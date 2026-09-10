@@ -2,8 +2,8 @@
   "schema_version": "rc-runtime-selection-observation-status.v1",
   "source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
   "observation_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy",
-  "state_at_observation": "running",
-  "observed_at_unix_seconds": 1788998505.1907501,
+  "state_at_observation": "completed_audited_and_sealed",
+  "observed_at_unix_seconds": 1789000381.4474099,
   "process": {
     "parent_pid": 992334,
     "worker_pid": 992787
@@ -158,21 +158,15 @@
     "earlier_overlapping_test_seconds": 36.87
   },
   "claims": {
-    "completed": false,
+    "completed": true,
     "selected_ridge": null,
     "speedup": false,
     "independent_validation": false,
-    "sealed": false,
+    "sealed": true,
     "roadmap_complete": false
   },
-  "observed_process_command": [
-    "/usr/bin/python3",
-    "-B",
-    "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy/run.py",
-    "worker"
-  ],
-  "completed_fold_count_at_observation": 6,
-  "completed_path_count_at_observation": 26,
+  "completed_fold_count_at_observation": 8,
+  "completed_path_count_at_observation": 32,
   "initial_iteration_diagnostic": "rc-first-iterate-diagnostic-20260910.summary.json",
   "audit_supervisor": {
     "pid": 999300,
@@ -202,5 +196,1825 @@
     "maximum_audit_attempts": 1
   },
   "audit_exec_session_id": 74597,
-  "audit_supervisor_live_at_observation": true
+  "audit_supervisor_live_at_observation": false,
+  "audit": {
+    "schema_version": "rc-runtime-selection-original-audit.v1",
+    "pid": 1001824,
+    "source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
+    "source_files_verified": 439,
+    "original_training_rows": 964,
+    "fits_checked": [
+      {
+        "index": 0,
+        "withheld_training_case": "train-a",
+        "rows": 723,
+        "ridge": 10000.0,
+        "relative_ridge_stationarity_residual": 3.258723218135118e-15,
+        "policy_hash": "sha256:89aa0abca67267a9b625491227847e6c01c9d26ac15e1b565d14c32e3ae9491b"
+      },
+      {
+        "index": 1,
+        "withheld_training_case": "train-b",
+        "rows": 723,
+        "ridge": 10000.0,
+        "relative_ridge_stationarity_residual": 6.829938987808197e-15,
+        "policy_hash": "sha256:2a924b90d6347379185a1ef1f4cbe689e794213ec73f0510abaa5e2cdedc9778"
+      },
+      {
+        "index": 2,
+        "withheld_training_case": "train-c",
+        "rows": 723,
+        "ridge": 10000.0,
+        "relative_ridge_stationarity_residual": 2.757046978707179e-15,
+        "policy_hash": "sha256:cdaa45b73509925d5dd030c6b5475e9c50e14706832d9db820642d2ab1e2b2e0"
+      },
+      {
+        "index": 3,
+        "withheld_training_case": "train-d",
+        "rows": 723,
+        "ridge": 10000.0,
+        "relative_ridge_stationarity_residual": 4.220243940819694e-15,
+        "policy_hash": "sha256:0098df92f669412d0bd2598e09cb9cf0f30e857d7962016d4172bd5806af4642"
+      },
+      {
+        "index": 4,
+        "withheld_training_case": "train-a",
+        "rows": 723,
+        "ridge": 1000000.0,
+        "relative_ridge_stationarity_residual": 1.3957225774579899e-15,
+        "policy_hash": "sha256:9c14f4f9760e316a0762ea3f0a7670f5816b2ed0e1cc75a0b08b721ef89bc6d2"
+      },
+      {
+        "index": 5,
+        "withheld_training_case": "train-b",
+        "rows": 723,
+        "ridge": 1000000.0,
+        "relative_ridge_stationarity_residual": 3.688129794759003e-15,
+        "policy_hash": "sha256:52b9799a827bf1fb234918b7c7593f70d1708217429686c8b1f1634dddf24fdf"
+      },
+      {
+        "index": 6,
+        "withheld_training_case": "train-c",
+        "rows": 723,
+        "ridge": 1000000.0,
+        "relative_ridge_stationarity_residual": 1.6782726626540924e-15,
+        "policy_hash": "sha256:032fd395e2d97f4158ef5383b1e8d6465ac8c73ad66b1789b63e6fdc28e357f5"
+      },
+      {
+        "index": 7,
+        "withheld_training_case": "train-d",
+        "rows": 723,
+        "ridge": 1000000.0,
+        "relative_ridge_stationarity_residual": 2.3552125735004845e-15,
+        "policy_hash": "sha256:1b41e3c0447ecb8d3be37a0bd38a2222a0a01bfe0274824fb223705dc861b57b"
+      }
+    ],
+    "newton_solves_in_audit": 0,
+    "fits_in_audit": 0,
+    "all_training_partitions_preprocessing_and_ridge_stationarity_checked": true,
+    "all_candidate_scores_and_selection_reconstructed": true,
+    "all_original_processes_absent": true,
+    "runtime_work": {
+      "core_calls": 7744,
+      "linear_solves": 37376,
+      "newton_iterations": 37376
+    },
+    "folds": [
+      {
+        "fold_index": 0,
+        "case_id": "train-a",
+        "ridge": 10000.0,
+        "fit_index": 0,
+        "paths": {
+          "reference": {
+            "wall_ns": 100878219241,
+            "cpu_ns": 100810776124,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1355,
+              "newton_iterations": 1355
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 461548,
+              "proposal_cpu_ns": 428890,
+              "recovery_wall_ns": 12333649241,
+              "recovery_cpu_ns": 12326806332,
+              "numerical_wall_ns": 85100535408,
+              "numerical_cpu_ns": 85046719182
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:44cb0bd3edb010d82dfdd26f3ff613c565eff49aba68a2f3ec1401c0a9f92990",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 72375052430,
+            "cpu_ns": 72369504172,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 969,
+              "newton_iterations": 969
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 855483787,
+              "proposal_cpu_ns": 855501962,
+              "recovery_wall_ns": 12282893381,
+              "recovery_cpu_ns": 12282188954,
+              "numerical_wall_ns": 55856821168,
+              "numerical_cpu_ns": 55852526699
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 391,
+              "assembly_call_count": 484,
+              "linear_solve_count": 391
+            },
+            "history_hash": "sha256:691d930f7b84a4e6667185540237995bc49208e3caf3a2e5195fb0f2d578e518",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 102333977618,
+            "cpu_ns": 102312294317,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1355,
+              "newton_iterations": 1355
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1279101956,
+              "material_capture_wall_ns": 1279031651,
+              "proposal_wall_ns": 510640208,
+              "proposal_cpu_ns": 510689790,
+              "recovery_wall_ns": 12138223989,
+              "recovery_cpu_ns": 12137421422,
+              "numerical_wall_ns": 84939127902,
+              "numerical_cpu_ns": 84932881835
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:44cb0bd3edb010d82dfdd26f3ff613c565eff49aba68a2f3ec1401c0a9f92990",
+            "decisions": {
+              "abstained_to_reference": 242
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 0,
+              "learned_scaled_mse_sum": 0,
+              "secant_scaled_mse_sum": 0,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 100540352213,
+            "cpu_ns": 100523175121,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1355,
+              "newton_iterations": 1355
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 443831,
+              "proposal_cpu_ns": 411700,
+              "recovery_wall_ns": 12144905472,
+              "recovery_cpu_ns": 12144080514,
+              "numerical_wall_ns": 84974712481,
+              "numerical_cpu_ns": 84968169733
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:44cb0bd3edb010d82dfdd26f3ff613c565eff49aba68a2f3ec1401c0a9f92990",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 2.546585164964199e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 242,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 5034,
+              "newton_iterations": 5034
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.4139399445268215,
+          "proposal_path_wall_ns": 102333977618,
+          "proposed_count": 0,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 72375052430,
+          "whole_benchmark_wall_ns": 381766660550
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 5034,
+          "newton_iterations": 5034
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      },
+      {
+        "fold_index": 1,
+        "case_id": "train-b",
+        "ridge": 10000.0,
+        "fit_index": 1,
+        "paths": {
+          "reference": {
+            "wall_ns": 87513151194,
+            "cpu_ns": 87501254159,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1165,
+              "newton_iterations": 1165
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 456575,
+              "proposal_cpu_ns": 425010,
+              "recovery_wall_ns": 12254329601,
+              "recovery_cpu_ns": 12253524480,
+              "numerical_wall_ns": 71770651962,
+              "numerical_cpu_ns": 71764774390
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 362,
+              "assembly_call_count": 478,
+              "linear_solve_count": 362
+            },
+            "history_hash": "sha256:bda56c59e9b784cabd9a95e3e0f8d7f8aab3f70ba611fb971ae759c2d97c73cb",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 66166222799,
+            "cpu_ns": 66147550164,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 870,
+              "newton_iterations": 870
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 854927147,
+              "proposal_cpu_ns": 854972090,
+              "recovery_wall_ns": 12237622092,
+              "recovery_cpu_ns": 12237021043,
+              "numerical_wall_ns": 49599907060,
+              "numerical_cpu_ns": 49596404648
+            },
+            "terminal_polishing": {
+              "attempt_count": 480,
+              "accepted_correction_count": 392,
+              "assembly_call_count": 480,
+              "linear_solve_count": 392
+            },
+            "history_hash": "sha256:fa487e211a96d4cb6e9a9118e4d28a2d514f6e75c0fd35b319e8a582c68f92fd",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 74280740024,
+            "cpu_ns": 74275343966,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 967,
+              "newton_iterations": 967
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1272062296,
+              "material_capture_wall_ns": 1271993768,
+              "proposal_wall_ns": 1393736386,
+              "proposal_cpu_ns": 1393746202,
+              "recovery_wall_ns": 12205029594,
+              "recovery_cpu_ns": 12204287317,
+              "numerical_wall_ns": 56033672704,
+              "numerical_cpu_ns": 56029611119
+            },
+            "terminal_polishing": {
+              "attempt_count": 479,
+              "accepted_correction_count": 369,
+              "assembly_call_count": 479,
+              "linear_solve_count": 369
+            },
+            "history_hash": "sha256:654c53366ed40f598782df3b64af1d87b19cb67a6449e5e6a047f856a1da438a",
+            "decisions": {
+              "abstained_to_reference": 1,
+              "proposed": 241
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 241,
+              "learned_scaled_mse_sum": 100.14184317598489,
+              "secant_scaled_mse_sum": 100.68985469209646,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 87656977920,
+            "cpu_ns": 87650346154,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1165,
+              "newton_iterations": 1165
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 451781,
+              "proposal_cpu_ns": 420120,
+              "recovery_wall_ns": 12294908976,
+              "recovery_cpu_ns": 12294102998,
+              "numerical_wall_ns": 71964713995,
+              "numerical_cpu_ns": 71959340680
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 362,
+              "assembly_call_count": 478,
+              "linear_solve_count": 362
+            },
+            "history_hash": "sha256:bda56c59e9b784cabd9a95e3e0f8d7f8aab3f70ba611fb971ae759c2d97c73cb",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 2.3283064365386963e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 1,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 4167,
+              "newton_iterations": 4167
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.1226383626227283,
+          "proposal_path_wall_ns": 74280740024,
+          "proposed_count": 241,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 66166222799,
+          "whole_benchmark_wall_ns": 321175742392
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 4167,
+          "newton_iterations": 4167
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      },
+      {
+        "fold_index": 2,
+        "case_id": "train-c",
+        "ridge": 10000.0,
+        "fit_index": 2,
+        "paths": {
+          "reference": {
+            "wall_ns": 106078086266,
+            "cpu_ns": 106042064670,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1376,
+              "newton_iterations": 1376
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 458742,
+              "proposal_cpu_ns": 427130,
+              "recovery_wall_ns": 12353014585,
+              "recovery_cpu_ns": 12352219082,
+              "numerical_wall_ns": 90238523895,
+              "numerical_cpu_ns": 90232083957
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 356,
+              "assembly_call_count": 478,
+              "linear_solve_count": 356
+            },
+            "history_hash": "sha256:43feed8e89e889cc24e973251e8167f6690d6f16bfcc073f2906b7cc569ce994",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 74670598218,
+            "cpu_ns": 74655658515,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 990,
+              "newton_iterations": 990
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 854598787,
+              "proposal_cpu_ns": 854629685,
+              "recovery_wall_ns": 12242550812,
+              "recovery_cpu_ns": 12241732689,
+              "numerical_wall_ns": 58100211657,
+              "numerical_cpu_ns": 58095997469
+            },
+            "terminal_polishing": {
+              "attempt_count": 479,
+              "accepted_correction_count": 374,
+              "assembly_call_count": 479,
+              "linear_solve_count": 374
+            },
+            "history_hash": "sha256:4292a5ef5bd76c9805f8c80c401501770c00cb63dc8aadbca64175616fded462",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 107872552293,
+            "cpu_ns": 107860369566,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1376,
+              "newton_iterations": 1376
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1279327281,
+              "material_capture_wall_ns": 1279290003,
+              "proposal_wall_ns": 518100725,
+              "proposal_cpu_ns": 518154715,
+              "recovery_wall_ns": 12280950477,
+              "recovery_cpu_ns": 12280208373,
+              "numerical_wall_ns": 90234619541,
+              "numerical_cpu_ns": 90228387042
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 356,
+              "assembly_call_count": 478,
+              "linear_solve_count": 356
+            },
+            "history_hash": "sha256:43feed8e89e889cc24e973251e8167f6690d6f16bfcc073f2906b7cc569ce994",
+            "decisions": {
+              "abstained_to_reference": 242
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 0,
+              "learned_scaled_mse_sum": 0,
+              "secant_scaled_mse_sum": 0,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 106948954184,
+            "cpu_ns": 106933783915,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1376,
+              "newton_iterations": 1376
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 471093,
+              "proposal_cpu_ns": 435680,
+              "recovery_wall_ns": 12391109424,
+              "recovery_cpu_ns": 12390526821,
+              "numerical_wall_ns": 90962816532,
+              "numerical_cpu_ns": 90958047014
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 356,
+              "assembly_call_count": 478,
+              "linear_solve_count": 356
+            },
+            "history_hash": "sha256:43feed8e89e889cc24e973251e8167f6690d6f16bfcc073f2906b7cc569ce994",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 2.3283064365386963e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 242,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 5118,
+              "newton_iterations": 5118
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.4446456151063267,
+          "proposal_path_wall_ns": 107872552293,
+          "proposed_count": 0,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 74670598218,
+          "whole_benchmark_wall_ns": 401239936781
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 5118,
+          "newton_iterations": 5118
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      },
+      {
+        "fold_index": 3,
+        "case_id": "train-d",
+        "ridge": 10000.0,
+        "fit_index": 3,
+        "paths": {
+          "reference": {
+            "wall_ns": 85169753650,
+            "cpu_ns": 85156809802,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1171,
+              "newton_iterations": 1171
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 445477,
+              "proposal_cpu_ns": 413130,
+              "recovery_wall_ns": 12325962894,
+              "recovery_cpu_ns": 12325249351,
+              "numerical_wall_ns": 69442772259,
+              "numerical_cpu_ns": 69437894156
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:84d786a97c176f9572d69d0a57cf2c2a5c70e8b20f26d14c61a58853e63706f4",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 65656536023,
+            "cpu_ns": 65638152348,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 852,
+              "newton_iterations": 852
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 854639368,
+              "proposal_cpu_ns": 854684231,
+              "recovery_wall_ns": 12128047705,
+              "recovery_cpu_ns": 12127387350,
+              "numerical_wall_ns": 49206726254,
+              "numerical_cpu_ns": 49203610583
+            },
+            "terminal_polishing": {
+              "attempt_count": 482,
+              "accepted_correction_count": 381,
+              "assembly_call_count": 482,
+              "linear_solve_count": 381
+            },
+            "history_hash": "sha256:1611360e9c59ad1f3ad8e89331eed5599b771e0f985c11f3350479ec6ba26d9a",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 87482573534,
+            "cpu_ns": 87462717045,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1171,
+              "newton_iterations": 1171
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1281565351,
+              "material_capture_wall_ns": 1281497673,
+              "proposal_wall_ns": 517701407,
+              "proposal_cpu_ns": 517763262,
+              "recovery_wall_ns": 12288585534,
+              "recovery_cpu_ns": 12287801456,
+              "numerical_wall_ns": 69943537138,
+              "numerical_cpu_ns": 69938936140
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:84d786a97c176f9572d69d0a57cf2c2a5c70e8b20f26d14c61a58853e63706f4",
+            "decisions": {
+              "abstained_to_reference": 242
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 0,
+              "learned_scaled_mse_sum": 0,
+              "secant_scaled_mse_sum": 0,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 85613995247,
+            "cpu_ns": 85580454340,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1171,
+              "newton_iterations": 1171
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 468379,
+              "proposal_cpu_ns": 441180,
+              "recovery_wall_ns": 12410183559,
+              "recovery_cpu_ns": 12409421809,
+              "numerical_wall_ns": 69739588469,
+              "numerical_cpu_ns": 69735409353
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:84d786a97c176f9572d69d0a57cf2c2a5c70e8b20f26d14c61a58853e63706f4",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 242,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 4365,
+              "newton_iterations": 4365
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.3324274905906424,
+          "proposal_path_wall_ns": 87482573534,
+          "proposed_count": 0,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 65656536023,
+          "whole_benchmark_wall_ns": 329523582416
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 4365,
+          "newton_iterations": 4365
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      },
+      {
+        "fold_index": 4,
+        "case_id": "train-a",
+        "ridge": 1000000.0,
+        "fit_index": 4,
+        "paths": {
+          "reference": {
+            "wall_ns": 100904535054,
+            "cpu_ns": 100880934160,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1355,
+              "newton_iterations": 1355
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 467124,
+              "proposal_cpu_ns": 431630,
+              "recovery_wall_ns": 12383728512,
+              "recovery_cpu_ns": 12383228915,
+              "numerical_wall_ns": 85003450099,
+              "numerical_cpu_ns": 84998941077
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:44cb0bd3edb010d82dfdd26f3ff613c565eff49aba68a2f3ec1401c0a9f92990",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 72262361409,
+            "cpu_ns": 72244647646,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 969,
+              "newton_iterations": 969
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 853462529,
+              "proposal_cpu_ns": 853523011,
+              "recovery_wall_ns": 12293101485,
+              "recovery_cpu_ns": 12292608469,
+              "numerical_wall_ns": 55710266558,
+              "numerical_cpu_ns": 55707568728
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 391,
+              "assembly_call_count": 484,
+              "linear_solve_count": 391
+            },
+            "history_hash": "sha256:691d930f7b84a4e6667185540237995bc49208e3caf3a2e5195fb0f2d578e518",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 102583754655,
+            "cpu_ns": 102563308235,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1355,
+              "newton_iterations": 1355
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1282643532,
+              "material_capture_wall_ns": 1282566448,
+              "proposal_wall_ns": 523743173,
+              "proposal_cpu_ns": 523794963,
+              "recovery_wall_ns": 12455659859,
+              "recovery_cpu_ns": 12454923575,
+              "numerical_wall_ns": 84753787227,
+              "numerical_cpu_ns": 84748667284
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:44cb0bd3edb010d82dfdd26f3ff613c565eff49aba68a2f3ec1401c0a9f92990",
+            "decisions": {
+              "abstained_to_reference": 242
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 0,
+              "learned_scaled_mse_sum": 0,
+              "secant_scaled_mse_sum": 0,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 101108340073,
+            "cpu_ns": 101091571367,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1355,
+              "newton_iterations": 1355
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 452760,
+              "proposal_cpu_ns": 421381,
+              "recovery_wall_ns": 12291719770,
+              "recovery_cpu_ns": 12290970028,
+              "numerical_wall_ns": 85361673830,
+              "numerical_cpu_ns": 85355526217
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:44cb0bd3edb010d82dfdd26f3ff613c565eff49aba68a2f3ec1401c0a9f92990",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 2.546585164964199e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 242,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 5034,
+              "newton_iterations": 5034
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.4196014723956085,
+          "proposal_path_wall_ns": 102583754655,
+          "proposed_count": 0,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 72262361409,
+          "whole_benchmark_wall_ns": 382508376479
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 5034,
+          "newton_iterations": 5034
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      },
+      {
+        "fold_index": 5,
+        "case_id": "train-b",
+        "ridge": 1000000.0,
+        "fit_index": 5,
+        "paths": {
+          "reference": {
+            "wall_ns": 87230137979,
+            "cpu_ns": 87214309514,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1165,
+              "newton_iterations": 1165
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 441977,
+              "proposal_cpu_ns": 409150,
+              "recovery_wall_ns": 12141908454,
+              "recovery_cpu_ns": 12141133453,
+              "numerical_wall_ns": 71695114534,
+              "numerical_cpu_ns": 71690064636
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 362,
+              "assembly_call_count": 478,
+              "linear_solve_count": 362
+            },
+            "history_hash": "sha256:bda56c59e9b784cabd9a95e3e0f8d7f8aab3f70ba611fb971ae759c2d97c73cb",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 66077293141,
+            "cpu_ns": 66057837372,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 870,
+              "newton_iterations": 870
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 854715432,
+              "proposal_cpu_ns": 854733174,
+              "recovery_wall_ns": 12200859178,
+              "recovery_cpu_ns": 12199855809,
+              "numerical_wall_ns": 49587402968,
+              "numerical_cpu_ns": 49583513348
+            },
+            "terminal_polishing": {
+              "attempt_count": 480,
+              "accepted_correction_count": 392,
+              "assembly_call_count": 480,
+              "linear_solve_count": 392
+            },
+            "history_hash": "sha256:fa487e211a96d4cb6e9a9118e4d28a2d514f6e75c0fd35b319e8a582c68f92fd",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 74251750533,
+            "cpu_ns": 74240838079,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 975,
+              "newton_iterations": 975
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1270853098,
+              "material_capture_wall_ns": 1270794704,
+              "proposal_wall_ns": 1400411891,
+              "proposal_cpu_ns": 1400415752,
+              "recovery_wall_ns": 12139926620,
+              "recovery_cpu_ns": 12139130583,
+              "numerical_wall_ns": 56031543157,
+              "numerical_cpu_ns": 56026964885
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 380,
+              "assembly_call_count": 478,
+              "linear_solve_count": 380
+            },
+            "history_hash": "sha256:a8895af431a5071f987effb2cd51a0d2c63169e7c9769594d404afa884f34106",
+            "decisions": {
+              "abstained_to_reference": 1,
+              "proposed": 241
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 241,
+              "learned_scaled_mse_sum": 100.0802660179925,
+              "secant_scaled_mse_sum": 100.68985469209638,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 87677795767,
+            "cpu_ns": 87651972809,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1165,
+              "newton_iterations": 1165
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 454951,
+              "proposal_cpu_ns": 422961,
+              "recovery_wall_ns": 12197820249,
+              "recovery_cpu_ns": 12196913770,
+              "numerical_wall_ns": 71969217645,
+              "numerical_cpu_ns": 71963664919
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 362,
+              "assembly_call_count": 478,
+              "linear_solve_count": 362
+            },
+            "history_hash": "sha256:bda56c59e9b784cabd9a95e3e0f8d7f8aab3f70ba611fb971ae759c2d97c73cb",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 1,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 4175,
+              "newton_iterations": 4175
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.1237105366068312,
+          "proposal_path_wall_ns": 74251750533,
+          "proposed_count": 241,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 66077293141,
+          "whole_benchmark_wall_ns": 320879159412
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 4175,
+          "newton_iterations": 4175
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      },
+      {
+        "fold_index": 6,
+        "case_id": "train-c",
+        "ridge": 1000000.0,
+        "fit_index": 6,
+        "paths": {
+          "reference": {
+            "wall_ns": 106146730270,
+            "cpu_ns": 106130243029,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1376,
+              "newton_iterations": 1376
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 454167,
+              "proposal_cpu_ns": 421440,
+              "recovery_wall_ns": 12274867957,
+              "recovery_cpu_ns": 12274114421,
+              "numerical_wall_ns": 90406549227,
+              "numerical_cpu_ns": 90400641620
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 356,
+              "assembly_call_count": 478,
+              "linear_solve_count": 356
+            },
+            "history_hash": "sha256:43feed8e89e889cc24e973251e8167f6690d6f16bfcc073f2906b7cc569ce994",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 75022992856,
+            "cpu_ns": 74999226737,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 990,
+              "newton_iterations": 990
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 859033903,
+              "proposal_cpu_ns": 859108095,
+              "recovery_wall_ns": 12292733614,
+              "recovery_cpu_ns": 12292157092,
+              "numerical_wall_ns": 58368092274,
+              "numerical_cpu_ns": 58364330474
+            },
+            "terminal_polishing": {
+              "attempt_count": 479,
+              "accepted_correction_count": 374,
+              "assembly_call_count": 479,
+              "linear_solve_count": 374
+            },
+            "history_hash": "sha256:4292a5ef5bd76c9805f8c80c401501770c00cb63dc8aadbca64175616fded462",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 107734606616,
+            "cpu_ns": 107719182602,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1376,
+              "newton_iterations": 1376
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1271797289,
+              "material_capture_wall_ns": 1271711518,
+              "proposal_wall_ns": 517299871,
+              "proposal_cpu_ns": 517352332,
+              "recovery_wall_ns": 12260816327,
+              "recovery_cpu_ns": 12260170843,
+              "numerical_wall_ns": 90135366878,
+              "numerical_cpu_ns": 90130290985
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 356,
+              "assembly_call_count": 478,
+              "linear_solve_count": 356
+            },
+            "history_hash": "sha256:43feed8e89e889cc24e973251e8167f6690d6f16bfcc073f2906b7cc569ce994",
+            "decisions": {
+              "abstained_to_reference": 242
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 0,
+              "learned_scaled_mse_sum": 0,
+              "secant_scaled_mse_sum": 0,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 107552131500,
+            "cpu_ns": 107531515668,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1376,
+              "newton_iterations": 1376
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 482376,
+              "proposal_cpu_ns": 445750,
+              "recovery_wall_ns": 12743628841,
+              "recovery_cpu_ns": 12742944181,
+              "numerical_wall_ns": 91279507285,
+              "numerical_cpu_ns": 91274176958
+            },
+            "terminal_polishing": {
+              "attempt_count": 478,
+              "accepted_correction_count": 356,
+              "assembly_call_count": 478,
+              "linear_solve_count": 356
+            },
+            "history_hash": "sha256:43feed8e89e889cc24e973251e8167f6690d6f16bfcc073f2906b7cc569ce994",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 2.3283064365386963e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 242,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 5118,
+              "newton_iterations": 5118
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.436021178504396,
+          "proposal_path_wall_ns": 107734606616,
+          "proposed_count": 0,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 75022992856,
+          "whole_benchmark_wall_ns": 402101569302
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 5118,
+          "newton_iterations": 5118
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      },
+      {
+        "fold_index": 7,
+        "case_id": "train-d",
+        "ridge": 1000000.0,
+        "fit_index": 7,
+        "paths": {
+          "reference": {
+            "wall_ns": 85305528648,
+            "cpu_ns": 85292330181,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1171,
+              "newton_iterations": 1171
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 453962,
+              "proposal_cpu_ns": 421250,
+              "recovery_wall_ns": 12217762922,
+              "recovery_cpu_ns": 12216731198,
+              "numerical_wall_ns": 69666695210,
+              "numerical_cpu_ns": 69661552747
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:84d786a97c176f9572d69d0a57cf2c2a5c70e8b20f26d14c61a58853e63706f4",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "secant": {
+            "wall_ns": 65702721949,
+            "cpu_ns": 65685123850,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 852,
+              "newton_iterations": 852
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 855798207,
+              "proposal_cpu_ns": 855859315,
+              "recovery_wall_ns": 12059275135,
+              "recovery_cpu_ns": 12058756170,
+              "numerical_wall_ns": 49298545074,
+              "numerical_cpu_ns": 49295957796
+            },
+            "terminal_polishing": {
+              "attempt_count": 482,
+              "accepted_correction_count": 381,
+              "assembly_call_count": 482,
+              "linear_solve_count": 381
+            },
+            "history_hash": "sha256:1611360e9c59ad1f3ad8e89331eed5599b771e0f985c11f3350479ec6ba26d9a",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          },
+          "proposal": {
+            "wall_ns": 86887877295,
+            "cpu_ns": 86863801739,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1171,
+              "newton_iterations": 1171
+            },
+            "cost_components_ns": {
+              "material_capture_cpu_ns": 1271344433,
+              "material_capture_wall_ns": 1271283579,
+              "proposal_wall_ns": 517348198,
+              "proposal_cpu_ns": 517398990,
+              "recovery_wall_ns": 12241277941,
+              "recovery_cpu_ns": 12240488334,
+              "numerical_wall_ns": 69327377951,
+              "numerical_cpu_ns": 69323357411
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:84d786a97c176f9572d69d0a57cf2c2a5c70e8b20f26d14c61a58853e63706f4",
+            "decisions": {
+              "abstained_to_reference": 242
+            },
+            "same_parent_accepted_solution_seed_errors": {
+              "proposed_rows": 0,
+              "learned_scaled_mse_sum": 0,
+              "secant_scaled_mse_sum": 0,
+              "not_a_new_fit_or_physical_error_metric": true
+            }
+          },
+          "fresh-reference": {
+            "wall_ns": 85834907613,
+            "cpu_ns": 85796753874,
+            "work": {
+              "core_calls": 242,
+              "linear_solves": 1171,
+              "newton_iterations": 1171
+            },
+            "cost_components_ns": {
+              "proposal_wall_ns": 465505,
+              "proposal_cpu_ns": 433800,
+              "recovery_wall_ns": 12447294839,
+              "recovery_cpu_ns": 12446542837,
+              "numerical_wall_ns": 69926701375,
+              "numerical_cpu_ns": 69922730046
+            },
+            "terminal_polishing": {
+              "attempt_count": 484,
+              "accepted_correction_count": 395,
+              "assembly_call_count": 484,
+              "linear_solve_count": 395
+            },
+            "history_hash": "sha256:84d786a97c176f9572d69d0a57cf2c2a5c70e8b20f26d14c61a58853e63706f4",
+            "decisions": {},
+            "same_parent_accepted_solution_seed_errors": null
+          }
+        },
+        "comparisons": {
+          "proposal": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "reference": {
+            "exact_terminal_checkpoint": true,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          },
+          "secant": {
+            "exact_terminal_checkpoint": false,
+            "full_history_pass": true,
+            "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-10,
+            "maximum_relative_difference": 2.0,
+            "mismatch_locations": {
+              "by_response_field": {},
+              "example_limit": 20,
+              "examples": [],
+              "examples_truncated": false,
+              "mismatch_count": 0
+            },
+            "physical_values_within_tolerance": true,
+            "structure_match": true
+          }
+        },
+        "score": {
+          "abstained_count": 242,
+          "execution_work": {
+            "known_work": {
+              "core_calls": 968,
+              "linear_solves": 4365,
+              "newton_iterations": 4365
+            },
+            "unknown_work": false
+          },
+          "full_comparison_pass": true,
+          "proposal_over_secant_path_wall_ratio": 1.322439538539125,
+          "proposal_path_wall_ns": 86887877295,
+          "proposed_count": 0,
+          "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
+          "secant_path_wall_ns": 65702721949,
+          "whole_benchmark_wall_ns": 329326081264
+        },
+        "runtime_work": {
+          "core_calls": 968,
+          "linear_solves": 4365,
+          "newton_iterations": 4365
+        },
+        "stored_proposals_reconstructed": 242,
+        "material_snapshots_reconstructed": 242,
+        "same_solver_assembly_response_replays": 968,
+        "native_terminal_reopens": 4,
+        "same_solver_recovery_material_integrations": 81312
+      }
+    ],
+    "candidates": [
+      {
+        "ridge": 10000.0,
+        "score": 1.3284128532116297,
+        "proposed_count": 241,
+        "fold_indices": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "ridge": 1000000.0,
+        "score": 1.3254431815114902,
+        "proposed_count": 241,
+        "fold_indices": [
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    ],
+    "selected_strategy": "secant",
+    "selected_ridge": null,
+    "selected_score": 1.0,
+    "same_solver_assembly_response_replays": 7744,
+    "same_solver_recovery_material_integrations": 650496,
+    "stored_proposals_reconstructed": 1936,
+    "material_snapshots_reconstructed": 1936,
+    "native_terminal_reopens": 32,
+    "physics_audit": {
+      "independent_assembly_rebuilds": {
+        "section_replays": 46464,
+        "member_replays": 15488,
+        "material_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0,
+        "assembly_replays": 7744
+      },
+      "independent_assembly_rebuild_seconds": 162.543100866,
+      "terminal_candidate_pairs_verified": 15395,
+      "terminal_accepted_pairs_verified": 12149,
+      "projection_counts": {
+        "coordinates": 107765,
+        "nonzero_projection_error": 12031
+      },
+      "maximum_twofold_projection_error": 6.018531076210112e-36,
+      "material_base_law_replays": {
+        "concrete": 557568,
+        "steel": 92928
+      },
+      "exact_fiber_inputs_checked": 650496,
+      "retained_low_strain_components_nonzero": 650496,
+      "independent_100_digit_stresses_checked": 650496,
+      "native_material_state_and_branch_replays_exact": true,
+      "rounded_base_vs_retained_stress_differences": {
+        "concrete/stress_mpa": 1.480411908911462e-14,
+        "concrete/consistent_tangent_mpa": 9.094947017729282e-12,
+        "steel/stress_mpa": 1.7053025658242404e-13,
+        "steel/consistent_tangent_mpa": 0.0
+      }
+    },
+    "worker": {
+      "pid": 992787,
+      "status": "completed",
+      "source_policy_unchanged": true,
+      "fit_attempt_count": 8,
+      "fit_completed_count": 8,
+      "completed_folds": 8,
+      "selected_strategy": "secant",
+      "selected_ridge": null,
+      "selected_score": 1.0,
+      "new_training_labels": 0,
+      "validation_or_holdout_execution": false,
+      "wall_ns_through_reports": 2875134822375,
+      "cpu_ns": 2874478499018,
+      "peak_rss_kib": 369100
+    },
+    "parent": {
+      "parent_pid": 992334,
+      "worker_pid": 992787,
+      "exit_code": 0,
+      "parent_wall_ns": 2875369819388
+    },
+    "independent_campaign": false,
+    "independent_physical_validation": false,
+    "wall_ns": 1113018635023,
+    "cpu_ns": 1111231352871,
+    "peak_rss_kib": 433072
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy.inventory.json",
+    "inventory_sha256": "4175ee8c66f8c51aa6fcceb38c2538e9c596cd4afbf0e6fe81e70c5293d2aaa2",
+    "file_count": 47071,
+    "total_bytes": 2734483787,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T00:29:53.035530+00:00",
+    "seal_wall_ns": 5833850459,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "final_result": {
+    "selected_strategy": "secant",
+    "selected_ridge": null,
+    "selected_score": 1.0,
+    "candidates": [
+      {
+        "fold_indices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "proposed_count": 241,
+        "ridge": 10000.0,
+        "score": 1.3284128532116297
+      },
+      {
+        "fold_indices": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "proposed_count": 241,
+        "ridge": 1000000.0,
+        "score": 1.3254431815114902
+      }
+    ],
+    "fits": 8,
+    "wall_ns": 2873025913743,
+    "cpu_ns": 2872380314067
+  },
+  "audit_parent": {
+    "parent_pid": 999300,
+    "worker_pid": 1001824,
+    "exit_code": 0,
+    "parent_wall_ns": 1113278081950
+  },
+  "completion_check": {
+    "original_and_audit_pids_absent": [
+      992334,
+      992787,
+      999300,
+      1001824
+    ],
+    "numerical_exit_code": 0,
+    "audit_exit_code": 0,
+    "eight_folds_and_fits": true,
+    "selected_strategy": "secant",
+    "no_learned_candidate_promoted": true
+  },
+  "historical_live_snapshot": {
+    "observed_at_unix_seconds": 1788998505.1907501,
+    "completed_fold_count_at_observation": 6,
+    "completed_path_count_at_observation": 26,
+    "audit_supervisor_live_at_observation": true,
+    "observed_process_command": [
+      "/usr/bin/python3",
+      "-B",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy/run.py",
+      "worker"
+    ]
+  }
 }

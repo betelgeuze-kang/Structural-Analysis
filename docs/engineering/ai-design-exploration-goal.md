@@ -1,5 +1,18 @@
 # AI design exploration implementation register
 
+The [direct-control candidate search](rc-control-candidate-selection-20260910.md)
+now freezes price/learned shortlists before full reference analysis and fresh
+replay, preserving constants, full-path screens, quantities and common declared
+prices. The original CLI pilot completes 176 core calls / 468 Newton iterations;
+both online arms and the later exhaustive oracle select the same candidate,
+with no demonstrated learned advantage. All original artifacts and the existing
+Workbench design-data consumer validate; the combined search panel remains open.
+Search v2 adds explicit missed-feasible, false-safe and unverifiable counts;
+45 selected tests pass. A separate sealed recount finds two feasible but
+unrequested alternatives per arm and zero learned false-safe cases in this
+permissive development pool. Independent families, repeated full costs and
+physical/hosted acceptance remain required.
+
 Started 2026-09-08 from main `4de4e3f55aae1d267cf704cec7d7533f3a627498`.
 The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
@@ -18,17 +31,16 @@ The learned path adds 120 base iterations while accepting 23 fewer terminal
 corrections, for 97 additional Newton/linear counts. Secant passes both initial
 gates at 117 positions and the learned path at none. Only two positions have
 exactly matching parent states, so causal attribution remains unproved. The
-full numerical observation and original-state audit are still pending; no
-protocol change or learned gain is claimed.
+full numerical observation and original-state audit now complete; the
+original protocol is unchanged and no learned gain is claimed.
 
-The [complete-path runtime selector](rc-runtime-selection-20260910.md) now fits
-without each training case and compares its full reference/secant/proposal/fresh
-paths using measured costs. Source/context/label consistency and budget guards
-pass 25 focused tests, including 80 actual retained core calls with constant
-preload. A frozen two-ridge, four-case observation is running (eight folds,
-32 paths, 7,744 nominal calls); validation/holdout are not executed for tuning.
-No selected result or speedup is claimed before terminal records and auditing.
-The complete roadmap remains active.
+The [complete-path runtime selector](rc-runtime-selection-20260910.md) now
+completes all eight fits and 32 paths. Its original-record audit verifies 7,744
+calls, 37,376 Newton/linear counts, all 24 comparisons, fitted partitions and
+selection. Mean proposal/secant path-time ratios are 1.328413 and 1.325443;
+secant is retained without a final learned refit. The 47,071-file packet is
+sealed. This closes this bounded observation, not M3 learned net savings or the
+full roadmap.
 
 The [training-only nested selection](rc-nested-selection-20260910.md) completes
 114 fits with all partitions, preprocessing, scores and decisions reconstructed

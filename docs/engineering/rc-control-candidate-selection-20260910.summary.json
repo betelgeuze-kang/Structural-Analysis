@@ -1,0 +1,565 @@
+{
+  "schema_version": "rc-control-candidate-development-record.v1",
+  "numerical_source_revision": "ef1f81f95ec8d343aaa012464fede2ca1195a89a",
+  "protocol": {
+    "source_revision": "ef1f81f95ec8d343aaa012464fede2ca1195a89a",
+    "training_models": 3,
+    "search_models": 4,
+    "training_search_models_disjoint": true,
+    "targets_per_path": 7,
+    "constant_preload_epochs": 1,
+    "online_budget_per_arm_including_baseline": 2,
+    "oracle_after_both_arms": true,
+    "nominal_total_core_calls": 176,
+    "independent_physical_validation": false,
+    "net_savings_proved": false,
+    "isolated_hardware": false,
+    "automatic_retry": false
+  },
+  "training": {
+    "cpu_ns": 2754071811,
+    "fit": {
+      "cpu_ns": 1099270,
+      "method": "svd-ridge-penalized-intercept.v1",
+      "status": "completed",
+      "unknown_fit_work_until_outcome": false,
+      "wall_ns": 1098991
+    },
+    "independent_generalization": false,
+    "label_comparison_hash": "sha256:2ff985be02880b45f0e1e92d4b41fea54507c9d6367db83dd03a6a76e262dba8",
+    "label_generation_wall_ns": 2745128431,
+    "label_invocations": [
+      {
+        "phase": "analysis",
+        "process_cpu_ns": 467360517,
+        "status": "returned",
+        "unknown_execution_work": false,
+        "wall_ns": 467383390,
+        "work": {
+          "attempted_step_count": 8,
+          "known_linear_solve_count": 21,
+          "known_newton_iteration_count": 21,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      {
+        "phase": "verification",
+        "process_cpu_ns": 463862335,
+        "status": "returned",
+        "unknown_execution_work": false,
+        "wall_ns": 463874058,
+        "work": {
+          "attempted_step_count": 8,
+          "known_linear_solve_count": 21,
+          "known_newton_iteration_count": 21,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      {
+        "phase": "analysis",
+        "process_cpu_ns": 449692449,
+        "status": "returned",
+        "unknown_execution_work": false,
+        "wall_ns": 449704350,
+        "work": {
+          "attempted_step_count": 8,
+          "known_linear_solve_count": 22,
+          "known_newton_iteration_count": 22,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      {
+        "phase": "verification",
+        "process_cpu_ns": 461139854,
+        "status": "returned",
+        "unknown_execution_work": false,
+        "wall_ns": 461167533,
+        "work": {
+          "attempted_step_count": 8,
+          "known_linear_solve_count": 22,
+          "known_newton_iteration_count": 22,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      {
+        "phase": "analysis",
+        "process_cpu_ns": 441251195,
+        "status": "returned",
+        "unknown_execution_work": false,
+        "wall_ns": 441263098,
+        "work": {
+          "attempted_step_count": 8,
+          "known_linear_solve_count": 21,
+          "known_newton_iteration_count": 21,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      {
+        "phase": "verification",
+        "process_cpu_ns": 454725361,
+        "status": "returned",
+        "unknown_execution_work": false,
+        "wall_ns": 454764379,
+        "work": {
+          "attempted_step_count": 8,
+          "known_linear_solve_count": 21,
+          "known_newton_iteration_count": 21,
+          "unknown_solver_work_attempt_count": 0
+        }
+      }
+    ],
+    "net_savings_proved": false,
+    "policy_hash": "sha256:ecdd56e567f75253ac31953c03377298e4911a51428dbb46c1ae48032e4d3a17",
+    "report_hash": "sha256:907b54f999caa45ed651418e27152b74d9bdb3cf121cb6e6f225478218b0ed16",
+    "sample_count": 3,
+    "schema_version": "experimental-rc-control-candidate-training.v1",
+    "source_revision": "ef1f81f95ec8d343aaa012464fede2ca1195a89a",
+    "timing_scope": "training_preparation_labels_fresh_replay_fit_and_artifact_IO_excluding_final_report_write",
+    "wall_ns": 2754322036
+  },
+  "search": {
+    "arms": {
+      "learned_order": {
+        "comparison_hash": "sha256:be59dcb792ff2fd7bbf98b5d9ca1ac5efff86df875e6f4ec3332f54dffdc661f",
+        "comparison_path": "learned_order/comparison.json",
+        "cpu_ns": 1778053648,
+        "execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 32,
+            "known_linear_solve_count": 88,
+            "known_newton_iteration_count": 88,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "request_count": 2,
+        "selected_candidate_id": "cheap",
+        "selected_estimate": 137.7108,
+        "selected_full_reference_verified": true,
+        "status": "completed",
+        "unknown_work_until_outcome": false,
+        "wall_ns": 1782858703
+      },
+      "price_order": {
+        "comparison_hash": "sha256:78083dc6b108554fed441e287b63131c662671f9e92e54ff9f2deb625443b78c",
+        "comparison_path": "price_order/comparison.json",
+        "cpu_ns": 1805582911,
+        "execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 32,
+            "known_linear_solve_count": 88,
+            "known_newton_iteration_count": 88,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "request_count": 2,
+        "selected_candidate_id": "cheap",
+        "selected_estimate": 137.7108,
+        "selected_full_reference_verified": true,
+        "status": "completed",
+        "unknown_work_until_outcome": false,
+        "wall_ns": 1805650619
+      }
+    },
+    "candidate_denominator": 4,
+    "claims": {
+      "confirmed_currency_savings": false,
+      "independent_generalization": false,
+      "net_savings_proved": false,
+      "physical_winner_requires_full_reference_and_screens": true,
+      "workbench_search_review_integrated": false
+    },
+    "historical_training_cost": {
+      "cpu_ns": 2754071811,
+      "fit": {
+        "cpu_ns": 1099270,
+        "method": "svd-ridge-penalized-intercept.v1",
+        "status": "completed",
+        "unknown_fit_work_until_outcome": false,
+        "wall_ns": 1098991
+      },
+      "independent_generalization": false,
+      "label_comparison_hash": "sha256:2ff985be02880b45f0e1e92d4b41fea54507c9d6367db83dd03a6a76e262dba8",
+      "label_generation_wall_ns": 2745128431,
+      "label_invocations": [
+        {
+          "phase": "analysis",
+          "process_cpu_ns": 467360517,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 467383390,
+          "work": {
+            "attempted_step_count": 8,
+            "known_linear_solve_count": 21,
+            "known_newton_iteration_count": 21,
+            "unknown_solver_work_attempt_count": 0
+          }
+        },
+        {
+          "phase": "verification",
+          "process_cpu_ns": 463862335,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 463874058,
+          "work": {
+            "attempted_step_count": 8,
+            "known_linear_solve_count": 21,
+            "known_newton_iteration_count": 21,
+            "unknown_solver_work_attempt_count": 0
+          }
+        },
+        {
+          "phase": "analysis",
+          "process_cpu_ns": 449692449,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 449704350,
+          "work": {
+            "attempted_step_count": 8,
+            "known_linear_solve_count": 22,
+            "known_newton_iteration_count": 22,
+            "unknown_solver_work_attempt_count": 0
+          }
+        },
+        {
+          "phase": "verification",
+          "process_cpu_ns": 461139854,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 461167533,
+          "work": {
+            "attempted_step_count": 8,
+            "known_linear_solve_count": 22,
+            "known_newton_iteration_count": 22,
+            "unknown_solver_work_attempt_count": 0
+          }
+        },
+        {
+          "phase": "analysis",
+          "process_cpu_ns": 441251195,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 441263098,
+          "work": {
+            "attempted_step_count": 8,
+            "known_linear_solve_count": 21,
+            "known_newton_iteration_count": 21,
+            "unknown_solver_work_attempt_count": 0
+          }
+        },
+        {
+          "phase": "verification",
+          "process_cpu_ns": 454725361,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 454764379,
+          "work": {
+            "attempted_step_count": 8,
+            "known_linear_solve_count": 21,
+            "known_newton_iteration_count": 21,
+            "unknown_solver_work_attempt_count": 0
+          }
+        }
+      ],
+      "net_savings_proved": false,
+      "policy_hash": "sha256:ecdd56e567f75253ac31953c03377298e4911a51428dbb46c1ae48032e4d3a17",
+      "report_hash": "sha256:907b54f999caa45ed651418e27152b74d9bdb3cf121cb6e6f225478218b0ed16",
+      "sample_count": 3,
+      "schema_version": "experimental-rc-control-candidate-training.v1",
+      "source_revision": "ef1f81f95ec8d343aaa012464fede2ca1195a89a",
+      "timing_scope": "training_preparation_labels_fresh_replay_fit_and_artifact_IO_excluding_final_report_write",
+      "wall_ns": 2754322036
+    },
+    "historical_training_cost_counted_once_outside_online_arms": true,
+    "online_and_optional_oracle_cpu_ns": 7185216515,
+    "online_and_optional_oracle_wall_ns": 7190282702,
+    "oracle": {
+      "comparison_hash": "sha256:044f538849ca0189191ea1aed89560e3731bc65cfc37c14527f096ac4223f2e8",
+      "comparison_path": "exhaustive_oracle/comparison.json",
+      "cpu_ns": 3589152221,
+      "execution_work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 64,
+          "known_linear_solve_count": 164,
+          "known_newton_iteration_count": 164,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "request_count": 4,
+      "selected_candidate_id": "cheap",
+      "selected_estimate": 137.7108,
+      "selected_full_reference_verified": true,
+      "status": "completed",
+      "unknown_work_until_outcome": false,
+      "wall_ns": 3589344362
+    },
+    "plan_hash": "sha256:55eb85dc3f9da1c3813460f1f8c5af5fcd02aed212226631cbf86112746dd963",
+    "ranking_wall_ns": 2967066,
+    "report_hash": "sha256:a37823b7a004a9a045feaf17b4f68eb9418a96e183f545319e7509c073614752",
+    "schema_version": "experimental-rc-control-candidate-search.v1",
+    "source_revision": "ef1f81f95ec8d343aaa012464fede2ca1195a89a",
+    "timing_scope": "preflight_ranking_both_full_analysis_arms_optional_oracle_and_IO_excluding_final_report_write"
+  },
+  "audit": {
+    "schema_version": "rc-control-candidate-pilot-audit.v1",
+    "pid": 1007730,
+    "source_revision": "ef1f81f95ec8d343aaa012464fede2ca1195a89a",
+    "source_files_checked": 438,
+    "training_samples": 3,
+    "model_overlap": false,
+    "relative_ridge_stationarity_residual": 3.155649453157463e-16,
+    "comparisons": [
+      {
+        "arm": "train/labels",
+        "report_hash": "sha256:2ff985be02880b45f0e1e92d4b41fea54507c9d6367db83dd03a6a76e262dba8",
+        "rows": 3,
+        "selected_candidate": null
+      },
+      {
+        "arm": "search/price_order",
+        "report_hash": "sha256:78083dc6b108554fed441e287b63131c662671f9e92e54ff9f2deb625443b78c",
+        "rows": 2,
+        "selected_candidate": "cheap"
+      },
+      {
+        "arm": "search/learned_order",
+        "report_hash": "sha256:be59dcb792ff2fd7bbf98b5d9ca1ac5efff86df875e6f4ec3332f54dffdc661f",
+        "rows": 2,
+        "selected_candidate": "cheap"
+      },
+      {
+        "arm": "search/exhaustive_oracle",
+        "report_hash": "sha256:044f538849ca0189191ea1aed89560e3731bc65cfc37c14527f096ac4223f2e8",
+        "rows": 4,
+        "selected_candidate": "cheap"
+      }
+    ],
+    "numerical_work": {
+      "attempted_step_count": 176,
+      "known_newton_iteration_count": 468,
+      "known_linear_solve_count": 468
+    },
+    "training_and_search_exit_codes": [
+      0,
+      0
+    ],
+    "selected_candidate_all_search_arms": "cheap",
+    "all_artifact_byte_references_checked": true,
+    "consumer_reports_checked": 4,
+    "new_fits": 0,
+    "new_newton_solves": 0,
+    "independent_physical_validation": false,
+    "learned_advantage_proved": false,
+    "wall_ns": 19994201
+  },
+  "consumer_check": {
+    "schema_version": "rc-control-candidate-existing-workbench-consumer-check.v1",
+    "pid": 1007574,
+    "node_version": "v20.19.0",
+    "node_executable": "/home/betelgeuze/.local/node/node-v20.19.0-linux-x64/bin/node",
+    "node_executable_sha256": "34bc6627675906f8431892630b5e91fc4cc9f1e03ce15e9716025aa551e5c823",
+    "typescript_version": "5.0.2",
+    "method": "actual frozen TypeScript data validator transpiled to CommonJS under Node; no browser, rendering, transport, or pinned frontend delivery lane qualification",
+    "reviews": [
+      {
+        "arm": "train/labels",
+        "comparison_sha256": "39ed412fd82878e06689aae71ed9ef018a33fd88f3a26c0bf7c84f3409018cda",
+        "rows": 3,
+        "verified": 3,
+        "selected": null,
+        "price_table_hash": null,
+        "artifact_reads": 24,
+        "artifact_bytes": 1122123
+      },
+      {
+        "arm": "search/price_order",
+        "comparison_sha256": "a3df3c28de9bd2b8a572edc8f0ab5dd10ae938037109ea98b5b700f58b493d60",
+        "rows": 2,
+        "verified": 2,
+        "selected": "cheap",
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "artifact_reads": 16,
+        "artifact_bytes": 745968
+      },
+      {
+        "arm": "search/learned_order",
+        "comparison_sha256": "da65bb06f9bfc16ecf121d694caee0c38bac9a0873ba970fb54309496bc9b434",
+        "rows": 2,
+        "verified": 2,
+        "selected": "cheap",
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "artifact_reads": 16,
+        "artifact_bytes": 745968
+      },
+      {
+        "arm": "search/exhaustive_oracle",
+        "comparison_sha256": "9927021404f0007fa05a55c07e6e81d13fdab3abe93bf1fccb0466a5b0188f74",
+        "rows": 4,
+        "verified": 4,
+        "selected": "cheap",
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "artifact_reads": 32,
+        "artifact_bytes": 1490341
+      }
+    ],
+    "wall_ns": 780989573,
+    "peak_rss_kib": 242388,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "combined_search_panel_integrated": false
+  },
+  "completion": {
+    "checked_at_utc": "2026-09-10T00:40:34.258175+00:00",
+    "all_original_processes_absent": true,
+    "pids": [
+      1006696,
+      1007152,
+      1007174,
+      1007574,
+      1007730
+    ],
+    "audit_tool_session": 81832,
+    "audit_exit_code": 0,
+    "numerical_restarts": 0,
+    "consumer_scope": "frozen TypeScript data validator; browser and combined search panel not covered"
+  },
+  "train_process": {
+    "parent_pid": 1006696,
+    "worker_pid": 1007152,
+    "exit_code": 0,
+    "parent_wall_ns": 4505267843,
+    "child_cpu_seconds": 4.504536,
+    "peak_child_rss_kib_cumulative": 114980
+  },
+  "search_process": {
+    "parent_pid": 1006696,
+    "worker_pid": 1007174,
+    "exit_code": 0,
+    "parent_wall_ns": 8907319561,
+    "child_cpu_seconds": 8.901769999999999,
+    "peak_child_rss_kib_cumulative": 114980
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-control-candidate-9llgy6n9",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-control-candidate-9llgy6n9.inventory.json",
+    "inventory_sha256": "36f6e82817ff8cc232269f4f5c4b7f5e5bc3838a5c381f4764fe632c49a6d7e8",
+    "file_count": 573,
+    "total_bytes": 13186109,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T00:40:34.332788+00:00",
+    "seal_wall_ns": 51640938,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "coverage_observation": {
+    "schema_version": "rc-control-candidate-coverage-observation.v1",
+    "pid": 1009975,
+    "checked_at_utc": "2026-09-10T00:45:11.966975+00:00",
+    "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-control-candidate-9llgy6n9",
+    "original_inventory_sha256": "36f6e82817ff8cc232269f4f5c4b7f5e5bc3838a5c381f4764fe632c49a6d7e8",
+    "original_files_checked": 573,
+    "observer_source_revision": "9bad3dd2e14b6948500e480fb8731c1155a98dbf",
+    "observer_source_sha256": "c4968960e62dcf8bc61eb366c8eae6dab6b4c96f58bdc93adadb264ebc3a7475",
+    "audit": {
+      "schema_version": "rc-control-candidate-coverage-audit.v1",
+      "status": "compared_with_separate_full_reference_oracle",
+      "alternative_denominator": 3,
+      "baseline_excluded": true,
+      "oracle_comparison_hash": "sha256:044f538849ca0189191ea1aed89560e3731bc65cfc37c14527f096ac4223f2e8",
+      "definitions": {
+        "missed_feasible": "oracle_verified_all_requested_limits_pass_but_not_shortlisted",
+        "false_safe": "predicted_all_requested_limits_pass_but_oracle_verified_limit_failure",
+        "predicted_safe_unverifiable": "predicted_all_requested_limits_pass_but_oracle_unverifiable",
+        "false_negative": "predicted_limit_failure_but_oracle_verified_all_requested_limits_pass",
+        "deterministic_prediction_counts": "not_applicable_strategy_makes_no_predictions",
+        "unavailable_counts": "null_does_not_mean_zero"
+      },
+      "candidates": [
+        {
+          "candidate_id": "cheap",
+          "predicted_all_requested_limits_pass": true,
+          "oracle_all_requested_limits_pass": true,
+          "shortlisted_by": [
+            "learned_order",
+            "price_order"
+          ]
+        },
+        {
+          "candidate_id": "middle",
+          "predicted_all_requested_limits_pass": true,
+          "oracle_all_requested_limits_pass": true,
+          "shortlisted_by": []
+        },
+        {
+          "candidate_id": "costly",
+          "predicted_all_requested_limits_pass": true,
+          "oracle_all_requested_limits_pass": true,
+          "shortlisted_by": []
+        }
+      ],
+      "arms": {
+        "learned_order": {
+          "missed_feasible_count": 2,
+          "missed_feasible_candidate_ids": [
+            "middle",
+            "costly"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": 0,
+          "false_safe_candidate_ids": [],
+          "predicted_safe_unverifiable_count": 0,
+          "predicted_safe_unverifiable_candidate_ids": [],
+          "false_negative_count": 0,
+          "false_negative_candidate_ids": []
+        },
+        "price_order": {
+          "missed_feasible_count": 2,
+          "missed_feasible_candidate_ids": [
+            "middle",
+            "costly"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": null,
+          "false_safe_candidate_ids": null,
+          "predicted_safe_unverifiable_count": null,
+          "predicted_safe_unverifiable_candidate_ids": null,
+          "false_negative_count": null,
+          "false_negative_candidate_ids": null
+        }
+      },
+      "independent_physical_validation": false
+    },
+    "original_v1_reports_unchanged": true,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "wall_ns": 30319413,
+    "independent_physical_validation": false,
+    "net_savings_proved": false
+  },
+  "coverage_seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-candidate-coverage-zxs9m0at",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-candidate-coverage-zxs9m0at.inventory.json",
+    "inventory_sha256": "0494194c4af5e0e2d0286ff9891ed66c989c99431a0189743c326ca752a2af46",
+    "file_count": 6,
+    "total_bytes": 27086,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T00:46:34.924708+00:00",
+    "seal_wall_ns": 799394,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "claims": {
+    "bounded_observation_completed": true,
+    "combined_workbench_search_panel_integrated": false,
+    "independent_project_geometry_history_evaluation": false,
+    "independent_physical_validation": false,
+    "learned_advantage_proved": false,
+    "release_approved": false,
+    "full_roadmap_complete": false
+  }
+}

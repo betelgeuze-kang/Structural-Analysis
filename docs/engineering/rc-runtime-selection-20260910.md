@@ -80,35 +80,70 @@ distinct reversal shapes. Its initial log is retained. An earlier overlapping
 The 964 original material-learning rows then pass a separate real-input preflight
 against all four training models with no fit or structural solve.
 
-## Frozen observation in progress
+## Completed frozen observation
 
-The source snapshot contains 439 source/schema/test files matching Git.
-The original models, requests, 964 training rows and source policy are copied
-only after verification against their sealed inventories. The declared grid
-is **10,000 and 1,000,000**: the earlier training-only loss-selected ridge and
-a more strongly shrunk candidate. This is a new runtime-tuning comparison, not
-reuse of validation results for selection.
+The fixed two-ridge grid now completes all eight withheld-training-case fits,
+32 full paths and **7,744 numerical calls / 37,376 Newton iterations and linear
+solves**. All 24 full-history comparisons pass; each reference/fresh-reference
+pair has exact history and terminal-checkpoint bytes. All original target
+sequences remain unchanged. No validation/holdout path executes and no label is
+regenerated. The source snapshot's 439 files match Git
+`664f128896dc08eeb3337264881fa2d869badc4e`.
 
-The plan contains **eight folds / 32 complete paths / 242 targets per path**,
-with 7,744 nominal core calls and a 9,680-call bound including possible numerical
-proposal retries. There are eight fold fits and at most one final selected refit.
-The 1% selection margin, arithmetic, comparisons and arm order are frozen before
-execution. Original label generation remains 2,904 core calls and 13,815
-Newton/linear counts, with 1,045.632469 s across its recorded generation paths;
-its other costs remain in the preceding source records.
+| Ridge | Equal-case mean proposal/secant path-time ratio | Genuine proposal rows |
+| --- | ---: | ---: |
+| 10,000 | 1.328413 | 241 |
+| 1,000,000 | 1.325443 | 241 |
 
-The active packet is
-`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy`.
-The original driver is retained as `run.py`, with `protocol.json`, the source
-manifest, original input identities, tests and live fit/fold reservations.
-It is **not sealed or a completed result**. The initial worker PID is `992787`
-and parent PID `992334`; these identify the observed run, not proof that it is
-still live at a later time. Check the original process/session and terminal
-records before continuing. Do not restart merely because an observation times out.
+Both candidates are slower under the declared score, so **secant remains
+selected**. There is no selected learned ridge, final refit or promoted policy.
+At both ridges only train-b has learned proposals; all other cases abstain to
+the original reference path. Train-b is 12.26% and 12.37% slower than secant.
+The [initial-iteration diagnostic](rc-first-iterate-diagnostic-20260910.md)
+records the first candidate's additional iterations without claiming causality
+from different parent states. These are single-run internal tuning observations
+on a shared host, not repeated independent evaluation or amortized net savings.
 
-The [machine status](rc-runtime-selection-20260910.summary.json) records the
-observed state. No completed candidate score, speedup, final policy or independent
-verification is claimed while it runs. The result must be audited against original
-states, costs, fitted partitions and source bytes before a decision is reported.
-M3 net savings, public experiment/model correspondence, wider independent solver
-verification, Workbench/candidate integration and the full roadmap remain open.
+## Original-record and arithmetic verification
+
+A separate terminal-process audit reconstructs all eight training partitions,
+train-only preprocessing arrays and policy identities. Its ridge-stationarity
+check has maximum relative residual `6.829939e-15`; it performs no new fit.
+It reconstructs 1,936 stored proposal decisions and their committed material
+snapshots, checks all original step reservations/outcomes and parent chains,
+reopens all 32 terminal native states, and recomputes all candidate scores and
+the final selection.
+
+The audit replays 7,744 accepted assemblies and responses with the frozen solver,
+charging 650,496 material integrations separately. A separate rational-assembly
+helper checks 7,744 assemblies, 46,464 sections and 15,488 members. Its 100-digit
+material checks cover 650,496 stresses and preserve the native branch/state
+results. These arithmetic implementations do not provide a new experiment,
+external solver qualification or independent physical calibration. No Newton
+path is rerun by the auditor.
+
+The numerical parent takes 2,875.369819 s; the worker takes 2,875.134822 s through
+reports, with 2,874.478499 s CPU and 369,100 KiB peak RSS. The auditor takes
+1,113.018635 s internally, 1,111.231353 s CPU and 433,072 KiB peak RSS; its parent
+interval is 1,113.278082 s. The supervisor's wait is separate and must not be
+added again as numerical work. Original generation remains 2,904 calls / 13,815
+Newton counts and 1,045.632469 s across its original generation paths, with the
+other historical selection/research costs retained separately.
+
+The adapted auditor's fold-file name was corrected during preparation to avoid
+shadowing by inner step-file names. The retained deployed audit completes on its
+first execution with exit zero. The earlier diagnostics, their original hashes,
+auditor adaptation, all input/source inventories and process outcomes are kept.
+
+All numerical and audit processes are terminal. The packet at
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy`
+is sealed after rereading **47,071 files / 2,734,483,787 bytes** exactly. Inventory
+SHA-256 is `4175ee8c66f8c51aa6fcceb38c2538e9c596cd4afbf0e6fe81e70c5293d2aaa2`.
+See the [machine summary](rc-runtime-selection-20260910.summary.json) for the full
+fold scores, cost records, arithmetic audit and seal. The pre-existing initial
+live-state fields are historical snapshots, not current process status.
+
+M3 learned net savings, external data/model correspondence, broader independent
+solver verification, Workbench candidate-search integration and the full roadmap
+remain incomplete. The negative candidate outcome is retained as evidence for
+changing the learning strategy rather than promoting either tested ridge.
