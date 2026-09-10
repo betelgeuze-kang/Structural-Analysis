@@ -10,7 +10,8 @@ inspects those states at every target.
 
 This is a source-bound diagnostic, not an implemented fast path, a measured
 speedup or a completed audit of all numerical states. The full runtime auditor
-continues separately. The frozen numerical source is
+was running separately when this diagnostic snapshot was captured. Its later
+completion and sealing are recorded in the linked parent study. The frozen numerical source is
 `3d4ecef4b737703717522ef385bdc6004eba56e1`.
 
 ## Reconstruct the inputs without a structural response
@@ -77,6 +78,9 @@ preparation and reporting costs, and preserve reference fallback/rollback and
 accepted-result authority. It must not use a lack of static violations to bypass
 the remaining checks. No such optimization is implemented by this diagnostic.
 The active-case regression remains a separate learning/solver-strategy problem.
+The subsequent [static model gate](rc-static-model-gate-20260910.md) implements
+the explicit material-profile option and verifies baseline preservation, without
+claiming a measured full-path speedup.
 
 [Machine summary](rc-static-abstention-diagnostic-20260910.summary.json) includes
 all violated coordinates, bounds, margins, decision counts and timing sums.
@@ -88,4 +92,5 @@ All 209 imported project source files match the frozen manifest and Git revision
 all packet files are reread and hash-checked. Original training bytes, policy
 files, proposal reports, terminal result, diagnostic source and logs are retained.
 This seal covers this diagnostic only. The parent experiment's original-state
-and fit audit is still running and its packet remains unsealed.
+and fit audit was still running at capture; it has subsequently completed and
+its separate packet is sealed, as recorded in the parent study.

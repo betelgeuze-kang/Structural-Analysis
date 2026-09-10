@@ -74,7 +74,7 @@ reserved only if a candidate beats the fixed improvement threshold. No policy
 is automatically promoted. These are internal tuning cases, not independent
 experimental campaigns or repeated hardware measurements.
 
-The packet is currently unsealed:
+The completed packet is:
 `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-secant-abstention-fhn1qvyq`.
 Its `protocol.json`, source manifest, launcher and original source inventories
 record the executable plan. Original numerical parent/worker PIDs are 1073200 /
@@ -88,21 +88,21 @@ all fit partitions, preprocessing, ridge stationarity, actual proposal/abstentio
 choices, full native state histories, costs and final selection. Its adaptation
 from the prior sealed auditor is hash-bound. It performs no fitting or Newton
 paths, but its material/assembly replays have their own recorded cost. Audit
-success remains pending; a configured supervisor is not a passing audit.
+success is recorded below; a configured supervisor alone is not a passing audit.
 
 The previous fallback experiment's timings remain historical context, not a
 same-source repeated causal comparison. Current learned advantage, total net
-savings, original-record audit completion, independent families, external-data
-admission and full-roadmap closure remain unproved. The terminal numerical
-outcomes below are separated from the still-pending original-record audit.
+savings, independent families, external-data admission and full-roadmap closure
+remain unproved. The terminal numerical outcomes and completed original-record
+audit below do not establish those broader claims.
 
-## Numerical execution completed; original audit running
+## Numerical execution and original audit completed
 
 The original worker and parent terminate with exit code 0. All eight fits and
 32 full paths return; the parent records **2,702.226514417 s**. The result reports
 7,744 core calls and 35,194 Newton iterations/linear solves, with all eight fold
-comparison flags true. The original-record auditor must still reconstruct those
-counts, states and decisions before they become audited totals.
+comparison flags true. The original-record auditor reconstructs those counts,
+states and decisions from the retained inputs and original records.
 
 | Ridge | Mean proposal/secant path-time ratio | Actual learned proposals |
 | --- | ---: | ---: |
@@ -119,10 +119,35 @@ controlled estimate of the abstention change's effect.
 The supervisor observes both original numerical processes absent and starts
 audit worker 1085253 once, with script hash
 `2202a16beb87ad794749e2120935c19990acc257aeb02c6a6ba20fa5398ecdf3`.
-Its process is verified live. No second numerical run or audit is launched.
-The main packet remains unsealed until that audit reaches a verified outcome.
+Both audit worker and supervisor then exit with code 0. No second numerical run
+or audit is launched. All four original processes are absent at sealing.
+
+The completed audit verifies 445 source files, all eight training partitions,
+preprocessing and ridge stationarity (maximum relative residual
+`6.829938987808197e-15`). It reconstructs all 1,936 proposal decisions/material
+snapshots, reopens 32 native terminal states and replays 7,744 assemblies.
+It checks 650,496 original fiber inputs, native material branches and 100-digit
+stress calculations. These are computational consistency checks within the
+declared formulation, not independent experimental validation.
+
+All 24 full-history comparisons pass their unchanged bounds. All eight repeated
+reference terminal checkpoints are exact; seeded versus reference paths need
+not be byte-identical and are assessed with the declared componentwise bounds.
+The auditor reconstructs both candidate scores and the secant selection. It
+performs no new Newton solve or fit; material/assembly replay costs are retained.
+The audit parent records **1,102.776161520 s**, separately from the numerical
+parent's 2,702.226514417 s and earlier label-generation/research costs.
+
+The sealed packet contains **47,072 files / 2,731,657,488 bytes**. Its sibling
+inventory SHA-256 is
+`df41ee6c060fe8dd5e5bb4586c6c801177b5d5d7ec56929ec37bdc1bc08ed064`.
+Every file is reread and hash-checked; inventory construction plus rereading
+takes another 5.418526949 s. The
+[completion summary](rc-secant-abstention-20260910.summary.json) binds these
+outcomes. No file is added to the main packet after sealing.
 
 A separate [static-input diagnostic](rc-static-abstention-diagnostic-20260910.md)
 reconstructs all 74 immutable model features and finds pre-analysis range
-violations in six folds. It identifies recorded avoidable-work candidates, but
-does not implement an optimization or prove saved execution time.
+violations in six folds. The later [static model gate](rc-static-model-gate-20260910.md)
+implements that one-way rejection as an explicit option. It is not included in
+this 3d4ecef4b experiment and has no full-path speedup claim from these timings.

@@ -1887,7 +1887,7 @@ rounded/resampled equivalence or authenticated provenance. External training,
 independent validation, net learned savings and full-goal closure remain open.
 
 
-The [secant-abstention numerical run](rc-secant-abstention-20260910.md#numerical-execution-completed-original-audit-running)
+The [secant-abstention numerical run](rc-secant-abstention-20260910.md#numerical-execution-and-original-audit-completed)
 finishes with original parent/worker exit 0: eight fits and 32 paths, reported
 7,744 calls / 35,194 Newton/linear. Candidate mean path-time ratios 1.047923 and
 1.049094 retain secant without final refit/promotion. Original audit worker
@@ -1905,3 +1905,24 @@ The row-subsequence change also passes hosted development CI: 346 tests in
 JUnit ZIP/digest and original logs agree. All four full shards still fail
 materialization and skip actual pytest; the required aggregate fails. This
 provides diagnostic regression coverage only, not full-suite qualification.
+
+
+The [secant-abstention original audit](rc-secant-abstention-20260910.md#numerical-execution-and-original-audit-completed)
+now exits 0 and reconstructs 7,744 calls / 35,194 Newton/linear, all eight fits,
+1,936 decisions/snapshots, 32 native terminals and 24 passing full-history
+comparisons. Numerical parent 2,702.226514417 s and audit parent 1,102.776161520 s
+remain separate costs. The 47,072-file packet is sealed; all original processes
+are absent. Secant remains selected without learned refit/promotion. These are
+internal consistency checks, not independent physical validation or net savings.
+
+The [static material model gate](rc-static-model-gate-20260910.md) at 6885cd7af
+implements explicit one-way preflight rejection and omits capture/inference only
+when immutable features fail the unchanged range rule. Gate calculation and
+record-writing costs enter the proposal score; unresolved cases retain full
+checks. Forty runtime tests pass and two expanded actual-path checks pass again;
+20 original step pairs are byte-identical across both abstention strategies.
+Eight original fitted policies reproduce the prior six rejecting/two nonrejecting
+model decisions with no new solve/fit/label in that separate observation. The
+option is not part of the earlier 32-path experiment and has no measured saved
+runtime claim. Active learned-path benefit, full repository qualification,
+external independent evidence and the full roadmap remain open.
