@@ -1,0 +1,83 @@
+{
+  "schema_version": "rc-same-parent-cost-progress-snapshot.v1",
+  "snapshot_unix_ns": 1789023640491974753,
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-e_rj5919",
+  "packet_sealed": false,
+  "source_revision": "cbc1952f5066b323f3a9369318c1615a94372122",
+  "process_started": {
+    "parent_pid": 1131148,
+    "worker_pid": 1131189,
+    "runner_sha256": "5aec7c010bca4497c778a17fe6b4f11297ab19c8cf07b4161ec10397163cd00e",
+    "protocol_sha256": "b8687cd7e1a40632250f986c48c9126bbea35c689a8992bdf4938fb29cf690d7",
+    "source_manifest_sha256": "01b91f2dcbb7027d24568d029f15db1ce77b524721656c50909ea55c33e593ec",
+    "input_bindings_sha256": "351a1f81890f8bda3808e872b0b1b0d2e05f3ac0178485ff8fba03af594a96f5",
+    "automatic_retry": false
+  },
+  "processes_confirmed_live": {
+    "parent_pid": true,
+    "worker_pid": true
+  },
+  "origin_preflight": {
+    "input_files_verified": 3906,
+    "source_files_verified": 448,
+    "original_core_work": {
+      "core_calls": 968,
+      "linear_solves": 3681,
+      "newton_iterations": 3681
+    },
+    "original_parents_and_complete_prefixes_verified": 968,
+    "original_training_partition_audit_bound": true,
+    "prefix_newton_reexecutions": 0,
+    "fits": 0,
+    "wall_ns": 56344132887
+  },
+  "completed_comparisons_at_snapshot": 64,
+  "all_completed_comparisons_pass": true,
+  "all_completed_original_secant_children_reproduced": true,
+  "all_completed_new_work": {
+    "core_calls": 256,
+    "newton_iterations": 1446,
+    "linear_solves": 1446
+  },
+  "final_result_available": false,
+  "original_audit_available": false,
+  "training_admitted": false,
+  "full_path_performance_credit": false,
+  "bindings": [
+    {
+      "path": "protocol.json",
+      "bytes": 19276,
+      "sha256": "b8687cd7e1a40632250f986c48c9126bbea35c689a8992bdf4938fb29cf690d7"
+    },
+    {
+      "path": "source-manifest.json",
+      "bytes": 90610,
+      "sha256": "01b91f2dcbb7027d24568d029f15db1ce77b524721656c50909ea55c33e593ec"
+    },
+    {
+      "path": "input-bindings.json",
+      "bytes": 682981,
+      "sha256": "351a1f81890f8bda3808e872b0b1b0d2e05f3ac0178485ff8fba03af594a96f5"
+    },
+    {
+      "path": "origin-preflight.json",
+      "bytes": 361,
+      "sha256": "0b6990c020e57b3e12a80f386106aa0e3452bacb0760930e4ca540ea7d5b55a3"
+    },
+    {
+      "path": "process-started.json",
+      "bytes": 448,
+      "sha256": "b54540eb5cd527d9e0182a58ea2bf061ef2f0527ec7e4460afb75750b5440e32"
+    },
+    {
+      "path": "run.py",
+      "bytes": 11277,
+      "sha256": "5aec7c010bca4497c778a17fe6b4f11297ab19c8cf07b4161ec10397163cd00e"
+    },
+    {
+      "path": "prepare.py",
+      "bytes": 5951,
+      "sha256": "2069452b43cd6d941d87eb823068029af7abd7a0edc4af87b067f2939406b630"
+    }
+  ]
+}

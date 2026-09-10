@@ -1,0 +1,113 @@
+# Original-parent cost comparison protocol
+
+The [step-work observation](rc-step-work-observation-20260910.md) found that
+lower-iteration learned steps occurred on different trajectories. The new
+[parent-step runner](rc-parent-step-comparison-20260910.md) can compare actions
+from one native parent and one complete accepted prefix. This study applies it
+to the complete declared development roster. It does not fit or adopt a policy.
+
+## Fixed experiment
+
+The numerical source is frozen at
+`cbc1952f5066b323f3a9369318c1615a94372122`, including the parent-step implementation
+from `50b2f30f3`. The previous focused verification covered 118 passing tests;
+it does not itself validate this new research execution script or large study.
+
+Inputs come from the sealed [secant-abstention study](rc-secant-abstention-20260910.md).
+The original inventory SHA-256 is
+`df41ee6c060fe8dd5e5bb4586c6c801177b5d5d7ec56929ec37bdc1bc08ed064`.
+The new packet copies and verifies 3,906 original files, including the previous
+successful original-record audit, four ridge-10,000 policies, full original
+secant paths and their step/context/outcome records. All six declared cases enter
+the existing split preflight; only the four training cases execute.
+
+Each case contributes **all 242 original targets**. At each target, the original
+secant parent and full accepted-coordinate prefix are fixed while reference,
+secant and the frozen learned policy each execute one target. A fresh reference
+follows. There are **968 comparisons / 3,872 nominal numerical calls**, with a
+conservative limit of **5,808 calls** allowing the existing seeded fallback.
+There are **zero new fits**. Every original target remains in the denominator;
+the target roster does not select positions where AI previously looked better.
+
+Three arm orders rotate by global comparison index; the fresh reference is
+always last. These are different parents, not repeated timing measurements of
+one parent. The policy is frozen per case and comes from its previously audited
+withheld-case fit. Source and inputs are frozen before launch; the process-start
+record binds the source revision, protocol, complete input bindings and research
+script by hash.
+
+The exact archived [preparation script](rc-same-parent-cost-study-20260910.prepare.py.txt)
+and [execution script](rc-same-parent-cost-study-20260910.run.py.txt) are available
+for review. They are this experiment's source-bound reproduction records, not a
+general-purpose production CLI. They require the declared source checkout and
+sealed local input packet; their absolute paths and fixed revision are intentional.
+
+Before new numerical calls, the worker verifies the complete original native
+parent chain, all accepted-coordinate prefixes, original step hashes and
+invocation work, and reopens the native states under the frozen current source.
+The original prefix is authenticated from records, not recomputed with Newton.
+Each new secant result is compared to the original accepted child; a completed
+but different child stops scheduling before further comparisons. Unknown new
+numerical work also stops immediately. Known failed comparisons remain records
+and receive no training or full-path credit.
+
+## Costs and limits
+
+This experiment evaluates the full original learned policy, including material
+capture and inference when it abstains. It deliberately does not use the static
+model rejection optimization. Consequently, it is not the same runtime
+configuration as the [counterbalanced full-path study](rc-counterbalanced-runtime-20260910.md).
+Its local time ratios must not be compared directly with that study to claim
+an optimization effect.
+
+Records include every numerical attempt, fallback, Newton iteration and linear
+solve, per-arm costs, per-comparison cost, policy decision and verification result.
+The worker/parent elapsed time includes origin preflight and execution/report I/O.
+Historical label generation, old policy fitting, reaching original parents,
+packet preparation and the separately retained failed attempt are distinct
+costs. No end-to-end user-time saving is claimed.
+
+The host is shared with the running original-record audit of the completed
+48-path experiment. No isolated-hardware timing claim is possible. These four
+authored development cases and their correlated targets do not constitute
+independent physical validation. The dataset remains unadmitted until a separate
+original-record check of the new comparisons; even then, strategy adoption
+requires fresh full-path and leakage-resistant evaluation.
+
+## Preserved preflight failure
+
+The first script attempt supplied the checkpoint's internal hash representation
+to a loader requiring canonical UTF-8 JSON. The loader rejected it during origin
+preflight. No study directory was created and no new solver or fitting call ran.
+The worker and parent terminated; the parent took **2.536980 seconds**.
+
+The correction is in the research script: serialize `previous.to_dict()` through
+the benchmark's canonical JSON encoder. No solver tolerance, numerical code,
+policy or original record was changed. The corrected run uses a separate packet
+and explicitly binds the failed attempt in its prospective protocol.
+
+Failed packet:
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-t4_7x8fg`.
+Its adjacent inventory and seal cover **4,367 files / 334,622,806 bytes** with
+inventory SHA-256
+`7ff4cdecb664ec104078b047f7b83d7adc04e78150c7373e35b26abc62e42c07`.
+Every payload file was reread after both original processes were confirmed absent.
+
+## Active execution handoff
+
+Corrected, unsealed packet:
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-e_rj5919`.
+Parent/worker PIDs at launch are **1131148 / 1131189**. The process-start record
+binds the runner, protocol and source/input manifests. Inspect the actual process
+identities and terminal outcome files before taking action. Observation timeout
+does not authorize a restart. The runner has no automatic retries or promotion.
+
+The [machine snapshot](rc-same-parent-cost-study-20260910.summary.json) records
+successful preflight of all **968 origins** and the first **64 comparisons**:
+256 numerical calls, 1,446 Newton iterations/linear solves, all same-parent
+comparisons passing and original secant children reproduced. This is the initial
+train-a prefix, not a completed cross-case result or an audited dataset.
+
+The prospective protocol, frozen source and a live process establish execution
+provenance, not a completed experiment. Final outcomes, the original-record audit
+of all new comparisons and a complete reread/hash seal remain required.
