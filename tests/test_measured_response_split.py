@@ -252,11 +252,101 @@ def test_subset_can_share_training_partition():
             ("subset", "train", source(campaign="mirror", metres=True)),
         ]
     )
-    assert report["schema_version"] == "measured-response-learning-split-screen.v2"
+    assert report["schema_version"] == "measured-response-learning-split-screen.v3"
     assert not report["independent_provenance_verified"]
 
 
-@pytest.mark.parametrize("subset", [False, True])
+def row_sources(**subset_changes):
+    full = source(
+        extra_sensor=True,
+        displacement_values=["-3", "0", "1", "1", "4", "6"],
+        force_values=["-9", "0", "2", "3", "7", "12"],
+    )
+    options = dict(
+        campaign="renamed",
+        metres=True,
+        swapped=True,
+        displacement_values=["-0.003", "0.001", "0.006"],
+        force_values=["-9", "2", "12"],
+    )
+    options.update(subset_changes)
+    return full, source(**options)
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_exact_ordered_row_subset_rejects_with_source_bound_witness(reverse):
+    full, subset = row_sources()
+    records = [("full", "train", full), ("subset", "holdout", subset)]
+    if reverse:
+        records.reverse()
+    with localcontext() as context:
+        context.prec = 2
+        with pytest.raises(MeasuredSplitLeakageError, match="row_subsequence") as error:
+            validate_measured_response_split_sources(records)
+    details = error.value.details
+    witness = details["overlap_witness"]
+    assert witness["short_case_id"] == "subset"
+    assert witness["long_case_id"] == "full"
+    assert witness["short_source_sha256"] == subset.source.source_sha256
+    assert witness["long_source_sha256"] == full.source.source_sha256
+    assert witness["short_displacement_column"] == "B"
+    assert witness["long_displacement_column"] == "A"
+    assert witness["matched_point_count"] == 3
+    assert (
+        witness["ordered_long_indices_sha256"]
+        == hashlib.sha256(b"0\n2\n5\n").hexdigest()
+    )
+    assert (
+        witness["first_zero_based_long_index"],
+        witness["last_zero_based_long_index"],
+    ) == (0, 5)
+    assert details["structural_calls"] == details["training_fits"] == 0
+    assert details["screen_wall_ns"] > 0
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        dict(reordered=True),
+        # Each channel separately is a subsequence, but their row pairing differs.
+        dict(force_values=["-9", "7", "12"]),
+        # Exact repeated pairs require distinct source rows.
+        dict(
+            displacement_values=["-0.003", "0.001", "0.001", "0.006"],
+            force_values=["-9", "2", "2", "12"],
+        ),
+        dict(force_values=["600", "600.0", "600"]),
+        dict(displacement_values=["0.001", "0.001", "0.001"]),
+        # No precision tolerance is silently applied to nearby observations.
+        dict(displacement_values=["-0.003", "0.0010000000000000001", "0.006"]),
+    ],
+)
+def test_row_subset_requires_complete_exact_nonconstant_paired_sequence(changes):
+    full, subset = row_sources(**changes)
+    report = validate_measured_response_split_sources(
+        [("full", "train", full), ("subset", "validation", subset)]
+    )
+    assert report["exact_ordered_force_displacement_row_subsequence_screened"]
+    assert not report["rounded_or_interpolated_row_equivalence_verified"]
+    assert not report["training_admission_granted"]
+
+
+def test_row_subset_same_partition_does_not_hide_later_cross_partition_overlap():
+    full, subset = row_sources()
+    records = [("full", "train", full), ("subset", "train", subset)]
+    assert len(validate_measured_response_split_sources(records)["sources"]) == 2
+    other = source(
+        campaign="third",
+        displacement_values=["0", "1", "4"],
+        force_values=["0", "3", "7"],
+    )
+    with pytest.raises(MeasuredSplitLeakageError, match="row_subsequence"):
+        validate_measured_response_split_sources(
+            records + [("third", "holdout", other)]
+        )
+
+
+@pytest.mark.parametrize("subset", [False, True, "rows"])
 def test_actual_learning_entry_rejects_before_compile_solve_fit_or_output(
     tmp_path, monkeypatch, subset
 ):
@@ -280,15 +370,25 @@ def test_actual_learning_entry_rejects_before_compile_solve_fit_or_output(
             split,
             model,
             request,
-            measurement_source=source(
-                test=name,
-                campaign=name if subset else "experiment",
-                extra_sensor=subset and name == "a",
+            measurement_source=(
+                row_sources()[0 if name == "a" else 1]
+                if subset == "rows"
+                else source(
+                    test=name,
+                    campaign=name if subset else "experiment",
+                    extra_sensor=subset and name == "a",
+                )
             ),
         )
         for name, split in [("a", "train"), ("b", "holdout")]
     ]
-    reason = "si_force_displacement_trajectory" if subset else "campaign"
+    reason = (
+        "si_force_displacement_row_subsequence"
+        if subset == "rows"
+        else "si_force_displacement_trajectory"
+        if subset
+        else "campaign"
+    )
     with pytest.raises(MeasuredSplitLeakageError, match=f"measured_{reason}"):
         learning.run_rc_control_learning_study(
             cases, source_revision="a" * 40, output_directory=tmp_path / "study"

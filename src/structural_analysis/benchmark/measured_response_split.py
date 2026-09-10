@@ -3,8 +3,8 @@
 Source IDs are declarations, not authenticated physical provenance. The content
 screen groups exact ordered SI observations across workbook repackaging, column
 reordering, unit representation, renamed metadata, and force/displacement channel
-subsets. It does not infer sensor correspondence, authenticate campaigns, or
-detect arbitrary resampling.
+subsets, including exact ordered row subsequences. It does not infer sensor
+correspondence, authenticate campaigns, or detect rounded/interpolated resampling.
 """
 
 import hashlib
@@ -13,6 +13,9 @@ from time import perf_counter_ns
 from typing import Any
 
 from structural_analysis.io.measured_response_workbook import MeasuredResponseWorkbook
+
+
+_ResponseChannels = dict[str, dict[str, tuple[str, tuple[str, ...]]]]
 
 
 class MeasuredSplitLeakageError(ValueError):
@@ -44,7 +47,7 @@ def _decimal_key(value):
     return f"{sign}:{''.join(str(d) for d in significant)}:{exponent}"
 
 
-def measured_response_split_identity(source: MeasuredResponseWorkbook):
+def _source_identity(source: MeasuredResponseWorkbook, *, retain_response=False):
     """Hash SI observation values without labels or source serialization details.
 
     Observation indices are excluded. Physical channel multiplicity and sample
@@ -55,14 +58,19 @@ def measured_response_split_identity(source: MeasuredResponseWorkbook):
         raise ValueError("decoded measured response workbook required")
     channels = []
     nonconstant_channels = []
+    response: _ResponseChannels = {"displacement": {}, "force": {}}
     for spec in source.channels:
         if spec.quantity == "observation_index":
             continue
         digest = hashlib.sha256()
         first = None
         varying = False
+        values = []
+        retain = retain_response and spec.quantity in response
         for value in source.channel_si(spec.column_id):
             key = _decimal_key(value)
+            if retain:
+                values.append(key)
             if first is None:
                 first = key
             varying = varying or key != first
@@ -71,6 +79,10 @@ def measured_response_split_identity(source: MeasuredResponseWorkbook):
         channels.append(channel)
         if varying:
             nonconstant_channels.append(channel)
+            if retain:
+                response[spec.quantity].setdefault(
+                    digest.hexdigest(), (spec.column_id, tuple(values))
+                )
     if not channels:
         raise ValueError("at least one physical observation channel required")
     content = json.dumps(
@@ -83,7 +95,7 @@ def measured_response_split_identity(source: MeasuredResponseWorkbook):
         separators=(",", ":"),
         allow_nan=False,
     ).encode()
-    return {
+    identity = {
         "campaign_id": source.campaign_id,
         "specimen_id": source.specimen_id,
         "test_id": source.test_id,
@@ -93,6 +105,53 @@ def measured_response_split_identity(source: MeasuredResponseWorkbook):
         "physical_channel_count": len(channels),
         "nonconstant_si_channels": sorted(set(nonconstant_channels)),
     }
+    return identity, response
+
+
+def measured_response_split_identity(source: MeasuredResponseWorkbook):
+    """Return the stable exact SI content identity without retaining sample arrays."""
+    return _source_identity(source)[0]
+
+
+def _ordered_response_subset(short, long):
+    """Witness one entire shorter paired response in a longer ordered response.
+
+    Greedy matching advances only when both channels match at the same row.
+    Repeated samples therefore require separate source rows; independent channel
+    matches, a common zero or shared loading alone cannot establish this witness.
+    Both channels were filtered for variation before this check. No rounding or
+    tolerance is used. The witness is a reason to reject a split, not provenance.
+    """
+    for short_d_id, short_d in short["displacement"].values():
+        for long_d_id, long_d in long["displacement"].values():
+            for short_f_id, short_f in short["force"].values():
+                for long_f_id, long_f in long["force"].values():
+                    matched = 0
+                    index_hash = hashlib.sha256()
+                    first_index = None
+                    for index, (displacement, force) in enumerate(zip(long_d, long_f)):
+                        if (
+                            displacement != short_d[matched]
+                            or force != short_f[matched]
+                        ):
+                            continue
+                        if first_index is None:
+                            first_index = index
+                        index_hash.update(f"{index}\n".encode("ascii"))
+                        matched += 1
+                        if matched == len(short_d):
+                            return {
+                                "short_displacement_column": short_d_id,
+                                "short_force_column": short_f_id,
+                                "long_displacement_column": long_d_id,
+                                "long_force_column": long_f_id,
+                                "matched_point_count": matched,
+                                "first_zero_based_long_index": first_index,
+                                "last_zero_based_long_index": index,
+                                "ordered_long_indices_sha256": index_hash.hexdigest(),
+                                "index_hash_encoding": "zero-based ASCII integer plus LF per match",
+                            }
+    return None
 
 
 def _force_displacement_trajectories(identity):
@@ -128,6 +187,7 @@ def validate_measured_response_split_sources(records):
     started = perf_counter_ns()
     owners: dict[tuple[str, str], str] = {}
     identities: list[dict[str, Any]] = []
+    responses: list[_ResponseChannels] = []
     uncovered = []
     for case_id, split, source in records:
         if split not in ("train", "validation", "holdout"):
@@ -135,7 +195,7 @@ def validate_measured_response_split_sources(records):
         if source is None:
             uncovered.append(case_id)
             continue
-        identity = measured_response_split_identity(source)
+        identity, response = _source_identity(source, retain_response=True)
         keys = [
             ("campaign", identity["campaign_id"]),
             ("original_workbook", identity["source_sha256"]),
@@ -162,9 +222,41 @@ def validate_measured_response_split_sources(records):
                     elapsed_ns=perf_counter_ns() - started,
                 )
             owners[key] = split
+        for previous, previous_response in zip(identities, responses):
+            if (
+                previous["split"] == split
+                or previous["point_count"] == identity["point_count"]
+            ):
+                continue
+            current = {"case_id": case_id, "split": split, **identity}
+            short, long = current, previous
+            short_response, long_response = response, previous_response
+            if short["point_count"] > long["point_count"]:
+                short, long = long, short
+                short_response, long_response = long_response, short_response
+            witness = _ordered_response_subset(short_response, long_response)
+            if witness is not None:
+                error = MeasuredSplitLeakageError(
+                    "si_force_displacement_row_subsequence",
+                    case_id=case_id,
+                    identity=identity,
+                    processed_count=len(identities) + 1,
+                    elapsed_ns=perf_counter_ns() - started,
+                )
+                error.details["overlap_witness"] = {
+                    **witness,
+                    "short_case_id": short["case_id"],
+                    "long_case_id": long["case_id"],
+                    "short_source_sha256": short["source_sha256"],
+                    "long_source_sha256": long["source_sha256"],
+                    "short_point_count": short["point_count"],
+                    "long_point_count": long["point_count"],
+                }
+                raise error
         identities.append({"case_id": case_id, "split": split, **identity})
+        responses.append(response)
     return {
-        "schema_version": "measured-response-learning-split-screen.v2",
+        "schema_version": "measured-response-learning-split-screen.v3",
         "sources": identities,
         "cases_without_measured_source": uncovered,
         "all_cases_have_declared_measured_sources": bool(identities) and not uncovered,
@@ -174,6 +266,8 @@ def validate_measured_response_split_sources(records):
         "source_model_correspondence_verified": False,
         "resampling_equivalence_verified": False,
         "exact_nonconstant_force_displacement_subset_screened": True,
+        "exact_ordered_force_displacement_row_subsequence_screened": True,
+        "rounded_or_interpolated_row_equivalence_verified": False,
         "shared_trajectory_is_not_authenticated_specimen_identity": True,
         "training_admission_granted": False,
     }
