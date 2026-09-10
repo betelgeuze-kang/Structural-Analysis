@@ -33,6 +33,9 @@ def source(
     metres=False,
     changed=False,
     reordered=False,
+    extra_sensor=False,
+    force_values=None,
+    displacement_values=None,
 ):
     ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
     rel = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -41,6 +44,10 @@ def source(
         ["-0.000", "1.2300", "1.2300"] if not metres else ["+0", "0.00123", "0.001230"]
     )
     forces = ["0", "2", "3" if changed else "2"]
+    if force_values is not None:
+        forces = force_values
+    if displacement_values is not None:
+        disps = displacement_values
     pairs = list(zip(disps, forces))
     if reordered:
         pairs = list(reversed(pairs))
@@ -48,21 +55,30 @@ def source(
     units = (
         ("kN", "m" if metres else "mm") if swapped else ("m" if metres else "mm", "kN")
     )
+    columns = "ABC" if extra_sensor else "AB"
+    if extra_sensor:
+        quantities += ("strain",)
+        units += ("%",)
     specs = tuple(
-        MeasuredChannelSpec(c, q, u, (c,)) for c, q, u in zip("AB", quantities, units)
+        MeasuredChannelSpec(c, q, u, (c,))
+        for c, q, u in zip(columns, quantities, units)
     )
     header = (
         '<row r="1">'
-        + "".join(f'<c r="{c}1" t="inlineStr"><is><t>{c}</t></is></c>' for c in "AB")
+        + "".join(f'<c r="{c}1" t="inlineStr"><is><t>{c}</t></is></c>' for c in columns)
         + "</row>"
     )
     rows = header
     for row, values in enumerate(pairs, 2):
         if swapped:
             values = values[::-1]
+        if extra_sensor:
+            values += (str(row),)
         rows += (
             f'<row r="{row}">'
-            + "".join(f'<c r="{c}{row}"><v>{v}</v></c>' for c, v in zip("AB", values))
+            + "".join(
+                f'<c r="{c}{row}"><v>{v}</v></c>' for c, v in zip(columns, values)
+            )
             + "</row>"
         )
     out = io.BytesIO()
@@ -175,8 +191,74 @@ def test_distinct_records_can_pass_without_independent_physics_credit():
     assert not report["source_model_correspondence_verified"]
 
 
+@pytest.mark.parametrize("reverse", [False, True])
+def test_response_subset_cannot_cross_splits_after_repackaging(reverse):
+    full = source(extra_sensor=True)
+    subset = source(campaign="mirror", swapped=True, metres=True)
+    assert (
+        measured_response_split_identity(full)["si_observation_content_sha256"]
+        != measured_response_split_identity(subset)["si_observation_content_sha256"]
+    )
+    records = [("full", "train", full), ("subset", "holdout", subset)]
+    if reverse:
+        records.reverse()
+    with localcontext() as context:
+        context.prec = 2
+        with pytest.raises(
+            MeasuredSplitLeakageError, match="measured_si_force_displacement_trajectory"
+        ) as error:
+            validate_measured_response_split_sources(records)
+    assert error.value.details["structural_calls"] == 0
+    assert error.value.details["training_fits"] == 0
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [dict(changed=True), dict(reordered=True)],
+)
+def test_subset_requires_same_response_values_and_row_order(changes):
+    report = validate_measured_response_split_sources(
+        [
+            ("full", "train", source(extra_sensor=True)),
+            ("subset", "holdout", source(campaign="other", **changes)),
+        ]
+    )
+    assert report["exact_nonconstant_force_displacement_subset_screened"]
+    assert not report["training_admission_granted"]
+
+
+@pytest.mark.parametrize(
+    "constant",
+    [
+        dict(force_values=["0", "-0.00", "+0"]),
+        dict(force_values=["600", "600.0", "6e2"]),
+        dict(displacement_values=["1", "1.00", "1e0"]),
+    ],
+)
+def test_constant_channel_and_shared_loading_alone_do_not_link_subsets(constant):
+    report = validate_measured_response_split_sources(
+        [
+            ("full", "train", source(extra_sensor=True, **constant)),
+            ("subset", "holdout", source(campaign="other", **constant)),
+        ]
+    )
+    assert len(report["sources"]) == 2
+
+
+def test_subset_can_share_training_partition():
+    report = validate_measured_response_split_sources(
+        [
+            ("full", "train", source(extra_sensor=True)),
+            ("subset", "train", source(campaign="mirror", metres=True)),
+        ]
+    )
+    assert report["schema_version"] == "measured-response-learning-split-screen.v2"
+    assert not report["independent_provenance_verified"]
+
+
+@pytest.mark.parametrize("subset", [False, True])
 def test_actual_learning_entry_rejects_before_compile_solve_fit_or_output(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, subset
 ):
     model = load_neutral_json(Path("examples/public_rc_fiber_frame_cantilever.json"))
     request = BoundedRCFiberDirectControlRequest(4, (-1e-6, -2e-6))
@@ -198,11 +280,16 @@ def test_actual_learning_entry_rejects_before_compile_solve_fit_or_output(
             split,
             model,
             request,
-            measurement_source=source(test=name),
+            measurement_source=source(
+                test=name,
+                campaign=name if subset else "experiment",
+                extra_sensor=subset and name == "a",
+            ),
         )
         for name, split in [("a", "train"), ("b", "holdout")]
     ]
-    with pytest.raises(MeasuredSplitLeakageError, match="measured_campaign"):
+    reason = "si_force_displacement_trajectory" if subset else "campaign"
+    with pytest.raises(MeasuredSplitLeakageError, match=f"measured_{reason}"):
         learning.run_rc_control_learning_study(
             cases, source_revision="a" * 40, output_directory=tmp_path / "study"
         )
