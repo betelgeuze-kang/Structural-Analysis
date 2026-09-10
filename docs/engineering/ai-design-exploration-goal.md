@@ -5,6 +5,15 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
+The [initial-iteration diagnostic](rc-first-iterate-diagnostic-20260910.md)
+recounts 484 original step records from the completed train-b tuning fold.
+The learned path adds 120 base iterations while accepting 23 fewer terminal
+corrections, for 97 additional Newton/linear counts. Secant passes both initial
+gates at 117 positions and the learned path at none. Only two positions have
+exactly matching parent states, so causal attribution remains unproved. The
+full numerical observation and original-state audit are still pending; no
+protocol change or learned gain is claimed.
+
 The [complete-path runtime selector](rc-runtime-selection-20260910.md) now fits
 without each training case and compares its full reference/secant/proposal/fresh
 paths using measured costs. Source/context/label consistency and budget guards

@@ -1,0 +1,63 @@
+{
+  "schema_version": "rc-runtime-first-iterate-diagnostic.v1",
+  "pid": 997153,
+  "source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
+  "case_id": "train-b",
+  "ridge": 10000.0,
+  "fold_index": 1,
+  "completed_fold_outcome": "fold-0001-outcome.json",
+  "path_pairs": 242,
+  "exact_same_parent_pairs": 2,
+  "first_relative_residual_greater_for_proposal_count": 175,
+  "first_relative_residual_ratio_median_positive_secant_only": 10.349100385140076,
+  "positive_secant_residual_pairs": 242,
+  "secant_first_iterate_passes_both_gates_count": 117,
+  "among_those_proposal_fails_initial_gates_count": 117,
+  "proposal_initial_gate_pass_count": 0,
+  "totals": {
+    "secant": {
+      "base_iterations_before_terminal_polishing": 478,
+      "accepted_terminal_corrections": 392,
+      "terminal_linear_solves": 392,
+      "total_iteration_count": 870,
+      "total_linear_solve_count": 870
+    },
+    "proposal": {
+      "base_iterations_before_terminal_polishing": 598,
+      "accepted_terminal_corrections": 369,
+      "terminal_linear_solves": 369,
+      "total_iteration_count": 967,
+      "total_linear_solve_count": 967
+    }
+  },
+  "source_trace_semantics": "vector newton.py stores starting free coordinates and residual before applying the selected Newton increment; first row is iteration zero",
+  "paired_exact_parent_counterfactual": false,
+  "causal_attribution_proved": false,
+  "newton_solves": 0,
+  "material_integrations": 0,
+  "fits": 0,
+  "original_benchmark_worker_concurrent": true,
+  "wall_ns": 895857977,
+  "cpu_ns": 891822415,
+  "peak_rss_kib": 2479012,
+  "observation_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy",
+  "original_recount": {
+    "schema_version": "rc-first-iterate-recount.v1",
+    "pid": 999588,
+    "diagnostic_sha256": "70a21a40cdd8a2d26bfe9f6aff8f2c0104587cb79c8bc871b1707e1483662dc3",
+    "original_step_files_checked": 484,
+    "all_stored_rows_and_totals_reconstructed": true,
+    "parent_chain_entry_binding_checked": true,
+    "trace_source_git_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
+    "trace_source_sha256": "fb351952e0ae4870c5fec652a7f0eb0fba6d56b5062c39596d4ca356dd266eca",
+    "fits": 0,
+    "newton_solves": 0,
+    "material_integrations": 0,
+    "full_path_physics_audit_completed": false,
+    "causal_attribution_proved": false,
+    "wall_ns": 909873590
+  },
+  "diagnostic_sha256": "70a21a40cdd8a2d26bfe9f6aff8f2c0104587cb79c8bc871b1707e1483662dc3",
+  "sealed": false,
+  "full_runtime_selection_audit_completed": false
+}

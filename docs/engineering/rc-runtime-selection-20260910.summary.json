@@ -3,7 +3,7 @@
   "source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
   "observation_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy",
   "state_at_observation": "running",
-  "observed_at_unix_seconds": 1788996450.1214316,
+  "observed_at_unix_seconds": 1788998505.1907501,
   "process": {
     "parent_pid": 992334,
     "worker_pid": 992787
@@ -171,5 +171,36 @@
     "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy/run.py",
     "worker"
   ],
-  "completed_fold_count_at_observation": 0
+  "completed_fold_count_at_observation": 6,
+  "completed_path_count_at_observation": 26,
+  "initial_iteration_diagnostic": "rc-first-iterate-diagnostic-20260910.summary.json",
+  "audit_supervisor": {
+    "pid": 999300,
+    "original_processes": {
+      "parent_pid": 992334,
+      "worker_pid": 992787
+    },
+    "original_identities": {
+      "992334": {
+        "start_ticks": "20837769",
+        "cmdline": [
+          "python3",
+          "/tmp/run-rc-runtime-selection.py"
+        ]
+      },
+      "992787": {
+        "start_ticks": "20837922",
+        "cmdline": [
+          "/usr/bin/python3",
+          "-B",
+          "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy/run.py",
+          "worker"
+        ]
+      }
+    },
+    "automatic_numerical_restart": false,
+    "maximum_audit_attempts": 1
+  },
+  "audit_exec_session_id": 74597,
+  "audit_supervisor_live_at_observation": true
 }
