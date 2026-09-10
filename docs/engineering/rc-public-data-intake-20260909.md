@@ -113,3 +113,11 @@ source, including original headers and row order. This supersedes the earlier
 A:J-only programmatic extraction. All cells pass an independent source-token
 audit; physical reconstruction, commanded loading, long-history solver support
 and external training admission remain open.
+
+The [continuous-rebar control review](zenodo-continuous-controls-20260910.md)
+confirms a CC BY 4.0 dataset declaration in DataCite for Zenodo 1205887 and
+inspects the author's original thesis. It preserves a LAP-C1 confinement conflict
+between the experimental table and later model discussion. Axial loading,
+anchorage deformation and buckling/crushing prevent automatic admission as a
+current flexural benchmark. Original control ZIPs and numeric histories remain
+unacquired; the dataset license is not assigned to the separate thesis.
