@@ -10,7 +10,7 @@ export interface RcSearchSession extends RcSearchReview {
   dispose(): void
 }
 export async function loadRcControlSearch(url: string, signal: AbortSignal, authorize?: JobAuthorizationProvider): Promise<RcSearchSession> {
-  const connection = await openRcReviewWorker(new URL('./rcControlSearch.worker.ts', import.meta.url), url, signal, authorize)
+  const connection = await openRcReviewWorker(() => new Worker(new URL('./rcControlSearch.worker.ts', import.meta.url), { type: 'module' }), url, signal, authorize)
   try {
     const review = await connection.initialize<RcSearchReview>()
     return { ...review, dispose: connection.dispose, onFailure: connection.onFailure,

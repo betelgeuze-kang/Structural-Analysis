@@ -1,0 +1,438 @@
+{
+  "schema_version": "rc-control-search-frontend-fixture.v1",
+  "source_revision": "30bb2d62344836d0f99a6043a07448e9a4db81d1",
+  "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-control-search-ui-6hrurhx7/search",
+  "generated_with_actual_solver": true,
+  "purpose": "authored regression fixture, not a performance or independent-validation corpus",
+  "original_outcome": {
+    "parent_pid": 1013082,
+    "worker_pid": 1013691,
+    "exit_code": 0,
+    "parent_wall_ns": 9032774480,
+    "child_cpu_seconds": 9.031846999999999,
+    "peak_child_rss_kib_cumulative": 115716
+  },
+  "source_manifest_sha256": "43832f0c5e9450fb50b790c15c068e8512d33359e365900c91690c606f2fe4fc",
+  "files": [
+    {
+      "path": "exhaustive_oracle/baseline/analysis-outcome.json",
+      "sha256": "6e87ec964059500e02e386b8fb62ec8175997ac3d4ce9d1458a1ae45a8b6c19f",
+      "bytes": 254
+    },
+    {
+      "path": "exhaustive_oracle/baseline/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "exhaustive_oracle/baseline/checkpoint.json",
+      "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189",
+      "bytes": 12295
+    },
+    {
+      "path": "exhaustive_oracle/baseline/model.json",
+      "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2",
+      "bytes": 1323
+    },
+    {
+      "path": "exhaustive_oracle/baseline/result.json",
+      "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b",
+      "bytes": 357258
+    },
+    {
+      "path": "exhaustive_oracle/baseline/verification-outcome.json",
+      "sha256": "7c182e833db37aa0921c9bf6ade887cb477f6d7cae28fed81047a728518cc37a",
+      "bytes": 258
+    },
+    {
+      "path": "exhaustive_oracle/baseline/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "exhaustive_oracle/baseline/verification.json",
+      "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0",
+      "bytes": 1047
+    },
+    {
+      "path": "exhaustive_oracle/cheap/analysis-outcome.json",
+      "sha256": "e277845ef8f52eb04d7689fdcbbc915120095d3094831c8149866042b05cedcc",
+      "bytes": 254
+    },
+    {
+      "path": "exhaustive_oracle/cheap/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "exhaustive_oracle/cheap/checkpoint.json",
+      "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a",
+      "bytes": 12426
+    },
+    {
+      "path": "exhaustive_oracle/cheap/model.json",
+      "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a",
+      "bytes": 1323
+    },
+    {
+      "path": "exhaustive_oracle/cheap/result.json",
+      "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445",
+      "bytes": 357893
+    },
+    {
+      "path": "exhaustive_oracle/cheap/verification-outcome.json",
+      "sha256": "7f087e94523a5b643e02a68f994b68ee38472f89a0d7e7e0604859fcea35d945",
+      "bytes": 258
+    },
+    {
+      "path": "exhaustive_oracle/cheap/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "exhaustive_oracle/cheap/verification.json",
+      "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771",
+      "bytes": 1047
+    },
+    {
+      "path": "exhaustive_oracle/comparison.json",
+      "sha256": "93684337896b0c8b66acb709d8fa83e8fe8b4c81858fd7996011c436b2b00eeb",
+      "bytes": 21721
+    },
+    {
+      "path": "exhaustive_oracle/costly/analysis-outcome.json",
+      "sha256": "4f55de9a6a3a90378bdffa52f250e620d3d4cf1beccc43971b6f3a943bdc8f12",
+      "bytes": 254
+    },
+    {
+      "path": "exhaustive_oracle/costly/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "exhaustive_oracle/costly/checkpoint.json",
+      "sha256": "0e70130cefd95ee9b1a1746e457d8d54efdfaa73ced2e06600282c6e7132da34",
+      "bytes": 12295
+    },
+    {
+      "path": "exhaustive_oracle/costly/model.json",
+      "sha256": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc",
+      "bytes": 1322
+    },
+    {
+      "path": "exhaustive_oracle/costly/result.json",
+      "sha256": "6477f886442d41e419017cd9d6d6a87f6c4cde74b4843d2d4ba3ded08bd02ad1",
+      "bytes": 355428
+    },
+    {
+      "path": "exhaustive_oracle/costly/verification-outcome.json",
+      "sha256": "3336c05b0d1580a110e1cfc245a3fd35cbc2be0f53ca9d2d819e57fd2b727638",
+      "bytes": 258
+    },
+    {
+      "path": "exhaustive_oracle/costly/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "exhaustive_oracle/costly/verification.json",
+      "sha256": "6af242751c5d8ed253ea76dd695e81a76522d40150a38022e68cda2c214d2108",
+      "bytes": 1047
+    },
+    {
+      "path": "exhaustive_oracle/middle/analysis-outcome.json",
+      "sha256": "df3e7b47f4b8882e9e6f195eb741b2ecbd80b90968775a9fb68094b534b01e58",
+      "bytes": 254
+    },
+    {
+      "path": "exhaustive_oracle/middle/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "exhaustive_oracle/middle/checkpoint.json",
+      "sha256": "2920cbff319885af8902e98d4a29cee99bfaffd6bba1beb79223b71654c9fc03",
+      "bytes": 12421
+    },
+    {
+      "path": "exhaustive_oracle/middle/model.json",
+      "sha256": "ef4f475bd1dba67ee8dcff339de620dd47340150dbcfc1d38f78dd17f2a9abd2",
+      "bytes": 1323
+    },
+    {
+      "path": "exhaustive_oracle/middle/result.json",
+      "sha256": "95da5d6e9a490a49079e89c61d2c82ccd813987b6df8460d120c4dd30135bc6b",
+      "bytes": 358134
+    },
+    {
+      "path": "exhaustive_oracle/middle/verification-outcome.json",
+      "sha256": "691fd2bc93868bbb278ab7018f3972ca51cf5e2443c4dbc6ffe552737e24c788",
+      "bytes": 258
+    },
+    {
+      "path": "exhaustive_oracle/middle/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "exhaustive_oracle/middle/verification.json",
+      "sha256": "7eafc5b1ff13ea6269cf3b616ef150b24218b4b767a429aed7dcf70603392da2",
+      "bytes": 1047
+    },
+    {
+      "path": "exhaustive_oracle/request.json",
+      "sha256": "28ce3fdbfa221a275092c5f791e2c59b739b2d26f6e6e79916fcf2cbea919570",
+      "bytes": 1939
+    },
+    {
+      "path": "exhaustive_oracle-outcome.json",
+      "sha256": "23c3647cb90f8517d8e00b735f796c373f85c2f929b12452b644e79c6655dfec",
+      "bytes": 577
+    },
+    {
+      "path": "exhaustive_oracle-started.json",
+      "sha256": "323bcb174389101b2f6d8ad9dcb25546193df1c609364d3a86eaa3bca52c2907",
+      "bytes": 109
+    },
+    {
+      "path": "historical-training.json",
+      "sha256": "b000b6f2e4672e8479918db1ae041aa1d4936bb6d0440dd88fff88fa1a18268a",
+      "bytes": 2377
+    },
+    {
+      "path": "learned_order/baseline/analysis-outcome.json",
+      "sha256": "8c243f1e9abfd0d63e01d85bebc4ff67bb115b3ac11415a09d4f1c698ad60c2a",
+      "bytes": 254
+    },
+    {
+      "path": "learned_order/baseline/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "learned_order/baseline/checkpoint.json",
+      "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189",
+      "bytes": 12295
+    },
+    {
+      "path": "learned_order/baseline/model.json",
+      "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2",
+      "bytes": 1323
+    },
+    {
+      "path": "learned_order/baseline/result.json",
+      "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b",
+      "bytes": 357258
+    },
+    {
+      "path": "learned_order/baseline/verification-outcome.json",
+      "sha256": "ecdd50b79bf4ff4cc29a2febaef597595f450828e8cfcbe9e6dcd90a5e95789c",
+      "bytes": 258
+    },
+    {
+      "path": "learned_order/baseline/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "learned_order/baseline/verification.json",
+      "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0",
+      "bytes": 1047
+    },
+    {
+      "path": "learned_order/cheap/analysis-outcome.json",
+      "sha256": "c7c366fa43fc99ec6d315e1cad20ffdabcddb47478cd10994520ff1ae4df680e",
+      "bytes": 254
+    },
+    {
+      "path": "learned_order/cheap/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "learned_order/cheap/checkpoint.json",
+      "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a",
+      "bytes": 12426
+    },
+    {
+      "path": "learned_order/cheap/model.json",
+      "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a",
+      "bytes": 1323
+    },
+    {
+      "path": "learned_order/cheap/result.json",
+      "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445",
+      "bytes": 357893
+    },
+    {
+      "path": "learned_order/cheap/verification-outcome.json",
+      "sha256": "d93708100016f7771fcaafd7b1ebb1fa325a99d218182a5bebe5f660ceace49d",
+      "bytes": 258
+    },
+    {
+      "path": "learned_order/cheap/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "learned_order/cheap/verification.json",
+      "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771",
+      "bytes": 1047
+    },
+    {
+      "path": "learned_order/comparison.json",
+      "sha256": "775be57c78e47f18ab147bc13366558656a9426d787cf3f4db2aa9ab7e8ee3f8",
+      "bytes": 11820
+    },
+    {
+      "path": "learned_order/request.json",
+      "sha256": "3f0da294313798a0a688c7cb31af6edfcb599021673345fc7e769a14d041de6a",
+      "bytes": 1604
+    },
+    {
+      "path": "learned_order-outcome.json",
+      "sha256": "93c0e77f71b45623dbd83d0cb3b4750f422cb846e725710527c1e9c9ebf13aa0",
+      "bytes": 571
+    },
+    {
+      "path": "learned_order-started.json",
+      "sha256": "10be691272c76dc85567c40d640c9783770d31fecd9287fb743fde605fbbe18d",
+      "bytes": 91
+    },
+    {
+      "path": "plan.json",
+      "sha256": "cb1fa92bd265b9837c16cf61fff1668fc9f7ed3499db1dfe4e1c0a297cfbb3bb",
+      "bytes": 13245
+    },
+    {
+      "path": "policy.json",
+      "sha256": "05b9e4ef46798aff53daacc4d407e93e101adc7baedcc08e54713be16b4e51c4",
+      "bytes": 9088
+    },
+    {
+      "path": "pool/baseline.json",
+      "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2",
+      "bytes": 1323
+    },
+    {
+      "path": "pool/cheap.json",
+      "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a",
+      "bytes": 1323
+    },
+    {
+      "path": "pool/costly.json",
+      "sha256": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc",
+      "bytes": 1322
+    },
+    {
+      "path": "pool/middle.json",
+      "sha256": "ef4f475bd1dba67ee8dcff339de620dd47340150dbcfc1d38f78dd17f2a9abd2",
+      "bytes": 1323
+    },
+    {
+      "path": "price_order/baseline/analysis-outcome.json",
+      "sha256": "6297ccaaccf822139444e1a002675f026c0c5c28bf8e4ad72a7086252e0b93c2",
+      "bytes": 254
+    },
+    {
+      "path": "price_order/baseline/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "price_order/baseline/checkpoint.json",
+      "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189",
+      "bytes": 12295
+    },
+    {
+      "path": "price_order/baseline/model.json",
+      "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2",
+      "bytes": 1323
+    },
+    {
+      "path": "price_order/baseline/result.json",
+      "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b",
+      "bytes": 357258
+    },
+    {
+      "path": "price_order/baseline/verification-outcome.json",
+      "sha256": "aba4f8e80c211bf0070102635cbca52080174e3c5b7861e684af584175bf35e7",
+      "bytes": 258
+    },
+    {
+      "path": "price_order/baseline/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "price_order/baseline/verification.json",
+      "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0",
+      "bytes": 1047
+    },
+    {
+      "path": "price_order/cheap/analysis-outcome.json",
+      "sha256": "21a80e3b4972dfc0c1e8915fccfa3344e2cbfeade84c27c6141dd2a197b74509",
+      "bytes": 254
+    },
+    {
+      "path": "price_order/cheap/analysis-started.json",
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+      "bytes": 81
+    },
+    {
+      "path": "price_order/cheap/checkpoint.json",
+      "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a",
+      "bytes": 12426
+    },
+    {
+      "path": "price_order/cheap/model.json",
+      "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a",
+      "bytes": 1323
+    },
+    {
+      "path": "price_order/cheap/result.json",
+      "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445",
+      "bytes": 357893
+    },
+    {
+      "path": "price_order/cheap/verification-outcome.json",
+      "sha256": "79893f1480b18e315bf5f314ceadd0c9f199a146fd2e421694ebb6fc9ac00aab",
+      "bytes": 258
+    },
+    {
+      "path": "price_order/cheap/verification-started.json",
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+      "bytes": 85
+    },
+    {
+      "path": "price_order/cheap/verification.json",
+      "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771",
+      "bytes": 1047
+    },
+    {
+      "path": "price_order/comparison.json",
+      "sha256": "d2b685a7a43ec16683130f9d36e55db098d494e2ad523b9984d3330e89c5ed95",
+      "bytes": 11820
+    },
+    {
+      "path": "price_order/request.json",
+      "sha256": "3f0da294313798a0a688c7cb31af6edfcb599021673345fc7e769a14d041de6a",
+      "bytes": 1604
+    },
+    {
+      "path": "price_order-outcome.json",
+      "sha256": "5562205fa899d026a2ff64bb76defe39c82cb15b7afb3a0d8be4ef4b5f2026e3",
+      "bytes": 569
+    },
+    {
+      "path": "price_order-started.json",
+      "sha256": "10be691272c76dc85567c40d640c9783770d31fecd9287fb743fde605fbbe18d",
+      "bytes": 91
+    },
+    {
+      "path": "result.json",
+      "sha256": "3c108cc60dcd344fda12d6b20143223e0c9ccc9fe990420cd6d83384b75c9140",
+      "bytes": 7004
+    }
+  ]
+}

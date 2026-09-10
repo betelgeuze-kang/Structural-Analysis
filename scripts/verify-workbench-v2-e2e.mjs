@@ -20,6 +20,8 @@ const specs = [
   'tests/frontend/workbench-v2-job-contract.spec.ts',
   'tests/frontend/workbench-v2-job-transport.spec.ts',
   'tests/frontend/workbench-v2-rc-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-search-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-search-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-design-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-design-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-job-browser.spec.ts',

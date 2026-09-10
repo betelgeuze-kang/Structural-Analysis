@@ -8,7 +8,7 @@ export interface RcDesignSession extends RcDesignReview {
   dispose(): void
 }
 export async function loadRcControlDesign(url: string, signal: AbortSignal, authorize?: JobAuthorizationProvider): Promise<RcDesignSession> {
-  const connection = await openRcReviewWorker(new URL('./rcControlDesign.worker.ts', import.meta.url), url, signal, authorize)
+  const connection = await openRcReviewWorker(() => new Worker(new URL('./rcControlDesign.worker.ts', import.meta.url), { type: 'module' }), url, signal, authorize)
   try {
     const review = await connection.initialize<RcDesignReview>()
     return { ...review, dispose: connection.dispose, onFailure: connection.onFailure, download: (candidate, role) => connection.call('download', { candidate, role }) }

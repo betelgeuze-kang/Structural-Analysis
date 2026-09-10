@@ -1,6 +1,6 @@
 import type { JobAuthorizationProvider } from './jobTransport'
 
-export async function openRcReviewWorker(workerUrl: URL, url: string, signal: AbortSignal, authorize?: JobAuthorizationProvider) {
+export async function openRcReviewWorker(createWorker: () => Worker, url: string, signal: AbortSignal, authorize?: JobAuthorizationProvider) {
   const target = new URL(url, location.href)
   if (target.origin !== location.origin || !/^https?:$/.test(target.protocol) || target.username || target.password || target.search || target.hash) throw new Error('rc_design_endpoint_invalid')
   const headers: Record<string, string> = {}
@@ -12,7 +12,7 @@ export async function openRcReviewWorker(workerUrl: URL, url: string, signal: Ab
     headers['X-Structural-Tenant'] = credentials.tenantId; headers.Authorization = `Bearer ${credentials.bearerToken}`
   }
   signal.throwIfAborted()
-  const worker = new Worker(workerUrl, { type: 'module' })
+  const worker = createWorker()
   const pending = new Map<number, { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>()
   const listeners = new Set<() => void>()
   let stopped = false, next = 0
