@@ -58,5 +58,71 @@
     "full_shards_materialization_failed": 4,
     "full_shards_actual_suite_skipped": 4,
     "includes_this_change": false
+  },
+  "hosted_ci_followup": {
+    "run_id": 34447997291,
+    "head": "e6371de07706035832591c83653affa67dbcecbb",
+    "tested_merge": "97da68f3404da17b2a3ea502b2f2259f0c2c96f7",
+    "passed": 430,
+    "parent_step_tests": 22,
+    "module_counts": {
+      "tests.test_rc_control_warm_start": 29,
+      "tests.test_rc_control_learning": 37,
+      "tests.test_rc_control_learning_split": 18,
+      "tests.test_rc_control_history_features": 11,
+      "tests.test_rc_control_svd_fit": 6,
+      "tests.test_rc_control_model_selection": 11,
+      "tests.test_rc_control_training_diagnostics": 8,
+      "tests.test_rc_control_runtime_selection": 53,
+      "tests.test_rc_control_step_work": 21,
+      "tests.test_rc_control_parent_step": 22,
+      "tests.test_measured_response_workbook": 18,
+      "tests.test_measured_response_split": 27,
+      "tests.test_rc_control_design": 20,
+      "tests.test_rc_control_candidate_search": 46,
+      "tests.test_rc_control_candidate_cost": 23,
+      "tests.test_rc_search_http": 34,
+      "tests.test_rc_seed_original_audit": 5,
+      "tests.test_pinned_opensees_runtime": 27,
+      "tests.test_local_source_reference_comparison": 14
+    },
+    "suite_seconds": 484.057,
+    "job_id": 102777807385,
+    "artifact_id": 10140788520,
+    "artifact_bytes": 7755,
+    "artifact_zip_sha256": "sha256:1c166f62da9e3a6224a1fa59ad1081a12cc28c7a50f820f9ab3d686d3af3e091",
+    "shards": [
+      {
+        "name": "pytest-full-shard-3",
+        "status": "completed",
+        "conclusion": "failure",
+        "materialization": "failure",
+        "actual_suite": "skipped"
+      },
+      {
+        "name": "pytest-full-shard-2",
+        "status": "completed",
+        "conclusion": "failure",
+        "materialization": "failure",
+        "actual_suite": "skipped"
+      },
+      {
+        "name": "pytest-full-shard-1",
+        "status": "completed",
+        "conclusion": "failure",
+        "materialization": "failure",
+        "actual_suite": "skipped"
+      },
+      {
+        "name": "pytest-full-shard-0",
+        "status": "completed",
+        "conclusion": "failure",
+        "materialization": "failure",
+        "actual_suite": "skipped"
+      }
+    ],
+    "full_repository_ci_passed": false,
+    "new_parent_step_source_included": true,
+    "local_verified_artifact_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-parent-step-hosted-ci-rs9ktfz_"
   }
 }

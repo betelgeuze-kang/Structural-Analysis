@@ -2,15 +2,17 @@
 
 Source `f933f9651180fe65ceab2e8cfafb84e5bbf810d3` adds bounded repeated
 execution to `run_rc_control_runtime_selection`. The large original-data study's
-**numerical execution completed; its original-record audit is running**.
-The worker reports all 12 four-path folds completed and secant retained. The
-packet is unsealed; the figures below remain reported results pending audit.
+**numerical execution and original-record audit are completed and sealed**.
+All 12 four-path folds were verified and secant was retained. The audit confirmed
+the complete recorded comparisons, costs, repeated fit reuse and final selection.
+This completes this bounded development experiment, not independent validation
+or the full product roadmap.
 
-## Numerical completion update
+## Audited results
 
 The original parent exited successfully after **4,034.276 seconds**. Four frozen
 withheld-case fits and 48 complete paths executed; no final learned refit or
-promotion occurred. The reported candidate mean time ratio is **1.030596**,
+promotion occurred. The audited candidate mean time ratio is **1.030596**,
 which does not meet the fixed improvement rule. Per-case means over three
 rotated-order repetitions are:
 
@@ -21,9 +23,10 @@ rotated-order repetitions are:
 | train-c | 0.999225 |
 | train-d | 0.997615 |
 
-Fold summaries report **11,616 core calls and 52,779 Newton iterations/linear
-solves**, known work in every fold, and all full-comparison scores passing.
-These totals have not yet completed the separate original-record recount.
+The original-record recount confirmed **11,616 core calls and 52,779 Newton
+iterations/linear solves**, known work in every fold, and all full-comparison
+scores passing. The audit parent took **1,690.456 seconds**, separately charged
+from the numerical parent and historical label generation.
 
 Only train-b receives actual learned proposals, 723 over its three repetitions.
 The other cases use static rejection and secant fallback. Ratios near one in
@@ -31,11 +34,24 @@ those cases are not evidence of learned acceleration. The shared host was not
 isolated; focused development tests also ran during measurement. Repeats are
 not independent cases, and historical timings are not a matched gate-off control.
 
-Auditor PID **1126637** started under the existing one-attempt supervisor after
-the original numerical processes exited. Its terminal outcome, original-record
-checks and the final packet seal are still pending. This update preserves the
-initial planning snapshot below and appends a separately timestamped numerical
-completion object with exact input/output bindings to the machine summary.
+Auditor PID **1126637** completed successfully under the existing one-attempt
+supervisor. Both numerical processes, the auditor and its supervisor were
+confirmed absent before sealing. Initial planning and numerical-only snapshots
+remain in the machine summary; its `audited_sealed_completion` object records
+the completed observation without overwriting those earlier snapshots.
+
+The audit verified **446 source files, 964 original training rows and four fits**.
+It reconstructed **2,904 stored proposals, 726 material snapshots and 48 native
+terminal checkpoints**, replayed all **11,616 original assemblies/responses**,
+and checked **975,744 fiber stresses at 100-digit precision**. Audit Newton
+solves and fits were both zero. These checks verify original records and the
+implemented numerical model; they do not supply independent physical tests.
+
+The sealed packet contains **70,364 files / 3,986,844,683 bytes**. Every payload
+file was reread and its hash checked. The adjacent inventory SHA-256 is
+`bf29c500319c9c49f24066ee78d5b7a8e38c7c333267b84d89c62ef257c90ad6`.
+The new terminal summary is `repeated-completion-summary.json`; the older
+`completion-summary.json` remains unchanged historical input.
 
 ## Repetition contract
 
@@ -135,8 +151,8 @@ audit was prepared but not executed; the completion update above records its
 subsequent launch. Its existence or launch is not an audit result.
 
 [Machine snapshot](rc-counterbalanced-runtime-20260910.summary.json) identifies
-source, protocol, live-process records and completed-prefix status. Final results,
-original audit, all process outcomes and a reread/hash seal are still required.
+source, protocol, historical live-process records and the subsequently audited
+sealed completion. The initial pending statuses are historical snapshots.
 The older `completion-summary.json` copied into the packet is historical input;
 it is not completion of this new repeated study.
 
@@ -150,5 +166,6 @@ This result predates the new repetition code and does not verify it.
 
 Independent physical validation, licensing, full-suite prerequisite resolution,
 net learned benefit, broader material/geometry/history validation and the complete
-roadmap remain open. The original-record audit must finish before these reported
-numerical and timing results can be accepted as an audited experiment.
+roadmap remain open. This completed audit supports the bounded recorded
+experiment only. It does not establish a learned speedup, a static-gate causal
+effect, independent-case generalization or production readiness.

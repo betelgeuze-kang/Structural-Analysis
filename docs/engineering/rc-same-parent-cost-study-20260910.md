@@ -67,8 +67,10 @@ Historical label generation, old policy fitting, reaching original parents,
 packet preparation and the separately retained failed attempt are distinct
 costs. No end-to-end user-time saving is claimed.
 
-The host is shared with the running original-record audit of the completed
-48-path experiment. No isolated-hardware timing claim is possible. These four
+The host was shared with the original-record audit of the completed 48-path
+experiment during the initial part of execution; that audit subsequently
+completed and its packet was sealed. No isolated-hardware timing claim is
+possible. These four
 authored development cases and their correlated targets do not constitute
 independent physical validation. The dataset remains unadmitted until a separate
 original-record check of the new comparisons; even then, strategy adoption

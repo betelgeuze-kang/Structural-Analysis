@@ -82,6 +82,18 @@ hosted development-contract job in
 Its four full-test shards failed at current-source evidence materialization and
 skipped actual suite execution. That run does not test this new parent-step code.
 
+The later source `e6371de07706035832591c83653affa67dbcecbb` ran the new code in
+[run 34447997291](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34447997291):
+**430 development tests passed in 484.057 seconds**, including all **22
+parent-step cases**, 21 step-work cases and 53 runtime-selection cases. Counts
+were read from the original JUnit artifact after its ZIP length and SHA-256
+matched GitHub metadata. Tested merge:
+`97da68f3404da17b2a3ea502b2f2259f0c2c96f7`; artifact `10140788520`, 7,755 bytes,
+SHA-256 `1c166f62da9e3a6224a1fa59ad1081a12cc28c7a50f820f9ab3d686d3af3e091`.
+All four full-test shards still failed evidence materialization and skipped the
+actual suite. This verifies the hosted development modules, not full CI or the
+subsequently prepared research auditor.
+
 The separate [48-path counterbalanced study](rc-counterbalanced-runtime-20260910.md)
 uses its previously frozen source. This change does not alter its in-flight
 code, inputs or audit process. Its completion and audit must be checked separately.
