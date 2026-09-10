@@ -368,5 +368,123 @@
         "sha256": "de5920c504ddffaa51941f68a38e83bd38c64b772df69546ac2aafae74969106"
       }
     ]
+  },
+  "audited_sealed_completion": {
+    "completion": {
+      "schema_version": "rc-same-parent-cost-completion.v1",
+      "source_revision": "cbc1952f5066b323f3a9369318c1615a94372122",
+      "source_files_verified": 448,
+      "input_files_verified": 3906,
+      "original_prefixes_reconstructed": 968,
+      "comparison_count": 968,
+      "work": {
+        "core_calls": 3872,
+        "newton_iterations": 17648,
+        "linear_solves": 17648
+      },
+      "groups": {
+        "train-a": {
+          "comparisons": 242,
+          "passed": 242,
+          "original_secant_reproduced": 242,
+          "policy_proposed": 0,
+          "proposal_minus_secant_newton": 0
+        },
+        "train-b": {
+          "comparisons": 242,
+          "passed": 242,
+          "original_secant_reproduced": 242,
+          "policy_proposed": 241,
+          "proposal_minus_secant_newton": 104,
+          "proposed_more_newton": 108,
+          "proposed_equal_newton": 105,
+          "proposed_fewer_newton": 28
+        },
+        "train-c": {
+          "comparisons": 242,
+          "passed": 242,
+          "original_secant_reproduced": 242,
+          "policy_proposed": 0,
+          "proposal_minus_secant_newton": 0
+        },
+        "train-d": {
+          "comparisons": 242,
+          "passed": 242,
+          "original_secant_reproduced": 242,
+          "policy_proposed": 0,
+          "proposal_minus_secant_newton": 0
+        }
+      },
+      "counts": {
+        "accepted_assembly_replays": 3872,
+        "core_calls": 3872,
+        "newton_iterations": 17648,
+        "linear_solves": 17648,
+        "material_snapshots": 968
+      },
+      "physics_audit": {
+        "independent_assembly_rebuilds": {
+          "section_replays": 23232,
+          "member_replays": 7744,
+          "material_integrations": 0,
+          "newton_solves": 0,
+          "state_commits": 0,
+          "assembly_replays": 3872
+        },
+        "independent_assembly_rebuild_seconds": 81.639396989,
+        "terminal_candidate_pairs_verified": 7705,
+        "terminal_accepted_pairs_verified": 6124,
+        "projection_counts": {
+          "coordinates": 53935,
+          "nonzero_projection_error": 5931
+        },
+        "maximum_twofold_projection_error": 6.018531076210112e-36,
+        "material_base_law_replays": {
+          "concrete": 278784,
+          "steel": 46464
+        },
+        "exact_fiber_inputs_checked": 325248,
+        "retained_low_strain_components_nonzero": 325248,
+        "independent_100_digit_stresses_checked": 325248,
+        "native_material_state_and_branch_replays_exact": true,
+        "rounded_base_vs_retained_stress_differences": {
+          "concrete/stress_mpa": 1.480411908911462e-14,
+          "concrete/consistent_tangent_mpa": 7.275957614183426e-12,
+          "steel/stress_mpa": 1.7053025658242404e-13,
+          "steel/consistent_tangent_mpa": 0.0
+        }
+      },
+      "all_same_parent_comparisons_pass": true,
+      "all_original_secant_children_reproduced": true,
+      "fits": 0,
+      "audit_newton_calls": 0,
+      "audit_fits": 0,
+      "numerical_parent_wall_ns": 1463957469037,
+      "audit_parent_wall_ns": 495316789876,
+      "previous_preflight_failure": {
+        "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-t4_7x8fg",
+        "inventory_sha256": "7ff4cdecb664ec104078b047f7b83d7adc04e78150c7373e35b26abc62e42c07",
+        "new_solver_calls": 0,
+        "new_fits": 0,
+        "cause": "preflight checkpoint serialization in the runner; corrected to canonical JSON"
+      },
+      "source_parent_cost_included": false,
+      "prior_policy_fit_cost_included": false,
+      "causal_training_dataset_admitted": false,
+      "full_path_performance_credit": false,
+      "independent_physical_validation": false,
+      "hardware_isolation": false,
+      "all_recorded_processes_absent": true
+    },
+    "seal": {
+      "file_count": 38265,
+      "bytes": 1859898767,
+      "inventory_sha256": "7e33f7153577b2be79114abe5ac144a227ff6fd33c258554062675a0d6cb1d2d",
+      "all_payload_files_reread": true,
+      "no_live_writers": true,
+      "sealed_unix_ns": 1789025548242663287
+    },
+    "original_audit_available": true,
+    "packet_sealed": true
   }
 }

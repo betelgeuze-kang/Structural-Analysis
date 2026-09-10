@@ -182,6 +182,17 @@ secant-abstention study has a different origin; those rows are not admitted as
 causal strategy labels. The next learning target needs unchanged native parents
 and accepted prefixes, followed by complete-path cost verification.
 
+The completed [same-parent iteration-cost study](rc-parent-iteration-cost-20260910.md)
+now covers all 968 original parents. Of 241 actual learned proposals, none lowers
+primary convergence rows. The 28 lower inclusive counts mostly reflect fewer
+accepted terminal refinements after their trial assembly was already computed;
+all 28 have higher total step time. Do not train the next selector on that
+inclusive-count proxy. Preserve separate primary rows, line-search trials,
+terminal assembly/solve work and measured costs, and obtain actual positive
+examples from a different proposal or harder supported cases before fitting.
+The current policy and the existing secant baseline remain unchanged. This
+diagnosis closes neither net benefit nor independent-corpus validation.
+
 ### 4. Connect multi-fidelity selection and cost review
 
 Select promising, uncertain and near-limit candidates for full analysis. Report

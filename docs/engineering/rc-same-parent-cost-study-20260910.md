@@ -6,6 +6,29 @@ lower-iteration learned steps occurred on different trajectories. The new
 from one native parent and one complete accepted prefix. This study applies it
 to the complete declared development roster. It does not fit or adopt a policy.
 
+## Completed numerical execution, audit and seal
+
+All **968 same-parent comparisons** completed and passed the original-record
+audit. All original secant children reproduced. The audit recounted **3,872
+numerical calls, 17,648 inclusive Newton iterations/linear solves**, 968 material
+snapshots and **325,248 100-digit fiber stress checks**. Numerical fitting and
+audit Newton/fitting calls were zero. The numerical parent took **1,463.957 s**
+and the separate audit parent **495.317 s**; earlier generation, policy training
+and the preserved failed preflight remain distinct costs.
+
+The packet is sealed: **38,265 files / 1,859,898,767 bytes**, adjacent inventory
+SHA-256 `7e33f7153577b2be79114abe5ac144a227ff6fd33c258554062675a0d6cb1d2d`.
+All recorded numerical/audit processes were confirmed absent and every payload
+file was reread. The initial live and audit-preparation snapshots below remain
+historical; the machine summary adds `audited_sealed_completion`.
+
+The [complete iteration-cost analysis](rc-parent-iteration-cost-20260910.md)
+finds no reduction of primary convergence rows among the 241 actual learned
+proposals. The 28 lower inclusive counts mostly reflect fewer accepted terminal
+corrections, and all 28 have higher recorded total step time. This completed
+experiment does not admit training data, select a new policy or establish
+whole-path benefit or independent physical validity.
+
 ## Fixed experiment
 
 The numerical source is frozen at
@@ -95,7 +118,7 @@ inventory SHA-256
 `7ff4cdecb664ec104078b047f7b83d7adc04e78150c7373e35b26abc62e42c07`.
 Every payload file was reread after both original processes were confirmed absent.
 
-## Active execution handoff
+## Initial execution handoff
 
 Corrected, unsealed packet:
 `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-e_rj5919`.
@@ -110,11 +133,11 @@ successful preflight of all **968 origins** and the first **64 comparisons**:
 comparisons passing and original secant children reproduced. This is the initial
 train-a prefix, not a completed cross-case result or an audited dataset.
 
-The prospective protocol, frozen source and a live process establish execution
-provenance, not a completed experiment. Final outcomes, the original-record audit
-of all new comparisons and a complete reread/hash seal remain required.
+At that initial snapshot, the protocol, frozen source and live process established
+execution provenance only. The completion update above records the subsequently
+verified terminal outcomes, full audit and reread/hash seal.
 
-## Prepared original-record audit and direct smoke verification
+## Original-record audit preparation and direct smoke verification
 
 The [auditor source](rc-same-parent-cost-study-20260910.audit.py.txt) verifies the
 frozen numerical source/input bindings and reconstructs all 968 original
@@ -148,5 +171,6 @@ The [supervisor](rc-same-parent-cost-study-20260910.launch-audit.py.txt), PID
 waits for their verified disappearance and successful terminal outcome. It then
 checks the auditor hash and permits exactly one full audit attempt. It neither
 restarts numerical work nor retries a failed audit. The full audit has not yet
-started at this snapshot. Original outcomes, not elapsed observation time,
-determine whether it may launch.
+started at that preparation snapshot. It subsequently ran exactly once and
+completed successfully as recorded above. Original outcomes, not elapsed
+observation time, determined when it could launch.
