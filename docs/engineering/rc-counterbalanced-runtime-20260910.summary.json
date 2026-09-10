@@ -110,5 +110,173 @@
     "artifact_zip_sha256": "sha256:f73ebe50fffd452bac95d7877e2ed6cbcfd43c07c13775504f9afbce0ee08bc3",
     "four_full_shards_preparation_failed_suite_skipped": true,
     "new_repetition_source_included": false
+  },
+  "latest_numerical_completion_snapshot": {
+    "snapshot_unix_ns": 1789023018917997273,
+    "status": "numerical_completed_original_audit_running",
+    "worker_outcome": {
+      "pid": 1111200,
+      "status": "completed",
+      "source_policy_unchanged": true,
+      "fit_attempt_count": 4,
+      "fit_completed_count": 4,
+      "completed_folds": 12,
+      "selected_strategy": "secant",
+      "selected_ridge": null,
+      "selected_score": 1.0,
+      "new_training_labels": 0,
+      "validation_or_holdout_execution": false,
+      "wall_ns_through_reports": 4034061813233,
+      "cpu_ns": 4032800160266,
+      "peak_rss_kib": 369464
+    },
+    "parent_outcome": {
+      "parent_pid": 1110723,
+      "worker_pid": 1111200,
+      "exit_code": 0,
+      "parent_wall_ns": 4034275963386
+    },
+    "audit_started": {
+      "parent_pid": 1111682,
+      "worker_pid": 1126637,
+      "script_sha256": "9331e395a50a79ac883a115e42b07c0692a73abf51094c885c6fc28f1f650fd8",
+      "original_processes_absent": true,
+      "unknown_work_until_outcome": true
+    },
+    "audit_outcome_available": false,
+    "packet_sealed": false,
+    "completed_full_paths": 48,
+    "reported_work": {
+      "core_calls": 11616,
+      "newton_iterations": 52779,
+      "linear_solves": 52779
+    },
+    "all_fold_comparison_scores_pass": true,
+    "all_fold_work_known": true,
+    "candidates_reported_pending_audit": [
+      {
+        "case_repeat_scores": [
+          {
+            "case_id": "train-a",
+            "fold_indices": [
+              0,
+              1,
+              2
+            ],
+            "maximum_ratio": 1.0055526442212872,
+            "mean_ratio": 0.9997787972905385,
+            "minimum_ratio": 0.9967197941782949,
+            "ratios": [
+              1.0055526442212872,
+              0.9970639534720337,
+              0.9967197941782949
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.005003258207373766,
+            "valid_repetitions": 3
+          },
+          {
+            "case_id": "train-b",
+            "fold_indices": [
+              3,
+              4,
+              5
+            ],
+            "maximum_ratio": 1.1284924058078505,
+            "mean_ratio": 1.1257639849770775,
+            "minimum_ratio": 1.1222513591732766,
+            "ratios": [
+              1.1265481899501055,
+              1.1284924058078505,
+              1.1222513591732766
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.0031935714887133815,
+            "valid_repetitions": 3
+          },
+          {
+            "case_id": "train-c",
+            "fold_indices": [
+              6,
+              7,
+              8
+            ],
+            "maximum_ratio": 1.0054170627355161,
+            "mean_ratio": 0.9992249373938002,
+            "minimum_ratio": 0.9935818805733921,
+            "ratios": [
+              1.0054170627355161,
+              0.9935818805733921,
+              0.9986758688724925
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.005936665005159271,
+            "valid_repetitions": 3
+          },
+          {
+            "case_id": "train-d",
+            "fold_indices": [
+              9,
+              10,
+              11
+            ],
+            "maximum_ratio": 1.0061754223894028,
+            "mean_ratio": 0.9976154722942367,
+            "minimum_ratio": 0.9891645039190884,
+            "ratios": [
+              0.9975064905742191,
+              1.0061754223894028,
+              0.9891645039190884
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.008505982868686883,
+            "valid_repetitions": 3
+          }
+        ],
+        "fold_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "proposed_count": 723,
+        "ridge": 10000.0,
+        "score": 1.0305957979889133
+      }
+    ],
+    "candidate_promoted": false,
+    "selected_strategy": "secant",
+    "independent_evaluation": false,
+    "net_savings_proved": false,
+    "bindings": [
+      {
+        "path": "study/result.json",
+        "bytes": 233065,
+        "sha256": "b195e8f7a782de866130c1494ad3999b2707a931590d543d073ab0f5da4fab47"
+      },
+      {
+        "path": "worker-outcome.json",
+        "bytes": 413,
+        "sha256": "c101d631c745abaa3f3f277e1740e410ce184f7e2522c68a5c3169ab56355bb3"
+      },
+      {
+        "path": "process-outcome.json",
+        "bytes": 106,
+        "sha256": "ae42f5c3195c3ca69828b964c502a8b126f07c7de82998e0aa3be7e71a7b18e6"
+      },
+      {
+        "path": "audit-attempt-1-started.json",
+        "bytes": 215,
+        "sha256": "cbad1dfd78651020eecc450c3ea7f0dfad3efcbf081184110e21b9257d44da6e"
+      }
+    ]
   }
 }

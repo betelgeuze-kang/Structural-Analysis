@@ -1,11 +1,41 @@
 # Counterbalanced full-path runtime selection
 
 Source `f933f9651180fe65ceab2e8cfafb84e5bbf810d3` adds bounded repeated
-execution to `run_rc_control_runtime_selection`. The large original-data study
-is **running, not completed or qualified** at this documentation snapshot. Its
-first four-path fold has completed with full comparisons passing; the remaining
-folds and the original-record audit are pending. No aggregate timing result or
-speedup is claimed.
+execution to `run_rc_control_runtime_selection`. The large original-data study's
+**numerical execution completed; its original-record audit is running**.
+The worker reports all 12 four-path folds completed and secant retained. The
+packet is unsealed; the figures below remain reported results pending audit.
+
+## Numerical completion update
+
+The original parent exited successfully after **4,034.276 seconds**. Four frozen
+withheld-case fits and 48 complete paths executed; no final learned refit or
+promotion occurred. The reported candidate mean time ratio is **1.030596**,
+which does not meet the fixed improvement rule. Per-case means over three
+rotated-order repetitions are:
+
+| Case | Proposal / secant scored path time |
+| --- | ---: |
+| train-a | 0.999779 |
+| train-b | 1.125764 |
+| train-c | 0.999225 |
+| train-d | 0.997615 |
+
+Fold summaries report **11,616 core calls and 52,779 Newton iterations/linear
+solves**, known work in every fold, and all full-comparison scores passing.
+These totals have not yet completed the separate original-record recount.
+
+Only train-b receives actual learned proposals, 723 over its three repetitions.
+The other cases use static rejection and secant fallback. Ratios near one in
+those cases are not evidence of learned acceleration. The shared host was not
+isolated; focused development tests also ran during measurement. Repeats are
+not independent cases, and historical timings are not a matched gate-off control.
+
+Auditor PID **1126637** started under the existing one-attempt supervisor after
+the original numerical processes exited. Its terminal outcome, original-record
+checks and the final packet seal are still pending. This update preserves the
+initial planning snapshot below and appends a separately timestamped numerical
+completion object with exact input/output bindings to the machine summary.
 
 ## Repetition contract
 
@@ -64,7 +94,7 @@ insufficient repeated budget before fitting, unsupported repetition values,
 known failed-repeat retention, immediate unknown-work stop and one fit per case.
 Synthetic timings verify aggregation only and do not demonstrate a speedup.
 
-## Fixed large-study protocol and live handoff
+## Fixed large-study protocol and initial live handoff
 
 The new packet reuses the hash-bound cases, 964 original training rows and source
 policy from the [completed secant-abstention study](rc-secant-abstention-20260910.md).
@@ -100,8 +130,9 @@ once. The auditor is adapted from the previous sealed original-record audit to
 check repeated fit reuse, rotated order, static gate proofs, omitted capture,
 charged setup cost and per-case aggregates. It also retains source/input checks,
 fit stationarity, original checkpoints, assembly/response and material checks.
-It prohibits Newton solves and fitting. This adapted audit is **prepared but
-has not yet executed**; its existence is not an audit result.
+It prohibits Newton solves and fitting. At the initial snapshot this adapted
+audit was prepared but not executed; the completion update above records its
+subsequent launch. Its existence or launch is not an audit result.
 
 [Machine snapshot](rc-counterbalanced-runtime-20260910.summary.json) identifies
 source, protocol, live-process records and completed-prefix status. Final results,
@@ -119,5 +150,5 @@ This result predates the new repetition code and does not verify it.
 
 Independent physical validation, licensing, full-suite prerequisite resolution,
 net learned benefit, broader material/geometry/history validation and the complete
-roadmap remain open. The running experiment must finish and be audited before
-its numerical or timing conclusions can be assessed.
+roadmap remain open. The original-record audit must finish before these reported
+numerical and timing results can be accepted as an audited experiment.
