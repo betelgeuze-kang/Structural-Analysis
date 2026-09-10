@@ -125,6 +125,14 @@ def test_actual_search_freezes_both_rankings_before_full_paths_and_oracle(
         plan = json.loads((root / "plan.json").read_bytes())
         assert set(plan["plans"]) == {"price_order", "learned_order"}
         assert plan["predictions"]
+        assert (
+            plan["schema_version"] == "experimental-rc-control-candidate-search-plan.v2"
+        )
+        for row in plan["pool"]:
+            ref = row["model_artifact"]
+            raw = (root / ref["path"]).read_bytes()
+            assert ref["sha256"] == study._sha(raw) == row["model_checksum"]
+            assert len(raw) == ref["byte_length"]
         observed.append(kw["output_directory"].name)
         return call(*a, **kw)
 

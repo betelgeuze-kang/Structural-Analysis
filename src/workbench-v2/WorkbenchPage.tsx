@@ -1,3 +1,4 @@
+import { RcControlSearchPanel } from './components/RcControlSearchPanel'
 import { RcControlDesignPanel } from './components/RcControlDesignPanel'
 import { RcHistoryFilePanel } from './components/RcHistoryFilePanel'
 import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
@@ -55,6 +56,7 @@ export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
   /** Same-origin manifest for one raw-byte-bound physical design comparison. */
   designComparisonUrl?: string
+  rcControlSearchUrl?: string
   rcControlDesignUrl?: string
   /** Same-origin completed candidate search process review manifest. */
   candidateSearchProcessUrl?: string
@@ -83,6 +85,7 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 export function WorkbenchPage({
   initialProviderMode = 'demo',
   designComparisonUrl,
+  rcControlSearchUrl,
   rcControlDesignUrl,
   candidateSearchProcessUrl,
   jobStatusUrl,
@@ -464,8 +467,9 @@ export function WorkbenchPage({
 
       <div id="wb2-sec-compare" className="wb2-section">
         <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
+        {rcControlSearchUrl ? <RcControlSearchPanel url={rcControlSearchUrl} authorize={jobAuthorization} /> : null}
         {rcControlDesignUrl ? <RcControlDesignPanel url={rcControlDesignUrl} authorize={jobAuthorization} /> : null}
-        {designComparisonUrl || (!candidateSearchProcessUrl && !rcControlDesignUrl) ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
+        {designComparisonUrl || (!candidateSearchProcessUrl && !rcControlDesignUrl && !rcControlSearchUrl) ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
         {candidateSearchProcessUrl ? <CandidateSearchProcessPanel load={candidateProcessLoad} selectedSlot={selectedCandidateSlot} onSelect={setSelectedCandidateSlotKey} /> : null}
       </div>
 

@@ -88,11 +88,12 @@ def main(argv=None):
             "report_hash": report["report_hash"],
             "candidate_denominator": report["candidate_denominator"],
             "arms": report["arms"],
+            "workbench_search_report": str(args.output / "result.json"),
             "workbench_design_reports": {
                 name: str(args.output / arm["comparison_path"])
                 for name, arm in report["arms"].items()
             },
-            "workbench_scope": "verified evaluated alternatives per arm; combined search review remains separate",
+            "workbench_scope": "configure rcControlSearchUrl with a same-origin result.json endpoint; artifact hosting is required",
             "net_savings_proved": False,
         }
     print(json.dumps(output, sort_keys=True, allow_nan=False))

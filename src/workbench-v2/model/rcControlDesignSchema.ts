@@ -66,7 +66,7 @@ function performance(history: RcObject[]): RcObject {
   return out
 }
 
-async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: string, report: RcObject): Promise<void> {
+export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: string, report: RcObject): Promise<void> {
   const q = row.quantities
   check(q && q.schema_version === 'public-rc-fiber-member-quantities.v1' && q.scope === SCOPE && q.detailed_takeoff === false
     && same(q.excluded_items, EXCLUDED) && q.rebar_density_kg_per_m3 === 7850 && q.model_checksum === row.artifacts.model.sha256, 'study_quantity_scope_invalid')

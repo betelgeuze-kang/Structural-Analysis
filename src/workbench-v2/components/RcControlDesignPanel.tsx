@@ -12,29 +12,34 @@ const metrics = [
 export function RcControlDesignPanel({ url, authorize }: { url: string; authorize?: JobAuthorizationProvider }): ReactElement {
   const [session, setSession] = useState<RcDesignSession | null>(null)
   const [state, setState] = useState('loading')
-  const [selected, setSelected] = useState<string | null>(null)
-  const urls = useRef(new Set<string>())
   useEffect(() => {
     const controller = new AbortController()
     let loaded: RcDesignSession | null = null
-    setSession(null); setState('loading'); setSelected(null)
+    setSession(null); setState('loading')
     loadRcControlDesign(url, controller.signal, authorize).then(value => {
       loaded = value
       if (controller.signal.aborted) { value.dispose(); return }
-      value.onFailure(() => { setSession(null); setState('invalid'); setSelected(null) })
-      setSession(value); setState('verified'); setSelected(value.report.selected_candidate_id)
+      value.onFailure(() => { setSession(null); setState('invalid') })
+      setSession(value); setState('verified')
     }).catch(() => { if (!controller.signal.aborted) setState('invalid') })
-    return () => { controller.abort(); loaded?.dispose(); for (const value of urls.current) URL.revokeObjectURL(value); urls.current.clear() }
+    return () => { controller.abort(); loaded?.dispose() }
   }, [url, authorize])
+  if (!session) return <section className="wb2-panel" data-rc-design={state}><h2>Experimental RC design comparison</h2><p role="status">{state === 'loading' ? 'Checking original candidate artifacts…' : 'UNAVAILABLE — RC comparison artifacts could not be verified.'}</p></section>
+  return <RcControlDesignReviewPanel key={session.report.report_hash} session={session} onInvalid={() => { setSession(null); setState('invalid') }} />
+}
+
+export function RcControlDesignReviewPanel({ session, onInvalid }: { session: RcDesignSession; onInvalid: () => void }): ReactElement {
+  const [selected, setSelected] = useState<string | null>(session.report.selected_candidate_id)
+  const urls = useRef(new Set<string>())
+  useEffect(() => () => { for (const value of urls.current) URL.revokeObjectURL(value); urls.current.clear() }, [])
   async function download(candidate: string, role: string) {
     try {
-      const blob = await session!.download(candidate, role), href = URL.createObjectURL(blob), anchor = document.createElement('a')
+      const blob = await session.download(candidate, role), href = URL.createObjectURL(blob), anchor = document.createElement('a')
       urls.current.add(href); anchor.href = href; anchor.download = `${candidate}-rc-design-${role}.json`
       document.body.append(anchor); anchor.click(); anchor.remove()
       window.setTimeout(() => { URL.revokeObjectURL(href); urls.current.delete(href) }, 0)
-    } catch { setSession(null); setState('invalid'); setSelected(null) }
+    } catch { onInvalid() }
   }
-  if (!session) return <section className="wb2-panel" data-rc-design={state}><h2>Experimental RC design comparison</h2><p role="status">{state === 'loading' ? 'Checking original candidate artifacts…' : 'UNAVAILABLE — RC comparison artifacts could not be verified.'}</p></section>
   const { report, models } = session
   const current = report.rows.find((r: RcObject) => r.candidate_id === selected)
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>

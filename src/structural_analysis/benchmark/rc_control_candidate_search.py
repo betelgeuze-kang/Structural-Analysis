@@ -305,11 +305,17 @@ def compare_rc_control_candidate_search(
         quantities = design.calculate_fiber_frame_member_quantities(model)
         estimate = design._estimate(quantities, prices)
         assert estimate is not None
+        model_bytes = study._bytes(model.canonical_payload())
         pool.append(
             {
                 "candidate_id": key,
                 "model_identity": identities[key],
                 "model_checksum": model.canonical_model_checksum,
+                "model_artifact": {
+                    "path": "pool/" + key + ".json",
+                    "byte_length": len(model_bytes),
+                    "sha256": study._sha(model_bytes),
+                },
                 "quantities": quantities,
                 "material_estimate": estimate,
             }
@@ -366,8 +372,14 @@ def compare_rc_control_candidate_search(
     }
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
+    for row in pool:
+        study._save(
+            root,
+            row["model_artifact"]["path"],
+            study._bytes(models[row["candidate_id"]].canonical_payload()),
+        )
     plan = {
-        "schema_version": "experimental-rc-control-candidate-search-plan.v1",
+        "schema_version": "experimental-rc-control-candidate-search-plan.v2",
         "source_revision": source_revision,
         "control_request": request.to_dict(),
         "policy_hash": policy.policy_hash,

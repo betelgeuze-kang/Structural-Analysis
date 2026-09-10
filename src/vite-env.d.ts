@@ -19,6 +19,7 @@ interface ImportMeta {
 
 interface StructuralWorkbenchRuntimeConfig {
   readonly designComparisonUrl?: string
+  readonly rcControlSearchUrl?: string
   readonly rcControlDesignUrl?: string
   readonly candidateSearchProcessUrl?: string
   readonly jobStatusUrl?: string
