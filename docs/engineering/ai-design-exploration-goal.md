@@ -1832,3 +1832,14 @@ authority flag remains false; no official receipt or CI adoption changes. The
 focused selection passes 46 tests. Official-wheel mismatches, same-head full CI,
 independent verification, licensing, compatible experiments, learned net benefit
 and the full roadmap remain open.
+
+
+[Secant on policy abstention](rc-secant-abstention-20260910.md) at 3d4ecef4b
+adds an explicit experimental option that keeps the accepted-history deterministic
+baseline when the learned policy returns no proposal. Invalid/numerically failed
+proposals retain the original reference/rollback rules. The selector now reserves
+both seeded arms' possible retries. 59 focused and 33 related tests pass. A frozen
+445-file source copy is executing the full two-ridge/four-withheld-case experiment
+with 964 original training rows, 32 planned paths and all 242 targets. The original
+numerical processes and subsequent one-shot audit must be observed to completion;
+no current runtime result, learned gain or full-goal closure is claimed.
