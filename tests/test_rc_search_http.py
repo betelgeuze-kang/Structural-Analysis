@@ -210,3 +210,24 @@ def test_wsgi_read_only_framing_and_query_guard(app):
         body = b"".join(app(base | extra, lambda s, h: observed.append((s, h))))
         assert observed[0][0].startswith(status)
         assert dict(observed[0][1])["Content-Length"] == str(len(body))
+
+
+def test_search_without_oracle_mounts_only_its_actual_graph():
+    root = Path("tests/frontend/fixtures/rc-control-search-no-oracle")
+    expected = json.loads((root / "result.json").read_bytes())["report_hash"]
+    bundle = RcSearchArtifactBundle.from_directory(root, expected_report_hash=expected)
+    assert len(bundle.artifacts) == 42
+    assert all(not path.startswith("exhaustive_oracle/") for path in bundle.artifacts)
+    app = RcSearchArtifactWSGIApplication(
+        {("alpha", "experiment"): bundle}, authorize=authorizer
+    )
+    assert (
+        app.handle("GET", route(), headers=HEADERS).body
+        == (root / "result.json").read_bytes()
+    )
+    assert (
+        app.handle(
+            "GET", route("exhaustive_oracle/comparison.json"), headers=HEADERS
+        ).status
+        == 404
+    )
