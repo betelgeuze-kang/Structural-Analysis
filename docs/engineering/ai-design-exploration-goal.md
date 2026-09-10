@@ -1,5 +1,15 @@
 # AI design exploration implementation register
 
+The [real RC search HTTP mount](rc-search-http-integration-20260910.md) now
+serves pinned, immutable candidate artifacts with per-request tenant authorization.
+Actual loopback browser/API tests pass at desktop/mobile widths with no response
+interception: 159 successful responses match every original byte, while six
+requests are denied by authentication/access/method rules. Six frontend and
+30 Python tests pass; no solver call or fit is added. The 231-file packet is
+sealed. This covers the local actual artifact mount; production identity and
+deployment, independent families/physics and learned net benefit remain open.
+
+
 The [combined RC control search review](rc-control-search-workbench-20260910.md)
 now connects price/learned strategies, coverage/errors, full-path candidate
 performance and original quantity/price artifacts in Workbench. All pool models

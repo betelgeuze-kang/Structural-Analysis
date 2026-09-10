@@ -132,3 +132,11 @@ bindings. Actual service hosting, repeated independent-family comparisons,
 full learned net benefit and external physical validation remain open. This
 change does not close those requirements, approve a design or complete the
 full Structural Analysis roadmap.
+
+
+## Subsequent real HTTP mount
+
+The [authenticated artifact service and real browser observation](rc-search-http-integration-20260910.md)
+now verifies a local WSGI mount without intercepted API responses. It covers the
+previous local service-hosting gap for this format, while production deployment,
+independent-family performance and physical acceptance remain separate.

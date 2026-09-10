@@ -1,0 +1,1229 @@
+{
+  "schema_version": "rc-search-http-integration-record.v1",
+  "audit": {
+    "schema_version": "rc-search-real-http-original-audit.v1",
+    "source_revision": "614a2c458e56befd965b806b5802f10748f1a1b5",
+    "browser_source_revision": "577b3246ff51c63903b3850744ae6d7ba7fd4dd9",
+    "source_files_checked": 221,
+    "server_pid": 1023893,
+    "server_absent": true,
+    "terminal_tool_session": 92153,
+    "terminal_exit_code": 0,
+    "response_status_counts": {
+      "200": 159,
+      "401": 3,
+      "404": 2,
+      "405": 1
+    },
+    "all_successful_response_bytes_matched": true,
+    "unique_artifact_paths": 75,
+    "successful_response_bytes": 6881668,
+    "frontend_tests": 6,
+    "new_search_frontend_tests": 4,
+    "existing_durable_api_frontend_tests": 2,
+    "python_tests": 30,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "runtime": {
+      "node_path": "/tmp/structural-design-node.2DnehE/node-v24.20.0-linux-x64/bin/node",
+      "node_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+    },
+    "visually_reviewed_viewports": [
+      1440,
+      390
+    ],
+    "independent_physical_validation": false,
+    "production_deployment": false,
+    "audit_wall_ns": 803464886,
+    "checked_at_utc": "2026-09-10T01:26:05.998918+00:00"
+  },
+  "http_receipt": {
+    "schema_version": "rc-search-real-http-browser-observation.v1",
+    "pid": 1023893,
+    "report_hash": "sha256:3e51db2c1223d53b3a5aa0ac17345628c92c3727d395115463354be82681568b",
+    "snapshot_artifact_count": 75,
+    "snapshot_bytes": 3064643,
+    "snapshot_load_ns": 17973769,
+    "wall_ns": 6558453360,
+    "cpu_ns": 99176042,
+    "peak_rss_kib": 114340,
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 200,
+        "bytes": 7004,
+        "sha256": "3c108cc60dcd344fda12d6b20143223e0c9ccc9fe990420cd6d83384b75c9140"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/plan.json",
+        "status": 200,
+        "bytes": 13245,
+        "sha256": "cb1fa92bd265b9837c16cf61fff1668fc9f7ed3499db1dfe4e1c0a297cfbb3bb"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/policy.json",
+        "status": 200,
+        "bytes": 9088,
+        "sha256": "05b9e4ef46798aff53daacc4d407e93e101adc7baedcc08e54713be16b4e51c4"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/historical-training.json",
+        "status": 200,
+        "bytes": 2377,
+        "sha256": "b000b6f2e4672e8479918db1ae041aa1d4936bb6d0440dd88fff88fa1a18268a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/comparison.json",
+        "status": 200,
+        "bytes": 11820,
+        "sha256": "d2b685a7a43ec16683130f9d36e55db098d494e2ad523b9984d3330e89c5ed95"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "6297ccaaccf822139444e1a002675f026c0c5c28bf8e4ad72a7086252e0b93c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/result.json",
+        "status": 200,
+        "bytes": 357258,
+        "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "aba4f8e80c211bf0070102635cbca52080174e3c5b7861e684af584175bf35e7"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "21a80e3b4972dfc0c1e8915fccfa3344e2cbfeade84c27c6141dd2a197b74509"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "79893f1480b18e315bf5f314ceadd0c9f199a146fd2e421694ebb6fc9ac00aab"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/comparison.json",
+        "status": 200,
+        "bytes": 11820,
+        "sha256": "775be57c78e47f18ab147bc13366558656a9426d787cf3f4db2aa9ab7e8ee3f8"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "8c243f1e9abfd0d63e01d85bebc4ff67bb115b3ac11415a09d4f1c698ad60c2a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/result.json",
+        "status": 200,
+        "bytes": 357258,
+        "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "ecdd50b79bf4ff4cc29a2febaef597595f450828e8cfcbe9e6dcd90a5e95789c"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "c7c366fa43fc99ec6d315e1cad20ffdabcddb47478cd10994520ff1ae4df680e"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "d93708100016f7771fcaafd7b1ebb1fa325a99d218182a5bebe5f660ceace49d"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/comparison.json",
+        "status": 200,
+        "bytes": 21721,
+        "sha256": "93684337896b0c8b66acb709d8fa83e8fe8b4c81858fd7996011c436b2b00eeb"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "6e87ec964059500e02e386b8fb62ec8175997ac3d4ce9d1458a1ae45a8b6c19f"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/result.json",
+        "status": 200,
+        "bytes": 357258,
+        "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "7c182e833db37aa0921c9bf6ade887cb477f6d7cae28fed81047a728518cc37a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "e277845ef8f52eb04d7689fdcbbc915120095d3094831c8149866042b05cedcc"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "7f087e94523a5b643e02a68f994b68ee38472f89a0d7e7e0604859fcea35d945"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "df3e7b47f4b8882e9e6f195eb741b2ecbd80b90968775a9fb68094b534b01e58"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/checkpoint.json",
+        "status": 200,
+        "bytes": 12421,
+        "sha256": "2920cbff319885af8902e98d4a29cee99bfaffd6bba1beb79223b71654c9fc03"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "ef4f475bd1dba67ee8dcff339de620dd47340150dbcfc1d38f78dd17f2a9abd2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/result.json",
+        "status": 200,
+        "bytes": 358134,
+        "sha256": "95da5d6e9a490a49079e89c61d2c82ccd813987b6df8460d120c4dd30135bc6b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "7eafc5b1ff13ea6269cf3b616ef150b24218b4b767a429aed7dcf70603392da2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "691fd2bc93868bbb278ab7018f3972ca51cf5e2443c4dbc6ffe552737e24c788"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "4f55de9a6a3a90378bdffa52f250e620d3d4cf1beccc43971b6f3a943bdc8f12"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "0e70130cefd95ee9b1a1746e457d8d54efdfaa73ced2e06600282c6e7132da34"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/model.json",
+        "status": 200,
+        "bytes": 1322,
+        "sha256": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/result.json",
+        "status": 200,
+        "bytes": 355428,
+        "sha256": "6477f886442d41e419017cd9d6d6a87f6c4cde74b4843d2d4ba3ded08bd02ad1"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "6af242751c5d8ed253ea76dd695e81a76522d40150a38022e68cda2c214d2108"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "3336c05b0d1580a110e1cfc245a3fd35cbc2be0f53ca9d2d819e57fd2b727638"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/baseline.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/cheap.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/middle.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "ef4f475bd1dba67ee8dcff339de620dd47340150dbcfc1d38f78dd17f2a9abd2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/costly.json",
+        "status": 200,
+        "bytes": 1322,
+        "sha256": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 200,
+        "bytes": 7004,
+        "sha256": "3c108cc60dcd344fda12d6b20143223e0c9ccc9fe990420cd6d83384b75c9140"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/plan.json",
+        "status": 200,
+        "bytes": 13245,
+        "sha256": "cb1fa92bd265b9837c16cf61fff1668fc9f7ed3499db1dfe4e1c0a297cfbb3bb"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/policy.json",
+        "status": 200,
+        "bytes": 9088,
+        "sha256": "05b9e4ef46798aff53daacc4d407e93e101adc7baedcc08e54713be16b4e51c4"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/historical-training.json",
+        "status": 200,
+        "bytes": 2377,
+        "sha256": "b000b6f2e4672e8479918db1ae041aa1d4936bb6d0440dd88fff88fa1a18268a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/comparison.json",
+        "status": 200,
+        "bytes": 11820,
+        "sha256": "d2b685a7a43ec16683130f9d36e55db098d494e2ad523b9984d3330e89c5ed95"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "6297ccaaccf822139444e1a002675f026c0c5c28bf8e4ad72a7086252e0b93c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/result.json",
+        "status": 200,
+        "bytes": 357258,
+        "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "aba4f8e80c211bf0070102635cbca52080174e3c5b7861e684af584175bf35e7"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/baseline/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "21a80e3b4972dfc0c1e8915fccfa3344e2cbfeade84c27c6141dd2a197b74509"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "79893f1480b18e315bf5f314ceadd0c9f199a146fd2e421694ebb6fc9ac00aab"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/price_order/cheap/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/comparison.json",
+        "status": 200,
+        "bytes": 11820,
+        "sha256": "775be57c78e47f18ab147bc13366558656a9426d787cf3f4db2aa9ab7e8ee3f8"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "8c243f1e9abfd0d63e01d85bebc4ff67bb115b3ac11415a09d4f1c698ad60c2a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/result.json",
+        "status": 200,
+        "bytes": 357258,
+        "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "ecdd50b79bf4ff4cc29a2febaef597595f450828e8cfcbe9e6dcd90a5e95789c"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/baseline/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "c7c366fa43fc99ec6d315e1cad20ffdabcddb47478cd10994520ff1ae4df680e"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "d93708100016f7771fcaafd7b1ebb1fa325a99d218182a5bebe5f660ceace49d"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/comparison.json",
+        "status": 200,
+        "bytes": 21721,
+        "sha256": "93684337896b0c8b66acb709d8fa83e8fe8b4c81858fd7996011c436b2b00eeb"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "6e87ec964059500e02e386b8fb62ec8175997ac3d4ce9d1458a1ae45a8b6c19f"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/result.json",
+        "status": 200,
+        "bytes": 357258,
+        "sha256": "1e58b162d826b0ee92f975a2acfc12237b67154e94126e5b45e6da36297ce13b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "71a805c7fa5cc8c4c0eb58d49ccba779d762d1d5ad7cf9676a1341a4ff163cc0"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "7c182e833db37aa0921c9bf6ade887cb477f6d7cae28fed81047a728518cc37a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/baseline/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "e277845ef8f52eb04d7689fdcbbc915120095d3094831c8149866042b05cedcc"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "7f087e94523a5b643e02a68f994b68ee38472f89a0d7e7e0604859fcea35d945"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/cheap/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "df3e7b47f4b8882e9e6f195eb741b2ecbd80b90968775a9fb68094b534b01e58"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/checkpoint.json",
+        "status": 200,
+        "bytes": 12421,
+        "sha256": "2920cbff319885af8902e98d4a29cee99bfaffd6bba1beb79223b71654c9fc03"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "ef4f475bd1dba67ee8dcff339de620dd47340150dbcfc1d38f78dd17f2a9abd2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/result.json",
+        "status": 200,
+        "bytes": 358134,
+        "sha256": "95da5d6e9a490a49079e89c61d2c82ccd813987b6df8460d120c4dd30135bc6b"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "7eafc5b1ff13ea6269cf3b616ef150b24218b4b767a429aed7dcf70603392da2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "691fd2bc93868bbb278ab7018f3972ca51cf5e2443c4dbc6ffe552737e24c788"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/middle/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/analysis-outcome.json",
+        "status": 200,
+        "bytes": 254,
+        "sha256": "4f55de9a6a3a90378bdffa52f250e620d3d4cf1beccc43971b6f3a943bdc8f12"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/analysis-started.json",
+        "status": 200,
+        "bytes": 81,
+        "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/checkpoint.json",
+        "status": 200,
+        "bytes": 12295,
+        "sha256": "0e70130cefd95ee9b1a1746e457d8d54efdfaa73ced2e06600282c6e7132da34"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/model.json",
+        "status": 200,
+        "bytes": 1322,
+        "sha256": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/result.json",
+        "status": 200,
+        "bytes": 355428,
+        "sha256": "6477f886442d41e419017cd9d6d6a87f6c4cde74b4843d2d4ba3ded08bd02ad1"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "6af242751c5d8ed253ea76dd695e81a76522d40150a38022e68cda2c214d2108"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/verification-outcome.json",
+        "status": 200,
+        "bytes": 258,
+        "sha256": "3336c05b0d1580a110e1cfc245a3fd35cbc2be0f53ca9d2d819e57fd2b727638"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/exhaustive_oracle/costly/verification-started.json",
+        "status": 200,
+        "bytes": 85,
+        "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/baseline.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/cheap.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/middle.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "ef4f475bd1dba67ee8dcff339de620dd47340150dbcfc1d38f78dd17f2a9abd2"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/pool/costly.json",
+        "status": 200,
+        "bytes": 1322,
+        "sha256": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/model.json",
+        "status": 200,
+        "bytes": 1323,
+        "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/result.json",
+        "status": 200,
+        "bytes": 357893,
+        "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/checkpoint.json",
+        "status": 200,
+        "bytes": 12426,
+        "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/learned_order/cheap/verification.json",
+        "status": 200,
+        "bytes": 1047,
+        "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 401,
+        "bytes": 80,
+        "sha256": "8b6fe7d30915af5c01ebc2373c1f2dec9ea047b2fe15b28cc35242db906e2d44"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 404,
+        "bytes": 86,
+        "sha256": "c2bcfade4126dfea8eedb9860ffeba789db1a8b387a6c214e7bc580fcdb4d0ab"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 401,
+        "bytes": 80,
+        "sha256": "8b6fe7d30915af5c01ebc2373c1f2dec9ea047b2fe15b28cc35242db906e2d44"
+      },
+      {
+        "method": "POST",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 405,
+        "bytes": 77,
+        "sha256": "b54c12204176e795caba4e002c467d1428dfd73eea32f7f71182680a6fdab198"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/provenance.json",
+        "status": 404,
+        "bytes": 86,
+        "sha256": "c2bcfade4126dfea8eedb9860ffeba789db1a8b387a6c214e7bc580fcdb4d0ab"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 200,
+        "bytes": 7004,
+        "sha256": "3c108cc60dcd344fda12d6b20143223e0c9ccc9fe990420cd6d83384b75c9140"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/rc-search/regression/result.json",
+        "status": 401,
+        "bytes": 80,
+        "sha256": "8b6fe7d30915af5c01ebc2373c1f2dec9ea047b2fe15b28cc35242db906e2d44"
+      }
+    ],
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "independent_physical_validation": false
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-search-http-_d0rcmm4",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-search-http-_d0rcmm4.inventory.json",
+    "inventory_sha256": "72a5bb434f8c2bcf16ec25cb50fa6a1d6b8d7fc099fd2b2940482f09567d885a",
+    "file_count": 231,
+    "total_bytes": 6727016,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T01:26:06.044967+00:00",
+    "seal_wall_ns": 24828755,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "claims": {
+    "local_real_http_mount_verified": true,
+    "production_deployment": false,
+    "independent_physical_validation": false,
+    "learned_advantage": false,
+    "full_roadmap_complete": false
+  }
+}
