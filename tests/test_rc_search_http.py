@@ -231,3 +231,55 @@ def test_search_without_oracle_mounts_only_its_actual_graph():
         ).status
         == 404
     )
+
+
+@pytest.mark.parametrize(
+    "mutation", [None, "unknown_strategy", "old_version", "missing_ranking"]
+)
+def test_new_ranking_plan_snapshot_binds_version_and_named_strategy(mutation):
+    from structural_analysis.benchmark.rc_control_candidate_ranking import (
+        candidate_ranking,
+        CHEAPER_BOUNDARY_RANKING,
+    )
+    from structural_analysis.execution.rc_search_http import _sha
+
+    # Controlled metadata upgrade preserves the old fixture's same schedule.
+    plan = json.loads((ROOT / "plan.json").read_bytes())
+    plan["schema_version"] = "experimental-rc-control-candidate-search-plan.v3"
+    plan["ranking"] = candidate_ranking(plan["predictions"], CHEAPER_BOUNDARY_RANKING)[
+        1
+    ]
+    if mutation == "unknown_strategy":
+        plan["ranking"]["strategy"] = "unknown"
+    if mutation == "old_version":
+        plan["schema_version"] = "experimental-rc-control-candidate-search-plan.v2"
+    if mutation == "missing_ranking":
+        plan.pop("ranking")
+
+    def hashed(value, field):
+        value.pop(field)
+        def raw():
+            return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+        value[field] = _sha(raw())
+        return raw()
+
+    plan_bytes = hashed(plan, "plan_hash")
+    result = json.loads((ROOT / "result.json").read_bytes())
+    result["plan_hash"] = plan["plan_hash"]
+    result_bytes = hashed(result, "report_hash")
+
+    def read(name, maximum):
+        return {"plan.json": plan_bytes, "result.json": result_bytes}.get(name) or (
+            ROOT / name
+        ).read_bytes()
+
+    if mutation is not None:
+        with pytest.raises(ValueError, match="metadata binding"):
+            RcSearchArtifactBundle.from_reader(
+                read, expected_report_hash=result["report_hash"]
+            )
+    else:
+        b = RcSearchArtifactBundle.from_reader(
+            read, expected_report_hash=result["report_hash"]
+        )
+        assert b.artifacts["plan.json"] == plan_bytes and len(b.artifacts) == 75

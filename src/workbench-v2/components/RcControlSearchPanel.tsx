@@ -41,6 +41,11 @@ export function RcControlSearchPanel({ url, authorize }: { url: string; authoriz
   return <section className="wb2-panel" data-rc-search="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2>RC candidate search</h2>
     <p>{plan.pool.length - 1} alternatives · up to {plan.full_analysis_budget_per_arm} full analyses per online strategy, including its own baseline. Each analyzed model also has a fresh verification run.</p>
+    <p data-rc-search-ranking>{plan.ranking
+      ? plan.ranking.predicted_feasible_seed_id === null
+        ? 'No predicted feasible seed: learned priority falls back to prediction tier, then price.'
+        : `Learned priority starts with predicted feasible candidate ${plan.ranking.predicted_feasible_seed_id}, then checks cheaper alternatives. Cheaper abstentions come first; other cheaper alternatives are ordered by their predicted relative limit exceedance. This distance is not a probability or a verified performance margin.`
+      : 'Learned priority uses predicted feasibility, then price.'} Evaluation order: {plan.plans.learned_order.ordering.join(' → ')}. The schedule is fixed before any candidate analysis.</p>
     <p data-rc-search-authority>Candidate models, quantities, declared prices and stored result bindings checked. Predictions remain estimates; passing caller limits is not design approval. This review does not establish independent physical validation, learned speedup or confirmed monetary savings.</p>
     <div className="wb2-table-scroll" role="region" aria-label="RC search strategies" tabIndex={0}><table className="wb2-table" style={{ minWidth: 900, overflowWrap: 'normal' }}><thead><tr><th>Strategy</th><th>Analyzed models</th><th>Selected candidate</th><th>Scoped estimate</th><th>Core calls</th><th>Newton / linear</th><th>Elapsed / CPU (s)</th><th>Review</th></tr></thead><tbody>
       {names.map(name => { const r = name === 'exhaustive_oracle' ? report.oracle : report.arms[name], work = r.execution_work.known_counters

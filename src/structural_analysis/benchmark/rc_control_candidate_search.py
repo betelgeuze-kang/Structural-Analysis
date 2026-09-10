@@ -21,6 +21,11 @@ from structural_analysis.benchmark.rc_control_candidate_learning import (
     RCControlCandidatePolicy,
     control_candidate_features,
 )
+from structural_analysis.benchmark.rc_control_candidate_ranking import (
+    LEGACY_RANKING,
+    RANKING_STRATEGIES,
+    candidate_ranking,
+)
 
 
 def _work(report):
@@ -185,6 +190,7 @@ def compare_rc_control_candidate_search(
     full_analysis_budget: int = 3,
     terminal_limits: design.FiberFrameTerminalLimits | None = None,
     evaluate_exhaustive_oracle: bool = False,
+    ranking_strategy: str = LEGACY_RANKING,
 ):
     """Compare frozen price-order and learned-order shortlists at the same budget.
 
@@ -195,6 +201,8 @@ def compare_rc_control_candidate_search(
     family study is not a held-out project/campaign generalization experiment.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if type(ranking_strategy) is not str or ranking_strategy not in RANKING_STRATEGIES:
+        raise ValueError("supported candidate ranking strategy required")
     if type(policy) is not RCControlCandidatePolicy:
         raise ValueError("direct-control candidate policy required")
     if type(candidates) is not tuple or not 1 <= len(candidates) <= 16:
@@ -346,13 +354,7 @@ def compare_rc_control_candidate_search(
                 "estimate": row["material_estimate"]["total"],
             }
         )
-    learned = [
-        r["candidate_id"]
-        for r in sorted(
-            predicted,
-            key=lambda r: (r["ranking_tier"], r["estimate"], r["candidate_id"]),
-        )
-    ]
+    learned, ranking = candidate_ranking(predicted, ranking_strategy)
     rank_wall = perf_counter_ns() - rank_start
     if policy._json != frozen:
         raise ValueError("policy changed while ranking")
@@ -386,6 +388,9 @@ def compare_rc_control_candidate_search(
         "original_training_and_pool_models_disjoint": True,
         "independent_project_geometry_history_split": False,
     }
+    if ranking is not None:
+        plan["schema_version"] = "experimental-rc-control-candidate-search-plan.v3"
+        plan["ranking"] = ranking
     plan["plan_hash"] = study._sha(study._bytes(plan))
     study._save(root, "plan.json", study._bytes(plan))
     study._save(root, "policy.json", study._bytes(p))

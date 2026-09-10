@@ -138,3 +138,58 @@ test('RC search cost arithmetic distinguishes loss, ties and unknown outcomes in
   expect(ties.pool_minimum_feasible_candidate_ids).toEqual(['baseline', 'cheap', 'middle'])
   expect(ties.arms.learned_order.matches_pool_minimum).toBe(true)
 })
+
+// Controlled ranking metadata exercises schedule reconstruction, not prediction quality.
+import { candidateRanking, CHEAPER_BOUNDARY_RANKING, LEGACY_RANKING } from '../../src/workbench-v2/model/rcControlCandidateRanking'
+function rankingControl(candidate_id: string, estimate: number, value: number | null, limit = 100) {
+  return { candidate_id, estimate, ranking_tier: value === null ? 1 : value <= limit ? 0 : 2,
+    predicted_screens: value === null ? null : { limit: { value, limit, status: value <= limit ? 'pass' : 'fail' } } }
+}
+test('boundary ranking retains a seed and explores cheaper unknowns and near-limit failures', () => {
+  const rows = [rankingControl('expensive', 300, 80), rankingControl('far', 50, 200), rankingControl('near', 100, 101), rankingControl('seed', 200, 90), rankingControl('unknown', 150, null)]
+  const originalRows = structuredClone(rows)
+  expect(candidateRanking(rows, LEGACY_RANKING).ordering).toEqual(['seed', 'expensive', 'unknown', 'far', 'near'])
+  const ranked = candidateRanking(rows, CHEAPER_BOUNDARY_RANKING)
+  expect(ranked.ordering).toEqual(['seed', 'unknown', 'near', 'far', 'expensive'])
+  expect(ranked.detail!.rows.find((r: any) => r.candidate_id === 'near').relative_exceedance).toBe(1 / 101)
+  expect(ranked.detail!.rows.find((r: any) => r.candidate_id === 'unknown').relative_exceedance).toBeNull()
+  expect(ranked.detail!.uncertainty_calibrated).toBe(false)
+  expect(ranked.detail!.physical_result_authority).toBe(false)
+  expect(rows).toEqual(originalRows)
+  expect(candidateRanking(rows.filter(r => r.ranking_tier !== 0), CHEAPER_BOUNDARY_RANKING).ordering).toEqual(['unknown', 'far', 'near'])
+})
+test('boundary ranking handles zero limits, worst constraint and deterministic ties', () => {
+  const rows: any[] = [rankingControl('near_b', 100, 101), rankingControl('near_a', 100, 101), rankingControl('zero', 10, 1e-300, 0), rankingControl('seed', 200, 0, 0), rankingControl('multiple', 90, 100.01)]
+  rows[4].predicted_screens.second = { value: 1e300, limit: 1e-300, status: 'fail' }
+  const ranked = candidateRanking(rows, CHEAPER_BOUNDARY_RANKING)
+  expect(ranked.ordering).toEqual(['seed', 'near_a', 'near_b', 'zero', 'multiple'])
+  expect(ranked.detail!.rows.find((r: any) => r.candidate_id === 'zero').relative_exceedance).toBe(1)
+})
+function boundaryMetadata(mutate?: (plan: any) => void) {
+  const raw = readFileSync(root + 'plan.json', 'utf8'), plan = JSON.parse(raw)
+  plan.schema_version = 'experimental-rc-control-candidate-search-plan.v3'
+  plan.ranking = candidateRanking(plan.predictions, CHEAPER_BOUNDARY_RANKING).detail
+  mutate?.(plan)
+  const encoded = changed(raw, { schema_version: JSON.stringify(plan.schema_version), ranking: JSON.stringify(plan.ranking) }, 'plan_hash')
+  const result = changed(original.toString(), { plan_hash: JSON.stringify(JSON.parse(new TextDecoder().decode(encoded)).plan_hash) }, 'report_hash')
+  return { result, read: (path: string) => path === 'plan.json' ? Promise.resolve(encoded) : read(path) }
+}
+test('new ranking metadata binds an unchanged controlled schedule to original full results', async () => {
+  const input = boundaryMetadata()
+  const review = await validateRcControlSearch(input.result, input.read)
+  expect(review.plan.ranking.predicted_feasible_seed_id).toBe('cheap')
+  expect(review.report.arms.learned_order.selected_candidate_id).toBe('cheap')
+})
+for (const [name, mutate] of [
+  ['seed', (p: any) => { p.ranking.predicted_feasible_seed_id = 'costly' }],
+  ['distance', (p: any) => { p.ranking.rows[0].relative_exceedance = .25 }],
+  ['role', (p: any) => { p.ranking.rows[0].role = 'cheaper_unpredicted' }],
+  ['uncertainty claim', (p: any) => { p.ranking.uncertainty_calibrated = true }],
+  ['unsupported strategy', (p: any) => { p.ranking.strategy = 'unknown' }],
+  ['old version with new metadata', (p: any) => { p.schema_version = 'experimental-rc-control-candidate-search-plan.v2' }],
+] as const) {
+  test(`boundary ranking refuses rehashed ${name}`, async () => {
+    const input = boundaryMetadata(mutate)
+    await expect(validateRcControlSearch(input.result, input.read)).rejects.toThrow()
+  })
+}

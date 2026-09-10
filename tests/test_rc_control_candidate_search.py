@@ -390,8 +390,11 @@ def test_interrupt_preserves_started_and_unknown_outcome(
     assert not (root / "learned_order-started.json").exists()
 
 
+@pytest.mark.parametrize(
+    "strategy", ["feasibility_then_price.v1", "feasibility_then_cheaper_boundary.v1"]
+)
 def test_injected_optimistic_ranking_cannot_authorize_a_failed_physical_screen(
-    trained, tmp_path, monkeypatch
+    trained, tmp_path, monkeypatch, strategy
 ):
     # Deliberately invented predictions test decision authority, not learned quality.
     def optimistic(self, model, request):
@@ -411,6 +414,7 @@ def test_injected_optimistic_ranking_cannot_authorize_a_failed_physical_screen(
         **args,
         output_directory=tmp_path / "false-positive",
         evaluate_exhaustive_oracle=True,
+        ranking_strategy=strategy,
     )
     assert all(a["selected_candidate_id"] is None for a in report["arms"].values())
     assert all(
@@ -663,3 +667,143 @@ def test_existing_candidate_policy_bytes_keep_their_original_interpretation():
     restored = learning.RCControlCandidatePolicy(raw.decode())
     assert restored.to_dict() == original
     assert restored.policy_hash == original["policy_hash"]
+
+
+def ranking_control(candidate_id, estimate, value=None, limit=100):
+    return {
+        "candidate_id": candidate_id,
+        "estimate": estimate,
+        "ranking_tier": 1 if value is None else 0 if value <= limit else 2,
+        "predicted_screens": None
+        if value is None
+        else {
+            "limit": {
+                "value": value,
+                "limit": limit,
+                "status": "pass" if value <= limit else "fail",
+            }
+        },
+    }
+
+
+def test_cheaper_boundary_uses_seed_unknowns_and_relative_distance_without_oracle():
+    from structural_analysis.benchmark.rc_control_candidate_ranking import (
+        candidate_ranking,
+        CHEAPER_BOUNDARY_RANKING,
+        LEGACY_RANKING,
+    )
+
+    rows = [
+        ranking_control("expensive", 300, 80),
+        ranking_control("far", 50, 200),
+        ranking_control("near", 100, 101),
+        ranking_control("seed", 200, 90),
+        ranking_control("unknown", 150),
+    ]
+    original = deepcopy(rows)
+    assert candidate_ranking(rows, LEGACY_RANKING) == (
+        ["seed", "expensive", "unknown", "far", "near"],
+        None,
+    )
+    order, detail = candidate_ranking(rows, CHEAPER_BOUNDARY_RANKING)
+    assert order == ["seed", "unknown", "near", "far", "expensive"]
+    assert detail["predicted_feasible_seed_id"] == "seed"
+    assert (
+        not detail["uncertainty_calibrated"] and not detail["physical_result_authority"]
+    )
+    recorded = {r["candidate_id"]: r for r in detail["rows"]}
+    assert recorded["unknown"]["relative_exceedance"] is None
+    assert recorded["unknown"]["role"] == "cheaper_unpredicted"
+    assert recorded["near"]["relative_exceedance"] == 1 / 101
+    assert recorded["far"]["relative_exceedance"] == 0.5
+    assert recorded["expensive"]["role"] == "remaining_legacy_order"
+    assert rows == original
+    # Equivalent units retain order; this is not an uncertainty calibration test.
+    for multiplier in (1e-6, 1e6):
+        scaled = deepcopy(rows)
+        for r in scaled:
+            for s in (r["predicted_screens"] or {}).values():
+                s["value"] *= multiplier
+                s["limit"] *= multiplier
+        assert candidate_ranking(scaled, CHEAPER_BOUNDARY_RANKING)[0] == order
+
+
+def test_cheaper_boundary_zero_limits_multiple_constraints_ties_and_no_seed():
+    from structural_analysis.benchmark.rc_control_candidate_ranking import (
+        candidate_ranking,
+        CHEAPER_BOUNDARY_RANKING,
+    )
+
+    rows = [
+        ranking_control("near_b", 100, 101),
+        ranking_control("near_a", 100, 101),
+        ranking_control("zero", 10, 1e-300, 0),
+        ranking_control("seed", 200, 0, 0),
+        ranking_control("multiple", 90, 100.01),
+    ]
+    rows[-1]["predicted_screens"]["second"] = {
+        "value": 1e300,
+        "limit": 1e-300,
+        "status": "fail",
+    }
+    order, detail = candidate_ranking(rows, CHEAPER_BOUNDARY_RANKING)
+    assert order == ["seed", "near_a", "near_b", "zero", "multiple"]
+    scores = {r["candidate_id"]: r["relative_exceedance"] for r in detail["rows"]}
+    assert scores["seed"] == 0 and scores["zero"] == scores["multiple"] == 1
+    rows = [r for r in rows if r["candidate_id"] != "seed"]
+    order, detail = candidate_ranking(rows, CHEAPER_BOUNDARY_RANKING)
+    assert order == ["zero", "multiple", "near_a", "near_b"]
+    assert detail["predicted_feasible_seed_id"] is None
+    assert detail["fallback_reason"] == "no_predicted_feasible_seed"
+    assert all(r["role"] == "remaining_legacy_order" for r in detail["rows"])
+
+
+@pytest.mark.parametrize("strategy", [None, True, 1, "unknown"])
+def test_unknown_ranking_strategy_rejects_before_models_or_outputs(
+    trained, tmp_path, monkeypatch, strategy
+):
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid strategy must reject before model work")
+
+    monkeypatch.setattr(search, "candidate_model_identity", forbidden)
+    root = tmp_path / "invalid-mode"
+    with pytest.raises(ValueError, match="ranking strategy"):
+        search.compare_rc_control_candidate_search(
+            **search_inputs(trained), ranking_strategy=strategy, output_directory=root
+        )
+    assert not root.exists()
+
+
+def test_new_ranking_plan_is_bound_and_frozen_before_actual_reanalysis(
+    trained, tmp_path, monkeypatch
+):
+    from structural_analysis.benchmark.rc_control_candidate_ranking import (
+        CHEAPER_BOUNDARY_RANKING,
+    )
+
+    root = tmp_path / "boundary"
+    actual = study.compare_rc_control_designs
+    observed = []
+
+    def observe(*args, **kwargs):
+        plan = json.loads((root / "plan.json").read_bytes())
+        assert (
+            plan["schema_version"] == "experimental-rc-control-candidate-search-plan.v3"
+        )
+        assert plan["ranking"]["strategy"] == CHEAPER_BOUNDARY_RANKING
+        assert plan["ranking"]["predicted_feasible_seed_id"] == "cheap"
+        assert plan["plan_hash"] == study._sha(
+            study._bytes({k: v for k, v in plan.items() if k != "plan_hash"})
+        )
+        observed.append(plan)
+        return actual(*args, **kwargs)
+
+    monkeypatch.setattr(study, "compare_rc_control_designs", observe)
+    result = search.compare_rc_control_candidate_search(
+        **search_inputs(trained),
+        ranking_strategy=CHEAPER_BOUNDARY_RANKING,
+        output_directory=root,
+    )
+    assert len(observed) == 2 and observed[0] == observed[1]
+    assert result["plan_hash"] == observed[0]["plan_hash"]
+    assert all(a["selected_full_reference_verified"] for a in result["arms"].values())

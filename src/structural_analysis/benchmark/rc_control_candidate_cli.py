@@ -24,6 +24,10 @@ from structural_analysis.benchmark.rc_control_candidate_learning import (
 from structural_analysis.benchmark.rc_control_candidate_search import (
     compare_rc_control_candidate_search,
 )
+from structural_analysis.benchmark.rc_control_candidate_ranking import (
+    LEGACY_RANKING,
+    RANKING_STRATEGIES,
+)
 from structural_analysis.benchmark.rc_control_design_cli import _read
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
@@ -43,6 +47,9 @@ def main(argv=None):
                 "--fit-method", choices=FIT_METHODS, default=CENTERED_FIT_METHOD
             )
         else:
+            sub.add_argument(
+                "--ranking-strategy", choices=RANKING_STRATEGIES, default=LEGACY_RANKING
+            )
             sub.add_argument("--policy", type=Path, required=True)
             sub.add_argument("--training-report", type=Path, required=True)
             sub.add_argument("--full-analysis-budget", type=int, default=3)
@@ -96,6 +103,7 @@ def main(argv=None):
             training_report=training,
             full_analysis_budget=args.full_analysis_budget,
             evaluate_exhaustive_oracle=args.evaluate_exhaustive_oracle,
+            ranking_strategy=args.ranking_strategy,
         )
         output = {
             "report_hash": report["report_hash"],

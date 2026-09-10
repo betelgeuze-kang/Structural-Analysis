@@ -159,9 +159,18 @@ class RcSearchArtifactBundle:
         plan = _document(read("plan.json", _META_MAX), "plan_hash")
         training = _document(read("historical-training.json", _META_MAX), "report_hash")
         policy = _document(read("policy.json", _META_MAX), "policy_hash")
+        plan_version = plan.get("schema_version")
+        supported_plan = (
+            plan_version == "experimental-rc-control-candidate-search-plan.v2"
+            and "ranking" not in plan
+        ) or (
+            plan_version == "experimental-rc-control-candidate-search-plan.v3"
+            and type(plan.get("ranking")) is dict
+            and plan["ranking"].get("strategy")
+            == "feasibility_then_cheaper_boundary.v1"
+        )
         if (
-            plan.get("schema_version")
-            != "experimental-rc-control-candidate-search-plan.v2"
+            not supported_plan
             or result.get("plan_hash") != plan["plan_hash"]
             or result.get("historical_training_cost") != training
             or plan.get("training_report_hash") != training["report_hash"]

@@ -2,6 +2,7 @@ import { sha256Bytes } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
 import { validateRcDesignStudy, verifyQuantities, type RcDesignReview, type StudyRead } from './rcControlDesignSchema'
 import { costOptimality } from './rcControlSearchCost'
+import { candidateRanking, CHEAPER_BOUNDARY_RANKING, LEGACY_RANKING } from './rcControlCandidateRanking'
 
 export const RC_SEARCH_ARMS = ['price_order', 'learned_order'] as const
 const MAX = 2 * 1024 ** 2
@@ -78,7 +79,9 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     && report.historical_training_cost_counted_once_outside_online_arms === true, 'search_report_invalid')
   const planDoc = document(await read('plan.json', MAX)), plan = planDoc.value
   await selfHash(planDoc.raw, plan, 'plan_hash')
-  check(plan.schema_version === 'experimental-rc-control-candidate-search-plan.v2' && plan.plan_hash === report.plan_hash && plan.source_revision === report.source_revision
+  check((plan.schema_version === 'experimental-rc-control-candidate-search-plan.v2' && !('ranking' in plan)
+    || plan.schema_version === 'experimental-rc-control-candidate-search-plan.v3' && plan.ranking?.strategy === CHEAPER_BOUNDARY_RANKING)
+    && plan.plan_hash === report.plan_hash && plan.source_revision === report.source_revision
     && Array.isArray(plan.pool) && plan.pool.length >= 2 && plan.pool.length <= 17 && report.candidate_denominator === plan.pool.length
     && plan.pool[0].candidate_id === 'baseline' && plan.pool.every((r: RcObject) => id(r.candidate_id) && hash(r.model_identity) && hash(r.model_checksum))
     && new Set(plan.pool.map((r: RcObject) => r.candidate_id)).size === plan.pool.length
@@ -126,9 +129,10 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
       check(row.ranking_tier === (Object.values(row.predicted_screens).every((s: any) => s.status === 'pass') ? 0 : 2), 'search_prediction_tier_invalid')
     }
   }
-  const tiers = new Map<string, number>(plan.predictions.map((r: RcObject) => [r.candidate_id, r.ranking_tier]))
+  const ranked = candidateRanking(plan.predictions, plan.ranking?.strategy ?? LEGACY_RANKING)
+  check(same(ranked.detail, plan.ranking ?? null), 'search_ranking_detail_invalid')
   for (const name of RC_SEARCH_ARMS) {
-    const ordering = [...ids].sort(name === 'price_order' ? priceSort : (a, b) => tiers.get(a)! - tiers.get(b)! || priceSort(a, b))
+    const ordering = name === 'price_order' ? [...ids].sort(priceSort) : ranked.ordering
     check(same(plan.plans[name], { ordering, shortlist: ordering.slice(0, plan.full_analysis_budget_per_arm - 1) }), 'search_ranking_invalid')
   }
   const designs: Record<string, RcDesignReview> = {}
