@@ -46,7 +46,7 @@ const specs = [
 // The hermetic frontend lane has no Python solver installation. Opt into the
 // actual WSGI/browser integration only in a Python-enabled test environment.
 const withJobApi = process.argv.includes('--with-job-api')
-if (withJobApi) specs.push('tests/frontend/workbench-v2-job-api-browser.spec.ts')
+if (withJobApi) specs.push('tests/frontend/workbench-v2-job-api-browser.spec.ts', 'tests/frontend/workbench-v2-rc-search-http-browser.spec.ts')
 const passthrough = process.argv.slice(2).filter((arg) => arg !== '--with-job-api')
 
 const mime = {
