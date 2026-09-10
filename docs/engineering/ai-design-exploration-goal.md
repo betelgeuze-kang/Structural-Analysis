@@ -1,5 +1,18 @@
 # AI design exploration implementation register
 
+The [combined RC control search review](rc-control-search-workbench-20260910.md)
+now connects price/learned strategies, coverage/errors, full-path candidate
+performance and original quantity/price artifacts in Workbench. All pool models
+are exported before search and verified by the consumer, including unrequested
+alternatives. A fresh authored regression with and without a later oracle counts
+240 core calls / 644 Newton iterations and 30 paths, with original-byte audits.
+The official pinned frontend lane passes 57 selected tests; four affected layout
+checks pass again after mobile wrapping is corrected. Python regressions pass
+45 tests. The 811-file source/result/browser packet is sealed. Actual service
+hosting, repeated independent families, learned advantage and physical acceptance
+remain open; the full roadmap remains active.
+
+
 The [direct-control candidate search](rc-control-candidate-selection-20260910.md)
 now freezes price/learned shortlists before full reference analysis and fresh
 replay, preserving constants, full-path screens, quantities and common declared

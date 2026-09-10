@@ -126,3 +126,12 @@ The oracle uses the same reference solver and provides no independent physical
 validation. External-data admission, actual quotes, hosted acceptance and the
 full roadmap remain open. The separate [warm-start selection](rc-runtime-selection-20260910.md)
 now has its completed original audit and continues to select deterministic secant.
+
+
+## Subsequent combined Workbench integration
+
+The [combined review and original browser observation](rc-control-search-workbench-20260910.md)
+now supplies the previously missing local search panel for plan v2 / report v2,
+with all-pool models, strategy comparisons, coverage and original design downloads.
+This does not change this earlier sealed observation or supply independent-family
+performance, actual service hosting or physical qualification.
