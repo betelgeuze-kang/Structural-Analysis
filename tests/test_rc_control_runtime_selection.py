@@ -372,13 +372,19 @@ def test_interrupted_work_retains_reservation_without_invented_completion(
         ]
 
 
+@pytest.mark.parametrize("repetitions", [1, 3])
 def test_unknown_runtime_work_stops_before_another_candidate(
-    tmp_path, original, monkeypatch
+    tmp_path, original, monkeypatch, repetitions
 ):
     calls = injected_benchmark(original, monkeypatch, (0.8, 0.8), known=False)
     root = tmp_path / "study"
     with pytest.raises(ValueError, match="unaccounted work"):
-        run(root, original)
+        run(
+            root,
+            original,
+            repetitions=repetitions,
+            maximum_core_calls=112 * repetitions,
+        )
     assert len(calls) == 1 and not (root / "fit-0001-started.json").exists()
     assert json.loads((root / "fold-0000-outcome.json").read_bytes())[
         "unknown_work_until_outcome"
@@ -590,3 +596,215 @@ def test_model_gate_cost_is_charged_without_qualifying_failed_paths(original, ph
     for invalid in (True, -1, 0.0, float("nan")):
         with pytest.raises(ValueError, match="setup time"):
             selection._runtime_score(report, [], proposal_setup_wall_ns=invalid)
+
+
+def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
+    tmp_path, original, monkeypatch
+):
+    observed = []
+    real = learning.benchmark_rc_control_seed_paths
+
+    def record(model, request, **kwargs):
+        observed.append(
+            (
+                model.canonical_model_checksum,
+                kwargs["arm_order"],
+                kwargs["proposal_identity"],
+            )
+        )
+        return real(model, request, **kwargs)
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", record)
+    root = tmp_path / "repeated"
+    result = run(
+        root,
+        original,
+        ridge_grid=(1e4,),
+        repetitions=3,
+        maximum_core_calls=168,
+        maximum_fits=3,
+        proposal_abstention_strategy="secant",
+        static_model_abstention=True,
+    )
+    plan = json.loads((root / "plan.json").read_bytes())
+    schedule = [
+        ["reference", "secant", "proposal"],
+        ["secant", "proposal", "reference"],
+        ["proposal", "reference", "secant"],
+    ]
+    assert plan["arm_order_schedule"] == schedule
+    assert (
+        plan["maximum_possible_core_calls"] == 168
+        and plan["maximum_required_fits"] == 3
+    )
+    assert plan["schema_version"] == "rc-control-runtime-selection-plan.v2"
+    assert result["schema_version"] == "rc-control-runtime-selection-result.v2"
+    assert (
+        result["fit_completed_count"] == 2
+        and len(result["folds"]) == len(observed) == 6
+    )
+    assert [f["fit_index"] for f in result["folds"]] == [0, 0, 0, 1, 1, 1]
+    assert [f["repetition_index"] for f in result["folds"]] == [0, 1, 2, 0, 1, 2]
+    assert [list(item[1]) for item in observed] == schedule * 2
+    assert len(set(item[0] for item in observed)) == 2
+    assert observed[0][2] == observed[1][2] == observed[2][2]
+    assert observed[3][2] == observed[4][2] == observed[5][2]
+    assert not result["repeats_are_independent_cases"]
+    assert (
+        not result["validation_or_holdout_execution"]
+        and not result["net_savings_proved"]
+    )
+    assert result["selected_strategy"] == "secant" and result["selected_policy"] is None
+    assert (
+        sum(
+            f["score"]["execution_work"]["known_work"]["core_calls"]
+            for f in result["folds"]
+        )
+        == 120
+    )
+    for fold in result["folds"]:
+        folder = root / f"fold-{fold['index']:04d}"
+        score = fold["score"]
+        assert score["full_comparison_pass"] and score["proposed_count"] == 0
+        assert score["proposal_setup_wall_ns"] == fold["static_model_gate_wall_ns"] > 0
+        assert (
+            score["proposal_scored_wall_ns"]
+            == score["proposal_path_wall_ns"] + score["proposal_setup_wall_ns"]
+        )
+        baseline = json.loads((folder / "secant/path.json").read_bytes())
+        proposal = json.loads((folder / "proposal/path.json").read_bytes())
+        assert baseline["response_history"] == proposal["response_history"]
+        assert baseline["terminal_checkpoint"] == proposal["terminal_checkpoint"]
+    for case in result["candidates"][0]["case_repeat_scores"]:
+        assert case["requested_repetitions"] == case["valid_repetitions"] == 3
+        assert case["mean_ratio"] == pytest.approx(np.mean(case["ratios"]))
+        assert case["sample_standard_deviation"] == pytest.approx(
+            np.std(case["ratios"], ddof=1)
+        )
+
+
+@pytest.mark.parametrize("repetitions", [None, True, 0, 2, 4, "3", 3.0])
+def test_repetition_count_rejects_before_preflight_or_output(
+    tmp_path, original, monkeypatch, repetitions
+):
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid repeats must reject before data validation")
+
+    monkeypatch.setattr(selection, "_validated_training_data", forbidden)
+    with pytest.raises(ValueError, match="counterbalanced repetitions"):
+        run(tmp_path / "bad", original, repetitions=repetitions)
+    assert not (tmp_path / "bad").exists()
+
+
+def test_repeated_core_reservation_rejects_before_fit(tmp_path, original, monkeypatch):
+    def forbidden(*args, **kwargs):
+        pytest.fail("insufficient repeated budget must reject before fit")
+
+    monkeypatch.setattr(learning, "_fit", forbidden)
+    with pytest.raises(ValueError, match="up to 168 core calls"):
+        run(
+            tmp_path / "short",
+            original,
+            repetitions=3,
+            ridge_grid=(1e4,),
+            maximum_core_calls=167,
+        )
+    assert not (tmp_path / "short").exists()
+
+
+def test_failed_repeat_remains_in_denominator_and_disqualifies_candidate(
+    tmp_path, original, monkeypatch
+):
+    # Synthetic timing/physical-status controls, not evidence of a speed benefit.
+    calls = injected_benchmark(original, monkeypatch, (0.5, 0.5, 0.5))
+    template = learning.benchmark_rc_control_seed_paths
+
+    def one_failed(*args, **kwargs):
+        report = template(*args, **kwargs)
+        if len(calls) == 3:
+            report["comparisons"]["proposal"]["full_history_pass"] = False
+        return report
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", one_failed)
+    result = run(
+        tmp_path / "failed-repeat",
+        original,
+        repetitions=3,
+        ridge_grid=(1e4,),
+        maximum_core_calls=168,
+    )
+    candidate = result["candidates"][0]
+    assert len(calls) == 6 and result["fit_completed_count"] == 2
+    assert candidate["score"] is None and result["selected_strategy"] == "secant"
+    first = candidate["case_repeat_scores"][0]
+    assert (
+        first["ratios"] == [0.5, 0.5, None]
+        and first["requested_repetitions"] == 3
+        and first["valid_repetitions"] == 2
+    )
+    assert (
+        first["mean_ratio"]
+        is first["minimum_ratio"]
+        is first["maximum_ratio"]
+        is first["sample_standard_deviation"]
+        is None
+    )
+    assert candidate["case_repeat_scores"][1]["mean_ratio"] == 0.5
+
+
+def test_repeated_score_preserves_each_case_and_counts_one_fit_per_case(
+    tmp_path, original, monkeypatch
+):
+    # Invented ratios isolate aggregation and final-refit accounting.
+    injected_benchmark(original, monkeypatch, (0.8, 0.9, 1.0))
+    result = run(
+        tmp_path / "synthetic-repeat",
+        original,
+        repetitions=3,
+        ridge_grid=(1e4,),
+        maximum_core_calls=168,
+    )
+    scores = result["candidates"][0]["case_repeat_scores"]
+    assert scores[0]["ratios"] == [0.8, 0.8, 0.9] and scores[1]["ratios"] == [
+        0.9,
+        1.0,
+        1.0,
+    ]
+    assert result["candidates"][0]["score"] == pytest.approx(0.9)
+    assert result["fit_completed_count"] == 3
+    assert not result["candidate_promoted"] and not result["independent_evaluation"]
+
+
+def test_six_repeat_schedule_has_two_observations_in_every_arm_position(
+    tmp_path, original, monkeypatch
+):
+    # Synthetic runtime reports only verify scheduling and accounting.
+    injected_benchmark(original, monkeypatch, (1.2,) * 6)
+    real_control = learning.benchmark_rc_control_seed_paths
+    observed = []
+
+    def observe(*args, **kwargs):
+        observed.append(kwargs["arm_order"])
+        return real_control(*args, **kwargs)
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", observe)
+    result = run(
+        tmp_path / "six",
+        original,
+        repetitions=6,
+        ridge_grid=(1e4,),
+        maximum_core_calls=336,
+    )
+    assert (
+        len(result["folds"]) == len(observed) == 12
+        and result["fit_completed_count"] == 2
+    )
+    for offset in (0, 6):
+        orders = observed[offset : offset + 6]
+        for arm in ["reference", "secant", "proposal"]:
+            for position in range(3):
+                assert sum(order[position] == arm for order in orders) == 2
+    assert all(
+        c["requested_repetitions"] == c["valid_repetitions"] == 6
+        for c in result["candidates"][0]["case_repeat_scores"]
+    )

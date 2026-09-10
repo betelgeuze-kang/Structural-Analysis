@@ -241,6 +241,7 @@ def run_rc_control_runtime_selection(
     maximum_core_calls=32768,
     proposal_abstention_strategy="reference",
     static_model_abstention=False,
+    repetitions=1,
 ):
     """Fit each ridge without one training case, then execute that case's full path.
 
@@ -251,6 +252,8 @@ def run_rc_control_runtime_selection(
     proposal retry before the first fit or output is created.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if type(repetitions) is not int or repetitions not in (1, 3, 6):
+        raise ValueError("one run or three/six counterbalanced repetitions required")
     if type(source_revision) is not str or not re.fullmatch(
         r"[0-9a-f]{40}", source_revision
     ):
@@ -305,9 +308,13 @@ def run_rc_control_runtime_selection(
     fit_bound = len(case_ids) * len(ridge_grid) + 1
     # Reference and fresh reference use one call per target. Both secant and
     # proposer can retry once; constant preload runs once per path.
-    core_bound = len(ridge_grid) * sum(
-        6 * len(c.request.targets_m) + 4 * bool(c.request.constant_nodal_loads)
-        for c in training_cases.values()
+    core_bound = (
+        repetitions
+        * len(ridge_grid)
+        * sum(
+            6 * len(c.request.targets_m) + 4 * bool(c.request.constant_nodal_loads)
+            for c in training_cases.values()
+        )
     )
     if fit_bound > maximum_fits or core_bound > maximum_core_calls:
         raise ValueError(
@@ -370,6 +377,22 @@ def run_rc_control_runtime_selection(
         plan["selection_score"] += (
             "; static model gate computation and record write charged to proposal"
         )
+    if repetitions > 1:
+        plan["schema_version"] = "rc-control-runtime-selection-plan.v2"
+        base_order = plan["arm_order"]
+        plan["repetitions"] = repetitions
+        plan["arm_order_schedule"] = [
+            base_order[i % 3 :] + base_order[: i % 3] for i in range(repetitions)
+        ]
+        plan["fold_order"] = "ridge_then_withheld_case_then_repetition"
+        plan["fit_reuse"] = "one_withheld_case_fit_frozen_across_repetitions"
+        plan["warmup_repetitions_excluded"] = 0
+        plan["repeats_are_independent_cases"] = False
+        plan["selection_score"] = (
+            "equal-case mean of within-case equal-repeat proposal/secant path ratios; "
+            "every repeat must pass full comparisons and known-work checks; "
+            "static gate computation and record writing charged when enabled"
+        )
     plan["plan_hash"] = _sha(_bytes(plan))
     _save(root, "plan.json", _bytes(plan))
     fits: list[dict[str, Any]] = []
@@ -429,120 +452,133 @@ def run_rc_control_runtime_selection(
             policy, fit_index = fit(rows, ridge, {"withheld_training_case": held})
             frozen = _bytes(policy.to_dict())
             _, compiled, features, _, _ = prepared[held]
-            decisions = []
-            static_abstain = False
-
-            def propose(context):
-                value = (
-                    None
-                    if static_abstain
-                    else policy.propose(
-                        context,
-                        features,
-                        compiled.problem.free_global_dofs,
-                        case.request.solver_config.contract_hash,
-                        arithmetic_profile=arithmetic_profile,
-                        load_factor_coordinate_scale_m=case.request.solver_config.load_factor_coordinate_scale_m,
-                    )
+            for repetition in range(repetitions):
+                decisions = []
+                arm_order = tuple(
+                    plan["arm_order"]
+                    if repetitions == 1
+                    else plan["arm_order_schedule"][repetition]
                 )
-                decisions.append(
-                    {
-                        "accepted_prefix_count": len(context.accepted_targets_m),
-                        "target_m": context.target_m,
-                        "decision": (
-                            "abstained_to_secant"
-                            if proposal_abstention_strategy == "secant"
-                            and learning.secant_seed(context) is not None
-                            else "abstained_to_reference"
+                static_abstain = False
+
+                def propose(context):
+                    value = (
+                        None
+                        if static_abstain
+                        else policy.propose(
+                            context,
+                            features,
+                            compiled.problem.free_global_dofs,
+                            case.request.solver_config.contract_hash,
+                            arithmetic_profile=arithmetic_profile,
+                            load_factor_coordinate_scale_m=case.request.solver_config.load_factor_coordinate_scale_m,
                         )
-                        if value is None
-                        else "proposed",
-                    }
-                )
-                return value
-
-            index = len(folds)
-            stem = f"fold-{index:04d}"
-            record = {
-                "index": index,
-                "withheld_training_case": held,
-                "ridge": ridge,
-                "fit_index": fit_index,
-                "policy_hash": policy.policy_hash,
-                "status": "started",
-                "unknown_work_until_outcome": True,
-            }
-            folds.append(record)
-            _save(root, stem + "-started.json", _bytes(record))
-            fw, fc = perf_counter_ns(), process_time_ns()
-            try:
-                setup_wall = None
-                if static_model_abstention:
-                    gw, gc = perf_counter_ns(), process_time_ns()
-                    gate = _static_material_model_gate(policy, features)
-                    _save(root, stem + "-model-gate.json", _bytes(gate))
-                    setup_wall = perf_counter_ns() - gw
-                    record.update(
-                        static_model_gate_hash=gate["gate_hash"],
-                        static_model_gate_wall_ns=setup_wall,
-                        static_model_gate_cpu_ns=process_time_ns() - gc,
                     )
-                    static_abstain = gate["status"] == "rejected"
-                effective_capture = capture and not static_abstain
-                report = learning.benchmark_rc_control_seed_paths(
-                    case.model,
-                    case.request,
-                    source_revision=source_revision,
-                    output_directory=root / stem,
-                    proposal=propose,
-                    proposal_identity=policy.policy_hash,
-                    proposal_abstention_strategy=proposal_abstention_strategy,
-                    arm_order=tuple(plan["arm_order"]),
-                    absolute_tolerance=1e-10,
-                    relative_tolerance=1e-8,
-                    capture_material_state=effective_capture,
-                    material_capture_scope="proposal-only"
-                    if effective_capture
-                    else "all-arms",
-                    **learning._arithmetic_kwargs(arithmetic_profile),
-                )
-                if _bytes(policy.to_dict()) != frozen:
-                    raise ValueError("frozen fold policy changed during execution")
-                score = _runtime_score(
-                    report, decisions, proposal_setup_wall_ns=setup_wall
-                )
-            except Exception as exc:
+                    decisions.append(
+                        {
+                            "accepted_prefix_count": len(context.accepted_targets_m),
+                            "target_m": context.target_m,
+                            "decision": (
+                                "abstained_to_secant"
+                                if proposal_abstention_strategy == "secant"
+                                and learning.secant_seed(context) is not None
+                                else "abstained_to_reference"
+                            )
+                            if value is None
+                            else "proposed",
+                        }
+                    )
+                    return value
+
+                index = len(folds)
+                stem = f"fold-{index:04d}"
+                record = {
+                    "index": index,
+                    "withheld_training_case": held,
+                    "ridge": ridge,
+                    "fit_index": fit_index,
+                    "policy_hash": policy.policy_hash,
+                    "status": "started",
+                    "unknown_work_until_outcome": True,
+                }
+                if repetitions > 1:
+                    record.update(
+                        repetition_index=repetition, arm_order=list(arm_order)
+                    )
+                folds.append(record)
+                _save(root, stem + "-started.json", _bytes(record))
+                fw, fc = perf_counter_ns(), process_time_ns()
+                try:
+                    setup_wall = None
+                    if static_model_abstention:
+                        gw, gc = perf_counter_ns(), process_time_ns()
+                        gate = _static_material_model_gate(policy, features)
+                        _save(root, stem + "-model-gate.json", _bytes(gate))
+                        setup_wall = perf_counter_ns() - gw
+                        record.update(
+                            static_model_gate_hash=gate["gate_hash"],
+                            static_model_gate_wall_ns=setup_wall,
+                            static_model_gate_cpu_ns=process_time_ns() - gc,
+                        )
+                        static_abstain = gate["status"] == "rejected"
+                    effective_capture = capture and not static_abstain
+                    report = learning.benchmark_rc_control_seed_paths(
+                        case.model,
+                        case.request,
+                        source_revision=source_revision,
+                        output_directory=root / stem,
+                        proposal=propose,
+                        proposal_identity=policy.policy_hash,
+                        proposal_abstention_strategy=proposal_abstention_strategy,
+                        arm_order=arm_order,
+                        absolute_tolerance=1e-10,
+                        relative_tolerance=1e-8,
+                        capture_material_state=effective_capture,
+                        material_capture_scope="proposal-only"
+                        if effective_capture
+                        else "all-arms",
+                        **learning._arithmetic_kwargs(arithmetic_profile),
+                    )
+                    if _bytes(policy.to_dict()) != frozen:
+                        raise ValueError("frozen fold policy changed during execution")
+                    score = _runtime_score(
+                        report, decisions, proposal_setup_wall_ns=setup_wall
+                    )
+                except Exception as exc:
+                    record.update(
+                        status="raised",
+                        exception_kind=type(exc).__name__,
+                        wall_ns=perf_counter_ns() - fw,
+                        cpu_ns=process_time_ns() - fc,
+                    )
+                    _save(root, stem + "-outcome.json", _bytes(record))
+                    raise
+                finally:
+                    _save(root, stem + "-decisions.json", _bytes(decisions))
                 record.update(
-                    status="raised",
-                    exception_kind=type(exc).__name__,
+                    status="completed",
+                    unknown_work_until_outcome=score["execution_work"]["unknown_work"],
                     wall_ns=perf_counter_ns() - fw,
                     cpu_ns=process_time_ns() - fc,
+                    report_hash=report["report_hash"],
+                    score=score,
                 )
                 _save(root, stem + "-outcome.json", _bytes(record))
-                raise
-            finally:
-                _save(root, stem + "-decisions.json", _bytes(decisions))
-            record.update(
-                status="completed",
-                unknown_work_until_outcome=score["execution_work"]["unknown_work"],
-                wall_ns=perf_counter_ns() - fw,
-                cpu_ns=process_time_ns() - fc,
-                report_hash=report["report_hash"],
-                score=score,
-            )
-            _save(root, stem + "-outcome.json", _bytes(record))
-            candidate_folds.append(record)
-            known_calls = sum(
-                f.get("score", {})
-                .get("execution_work", {})
-                .get("known_work", {})
-                .get("core_calls", 0)
-                for f in folds
-            )
-            if record["unknown_work_until_outcome"] or known_calls > maximum_core_calls:
-                raise ValueError(
-                    "unaccounted work or declared core-call budget exhausted"
+                candidate_folds.append(record)
+                known_calls = sum(
+                    f.get("score", {})
+                    .get("execution_work", {})
+                    .get("known_work", {})
+                    .get("core_calls", 0)
+                    for f in folds
                 )
+                if (
+                    record["unknown_work_until_outcome"]
+                    or known_calls > maximum_core_calls
+                ):
+                    raise ValueError(
+                        "unaccounted work or declared core-call budget exhausted"
+                    )
         ratios = [
             f["score"]["proposal_over_secant_path_wall_ratio"] for f in candidate_folds
         ]
@@ -557,6 +593,37 @@ def run_rc_control_runtime_selection(
                 "fold_indices": [f["index"] for f in candidate_folds],
             }
         )
+        if repetitions > 1:
+            repeated_cases = []
+            for held in case_ids:
+                records = [
+                    f for f in candidate_folds if f["withheld_training_case"] == held
+                ]
+                values = [
+                    f["score"]["proposal_over_secant_path_wall_ratio"] for f in records
+                ]
+                valid = all(v is not None for v in values)
+                repeated_cases.append(
+                    {
+                        "case_id": held,
+                        "fold_indices": [f["index"] for f in records],
+                        "ratios": values,
+                        "requested_repetitions": repetitions,
+                        "valid_repetitions": sum(v is not None for v in values),
+                        "mean_ratio": float(np.mean(values)) if valid else None,
+                        "minimum_ratio": min(values) if valid else None,
+                        "maximum_ratio": max(values) if valid else None,
+                        "sample_standard_deviation": float(np.std(values, ddof=1))
+                        if valid
+                        else None,
+                    }
+                )
+            candidates[-1]["case_repeat_scores"] = repeated_cases
+            candidates[-1]["score"] = (
+                float(np.mean([c["mean_ratio"] for c in repeated_cases]))
+                if all(c["mean_ratio"] is not None for c in repeated_cases)
+                else None
+            )
     eligible = [
         c
         for c in candidates
@@ -597,6 +664,11 @@ def run_rc_control_runtime_selection(
     }
     if static_model_abstention:
         result["static_model_abstention"] = True
+    if repetitions > 1:
+        result["schema_version"] = "rc-control-runtime-selection-result.v2"
+        result["repetitions"] = repetitions
+        result["arm_order_schedule"] = plan["arm_order_schedule"]
+        result["repeats_are_independent_cases"] = False
     result["result_hash"] = _sha(_bytes(result))
     _save(root, "result.json", _bytes(result))
     return result
