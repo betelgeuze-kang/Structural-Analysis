@@ -274,15 +274,20 @@ def _path(
     root,
     capture_material_state=False,
     proposal_abstention_strategy="reference",
+    initial_prefix=None,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
-    accepted = initial_stateful_fiber_frame2d_checkpoint(compiled.problem)
+    accepted = (
+        initial_stateful_fiber_frame2d_checkpoint(compiled.problem)
+        if initial_prefix is None
+        else initial_prefix[0]
+    )
     source_hash = compiled.problem.contract_hash
     preload_step = preload_response = preload_coordinates = None
     preload_invocations = []
     failure = None
-    if request.constant_nodal_loads:
+    if request.constant_nodal_loads and initial_prefix is None:
         preload_step, preload_response, preload_coordinates, invocation, failure = (
             _preload(compiled, request, root)
         )
@@ -322,6 +327,11 @@ def _path(
         [],
         [],
     )
+    if initial_prefix is not None:
+        # The compiled constant load stays active; its existing preload must
+        # not be executed again on this already accepted parent.
+        targets = list(initial_prefix[1])
+        coordinates = list(initial_prefix[2])
     for index, target in enumerate(() if failure else request.targets_m):
         material_state = None
         capture_cost = None
@@ -557,6 +567,14 @@ def _path(
         "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
         "source_problem_hash": source_hash,
     }
+    if initial_prefix is not None:
+        result.update(
+            schema_version="experimental-rc-control-parent-step-path.v1",
+            initial_parent_hash=initial_prefix[0].state_hash,
+            supplied_prefix_target_count=len(initial_prefix[1]),
+            original_complete_path_executed=False,
+            preload_reexecuted=False,
+        )
     result["path_hash"] = _sha(_bytes(result))
     _save(root, "path.json", _bytes(result))
     return result
@@ -806,6 +824,80 @@ def _with_terminal_coordinate_precision(compiled, profile, refinement_limit=1):
     )
 
 
+def _parent_step_prefix(compiled, request, checkpoint_bytes, context):
+    """Check a supplied local origin without claiming prefix reachability."""
+    from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import (
+        load_stateful_fiber_frame2d_checkpoint_bytes,
+    )
+
+    if type(context) is not RCControlSeedContext or type(checkpoint_bytes) is not bytes:
+        raise ValueError(
+            "exact accepted context and canonical checkpoint bytes required"
+        )
+    encoded = _bytes(context.to_dict())
+    if len(encoded) > 8 * 1024 * 1024:
+        raise ValueError("accepted context exceeds byte bound")
+    parent = load_stateful_fiber_frame2d_checkpoint_bytes(
+        checkpoint_bytes, compiled.problem
+    )
+    targets = context.accepted_targets_m
+    coordinates = context.accepted_augmented_coordinates_m
+    index = len(targets) - 1
+    free = compiled.problem.free_global_dofs
+    if (
+        context.problem_contract_hash != compiled.problem.contract_hash
+        or type(context.control_global_dof) is not int
+        or context.control_global_dof != request.control_global_dof
+        or type(context.control_free_index) is not int
+        or context.control_free_index != free.index(request.control_global_dof)
+        or not 0 <= index < len(request.targets_m)
+        or list(targets[1:]) != list(request.targets_m[:index])
+        or context.target_m != request.targets_m[index]
+        or parent.step_index != index + bool(request.constant_nodal_loads)
+        or len(coordinates) != len(targets)
+        or any(len(row) != len(free) + 1 for row in coordinates)
+    ):
+        raise ValueError("accepted prefix, checkpoint and original request differ")
+    values = [context.target_m, *targets, *(v for row in coordinates for v in row)]
+    try:
+        finite = all(type(v) in (int, float) and np.isfinite(v) for v in values)
+    except (TypeError, OverflowError):
+        finite = False
+    if not finite:
+        raise ValueError("finite accepted prefix coordinates required")
+    _, reversals = _directions(request.targets_m, targets[0])
+    if reversals > request.maximum_reversals or (
+        reversals and not request.allow_reversals
+    ):
+        raise ValueError("source request exceeds the supplied-origin reversal budget")
+    native_high = parent.free_coordinates_m
+    supplied_high = list(coordinates[-1][:-1])
+    if native_high is None:
+        # Binary64 checkpoints store physical rotations; the accepted prefix
+        # stores solver coordinates. Use the same forward scaling as assembly,
+        # without an inexact inverse or a new numerical tolerance.
+        native_high = tuple(parent.global_displacements[i] for i in free)
+        supplied_high = (
+            np.asarray(supplied_high)
+            * compiled.problem.physical_coordinate_scale[list(free)]
+        ).tolist()
+    if _bytes(supplied_high) != _bytes(list(native_high)):
+        raise ValueError("latest supplied coordinates differ from the native parent")
+    if context.committed_material_state_json is not None:
+        from structural_analysis.benchmark.rc_control_material_features import (
+            committed_material_snapshot,
+        )
+
+        if context.committed_material_state_json != committed_material_snapshot(
+            compiled.problem, parent
+        ):
+            raise ValueError(
+                "supplied material snapshot differs from the native parent"
+            )
+    prefix = (parent, tuple(targets), tuple(tuple(row) for row in coordinates))
+    return prefix, index, encoded
+
+
 def benchmark_rc_control_seed_paths(
     model: CanonicalModel,
     request: BoundedRCFiberDirectControlRequest,
@@ -827,9 +919,18 @@ def benchmark_rc_control_seed_paths(
     capture_material_state: bool = False,
     material_capture_scope: str = "all-arms",
     proposal_abstention_strategy: str = "reference",
+    parent_checkpoint_bytes: bytes | None = None,
+    accepted_context: RCControlSeedContext | None = None,
 ):
-    """Run all arms independently, then a fresh reference; never refit a proposal."""
+    """Run all arms independently, then a fresh reference; never refit a proposal.
+
+    Supplying both a native parent and accepted context opts into a separate
+    single-step comparison schema. It does not execute or authenticate the
+    original prefix, and cannot provide complete-path performance credit.
+    """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if (parent_checkpoint_bytes is None) != (accepted_context is None):
+        raise ValueError("native parent and accepted context must be supplied together")
     if type(
         proposal_abstention_strategy
     ) is not str or proposal_abstention_strategy not in (
@@ -984,6 +1085,13 @@ def benchmark_rc_control_seed_paths(
             request.targets_m[0],
             request.solver_config,
         )
+    initial_prefix = None
+    source_request = request
+    if accepted_context is not None:
+        initial_prefix, source_index, context_bytes = _parent_step_prefix(
+            compiled, request, parent_checkpoint_bytes, accepted_context
+        )
+        request = replace(request, targets_m=(request.targets_m[source_index],))
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
     identity = {
@@ -1072,29 +1180,66 @@ def benchmark_rc_control_seed_paths(
         "absolute_tolerance": absolute_tolerance,
         "relative_tolerance": relative_tolerance,
     }
+    if initial_prefix is not None:
+        identity.update(
+            schema_version="experimental-rc-control-parent-step-comparison.v1",
+            source_request=source_request.to_dict(),
+            source_target_index=source_index,
+            initial_parent_hash=initial_prefix[0].state_hash,
+            initial_parent_artifact=_save(root, "parent.json", parent_checkpoint_bytes),
+            accepted_context_artifact=_save(
+                root, "accepted-context.json", context_bytes
+            ),
+            comparison_scope="one_target_from_one_supplied_native_parent_and_accepted_prefix",
+            prefix_reachability_verified=False,
+            original_complete_path_executed=False,
+            maximum_numerical_core_calls=2 + 2 * (len(order) - 1),
+        )
     _save(root, "request.json", _bytes(identity))
     _save(root, "model.json", _bytes(model.canonical_payload()))
-    arms = {
-        name: _path(
+    origin_bytes = (
+        None if initial_prefix is None else initial_prefix[0].canonical_bytes()
+    )
+
+    def execute_arm(name, callback, directory):
+        arm = _path(
             compiled,
             request,
             name,
-            proposal,
-            root / name,
+            callback,
+            root / directory,
             capture_material_state
             and (material_capture_scope == "all-arms" or name == "proposal"),
             proposal_abstention_strategy,
+            initial_prefix,
         )
-        for name in order
-    }
-    fresh = _path(
-        compiled,
-        request,
-        "reference",
-        None,
-        root / "fresh-reference",
-        capture_material_state and material_capture_scope == "all-arms",
-    )
+        if initial_prefix is not None:
+            unknown = any(
+                inv["unknown_work"]
+                for entry in arm["entries"]
+                for inv in entry["invocations"]
+            )
+            changed = initial_prefix[0].canonical_bytes() != origin_bytes
+            if unknown or changed:
+                _save(
+                    root,
+                    "scheduling-stop.json",
+                    _bytes(
+                        {
+                            "after_arm": directory,
+                            "unknown_numerical_work": unknown,
+                            "native_parent_changed": changed,
+                            "later_arms_not_started": True,
+                        }
+                    ),
+                )
+                raise ValueError(
+                    "parent-step scheduling stopped after unknown work or changed origin"
+                )
+        return arm
+
+    arms = {name: execute_arm(name, proposal, name) for name in order}
+    fresh = execute_arm("reference", None, "fresh-reference")
     comparisons = {}
 
     def complete_history(arm):
@@ -1174,6 +1319,15 @@ def benchmark_rc_control_seed_paths(
             "design_approval": False,
         },
     }
+    if initial_prefix is not None:
+        for comparison in comparisons.values():
+            comparison["step_response_pass"] = comparison.pop("full_history_pass")
+        report["claims"].update(
+            same_native_parent_and_accepted_prefix=True,
+            original_prefix_authentication=False,
+            complete_path_performance_evidence=False,
+            causal_training_dataset_admitted=False,
+        )
     report["report_hash"] = _sha(_bytes(report))
     _save(root, "comparison.json", _bytes(report))
     return report

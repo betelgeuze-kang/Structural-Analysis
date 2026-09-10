@@ -1,0 +1,62 @@
+{
+  "schema_version": "rc-parent-step-implementation-observation.v1",
+  "base_revision": "a65db4a56fce6e1550ea4c14c3c20149be7e2d73",
+  "source_bindings": [
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_seed_runtime.py",
+      "bytes": 53151,
+      "sha256": "ce90195662dedb32d68d8a0976be85a3595778f809a285742b323f28a9600dbd"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_runtime_selection.py",
+      "bytes": 30189,
+      "sha256": "72730700326fa60f8998e42c8c705e34c6feeca7c9bb781815fd40d99ad675be"
+    },
+    {
+      "path": "tests/test_rc_control_parent_step.py",
+      "bytes": 8900,
+      "sha256": "62d77eeb4e8ff523a422e27328a042d4592bd13e6c8b8ce19933b29ec08c856c"
+    },
+    {
+      "path": ".github/workflows/python-test-collection.yml",
+      "bytes": 7878,
+      "sha256": "50d3efac578d28d05021ecbc56d49a18e7fdd60678e9903570e54c06b43dc230"
+    },
+    {
+      "path": "tests/test_repository_python_workflow_contract.py",
+      "bytes": 41108,
+      "sha256": "0520d224e24aece496be4b27e8ce9caa9990d973c39541035f21ada3612e69dd"
+    }
+  ],
+  "verification": {
+    "new_parent_step_tests": 22,
+    "combined_tests_passed": 118,
+    "combined_seconds": 120.27,
+    "modules": [
+      "tests/test_rc_control_parent_step.py",
+      "tests/test_rc_control_warm_start.py",
+      "tests/test_rc_control_runtime_selection.py",
+      "tests/test_repository_python_workflow_contract.py"
+    ],
+    "log": "/tmp/rc-parent-step-regression.log",
+    "log_sha256": "12047dc0836f93cdbd8578a797563120a900b3a0c2a9dfa1dadc30bdff75732b",
+    "ruff_pass": true,
+    "scoped_mypy_pass": true
+  },
+  "claims": {
+    "same_parent_step_execution_tested": true,
+    "complete_path_speedup": false,
+    "new_causal_training_dataset": false,
+    "independent_physical_validation": false,
+    "full_repository_ci_passed": false,
+    "policy_fits": 0
+  },
+  "preceding_ci": {
+    "head": "a65db4a56fce6e1550ea4c14c3c20149be7e2d73",
+    "run_id": 34445399532,
+    "development_contracts": "success",
+    "full_shards_materialization_failed": 4,
+    "full_shards_actual_suite_skipped": 4,
+    "includes_this_change": false
+  }
+}

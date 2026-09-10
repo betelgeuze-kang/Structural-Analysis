@@ -178,6 +178,13 @@ def _validate_case_rows(cases, prepared, grouped, source, arithmetic_profile):
 
 def _runtime_score(report, decisions, *, proposal_setup_wall_ns=None):
     """Keep failed or unaccounted paths ineligible, including the fresh reference."""
+    if (
+        report.get("schema_version")
+        == "experimental-rc-control-parent-step-comparison.v1"
+    ):
+        raise ValueError(
+            "a parent-step comparison is not complete-path runtime evidence"
+        )
     if proposal_setup_wall_ns is not None and (
         type(proposal_setup_wall_ns) is not int or proposal_setup_wall_ns < 0
     ):

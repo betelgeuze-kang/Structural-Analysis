@@ -89,6 +89,7 @@ jobs:
           tests/test_rc_control_training_diagnostics.py
           tests/test_rc_control_runtime_selection.py
           tests/test_rc_control_step_work.py
+          tests/test_rc_control_parent_step.py
           tests/test_measured_response_workbook.py
           tests/test_measured_response_split.py
           tests/test_rc_control_design.py
