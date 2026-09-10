@@ -138,7 +138,8 @@ def _runtime_score(report, decisions):
         "proposal_path_wall_ns": proposed,
         "proposed_count": sum(d["decision"] == "proposed" for d in decisions),
         "abstained_count": sum(
-            d["decision"] == "abstained_to_reference" for d in decisions
+            d["decision"] in ("abstained_to_reference", "abstained_to_secant")
+            for d in decisions
         ),
         "execution_work": learning._execution_work([{"report": report}]),
         "whole_benchmark_wall_ns": report["whole_study_wall_ns"],
@@ -158,6 +159,7 @@ def run_rc_control_runtime_selection(
     minimum_relative_improvement=0.01,
     maximum_fits=257,
     maximum_core_calls=32768,
+    proposal_abstention_strategy="reference",
 ):
     """Fit each ridge without one training case, then execute that case's full path.
 
@@ -194,6 +196,13 @@ def run_rc_control_runtime_selection(
         or not 1 <= maximum_core_calls <= 1048576
     ):
         raise ValueError("bounded improvement, fit and core-call budgets required")
+    if type(
+        proposal_abstention_strategy
+    ) is not str or proposal_abstention_strategy not in (
+        "reference",
+        "secant",
+    ):
+        raise ValueError("supported proposal abstention strategy required")
     source, grouped, profile = _validated_training_data(samples, original_policy)
     measured: dict[str, Any] = {}
     prepared = learning._preflight(
@@ -204,10 +213,10 @@ def run_rc_control_runtime_selection(
     )
     case_ids = sorted(training_cases)
     fit_bound = len(case_ids) * len(ridge_grid) + 1
-    # Each case has three experimental arms and a fresh reference. Only the
-    # proposer may retry a target once; constant preload runs once per path.
+    # Reference and fresh reference use one call per target. Both secant and
+    # proposer can retry once; constant preload runs once per path.
     core_bound = len(ridge_grid) * sum(
-        5 * len(c.request.targets_m) + 4 * bool(c.request.constant_nodal_loads)
+        6 * len(c.request.targets_m) + 4 * bool(c.request.constant_nodal_loads)
         for c in training_cases.values()
     )
     if fit_bound > maximum_fits or core_bound > maximum_core_calls:
@@ -252,7 +261,10 @@ def run_rc_control_runtime_selection(
         "material_capture_scope": "proposal-only" if capture else "all-arms",
         "absolute_tolerance": 1e-10,
         "relative_tolerance": 1e-8,
-        "abstention": "existing_reference_fallback",
+        "abstention": "existing_reference_fallback"
+        if proposal_abstention_strategy == "reference"
+        else "secant_when_available_otherwise_reference",
+        "proposal_abstention_strategy": proposal_abstention_strategy,
         "selection_score": "equal-case mean of proposal/secant measured path wall ratios; all fixed comparisons and known-work records required",
         "tie_break": "secant unless strict improvement; greatest ridge among exact learned score ties",
         "independent_evaluation": False,
@@ -336,7 +348,12 @@ def run_rc_control_runtime_selection(
                     {
                         "accepted_prefix_count": len(context.accepted_targets_m),
                         "target_m": context.target_m,
-                        "decision": "abstained_to_reference"
+                        "decision": (
+                            "abstained_to_secant"
+                            if proposal_abstention_strategy == "secant"
+                            and learning.secant_seed(context) is not None
+                            else "abstained_to_reference"
+                        )
                         if value is None
                         else "proposed",
                     }
@@ -365,6 +382,7 @@ def run_rc_control_runtime_selection(
                     output_directory=root / stem,
                     proposal=propose,
                     proposal_identity=policy.policy_hash,
+                    proposal_abstention_strategy=proposal_abstention_strategy,
                     arm_order=tuple(plan["arm_order"]),
                     absolute_tolerance=1e-10,
                     relative_tolerance=1e-8,
@@ -449,6 +467,7 @@ def run_rc_control_runtime_selection(
         "selected_ridge": None if winner is None else winner["ridge"],
         "selected_score": 1.0 if winner is None else winner["score"],
         "selected_policy": None if selected is None else selected.to_dict(),
+        "proposal_abstention_strategy": proposal_abstention_strategy,
         "wall_ns": perf_counter_ns() - wall,
         "cpu_ns": process_time_ns() - cpu,
         "timing_scope": "validation_fits_all_four_path_fold_runs_comparisons_and_intermediate_IO_excluding_final_result_write",

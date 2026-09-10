@@ -79,7 +79,7 @@ def run(root, original, **kwargs):
         "ridge_grid": (1e4, 1e6),
         "arithmetic_profile": "retained-twofold-refinement.v1",
         "maximum_fits": 5,
-        "maximum_core_calls": 96,
+        "maximum_core_calls": 112,
     } | kwargs
     return selection.run_rc_control_runtime_selection(
         cases,
@@ -383,3 +383,51 @@ def test_unknown_runtime_work_stops_before_another_candidate(
     assert json.loads((root / "fold-0000-outcome.json").read_bytes())[
         "unknown_work_until_outcome"
     ]
+
+
+def test_secant_abstention_runs_actual_full_paths_and_keeps_baseline_states(
+    tmp_path, original, monkeypatch
+):
+    # Force abstention to isolate the fallback mechanics, not learned performance.
+    monkeypatch.setattr(learning.RCControlSeedPolicy, "propose", lambda *a, **k: None)
+    root = tmp_path / "secant-abstention"
+    result = run(
+        root, original, ridge_grid=(1e4,), proposal_abstention_strategy="secant"
+    )
+    assert result["proposal_abstention_strategy"] == "secant"
+    plan = json.loads((root / "plan.json").read_bytes())
+    assert plan["maximum_possible_core_calls"] == 56
+    assert plan["abstention"] == "secant_when_available_otherwise_reference"
+    for fold in result["folds"]:
+        folder = root / f"fold-{fold['index']:04d}"
+        baseline = json.loads((folder / "secant/path.json").read_bytes())
+        proposal = json.loads((folder / "proposal/path.json").read_bytes())
+        assert baseline["terminal_checkpoint"] == proposal["terminal_checkpoint"]
+        assert baseline["response_history"] == proposal["response_history"]
+        decisions = [e["proposal_decision"] for e in proposal["entries"]]
+        assert decisions == ["abstained_to_reference"] + ["abstained_to_secant"] * 3
+        assert [e["proposal"] for e in baseline["entries"]] == [
+            e["proposal"] for e in proposal["entries"]
+        ]
+        assert fold["score"]["abstained_count"] == 4
+        assert fold["score"]["proposed_count"] == 0
+        assert fold["score"]["full_comparison_pass"]
+        assert all(e["proposal_wall_ns"] > 0 for e in proposal["entries"])
+        assert all("committed_material_capture" in e for e in proposal["entries"])
+        assert all("committed_material_capture" not in e for e in baseline["entries"])
+
+
+@pytest.mark.parametrize("option", [None, True, "automatic"])
+def test_unknown_abstention_option_rejected_before_output(tmp_path, original, option):
+    with pytest.raises(ValueError, match="abstention"):
+        run(tmp_path / "invalid", original, proposal_abstention_strategy=option)
+    assert not (tmp_path / "invalid").exists()
+
+
+def test_budget_counts_possible_secant_retries_too(tmp_path, original):
+    # 48 covered the old five-per-target estimate but not both seeded arms' retry.
+    with pytest.raises(ValueError, match="56 core calls"):
+        run(
+            tmp_path / "underbudget", original, ridge_grid=(1e4,), maximum_core_calls=48
+        )
+    assert not (tmp_path / "underbudget").exists()

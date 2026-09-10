@@ -298,7 +298,8 @@ def test_actual_complete_seed_paths_and_rejected_proposer(tmp_path, polishing):
                         assert detail["candidate_increment_abs_m"] <= 1e-12
 
 
-def test_actual_numerically_rejected_seed_records_fallback_cost(tmp_path):
+@pytest.mark.parametrize("abstention", ["reference", "secant"])
+def test_actual_numerically_rejected_seed_records_fallback_cost(tmp_path, abstention):
     from pathlib import Path
     from structural_analysis.api.rc_fiber_frame_direct_control_request import (
         BoundedRCFiberDirectControlRequest,
@@ -317,6 +318,7 @@ def test_actual_numerically_rejected_seed_records_fallback_cost(tmp_path):
         ),
         BoundedRCFiberDirectControlRequest(7, (-1e-6,), solver_config=cfg),
         source_revision="a" * 40,
+        proposal_abstention_strategy=abstention,
         output_directory=tmp_path / "study",
         proposal=lambda context: (0.001,)
         * len(context.accepted_augmented_coordinates_m[-1]),
@@ -427,3 +429,43 @@ def test_mismatch_diagnostics_retain_missing_history_and_wrong_response_structur
         "sequence_lengths_differ",
         "sequence_type_differ",
     ]
+
+
+@pytest.mark.parametrize("mode", ["reference", "secant"])
+@pytest.mark.parametrize("kind", ["invalid", "raises"])
+def test_invalid_proposal_still_returns_to_original_reference(tmp_path, mode, kind):
+    import json
+    from pathlib import Path
+    from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+        BoundedRCFiberDirectControlRequest,
+    )
+    from structural_analysis.benchmark import rc_control_seed_runtime as runtime
+    from structural_analysis.io.neutral.loader import load_neutral_json
+
+    def propose(context):
+        if kind == "raises":
+            raise ValueError("deliberate invalid inference")
+        return (float("nan"),)
+
+    report = runtime.benchmark_rc_control_seed_paths(
+        load_neutral_json(
+            Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
+        ),
+        BoundedRCFiberDirectControlRequest(7, (-1e-6, -2e-6)),
+        source_revision="a" * 40,
+        output_directory=tmp_path / "run",
+        proposal=propose,
+        proposal_identity="sha256:" + "b" * 64,
+        proposal_abstention_strategy=mode,
+    )
+    assert report["reference_repeat_exact"]
+    assert all(c["full_history_pass"] for c in report["comparisons"].values())
+    for e in report["arms"]["proposal"]["entries"]:
+        assert e["proposal_decision"] == "invalid_proposal_to_reference"
+        assert e["proposal_rejected_to_reference"]
+        assert len(e["invocations"]) == 1 and not e["invocations"][0]["seed_used"]
+    proposal_path = json.loads((tmp_path / "run/proposal/path.json").read_bytes())
+    reference_path = json.loads(
+        (tmp_path / "run/fresh-reference/path.json").read_bytes()
+    )
+    assert proposal_path["terminal_checkpoint"] == reference_path["terminal_checkpoint"]

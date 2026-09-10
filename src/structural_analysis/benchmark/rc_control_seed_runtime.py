@@ -266,7 +266,15 @@ def _preload(compiled, request, root):
     return step, response, coordinates, inv, failure
 
 
-def _path(compiled, request, strategy, proposal, root, capture_material_state=False):
+def _path(
+    compiled,
+    request,
+    strategy,
+    proposal,
+    root,
+    capture_material_state=False,
+    proposal_abstention_strategy="reference",
+):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
     accepted = initial_stateful_fiber_frame2d_checkpoint(compiled.problem)
@@ -371,6 +379,19 @@ def _path(compiled, request, strategy, proposal, root, capture_material_state=Fa
                 if strategy == "secant"
                 else proposal(context)
             )
+            if strategy == "proposal":
+                entry["proposal_decision"] = "proposed"
+                if seed is None:
+                    seed = (
+                        secant_seed(context)
+                        if proposal_abstention_strategy == "secant"
+                        else None
+                    )
+                    entry["proposal_decision"] = (
+                        "abstained_to_secant"
+                        if seed is not None
+                        else "abstained_to_reference"
+                    )
             if seed is not None:
                 seed = StatefulFiberFrame2DDisplacementControlStepAdapter(
                     compiled.problem,
@@ -389,6 +410,7 @@ def _path(compiled, request, strategy, proposal, root, capture_material_state=Fa
             }
             seed = None
             entry["proposal_rejected_to_reference"] = True
+            entry["proposal_decision"] = "invalid_proposal_to_reference"
         finally:
             entry["proposal_wall_ns"] = perf_counter_ns() - pw
             entry["proposal_cpu_ns"] = process_time_ns() - pc
@@ -804,9 +826,19 @@ def benchmark_rc_control_seed_paths(
     terminal_refinement_limit: int = 1,
     capture_material_state: bool = False,
     material_capture_scope: str = "all-arms",
+    proposal_abstention_strategy: str = "reference",
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(
+        proposal_abstention_strategy
+    ) is not str or proposal_abstention_strategy not in (
+        "reference",
+        "secant",
+    ):
+        raise ValueError("supported proposal abstention strategy required")
+    if proposal_abstention_strategy == "secant" and proposal is None:
+        raise ValueError("secant abstention requires an opted-in proposer")
     if type(capture_material_state) is not bool:
         raise ValueError("explicit boolean material capture required")
     if type(material_capture_scope) is not str or material_capture_scope not in (
@@ -1023,6 +1055,11 @@ def benchmark_rc_control_seed_paths(
         ),
         "request": request.to_dict(),
         "proposal_requested": proposal is not None,
+        **(
+            {"proposal_abstention_strategy": proposal_abstention_strategy}
+            if proposal_abstention_strategy != "reference"
+            else {}
+        ),
         **({"capture_material_state": True} if capture_material_state else {}),
         **(
             {"material_capture_scope": material_capture_scope}
@@ -1046,6 +1083,7 @@ def benchmark_rc_control_seed_paths(
             root / name,
             capture_material_state
             and (material_capture_scope == "all-arms" or name == "proposal"),
+            proposal_abstention_strategy,
         )
         for name in order
     }
