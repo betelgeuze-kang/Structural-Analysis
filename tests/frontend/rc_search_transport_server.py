@@ -41,12 +41,17 @@ class QuietHandler(WSGIRequestHandler):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path, required=True)
+    parser.add_argument(
+        "--fixture",
+        choices=("rc-control-search", "rc-control-search-cost"),
+        default="rc-control-search",
+    )
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
     dist = root / "dist"
     before = time.perf_counter_ns()
     cpu = time.process_time_ns()
-    snapshot_root = root / "tests/frontend/fixtures/rc-control-search"
+    snapshot_root = root / "tests/frontend/fixtures" / args.fixture
     expected = json.loads((snapshot_root / "result.json").read_bytes())["report_hash"]
     bundle = RcSearchArtifactBundle.from_directory(
         snapshot_root, expected_report_hash=expected

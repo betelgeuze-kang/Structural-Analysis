@@ -31,6 +31,8 @@ for (const width of [1440, 390]) {
       expect(reviewButton!.height).toBeLessThan(60)
       await expect(panel.locator('[data-rc-search-candidate]')).toHaveCount(3)
       await expect(panel.locator('[data-rc-search-training]')).toContainText('48 core calls')
+      await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('cheap')
+      await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Yes')
       await expect(panel.locator('[data-rc-search-candidate="middle"]')).toContainText('Not requested')
       for (const [arm, title] of [['learned_order', 'Learned order'], ['exhaustive_oracle', 'Later exhaustive check']]) {
         await panel.getByRole('button', { name: `Review ${title}`, exact: true }).click()
@@ -59,6 +61,8 @@ for (const width of [1440, 390]) {
       await expect(panel.locator('[data-rc-search-arm]')).toHaveCount(2)
       await expect(panel.getByRole('region', { name: 'RC prediction errors' })).toContainText('Unavailable')
       await expect(panel.locator('[data-rc-search-candidate="costly"]')).toContainText('Not run')
+      await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('exhaustive check was not run')
+      await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Unavailable')
     })
   })
 }

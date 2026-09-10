@@ -6,13 +6,13 @@ import { resolve } from 'node:path'
 import { createHash } from 'node:crypto'
 const credentials = { tenantId: 'transport-test', bearerToken: 'synthetic-search-memory-token' }
 const path = '/v1/rc-search/regression/result.json'
-const fixture = 'tests/frontend/fixtures/rc-control-search/'
+const fixture = 'tests/frontend/fixtures/rc-control-search-cost/'
 
 test.describe('RC search real HTTP', () => {
   let server: ChildProcess, origin: string, receipt: string
   test.beforeAll(async () => {
     receipt = resolve(`test-results/rc-search-real-http-${process.pid}.json`)
-    server = spawn('python3', ['-B', 'tests/frontend/rc_search_transport_server.py', '--receipt', receipt], {
+    server = spawn('python3', ['-B', 'tests/frontend/rc_search_transport_server.py', '--receipt', receipt, '--fixture', 'rc-control-search-cost'], {
       env: { ...process.env, PYTHONPATH: resolve('src') }, stdio: ['ignore', 'pipe', 'pipe'],
     })
     const ready = await new Promise<{ origin: string; artifact_count: number }>((resolveReady, reject) => {
@@ -54,6 +54,8 @@ test.describe('RC search real HTTP', () => {
       await expect(panel).toHaveAttribute('data-rc-search', 'verified', { timeout: 60000 })
       await expect(panel.locator('[data-rc-search-arm]')).toHaveCount(3)
       await expect(panel.locator('[data-rc-search-candidate]')).toHaveCount(3)
+      await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('137.7108 KRW · cheap')
+      await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Yes')
       await panel.getByRole('button', { name: 'Review Learned order', exact: true }).click()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'cheap')
       for (const role of ['model', 'result', 'checkpoint', 'verification']) {
