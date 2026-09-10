@@ -82,6 +82,7 @@ def test_actual_training_labels_include_preload_all_epochs_and_fresh_verificatio
     trained,
 ):
     policy, report, root = trained
+    assert report["fit"]["method"] == learning.CENTERED_FIT_METHOD
     labels = json.loads((root / "labels/comparison.json").read_bytes())
     samples = json.loads((root / "training-samples.json").read_bytes())
     assert labels["verified_count"] == 3 and report["sample_count"] == 3
@@ -97,10 +98,15 @@ def test_actual_training_labels_include_preload_all_epochs_and_fresh_verificatio
     p = policy.to_dict()
     x = np.array([s["features"] for s in samples])
     y = np.array([s["targets"] for s in samples])
-    assert np.array_equal(x.mean(axis=0), p["mean"])
+    expected_mean = x.mean(axis=0)
+    constant = np.ptp(x, axis=0) == 0
+    expected_mean[constant] = x[0, constant]
+    assert np.array_equal(expected_mean, p["mean"])
     z = np.column_stack(((x - p["mean"]) / p["scale"], np.ones(len(x))))
     w = np.array(p["weights"])
-    residual = z.T @ (z @ w - y / p["target_scale"]) + p["ridge"] * w
+    penalty = p["ridge"] * w.copy()
+    penalty[-1] = 0
+    residual = z.T @ (z @ w - y / p["target_scale"]) + penalty
     assert (
         np.linalg.norm(residual) / max(np.linalg.norm(z.T @ (y / p["target_scale"])), 1)
         < 1e-12
@@ -567,3 +573,93 @@ def test_infeasible_training_rows_are_retained_after_physical_verification(tmp_p
     assert (
         report["sample_count"] == len(policy.to_dict()["training_sample_hashes"]) == 3
     )
+
+
+def _affine_predictions(x, fit):
+    z = np.column_stack(((x - fit["mean"]) / fit["scale"], np.ones(len(x))))
+    return z @ np.asarray(fit["weights"]) * fit["target_scale"]
+
+
+def test_centered_candidate_fit_has_no_constant_feature_or_mean_shrinkage():
+    # Repeated 0.05 can acquire a nonzero std from the rounded arithmetic mean.
+    x = np.asarray([[0.32, 0.05, 0.05], [0.40, 0.05, 0.05], [0.54, 0.05, 0.05]])
+    y = np.asarray([[0.000357, 0], [0.000340, 0], [0.000321, 0]])
+    legacy = learning._candidate_fit_parameters(x, y, 1.0, learning.LEGACY_FIT_METHOD)
+    assert legacy["mean"][1] != 0.05 and legacy["scale"][1] != 1
+    np.testing.assert_allclose(
+        _affine_predictions(x, legacy)[:, 0].mean() / y[:, 0].mean(), 0.9, atol=1e-12
+    )
+    centered = learning._candidate_fit_parameters(
+        x, y, 1.0, learning.CENTERED_FIT_METHOD
+    )
+    assert centered["mean"][1:] == [0.05, 0.05]
+    assert centered["scale"][1:] == [1, 1]
+    assert np.array_equal(
+        ((x - centered["mean"]) / centered["scale"])[:, 1:], np.zeros((3, 2))
+    )
+    prediction = _affine_predictions(x, centered)
+    np.testing.assert_allclose(
+        prediction.mean(axis=0), y.mean(axis=0), rtol=1e-13, atol=1e-18
+    )
+    assert np.array_equal(prediction[:, 1], np.zeros(3))
+
+
+def test_centered_candidate_fit_matches_unpenalized_augmented_least_squares():
+    x = np.asarray(
+        [[1, 0.05, 2], [2, 0.05, 4], [4, 0.05, 8], [7, 0.05, 14]], dtype=float
+    )
+    y = np.asarray([[2, 8], [3, 9], [4, 10], [8, 11]], dtype=float)
+    for ridge in (0.01, 1.0, 1e4):
+        fit = learning._candidate_fit_parameters(
+            x, y, ridge, learning.CENTERED_FIT_METHOD
+        )
+        z = (x - fit["mean"]) / fit["scale"]
+        # Independently solve the augmented objective. Its offset has no penalty.
+        augmented = np.vstack(
+            (
+                np.column_stack((z, np.ones(len(x)))),
+                np.column_stack(
+                    (np.sqrt(ridge) * np.eye(x.shape[1]), np.zeros(x.shape[1]))
+                ),
+            )
+        )
+        target = np.vstack(
+            (y / fit["target_scale"], np.zeros((x.shape[1], y.shape[1])))
+        )
+        weights, *_ = np.linalg.lstsq(augmented, target, rcond=None)
+        np.testing.assert_allclose(fit["weights"], weights, rtol=2e-11, atol=1e-12)
+        np.testing.assert_allclose(
+            _affine_predictions(x, fit).mean(axis=0), y.mean(axis=0), atol=1e-12
+        )
+        shifted = learning._candidate_fit_parameters(
+            x, y + [32, 64], ridge, learning.CENTERED_FIT_METHOD
+        )
+        np.testing.assert_allclose(
+            _affine_predictions(x, shifted),
+            _affine_predictions(x, fit) + [32, 64],
+            atol=1e-12,
+        )
+
+
+@pytest.mark.parametrize("method", [None, True, "unknown"])
+def test_unknown_candidate_fit_method_rejects_before_labels_or_output(
+    tmp_path, monkeypatch, method
+):
+    monkeypatch.setattr(
+        study,
+        "compare_rc_control_designs",
+        lambda *a, **k: pytest.fail("must reject before label generation"),
+    )
+    with pytest.raises(ValueError, match="fit method"):
+        learning.train_rc_control_candidate_policy(
+            **inputs(), output_directory=tmp_path / "train", fit_method=method
+        )
+    assert not (tmp_path / "train").exists()
+
+
+def test_existing_candidate_policy_bytes_keep_their_original_interpretation():
+    raw = Path("tests/frontend/fixtures/rc-control-search/policy.json").read_bytes()
+    original = json.loads(raw)
+    restored = learning.RCControlCandidatePolicy(raw.decode())
+    assert restored.to_dict() == original
+    assert restored.policy_hash == original["policy_hash"]

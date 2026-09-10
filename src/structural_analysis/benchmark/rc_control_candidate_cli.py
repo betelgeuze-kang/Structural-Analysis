@@ -17,6 +17,8 @@ from structural_analysis.benchmark.fiber_frame_design_cli import (
 )
 from structural_analysis.benchmark.rc_control_candidate_learning import (
     RCControlCandidatePolicy,
+    FIT_METHODS,
+    CENTERED_FIT_METHOD,
     train_rc_control_candidate_policy,
 )
 from structural_analysis.benchmark.rc_control_candidate_search import (
@@ -37,6 +39,9 @@ def main(argv=None):
         if name == "train":
             sub.add_argument("--ridge", type=float, default=1.0)
             sub.add_argument("--ood-margin", type=float, default=0.0)
+            sub.add_argument(
+                "--fit-method", choices=FIT_METHODS, default=CENTERED_FIT_METHOD
+            )
         else:
             sub.add_argument("--policy", type=Path, required=True)
             sub.add_argument("--training-report", type=Path, required=True)
@@ -63,7 +68,10 @@ def main(argv=None):
     )
     if args.command == "train":
         policy, report = train_rc_control_candidate_policy(
-            **common, ridge=args.ridge, ood_margin=args.ood_margin
+            **common,
+            ridge=args.ridge,
+            ood_margin=args.ood_margin,
+            fit_method=args.fit_method,
         )
         output = {
             "policy_hash": policy.policy_hash,

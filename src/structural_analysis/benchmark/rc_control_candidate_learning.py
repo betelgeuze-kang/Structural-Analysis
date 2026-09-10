@@ -35,6 +35,9 @@ from structural_analysis.model.schema import CanonicalModel
 
 
 POLICY_SCHEMA = "experimental-rc-control-candidate-policy.v1"
+LEGACY_FIT_METHOD = "svd-ridge-penalized-intercept.v1"
+CENTERED_FIT_METHOD = "svd-ridge-unpenalized-intercept.v2"
+FIT_METHODS = (LEGACY_FIT_METHOD, CENTERED_FIT_METHOD)
 TARGETS = (
     "terminal_maximum_translation_m",
     "terminal_maximum_absolute_fiber_strain",
@@ -87,6 +90,67 @@ def _valid_targets(values):
         and values[5] <= 1
         and values[6] <= 1
     )
+
+
+def _candidate_fit_parameters(x, y, ridge, fit_method):
+    """Keep the affine policy representation while leaving its offset unpenalized.
+
+    The legacy branch preserves its original preprocessing and augmented SVD.
+    The centered branch gives exact constant columns zero normalized values,
+    fits only centered slopes and restores the response mean in the last row.
+    """
+    if type(fit_method) is not str or fit_method not in FIT_METHODS:
+        raise ValueError("supported candidate fit method required")
+    x, y = np.asarray(x, dtype=float), np.asarray(y, dtype=float)
+    if (
+        x.ndim != 2
+        or y.ndim != 2
+        or len(x) != len(y)
+        or len(x) < 2
+        or not x.shape[1]
+        or not y.shape[1]
+        or not np.all(np.isfinite(x))
+        or not np.all(np.isfinite(y))
+        or not _finite(ridge)
+        or ridge <= 0
+    ):
+        raise ValueError("finite candidate fit matrices and positive ridge required")
+    minimum, maximum = x.min(axis=0), x.max(axis=0)
+    mean, scale, target_scale = x.mean(axis=0), x.std(axis=0), y.std(axis=0)
+    scale, target_scale = (
+        np.where(scale > 0, scale, 1.0),
+        np.where(target_scale > 0, target_scale, 1.0),
+    )
+    if fit_method == LEGACY_FIT_METHOD:
+        z = np.column_stack(((x - mean) / scale, np.ones(len(x))))
+        u, singular, vt = np.linalg.svd(z, full_matrices=False)
+        weights = (vt.T * (singular / (singular**2 + ridge))) @ u.T @ (y / target_scale)
+    else:
+        constant = minimum == maximum
+        mean, scale = np.where(constant, minimum, mean), np.where(constant, 1.0, scale)
+        constant_target = y.min(axis=0) == y.max(axis=0)
+        target_mean = np.where(constant_target, y[0], y.mean(axis=0))
+        target_scale = np.where(constant_target, 1.0, target_scale)
+        z = (x - mean) / scale
+        # Account for the finite-precision mean of the normalized columns too.
+        z_mean = z.mean(axis=0)
+        centered = z - z_mean
+        u, singular, vt = np.linalg.svd(centered, full_matrices=False)
+        slopes = (
+            (vt.T * (singular / (singular**2 + ridge)))
+            @ u.T
+            @ ((y - target_mean) / target_scale)
+        )
+        intercept = target_mean / target_scale - z_mean @ slopes
+        weights = np.vstack((slopes, intercept))
+    return {
+        "mean": mean.tolist(),
+        "scale": scale.tolist(),
+        "minimum": minimum.tolist(),
+        "maximum": maximum.tolist(),
+        "target_scale": target_scale.tolist(),
+        "weights": weights.tolist(),
+    }
 
 
 @dataclass(frozen=True)
@@ -226,6 +290,7 @@ def train_rc_control_candidate_policy(
     output_directory: Path,
     ridge: float = 1.0,
     ood_margin: float = 0.0,
+    fit_method: str = CENTERED_FIT_METHOD,
 ):
     """Generate full reference/replay labels, then fit only this training family.
 
@@ -233,6 +298,8 @@ def train_rc_control_candidate_policy(
     are useful labels; incomplete or unverified physical paths are not labels.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if type(fit_method) is not str or fit_method not in FIT_METHODS:
+        raise ValueError("supported candidate fit method required")
     if (
         not _finite(ridge)
         or ridge <= 0
@@ -268,6 +335,7 @@ def train_rc_control_candidate_policy(
                 "control_request": request.to_dict(),
                 "ridge": ridge,
                 "ood_margin": ood_margin,
+                "fit_method": fit_method,
                 "independent_campaign": False,
             }
         ),
@@ -319,25 +387,13 @@ def train_rc_control_candidate_policy(
     try:
         x = np.asarray([s["features"] for s in samples])
         y = np.asarray([s["targets"] for s in samples])
-        mean, scale, target_scale = x.mean(axis=0), x.std(axis=0), y.std(axis=0)
-        scale, target_scale = (
-            np.where(scale > 0, scale, 1.0),
-            np.where(target_scale > 0, target_scale, 1.0),
-        )
-        z = np.column_stack(((x - mean) / scale, np.ones(len(x))))
-        u, singular, vt = np.linalg.svd(z, full_matrices=False)
-        weights = (vt.T * (singular / (singular**2 + ridge))) @ u.T @ (y / target_scale)
+        parameters = _candidate_fit_parameters(x, y, ridge, fit_method)
         p = {
             "schema_version": POLICY_SCHEMA,
             "context_hash": descriptors[0][1],
             "features": list(FEATURE_NAMES),
             "targets": list(TARGETS),
-            "mean": mean.tolist(),
-            "scale": scale.tolist(),
-            "minimum": x.min(axis=0).tolist(),
-            "maximum": x.max(axis=0).tolist(),
-            "target_scale": target_scale.tolist(),
-            "weights": weights.tolist(),
+            **parameters,
             "ridge": ridge,
             "ood_margin": ood_margin,
             "training_model_identities": model_ids,
@@ -368,7 +424,7 @@ def train_rc_control_candidate_policy(
         "wall_ns": perf_counter_ns() - fit_wall,
         "cpu_ns": process_time_ns() - fit_cpu,
         "unknown_fit_work_until_outcome": False,
-        "method": "svd-ridge-penalized-intercept.v1",
+        "method": fit_method,
     }
     study._save(root, "fit-outcome.json", study._bytes(fit))
     study._save(root, "policy.json", study._bytes(policy.to_dict()))
