@@ -1,0 +1,114 @@
+{
+  "schema_version": "rc-counterbalanced-runtime-progress-snapshot.v1",
+  "snapshot_unix_ns": 1789019324364560478,
+  "source_revision": "f933f9651180fe65ceab2e8cfafb84e5bbf810d3",
+  "source_file_count": 446,
+  "source_manifest_sha256": "0f012397630cb68be9acaaa261627ab4c2834cb6b932566c4f57835716163f1e",
+  "protocol_sha256": "dcabae9282632cd4f8d23daab5961b0ab2fb4c6bb537bed1c8af49f160108f01",
+  "protocol": {
+    "schema_version": "rc-counterbalanced-runtime-prospective-protocol.v1",
+    "planning_revision": "cbbf2df462a6ca7a4427830cbf85701c352184db",
+    "prior_packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-secant-abstention-fhn1qvyq",
+    "prior_inventory_sha256": "df41ee6c060fe8dd5e5bb4586c6c801177b5d5d7ec56929ec37bdc1bc08ed064",
+    "ridge_grid": [
+      10000.0
+    ],
+    "ridge_choice": "smaller recorded mean runtime ratio among the two prior development candidates; both failed adoption; this choice is tuning, not a fresh independent evaluation",
+    "repetitions": 3,
+    "arm_order_schedule": [
+      [
+        "reference",
+        "secant",
+        "proposal"
+      ],
+      [
+        "secant",
+        "proposal",
+        "reference"
+      ],
+      [
+        "proposal",
+        "reference",
+        "secant"
+      ]
+    ],
+    "case_count": 4,
+    "case_order": "sorted training case IDs; all three repetitions for a case share one frozen fit",
+    "expected_fold_count": 12,
+    "expected_full_path_count": 48,
+    "targets_per_path": 242,
+    "nominal_core_calls_without_retries": 11616,
+    "maximum_core_calls": 17424,
+    "maximum_fits": 5,
+    "nominal_training_fits": 4,
+    "one_possible_final_training_refit_only_if_existing_runtime_rule_eligible": true,
+    "arithmetic_profile": "retained-twofold-refinement.v1",
+    "proposal_abstention_strategy": "secant",
+    "static_model_abstention": true,
+    "minimum_relative_improvement": 0.01,
+    "new_training_labels": 0,
+    "validation_or_holdout_execution": false,
+    "warmup_repetitions_excluded": 0,
+    "repeats_are_independent_cases": false,
+    "independent_evaluation": false,
+    "paired_static_gate_on_off_comparison": false,
+    "historical_timings_not_a_matched_control": true,
+    "hardware_isolation": false,
+    "automatic_retry": false,
+    "automatic_extra_repetitions": false,
+    "automatic_promotion": false,
+    "source_labels_authenticate_independent_measurements": false,
+    "historical_label_generation_cost": {
+      "historical_original_generation_core_calls": 2904,
+      "historical_original_generation_newton_iterations": 13815,
+      "historical_original_generation_path_seconds": 1045.632468841
+    },
+    "expected_artifact_storage_order_gigabytes": 4,
+    "planned_inputs_policy_and_thresholds_fixed_before_new_fits_or_paths": true
+  },
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-counterbalanced-runtime-fx57v2kf",
+  "packet_sealed": false,
+  "numerical_processes": {
+    "parent_pid": 1110723,
+    "worker_pid": 1111200,
+    "source_revision": "f933f9651180fe65ceab2e8cfafb84e5bbf810d3",
+    "automatic_retry": false
+  },
+  "audit_supervisor_pid": 1111682,
+  "worker_and_supervisor_confirmed_live_at_snapshot": true,
+  "completed_folds_at_snapshot": 1,
+  "completed_fold_indices": [
+    0
+  ],
+  "completed_prefix_comparisons_pass": true,
+  "aggregate_result_available": false,
+  "original_audit_available": false,
+  "new_speedup_claim": false,
+  "local_checks": {
+    "initial_module": {
+      "passed": 51,
+      "seconds": 98.33
+    },
+    "additional_subset": {
+      "passed": 3,
+      "deselected": 50,
+      "seconds": 14.81,
+      "overlap_with_initial": 1
+    },
+    "unique_final_checks_covered": 53,
+    "ruff": true,
+    "scoped_mypy": true
+  },
+  "preceding_ci": {
+    "run": 34441285174,
+    "head": "cbbf2df462a6ca7a4427830cbf85701c352184db",
+    "tested_merge": "e4295a432ce2a80a0e86234d92772cd6f58944f4",
+    "passed": 374,
+    "suite_seconds": 414.056,
+    "job_id": 102756679795,
+    "artifact_id": 10138209598,
+    "artifact_zip_sha256": "sha256:f73ebe50fffd452bac95d7877e2ed6cbcfd43c07c13775504f9afbce0ee08bc3",
+    "four_full_shards_preparation_failed_suite_skipped": true,
+    "new_repetition_source_included": false
+  }
+}
