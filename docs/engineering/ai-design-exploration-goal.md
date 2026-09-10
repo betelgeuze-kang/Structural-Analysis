@@ -1767,3 +1767,16 @@ remain unavailable from a single stream. Multi-run cost and durable HTTP
 integration, experimental admission, learned advantage and independent/full
 roadmap acceptance remain open. The preceding a7f699cfc hosted main/Python lanes
 still fail at external replay and technical-receipt prerequisites.
+
+
+[Public response aliases and candidate JSON review](rc-learning-input-review-20260910.md)
+at 41f59017a and 4d345a423 closes two reproduced input defects. An actual
+4,059-row ARISTA full/subset alias passes the old split screen but is rejected
+by the new screen and learning entry before numerical work. The expanded
+learning selection passes 90 tests; candidate selection passes 32 tests with
+strict duplicate/nonfinite policy and CLI report parsing. Five ambiguous probes
+of an existing generated policy now reject with the normal policy hash unchanged.
+Current 66c3a1d46 hosted logs confirm replay/technical-receipt materialization
+failures before full/legacy execution. External replay diagnosis, candidate-pool
+cost optimality, runtime-relevant learning, compatible experimental reconstruction
+and the full roadmap remain open; no independent or learned benefit is claimed.
