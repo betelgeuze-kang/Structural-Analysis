@@ -1,0 +1,104 @@
+"""Original rational-frame, retained-coordinate and material-state record checks."""
+import collections, importlib.util, math
+from dataclasses import asdict,fields
+from decimal import Decimal,localcontext
+from fractions import Fraction as F
+from pathlib import Path
+from time import perf_counter_ns
+from structural_analysis.materials.concrete_damage import AsymmetricConcreteDamageMaterial,ConcreteDamageState
+from structural_analysis.materials.uniaxial_plasticity import BilinearCombinedHardeningSteel,UniaxialPlasticityState
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+root=Path(__file__).resolve().parent
+spec=importlib.util.spec_from_file_location('independent_rational',root/'source/scripts/verify_rc_rational_assembly.py');verifier=importlib.util.module_from_spec(spec);spec.loader.exec_module(verifier)
+assembly_replays=collections.Counter();assembly_replay_ns=0;terminal_compensated_candidates=0;terminal_compensated_accepted=0;projection_counts=collections.Counter();projection_max=F();material=collections.Counter();max_delta=collections.defaultdict(float);strain_checks=0;retained_nonzero=0;stress_checks=0
+
+def audit_step(problem,step):
+ global assembly_replay_ns,terminal_compensated_candidates,terminal_compensated_accepted,projection_max,strain_checks,retained_nonzero,stress_checks
+ sm=step['trial_solution']['metrics'];payload=dict(step);assert payload.pop('step_hash')==canonical_hash(payload)
+ vstart=perf_counter_ns();assembly_replays.update(verifier.verify_assembly(problem,step['trial_assembly']));assembly_replays['assembly_replays']+=1;assembly_replay_ns+=perf_counter_ns()-vstart
+ pr=sm['terminal_polishing'];assert pr['schema_version']=='newton-vector-terminal-refinement.v1' and pr['refinement_limit']==2
+ attempts=pr['attempts'];assert 1<=len(attempts)<=2
+ assert pr['attempt_count']==sum(a['attempted'] for a in attempts)
+ assert pr['accepted_correction_count']==sum(a['accepted'] for a in attempts)
+ for key in ['assembly_call_count','assembly_exception_count','linear_solve_count','linear_solve_exception_count']:assert pr[key]==sum(a[key] for a in attempts)
+ history=step['trial_solution']['convergence_history'];by_iteration={h['iteration']:h for h in history};assert len(by_iteration)==len(history)
+ base_count=attempts[0]['source_iteration']+1
+ assert sm['iteration_count']==len(history)==base_count+pr['accepted_correction_count']
+ assert sm['linear_solve_count']==base_count+pr['linear_solve_count']
+ selected=None
+ for n,a in enumerate(attempts):
+  original=by_iteration[a['source_iteration']]
+  assert original['free_displacements_m']==a['original_free_displacements_m'] and original['residual_kn']==a['original_residual_kn'] and original['newton_increment_m']==a['proposed_correction_m']
+  assert original.get('free_displacement_compensation_m')==a.get('original_coordinate_compensation_m')
+  if a['accepted']:
+   accepted=by_iteration[a['candidate_iteration']]
+   assert accepted['free_displacements_m']==a['candidate_free_displacements_m'] and accepted['free_displacement_compensation_m']==a['candidate_coordinate_compensation_m']
+   assert accepted['residual_kn']==a['candidate_residual_kn'] and accepted['newton_increment_m']==a['candidate_newton_increment_m']
+  if n:
+   prev=attempts[n-1];assert prev['accepted']
+   assert a['original_free_displacements_m']==prev['candidate_free_displacements_m'] and a['original_coordinate_compensation_m']==prev['candidate_coordinate_compensation_m']
+   assert a['original_residual_kn']==prev['candidate_residual_kn'] and a['proposed_correction_m']==prev['candidate_newton_increment_m']
+  cs=a.get('candidate_coordinate_compensation_m')
+  if cs is not None:
+   assert a['coordinate_precision']=='twofold'
+   for h,l,x,low,d in zip(a['candidate_free_displacements_m'],cs,a['original_free_displacements_m'],a.get('original_coordinate_compensation_m',[0.0]*len(cs)),a['proposed_correction_m'],strict=True):
+    exact=F(x)+F(low)+F(d);hi=float(exact);lo=float(exact-F(hi));total=hi+lo;tail=(hi-total)+lo
+    assert h==total and l==tail
+    error=abs(F(h)+F(l)-exact)
+    projection_counts['coordinates']+=1;projection_counts['nonzero_projection_error']+=bool(error)
+    projection_max=max(projection_max,error)
+   terminal_compensated_candidates+=1
+  if a['accepted']:
+   assert a['candidate_residual_linf']<a['original_residual_linf']
+   assert a['candidate_relative_residual']<=sm['residual_tolerance'] and a['candidate_increment_abs_m']<=sm['increment_tolerance']
+   selected=a;terminal_compensated_accepted+=1
+  else:assert n==len(attempts)-1
+ if selected is not None:
+  assert pr['accepted'] and pr['candidate_free_displacements_m']==selected['candidate_free_displacements_m']
+  assert step['trial_solution']['solver_increment_coordinate_compensation_m']==sm['free_displacement_compensation_m']==selected['candidate_coordinate_compensation_m']
+  assert step['trial_solution']['solver_increment_coordinates_m']==selected['candidate_free_displacements_m']
+ else:assert not pr['accepted'] and 'solver_increment_coordinate_compensation_m' not in step['trial_solution'] and 'free_displacement_compensation_m' not in sm
+ for member,parent,row in zip(problem.members,step['parent_checkpoint']['element_states'],step['trial_assembly']['member_assemblies'],strict=True):
+  section=member.element.section;base_materials={'steel':BilinearCombinedHardeningSteel(**asdict(section.steel)),'concrete':AsymmetricConcreteDamageMaterial(**asdict(section.concrete))}
+  for point,(parent_section,response) in enumerate(zip(parent['integration_point_states'],row['element_response']['section_responses'],strict=True)):
+   er=row['element_response'];u=[F(h)+F(l) for h,l in zip(er['local_displacements'],er['local_displacement_compensation'],strict=True)];L=F(member.element.length_m);x=F(float(member.element.quadrature[0][point]));t=(x+1)/2
+   curvature=(-6+12*t)*u[1]/L**2+(-4+6*t)*u[2]/L+(6-12*t)*u[4]/L**2+(-2+6*t)*u[5]/L
+   axial=(u[3]-u[0])/L
+   assert response['fiber_strain_evaluation']=='retained-rational-strain-stress80-original-state.v1'
+   for fiber,parent_fiber,actual,strain in zip(section.fibers,parent_section['fiber_states'],response['fiber_responses'],response['fiber_strains'],strict=True):
+    exact_strain=axial-F(fiber.y_m)*curvature
+    assert strain==float(exact_strain);strain_checks+=1
+    identity=actual['stress_trial_strain'];assert exact_strain==F(int(identity['numerator']),int(identity['denominator']))
+    retained_nonzero+=exact_strain!=F(strain)
+    kind=fiber.material_kind;cls=UniaxialPlasticityState if kind=='steel' else ConcreteDamageState
+    state=cls(**{f.name:parent_fiber[f.name] for f in fields(cls)});assert state.to_dict()==parent_fiber
+    assert actual['total_strain']==strain and actual['stress_evaluation_profile']=='retained-rational-strain-stress80-original-state.v1'
+    material[kind]+=1;replayed=base_materials[kind].integrate(strain,state);original=replayed.to_dict()
+    assert original['trial_state']==actual['trial_state'] and original['committed_state_hash']==actual['committed_state_hash']
+    keys=['yielded','plastic_multiplier_increment'] if kind=='steel' else ['active_branch','active_damage','damage_evolved','tensile_damage_increment','compressive_damage_increment']
+    assert all(original[k]==actual[k] for k in keys)
+    with localcontext() as context:
+     context.prec=100
+     def D(v):
+      v=F(v);return Decimal(v.numerator)/Decimal(v.denominator)
+     law=base_materials[kind];E=D(law.elastic_modulus_mpa);trial=D(exact_strain)
+     if kind=='steel':
+      if original['yielded']:
+       direction=1 if law.elastic_modulus_mpa*(strain-state.plastic_strain)-state.backstress_mpa>=0 else -1
+       H=D(law.isotropic_hardening_modulus_mpa)+D(law.kinematic_hardening_modulus_mpa)
+       radius=D(law.yield_stress_mpa)+D(law.isotropic_hardening_modulus_mpa)*D(state.accumulated_plastic_strain)
+       expected=D(state.backstress_mpa)+direction*(radius+H*D(original['plastic_multiplier_increment']))+(trial-D(strain))/(1/E+1/H) if H else D(state.backstress_mpa)+direction*radius
+      else:expected=E*(trial-D(state.plastic_strain))
+     else:
+      tension=strain>=0;ph=state.tensile_history_strain if tension else state.compressive_history_strain
+      h=abs(trial) if abs(strain)>=ph else D(ph)
+      threshold=law.tensile_threshold_strain if tension else law.compressive_threshold_strain
+      rate=law.tensile_softening_rate if tension else law.compressive_softening_rate
+      survival=Decimal(1) if max(abs(strain),ph)<=threshold else D(threshold)/h*((D(threshold)-h)*D(rate)).exp()
+      expected=E*max(survival,D(1.0-__import__('math').nextafter(1.0,0.0)))*trial
+     assert float(expected)==actual['stress_mpa'],(problem.case_id,kind,str(expected),actual['stress_mpa'])
+     stress_checks+=1
+    for field in ['stress_mpa','consistent_tangent_mpa']:max_delta[kind+'/'+field]=max(max_delta[kind+'/'+field],abs(original[field]-actual[field]))
+
+def summary():
+ return {'independent_assembly_rebuilds':dict(assembly_replays),'independent_assembly_rebuild_seconds':assembly_replay_ns/1e9,'terminal_candidate_pairs_verified':terminal_compensated_candidates,'terminal_accepted_pairs_verified':terminal_compensated_accepted,'projection_counts':dict(projection_counts),'maximum_twofold_projection_error':float(projection_max),'material_base_law_replays':dict(material),'exact_fiber_inputs_checked':strain_checks,'retained_low_strain_components_nonzero':retained_nonzero,'independent_100_digit_stresses_checked':stress_checks,'native_material_state_and_branch_replays_exact':True,'rounded_base_vs_retained_stress_differences':dict(max_delta)}

@@ -79,5 +79,294 @@
       "bytes": 5951,
       "sha256": "2069452b43cd6d941d87eb823068029af7abd7a0edc4af87b067f2939406b630"
     }
-  ]
+  ],
+  "audit_preparation_snapshot": {
+    "snapshot_unix_ns": 1789024342106856968,
+    "full_audit_started": false,
+    "original_audit_available": false,
+    "adaptation": {
+      "schema_version": "rc-same-parent-audit-adaptation.v1",
+      "generated_auditor_sha256": "29fc05cfb361228f59ffa9106b09585978a025816e60b7987fca244a4f396da2",
+      "support_files": [
+        {
+          "original_path": "audit-support/physics_audit.py",
+          "original_binding": {
+            "path": "audit-support/physics_audit.py",
+            "bytes": 9613,
+            "sha256": "f165758b8a944b6408a8f420ddf9a4720166f87fbe1a783a2025e3e6d8257179"
+          },
+          "destination": "audit-support/physics_audit.py"
+        },
+        {
+          "original_path": "audit-support/source/scripts/verify_rc_rational_assembly.py",
+          "original_binding": {
+            "path": "audit-support/source/scripts/verify_rc_rational_assembly.py",
+            "bytes": 6437,
+            "sha256": "09566603921b32a7a50fc60873034fe280164d58970d4a765d0c4338fa68d413"
+          },
+          "destination": "audit-support/source/scripts/verify_rc_rational_assembly.py"
+        }
+      ],
+      "no_numerical_source_changes": true,
+      "full_audit_requires_terminal_numerical_success": true,
+      "no_audit_newton_or_fits": true,
+      "smoke_is_partial_and_separate": true
+    },
+    "supervisor_started": {
+      "pid": 1133597,
+      "original_processes": {
+        "parent_pid": 1131148,
+        "worker_pid": 1131189
+      },
+      "original_identities": {
+        "1131148": {
+          "start_ticks": "23572369",
+          "cmdline": [
+            "python3",
+            "/tmp/run-rc-same-parent-cost.py"
+          ]
+        },
+        "1131189": {
+          "start_ticks": "23572380",
+          "cmdline": [
+            "/usr/bin/python3",
+            "-B",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-e_rj5919/run.py",
+            "worker"
+          ]
+        }
+      },
+      "automatic_numerical_restart": false,
+      "maximum_audit_attempts": 1
+    },
+    "smoke_runs": [
+      {
+        "schema_version": "rc-same-parent-cost-partial-audit.v1",
+        "partial": true,
+        "source_revision": "cbc1952f5066b323f3a9369318c1615a94372122",
+        "source_files_verified": 448,
+        "input_files_verified": 3906,
+        "original_prefixes_reconstructed": 968,
+        "comparison_count": 4,
+        "rows": [
+          {
+            "ordinal": 0,
+            "source_target_index": 0,
+            "report_hash": "sha256:a4a3fb516b3000ed10e6d649daa86f4d8409711767c806f40a157b49fc4757d5",
+            "comparison_pass": true,
+            "original_secant_reproduced": true
+          },
+          {
+            "ordinal": 1,
+            "source_target_index": 1,
+            "report_hash": "sha256:da5d0eb8711b3d5eeb3374253f1e6e255b3fb9bfb9f143ecf12b77b0bdb53623",
+            "comparison_pass": true,
+            "original_secant_reproduced": true
+          },
+          {
+            "ordinal": 241,
+            "source_target_index": 241,
+            "report_hash": "sha256:1effcdc5c8bbeadfb42dac1c87d9a2855d5db833cda7c0929246d2e220792516",
+            "comparison_pass": true,
+            "original_secant_reproduced": true
+          },
+          {
+            "ordinal": 242,
+            "source_target_index": 0,
+            "report_hash": "sha256:1d8be349ccb7278450702402825c90c56aecad35b2396c4c5cfcfd8121532309",
+            "comparison_pass": true,
+            "original_secant_reproduced": true
+          }
+        ],
+        "groups": {
+          "train-a": {
+            "comparisons": 3,
+            "passed": 3,
+            "original_secant_reproduced": 3,
+            "policy_proposed": 0,
+            "proposal_minus_secant_newton": 0
+          },
+          "train-b": {
+            "comparisons": 1,
+            "passed": 1,
+            "original_secant_reproduced": 1,
+            "policy_proposed": 0,
+            "proposal_minus_secant_newton": 0
+          }
+        },
+        "counts": {
+          "accepted_assembly_replays": 16,
+          "core_calls": 16,
+          "newton_iterations": 70,
+          "linear_solves": 70,
+          "material_snapshots": 4
+        },
+        "physics_audit": {
+          "independent_assembly_rebuilds": {
+            "section_replays": 96,
+            "member_replays": 32,
+            "material_integrations": 0,
+            "newton_solves": 0,
+            "state_commits": 0,
+            "assembly_replays": 16
+          },
+          "independent_assembly_rebuild_seconds": 0.336564655,
+          "terminal_candidate_pairs_verified": 32,
+          "terminal_accepted_pairs_verified": 24,
+          "projection_counts": {
+            "coordinates": 224,
+            "nonzero_projection_error": 52
+          },
+          "maximum_twofold_projection_error": 3.009265538105056e-36,
+          "material_base_law_replays": {
+            "concrete": 1152,
+            "steel": 192
+          },
+          "exact_fiber_inputs_checked": 1344,
+          "retained_low_strain_components_nonzero": 1344,
+          "independent_100_digit_stresses_checked": 1344,
+          "native_material_state_and_branch_replays_exact": true,
+          "rounded_base_vs_retained_stress_differences": {
+            "concrete/stress_mpa": 6.066932813411181e-15,
+            "concrete/consistent_tangent_mpa": 3.637978807091713e-12,
+            "steel/stress_mpa": 2.842170943040401e-14,
+            "steel/consistent_tangent_mpa": 0.0
+          }
+        },
+        "audit_newton_calls": 0,
+        "audit_fits": 0,
+        "causal_training_dataset_admitted": false,
+        "full_path_performance_credit": false,
+        "independent_physical_validation": false,
+        "wall_ns": 13712167162,
+        "cpu_ns": 13647073111,
+        "peak_rss_kib": 385864
+      },
+      {
+        "schema_version": "rc-same-parent-cost-partial-audit.v1",
+        "partial": true,
+        "source_revision": "cbc1952f5066b323f3a9369318c1615a94372122",
+        "source_files_verified": 448,
+        "input_files_verified": 3906,
+        "original_prefixes_reconstructed": 968,
+        "comparison_count": 2,
+        "rows": [
+          {
+            "ordinal": 243,
+            "source_target_index": 1,
+            "report_hash": "sha256:baf3bd53a3304ff92721648b692e3f19c4dd2edc5e87421aa2224bc21d1fa25f",
+            "comparison_pass": true,
+            "original_secant_reproduced": true
+          },
+          {
+            "ordinal": 244,
+            "source_target_index": 2,
+            "report_hash": "sha256:7d60b37f7b3c3e843823bc407e42e68f92852254910cb14a4f53e3e048a534bf",
+            "comparison_pass": true,
+            "original_secant_reproduced": true
+          }
+        ],
+        "groups": {
+          "train-b": {
+            "comparisons": 2,
+            "passed": 2,
+            "original_secant_reproduced": 2,
+            "policy_proposed": 2,
+            "proposed_more_newton": 2,
+            "proposal_minus_secant_newton": 3
+          }
+        },
+        "counts": {
+          "accepted_assembly_replays": 8,
+          "core_calls": 8,
+          "newton_iterations": 27,
+          "linear_solves": 27,
+          "material_snapshots": 2
+        },
+        "physics_audit": {
+          "independent_assembly_rebuilds": {
+            "section_replays": 48,
+            "member_replays": 16,
+            "material_integrations": 0,
+            "newton_solves": 0,
+            "state_commits": 0,
+            "assembly_replays": 8
+          },
+          "independent_assembly_rebuild_seconds": 0.165306864,
+          "terminal_candidate_pairs_verified": 16,
+          "terminal_accepted_pairs_verified": 13,
+          "projection_counts": {
+            "coordinates": 112,
+            "nonzero_projection_error": 38
+          },
+          "maximum_twofold_projection_error": 3.009265538105056e-36,
+          "material_base_law_replays": {
+            "concrete": 576,
+            "steel": 96
+          },
+          "exact_fiber_inputs_checked": 672,
+          "retained_low_strain_components_nonzero": 672,
+          "independent_100_digit_stresses_checked": 672,
+          "native_material_state_and_branch_replays_exact": true,
+          "rounded_base_vs_retained_stress_differences": {
+            "concrete/stress_mpa": 2.220446049250313e-16,
+            "concrete/consistent_tangent_mpa": 0.0,
+            "steel/stress_mpa": 3.552713678800501e-15,
+            "steel/consistent_tangent_mpa": 0.0
+          }
+        },
+        "audit_newton_calls": 0,
+        "audit_fits": 0,
+        "causal_training_dataset_admitted": false,
+        "full_path_performance_credit": false,
+        "independent_physical_validation": false,
+        "wall_ns": 12694725395,
+        "cpu_ns": 12678767038,
+        "peak_rss_kib": 385604
+      }
+    ],
+    "unique_smoke_comparisons": 6,
+    "original_call_records_checked": 24,
+    "accepted_assembly_replays": 24,
+    "independent_100_digit_stresses_checked": 2016,
+    "newton_calls": 0,
+    "fits": 0,
+    "bindings": [
+      {
+        "path": "audit.py",
+        "bytes": 19454,
+        "sha256": "29fc05cfb361228f59ffa9106b09585978a025816e60b7987fca244a4f396da2"
+      },
+      {
+        "path": "launch-audit.py",
+        "bytes": 3180,
+        "sha256": "5753aa843db52db3d2c7e6148e26b097b35d9c1e6e790f1ea6859407a599f10d"
+      },
+      {
+        "path": "audit-adaptation.json",
+        "bytes": 1082,
+        "sha256": "5873b4b7291ba347e871e39a684e3c61efe2f24b7b433af93a77971a235696c7"
+      },
+      {
+        "path": "audit-supervisor-source.json",
+        "bytes": 319,
+        "sha256": "d5671ae654e6846951a59cdb46c034959c41bc0ea2d5779aabf58d3daaabe532"
+      },
+      {
+        "path": "audit-supervisor-started.json",
+        "bytes": 595,
+        "sha256": "6baecd2968d8dea6b738ac4db46cd76f8bddb915c4c9655ae50107ac66fe7e34"
+      },
+      {
+        "path": "audit-smoke-01.json",
+        "bytes": 3116,
+        "sha256": "60b2c0d5e7217f8b6fd58d0e266803a0bc0820784d827388fbd79a51dea764eb"
+      },
+      {
+        "path": "audit-smoke-02.json",
+        "bytes": 2481,
+        "sha256": "de5920c504ddffaa51941f68a38e83bd38c64b772df69546ac2aafae74969106"
+      }
+    ]
+  }
 }

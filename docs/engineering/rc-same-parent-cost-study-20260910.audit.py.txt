@@ -1,0 +1,178 @@
+"""Recheck original-parent comparisons; no fits or Newton calls, no adoption."""
+from pathlib import Path
+from collections import Counter
+from fractions import Fraction as F
+import argparse,hashlib,importlib.util,json,os,resource,sys,time
+import numpy as np
+
+parser=argparse.ArgumentParser();parser.add_argument('--smoke');parser.add_argument('--output');args=parser.parse_args()
+root=Path(__file__).resolve().parent;read=lambda p:json.loads(p.read_bytes());sha=lambda raw:hashlib.sha256(raw).hexdigest();start,cpu=time.perf_counter_ns(),time.process_time_ns()
+partial=args.smoke is not None
+if partial:assert args.output and not Path(args.output).exists()
+else:
+ terminal=read(root/'process-outcome.json');assert terminal['exit_code']==0
+ for pid in [terminal['parent_pid'],terminal['worker_pid']]:
+  try:os.kill(pid,0)
+  except ProcessLookupError:pass
+  else:raise RuntimeError('Original numerical process still live')
+sys.path.insert(0,str(root/'source/src'))
+from structural_analysis.benchmark import rc_control_learning as learning
+from structural_analysis.benchmark import rc_control_seed_runtime as runtime
+from structural_analysis.benchmark.rc_control_material_features import committed_material_snapshot
+from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import load_stateful_fiber_frame2d_checkpoint_bytes as load
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+
+def prohibited(*args,**kwargs):raise AssertionError('Audit must not fit or execute Newton')
+learning._fit=prohibited;runtime.solve_stateful_fiber_frame2d_displacement_control_step=prohibited
+b=runtime._bytes
+
+def checked(path,field):
+ data=read(path);payload=dict(data);stored=payload.pop(field)
+ assert stored==(canonical_hash(payload) if field=='step_hash' else runtime._sha(b(payload))),str(path)
+ return data
+
+def natural(v):assert type(v) is int and v>=0;return v
+
+protocol=read(root/'protocol.json');manifest=read(root/'source-manifest.json');declaration=read(root/'process-started.json');adaptation=read(root/'audit-adaptation.json')
+assert manifest['revision']==protocol['source_revision']
+for name,key in [('protocol.json','protocol_sha256'),('source-manifest.json','source_manifest_sha256'),('input-bindings.json','input_bindings_sha256')]:assert sha((root/name).read_bytes())==declaration[key]
+assert sha((root/'run.py').read_bytes())==declaration['runner_sha256']
+for row in manifest['files']:
+ raw=(root/'source'/row['path']).read_bytes();assert len(raw)==row['bytes'] and sha(raw)==row['sha256']
+original_root=Path(protocol['original_packet']);inventory_raw=original_root.with_name(original_root.name+'.inventory.json').read_bytes();assert sha(inventory_raw)==protocol['original_inventory_sha256'];inventory={r['path']:r for r in json.loads(inventory_raw)['files']}
+bindings=read(root/'input-bindings.json')['files']
+for row in bindings:
+ assert row==inventory[row['path']];raw=(root/'inputs'/row['path']).read_bytes();assert len(raw)==row['bytes'] and sha(raw)==row['sha256']
+for row in adaptation['support_files']:
+ raw=(root/row['destination']).read_bytes();assert row['original_binding']==inventory[row['original_path']];assert len(raw)==row['original_binding']['bytes'] and sha(raw)==row['original_binding']['sha256']
+spec=importlib.util.spec_from_file_location('parent_cost_physics',root/'audit-support/physics_audit.py');physics=importlib.util.module_from_spec(spec);spec.loader.exec_module(physics)
+original=lambda name:read(root/'inputs'/name)
+prior_audit=original('original-audit.json');assert original('audit-attempt-1-outcome.json')['exit_code']==0 and prior_audit['all_training_partitions_preprocessing_and_ridge_stationarity_checked']
+cases=[]
+for c in original('original-plan.json')['cases']:
+ model=load_neutral_json(root/'inputs/inputs'/c['model_path']);request=learning.decode_bounded_rc_fiber_direct_control_request((root/'inputs/inputs'/c['request_path']).read_bytes());cases.append(learning.RCControlLearningCase(c['case_id'],c['project_id'],c['geometry_family_id'],c['load_history_id'],c['split'],model,request))
+prepared=learning._preflight(cases,protocol['arithmetic_profile']);cases={c.case_id:c for c in cases};origins=[];policies={}
+# Reconstruct every original prefix from the authenticated old step records.
+for item in protocol['roster']:
+ case=cases[item['case_id']];_,compiled,features,_,_=prepared[case.case_id];problem=compiled.problem
+ policy=learning.RCControlSeedPolicy((root/'inputs'/item['policy_path']).read_text());assert policy.policy_hash==item['policy_hash'];policies[case.case_id]=policy
+ assert any(f['withheld_training_case']==case.case_id and f['policy_hash']==policy.policy_hash for f in prior_audit['fits_checked'])
+ stem=f"study/fold-{item['fold_index']:04d}";old_comparison=checked(root/'inputs'/stem/'comparison.json','report_hash');path=checked(root/'inputs'/stem/'secant/path.json','path_hash')
+ previous=runtime.initial_stateful_fiber_frame2d_checkpoint(problem).to_dict();coords=[[0.0]*(len(problem.free_global_dofs)+1)];targets=[0.0]
+ for i in item['target_indices']:
+  context=original(f'{stem}/secant/{i:03d}-context.json');entry=path['entries'][i]
+  assert b(context['accepted_targets_m'])==b(targets) and b(context['accepted_augmented_coordinates_m'])==b(coords)
+  assert entry['parent_hash']==previous['state_hash'] and entry['target_m']==context['target_m']==case.request.targets_m[i]
+  parent_bytes=b(previous);accepted=[]
+  for inv in entry['invocations']:
+   step=checked(root/'inputs'/f"{stem}/secant/{i:03d}-{inv['ordinal']}-step.json",'step_hash');assert b(step['parent_checkpoint'])==parent_bytes
+   if step['committed']:accepted.append(step)
+   else:assert step['metrics']['rollback_exact'] and b(step['accepted_checkpoint'])==parent_bytes
+  assert len(accepted)==1;step=accepted[0]
+  origins.append((case,i,context,parent_bytes,step['accepted_checkpoint'],old_comparison))
+  previous=step['accepted_checkpoint'];coords.append(step['metrics']['absolute_augmented_coordinates_m']);targets.append(context['target_m'])
+ assert b(previous)==b(path['terminal_checkpoint'])
+assert len(origins)==protocol['comparison_count']==968
+indices=[int(v) for v in args.smoke.split(',')] if partial else list(range(len(origins)))
+assert indices and len(indices)==len(set(indices)) and all(0<=i<len(origins) for i in indices)
+if not partial:
+ result=read(root/'result.json');assert len(result['comparisons'])==968 and result['fits']==0
+ assert result['protocol_sha256']==declaration['protocol_sha256'] and not result['causal_training_dataset_admitted'] and not result['full_path_performance_credit']
+counts=Counter();rows=[];groups={}
+for ordinal in indices:
+ case,index,expected_context,parent_bytes,old_child,old_comparison=origins[ordinal];_,compiled,features,_,_=prepared[case.case_id];problem=compiled.problem;policy=policies[case.case_id];frozen=b(policy.to_dict())
+ base=root/'study'/f'comparison-{ordinal:04d}';row=read(root/'study'/f'comparison-{ordinal:04d}-outcome.json');report=checked(base/'comparison.json','report_hash')
+ assert report['schema_version']=='experimental-rc-control-parent-step-comparison.v1' and report['report_hash']==row['report_hash']
+ assert report['source_revision']==manifest['revision'] and report['source_target_index']==index and report['source_request']==case.request.to_dict()
+ request=dict(case.request.to_dict());request['targets_m']=[case.request.targets_m[index]];assert report['request']==request
+ assert report['arm_order']==protocol['arm_order_schedule'][ordinal%3] and set(report['arms'])=={'reference','secant','proposal'}
+ assert report['proposal_identity']==policy.policy_hash and report['compiled_problem_contract_hash']==problem.contract_hash
+ assert report['capture_material_state'] is True and report['material_capture_scope']=='proposal-only' and report['proposal_abstention_strategy']=='secant'
+ for key,value in learning._arithmetic_kwargs(protocol['arithmetic_profile']).items():assert report[key]==value
+ assert report['absolute_tolerance']==old_comparison['absolute_tolerance'] and report['relative_tolerance']==old_comparison['relative_tolerance']
+ assert not report['original_complete_path_executed'] and not report['prefix_reachability_verified'] and report['maximum_numerical_core_calls']==6
+ assert not report['claims']['complete_path_performance_evidence'] and not report['claims']['causal_training_dataset_admitted']
+ assert (base/'parent.json').read_bytes()==parent_bytes and read(base/'accepted-context.json')==expected_context
+ for key,name in [('initial_parent_artifact','parent.json'),('accepted_context_artifact','accepted-context.json')]:
+  raw=(base/name).read_bytes();assert report[key]=={'path':name,'byte_length':len(raw),'sha256':runtime._sha(raw)}
+ parent=load(parent_bytes,problem);assert report['initial_parent_hash']==parent.state_hash
+ paths={};works={};proposal_used=None;proposal_decision=None
+ for arm in (*report['arm_order'],'fresh-reference'):
+  path=checked(base/arm/'path.json','path_hash');paths[arm]=path
+  recorded=report['fresh_reference'] if arm=='fresh-reference' else report['arms'][arm]
+  assert recorded=={k:v for k,v in path.items() if k not in ('response_history','terminal_checkpoint','preload_response')}
+  assert path['schema_version']=='experimental-rc-control-parent-step-path.v1' and path['initial_parent_hash']==parent.state_hash
+  assert path['requested_targets_m']==[context_target:=case.request.targets_m[index]] and len(path['entries'])==1
+  assert not path['preload_reexecuted'] and not path['original_complete_path_executed'] and not path.get('preload_invocations')
+  assert path['supplied_prefix_target_count']==index+1
+  context_data=read(base/arm/'000-context.json');bare=dict(context_data);material=bare.pop('committed_material_state_json',None);assert bare==expected_context
+  assert (material is not None)==(arm=='proposal')
+  if material is not None:assert material==committed_material_snapshot(problem,parent);counts['material_snapshots']+=1
+  context=runtime.RCControlSeedContext(**context_data);entry=path['entries'][0];assert entry['target_index']==0 and entry['target_m']==context_target and entry['parent_hash']==parent.state_hash
+  raw_proposed=policy.propose(context,features,problem.free_global_dofs,case.request.solver_config.contract_hash,arithmetic_profile=protocol['arithmetic_profile'],load_factor_coordinate_scale_m=case.request.solver_config.load_factor_coordinate_scale_m) if arm=='proposal' else None
+  seed=raw_proposed if arm=='proposal' else runtime.secant_seed(context) if arm=='secant' else None
+  if arm=='proposal':
+   proposal_used=raw_proposed is not None;proposal_decision='proposed'
+   if seed is None:
+    seed=runtime.secant_seed(context);proposal_decision='abstained_to_secant' if seed is not None else 'abstained_to_reference'
+   assert entry['proposal_decision']==proposal_decision
+  if seed is not None:seed=runtime.StatefulFiberFrame2DDisplacementControlStepAdapter(problem,parent,case.request.control_global_dof,context_target,case.request.solver_config,seed).initial_augmented_coordinates_m
+  assert b(entry['proposal'])==b(None if seed is None else list(seed))
+  initial_entry=read(base/arm/'000-proposal.json');assert initial_entry['invocations']==[]
+  for key in ['proposal','proposal_wall_ns','proposal_cpu_ns','parent_hash','target_index','target_m']:assert initial_entry[key]==entry[key]
+  work=Counter();timing=Counter();committed=[]
+  for n,inv in enumerate(entry['invocations']):
+   assert inv['ordinal']==n+1 and inv['status']=='returned' and not inv['unknown_work'] and inv['seed_used']==(seed is not None and n==0)
+   stem=base/arm/f'000-{n+1}';assert read(Path(str(stem)+'-outcome.json'))==inv
+   reservation=read(Path(str(stem)+'-started.json'));assert reservation['unknown_work'] and reservation['work'] is None and reservation['status']=='started'
+   step=checked(Path(str(stem)+'-step.json'),'step_hash');assert b(step['parent_checkpoint'])==parent_bytes
+   metrics=step['trial_solution']['metrics'];expected_work={'core_calls':1,'newton_iterations':natural(metrics['iteration_count']),'linear_solves':natural(metrics['linear_solve_count'])};assert inv['work']==expected_work;work.update(expected_work)
+   for key in ['wall_ns','cpu_ns']:timing[key]+=natural(inv[key])
+   if not step['committed']:
+    assert b(step['accepted_checkpoint'])==parent_bytes and step['metrics']['rollback_exact'];counts['rejected_numerical_attempts']+=1;continue
+   assert all(metrics[k] is True for k in ['contract_pass','increment_gate_passed','residual_gate_passed'])
+   assert all(step['metrics'][k] is True for k in ['equilibrium_gate_passed','control_gate_passed','parent_checkpoint_immutable','solver_assembly_coordinate_residual_binding_passed','section_and_element_parent_binding_passed'])
+   physics.audit_step(problem,step)
+   high=step['metrics']['absolute_augmented_coordinates_m'];low=step['metrics']['absolute_augmented_coordinate_compensation_m'];trial=step['trial_solution']
+   adapter=runtime.StatefulFiberFrame2DDisplacementControlStepAdapter(problem,parent,case.request.control_global_dof,context_target,case.request.solver_config,seed if n==0 else None)
+   solver=trial.get('solver_increment_coordinates_m',trial['augmented_coordinates_m']);solver_low=trial.get('solver_increment_coordinate_compensation_m');reconstructed=adapter.absolute_coordinates(solver,solver_low)
+   assert b(reconstructed[0].tolist())==b(high) and b(reconstructed[1].tolist())==b(low)
+   factor=adapter.load_factor_at(high,low);child=load(b(step['accepted_checkpoint']),problem);assert factor==child.load_factor
+   assembly=runtime.assemble_stateful_fiber_frame2d(problem,parent,target_load_factor=factor,trial_free_coordinates_m=high[:-1],trial_free_coordinate_compensation_m=low[:-1]);assert b(assembly.to_dict())==b(step['trial_assembly'])
+   rebuilt=runtime.StatefulFiberFrame2DCheckpoint(case_id=problem.case_id,problem_contract_hash=problem.contract_hash,epoch=parent.epoch+1,step_index=parent.step_index+1,load_factor=factor,parent_state_hash=parent.state_hash,global_displacements=tuple(float(x) for x in assembly.global_displacements),element_states=assembly.trial_element_states,free_coordinates_m=tuple(high[:-1]),free_coordinate_compensation_m=tuple(low[:-1]))
+   assert b(rebuilt.to_dict())==b(child.to_dict())
+   relative=float(np.linalg.norm(assembly.residual_kn,ord=np.inf))/problem.reference_force_scale();error=abs(float(F(high[context.control_free_index])+F(low[context.control_free_index])-F(context_target)))
+   assert relative<=case.request.solver_config.newton.residual_tolerance and error<=case.request.solver_config.control_tolerance_m
+   response=runtime.api._response_rows(compiled,assembly,child,step['step_hash']);committed.append((child.to_dict(),response));counts['accepted_assembly_replays']+=1
+  assert 1<=len(entry['invocations'])<=2 and len(committed)<=1
+  if path['status']=='complete':assert len(committed)==1 and b(path['terminal_checkpoint'])==b(committed[0][0]) and b(path['response_history'])==b([committed[0][1]])
+  else:assert path['status']=='incomplete'
+  for key in ['wall_ns','cpu_ns']:
+   accounted=timing[key]+natural(entry['proposal_'+key])+natural(entry.get('recovery_'+key,0))
+   if arm=='proposal':accounted+=natural(entry['committed_material_capture'][key])
+   assert accounted<=natural(path[key])
+  works[arm]=dict(work);counts.update(work)
+ fresh=paths['fresh-reference'];calculated={}
+ for arm in report['arm_order']:
+  path=paths[arm];structure,absolute,relative,within=runtime._numeric_payload_difference(fresh['response_history'],path['response_history'],absolute_tolerance=report['absolute_tolerance'],relative_tolerance=report['relative_tolerance'])
+  calculated[arm]={'step_response_pass':fresh['status']==path['status']=='complete' and structure and within,'structure_match':structure,'mismatch_locations':runtime._physical_mismatch_locations(fresh['response_history'],path['response_history'],absolute_tolerance=report['absolute_tolerance'],relative_tolerance=report['relative_tolerance']),'physical_values_within_tolerance':within,'maximum_absolute_difference_mixed_SI_fields':absolute if np.isfinite(absolute) else None,'maximum_relative_difference':relative if np.isfinite(relative) else None,'exact_terminal_checkpoint':b(fresh['terminal_checkpoint'])==b(path['terminal_checkpoint'])}
+ assert report['comparisons']==calculated
+ exact=calculated['reference']['step_response_pass'] and calculated['reference']['exact_terminal_checkpoint'] and b(paths['reference']['response_history'])==b(fresh['response_history']);assert report['reference_repeat_exact']==exact
+ passed=exact and all(c['step_response_pass'] for c in calculated.values());reproduced=b(paths['secant']['terminal_checkpoint'])==b(old_child)
+ assert row['same_parent_comparison_pass']==passed and row['original_secant_child_reproduced']==reproduced and row['arm_work']==works
+ assert row['policy_proposed']==proposal_used and row['proposal_decision']==proposal_decision
+ delta=works['proposal']['newton_iterations']-works['secant']['newton_iterations'];assert row['proposal_minus_secant_newton']==delta
+ assert row['ordinal']==ordinal and row['case_id']==case.case_id and row['source_target_index']==index and row['native_parent_hash']==parent.state_hash and row['source_policy_hash']==policy.policy_hash
+ assert row['parent_comparison_wall_ns']==report['whole_study_wall_ns'] and row['row_wall_ns_before_outcome_write']>=report['whole_study_wall_ns']>=sum(p['wall_ns'] for p in paths.values())
+ assert not row['training_admitted'] and not row['complete_path_credit'] and b(policy.to_dict())==frozen
+ if not partial:assert result['comparisons'][ordinal]==row
+ group=groups.setdefault(case.case_id,Counter());group['comparisons']+=1;group['passed']+=passed;group['original_secant_reproduced']+=reproduced;group['policy_proposed']+=bool(proposal_used)
+ if passed and reproduced and proposal_used:group['proposed_fewer_newton' if delta<0 else 'proposed_more_newton' if delta>0 else 'proposed_equal_newton']+=1
+ group['proposal_minus_secant_newton']+=delta;rows.append({'ordinal':ordinal,'source_target_index':index,'report_hash':report['report_hash'],'comparison_pass':passed,'original_secant_reproduced':reproduced})
+ if ordinal%25==0:print('audited comparison',ordinal,case.case_id,flush=True)
+if not partial:assert result['work']=={k:counts[k] for k in ['core_calls','newton_iterations','linear_solves']}
+summary={'schema_version':'rc-same-parent-cost-partial-audit.v1' if partial else 'rc-same-parent-cost-original-audit.v1','partial':partial,'source_revision':manifest['revision'],'source_files_verified':len(manifest['files']),'input_files_verified':len(bindings),'original_prefixes_reconstructed':len(origins),'comparison_count':len(rows),'rows':rows,'groups':{k:dict(v) for k,v in groups.items()},'counts':dict(counts),'physics_audit':physics.summary(),'audit_newton_calls':0,'audit_fits':0,'causal_training_dataset_admitted':False,'full_path_performance_credit':False,'independent_physical_validation':False,'wall_ns':time.perf_counter_ns()-start,'cpu_ns':time.process_time_ns()-cpu,'peak_rss_kib':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss}
+output=Path(args.output) if partial else root/'original-audit.json'
+with output.open('x') as f:json.dump(summary,f,indent=2,allow_nan=False);f.write('\n')
+print(json.dumps({k:v for k,v in summary.items() if k not in ['rows','physics_audit']}),flush=True)

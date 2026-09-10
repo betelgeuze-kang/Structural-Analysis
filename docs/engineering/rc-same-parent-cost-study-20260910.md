@@ -111,3 +111,40 @@ train-a prefix, not a completed cross-case result or an audited dataset.
 The prospective protocol, frozen source and a live process establish execution
 provenance, not a completed experiment. Final outcomes, the original-record audit
 of all new comparisons and a complete reread/hash seal remain required.
+
+## Prepared original-record audit and direct smoke verification
+
+The [auditor source](rc-same-parent-cost-study-20260910.audit.py.txt) verifies the
+frozen numerical source/input bindings and reconstructs all 968 original
+prefixes. For each new comparison it checks the exact parent and context against
+those originals, reconstructs the policy proposal or secant fallback, and
+recounts every original numerical outcome. It recreates native children from
+the stored solver coordinates, reassembles force/tangent/response, checks the
+unchanged residual/control tolerances, and reconstructs the fresh-reference
+comparison and reported work difference.
+
+The bound [material and assembly helper](rc-same-parent-cost-study-20260910.physics-audit.py.txt)
+is copied exactly from the earlier sealed audit. Its rational assembly verifier
+is also bound to that original inventory. It checks retained coordinate
+arithmetic, material branches/state and 100-digit stress calculations; it is
+not an external physical experiment. Newton execution and fitting are explicitly
+disabled in the auditor.
+
+Two partial audit runs inspected six completed comparisons: indices 0, 1, 241,
+242, then 243 and 244. The first set spans the initial/last train-a parents and
+the initial train-b parent; the second exercises actual learned proposals.
+All six original secant children and same-parent comparisons were reproduced.
+The audit checked **24 original numerical-call records and assembly replays**,
+**2,016 100-digit fiber stresses**, and six material snapshots. Audit Newton
+calls and fits were both zero. The two audit runs took 13.712 and 12.695 seconds.
+These are targeted auditor checks, not a representative performance sample or
+completion of the 968-comparison study. Both actual learned proposals in this
+small sample used more Newton iterations; no strategy is selected from them.
+
+The [supervisor](rc-same-parent-cost-study-20260910.launch-audit.py.txt), PID
+**1133597** at launch, records the original parent/worker start identities and
+waits for their verified disappearance and successful terminal outcome. It then
+checks the auditor hash and permits exactly one full audit attempt. It neither
+restarts numerical work nor retries a failed audit. The full audit has not yet
+started at this snapshot. Original outcomes, not elapsed observation time,
+determine whether it may launch.
