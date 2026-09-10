@@ -1,5 +1,9 @@
 # Soesianawati cohort: identify data before using the accompanying drawing
 
+Follow-up: [NIST specimen table and force conventions](soesianawati-nist-correspondence-20260910.md)
+now support No. 1-specific hoop details and the equivalent-cantilever mapping.
+The original 1986 full text and complete physical model reconstruction remain open.
+
 A source review identifies a flexure-classified PEER cohort and establishes the
 numerical relationship between an existing public calibration example and one
 of its histories. It also finds a specimen mismatch between that example's
