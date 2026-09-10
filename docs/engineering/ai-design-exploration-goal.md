@@ -1843,3 +1843,13 @@ both seeded arms' possible retries. 59 focused and 33 related tests pass. A froz
 with 964 original training rows, 32 planned paths and all 242 targets. The original
 numerical processes and subsequent one-shot audit must be observed to completion;
 no current runtime result, learned gain or full-goal closure is claimed.
+
+
+[Independent development-contract CI](development-contract-ci-20260910.md)
+adds a separate 17-module diagnostic job while preserving the complete collection,
+four full shards, external preparation and required pytest-full aggregate.
+336 selected tests collect; 23 local workflow contracts pass. Hosted execution
+of the new job remains pending. The running secant-abstention experiment has one
+completed all-abstention fold: all 242 secant/proposal step files are byte-equal,
+with a single path-time ratio of 1.021979. Remaining folds, complete audit,
+repeated net benefit and the full roadmap remain open.

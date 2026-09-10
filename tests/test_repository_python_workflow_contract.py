@@ -22,7 +22,7 @@ def test_every_pull_request_collects_the_complete_pytest_suite() -> None:
     assert "paths:" not in workflow
     assert "python -m pytest --collect-only -q" in workflow
     assert "collect:\n    if:" not in workflow
-    assert workflow.count("python -m pip install numpy==1.26.4 scipy==1.12.0") == 2
+    assert workflow.count("python -m pip install numpy==1.26.4 scipy==1.12.0") == 3
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
@@ -839,3 +839,54 @@ def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:
     assert workflow.count("  full:\n") == 1
     assert "needs: full_shards" in workflow.split("  full:\n", 1)[1]
     assert "FULL_SHARDS_RESULT: ${{ needs.full_shards.result }}" in workflow
+
+
+def test_development_contracts_remain_independent_without_replacing_full_gate():
+    import shlex
+    import yaml
+
+    workflow = yaml.load(
+        (ROOT / ".github/workflows/python-test-collection.yml").read_text(),
+        Loader=yaml.BaseLoader,
+    )
+    jobs = workflow["jobs"]
+    diagnostic = jobs["development_contracts"]
+    assert diagnostic["name"] == "pytest-development-contracts"
+    assert "needs" not in diagnostic and "if" not in diagnostic
+    assert "continue-on-error" not in diagnostic
+    assert workflow["permissions"] == {"contents": "read"}
+    assert all("continue-on-error" not in step for step in diagnostic["steps"])
+    commands = [step["run"] for step in diagnostic["steps"] if "run" in step]
+    assert len(commands) == 2
+    tests = shlex.split(commands[1])
+    assert tests[:3] == ["python", "-m", "pytest"]
+    assert "--junitxml=development-contracts.xml" in tests
+    assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
+    selected = {x for x in tests if x.startswith("tests/")}
+    assert len(selected) == 17
+    assert all((ROOT / path).is_file() for path in selected)
+    assert {
+        "tests/test_rc_control_runtime_selection.py",
+        "tests/test_rc_control_candidate_search.py",
+        "tests/test_rc_control_candidate_cost.py",
+        "tests/test_measured_response_split.py",
+        "tests/test_pinned_opensees_runtime.py",
+        "tests/test_local_source_reference_comparison.py",
+    } <= selected
+    assert all(
+        "materializ" not in cmd and "--refresh-product-replay" not in cmd
+        for cmd in commands
+    )
+    upload = diagnostic["steps"][-1]
+    assert upload["if"] == "${{ always() }}"
+    assert upload["with"]["path"] == "development-contracts.xml"
+    # A successful diagnostic cannot mask failed, cancelled or skipped shards.
+    full = jobs["full"]
+    assert full["needs"] == "full_shards"
+    assert full["if"] == "${{ always() }}"
+    assert full["steps"][0]["run"] == 'test "$FULL_SHARDS_RESULT" = "success"'
+    assert (
+        full["steps"][0]["env"]["FULL_SHARDS_RESULT"]
+        == "${{ needs.full_shards.result }}"
+    )
+    assert "continue-on-error" not in jobs["full_shards"]
