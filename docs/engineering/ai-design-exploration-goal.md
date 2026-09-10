@@ -1874,3 +1874,14 @@ the required aggregate remains failed. Current shard-1 output identifies the
 external replay and technical-receipt blockers. Eight original evidence files
 are sealed separately. This closes hosted execution of the new diagnostic only;
 full-suite completion, independent qualification and the roadmap remain open.
+
+
+[Exact measured row-subsequence screening](measured-row-subsequence-20260910.md)
+at e281ebb1f rejects an entire shorter paired response across declared splits,
+including renamed campaigns and exact unit conversion, before solver/fit/output.
+45 focused tests pass. A sealed 744/548-pair original-source derivative audit
+reproduces old acceptance and new rejection in both orders, with unchanged
+content identities and zero structural calls/fits. The actual rounded SimCenter
+copy still requires the known common campaign: exact matching does not establish
+rounded/resampled equivalence or authenticated provenance. External training,
+independent validation, net learned savings and full-goal closure remain open.
