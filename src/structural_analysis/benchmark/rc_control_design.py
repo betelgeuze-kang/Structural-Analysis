@@ -107,8 +107,15 @@ def _screens(performance, history_limits, material_limits, terminal_limits=None)
 
 
 def _evaluate_design_row(
-    baseline, candidate, request, *, root, prices, history_limits,
-    material_limits, terminal_limits,
+    baseline,
+    candidate,
+    request,
+    *,
+    root,
+    prices,
+    history_limits,
+    material_limits,
+    terminal_limits,
 ):
     """One virgin-state analysis plus fresh replay, shared by study and local use.
 
@@ -146,9 +153,7 @@ def _evaluate_design_row(
             "detail": str(error),
         }
         return row
-    row["artifacts"]["model"] = _save(
-        root, f"{candidate_id}/model.json", model_bytes
-    )
+    row["artifacts"]["model"] = _save(root, f"{candidate_id}/model.json", model_bytes)
     result, raw, checkpoint = None, None, None
     payload: dict[str, Any] | None = None
     validation: dict[str, Any] | None = None
@@ -191,8 +196,7 @@ def _evaluate_design_row(
             invocation["status"] = "returned"
             invocation["unknown_execution_work"] = (
                 invocation["work"] is None
-                or invocation["work"].get("unknown_solver_work_attempt_count", 0)
-                > 0
+                or invocation["work"].get("unknown_solver_work_attempt_count", 0) > 0
             )
         except Exception as error:
             invocation["status"] = "raised"
@@ -211,9 +215,7 @@ def _evaluate_design_row(
         # Artifact writes are outside the numerical exception handler: an
         # export failure must not masquerade as a solver failure.
         if phase == "analysis" and raw is not None:
-            row["artifacts"]["result"] = _save(
-                root, f"{candidate_id}/result.json", raw
-            )
+            row["artifacts"]["result"] = _save(root, f"{candidate_id}/result.json", raw)
             if checkpoint is not None:
                 row["artifacts"]["checkpoint"] = _save(
                     root, f"{candidate_id}/checkpoint.json", checkpoint
@@ -353,8 +355,13 @@ def compare_rc_control_designs(
     _save(root, "request.json", _bytes(identity))
     rows = [
         _evaluate_design_row(
-            baseline, candidate, request, root=root, prices=prices,
-            history_limits=history_limits, material_limits=material_limits,
+            baseline,
+            candidate,
+            request,
+            root=root,
+            prices=prices,
+            history_limits=history_limits,
+            material_limits=material_limits,
             terminal_limits=terminal_limits,
         )
         for candidate in (None, *candidates)
