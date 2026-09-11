@@ -106,6 +106,169 @@ def _screens(performance, history_limits, material_limits, terminal_limits=None)
     }
 
 
+def _evaluate_design_row(
+    baseline, candidate, request, *, root, prices, history_limits,
+    material_limits, terminal_limits,
+):
+    """One virgin-state analysis plus fresh replay, shared by study and local use.
+
+    Internal entry point: callers validate and detach their complete request.
+    This extraction preserves the existing reference calculation and gates.
+    """
+    kwargs = request.api_kwargs() | {"restart": None}
+    candidate_id = "baseline" if candidate is None else candidate.candidate_id
+    row: dict[str, Any] = {
+        "candidate_id": candidate_id,
+        "status": "invalid_candidate",
+        "artifacts": {},
+        "quantities": None,
+        "material_estimate": None,
+        "performance": None,
+        "screens": None,
+        "full_reference_verification_pass": False,
+        "selection_eligible": False,
+        "invocations": [],
+        "failure": None,
+    }
+    try:
+        model = (
+            baseline.detached_analysis_snapshot()
+            if candidate is None
+            else design.apply_fiber_frame_section_changes(baseline, candidate)
+        )
+        row["quantities"] = design.calculate_fiber_frame_member_quantities(model)
+        row["material_estimate"] = design._estimate(row["quantities"], prices)
+        model_bytes = _bytes(model.canonical_payload())
+    except (ValueError, TypeError, KeyError) as error:
+        row["failure"] = {
+            "phase": "preparation",
+            "kind": type(error).__name__,
+            "detail": str(error),
+        }
+        return row
+    row["artifacts"]["model"] = _save(
+        root, f"{candidate_id}/model.json", model_bytes
+    )
+    result, raw, checkpoint = None, None, None
+    payload: dict[str, Any] | None = None
+    validation: dict[str, Any] | None = None
+    for phase in ("analysis", "verification"):
+        invocation: dict[str, Any] = {
+            "phase": phase,
+            "status": "started",
+            "work": None,
+            "unknown_execution_work": True,
+        }
+        row["invocations"].append(invocation)
+        row["artifacts"][f"{phase}_started"] = _save(
+            root, f"{candidate_id}/{phase}-started.json", _bytes(invocation)
+        )
+        wall, cpu = perf_counter_ns(), process_time_ns()
+        try:
+            if phase == "analysis":
+                result = api.analyze_bounded_rc_fiber_direct_control(
+                    model, request.targets_m, **kwargs
+                )
+                raw = result.result_artifact_bytes()
+                payload = json.loads(raw)
+                checkpoint = (
+                    result.checkpoint_artifact_bytes()
+                    if payload["checkpoint"] is not None
+                    else None
+                )
+                invocation["work"] = payload["metrics"]["control_work"]
+            else:
+                if raw is None:
+                    raise ValueError("original result required for verification")
+                validation = api.validate_bounded_rc_fiber_direct_control_artifacts(
+                    model,
+                    request.targets_m,
+                    result=raw,
+                    checkpoint=checkpoint,
+                    **kwargs,
+                ).to_dict()
+                invocation["work"] = validation["replay_control_work"]
+            invocation["status"] = "returned"
+            invocation["unknown_execution_work"] = (
+                invocation["work"] is None
+                or invocation["work"].get("unknown_solver_work_attempt_count", 0)
+                > 0
+            )
+        except Exception as error:
+            invocation["status"] = "raised"
+            row["failure"] = {
+                "phase": phase,
+                "kind": type(error).__name__,
+                "detail": str(error),
+            }
+            row["status"] = "execution_error"
+        finally:
+            invocation["wall_ns"] = perf_counter_ns() - wall
+            invocation["process_cpu_ns"] = process_time_ns() - cpu
+        row["artifacts"][f"{phase}_outcome"] = _save(
+            root, f"{candidate_id}/{phase}-outcome.json", _bytes(invocation)
+        )
+        # Artifact writes are outside the numerical exception handler: an
+        # export failure must not masquerade as a solver failure.
+        if phase == "analysis" and raw is not None:
+            row["artifacts"]["result"] = _save(
+                root, f"{candidate_id}/result.json", raw
+            )
+            if checkpoint is not None:
+                row["artifacts"]["checkpoint"] = _save(
+                    root, f"{candidate_id}/checkpoint.json", checkpoint
+                )
+        elif validation is not None:
+            row["artifacts"]["verification"] = _save(
+                root, f"{candidate_id}/verification.json", _bytes(validation)
+            )
+        if invocation["status"] == "raised":
+            break
+    if validation is None or payload is None:
+        return row
+    verified = (
+        all(
+            validation.get(key) is True
+            for key in (
+                "artifact_contract_pass",
+                "contract_pass",
+                "physical_path_complete",
+                "fresh_source_execution_invoked",
+                "solver_replay_performed",
+            )
+        )
+        and validation.get("verified_result_hash") == payload["result_hash"]
+        and validation.get("errors") == []
+        and validation.get("unavailable_execution_work") is False
+    )
+    verified = (
+        verified
+        and payload["contract_pass"] is True
+        and len(payload["response_history"]) == len(request.targets_m)
+    )
+    row["full_reference_verification_pass"] = verified
+    row["status"] = "verified" if verified else "verification_blocked"
+    if not verified:
+        row["failure"] = {
+            "phase": "verification",
+            "kind": "full_reference_blocked",
+            "api_status": payload["status"],
+            "errors": validation["errors"],
+        }
+        return row
+    history = payload["response_history"]
+    if request.constant_nodal_loads:
+        history = [payload["preload_response"], *history]
+    row["performance"] = _performance(history)
+    row["screens"] = _screens(
+        row["performance"], history_limits, material_limits, terminal_limits
+    )
+    row["selection_eligible"] = all(
+        screen["status"] == "pass" for screen in row["screens"].values()
+    )
+    return row
+
+
 def compare_rc_control_designs(
     baseline: CanonicalModel,
     candidates: tuple[design.FiberFrameDesignCandidate, ...],
@@ -188,160 +351,14 @@ def compare_rc_control_designs(
         "source_revision_is_attestation": False,
     }
     _save(root, "request.json", _bytes(identity))
-    kwargs = request.api_kwargs() | {"restart": None}
-    rows = []
-    for candidate in (None, *candidates):
-        candidate_id = "baseline" if candidate is None else candidate.candidate_id
-        row: dict[str, Any] = {
-            "candidate_id": candidate_id,
-            "status": "invalid_candidate",
-            "artifacts": {},
-            "quantities": None,
-            "material_estimate": None,
-            "performance": None,
-            "screens": None,
-            "full_reference_verification_pass": False,
-            "selection_eligible": False,
-            "invocations": [],
-            "failure": None,
-        }
-        rows.append(row)
-        try:
-            model = (
-                baseline.detached_analysis_snapshot()
-                if candidate is None
-                else design.apply_fiber_frame_section_changes(baseline, candidate)
-            )
-            row["quantities"] = design.calculate_fiber_frame_member_quantities(model)
-            row["material_estimate"] = design._estimate(row["quantities"], prices)
-            model_bytes = _bytes(model.canonical_payload())
-        except (ValueError, TypeError, KeyError) as error:
-            row["failure"] = {
-                "phase": "preparation",
-                "kind": type(error).__name__,
-                "detail": str(error),
-            }
-            continue
-        row["artifacts"]["model"] = _save(
-            root, f"{candidate_id}/model.json", model_bytes
+    rows = [
+        _evaluate_design_row(
+            baseline, candidate, request, root=root, prices=prices,
+            history_limits=history_limits, material_limits=material_limits,
+            terminal_limits=terminal_limits,
         )
-        result, raw, checkpoint = None, None, None
-        payload: dict[str, Any] | None = None
-        validation: dict[str, Any] | None = None
-        for phase in ("analysis", "verification"):
-            invocation: dict[str, Any] = {
-                "phase": phase,
-                "status": "started",
-                "work": None,
-                "unknown_execution_work": True,
-            }
-            row["invocations"].append(invocation)
-            row["artifacts"][f"{phase}_started"] = _save(
-                root, f"{candidate_id}/{phase}-started.json", _bytes(invocation)
-            )
-            wall, cpu = perf_counter_ns(), process_time_ns()
-            try:
-                if phase == "analysis":
-                    result = api.analyze_bounded_rc_fiber_direct_control(
-                        model, request.targets_m, **kwargs
-                    )
-                    raw = result.result_artifact_bytes()
-                    payload = json.loads(raw)
-                    checkpoint = (
-                        result.checkpoint_artifact_bytes()
-                        if payload["checkpoint"] is not None
-                        else None
-                    )
-                    invocation["work"] = payload["metrics"]["control_work"]
-                else:
-                    if raw is None:
-                        raise ValueError("original result required for verification")
-                    validation = api.validate_bounded_rc_fiber_direct_control_artifacts(
-                        model,
-                        request.targets_m,
-                        result=raw,
-                        checkpoint=checkpoint,
-                        **kwargs,
-                    ).to_dict()
-                    invocation["work"] = validation["replay_control_work"]
-                invocation["status"] = "returned"
-                invocation["unknown_execution_work"] = (
-                    invocation["work"] is None
-                    or invocation["work"].get("unknown_solver_work_attempt_count", 0)
-                    > 0
-                )
-            except Exception as error:
-                invocation["status"] = "raised"
-                row["failure"] = {
-                    "phase": phase,
-                    "kind": type(error).__name__,
-                    "detail": str(error),
-                }
-                row["status"] = "execution_error"
-            finally:
-                invocation["wall_ns"] = perf_counter_ns() - wall
-                invocation["process_cpu_ns"] = process_time_ns() - cpu
-            row["artifacts"][f"{phase}_outcome"] = _save(
-                root, f"{candidate_id}/{phase}-outcome.json", _bytes(invocation)
-            )
-            # Artifact writes are outside the numerical exception handler: an
-            # export failure must not masquerade as a solver failure.
-            if phase == "analysis" and raw is not None:
-                row["artifacts"]["result"] = _save(
-                    root, f"{candidate_id}/result.json", raw
-                )
-                if checkpoint is not None:
-                    row["artifacts"]["checkpoint"] = _save(
-                        root, f"{candidate_id}/checkpoint.json", checkpoint
-                    )
-            elif validation is not None:
-                row["artifacts"]["verification"] = _save(
-                    root, f"{candidate_id}/verification.json", _bytes(validation)
-                )
-            if invocation["status"] == "raised":
-                break
-        if validation is None or payload is None:
-            continue
-        verified = (
-            all(
-                validation.get(key) is True
-                for key in (
-                    "artifact_contract_pass",
-                    "contract_pass",
-                    "physical_path_complete",
-                    "fresh_source_execution_invoked",
-                    "solver_replay_performed",
-                )
-            )
-            and validation.get("verified_result_hash") == payload["result_hash"]
-            and validation.get("errors") == []
-            and validation.get("unavailable_execution_work") is False
-        )
-        verified = (
-            verified
-            and payload["contract_pass"] is True
-            and len(payload["response_history"]) == len(request.targets_m)
-        )
-        row["full_reference_verification_pass"] = verified
-        row["status"] = "verified" if verified else "verification_blocked"
-        if not verified:
-            row["failure"] = {
-                "phase": "verification",
-                "kind": "full_reference_blocked",
-                "api_status": payload["status"],
-                "errors": validation["errors"],
-            }
-            continue
-        history = payload["response_history"]
-        if request.constant_nodal_loads:
-            history = [payload["preload_response"], *history]
-        row["performance"] = _performance(history)
-        row["screens"] = _screens(
-            row["performance"], history_limits, material_limits, terminal_limits
-        )
-        row["selection_eligible"] = all(
-            screen["status"] == "pass" for screen in row["screens"].values()
-        )
+        for candidate in (None, *candidates)
+    ]
     eligible = [row for row in rows if row["selection_eligible"]]
     selected = (
         min(
