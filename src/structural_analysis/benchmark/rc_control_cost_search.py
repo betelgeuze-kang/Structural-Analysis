@@ -192,11 +192,15 @@ def run_rc_control_cost_search(
                 or evaluation['model_checksum'] != models[name].canonical_model_checksum
                 or evaluation['request'] != request.to_dict()):
             raise ValueError('evaluated model/quantity/price/request differs from the frozen pool')
-        outcomes[name] = verified_limit_outcome(plan, row)
+        work = evaluation['new_work']
+        # An uncounted execution cannot become a price-bound incumbent even
+        # when its response/verification fields otherwise look successful.
+        outcomes[name] = (
+            None if work['unknown_work'] else verified_limit_outcome(plan, row)
+        )
         record.update(status='evaluated', verified_limit_outcome=outcomes[name],
                       evaluation={'path': f'{name}/evaluation.json', 'report_hash': evaluation['report_hash'],
                                   'mode': evaluation['mode'], 'physics_key': evaluation['physics_key']})
-        work = evaluation['new_work']
         invocations += work['api_invocation_count']
         unknown_work_stop = work['unknown_work']
         for key, value in work['known_counters'].items():

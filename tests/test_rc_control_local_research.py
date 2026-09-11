@@ -461,3 +461,65 @@ def test_unknown_work_is_not_cached(model,control_request,options,tmp_path,monke
     assert result['new_work']['unknown_work'] is True
     assert s.retained_bytes==0
     assert result['retained_for_reuse'] is False
+
+
+def test_unknown_work_alone_cannot_confirm_incumbent(model, control_request, options, tmp_path, monkeypatch):
+    """Fault injection retains a good response but removes work certainty only."""
+    original = reference._evaluate_design_row
+
+    def uncounted(*args, **kwargs):
+        row = original(*args, **kwargs)
+        assert row['full_reference_verification_pass'] is True
+        row['invocations'][0]['unknown_execution_work'] = True
+        return row
+
+    monkeypatch.setattr(reference, '_evaluate_design_row', uncounted)
+    result = search.run_rc_control_cost_search(
+        model, (candidate('costly', .5),), control_request,
+        session=session(), scope_id='research', output_directory=tmp_path/'unknown', **options)
+    assert result['status'] == 'unknown_work_stop'
+    assert result['cost_bound']['pool_minimum_feasible_estimate'] is None
+    assert result['cost_bound']['selected_candidate_id'] is None
+    assert result['outcomes'] == {'baseline': None, 'costly': None}
+    assert result['records'][1]['status'] == 'not_run_after_unknown_numerical_work'
+
+
+def test_publication_failure_never_admits_fresh_cache(model, control_request, options, tmp_path, monkeypatch):
+    original = reference._save
+
+    def fail_report(root, relative, data):
+        if relative == 'evaluation.json':
+            raise OSError('injected final report publication failure')
+        return original(root, relative, data)
+
+    s = session()
+    with monkeypatch.context() as scoped:
+        scoped.setattr(reference, '_save', fail_report)
+        with pytest.raises(OSError, match='publication'):
+            evaluate(s, model, control_request, options, tmp_path/'publication-failed')
+    assert s.retained_bytes == 0
+    with pytest.raises(reuse.NewAnalysisRequired):
+        evaluate(s, model, control_request, options, tmp_path/'no-credit', allow_new_analysis=False)
+    assert not (tmp_path/'no-credit').exists()
+
+
+def test_real_zero_price_baseline_confirms_minimum_without_tie_claim(model, control_request, options, tmp_path):
+    zero = replace(options['prices'], concrete_per_m3=0.0, rebar_per_kg=0.0)
+    result = search.run_rc_control_cost_search(
+        model, (candidate('alternative', .5),), control_request,
+        session=session(), scope_id='research', output_directory=tmp_path/'zero-prices',
+        **(options | {'prices': zero}))
+    assert result['new_model_evaluations'] == 1
+    assert result['status'] == 'pool_minimum_confirmed'
+    assert result['cost_bound']['pool_minimum_feasible_estimate'] == 0.0
+    assert result['cost_bound']['all_minimum_cost_ties_verified'] is False
+    assert result['cost_bound']['response_coverage_complete'] is False
+
+
+@pytest.mark.parametrize('field,value', [
+    ('fresh', 0), ('fresh', 'false'), ('allow_new_analysis', 1), ('allow_new_analysis', None),
+])
+def test_execution_options_require_booleans(model, control_request, options, tmp_path, field, value):
+    with pytest.raises(ValueError, match='boolean'):
+        evaluate(session(), model, control_request, options, tmp_path/'bad-option', **{field: value})
+    assert not (tmp_path/'bad-option').exists()
