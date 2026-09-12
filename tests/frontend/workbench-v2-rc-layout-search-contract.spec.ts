@@ -40,6 +40,52 @@ for (const [name, mutate] of [
 }
 
 import { standaloneLayouts } from './layoutStandaloneFixture'
+import { prunedLayouts } from './layoutPrunedFixture'
+
+for (const [id, files] of Object.entries(prunedLayouts)) {
+  test(`RC layout pruned validates original decisions ${id}`, async () => {
+    const requested: string[] = []
+    const review = await validateRcControlSearch(files['result.json'], async path => { requested.push(path); if (!files[path]) throw new Error('missing original'); return files[path] })
+    const strategy = id === 'learned' ? 'learned_order' : 'price_order'
+    const pruning = review.report.arms[strategy].cost_pruning
+    expect(review.costOptimality).toBeNull()
+    expect(review.report.candidate_coverage_audit).toBeNull()
+    expect(review.report.arms[strategy].selected_candidate_id).toBe(id === 'horizon' ? null : 'middle')
+    expect(pruning.skipped_cost_dominated_candidate_ids).toEqual(id === 'horizon' ? [] : id === 'price' ? ['large', 'outside'] : ['outside'])
+    expect(pruning.outside_consideration_horizon_candidate_ids).toEqual(id === 'horizon' ? ['middle', 'large', 'outside'] : [])
+    expect(pruning.unevaluated_physical_feasibility).toBe('unknown')
+    for (const r of pruning.decisions) expect(requested).toContain(`${strategy}/${r.artifact.path}`)
+    for (const key of pruning.unevaluated_candidate_ids) {
+      expect(requested).toContain(`pool/${key}.json`)
+      expect(requested.some(p => p.startsWith(`${strategy}/${key}/`))).toBe(false)
+    }
+    expect(review.designs[strategy].report).toEqual(JSON.parse(files[`${strategy}/comparison.json`].toString()))
+  })
+  for (const change of ['decision_action', 'future_rows', 'physical_promotion', 'raw_decision', 'pool_model']) {
+    test(`RC layout pruned rejects ${id} ${change}`, async () => {
+      const source = { ...files }, result = JSON.parse(source['result.json'].toString()), strategy = result.strategy
+      const path = `${strategy}/comparison.json`, comp = JSON.parse(source[path].toString()), pruning = comp.cost_pruning
+      const ref = pruning.decisions[0].artifact, decisionPath = `${strategy}/${ref.path}`
+      if (change === 'pool_model') source['pool/outside.json'] = Buffer.concat([source['pool/outside.json'], Buffer.from(' ')])
+      else if (change === 'raw_decision') source[decisionPath] = Buffer.concat([source[decisionPath], Buffer.from(' ')])
+      else {
+        if (change === 'physical_promotion') pruning.unevaluated_physical_feasibility = 'infeasible'
+        else {
+          const edits = change === 'future_rows' ? { evaluated_candidate_ids_before: '["baseline"]' } : { action: '"skip_cost_dominated"' }
+          const raw = changed(source[decisionPath], edits, 'decision_hash')
+          if (change === 'decision_action') pruning.decisions[0].action = 'skip_cost_dominated'
+          ref.byte_length = raw.byteLength; ref.sha256 = `sha256:${createHash('sha256').update(raw).digest('hex')}`
+          source[decisionPath] = Buffer.from(raw)
+        }
+        source[path] = Buffer.from(changed(source[path], { cost_pruning: JSON.stringify(pruning) }, 'report_hash'))
+        result.arms[strategy].comparison_hash = JSON.parse(source[path].toString()).report_hash
+        result.arms[strategy].cost_pruning = pruning
+        source['result.json'] = Buffer.from(changed(source['result.json'], { arms: JSON.stringify(result.arms) }, 'report_hash'))
+      }
+      await expect(validateRcControlSearch(source['result.json'], async p => source[p])).rejects.toThrow()
+    })
+  }
+}
 for (const [id, files] of Object.entries(standaloneLayouts)) {
   test(`RC layout standalone validates original ${id}`, async () => {
     const requested:string[]=[]

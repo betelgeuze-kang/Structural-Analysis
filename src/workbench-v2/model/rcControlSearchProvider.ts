@@ -6,6 +6,7 @@ import type { RcSearchReview } from './rcControlSearchSchema'
 export interface RcSearchSession extends RcSearchReview {
   designSession(arm: string): RcDesignSession
   download(role: 'result' | 'plan' | 'policy' | 'historical-training' | 'price-table'): Promise<Blob>
+  downloadPruning(candidate: string, role: 'model' | 'decision'): Promise<Blob>
   onFailure(listener: () => void): () => void
   dispose(): void
 }
@@ -15,6 +16,7 @@ export async function loadRcControlSearch(url: string, signal: AbortSignal, auth
     const review = await connection.initialize<RcSearchReview>()
     return { ...review, dispose: connection.dispose, onFailure: connection.onFailure,
       download: role => connection.call('metadata', { role }),
+      downloadPruning: (candidate, role) => connection.call('pruningDownload', { candidate, role }),
       designSession(arm) {
         if (!Object.prototype.hasOwnProperty.call(review.designs, arm)) throw new Error('rc_search_arm_unavailable')
         return { ...review.designs[arm], dispose() { /* Search session owns its shared worker. */ }, onFailure: connection.onFailure,

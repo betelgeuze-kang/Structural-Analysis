@@ -35,10 +35,19 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       window.setTimeout(() => { URL.revokeObjectURL(href); urls.current.delete(href) }, 0)
     } catch { invalidate() }
   }
+  async function downloadPruning(candidate: string, role: 'model' | 'decision') {
+    try {
+      const blob = await session!.downloadPruning(candidate, role), href = URL.createObjectURL(blob), anchor = document.createElement('a')
+      urls.current.add(href); anchor.href = href; anchor.download = `rc-pruning-${candidate}-${role}.json`
+      document.body.append(anchor); anchor.click(); anchor.remove()
+      window.setTimeout(() => { URL.revokeObjectURL(href); urls.current.delete(href) }, 0)
+    } catch { invalidate() }
+  }
   if (!session) return <section className="wb2-panel" data-rc-search={status}><h2>RC candidate search</h2><p role="status">{status === 'invalid' ? 'Unavailable — the original search records could not be verified.' : 'Checking candidate models, full-path results and search accounting…'}</p></section>
   const { report, plan, costOptimality: cost } = session, audit = report.candidate_coverage_audit, training = report.historical_training_cost
-  const arms = RC_SEARCH_ARMS.filter(name => report.arms[name]), standalone = ['experimental-rc-control-candidate-strategy.v1', 'experimental-rc-control-layout-strategy.v1'].includes(report.schema_version)
-  const layout = ['experimental-rc-control-layout-search.v1', 'experimental-rc-control-layout-strategy.v1'].includes(report.schema_version)
+  const arms = RC_SEARCH_ARMS.filter(name => report.arms[name]), standalone = ['experimental-rc-control-candidate-strategy.v1', 'experimental-rc-control-layout-strategy.v1', 'experimental-rc-control-layout-cost-pruned-strategy.v1'].includes(report.schema_version)
+  const layout = ['experimental-rc-control-layout-search.v1', 'experimental-rc-control-layout-strategy.v1', 'experimental-rc-control-layout-cost-pruned-strategy.v1'].includes(report.schema_version)
+  const pruning = report.schema_version === 'experimental-rc-control-layout-cost-pruned-strategy.v1' ? report.arms[report.strategy].cost_pruning : null
   const names = [...arms, ...(report.oracle ? ['exhaustive_oracle'] : [])]
   const trainingWork = training ? searchWork([{ invocations: training.label_invocations }]) : null
   return <section className="wb2-panel" data-rc-search="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
@@ -66,7 +75,21 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       {arms.map(name => { const a = audit.arms[name]; return <tr key={name}><td>{label(name)}</td><td>{shown(a.missed_feasible_count)}</td>{['false_safe_count', 'predicted_safe_unverifiable_count', 'false_negative_count'].map(k => <td key={k}>{name === 'price_order' ? 'Not applicable' : shown(a[k])}</td>)}</tr> })}
     </tbody></table></div>
     <p>Counts cover alternatives, excluding the baseline. Unavailable counts do not mean zero. Feasible but unrequested candidates may cost more than the selected design. The exhaustive check uses the same reference solver.</p></>}
+    {pruning && <>
+      <h3>Candidate evaluation decisions</h3>
+      <p data-rc-search-pruning>{pruning.evaluated_candidate_ids.length} models analyzed; {pruning.skipped_cost_dominated_candidate_ids.length} skipped because their declared material cost exceeded an already verified feasible candidate. {pruning.outside_consideration_horizon_candidate_ids.length} outside the fixed consideration horizon. Skipping does not extend that horizon. Unevaluated physical feasibility remains unknown.</p>
+      <p>Decision processing: {pruning.decision_wall_ns / 1e9} s, already included in the strategy time. These records do not establish an exhaustive pool minimum or AI speedup.</p>
+      <div className="wb2-table-scroll" role="region" aria-label="RC evaluation decisions" tabIndex={0}><table className="wb2-table" style={{ minWidth: 800, overflowWrap: 'normal' }}><thead><tr><th>Candidate</th><th>Declared material cost</th><th>Evaluation decision</th><th>Physical verification</th><th>Original records</th></tr></thead><tbody>
+        {plan.pool.map((p: RcObject) => {
+          const row = session.designs[report.strategy].report.rows.find((r: RcObject) => r.candidate_id === p.candidate_id)
+          const decision = pruning.decisions.find((d: RcObject) => d.candidate_id === p.candidate_id)
+          return <tr key={p.candidate_id} data-rc-pruning-candidate={p.candidate_id}><td>{p.candidate_id}</td><td>{p.material_estimate.total} {p.material_estimate.currency}</td><td>{row ? 'Analyzed' : decision ? 'Skipped: higher cost than a verified feasible candidate' : 'Outside consideration horizon'}</td><td>{row?.full_reference_verification_pass ? row.selection_eligible ? 'Verified limits pass' : 'Verified limit failure' : 'Unknown'}</td><td><button className="wb2-btn" type="button" onClick={() => { void downloadPruning(p.candidate_id, 'model') }}>Download pool {p.candidate_id} model</button>{decision && <button className="wb2-btn" type="button" onClick={() => { void downloadPruning(p.candidate_id, 'decision') }}>Download {p.candidate_id} decision</button>}</td></tr>
+        })}
+      </tbody></table></div>
+    </>}
     <h3>Cost within this candidate pool</h3>
+    {!cost && <p data-rc-search-pool-minimum>Pool minimum unavailable: this report has no exhaustive comparison. A cost-based skip does not establish physical feasibility.</p>}
+    {cost && <>
     <p data-rc-search-pool-minimum>{cost.status === 'complete'
       ? `Lowest verified feasible estimate: ${cost.pool_minimum_feasible_estimate} ${cost.currency} · ${cost.pool_minimum_feasible_candidate_ids.join(', ')}`
       : cost.status === 'oracle_not_run' ? 'Pool minimum unavailable: the exhaustive check was not run.'
@@ -76,6 +99,7 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       {arms.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{a.missed_cheaper_feasible_candidate_ids === null ? 'Unavailable' : `${a.missed_cheaper_feasible_count}${a.missed_cheaper_feasible_count ? `: ${a.missed_cheaper_feasible_candidate_ids.join(', ')}` : ''}`}</td></tr> })}
     </tbody></table></div>
     <p>Recomputed from verified design records using one price table and material scope. The baseline is included. A minimum requires every candidate to be verified; unknown values do not mean zero. This finite-pool comparison does not establish a global design optimum or quoted monetary savings.</p>
+    </>}
     <div>{(['result', 'plan', 'policy', 'historical-training', 'price-table'] as const).filter(role => role === 'price-table' ? layout : training || role === 'result' || role === 'plan').map(role => <button className="wb2-btn" type="button" key={role} onClick={() => { void download(role) }}>Download search {role}</button>)}</div>
     <h3>{label(arm)}: verified design records</h3>
     <RcControlDesignReviewPanel key={`${report.report_hash}:${arm}`} session={session.designSession(arm)} onInvalid={invalidate} />

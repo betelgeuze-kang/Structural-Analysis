@@ -46,6 +46,64 @@ test('RC layout search browser rejects changed original result before showing a 
 })
 
 import { standaloneLayouts } from './layoutStandaloneFixture'
+import { prunedLayouts } from './layoutPrunedFixture'
+
+test('RC layout pruned browser hides selections when a decision changes', async ({ page }) => {
+  const files = prunedLayouts.price
+  await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/pruned-invalid/result.json' } })
+  await page.route('**/pruned-invalid/**', async route => {
+    const path = new URL(route.request().url()).pathname.replace('/pruned-invalid/', '')
+    await route.fulfill({ contentType: 'application/json', body: path.endsWith('decisions/03.json') ? Buffer.concat([files[path], Buffer.from(' ')]) : files[path] })
+  })
+  await page.goto(`${base}/#/workbench-v2`)
+  await expect(page.locator('[data-rc-search]')).toHaveAttribute('data-rc-search', 'invalid', { timeout: 60000 })
+  await expect(page.locator('[data-rc-design-selected]')).toHaveCount(0)
+  await expect(page.locator('[data-rc-pruning-candidate]')).toHaveCount(0)
+})
+
+for (const width of [1440, 390]) for (const id of ['price', 'learned', 'horizon']) {
+  test.describe(`RC layout pruned browser ${width} ${id}`, () => {
+    test.use({ viewport: { width, height: 1000 } })
+    test('shows verified decisions, unknown feasibility and original downloads', async ({ page }) => {
+      const files = prunedLayouts[id], result = JSON.parse(files['result.json'].toString()), strategy = result.strategy
+      const pruning = result.arms[strategy].cost_pruning
+      await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/layout-pruned/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-layout', bearerToken: 'synthetic-layout-token' }) } })
+      await page.route('**/layout-pruned/**', async route => {
+        expect(await route.request().headerValue('authorization')).toBe('Bearer synthetic-layout-token')
+        const path = new URL(route.request().url()).pathname.replace('/layout-pruned/', '')
+        expect(files[path]).toBeDefined(); await route.fulfill({ contentType: 'application/json', body: files[path] })
+      })
+      await page.goto(`${base}/#/workbench-v2`)
+      const panel = page.locator('[data-rc-search]')
+      await expect(panel).toHaveAttribute('data-rc-search', 'verified', { timeout: 60000 })
+      await expect(panel.locator('[data-rc-search-pruning]')).toContainText('physical feasibility remains unknown')
+      await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('unavailable')
+      await expect(panel.locator('[data-rc-search-arm]')).toHaveCount(1)
+      for (const key of pruning.unevaluated_candidate_ids) {
+        const row = panel.locator(`[data-rc-pruning-candidate="${key}"]`)
+        await expect(row).toContainText('Unknown')
+        await expect(row).toContainText(id === 'horizon' ? 'Outside consideration horizon' : 'Skipped: higher cost')
+        const pending = page.waitForEvent('download')
+        await row.getByRole('button', { name: `Download pool ${key} model`, exact: true }).click()
+        expect(await readFile((await (await pending).path())!)).toEqual(files[`pool/${key}.json`])
+      }
+      for (const decision of pruning.decisions) {
+        const pending = page.waitForEvent('download')
+        await panel.getByRole('button', { name: `Download ${decision.candidate_id} decision`, exact: true }).click()
+        expect(await readFile((await (await pending).path())!)).toEqual(files[`${strategy}/${decision.artifact.path}`])
+      }
+      if (id !== 'horizon') {
+        await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'middle')
+        for (const role of ['model', 'result', 'checkpoint', 'verification']) {
+          const pending = page.waitForEvent('download')
+          await panel.getByRole('button', { name: `Download middle ${role}`, exact: true }).click()
+          expect(await readFile((await (await pending).path())!)).toEqual(files[`${strategy}/middle/baseline/${role}.json`])
+        }
+      }
+      const box = await panel.boundingBox(); expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1)
+    })
+  })
+}
 for (const width of [1440,390]) for (const strategy of ['price_order','learned_order']) {
   test.describe(`RC layout standalone browser ${width} ${strategy}`,()=>{
     test.use({viewport:{width,height:1000}})

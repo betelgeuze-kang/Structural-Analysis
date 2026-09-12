@@ -20,7 +20,7 @@ self.onmessage = async ({ data }) => {
         const response = await fetch(target.href, { headers, credentials: 'include', cache: 'no-store', redirect: 'error' })
         if (!response.ok) { await response.body?.cancel(); throw new Error('artifact unavailable') }
         const bytes = await readBoundedJobBytes(response, maximum, 'rc search', expected)
-        if (['price-table.json', 'plan.json', 'policy.json', 'historical-training.json', 'price_order/comparison.json', 'learned_order/comparison.json', 'exhaustive_oracle/comparison.json'].includes(relative)) originals.set(relative, bytes)
+        if (['price-table.json', 'plan.json', 'policy.json', 'historical-training.json', 'price_order/comparison.json', 'learned_order/comparison.json', 'exhaustive_oracle/comparison.json'].includes(relative) || /^pool\/[A-Za-z0-9_-]+\.json$/.test(relative) || /^(price_order|learned_order)\/decisions\/[0-9]{2}\.json$/.test(relative)) originals.set(relative, bytes)
         return bytes
       }
       const original = await read(base.href, 2 * 1024 ** 2)
@@ -31,11 +31,19 @@ self.onmessage = async ({ data }) => {
       const bytes = originals.get(`${data.role}.json`)
       if (!bytes) throw new Error('missing original metadata')
       self.postMessage({ id, value: new Blob([bytes], { type: 'application/json' }) })
+    } else if (type === 'pruningDownload' && review?.report.schema_version === 'experimental-rc-control-layout-cost-pruned-strategy.v1') {
+      const pool = review.plan.pool.find((p: any) => p.candidate_id === data.candidate)
+      const arm = review.report.arms[review.report.strategy]
+      const decision = arm.cost_pruning.decisions.find((d: any) => d.candidate_id === data.candidate)
+      const path = data.role === 'model' ? pool?.model_artifact.path : data.role === 'decision' && decision ? `${review.report.strategy}/${decision.artifact.path}` : null
+      const bytes = path ? originals.get(path) : null
+      if (!bytes) throw new Error('missing original pruning artifact')
+      self.postMessage({ id, value: new Blob([bytes], { type: 'application/json' }) })
     } else if (type === 'download' && review && Object.prototype.hasOwnProperty.call(review.designs, data.arm)) {
       const design = review.designs[data.arm]
       const row = design.report.rows.find((r: any) => r.candidate_id === data.candidate)
       const bytes = data.role === 'comparison' ? originals.get(`${data.arm}/comparison.json`)
-        : row ? await verifiedStudyBytes((path, max, expected) => read(`${data.arm}/${path}`, max, expected), row, data.role, design.report.schema_version === 'experimental-rc-control-layout-comparison.v1' ? 'layout' : 'section') : null
+        : row ? await verifiedStudyBytes((path, max, expected) => read(`${data.arm}/${path}`, max, expected), row, data.role, ['experimental-rc-control-layout-comparison.v1', 'experimental-rc-control-layout-cost-pruned-comparison.v1'].includes(design.report.schema_version) ? 'layout' : 'section') : null
       if (!bytes) throw new Error('missing original artifact')
       self.postMessage({ id, value: new Blob([bytes], { type: 'application/json' }) })
     } else throw new Error('invalid operation')
