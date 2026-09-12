@@ -161,7 +161,7 @@ def target_work_inputs():
 
 
 def run_target_work(report, decisions):
-    from structural_analysis.benchmark.rc_control_step_work import (
+    from structural_analysis.benchmark.rc_control_target_work_diagnostic import (
         diagnose_control_step_work,
     )
 
@@ -216,7 +216,7 @@ def test_target_work_groups_prescribed_reversals_and_includes_fallback_work():
     ],
 )
 def test_target_work_rejects_incomplete_or_misaligned_inputs(change):
-    from structural_analysis.benchmark.rc_control_step_work import (
+    from structural_analysis.benchmark.rc_control_target_work_diagnostic import (
         diagnose_control_step_work,
     )
 
