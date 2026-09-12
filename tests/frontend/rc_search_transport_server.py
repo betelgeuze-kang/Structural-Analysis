@@ -47,11 +47,13 @@ def main():
         choices=("rc-control-search", "rc-control-search-cost", "rc-strategy-cohort-control"),
         default="rc-control-search",
     )
-    parser.add_argument("--cohort-directory", type=Path)
+    directories = parser.add_mutually_exclusive_group()
+    directories.add_argument("--cohort-directory", type=Path)
+    directories.add_argument("--study-directory", type=Path)
     parser.add_argument("--expected-report-hash")
     args = parser.parse_args()
-    if args.cohort_directory and not args.expected_report_hash:
-        parser.error("original cohort directory requires an explicit report hash")
+    if (args.cohort_directory or args.study_directory) and not args.expected_report_hash:
+        parser.error("original artifact directory requires an explicit report hash")
     root = Path(__file__).resolve().parents[2]
     dist = root / "dist"
     before = time.perf_counter_ns()
@@ -79,7 +81,9 @@ def main():
         )["report_hash"]
         bundle = RcStrategyCohortBundle.from_reader(reader, expected_report_hash=expected)
     else:
-        expected = json.loads((snapshot_root / "result.json").read_bytes())["report_hash"]
+        if args.study_directory:
+            snapshot_root = args.study_directory.resolve()
+        expected = args.expected_report_hash or json.loads((snapshot_root / "result.json").read_bytes())["report_hash"]
         bundle = RcSearchArtifactBundle.from_directory(
             snapshot_root, expected_report_hash=expected
         )

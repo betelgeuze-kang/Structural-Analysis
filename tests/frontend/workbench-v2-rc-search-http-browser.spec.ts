@@ -12,7 +12,7 @@ test.describe('RC search real HTTP', () => {
   let server: ChildProcess, origin: string, receipt: string
   test.beforeAll(async () => {
     receipt = resolve(`test-results/rc-search-real-http-${process.pid}.json`)
-    server = spawn('python3', ['-B', 'tests/frontend/rc_search_transport_server.py', '--receipt', receipt, '--fixture', 'rc-control-search-cost'], {
+    server = spawn('python3', ['-B', 'tests/frontend/rc_search_transport_server.py', '--receipt', receipt, '--study-directory', resolve(fixture), '--expected-report-hash', JSON.parse(readFileSync(fixture + 'result.json', 'utf8')).report_hash], {
       env: { ...process.env, PYTHONPATH: resolve('src') }, stdio: ['ignore', 'pipe', 'pipe'],
     })
     const ready = await new Promise<{ origin: string; artifact_count: number }>((resolveReady, reject) => {
