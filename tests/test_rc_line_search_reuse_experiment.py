@@ -2,6 +2,7 @@
 
 import importlib.util
 import ast
+import json
 from pathlib import Path
 
 import numpy as np
@@ -132,3 +133,36 @@ def test_historical_wrapper_runs_through_native_dispatch_signature(tmp_path, mon
     assert report["reference_repeat_exact"]
     assert all(v["full_history_pass"] for v in report["comparisons"].values())
     assert wrapper.hits > 0
+
+
+@pytest.mark.parametrize("has_model,has_request,case", [
+    (True, False, "supplied"), (False, True, "supplied"), (True, True, "small"),
+])
+def test_supplied_case_requires_explicit_paired_inputs(tmp_path, has_model, has_request, case):
+    output = tmp_path / "absent"
+    with pytest.raises(ValueError, match="both model and request"):
+        experiment.run(output, 2, case=case,
+                       model_path=tmp_path / "model" if has_model else None,
+                       request_path=tmp_path / "request" if has_request else None)
+    assert not output.exists()
+
+
+def test_supplied_case_preserves_preload_and_targets_through_native_comparison(tmp_path):
+    request = experiment.experiment_request("small", True)
+    request_path = tmp_path / "request.json"
+    request_path.write_text(json.dumps(request.to_dict()))
+    model_path = Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
+    output = tmp_path / "study"
+    experiment.run(output, 2, case="supplied", arithmetic="retained",
+                   model_path=model_path, request_path=request_path)
+    summary = json.loads((output / "summary.json").read_bytes())
+    assert summary["supplied_target_count"] == 3
+    assert summary["supplied_constant_load_count"] == 1
+    assert summary["supplied_request_sha256"] == experiment.hashlib.sha256(
+        request_path.read_bytes()).hexdigest()
+    assert [row["order"] for row in summary["rows"]] == [[False, True], [True, False]]
+    for row in summary["rows"]:
+        assert row["constant"] is True
+        assert row["native_step_bytes_exact"]
+        assert row["baseline"]["step_count"] == row["reuse"]["step_count"] == 16
+        assert row["reuse"]["reused_dispatches"] > 0

@@ -20,6 +20,7 @@ import numpy as np
 
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
+    decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
     StatefulFiberFrame2DDisplacementControlStepAdapter as Adapter,
@@ -96,27 +97,35 @@ def experiment_request(case, constant):
 
 
 def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "both",
-        implementation: str = "native"):
+        implementation: str = "native", *, model_path: Path | None = None,
+        request_path: Path | None = None):
     if type(repetitions) is not int or repetitions < 2 or repetitions % 2:
         raise ValueError("a positive even number of order-balanced repetitions required")
-    experiment_request(case, False)  # validate before creating output
+    supplied = model_path is not None or request_path is not None
+    if supplied:
+        if case != "supplied" or model_path is None or request_path is None:
+            raise ValueError("supplied case requires both model and request paths")
+        request_raw = request_path.read_bytes()
+        supplied_request = decode_bounded_rc_fiber_direct_control_request(request_raw)
+    else:
+        experiment_request(case, False)  # validate before creating output
+        model_path = Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
     if arithmetic not in ("both", "binary64", "retained"):
         raise ValueError("unknown arithmetic selection")
     if implementation not in ("native", "wrapper"):
         raise ValueError("unknown reuse implementation")
+    model = load_neutral_json(model_path)
     # Refuse existing output; raw evidence is never overwritten.
     output.mkdir(parents=True, exist_ok=False)
     source_revision = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], text=True
     ).strip()
-    model_path = Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
-    model = load_neutral_json(model_path)
     identity = "sha256:" + hashlib.sha256(b"deterministic-secant-reuse-study").hexdigest()
     rows = []
     profiles = (False, True) if arithmetic == "both" else (arithmetic == "retained",)
     for retained in profiles:
-        for constant in ((False,) if case == "yielded-prefix" else (False, True)):
-            request = experiment_request(case, constant)
+        for constant in ((False,) if case in ("yielded-prefix", "supplied") else (False, True)):
+            request = supplied_request if supplied else experiment_request(case, constant)
             arithmetic_kwargs = learning._arithmetic_kwargs(
                 learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
             ) if retained else {}
@@ -171,7 +180,7 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
                         reused[2]["reused_dispatches"]):
                     raise ValueError("actual dispatch accounting does not close")
                 rows.append({
-                    "retained": retained, "constant": constant,
+                    "retained": retained, "constant": bool(request.constant_nodal_loads),
                     "repetition": repetition, "order": list(order),
                     "baseline": baseline[2], "reuse": reused[2],
                     "native_step_bytes_exact": True,
@@ -183,7 +192,8 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
         "base_revision": source_revision,
         "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "model_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest(),
-        "scope": "single authored L-frame; declared arithmetic/preload configurations",
+        "scope": ("one supplied model and unmodified supplied request" if supplied else
+                  "single authored L-frame; declared arithmetic/preload configurations"),
         "case": case,
         "arithmetic_selection": arithmetic,
         "implementation": implementation,
@@ -193,6 +203,10 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
         "concurrent_execution_supported": False,
         "rows": rows,
     }
+    if supplied:
+        summary["supplied_request_sha256"] = hashlib.sha256(request_raw).hexdigest()
+        summary["supplied_target_count"] = len(supplied_request.targets_m)
+        summary["supplied_constant_load_count"] = len(supplied_request.constant_nodal_loads)
     (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
 
@@ -200,8 +214,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("--repetitions", type=int, default=4)
-    parser.add_argument("--case", choices=("small", "yielded-prefix"), default="small")
+    parser.add_argument("--case", choices=("small", "yielded-prefix", "supplied"), default="small")
+    parser.add_argument("--model", type=Path)
+    parser.add_argument("--request", type=Path)
     parser.add_argument("--arithmetic", choices=("both", "binary64", "retained"), default="both")
     parser.add_argument("--implementation", choices=("native", "wrapper"), default="native")
     args = parser.parse_args()
-    run(args.output, args.repetitions, args.case, args.arithmetic, args.implementation)
+    run(args.output, args.repetitions, args.case, args.arithmetic, args.implementation,
+        model_path=args.model, request_path=args.request)

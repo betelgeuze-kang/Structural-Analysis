@@ -87,3 +87,7 @@ This completes a request-to-worker-to-verified-display connection for the option
 It does not establish AI net benefit, resolve the earlier binary64 yield-case
 baseline mismatch, complete hosted qualification, prove independent physics,
 or grant release/owner acceptance.
+
+The subsequent [four-geometry prefix experiment](rc-multicase-native-reuse-20260912.md)
+checks native record equality and actual dispatch reduction beyond the original
+single geometry. It does not establish full cyclic or learned benefit.
