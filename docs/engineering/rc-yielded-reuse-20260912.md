@@ -85,3 +85,7 @@ implementation step is explicitly scoped reuse without a process-global patch,
 with failure and rollback verification. AI still needs separate net-benefit
 evaluation against that deterministic baseline. External-reference CI,
 independent physics and release acceptance remain open.
+
+The [native implementation](rc-native-assembly-reuse-20260912.md) now exposes
+explicit step, benchmark and repeated-selector options and repeats this retained
+case without a module patch. Its measurements are retained separately.

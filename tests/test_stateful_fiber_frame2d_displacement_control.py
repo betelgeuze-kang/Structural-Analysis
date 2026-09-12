@@ -667,8 +667,9 @@ def test_underflowed_control_equation_weight_is_rejected_before_assembly(
 
 
 @pytest.mark.parametrize("field", ["residual_kn", "free_displacements_m"])
+@pytest.mark.parametrize("reuse", [False, True])
 def test_ready_newton_metric_must_match_actual_coordinates_and_assembly(
-    elastic_pair, monkeypatch, field
+    elastic_pair, monkeypatch, field, reuse
 ):
     pair = elastic_pair
     original = pair.direct.trial_solution
@@ -677,7 +678,7 @@ def test_ready_newton_metric_must_match_actual_coordinates_and_assembly(
     values[0] += 0.1
     metrics[field] = values
 
-    def detached_metric(adapter, *, config):
+    def detached_metric(adapter, *, config, assembly_work=None, assembly_reuse=None):
         # Bind the actual current adapter/config so only the altered metric
         # contradicts the unchanged, physically converged final coordinates.
         return replace(original, problem=adapter, config=config, metrics=metrics)
@@ -688,6 +689,7 @@ def test_ready_newton_metric_must_match_actual_coordinates_and_assembly(
         pair.parent,
         control_global_dof=7,
         target_control_displacement_m=pair.target,
+        reuse_line_search_assembly=reuse,
     )
     assert result.metrics["control_gate_passed"] is True
     assert result.metrics["equilibrium_gate_passed"] is True

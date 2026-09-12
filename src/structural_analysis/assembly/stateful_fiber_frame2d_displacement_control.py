@@ -32,6 +32,7 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_MATRIX_BACKEND,
     VectorAssemblyWorkRecorder,
+    VectorLineSearchAssemblyReuse,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
     newton_raphson_vector,
@@ -469,8 +470,11 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     config: StatefulFiberFrame2DDisplacementControlConfig | None = None,
     initial_augmented_coordinates_m: tuple[float, ...] | None = None,
     assembly_work: VectorAssemblyWorkRecorder | None = None,
+    reuse_line_search_assembly: bool = False,
 ) -> StatefulFiberFrame2DDisplacementControlStepResult:
     """Use ordinary Newton on one augmented target; commit only all passed gates."""
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
     cfg = (
         config
         if config is not None
@@ -486,9 +490,19 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     )
     parent_bytes = accepted_checkpoint.canonical_bytes()
     initial = adapter.initial_augmented_coordinates_m
-    solution = newton_raphson_vector(
-        adapter, config=cfg.newton, assembly_work=assembly_work
+    reuse = (
+        VectorLineSearchAssemblyReuse(adapter) if reuse_line_search_assembly else None
     )
+    try:
+        solution = newton_raphson_vector(
+            adapter,
+            config=cfg.newton,
+            assembly_work=assembly_work,
+            assembly_reuse=reuse,
+        )
+    finally:
+        if reuse is not None:
+            reuse.clear()
     terminal = (
         adapter.observe(solution.free_displacements_m)
         if solution.free_displacement_compensation_m is None

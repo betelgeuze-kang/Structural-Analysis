@@ -598,8 +598,9 @@ def test_model_gate_cost_is_charged_without_qualifying_failed_paths(original, ph
             selection._runtime_score(report, [], proposal_setup_wall_ns=invalid)
 
 
+@pytest.mark.parametrize("reuse", [False, True])
 def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
-    tmp_path, original, monkeypatch
+    tmp_path, original, monkeypatch, reuse
 ):
     observed = []
     real = learning.benchmark_rc_control_seed_paths
@@ -626,7 +627,9 @@ def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
         proposal_abstention_strategy="secant",
         static_model_abstention=True,
         record_assembly_work=True,
+        reuse_line_search_assembly=reuse,
     )
+    assert ("line_search_assembly_reuse" in result) is reuse
     plan = json.loads((root / "plan.json").read_bytes())
     assert (
         plan["assembly_work_recording"]
@@ -686,6 +689,13 @@ def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
                 inv for entry in path["entries"] for inv in entry["invocations"]
             ]
             assert len(invocations) == 5
+            assert (
+                sum(
+                    inv["newton_assembly_work"].get("line_search_reuse_hit_count", 0)
+                    for inv in invocations
+                )
+                > 0
+            ) is reuse
             for inv in invocations:
                 work = inv["newton_assembly_work"]
                 assert (
@@ -863,5 +873,20 @@ def test_invalid_assembly_recording_rejects_before_training_or_output(tmp_path, 
             output_directory=tmp_path / "absent",
             ridge_grid=(1e4,),
             record_assembly_work=value,
+        )
+    assert not (tmp_path / "absent").exists()
+
+
+@pytest.mark.parametrize("value", [1, None, "true"])
+def test_invalid_assembly_reuse_rejects_before_training_or_output(tmp_path, value):
+    with pytest.raises(ValueError, match="boolean line-search assembly reuse"):
+        selection.run_rc_control_runtime_selection(
+            None,
+            None,
+            None,
+            source_revision="a" * 40,
+            output_directory=tmp_path / "absent",
+            ridge_grid=(1e4,),
+            reuse_line_search_assembly=value,
         )
     assert not (tmp_path / "absent").exists()

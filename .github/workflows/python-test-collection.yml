@@ -92,6 +92,7 @@ jobs:
           tests/test_rc_control_iteration_cost.py
           tests/test_newton_assembly_work.py
           tests/test_rc_control_assembly_work.py
+          tests/test_rc_native_assembly_reuse.py
           tests/test_rc_control_parent_step.py
           tests/test_measured_response_workbook.py
           tests/test_measured_response_split.py

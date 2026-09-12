@@ -286,6 +286,7 @@ def _path(
     proposal_abstention_strategy="reference",
     initial_prefix=None,
     record_assembly_work=False,
+    reuse_line_search_assembly=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -467,11 +468,8 @@ def _path(
                     target_control_displacement_m=target,
                     config=request.solver_config,
                     initial_augmented_coordinates_m=current,
-                    **(
-                        {"assembly_work": assembly_work}
-                        if assembly_work is not None
-                        else {}
-                    ),
+                    reuse_line_search_assembly=reuse_line_search_assembly,
+                    assembly_work=assembly_work,
                 )
                 if (
                     accepted.canonical_bytes() != before
@@ -943,6 +941,7 @@ def benchmark_rc_control_seed_paths(
     parent_checkpoint_bytes: bytes | None = None,
     accepted_context: RCControlSeedContext | None = None,
     record_assembly_work: bool = False,
+    reuse_line_search_assembly: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -953,6 +952,8 @@ def benchmark_rc_control_seed_paths(
     started, started_cpu = perf_counter_ns(), process_time_ns()
     if type(record_assembly_work) is not bool:
         raise ValueError("explicit boolean assembly recording required")
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
     if (parent_checkpoint_bytes is None) != (accepted_context is None):
         raise ValueError("native parent and accepted context must be supplied together")
     if type(
@@ -1221,6 +1222,10 @@ def benchmark_rc_control_seed_paths(
         )
     if record_assembly_work:
         identity["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
+    if reuse_line_search_assembly:
+        identity["line_search_assembly_reuse"] = (
+            "rc-control-immediate-line-search-reuse.v1"
+        )
     _save(root, "request.json", _bytes(identity))
     _save(root, "model.json", _bytes(model.canonical_payload()))
     origin_bytes = (
@@ -1239,6 +1244,7 @@ def benchmark_rc_control_seed_paths(
             proposal_abstention_strategy,
             initial_prefix,
             record_assembly_work,
+            reuse_line_search_assembly,
         )
         if initial_prefix is not None:
             unknown = any(

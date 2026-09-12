@@ -2,11 +2,12 @@
 
 Only the exact RC control adapter may reuse an immediately preceding line-search
 assembly at byte-identical coordinates in the next primary iteration. Final and
-terminal observations remain fresh. Run in a dedicated process: the experiment
-temporarily replaces a module function, and is not a concurrent service API.
+terminal observations remain fresh. Native opt-in is the default. The historical
+wrapper option temporarily replaces a module function and must run serially.
 """
 
 import argparse
+from contextlib import nullcontext
 from dataclasses import replace
 import hashlib
 import json
@@ -39,7 +40,10 @@ class ImmediateLineSearchReuse:
         self.hits = 0
         self.dispatches = 0
 
-    def __call__(self, problem, coordinates, *, compensation=None, phase, recorder=None):
+    def __call__(self, problem, coordinates, *, compensation=None, phase, recorder=None,
+                 reuse=None):
+        if reuse is not None:
+            raise ValueError("wrapper and native reuse cannot be nested")
         pending, self.pending = self.pending, None
         eligible = type(problem) is self.adapter_type and compensation is None
         key = None
@@ -91,12 +95,15 @@ def experiment_request(case, constant):
     ))
 
 
-def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "both"):
+def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "both",
+        implementation: str = "native"):
     if type(repetitions) is not int or repetitions < 2 or repetitions % 2:
         raise ValueError("a positive even number of order-balanced repetitions required")
     experiment_request(case, False)  # validate before creating output
     if arithmetic not in ("both", "binary64", "retained"):
         raise ValueError("unknown arithmetic selection")
+    if implementation not in ("native", "wrapper"):
+        raise ValueError("unknown reuse implementation")
     # Refuse existing output; raw evidence is never overwritten.
     output.mkdir(parents=True, exist_ok=False)
     source_revision = subprocess.check_output(
@@ -122,11 +129,14 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
                     reuse = ImmediateLineSearchReuse(newton.assemble_vector)
                     dispatch = reuse if enabled else newton.assemble_vector
                     started = perf_counter_ns()
-                    with patch.object(newton, "assemble_vector", dispatch):
+                    context = (patch.object(newton, "assemble_vector", dispatch)
+                               if implementation == "wrapper" else nullcontext())
+                    with context:
                         report = runtime.benchmark_rc_control_seed_paths(
                             model, request, source_revision=source_revision,
                             output_directory=destination, proposal=runtime.secant_seed,
                             proposal_identity=identity, record_assembly_work=True,
+                            reuse_line_search_assembly=enabled and implementation == "native",
                             **arithmetic_kwargs,
                         )
                     elapsed = perf_counter_ns() - started
@@ -137,17 +147,19 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
                         raise ValueError("a strategy failed its full-history comparison")
                     steps = {str(p.relative_to(destination)): p.read_bytes()
                              for p in destination.glob("*/*-step.json")}
-                    calls = 0
+                    calls = native_hits = 0
                     for step in steps:
                         path = destination / step.replace("-step.json", "-outcome.json")
                         work = json.loads(path.read_bytes())["newton_assembly_work"]
                         if work["exception_count"] or work["in_flight_count"]:
                             raise ValueError("assembly failure in completed experiment")
                         calls += work["call_count"]
+                        native_hits += work.get("line_search_reuse_hit_count", 0)
                     pair[enabled] = (steps, report, {
                         "directory": name, "wall_ns": elapsed,
                         "step_count": len(steps), "actual_newton_dispatches": calls,
-                        "reused_dispatches": reuse.hits if enabled else 0,
+                        "reused_dispatches": native_hits if implementation == "native" else
+                            reuse.hits if enabled else 0,
                     })
                 baseline, reused = pair[False], pair[True]
                 if not baseline[0] or baseline[0] != reused[0]:
@@ -174,6 +186,7 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
         "scope": "single authored L-frame; declared arithmetic/preload configurations",
         "case": case,
         "arithmetic_selection": arithmetic,
+        "implementation": implementation,
         "timing_scope": "whole benchmark including serialization, verification, and recording",
         "default_solver_changed": False, "learned_policy": False,
         "independent_physical_validation": False,
@@ -189,5 +202,6 @@ if __name__ == "__main__":
     parser.add_argument("--repetitions", type=int, default=4)
     parser.add_argument("--case", choices=("small", "yielded-prefix"), default="small")
     parser.add_argument("--arithmetic", choices=("both", "binary64", "retained"), default="both")
+    parser.add_argument("--implementation", choices=("native", "wrapper"), default="native")
     args = parser.parse_args()
-    run(args.output, args.repetitions, args.case, args.arithmetic)
+    run(args.output, args.repetitions, args.case, args.arithmetic, args.implementation)

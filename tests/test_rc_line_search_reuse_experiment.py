@@ -118,3 +118,17 @@ def test_unknown_arithmetic_rejects_before_output(tmp_path):
     with pytest.raises(ValueError, match="arithmetic selection"):
         experiment.run(output, 2, arithmetic="unknown")
     assert not output.exists()
+
+
+def test_historical_wrapper_runs_through_native_dispatch_signature(tmp_path, monkeypatch):
+    wrapper = experiment.ImmediateLineSearchReuse(experiment.newton.assemble_vector)
+    monkeypatch.setattr(experiment.newton, "assemble_vector", wrapper)
+    model = experiment.load_neutral_json(Path("examples/public_rc_fiber_frame_l_frame_material_history.json"))
+    report = experiment.runtime.benchmark_rc_control_seed_paths(
+        model, experiment.experiment_request("small", False),
+        source_revision="a" * 40, output_directory=tmp_path / "wrapper",
+        proposal=experiment.runtime.secant_seed, proposal_identity="sha256:" + "b" * 64,
+    )
+    assert report["reference_repeat_exact"]
+    assert all(v["full_history_pass"] for v in report["comparisons"].values())
+    assert wrapper.hits > 0
