@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Full-layout strategy CLI and completed bounded installation replay](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-strategy-cli-20260913.md)
 - [Changed-amplitude staged screening costs and exact retained histories](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-amplitudes-20260913.md)
 - [CI action inventory and package versus nested viewer manifest scope](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/ci-package-manifest-scope-20260913.md)
 - [Workbench staged prefix decisions, full acceptance and original downloads](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-workbench-20260913.md)
