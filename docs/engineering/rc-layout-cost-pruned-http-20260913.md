@@ -26,7 +26,9 @@ These are consistency checks on pinned original records, not a new numerical
 replay or independent physical validation. A host must still supply the trusted
 report pin and authorization. Serving the bundle performs no mutable filesystem
 reads after admission. Workbench engineering review of these new schemas is the
-next integration step and was not executed in this observation.
+next integration step and was not executed in this observation. Subsequent
+[Workbench review](rc-layout-pruned-workbench-20260913.md) records that connection,
+original downloads and the separately observed legacy-viewer limitations.
 
 ## Local verification
 
