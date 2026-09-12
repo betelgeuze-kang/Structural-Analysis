@@ -112,3 +112,138 @@ def test_ineligible_inputs_reject_before_any_diagnostic_fit(monkeypatch, mutatio
     monkeypatch.setattr(audit, "_fit", forbidden)
     with pytest.raises(ValueError):
         audit.audit_rc_control_training_folds(samples, policy)
+
+
+def target_work_inputs():
+    """Controlled accounting records only, not a physical simulation fixture."""
+    targets = [-1.0, -2.0, -1.0, 1.0, -0.5]
+    arms = {}
+    for name, iterations in (
+        ("secant", [2, 3, 5, 2, 4]),
+        ("proposal", [2, 5, 3, 2, 6]),
+    ):
+        arms[name] = {
+            "status": "complete",
+            "accepted_target_count": 5,
+            "requested_targets_m": targets,
+            "entries": [
+                {
+                    "target_index": i,
+                    "target_m": t,
+                    "parent_hash": name,
+                    "invocations": [
+                        {
+                            "unknown_work": False,
+                            "work": {
+                                "core_calls": 1,
+                                "newton_iterations": n,
+                                "linear_solves": n,
+                            },
+                        }
+                    ],
+                }
+                for i, (t, n) in enumerate(zip(targets, iterations))
+            ],
+        }
+    report = {
+        "schema_version": "experimental-rc-control-seed-comparison.v1",
+        "all_execution_work_reported": True,
+        "reference_repeat_exact": True,
+        "request": {"targets_m": targets},
+        "arms": arms,
+        "comparisons": {name: {"full_history_pass": True} for name in arms},
+    }
+    decisions = [
+        {"target_m": t, "accepted_prefix_count": i + 1, "decision": "proposed"}
+        for i, t in enumerate(targets)
+    ]
+    return report, decisions
+
+
+def run_target_work(report, decisions):
+    from structural_analysis.benchmark.rc_control_step_work import (
+        diagnose_control_step_work,
+    )
+
+    report["report_hash"] = _sha(
+        _bytes({k: v for k, v in report.items() if k != "report_hash"})
+    )
+    return diagnose_control_step_work(
+        _bytes(report), decisions, expected_report_hash=report["report_hash"]
+    )
+
+
+def test_target_work_groups_prescribed_reversals_and_includes_fallback_work():
+    report, decisions = target_work_inputs()
+    report["arms"]["proposal"]["entries"][2]["invocations"].append(
+        {
+            "unknown_work": False,
+            "work": {"core_calls": 1, "newton_iterations": 1, "linear_solves": 1},
+        }
+    )
+    result = run_target_work(report, decisions)
+    assert [r["phase"] for r in result["rows"]] == [
+        "initial",
+        "new_absolute_envelope",
+        "reversal",
+        "within_absolute_envelope",
+        "reversal",
+    ]
+    group = result["groups"]["proposed:reversal"]
+    assert group["fewer_newton_targets"] == group["more_newton_targets"] == 1
+    assert group["proposal_minus_secant"] == {
+        "core_calls": 1,
+        "newton_iterations": 1,
+        "linear_solves": 1,
+    }
+    assert not result["same_parent_causal_comparison"]
+    assert not result["prospective_policy_validated"]
+    assert not any(r["same_parent_hash"] for r in result["rows"])
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "unknown",
+        "bool_counter",
+        "missing_counter",
+        "partial",
+        "history",
+        "index",
+        "decision",
+        "bool_prefix",
+        "pin",
+    ],
+)
+def test_target_work_rejects_incomplete_or_misaligned_inputs(change):
+    from structural_analysis.benchmark.rc_control_step_work import (
+        diagnose_control_step_work,
+    )
+
+    report, decisions = target_work_inputs()
+    entry = report["arms"]["proposal"]["entries"][0]
+    if change == "unknown":
+        entry["invocations"][0]["unknown_work"] = True
+    elif change == "bool_counter":
+        entry["invocations"][0]["work"]["newton_iterations"] = True
+    elif change == "missing_counter":
+        entry["invocations"][0]["work"].pop("core_calls")
+    elif change == "partial":
+        report["arms"]["proposal"]["status"] = "failed"
+    elif change == "history":
+        report["comparisons"]["proposal"]["full_history_pass"] = False
+    elif change == "index":
+        entry["target_index"] = False
+    elif change == "decision":
+        decisions[0]["target_m"] = -2.0
+    elif change == "bool_prefix":
+        decisions[0]["accepted_prefix_count"] = True
+    if change == "pin":
+        run_target_work(report, decisions)
+        with pytest.raises(ValueError):
+            diagnose_control_step_work(
+                _bytes(report), decisions, expected_report_hash="sha256:" + "0" * 64
+            )
+    else:
+        with pytest.raises(ValueError):
+            run_target_work(report, decisions)
