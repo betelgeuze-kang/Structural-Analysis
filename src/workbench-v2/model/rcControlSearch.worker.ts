@@ -20,14 +20,14 @@ self.onmessage = async ({ data }) => {
         const response = await fetch(target.href, { headers, credentials: 'include', cache: 'no-store', redirect: 'error' })
         if (!response.ok) { await response.body?.cancel(); throw new Error('artifact unavailable') }
         const bytes = await readBoundedJobBytes(response, maximum, 'rc search', expected)
-        if (['plan.json', 'policy.json', 'historical-training.json', 'price_order/comparison.json', 'learned_order/comparison.json', 'exhaustive_oracle/comparison.json'].includes(relative)) originals.set(relative, bytes)
+        if (['price-table.json', 'plan.json', 'policy.json', 'historical-training.json', 'price_order/comparison.json', 'learned_order/comparison.json', 'exhaustive_oracle/comparison.json'].includes(relative)) originals.set(relative, bytes)
         return bytes
       }
       const original = await read(base.href, 2 * 1024 ** 2)
       originals.set('result.json', original)
       review = await validateRcControlSearch(original, read)
       self.postMessage({ id, value: review })
-    } else if (type === 'metadata' && review && ['result', 'plan', 'policy', 'historical-training'].includes(data.role)) {
+    } else if (type === 'metadata' && review && ['result', 'plan', 'policy', 'historical-training', 'price-table'].includes(data.role)) {
       const bytes = originals.get(`${data.role}.json`)
       if (!bytes) throw new Error('missing original metadata')
       self.postMessage({ id, value: new Blob([bytes], { type: 'application/json' }) })
@@ -35,7 +35,7 @@ self.onmessage = async ({ data }) => {
       const design = review.designs[data.arm]
       const row = design.report.rows.find((r: any) => r.candidate_id === data.candidate)
       const bytes = data.role === 'comparison' ? originals.get(`${data.arm}/comparison.json`)
-        : row ? await verifiedStudyBytes((path, max, expected) => read(`${data.arm}/${path}`, max, expected), row, data.role) : null
+        : row ? await verifiedStudyBytes((path, max, expected) => read(`${data.arm}/${path}`, max, expected), row, data.role, design.report.schema_version === 'experimental-rc-control-layout-comparison.v1' ? 'layout' : 'section') : null
       if (!bytes) throw new Error('missing original artifact')
       self.postMessage({ id, value: new Blob([bytes], { type: 'application/json' }) })
     } else throw new Error('invalid operation')

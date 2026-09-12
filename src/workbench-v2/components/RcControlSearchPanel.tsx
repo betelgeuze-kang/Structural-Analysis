@@ -27,7 +27,7 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
     }).catch(() => { if (!controller.signal.aborted) { setStatus('invalid'); onInvalid?.() } })
     return () => { controller.abort(); value?.dispose(); for (const href of urls.current) URL.revokeObjectURL(href); urls.current.clear() }
   }, [url, authorize, expectedReportHash, onInvalid])
-  async function download(role: 'result' | 'plan' | 'policy' | 'historical-training') {
+  async function download(role: 'result' | 'plan' | 'policy' | 'historical-training' | 'price-table') {
     try {
       const blob = await session!.download(role), href = URL.createObjectURL(blob), anchor = document.createElement('a')
       urls.current.add(href); anchor.href = href; anchor.download = `rc-search-${role}.json`
@@ -42,6 +42,7 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
   const trainingWork = training ? searchWork([{ invocations: training.label_invocations }]) : null
   return <section className="wb2-panel" data-rc-search="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2>RC candidate search</h2>
+    {report.schema_version === 'experimental-rc-control-layout-search.v1' && <p data-rc-search-layout>Layout alternatives may change building function. Shared prices and verified response limits do not establish equivalent building function or confirmed savings.</p>}
     <p>{plan.pool.length - 1} alternatives · up to {plan.full_analysis_budget_per_arm} full analyses per online strategy, including its own baseline. Each analyzed model also has a fresh verification run.</p>
     {standalone && <p data-rc-search-standalone>Standalone {label(report.strategy)} execution. No other strategy or exhaustive check was run in this report.</p>}
     <p data-rc-search-ranking>{!plan.plans.learned_order ? 'Price priority uses the declared common-price estimate.' : plan.ranking
@@ -52,7 +53,7 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
     <p data-rc-search-authority>Candidate models, quantities, declared prices and stored result bindings checked. Predictions remain estimates; passing caller limits is not design approval. This review does not establish independent physical validation, learned speedup or confirmed monetary savings.</p>
     <div className="wb2-table-scroll" role="region" aria-label="RC search strategies" tabIndex={0}><table className="wb2-table" style={{ minWidth: 900, overflowWrap: 'normal' }}><thead><tr><th>Strategy</th><th>Analyzed models</th><th>Selected candidate</th><th>Scoped estimate</th><th>Core calls</th><th>Newton / linear</th><th>Elapsed / CPU (s)</th><th>Review</th></tr></thead><tbody>
       {names.map(name => { const r = name === 'exhaustive_oracle' ? report.oracle : report.arms[name], work = r.execution_work.known_counters
-        return <tr key={name} data-rc-search-arm={name}><td>{label(name)}</td><td>{r.request_count}</td><td>{r.selected_candidate_id ?? 'None'}</td><td>{shown(r.selected_estimate)} {session.designs[name].report.prices.currency}</td><td>{work.attempted_step_count}</td><td>{work.known_newton_iteration_count} / {work.known_linear_solve_count}</td><td>{(r.wall_ns / 1e9).toFixed(3)} / {(r.cpu_ns / 1e9).toFixed(3)}</td><td><button className="wb2-btn" type="button" style={{ whiteSpace: 'nowrap', minWidth: 120 }} aria-pressed={arm === name} onClick={() => setArm(name)}>Review {label(name)}</button></td></tr>
+        return <tr key={name} data-rc-search-arm={name}><td>{label(name)}</td><td>{r.request_count}</td><td>{r.selected_candidate_id ?? 'None'}</td><td>{shown(r.selected_estimate ?? session.designs[name].report.rows.find((row: RcObject) => row.candidate_id === r.selected_candidate_id)?.material_estimate?.total)} {(session.designs[name].displayReport ?? session.designs[name].report).prices.currency}</td><td>{work.attempted_step_count}</td><td>{work.known_newton_iteration_count} / {work.known_linear_solve_count}</td><td>{(r.wall_ns / 1e9).toFixed(3)} / {(r.cpu_ns / 1e9).toFixed(3)}</td><td><button className="wb2-btn" type="button" style={{ whiteSpace: 'nowrap', minWidth: 120 }} aria-pressed={arm === name} onClick={() => setArm(name)}>Review {label(name)}</button></td></tr>
       })}
     </tbody></table></div>
     {training && trainingWork ? <p data-rc-search-training>Historical training, counted once: {training.sample_count} labels · {trainingWork.known_counters.attempted_step_count} core calls · {training.wall_ns / 1e9} s including label generation and fitting. Fit: {training.fit.wall_ns / 1e9} s. These original cost declarations are hash-bound; this review does not replay the historical training artifacts or refit the policy.</p> : <p data-rc-search-training>No learned policy or training artifact is used by this price-order execution.</p>}
@@ -74,7 +75,7 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       {arms.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{a.missed_cheaper_feasible_candidate_ids === null ? 'Unavailable' : `${a.missed_cheaper_feasible_count}${a.missed_cheaper_feasible_count ? `: ${a.missed_cheaper_feasible_candidate_ids.join(', ')}` : ''}`}</td></tr> })}
     </tbody></table></div>
     <p>Recomputed from verified design records using one price table and material scope. The baseline is included. A minimum requires every candidate to be verified; unknown values do not mean zero. This finite-pool comparison does not establish a global design optimum or quoted monetary savings.</p>
-    <div>{(['result', 'plan', 'policy', 'historical-training'] as const).filter(role => training || role === 'result' || role === 'plan').map(role => <button className="wb2-btn" type="button" key={role} onClick={() => { void download(role) }}>Download search {role}</button>)}</div>
+    <div>{(['result', 'plan', 'policy', 'historical-training', 'price-table'] as const).filter(role => role === 'price-table' ? report.schema_version === 'experimental-rc-control-layout-search.v1' : training || role === 'result' || role === 'plan').map(role => <button className="wb2-btn" type="button" key={role} onClick={() => { void download(role) }}>Download search {role}</button>)}</div>
     <h3>{label(arm)}: verified design records</h3>
     <RcControlDesignReviewPanel key={`${report.report_hash}:${arm}`} session={session.designSession(arm)} onInvalid={invalidate} />
   </section>

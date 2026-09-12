@@ -40,7 +40,8 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
       window.setTimeout(() => { URL.revokeObjectURL(href); urls.current.delete(href) }, 0)
     } catch { onInvalid() }
   }
-  const { report, models } = session
+  const { models } = session
+  const report = session.displayReport ?? session.report
   const current = report.rows.find((r: RcObject) => r.candidate_id === selected)
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
@@ -50,7 +51,8 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
     <p>Source declaration <code>{report.source_revision}</code> · report <code data-rc-design-hash>{report.report_hash}</code></p>
     <p>{report.prices ? `Declared prices: ${report.prices.currency} · ${report.prices.as_of} · ${report.prices.source}` : 'Prices unavailable; no cost-based candidate can be selected.'}</p>
     <p data-rc-design-recommendation>Lowest declared estimate among verified candidates passing all screens: {report.selected_candidate_id ?? 'UNAVAILABLE'}. Current selection: {selected ?? 'none'}.</p>
-    <p>Whole-study elapsed {report.total_wall_ns / 1e9} s · process CPU {report.total_process_cpu_ns / 1e9} s. Includes preparation, original analysis, fresh verification and artifact I/O; excludes final report write. Unknown work remains unknown.</p>
+    {session.displayReport ? <p>Arm elapsed {report.total_wall_ns / 1e9} s · process CPU {report.total_process_cpu_ns / 1e9} s. Includes the arm’s original analyses, fresh verification and artifact I/O. Historical training and shared ranking are outside this arm interval.</p>
+      : <p>Whole-study elapsed {report.total_wall_ns / 1e9} s · process CPU {report.total_process_cpu_ns / 1e9} s. Includes preparation, original analysis, fresh verification and artifact I/O; excludes final report write. Unknown work remains unknown.</p>}
     <div className="wb2-table-scroll" role="region" aria-label="RC design alternatives" tabIndex={0}>
       <table className="wb2-table"><thead><tr><th>Candidate</th><th>Concrete (m³)</th><th>Longitudinal rebar (kg)</th><th>Scoped estimate</th><th>Estimate reduction</th><th>Verification / selection</th></tr></thead>
         <tbody>{report.rows.map((row: RcObject) => <tr key={row.candidate_id} data-rc-design-candidate={row.candidate_id}>

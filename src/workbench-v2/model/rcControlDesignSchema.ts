@@ -13,19 +13,19 @@ const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinit
 const hash = (v: unknown): boolean => typeof v === 'string' && /^sha256:[a-f0-9]{64}$/.test(v)
 const close = (a: unknown, b: number): boolean => num(a) && Math.abs(a - b) <= 1e-12 * Math.max(1, Math.abs(b))
 export type StudyRead = (relative: string, maximum: number, expected?: number) => Promise<Uint8Array>
-export interface RcDesignReview { report: RcObject; models: Record<string, RcObject> }
+export interface RcDesignReview { report: RcObject; models: Record<string, RcObject>; displayReport?: RcObject }
 
-export async function verifiedStudyBytes(read: StudyRead, row: RcObject, role: string): Promise<Uint8Array> {
+export async function verifiedStudyBytes(read: StudyRead, row: RcObject, role: string, profile: 'section' | 'layout' = 'section'): Promise<Uint8Array> {
   const ref = row.artifacts[role]
   check(ROLES.includes(role) && ref, 'study_role_invalid')
-  check(ref.path === `${row.candidate_id}/${role.replace(/_/g, '-')}.json`, 'study_path_invalid')
+  check(ref.path === `${row.candidate_id}/${profile === 'layout' ? 'baseline/' : ''}${role.replace(/_/g, '-')}.json`, 'study_path_invalid')
   check(nat(ref.byte_length) && ref.byte_length > 0 && ref.byte_length <= artifactMaximum(role) && hash(ref.sha256), 'study_reference_invalid')
   const raw = await read(ref.path, artifactMaximum(role), ref.byte_length)
   check(raw.byteLength === ref.byte_length && await sha256Bytes(raw) === ref.sha256, 'study_bytes_invalid')
   return raw
 }
 
-function limits(report: RcObject): RcObject {
+export function validateRcStudyLimits(report: RcObject): RcObject {
   const geometric = ['maximum_translation_m', 'maximum_absolute_fiber_strain']
   const material = ['maximum_steel_accumulated_plastic_strain', 'maximum_concrete_tensile_damage', 'maximum_concrete_compressive_damage']
   const result: RcObject = {}
@@ -93,9 +93,9 @@ export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: s
     && estimate.currency === price.currency && close(estimate.total, totals.gross_concrete_volume_m3 * price.concrete_per_m3 + totals.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_estimate_invalid')
 }
 
-async function verifyCandidate(row: RcObject, rowRaw: string, report: RcObject, read: StudyRead): Promise<RcObject | null> {
+export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, report: RcObject, read: StudyRead, profile: 'section' | 'layout' = 'section'): Promise<RcObject | null> {
   const artifacts: Record<string, { raw: string; value: RcObject }> = {}
-  for (const role of Object.keys(row.artifacts)) artifacts[role] = document(await verifiedStudyBytes(read, row, role))
+  for (const role of Object.keys(row.artifacts)) artifacts[role] = document(await verifiedStudyBytes(read, row, role, profile))
   if (!artifacts.model) {
     check(row.status === 'invalid_candidate' && row.quantities === null && row.material_estimate === null && row.invocations.length === 0 && Object.keys(artifacts).length === 0, 'study_preparation_invalid')
   } else {
@@ -152,7 +152,7 @@ async function verifyCandidate(row: RcObject, rowRaw: string, report: RcObject, 
   const values = performance(history)
   check(same(Object.keys(values).sort(), Object.keys(row.performance).sort()), 'study_performance_keys_invalid')
   for (const [key, value] of Object.entries(values)) check(value === null ? row.performance[key] === null : close(row.performance[key], Number(value)), 'study_performance_invalid')
-  const requested = limits(report)
+  const requested = validateRcStudyLimits(report)
   check(same(Object.keys(requested).sort(), Object.keys(row.screens).sort()), 'study_screen_keys_invalid')
   for (const [key, limit] of Object.entries(requested)) {
     const value = row.performance[key]
@@ -174,16 +174,8 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   }
   const members = fields(doc.raw)
   check(await sha256Hex(`{${identityKeys.sort().map(k => { check(members.has(k), 'study_identity_missing'); return members.get(k)!.member }).join(',')}}`) === report.request_hash, 'study_request_hash_invalid')
-  const config = report.control_request
-  check(['bounded-rc-fiber-direct-control-request.v1', 'bounded-rc-fiber-direct-control-request.v2'].includes(config?.schema_version) && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
-    && config.targets_m.every(num) && nat(config.control_global_dof) && num(config.solver_config?.control_tolerance_m) && config.solver_config.control_tolerance_m > 0, 'study_control_invalid')
-  if (config.schema_version.endsWith('.v2')) {
-    check(Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0 && config.constant_nodal_loads.length <= 16
-      && new Set(config.constant_nodal_loads.map((r: RcObject) => r?.node_id)).size === config.constant_nodal_loads.length
-      && config.constant_nodal_loads.every((r: RcObject) => r && same(Object.keys(r).sort(), ['FX_kN', 'FY_kN', 'MZ_kNm', 'node_id']) && typeof r.node_id === 'string'
-        && ['FX_kN', 'FY_kN', 'MZ_kNm'].every(k => num(r[k])) && ['FX_kN', 'FY_kN', 'MZ_kNm'].some(k => r[k] !== 0)), 'study_constant_loads_invalid')
-  } else check(config.constant_nodal_loads === undefined, 'study_constant_profile_invalid')
-  limits(report)
+  validateRcStudyControl(report.control_request)
+  validateRcStudyLimits(report)
   check(Array.isArray(report.rows) && Array.isArray(report.candidates) && report.candidates.length >= 1 && report.candidates.length <= 16
     && report.rows.length === report.candidates.length + 1 && report.candidate_denominator === report.rows.length
     && same(report.rows.map((r: RcObject) => r.candidate_id), ['baseline', ...report.candidates.map((c: RcObject) => c.candidate_id)])
@@ -210,7 +202,7 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   const rowSlices = rawValues(members.get('rows')!.value)
   const models: Record<string, RcObject> = {}
   for (const [i, row] of report.rows.entries()) {
-    const model = await verifyCandidate(row, rowSlices[i], report, read)
+    const model = await verifyRcDesignCandidate(row, rowSlices[i], report, read)
     if (model) models[row.candidate_id] = model
   }
   const base = report.rows[0]
@@ -245,4 +237,15 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
     && report.verified_count === report.rows.filter((r: RcObject) => r.full_reference_verification_pass).length
     && report.status === (report.verified_count === report.rows.length ? 'complete' : 'incomplete') && nat(report.total_wall_ns) && nat(report.total_process_cpu_ns), 'study_selection_invalid')
   return { report, models }
+}
+
+export function validateRcStudyControl(config: RcObject): void {
+  check(['bounded-rc-fiber-direct-control-request.v1', 'bounded-rc-fiber-direct-control-request.v2'].includes(config?.schema_version) && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
+    && config.targets_m.every(num) && nat(config.control_global_dof) && num(config.solver_config?.control_tolerance_m) && config.solver_config.control_tolerance_m > 0, 'study_control_invalid')
+  if (config.schema_version.endsWith('.v2')) {
+    check(Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0 && config.constant_nodal_loads.length <= 16
+      && new Set(config.constant_nodal_loads.map((r: RcObject) => r?.node_id)).size === config.constant_nodal_loads.length
+      && config.constant_nodal_loads.every((r: RcObject) => r && same(Object.keys(r).sort(), ['FX_kN', 'FY_kN', 'MZ_kNm', 'node_id']) && typeof r.node_id === 'string'
+        && ['FX_kN', 'FY_kN', 'MZ_kNm'].every(k => num(r[k])) && ['FX_kN', 'FY_kN', 'MZ_kNm'].some(k => r[k] !== 0)), 'study_constant_loads_invalid')
+  } else check(config.constant_nodal_loads === undefined, 'study_constant_profile_invalid')
 }

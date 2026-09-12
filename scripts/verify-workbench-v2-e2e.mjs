@@ -22,6 +22,8 @@ const specs = [
   'tests/frontend/workbench-v2-rc-job-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-cohort-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-cohort-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-layout-search-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-layout-search-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-search-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-search-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-design-contract.spec.ts',

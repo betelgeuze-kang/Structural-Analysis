@@ -5,7 +5,7 @@ import type { RcSearchReview } from './rcControlSearchSchema'
 
 export interface RcSearchSession extends RcSearchReview {
   designSession(arm: string): RcDesignSession
-  download(role: 'result' | 'plan' | 'policy' | 'historical-training'): Promise<Blob>
+  download(role: 'result' | 'plan' | 'policy' | 'historical-training' | 'price-table'): Promise<Blob>
   onFailure(listener: () => void): () => void
   dispose(): void
 }
