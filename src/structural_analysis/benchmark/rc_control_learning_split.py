@@ -76,6 +76,23 @@ def geometry_shape_signature(model):
     }
 
 
+def geometry_shapes_overlap(left, right):
+    """Shared conservative shape comparison for explicit split contracts."""
+    topology = all(
+        left[k] == right[k]
+        for k in ("node_count", "member_count", "sorted_degrees", "restraint_count")
+    )
+    return bool(
+        topology
+        and np.allclose(
+            left["normalized_pair_distances"],
+            right["normalized_pair_distances"],
+            rtol=1e-10,
+            atol=1e-12,
+        )
+    )
+
+
 def _history_prefix(shorter, longer):
     if len(shorter) > len(longer):
         return False
@@ -101,22 +118,7 @@ def validate_control_learning_split_shapes(cases):
         for previous in records:
             if previous["split"] == case.split:
                 continue
-            old = previous["geometry"]
-            topology = all(
-                old[k] == geometry[k]
-                for k in [
-                    "node_count",
-                    "member_count",
-                    "sorted_degrees",
-                    "restraint_count",
-                ]
-            )
-            if topology and np.allclose(
-                old["normalized_pair_distances"],
-                geometry["normalized_pair_distances"],
-                rtol=1e-10,
-                atol=1e-12,
-            ):
+            if geometry_shapes_overlap(previous["geometry"], geometry):
                 raise ValueError("split_leakage: transformed_or_scaled_geometry_shape")
             history = previous["normalized_turning_points"]
             if _history_prefix(history, turning) or _history_prefix(turning, history):
