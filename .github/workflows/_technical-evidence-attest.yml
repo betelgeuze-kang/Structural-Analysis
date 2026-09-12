@@ -861,7 +861,7 @@ jobs:
                           require(0 < info.file_size <= MAX_FILE_BYTES, "native_package_file_size_invalid")
                           total_size += info.file_size
                           require(total_size <= MAX_ARCHIVE_BYTES, "native_package_expansion_limit_exceeded")
-                      manifest_names = [name for name in names if name.endswith("/manifest.json")]
+                      manifest_names = [name for name in names if name.count("/") == 1 and name.endswith("/manifest.json")]
                       require(len(manifest_names) == 1, "native_package_manifest_count_invalid")
                       manifest_name = manifest_names[0]
                       manifest = strict_json_bytes(

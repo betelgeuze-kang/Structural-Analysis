@@ -59,6 +59,7 @@ def _archive(
     files = {
         "bin/structural-cli": f"binary:{marker}\n".encode(),
         "workbench/index.html": f"<html>{marker}</html>\n".encode(),
+        "workbench/src/structure-viewer/drawings/manifest.json": b'{"drawings": []}\n',
     }
     rows = [
         {
@@ -93,7 +94,9 @@ def _archive(
 def _manifest(archive_path: Path) -> dict[str, object]:
     with zipfile.ZipFile(archive_path) as archive:
         name = next(
-            name for name in archive.namelist() if name.endswith("/manifest.json")
+            name
+            for name in archive.namelist()
+            if name.count("/") == 1 and name.endswith("/manifest.json")
         )
         return json.loads(archive.read(name))
 
