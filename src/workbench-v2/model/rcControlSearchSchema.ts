@@ -75,7 +75,7 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
   }
   const resultDoc = document(raw), report = resultDoc.value
   await selfHash(resultDoc.raw, report, 'report_hash')
-  if (report.schema_version === 'experimental-rc-control-layout-search.v1') return validateRcLayoutSearch(raw, read, searchWork, coverage)
+  if (['experimental-rc-control-layout-search.v1', 'experimental-rc-control-layout-strategy.v1'].includes(report.schema_version)) return validateRcLayoutSearch(raw, read, searchWork, coverage)
   const standalone = report.schema_version === 'experimental-rc-control-candidate-strategy.v1'
   check(!standalone || RC_SEARCH_ARMS.includes(report.strategy), 'search_strategy_invalid')
   const arms: string[] = standalone ? [report.strategy] : [...RC_SEARCH_ARMS]

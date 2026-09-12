@@ -38,3 +38,27 @@ for (const [name, mutate] of [
     await expect(validateRcControlSearch(changed(layoutFiles['result.json'],edits,'report_hash'),layoutRead)).rejects.toThrow()
   })
 }
+
+import { standaloneLayouts } from './layoutStandaloneFixture'
+for (const [id, files] of Object.entries(standaloneLayouts)) {
+  test(`RC layout standalone validates original ${id}`, async () => {
+    const requested:string[]=[]
+    const review=await validateRcControlSearch(files['result.json'],async p=>{ requested.push(p); if (!files[p]) throw new Error('missing'); return files[p] })
+    const strategy=id.endsWith('price_order')?'price_order':'learned_order'
+    expect(Object.keys(review.designs)).toEqual([strategy])
+    expect(review.report.strategy).toBe(strategy)
+    expect(review.report.oracle).toBeNull()
+    expect(review.costOptimality.status).toBe('oracle_not_run')
+    expect(review.designs[strategy].report.selected_candidate_id).toBe(id.startsWith('b3')?'middle':strategy==='price_order'?null:'large')
+    expect(review.designs[strategy].report).toEqual(JSON.parse(files[`${strategy}/comparison.json`].toString()))
+    expect(requested.includes('policy.json')).toBe(strategy==='learned_order')
+    expect(requested.includes('historical-training.json')).toBe(strategy==='learned_order')
+  })
+  for (const change of ['timing','strategy','coverage','checkpoint']) test(`RC layout standalone rejects ${id} ${change}`,async()=>{
+    let raw:Uint8Array=files['result.json']
+    if(change==='timing') raw=changed(raw,{timing_scope:JSON.stringify('both_arms')},'report_hash')
+    if(change==='strategy') raw=changed(raw,{strategy:JSON.stringify('exhaustive_oracle')},'report_hash')
+    if(change==='coverage') raw=changed(raw,{candidate_coverage_audit:'{}'},'report_hash')
+    await expect(validateRcControlSearch(raw,async p=>change==='checkpoint'&&p.endsWith('/checkpoint.json')?Buffer.concat([files[p],Buffer.from(' ')]):files[p])).rejects.toThrow()
+  })
+}

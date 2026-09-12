@@ -44,3 +44,37 @@ test('RC layout search browser rejects changed original result before showing a 
   await expect(page.locator('[data-rc-search]')).toHaveAttribute('data-rc-search','invalid',{timeout:60000})
   await expect(page.locator('[data-rc-design-selected]')).toHaveCount(0)
 })
+
+import { standaloneLayouts } from './layoutStandaloneFixture'
+for (const width of [1440,390]) for (const strategy of ['price_order','learned_order']) {
+  test.describe(`RC layout standalone browser ${width} ${strategy}`,()=>{
+    test.use({viewport:{width,height:1000}})
+    test('single strategy selection and exact original downloads',async({page})=>{
+      const files=standaloneLayouts[`b3-o0-${strategy}`]
+      await page.addInitScript(()=>{window.__STRUCTURAL_WORKBENCH_CONFIG__={rcControlSearchUrl:'/layout-single/result.json',jobAuthorization:()=>({tenantId:'synthetic-layout',bearerToken:'synthetic-layout-token'})}})
+      await page.route('**/layout-single/**',async route=>{
+        const path=new URL(route.request().url()).pathname.replace('/layout-single/','')
+        expect(files[path]).toBeDefined();await route.fulfill({contentType:'application/json',body:files[path]})
+      })
+      await page.goto(`${base}/#/workbench-v2`)
+      const panel=page.locator('[data-rc-search]')
+      await expect(panel).toHaveAttribute('data-rc-search','verified',{timeout:60000})
+      await expect(panel.locator('[data-rc-search-arm]')).toHaveCount(1)
+      await expect(panel.locator('[data-rc-search-standalone]')).toContainText('No other strategy')
+      await expect(panel.locator('[data-rc-search-layout]')).toContainText('equivalent building function')
+      await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('unavailable')
+      await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected','middle')
+      const metadata=['result','plan','price-table',...(strategy==='learned_order'?['policy','historical-training']:[])]
+      if(strategy==='price_order') await expect(panel.getByRole('button',{name:'Download search policy',exact:true})).toHaveCount(0)
+      for(const role of metadata){
+        const pending=page.waitForEvent('download');await panel.getByRole('button',{name:`Download search ${role}`,exact:true}).click()
+        expect(await readFile((await (await pending).path())!)).toEqual(files[`${role}.json`])
+      }
+      for(const role of ['model','result','checkpoint','verification']){
+        const pending=page.waitForEvent('download');await panel.getByRole('button',{name:`Download middle ${role}`,exact:true}).click()
+        expect(await readFile((await (await pending).path())!)).toEqual(files[`${strategy}/middle/baseline/${role}.json`])
+      }
+      const box=await panel.boundingBox();expect(box!.x+box!.width).toBeLessThanOrEqual(width+1)
+    })
+  })
+}

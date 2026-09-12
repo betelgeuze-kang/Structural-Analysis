@@ -37,12 +37,13 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
   }
   if (!session) return <section className="wb2-panel" data-rc-search={status}><h2>RC candidate search</h2><p role="status">{status === 'invalid' ? 'Unavailable — the original search records could not be verified.' : 'Checking candidate models, full-path results and search accounting…'}</p></section>
   const { report, plan, costOptimality: cost } = session, audit = report.candidate_coverage_audit, training = report.historical_training_cost
-  const arms = RC_SEARCH_ARMS.filter(name => report.arms[name]), standalone = report.schema_version === 'experimental-rc-control-candidate-strategy.v1'
+  const arms = RC_SEARCH_ARMS.filter(name => report.arms[name]), standalone = ['experimental-rc-control-candidate-strategy.v1', 'experimental-rc-control-layout-strategy.v1'].includes(report.schema_version)
+  const layout = ['experimental-rc-control-layout-search.v1', 'experimental-rc-control-layout-strategy.v1'].includes(report.schema_version)
   const names = [...arms, ...(report.oracle ? ['exhaustive_oracle'] : [])]
   const trainingWork = training ? searchWork([{ invocations: training.label_invocations }]) : null
   return <section className="wb2-panel" data-rc-search="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2>RC candidate search</h2>
-    {report.schema_version === 'experimental-rc-control-layout-search.v1' && <p data-rc-search-layout>Layout alternatives may change building function. Shared prices and verified response limits do not establish equivalent building function or confirmed savings.</p>}
+    {layout && <p data-rc-search-layout>Layout alternatives may change building function. Shared prices and verified response limits do not establish equivalent building function or confirmed savings.</p>}
     <p>{plan.pool.length - 1} alternatives · up to {plan.full_analysis_budget_per_arm} full analyses per online strategy, including its own baseline. Each analyzed model also has a fresh verification run.</p>
     {standalone && <p data-rc-search-standalone>Standalone {label(report.strategy)} execution. No other strategy or exhaustive check was run in this report.</p>}
     <p data-rc-search-ranking>{!plan.plans.learned_order ? 'Price priority uses the declared common-price estimate.' : plan.ranking
@@ -75,7 +76,7 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       {arms.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{a.missed_cheaper_feasible_candidate_ids === null ? 'Unavailable' : `${a.missed_cheaper_feasible_count}${a.missed_cheaper_feasible_count ? `: ${a.missed_cheaper_feasible_candidate_ids.join(', ')}` : ''}`}</td></tr> })}
     </tbody></table></div>
     <p>Recomputed from verified design records using one price table and material scope. The baseline is included. A minimum requires every candidate to be verified; unknown values do not mean zero. This finite-pool comparison does not establish a global design optimum or quoted monetary savings.</p>
-    <div>{(['result', 'plan', 'policy', 'historical-training', 'price-table'] as const).filter(role => role === 'price-table' ? report.schema_version === 'experimental-rc-control-layout-search.v1' : training || role === 'result' || role === 'plan').map(role => <button className="wb2-btn" type="button" key={role} onClick={() => { void download(role) }}>Download search {role}</button>)}</div>
+    <div>{(['result', 'plan', 'policy', 'historical-training', 'price-table'] as const).filter(role => role === 'price-table' ? layout : training || role === 'result' || role === 'plan').map(role => <button className="wb2-btn" type="button" key={role} onClick={() => { void download(role) }}>Download search {role}</button>)}</div>
     <h3>{label(arm)}: verified design records</h3>
     <RcControlDesignReviewPanel key={`${report.report_hash}:${arm}`} session={session.designSession(arm)} onInvalid={invalidate} />
   </section>
