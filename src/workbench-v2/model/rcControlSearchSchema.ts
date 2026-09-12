@@ -36,11 +36,11 @@ function coverage(plan: RcObject, oracle: RcObject | null): RcObject {
     return { candidate_id: p.candidate_id,
       predicted_all_requested_limits_pass: prediction.prediction.abstained ? null : Object.values(prediction.predicted_screens).every((s: any) => s.status === 'pass'),
       oracle_all_requested_limits_pass: !actual || !actual.full_reference_verification_pass ? null : actual.selection_eligible,
-      shortlisted_by: RC_SEARCH_ARMS.filter(name => plan.plans[name].shortlist.includes(p.candidate_id)),
+      shortlisted_by: RC_SEARCH_ARMS.filter(name => plan.plans[name]?.shortlist.includes(p.candidate_id)),
     }
   })
   const arms: RcObject = {}
-  for (const name of RC_SEARCH_ARMS) {
+  for (const name of Object.keys(plan.plans)) {
     const matching = (predicate: (r: RcObject) => boolean) => oracle ? rows.filter(predicate).map((r: RcObject) => r.candidate_id) : null
     const groups = {
       missed_feasible: matching(r => r.oracle_all_requested_limits_pass === true && !r.shortlisted_by.includes(name)),
@@ -74,14 +74,23 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
   }
   const resultDoc = document(raw), report = resultDoc.value
   await selfHash(resultDoc.raw, report, 'report_hash')
-  check(['experimental-rc-control-candidate-search.v2', 'experimental-rc-control-candidate-search.v3'].includes(report.schema_version) && same(report.claims, claims)
-    && /^[a-f0-9]{40}$/.test(report.source_revision) && keys(report.arms, RC_SEARCH_ARMS)
+  const standalone = report.schema_version === 'experimental-rc-control-candidate-strategy.v1'
+  check(!standalone || RC_SEARCH_ARMS.includes(report.strategy), 'search_strategy_invalid')
+  const arms: string[] = standalone ? [report.strategy] : [...RC_SEARCH_ARMS]
+  check(!standalone || report.timing_scope === 'single_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write', 'search_strategy_timing_scope_invalid')
+  const priceOnly = standalone && report.strategy === 'price_order'
+  check(['experimental-rc-control-candidate-search.v2', 'experimental-rc-control-candidate-search.v3', 'experimental-rc-control-candidate-strategy.v1'].includes(report.schema_version) && same(report.claims, claims)
+    && /^[a-f0-9]{40}$/.test(report.source_revision) && keys(report.arms, arms)
     && report.historical_training_cost_counted_once_outside_online_arms === true, 'search_report_invalid')
   const planDoc = document(await read('plan.json', MAX)), plan = planDoc.value
   await selfHash(planDoc.raw, plan, 'plan_hash')
+  check(standalone ? plan.schema_version === 'experimental-rc-control-candidate-strategy-plan.v1'
+    && plan.strategy === report.strategy && report.oracle === null && plan.oracle_after_online_arms === false
+    : !('strategy' in plan) && !('strategy' in report), 'search_strategy_binding_invalid')
   check(plan.line_search_assembly_reuse === undefined || plan.line_search_assembly_reuse === 'rc-control-immediate-line-search-reuse.v1', 'search_reuse_profile_invalid')
   check((plan.schema_version === 'experimental-rc-control-candidate-search-plan.v2' && !('ranking' in plan)
-    || plan.schema_version === 'experimental-rc-control-candidate-search-plan.v3' && plan.ranking?.strategy === CHEAPER_BOUNDARY_RANKING)
+    || plan.schema_version === 'experimental-rc-control-candidate-search-plan.v3' && plan.ranking?.strategy === CHEAPER_BOUNDARY_RANKING
+    || standalone && (!('ranking' in plan) || !priceOnly && plan.ranking?.strategy === CHEAPER_BOUNDARY_RANKING))
     && plan.plan_hash === report.plan_hash && plan.source_revision === report.source_revision
     && Array.isArray(plan.pool) && plan.pool.length >= 2 && plan.pool.length <= 17 && report.candidate_denominator === plan.pool.length
     && plan.pool[0].candidate_id === 'baseline' && plan.pool.every((r: RcObject) => id(r.candidate_id) && hash(r.model_identity) && hash(r.model_checksum))
@@ -90,30 +99,36 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     && new Set(plan.pool.map((r: RcObject) => r.model_checksum)).size === plan.pool.length
     && nat(plan.full_analysis_budget_per_arm) && plan.full_analysis_budget_per_arm >= 2 && plan.full_analysis_budget_per_arm <= 17
     && typeof plan.oracle_after_online_arms === 'boolean' && (report.oracle !== null) === plan.oracle_after_online_arms
-    && plan.original_training_and_pool_models_disjoint === true && plan.independent_project_geometry_history_split === false
-    && keys(plan.plans, RC_SEARCH_ARMS), 'search_plan_invalid')
-  const policyDoc = document(await read('policy.json', MAX)), policy = policyDoc.value
-  await selfHash(policyDoc.raw, policy, 'policy_hash')
-  const trainingDoc = document(await read('historical-training.json', MAX)), training = trainingDoc.value
-  await selfHash(trainingDoc.raw, training, 'report_hash')
-  check(policy.policy_hash === plan.policy_hash && training.policy_hash === plan.policy_hash && training.report_hash === plan.training_report_hash
-    && same(training, report.historical_training_cost) && training.label_comparison_hash === policy.label_comparison_hash
-    && training.schema_version === 'experimental-rc-control-candidate-training.v1' && training.independent_generalization === false && training.net_savings_proved === false
-    && nat(training.sample_count) && training.sample_count >= 2 && training.sample_count <= 17
-    && Array.isArray(policy.training_model_identities) && policy.training_model_identities.length === training.sample_count
-    && policy.training_model_identities.every(hash) && new Set(policy.training_model_identities).size === training.sample_count
-    && !plan.pool.some((r: RcObject) => policy.training_model_identities.includes(r.model_identity))
-    && Array.isArray(policy.training_sample_hashes) && policy.training_sample_hashes.length === training.sample_count && policy.training_sample_hashes.every(hash)
-    && Array.isArray(training.label_invocations) && training.label_invocations.length === 2 * training.sample_count
-    && training.fit?.status === 'completed' && training.fit.unknown_fit_work_until_outcome === false
-    && [training.wall_ns, training.cpu_ns, training.label_generation_wall_ns, training.fit.wall_ns, training.fit.cpu_ns].every(nat), 'search_training_binding_invalid')
-  searchWork([{ invocations: training.label_invocations }])
+    && plan.original_training_and_pool_models_disjoint === (priceOnly ? null : true) && plan.independent_project_geometry_history_split === false
+    && keys(plan.plans, arms), 'search_plan_invalid')
+  if (priceOnly) {
+    check(plan.policy_hash === null && plan.training_report_hash === null && report.historical_training_cost === null
+      && same(plan.predictions, []) && !('ranking' in plan) && report.ranking_wall_ns === 0
+      && report.candidate_coverage_audit === null, 'search_price_only_metadata_invalid')
+  } else {
+    const policyDoc = document(await read('policy.json', MAX)), policy = policyDoc.value
+    await selfHash(policyDoc.raw, policy, 'policy_hash')
+    const trainingDoc = document(await read('historical-training.json', MAX)), training = trainingDoc.value
+    await selfHash(trainingDoc.raw, training, 'report_hash')
+    check(policy.policy_hash === plan.policy_hash && training.policy_hash === plan.policy_hash && training.report_hash === plan.training_report_hash
+      && same(training, report.historical_training_cost) && training.label_comparison_hash === policy.label_comparison_hash
+      && training.schema_version === 'experimental-rc-control-candidate-training.v1' && training.independent_generalization === false && training.net_savings_proved === false
+      && nat(training.sample_count) && training.sample_count >= 2 && training.sample_count <= 17
+      && Array.isArray(policy.training_model_identities) && policy.training_model_identities.length === training.sample_count
+      && policy.training_model_identities.every(hash) && new Set(policy.training_model_identities).size === training.sample_count
+      && !plan.pool.some((r: RcObject) => policy.training_model_identities.includes(r.model_identity))
+      && Array.isArray(policy.training_sample_hashes) && policy.training_sample_hashes.length === training.sample_count && policy.training_sample_hashes.every(hash)
+      && Array.isArray(training.label_invocations) && training.label_invocations.length === 2 * training.sample_count
+      && training.fit?.status === 'completed' && training.fit.unknown_fit_work_until_outcome === false
+      && [training.wall_ns, training.cpu_ns, training.label_generation_wall_ns, training.fit.wall_ns, training.fit.cpu_ns].every(nat), 'search_training_binding_invalid')
+    searchWork([{ invocations: training.label_invocations }])
+  }
   const ids: string[] = plan.pool.slice(1).map((r: RcObject) => r.candidate_id)
   const compareId = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0
   const prices = new Map<string, number>(plan.pool.map((r: RcObject) => [r.candidate_id, r.material_estimate?.total]))
   check([...prices.values()].every(p => typeof p === 'number' && Number.isFinite(p) && p >= 0), 'search_estimate_invalid')
   const priceSort = (a: string, b: string) => prices.get(a)! - prices.get(b)! || compareId(a, b)
-  check(Array.isArray(plan.predictions) && same(plan.predictions.map((r: RcObject) => r.candidate_id), ids), 'search_prediction_denominator_invalid')
+  check(Array.isArray(plan.predictions) && same(plan.predictions.map((r: RcObject) => r.candidate_id), priceOnly ? [] : ids), 'search_prediction_denominator_invalid')
   const limits: RcObject = { ...plan.history_limits, ...plan.material_limits, ...Object.fromEntries(Object.entries(plan.terminal_limits ?? {}).map(([k, v]) => [`terminal_${k}`, v])) }
   for (const row of plan.predictions) {
     const prediction = row.prediction
@@ -132,12 +147,12 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
   }
   const ranked = candidateRanking(plan.predictions, plan.ranking?.strategy ?? LEGACY_RANKING)
   check(same(ranked.detail, plan.ranking ?? null), 'search_ranking_detail_invalid')
-  for (const name of RC_SEARCH_ARMS) {
+  for (const name of arms) {
     const ordering = name === 'price_order' ? [...ids].sort(priceSort) : ranked.ordering
     check(same(plan.plans[name], { ordering, shortlist: ordering.slice(0, plan.full_analysis_budget_per_arm - 1) }), 'search_ranking_invalid')
   }
   const designs: Record<string, RcDesignReview> = {}
-  const names: string[] = [...RC_SEARCH_ARMS, ...(report.oracle ? ['exhaustive_oracle'] : [])]
+  const names: string[] = [...arms, ...(report.oracle ? ['exhaustive_oracle'] : [])]
   for (const name of names) {
     const outcome = name === 'exhaustive_oracle' ? report.oracle : report.arms[name]
     check(outcome && outcome.status === 'completed' && outcome.comparison_path === `${name}/comparison.json` && outcome.unknown_work_until_outcome === false
@@ -162,7 +177,7 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     designs[name] = review
   }
   const poolSlices = rawValues(fields(planDoc.raw).get('pool')!.value)
-  const common = designs.price_order.report
+  const common = designs[arms[0]].report
   for (const [index, row] of plan.pool.entries()) {
     const ref = row.model_artifact
     check(ref && ref.path === `pool/${row.candidate_id}.json` && nat(ref.byte_length) && ref.byte_length > 0 && ref.byte_length <= 16 * MAX && ref.sha256 === row.model_checksum, 'search_pool_model_reference_invalid')
@@ -172,9 +187,9 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     check(model.schema_version === 'structural-analysis-canonical-model.v1', 'search_pool_model_invalid')
     await verifyQuantities({ ...row, artifacts: { model: ref } }, model, poolSlices[index], common)
   }
-  check(same(report.candidate_coverage_audit, coverage(plan, designs.exhaustive_oracle?.report ?? null)), 'search_coverage_invalid')
+  check(same(report.candidate_coverage_audit, priceOnly ? null : coverage(plan, designs.exhaustive_oracle?.report ?? null)), 'search_coverage_invalid')
   const cost = costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, review]) => [name, review.report])))
-  check(report.schema_version === 'experimental-rc-control-candidate-search.v3'
+  check(standalone || report.schema_version === 'experimental-rc-control-candidate-search.v3'
     ? same(report.candidate_cost_optimality_audit, cost) : !('candidate_cost_optimality_audit' in report), 'search_cost_optimality_invalid')
   check([report.ranking_wall_ns, report.online_and_optional_oracle_wall_ns, report.online_and_optional_oracle_cpu_ns].every(nat)
     && report.online_and_optional_oracle_wall_ns >= names.reduce((n, name) => n + (name === 'exhaustive_oracle' ? report.oracle : report.arms[name]).wall_ns, 0)

@@ -96,3 +96,40 @@ test('RC search rejects foreign origins before requesting credentials', async ({
   await page.goto(`${baseUrl}/#/workbench-v2`); await ready(page, 'invalid')
   expect(await page.evaluate(() => (window as any).__searchAuthCalls)).toBe(0)
 })
+
+for (const width of [1440, 390]) for (const strategy of ['price_order', 'learned_order'] as const) {
+  test(`standalone ${strategy} original design review and downloads at ${width}`, async ({ page }) => {
+    const { standaloneFixture } = await import('./rc-search-standalone-fixture')
+    const fixture = standaloneFixture(strategy), paths: string[] = []
+    await page.setViewportSize({ width, height: 1000 })
+    await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/rc-search/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-search', bearerToken: 'synthetic-test-only' }) } })
+    await page.route('**/rc-search/**', async route => {
+      const path = new URL(route.request().url()).pathname.replace('/rc-search/', '')
+      paths.push(path)
+      await route.fulfill({ contentType: 'application/json', body: Buffer.from(fixture.read(path)) })
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = await ready(page)
+    await expect(panel.locator('[data-rc-search-standalone]')).toContainText('Standalone')
+    await expect(panel.locator('[data-rc-search-arm]')).toHaveCount(1)
+    await expect(panel.locator(`[data-rc-search-arm="${strategy}"]`)).toContainText('cheap')
+    await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('exhaustive check was not run')
+    await expect(panel.getByRole('button', { name: 'Download search policy', exact: true })).toHaveCount(strategy === 'price_order' ? 0 : 1)
+    await expect(panel.locator('[data-rc-search-training]')).toContainText(strategy === 'price_order' ? 'No learned policy' : 'Historical training')
+    for (const role of ['result', 'plan'] as const) {
+      const pending = page.waitForEvent('download')
+      await panel.getByRole('button', { name: `Download search ${role}`, exact: true }).click()
+      expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(fixture.read(`${role}.json`)))
+    }
+    await panel.getByRole('button', { name: 'Select cheap', exact: true }).click()
+    const details = panel.locator('[data-rc-design-details="cheap"]')
+    const pending = page.waitForEvent('download')
+    await details.getByRole('button', { name: 'Download cheap checkpoint', exact: true }).click()
+    expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(fixture.read(`${strategy}/cheap/checkpoint.json`)))
+    expect(paths.some(p => p.startsWith(strategy === 'price_order' ? 'learned_order/' : 'price_order/'))).toBe(false)
+    expect(paths.includes('strategy-runtime.json')).toBe(false)
+    const bounds = await panel.boundingBox()
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
+    await panel.screenshot({ path: `test-results/rc-standalone-${strategy}-${width}.png` })
+  })
+}

@@ -201,3 +201,40 @@ for (const profile of ['unknown', 'rc-control-immediate-line-search-reuse.v1']) 
     await expect(validateRcControlSearch(result, p => p === 'plan.json' ? Promise.resolve(plan) : read(p))).rejects.toThrow(profile === 'unknown' ? 'search_reuse_profile_invalid' : 'search_comparison_binding_invalid')
   })
 }
+
+for (const strategy of ['price_order', 'learned_order'] as const) {
+  test(`standalone ${strategy} validates original designs and reads only its graph`, async () => {
+    const { standaloneFixture } = await import('./rc-search-standalone-fixture')
+    const fixture = standaloneFixture(strategy), paths: string[] = []
+    const review = await validateRcControlSearch(fixture.report, async p => { paths.push(p); return fixture.read(p) })
+    expect(Object.keys(review.designs)).toEqual([strategy])
+    expect(review.designs[strategy].report.selected_candidate_id).toBe('cheap')
+    expect(review.costOptimality.arms[strategy].selected_minus_pool_minimum_estimate).toBeNull()
+    expect(paths.some(p => p.startsWith(strategy === 'price_order' ? 'learned_order/' : 'price_order/'))).toBe(false)
+    expect(paths.includes('policy.json')).toBe(strategy === 'learned_order')
+    expect(paths.includes('historical-training.json')).toBe(strategy === 'learned_order')
+  })
+}
+for (const mutation of ['strategy', 'schema', 'other_arm', 'oracle', 'training', 'quantity', 'cost', 'selection', 'work']) {
+  test(`standalone rejects rehashed ${mutation}`, async () => {
+    const { standaloneFixture, rebind } = await import('./rc-search-standalone-fixture')
+    const f = standaloneFixture('price_order'), d = JSON.parse(new TextDecoder().decode(f.report))
+    const changes: Record<string, unknown> = {}
+    if (mutation === 'strategy') changes.strategy = 'learned_order'
+    if (mutation === 'schema') changes.schema_version = 'experimental-rc-control-candidate-search.v3'
+    if (mutation === 'other_arm') changes.arms = { ...d.arms, learned_order: d.arms.price_order }
+    if (mutation === 'oracle') changes.oracle = d.arms.price_order
+    if (mutation === 'training') changes.historical_training_cost = {}
+    if (mutation === 'cost') { d.candidate_cost_optimality_audit.arms.price_order.selected_minus_pool_minimum_estimate = 0; changes.candidate_cost_optimality_audit = d.candidate_cost_optimality_audit }
+    if (mutation === 'selection') { d.arms.price_order.selected_candidate_id = 'middle'; changes.arms = d.arms }
+    if (mutation === 'work') { d.arms.price_order.execution_work.known_counters.attempted_step_count = 0; changes.arms = d.arms }
+    let plan = f.plan
+    if (mutation === 'quantity') {
+      const p = JSON.parse(new TextDecoder().decode(plan)); p.pool[0].quantities.concrete_volume_m3 = 999
+      plan = rebind(new TextDecoder().decode(plan), { pool: p.pool }, 'plan_hash')
+      changes.plan_hash = JSON.parse(new TextDecoder().decode(plan)).plan_hash
+    }
+    const report = rebind(new TextDecoder().decode(f.report), changes, 'report_hash')
+    await expect(validateRcControlSearch(report, async p => p === 'plan.json' ? plan : f.read(p))).rejects.toThrow()
+  })
+}
