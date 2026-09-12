@@ -153,6 +153,16 @@ def test_actual_search_freezes_both_rankings_before_full_paths_and_oracle(
         reuse_line_search_assembly=reuse,
     )
     assert observed == ["price_order", "learned_order", "exhaustive_oracle"]
+    from structural_analysis.benchmark.rc_control_search_accounting import (
+        account_rc_control_search_reports,
+    )
+
+    accounting = account_rc_control_search_reports([report])
+    assert accounting["combined_recorded_interval_sum_ns"] == (
+        report["online_and_optional_oracle_wall_ns"]
+        + report["historical_training_cost"]["wall_ns"]
+    )
+    assert accounting["executions"][0]["unallocated_search_wall_ns"] >= 0
     assert args["baseline"].canonical_payload() == before
     assert report["candidate_denominator"] == 4
     for arm in report["arms"].values():
