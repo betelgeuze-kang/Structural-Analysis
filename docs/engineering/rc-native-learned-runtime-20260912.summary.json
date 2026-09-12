@@ -1,0 +1,272 @@
+{
+  "source_revision": "9374eb140725a67edfd7cca3c04a4febe3f3fbeb",
+  "source_files_verified": 447,
+  "original_training_rows": 964,
+  "repetitions": 3,
+  "arm_order_schedule": [
+    [
+      "reference",
+      "secant",
+      "proposal"
+    ],
+    [
+      "secant",
+      "proposal",
+      "reference"
+    ],
+    [
+      "proposal",
+      "reference",
+      "secant"
+    ]
+  ],
+  "runtime_work": {
+    "core_calls": 11616,
+    "linear_solves": 52779,
+    "newton_iterations": 52779
+  },
+  "native_assembly_work": {
+    "dispatch_calls": 74475,
+    "reuse_hits": 22956
+  },
+  "candidates": [
+    {
+      "ridge": 10000.0,
+      "score": 1.0185773190436491,
+      "proposed_count": 723,
+      "fold_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "case_repeat_scores": [
+        {
+          "case_id": "train-a",
+          "fold_indices": [
+            0,
+            1,
+            2
+          ],
+          "ratios": [
+            0.9955606721869783,
+            0.9998077301072753,
+            0.9917962526139921
+          ],
+          "requested_repetitions": 3,
+          "valid_repetitions": 3,
+          "mean_ratio": 0.9957215516360819,
+          "minimum_ratio": 0.9917962526139921,
+          "maximum_ratio": 0.9998077301072753,
+          "sample_standard_deviation": 0.004008160994047503
+        },
+        {
+          "case_id": "train-b",
+          "fold_indices": [
+            3,
+            4,
+            5
+          ],
+          "ratios": [
+            1.0776350076716583,
+            1.0868870152505068,
+            1.0829106354413867
+          ],
+          "requested_repetitions": 3,
+          "valid_repetitions": 3,
+          "mean_ratio": 1.0824775527878507,
+          "minimum_ratio": 1.0776350076716583,
+          "maximum_ratio": 1.0868870152505068,
+          "sample_standard_deviation": 0.0046411832002586145
+        },
+        {
+          "case_id": "train-c",
+          "fold_indices": [
+            6,
+            7,
+            8
+          ],
+          "ratios": [
+            0.9984787245003363,
+            1.0022738010689956,
+            0.9915022727640083
+          ],
+          "requested_repetitions": 3,
+          "valid_repetitions": 3,
+          "mean_ratio": 0.9974182661111134,
+          "minimum_ratio": 0.9915022727640083,
+          "maximum_ratio": 1.0022738010689956,
+          "sample_standard_deviation": 0.005463504781982029
+        },
+        {
+          "case_id": "train-d",
+          "fold_indices": [
+            9,
+            10,
+            11
+          ],
+          "ratios": [
+            0.9997139630714217,
+            1.0029496121221533,
+            0.9934121417250754
+          ],
+          "requested_repetitions": 3,
+          "valid_repetitions": 3,
+          "mean_ratio": 0.9986919056395501,
+          "minimum_ratio": 0.9934121417250754,
+          "maximum_ratio": 1.0029496121221533,
+          "sample_standard_deviation": 0.004850184165505167
+        }
+      ]
+    }
+  ],
+  "selected_strategy": "secant",
+  "selected_ridge": null,
+  "selected_score": 1.0,
+  "all_training_partitions_preprocessing_and_ridge_stationarity_checked": true,
+  "all_candidate_scores_and_selection_reconstructed": true,
+  "same_solver_assembly_response_replays": 11616,
+  "same_solver_recovery_material_integrations": 975744,
+  "stored_proposals_reconstructed": 2904,
+  "material_snapshots_reconstructed": 726,
+  "native_terminal_reopens": 48,
+  "newton_solves_in_audit": 0,
+  "fits_in_audit": 0,
+  "independent_campaign": false,
+  "independent_physical_validation": false,
+  "complete_paths": 48,
+  "complete_folds": 12,
+  "full_history_comparisons_passed": 36,
+  "numerical_parent_wall_seconds": 3430.746125155,
+  "successful_audit_wall_seconds": 1632.271805463,
+  "failed_audit_wall_seconds": null,
+  "fit_wall_seconds": 0.326183887,
+  "fit_count": 4,
+  "historical_off_cache_is_contemporaneous_control": false,
+  "new_training_labels": 0,
+  "validation_or_holdout_execution": false,
+  "case_costs": [
+    {
+      "case": "train-a",
+      "arms": {
+        "secant": {
+          "path_wall_seconds": 190.471323541,
+          "newton_iterations": 2907
+        },
+        "proposal": {
+          "path_wall_seconds": 189.648801896,
+          "newton_iterations": 2907
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "arms": {
+        "secant": {
+          "path_wall_seconds": 179.599169278,
+          "newton_iterations": 2610
+        },
+        "proposal": {
+          "path_wall_seconds": 194.402779011,
+          "newton_iterations": 2901
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "arms": {
+        "secant": {
+          "path_wall_seconds": 193.75634212,
+          "newton_iterations": 2970
+        },
+        "proposal": {
+          "path_wall_seconds": 193.245201164,
+          "newton_iterations": 2970
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "arms": {
+        "secant": {
+          "path_wall_seconds": 179.260861761,
+          "newton_iterations": 2556
+        },
+        "proposal": {
+          "path_wall_seconds": 179.017892454,
+          "newton_iterations": 2556
+        }
+      }
+    }
+  ],
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-learned-runtime-5ixhrw6z",
+    "file_count": 70356,
+    "bytes": 4018671601,
+    "inventory_sha256": "a16d571fa22739ba5b9bfd16e5fbf093390c66e0f29f49f3b094bdccb661411a",
+    "all_files_reread": true
+  },
+  "ci_seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-9374-ci-5xkwuv29",
+    "file_count": 16,
+    "total_bytes": 356675,
+    "inventory_sha256": "088e61e4d6dcf094b58837fde32e650b752548747f49a94eae9cfa6c42450565"
+  },
+  "ci_junit": {
+    "artifact_id": 10299266243,
+    "zip_bytes": 10015,
+    "zip_sha256": "17ad9dd697f84b72cb6c4c9cf07876f0663e4a0a6ecbf879c5da9d6806e966e8",
+    "test_cases": 562,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "562",
+        "time": "699.379",
+        "timestamp": "2026-09-12T13:20:45.737381+00:00",
+        "hostname": "runnervmlun5p"
+      }
+    ],
+    "modules": [
+      "tests.test_local_source_reference_comparison",
+      "tests.test_measured_response_split",
+      "tests.test_measured_response_workbook",
+      "tests.test_newton_assembly_work",
+      "tests.test_pinned_opensees_runtime",
+      "tests.test_rc_constant_load_durable",
+      "tests.test_rc_control_assembly_work",
+      "tests.test_rc_control_candidate_cost",
+      "tests.test_rc_control_candidate_search",
+      "tests.test_rc_control_design",
+      "tests.test_rc_control_history_features",
+      "tests.test_rc_control_iteration_cost",
+      "tests.test_rc_control_learning",
+      "tests.test_rc_control_learning_split",
+      "tests.test_rc_control_model_selection",
+      "tests.test_rc_control_parent_step",
+      "tests.test_rc_control_runtime_selection",
+      "tests.test_rc_control_step_work",
+      "tests.test_rc_control_svd_fit",
+      "tests.test_rc_control_training_diagnostics",
+      "tests.test_rc_control_warm_start",
+      "tests.test_rc_line_search_reuse_experiment",
+      "tests.test_rc_native_assembly_reuse",
+      "tests.test_rc_search_http",
+      "tests.test_rc_seed_original_audit",
+      "tests.test_repository_python_workflow_contract"
+    ]
+  }
+}
