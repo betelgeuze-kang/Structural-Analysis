@@ -64,6 +64,47 @@ def test_section_identity_cache_preserves_non_string_key_rejection():
         _ = malformed.contract_hash
 
 
+def test_equal_steel_area_does_not_equate_perimeter_and_two_layer_bending():
+    """Authored geometry check, not reconstruction of a measured specimen."""
+    outer = make_rectangular_stateful_rc_fiber_section(
+        width_m=0.4,
+        depth_m=0.4,
+        cover_m=0.04,
+        top_bar_count=6,
+        bottom_bar_count=6,
+        bar_area_m2=0.0002,
+    )
+    concrete = tuple(f for f in outer.fibers if f.material_kind == "concrete")
+    s = 0.16
+    perimeter = replace(
+        outer,
+        fibers=concrete
+        + tuple(
+            StatefulSectionFiber(
+                fiber_id=f"steel-row-{i}",
+                y_m=y,
+                area_m2=count * 0.0002,
+                material_kind="steel",
+            )
+            for i, (y, count) in enumerate(((-s, 4), (-s / 3, 2), (s / 3, 2), (s, 4)))
+        ),
+    )
+    a = outer.integrate((0.0, 0.0), outer.initial_state())
+    b = perimeter.integrate((0.0, 0.0), perimeter.initial_state())
+    assert a.consistent_tangent[0, 0] == pytest.approx(b.consistent_tangent[0, 0])
+    concrete_ei = (
+        outer.concrete.elastic_modulus_mpa
+        * 1000
+        * sum(f.area_m2 * f.y_m**2 for f in concrete)
+    )
+    outer_steel_ei = a.consistent_tangent[1, 1] - concrete_ei
+    perimeter_steel_ei = b.consistent_tangent[1, 1] - concrete_ei
+    assert outer_steel_ei / perimeter_steel_ei == pytest.approx(27 / 19)
+    assert outer.contract_hash != perimeter.contract_hash
+    with pytest.raises(ValueError, match="section_contract_hash"):
+        perimeter.validate_state(outer.initial_state())
+
+
 def test_rectangular_rc_fiber_geometry_state_and_elastic_tangent_are_exact() -> None:
     section = make_rectangular_stateful_rc_fiber_section()
     repeated = make_rectangular_stateful_rc_fiber_section()
