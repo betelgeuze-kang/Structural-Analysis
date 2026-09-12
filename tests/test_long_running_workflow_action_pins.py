@@ -40,7 +40,8 @@ def test_exact_reviewed_action_pins_are_retained() -> None:
 
     assert sources["repository_python"].count(checkout) == 3
     assert sources["repository_python"].count(setup_python) == 3
-    assert sources["repository_python"].count(upload) == 1
+    # Development, persistent-RC JUnit and formatter-diff diagnostics use the same pin.
+    assert sources["repository_python"].count(upload) == 3
 
     assert sources["legacy_evidence"].count(checkout) == 2
     assert sources["legacy_evidence"].count(setup_python) == 2

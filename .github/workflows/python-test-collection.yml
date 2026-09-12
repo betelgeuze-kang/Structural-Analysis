@@ -95,17 +95,18 @@ jobs:
 
       - name: Check local RC slice formatting with actionable diff
         if: ${{ !cancelled() }}
-        run: |
-          python -m ruff format --check --diff \
-            src/structural_analysis/benchmark/rc_control_design.py \
-            src/structural_analysis/benchmark/rc_control_reuse.py \
-            src/structural_analysis/benchmark/rc_control_cost_search.py \
-            src/structural_analysis/benchmark/rc_control_local_search_cli.py \
-            src/structural_analysis/execution/rc_result_repository.py \
-            src/structural_analysis/execution/local_runtime_doctor.py \
-            tests/test_rc_control_persistence.py \
-            tests/test_rc_local_resources.py \
-            tests/test_rc_control_local_research.py > rc-local-format.diff
+        run: >-
+          python -m ruff format --check --diff
+          src/structural_analysis/benchmark/rc_control_design.py
+          src/structural_analysis/benchmark/rc_control_reuse.py
+          src/structural_analysis/benchmark/rc_control_cost_search.py
+          src/structural_analysis/benchmark/rc_control_local_search_cli.py
+          src/structural_analysis/execution/rc_result_repository.py
+          src/structural_analysis/execution/local_runtime_doctor.py
+          tests/test_rc_control_persistence.py
+          tests/test_rc_local_resources.py
+          tests/test_rc_control_local_research.py
+          > rc-local-format.diff
 
       - name: Retain local RC formatting diagnostic
         if: ${{ always() }}

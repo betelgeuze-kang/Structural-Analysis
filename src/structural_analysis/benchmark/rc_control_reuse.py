@@ -49,13 +49,14 @@ def _native_numeric_identity() -> list[tuple[str, str]]:
         for library_root in (root, root.parent / (root.name + ".libs")):
             if library_root.is_dir():
                 paths.update(
-                    path for path in library_root.rglob("*")
-                    if path.is_file() and (
+                    path
+                    for path in library_root.rglob("*")
+                    if path.is_file()
+                    and (
                         ".so" in path.name or path.suffix in (".pyd", ".dll", ".dylib")
                     )
                 )
     return [(str(path), study._sha(path.read_bytes())) for path in sorted(paths)]
-
 
 
 def _runtime_fingerprint() -> str:
@@ -200,7 +201,9 @@ class RCControlResultSession:
         if type(max_bytes) is not int or not 1 <= max_bytes <= 1024**3:
             raise ValueError("max_bytes must be an integer in [1, 1073741824]")
         if repository is not None:
-            from structural_analysis.execution.rc_result_repository import RCResultRepository
+            from structural_analysis.execution.rc_result_repository import (
+                RCResultRepository,
+            )
 
             if type(repository) is not RCResultRepository:
                 raise ValueError("exact persistent RC repository required")
@@ -313,8 +316,10 @@ class RCControlResultSession:
         mark = perf_counter_ns()
         if type(fresh) is not bool or type(allow_new_analysis) is not bool:
             raise ValueError("explicit boolean execution options required")
-        model, request, history_limits, material_limits, terminal_limits, prices = _inputs(
-            model, request, history_limits, material_limits, terminal_limits, prices
+        model, request, history_limits, material_limits, terminal_limits, prices = (
+            _inputs(
+                model, request, history_limits, material_limits, terminal_limits, prices
+            )
         )
         stages["input_validation_ns"] = perf_counter_ns() - mark
         with ExitStack() as stack:
@@ -352,8 +357,13 @@ class RCControlResultSession:
             mark = perf_counter_ns()
             if entry is None:
                 row = study._evaluate_design_row(
-                    model, None, request, root=root, prices=prices,
-                    history_limits=history_limits, material_limits=material_limits,
+                    model,
+                    None,
+                    request,
+                    root=root,
+                    prices=prices,
+                    history_limits=history_limits,
+                    material_limits=material_limits,
                     terminal_limits=terminal_limits,
                 )
                 new_work = _work({"rows": [row]})
@@ -377,9 +387,12 @@ class RCControlResultSession:
                 )
                 new_work = _work({"rows": []})
                 new_work["known_counters"] = {
-                    k: 0 for k in (
-                        "attempted_step_count", "known_linear_solve_count",
-                        "known_newton_iteration_count", "unknown_solver_work_attempt_count",
+                    k: 0
+                    for k in (
+                        "attempted_step_count",
+                        "known_linear_solve_count",
+                        "known_newton_iteration_count",
+                        "unknown_solver_work_attempt_count",
                     )
                 }
                 mode = "verified_original_reused"
@@ -388,7 +401,8 @@ class RCControlResultSession:
             stages["evaluation_or_reuse_with_original_io_ns"] = perf_counter_ns() - mark
             report = {
                 "schema_version": "local-rc-control-evaluation.v1",
-                "physics_key": key, "scope_id": self._scope_id,
+                "physics_key": key,
+                "scope_id": self._scope_id,
                 "source_revision": self._source_revision,
                 "source_revision_is_attestation": False,
                 "runtime_fingerprint": self._runtime,
@@ -396,23 +410,34 @@ class RCControlResultSession:
                 "request": request.to_dict(),
                 "history_limits": asdict(history_limits),
                 "material_limits": asdict(material_limits),
-                "terminal_limits": None if terminal_limits is None else asdict(terminal_limits),
+                "terminal_limits": None
+                if terminal_limits is None
+                else asdict(terminal_limits),
                 "prices": None if prices is None else asdict(prices),
-                "mode": mode, "reuse_origin": origin, "row": row,
-                "new_work": new_work, "original_work_not_recharged": origin_work,
+                "mode": mode,
+                "reuse_origin": origin,
+                "row": row,
+                "new_work": new_work,
+                "original_work_not_recharged": origin_work,
                 "original_snapshot_hash": None if entry is None else entry.seal,
                 "retained_for_reuse": entry is not None or new_entry is not None,
                 "persistent_repository_enabled": self._repository is not None,
-                "persistence_receipt": "persistence.json" if self._repository is not None else None,
-                "fresh_reference_verification_this_call": entry is None and row["full_reference_verification_pass"] is True,
+                "persistence_receipt": "persistence.json"
+                if self._repository is not None
+                else None,
+                "fresh_reference_verification_this_call": entry is None
+                and row["full_reference_verification_pass"] is True,
                 "stage_wall_ns": stages,
                 "total_wall_ns": perf_counter_ns() - wall,
                 "total_process_cpu_ns": process_time_ns() - cpu,
                 "timing_scope": "local_call_before_final_report_and_persistent_publication_see_completion_sidecar",
                 "claims": {
-                    "independent_physical_validation": False, "design_authority": False,
-                    "confirmed_currency_savings": False, "performance_improvement": False,
-                    "release_approved": False, "persistent_cache": self._repository is not None,
+                    "independent_physical_validation": False,
+                    "design_authority": False,
+                    "confirmed_currency_savings": False,
+                    "performance_improvement": False,
+                    "release_approved": False,
+                    "persistent_cache": self._repository is not None,
                 },
             }
             design._finite_tree(report)
@@ -426,12 +451,19 @@ class RCControlResultSession:
                 publish = new_entry if new_entry is not None else entry
                 if publish is not None and not admitted:
                     admitted = self._repository._publish(publish, scope_id)
-                study._save(root, "persistence.json", study._bytes({
-                    "schema_version": "local-rc-persistence-outcome.v1",
-                    "evaluation_hash": report["report_hash"],
-                    "physics_key": key, "admitted": admitted,
-                    "new_verification_credit": False,
-                }))
+                study._save(
+                    root,
+                    "persistence.json",
+                    study._bytes(
+                        {
+                            "schema_version": "local-rc-persistence-outcome.v1",
+                            "evaluation_hash": report["report_hash"],
+                            "physics_key": key,
+                            "admitted": admitted,
+                            "new_verification_credit": False,
+                        }
+                    ),
+                )
             storage_ns = perf_counter_ns() - mark
             completion = {
                 "schema_version": "local-rc-evaluation-completion.v1",
@@ -444,7 +476,11 @@ class RCControlResultSession:
             }
             study._save(root, "completion.json", study._bytes(completion))
             retain = new_entry if new_entry is not None else entry
-            if retain is not None and key not in self._entries and retain.byte_length <= self._max_bytes:
+            if (
+                retain is not None
+                and key not in self._entries
+                and retain.byte_length <= self._max_bytes
+            ):
                 while self._entries and (
                     len(self._entries) >= self._max_entries
                     or self.retained_bytes + retain.byte_length > self._max_bytes

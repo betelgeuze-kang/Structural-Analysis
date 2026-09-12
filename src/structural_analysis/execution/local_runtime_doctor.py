@@ -26,7 +26,9 @@ def _small_text(path: Path) -> str | None:
         return None
 
 
-def inspect_local_runtime(*, sysfs_root: Path = Path("/sys/class/drm"), dev_root: Path = Path("/dev")) -> dict:
+def inspect_local_runtime(
+    *, sysfs_root: Path = Path("/sys/class/drm"), dev_root: Path = Path("/dev")
+) -> dict:
     devices = []
     if sysfs_root.is_dir():
         for card in sorted(sysfs_root.iterdir()):
@@ -38,16 +40,22 @@ def inspect_local_runtime(*, sysfs_root: Path = Path("/sys/class/drm"), dev_root
             device = _small_text(card / "device/device")
             if device is not None and not re.fullmatch(r"0x[0-9a-fA-F]{4}", device):
                 device = None
-            devices.append({"card": card.name, "vendor_id": "0x1002", "device_id": device})
+            devices.append(
+                {"card": card.name, "vendor_id": "0x1002", "device_id": device}
+            )
     node = dev_root / "kfd"
     return {
         "schema_version": "local-structural-runtime-inventory.v1",
-        "platform": platform.system(), "machine": platform.machine(),
-        "python": platform.python_version(), "logical_cpu_count": os.cpu_count(),
+        "platform": platform.system(),
+        "machine": platform.machine(),
+        "python": platform.python_version(),
+        "logical_cpu_count": os.cpu_count(),
         "amd_display_devices": devices,
         "kfd_node_present": node.exists(),
         "kfd_read_write_access": node.exists() and os.access(node, os.R_OK | os.W_OK),
-        "tool_paths": {name: shutil.which(name) for name in ("hipcc", "rocminfo", "amd-smi")},
+        "tool_paths": {
+            name: shutil.which(name) for name in ("hipcc", "rocminfo", "amd-smi")
+        },
         "hardware_kernel_executed": False,
         "gpu_numerical_parity_verified": False,
         "gpu_performance_measured": False,
@@ -58,7 +66,9 @@ def inspect_local_runtime(*, sysfs_root: Path = Path("/sys/class/drm"), dev_root
 
 
 def main() -> int:
-    print(json.dumps(inspect_local_runtime(), allow_nan=False, sort_keys=True, indent=2))
+    print(
+        json.dumps(inspect_local_runtime(), allow_nan=False, sort_keys=True, indent=2)
+    )
     return 0
 
 

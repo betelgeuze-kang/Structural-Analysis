@@ -346,7 +346,9 @@ def run_rc_control_cost_search(
     report = {
         "schema_version": "local-rc-cost-search-result.v1",
         "plan_hash": plan["plan_hash"],
-        "status": "unknown_work_stop" if unknown_work_stop else (stopped or bound["status"]),
+        "status": "unknown_work_stop"
+        if unknown_work_stop
+        else (stopped or bound["status"]),
         "evaluation_order": order,
         "records": records,
         "outcomes": outcomes,

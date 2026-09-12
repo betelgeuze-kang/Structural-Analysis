@@ -31,7 +31,9 @@ def _digest(raw: bytes) -> str:
 
 
 def _encode(value: dict) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
 
 
 def _identifier(value: str) -> None:
@@ -62,7 +64,9 @@ class RCResultRepository:
         lock_timeout_seconds: float = 30.0,
     ) -> None:
         if os.name != "posix":
-            raise ValueError("persistent RC reuse currently requires POSIX local storage")
+            raise ValueError(
+                "persistent RC reuse currently requires POSIX local storage"
+            )
         if type(service) is not DurableJobService:
             raise ValueError("existing durable job service required")
         if type(scope_id) is not str or not scope_id or len(scope_id) > 128:
@@ -70,7 +74,9 @@ class RCResultRepository:
         if type(max_entries) is not int or not 1 <= max_entries <= 4096:
             raise ValueError("persistent entry capacity must be in [1, 4096]")
         if type(max_bytes) is not int or not 1 <= max_bytes <= 4 * 1024**3:
-            raise ValueError("persistent referenced-byte capacity must be in [1, 4 GiB]")
+            raise ValueError(
+                "persistent referenced-byte capacity must be in [1, 4 GiB]"
+            )
         if (
             type(lock_timeout_seconds) not in (int, float)
             or not math.isfinite(lock_timeout_seconds)
@@ -100,7 +106,12 @@ class RCResultRepository:
     def _paths_safe(self) -> None:
         # Trusted local filesystem, not a hostile concurrent path-replacement API.
         root = self._service.root
-        for path in (root, self._service._blob_root, self._service._db_path, self._locks):
+        for path in (
+            root,
+            self._service._blob_root,
+            self._service._db_path,
+            self._locks,
+        ):
             current = path
             while current != root.parent:
                 if current.is_symlink():
@@ -127,7 +138,9 @@ class RCResultRepository:
         self._authorize(scope_id)
         self._paths_safe()
         _identifier(key)
-        name = _digest(_encode({"tenant": self._tenant, "scope": scope_id, "key": key}))[7:]
+        name = _digest(
+            _encode({"tenant": self._tenant, "scope": scope_id, "key": key})
+        )[7:]
         path = self._locks / name
         descriptor = os.open(path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
         try:
@@ -140,7 +153,9 @@ class RCResultRepository:
                     break
                 except BlockingIOError:
                     if monotonic() >= deadline:
-                        raise TimeoutError("verified-result reservation is busy") from None
+                        raise TimeoutError(
+                            "verified-result reservation is busy"
+                        ) from None
                     sleep(min(0.02, max(0.0, deadline - monotonic())))
             try:
                 yield
@@ -178,7 +193,9 @@ class RCResultRepository:
             connection.close()
         if indexed is None:
             return None
-        from structural_analysis.api.frame3d_direct_control_request import strict_json_object_bytes
+        from structural_analysis.api.frame3d_direct_control_request import (
+            strict_json_object_bytes,
+        )
         from structural_analysis.benchmark.rc_control_reuse import _Snapshot
 
         raw = self._read(
@@ -187,7 +204,8 @@ class RCResultRepository:
         )
         value = strict_json_object_bytes(raw, maximum_bytes=_MAX_MANIFEST)
         if (
-            set(value) != {"schema", "key", "tenant", "scope", "row", "artifacts", "seal", "size"}
+            set(value)
+            != {"schema", "key", "tenant", "scope", "row", "artifacts", "seal", "size"}
             or value["schema"] != "persistent-rc-original.v1"
             or value["key"] != key
             or value["tenant"] != self._tenant
@@ -237,12 +255,18 @@ class RCResultRepository:
                 "FROM rc_verified_result_index_v1 WHERE tenant=?",
                 (self._tenant,),
             ).fetchone()
-            if capacity[0] >= self._max_entries or capacity[1] + entry.byte_length > self._max_bytes:
+            if (
+                capacity[0] >= self._max_entries
+                or capacity[1] + entry.byte_length > self._max_bytes
+            ):
                 return False
 
             def put(raw: bytes) -> dict:
                 reference = self._service._put_blob(
-                    raw, role="evidence", media_type="application/json", maximum_bytes=_MAX_SNAPSHOT
+                    raw,
+                    role="evidence",
+                    media_type="application/json",
+                    maximum_bytes=_MAX_SNAPSHOT,
                 )
                 return {"hash": reference.content_hash, "size": reference.byte_length}
 
@@ -262,7 +286,14 @@ class RCResultRepository:
             reference = put(manifest)
             connection.execute(
                 "INSERT INTO rc_verified_result_index_v1 VALUES (?, ?, ?, ?, ?, ?)",
-                (self._tenant, scope_id, entry.key, reference["hash"], reference["size"], entry.byte_length),
+                (
+                    self._tenant,
+                    scope_id,
+                    entry.key,
+                    reference["hash"],
+                    reference["size"],
+                    entry.byte_length,
+                ),
             )
         return True
 
@@ -362,17 +393,22 @@ def open_local_rc_repository(
         "schema": "local-rc-owner.v1",
         "tenant": tenant_id,
         "token_hash": _digest(
-            b"local-rc-owner.v1\0" + tenant_id.encode() + b"\0"
+            b"local-rc-owner.v1\0"
+            + tenant_id.encode()
+            + b"\0"
             + authorization_token.encode()
         ),
     }
     _initialize_local_owner(requested, expected)
     service = DurableJobService(
-        requested, tenant_tokens={tenant_id: authorization_token},
+        requested,
+        tenant_tokens={tenant_id: authorization_token},
         worker_tokens={"rc-local-internal": secrets.token_urlsafe(32)},
         worker_tenants={"rc-local-internal": [tenant_id]},
     )
     return RCResultRepository(
-        service, tenant_id=tenant_id, authorization_token=authorization_token,
+        service,
+        tenant_id=tenant_id,
+        authorization_token=authorization_token,
         scope_id=scope_id,
     )
