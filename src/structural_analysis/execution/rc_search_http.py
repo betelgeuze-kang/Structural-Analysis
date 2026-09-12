@@ -152,6 +152,18 @@ class RcSearchArtifactBundle:
             return raw
 
         result = _document(read("result.json", _META_MAX), "report_hash")
+        if result.get("schema_version") == "experimental-rc-control-layout-search.v1":
+            from structural_analysis.execution.rc_layout_search_graph import (
+                read_layout_search_graph,
+            )
+
+            if result["report_hash"] != expected_report_hash:
+                raise ValueError("pinned layout search result mismatch")
+            read_layout_search_graph(read, result)
+            bundle = object.__new__(cls)
+            object.__setattr__(bundle, "report_hash", expected_report_hash)
+            object.__setattr__(bundle, "artifacts", MappingProxyType(dict(files)))
+            return bundle
         if result["report_hash"] != expected_report_hash or result.get(
             "schema_version"
         ) not in (

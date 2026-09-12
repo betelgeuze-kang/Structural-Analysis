@@ -262,6 +262,7 @@ def compare_control_layout_search(
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
     study._save(root, "plan.json", study._bytes(plan))
+    study._save(root, "price-table.json", study._bytes(asdict(prices)))
     study._save(root, "policy.json", study._bytes(policy.to_dict()))
     study._save(root, "historical-training.json", study._bytes(training))
     for row in pool:
