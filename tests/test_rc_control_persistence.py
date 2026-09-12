@@ -5,14 +5,13 @@ from __future__ import annotations
 from dataclasses import replace
 import json
 import os
-from pathlib import Path
 import sqlite3
 import subprocess
 import sys
 
 import pytest
 
-from test_rc_control_local_research import (
+from tests.test_rc_control_local_research import (
     SOURCE, ROOT, model as model, control_request as control_request,
     options as options, evaluate, experiment_file,
 )

@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from test_rc_control_local_research import (
+from tests.test_rc_control_local_research import (
     SOURCE, model as model, control_request as control_request,
     options as options, candidate,
 )

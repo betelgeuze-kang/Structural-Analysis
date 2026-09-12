@@ -94,6 +94,7 @@ jobs:
           retention-days: 14
 
       - name: Check local RC slice formatting with actionable diff
+        if: ${{ !cancelled() }}
         run: |
           python -m ruff format --check --diff \
             src/structural_analysis/benchmark/rc_control_design.py \
