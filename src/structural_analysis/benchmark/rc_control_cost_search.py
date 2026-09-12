@@ -19,6 +19,9 @@ from structural_analysis.benchmark import rc_control_design as study
 from structural_analysis.benchmark.rc_control_candidate_cost import (
     verified_limit_outcome,
 )
+from structural_analysis.benchmark.rc_control_durable import (
+    DurableRCControlResultSession,
+)
 from structural_analysis.benchmark.rc_control_reuse import (
     NewAnalysisRequired,
     RCControlResultSession,
@@ -142,7 +145,7 @@ def run_rc_control_cost_search(
     No exhaustive oracle or second strategy is run by this local-use function.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
-    if type(session) is not RCControlResultSession:
+    if type(session) not in (RCControlResultSession, DurableRCControlResultSession):
         raise ValueError("exact process-local result session required")
     if type(max_new_model_analyses) is not int or not 0 <= max_new_model_analyses <= 17:
         raise ValueError("new-model budget must be an integer in [0, 17]")
@@ -281,9 +284,14 @@ def run_rc_control_cost_search(
         except NewAnalysisRequired:
             record["status"] = "new_analysis_budget_exhausted"
             continue  # A later cheaper candidate may already exist in the session.
-        fresh = evaluation["mode"] == "fresh_reference_and_replay"
+        fresh = evaluation.get(
+            "new_model_evaluation", evaluation["mode"] == "fresh_reference_and_replay"
+        )
         used += int(fresh)
-        hits += int(not fresh)
+        hits += int(
+            evaluation["mode"]
+            in ("verified_original_reused", "verified_durable_original_reused")
+        )
         row = evaluation["row"]
         if (
             row["material_estimate"]
@@ -312,7 +320,9 @@ def run_rc_control_cost_search(
             },
         )
         invocations += work["api_invocation_count"]
-        unknown_work_stop = work["unknown_work"]
+        unknown_work_stop = work["unknown_work"] or evaluation.get(
+            "historical_unknown_work", False
+        )
         for key, value in work["known_counters"].items():
             aggregate[key] += value
     bound = finite_pool_cost_bound(pool, outcomes)

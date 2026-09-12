@@ -198,6 +198,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert 'workflows: ["Nightly Full Quality"]' in workflow
     assert "github.event.workflow_run.conclusion == 'success'" not in workflow
     assert "github.event.workflow_run.head_branch == 'main'" in workflow
+    assert "github.event.workflow_run.head_branch == 'main'" in workflow
     assert "github.event.workflow_run.event == 'schedule'" in workflow
     assert "github.event.workflow_run.event == 'workflow_dispatch'" in workflow
     assert "PRODUCT_STATE_SHA: ${{ github.event.workflow_run.head_sha }}" in workflow
@@ -857,13 +858,28 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     assert workflow["permissions"] == {"contents": "read"}
     assert all("continue-on-error" not in step for step in diagnostic["steps"])
     commands = [step["run"] for step in diagnostic["steps"] if "run" in step]
-    assert len(commands) == 2
-    tests = shlex.split(commands[1])
+    assert len(commands) == 4
+    # The extra early regression and format checks are mandatory diagnostics,
+    # not replacements for the complete development list or required shards.
+    early = shlex.split(commands[1])
+    assert early[:3] == ["python", "-m", "pytest"]
+    assert "--junitxml=rc-durable-tests.xml" in early
+    assert not any(x in early for x in ("-k", "--deselect", "--ignore"))
+    early_selected = {x for x in early if x.startswith("tests/")}
+    assert early_selected == {
+        "tests/test_rc_control_durable_research.py",
+        "tests/test_local_amd_diagnostic.py",
+    }
+    formatting = shlex.split(commands[2])
+    assert formatting[:6] == ["python", "-m", "ruff", "format", "--check", "--diff"]
+    assert formatting[-2:] == [">", "rc-local-format.diff"]
+    assert early_selected <= set(formatting)
+    tests = shlex.split(commands[3])
     assert tests[:3] == ["python", "-m", "pytest"]
     assert "--junitxml=development-contracts.xml" in tests
     assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
     selected = {x for x in tests if x.startswith("tests/")}
-    assert len(selected) == 20
+    assert len(selected) == 23
     assert all((ROOT / path).is_file() for path in selected)
     assert {
         "tests/test_rc_control_runtime_selection.py",
@@ -875,10 +891,28 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "tests/test_measured_response_split.py",
         "tests/test_pinned_opensees_runtime.py",
         "tests/test_local_source_reference_comparison.py",
+        "tests/test_rc_control_local_research.py",
+        "tests/test_rc_control_durable_research.py",
+        "tests/test_local_amd_diagnostic.py",
     } <= selected
     assert all(
         "materializ" not in cmd and "--refresh-product-replay" not in cmd
         for cmd in commands
+    )
+    uploads = [
+        step for step in diagnostic["steps"]
+        if "uses" in step and step["uses"].startswith("actions/upload-artifact@")
+    ]
+    assert len(uploads) == 3
+    assert {step["with"]["path"] for step in uploads} == {
+        "rc-durable-tests.xml",
+        "rc-local-format.diff",
+        "development-contracts.xml",
+    }
+    assert all(step["if"] == "${{ always() }}" for step in uploads)
+    assert all(
+        step["uses"] == "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        for step in uploads
     )
     upload = diagnostic["steps"][-1]
     assert upload["if"] == "${{ always() }}"
