@@ -33,6 +33,7 @@ MAX_NODES = 2 * _MAX_FEATURE_MEMBERS
 LAYOUT_FEATURE_NAMES = (
     *FEATURE_NAMES,
     "node_count",
+    "rotation_coordinate_scale_m",
     *(f"node_{i}_relative_{axis}_m" for i in range(MAX_NODES) for axis in ("x", "y")),
 )
 
@@ -48,6 +49,7 @@ def control_layout_candidate_features(model, request):
     coordinates = physical.pop("node_coordinates_m")
     if not 2 <= len(coordinates) <= MAX_NODES:
         raise ValueError("bounded layout node count required")
+    rotation_scale = physical.pop("rotation_coordinate_scale_m")
     anchor = coordinates[0]
     relative = tuple(
         float(row[axis] - anchor[axis]) for row in coordinates for axis in (0, 1)
@@ -55,6 +57,7 @@ def control_layout_candidate_features(model, request):
     values = (
         *section_values,
         float(len(coordinates)),
+        float(rotation_scale),
         *relative,
         *((0.0,) * (2 * (MAX_NODES - len(coordinates)))),
     )

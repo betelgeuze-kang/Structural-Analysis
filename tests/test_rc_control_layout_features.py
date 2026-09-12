@@ -118,3 +118,15 @@ def test_fixed_physical_conditions_cannot_share_a_layout_context(change):
             describe(changed)
     else:
         assert describe(original)["context_hash"] != describe(changed)["context_hash"]
+
+
+def test_geometry_derived_rotation_scale_is_explicitly_encoded():
+    raw = raw_model()
+    changed = deepcopy(raw)
+    changed["nodes"][1]["coordinates"] = [3.0, 0.0, 0.0]
+    changed["nodes"][2]["coordinates"] = [3.0, 2.5, 0.0]
+    a, b = describe(raw), describe(changed)
+    index = LAYOUT_FEATURE_NAMES.index("rotation_coordinate_scale_m")
+    assert a["values"][index] == 2.0
+    assert b["values"][index] == 3.0
+    assert a["context_hash"] == b["context_hash"]
