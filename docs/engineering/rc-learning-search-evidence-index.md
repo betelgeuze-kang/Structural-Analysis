@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Code-check model and load-combination scope isolation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-codecheck-scope-20260913.md)
 - [Missing optimization timeline recovery and production browser regression](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-missing-timeline-20260913.md)
 - [Production runtime data delivery and non-demo preset observation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-runtime-delivery-20260913.md)
 - [Workspace preset error recovery and actual browser continuation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-preset-recovery-20260913.md)
