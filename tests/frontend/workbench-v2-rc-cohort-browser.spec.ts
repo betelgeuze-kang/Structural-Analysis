@@ -76,3 +76,23 @@ test('cohort host rejects missing scripts while preserving application navigatio
   expect(navigation.status()).toBe(200)
   expect(await navigation.text()).toContain('<!DOCTYPE html>')
 })
+
+for (const width of [1440, 390]) {
+  test(`process cohort displays verified enclosing costs and exact observations at ${width}`, async ({ page }) => {
+    const { processCohortBytes } = await import('./rc-cohort-fixture')
+    await page.setViewportSize({ width, height: 1000 })
+    const errors: string[] = []; page.on('pageerror', error => errors.push(error.message))
+    await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlStrategyCohortUrl: '/rc-process/cohort.json' } })
+    await page.route('**/rc-process/**', route => route.fulfill({ contentType: 'application/json', body: Buffer.from(processCohortBytes(new URL(route.request().url()).pathname.replace('/rc-process/', ''))) }))
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = page.locator('[data-rc-cohort="verified"]')
+    await expect(panel).toBeVisible({ timeout: 60000 })
+    await expect(panel.locator('[data-rc-cohort-process]')).toContainText('Process totals replace the nested CLI times above')
+    await expect(panel.getByRole('region', { name: 'Enclosing process pairs' }).locator('tbody tr')).toHaveCount(1)
+    const pending = page.waitForEvent('download')
+    await panel.getByRole('button', { name: 'Download original process observations', exact: true }).click()
+    expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(processCohortBytes('process-observations.json')))
+    const bounds = await panel.boundingBox(); expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
+    expect(errors).toEqual([])
+  })
+}

@@ -36,12 +36,21 @@ export function RcStrategyCohortPanel({ url, authorize }: { url: string; authori
   }
   const review = loaded?.url === url ? loaded.review : null
   if (!review) return <section className="wb2-panel" data-rc-cohort={status}><h2>Repeated strategy costs</h2><p role="status">{status === 'invalid' ? 'Unavailable — the original cohort could not be verified.' : 'Checking every original design, runtime record and paired cost…'}</p></section>
-  const { cost, executions } = review, active = selected === null ? null : executions[selected]
+  const { cost, processCost, executions } = review, active = selected === null ? null : executions[selected]
   return <section className="wb2-panel" data-rc-cohort="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2>Repeated strategy costs</h2>
     <p>{cost.pair_count} pairs retained · {cost.uncomparable_pair_count} incomparable selections. A time ratio requires verified selections on both sides and a learned estimate no higher than the price-order estimate.</p>
     <p data-rc-cohort-totals>Price CLI total: {seconds(cost.price_cli_interval_sum_ns)} s. Learned CLI total: {seconds(cost.learned_cli_interval_sum_ns)} s. Historical training counted once per artifact: {seconds(cost.historical_training_wall_ns_counted_once)} s. Learned plus historical / price: {ratio(cost.learned_plus_historical_over_price_ratio)}.</p>
     <p>These are sums of recorded CLI and historical training intervals, not campaign elapsed time. Startup/imports, runtime-sidecar writing, transport, this review and separate audits are excluded. Ratios do not establish learned speedup or independent physical validation.</p>
+    {processCost && <section data-rc-cohort-process>
+      <h3>Enclosing process costs</h3>
+      <p>Price process total: {seconds(processCost.price_process_interval_sum_ns)} s. Learned process total: {seconds(processCost.learned_process_interval_sum_ns)} s. Historical training counted once: {seconds(processCost.historical_training_wall_ns_counted_once)} s. Learned plus historical / price: {ratio(processCost.learned_plus_historical_over_price_ratio)}.</p>
+      <p>Process totals replace the nested CLI times above. Do not add them together. Transport, this review, separate audits and campaign preparation are excluded. The difference outside CLI includes more than startup. These observations do not attest clocks or establish independent speedup.</p>
+      <div className="wb2-table-scroll" role="region" aria-label="Enclosing process pairs" tabIndex={0}><table className="wb2-table" style={{ minWidth: 800 }}><thead><tr><th>Pair</th><th>Price process (s)</th><th>Learned process (s)</th><th>Price outside CLI (s)</th><th>Learned outside CLI (s)</th><th>Learned / price</th></tr></thead><tbody>
+        {processCost.pairs.map((p: any, i: number) => <tr key={i}><td>{i + 1}</td><td>{seconds(p.price_process_wall_ns)}</td><td>{seconds(p.learned_process_wall_ns)}</td><td>{seconds(p.price_outside_cli_wall_ns)}</td><td>{seconds(p.learned_outside_cli_wall_ns)}</td><td>{ratio(p.learned_over_price_process_ratio)}</td></tr>)}
+      </tbody></table></div>
+      <button className="wb2-btn" onClick={() => { void download('process-observations.json') }}>Download original process observations</button>
+    </section>}
     <div className="wb2-table-scroll" role="region" aria-label="Paired strategy costs" tabIndex={0}><table className="wb2-table" style={{ minWidth: 800 }}><thead><tr><th>Pair</th><th>Price CLI (s)</th><th>Learned CLI (s)</th><th>Selection comparable</th><th>Learned / price</th></tr></thead><tbody>
       {cost.pairs.map((p: any, i: number) => <tr key={i} data-rc-cohort-pair={i}><td>{i + 1}</td><td>{seconds(p.price_cli_wall_ns)}</td><td>{seconds(p.learned_cli_wall_ns)}</td><td>{p.recorded_selection_comparable ? 'Yes' : 'No'}</td><td>{ratio(p.learned_over_price_cli_ratio)}</td></tr>)}
     </tbody></table></div>

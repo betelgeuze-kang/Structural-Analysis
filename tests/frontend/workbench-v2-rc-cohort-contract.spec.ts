@@ -42,3 +42,34 @@ test('duplicate keys reject before original artifact reads', async () => {
   await expect(validateRcStrategyCohort(raw, async p => { reads++; return cohortBytes(p) })).rejects.toThrow()
   expect(reads).toBe(0)
 })
+
+test('process cohort recomputes enclosing intervals and retains original CLI accounting', async () => {
+  const { processCohortBytes } = await import('./rc-cohort-fixture')
+  const review = await validateRcStrategyCohort(processCohortBytes('cohort.json'), async path => processCohortBytes(path))
+  expect(review.processCost!.price_process_interval_sum_ns).toBe(review.cost.price_cli_interval_sum_ns + 1000)
+  expect(review.processCost!.historical_training_wall_ns_counted_once).toBe(review.cost.historical_training_wall_ns_counted_once)
+  expect(review.processCost!.net_savings_proved).toBe(false)
+})
+for (const mutation of ['bytes', 'short', 'duplicate', 'bool_exit', 'scope', 'extra', 'cost', 'overflow']) {
+  test(`process cohort refuses changed ${mutation}`, async () => {
+    const { processCohortBytes } = await import('./rc-cohort-fixture')
+    const rootRaw = new TextDecoder().decode(processCohortBytes('cohort.json')), manifest = JSON.parse(rootRaw)
+    let processRaw = processCohortBytes('process-observations.json')
+    const changes: Record<string, unknown> = {}
+    if (mutation === 'cost') { manifest.process_cost_accounting.price_process_interval_sum_ns++; changes.process_cost_accounting = manifest.process_cost_accounting }
+    else if (mutation === 'bytes') processRaw = new Uint8Array([...processRaw, 32])
+    else {
+      const doc = JSON.parse(new TextDecoder().decode(processRaw)), p = doc.processes[0]
+      if (mutation === 'short') p.wall_ns = 0
+      if (mutation === 'duplicate') doc.processes[1] = p
+      if (mutation === 'bool_exit') p.return_code = false
+      if (mutation === 'scope') p.scope = 'solver_only'
+      if (mutation === 'extra') p.attested = true
+      if (mutation === 'overflow') for (const item of doc.processes) item.wall_ns = Number.MAX_SAFE_INTEGER
+      processRaw = new TextEncoder().encode(JSON.stringify(doc))
+      changes.process_observations = { ...manifest.process_observations, byte_length: processRaw.length, sha256: `sha256:${createHash('sha256').update(processRaw).digest('hex')}` }
+    }
+    const raw = rebind(rootRaw, changes, 'report_hash')
+    await expect(validateRcStrategyCohort(raw, async path => path === 'process-observations.json' ? processRaw : processCohortBytes(path))).rejects.toThrow()
+  })
+}

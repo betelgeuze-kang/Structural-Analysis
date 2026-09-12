@@ -1,5 +1,5 @@
 import { sha256Bytes, sha256Hex } from './checksum'
-import { check, document, same, selfHash, type RcObject } from './rcJobSchema'
+import { check, document, fields, same, selfHash, type RcObject } from './rcJobSchema'
 import { validateRcControlSearch } from './rcControlSearchSchema'
 import type { StudyRead } from './rcControlDesignSchema'
 
@@ -12,15 +12,16 @@ export interface RcCohortExecution {
   pair: number; strategy: string; reportPath: string; reportHash: string
   selected: string | null; estimate: number | null; cliWallNs: number; runtimePath: string
 }
-export interface RcCohortReview { manifest: RcObject; cost: RcObject; executions: RcCohortExecution[] }
+export interface RcCohortReview { manifest: RcObject; cost: RcObject; processCost: RcObject | null; executions: RcCohortExecution[] }
 
 /** Independently validate every original study before deriving cohort costs. */
 export async function validateRcStrategyCohort(raw: Uint8Array, sourceRead: StudyRead): Promise<RcCohortReview> {
   check(raw.byteLength <= MAX, 'cohort_manifest_too_large')
   const doc = document(raw), m = doc.value
   await selfHash(doc.raw, m, 'report_hash')
-  check(keys(m, ['schema_version', 'source_revision', 'source_revision_is_attestation', 'pairs', 'cost_accounting', 'independent_physical_validation', 'report_hash'])
-    && m.schema_version === 'rc-control-strategy-cohort-artifact.v1' && /^[a-f0-9]{40}$/.test(m.source_revision)
+  const withProcesses = m.schema_version === 'rc-control-strategy-cohort-artifact.v2'
+  check(keys(m, ['schema_version', 'source_revision', 'source_revision_is_attestation', 'pairs', 'cost_accounting', 'independent_physical_validation', 'report_hash', ...(withProcesses ? ['process_observations', 'process_cost_accounting'] : [])])
+    && ['rc-control-strategy-cohort-artifact.v1', 'rc-control-strategy-cohort-artifact.v2'].includes(m.schema_version) && /^[a-f0-9]{40}$/.test(m.source_revision)
     && m.source_revision_is_attestation === false && m.independent_physical_validation === false
     && Array.isArray(m.pairs) && m.pairs.length >= 1 && m.pairs.length <= 64, 'cohort_manifest_invalid')
   let total = raw.byteLength
@@ -94,5 +95,47 @@ export async function validateRcStrategyCohort(raw: Uint8Array, sourceRead: Stud
     scope: 'sum_of_cli_intervals_plus_distinct_historical_training_not_campaign_elapsed', excluded: [...excludes, 'separate_audits'],
     original_physical_artifacts_replayed: false, runtime_digest_is_attestation: false, net_savings_proved: false, independent_generalization: false }
   check(same(m.cost_accounting, cost), 'cohort_cost_accounting_invalid')
-  return { manifest: m, cost, executions }
+  let processCost: RcObject | null = null
+  if (withProcesses) {
+    const processDoc = document(await referenced(m.process_observations, 'process-observations.json')).value
+    check(keys(processDoc, ['processes']) && Array.isArray(processDoc.processes) && processDoc.processes.length === 2 * rows.length, 'cohort_process_count_invalid')
+    const expected = new Map<string, { digest: string; wall: number }>()
+    for (const row of rows) for (const name of ['price', 'learned']) expected.set(row[`${name}_report_hash`], { digest: row[`${name}_runtime_digest`], wall: row[`${name}_cli_wall_ns`] })
+    const indexed = new Map<string, RcObject>()
+    for (const observation of processDoc.processes) {
+      check(keys(observation, ['report_hash', 'runtime_digest', 'wall_ns', 'return_code', 'scope']) && typeof observation.report_hash === 'string', 'cohort_process_fields_invalid')
+      const parent = expected.get(observation.report_hash)
+      check(parent && !indexed.has(observation.report_hash) && observation.runtime_digest === parent.digest
+        && observation.return_code === 0 && observation.scope === 'subprocess_launch_through_exit_including_startup_and_stdout'
+        && nat(observation.wall_ns) && observation.wall_ns >= parent.wall, 'cohort_process_binding_invalid')
+      // All process fields are constrained ASCII strings and safe integer clocks.
+      const digest = await sha256Hex(JSON.stringify(Object.fromEntries(Object.keys(observation).sort().map(k => [k, observation[k]]))))
+      indexed.set(observation.report_hash, { ...observation, digest })
+    }
+    const processRows = rows.map(row => {
+      const p = indexed.get(row.price_report_hash)!, l = indexed.get(row.learned_report_hash)!
+      return { price_report_hash: p.report_hash, learned_report_hash: l.report_hash,
+        price_process_digest: p.digest, learned_process_digest: l.digest,
+        price_process_wall_ns: p.wall_ns, learned_process_wall_ns: l.wall_ns,
+        price_outside_cli_wall_ns: p.wall_ns - row.price_cli_wall_ns, learned_outside_cli_wall_ns: l.wall_ns - row.learned_cli_wall_ns,
+        recorded_selection_comparable: row.recorded_selection_comparable,
+        learned_over_price_process_ratio: row.recorded_selection_comparable && p.wall_ns > 0 ? l.wall_ns / p.wall_ns : null }
+    })
+    const ptotal = processRows.reduce((n, r) => n + r.price_process_wall_ns, 0), ltotal = processRows.reduce((n, r) => n + r.learned_process_wall_ns, 0)
+    check([ptotal, ltotal, ltotal + upfront].every(nat), 'cohort_process_total_overflow')
+    // Preserve producer numeric spelling (e.g. 1.0) in the already verified CLI object.
+    const cliDigest = await sha256Hex(fields(doc.raw).get('cost_accounting')!.value)
+    processCost = { schema_version: 'experimental-rc-control-process-cost-cohort.v1', cli_accounting_digest: cliDigest,
+      pairs: processRows, pair_count: rows.length, uncomparable_pair_count: cost.uncomparable_pair_count,
+      price_process_interval_sum_ns: ptotal, learned_process_interval_sum_ns: ltotal,
+      distinct_historical_training_wall_ns: training, historical_training_wall_ns_counted_once: upfront,
+      learned_plus_historical_interval_sum_ns: ltotal + upfront,
+      learned_plus_historical_over_price_ratio: !cost.uncomparable_pair_count && ptotal > 0 ? (ltotal + upfront) / ptotal : null,
+      scope: 'sum_of_process_intervals_plus_distinct_historical_training_not_campaign_elapsed',
+      excluded: ['transport_and_workbench_review', 'separate_audits', 'campaign_preparation'],
+      outside_cli_interval_is_startup_only: false, process_digest_is_attestation: false,
+      original_physical_artifacts_replayed: false, net_savings_proved: false, independent_generalization: false }
+    check(same(m.process_cost_accounting, processCost), 'cohort_process_cost_invalid')
+  }
+  return { manifest: m, cost, processCost, executions }
 }
