@@ -1,5 +1,9 @@
 # Frozen envelope-admission campaign — launched 2026-09-13
 
+This launch record is historical. The worker later stopped on a progress-file
+collision after one completed slot; the remaining eight slots continue separately.
+See the [preserved failure and active continuation](rc-envelope-continuation-20260913.md).
+
 Source `c72ff7b0012d1c4a4287bde82ec1a51dbc876fb2` adds an explicit experimental
 admission rule: consult the existing seed policy only when the next prescribed
 target exceeds the maximum absolute target in that arm's accepted prefix. Equality
