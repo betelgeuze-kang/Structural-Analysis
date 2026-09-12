@@ -59,7 +59,11 @@ def read_layout_search_graph(read, result):
 
 
 def _read_layout_search_graph(read, result):
-    pruned = result.get("schema_version") == (
+    staged = (
+        result.get("schema_version")
+        == "experimental-rc-control-layout-staged-strategy.v1"
+    )
+    pruned = staged or result.get("schema_version") == (
         "experimental-rc-control-layout-cost-pruned-strategy.v1"
     )
     standalone = pruned or result.get("schema_version") == (
@@ -73,7 +77,9 @@ def _read_layout_search_graph(read, result):
     if (
         plan.get("schema_version")
         != (
-            "experimental-rc-control-layout-cost-pruned-strategy-plan.v1"
+            "experimental-rc-control-layout-staged-plan.v1"
+            if staged
+            else "experimental-rc-control-layout-cost-pruned-strategy-plan.v1"
             if pruned
             else "experimental-rc-control-layout-strategy-plan.v1"
             if standalone
@@ -94,7 +100,9 @@ def _read_layout_search_graph(read, result):
         or result.get("oracle") is not None
         or result.get("timing_scope")
         != (
-            "single_layout_strategy_preparation_ranking_cost_bounds_full_reference_and_IO_excluding_final_report_write"
+            "single_strategy_preparation_cost_bounds_prefix_and_full_reference_verification_IO_excluding_final_report_write"
+            if staged
+            else "single_layout_strategy_preparation_ranking_cost_bounds_full_reference_and_IO_excluding_final_report_write"
             if pruned
             else "single_layout_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write"
         )
@@ -177,6 +185,12 @@ def _read_layout_search_graph(read, result):
     request = decode_bounded_rc_fiber_direct_control_request(
         study._bytes(plan["control_request"])
     )
+    if staged:
+        from structural_analysis.execution.rc_layout_staged_graph import (
+            check_staged_policy,
+        )
+
+        check_staged_policy(plan, result, request)
     models = {}
     history_limits = FiberFrameHistoryLimits(**plan["history_limits"])
     material_limits = FiberFrameMaterialHistoryLimits(**plan["material_limits"])
@@ -313,7 +327,9 @@ def _read_layout_search_graph(read, result):
             raise ValueError("completed layout arm required")
         comparison = _document(read(path, _META_MAX), "report_hash")
         comparison_schema = (
-            "experimental-rc-control-layout-cost-pruned-comparison.v1"
+            "experimental-rc-control-layout-staged-comparison.v1"
+            if staged
+            else "experimental-rc-control-layout-cost-pruned-comparison.v1"
             if pruned
             else "experimental-rc-control-layout-comparison.v1"
         )
@@ -349,9 +365,12 @@ def _read_layout_search_graph(read, result):
         work = _work(comparison)
         if work["unknown_work"]:
             raise ValueError("layout comparison has unknown work")
-        _same(
-            outcome.get("execution_work"), work, "layout execution accounting differs"
-        )
+        if not staged:
+            _same(
+                outcome.get("execution_work"),
+                work,
+                "layout execution accounting differs",
+            )
         if outcome.get("selected_candidate_id") != comparison.get(
             "selected_candidate_id"
         ):
@@ -415,7 +434,20 @@ def _read_layout_search_graph(read, result):
                     },
                     "reference model differs from pool",
                 )
-        if pruned:
+        if staged:
+            from structural_analysis.execution.rc_layout_staged_graph import (
+                check_staged_comparison,
+            )
+
+            staged_work = check_staged_comparison(
+                read, plan, name, comparison, outcome, models, request
+            )
+            _same(
+                outcome.get("execution_work"),
+                staged_work,
+                "staged total execution accounting differs",
+            )
+        elif pruned:
             from structural_analysis.execution.rc_layout_cost_pruning_graph import (
                 check_pruned_comparison,
             )

@@ -156,6 +156,7 @@ class RcSearchArtifactBundle:
             "experimental-rc-control-layout-search.v1",
             "experimental-rc-control-layout-strategy.v1",
             "experimental-rc-control-layout-cost-pruned-strategy.v1",
+            "experimental-rc-control-layout-staged-strategy.v1",
         ):
             from structural_analysis.execution.rc_layout_search_graph import (
                 read_layout_search_graph,

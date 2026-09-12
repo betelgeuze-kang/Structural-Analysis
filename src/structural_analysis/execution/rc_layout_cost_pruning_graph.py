@@ -26,12 +26,14 @@ def check_pruning_policy(plan, result):
         _same(document.get("execution_policy"), expected, "cost pruning policy differs")
 
 
-def _original_row(read, name, row, model, request):
+def _original_row(read, name, row, model, request, *, allow_unverified=False):
     """Bind incumbent metadata to original records, without granting solver authority."""
     if row.get("full_reference_verification_pass") is not True:
         if row.get("selection_eligible") is not False:
             raise ValueError("unverified pruning row cannot be eligible")
-        return
+        if not allow_unverified:
+            return
+    verified = row.get("full_reference_verification_pass") is True
     refs = row["artifacts"]
 
     def raw(role):
@@ -41,11 +43,14 @@ def _original_row(read, name, row, model, request):
     verification = strict_json_object_bytes(
         raw("verification"), maximum_bytes=_META_MAX
     )
-    checkpoint_raw = raw("checkpoint")
-    _document(checkpoint_raw, "artifact_hash")
+    checkpoint_raw = raw("checkpoint") if "checkpoint" in refs else None
+    if checkpoint_raw is not None:
+        _document(checkpoint_raw, "artifact_hash")
     _same(
         result.get("checkpoint"),
-        {"sha256": study._sha(checkpoint_raw), "byte_length": len(checkpoint_raw)},
+        {"sha256": study._sha(checkpoint_raw), "byte_length": len(checkpoint_raw)}
+        if checkpoint_raw is not None
+        else None,
         "pruning result checkpoint differs",
     )
     expected_request = {
@@ -68,12 +73,14 @@ def _original_row(read, name, row, model, request):
         != model.canonical_model_checksum
     ):
         raise ValueError("pruning original result model differs")
-    if result.get("contract_pass") is not True or len(
-        result.get("response_history", [])
-    ) != len(request.targets_m):
+    if verified and (
+        result.get("contract_pass") is not True
+        or len(result.get("response_history", [])) != len(request.targets_m)
+    ):
         raise ValueError("pruning original path incomplete")
     if (
-        any(
+        verified
+        and any(
             verification.get(k) is not True
             for k in (
                 "artifact_contract_pass",
@@ -84,7 +91,8 @@ def _original_row(read, name, row, model, request):
             )
         )
         or verification.get("verified_result_hash") != result["result_hash"]
-        or verification.get("errors") != []
+        or verified
+        and verification.get("errors") != []
         or verification.get("unavailable_execution_work") is not False
     ):
         raise ValueError("pruning original verification incomplete")
@@ -108,12 +116,20 @@ def _original_row(read, name, row, model, request):
             else verification["replay_control_work"]
         )
         _same(inv.get("work"), work, "pruning original work binding differs")
-        minimum_steps = len(request.targets_m) + bool(request.constant_nodal_loads)
+        minimum_steps = (
+            (len(request.targets_m) + bool(request.constant_nodal_loads))
+            if verified
+            else 0
+        )
         if (
             type(work.get("attempted_step_count")) is not int
             or work["attempted_step_count"] < minimum_steps
         ):
             raise ValueError("pruning original work excludes complete path")
+    if not verified:
+        if row.get("performance") is not None or row.get("screens") is not None:
+            raise ValueError("unverified prefix cannot carry response screens")
+        return
     history = result["response_history"]
     if request.constant_nodal_loads:
         history = [result["preload_response"], *history]
@@ -124,7 +140,9 @@ def _original_row(read, name, row, model, request):
     )
 
 
-def check_pruned_comparison(read, plan, name, comparison, outcome, models, request):
+def check_pruned_comparison(
+    read, plan, name, comparison, outcome, models, request, *, prefix_check=None
+):
     rows = comparison["rows"]
     for row in rows:
         _original_row(read, name, row, models[row["candidate_id"]], request)
@@ -141,7 +159,13 @@ def check_pruned_comparison(read, plan, name, comparison, outcome, models, reque
     for ordinal, (key, record) in enumerate(zip(considered, decisions, strict=True)):
         bound = layout_cost_dominance(plan, evaluated)
         skip = key in bound["cost_dominated_unevaluated_candidate_ids"]
-        action = "skip_cost_dominated" if skip else "execute_full_reference"
+        action = (
+            "skip_cost_dominated"
+            if skip
+            else "execute_prefix_screen"
+            if prefix_check is not None and key != "baseline"
+            else "execute_full_reference"
+        )
         if type(record) is not dict or set(record) != {
             "candidate_id",
             "action",
@@ -158,7 +182,9 @@ def check_pruned_comparison(read, plan, name, comparison, outcome, models, reque
             raise ValueError("pruning decision path differs")
         decision = _document(read(f"{name}/{path}", _META_MAX, ref), "decision_hash")
         expected = {
-            "schema_version": "experimental-rc-layout-cost-pruning-decision.v1",
+            "schema_version": "experimental-rc-layout-staged-cost-decision.v1"
+            if prefix_check is not None
+            else "experimental-rc-layout-cost-pruning-decision.v1",
             "candidate_id": key,
             "evaluated_candidate_ids_before": [r["candidate_id"] for r in evaluated],
             "action": action,
@@ -175,6 +201,8 @@ def check_pruned_comparison(read, plan, name, comparison, outcome, models, reque
         if skip:
             skipped.append(key)
         else:
+            if prefix_check is not None and key != "baseline" and prefix_check(key):
+                continue
             if (
                 len(evaluated) >= len(rows)
                 or rows[len(evaluated)]["candidate_id"] != key
