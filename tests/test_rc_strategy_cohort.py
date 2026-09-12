@@ -86,6 +86,7 @@ def test_roundtrip_binds_runtime_preserves_original_graph_and_uses_relative_path
         "ratio",
         "boolean_count",
         "runtime_hash",
+        "float_length",
         "path_escape",
         "other_strategy",
         "attestation",
@@ -100,6 +101,9 @@ def test_rehashed_manifest_cannot_change_cost_scope_or_original_bindings(
         manifest["cost_accounting"]["learned_plus_historical_over_price_ratio"] = 0
     elif mutation == "boolean_count":
         manifest["cost_accounting"]["pair_count"] = True
+    elif mutation == "float_length":
+        ref = manifest["pairs"][0]["price_order"]["runtime"]
+        ref["byte_length"] = float(ref["byte_length"])
     elif mutation == "runtime_hash":
         manifest["pairs"][0]["price_order"]["runtime"]["sha256"] = "sha256:" + "0" * 64
     elif mutation == "path_escape":
