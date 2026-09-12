@@ -32,6 +32,7 @@ from structural_analysis.api.frame3d_direct_control_request import (
     strict_json_object_bytes,
 )
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.benchmark.rc_control_prefix_screen import run_prefix_screen
 
 
 @dataclass(frozen=True)
@@ -130,6 +131,7 @@ def _run_layout_search(
     terminal_limits=None,
     only_strategy=None,
     cost_pruning=False,
+    prefix_target_count=None,
 ):
     """Execute frozen schedules; final results require actual reference paths."""
     wall, cpu = perf_counter_ns(), process_time_ns()
@@ -266,6 +268,12 @@ def _run_layout_search(
         for name, order in (("price_order", deterministic), ("learned_order", learned))
         if only_strategy is None or name == only_strategy
     }
+    if prefix_target_count is not None and (
+        not cost_pruning
+        or type(prefix_target_count) is not int
+        or not 1 <= prefix_target_count < len(request.targets_m)
+    ):
+        raise ValueError("proper nonempty prefix requires standalone cost pruning")
     plan = {
         "schema_version": "experimental-rc-control-layout-search-plan.v1",
         "source_revision": source_revision,
@@ -300,6 +308,16 @@ def _run_layout_search(
             "unused_analysis_budget_reallocated": False,
             "unevaluated_physical_feasibility": "unknown",
         }
+    if prefix_target_count is not None:
+        plan["schema_version"] = "experimental-rc-control-layout-staged-plan.v1"
+        plan["prefix_screening"] = {
+            "profile": "verified-history-maximum-prefix.v1",
+            "target_count": prefix_target_count,
+            "baseline": "full_reference_without_prefix",
+            "prefix_pass_is_full_acceptance": False,
+            "reuse_prefix_checkpoint": False,
+            "terminal_limits_used": False,
+        }
     plan["plan_hash"] = study._sha(study._bytes(plan))
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
@@ -322,6 +340,9 @@ def _run_layout_search(
         rows: list[dict] = []
         decisions = []
         skipped = []
+        prefix_rows = []
+        prefix_decisions = []
+        prefix_rejected = []
         pruning_wall = 0
         study._save(
             arm_root,
@@ -342,13 +363,17 @@ def _run_layout_search(
                     bound = layout_cost_dominance(plan, rows)
                     omit = key in bound["cost_dominated_unevaluated_candidate_ids"]
                     decision = {
-                        "schema_version": "experimental-rc-layout-cost-pruning-decision.v1",
+                        "schema_version": "experimental-rc-layout-staged-cost-decision.v1"
+                        if prefix_target_count is not None
+                        else "experimental-rc-layout-cost-pruning-decision.v1",
                         "candidate_id": key,
                         "evaluated_candidate_ids_before": [
                             r["candidate_id"] for r in rows
                         ],
                         "action": "skip_cost_dominated"
                         if omit
+                        else "execute_prefix_screen"
+                        if prefix_target_count is not None and key != "baseline"
                         else "execute_full_reference",
                         "bound": bound,
                         "physical_feasibility_at_decision": "unknown",
@@ -371,6 +396,31 @@ def _run_layout_search(
                     pruning_wall += perf_counter_ns() - decision_start
                     if omit:
                         skipped.append(key)
+                        continue
+                if prefix_target_count is not None and key != "baseline":
+                    prefix_row, prefix_decision, prefix_ref = run_prefix_screen(
+                        models[key],
+                        request,
+                        prefix_target_count,
+                        arm_root / "prefix" / key,
+                        prices,
+                        history_limits,
+                        material_limits,
+                    )
+                    prefix_row["candidate_id"] = key
+                    prefix_rows.append(prefix_row)
+                    prefix_decisions.append(
+                        {
+                            "candidate_id": key,
+                            "action": prefix_decision["action"],
+                            "artifact": prefix_ref
+                            | {"path": f"prefix/{key}/{prefix_ref['path']}"},
+                        }
+                    )
+                    if prefix_decision["action"] == "stop_unknown_work":
+                        raise ValueError("unknown prefix work; stop layout search")
+                    if prefix_decision["action"] == "reject_history_maximum":
+                        prefix_rejected.append(key)
                         continue
                 case_root = arm_root / key
                 case_root.mkdir()
@@ -436,6 +486,19 @@ def _run_layout_search(
                     "unevaluated_physical_feasibility": "unknown",
                     "global_cost_optimality_proved": False,
                 }
+            if prefix_target_count is not None:
+                comparison["schema_version"] = (
+                    "experimental-rc-control-layout-staged-comparison.v1"
+                )
+                comparison["prefix_screening"] = {
+                    "prefix_request_count": len(prefix_rows),
+                    "full_reference_request_count": len(rows),
+                    "decisions": prefix_decisions,
+                    "rejected_history_maximum_candidate_ids": prefix_rejected,
+                    "prefix_execution_work": _work({"rows": prefix_rows}),
+                    "full_reference_execution_work": _work(comparison),
+                    "full_history_acceptance_from_prefix": False,
+                }
             comparison["report_hash"] = study._sha(study._bytes(comparison))
             study._save(arm_root, "comparison.json", study._bytes(comparison))
         except BaseException as error:
@@ -449,6 +512,14 @@ def _run_layout_search(
                         else "raised",
                         "exception_kind": type(error).__name__,
                         "rows": rows,
+                        **(
+                            {
+                                "prefix_rows": prefix_rows,
+                                "prefix_decisions": prefix_decisions,
+                            }
+                            if prefix_target_count is not None
+                            else {}
+                        ),
                         **(
                             {
                                 "cost_pruning_decisions": decisions,
@@ -469,11 +540,13 @@ def _run_layout_search(
             "comparison_path": f"{name}/comparison.json",
             "request_count": len(rows),
             "selected_candidate_id": comparison["selected_candidate_id"],
-            "execution_work": _work(comparison),
+            "execution_work": _work({"rows": [*rows, *prefix_rows]}),
             "wall_ns": perf_counter_ns() - aw,
             "cpu_ns": process_time_ns() - ac,
             "unknown_work_until_outcome": False,
         }
+        if prefix_target_count is not None:
+            outcome["prefix_screening"] = comparison["prefix_screening"]
         if cost_pruning:
             outcome["cost_pruning"] = comparison["cost_pruning"]
         study._save(arm_root, "outcome.json", study._bytes(outcome))
@@ -534,6 +607,12 @@ def _run_layout_search(
         report["timing_scope"] = (
             "single_layout_strategy_preparation_ranking_cost_bounds_full_reference_and_IO_excluding_final_report_write"
         )
+    if prefix_target_count is not None:
+        report["schema_version"] = "experimental-rc-control-layout-staged-strategy.v1"
+        report["prefix_screening"] = plan["prefix_screening"]
+        report["timing_scope"] = (
+            "single_strategy_preparation_cost_bounds_prefix_and_full_reference_verification_IO_excluding_final_report_write"
+        )
     report["report_hash"] = study._sha(study._bytes(report))
     study._save(root, "result.json", study._bytes(report))
     return report
@@ -541,7 +620,9 @@ def _run_layout_search(
 
 def compare_control_layout_search(*args, **kwargs):
     """Run both frozen schedules followed by an optional separate oracle."""
-    if "only_strategy" in kwargs or "cost_pruning" in kwargs:
+    if any(
+        k in kwargs for k in ("only_strategy", "cost_pruning", "prefix_target_count")
+    ):
         raise ValueError("use run_control_layout_strategy for standalone execution")
     return _run_layout_search(*args, **kwargs)
 
@@ -549,7 +630,7 @@ def compare_control_layout_search(*args, **kwargs):
 def run_control_layout_strategy(*args, strategy, **kwargs):
     """Run one complete strategy; price order receives no learned artifacts."""
     if strategy not in ("price_order", "learned_order") or any(
-        k in kwargs for k in ("only_strategy", "cost_pruning")
+        k in kwargs for k in ("only_strategy", "cost_pruning", "prefix_target_count")
     ):
         raise ValueError("one supported explicit layout strategy required")
     return _run_layout_search(*args, only_strategy=strategy, **kwargs)
@@ -558,9 +639,26 @@ def run_control_layout_strategy(*args, strategy, **kwargs):
 def run_control_layout_cost_pruned_strategy(*args, strategy, **kwargs):
     """Execute one frozen shortlist with recorded cost-only pruning decisions."""
     if strategy not in ("price_order", "learned_order") or any(
-        k in kwargs for k in ("only_strategy", "cost_pruning")
+        k in kwargs for k in ("only_strategy", "cost_pruning", "prefix_target_count")
     ):
         raise ValueError("one explicit cost-pruned layout strategy required")
     return _run_layout_search(
         *args, only_strategy=strategy, cost_pruning=True, **kwargs
+    )
+
+
+def run_control_layout_staged_strategy(*args, strategy, prefix_target_count, **kwargs):
+    """Cost-bound, verified prefix rejection, then fresh full-reference acceptance."""
+    if (
+        strategy not in ("price_order", "learned_order")
+        or any(k in kwargs for k in ("only_strategy", "cost_pruning"))
+        or prefix_target_count is None
+    ):
+        raise ValueError("explicit staged strategy and proper prefix required")
+    return _run_layout_search(
+        *args,
+        only_strategy=strategy,
+        cost_pruning=True,
+        prefix_target_count=prefix_target_count,
+        **kwargs,
     )

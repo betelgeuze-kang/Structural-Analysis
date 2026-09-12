@@ -37,6 +37,7 @@ def layout_cost_dominance(plan, rows):
             "experimental-rc-control-layout-search-plan.v1",
             "experimental-rc-control-layout-strategy-plan.v1",
             "experimental-rc-control-layout-cost-pruned-strategy-plan.v1",
+            "experimental-rc-control-layout-staged-plan.v1",
         )
         or plan.get("plan_hash")
         != study._sha(study._bytes({k: v for k, v in plan.items() if k != "plan_hash"}))

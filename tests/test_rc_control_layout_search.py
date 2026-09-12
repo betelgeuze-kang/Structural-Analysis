@@ -503,3 +503,238 @@ def test_standalone_rejects_invalid_strategy_inputs_before_output(
             **args, strategy=strategy, output_directory=root
         )
     assert not root.exists()
+
+
+@pytest.mark.parametrize(
+    "count,full_ids,rejected,steps",
+    [
+        (1, ["baseline", "small", "large"], [], 40),
+        (2, ["baseline", "large"], ["small"], 32),
+    ],
+)
+def test_actual_staged_prefix_rejection_preserves_full_acceptance_and_costs(
+    actual, inputs, tmp_path, monkeypatch, count, full_ids, rejected, steps
+):
+    root = tmp_path / "staged"
+    options = _price_pruning_inputs(inputs, budget=4)
+    options["history_limits"] = design.FiberFrameHistoryLimits(1, 2e-6)
+    options["candidates"] += (
+        search.RCControlLayoutCandidate(
+            "costly",
+            case(
+                tmp_path,
+                "costly",
+                "validation",
+                lengths=(3.4, 2.6),
+                load="fixed-history",
+            ).model,
+        ),
+    )
+    original = study._reference_design_row
+    calls = []
+
+    def observe(model, candidate, request, case_root, kwargs, *limits):
+        plan = json.loads((root / "plan.json").read_bytes())
+        assert plan["prefix_screening"]["target_count"] == count
+        if "prefix" in case_root.parts:
+            assert (case_root / "request.json").is_file()
+            assert (
+                limits[-1] is None
+            )  # terminal-only constraints are not prefix rejection criteria
+        elif case_root.name != "baseline":
+            decision = json.loads(
+                (
+                    root / "price_order/prefix" / case_root.name / "decision.json"
+                ).read_bytes()
+            )
+            assert decision["action"] == "execute_full_reference"
+        calls.append((case_root.name, len(request.targets_m)))
+        return original(model, candidate, request, case_root, kwargs, *limits)
+
+    monkeypatch.setattr(study, "_reference_design_row", observe)
+    result = search.run_control_layout_staged_strategy(
+        **options,
+        strategy="price_order",
+        prefix_target_count=count,
+        output_directory=root,
+    )
+    assert (
+        result["schema_version"] == "experimental-rc-control-layout-staged-strategy.v1"
+    )
+    arm = result["arms"]["price_order"]
+    comparison = json.loads((root / "price_order/comparison.json").read_bytes())
+    assert [r["candidate_id"] for r in comparison["rows"]] == full_ids
+    assert arm["selected_candidate_id"] == "large"
+    assert arm["prefix_screening"]["rejected_history_maximum_candidate_ids"] == rejected
+    assert arm["execution_work"]["known_counters"]["attempted_step_count"] == steps
+    assert arm["execution_work"]["api_invocation_count"] == 2 * (len(full_ids) + 2)
+    assert arm["cost_pruning"]["skipped_cost_dominated_candidate_ids"] == ["costly"]
+    assert not (root / "price_order/prefix/costly").exists()
+    assert not (root / "price_order/prefix/baseline").exists()
+    assert calls == [("baseline", 6), ("small", count)] + (
+        [("small", 6)] if count == 1 else []
+    ) + [("large", count), ("large", 6)]
+    for key in ("small", "large"):
+        stage = root / "price_order/prefix" / key
+        decision = json.loads((stage / "decision.json").read_bytes())
+        for ref in (decision["prefix_request"], decision["prefix_row"]):
+            raw = (stage / ref["path"]).read_bytes()
+            assert study._sha(raw) == ref["sha256"] and len(raw) == ref["byte_length"]
+        assert decision["full_history_acceptance"] is False
+        assert decision["terminal_limits_used"] is False
+        prefix_row = json.loads((stage / "row.json").read_bytes())
+        prefix_result = json.loads(
+            (stage / prefix_row["artifacts"]["result"]["path"]).read_bytes()
+        )
+        oracle_root = actual[0] / "exhaustive_oracle"
+        oracle = json.loads((oracle_root / "comparison.json").read_bytes())
+        full_row = next(r for r in oracle["rows"] if r["candidate_id"] == key)
+        full_result = json.loads(
+            (oracle_root / full_row["artifacts"]["result"]["path"]).read_bytes()
+        )
+        assert (
+            prefix_result["response_history"] == full_result["response_history"][:count]
+        )
+    assert result["candidate_cost_optimality_audit"] is None
+    assert result["claims"]["workbench_search_review_integrated"] is False
+
+
+@pytest.mark.parametrize("count", [None, True, 0, -1, 6, 7, 1.5])
+def test_staged_prefix_rejects_invalid_counts_before_output(inputs, tmp_path, count):
+    root = tmp_path / "invalid-staged"
+    with pytest.raises(ValueError):
+        search.run_control_layout_staged_strategy(
+            **_price_pruning_inputs(inputs),
+            strategy="price_order",
+            prefix_target_count=count,
+            output_directory=root,
+        )
+    assert not root.exists()
+
+
+@pytest.mark.parametrize(
+    "verified,unknown,expected",
+    [
+        (False, False, "execute_full_reference"),
+        (True, True, "stop_unknown_work"),
+        (True, False, "reject_history_maximum"),
+    ],
+)
+def test_prefix_failure_is_not_physical_rejection(
+    inputs, tmp_path, monkeypatch, verified, unknown, expected
+):
+    from structural_analysis.benchmark import rc_control_prefix_screen as prefix
+
+    row = {
+        "full_reference_verification_pass": verified,
+        "performance": {"maximum_absolute_fiber_strain": 2.0},
+        "invocations": [
+            {
+                "phase": phase,
+                "status": "returned",
+                "unknown_execution_work": unknown,
+                "work": {
+                    "attempted_step_count": 2,
+                    "known_newton_iteration_count": 4,
+                    "known_linear_solve_count": 4,
+                    "unknown_solver_work_attempt_count": 0,
+                },
+            }
+            for phase in ("analysis", "verification")
+        ],
+    }
+    monkeypatch.setattr(study, "_reference_design_row", lambda *args: deepcopy(row))
+    _, decision, _ = prefix.run_prefix_screen(
+        inputs["baseline"],
+        inputs["request"],
+        2,
+        tmp_path / "prefix",
+        inputs["prices"],
+        inputs["history_limits"],
+        inputs["material_limits"],
+    )
+    assert decision["action"] == expected
+    assert bool(decision["history_maximum_violations"]) == (
+        expected == "reject_history_maximum"
+    )
+    assert decision["full_history_acceptance"] is False
+
+
+def test_staged_unknown_prefix_work_stops_and_retains_failure(
+    inputs, tmp_path, monkeypatch
+):
+    root = tmp_path / "unknown-prefix"
+    original = study._reference_design_row
+
+    def incomplete(model, candidate, request, case_root, *args):
+        if "prefix" in case_root.parts:
+            return {
+                "full_reference_verification_pass": False,
+                "performance": None,
+                "invocations": [
+                    {
+                        "phase": "analysis",
+                        "status": "raised",
+                        "unknown_execution_work": True,
+                        "work": None,
+                    }
+                ],
+            }
+        return original(model, candidate, request, case_root, *args)
+
+    monkeypatch.setattr(study, "_reference_design_row", incomplete)
+    options = _price_pruning_inputs(inputs, budget=3)
+    options["history_limits"] = design.FiberFrameHistoryLimits(1, 2e-6)
+    with pytest.raises(ValueError, match="unknown prefix work"):
+        search.run_control_layout_staged_strategy(
+            **options,
+            strategy="price_order",
+            prefix_target_count=2,
+            output_directory=root,
+        )
+    outcome = json.loads((root / "price_order/outcome.json").read_bytes())
+    assert outcome["unknown_work_until_outcome"] is True
+    assert len(outcome["prefix_rows"]) == 1
+    assert outcome["prefix_decisions"][0]["action"] == "stop_unknown_work"
+    assert not (root / "price_order/small").exists()
+    assert not (root / "result.json").exists()
+
+
+def test_actual_prefix_preserves_constant_preload_and_full_history_prefix(
+    inputs, tmp_path
+):
+    from structural_analysis.benchmark.rc_control_prefix_screen import run_prefix_screen
+
+    request = replace(inputs["request"], constant_nodal_loads=(("N3", 0.0, -0.1, 0.0),))
+    root = tmp_path / "constant-prefix"
+    row, decision, _ = run_prefix_screen(
+        inputs["baseline"],
+        request,
+        2,
+        root,
+        inputs["prices"],
+        inputs["history_limits"],
+        inputs["material_limits"],
+    )
+    assert decision["prefix_verified"] is True
+    assert decision["execution_work"]["known_counters"]["attempted_step_count"] == 6
+    saved = json.loads((root / "request.json").read_bytes())
+    assert saved == request.to_dict() | {"targets_m": list(request.targets_m[:2])}
+    full_root = tmp_path / "constant-full"
+    full_root.mkdir()
+    full = study._reference_design_row(
+        inputs["baseline"],
+        None,
+        request,
+        full_root,
+        request.api_kwargs() | {"restart": None},
+        inputs["prices"],
+        inputs["history_limits"],
+        inputs["material_limits"],
+        inputs["terminal_limits"],
+    )
+    assert full["full_reference_verification_pass"] is True
+    a = json.loads((root / row["artifacts"]["result"]["path"]).read_bytes())
+    b = json.loads((full_root / full["artifacts"]["result"]["path"]).read_bytes())
+    assert a["preload_response"] == b["preload_response"]
+    assert a["response_history"] == b["response_history"][:2]
