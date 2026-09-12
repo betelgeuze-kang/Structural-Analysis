@@ -59,8 +59,11 @@ def read_layout_search_graph(read, result):
 
 
 def _read_layout_search_graph(read, result):
-    standalone = (
-        result.get("schema_version") == "experimental-rc-control-layout-strategy.v1"
+    pruned = result.get("schema_version") == (
+        "experimental-rc-control-layout-cost-pruned-strategy.v1"
+    )
+    standalone = pruned or result.get("schema_version") == (
+        "experimental-rc-control-layout-strategy.v1"
     )
     strategy = result.get("strategy") if standalone else None
     if standalone and strategy not in ("price_order", "learned_order"):
@@ -70,7 +73,9 @@ def _read_layout_search_graph(read, result):
     if (
         plan.get("schema_version")
         != (
-            "experimental-rc-control-layout-strategy-plan.v1"
+            "experimental-rc-control-layout-cost-pruned-strategy-plan.v1"
+            if pruned
+            else "experimental-rc-control-layout-strategy-plan.v1"
             if standalone
             else "experimental-rc-control-layout-search-plan.v1"
         )
@@ -88,9 +93,19 @@ def _read_layout_search_graph(read, result):
         or plan.get("oracle_after_online_arms") is not False
         or result.get("oracle") is not None
         or result.get("timing_scope")
-        != "single_layout_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write"
+        != (
+            "single_layout_strategy_preparation_ranking_cost_bounds_full_reference_and_IO_excluding_final_report_write"
+            if pruned
+            else "single_layout_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write"
+        )
     ):
         raise ValueError("standalone layout strategy or scope differs")
+    if pruned:
+        from structural_analysis.execution.rc_layout_cost_pruning_graph import (
+            check_pruning_policy,
+        )
+
+        check_pruning_policy(plan, result)
     policy = None
     if uses_policy:
         policy_raw = read("policy.json", _META_MAX)
@@ -297,11 +312,16 @@ def _read_layout_search_graph(read, result):
         ):
             raise ValueError("completed layout arm required")
         comparison = _document(read(path, _META_MAX), "report_hash")
-        if comparison.get(
-            "schema_version"
-        ) != "experimental-rc-control-layout-comparison.v1" or comparison[
-            "report_hash"
-        ] != outcome.get("comparison_hash"):
+        comparison_schema = (
+            "experimental-rc-control-layout-cost-pruned-comparison.v1"
+            if pruned
+            else "experimental-rc-control-layout-comparison.v1"
+        )
+        if (
+            comparison.get("schema_version") != comparison_schema
+            or comparison["report_hash"] != outcome.get("comparison_hash")
+            or comparison.get("price_table_hash") != plan["price_table_hash"]
+        ):
             raise ValueError("layout comparison binding mismatch")
         rows = comparison.get("rows")
         expected_ids = [
@@ -314,7 +334,14 @@ def _read_layout_search_graph(read, result):
         ]
         if (
             type(rows) is not list
-            or [r["candidate_id"] for r in rows] != expected_ids
+            or not pruned
+            and [r["candidate_id"] for r in rows] != expected_ids
+            or pruned
+            and (
+                len(rows) > len(expected_ids)
+                or len({r["candidate_id"] for r in rows}) != len(rows)
+                or any(r["candidate_id"] not in expected_ids for r in rows)
+            )
             or type(outcome.get("request_count")) is not int
             or outcome["request_count"] != len(rows)
         ):
@@ -334,6 +361,11 @@ def _read_layout_search_graph(read, result):
                 row["quantities"],
                 by_id[row["candidate_id"]]["quantities"],
                 "comparison quantities differ from pool",
+            )
+            _same(
+                row["material_estimate"],
+                by_id[row["candidate_id"]]["material_estimate"],
+                "comparison material estimate differs from pool",
             )
             if row.get("full_reference_verification_pass") is True:
                 screens = study._screens(
@@ -383,6 +415,14 @@ def _read_layout_search_graph(read, result):
                     },
                     "reference model differs from pool",
                 )
+        if pruned:
+            from structural_analysis.execution.rc_layout_cost_pruning_graph import (
+                check_pruned_comparison,
+            )
+
+            check_pruned_comparison(
+                read, plan, name, comparison, outcome, models, request
+            )
         eligible = [
             r
             for r in rows
@@ -419,13 +459,13 @@ def _read_layout_search_graph(read, result):
         raise ValueError("layout total is smaller than disjoint components")
     _same(
         result.get("candidate_cost_optimality_audit"),
-        candidate_cost_optimality_audit(plan, comparisons),
+        None if pruned else candidate_cost_optimality_audit(plan, comparisons),
         "layout cost optimality differs",
     )
     _same(
         result.get("candidate_coverage_audit"),
         _coverage_audit(plan | {"plans": plans}, comparisons.get("exhaustive_oracle"))
-        if uses_policy
+        if uses_policy and not pruned
         else None,
         "layout coverage differs",
     )
