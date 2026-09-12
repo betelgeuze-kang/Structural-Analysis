@@ -77,6 +77,10 @@ function serveDist() {
       return
     }
     if (!existsSync(target) || !statSync(target).isFile()) {
+      if (path.extname(target)) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' }).end('Not found')
+        return
+      }
       target = path.join(distDir, 'index.html')
     }
     if (!existsSync(target)) {

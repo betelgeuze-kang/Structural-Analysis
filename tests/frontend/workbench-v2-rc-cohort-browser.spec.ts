@@ -66,3 +66,13 @@ test('cohort rejects a separately valid replacement report at the original URL',
   await expect(panel).toHaveAttribute('data-rc-cohort', 'invalid', { timeout: 60000 })
   await expect(panel.locator('[data-rc-cohort-totals]')).toHaveCount(0)
 })
+
+
+test('cohort host rejects missing scripts while preserving application navigation', async ({ request }) => {
+  const missing = await request.get(`${baseUrl}/src/structure-viewer/missing-controlled-cohort.js`)
+  expect(missing.status()).toBe(404)
+  expect((await missing.text()).trim()).not.toContain('<!DOCTYPE html>')
+  const navigation = await request.get(`${baseUrl}/controlled-cohort-navigation`)
+  expect(navigation.status()).toBe(200)
+  expect(await navigation.text()).toContain('<!DOCTYPE html>')
+})
