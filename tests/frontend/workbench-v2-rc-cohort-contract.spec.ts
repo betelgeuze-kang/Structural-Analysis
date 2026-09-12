@@ -1,0 +1,44 @@
+import { expect, test } from '@playwright/test'
+import { validateRcStrategyCohort } from '../../src/workbench-v2/model/rcStrategyCohortSchema'
+import { cohortBytes } from './rc-cohort-fixture'
+import { rebind } from './rc-search-standalone-fixture'
+import { createHash } from 'node:crypto'
+
+const original = cohortBytes('cohort.json')
+test('Python cohort validates both original designs, runtime digests and once-counted training', async () => {
+  const review = await validateRcStrategyCohort(original, async p => cohortBytes(p))
+  expect(review.executions.map(e => e.selected)).toEqual(['cheap', 'cheap'])
+  expect(review.executions).toHaveLength(2)
+  expect(Object.keys(review.cost.distinct_historical_training_wall_ns)).toHaveLength(1)
+  expect(review.cost).toEqual(review.manifest.cost_accounting)
+  expect(review.cost.net_savings_proved).toBe(false)
+})
+for (const mutation of ['training', 'ratio', 'pair_count', 'path', 'report_hash', 'extra_claim', 'physical_bytes', 'runtime_clock']) {
+  test(`cohort rejects rehashed or replaced ${mutation}`, async () => {
+    const m = JSON.parse(new TextDecoder().decode(original)); let runtime: Uint8Array | null = null
+    if (mutation === 'training') m.cost_accounting.historical_training_wall_ns_counted_once = 0
+    if (mutation === 'ratio') m.cost_accounting.learned_plus_historical_over_price_ratio = 0
+    if (mutation === 'pair_count') m.cost_accounting.pair_count = true
+    if (mutation === 'path') m.pairs[0].price_order.runtime.path = '../runtime.json'
+    if (mutation === 'report_hash') m.pairs[0].price_order.report_hash = m.pairs[0].learned_order.report_hash
+    if (mutation === 'extra_claim') m.net_savings_proved = true
+    if (mutation === 'runtime_clock') {
+      const r = JSON.parse(new TextDecoder().decode(cohortBytes(m.pairs[0].price_order.runtime.path))); r.wall_ns = true
+      runtime = new TextEncoder().encode(JSON.stringify(r))
+      m.pairs[0].price_order.runtime.byte_length = runtime.byteLength
+      m.pairs[0].price_order.runtime.sha256 = `sha256:${createHash('sha256').update(runtime).digest('hex')}`
+    }
+    const raw = rebind(new TextDecoder().decode(original), m, 'report_hash')
+    const read = async (p: string) => {
+      if (mutation === 'physical_bytes' && p.endsWith('/cheap/checkpoint.json')) return new Uint8Array([...cohortBytes(p), 32])
+      return runtime && p === m.pairs[0].price_order.runtime.path ? runtime : cohortBytes(p)
+    }
+    await expect(validateRcStrategyCohort(raw, read)).rejects.toThrow()
+  })
+}
+test('duplicate keys reject before original artifact reads', async () => {
+  let reads = 0
+  const raw = new TextEncoder().encode(new TextDecoder().decode(original).replace('{', '{"pairs":[], '))
+  await expect(validateRcStrategyCohort(raw, async p => { reads++; return cohortBytes(p) })).rejects.toThrow()
+  expect(reads).toBe(0)
+})

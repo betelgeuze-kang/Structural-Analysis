@@ -7,13 +7,13 @@ import { RcControlDesignReviewPanel } from './RcControlDesignPanel'
 
 const label = (name: string) => ({ price_order: 'Price order', learned_order: 'Learned order', exhaustive_oracle: 'Later exhaustive check' })[name] ?? name
 const shown = (value: unknown) => typeof value === 'number' ? String(value) : 'Unavailable'
-export function RcControlSearchPanel({ url, authorize }: { url: string; authorize?: JobAuthorizationProvider }): ReactElement {
+export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInvalid }: { url: string; authorize?: JobAuthorizationProvider; expectedReportHash?: string; onInvalid?: () => void }): ReactElement {
   const [loaded, setLoaded] = useState<{ url: string; session: RcSearchSession } | null>(null)
   const [status, setStatus] = useState('loading')
   const [arm, setArm] = useState('price_order')
   const urls = useRef(new Set<string>())
   const session = loaded?.url === url ? loaded.session : null
-  const invalidate = () => { setLoaded(null); setStatus('invalid') }
+  const invalidate = () => { setLoaded(null); setStatus('invalid'); onInvalid?.() }
   useEffect(() => {
     const controller = new AbortController()
     let value: RcSearchSession | null = null
@@ -21,11 +21,12 @@ export function RcControlSearchPanel({ url, authorize }: { url: string; authoriz
     loadRcControlSearch(url, controller.signal, authorize).then(result => {
       value = result
       if (controller.signal.aborted) { result.dispose(); return }
-      result.onFailure(() => { if (!controller.signal.aborted) { setLoaded(null); setStatus('invalid') } })
+      if (expectedReportHash && result.report.report_hash !== expectedReportHash) { result.dispose(); invalidate(); return }
+      result.onFailure(() => { if (!controller.signal.aborted) { setLoaded(null); setStatus('invalid'); onInvalid?.() } })
       setArm(result.report.strategy ?? 'price_order'); setLoaded({ url, session: result }); setStatus('verified')
-    }).catch(() => { if (!controller.signal.aborted) setStatus('invalid') })
+    }).catch(() => { if (!controller.signal.aborted) { setStatus('invalid'); onInvalid?.() } })
     return () => { controller.abort(); value?.dispose(); for (const href of urls.current) URL.revokeObjectURL(href); urls.current.clear() }
-  }, [url, authorize])
+  }, [url, authorize, expectedReportHash, onInvalid])
   async function download(role: 'result' | 'plan' | 'policy' | 'historical-training') {
     try {
       const blob = await session!.download(role), href = URL.createObjectURL(blob), anchor = document.createElement('a')

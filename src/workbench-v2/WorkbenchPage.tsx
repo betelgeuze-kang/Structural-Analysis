@@ -1,3 +1,4 @@
+import { RcStrategyCohortPanel } from './components/RcStrategyCohortPanel'
 import { RcControlSearchPanel } from './components/RcControlSearchPanel'
 import { RcControlDesignPanel } from './components/RcControlDesignPanel'
 import { RcHistoryFilePanel } from './components/RcHistoryFilePanel'
@@ -56,6 +57,7 @@ export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
   /** Same-origin manifest for one raw-byte-bound physical design comparison. */
   designComparisonUrl?: string
+  rcControlStrategyCohortUrl?: string
   rcControlSearchUrl?: string
   rcControlDesignUrl?: string
   /** Same-origin completed candidate search process review manifest. */
@@ -85,6 +87,7 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 export function WorkbenchPage({
   initialProviderMode = 'demo',
   designComparisonUrl,
+  rcControlStrategyCohortUrl,
   rcControlSearchUrl,
   rcControlDesignUrl,
   candidateSearchProcessUrl,
@@ -467,9 +470,10 @@ export function WorkbenchPage({
 
       <div id="wb2-sec-compare" className="wb2-section">
         <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
+        {rcControlStrategyCohortUrl ? <RcStrategyCohortPanel url={rcControlStrategyCohortUrl} authorize={jobAuthorization} /> : null}
         {rcControlSearchUrl ? <RcControlSearchPanel url={rcControlSearchUrl} authorize={jobAuthorization} /> : null}
         {rcControlDesignUrl ? <RcControlDesignPanel url={rcControlDesignUrl} authorize={jobAuthorization} /> : null}
-        {designComparisonUrl || (!candidateSearchProcessUrl && !rcControlDesignUrl && !rcControlSearchUrl) ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
+        {designComparisonUrl || (!candidateSearchProcessUrl && !rcControlDesignUrl && !rcControlSearchUrl && !rcControlStrategyCohortUrl) ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
         {candidateSearchProcessUrl ? <CandidateSearchProcessPanel load={candidateProcessLoad} selectedSlot={selectedCandidateSlot} onSelect={setSelectedCandidateSlotKey} /> : null}
       </div>
 
