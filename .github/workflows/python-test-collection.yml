@@ -95,6 +95,7 @@ jobs:
           tests/test_rc_native_assembly_reuse.py
           tests/test_rc_line_search_reuse_experiment.py
           tests/test_rc_control_search_accounting.py
+          tests/test_rc_control_strategy_costs.py
           tests/test_repository_python_workflow_contract.py
           tests/test_rc_constant_load_durable.py
           tests/test_rc_control_parent_step.py
