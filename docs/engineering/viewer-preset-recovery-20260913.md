@@ -41,3 +41,7 @@ Six files / 252,017 bytes; inventory SHA-256
 It retains the observer, screenshot, action and console records, HTTP receipt
 and full summary. See the [machine-readable record](viewer-preset-recovery-20260913.summary.json)
 and [preceding Workbench observation](rc-layout-pruned-workbench-20260913.md).
+
+The subsequent [runtime asset delivery fix](viewer-runtime-delivery-20260913.md)
+includes the original dynamically loaded data in production builds and verifies
+the default preset's non-demo source. Separate code-check/comparison gaps remain.
