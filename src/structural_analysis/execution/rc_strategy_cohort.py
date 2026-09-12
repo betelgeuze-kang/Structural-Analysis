@@ -15,6 +15,9 @@ from structural_analysis.api.frame3d_direct_control_request import (
     strict_json_object_bytes,
 )
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+from structural_analysis.benchmark.rc_control_process_costs import (
+    compare_rc_control_process_costs,
+)
 from structural_analysis.benchmark.rc_control_strategy_costs import (
     compare_rc_control_strategy_costs,
 )
@@ -27,6 +30,16 @@ from structural_analysis.execution.rc_search_http import (
 )
 
 SCHEMA = "rc-control-strategy-cohort-artifact.v1"
+PROCESS_SCHEMA = "rc-control-strategy-cohort-artifact.v2"
+
+
+def _processes(raw):
+    value = strict_json_object_bytes(raw, maximum_bytes=_META_MAX)
+    if set(value) != {"processes"}:
+        raise ValueError("exact process observations document required")
+    return value["processes"]
+
+
 STRATEGIES = ("price_order", "learned_order")
 
 
@@ -70,6 +83,7 @@ class RcStrategyCohortBundle:
             return raw
 
         manifest = _document(read("cohort.json", _META_MAX), "report_hash")
+        with_processes = manifest.get("schema_version") == PROCESS_SCHEMA
         if (
             set(manifest)
             != {
@@ -81,8 +95,13 @@ class RcStrategyCohortBundle:
                 "independent_physical_validation",
                 "report_hash",
             }
+            | (
+                {"process_observations", "process_cost_accounting"}
+                if with_processes
+                else set()
+            )
             or manifest["report_hash"] != expected_report_hash
-            or manifest.get("schema_version") != SCHEMA
+            or manifest.get("schema_version") not in (SCHEMA, PROCESS_SCHEMA)
             or not re.fullmatch(r"[a-f0-9]{40}", str(manifest.get("source_revision")))
             or manifest.get("source_revision_is_attestation") is not False
             or manifest.get("independent_physical_validation") is not False
@@ -133,6 +152,14 @@ class RcStrategyCohortBundle:
             compare_rc_control_strategy_costs(pairs)
         ):
             raise ValueError("cohort cost accounting mismatch")
+        if with_processes:
+            raw = read(
+                "process-observations.json", _META_MAX, manifest["process_observations"]
+            )
+            if _bytes(manifest["process_cost_accounting"]) != _bytes(
+                compare_rc_control_process_costs(pairs, _processes(raw))
+            ):
+                raise ValueError("cohort process cost accounting mismatch")
         instance = object.__new__(cls)
         object.__setattr__(instance, "report_hash", manifest["report_hash"])
         object.__setattr__(instance, "artifacts", MappingProxyType(files))
@@ -153,7 +180,9 @@ class RcStrategyCohortBundle:
             stream.write(self.artifacts["cohort.json"])
 
 
-def create_rc_strategy_cohort(pairs, *, source_revision: str):
+def create_rc_strategy_cohort(
+    pairs, *, source_revision: str, process_observations: bytes | None = None
+):
     """Package pairs of {strategy: (validated study bundle, original runtime bytes)}.
 
     Nested original bytes are preserved. Runtime inputs become explicitly bound
@@ -208,6 +237,22 @@ def create_rc_strategy_cohort(pairs, *, source_revision: str):
         "cost_accounting": compare_rc_control_strategy_costs(values),
         "independent_physical_validation": False,
     }
+    if process_observations is not None:
+        if (
+            type(process_observations) is not bytes
+            or len(process_observations) > _META_MAX
+        ):
+            raise ValueError("bounded original process observation bytes required")
+        manifest.update(
+            schema_version=PROCESS_SCHEMA,
+            process_observations=_ref(
+                "process-observations.json", process_observations
+            ),
+            process_cost_accounting=compare_rc_control_process_costs(
+                values, _processes(process_observations)
+            ),
+        )
+        files["process-observations.json"] = process_observations
     manifest["report_hash"] = _sha(_bytes(manifest))
     files["cohort.json"] = _bytes(manifest)
     return RcStrategyCohortBundle.from_reader(

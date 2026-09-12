@@ -204,3 +204,85 @@ def test_cohort_uses_existing_authenticated_read_only_snapshot_mount(bundle):
         app.handle("GET", "/v1/rc-search/cohort/unknown.json", headers=headers).status
         == 404
     )
+
+
+@pytest.fixture(scope="module")
+def process_raw(inputs):
+    from structural_analysis.benchmark.rc_control_process_costs import PROCESS_SCOPE
+
+    observations = []
+    for study, runtime_raw in inputs[0].values():
+        runtime = json.loads(runtime_raw)
+        observations.append(
+            dict(
+                report_hash=study.report_hash,
+                runtime_digest=_sha(_bytes(runtime)),
+                wall_ns=runtime["wall_ns"] + 1000,
+                return_code=0,
+                scope=PROCESS_SCOPE,
+            )
+        )
+    return _bytes({"processes": observations}) + b"\n"
+
+
+def test_process_roundtrip_preserves_original_bytes_and_existing_graph(
+    inputs, bundle, process_raw, tmp_path
+):
+    enriched = create_rc_strategy_cohort(
+        inputs, source_revision="a" * 40, process_observations=process_raw
+    )
+    for path, raw in bundle.artifacts.items():
+        if path != "cohort.json":
+            assert enriched.artifacts[path] == raw
+    assert enriched.artifacts["process-observations.json"] == process_raw
+    manifest = json.loads(enriched.artifacts["cohort.json"])
+    assert manifest["schema_version"] == "rc-control-strategy-cohort-artifact.v2"
+    assert (
+        manifest["process_cost_accounting"]["price_process_interval_sum_ns"]
+        == manifest["cost_accounting"]["price_cli_interval_sum_ns"] + 1000
+    )
+    enriched.write_directory(tmp_path / "export")
+    reread = RcStrategyCohortBundle.from_reader(
+        lambda path, maximum: (tmp_path / "export" / path).read_bytes(),
+        expected_report_hash=enriched.report_hash,
+    )
+    assert reread.artifacts == enriched.artifacts
+
+
+@pytest.mark.parametrize(
+    "mutation", ["bytes", "cost", "bool_cost", "path", "schema", "missing"]
+)
+def test_process_cohort_rejects_tampering(inputs, process_raw, mutation):
+    bundle = create_rc_strategy_cohort(
+        inputs, source_revision="a" * 40, process_observations=process_raw
+    )
+    files = dict(bundle.artifacts)
+    manifest = json.loads(files["cohort.json"])
+    if mutation == "bytes":
+        files["process-observations.json"] += b" "
+    if mutation == "cost":
+        manifest["process_cost_accounting"]["price_process_interval_sum_ns"] += 1
+    if mutation == "bool_cost":
+        manifest["process_cost_accounting"]["pair_count"] = True
+    if mutation == "path":
+        manifest["process_observations"]["path"] = "../process-observations.json"
+    if mutation == "schema":
+        manifest["schema_version"] = "rc-control-strategy-cohort-artifact.v1"
+    if mutation == "missing":
+        del manifest["process_cost_accounting"]
+    manifest.pop("report_hash")
+    manifest["report_hash"] = _sha(_bytes(manifest))
+    files["cohort.json"] = _bytes(manifest)
+    with pytest.raises(ValueError):
+        RcStrategyCohortBundle.from_reader(
+            lambda path, maximum: files[path],
+            expected_report_hash=manifest["report_hash"],
+        )
+
+
+def test_process_document_rejects_duplicate_keys_before_packaging(inputs, process_raw):
+    raw = process_raw.replace(b'{"processes":', b'{"processes":[],"processes":', 1)
+    with pytest.raises(ValueError):
+        create_rc_strategy_cohort(
+            inputs, source_revision="a" * 40, process_observations=raw
+        )
