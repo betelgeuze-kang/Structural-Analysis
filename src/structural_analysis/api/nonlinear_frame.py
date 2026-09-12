@@ -1423,7 +1423,25 @@ def _compile_portal(
     section_materials: dict[str, tuple[str, str]] = {}
     for index, row in enumerate(model.sections):
         path = f"/sections/{index}"
-        _keys(row, _SECTION_KEYS, path)
+        _keys(
+            row,
+            _SECTION_KEYS
+            | (
+                {"intermediate_steel_layers"}
+                if "intermediate_steel_layers" in row
+                else set()
+            ),
+            path,
+        )
+        if (
+            "intermediate_steel_layers" in row
+            and type(row["intermediate_steel_layers"]) is not list
+        ):
+            _fail(
+                "intermediate_steel_layers_invalid",
+                path,
+                "Expected an explicit nonempty layer list.",
+            )
         section_id = _stable(row["id"], f"{path}/id")
         if section_id in sections or row["type"] != "rectangular_rc_fiber_section":
             _fail(
@@ -1463,6 +1481,7 @@ def _compile_portal(
                     row["bottom_bar_count"], f"{path}/bottom_bar_count", 1, 64
                 ),
                 bar_area_m2=_positive(row["bar_area_m2"], f"{path}/bar_area_m2"),
+                intermediate_steel_layers=row.get("intermediate_steel_layers"),
                 section_id=section_id,
                 steel=steel[1],
                 concrete=concrete[1],

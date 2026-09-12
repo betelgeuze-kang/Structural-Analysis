@@ -18,7 +18,9 @@ from structural_analysis.model.schema import CanonicalModel
 PHYSICAL_MODEL_IDENTITY_PROFILE = "public-rc-fiber-frame-entity-invariant-model.v1"
 _SECTION_FLOAT_FIELDS = ("width_m", "depth_m", "cover_m", "bar_area_m2")
 _SECTION_COUNT_FIELDS = (
-    "concrete_layer_count", "top_bar_count", "bottom_bar_count",
+    "concrete_layer_count",
+    "top_bar_count",
+    "bottom_bar_count",
 )
 
 
@@ -59,6 +61,19 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
         section = authored_sections[authored_elements[member.member_id]["section"]]
         expanded_section = {
             "type": section["type"],
+            **(
+                {
+                    "intermediate_steel_layers": [
+                        {
+                            "y_m": _physical_float(layer["y_m"]),
+                            "bar_count": layer["bar_count"],
+                        }
+                        for layer in section["intermediate_steel_layers"]
+                    ]
+                }
+                if "intermediate_steel_layers" in section
+                else {}
+            ),
             **{name: _physical_float(section[name]) for name in _SECTION_FLOAT_FIELDS},
             **{name: section[name] for name in _SECTION_COUNT_FIELDS},
             **{
@@ -70,11 +85,13 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
                 for kind in ("steel", "concrete")
             },
         }
-        members.append({
-            "nodes": [node_index[member.node_i], node_index[member.node_j]],
-            "integration_order": element.integration_order,
-            "section": expanded_section,
-        })
+        members.append(
+            {
+                "nodes": [node_index[member.node_i], node_index[member.node_j]],
+                "integration_order": element.integration_order,
+                "section": expanded_section,
+            }
+        )
     members.sort(key=lambda row: tuple(row["nodes"]))
     return {
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,

@@ -174,7 +174,14 @@ def candidate_preanalysis_features(
                 for row, length in zip(assigned, lengths, strict=True)
             ),
             math.fsum(
-                (row["top_bar_count"] + row["bottom_bar_count"])
+                (
+                    row["top_bar_count"]
+                    + row["bottom_bar_count"]
+                    + sum(
+                        layer["bar_count"]
+                        for layer in row.get("intermediate_steel_layers", [])
+                    )
+                )
                 * row["bar_area_m2"]
                 * length
                 for row, length in zip(assigned, lengths, strict=True)

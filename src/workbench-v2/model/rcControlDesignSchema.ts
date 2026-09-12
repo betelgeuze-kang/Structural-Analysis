@@ -1,3 +1,4 @@
+import { intermediateSteelBarCount } from './rcSteelLayers'
 import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
 
@@ -79,7 +80,7 @@ export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: s
     check(nodes.length === 2 && nodes.every(Boolean) && section, 'study_geometry_invalid')
     const length = Math.hypot(...nodes[0].coordinates.map((v: number, i: number) => v - nodes[1].coordinates[i]))
     const volume = length * section.width_m * section.depth_m
-    const rebar = length * (section.top_bar_count + section.bottom_bar_count) * section.bar_area_m2
+    const rebar = length * (section.top_bar_count + section.bottom_bar_count + intermediateSteelBarCount(section)) * section.bar_area_m2
     const values = [volume, rebar, rebar * 7850]
     const actual = q.members.find((m: RcObject) => m.member_id === member.id)
     check(actual && actual.section_id === member.section && close(actual.length_m, length), 'study_member_identity_invalid')

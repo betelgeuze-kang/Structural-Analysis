@@ -921,6 +921,19 @@ def _bounded_planar_issues(
             )
         parameters = section["parameters"]
         cover = float(parameters["cover_m"])
+        previous = -float(parameters["depth_m"]) / 2 + cover
+        for layer_index, layer in enumerate(
+            parameters.get("intermediate_steel_layers", [])
+        ):
+            y = float(layer["y_m"])
+            if not previous < y < float(parameters["depth_m"]) / 2 - cover:
+                yield ModelIRValidationIssue(
+                    "bounded_planar_intermediate_steel_layer_invalid",
+                    f"{base}/parameters/intermediate_steel_layers/{layer_index}/y_m",
+                    "Layers must increase strictly between the outer steel layers.",
+                )
+            previous = y
+
         if 2.0 * cover >= min(
             float(parameters["width_m"]), float(parameters["depth_m"])
         ):

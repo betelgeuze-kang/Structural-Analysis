@@ -298,9 +298,14 @@ def calculate_fiber_frame_member_quantities(
         section = sections[member["section"]]
         length = math.dist(nodes[member["nodes"][0]], nodes[member["nodes"][1]])
         gross_area = section["width_m"] * section["depth_m"]
-        bar_area = (section["top_bar_count"] + section["bottom_bar_count"]) * section[
-            "bar_area_m2"
-        ]
+        bar_area = (
+            section["top_bar_count"]
+            + section["bottom_bar_count"]
+            + sum(
+                layer["bar_count"]
+                for layer in section.get("intermediate_steel_layers", [])
+            )
+        ) * section["bar_area_m2"]
         row = {
             "member_id": member["id"],
             "section_id": member["section"],

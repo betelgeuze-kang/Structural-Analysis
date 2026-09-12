@@ -431,6 +431,16 @@ def _canonical_section(row: dict[str, Any]) -> dict[str, Any]:
         "top_bar_count": int(parameters["top_bar_count"]),
         "bottom_bar_count": int(parameters["bottom_bar_count"]),
         "bar_area_m2": float(parameters["bar_area_m2"]),
+        **(
+            {
+                "intermediate_steel_layers": [
+                    {"y_m": float(layer["y_m"]), "bar_count": int(layer["bar_count"])}
+                    for layer in parameters["intermediate_steel_layers"]
+                ]
+            }
+            if "intermediate_steel_layers" in parameters
+            else {}
+        ),
         "steel_material": str(row["steel_material_id"]),
         "concrete_material": str(row["concrete_material_id"]),
     }

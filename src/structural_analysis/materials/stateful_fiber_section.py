@@ -559,6 +559,7 @@ def make_rectangular_stateful_rc_fiber_section(
     top_bar_count: int = 4,
     bottom_bar_count: int = 4,
     bar_area_m2: float = 3.87e-4,
+    intermediate_steel_layers: list[dict[str, Any]] | None = None,
     section_id: str = "rectangular_rc_stateful_fiber_section",
     steel: BilinearCombinedHardeningSteel | None = None,
     concrete: AsymmetricConcreteDamageMaterial | None = None,
@@ -603,6 +604,33 @@ def make_rectangular_stateful_rc_fiber_section(
             ),
         )
     )
+    if intermediate_steel_layers is not None:
+        if (
+            type(intermediate_steel_layers) is not list
+            or not 1 <= len(intermediate_steel_layers) <= 32
+        ):
+            raise ValueError("intermediate_steel_layers must contain 1 to 32 rows")
+        previous = -0.5 * depth + cover
+        for index, row in enumerate(intermediate_steel_layers):
+            if type(row) is not dict or set(row) != {"y_m", "bar_count"}:
+                raise ValueError("intermediate steel row requires y_m and bar_count")
+            y = _finite(row["y_m"], name="intermediate steel y_m")
+            count = row["bar_count"]
+            if type(count) is not int or not 1 <= count <= 64:
+                raise ValueError("intermediate steel bar_count must be 1 to 64")
+            if not previous < y < 0.5 * depth - cover:
+                raise ValueError(
+                    "intermediate steel rows must increase strictly between outer layers"
+                )
+            previous = y
+            fibers.append(
+                StatefulSectionFiber(
+                    fiber_id=f"steel-intermediate-{index:02d}",
+                    y_m=y,
+                    area_m2=count * bar_area,
+                    material_kind="steel",
+                )
+            )
     return StatefulRCFiberSection(
         fibers=tuple(fibers),
         steel=steel or BilinearCombinedHardeningSteel(),
