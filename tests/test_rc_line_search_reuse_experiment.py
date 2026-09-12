@@ -1,6 +1,7 @@
 """Boundaries of the serial research-only, immediate assembly reuse experiment."""
 
 import importlib.util
+import ast
 from pathlib import Path
 
 import numpy as np
@@ -88,3 +89,32 @@ def test_exception_is_preserved_and_invalidates_previous_entry():
     reuse.dispatch = original
     reuse(adapter, np.array([1.0]), phase="primary_iteration")
     assert len(calls) == 2 and reuse.hits == 0
+
+
+@pytest.mark.parametrize("repetitions", [True, 0, -2, 1, 3, 2.0])
+def test_invalid_repetition_count_rejects_before_output(tmp_path, repetitions):
+    output = tmp_path / "absent"
+    with pytest.raises(ValueError, match="even number"):
+        experiment.run(output, repetitions)
+    assert not output.exists()
+
+
+def test_yielded_case_reuses_exact_existing_regression_targets():
+    source = Path(__file__).with_name("test_stateful_fiber_frame2d_displacement_control.py")
+    tree = ast.parse(source.read_text())
+    targets = next(ast.literal_eval(node.value) for node in tree.body
+                   if isinstance(node, ast.Assign) and any(
+                       isinstance(t, ast.Name) and t.id == "YIELDED_RC_TARGETS_M"
+                       for t in node.targets))
+    request = experiment.experiment_request("yielded-prefix", False)
+    assert request.targets_m == targets
+    assert request.solver_config.newton.max_iterations == 40
+    with pytest.raises(ValueError, match="constant preload"):
+        experiment.experiment_request("yielded-prefix", True)
+
+
+def test_unknown_arithmetic_rejects_before_output(tmp_path):
+    output = tmp_path / "absent"
+    with pytest.raises(ValueError, match="arithmetic selection"):
+        experiment.run(output, 2, arithmetic="unknown")
+    assert not output.exists()

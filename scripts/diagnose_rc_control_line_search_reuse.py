@@ -65,9 +65,38 @@ class ImmediateLineSearchReuse:
         return result
 
 
-def run(output: Path, repetitions: int):
-    if repetitions < 2:
-        raise ValueError("at least two order-balanced repetitions required")
+YIELDED_TARGETS_M = (
+    -0.0004, -0.0008, -0.0012000000000000001, -0.0016, -0.002,
+    -0.0024000000000000002, -0.0028, -0.0032, -0.0036, -0.004, -0.0044,
+    -0.0048000000000000004, -0.0052, -0.0056, -0.006, -0.0056,
+)
+
+
+def experiment_request(case, constant):
+    if case not in ("small", "yielded-prefix"):
+        raise ValueError("unknown experiment case")
+    if case == "yielded-prefix" and constant:
+        raise ValueError("yielded prefix does not declare a constant preload")
+    request = BoundedRCFiberDirectControlRequest(
+        7, YIELDED_TARGETS_M if case == "yielded-prefix" else (-1e-6, -2e-6, 1e-6),
+        allow_reversals=True, maximum_reversals=3,
+        maximum_targets=16 if case == "yielded-prefix" else 255,
+        constant_nodal_loads=(("N3", 0.0, -0.1, 0.0),) if constant else (),
+    )
+    return replace(request, solver_config=replace(
+        request.solver_config,
+        newton=replace(request.solver_config.newton, terminal_polishing=True,
+                       max_iterations=40 if case == "yielded-prefix" else
+                       request.solver_config.newton.max_iterations),
+    ))
+
+
+def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "both"):
+    if type(repetitions) is not int or repetitions < 2 or repetitions % 2:
+        raise ValueError("a positive even number of order-balanced repetitions required")
+    experiment_request(case, False)  # validate before creating output
+    if arithmetic not in ("both", "binary64", "retained"):
+        raise ValueError("unknown arithmetic selection")
     # Refuse existing output; raw evidence is never overwritten.
     output.mkdir(parents=True, exist_ok=False)
     source_revision = subprocess.check_output(
@@ -77,18 +106,11 @@ def run(output: Path, repetitions: int):
     model = load_neutral_json(model_path)
     identity = "sha256:" + hashlib.sha256(b"deterministic-secant-reuse-study").hexdigest()
     rows = []
-    for retained in (False, True):
-        for constant in (False, True):
-            request = BoundedRCFiberDirectControlRequest(
-                7, (-1e-6, -2e-6, 1e-6), allow_reversals=True,
-                maximum_reversals=3,
-                constant_nodal_loads=(("N3", 0.0, -0.1, 0.0),) if constant else (),
-            )
-            request = replace(request, solver_config=replace(
-                request.solver_config,
-                newton=replace(request.solver_config.newton, terminal_polishing=True),
-            ))
-            arithmetic = learning._arithmetic_kwargs(
+    profiles = (False, True) if arithmetic == "both" else (arithmetic == "retained",)
+    for retained in profiles:
+        for constant in ((False,) if case == "yielded-prefix" else (False, True)):
+            request = experiment_request(case, constant)
+            arithmetic_kwargs = learning._arithmetic_kwargs(
                 learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
             ) if retained else {}
             for repetition in range(repetitions):
@@ -105,12 +127,14 @@ def run(output: Path, repetitions: int):
                             model, request, source_revision=source_revision,
                             output_directory=destination, proposal=runtime.secant_seed,
                             proposal_identity=identity, record_assembly_work=True,
-                            **arithmetic,
+                            **arithmetic_kwargs,
                         )
                     elapsed = perf_counter_ns() - started
                     if not (report["reference_repeat_exact"] and
                             report["all_execution_work_reported"]):
                         raise ValueError("incomplete or nonrepeatable full path")
+                    if not all(v["full_history_pass"] for v in report["comparisons"].values()):
+                        raise ValueError("a strategy failed its full-history comparison")
                     steps = {str(p.relative_to(destination)): p.read_bytes()
                              for p in destination.glob("*/*-step.json")}
                     calls = 0
@@ -147,7 +171,9 @@ def run(output: Path, repetitions: int):
         "base_revision": source_revision,
         "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "model_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest(),
-        "scope": "single authored small L-frame; four arithmetic/preload configurations",
+        "scope": "single authored L-frame; declared arithmetic/preload configurations",
+        "case": case,
+        "arithmetic_selection": arithmetic,
         "timing_scope": "whole benchmark including serialization, verification, and recording",
         "default_solver_changed": False, "learned_policy": False,
         "independent_physical_validation": False,
@@ -161,5 +187,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("--repetitions", type=int, default=4)
+    parser.add_argument("--case", choices=("small", "yielded-prefix"), default="small")
+    parser.add_argument("--arithmetic", choices=("both", "binary64", "retained"), default="both")
     args = parser.parse_args()
-    run(args.output, args.repetitions)
+    run(args.output, args.repetitions, args.case, args.arithmetic)

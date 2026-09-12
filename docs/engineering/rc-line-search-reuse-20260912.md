@@ -90,3 +90,7 @@ paths and failure cases, and repeat full-history/cost comparisons. AI must then
 be compared with the improved deterministic baseline as well. Learned net
 benefit, full hosted qualification, and independent physical acceptance remain
 open. This experiment does not resolve the external-reference CI blockers.
+
+The [yield/unload follow-up](rc-yielded-reuse-20260912.md) extends this observation
+to positive committed steel plastic memory and retains a separate binary64
+baseline comparison failure without assigning it a speed ratio.
