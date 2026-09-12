@@ -14,12 +14,16 @@ rows cannot establish an incumbent. The returned bound includes hashes of the
 plan and evaluated rows; callers still must verify the underlying original
 reference artifacts. It is not an artifact authenticator or solver acceptance gate.
 
-This is a cost-only scheduling primitive. It does not yet skip execution in the
+At this observation's source, this is a cost-only scheduling primitive. It does not yet skip execution in the
 layout runner, alter its frozen shortlists, or change HTTP/Workbench schemas.
 Those integrations require explicit actual-execution records and retention of
 the unevaluated candidates. The existing exhaustive cost-optimality audit remains
 unchanged and continues to require its full comparison. This primitive alone
 does not close the roadmap's multi-fidelity exploration requirement.
+
+Subsequent [actual standalone execution](rc-layout-cost-pruned-execution-20260913.md)
+now records performed skips and matched process costs under separate schemas.
+The historical simulation below remains a post-hoc observation.
 
 ## Verification and retained-record observation
 

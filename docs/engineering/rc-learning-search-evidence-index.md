@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Actual standalone layout cost pruning and matched process costs](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-cost-pruned-execution-20260913.md)
 - [Verified-incumbent layout cost bound and retained-record simulation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-cost-dominance-20260913.md)
 - [Audited envelope results, full costs and CI boundaries](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-envelope-results-20260913.md)
 - [Envelope policy identities and historical cost provenance](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-envelope-historical-costs-20260913.md)
