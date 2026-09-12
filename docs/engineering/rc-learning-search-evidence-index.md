@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Layout artifact admission and original HTTP delivery](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-http-20260913.md)
 - [Full-layout search and finite-budget cost gap](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-search-20260913.md)
 - [Verified layout policy and held-out geometry pilot](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-learning-20260913.md)
 - [Full-reference labels for training layouts](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-labels-20260913.md)

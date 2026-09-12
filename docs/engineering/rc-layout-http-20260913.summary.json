@@ -1,0 +1,28 @@
+{
+  "observation": {
+    "admission_wall_ns": 62644458,
+    "artifact_count": 85,
+    "exact_http_responses": 85,
+    "http_transfer_and_teardown_wall_ns": 56737398,
+    "independent_physical_validation": false,
+    "model_quantities_and_frozen_predictions_recomputed": true,
+    "net_savings_proved": false,
+    "new_numerical_paths": 0,
+    "new_policy_fits": 0,
+    "original_graph_bytes_changed": false,
+    "original_report_hash": "sha256:6804c5f19ae7d6526fbabe28c545457ea23b73c86faeada8845b45bf7e7d2b0f",
+    "original_search_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-search-pttzyatg/search",
+    "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+    "price_table_supplement_matches_original_plan_hash": true,
+    "source_revision": "b059066da5d647ddb1379082ae0e4acab1b4e5e7",
+    "structural_result_engineering_replay": false,
+    "workbench_review_executed": false
+  },
+  "packet": {
+    "bytes": 15338910,
+    "files": 89,
+    "inventory_sha256": "fde3d601091ed140daebda7d3b775d22df23cb181fee408c3227094285a40118",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-http-3ghx6dtu"
+  },
+  "local_tests_passed": 79
+}
