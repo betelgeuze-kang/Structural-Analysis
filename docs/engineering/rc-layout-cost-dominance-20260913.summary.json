@@ -1,0 +1,352 @@
+{
+  "schema_version": "layout-cost-dominance-original-record-observation.v1",
+  "input_bindings": [
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-http-k2szhu8w/export/b5-o0-price_order/plan.json",
+      "sha256": "7b725f4c0e486167d20a33d886b4e58affd5eec3dc69103a0a5ac22d8fd494d1",
+      "bytes": 11771
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-http-k2szhu8w/export/b5-o0-price_order/price_order/comparison.json",
+      "sha256": "2ef633c9493a1f9005eb9acda2b5174ad62ed88182d42e665f8ec8c6e7b5cd38",
+      "bytes": 23973
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-http-k2szhu8w/export/b5-o1-price_order/plan.json",
+      "sha256": "7b725f4c0e486167d20a33d886b4e58affd5eec3dc69103a0a5ac22d8fd494d1",
+      "bytes": 11771
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-http-k2szhu8w/export/b5-o1-price_order/price_order/comparison.json",
+      "sha256": "76e8a89d0ee24b4a1b57012a9a2b0ad652dbfde75f6f57b960a50d14ac6062e8",
+      "bytes": 23973
+    }
+  ],
+  "helper_sha256": "49d990b3e23a6d66dbb268bc73b5796871e6f6547697c9b6d5f69964c88e6946",
+  "records": [
+    {
+      "order": 0,
+      "original_rows": 5,
+      "retained_rows": 3,
+      "skipped_ids": [
+        "large",
+        "outside"
+      ],
+      "same_selected_candidate_id": "middle",
+      "retained_recorded_work": {
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 72,
+          "known_newton_iteration_count": 72,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false,
+        "api_invocation_count": 6
+      },
+      "skipped_recorded_work": {
+        "known_counters": {
+          "attempted_step_count": 24,
+          "known_linear_solve_count": 48,
+          "known_newton_iteration_count": 48,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false,
+        "api_invocation_count": 4
+      },
+      "trace": [
+        {
+          "candidate_id": "baseline",
+          "omit": false,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "incumbent_candidate_id": null,
+            "incumbent_estimate": null,
+            "cost_dominated_unevaluated_candidate_ids": [],
+            "retained_unevaluated_candidate_ids": [
+              "baseline",
+              "small",
+              "middle",
+              "large",
+              "outside"
+            ],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:fe964e174882604b67c3f7ee706298d39ced2fb3291ae59ef41d77062c840023"
+          }
+        },
+        {
+          "candidate_id": "small",
+          "omit": false,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:50215aa5a59bd2a6d406892ec6210a8b04b318af770dc56c27c28275b6dab900",
+            "incumbent_candidate_id": null,
+            "incumbent_estimate": null,
+            "cost_dominated_unevaluated_candidate_ids": [],
+            "retained_unevaluated_candidate_ids": [
+              "small",
+              "middle",
+              "large",
+              "outside"
+            ],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:61bb2305799c0907184ab6f4687c6e08e9ba7073dc71a47d176175b6d0adda9c"
+          }
+        },
+        {
+          "candidate_id": "middle",
+          "omit": false,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:13deae8f53e6f77168be1117509693676984cc71558d7ca4edabb45cff428c3b",
+            "incumbent_candidate_id": null,
+            "incumbent_estimate": null,
+            "cost_dominated_unevaluated_candidate_ids": [],
+            "retained_unevaluated_candidate_ids": [
+              "middle",
+              "large",
+              "outside"
+            ],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:4cfc6de7d345790b8fb51ee82f74f85d707ff176b4b8c71f1b759563087df5ae"
+          }
+        },
+        {
+          "candidate_id": "large",
+          "omit": true,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:2a84a423295f9ecc8336a92fef269ffa5c3d04372de5d58a78d01ae1aab3bfa3",
+            "incumbent_candidate_id": "middle",
+            "incumbent_estimate": 246.34835999999999,
+            "cost_dominated_unevaluated_candidate_ids": [
+              "large",
+              "outside"
+            ],
+            "retained_unevaluated_candidate_ids": [],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:ef458864bbb7a57dc5d417c6e238fda7c9037c59faccb3a50452e90d26bf5d59"
+          }
+        },
+        {
+          "candidate_id": "outside",
+          "omit": true,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:2a84a423295f9ecc8336a92fef269ffa5c3d04372de5d58a78d01ae1aab3bfa3",
+            "incumbent_candidate_id": "middle",
+            "incumbent_estimate": 246.34835999999999,
+            "cost_dominated_unevaluated_candidate_ids": [
+              "large",
+              "outside"
+            ],
+            "retained_unevaluated_candidate_ids": [],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:ef458864bbb7a57dc5d417c6e238fda7c9037c59faccb3a50452e90d26bf5d59"
+          }
+        }
+      ]
+    },
+    {
+      "order": 1,
+      "original_rows": 5,
+      "retained_rows": 3,
+      "skipped_ids": [
+        "large",
+        "outside"
+      ],
+      "same_selected_candidate_id": "middle",
+      "retained_recorded_work": {
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 72,
+          "known_newton_iteration_count": 72,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false,
+        "api_invocation_count": 6
+      },
+      "skipped_recorded_work": {
+        "known_counters": {
+          "attempted_step_count": 24,
+          "known_linear_solve_count": 48,
+          "known_newton_iteration_count": 48,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false,
+        "api_invocation_count": 4
+      },
+      "trace": [
+        {
+          "candidate_id": "baseline",
+          "omit": false,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "incumbent_candidate_id": null,
+            "incumbent_estimate": null,
+            "cost_dominated_unevaluated_candidate_ids": [],
+            "retained_unevaluated_candidate_ids": [
+              "baseline",
+              "small",
+              "middle",
+              "large",
+              "outside"
+            ],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:fe964e174882604b67c3f7ee706298d39ced2fb3291ae59ef41d77062c840023"
+          }
+        },
+        {
+          "candidate_id": "small",
+          "omit": false,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:4e206bb3040ac7a7730d4ead86b59c9574ea0f24e83610c2bc05d8d3aac2be99",
+            "incumbent_candidate_id": null,
+            "incumbent_estimate": null,
+            "cost_dominated_unevaluated_candidate_ids": [],
+            "retained_unevaluated_candidate_ids": [
+              "small",
+              "middle",
+              "large",
+              "outside"
+            ],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:82d7bed29a53efeed3ec1fda413bbc94bc87a25b3ad671babb1b85e5af37187b"
+          }
+        },
+        {
+          "candidate_id": "middle",
+          "omit": false,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:ed46f5184a4fd94b423c447a63382f8d028b7b82bf4baf77e7139f8c348392a6",
+            "incumbent_candidate_id": null,
+            "incumbent_estimate": null,
+            "cost_dominated_unevaluated_candidate_ids": [],
+            "retained_unevaluated_candidate_ids": [
+              "middle",
+              "large",
+              "outside"
+            ],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:a33c92bbf3e5fa98e4b2790cf79c81ad374006fafec059a9123df020a5aa9af2"
+          }
+        },
+        {
+          "candidate_id": "large",
+          "omit": true,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:00a74131b9bc70b8697abf39276f776bfdf6ceff4c1dd36ca7224f5007ab3169",
+            "incumbent_candidate_id": "middle",
+            "incumbent_estimate": 246.34835999999999,
+            "cost_dominated_unevaluated_candidate_ids": [
+              "large",
+              "outside"
+            ],
+            "retained_unevaluated_candidate_ids": [],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:7d81cdde29020310576ae845f31d57afc19ab515dacb483cb130f8736c72dcba"
+          }
+        },
+        {
+          "candidate_id": "outside",
+          "omit": true,
+          "bound": {
+            "schema_version": "experimental-rc-layout-cost-dominance.v1",
+            "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+            "price_table_hash": "sha256:06182c9669b67430b6ae8cfcdbcb04ddc7aa51bb0a7cd6e81ae48b8c624f9e3f",
+            "evaluated_rows_hash": "sha256:00a74131b9bc70b8697abf39276f776bfdf6ceff4c1dd36ca7224f5007ab3169",
+            "incumbent_candidate_id": "middle",
+            "incumbent_estimate": 246.34835999999999,
+            "cost_dominated_unevaluated_candidate_ids": [
+              "large",
+              "outside"
+            ],
+            "retained_unevaluated_candidate_ids": [],
+            "unevaluated_physical_feasibility": "unknown",
+            "original_reference_artifact_verification_required": true,
+            "global_cost_optimality_proved": false,
+            "net_savings_proved": false,
+            "execution_skips_performed": 0,
+            "bound_hash": "sha256:7d81cdde29020310576ae845f31d57afc19ab515dacb483cb130f8736c72dcba"
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "Post-hoc scheduling simulation from previously completed full-reference rows. No new fits or solves; no actual runtime pruning, speedup, global optimum, functional equivalence or independent physical validation is proved.",
+  "new_newton_solves": 0,
+  "new_fits": 0,
+  "actual_execution_skips_performed": 0,
+  "net_savings_proved": false,
+  "prior_observation_file": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-cost-bound-ewrk0e0x/observation.json",
+  "prior_observation_sha256": "2c3b98ad8e2d35c87350f12c6490b0c581f3dbeceec6d7a5033ef3be0115f21f",
+  "prior_helper_sha256": "533f2609ea325eff9571f270953ae933a7df678e41370d7bc3b27e92564a8a63",
+  "final_helper_all_original_bound_records_exact": true,
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-cost-bound-final-m9pxh20i",
+    "files": 3,
+    "bytes": 25178,
+    "inventory_sha256": "d55aa474578e62c5c9ef25718488e0a4264eeb148c024f752e6b47e6ed84d4c8"
+  },
+  "focused_tests_passed": 59,
+  "actual_runtime_pruning_integrated": false,
+  "multi_fidelity_roadmap_complete": false
+}

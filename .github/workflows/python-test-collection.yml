@@ -112,6 +112,7 @@ jobs:
           tests/test_rc_control_design.py
           tests/test_rc_control_candidate_search.py
           tests/test_rc_control_candidate_cost.py
+          tests/test_rc_control_cost_dominance.py
           tests/test_rc_search_http.py
           tests/test_rc_seed_original_audit.py
           tests/test_pinned_opensees_runtime.py
