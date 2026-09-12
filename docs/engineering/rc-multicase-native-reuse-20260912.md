@@ -104,3 +104,7 @@ experiment, never a replacement for these observations.
 Next scope remains full declared cyclic histories and independent structural
 cases, with separately assessed learned benefit. The [durable job integration](rc-job-native-reuse-20260912.md)
 continues to require the same source verification when reuse is enabled.
+
+The subsequent [complete cyclic study](rc-full-cycle-native-reuse-20260912.md)
+executes all 242 targets for the same four authored geometries, with separate
+whole-benchmark and secant-path cost accounting.

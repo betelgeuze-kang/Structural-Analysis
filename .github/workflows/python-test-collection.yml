@@ -152,6 +152,7 @@ jobs:
           tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
 
       - name: Materialize exact current-source test evidence
+        id: materialize
         shell: bash
         run: |
           python scripts/run_external_code_to_code_technical_receipt.py \
@@ -177,6 +178,42 @@ jobs:
           python scripts/build_fracture_energy_concrete_benchmark.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
+
+      # A failed command may leave tracked or partially rewritten receipts.
+      - name: Describe failed materialization diagnostics
+        if: ${{ failure() && steps.materialize.outcome == 'failure' }}
+        shell: bash
+        run: |
+          python - <<'PYTHON'
+          import json
+          import os
+          from pathlib import Path
+          payload = {
+              "schema": "ci-materialization-failure-context.v1",
+              "workflow_sha": os.environ["GITHUB_SHA"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "job": os.environ["GITHUB_JOB"],
+              "diagnostic_only": True,
+              "receipt_generation_attested": False,
+              "may_include_tracked_or_partially_rewritten_receipts": True,
+              "qualification_inferred": False,
+          }
+          Path("materialization-failure-context.json").write_text(json.dumps(payload, indent=2) + "\n")
+          PYTHON
+
+      - name: Upload failed materialization diagnostics
+        if: ${{ failure() && steps.materialize.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: materialization-failure-shard-${{ matrix.shard }}-${{ github.sha }}
+          path: |
+            materialization-failure-context.json
+            implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json
+            implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json
+            artifacts/manifests/internal_license_due_diligence.current.v1.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Run materialized repository test suite shard
         run: >-
