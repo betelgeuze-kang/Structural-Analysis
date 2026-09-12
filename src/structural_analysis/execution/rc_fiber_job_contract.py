@@ -286,7 +286,17 @@ def validate_rc_fiber_job_request(
     execution = value["execution_config"]
     if (
         type(execution) is not dict
-        or set(execution) != {"chunk_target_count", "maximum_api_invocations"}
+        or not {"chunk_target_count", "maximum_api_invocations"} <= set(execution)
+        or set(execution)
+        - {
+            "chunk_target_count",
+            "maximum_api_invocations",
+            "reuse_line_search_assembly",
+        }
+        or (
+            "reuse_line_search_assembly" in execution
+            and type(execution["reuse_line_search_assembly"]) is not bool
+        )
         or type(execution["chunk_target_count"]) is not int
         or not 1 <= execution["chunk_target_count"] <= 255
         or type(execution["maximum_api_invocations"]) is not int
@@ -344,6 +354,7 @@ def _context(request):
         config.allow_reversals,
         config.maximum_reversals,
         config.maximum_targets,
+        request["execution_config"].get("reuse_line_search_assembly", False),
     )
     binding = {
         "canonical_model_checksum": model.canonical_model_checksum,
@@ -370,9 +381,14 @@ def _chunk(config, request, before):
     return after, replace(config, targets_m=config.targets_m[before:after])
 
 
-def _api_request(config, restart_hash):
+def _api_request(config, restart_hash, reuse_line_search_assembly=False):
     return {
         "targets_m": list(config.targets_m),
+        **(
+            {"line_search_assembly_reuse": "rc-control-immediate-line-search-reuse.v1"}
+            if reuse_line_search_assembly
+            else {}
+        ),
         **(
             {
                 "constant_nodal_loads": _constant_load_payload(
@@ -818,7 +834,11 @@ def _validate_receipt(
         "completed_before": before,
         "completed_after": after,
         "restart_input_sha256": restart_hash,
-        "api_request": _api_request(chunk, restart_hash),
+        "api_request": _api_request(
+            chunk,
+            restart_hash,
+            request["execution_config"].get("reuse_line_search_assembly", False),
+        ),
         "model_binding": model,
         "control": control,
     }

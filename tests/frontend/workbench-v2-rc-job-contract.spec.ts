@@ -83,3 +83,15 @@ test('RC review keeps unconfirmed reservations as unknown work', async () => {
   const { summary } = await validateRcJobArtifacts(source.job, source.artifacts)
   expect(summary).toMatchObject({ reservedInvocations: 7, confirmedInvocations: 6, unknownWork: true, knownCoreCalls: 12 })
 })
+
+for (const value of [1, null, 'true']) {
+  test(`RC job rejects a non-boolean reuse setting: ${value}`, async () => {
+    const input = fixture()
+    const request = JSON.parse(new TextDecoder().decode(input.artifacts.request))
+    request.execution_config.reuse_line_search_assembly = value
+    input.artifacts.request = new TextEncoder().encode(JSON.stringify(request))
+    input.job.request.content_hash = digest(input.artifacts.request)
+    input.job.request.byte_length = input.artifacts.request.byteLength
+    await expect(validateRcJobArtifacts(input.job, input.artifacts)).rejects.toThrow('execution_reuse_invalid')
+  })
+}

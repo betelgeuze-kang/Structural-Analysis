@@ -68,8 +68,15 @@ def forbidden(*args, **kwargs):
 def actual(tmp_path_factory):
     directory = tmp_path_factory.mktemp("constant-durable")
     results = {}
-    for label, chunk in (("split", 1), ("full", 3)):
+    for label, chunk in (
+        ("split", 1),
+        ("full", 3),
+        ("reuse-split", 1),
+        ("reuse-full", 3),
+    ):
         req = request(chunk)
+        if label.startswith("reuse-"):
+            req["execution_config"]["reuse_line_search_assembly"] = True
         store = directory / label
         service = _service(store)
         job = service.submit_job(**TENANT, idempotency_key=label, request=req)
@@ -120,7 +127,17 @@ def actual(tmp_path_factory):
             )
             for row in evidence["invocations"]
         ]
+        export = directory / (label + "-export")
+        export.mkdir()
+        (export / "job.json").write_text(json.dumps(job.to_dict()))
+        for role in ("request", "checkpoint", "result", "evidence"):
+            if getattr(job, role) is None:
+                continue
+            (export / (role + ".json")).write_bytes(
+                getattr(service, "read_" + role)(job.job_id, **TENANT)
+            )
         results[label] = dict(
+            export=export,
             request=req,
             result=value,
             raw=raw,
@@ -424,3 +441,47 @@ def test_exhausted_budget_keeps_v2_checkpoint_without_extra_solves(
     assert service.read_checkpoint(job.job_id, **TENANT) == prior_bytes
     evidence = service.read_rc_invocation_evidence(job.job_id, **TENANT)
     assert len(evidence["invocations"]) == 2
+
+
+def test_native_reuse_reopened_jobs_keep_verified_physical_results(actual):
+    for label in ("split", "full"):
+        old, new = actual[label], actual["reuse-" + label]
+        a, b = old["result"]["api_result"], new["result"]["api_result"]
+        for key in ("response_history", "terminal_response", "preload_response"):
+            assert a[key] == b[key]
+        assert (
+            b["request"]["line_search_assembly_reuse"]
+            == "rc-control-immediate-line-search-reuse.v1"
+        )
+        assert new["observed"] == old["observed"]
+        for receipt in new["result"]["receipts"]:
+            assert (
+                receipt["api_request"]["line_search_assembly_reuse"]
+                == b["request"]["line_search_assembly_reuse"]
+            )
+        old_state = json.loads(
+            base64.b64decode(old["result"]["terminal_checkpoint_artifact_base64"])
+        )
+        new_state = json.loads(
+            base64.b64decode(new["result"]["terminal_checkpoint_artifact_base64"])
+        )
+        assert old_state["terminal_checkpoint"] == new_state["terminal_checkpoint"]
+        assert (
+            new_state["scope"]["line_search_assembly_reuse"]
+            == b["request"]["line_search_assembly_reuse"]
+        )
+
+
+@pytest.mark.parametrize("value", [None, 1, "true"])
+def test_reuse_execution_setting_requires_boolean(value):
+    req = request()
+    req["execution_config"]["reuse_line_search_assembly"] = value
+    with pytest.raises(ValueError, match="execution configuration"):
+        contract.validate_rc_fiber_job_request(req)
+    schema = json.loads(
+        (
+            ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+        ).read_bytes()
+    )
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(req, schema)

@@ -57,6 +57,9 @@
           "type": "integer",
           "minimum": 2,
           "maximum": 4096
+        },
+        "reuse_line_search_assembly": {
+          "type": "boolean"
         }
       }
     },

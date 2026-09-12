@@ -191,7 +191,8 @@ def execute_rc_fiber_direct_control_claim(
             receipts, restart = [], None
             if claim.checkpoint_bytes is not None:
                 if (
-                    type(claim.checkpoint_bytes) is not bytes
+                    current.checkpoint is None
+                    or type(claim.checkpoint_bytes) is not bytes
                     or len(claim.checkpoint_bytes) != current.checkpoint.byte_length
                     or _hash(claim.checkpoint_bytes) != current.checkpoint.content_hash
                     or current.resume_contract_hash != resume_hash
@@ -266,7 +267,13 @@ def execute_rc_fiber_direct_control_claim(
 
             def analyze():
                 result = api.analyze_bounded_rc_fiber_direct_control(
-                    model, chunk.targets_m, restart=restart, **chunk.api_kwargs()
+                    model,
+                    chunk.targets_m,
+                    restart=restart,
+                    reuse_line_search_assembly=request["execution_config"].get(
+                        "reuse_line_search_assembly", False
+                    ),
+                    **chunk.api_kwargs(),
                 )
                 payload = result.to_dict()
                 raw = result.result_artifact_bytes()
@@ -303,6 +310,9 @@ def execute_rc_fiber_direct_control_claim(
                     result=raw,
                     checkpoint=checkpoint,
                     restart=restart,
+                    reuse_line_search_assembly=request["execution_config"].get(
+                        "reuse_line_search_assembly", False
+                    ),
                     **chunk.api_kwargs(),
                 ).to_dict()
                 return report, {

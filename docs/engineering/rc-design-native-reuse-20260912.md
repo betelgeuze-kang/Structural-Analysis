@@ -77,3 +77,7 @@ independent physical validation and release/owner acceptance remain open. The
 job-service request transport and UI submission controls have not been extended
 to expose this option; these changes validate CLI-generated study artifacts in
 the existing Workbench review path.
+
+[Durable job integration](rc-job-native-reuse-20260912.md) subsequently adds the
+execution option to stored job requests and verifies worker, replay and browser
+display bindings. The RC review panel remains a review view, without a new form.

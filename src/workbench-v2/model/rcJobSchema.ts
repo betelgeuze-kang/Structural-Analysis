@@ -10,6 +10,7 @@ export interface RcJobSummary {
   sourceRevision: string
   targets: number[]
   hasPreload?: boolean
+  assemblyReuse?: boolean
   constantLoads?: RcObject[]
   control: { node_id: string; component: string; unit: string }
   reservedInvocations: number
@@ -154,6 +155,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     }
   } else check(config.constant_nodal_loads === undefined, 'constant_loads_invalid')
   const execution = object(request.execution_config)
+  check(execution.reuse_line_search_assembly === undefined || typeof execution.reuse_line_search_assembly === 'boolean', 'execution_reuse_invalid')
+  const reuseProfile = execution.reuse_line_search_assembly === true ? 'rc-control-immediate-line-search-reuse.v1' : undefined
   check(config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`
     && request.model.schema_version === 'structural-analysis-canonical-model.v1'
     && typeof config.solver_config.control_tolerance_m === 'number'
@@ -204,6 +207,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   check(binary.length <= 128 * 1024 * 1024, 'native_too_large')
   const terminalBytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
   const nativeDoc = document(terminalBytes), native = nativeDoc.value
+  check(api.request.line_search_assembly_reuse === reuseProfile && native.scope.line_search_assembly_reuse === reuseProfile, 'reuse_binding_invalid')
   await selfHash(nativeDoc.raw, native, 'artifact_hash')
   const terminalHash = await sha256Bytes(terminalBytes)
   check(api.checkpoint.sha256 === terminalHash && api.checkpoint.byte_length === terminalBytes.byteLength
@@ -244,6 +248,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       && receipt.verification_ordinal <= budget.reserved_attempts
       && same(receipt.api_request.targets_m, targets.slice(completed, after))
       && receipt.api_request.restart_input_sha256 === restart
+      && receipt.api_request.line_search_assembly_reuse === reuseProfile
       && receipt.api_request.control_global_dof === config.control_global_dof
       && receipt.api_request.allow_reversals === config.allow_reversals
       && receipt.api_request.maximum_reversals === config.maximum_reversals
@@ -308,6 +313,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   check(nat(core) && nat(iterations), 'work_total_invalid')
   return { history: acceptedHistory, terminalBytes, summary: {
     resultHash: result.result_hash, sourceRevision: result.source_revision,
+    ...(reuseProfile ? { assemblyReuse: true } : {}),
     targets, hasPreload, constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
     control: api.control, reservedInvocations: budget.reserved_attempts,
     confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
