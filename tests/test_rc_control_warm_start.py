@@ -469,3 +469,94 @@ def test_invalid_proposal_still_returns_to_original_reference(tmp_path, mode, ki
         (tmp_path / "run/fresh-reference/path.json").read_bytes()
     )
     assert proposal_path["terminal_checkpoint"] == reference_path["terminal_checkpoint"]
+
+
+@pytest.mark.parametrize(
+    "past,target,expected",
+    [
+        ((0.0,), -1.0, True),
+        ((0.0, -1.0, -2.0), -1.5, False),
+        ((0.0, -2.0), 2.0, False),
+        ((0.0, -2.0), 3.0, True),
+    ],
+)
+def test_envelope_admission_uses_only_accepted_prescribed_extrema(
+    past, target, expected
+):
+    from structural_analysis.benchmark.rc_control_seed_runtime import (
+        RCControlSeedContext,
+    )
+    from structural_analysis.benchmark.rc_control_envelope_admission import (
+        control_envelope_admission,
+    )
+
+    context = RCControlSeedContext("sha256:" + "a" * 64, 7, 4, target, past, ())
+    result = control_envelope_admission(context)
+    assert result["consult_policy"] is expected
+    assert result["previous_maximum_absolute_target_m"] == max(abs(v) for v in past)
+    assert result["physical_acceptance_authorized"] is False
+    assert result["prospective_policy_validated"] is False
+
+
+@pytest.mark.parametrize(
+    "past,target",
+    [
+        ((), 1.0),
+        ((0.0,), True),
+        ((0.0, float("nan")), 1.0),
+        ((0.0,), float("inf")),
+        ((0.0,), 10**400),
+    ],
+)
+def test_envelope_admission_rejects_invalid_target_history(past, target):
+    from structural_analysis.benchmark.rc_control_seed_runtime import (
+        RCControlSeedContext,
+    )
+    from structural_analysis.benchmark.rc_control_envelope_admission import (
+        control_envelope_admission,
+    )
+
+    context = RCControlSeedContext("sha256:" + "a" * 64, 7, 4, target, past, ())
+    with pytest.raises(ValueError):
+        control_envelope_admission(context)
+
+
+def test_envelope_abstention_runs_actual_complete_secant_fallback_paths(tmp_path):
+    from pathlib import Path
+    from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+        BoundedRCFiberDirectControlRequest,
+    )
+    from structural_analysis.benchmark import rc_control_seed_runtime as runtime
+    from structural_analysis.benchmark.rc_control_envelope_admission import (
+        control_envelope_admission,
+    )
+    from structural_analysis.io.neutral.loader import load_neutral_json
+
+    decisions = []
+
+    def propose(context):
+        decision = control_envelope_admission(context)
+        decisions.append(decision)
+        return runtime.secant_seed(context) if decision["consult_policy"] else None
+
+    report = runtime.benchmark_rc_control_seed_paths(
+        load_neutral_json(
+            Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
+        ),
+        BoundedRCFiberDirectControlRequest(
+            7, (-1e-6, -2e-6, -1e-6, 1e-6), allow_reversals=True, maximum_reversals=1
+        ),
+        source_revision="a" * 40,
+        output_directory=tmp_path / "gate",
+        proposal=propose,
+        proposal_identity="sha256:" + "b" * 64,
+        proposal_abstention_strategy="secant",
+    )
+    assert [d["consult_policy"] for d in decisions] == [True, True, False, False]
+    assert report["reference_repeat_exact"]
+    assert all(c["full_history_pass"] for c in report["comparisons"].values())
+    assert all(
+        a["status"] == "complete"
+        for a in [*report["arms"].values(), report["fresh_reference"]]
+    )
+    assert report["all_execution_work_reported"]
