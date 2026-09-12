@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Staged prefix graph admission and original HTTP delivery](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-http-20260913.md)
 - [Matched staged versus cost-pruned process costs](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-costs-20260913.md)
 - [Staged prefix rejection and full-reference candidate execution](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-execution-20260913.md)
 - [Actual short-history layout screening and full-prefix equality](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-prefix-pilot-20260913.md)
