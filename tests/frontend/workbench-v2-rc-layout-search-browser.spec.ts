@@ -2,6 +2,25 @@ import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { layoutFiles } from './layoutSearchFixture'
 const base = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
+
+test('viewer runtime assets preserve originals and load configured preset', async ({ page, request }) => {
+  const manifest: string[] = JSON.parse(await readFile('src/structure-viewer/viewer-runtime-assets.json', 'utf8'))
+  for (const relative of manifest) {
+    const response = await request.get(`${base}/src/structure-viewer/${relative}`)
+    expect(response.status()).toBe(200)
+    expect((await response.body()).equals(await readFile(`src/structure-viewer/${relative}`))).toBe(true)
+    await response.dispose()
+  }
+  const messages: string[] = []
+  page.on('console', m => messages.push(m.text()))
+  await page.goto(`${base}/src/structure-viewer/index.html?preset=midas33_optimized`)
+  await expect(page.locator('#provenance-source-label')).not.toHaveText('--', { timeout: 60000 })
+  const source = await page.locator('#provenance-source-label').innerText()
+  expect(source.toLowerCase()).not.toContain('demo')
+  expect(source.toLowerCase()).toContain('midas')
+  expect(messages.some(m => m.includes('Preset sidecar unavailable'))).toBe(false)
+  expect(messages.some(m => m.includes('initLog is not defined'))).toBe(false)
+})
 async function setup(page: Page, tamper = false) {
   await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/layout-search/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-layout', bearerToken: 'synthetic-layout-token' }) } })
   await page.route('**/layout-search/**', async route => {
