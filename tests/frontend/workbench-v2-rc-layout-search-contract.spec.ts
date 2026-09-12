@@ -108,3 +108,75 @@ for (const [id, files] of Object.entries(standaloneLayouts)) {
     await expect(validateRcControlSearch(raw,async p=>change==='checkpoint'&&p.endsWith('/checkpoint.json')?Buffer.concat([files[p],Buffer.from(' ')]):files[p])).rejects.toThrow()
   })
 }
+
+import { stagedFiles } from './layoutStagedFixture'
+test('RC staged layout validates prefix originals and includes all work', async () => {
+  const review = await validateRcControlSearch(stagedFiles['result.json'], async path => stagedFiles[path])
+  expect(review.report.arms.price_order.selected_candidate_id).toBe('middle')
+  expect(review.report.arms.price_order.execution_work.known_counters.attempted_step_count).toBe(32)
+  expect(review.prefixes?.small.decision.action).toBe('reject_history_maximum')
+  expect(review.prefixes?.middle.decision.action).toBe('execute_full_reference')
+  expect(Object.keys(review.designs.price_order.models)).toEqual(['baseline', 'middle'])
+  expect(review.costOptimality).toBeNull()
+})
+for (const role of ['request', 'row', 'decision', 'baseline/model', 'baseline/result', 'baseline/checkpoint', 'baseline/verification']) {
+  test(`RC staged layout rejects changed prefix ${role}`, async () => {
+    const path = `price_order/prefix/small/${role}.json`
+    await expect(validateRcControlSearch(stagedFiles['result.json'], async p => p === path ? Buffer.concat([stagedFiles[p], Buffer.from(' ')]) : stagedFiles[p])).rejects.toThrow()
+  })
+}
+for (const change of ['action', 'model', 'acceptance', 'violations', 'target_count', 'accounting', 'policy']) {
+  test(`RC staged layout rejects rehashed ${change}`, async () => {
+    const files = { ...stagedFiles }, report = JSON.parse(files['result.json'].toString()), plan = JSON.parse(files['plan.json'].toString())
+    const comparison = JSON.parse(files['price_order/comparison.json'].toString()), info = comparison.prefix_screening
+    const record = info.decisions[0], path = `price_order/${record.artifact.path}`
+    const edits: Record<string, string> = {}
+    if (change === 'action') { edits.action = JSON.stringify('execute_full_reference'); record.action = 'execute_full_reference' }
+    if (change === 'model') edits.model_checksum = JSON.stringify(`sha256:${'0'.repeat(64)}`)
+    if (change === 'acceptance') edits.full_history_acceptance = 'true'
+    if (change === 'violations') edits.history_maximum_violations = '[]'
+    if (change === 'target_count') edits.prefix_target_count = '1'
+    const raw = changed(files[path], edits, 'decision_hash'); files[path] = Buffer.from(raw)
+    record.artifact = { ...record.artifact, sha256: `sha256:${createHash('sha256').update(raw).digest('hex')}`, byte_length: raw.byteLength }
+    files['price_order/comparison.json'] = Buffer.from(changed(files['price_order/comparison.json'], { prefix_screening: JSON.stringify(info) }, 'report_hash'))
+    const comparisonHash = JSON.parse(files['price_order/comparison.json'].toString()).report_hash
+    report.arms.price_order.comparison_hash = comparisonHash; report.arms.price_order.prefix_screening = info
+    if (change === 'accounting') report.arms.price_order.execution_work = info.full_reference_execution_work
+    const reportEdits: Record<string, string> = { arms: JSON.stringify(report.arms) }
+    if (change === 'policy') {
+      plan.prefix_screening.terminal_limits_used = true
+      files['plan.json'] = Buffer.from(changed(files['plan.json'], { prefix_screening: JSON.stringify(plan.prefix_screening) }, 'plan_hash'))
+      reportEdits.plan_hash = JSON.stringify(JSON.parse(files['plan.json'].toString()).plan_hash)
+      reportEdits.prefix_screening = JSON.stringify(plan.prefix_screening)
+    }
+    files['result.json'] = Buffer.from(changed(files['result.json'], reportEdits, 'report_hash'))
+    await expect(validateRcControlSearch(files['result.json'], async p => files[p])).rejects.toThrow()
+  })
+}
+
+test('RC staged layout keeps full acceptance separate from unavailable prefix verification', async () => {
+  const files = { ...stagedFiles }, folder = 'price_order/prefix/middle', comparisonPath = 'price_order/comparison.json'
+  const replaceMembers = (raw: Uint8Array, edits: Record<string, string>) => {
+    const members = new Map([...fields(new TextDecoder().decode(raw))].map(([k, v]) => [k, v.value]))
+    for (const [k, v] of Object.entries(edits)) members.set(k, v)
+    return Buffer.from(`{${[...members].sort(([a], [b]) => a < b ? -1 : 1).map(([k, v]) => `${JSON.stringify(k)}:${v}`).join(',')}}`)
+  }
+  const ref = (path: string, raw: Buffer) => ({ path, byte_length: raw.byteLength, sha256: `sha256:${createHash('sha256').update(raw).digest('hex')}` })
+  const row = JSON.parse(files[`${folder}/row.json`].toString())
+  files[`${folder}/baseline/verification.json`] = replaceMembers(files[`${folder}/baseline/verification.json`], { solver_replay_performed: 'false', errors: '["simulated verification failure"]' })
+  row.artifacts.verification = ref('baseline/verification.json', files[`${folder}/baseline/verification.json`])
+  files[`${folder}/row.json`] = replaceMembers(files[`${folder}/row.json`], { artifacts: JSON.stringify(row.artifacts), full_reference_verification_pass: 'false', selection_eligible: 'false', status: '"verification_blocked"', performance: 'null', screens: 'null', failure: '{"phase":"verification","kind":"simulated"}' })
+  files[`${folder}/decision.json`] = Buffer.from(changed(files[`${folder}/decision.json`], { prefix_verified: 'false', prefix_row: JSON.stringify(ref('row.json', files[`${folder}/row.json`])) }, 'decision_hash'))
+  const comparison = JSON.parse(files[comparisonPath].toString())
+  comparison.prefix_screening.decisions.find((d: any) => d.candidate_id === 'middle').artifact = ref('prefix/middle/decision.json', files[`${folder}/decision.json`])
+  files[comparisonPath] = Buffer.from(changed(files[comparisonPath], { prefix_screening: JSON.stringify(comparison.prefix_screening) }, 'report_hash'))
+  const report = JSON.parse(files['result.json'].toString())
+  report.arms.price_order.prefix_screening = comparison.prefix_screening
+  report.arms.price_order.comparison_hash = JSON.parse(files[comparisonPath].toString()).report_hash
+  files['result.json'] = Buffer.from(changed(files['result.json'], { arms: JSON.stringify(report.arms) }, 'report_hash'))
+  const review = await validateRcControlSearch(files['result.json'], async path => files[path])
+  expect(review.prefixes?.middle.decision.prefix_verified).toBe(false)
+  expect(review.prefixes?.middle.decision.action).toBe('execute_full_reference')
+  expect(review.designs.price_order.report.selected_candidate_id).toBe('middle')
+  expect(review.designs.price_order.report.rows.find((r: any) => r.candidate_id === 'middle').full_reference_verification_pass).toBe(true)
+})

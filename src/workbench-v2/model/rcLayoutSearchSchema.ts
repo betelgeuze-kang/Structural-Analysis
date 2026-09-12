@@ -4,6 +4,7 @@ import { artifactMaximum, validateRcStudyControl, validateRcStudyLimits, verifyR
 import { candidateRanking, CHEAPER_BOUNDARY_RANKING } from './rcControlCandidateRanking'
 import { costOptimality } from './rcControlSearchCost'
 import { layoutPruningPolicy, validateLayoutPruning } from './rcLayoutCostPruning'
+import { validateStagingPolicy, validateLayoutStaging } from './rcLayoutStaging'
 import type { RcSearchReview } from './rcControlSearchSchema'
 
 const MAX = 2 * 1024 ** 2
@@ -19,7 +20,8 @@ const features = ['member_count', 'total_length_m', 'gross_concrete_volume_m3', 
 export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, work: (rows: RcObject[]) => RcObject, coverage: (plan: RcObject, oracle: RcObject | null) => RcObject): Promise<RcSearchReview> {
   const doc = document(raw), report = doc.value
   await selfHash(doc.raw, report, 'report_hash')
-  const pruned = report.schema_version === 'experimental-rc-control-layout-cost-pruned-strategy.v1'
+  const staged = report.schema_version === 'experimental-rc-control-layout-staged-strategy.v1'
+  const pruned = staged || report.schema_version === 'experimental-rc-control-layout-cost-pruned-strategy.v1'
   const standalone = pruned || report.schema_version === 'experimental-rc-control-layout-strategy.v1'
   check(!standalone || ['price_order', 'learned_order'].includes(report.strategy), 'layout_strategy_invalid')
   const priceOnly = standalone && report.strategy === 'price_order'
@@ -29,7 +31,7 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
     && /^[a-f0-9]{40}$/.test(report.source_revision) && report.historical_training_cost_counted_once_outside_online_arms === !priceOnly, 'layout_report_invalid')
   const planDoc = document(await read('plan.json', MAX)), plan = planDoc.value
   await selfHash(planDoc.raw, plan, 'plan_hash')
-  check(plan.schema_version === (pruned ? 'experimental-rc-control-layout-cost-pruned-strategy-plan.v1' : standalone ? 'experimental-rc-control-layout-strategy-plan.v1' : 'experimental-rc-control-layout-search-plan.v1') && plan.plan_hash === report.plan_hash && plan.source_revision === report.source_revision
+  check(plan.schema_version === (staged ? 'experimental-rc-control-layout-staged-plan.v1' : pruned ? 'experimental-rc-control-layout-cost-pruned-strategy-plan.v1' : standalone ? 'experimental-rc-control-layout-strategy-plan.v1' : 'experimental-rc-control-layout-search-plan.v1') && plan.plan_hash === report.plan_hash && plan.source_revision === report.source_revision
     && plan.functional_equivalence_verified === false && plan.independent_project_geometry_history_split === false
     && Array.isArray(plan.pool) && plan.pool.length >= 2 && plan.pool.length <= 17 && plan.pool[0].candidate_id === 'baseline'
     && plan.pool.every((p: RcObject) => typeof p.candidate_id === 'string' && /^[A-Za-z0-9_][A-Za-z0-9_-]{0,63}$/.test(p.candidate_id) && hash(p.model_identity))
@@ -38,9 +40,10 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
     && nat(plan.full_analysis_budget_per_arm) && plan.full_analysis_budget_per_arm >= 2 && plan.full_analysis_budget_per_arm <= 17
     && typeof plan.oracle_after_online_arms === 'boolean' && plan.oracle_after_online_arms === (report.oracle !== null) && keys(plan.plans, arms), 'layout_plan_invalid')
   check(!standalone || (plan.strategy === report.strategy && plan.oracle_after_online_arms === false && report.oracle === null
-    && report.timing_scope === (pruned ? 'single_layout_strategy_preparation_ranking_cost_bounds_full_reference_and_IO_excluding_final_report_write' : 'single_layout_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write')), 'layout_standalone_scope_invalid')
+    && report.timing_scope === (staged ? 'single_strategy_preparation_cost_bounds_prefix_and_full_reference_verification_IO_excluding_final_report_write' : pruned ? 'single_layout_strategy_preparation_ranking_cost_bounds_full_reference_and_IO_excluding_final_report_write' : 'single_layout_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write')), 'layout_standalone_scope_invalid')
   if (pruned) check(same(plan.execution_policy, layoutPruningPolicy) && same(report.execution_policy, layoutPruningPolicy), 'layout_pruning_policy_invalid')
   validateRcStudyControl(plan.control_request)
+  if (staged) validateStagingPolicy(plan, report)
   const priceDoc = document(await read('price-table.json', MAX)), prices = priceDoc.value
   check(keys(prices, ['concrete_per_m3', 'rebar_per_kg', 'currency', 'as_of', 'source']) && num(prices.concrete_per_m3) && prices.concrete_per_m3 >= 0 && num(prices.rebar_per_kg) && prices.rebar_per_kg >= 0
     && typeof prices.currency === 'string' && /^[A-Z]{3}$/.test(prices.currency) && typeof prices.as_of === 'string' && typeof prices.source === 'string', 'layout_prices_invalid')
@@ -108,7 +111,7 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
     const ordering = name === 'price_order' ? priceOrder : ranked.ordering
     check(same(plan.plans[name], { ordering, shortlist: ordering.slice(0, plan.full_analysis_budget_per_arm - 1) }), 'layout_schedule_invalid')
   }
-  const designs: Record<string, RcDesignReview> = {}
+  const designs: Record<string, RcDesignReview> = {}, prefixes: Record<string, RcObject> = Object.create(null)
   const names = [...arms, ...(report.oracle ? ['exhaustive_oracle'] : [])]
   for (const name of names) {
     const outcome = name === 'exhaustive_oracle' ? report.oracle : report.arms[name]
@@ -116,7 +119,7 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
     const comparisonDoc = document(await read(outcome.comparison_path, MAX)), comparison = comparisonDoc.value
     await selfHash(comparisonDoc.raw, comparison, 'report_hash')
     const expectedIds = ['baseline', ...(name === 'exhaustive_oracle' ? priceOrder : plan.plans[name].shortlist)]
-    check(comparison.schema_version === (pruned ? 'experimental-rc-control-layout-cost-pruned-comparison.v1' : 'experimental-rc-control-layout-comparison.v1') && comparison.report_hash === outcome.comparison_hash && comparison.price_table_hash === plan.price_table_hash
+    check(comparison.schema_version === (staged ? 'experimental-rc-control-layout-staged-comparison.v1' : pruned ? 'experimental-rc-control-layout-cost-pruned-comparison.v1' : 'experimental-rc-control-layout-comparison.v1') && comparison.report_hash === outcome.comparison_hash && comparison.price_table_hash === plan.price_table_hash
       && Array.isArray(comparison.rows) && (pruned ? comparison.rows.length <= expectedIds.length && new Set(comparison.rows.map((r: RcObject) => r.candidate_id)).size === comparison.rows.length && comparison.rows.every((r: RcObject) => expectedIds.includes(r.candidate_id)) : same(comparison.rows.map((r: RcObject) => r.candidate_id), expectedIds)) && outcome.request_count === comparison.rows.length, 'layout_comparison_invalid')
     const slices = rawValues(fields(comparisonDoc.raw).get('rows')!.value), models: Record<string, RcObject> = {}
     let bytes = 0
@@ -128,8 +131,15 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
       check(pool && row.artifacts.model?.sha256 === pool.model_artifact.sha256 && same(row.quantities, pool.quantities) && same(row.material_estimate, pool.material_estimate) && same(model, poolModels[row.candidate_id]), 'layout_reference_pool_mismatch')
       if (model) models[row.candidate_id] = model
     }
-    check(same(work(comparison.rows), outcome.execution_work), 'layout_arm_work_invalid')
-    if (pruned) await validateLayoutPruning(plan, comparison, slices, outcome, name, read)
+    if (staged) {
+      const requestHash = await sha256Hex(fields(planDoc.raw).get('control_request')!.value)
+      check(requestHash !== null, 'layout_prefix_request_hash_unavailable')
+      const prefix = await validateLayoutStaging(plan, comparison, slices, outcome, name, read, common, poolModels, requestHash, work)
+      check(same(prefix.work, outcome.execution_work), 'layout_staged_work_invalid'); Object.assign(prefixes, prefix.records)
+    } else {
+      check(same(work(comparison.rows), outcome.execution_work), 'layout_arm_work_invalid')
+      if (pruned) await validateLayoutPruning(plan, comparison, slices, outcome, name, read)
+    }
     const eligible = comparison.rows.filter((r: RcObject) => r.selection_eligible).sort((a: RcObject, b: RcObject) => a.material_estimate.total - b.material_estimate.total || (a.candidate_id < b.candidate_id ? -1 : 1))
     const selected = eligible[0]?.candidate_id ?? null
     check(comparison.selected_candidate_id === selected && outcome.selected_candidate_id === selected, 'layout_selection_invalid')
@@ -145,5 +155,5 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
   check([report.ranking_wall_ns, report.online_and_optional_oracle_wall_ns, report.online_and_optional_oracle_cpu_ns].every(nat)
     && report.online_and_optional_oracle_wall_ns >= report.ranking_wall_ns + names.reduce((s, n) => s + (n === 'exhaustive_oracle' ? report.oracle : report.arms[n]).wall_ns, 0)
     && report.online_and_optional_oracle_cpu_ns >= names.reduce((s, n) => s + (n === 'exhaustive_oracle' ? report.oracle : report.arms[n]).cpu_ns, 0), 'layout_total_cost_invalid')
-  return { report, plan, designs, costOptimality: cost }
+  return { report, plan, designs, costOptimality: cost, prefixes }
 }

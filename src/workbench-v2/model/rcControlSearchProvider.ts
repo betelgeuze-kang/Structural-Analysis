@@ -3,9 +3,11 @@ import type { RcDesignSession } from './rcControlDesignProvider'
 import { openRcReviewWorker } from './rcReviewWorker'
 import type { RcSearchReview } from './rcControlSearchSchema'
 
+export type PrefixRole = 'decision' | 'request' | 'row' | 'model' | 'result' | 'checkpoint' | 'verification'
 export interface RcSearchSession extends RcSearchReview {
   designSession(arm: string): RcDesignSession
   download(role: 'result' | 'plan' | 'policy' | 'historical-training' | 'price-table'): Promise<Blob>
+  downloadPrefix(candidate: string, role: PrefixRole): Promise<Blob>
   downloadPruning(candidate: string, role: 'model' | 'decision'): Promise<Blob>
   onFailure(listener: () => void): () => void
   dispose(): void
@@ -16,6 +18,7 @@ export async function loadRcControlSearch(url: string, signal: AbortSignal, auth
     const review = await connection.initialize<RcSearchReview>()
     return { ...review, dispose: connection.dispose, onFailure: connection.onFailure,
       download: role => connection.call('metadata', { role }),
+      downloadPrefix: (candidate, role) => connection.call('prefixDownload', { candidate, role }),
       downloadPruning: (candidate, role) => connection.call('pruningDownload', { candidate, role }),
       designSession(arm) {
         if (!Object.prototype.hasOwnProperty.call(review.designs, arm)) throw new Error('rc_search_arm_unavailable')

@@ -8,7 +8,7 @@ export const layoutPruningPolicy = {
 }
 
 /** Recompute decisions only after the caller verifies every original design row. */
-export async function validateLayoutPruning(plan: RcObject, comparison: RcObject, slices: string[], outcome: RcObject, name: string, read: StudyRead): Promise<void> {
+export async function validateLayoutPruning(plan: RcObject, comparison: RcObject, slices: string[], outcome: RcObject, name: string, read: StudyRead, prefixCheck?: (key: string) => Promise<boolean>): Promise<void> {
   const pruning = comparison.cost_pruning, considered: string[] = ['baseline', ...plan.plans[name].shortlist]
   const rows: RcObject[] = comparison.rows, evaluated: RcObject[] = [], skipped: string[] = []
   check(pruning && same(outcome.cost_pruning, pruning) && Array.isArray(pruning.decisions) && pruning.decisions.length === considered.length, 'layout_pruning_records_invalid')
@@ -22,7 +22,7 @@ export async function validateLayoutPruning(plan: RcObject, comparison: RcObject
       .sort((a, b) => a.material_estimate.total - b.material_estimate.total || (a.candidate_id < b.candidate_id ? -1 : a.candidate_id > b.candidate_id ? 1 : 0))
     const winner = eligible[0], remaining: RcObject[] = plan.pool.filter((p: RcObject) => !ids.includes(p.candidate_id))
     const dominated = remaining.filter(p => winner && p.material_estimate.total > winner.material_estimate.total).map(p => p.candidate_id)
-    const skip = dominated.includes(key), action = skip ? 'skip_cost_dominated' : 'execute_full_reference'
+    const skip = dominated.includes(key), action = skip ? 'skip_cost_dominated' : prefixCheck && key !== 'baseline' ? 'execute_prefix_screen' : 'execute_full_reference'
     const record = pruning.decisions[ordinal], ref = record?.artifact, path = `decisions/${String(ordinal).padStart(2, '0')}.json`
     check(record && same(Object.keys(record).sort(), ['action', 'artifact', 'candidate_id']) && record.candidate_id === key && record.action === action
       && ref && same(Object.keys(ref).sort(), ['byte_length', 'path', 'sha256']) && ref.path === path
@@ -42,10 +42,10 @@ export async function validateLayoutPruning(plan: RcObject, comparison: RcObject
       unevaluated_physical_feasibility: 'unknown', original_reference_artifact_verification_required: true,
       global_cost_optimality_proved: false, net_savings_proved: false, execution_skips_performed: 0, bound_hash: bound.bound_hash,
     }
-    check(same(bound, expectedBound) && same(decision, { schema_version: 'experimental-rc-layout-cost-pruning-decision.v1', candidate_id: key,
+    check(same(bound, expectedBound) && same(decision, { schema_version: prefixCheck ? 'experimental-rc-layout-staged-cost-decision.v1' : 'experimental-rc-layout-cost-pruning-decision.v1', candidate_id: key,
       evaluated_candidate_ids_before: ids, action, bound, physical_feasibility_at_decision: 'unknown', decision_hash: decision.decision_hash }), 'layout_pruning_decision_invalid')
     if (skip) skipped.push(key)
-    else { check(rows[evaluated.length]?.candidate_id === key, 'layout_pruning_required_row_missing'); evaluated.push(rows[evaluated.length]) }
+    else if (!(prefixCheck && key !== 'baseline' && await prefixCheck(key))) { check(rows[evaluated.length]?.candidate_id === key, 'layout_pruning_required_row_missing'); evaluated.push(rows[evaluated.length]) }
   }
   check(evaluated.length === rows.length, 'layout_pruning_extra_row')
   const ids = evaluated.map(r => r.candidate_id), poolIds: string[] = plan.pool.map((p: RcObject) => p.candidate_id)

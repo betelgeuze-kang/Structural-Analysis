@@ -159,3 +159,58 @@ for (const width of [1440,390]) for (const strategy of ['price_order','learned_o
     })
   })
 }
+
+import { stagedFiles } from './layoutStagedFixture'
+async function setupStaged(page: Page, tamper: 'none' | 'initial' | 'download' = 'none') {
+  await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/layout-staged/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-layout', bearerToken: 'synthetic-layout-token' }) } })
+  let resultReads = 0
+  await page.route('**/layout-staged/**', async route => {
+    expect(await route.request().headerValue('authorization')).toBe('Bearer synthetic-layout-token')
+    const path = new URL(route.request().url()).pathname.replace('/layout-staged/', '')
+    if (path === 'price_order/prefix/small/baseline/result.json') resultReads++
+    const corrupt = tamper === 'initial' && path === 'price_order/prefix/small/decision.json'
+      || tamper === 'download' && path === 'price_order/prefix/small/baseline/result.json' && resultReads > 1
+    await route.fulfill({ contentType: 'application/json', body: corrupt ? Buffer.concat([stagedFiles[path], Buffer.from(' ')]) : stagedFiles[path] })
+  })
+}
+for (const width of [1440, 390]) test.describe(`RC staged layout browser ${width}`, () => {
+  test.use({ viewport: { width, height: 1000 } })
+  test('shows prefix rejection and downloads exact prefix and full originals', async ({ page }) => {
+    test.setTimeout(60000)
+    await setupStaged(page); await page.goto(`${base}/#/workbench-v2`)
+    const panel = page.locator('[data-rc-search]')
+    await expect(panel).toHaveAttribute('data-rc-search', 'verified', { timeout: 60000 })
+    await expect(panel.locator('[data-rc-search-staging]')).toContainText('Prefix steps: 8; full steps: 24')
+    await expect(panel.locator('[data-rc-pruning-candidate="small"]')).toContainText('Rejected: verified prefix limit violation')
+    await expect(panel.locator('[data-rc-pruning-candidate="large"]')).toContainText('Skipped: higher cost')
+    await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'middle')
+    for (const key of ['small', 'middle']) for (const role of ['decision', 'request', 'row', 'model', 'result', 'checkpoint', 'verification']) {
+      // Pace repeated user downloads below Chromium's burst limit.
+      await page.waitForTimeout(250)
+      const pending = page.waitForEvent('download')
+      await panel.getByRole('button', { name: `Download prefix ${key} ${role}`, exact: true }).click()
+      const raw = await readFile((await (await pending).path())!)
+      const relative = ['decision', 'request', 'row'].includes(role) ? `${role}.json` : `baseline/${role}.json`
+      expect(raw.equals(stagedFiles[`price_order/prefix/${key}/${relative}`])).toBe(true)
+    }
+    for (const role of ['model', 'result', 'checkpoint', 'verification']) {
+      // Pace repeated user downloads below Chromium's burst limit.
+      await page.waitForTimeout(250)
+      const pending = page.waitForEvent('download')
+      await panel.getByRole('button', { name: `Download middle ${role}`, exact: true }).click()
+      expect((await readFile((await (await pending).path())!)).equals(stagedFiles[`price_order/middle/baseline/${role}.json`])).toBe(true)
+    }
+    const box = await panel.boundingBox(); expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1)
+  })
+})
+for (const tamper of ['initial', 'download'] as const) test(`RC staged layout browser invalidates ${tamper} corruption`, async ({ page }) => {
+  await setupStaged(page, tamper); await page.goto(`${base}/#/workbench-v2`)
+  const panel = page.locator('[data-rc-search]')
+  if (tamper === 'download') {
+    await expect(panel).toHaveAttribute('data-rc-search', 'verified', { timeout: 60000 })
+    await panel.getByRole('button', { name: 'Download prefix small result', exact: true }).click()
+  }
+  await expect(panel).toHaveAttribute('data-rc-search', 'invalid', { timeout: 60000 })
+  await expect(panel.locator('[data-rc-design-selected]')).toHaveCount(0)
+  await expect(panel.locator('[data-rc-prefix-candidate]')).toHaveCount(0)
+})

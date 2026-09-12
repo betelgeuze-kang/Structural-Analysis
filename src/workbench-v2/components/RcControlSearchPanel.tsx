@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
-import { loadRcControlSearch, type RcSearchSession } from '../model/rcControlSearchProvider'
+import { loadRcControlSearch, type RcSearchSession, type PrefixRole } from '../model/rcControlSearchProvider'
 import { RC_SEARCH_ARMS, searchWork } from '../model/rcControlSearchSchema'
 import type { JobAuthorizationProvider } from '../model/jobTransport'
 import type { RcObject } from '../model/rcJobSchema'
@@ -43,11 +43,20 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       window.setTimeout(() => { URL.revokeObjectURL(href); urls.current.delete(href) }, 0)
     } catch { invalidate() }
   }
+  async function downloadPrefix(candidate: string, role: PrefixRole) {
+    try {
+      const blob = await session!.downloadPrefix(candidate, role), href = URL.createObjectURL(blob), anchor = document.createElement('a')
+      urls.current.add(href); anchor.href = href; anchor.download = `rc-prefix-${candidate}-${role}.json`
+      document.body.append(anchor); anchor.click(); anchor.remove()
+      window.setTimeout(() => { URL.revokeObjectURL(href); urls.current.delete(href) }, 0)
+    } catch { invalidate() }
+  }
   if (!session) return <section className="wb2-panel" data-rc-search={status}><h2>RC candidate search</h2><p role="status">{status === 'invalid' ? 'Unavailable — the original search records could not be verified.' : 'Checking candidate models, full-path results and search accounting…'}</p></section>
   const { report, plan, costOptimality: cost } = session, audit = report.candidate_coverage_audit, training = report.historical_training_cost
-  const arms = RC_SEARCH_ARMS.filter(name => report.arms[name]), standalone = ['experimental-rc-control-candidate-strategy.v1', 'experimental-rc-control-layout-strategy.v1', 'experimental-rc-control-layout-cost-pruned-strategy.v1'].includes(report.schema_version)
-  const layout = ['experimental-rc-control-layout-search.v1', 'experimental-rc-control-layout-strategy.v1', 'experimental-rc-control-layout-cost-pruned-strategy.v1'].includes(report.schema_version)
-  const pruning = report.schema_version === 'experimental-rc-control-layout-cost-pruned-strategy.v1' ? report.arms[report.strategy].cost_pruning : null
+  const arms = RC_SEARCH_ARMS.filter(name => report.arms[name]), standalone = ['experimental-rc-control-candidate-strategy.v1', 'experimental-rc-control-layout-strategy.v1', 'experimental-rc-control-layout-cost-pruned-strategy.v1', 'experimental-rc-control-layout-staged-strategy.v1'].includes(report.schema_version)
+  const layout = ['experimental-rc-control-layout-search.v1', 'experimental-rc-control-layout-strategy.v1', 'experimental-rc-control-layout-cost-pruned-strategy.v1', 'experimental-rc-control-layout-staged-strategy.v1'].includes(report.schema_version)
+  const pruning = ['experimental-rc-control-layout-cost-pruned-strategy.v1', 'experimental-rc-control-layout-staged-strategy.v1'].includes(report.schema_version) ? report.arms[report.strategy].cost_pruning : null
+  const staging = report.schema_version === 'experimental-rc-control-layout-staged-strategy.v1' ? report.arms[report.strategy].prefix_screening : null
   const names = [...arms, ...(report.oracle ? ['exhaustive_oracle'] : [])]
   const trainingWork = training ? searchWork([{ invocations: training.label_invocations }]) : null
   return <section className="wb2-panel" data-rc-search="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
@@ -75,6 +84,11 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       {arms.map(name => { const a = audit.arms[name]; return <tr key={name}><td>{label(name)}</td><td>{shown(a.missed_feasible_count)}</td>{['false_safe_count', 'predicted_safe_unverifiable_count', 'false_negative_count'].map(k => <td key={k}>{name === 'price_order' ? 'Not applicable' : shown(a[k])}</td>)}</tr> })}
     </tbody></table></div>
     <p>Counts cover alternatives, excluding the baseline. Unavailable counts do not mean zero. Feasible but unrequested candidates may cost more than the selected design. The exhaustive check uses the same reference solver.</p></>}
+    {staging && <div data-rc-search-staging>
+      <h3>Initial history screening</h3>
+      <p>{staging.prefix_request_count} prefix paths and {staging.full_reference_request_count} full paths, each with a separate verification run. {staging.rejected_history_maximum_candidate_ids.length} candidates rejected after a verified cumulative-limit violation. Prefix passes require full analysis; terminal-only limits do not reject candidates at this stage.</p>
+      <p>Prefix steps: {staging.prefix_execution_work.known_counters.attempted_step_count}; full steps: {staging.full_reference_execution_work.known_counters.attempted_step_count}. Both are already included in the strategy work and elapsed time. Prefix checkpoints are not reused for full acceptance.</p>
+    </div>}
     {pruning && <>
       <h3>Candidate evaluation decisions</h3>
       <p data-rc-search-pruning>{pruning.evaluated_candidate_ids.length} models analyzed; {pruning.skipped_cost_dominated_candidate_ids.length} skipped because their declared material cost exceeded an already verified feasible candidate. {pruning.outside_consideration_horizon_candidate_ids.length} outside the fixed consideration horizon. Skipping does not extend that horizon. Unevaluated physical feasibility remains unknown.</p>
@@ -82,8 +96,9 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       <div className="wb2-table-scroll" role="region" aria-label="RC evaluation decisions" tabIndex={0}><table className="wb2-table" style={{ minWidth: 800, overflowWrap: 'normal' }}><thead><tr><th>Candidate</th><th>Declared material cost</th><th>Evaluation decision</th><th>Physical verification</th><th>Original records</th></tr></thead><tbody>
         {plan.pool.map((p: RcObject) => {
           const row = session.designs[report.strategy].report.rows.find((r: RcObject) => r.candidate_id === p.candidate_id)
+          const prefix = session.prefixes?.[p.candidate_id]
           const decision = pruning.decisions.find((d: RcObject) => d.candidate_id === p.candidate_id)
-          return <tr key={p.candidate_id} data-rc-pruning-candidate={p.candidate_id}><td>{p.candidate_id}</td><td>{p.material_estimate.total} {p.material_estimate.currency}</td><td>{row ? 'Analyzed' : decision ? 'Skipped: higher cost than a verified feasible candidate' : 'Outside consideration horizon'}</td><td>{row?.full_reference_verification_pass ? row.selection_eligible ? 'Verified limits pass' : 'Verified limit failure' : 'Unknown'}</td><td><button className="wb2-btn" type="button" onClick={() => { void downloadPruning(p.candidate_id, 'model') }}>Download pool {p.candidate_id} model</button>{decision && <button className="wb2-btn" type="button" onClick={() => { void downloadPruning(p.candidate_id, 'decision') }}>Download {p.candidate_id} decision</button>}</td></tr>
+          return <tr key={p.candidate_id} data-rc-pruning-candidate={p.candidate_id}><td>{p.candidate_id}</td><td>{p.material_estimate.total} {p.material_estimate.currency}</td><td>{row ? 'Analyzed' : prefix?.decision.action === 'reject_history_maximum' ? 'Rejected: verified prefix limit violation' : decision ? 'Skipped: higher cost than a verified feasible candidate' : 'Outside consideration horizon'}</td><td>{row?.full_reference_verification_pass ? row.selection_eligible ? 'Verified limits pass' : 'Verified limit failure' : prefix?.decision.action === 'reject_history_maximum' ? 'Prefix violation; full path not run' : 'Unknown'}</td><td><button className="wb2-btn" type="button" onClick={() => { void downloadPruning(p.candidate_id, 'model') }}>Download pool {p.candidate_id} model</button>{decision && <button className="wb2-btn" type="button" onClick={() => { void downloadPruning(p.candidate_id, 'decision') }}>Download {p.candidate_id} decision</button>}{prefix && <div data-rc-prefix-candidate={p.candidate_id}><p>{prefix.decision.history_maximum_violations.length ? prefix.decision.history_maximum_violations.map((v: RcObject) => `${v.metric}: ${v.value} > ${v.limit}`).join('; ') : prefix.decision.prefix_verified ? 'Prefix passed; full analysis required.' : 'Prefix verification unavailable; full analysis required.'}</p>{(['decision', 'request', 'row', 'model', 'result', 'checkpoint', 'verification'] as PrefixRole[]).filter(role => ['decision', 'request', 'row'].includes(role) || prefix.row.artifacts[role]).map(role => <button key={role} className="wb2-btn" type="button" onClick={() => { void downloadPrefix(p.candidate_id, role) }}>Download prefix {p.candidate_id} {role}</button>)}</div>}</td></tr>
         })}
       </tbody></table></div>
     </>}
