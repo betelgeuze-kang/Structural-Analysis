@@ -12,6 +12,7 @@ import math
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
+from typing import ClassVar
 
 import numpy as np
 
@@ -158,6 +159,9 @@ class RCControlCandidatePolicy:
     """An immutable serialized policy; each exported dictionary is detached."""
 
     _json: str
+    _schema: ClassVar[str] = POLICY_SCHEMA
+    _features: ClassVar[tuple[str, ...]] = FEATURE_NAMES
+    _maximum_training_count: ClassVar[int] = 17
 
     def __post_init__(self):
         if type(self._json) is not str or len(self._json) > 2 * 1024 * 1024:
@@ -184,8 +188,8 @@ class RCControlCandidatePolicy:
         if type(p) is not dict or set(p) != keys:
             raise ValueError("exact candidate policy fields required")
         if (
-            p["schema_version"] != POLICY_SCHEMA
-            or p["features"] != list(FEATURE_NAMES)
+            p["schema_version"] != self._schema
+            or p["features"] != list(self._features)
             or p["targets"] != list(TARGETS)
             or any(
                 type(p[k]) is not str or not _HASH.fullmatch(p[k])
@@ -193,7 +197,7 @@ class RCControlCandidatePolicy:
             )
         ):
             raise ValueError("candidate policy profile or identity mismatch")
-        n = len(FEATURE_NAMES)
+        n = len(self._features)
         for key, size in (
             ("mean", n),
             ("scale", n),
@@ -228,7 +232,7 @@ class RCControlCandidatePolicy:
             values = p[key]
             if (
                 type(values) is not list
-                or not 2 <= len(values) <= 17
+                or not 2 <= len(values) <= self._maximum_training_count
                 or any(type(v) is not str or not _HASH.fullmatch(v) for v in values)
                 or len(set(values)) != len(values)
             ):
@@ -248,11 +252,16 @@ class RCControlCandidatePolicy:
         return self.to_dict()["policy_hash"]
 
     def predict(self, model, request):
-        p = self.to_dict()
         values, context = control_candidate_features(model, request)
-        reason = None
+        return self._predict_features(values, context)
+
+    def _predict_features(self, values, context, *, rejection=None):
+        p = self.to_dict()
+        reason = rejection
         x = np.asarray(values)
-        if context != p["context_hash"]:
+        if reason is not None:
+            pass
+        elif context != p["context_hash"]:
             reason = "control_or_fixed_model_context_mismatch"
         else:
             low, high = np.asarray(p["minimum"]), np.asarray(p["maximum"])

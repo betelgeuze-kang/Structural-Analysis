@@ -100,6 +100,7 @@ jobs:
           tests/test_rc_control_layout_features.py
           tests/test_rc_control_layout_dataset.py
           tests/test_rc_control_layout_labels.py
+          tests/test_rc_control_layout_learning.py
           tests/test_rc_strategy_cohort.py
           tests/test_repository_python_workflow_contract.py
           tests/test_rc_constant_load_durable.py
