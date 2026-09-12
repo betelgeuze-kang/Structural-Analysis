@@ -1,0 +1,1450 @@
+{
+  "observation": {
+    "aligned_target_rows": 2904,
+    "assembly_phase_counts": {
+      "train-a": {
+        "proposal": {
+          "final_observation": 726,
+          "line_search": 1008,
+          "primary_iteration": 726,
+          "terminal_refinement": 1452
+        },
+        "secant": {
+          "final_observation": 726,
+          "line_search": 1008,
+          "primary_iteration": 726,
+          "terminal_refinement": 1452
+        }
+      },
+      "train-b": {
+        "proposal": {
+          "final_observation": 726,
+          "line_search": 1068,
+          "primary_iteration": 726,
+          "terminal_refinement": 1437
+        },
+        "secant": {
+          "final_observation": 726,
+          "line_search": 708,
+          "primary_iteration": 726,
+          "terminal_refinement": 1440
+        }
+      },
+      "train-c": {
+        "proposal": {
+          "final_observation": 726,
+          "line_search": 1122,
+          "primary_iteration": 726,
+          "terminal_refinement": 1437
+        },
+        "secant": {
+          "final_observation": 726,
+          "line_search": 1122,
+          "primary_iteration": 726,
+          "terminal_refinement": 1437
+        }
+      },
+      "train-d": {
+        "proposal": {
+          "final_observation": 726,
+          "line_search": 687,
+          "primary_iteration": 726,
+          "terminal_refinement": 1446
+        },
+        "secant": {
+          "final_observation": 726,
+          "line_search": 687,
+          "primary_iteration": 726,
+          "terminal_refinement": 1446
+        }
+      }
+    },
+    "distinct_cases": 4,
+    "folds": [
+      {
+        "case_id": "train-a",
+        "diagnostic_hash": "sha256:972f2bf8c1d5bb534fc27bd0efb4a12f78b5463336a71755fc21d0b9dd9d11d9",
+        "fold": 0,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 49,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 238,
+              "newton_iterations": 238
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 238,
+              "newton_iterations": 238
+            },
+            "targets": 49
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 9,
+              "newton_iterations": 9
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 9,
+              "newton_iterations": 9
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 190,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 718,
+              "newton_iterations": 718
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 718,
+              "newton_iterations": 718
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-a",
+        "diagnostic_hash": "sha256:42c0d3e2ab817cc3208fdf5c0a9d2d0c89bc0a90ade096d57d8ce795536f09ec",
+        "fold": 1,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 49,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 238,
+              "newton_iterations": 238
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 238,
+              "newton_iterations": 238
+            },
+            "targets": 49
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 9,
+              "newton_iterations": 9
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 9,
+              "newton_iterations": 9
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 190,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 718,
+              "newton_iterations": 718
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 718,
+              "newton_iterations": 718
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-a",
+        "diagnostic_hash": "sha256:7acc64410f58cf984e9f0f1888916c7e78f53d5f752f3fb3d5e662de3ac17754",
+        "fold": 2,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 49,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 238,
+              "newton_iterations": 238
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 238,
+              "newton_iterations": 238
+            },
+            "targets": 49
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 9,
+              "newton_iterations": 9
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 9,
+              "newton_iterations": 9
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 190,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 718,
+              "newton_iterations": 718
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 718,
+              "newton_iterations": 718
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-b",
+        "diagnostic_hash": "sha256:da89778db28d5decdafb8363c0fbe7a71abc4024d4fe2f44f69f6b9afc0f2627",
+        "fold": 3,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "targets": 1
+          },
+          "proposed:new_absolute_envelope": {
+            "equal_newton_targets": 26,
+            "fewer_newton_targets": 10,
+            "more_newton_targets": 13,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 228,
+              "newton_iterations": 228
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 224,
+              "newton_iterations": 224
+            },
+            "targets": 49
+          },
+          "proposed:reversal": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 1,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 1,
+              "newton_iterations": 1
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "targets": 2
+          },
+          "proposed:within_absolute_envelope": {
+            "equal_newton_targets": 74,
+            "fewer_newton_targets": 22,
+            "more_newton_targets": 94,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 728,
+              "newton_iterations": 728
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 92,
+              "newton_iterations": 92
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 636,
+              "newton_iterations": 636
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-b",
+        "diagnostic_hash": "sha256:9df6ccff7a14f921f3412e42b2c8531f7c8bc9395b8e18d9f86c07b6b7963b9f",
+        "fold": 4,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "targets": 1
+          },
+          "proposed:new_absolute_envelope": {
+            "equal_newton_targets": 26,
+            "fewer_newton_targets": 10,
+            "more_newton_targets": 13,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 228,
+              "newton_iterations": 228
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 224,
+              "newton_iterations": 224
+            },
+            "targets": 49
+          },
+          "proposed:reversal": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 1,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 1,
+              "newton_iterations": 1
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "targets": 2
+          },
+          "proposed:within_absolute_envelope": {
+            "equal_newton_targets": 74,
+            "fewer_newton_targets": 22,
+            "more_newton_targets": 94,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 728,
+              "newton_iterations": 728
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 92,
+              "newton_iterations": 92
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 636,
+              "newton_iterations": 636
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-b",
+        "diagnostic_hash": "sha256:35e5182e7c3425fad40b1ab3fd18cf9a57a032238142b08241b388d98b43ebdf",
+        "fold": 5,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "targets": 1
+          },
+          "proposed:new_absolute_envelope": {
+            "equal_newton_targets": 26,
+            "fewer_newton_targets": 10,
+            "more_newton_targets": 13,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 228,
+              "newton_iterations": 228
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 224,
+              "newton_iterations": 224
+            },
+            "targets": 49
+          },
+          "proposed:reversal": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 1,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 1,
+              "newton_iterations": 1
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "targets": 2
+          },
+          "proposed:within_absolute_envelope": {
+            "equal_newton_targets": 74,
+            "fewer_newton_targets": 22,
+            "more_newton_targets": 94,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 728,
+              "newton_iterations": 728
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 92,
+              "newton_iterations": 92
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 636,
+              "newton_iterations": 636
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-c",
+        "diagnostic_hash": "sha256:548fdd928a2790333d8208ed78e86d0ab96b42dc4a0ba9020ab2bab7b653e552",
+        "fold": 6,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 58,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 58,
+              "linear_solves": 274,
+              "newton_iterations": 274
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 58,
+              "linear_solves": 274,
+              "newton_iterations": 274
+            },
+            "targets": 58
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 181,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 181,
+              "linear_solves": 705,
+              "newton_iterations": 705
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 181,
+              "linear_solves": 705,
+              "newton_iterations": 705
+            },
+            "targets": 181
+          }
+        }
+      },
+      {
+        "case_id": "train-c",
+        "diagnostic_hash": "sha256:13685dfeae8a88df372b78f9edbadbb925aa34406d154b5b3fd103494acec66f",
+        "fold": 7,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 58,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 58,
+              "linear_solves": 274,
+              "newton_iterations": 274
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 58,
+              "linear_solves": 274,
+              "newton_iterations": 274
+            },
+            "targets": 58
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 181,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 181,
+              "linear_solves": 705,
+              "newton_iterations": 705
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 181,
+              "linear_solves": 705,
+              "newton_iterations": 705
+            },
+            "targets": 181
+          }
+        }
+      },
+      {
+        "case_id": "train-c",
+        "diagnostic_hash": "sha256:1cd5246033ef70f5dd66c3a81c8977f14464ed413847c4098ef3519689c2480e",
+        "fold": 8,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 58,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 58,
+              "linear_solves": 274,
+              "newton_iterations": 274
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 58,
+              "linear_solves": 274,
+              "newton_iterations": 274
+            },
+            "targets": 58
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 181,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 181,
+              "linear_solves": 705,
+              "newton_iterations": 705
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 181,
+              "linear_solves": 705,
+              "newton_iterations": 705
+            },
+            "targets": 181
+          }
+        }
+      },
+      {
+        "case_id": "train-d",
+        "diagnostic_hash": "sha256:3cf1276ba32e3351975e7ad5b62781b60d4e3246cbef7b1ce7cafd0649561e89",
+        "fold": 9,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 49,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 221,
+              "newton_iterations": 221
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 221,
+              "newton_iterations": 221
+            },
+            "targets": 49
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 190,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 620,
+              "newton_iterations": 620
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 620,
+              "newton_iterations": 620
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-d",
+        "diagnostic_hash": "sha256:03dbbe6e3e3d93190cc2acdbdca9739f6c7d7275d0452f8cced5ea043a5b48e2",
+        "fold": 10,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 49,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 221,
+              "newton_iterations": 221
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 221,
+              "newton_iterations": 221
+            },
+            "targets": 49
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 190,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 620,
+              "newton_iterations": 620
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 620,
+              "newton_iterations": 620
+            },
+            "targets": 190
+          }
+        }
+      },
+      {
+        "case_id": "train-d",
+        "diagnostic_hash": "sha256:f22af5927c87ffb10dd1323fad85f7387780940e52951490e15510448568545e",
+        "fold": 11,
+        "groups": {
+          "abstained_to_reference:initial": {
+            "equal_newton_targets": 1,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "targets": 1
+          },
+          "abstained_to_secant:new_absolute_envelope": {
+            "equal_newton_targets": 49,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 49,
+              "linear_solves": 221,
+              "newton_iterations": 221
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 49,
+              "linear_solves": 221,
+              "newton_iterations": 221
+            },
+            "targets": 49
+          },
+          "abstained_to_secant:reversal": {
+            "equal_newton_targets": 2,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 2,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "targets": 2
+          },
+          "abstained_to_secant:within_absolute_envelope": {
+            "equal_newton_targets": 190,
+            "fewer_newton_targets": 0,
+            "more_newton_targets": 0,
+            "proposal": {
+              "core_calls": 190,
+              "linear_solves": 620,
+              "newton_iterations": 620
+            },
+            "proposal_minus_secant": {
+              "core_calls": 0,
+              "linear_solves": 0,
+              "newton_iterations": 0
+            },
+            "secant": {
+              "core_calls": 190,
+              "linear_solves": 620,
+              "newton_iterations": 620
+            },
+            "targets": 190
+          }
+        }
+      }
+    ],
+    "groups": {
+      "train-a:abstained_to_reference:initial": {
+        "delta_newton": 0,
+        "equal_newton_targets": 3,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 12,
+        "secant_newton": 12,
+        "targets": 3
+      },
+      "train-a:abstained_to_secant:new_absolute_envelope": {
+        "delta_newton": 0,
+        "equal_newton_targets": 147,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 714,
+        "secant_newton": 714,
+        "targets": 147
+      },
+      "train-a:abstained_to_secant:reversal": {
+        "delta_newton": 0,
+        "equal_newton_targets": 6,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 27,
+        "secant_newton": 27,
+        "targets": 6
+      },
+      "train-a:abstained_to_secant:within_absolute_envelope": {
+        "delta_newton": 0,
+        "equal_newton_targets": 570,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 2154,
+        "secant_newton": 2154,
+        "targets": 570
+      },
+      "train-b:abstained_to_reference:initial": {
+        "delta_newton": 0,
+        "equal_newton_targets": 3,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 9,
+        "secant_newton": 9,
+        "targets": 3
+      },
+      "train-b:proposed:new_absolute_envelope": {
+        "delta_newton": 12,
+        "equal_newton_targets": 78,
+        "fewer_newton_targets": 30,
+        "more_newton_targets": 39,
+        "proposal_newton": 684,
+        "secant_newton": 672,
+        "targets": 147
+      },
+      "train-b:proposed:reversal": {
+        "delta_newton": 3,
+        "equal_newton_targets": 3,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 3,
+        "proposal_newton": 24,
+        "secant_newton": 21,
+        "targets": 6
+      },
+      "train-b:proposed:within_absolute_envelope": {
+        "delta_newton": 276,
+        "equal_newton_targets": 222,
+        "fewer_newton_targets": 66,
+        "more_newton_targets": 282,
+        "proposal_newton": 2184,
+        "secant_newton": 1908,
+        "targets": 570
+      },
+      "train-c:abstained_to_reference:initial": {
+        "delta_newton": 0,
+        "equal_newton_targets": 3,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 9,
+        "secant_newton": 9,
+        "targets": 3
+      },
+      "train-c:abstained_to_secant:new_absolute_envelope": {
+        "delta_newton": 0,
+        "equal_newton_targets": 174,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 822,
+        "secant_newton": 822,
+        "targets": 174
+      },
+      "train-c:abstained_to_secant:reversal": {
+        "delta_newton": 0,
+        "equal_newton_targets": 6,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 24,
+        "secant_newton": 24,
+        "targets": 6
+      },
+      "train-c:abstained_to_secant:within_absolute_envelope": {
+        "delta_newton": 0,
+        "equal_newton_targets": 543,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 2115,
+        "secant_newton": 2115,
+        "targets": 543
+      },
+      "train-d:abstained_to_reference:initial": {
+        "delta_newton": 0,
+        "equal_newton_targets": 3,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 12,
+        "secant_newton": 12,
+        "targets": 3
+      },
+      "train-d:abstained_to_secant:new_absolute_envelope": {
+        "delta_newton": 0,
+        "equal_newton_targets": 147,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 663,
+        "secant_newton": 663,
+        "targets": 147
+      },
+      "train-d:abstained_to_secant:reversal": {
+        "delta_newton": 0,
+        "equal_newton_targets": 6,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 21,
+        "secant_newton": 21,
+        "targets": 6
+      },
+      "train-d:abstained_to_secant:within_absolute_envelope": {
+        "delta_newton": 0,
+        "equal_newton_targets": 570,
+        "fewer_newton_targets": 0,
+        "more_newton_targets": 0,
+        "proposal_newton": 1860,
+        "secant_newton": 1860,
+        "targets": 570
+      }
+    },
+    "independent_generalization": false,
+    "independent_physical_validation": false,
+    "input_files": [
+      {
+        "bytes": 233206,
+        "path": "study/result.json",
+        "sha256": "9afd698ae50449dfdb4c034096a93721aa46664e4bca6874644f45118383c14e"
+      },
+      {
+        "bytes": 1485393,
+        "path": "study/fold-0000/comparison.json",
+        "sha256": "282a37f1d3bf771cf8e7160ff3a93489cb96344c4a6d2cf1a2eac876275a13ec"
+      },
+      {
+        "bytes": 21603,
+        "path": "study/fold-0000-decisions.json",
+        "sha256": "8c0b9bdae6f29caefeca6b44f6d23dc269a32652ec087a44a38247db23d8f05f"
+      },
+      {
+        "bytes": 1485393,
+        "path": "study/fold-0001/comparison.json",
+        "sha256": "fddf24263c9517d37f7e201575c7af1caf4c25b7065a5635f8898ce9b0cae099"
+      },
+      {
+        "bytes": 21603,
+        "path": "study/fold-0001-decisions.json",
+        "sha256": "8c0b9bdae6f29caefeca6b44f6d23dc269a32652ec087a44a38247db23d8f05f"
+      },
+      {
+        "bytes": 1485401,
+        "path": "study/fold-0002/comparison.json",
+        "sha256": "09a3b7787e0b654bbd5d0f22332fef561ad436433f847a1c462435c994b7fde9"
+      },
+      {
+        "bytes": 21603,
+        "path": "study/fold-0002-decisions.json",
+        "sha256": "8c0b9bdae6f29caefeca6b44f6d23dc269a32652ec087a44a38247db23d8f05f"
+      },
+      {
+        "bytes": 1448470,
+        "path": "study/fold-0003/comparison.json",
+        "sha256": "2b2c0238f694c3ca76486116237ad53b03e2992ecb0f5d7f888853f4c31705d3"
+      },
+      {
+        "bytes": 18952,
+        "path": "study/fold-0003-decisions.json",
+        "sha256": "bc535927d1327b52632091cc3967c355c127222fdbfeaf4c0b7cee119d6a73f6"
+      },
+      {
+        "bytes": 1448466,
+        "path": "study/fold-0004/comparison.json",
+        "sha256": "82f79a16419a1e37f4b65badaa88ca84dbbd0b91aed6007a52a8d26d412358b7"
+      },
+      {
+        "bytes": 18952,
+        "path": "study/fold-0004-decisions.json",
+        "sha256": "bc535927d1327b52632091cc3967c355c127222fdbfeaf4c0b7cee119d6a73f6"
+      },
+      {
+        "bytes": 1448474,
+        "path": "study/fold-0005/comparison.json",
+        "sha256": "bb7ad1a16d3454fa5b56940aee656c9eccc1a658afa927194e993b5ed3155fe3"
+      },
+      {
+        "bytes": 18952,
+        "path": "study/fold-0005-decisions.json",
+        "sha256": "bc535927d1327b52632091cc3967c355c127222fdbfeaf4c0b7cee119d6a73f6"
+      },
+      {
+        "bytes": 1511323,
+        "path": "study/fold-0006/comparison.json",
+        "sha256": "1ffbb2c23058596f958c5d76b666079bb1617238d1e72f92c1ad883474ef143b"
+      },
+      {
+        "bytes": 21685,
+        "path": "study/fold-0006-decisions.json",
+        "sha256": "ce2eb6259d5011197d51426811bbd9e1f26f8bc33dccb944a4ba02a165e8d1bc"
+      },
+      {
+        "bytes": 1511315,
+        "path": "study/fold-0007/comparison.json",
+        "sha256": "b922cb866e1c7b9abe25d7c159dc31f4aa6032cc1ca05aabf9966433921cd93a"
+      },
+      {
+        "bytes": 21685,
+        "path": "study/fold-0007-decisions.json",
+        "sha256": "ce2eb6259d5011197d51426811bbd9e1f26f8bc33dccb944a4ba02a165e8d1bc"
+      },
+      {
+        "bytes": 1511325,
+        "path": "study/fold-0008/comparison.json",
+        "sha256": "0eaf1943137004c129a53cbfa1e7f9ca2ae7a8c02f3099d88d3f99da60ed4037"
+      },
+      {
+        "bytes": 21685,
+        "path": "study/fold-0008-decisions.json",
+        "sha256": "ce2eb6259d5011197d51426811bbd9e1f26f8bc33dccb944a4ba02a165e8d1bc"
+      },
+      {
+        "bytes": 1417481,
+        "path": "study/fold-0009/comparison.json",
+        "sha256": "d5d3e63c957a058963e6aee178127359bae97efde5a3bd11c167ec2617f3f758"
+      },
+      {
+        "bytes": 21897,
+        "path": "study/fold-0009-decisions.json",
+        "sha256": "d68f5b7e4c76feef3ef3bdf92b7183063f63dfbf91d83b0a81894ea4a7de88d7"
+      },
+      {
+        "bytes": 1417477,
+        "path": "study/fold-0010/comparison.json",
+        "sha256": "a22ceb48c9a4e4c58fe3aa92c9a4f7910405ab9708da37438ac1b071652eb9a0"
+      },
+      {
+        "bytes": 21897,
+        "path": "study/fold-0010-decisions.json",
+        "sha256": "d68f5b7e4c76feef3ef3bdf92b7183063f63dfbf91d83b0a81894ea4a7de88d7"
+      },
+      {
+        "bytes": 1417477,
+        "path": "study/fold-0011/comparison.json",
+        "sha256": "2a53b955570d1cccff794b2e3e1a2ba69ffe49d8d36242907e64d865e27998f6"
+      },
+      {
+        "bytes": 21897,
+        "path": "study/fold-0011-decisions.json",
+        "sha256": "d68f5b7e4c76feef3ef3bdf92b7183063f63dfbf91d83b0a81894ea4a7de88d7"
+      }
+    ],
+    "net_savings_proved": false,
+    "new_fits": 0,
+    "new_solver_calls": 0,
+    "original_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-learned-runtime-5ixhrw6z",
+    "original_source_revision": "9374eb140725a67edfd7cca3c04a4febe3f3fbeb",
+    "prospective_policy_validated": false,
+    "repeats_per_case": 3,
+    "same_parent_causal_comparison": false,
+    "same_parent_hash_rows": 2184,
+    "source_revision": "eaadd228969b41bcb0fecfe32f6be4414ff93b6f",
+    "timing_speedup_claim": false
+  },
+  "packet": {
+    "bytes": 1100709,
+    "files": 14,
+    "inventory_sha256": "e7bc0400593e4584f414eed50d24caa5759835abf5f9c740679db6e926ccd49a",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-target-work-u51q0u7h"
+  }
+}
