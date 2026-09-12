@@ -13,6 +13,7 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from functools import lru_cache
 import hashlib
+import json
 import math
 import struct
 from typing import Any, Iterable, Literal
@@ -303,18 +304,35 @@ class StatefulRCFiberSection:
 
     def _base_contract_hash(self) -> str:
         """Base section identity, available without accessing a property descriptor."""
-        return canonical_hash(
-            {
-                "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
-                "section_id": self.section_id,
-                "strain_relation": FIBER_SECTION_STRAIN_RELATION,
-                "resultant_definition": FIBER_SECTION_RESULTANT_DEFINITION,
-                "tangent_definition": FIBER_SECTION_TANGENT_DEFINITION,
-                "fibers": [fiber.to_dict() for fiber in self.fibers],
-                "steel": asdict(self.steel),
-                "concrete": asdict(self.concrete),
-            }
-        )
+        payload = {
+            "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
+            "section_id": self.section_id,
+            "strain_relation": FIBER_SECTION_STRAIN_RELATION,
+            "resultant_definition": FIBER_SECTION_RESULTANT_DEFINITION,
+            "tangent_definition": FIBER_SECTION_TANGENT_DEFINITION,
+            "fibers": [fiber.to_dict() for fiber in self.fibers],
+            "steel": asdict(self.steel),
+            "concrete": asdict(self.concrete),
+        }
+        # Key by freshly captured content, never by section_id or object identity.
+        # State validation still observes replaced or even forcibly mutated inputs.
+        rows = [*payload["fibers"], payload["steel"], payload["concrete"]]
+        if any(
+            type(row) is not dict
+            or any(
+                type(key) is not str
+                or type(value) not in (str, int, float, bool, type(None))
+                for key, value in row.items()
+            )
+            for row in rows
+        ):
+            return canonical_hash(payload)
+        try:
+            encoded = json.dumps(payload, allow_nan=False, separators=(",", ":"))
+        except (TypeError, ValueError):
+            # Keep the canonical encoder's supported types and error semantics.
+            return canonical_hash(payload)
+        return _section_contract_hash_from_json(encoded)
 
     def initial_state(self) -> StatefulFiberSectionState:
         return StatefulFiberSectionState(
@@ -524,6 +542,12 @@ class StatefulRCFiberSection:
             dissipated_energy_mj_per_m=self.dissipated_energy_mj_per_m(next_state),
             state=next_state,
         )
+
+
+@lru_cache(maxsize=128)
+def _section_contract_hash_from_json(encoded: str) -> str:
+    """Reuse canonicalization for an identical, immutable content snapshot."""
+    return canonical_hash(json.loads(encoded))
 
 
 def make_rectangular_stateful_rc_fiber_section(
