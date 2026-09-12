@@ -132,3 +132,37 @@ console.log(JSON.stringify(results));
         {"dcr": 1.2, "combination": "B"},
         {"dcr": 1.4, "combination": "B"},
     ]
+
+
+def test_companion_hydration_reads_canonical_metadata_without_root_case_context() -> None:
+    payload = _run(
+        f"""
+import fs from 'node:fs';
+import * as hydrator from {json.dumps(str(HYDRATOR))};
+const html = fs.readFileSync('src/structure-viewer/index.html', 'utf8');
+const start = html.indexOf('async function hydrateModelDataFromCodecheckCompanion(');
+const end = html.indexOf('async function applyFullCodecheckHydration(', start);
+if (start < 0 || end < start) throw Error('companion function missing');
+const original = JSON.parse(fs.readFileSync({json.dumps(str(BASELINE_JSON))}, 'utf8'));
+if (original.case_context) throw Error('expected canonical metadata-only original');
+const results = [];
+for (const allCombinations of [false, true]) {{
+  const expected = allCombinations
+    ? hydrator.buildElementDcrMapAllCombinations(original.model.metadata, original)
+    : hydrator.buildElementDcrMapFromModelMeta(original.model.metadata, original, {{combination: 'KDS_ULS_1'}});
+  const globals = {{...hydrator, normalizeSelectionValue: x => String(x ?? '').trim(),
+    getActiveCodecheckCombinationName: () => 'KDS_ULS_1',
+    tryFetchArtifact: async () => ({{payload: original}}), console}};
+  const run = new Function(...Object.keys(globals), html.slice(start, end) + ';return hydrateModelDataFromCodecheckCompanion;')(...Object.values(globals));
+  const model = {{elements: [...expected.keys()].map(id => ({{id}})), meta: {{}}}};
+  const summary = await run(model, 'canonical-original.json', 'KDS_ULS_1', {{rootPayload: null, allCombinations}});
+  results.push({{expected: expected.size, hydrated: summary.hydrated_count,
+    exact: model.elements.every(e => e.dcr === expected.get(e.id).dcr && e.codecheck_combination === expected.get(e.id).combination)}});
+}}
+console.log(JSON.stringify(results));
+"""
+    )
+    for row in payload:
+        assert row["expected"] >= 200
+        assert row["hydrated"] == row["expected"]
+        assert row["exact"]

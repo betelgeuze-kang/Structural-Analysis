@@ -5189,9 +5189,10 @@ async function hydrateModelDataFromCodecheckCompanion(modelData=null,companionPa
   const combo=normalizeSelectionValue(combination)||getActiveCodecheckCombinationName();
   try{
     const result=await tryFetchArtifact(companionPath);
+    const companionMeta=result?.payload?.model?.metadata||{};
     const companionMap=allCombinations
-      ?buildElementDcrMapAllCombinations({},result?.payload)
-      :buildElementDcrMapFromModelMeta({},result?.payload,{combination:combo});
+      ?buildElementDcrMapAllCombinations(companionMeta,result?.payload)
+      :buildElementDcrMapFromModelMeta(companionMeta,result?.payload,{combination:combo});
     const localMap=allCombinations
       ?buildElementDcrMapAllCombinations(modelData?.meta||{},rootPayload)
       :buildElementDcrMapFromModelMeta(modelData?.meta||{},rootPayload,{combination:combo});
