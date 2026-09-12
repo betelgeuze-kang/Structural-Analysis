@@ -1,0 +1,92 @@
+# Count actual Newton assembly dispatches during RC path comparisons
+
+The [same-parent iteration diagnostic](rc-parent-iteration-cost-20260910.md)
+showed why fewer inclusive convergence rows need not mean less work. Its old
+records cannot establish total assembly calls. New comparisons can now record
+actual vector-Newton assembly dispatches, including rejected and raised trials.
+Historical records are not backfilled with inferred counts.
+
+## Implementation and scope
+
+`VectorAssemblyWorkRecorder` is an optional caller-owned sidecar for
+`newton_raphson_vector`. It records ordered calls in six phases: primary
+iteration, line search, terminal refinement, final observation, blocked
+observation and the no-free-equations observation. Normal and compensated
+coordinate dispatches are distinguished. An exception remains a spent call and
+the original exception propagates through the existing solver handling.
+
+The recorder forwards the original coordinate objects exactly once. It does not
+alter residuals, tangents, corrections, tolerances, accepted states or numerical
+result fields. A detached snapshot contains calls, returns, exceptions and any
+in-flight call; a returned assembly is not a convergence claim. One adapter
+dispatch may contain many element/material evaluations, which remain uncounted.
+
+`benchmark_rc_control_seed_paths(..., record_assembly_work=True)` passes a fresh
+recorder into every numerical invocation in every arm, including the fresh
+reference and constant-load preload. Its declared request includes the recording
+profile, and invocation outcomes retain `newton_assembly_work` alongside the
+unchanged core/iteration/linear-solve accounting. Default recording is false.
+An invalid non-boolean flag is rejected before output creation. A failed
+numerical invocation retains its partial dispatch counts and the existing
+unknown-work/failure state; known assembly calls do not make missing Newton work
+known or qualify an incomplete path.
+
+**This is not total application assembly work or assembly timing.** Adapter
+terminal observations outside Newton, checkpoint recovery, separate verification,
+material integrations and storage are outside this counter. The sidecar leaves
+outside-Newton counts, material evaluation counts and time null. Existing whole
+path elapsed time still includes the opted-in instrumentation and serialization;
+the counters do not establish a performance improvement. The same-parent mode
+remains a single-target comparison, even when recording is enabled.
+
+## Verification
+
+Focused tests exercise dense/sparse backtracking, accepted/rejected/raised
+compensated terminal refinements, singular tangent, exhausted iteration budget,
+unsupported backend, failed line search, empty-equation observations and escaped
+exceptions. Actual adapter call observations are checked independently against
+the recorder. Returned snapshots cannot mutate the caller's recorded rows.
+
+Real RC fixtures compare recording off/on for binary64 and retained-coordinate
+arithmetic, both with and without a constant-load preload. All four arms execute
+three lateral targets with a reversal. Each numerical step file must be byte
+identical across off/on runs, including its native parent, accepted state and
+step hash. The four fixture combinations cover 56 paired step records (112
+numerical invocations across both variants), not 56 independent structures.
+Additional focused direct-step checks preserve parent bytes and step hashes.
+These are local authored fixtures, not external experimental validation.
+
+The recorded half of those paired runs contains 276 Newton assembly dispatches:
+96 primary, 40 line-search, 84 terminal-refinement and 56 final-observation calls.
+Its inclusive convergence counter is 164. This demonstrates why those counters
+cannot be substituted for each other; it does not compare learned speed against
+secant. The proposer in these fixtures is the deterministic secant callback.
+
+The first resumed test failed because its file glob included four separate
+preload-recovery outcomes as Newton invocations. The test now maps each numerical
+step to its own outcome explicitly, retaining the recovery boundary. No solver
+or comparison tolerance was changed to address that failure.
+
+The independent development CI lane now includes both complete new test modules
+(22 modules in total). The required full-suite preparation and aggregate gates
+are unchanged. The machine summary records the final local command/result,
+source hashes, fixture counts and separately inspected hosted results.
+
+The final local run passes **303 tests in 117.96 seconds**, covering 14 complete
+focused modules. Ruff, six-source scoped mypy and diff checks pass. The
+[machine summary](rc-newton-assembly-work-20260912.summary.json) binds the source
+snapshot and separate retained fixture records; the full repository suite was
+not run locally.
+
+## Hosted integration boundary
+
+The completed [9b21d748d run](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34452206521)
+predates this implementation. Its original development JUnit artifact was
+downloaded and its published SHA-256 checked. Full repository shards remain
+blocked before their test steps; all **448 development tests** passed. This hosted
+result does not include the new assembly recorder. Development-lane success is
+not a full-suite
+pass. The earlier inspected c1470918 shard log explicitly names
+`external_code_to_code_product_replay_not_passed` and
+`external_code_to_code_technical_receipt_not_ready`. Those external requirements
+are not weakened by this change.

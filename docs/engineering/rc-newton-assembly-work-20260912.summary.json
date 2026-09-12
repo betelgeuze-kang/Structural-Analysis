@@ -1,0 +1,239 @@
+{
+  "base_commit": "9b21d748d4273b6850d99220a48907f6300fd98a",
+  "source_state": "base commit plus retained source files; not a clean-base test claim",
+  "source_files": [
+    {
+      "path": ".github/workflows/python-test-collection.yml",
+      "bytes": 8022,
+      "sha256": "8d9fc29e26d7790f35a2581e7d649ca6fa0050319111920cdc7db1a9ac589a89"
+    },
+    {
+      "path": "src/structural_analysis/assembly/stateful_fiber_frame2d_control_path.py",
+      "bytes": 38840,
+      "sha256": "e5f12522ebce21b1ae5dbfa25d4b961b08ff244a48ce5efa87ca6288a62b38b4"
+    },
+    {
+      "path": "src/structural_analysis/assembly/stateful_fiber_frame2d_displacement_control.py",
+      "bytes": 28389,
+      "sha256": "91f06a5f3112a54397ca3ae3ce28c5c5bce508ea51bbdda8a5176862cb0e08c0"
+    },
+    {
+      "path": "src/structural_analysis/assembly/stateful_fiber_frame2d_solver.py",
+      "bytes": 33890,
+      "sha256": "d94275c2ce2e9f296d95d2e2c7c597932434d288e302faae480d0b75ee6a3882"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_seed_runtime.py",
+      "bytes": 54369,
+      "sha256": "4b5af48ee69c0e234e8fb9ef249577fd4244c20e816f154724931c332db9a744"
+    },
+    {
+      "path": "src/structural_analysis/solvers/nonlinear/newton.py",
+      "bytes": 67966,
+      "sha256": "b225d34520c8547624e51cea8802c88ae859b2c15677130f154f5898490e6a17"
+    },
+    {
+      "path": "tests/test_repository_python_workflow_contract.py",
+      "bytes": 41255,
+      "sha256": "460395a2cea442e6db36afa2ca306e2aa04791bbaf3b285e6c75c5fb086281bf"
+    },
+    {
+      "path": "src/structural_analysis/solvers/nonlinear/assembly_work.py",
+      "bytes": 2760,
+      "sha256": "6a0d43709eafb657a3a2fee1528c1135986d99efde70ff15ec0033411f1d9565"
+    },
+    {
+      "path": "tests/test_newton_assembly_work.py",
+      "bytes": 10893,
+      "sha256": "9d512fbf7c24ac2df20d1aadeb87cb876c96a18fd9b309519b3bf54c03320e29"
+    },
+    {
+      "path": "tests/test_rc_control_assembly_work.py",
+      "bytes": 5310,
+      "sha256": "b7cf4dfab72d557f5fb8f26c7b8d037500fe4418b7950eb792c1089ec575296b"
+    }
+  ],
+  "local_tests": {
+    "passed": 303,
+    "pytest_seconds": 117.96,
+    "scope": "14 complete focused modules",
+    "full_repository": false,
+    "modules": [
+      "test_rc_control_assembly_work",
+      "test_newton_assembly_work",
+      "test_newton_terminal_polishing",
+      "test_rc_terminal_twofold",
+      "test_rc_control_warm_start",
+      "test_rc_control_parent_step",
+      "test_nonlinear_fully_constrained_no_solve",
+      "test_nonlinear_line_search_acceptance",
+      "test_sparse_factorization_diagnostics",
+      "test_extended_sparse_newton",
+      "test_repository_python_workflow_contract",
+      "test_stateful_fiber_frame2d_constant_loads",
+      "test_stateful_fiber_frame2d_control_path",
+      "test_fiber_frame_runtime_benchmark"
+    ],
+    "environment": {
+      "PYTHONPATH": "src",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    }
+  },
+  "fixtures": [
+    {
+      "fixture": "test_all_arms_and_preload_keep0",
+      "paired_step_records": 12,
+      "recorded_newton_assembly_calls": 52,
+      "phase_counts": {
+        "primary_iteration": 20,
+        "terminal_refinement": 12,
+        "final_observation": 12,
+        "line_search": 8
+      },
+      "recorded_inclusive_iterations": 30
+    },
+    {
+      "fixture": "test_all_arms_and_preload_keep1",
+      "paired_step_records": 16,
+      "recorded_newton_assembly_calls": 72,
+      "phase_counts": {
+        "primary_iteration": 28,
+        "line_search": 12,
+        "terminal_refinement": 16,
+        "final_observation": 16
+      },
+      "recorded_inclusive_iterations": 34
+    },
+    {
+      "fixture": "test_all_arms_and_preload_keep2",
+      "paired_step_records": 12,
+      "recorded_newton_assembly_calls": 64,
+      "phase_counts": {
+        "primary_iteration": 20,
+        "terminal_refinement": 24,
+        "final_observation": 12,
+        "line_search": 8
+      },
+      "recorded_inclusive_iterations": 42
+    },
+    {
+      "fixture": "test_all_arms_and_preload_keep3",
+      "paired_step_records": 16,
+      "recorded_newton_assembly_calls": 88,
+      "phase_counts": {
+        "primary_iteration": 28,
+        "line_search": 12,
+        "terminal_refinement": 32,
+        "final_observation": 16
+      },
+      "recorded_inclusive_iterations": 58
+    }
+  ],
+  "paired_step_records": 56,
+  "fixture_numerical_invocations": 112,
+  "training_fits": 0,
+  "performance_improvement_claimed": false,
+  "independent_physical_validation": false,
+  "hosted": {
+    "run_id": 34452206521,
+    "head": "9b21d748d4273b6850d99220a48907f6300fd98a",
+    "passed": 448,
+    "module_counts": {
+      "tests.test_rc_control_warm_start": 29,
+      "tests.test_rc_control_learning": 37,
+      "tests.test_rc_control_learning_split": 18,
+      "tests.test_rc_control_history_features": 11,
+      "tests.test_rc_control_svd_fit": 6,
+      "tests.test_rc_control_model_selection": 11,
+      "tests.test_rc_control_training_diagnostics": 8,
+      "tests.test_rc_control_runtime_selection": 53,
+      "tests.test_rc_control_step_work": 21,
+      "tests.test_rc_control_iteration_cost": 18,
+      "tests.test_rc_control_parent_step": 22,
+      "tests.test_measured_response_workbook": 18,
+      "tests.test_measured_response_split": 27,
+      "tests.test_rc_control_design": 20,
+      "tests.test_rc_control_candidate_search": 46,
+      "tests.test_rc_control_candidate_cost": 23,
+      "tests.test_rc_search_http": 34,
+      "tests.test_rc_seed_original_audit": 5,
+      "tests.test_pinned_opensees_runtime": 27,
+      "tests.test_local_source_reference_comparison": 14
+    },
+    "tested_merge": "712a71f5e6aea3f2ae6d998a0a3c877b884e5c00",
+    "artifact_sha256": "sha256:e667c50ab9efb6adf9a0bbf74f152c08e7c5cb05f4795d4f935d6c0265594c63",
+    "shards": [
+      {
+        "job_id": 102790275088,
+        "name": "pytest-full-shard-3",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Materialize exact current-source test evidence",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "conclusion": "skipped"
+          }
+        ]
+      },
+      {
+        "job_id": 102790275279,
+        "name": "pytest-full-shard-2",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Materialize exact current-source test evidence",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "conclusion": "skipped"
+          }
+        ]
+      },
+      {
+        "job_id": 102790275339,
+        "name": "pytest-full-shard-0",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Materialize exact current-source test evidence",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "conclusion": "skipped"
+          }
+        ]
+      },
+      {
+        "job_id": 102790275508,
+        "name": "pytest-full-shard-1",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Materialize exact current-source test evidence",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "conclusion": "skipped"
+          }
+        ]
+      }
+    ],
+    "full_repository_pass": false,
+    "new_assembly_recorder_included": false
+  },
+  "seal": {
+    "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-assembly-work-mcnr_s2_",
+    "file_count": 763,
+    "bytes": 36917996,
+    "inventory_sha256": "2a300519be2882303a2fdb0bfeed7ea002be03fd58b030a501d3aded0f1447ba",
+    "all_files_reread": true,
+    "sealed_unix_ns": 1789206986957841054
+  }
+}

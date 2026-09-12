@@ -24,6 +24,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_state import (
 )
 from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
 from structural_analysis.solvers.nonlinear.newton import (
+    VectorAssemblyWorkRecorder,
     NO_SOLVE_REACTION_ONLY_DISPOSITION,
     RESIDUAL_FORMULA,
     RESIDUAL_FORMULA_HASH,
@@ -470,15 +471,21 @@ def _solve_newton(
     config: NewtonRaphsonConfig,
     *,
     runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
     if runtime_recorder is None:
-        return newton_raphson_vector(adapter, config=config)
+        return newton_raphson_vector(
+            adapter, config=config, assembly_work=assembly_work
+        )
 
     started_ns = runtime_recorder.newton._begin_run()
     raised = False
     try:
         return newton_raphson_vector(
-            adapter, config=config, increment_runtime=runtime_recorder.newton.increment
+            adapter,
+            config=config,
+            increment_runtime=runtime_recorder.newton.increment,
+            assembly_work=assembly_work,
         )
     except BaseException:
         raised = True
@@ -495,6 +502,7 @@ def solve_stateful_fiber_frame2d_load_step(
     config: NewtonRaphsonConfig | None = None,
     initial_free_coordinates_m: Sequence[float] | np.ndarray | None = None,
     runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None = None,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> StatefulFiberFrame2DLoadStepResult:
     """Solve one load target and atomically commit or exactly roll back.
 
@@ -519,6 +527,7 @@ def solve_stateful_fiber_frame2d_load_step(
             config=config,
             initial_free_coordinates_m=initial_free_coordinates_m,
             runtime_recorder=None,
+            assembly_work=assembly_work,
         )
 
     started_ns = runtime_recorder._begin_run()
@@ -531,6 +540,7 @@ def solve_stateful_fiber_frame2d_load_step(
             config=config,
             initial_free_coordinates_m=initial_free_coordinates_m,
             runtime_recorder=runtime_recorder,
+            assembly_work=assembly_work,
         )
     except BaseException:
         raised = True
@@ -544,6 +554,7 @@ def solve_stateful_fiber_frame2d_constant_load_preload(
     *,
     config: NewtonRaphsonConfig | None = None,
     runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None = None,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> StatefulFiberFrame2DLoadStepResult:
     """Apply the declared constant pattern to a virgin state with lambda zero.
 
@@ -562,6 +573,7 @@ def solve_stateful_fiber_frame2d_constant_load_preload(
         target_load_factor=0.0,
         config=config,
         runtime_recorder=runtime_recorder,
+        assembly_work=assembly_work,
     )
 
 
@@ -573,6 +585,7 @@ def _solve_stateful_fiber_frame2d_load_step(
     config: NewtonRaphsonConfig | None,
     initial_free_coordinates_m: Sequence[float] | np.ndarray | None,
     runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> StatefulFiberFrame2DLoadStepResult:
     validate_stateful_fiber_frame2d_checkpoint(problem, accepted_checkpoint)
     parent_bytes = accepted_checkpoint.canonical_bytes()
@@ -595,6 +608,7 @@ def _solve_stateful_fiber_frame2d_load_step(
         adapter,
         cfg,
         runtime_recorder=runtime_recorder,
+        assembly_work=assembly_work,
     )
     absolute_high, absolute_low = adapter.absolute_coordinates(
         solution.free_displacements_m, solution.free_displacement_compensation_m

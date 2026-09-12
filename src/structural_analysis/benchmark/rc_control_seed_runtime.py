@@ -46,6 +46,9 @@ from structural_analysis.benchmark.fiber_frame_runtime import (
 )
 from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.solvers.nonlinear.assembly_work import (
+    VectorAssemblyWorkRecorder,
+)
 
 
 @dataclass(frozen=True)
@@ -204,7 +207,7 @@ def _recover_preload(compiled, step, request):
     return response, tuple(float(x) for x in coordinates) + (0.0,)
 
 
-def _preload(compiled, request, root):
+def _preload(compiled, request, root, record_assembly_work=False):
     """Retain the reservation, original outcome and recovery before any proposal."""
     inv = dict(
         ordinal=1,
@@ -217,8 +220,13 @@ def _preload(compiled, request, root):
     _save(root, "preload-started.json", _bytes(inv))
     wall, cpu = perf_counter_ns(), process_time_ns()
     step = attempt = response = coordinates = failure = None
+    assembly_work = VectorAssemblyWorkRecorder() if record_assembly_work else None
     try:
-        step, attempt = _execute_preload(compiled.problem, request.solver_config)
+        step, attempt = _execute_preload(
+            compiled.problem,
+            request.solver_config,
+            **({"assembly_work": assembly_work} if assembly_work is not None else {}),
+        )
         inv.update(status="returned", committed=True)
     except StatefulFiberFrame2DControlExecutionError as exc:
         detail = exc.to_dict()
@@ -232,6 +240,8 @@ def _preload(compiled, request, root):
             perf_counter_ns() - wall,
             process_time_ns() - cpu,
         )
+    if assembly_work is not None:
+        inv["newton_assembly_work"] = assembly_work.to_dict()
     if attempt is not None:
         metrics = attempt["solver_work"] or {}
         counts = [metrics.get("iteration_count"), metrics.get("linear_solve_count")]
@@ -275,6 +285,7 @@ def _path(
     capture_material_state=False,
     proposal_abstention_strategy="reference",
     initial_prefix=None,
+    record_assembly_work=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -289,7 +300,7 @@ def _path(
     failure = None
     if request.constant_nodal_loads and initial_prefix is None:
         preload_step, preload_response, preload_coordinates, invocation, failure = (
-            _preload(compiled, request, root)
+            _preload(compiled, request, root, record_assembly_work)
         )
         preload_invocations.append(invocation)
         if failure is None:
@@ -445,6 +456,9 @@ def _path(
             _save(root, stem + "-started.json", _bytes(inv))
             sw, sc = perf_counter_ns(), process_time_ns()
             step = None
+            assembly_work = (
+                VectorAssemblyWorkRecorder() if record_assembly_work else None
+            )
             try:
                 step = solve_stateful_fiber_frame2d_displacement_control_step(
                     compiled.problem,
@@ -453,6 +467,11 @@ def _path(
                     target_control_displacement_m=target,
                     config=request.solver_config,
                     initial_augmented_coordinates_m=current,
+                    **(
+                        {"assembly_work": assembly_work}
+                        if assembly_work is not None
+                        else {}
+                    ),
                 )
                 if (
                     accepted.canonical_bytes() != before
@@ -490,6 +509,8 @@ def _path(
                     perf_counter_ns() - sw,
                     process_time_ns() - sc,
                 )
+            if assembly_work is not None:
+                inv["newton_assembly_work"] = assembly_work.to_dict()
             _save(root, stem + "-outcome.json", _bytes(inv))
             if step is not None:
                 _save(root, stem + "-step.json", _bytes(step.to_dict()))
@@ -921,6 +942,7 @@ def benchmark_rc_control_seed_paths(
     proposal_abstention_strategy: str = "reference",
     parent_checkpoint_bytes: bytes | None = None,
     accepted_context: RCControlSeedContext | None = None,
+    record_assembly_work: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -929,6 +951,8 @@ def benchmark_rc_control_seed_paths(
     original prefix, and cannot provide complete-path performance credit.
     """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(record_assembly_work) is not bool:
+        raise ValueError("explicit boolean assembly recording required")
     if (parent_checkpoint_bytes is None) != (accepted_context is None):
         raise ValueError("native parent and accepted context must be supplied together")
     if type(
@@ -1195,6 +1219,8 @@ def benchmark_rc_control_seed_paths(
             original_complete_path_executed=False,
             maximum_numerical_core_calls=2 + 2 * (len(order) - 1),
         )
+    if record_assembly_work:
+        identity["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
     _save(root, "request.json", _bytes(identity))
     _save(root, "model.json", _bytes(model.canonical_payload()))
     origin_bytes = (
@@ -1212,6 +1238,7 @@ def benchmark_rc_control_seed_paths(
             and (material_capture_scope == "all-arms" or name == "proposal"),
             proposal_abstention_strategy,
             initial_prefix,
+            record_assembly_work,
         )
         if initial_prefix is not None:
             unknown = any(

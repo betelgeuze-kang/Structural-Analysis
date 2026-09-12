@@ -7,10 +7,15 @@ from dataclasses import dataclass, field
 import hashlib
 import math
 from time import perf_counter_ns
-from typing import Any, Protocol, cast
+from typing import Any, Protocol
 
 import numpy as np
 from scipy.sparse import csr_matrix, issparse
+
+from structural_analysis.solvers.nonlinear.assembly_work import (
+    VectorAssemblyWorkRecorder,
+    assemble_vector,
+)
 
 from structural_analysis.solvers.nonlinear.sparse_factorization import (
     SPARSE_FACTORIZATION_BACKEND,
@@ -418,6 +423,7 @@ def _terminal_polish_vector(
     relative_residual: float,
     correction: np.ndarray,
     solve_increment: Callable[..., tuple[np.ndarray, dict[str, Any] | None]],
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> dict[str, Any]:
     """Try one full correction; rejection cannot replace the converged state.
 
@@ -484,12 +490,13 @@ def _terminal_polish_vector(
                 return record
             record["assembly_call_count"] += 1
             try:
-                if compensation is None:
-                    candidate_residual, candidate_jacobian = problem.assemble(candidate)
-                else:
-                    candidate_residual, candidate_jacobian = cast(
-                        CompensatedVectorEquilibriumProblem, problem
-                    ).assemble_with_compensation(candidate, compensation)
+                candidate_residual, candidate_jacobian = assemble_vector(
+                    problem,
+                    candidate,
+                    compensation=compensation,
+                    phase="terminal_refinement",
+                    recorder=assembly_work,
+                )
             except BaseException:
                 record["assembly_exception_count"] += 1
                 raise
@@ -621,12 +628,18 @@ def _no_solve_reaction_only_vector_solution(
     cfg: NewtonRaphsonConfig,
     *,
     free_displacements_m: np.ndarray,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
     """Route F=0 to a reaction-only terminal state without Newton recurrence."""
     detail = "free_equation_space_empty"
     residual_kn = np.asarray([], dtype=float)
     try:
-        assembled_residual, assembled_jacobian = problem.assemble(free_displacements_m)
+        assembled_residual, assembled_jacobian = assemble_vector(
+            problem,
+            free_displacements_m,
+            phase="no_free_equations",
+            recorder=assembly_work,
+        )
         residual_kn = np.asarray(assembled_residual, dtype=float)
         if issparse(assembled_jacobian):
             # An empty sparse system needs shape/data checks, not a dense copy.
@@ -761,6 +774,7 @@ def _vector_line_search(
     newton_increment_m: np.ndarray,
     residual_before: np.ndarray,
     alphas: tuple[float, ...],
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> tuple[np.ndarray, float, list[dict[str, Any]]]:
     attempts: list[dict[str, Any]] = []
     best_alpha = 0.0
@@ -769,7 +783,9 @@ def _vector_line_search(
     residual_norm_before = float(np.linalg.norm(residual_before, ord=np.inf))
     for alpha in alphas:
         trial_displacement = free_displacements_m + alpha * newton_increment_m
-        trial_residual, _ = problem.assemble(trial_displacement)
+        trial_residual, _ = assemble_vector(
+            problem, trial_displacement, phase="line_search", recorder=assembly_work
+        )
         trial_norm = float(np.linalg.norm(trial_residual, ord=np.inf))
         accepted = trial_norm < residual_norm_before
         attempts.append(
@@ -799,6 +815,7 @@ def newton_raphson_vector(
     *,
     config: NewtonRaphsonConfig | None = None,
     increment_runtime: VectorIncrementRuntimeRecorder | None = None,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
     """Solve assembled R(u)=F_internal(u)-F_external with Newton and line search."""
     if (
@@ -806,6 +823,11 @@ def newton_raphson_vector(
         and type(increment_runtime) is not VectorIncrementRuntimeRecorder
     ):
         raise ValueError("increment_runtime must be VectorIncrementRuntimeRecorder")
+    if (
+        assembly_work is not None
+        and type(assembly_work) is not VectorAssemblyWorkRecorder
+    ):
+        raise ValueError("assembly_work must be VectorAssemblyWorkRecorder")
     cfg = config or NewtonRaphsonConfig()
     free_displacements_m = np.asarray(
         problem.initial_free_displacements_m(),
@@ -819,12 +841,14 @@ def newton_raphson_vector(
         return _no_solve_reaction_only_vector_solution(
             problem,
             cfg,
+            assembly_work=assembly_work,
             free_displacements_m=free_displacements_m,
         )
     if cfg.matrix_backend not in VECTOR_MATRIX_BACKENDS:
         return _blocked_vector_solution(
             problem,
             cfg,
+            assembly_work=assembly_work,
             free_displacements_m=free_displacements_m,
             history=[],
             line_search_history=[],
@@ -851,7 +875,12 @@ def newton_raphson_vector(
     free_compensation = None
 
     for iteration in range(cfg.max_iterations + 1):
-        residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
+        residual_kn, jacobian_kn_per_m = assemble_vector(
+            problem,
+            free_displacements_m,
+            phase="primary_iteration",
+            recorder=assembly_work,
+        )
         residual_kn = np.asarray(residual_kn, dtype=float)
         native_sparse_assembly_used = bool(
             native_sparse_assembly_used or issparse(jacobian_kn_per_m)
@@ -882,6 +911,7 @@ def newton_raphson_vector(
             return _blocked_vector_solution(
                 problem,
                 cfg,
+                assembly_work=assembly_work,
                 free_displacements_m=free_displacements_m,
                 history=history,
                 line_search_history=line_search_history,
@@ -927,6 +957,7 @@ def newton_raphson_vector(
                     attempt = _terminal_polish_vector(
                         problem,
                         cfg,
+                        assembly_work=assembly_work,
                         iteration=iteration + refinement_index,
                         coordinates=free_displacements_m,
                         coordinate_compensation=free_compensation,
@@ -1016,6 +1047,7 @@ def newton_raphson_vector(
             newton_increment_m=newton_increment_m,
             residual_before=residual_kn,
             alphas=cfg.line_search_alphas,
+            assembly_work=assembly_work,
         )
         increment_abs = float(
             np.linalg.norm(next_displacement_m - free_displacements_m, ord=np.inf)
@@ -1052,6 +1084,7 @@ def newton_raphson_vector(
             return _blocked_vector_solution(
                 problem,
                 cfg,
+                assembly_work=assembly_work,
                 free_displacements_m=free_displacements_m,
                 history=history,
                 line_search_history=line_search_history,
@@ -1065,6 +1098,7 @@ def newton_raphson_vector(
             return _blocked_vector_solution(
                 problem,
                 cfg,
+                assembly_work=assembly_work,
                 free_displacements_m=free_displacements_m,
                 history=history,
                 line_search_history=line_search_history,
@@ -1076,6 +1110,7 @@ def newton_raphson_vector(
         return _blocked_vector_solution(
             problem,
             cfg,
+            assembly_work=assembly_work,
             free_displacements_m=free_displacements_m,
             history=history,
             line_search_history=line_search_history,
@@ -1084,12 +1119,13 @@ def newton_raphson_vector(
             linear_solve_count=linear_solve_count,
         )
 
-    if free_compensation is None:
-        final_residual, final_jacobian = problem.assemble(free_displacements_m)
-    else:
-        final_residual, final_jacobian = cast(
-            CompensatedVectorEquilibriumProblem, problem
-        ).assemble_with_compensation(free_displacements_m, free_compensation)
+    final_residual, final_jacobian = assemble_vector(
+        problem,
+        free_displacements_m,
+        compensation=free_compensation,
+        phase="final_observation",
+        recorder=assembly_work,
+    )
     final_residual = np.asarray(final_residual, dtype=float)
     native_sparse_assembly_used = bool(
         native_sparse_assembly_used or issparse(final_jacobian)
@@ -1180,8 +1216,14 @@ def _blocked_vector_solution(
     detail: str,
     sparse_factorization_diagnostics: list[dict[str, Any]] | None = None,
     linear_solve_count: int = 0,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
-    residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
+    residual_kn, jacobian_kn_per_m = assemble_vector(
+        problem,
+        free_displacements_m,
+        phase="blocked_observation",
+        recorder=assembly_work,
+    )
     residual_kn = np.asarray(residual_kn, dtype=float)
     backend_metadata = _vector_backend_metadata(
         cfg.matrix_backend,

@@ -31,6 +31,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_state import (
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_MATRIX_BACKEND,
+    VectorAssemblyWorkRecorder,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
     newton_raphson_vector,
@@ -467,6 +468,7 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     target_control_displacement_m: float,
     config: StatefulFiberFrame2DDisplacementControlConfig | None = None,
     initial_augmented_coordinates_m: tuple[float, ...] | None = None,
+    assembly_work: VectorAssemblyWorkRecorder | None = None,
 ) -> StatefulFiberFrame2DDisplacementControlStepResult:
     """Use ordinary Newton on one augmented target; commit only all passed gates."""
     cfg = (
@@ -484,7 +486,9 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     )
     parent_bytes = accepted_checkpoint.canonical_bytes()
     initial = adapter.initial_augmented_coordinates_m
-    solution = newton_raphson_vector(adapter, config=cfg.newton)
+    solution = newton_raphson_vector(
+        adapter, config=cfg.newton, assembly_work=assembly_work
+    )
     terminal = (
         adapter.observe(solution.free_displacements_m)
         if solution.free_displacement_compensation_m is None

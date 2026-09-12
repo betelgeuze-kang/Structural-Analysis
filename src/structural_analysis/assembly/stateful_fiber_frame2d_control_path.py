@@ -519,7 +519,7 @@ class StatefulFiberFrame2DControlRestartError(ValueError):
         return json.loads(self._report)
 
 
-def _execute_preload(problem, config):
+def _execute_preload(problem, config, *, assembly_work=None):
     """One actual lambda-zero solve, with failure and source-bound work retained."""
     genesis = initial_stateful_fiber_frame2d_checkpoint(problem)
     source_hash, config_hash = problem.contract_hash, config.contract_hash
@@ -531,7 +531,9 @@ def _execute_preload(problem, config):
     }
     try:
         step = solve_stateful_fiber_frame2d_constant_load_preload(
-            problem, config=config.newton
+            problem,
+            config=config.newton,
+            **({"assembly_work": assembly_work} if assembly_work is not None else {}),
         )
         if (
             type(step) is not StatefulFiberFrame2DLoadStepResult

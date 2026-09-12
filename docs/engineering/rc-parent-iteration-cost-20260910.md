@@ -1,5 +1,9 @@
 # Same-parent cost: fewer accepted refinements did not accelerate Newton
 
+Follow-up: [opt-in actual Newton assembly dispatch recording](rc-newton-assembly-work-20260912.md)
+is available for new comparisons. It does not infer missing counts in this study
+or include outside-Newton recovery/verification work.
+
 The completed [968-parent study](rc-same-parent-cost-study-20260910.md) supplies
 same-native-parent and same-prefix comparisons of the frozen learned proposal
 and secant. Its original-record audit and seal are complete. All 968 comparisons
