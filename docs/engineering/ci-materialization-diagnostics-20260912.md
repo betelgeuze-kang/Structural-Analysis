@@ -30,3 +30,12 @@ upload availability; inspect a subsequent same-head failed shard's artifact
 before making that claim. Validation and source copies are retained with the
 [full-cycle numerical study](rc-full-cycle-native-reuse-20260912.md), after its
 numerical execution and separate audit have completed.
+
+Hosted shard 1 upload is now confirmed in the
+[same-head receipt inspection](ci-hosted-materialization-20260912.md).
+The independent development job additionally selects the experiment-runner and
+repository-workflow contract modules, increasing its explicit module list from
+24 to 26. Previously these recent regression checks were only available locally
+or behind full-suite materialization. The two added modules pass all 40 tests
+locally in 19.23 s; Ruff and diff checks pass. This is not a rerun of all 26
+modules or a hosted result. Full shards and their required aggregate are unchanged.
