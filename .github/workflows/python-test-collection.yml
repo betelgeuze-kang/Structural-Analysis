@@ -97,6 +97,7 @@ jobs:
           tests/test_rc_control_search_accounting.py
           tests/test_rc_control_strategy_costs.py
           tests/test_rc_control_process_costs.py
+          tests/test_rc_control_layout_features.py
           tests/test_rc_strategy_cohort.py
           tests/test_repository_python_workflow_contract.py
           tests/test_rc_constant_load_durable.py
