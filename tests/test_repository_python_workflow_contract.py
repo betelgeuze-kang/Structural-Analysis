@@ -856,16 +856,48 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     assert "continue-on-error" not in diagnostic
     assert workflow["permissions"] == {"contents": "read"}
     assert all("continue-on-error" not in step for step in diagnostic["steps"])
-    commands = [step["run"] for step in diagnostic["steps"] if "run" in step]
-    assert len(commands) == 2
-    tests = shlex.split(commands[1])
+    run_steps = [step for step in diagnostic["steps"] if "run" in step]
+    assert [step["name"] for step in run_steps] == [
+        "Install package and test tools",
+        "Run persistent RC contracts before formatting diagnostics",
+        "Check local RC slice formatting with actionable diff",
+        "Run development contracts from the committed checkout",
+    ]
+    commands = [step["run"] for step in run_steps]
+    assert "if" not in run_steps[1]
+    persistence = shlex.split(commands[1])
+    assert persistence[:4] == ["python", "-m", "pytest", "-q"]
+    assert "--junitxml=rc-persistence-contracts.xml" in persistence
+    assert not any(x in persistence for x in ("-k", "--deselect", "--ignore"))
+    assert {x for x in persistence if x.startswith("tests/")} == {
+        "tests/test_rc_control_local_research.py",
+        "tests/test_rc_control_persistence.py",
+        "tests/test_rc_local_resources.py",
+    }
+    assert run_steps[2]["if"] == "${{ !cancelled() }}"
+    formatting = shlex.split(commands[2])
+    assert formatting[:6] == ["python", "-m", "ruff", "format", "--check", "--diff"]
+    assert formatting[-2:] == [">", "rc-local-format.diff"]
+    assert set(formatting[6:-2]) == {
+        "src/structural_analysis/benchmark/rc_control_design.py",
+        "src/structural_analysis/benchmark/rc_control_reuse.py",
+        "src/structural_analysis/benchmark/rc_control_cost_search.py",
+        "src/structural_analysis/benchmark/rc_control_local_search_cli.py",
+        "src/structural_analysis/execution/rc_result_repository.py",
+        "src/structural_analysis/execution/local_runtime_doctor.py",
+        "tests/test_rc_control_persistence.py",
+        "tests/test_rc_local_resources.py",
+        "tests/test_rc_control_local_research.py",
+    }
+    tests = shlex.split(commands[3])
     assert tests[:3] == ["python", "-m", "pytest"]
     assert "--junitxml=development-contracts.xml" in tests
     assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
     selected = {x for x in tests if x.startswith("tests/")}
-    assert len(selected) == 20
+    assert len(selected) == 21
     assert all((ROOT / path).is_file() for path in selected)
     assert {
+        "tests/test_rc_control_local_research.py",
         "tests/test_rc_control_runtime_selection.py",
         "tests/test_rc_control_step_work.py",
         "tests/test_rc_control_iteration_cost.py",
@@ -880,6 +912,22 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "materializ" not in cmd and "--refresh-product-replay" not in cmd
         for cmd in commands
     )
+    retained = {
+        step["name"]: step for step in diagnostic["steps"] if "uses" in step
+        and step["uses"].startswith("actions/upload-artifact@")
+    }
+    assert set(retained) == {
+        "Retain persistent RC contract results",
+        "Retain local RC formatting diagnostic",
+        "Retain development contract results even on test failure",
+    }
+    assert retained["Retain persistent RC contract results"]["with"]["path"] == (
+        "rc-persistence-contracts.xml"
+    )
+    assert retained["Retain local RC formatting diagnostic"]["with"]["path"] == (
+        "rc-local-format.diff"
+    )
+    assert all(step["if"] == "${{ always() }}" for step in retained.values())
     upload = diagnostic["steps"][-1]
     assert upload["if"] == "${{ always() }}"
     assert upload["with"]["path"] == "development-contracts.xml"

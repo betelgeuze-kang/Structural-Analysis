@@ -3,13 +3,17 @@
 Repeat --experiment to rescreen/reprice in the SAME process. Existing experiment
 and request formats are retained. The global new-model budget includes each
 fresh model's original solve and full verification. No GPU or learned speedup
-is claimed, and no cache is imported or persisted between invocations.
+is claimed. --store-root opts into tenant-authorized local persistence; it never
+imports arbitrary user-supplied result files.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import math
+from time import monotonic
 from pathlib import Path
 import sys
 
@@ -39,8 +43,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--source-revision", required=True)
     parser.add_argument("--scope-id", default="local-research")
     parser.add_argument("--max-new-model-analyses", type=int, default=17)
+    parser.add_argument("--store-root", type=Path)
+    parser.add_argument("--tenant-id", default="local-research")
+    parser.add_argument("--max-wall-seconds", type=float)
+    parser.add_argument("--stop-file", type=Path)
     args = parser.parse_args(argv)
     try:
+        if args.max_wall_seconds is not None and (
+            not math.isfinite(args.max_wall_seconds)
+            or not 0 < args.max_wall_seconds <= 86400
+        ):
+            raise ValueError("wall budget must be finite in (0, 86400]")
+        batch_started = monotonic()
+
+        def stop_requested():
+            return args.stop_file is not None and args.stop_file.exists()
+
         if not 1 <= len(args.experiment) <= 16:
             raise ValueError("one to sixteen experiment scenarios required")
         if not 0 <= args.max_new_model_analyses <= 17:
@@ -56,8 +74,22 @@ def main(argv: list[str] | None = None) -> int:
         ]
         if any(prices is None for _, prices, _, _, _ in scenarios):
             raise ValueError("each scenario needs explicit prices")
+        repository = None
+        if args.store_root is not None:
+            from structural_analysis.execution.rc_result_repository import (
+                open_local_rc_repository,
+            )
+
+            repository = open_local_rc_repository(
+                args.store_root,
+                tenant_id=args.tenant_id,
+                scope_id=args.scope_id,
+                authorization_token=os.environ.get("STRUCTURAL_RC_STORE_TOKEN", ""),
+            )
         session = RCControlResultSession(
-            source_revision=args.source_revision, scope_id=args.scope_id
+            source_revision=args.source_revision,
+            scope_id=args.scope_id,
+            repository=repository,
         )
         args.output.mkdir(parents=True, exist_ok=False)
         remaining = args.max_new_model_analyses
@@ -77,6 +109,14 @@ def main(argv: list[str] | None = None) -> int:
                 material_limits=material,
                 output_directory=args.output / f"scenario-{index:03d}",
                 max_new_model_analyses=remaining,
+                stop_requested=stop_requested,
+                maximum_wall_seconds=(
+                    None
+                    if args.max_wall_seconds is None
+                    else max(
+                        1e-12, args.max_wall_seconds - (monotonic() - batch_started)
+                    )
+                ),
             )
             remaining -= report["new_model_evaluations"]
             summaries.append(
@@ -92,14 +132,17 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 }
             )
-            if report["new_work"]["unknown_work"]:
+            if report["new_work"]["unknown_work"] or report["status"] in {
+                "cancelled_between_models",
+                "wall_budget_exhausted_between_models",
+            }:
                 break
         summary = {
             "schema_version": "local-rc-cost-search-batch.v1",
             "requested_scenario_count": len(scenarios),
             "scenarios": summaries,
             "remaining_new_model_budget": remaining,
-            "persistent_cache": False,
+            "persistent_cache": repository is not None,
             "performance_improvement": False,
         }
         summary["report_hash"] = _sha(_bytes(summary))
