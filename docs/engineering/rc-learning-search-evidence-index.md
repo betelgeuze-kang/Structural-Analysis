@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Workspace preset error recovery and actual browser continuation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-preset-recovery-20260913.md)
 - [Workbench cost-pruned decisions, original downloads and viewer limits](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-pruned-workbench-20260913.md)
 - [Cost-pruned layout artifact admission and actual HTTP delivery](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-cost-pruned-http-20260913.md)
 - [Actual standalone layout cost pruning and matched process costs](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-cost-pruned-execution-20260913.md)

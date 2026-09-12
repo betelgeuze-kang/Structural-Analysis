@@ -91,6 +91,10 @@ events only; it must not be described as an error-free console or a functioning
 real-data legacy viewer. These are retained integration issues for follow-up,
 not proof of full viewer, GPU or production readiness.
 
+The subsequent [preset error-path repair](viewer-preset-recovery-20260913.md)
+removes the undefined logger and verifies continued artifact resolution. It does
+not supply the missing companion data or close the remaining viewer limitations.
+
 ## Retained packets and remaining scope
 
 All roots below are under
