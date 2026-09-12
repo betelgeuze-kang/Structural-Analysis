@@ -154,30 +154,82 @@ class RcSearchArtifactBundle:
         ) not in (
             "experimental-rc-control-candidate-search.v2",
             "experimental-rc-control-candidate-search.v3",
+            "experimental-rc-control-candidate-strategy.v1",
         ):
             raise ValueError("pinned search result mismatch")
         plan = _document(read("plan.json", _META_MAX), "plan_hash")
-        training = _document(read("historical-training.json", _META_MAX), "report_hash")
-        policy = _document(read("policy.json", _META_MAX), "policy_hash")
+        standalone = (
+            result["schema_version"] == "experimental-rc-control-candidate-strategy.v1"
+        )
+        strategy = result.get("strategy") if standalone else None
+        if standalone:
+            if (
+                strategy not in ("price_order", "learned_order")
+                or plan.get("strategy") != strategy
+                or plan.get("schema_version")
+                != "experimental-rc-control-candidate-strategy-plan.v1"
+                or result.get("oracle") is not None
+                or plan.get("oracle_after_online_arms") is not False
+                or type(plan.get("plans")) is not dict
+                or set(plan["plans"]) != {strategy}
+            ):
+                raise ValueError("standalone strategy binding mismatch")
+        elif "strategy" in result or "strategy" in plan:
+            raise ValueError("standalone strategy requires explicit schema")
         plan_version = plan.get("schema_version")
-        supported_plan = (
-            plan_version == "experimental-rc-control-candidate-search-plan.v2"
-            and "ranking" not in plan
-        ) or (
-            plan_version == "experimental-rc-control-candidate-search-plan.v3"
-            and type(plan.get("ranking")) is dict
+        ranking_valid = (
+            "ranking" not in plan
+            or type(plan["ranking"]) is dict
             and plan["ranking"].get("strategy")
             == "feasibility_then_cheaper_boundary.v1"
         )
-        if (
-            not supported_plan
-            or result.get("plan_hash") != plan["plan_hash"]
-            or result.get("historical_training_cost") != training
-            or plan.get("training_report_hash") != training["report_hash"]
-            or plan.get("policy_hash") != policy["policy_hash"]
-            or training.get("policy_hash") != policy["policy_hash"]
-        ):
+        supported_plan = (
+            (standalone and ranking_valid)
+            or (
+                plan_version == "experimental-rc-control-candidate-search-plan.v2"
+                and "ranking" not in plan
+            )
+            or (
+                plan_version == "experimental-rc-control-candidate-search-plan.v3"
+                and "ranking" in plan
+                and ranking_valid
+            )
+        )
+        if not supported_plan or result.get("plan_hash") != plan["plan_hash"]:
             raise ValueError("search metadata binding mismatch")
+        if strategy == "price_order":
+            if (
+                not {"historical_training_cost", "candidate_coverage_audit"}
+                <= set(result)
+                or not {
+                    "training_report_hash",
+                    "policy_hash",
+                    "original_training_and_pool_models_disjoint",
+                }
+                <= set(plan)
+                or result.get("historical_training_cost") is not None
+                or plan.get("training_report_hash") is not None
+                or plan.get("policy_hash") is not None
+                or plan.get("predictions") != []
+                or plan.get("original_training_and_pool_models_disjoint") is not None
+                or "ranking" in plan
+                or type(result.get("ranking_wall_ns")) is not int
+                or result["ranking_wall_ns"] != 0
+                or result.get("candidate_coverage_audit") is not None
+            ):
+                raise ValueError("price-only strategy cannot carry learned metadata")
+        else:
+            training = _document(
+                read("historical-training.json", _META_MAX), "report_hash"
+            )
+            policy = _document(read("policy.json", _META_MAX), "policy_hash")
+            if (
+                result.get("historical_training_cost") != training
+                or plan.get("training_report_hash") != training["report_hash"]
+                or plan.get("policy_hash") != policy["policy_hash"]
+                or training.get("policy_hash") != policy["policy_hash"]
+            ):
+                raise ValueError("search metadata binding mismatch")
         pool = plan.get("pool")
         if (
             type(pool) is not list
@@ -201,8 +253,9 @@ class RcSearchArtifactBundle:
                 raise ValueError("pool model reference invalid")
             read(expected, 16 * 1024**2, ref)
         arms = result.get("arms")
-        if type(arms) is not dict or set(arms) != {"price_order", "learned_order"}:
-            raise ValueError("both online search arms required")
+        expected_arms = {strategy} if standalone else {"price_order", "learned_order"}
+        if type(arms) is not dict or set(arms) != expected_arms:
+            raise ValueError("declared online search arms required")
         outcomes = dict(arms)
         if result.get("oracle") is not None:
             outcomes["exhaustive_oracle"] = result["oracle"]
@@ -235,6 +288,17 @@ class RcSearchArtifactBundle:
                 or not set(row_ids) <= set(ids)
             ):
                 raise ValueError("comparison pool mismatch")
+            if standalone:
+                shortlist = plan["plans"][strategy].get("shortlist")
+                if (
+                    type(shortlist) is not list
+                    or any(type(i) is not str or i not in ids[1:] for i in shortlist)
+                    or len(shortlist) != len(set(shortlist))
+                    or set(row_ids) != {"baseline", *shortlist}
+                ):
+                    raise ValueError(
+                        "standalone comparison differs from declared shortlist"
+                    )
             for row in rows:
                 refs = row.get("artifacts")
                 if type(refs) is not dict or not set(refs) <= _ROLES:

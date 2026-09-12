@@ -258,8 +258,10 @@ def test_new_ranking_plan_snapshot_binds_version_and_named_strategy(mutation):
 
     def hashed(value, field):
         value.pop(field)
+
         def raw():
             return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+
         value[field] = _sha(raw())
         return raw()
 
@@ -283,3 +285,129 @@ def test_new_ranking_plan_snapshot_binds_version_and_named_strategy(mutation):
             read, expected_report_hash=result["report_hash"]
         )
         assert b.artifacts["plan.json"] == plan_bytes and len(b.artifacts) == 75
+
+
+def standalone_documents(strategy):
+    """Controlled metadata conversion; it is not a new physical execution."""
+    plan = json.loads((ROOT / "plan.json").read_bytes())
+    report = json.loads((ROOT / "result.json").read_bytes())
+    plan.update(
+        schema_version="experimental-rc-control-candidate-strategy-plan.v1",
+        strategy=strategy,
+        oracle_after_online_arms=False,
+        plans={strategy: plan["plans"][strategy]},
+    )
+    report.update(
+        schema_version="experimental-rc-control-candidate-strategy.v1",
+        strategy=strategy,
+        oracle=None,
+        arms={strategy: report["arms"][strategy]},
+    )
+    if strategy == "price_order":
+        plan.update(
+            predictions=[],
+            policy_hash=None,
+            training_report_hash=None,
+            original_training_and_pool_models_disjoint=None,
+        )
+        report.update(
+            historical_training_cost=None,
+            candidate_coverage_audit=None,
+            ranking_wall_ns=0,
+        )
+    return plan, report
+
+
+def standalone_reader(plan, report):
+    from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+
+    def bind(doc, key):
+        doc.pop(key, None)
+        doc[key] = _sha(_bytes(doc))
+        return _bytes(doc)
+
+    plan_raw = bind(plan, "plan_hash")
+    report["plan_hash"] = plan["plan_hash"]
+    result_raw = bind(report, "report_hash")
+    calls = []
+
+    def read(name, maximum):
+        calls.append(name)
+        if name == "plan.json":
+            return plan_raw
+        if name == "result.json":
+            return result_raw
+        return (ROOT / name).read_bytes()
+
+    return read, calls
+
+
+@pytest.mark.parametrize("strategy", ["price_order", "learned_order"])
+def test_standalone_graph_only_reads_declared_strategy(strategy):
+    plan, report = standalone_documents(strategy)
+    read, calls = standalone_reader(plan, report)
+    bundle = RcSearchArtifactBundle.from_reader(
+        read, expected_report_hash=report["report_hash"]
+    )
+    other = "learned_order" if strategy == "price_order" else "price_order"
+    assert not any(p.startswith((other + "/", "exhaustive_oracle/")) for p in calls)
+    assert ("policy.json" in calls) is (strategy == "learned_order")
+    assert ("historical-training.json" in calls) is (strategy == "learned_order")
+    assert "strategy-runtime.json" not in calls
+    app = RcSearchArtifactWSGIApplication(
+        {("alpha", "experiment"): bundle}, authorize=authorizer
+    )
+    for name, raw in bundle.artifacts.items():
+        response = app.handle("GET", route(name), headers=HEADERS)
+        assert response.status == 200 and response.body == raw
+    for path in [
+        other + "/comparison.json",
+        "exhaustive_oracle/comparison.json",
+        "strategy-runtime.json",
+    ]:
+        assert app.handle("GET", route(path), headers=HEADERS).status == 404
+    assert app.handle("GET", route(), headers={}).status == 401
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "other_plan_strategy",
+        "oracle",
+        "other_arm",
+        "legacy_schema",
+        "policy_hash",
+        "predictions",
+        "training",
+        "missing_null",
+        "ranking_time_bool",
+        "shortlist",
+    ],
+)
+def test_rehashed_standalone_cross_bindings_reject(mutation):
+    plan, report = standalone_documents("price_order")
+    if mutation == "other_plan_strategy":
+        plan["strategy"] = "learned_order"
+    elif mutation == "oracle":
+        report["oracle"] = {"status": "completed"}
+    elif mutation == "other_arm":
+        report["arms"]["learned_order"] = report["arms"]["price_order"]
+    elif mutation == "legacy_schema":
+        report["schema_version"] = "experimental-rc-control-candidate-search.v3"
+    elif mutation == "policy_hash":
+        plan["policy_hash"] = "sha256:" + "a" * 64
+    elif mutation == "predictions":
+        plan["predictions"] = [{}]
+    elif mutation == "training":
+        report["historical_training_cost"] = {}
+    elif mutation == "missing_null":
+        plan.pop("policy_hash")
+    elif mutation == "ranking_time_bool":
+        report["ranking_wall_ns"] = False
+    elif mutation == "shortlist":
+        plan["plans"]["price_order"]["shortlist"] = ["middle"]
+    read, _ = standalone_reader(plan, report)
+    with pytest.raises(ValueError):
+        RcSearchArtifactBundle.from_reader(
+            read, expected_report_hash=report["report_hash"]
+        )
