@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Full-reference labels for training layouts](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-labels-20260913.md)
 - [Train-only layout data and scoped split validation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-dataset-20260913.md)
 - [Explicit fixed-topology layout descriptors](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-descriptors-20260913.md)
 - [Candidate transfer boundary and independent split decision](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-candidate-transfer-boundary-20260913.md)
