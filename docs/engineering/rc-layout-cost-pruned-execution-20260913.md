@@ -96,7 +96,9 @@ The launcher, frozen source, protocol, original inputs, execution records,
 decision traces, audit and failed audit attempt are preserved there.
 See the [machine-readable summary](rc-layout-cost-pruned-execution-20260913.summary.json).
 
-HTTP artifact admission and Workbench support for the new schemas remain open.
+At the numerical observation's source, HTTP artifact admission and Workbench
+support remained open. Subsequent [HTTP admission and actual delivery](rc-layout-cost-pruned-http-20260913.md)
+now preserve and check the new original graphs; Workbench support remains open.
 The [envelope experiment](rc-envelope-results-20260913.md) still provides negative
 learned warm-start evidence. This change does not resolve current-head full-suite
 materialization, independent external validation, broader physical models or
