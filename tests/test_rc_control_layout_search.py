@@ -223,3 +223,89 @@ def test_unknown_or_interrupted_work_stops_before_second_arm(
 def test_candidate_ids_cannot_be_paths(inputs, name):
     with pytest.raises(ValueError):
         search.RCControlLayoutCandidate(name, inputs["baseline"])
+
+
+@pytest.mark.parametrize("strategy", ["price_order", "learned_order"])
+def test_standalone_actual_references_and_frozen_single_plan(
+    inputs, tmp_path, monkeypatch, strategy
+):
+    args = dict(inputs)
+    root = tmp_path / strategy
+    calls = []
+    original = study._reference_design_row
+
+    def observed(*a, **kw):
+        plan = json.loads((root / "plan.json").read_bytes())
+        assert set(plan["plans"]) == {strategy}
+        calls.append(a[0].canonical_model_checksum)
+        return original(*a, **kw)
+
+    def forbidden(*a, **kw):
+        pytest.fail("price execution accessed learned computation")
+
+    monkeypatch.setattr(study, "_reference_design_row", observed)
+    if strategy == "price_order":
+        args.pop("policy")
+        args.pop("training_report")
+        monkeypatch.setattr(search, "_training_cost", forbidden)
+        monkeypatch.setattr(search.RCControlLayoutPolicy, "predict", forbidden)
+    report = search.run_control_layout_strategy(
+        **args, strategy=strategy, output_directory=root
+    )
+    assert len(calls) == 2
+    assert set(report["arms"]) == {strategy}
+    assert report["strategy"] == strategy
+    assert report["historical_training_cost_counted_once_outside_online_arms"] is (
+        strategy == "learned_order"
+    )
+    assert report["schema_version"] == "experimental-rc-control-layout-strategy.v1"
+    assert report["oracle"] is None
+    assert not (root / "exhaustive_oracle").exists()
+    assert report["candidate_cost_optimality_audit"]["status"] == "oracle_not_run"
+    comparison = json.loads((root / strategy / "comparison.json").read_bytes())
+    assert comparison["selected_candidate_id"] == "small"
+    for row in comparison["rows"]:
+        assert row["full_reference_verification_pass"] is True
+        for ref in row["artifacts"].values():
+            raw = (root / strategy / ref["path"]).read_bytes()
+            assert study._sha(raw) == ref["sha256"]
+            assert len(raw) == ref["byte_length"]
+    plan = json.loads((root / "plan.json").read_bytes())
+    if strategy == "price_order":
+        assert plan["policy_hash"] is None
+        assert plan["training_report_hash"] is None
+        assert plan["predictions"] == []
+        assert report["ranking_wall_ns"] == 0
+        assert report["historical_training_cost"] is None
+        assert report["candidate_coverage_audit"] is None
+        assert not (root / "policy.json").exists()
+        assert not (root / "historical-training.json").exists()
+    else:
+        assert report["historical_training_cost"] == inputs["training_report"]
+        assert (root / "policy.json").is_file()
+        assert (root / "historical-training.json").is_file()
+
+
+@pytest.mark.parametrize(
+    "change", ["price_policy", "price_training", "oracle", "selector", "missing_policy"]
+)
+def test_standalone_rejects_invalid_strategy_inputs_before_output(
+    inputs, tmp_path, change
+):
+    args = dict(inputs)
+    strategy = "learned_order"
+    if change.startswith("price_"):
+        strategy = "price_order"
+        args.pop("training_report" if change == "price_policy" else "policy")
+    elif change == "oracle":
+        args["evaluate_exhaustive_oracle"] = True
+    elif change == "selector":
+        strategy = "exhaustive_oracle"
+    else:
+        args.pop("policy")
+    root = tmp_path / "search"
+    with pytest.raises(ValueError):
+        search.run_control_layout_strategy(
+            **args, strategy=strategy, output_directory=root
+        )
+    assert not root.exists()
