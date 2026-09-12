@@ -78,7 +78,40 @@ focused modules. Ruff, six-source scoped mypy and diff checks pass. The
 snapshot and separate retained fixture records; the full repository suite was
 not run locally.
 
-## Hosted integration boundary
+## Repeated policy-selection integration
+
+`run_rc_control_runtime_selection(..., record_assembly_work=True)` now carries
+the same option through every ridge/case/repetition. The final frozen plan and
+result declare the recording profile; each original fold report retains its
+invocation sidecars, including preload and fresh-reference calls. Recording is
+off by default and does not replace wall-time selection with a call-count proxy.
+The recorded path time includes this instrumentation; original training-label
+generation, fitting and independent evaluation remain separate accounting scopes.
+
+The actual counterbalanced selection test uses two authored training cases, one
+ridge, two withheld-case SVD fits and three repetitions per case. Its six folds
+execute 24 complete paths, each with preload and four lateral targets, for 120
+runtime numerical invocations. The test checks recording in every invocation,
+unchanged reference/secant physical comparisons, frozen fit reuse, the complete
+arm schedule and continued exclusion of the validation case from tuning. Both
+static model gates abstain, so this fixture cannot demonstrate learned speedup.
+
+The first integration run had 57 passes and one failure: repeated-plan formatting
+overwrote the new cost-scope sentence. Applying the recording declaration after
+the final repetition description fixes the frozen plan before hashing. A named
+keyword also resolves the conditional-kwargs static typing error. The
+[selection integration summary](rc-runtime-selection-assembly-20260912.summary.json)
+records the final source/test result and retained repeated-execution files.
+
+The final full selection-module run passes **58 tests in 118.91 seconds**; Ruff,
+scoped mypy and diff checks pass. The six retained folds contain 648 recorded
+Newton assembly dispatches across the 120 numerical invocations. Secant and
+abstaining-proposal dispatch counts agree in every fold. These counts exclude
+the fixture's original label-generation study and other tests in that module.
+The sealed packet has 1,168 files / 63,621,317 bytes; inventory SHA-256
+`9a4df1e1fd7253cbc8a9dc65215bdaabb680fcdab186f506b6783e74543a0641`.
+
+## Hosted integration boundary (assembly-counter implementation)
 
 The completed [9b21d748d run](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34452206521)
 predates this implementation. Its original development JUnit artifact was

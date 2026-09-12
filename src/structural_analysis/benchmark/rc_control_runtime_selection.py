@@ -249,6 +249,7 @@ def run_rc_control_runtime_selection(
     proposal_abstention_strategy="reference",
     static_model_abstention=False,
     repetitions=1,
+    record_assembly_work=False,
 ):
     """Fit each ridge without one training case, then execute that case's full path.
 
@@ -259,6 +260,8 @@ def run_rc_control_runtime_selection(
     proposal retry before the first fit or output is created.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if type(record_assembly_work) is not bool:
+        raise ValueError("explicit boolean assembly recording required")
     if type(repetitions) is not int or repetitions not in (1, 3, 6):
         raise ValueError("one run or three/six counterbalanced repetitions required")
     if type(source_revision) is not str or not re.fullmatch(
@@ -400,6 +403,9 @@ def run_rc_control_runtime_selection(
             "every repeat must pass full comparisons and known-work checks; "
             "static gate computation and record writing charged when enabled"
         )
+    if record_assembly_work:
+        plan["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
+        plan["selection_score"] += "; opted-in assembly recording costs included"
     plan["plan_hash"] = _sha(_bytes(plan))
     _save(root, "plan.json", _bytes(plan))
     fits: list[dict[str, Any]] = []
@@ -544,6 +550,7 @@ def run_rc_control_runtime_selection(
                         material_capture_scope="proposal-only"
                         if effective_capture
                         else "all-arms",
+                        record_assembly_work=record_assembly_work,
                         **learning._arithmetic_kwargs(arithmetic_profile),
                     )
                     if _bytes(policy.to_dict()) != frozen:
@@ -669,6 +676,8 @@ def run_rc_control_runtime_selection(
         "net_savings_proved": False,
         "candidate_promoted": False,
     }
+    if record_assembly_work:
+        result["assembly_work_recording"] = plan["assembly_work_recording"]
     if static_model_abstention:
         result["static_model_abstention"] = True
     if repetitions > 1:

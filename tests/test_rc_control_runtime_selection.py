@@ -625,8 +625,15 @@ def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
         maximum_fits=3,
         proposal_abstention_strategy="secant",
         static_model_abstention=True,
+        record_assembly_work=True,
     )
     plan = json.loads((root / "plan.json").read_bytes())
+    assert (
+        plan["assembly_work_recording"]
+        == result["assembly_work_recording"]
+        == "vector-newton-assembly-dispatch-work.v1"
+    )
+    assert "recording costs included" in plan["selection_score"]
     schedule = [
         ["reference", "secant", "proposal"],
         ["secant", "proposal", "reference"],
@@ -673,6 +680,22 @@ def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
         )
         baseline = json.loads((folder / "secant/path.json").read_bytes())
         proposal = json.loads((folder / "proposal/path.json").read_bytes())
+        for arm in ("reference", "secant", "proposal", "fresh-reference"):
+            path = json.loads((folder / arm / "path.json").read_bytes())
+            invocations = path["preload_invocations"] + [
+                inv for entry in path["entries"] for inv in entry["invocations"]
+            ]
+            assert len(invocations) == 5
+            for inv in invocations:
+                work = inv["newton_assembly_work"]
+                assert (
+                    work["call_count"]
+                    == work["returned_count"]
+                    == len(work["calls"])
+                    > 0
+                )
+                assert work["exception_count"] == work["in_flight_count"] == 0
+                assert work["outside_newton_assembly_calls"] is None
         assert baseline["response_history"] == proposal["response_history"]
         assert baseline["terminal_checkpoint"] == proposal["terminal_checkpoint"]
     for case in result["candidates"][0]["case_repeat_scores"]:
@@ -808,3 +831,37 @@ def test_six_repeat_schedule_has_two_observations_in_every_arm_position(
         c["requested_repetitions"] == c["valid_repetitions"] == 6
         for c in result["candidates"][0]["case_repeat_scores"]
     )
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_assembly_recording_boolean_is_declared_and_forwarded(
+    tmp_path, original, monkeypatch, value
+):
+    observed = []
+    real = learning.benchmark_rc_control_seed_paths
+
+    def observe(*args, **kwargs):
+        observed.append(kwargs.get("record_assembly_work", False))
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", observe)
+    result = run(
+        tmp_path / "recording", original, ridge_grid=(1e4,), record_assembly_work=value
+    )
+    assert observed == [value, value]
+    assert ("assembly_work_recording" in result) is value
+
+
+@pytest.mark.parametrize("value", [1, None, "true"])
+def test_invalid_assembly_recording_rejects_before_training_or_output(tmp_path, value):
+    with pytest.raises(ValueError, match="explicit boolean assembly"):
+        selection.run_rc_control_runtime_selection(
+            None,
+            None,
+            None,
+            source_revision="a" * 40,
+            output_directory=tmp_path / "absent",
+            ridge_grid=(1e4,),
+            record_assembly_work=value,
+        )
+    assert not (tmp_path / "absent").exists()
