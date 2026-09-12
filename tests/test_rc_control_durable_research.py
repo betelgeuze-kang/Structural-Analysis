@@ -1,5 +1,7 @@
 """Real small RC solves plus explicitly isolated failure/lease controls."""
-from dataclasses import replace
+from __future__ import annotations
+
+from dataclasses import asdict, replace
 import json
 from pathlib import Path
 import subprocess
@@ -7,7 +9,9 @@ import sys
 
 import pytest
 
-from test_rc_control_local_research import model as model, control_request as control_request, options as options, candidate
+from structural_analysis.api.rc_fiber_frame_direct_control_request import BoundedRCFiberDirectControlRequest
+from structural_analysis.benchmark import fiber_frame_design as design
+from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.benchmark.rc_control_durable import DurableRCControlResultSession
 from structural_analysis.benchmark.rc_control_reuse import NewAnalysisRequired
 from structural_analysis.benchmark.rc_control_cost_search import run_rc_control_cost_search
@@ -18,6 +22,52 @@ from structural_analysis.execution.job_service import JobServiceError
 SOURCE = '4a856164a999aefb8204fd63eb8bbb150862d463'
 TENANT = 'fixture-tenant-token-long'
 WORKER = 'fixture-worker-token-long'
+
+
+@pytest.fixture
+def model():
+    root = Path(__file__).resolve().parents[1]
+    return load_neutral_json_bytes(
+        (root / "examples/public_rc_fiber_frame_cantilever.json").read_bytes(),
+        source_path="authored-local-research-example.json")
+
+
+@pytest.fixture
+def control_request():
+    return BoundedRCFiberDirectControlRequest(
+        control_global_dof=4, targets_m=(1e-5, 2e-5, -1e-5),
+        allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(("N2", -600.0, 0.0, 0.0),))
+
+
+@pytest.fixture
+def options():
+    return {
+        "history_limits": design.FiberFrameHistoryLimits(.1, .01),
+        "material_limits": design.FiberFrameMaterialHistoryLimits(.1, 1., 1.),
+        "prices": design.FiberFrameMaterialPrices(
+            100., 2., "KRW", "2026-09-12", "synthetic, not a quote"),
+    }
+
+
+def candidate(name, width):
+    return design.FiberFrameDesignCandidate(name, (
+        design.FiberFrameSectionChange("RC1", width_m=width),))
+
+
+def experiment_file(path, options):
+    value = {
+        "schema_version": "rc-fiber-design-experiment.v3",
+        "candidates": [
+            {"candidate_id": "cheap", "changes": [{"section_id": "RC1", "width_m": .35}]},
+            {"candidate_id": "costly", "changes": [{"section_id": "RC1", "width_m": .5}]},
+        ],
+        "prices": asdict(options["prices"]), "terminal_limits": None,
+        "history_limits": asdict(options["history_limits"]),
+        "material_history_limits": asdict(options["material_limits"]),
+    }
+    path.write_text(json.dumps(value))
+    return path
 
 
 def session(root, **kwargs):
@@ -63,7 +113,8 @@ def test_chunk_boundary_pause_resume_matches_fresh(model, control_request, optio
     assert final['job']['status'] == 'succeeded'
     assert final['new_work']['known_counters']['attempted_step_count'] == 8
     fresh = evaluate(session(tmp_path/'other'), model, control_request, options, tmp_path/'fresh')
-    payload = lambda row, root: json.loads((root/row['row']['artifacts']['result']['path']).read_bytes())['api_result']
+    def payload(row, root):
+        return json.loads((root / row['row']['artifacts']['result']['path']).read_bytes())['api_result']
     assert payload(final,tmp_path/'final')['response_history'] == payload(fresh,tmp_path/'fresh')['response_history']
 
 
@@ -72,7 +123,6 @@ def test_second_interpreter_reuses_without_calling_worker(model, control_request
     evaluate(session(root), model, control_request, options, tmp_path/'first')
     # CanonicalModel.to_dict retains provenance, needed for identical physics key.
     input_file = tmp_path/'input.json'
-    from dataclasses import asdict
     input_file.write_text(json.dumps({'model': model.to_dict(), 'request': control_request.to_dict(),
         'history': asdict(options['history_limits']), 'material': asdict(options['material_limits']),
         'prices': asdict(options['prices'])}))
@@ -218,7 +268,6 @@ def test_batch_stop_and_budget_leave_unrequested(model, control_request, options
 
 def test_durable_cli_cross_invocation(model, control_request, options, tmp_path, monkeypatch, capsys):
     from structural_analysis.benchmark.rc_control_durable_cli import main
-    from test_rc_control_local_research import experiment_file
     monkeypatch.setenv('STRUCTURAL_RC_TENANT_TOKEN',TENANT)
     monkeypatch.setenv('STRUCTURAL_RC_WORKER_TOKEN',WORKER)
     root=Path(__file__).resolve().parents[1]
