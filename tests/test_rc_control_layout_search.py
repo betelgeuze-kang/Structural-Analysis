@@ -14,6 +14,200 @@ from structural_analysis.benchmark import rc_control_design as study
 from structural_analysis.benchmark import fiber_frame_design as design
 
 
+def _price_pruning_inputs(inputs, budget=3):
+    return {
+        k: v for k, v in inputs.items() if k not in ("policy", "training_report")
+    } | {"full_analysis_budget": budget}
+
+
+def test_real_cost_pruning_skips_calls_and_preserves_full_reference_selection(
+    actual, inputs, tmp_path, monkeypatch
+):
+    root = tmp_path / "cost-pruned"
+    calls = []
+    original = study._reference_design_row
+
+    def observed(model, *args, **kwargs):
+        plan = json.loads((root / "plan.json").read_bytes())
+        assert (
+            plan["schema_version"]
+            == "experimental-rc-control-layout-cost-pruned-strategy-plan.v1"
+        )
+        decision = json.loads(
+            (root / "price_order/decisions" / f"{len(calls):02d}.json").read_bytes()
+        )
+        assert decision["action"] == "execute_full_reference"
+        calls.append(model.canonical_model_checksum)
+        return original(model, *args, **kwargs)
+
+    monkeypatch.setattr(study, "_reference_design_row", observed)
+    result = search.run_control_layout_cost_pruned_strategy(
+        **_price_pruning_inputs(inputs), strategy="price_order", output_directory=root
+    )
+    assert len(calls) == 2  # baseline and small; large receives no reference call.
+    assert (
+        result["schema_version"]
+        == "experimental-rc-control-layout-cost-pruned-strategy.v1"
+    )
+    assert result["candidate_cost_optimality_audit"] is None
+    assert result["candidate_coverage_audit"] is None
+    assert result["historical_training_cost"] is None
+    assert result["claims"]["net_savings_proved"] is False
+    arm = result["arms"]["price_order"]
+    assert arm["request_count"] == 2
+    assert arm["execution_work"]["api_invocation_count"] == 4
+    assert arm["execution_work"]["known_counters"]["attempted_step_count"] == 24
+    assert arm["selected_candidate_id"] == "small"
+    pruning = arm["cost_pruning"]
+    assert pruning["considered_candidate_ids"] == ["baseline", "small", "large"]
+    assert pruning["evaluated_candidate_ids"] == ["baseline", "small"]
+    assert pruning["skipped_cost_dominated_candidate_ids"] == ["large"]
+    assert pruning["unevaluated_candidate_ids"] == ["large"]
+    assert pruning["unevaluated_physical_feasibility"] == "unknown"
+    assert pruning["decision_wall_ns"] > 0
+    assert not (root / "price_order/large").exists()
+    assert (root / "pool/large.json").is_file()
+    comparison = json.loads((root / "price_order/comparison.json").read_bytes())
+    assert all(r["full_reference_verification_pass"] for r in comparison["rows"])
+    oracle = json.loads((actual[0] / "exhaustive_oracle/comparison.json").read_bytes())
+    assert comparison["selected_candidate_id"] == oracle["selected_candidate_id"]
+    for ref in pruning["decisions"]:
+        artifact = ref["artifact"]
+        raw = (root / "price_order" / artifact["path"]).read_bytes()
+        assert study._sha(raw) == artifact["sha256"]
+        assert len(raw) == artifact["byte_length"]
+    final = json.loads((root / "price_order/decisions/02.json").read_bytes())
+    assert final["action"] == "skip_cost_dominated"
+    assert final["bound"]["incumbent_candidate_id"] == "small"
+
+
+def test_pruning_distinguishes_unconsidered_from_cost_dominated(
+    actual, inputs, tmp_path, monkeypatch
+):
+    retained_rows(actual, monkeypatch)
+    result = search.run_control_layout_cost_pruned_strategy(
+        **_price_pruning_inputs(inputs, budget=2),
+        strategy="price_order",
+        output_directory=tmp_path / "horizon",
+    )
+    pruning = result["arms"]["price_order"]["cost_pruning"]
+    assert pruning["skipped_cost_dominated_candidate_ids"] == []
+    assert pruning["outside_consideration_horizon_candidate_ids"] == ["large"]
+    assert result["execution_policy"]["unused_analysis_budget_reallocated"] is False
+
+
+@pytest.mark.parametrize("reason", ["failed_limit", "failed_verification"])
+def test_pruning_without_feasible_incumbent_runs_full_shortlist(
+    actual, inputs, tmp_path, monkeypatch, reason
+):
+    retained_rows(actual, monkeypatch)
+    original = study._reference_design_row
+
+    def not_feasible(*args, **kwargs):
+        row = original(*args, **kwargs)
+        row["selection_eligible"] = True  # This flag alone must not grant authority.
+        if reason == "failed_limit":
+            next(iter(row["screens"].values()))["status"] = "fail"
+        else:
+            row["full_reference_verification_pass"] = False
+        return row
+
+    monkeypatch.setattr(study, "_reference_design_row", not_feasible)
+    result = search.run_control_layout_cost_pruned_strategy(
+        **_price_pruning_inputs(inputs),
+        strategy="price_order",
+        output_directory=tmp_path / "no-incumbent",
+    )
+    arm = result["arms"]["price_order"]
+    assert arm["request_count"] == 3 and arm["selected_candidate_id"] is None
+    assert arm["cost_pruning"]["skipped_cost_dominated_candidate_ids"] == []
+
+
+def test_learned_order_continues_to_cheaper_candidate_after_cost_skip(
+    actual, inputs, tmp_path, monkeypatch
+):
+    retained_rows(actual, monkeypatch)
+    original_ranking = search.candidate_ranking
+
+    def reverse_order(*args, **kwargs):
+        order, metadata = original_ranking(*args, **kwargs)
+        return list(reversed(order)), metadata  # Scheduling double only.
+
+    monkeypatch.setattr(search, "candidate_ranking", reverse_order)
+    result = search.run_control_layout_cost_pruned_strategy(
+        **(inputs | {"full_analysis_budget": 3}),
+        strategy="learned_order",
+        output_directory=tmp_path / "learned-pruned",
+    )
+    arm = result["arms"]["learned_order"]
+    assert arm["selected_candidate_id"] == "small"
+    assert arm["cost_pruning"]["considered_candidate_ids"] == [
+        "baseline",
+        "large",
+        "small",
+    ]
+    assert arm["cost_pruning"]["evaluated_candidate_ids"] == ["baseline", "small"]
+    assert arm["cost_pruning"]["skipped_cost_dominated_candidate_ids"] == ["large"]
+    assert result["historical_training_cost_counted_once_outside_online_arms"] is True
+
+
+def test_pruning_unknown_work_stops_before_later_candidates(
+    actual, inputs, tmp_path, monkeypatch
+):
+    retained_rows(actual, monkeypatch)
+    original = study._reference_design_row
+    calls = []
+
+    def unknown(*args, **kwargs):
+        calls.append(1)
+        row = original(*args, **kwargs)
+        row["invocations"][0]["unknown_execution_work"] = True
+        return row
+
+    monkeypatch.setattr(study, "_reference_design_row", unknown)
+    root = tmp_path / "unknown"
+    with pytest.raises(ValueError, match="unknown numerical work"):
+        search.run_control_layout_cost_pruned_strategy(
+            **_price_pruning_inputs(inputs),
+            strategy="price_order",
+            output_directory=root,
+        )
+    assert len(calls) == 1 and not (root / "result.json").exists()
+    outcome = json.loads((root / "price_order/outcome.json").read_bytes())
+    assert outcome["unknown_work_until_outcome"] is True
+    assert len(outcome["cost_pruning_decisions"]) == 1
+
+
+@pytest.mark.parametrize("entry", ["comparison", "standalone", "pruned"])
+def test_cost_pruning_requires_distinct_entrypoint(inputs, tmp_path, entry):
+    kwargs = _price_pruning_inputs(inputs) | {
+        "output_directory": tmp_path / entry,
+        "cost_pruning": True,
+    }
+    with pytest.raises(ValueError):
+        if entry == "comparison":
+            search.compare_control_layout_search(**kwargs)
+        elif entry == "standalone":
+            search.run_control_layout_strategy(**kwargs, strategy="price_order")
+        else:
+            search.run_control_layout_cost_pruned_strategy(
+                **kwargs, strategy="price_order"
+            )
+    assert not (tmp_path / entry).exists()
+
+
+def test_pruned_strategy_cannot_receive_oracle(inputs, tmp_path):
+    root = tmp_path / "no-oracle"
+    with pytest.raises(ValueError, match="cannot receive an oracle"):
+        search.run_control_layout_cost_pruned_strategy(
+            **_price_pruning_inputs(inputs),
+            strategy="price_order",
+            output_directory=root,
+            evaluate_exhaustive_oracle=True,
+        )
+    assert not root.exists()
+
+
 @pytest.fixture(scope="module")
 def inputs(tmp_path_factory):
     root = tmp_path_factory.mktemp("layout-search-training")

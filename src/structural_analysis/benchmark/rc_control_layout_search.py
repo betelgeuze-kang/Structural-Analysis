@@ -9,6 +9,10 @@ from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.benchmark import rc_control_design as study
 from structural_analysis.benchmark.rc_control_candidate_cost import (
     candidate_cost_optimality_audit,
+    verified_limit_outcome,
+)
+from structural_analysis.benchmark.rc_control_cost_dominance import (
+    layout_cost_dominance,
 )
 from structural_analysis.benchmark.rc_control_candidate_ranking import (
     CHEAPER_BOUNDARY_RANKING,
@@ -125,9 +129,12 @@ def _run_layout_search(
     evaluate_exhaustive_oracle=False,
     terminal_limits=None,
     only_strategy=None,
+    cost_pruning=False,
 ):
     """Execute frozen schedules; final results require actual reference paths."""
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if type(cost_pruning) is not bool or cost_pruning and only_strategy is None:
+        raise ValueError("cost pruning requires one explicit standalone strategy")
     if only_strategy not in (None, "price_order", "learned_order"):
         raise ValueError("supported standalone layout strategy required")
     if only_strategy is not None and evaluate_exhaustive_oracle:
@@ -283,6 +290,16 @@ def _run_layout_search(
     if only_strategy is not None:
         plan["schema_version"] = "experimental-rc-control-layout-strategy-plan.v1"
         plan["strategy"] = only_strategy
+    if cost_pruning:
+        plan["schema_version"] = (
+            "experimental-rc-control-layout-cost-pruned-strategy-plan.v1"
+        )
+        plan["execution_policy"] = {
+            "profile": "verified-incumbent-strict-cost.v1",
+            "consideration_horizon": "frozen_shortlist_including_baseline",
+            "unused_analysis_budget_reallocated": False,
+            "unevaluated_physical_feasibility": "unknown",
+        }
     plan["plan_hash"] = study._sha(study._bytes(plan))
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
@@ -302,7 +319,10 @@ def _run_layout_search(
     def execute(name, chosen):
         arm_root = root / name
         arm_root.mkdir()
-        rows = []
+        rows: list[dict] = []
+        decisions = []
+        skipped = []
+        pruning_wall = 0
         study._save(
             arm_root,
             "started.json",
@@ -316,7 +336,42 @@ def _run_layout_search(
         )
         aw, ac = perf_counter_ns(), process_time_ns()
         try:
-            for key in ("baseline", *chosen):
+            for ordinal, key in enumerate(("baseline", *chosen)):
+                if cost_pruning:
+                    decision_start = perf_counter_ns()
+                    bound = layout_cost_dominance(plan, rows)
+                    omit = key in bound["cost_dominated_unevaluated_candidate_ids"]
+                    decision = {
+                        "schema_version": "experimental-rc-layout-cost-pruning-decision.v1",
+                        "candidate_id": key,
+                        "evaluated_candidate_ids_before": [
+                            r["candidate_id"] for r in rows
+                        ],
+                        "action": "skip_cost_dominated"
+                        if omit
+                        else "execute_full_reference",
+                        "bound": bound,
+                        "physical_feasibility_at_decision": "unknown",
+                    }
+                    decision["decision_hash"] = study._sha(study._bytes(decision))
+                    raw = study._bytes(decision)
+                    path = f"decisions/{ordinal:02d}.json"
+                    study._save(arm_root, path, raw)
+                    decisions.append(
+                        {
+                            "candidate_id": key,
+                            "action": decision["action"],
+                            "artifact": {
+                                "path": path,
+                                "byte_length": len(raw),
+                                "sha256": study._sha(raw),
+                            },
+                        }
+                    )
+                    pruning_wall += perf_counter_ns() - decision_start
+                    if omit:
+                        skipped.append(key)
+                        continue
                 case_root = arm_root / key
                 case_root.mkdir()
                 row = study._reference_design_row(
@@ -339,7 +394,12 @@ def _run_layout_search(
                 study._save(case_root, "row.json", study._bytes(row))
                 if _work({"rows": [row]})["unknown_work"]:
                     raise ValueError("unknown numerical work; stop layout search")
-            eligible = [r for r in rows if r["selection_eligible"]]
+            eligible = [
+                r
+                for r in rows
+                if r["selection_eligible"]
+                and (not cost_pruning or verified_limit_outcome(plan, r) is True)
+            ]
             winner = (
                 min(
                     eligible,
@@ -356,6 +416,26 @@ def _run_layout_search(
                 if winner is None
                 else winner["candidate_id"],
             }
+            if cost_pruning:
+                comparison["schema_version"] = (
+                    "experimental-rc-control-layout-cost-pruned-comparison.v1"
+                )
+                comparison["cost_pruning"] = {
+                    "profile": plan["execution_policy"]["profile"],
+                    "considered_candidate_ids": ["baseline", *chosen],
+                    "evaluated_candidate_ids": [r["candidate_id"] for r in rows],
+                    "skipped_cost_dominated_candidate_ids": skipped,
+                    "outside_consideration_horizon_candidate_ids": [
+                        k for k in models if k not in ("baseline", *chosen)
+                    ],
+                    "unevaluated_candidate_ids": [
+                        k for k in models if k not in {r["candidate_id"] for r in rows}
+                    ],
+                    "decisions": decisions,
+                    "decision_wall_ns": pruning_wall,
+                    "unevaluated_physical_feasibility": "unknown",
+                    "global_cost_optimality_proved": False,
+                }
             comparison["report_hash"] = study._sha(study._bytes(comparison))
             study._save(arm_root, "comparison.json", study._bytes(comparison))
         except BaseException as error:
@@ -369,6 +449,14 @@ def _run_layout_search(
                         else "raised",
                         "exception_kind": type(error).__name__,
                         "rows": rows,
+                        **(
+                            {
+                                "cost_pruning_decisions": decisions,
+                                "skipped_cost_dominated_candidate_ids": skipped,
+                            }
+                            if cost_pruning
+                            else {}
+                        ),
                         "wall_ns": perf_counter_ns() - aw,
                         "unknown_work_until_outcome": True,
                     }
@@ -386,6 +474,8 @@ def _run_layout_search(
             "cpu_ns": process_time_ns() - ac,
             "unknown_work_until_outcome": False,
         }
+        if cost_pruning:
+            outcome["cost_pruning"] = comparison["cost_pruning"]
         study._save(arm_root, "outcome.json", study._bytes(outcome))
         comparisons[name] = comparison
         return outcome
@@ -408,11 +498,13 @@ def _run_layout_search(
         "candidate_coverage_audit": _coverage_audit(
             plan, comparisons.get("exhaustive_oracle")
         )
-        if uses_policy
+        if uses_policy and not cost_pruning
         else None,
         "candidate_cost_optimality_audit": candidate_cost_optimality_audit(
             plan, comparisons
-        ),
+        )
+        if not cost_pruning
+        else None,
         "ranking_wall_ns": rank_wall,
         "historical_training_cost": training,
         "historical_training_cost_counted_once_outside_online_arms": uses_policy,
@@ -434,6 +526,14 @@ def _run_layout_search(
         report["timing_scope"] = (
             "single_layout_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write"
         )
+    if cost_pruning:
+        report["schema_version"] = (
+            "experimental-rc-control-layout-cost-pruned-strategy.v1"
+        )
+        report["execution_policy"] = plan["execution_policy"]
+        report["timing_scope"] = (
+            "single_layout_strategy_preparation_ranking_cost_bounds_full_reference_and_IO_excluding_final_report_write"
+        )
     report["report_hash"] = study._sha(study._bytes(report))
     study._save(root, "result.json", study._bytes(report))
     return report
@@ -441,13 +541,26 @@ def _run_layout_search(
 
 def compare_control_layout_search(*args, **kwargs):
     """Run both frozen schedules followed by an optional separate oracle."""
-    if "only_strategy" in kwargs:
+    if "only_strategy" in kwargs or "cost_pruning" in kwargs:
         raise ValueError("use run_control_layout_strategy for standalone execution")
     return _run_layout_search(*args, **kwargs)
 
 
 def run_control_layout_strategy(*args, strategy, **kwargs):
     """Run one complete strategy; price order receives no learned artifacts."""
-    if strategy not in ("price_order", "learned_order") or "only_strategy" in kwargs:
+    if strategy not in ("price_order", "learned_order") or any(
+        k in kwargs for k in ("only_strategy", "cost_pruning")
+    ):
         raise ValueError("one supported explicit layout strategy required")
     return _run_layout_search(*args, only_strategy=strategy, **kwargs)
+
+
+def run_control_layout_cost_pruned_strategy(*args, strategy, **kwargs):
+    """Execute one frozen shortlist with recorded cost-only pruning decisions."""
+    if strategy not in ("price_order", "learned_order") or any(
+        k in kwargs for k in ("only_strategy", "cost_pruning")
+    ):
+        raise ValueError("one explicit cost-pruned layout strategy required")
+    return _run_layout_search(
+        *args, only_strategy=strategy, cost_pruning=True, **kwargs
+    )
