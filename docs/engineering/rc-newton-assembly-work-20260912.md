@@ -123,3 +123,9 @@ pass. The earlier inspected c1470918 shard log explicitly names
 `external_code_to_code_product_replay_not_passed` and
 `external_code_to_code_technical_receipt_not_ready`. Those external requirements
 are not weakened by this change.
+## Follow-up experiment
+
+[Immediate line-search reuse](rc-line-search-reuse-20260912.md) uses the actual
+dispatch counter to measure a bounded deterministic optimization: 128 fewer
+assemblies with 224 byte-exact paired step records. Default solver behavior and
+the unproved status of learned net benefit remain unchanged.
