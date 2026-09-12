@@ -1,5 +1,10 @@
 # Envelope campaign orchestration recovery — 2026-09-13
 
+**Historical continuation record:** the remaining execution and all nine original
+record audits subsequently completed. See the [audited results](rc-envelope-results-20260913.md)
+for terminal status, full costs and preserved packet inventories. The live handle
+description below records the launch state, not current process liveness.
+
 The original worker terminated with exit 1 after completing `train-b-r0`. The
 failure was `FileExistsError` when it tried to write `active-slot.json` a second
 time through the write-once `_save` helper. The second slot had not entered its
