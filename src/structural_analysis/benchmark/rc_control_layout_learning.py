@@ -284,6 +284,11 @@ def train_control_layout_policy(
         "policy": policy_ref,
         "fit": fit,
         "label_generation_wall_ns": labels["wall_ns"],
+        "label_invocations": [
+            invocation
+            for case in labels["cases"]
+            for invocation in case["row"]["invocations"]
+        ],
         "wall_ns": perf_counter_ns() - start,
         "cpu_ns": process_time_ns() - cpu,
         "timing_scope": "preflight_labels_fresh_verification_original_byte_checks_fit_and_IO_excluding_final_report_write",
