@@ -17,7 +17,10 @@ from pathlib import Path
 import re
 import stat
 from types import MappingProxyType
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from structural_analysis.execution.rc_strategy_cohort import RcStrategyCohortBundle
 
 from structural_analysis.execution.job_http_api import JobHttpResponse
 
@@ -366,10 +369,16 @@ class RcSearchArtifactWSGIApplication:
 
     def __init__(
         self,
-        mounts: Mapping[tuple[str, str], RcSearchArtifactBundle],
+        mounts: Mapping[
+            tuple[str, str], RcSearchArtifactBundle | RcStrategyCohortBundle
+        ],
         *,
         authorize: Callable[[str, str], bool],
     ):
+        from structural_analysis.execution.rc_strategy_cohort import (
+            RcStrategyCohortBundle,
+        )
+
         if not callable(authorize) or not 1 <= len(mounts) <= 32:
             raise ValueError("explicit authorization and bounded mounts required")
         frozen = {}
@@ -379,7 +388,7 @@ class RcSearchArtifactWSGIApplication:
                 or not _ID.fullmatch(tenant)
                 or type(study) is not str
                 or not _MOUNT.fullmatch(study)
-                or type(bundle) is not RcSearchArtifactBundle
+                or type(bundle) not in (RcSearchArtifactBundle, RcStrategyCohortBundle)
             ):
                 raise ValueError("registered tenant/study/bundle invalid")
             frozen[(tenant, study)] = bundle
