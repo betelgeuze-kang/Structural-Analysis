@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Changed-amplitude staged screening costs and exact retained histories](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-amplitudes-20260913.md)
 - [CI action inventory and package versus nested viewer manifest scope](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/ci-package-manifest-scope-20260913.md)
 - [Workbench staged prefix decisions, full acceptance and original downloads](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-workbench-20260913.md)
 - [Staged prefix graph admission and original HTTP delivery](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-http-20260913.md)
