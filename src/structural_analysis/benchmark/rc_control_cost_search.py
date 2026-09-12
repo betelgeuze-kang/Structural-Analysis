@@ -19,7 +19,9 @@ from structural_analysis.benchmark import rc_control_design as study
 from structural_analysis.benchmark.rc_control_candidate_cost import (
     verified_limit_outcome,
 )
-from structural_analysis.benchmark.rc_control_durable import DurableRCControlResultSession
+from structural_analysis.benchmark.rc_control_durable import (
+    DurableRCControlResultSession,
+)
 from structural_analysis.benchmark.rc_control_reuse import (
     NewAnalysisRequired,
     RCControlResultSession,
@@ -286,9 +288,10 @@ def run_rc_control_cost_search(
             "new_model_evaluation", evaluation["mode"] == "fresh_reference_and_replay"
         )
         used += int(fresh)
-        hits += int(evaluation["mode"] in (
-            "verified_original_reused", "verified_durable_original_reused"
-        ))
+        hits += int(
+            evaluation["mode"]
+            in ("verified_original_reused", "verified_durable_original_reused")
+        )
         row = evaluation["row"]
         if (
             row["material_estimate"]
@@ -317,7 +320,9 @@ def run_rc_control_cost_search(
             },
         )
         invocations += work["api_invocation_count"]
-        unknown_work_stop = work["unknown_work"] or evaluation.get("historical_unknown_work", False)
+        unknown_work_stop = work["unknown_work"] or evaluation.get(
+            "historical_unknown_work", False
+        )
         for key, value in work["known_counters"].items():
             aggregate[key] += value
     bound = finite_pool_cost_bound(pool, outcomes)
