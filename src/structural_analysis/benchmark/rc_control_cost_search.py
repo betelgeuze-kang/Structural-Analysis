@@ -9,6 +9,7 @@ The old exhaustive strategy-comparison contract is deliberately unchanged.
 from __future__ import annotations
 
 from dataclasses import asdict
+from collections.abc import Callable
 import math
 from pathlib import Path
 from time import perf_counter_ns, process_time_ns
@@ -131,6 +132,8 @@ def run_rc_control_cost_search(
     max_new_model_analyses: int = 17,
     candidate_order: tuple[str, ...] | None = None,
     terminal_limits: design.FiberFrameTerminalLimits | None = None,
+    maximum_wall_seconds: float | None = None,
+    stop_requested: Callable[[], bool] | None = None,
 ) -> dict[str, Any]:
     """Run one predeclared order, with bounded new verified-model evaluations.
 
@@ -142,6 +145,15 @@ def run_rc_control_cost_search(
     No exhaustive oracle or second strategy is run by this local-use function.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if maximum_wall_seconds is not None and (
+        type(maximum_wall_seconds) not in (int, float)
+        or not math.isfinite(maximum_wall_seconds)
+        or not 0 < maximum_wall_seconds <= 86400
+    ):
+        raise ValueError("wall budget must be finite in (0, 86400]")
+    if stop_requested is not None and not callable(stop_requested):
+        raise ValueError("stop request must be a callable")
+    stopped = None
     if type(session) is not RCControlResultSession:
         raise ValueError("exact process-local result session required")
     if type(max_new_model_analyses) is not int or not 0 <= max_new_model_analyses <= 17:
@@ -227,6 +239,9 @@ def run_rc_control_cost_search(
         "pool": pool,
         "evaluation_order": order,
         "max_new_model_analyses": max_new_model_analyses,
+        "maximum_wall_seconds": maximum_wall_seconds,
+        "cancellation_enabled": stop_requested is not None,
+        "wall_budget_scope": "cooperative_between_models_not_a_solver_timeout",
         "budget_scope": "new_model_evaluations_including_baseline_each_with_original_analysis_and_fresh_replay",
         "model_checksums": {
             name: model.canonical_model_checksum for name, model in models.items()
@@ -254,6 +269,18 @@ def run_rc_control_cost_search(
             "evaluation": None,
         }
         records.append(record)
+        if stopped is None and stop_requested is not None:
+            requested = stop_requested()
+            if type(requested) is not bool:
+                raise ValueError("stop request must return an actual boolean")
+            if requested:
+                stopped = "cancelled_between_models"
+        if stopped is None and maximum_wall_seconds is not None:
+            if perf_counter_ns() - wall >= maximum_wall_seconds * 1e9:
+                stopped = "wall_budget_exhausted_between_models"
+        if stopped is not None:
+            record["status"] = "not_run_after_cooperative_stop"
+            continue
         bound = finite_pool_cost_bound(pool, outcomes)
         selected_cost = bound["selected_estimate"]
         if (
@@ -319,7 +346,7 @@ def run_rc_control_cost_search(
     report = {
         "schema_version": "local-rc-cost-search-result.v1",
         "plan_hash": plan["plan_hash"],
-        "status": "unknown_work_stop" if unknown_work_stop else bound["status"],
+        "status": "unknown_work_stop" if unknown_work_stop else (stopped or bound["status"]),
         "evaluation_order": order,
         "records": records,
         "outcomes": outcomes,
