@@ -138,6 +138,43 @@ def test_standalone_rejects_cross_strategy_inputs_before_output(
     assert not root.exists()
 
 
+@pytest.mark.parametrize(
+    "options",
+    [
+        ["--strategy", "price_order", "--policy", "unused-policy.json"],
+        ["--strategy", "learned_order"],
+        ["--strategy", "learned_order", "--policy", "unused-policy.json"],
+    ],
+)
+def test_standalone_cli_rejects_missing_or_cross_strategy_artifacts_before_reads(
+    tmp_path, monkeypatch, options
+):
+    from structural_analysis.benchmark import rc_control_candidate_strategy_cli as cli
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid artifact combination must reject before reading inputs")
+
+    monkeypatch.setattr(cli, "_read", forbidden)
+    output = tmp_path / "output"
+    with pytest.raises(ValueError):
+        cli.main(
+            [
+                "--model",
+                "unused-model.json",
+                "--request",
+                "unused-request.json",
+                "--experiment",
+                "unused-experiment.json",
+                "--output",
+                str(output),
+                "--source-revision",
+                "a" * 40,
+                *options,
+            ]
+        )
+    assert not output.exists()
+
+
 def test_actual_training_labels_include_preload_all_epochs_and_fresh_verification(
     trained,
 ):
