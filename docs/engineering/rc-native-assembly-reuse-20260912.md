@@ -92,3 +92,7 @@ bytes**. Its adjacent inventory was reread and checked, SHA256
 [The summary](rc-native-assembly-reuse-20260912.summary.json) binds exact paths,
 source hashes, counters, timings and material observations. Numerical source
 files were checked against the captured execution snapshots before committing.
+
+[Design-search integration](rc-design-native-reuse-20260912.md) now carries the
+option through durable replay, candidate reanalysis and Workbench artifact
+validation, with separate execution evidence and no new AI benefit claim.

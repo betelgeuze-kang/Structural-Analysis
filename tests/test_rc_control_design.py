@@ -432,3 +432,26 @@ def test_history_screen_uses_peak_not_terminal_and_missing_family_is_unavailable
     assert (
         screens["maximum_steel_accumulated_plastic_strain"]["status"] == "unavailable"
     )
+
+
+def test_native_reuse_design_preserves_physical_and_cost_results(tmp_path):
+    args = inputs()
+    reports = [
+        study.compare_rc_control_designs(
+            **args,
+            output_directory=tmp_path / str(flag),
+            reuse_line_search_assembly=flag,
+        )
+        for flag in (False, True)
+    ]
+    assert reports[0]["selected_candidate_id"] == reports[1]["selected_candidate_id"]
+    assert reports[0]["verified_count"] == reports[1]["verified_count"] == 2
+    assert "line_search_assembly_reuse" not in reports[0]
+    assert (
+        reports[1]["line_search_assembly_reuse"]
+        == "rc-control-immediate-line-search-reuse.v1"
+    )
+    for old, new in zip(reports[0]["rows"], reports[1]["rows"], strict=True):
+        for key in ("quantities", "material_estimate", "performance", "screens"):
+            assert old[key] == new[key]
+        assert new["full_reference_verification_pass"]

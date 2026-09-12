@@ -1202,3 +1202,55 @@ def test_genesis_only_restart_has_no_positive_physical_contract(blocked, monkeyp
     assert report.to_dict()["fresh_source_execution_invoked"] is True
     assert report.to_dict()["solver_replay_performed"] is False
     assert report.to_dict()["replay_control_work"]["attempted_step_count"] == 0
+
+
+def test_native_reuse_binds_api_verification_and_restart_profile():
+    model = load_neutral_json(MODEL)
+    baseline = api.analyze_bounded_rc_fiber_direct_control(
+        model, SMALL_TARGETS, **OPTIONS
+    )
+    native = api.analyze_bounded_rc_fiber_direct_control(
+        model, SMALL_TARGETS, **OPTIONS, reuse_line_search_assembly=True
+    )
+    before, after = baseline.to_dict(), native.to_dict()
+    assert before["response_history"] == after["response_history"]
+    assert before["metrics"]["control_work"] == after["metrics"]["control_work"]
+    assert (
+        after["request"]["line_search_assembly_reuse"]
+        == "rc-control-immediate-line-search-reuse.v1"
+    )
+    assert (
+        after["path"]["scope"]["line_search_assembly_reuse"]
+        == after["request"]["line_search_assembly_reuse"]
+    )
+    for flag in (False, True):
+        verified = api.validate_bounded_rc_fiber_direct_control_artifacts(
+            model,
+            SMALL_TARGETS,
+            result=native.result_artifact_bytes(),
+            checkpoint=native.checkpoint_artifact_bytes(),
+            **OPTIONS,
+            reuse_line_search_assembly=flag,
+        ).to_dict()
+        assert verified["contract_pass"] is flag
+        assert verified["fresh_source_execution_invoked"] is flag
+    resumed = api.analyze_bounded_rc_fiber_direct_control(
+        model,
+        (),
+        **OPTIONS,
+        restart=native.checkpoint_artifact_bytes(),
+        reuse_line_search_assembly=True,
+    )
+    assert resumed.to_dict()["contract_pass"]
+    assert resumed.to_dict()["response_history"] == after["response_history"]
+    with pytest.raises(ValueError):
+        api.analyze_bounded_rc_fiber_direct_control(
+            model, (), **OPTIONS, restart=native.checkpoint_artifact_bytes()
+        )
+
+
+@pytest.mark.parametrize('value', [1, None, 'true'])
+def test_invalid_reuse_switch_rejects_before_model_compilation(value):
+    with pytest.raises(ValueError, match='boolean line-search assembly reuse'):
+        api.analyze_bounded_rc_fiber_direct_control(None, (1e-6,),
+            control_global_dof=7, reuse_line_search_assembly=value)

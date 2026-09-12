@@ -511,7 +511,10 @@ def _prepare(
     maximum_targets,
     restart,
     constant_nodal_loads,
+    reuse_line_search_assembly=False,
 ):
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
     if type(model) is not CanonicalModel:
         raise ValueError("model must be an exact CanonicalModel")
     constants = _constant_loads(constant_nodal_loads)
@@ -550,6 +553,10 @@ def _prepare(
         "maximum_targets": maximum_targets,
         "restart_input_sha256": None if resume is None else _hash(resume),
     }
+    if reuse_line_search_assembly:
+        request["line_search_assembly_reuse"] = (
+            "rc-control-immediate-line-search-reuse.v1"
+        )
     if constants:
         request["constant_nodal_loads"] = _constant_load_payload(constants)
     model_binding = {
@@ -590,6 +597,7 @@ def analyze_bounded_rc_fiber_direct_control(
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
     constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = (),
+    reuse_line_search_assembly: bool = False,
 ) -> BoundedRCFiberDirectControlResult:
     snapshot, targets, cfg, resume, request, binding, constants = _prepare(
         model,
@@ -601,6 +609,7 @@ def analyze_bounded_rc_fiber_direct_control(
         maximum_targets,
         restart,
         constant_nodal_loads,
+        reuse_line_search_assembly,
     )
     compiled, unsupported, warnings = _compile(snapshot)
     compiled = _with_constant_loading(compiled, constants)
@@ -655,6 +664,7 @@ def analyze_bounded_rc_fiber_direct_control(
                 maximum_reversals=maximum_reversals,
                 maximum_targets=maximum_targets,
                 restart=resume,
+                reuse_line_search_assembly=reuse_line_search_assembly,
             )
         except (
             StatefulFiberFrame2DControlExecutionError,
@@ -693,6 +703,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
     constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = (),
+    reuse_line_search_assembly: bool = False,
 ) -> BoundedRCFiberDirectControlValidationReport:
     """Verify against a fresh complete source execution, never a supplied success flag."""
     report: dict[str, Any] = {
@@ -740,6 +751,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_targets,
             restart,
             constant_nodal_loads,
+            reuse_line_search_assembly,
         )
         if supplied.get("schema_version") != (
             CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
@@ -775,6 +787,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_targets=maximum_targets,
             restart=resume,
             constant_nodal_loads=constants,
+            reuse_line_search_assembly=reuse_line_search_assembly,
         )
         regenerated = expected.to_dict()
         report["replay_control_work"] = regenerated["metrics"]["control_work"]

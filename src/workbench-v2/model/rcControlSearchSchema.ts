@@ -79,6 +79,7 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     && report.historical_training_cost_counted_once_outside_online_arms === true, 'search_report_invalid')
   const planDoc = document(await read('plan.json', MAX)), plan = planDoc.value
   await selfHash(planDoc.raw, plan, 'plan_hash')
+  check(plan.line_search_assembly_reuse === undefined || plan.line_search_assembly_reuse === 'rc-control-immediate-line-search-reuse.v1', 'search_reuse_profile_invalid')
   check((plan.schema_version === 'experimental-rc-control-candidate-search-plan.v2' && !('ranking' in plan)
     || plan.schema_version === 'experimental-rc-control-candidate-search-plan.v3' && plan.ranking?.strategy === CHEAPER_BOUNDARY_RANKING)
     && plan.plan_hash === report.plan_hash && plan.source_revision === report.source_revision
@@ -148,6 +149,7 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     check(comparison.report_hash === outcome.comparison_hash && comparison.source_revision === report.source_revision
       && same(comparison.rows.map((r: RcObject) => r.candidate_id), expected) && outcome.request_count === expected.length
       && ['control_request', 'history_limits', 'material_limits', 'terminal_limits', 'price_table_hash'].every(k => same(comparison[k], plan[k]))
+      && comparison.line_search_assembly_reuse === plan.line_search_assembly_reuse
       && comparison.prices !== null && same(searchWork(comparison.rows), outcome.execution_work)
       && comparison.total_wall_ns <= outcome.wall_ns && comparison.total_process_cpu_ns <= outcome.cpu_ns, 'search_comparison_binding_invalid')
     for (const row of comparison.rows) {

@@ -118,8 +118,9 @@ def test_actual_training_labels_include_preload_all_epochs_and_fresh_verificatio
     assert not report["independent_generalization"] and not report["net_savings_proved"]
 
 
+@pytest.mark.parametrize("reuse", [False, True])
 def test_actual_search_freezes_both_rankings_before_full_paths_and_oracle(
-    trained, tmp_path, monkeypatch
+    trained, tmp_path, monkeypatch, reuse
 ):
     args = search_inputs(trained)
     before = args["baseline"].canonical_payload()
@@ -139,12 +140,17 @@ def test_actual_search_freezes_both_rankings_before_full_paths_and_oracle(
             raw = (root / ref["path"]).read_bytes()
             assert ref["sha256"] == study._sha(raw) == row["model_checksum"]
             assert len(raw) == ref["byte_length"]
+        assert kw["reuse_line_search_assembly"] is reuse
+        assert ("line_search_assembly_reuse" in plan) is reuse
         observed.append(kw["output_directory"].name)
         return call(*a, **kw)
 
     monkeypatch.setattr(study, "compare_rc_control_designs", observe)
     report = search.compare_rc_control_candidate_search(
-        **args, output_directory=root, evaluate_exhaustive_oracle=True
+        **args,
+        output_directory=root,
+        evaluate_exhaustive_oracle=True,
+        reuse_line_search_assembly=reuse,
     )
     assert observed == ["price_order", "learned_order", "exhaustive_oracle"]
     assert args["baseline"].canonical_payload() == before

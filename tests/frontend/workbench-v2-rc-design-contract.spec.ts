@@ -79,3 +79,8 @@ test('RC study preserves quantities and unknown verification work for a failed a
   expect(review.report.rows[1].invocations[1]).toMatchObject({ status: 'raised', work: null, unknown_execution_work: true })
   expect(review.report.rows[1].selection_eligible).toBe(false)
 })
+
+test('RC study rejects unknown reuse profiles before trusting result files', async () => {
+  const changed = original.toString().replace('{', '{"line_search_assembly_reuse":"unknown",')
+  await expect(validateRcDesignStudy(rehash(changed), read)).rejects.toThrow('study_reuse_profile_invalid')
+})

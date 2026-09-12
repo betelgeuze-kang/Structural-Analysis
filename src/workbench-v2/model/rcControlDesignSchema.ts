@@ -119,6 +119,8 @@ async function verifyCandidate(row: RcObject, rowRaw: string, report: RcObject, 
   const apiDoc = artifacts.result, nativeDoc = artifacts.checkpoint, validation = artifacts.verification?.value
   check(apiDoc && nativeDoc && validation && row.status === 'verified' && row.failure === null && row.invocations.length === 2, 'study_verified_missing')
   const api = apiDoc.value, native = nativeDoc.value, config = report.control_request, targets = config.targets_m
+  check(api.request.line_search_assembly_reuse === report.line_search_assembly_reuse
+    && native.scope.line_search_assembly_reuse === report.line_search_assembly_reuse, 'study_reuse_binding_invalid')
   const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
   const version = hasPreload ? 'v2' : 'v1'
   await selfHash(apiDoc.raw, api, 'result_hash'); await selfHash(nativeDoc.raw, native, 'artifact_hash')
@@ -166,6 +168,10 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   check(report.schema_version === RC_STUDY_SCHEMA && same(report.claims, CLAIMS_STUDY) && report.source_revision_is_attestation === false
     && typeof report.source_revision === 'string' && /^[a-f0-9]{40}$/.test(report.source_revision), 'study_identity_invalid')
   const identityKeys = ['schema_version', 'baseline_checksum', 'candidates', 'control_request', 'history_limits', 'material_limits', 'terminal_limits', 'prices', 'price_table_hash', 'source_revision', 'source_revision_is_attestation']
+  if (report.line_search_assembly_reuse !== undefined) {
+    check(report.line_search_assembly_reuse === 'rc-control-immediate-line-search-reuse.v1', 'study_reuse_profile_invalid')
+    identityKeys.push('line_search_assembly_reuse')
+  }
   const members = fields(doc.raw)
   check(await sha256Hex(`{${identityKeys.sort().map(k => { check(members.has(k), 'study_identity_missing'); return members.get(k)!.member }).join(',')}}`) === report.request_hash, 'study_request_hash_invalid')
   const config = report.control_request

@@ -117,6 +117,7 @@ def compare_rc_control_designs(
     source_revision: str,
     output_directory: Path,
     terminal_limits: design.FiberFrameTerminalLimits | None = None,
+    reuse_line_search_assembly: bool = False,
 ) -> dict:
     """Analyze and freshly reverify baseline and every candidate from epoch zero.
 
@@ -124,6 +125,8 @@ def compare_rc_control_designs(
     the denominator; quantities survive numerical failure. An I/O failure aborts
     publication instead of silently losing an original numerical artifact.
     """
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
     if type(baseline) is not CanonicalModel:
         raise ValueError("exact canonical baseline required")
     if type(request) is not BoundedRCFiberDirectControlRequest:
@@ -187,8 +190,14 @@ def compare_rc_control_designs(
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
     }
+    if reuse_line_search_assembly:
+        identity["line_search_assembly_reuse"] = (
+            "rc-control-immediate-line-search-reuse.v1"
+        )
     _save(root, "request.json", _bytes(identity))
     kwargs = request.api_kwargs() | {"restart": None}
+    if reuse_line_search_assembly:
+        kwargs["reuse_line_search_assembly"] = True
     rows = []
     for candidate in (None, *candidates):
         candidate_id = "baseline" if candidate is None else candidate.candidate_id

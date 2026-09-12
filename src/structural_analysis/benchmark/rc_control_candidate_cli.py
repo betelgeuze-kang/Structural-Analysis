@@ -54,6 +54,7 @@ def main(argv=None):
             sub.add_argument("--training-report", type=Path, required=True)
             sub.add_argument("--full-analysis-budget", type=int, default=3)
             sub.add_argument("--evaluate-exhaustive-oracle", action="store_true")
+            sub.add_argument("--reuse-line-search-assembly", action="store_true")
     args = parser.parse_args(argv)
     model = load_neutral_json_bytes(
         _read(args.model, 16 * 1024 * 1024), source_path=str(args.model)
@@ -104,6 +105,7 @@ def main(argv=None):
             full_analysis_budget=args.full_analysis_budget,
             evaluate_exhaustive_oracle=args.evaluate_exhaustive_oracle,
             ranking_strategy=args.ranking_strategy,
+            reuse_line_search_assembly=args.reuse_line_search_assembly,
         )
         output = {
             "report_hash": report["report_hash"],

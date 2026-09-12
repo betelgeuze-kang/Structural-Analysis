@@ -29,6 +29,7 @@ def main(argv: list[str] | None = None) -> int:
     for name in ("model", "request", "experiment", "output"):
         parser.add_argument(f"--{name}", required=True, type=Path)
     parser.add_argument("--source-revision", required=True)
+    parser.add_argument("--reuse-line-search-assembly", action="store_true")
     args = parser.parse_args(argv)
     model = load_neutral_json_bytes(
         _read(args.model, 16 * 1024 * 1024), source_path=str(args.model)
@@ -39,6 +40,8 @@ def main(argv: list[str] | None = None) -> int:
     candidates, prices, terminal, history, material = (
         read_design_experiment_with_material_history(args.experiment)
     )
+    if history is None or material is None:
+        raise ValueError("explicit history and material limits required")
     report = compare_rc_control_designs(
         model,
         candidates,
@@ -49,6 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         prices=prices,
         source_revision=args.source_revision,
         output_directory=args.output,
+        reuse_line_search_assembly=args.reuse_line_search_assembly,
     )
     print(
         json.dumps(

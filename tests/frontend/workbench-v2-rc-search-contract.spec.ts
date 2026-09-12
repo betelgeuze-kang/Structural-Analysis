@@ -193,3 +193,11 @@ for (const [name, mutate] of [
     await expect(validateRcControlSearch(input.result, input.read)).rejects.toThrow()
   })
 }
+
+for (const profile of ['unknown', 'rc-control-immediate-line-search-reuse.v1']) {
+  test(`RC search rejects rehashed reuse profile mismatch: ${profile}`, async () => {
+    const plan = changed(readFileSync(root + 'plan.json', 'utf8'), { line_search_assembly_reuse: JSON.stringify(profile) }, 'plan_hash')
+    const result = changed(original.toString(), { plan_hash: JSON.stringify(JSON.parse(new TextDecoder().decode(plan)).plan_hash) }, 'report_hash')
+    await expect(validateRcControlSearch(result, p => p === 'plan.json' ? Promise.resolve(plan) : read(p))).rejects.toThrow(profile === 'unknown' ? 'search_reuse_profile_invalid' : 'search_comparison_binding_invalid')
+  })
+}

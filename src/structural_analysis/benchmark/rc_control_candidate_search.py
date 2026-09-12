@@ -191,6 +191,7 @@ def compare_rc_control_candidate_search(
     terminal_limits: design.FiberFrameTerminalLimits | None = None,
     evaluate_exhaustive_oracle: bool = False,
     ranking_strategy: str = LEGACY_RANKING,
+    reuse_line_search_assembly: bool = False,
 ):
     """Compare frozen price-order and learned-order shortlists at the same budget.
 
@@ -201,6 +202,8 @@ def compare_rc_control_candidate_search(
     family study is not a held-out project/campaign generalization experiment.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
     if type(ranking_strategy) is not str or ranking_strategy not in RANKING_STRATEGIES:
         raise ValueError("supported candidate ranking strategy required")
     if type(policy) is not RCControlCandidatePolicy:
@@ -391,6 +394,8 @@ def compare_rc_control_candidate_search(
     if ranking is not None:
         plan["schema_version"] = "experimental-rc-control-candidate-search-plan.v3"
         plan["ranking"] = ranking
+    if reuse_line_search_assembly:
+        plan["line_search_assembly_reuse"] = "rc-control-immediate-line-search-reuse.v1"
     plan["plan_hash"] = study._sha(study._bytes(plan))
     study._save(root, "plan.json", study._bytes(plan))
     study._save(root, "policy.json", study._bytes(p))
@@ -418,6 +423,7 @@ def compare_rc_control_candidate_search(
                 prices=prices,
                 source_revision=source_revision,
                 output_directory=root / name,
+                reuse_line_search_assembly=reuse_line_search_assembly,
             )
         except BaseException as exc:
             study._save(

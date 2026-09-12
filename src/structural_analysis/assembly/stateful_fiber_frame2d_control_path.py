@@ -129,6 +129,7 @@ def _scope(
     allow_reversals,
     maximum_reversals,
     maximum_targets,
+    reuse_line_search_assembly=False,
 ):
     return {
         "problem_contract_hash": problem.contract_hash,
@@ -140,6 +141,11 @@ def _scope(
         "allow_reversals": allow_reversals,
         "maximum_reversals": maximum_reversals,
         "maximum_targets": maximum_targets,
+        **(
+            {"line_search_assembly_reuse": "rc-control-immediate-line-search-reuse.v1"}
+            if reuse_line_search_assembly
+            else {}
+        ),
     }
 
 
@@ -366,9 +372,20 @@ class StatefulFiberFrame2DControlExecutionError(ValueError):
 
 
 def _execute_raw(
-    problem, initial, targets, control_global_dof, config, source_hash, *, phase
+    problem,
+    initial,
+    targets,
+    control_global_dof,
+    config,
+    source_hash,
+    *,
+    phase,
+    reuse_line_search_assembly=False,
 ):
     """Exactly one core call per authored target, without recursive restart or retries."""
+    control_options: dict[str, Any] = (
+        {"reuse_line_search_assembly": True} if reuse_line_search_assembly else {}
+    )
     accepted = initial
     steps = []
     attempts: list[dict[str, Any]] = []
@@ -428,6 +445,7 @@ def _execute_raw(
                 control_global_dof=control_global_dof,
                 target_control_displacement_m=target,
                 config=config,
+                **control_options,
             )
         except Exception as exc:
             if not source_unchanged():
@@ -688,6 +706,7 @@ def run_stateful_fiber_frame2d_control_path(
     maximum_reversals: int = 0,
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
+    reuse_line_search_assembly: bool = False,
 ) -> StatefulFiberFrame2DControlPathResult:
     """Execute a bounded suffix; validate a restart by solving its complete prefix.
 
@@ -695,6 +714,8 @@ def run_stateful_fiber_frame2d_control_path(
     Prefix verification work is separate from the newly requested denominator.
     An empty suffix is permitted only for explicit restart verification.
     """
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
     if type(problem) is not StatefulFiberFrame2DProblem:
         raise ValueError("problem must be a StatefulFiberFrame2DProblem")
     if (
@@ -719,6 +740,7 @@ def run_stateful_fiber_frame2d_control_path(
         allow_reversals,
         maximum_reversals,
         maximum_targets,
+        reuse_line_search_assembly,
     )
     genesis = initial_stateful_fiber_frame2d_checkpoint(problem)
     prior = None
@@ -779,6 +801,7 @@ def run_stateful_fiber_frame2d_control_path(
                 cfg,
                 scope["problem_contract_hash"],
                 phase="prefix_replay",
+                reuse_line_search_assembly=reuse_line_search_assembly,
             )
         except StatefulFiberFrame2DControlExecutionError as exc:
             failure = exc.to_dict()
@@ -830,6 +853,7 @@ def run_stateful_fiber_frame2d_control_path(
             cfg,
             scope["problem_contract_hash"],
             phase="suffix",
+            reuse_line_search_assembly=reuse_line_search_assembly,
         )
     except StatefulFiberFrame2DControlExecutionError as exc:
         failure = exc.to_dict()
