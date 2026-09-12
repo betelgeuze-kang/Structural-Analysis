@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Actual short-history layout screening and full-prefix equality](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-prefix-pilot-20260913.md)
 - [Canonical companion metadata and original-derived DCR fidelity](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-canonical-companion-20260913.md)
 - [Code-check model and load-combination scope isolation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-codecheck-scope-20260913.md)
 - [Missing optimization timeline recovery and production browser regression](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/viewer-missing-timeline-20260913.md)
