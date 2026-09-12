@@ -152,7 +152,10 @@ class RcSearchArtifactBundle:
             return raw
 
         result = _document(read("result.json", _META_MAX), "report_hash")
-        if result.get("schema_version") == "experimental-rc-control-layout-search.v1":
+        if result.get("schema_version") in (
+            "experimental-rc-control-layout-search.v1",
+            "experimental-rc-control-layout-strategy.v1",
+        ):
             from structural_analysis.execution.rc_layout_search_graph import (
                 read_layout_search_graph,
             )

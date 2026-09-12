@@ -168,3 +168,109 @@ def test_rejects_tampered_or_self_consistently_rehashed_graphs(graph, change):
         RcSearchArtifactBundle.from_reader(
             lambda name, maximum: files[name], expected_report_hash=expected
         )
+
+
+@pytest.fixture(scope="module", params=["price_order", "learned_order"])
+def standalone_graph(inputs, tmp_path_factory, request):  # noqa: F811
+    from structural_analysis.benchmark.rc_control_layout_search import (
+        run_control_layout_strategy,
+    )
+
+    strategy = request.param
+    args = dict(inputs)
+    if strategy == "price_order":
+        args.pop("policy")
+        args.pop("training_report")
+    root = tmp_path_factory.mktemp("layout-single-http") / strategy
+    report = run_control_layout_strategy(
+        **args, strategy=strategy, output_directory=root
+    )
+    return root, report, strategy
+
+
+def test_standalone_original_graph_http_without_solver_or_training(
+    standalone_graph, monkeypatch
+):
+    root, report, strategy = standalone_graph
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("admission executed solver or training")
+
+    monkeypatch.setattr(study.api, "analyze_bounded_rc_fiber_direct_control", forbidden)
+    monkeypatch.setattr(
+        study.api, "validate_bounded_rc_fiber_direct_control_artifacts", forbidden
+    )
+    monkeypatch.setattr(learning, "_candidate_fit_parameters", forbidden)
+    if strategy == "price_order":
+        monkeypatch.setattr(learning.RCControlLayoutPolicy, "predict", forbidden)
+    bundle = RcSearchArtifactBundle.from_directory(
+        root, expected_report_hash=report["report_hash"]
+    )
+    assert ("policy.json" in bundle.artifacts) == (strategy == "learned_order")
+    assert ("historical-training.json" in bundle.artifacts) == (
+        strategy == "learned_order"
+    )
+    assert not any("exhaustive_oracle" in name for name in bundle.artifacts)
+    app = RcSearchArtifactWSGIApplication(
+        {("tenant", "single"): bundle},
+        authorize=lambda t, k: (t, k) == ("tenant", "synthetic"),
+    )
+    for name, raw in bundle.artifacts.items():
+        assert raw == (root / name).read_bytes()
+        response = app.handle(
+            "GET",
+            "/v1/rc-search/single/" + name,
+            headers={
+                "X-Structural-Tenant": "tenant",
+                "Authorization": "Bearer synthetic",
+            },
+        )
+        assert response.status == 200 and response.body == raw
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "strategy",
+        "oracle",
+        "timing",
+        "coverage",
+        "training",
+        "extra_arm",
+        "raw_checkpoint",
+    ],
+)
+def test_standalone_rejects_rehashed_contract_tampering(standalone_graph, change):
+    root, report, strategy = standalone_graph
+    bundle = RcSearchArtifactBundle.from_directory(
+        root, expected_report_hash=report["report_hash"]
+    )
+    files = dict(bundle.artifacts)
+    result = json.loads(files["result.json"])
+    plan = json.loads(files["plan.json"])
+    if change == "strategy":
+        plan["strategy"] = (
+            "learned_order" if strategy == "price_order" else "price_order"
+        )
+    elif change == "oracle":
+        plan["oracle_after_online_arms"] = True
+    elif change == "timing":
+        result["timing_scope"] = "both_arms"
+    elif change == "coverage":
+        result["candidate_coverage_audit"] = {"missed_feasible_count": 0}
+    elif change == "training":
+        result["historical_training_cost_counted_once_outside_online_arms"] = (
+            strategy == "price_order"
+        )
+    elif change == "extra_arm":
+        result["arms"]["extra"] = result["arms"][strategy]
+    else:
+        files[f"{strategy}/baseline/baseline/checkpoint.json"] += b" "
+    files["plan.json"] = rehash(plan, "plan_hash")
+    result["plan_hash"] = plan["plan_hash"]
+    files["result.json"] = rehash(result, "report_hash")
+    with pytest.raises(ValueError):
+        RcSearchArtifactBundle.from_reader(
+            lambda name, maximum: files[name],
+            expected_report_hash=result["report_hash"],
+        )

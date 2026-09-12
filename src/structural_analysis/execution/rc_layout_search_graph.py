@@ -59,9 +59,21 @@ def read_layout_search_graph(read, result):
 
 
 def _read_layout_search_graph(read, result):
+    standalone = (
+        result.get("schema_version") == "experimental-rc-control-layout-strategy.v1"
+    )
+    strategy = result.get("strategy") if standalone else None
+    if standalone and strategy not in ("price_order", "learned_order"):
+        raise ValueError("explicit standalone layout strategy required")
+    uses_policy = strategy != "price_order"
     plan = _document(read("plan.json", _META_MAX), "plan_hash")
     if (
-        plan.get("schema_version") != "experimental-rc-control-layout-search-plan.v1"
+        plan.get("schema_version")
+        != (
+            "experimental-rc-control-layout-strategy-plan.v1"
+            if standalone
+            else "experimental-rc-control-layout-search-plan.v1"
+        )
         or result.get("plan_hash") != plan["plan_hash"]
     ):
         raise ValueError("layout plan binding mismatch")
@@ -71,25 +83,47 @@ def _read_layout_search_graph(read, result):
         or plan["source_revision"] != result.get("source_revision")
     ):
         raise ValueError("layout source revision binding mismatch")
-    policy_raw = read("policy.json", _META_MAX)
-    policy = RCControlLayoutPolicy(policy_raw.decode("utf-8"))
-    training = _document(read("historical-training.json", _META_MAX), "report_hash")
-    _training_cost(policy, training)
-    _same(
-        result.get("historical_training_cost"),
-        training,
-        "historical training document differs",
-    )
-    if (
-        plan.get("policy_hash") != policy.policy_hash
-        or plan.get("training_report_hash") != training["report_hash"]
+    if standalone and (
+        plan.get("strategy") != strategy
+        or plan.get("oracle_after_online_arms") is not False
+        or result.get("oracle") is not None
+        or result.get("timing_scope")
+        != "single_layout_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write"
     ):
-        raise ValueError("layout training/policy plan binding mismatch")
-    if (
-        result.get("historical_training_cost_counted_once_outside_online_arms")
-        is not True
-    ):
-        raise ValueError("explicit once-only training accounting required")
+        raise ValueError("standalone layout strategy or scope differs")
+    policy = None
+    if uses_policy:
+        policy_raw = read("policy.json", _META_MAX)
+        policy = RCControlLayoutPolicy(policy_raw.decode("utf-8"))
+        training = _document(read("historical-training.json", _META_MAX), "report_hash")
+        _training_cost(policy, training)
+        _same(
+            result.get("historical_training_cost"),
+            training,
+            "historical training document differs",
+        )
+        if (
+            plan.get("policy_hash") != policy.policy_hash
+            or plan.get("training_report_hash") != training["report_hash"]
+        ):
+            raise ValueError("layout training/policy plan binding mismatch")
+        if (
+            result.get("historical_training_cost_counted_once_outside_online_arms")
+            is not True
+        ):
+            raise ValueError("explicit once-only training accounting required")
+    else:
+        if (
+            any(
+                plan.get(k) is not None
+                for k in ("policy_hash", "training_report_hash", "ranking")
+            )
+            or result.get("historical_training_cost") is not None
+            or result.get("historical_training_cost_counted_once_outside_online_arms")
+            is not False
+            or result.get("ranking_wall_ns") != 0
+        ):
+            raise ValueError("price strategy cannot carry learned artifacts or costs")
     _same(
         result.get("claims"),
         {
@@ -122,7 +156,7 @@ def _read_layout_search_graph(read, result):
         raise ValueError("unique portable layout pool identities required")
     model_ids = [r["model_identity"] for r in pool]
     if len(set(model_ids)) != len(model_ids) or set(model_ids) & set(
-        policy.to_dict()["training_model_identities"]
+        policy.to_dict()["training_model_identities"] if policy is not None else []
     ):
         raise ValueError("duplicate or training-overlapping layout identities")
     request = decode_bounded_rc_fiber_direct_control_request(
@@ -143,6 +177,7 @@ def _read_layout_search_graph(read, result):
     )
     if prices.price_table_hash != plan["price_table_hash"]:
         raise ValueError("original price table hash differs")
+    context = None
     for row in pool:
         reference = row["model_artifact"]
         if (
@@ -154,9 +189,13 @@ def _read_layout_search_graph(read, result):
             read(reference["path"], 16 * 1024**2, reference)
         )
         descriptor = control_layout_candidate_features(model, request)
+        if context is None:
+            context = descriptor["context_hash"]
         if (
             descriptor["physical_model_identity"] != row["model_identity"]
-            or descriptor["context_hash"] != policy.to_dict()["context_hash"]
+            or descriptor["context_hash"] != context
+            or policy is not None
+            and context != policy.to_dict()["context_hash"]
         ):
             raise ValueError("original layout model identity or context differs")
         _same(
@@ -171,10 +210,13 @@ def _read_layout_search_graph(read, result):
         )
         models[row["candidate_id"]] = model
     predicted = plan.get("predictions")
-    if type(predicted) is not list or [r["candidate_id"] for r in predicted] != ids[1:]:
+    if type(predicted) is not list or [r["candidate_id"] for r in predicted] != (
+        ids[1:] if uses_policy else []
+    ):
         raise ValueError("complete ordered layout predictions required")
     by_id = {r["candidate_id"]: r for r in pool}
     for row in predicted:
+        assert policy is not None
         _same(
             row["estimate"],
             by_id[row["candidate_id"]]["material_estimate"]["total"],
@@ -217,7 +259,11 @@ def _read_layout_search_graph(read, result):
             _same(screens, expected, "predicted screens differ from declared limits")
             tier = 0 if all(s["status"] == "pass" for s in screens.values()) else 2
         _same(row["ranking_tier"], tier, "prediction tier differs")
-    learned, ranking = candidate_ranking(predicted, CHEAPER_BOUNDARY_RANKING)
+    learned, ranking = (
+        candidate_ranking(predicted, CHEAPER_BOUNDARY_RANKING)
+        if uses_policy
+        else ([], None)
+    )
     deterministic = [
         r["candidate_id"]
         for r in sorted(
@@ -228,10 +274,11 @@ def _read_layout_search_graph(read, result):
     plans = {
         name: {"ordering": order, "shortlist": order[: budget - 1]}
         for name, order in (("price_order", deterministic), ("learned_order", learned))
+        if not standalone or name == strategy
     }
     _same(plan.get("plans"), plans, "layout shortlist differs from frozen ranking")
     arms = result.get("arms")
-    if type(arms) is not dict or set(arms) != {"price_order", "learned_order"}:
+    if type(arms) is not dict or set(arms) != set(plans):
         raise ValueError("both layout arms required")
     if type(plan.get("oracle_after_online_arms")) is not bool or plan[
         "oracle_after_online_arms"
@@ -377,6 +424,8 @@ def _read_layout_search_graph(read, result):
     )
     _same(
         result.get("candidate_coverage_audit"),
-        _coverage_audit(plan | {"plans": plans}, comparisons.get("exhaustive_oracle")),
+        _coverage_audit(plan | {"plans": plans}, comparisons.get("exhaustive_oracle"))
+        if uses_policy
+        else None,
         "layout coverage differs",
     )
