@@ -18449,7 +18449,7 @@ function setOptimizationTimelineStep(value='-1'){
   const metaNode=document.querySelector('[data-optimization-timeline-meta]');
   const slider=document.getElementById('viewer-optimization-timeline-slider');
   if(slider instanceof HTMLInputElement)slider.value=String(optimizationTimelineStepIndex);
-  if(labelNode)labelNode.textContent=step?.label||'Baseline';
+  if(labelNode)labelNode.textContent=model?.status==='ready'?(step?.label||'Baseline'):'Optimization history unavailable';
   if(metaNode){
     const parts=[];
     if(step){
@@ -18464,7 +18464,7 @@ function setOptimizationTimelineStep(value='-1'){
     if(optimizationTimelineStepIndex>=0&&highlightState?.matchCount){
       parts.push(`${highlightState.matchCount} members highlighted`);
     }
-    metaNode.textContent=parts.join(' · ')||'Cumulative cost delta --';
+    metaNode.textContent=model?.status==='ready'?(parts.join(' · ')||'Cumulative cost delta --'):'No optimization change history loaded';
   }
   applyOptimizationTimelineStepHighlights(optimizationTimelineStepIndex);
   window.__STRUCTURE_VIEWER_OPTIMIZATION_TIMELINE__={

@@ -20,6 +20,10 @@ test('viewer runtime assets preserve originals and load configured preset', asyn
   expect(source.toLowerCase()).toContain('midas')
   expect(messages.some(m => m.includes('Preset sidecar unavailable'))).toBe(false)
   expect(messages.some(m => m.includes('initLog is not defined'))).toBe(false)
+  expect(messages.some(m => m.includes('Drawing comparison presentation failed'))).toBe(false)
+  await expect(page.locator('#viewer-optimization-timeline-slider')).toBeDisabled()
+  await expect(page.locator('[data-optimization-timeline-step-label]')).toHaveText('Optimization history unavailable')
+  await expect(page.locator('[data-optimization-timeline-meta]')).toHaveText('No optimization change history loaded')
 })
 async function setup(page: Page, tamper = false) {
   await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/layout-search/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-layout', bearerToken: 'synthetic-layout-token' }) } })
