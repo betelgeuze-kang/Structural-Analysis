@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Public planar backend parity with observed concrete tensile damage](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/planar-material-backends-20260913.md)
 - [Staged screening with observed material nonlinearity and completed CI observation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-staged-nonlinear-20260913.md)
 - [Installed wheel layout CLI and original-record admission](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-cli-wheel-20260913.md)
 - [Full-layout strategy CLI and completed bounded installation replay](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-layout-strategy-cli-20260913.md)
