@@ -20,6 +20,8 @@ const specs = [
   'tests/frontend/workbench-v2-job-contract.spec.ts',
   'tests/frontend/workbench-v2-job-transport.spec.ts',
   'tests/frontend/workbench-v2-rc-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-cohort-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-cohort-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-search-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-search-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-design-contract.spec.ts',
@@ -46,7 +48,7 @@ const specs = [
 // The hermetic frontend lane has no Python solver installation. Opt into the
 // actual WSGI/browser integration only in a Python-enabled test environment.
 const withJobApi = process.argv.includes('--with-job-api')
-if (withJobApi) specs.push('tests/frontend/workbench-v2-job-api-browser.spec.ts', 'tests/frontend/workbench-v2-rc-search-http-browser.spec.ts')
+if (withJobApi) specs.push('tests/frontend/workbench-v2-job-api-browser.spec.ts', 'tests/frontend/workbench-v2-rc-search-http-browser.spec.ts', 'tests/frontend/workbench-v2-rc-cohort-http-browser.spec.ts')
 const passthrough = process.argv.slice(2).filter((arg) => arg !== '--with-job-api')
 
 const mime = {

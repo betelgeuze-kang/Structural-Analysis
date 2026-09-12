@@ -19,6 +19,7 @@ import time
 from unittest.mock import patch
 from wsgiref.simple_server import WSGIRequestHandler, make_server
 
+from structural_analysis.execution.rc_strategy_cohort import RcStrategyCohortBundle
 from structural_analysis.execution.rc_search_http import (
     RcSearchArtifactBundle,
     RcSearchArtifactWSGIApplication,
@@ -43,19 +44,45 @@ def main():
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument(
         "--fixture",
-        choices=("rc-control-search", "rc-control-search-cost"),
+        choices=("rc-control-search", "rc-control-search-cost", "rc-strategy-cohort-control"),
         default="rc-control-search",
     )
+    parser.add_argument("--cohort-directory", type=Path)
+    parser.add_argument("--expected-report-hash")
     args = parser.parse_args()
+    if args.cohort_directory and not args.expected_report_hash:
+        parser.error("original cohort directory requires an explicit report hash")
     root = Path(__file__).resolve().parents[2]
     dist = root / "dist"
     before = time.perf_counter_ns()
     cpu = time.process_time_ns()
     snapshot_root = root / "tests/frontend/fixtures" / args.fixture
-    expected = json.loads((snapshot_root / "result.json").read_bytes())["report_hash"]
-    bundle = RcSearchArtifactBundle.from_directory(
-        snapshot_root, expected_report_hash=expected
-    )
+    if args.cohort_directory or args.fixture == "rc-strategy-cohort-control":
+        if args.cohort_directory:
+            snapshot_root = args.cohort_directory.resolve()
+
+        def reader(path, maximum):
+            target = snapshot_root / path
+            if not args.cohort_directory and path != "cohort.json":
+                parts = Path(path).parts
+                if parts[:2] != ("pairs", "0") or parts[2] not in {
+                    "price_order", "learned_order"
+                }:
+                    raise ValueError("unregistered controlled fixture path")
+                if parts[3:] not in [("result.json",), ("plan.json",), ("strategy-runtime.json",)]:
+                    target = root / "tests/frontend/fixtures/rc-control-search-cost-no-oracle" / Path(*parts[3:])
+            with target.open("rb") as stream:
+                return stream.read(maximum + 1)
+
+        expected = args.expected_report_hash or json.loads(
+            reader("cohort.json", 2 * 1024**2)
+        )["report_hash"]
+        bundle = RcStrategyCohortBundle.from_reader(reader, expected_report_hash=expected)
+    else:
+        expected = json.loads((snapshot_root / "result.json").read_bytes())["report_hash"]
+        bundle = RcSearchArtifactBundle.from_directory(
+            snapshot_root, expected_report_hash=expected
+        )
     load_ns = time.perf_counter_ns() - before
     creds = {
         "transport-test": "synthetic-search-memory-token",
@@ -109,6 +136,9 @@ def main():
             start_response("404 Not Found", [("Content-Type", "text/plain")])
             return [b"Not found"]
         if not target.is_file():
+            if target.suffix:
+                start_response("404 Not Found", [("Content-Type", "text/plain")])
+                return [b"Not found"]
             target = dist / "index.html"
         body = target.read_bytes()
         start_response(
