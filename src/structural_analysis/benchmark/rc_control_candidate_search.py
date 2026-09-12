@@ -175,13 +175,13 @@ def _coverage_audit(plan, oracle_report):
     }
 
 
-def compare_rc_control_candidate_search(
+def _run_candidate_search(
     baseline,
     candidates,
     request,
     *,
-    policy: RCControlCandidatePolicy,
-    training_report: dict,
+    policy: RCControlCandidatePolicy | None = None,
+    training_report: dict | None = None,
     prices: design.FiberFrameMaterialPrices,
     history_limits: design.FiberFrameHistoryLimits,
     material_limits: design.FiberFrameMaterialHistoryLimits,
@@ -192,6 +192,7 @@ def compare_rc_control_candidate_search(
     evaluate_exhaustive_oracle: bool = False,
     ranking_strategy: str = LEGACY_RANKING,
     reuse_line_search_assembly: bool = False,
+    only_strategy: str | None = None,
 ):
     """Compare frozen price-order and learned-order shortlists at the same budget.
 
@@ -202,11 +203,18 @@ def compare_rc_control_candidate_search(
     family study is not a held-out project/campaign generalization experiment.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if only_strategy not in (None, "price_order", "learned_order"):
+        raise ValueError("supported standalone strategy required")
+    if only_strategy is not None and evaluate_exhaustive_oracle:
+        raise ValueError("standalone online execution cannot receive an oracle")
+    uses_policy = only_strategy != "price_order"
+    if not uses_policy and (policy is not None or training_report is not None):
+        raise ValueError("price-only execution must not receive learned artifacts")
     if type(reuse_line_search_assembly) is not bool:
         raise ValueError("explicit boolean line-search assembly reuse required")
     if type(ranking_strategy) is not str or ranking_strategy not in RANKING_STRATEGIES:
         raise ValueError("supported candidate ranking strategy required")
-    if type(policy) is not RCControlCandidatePolicy:
+    if uses_policy and type(policy) is not RCControlCandidatePolicy:
         raise ValueError("direct-control candidate policy required")
     if type(candidates) is not tuple or not 1 <= len(candidates) <= 16:
         raise ValueError("one to sixteen canonical alternatives required")
@@ -236,48 +244,51 @@ def compare_rc_control_candidate_search(
         r"[0-9a-f]{40}", source_revision
     ):
         raise ValueError("full source revision required")
-    if (
-        type(training_report) is not dict
-        or training_report.get("schema_version")
-        != "experimental-rc-control-candidate-training.v1"
-    ):
-        raise ValueError("original candidate training report required")
-    # Detach caller-owned inputs before using their training cost declarations.
-    training = json.loads(study._bytes(training_report))
-    if training.get("report_hash") != study._sha(
-        study._bytes({k: v for k, v in training.items() if k != "report_hash"})
-    ):
-        raise ValueError("training report hash mismatch")
-    p = policy.to_dict()
-    if (
-        training.get("policy_hash") != policy.policy_hash
-        or training.get("label_comparison_hash") != p["label_comparison_hash"]
-    ):
-        raise ValueError("training report/policy identity mismatch")
-    if (
-        training.get("sample_count") != len(p["training_sample_hashes"])
-        or training.get("fit", {}).get("status") != "completed"
-        or training["fit"].get("unknown_fit_work_until_outcome") is not False
-    ):
-        raise ValueError("completed training fit required")
-    if len(training["label_invocations"]) != 2 * training["sample_count"]:
-        raise ValueError(
-            "original analysis and fresh replay required for every training model"
-        )
-    if any(
-        i.get("unknown_execution_work") is not False or i.get("work") is None
-        for i in training["label_invocations"]
-    ):
-        raise ValueError("known historical label generation work required")
-    for value in (
-        training["wall_ns"],
-        training["cpu_ns"],
-        training["fit"]["wall_ns"],
-        training["label_generation_wall_ns"],
-    ):
-        if type(value) is not int or value < 0:
-            raise ValueError("known nonnegative historical training costs required")
-    frozen = policy._json
+    training = p = frozen = None
+    if uses_policy:
+        assert policy is not None
+        if (
+            type(training_report) is not dict
+            or training_report.get("schema_version")
+            != "experimental-rc-control-candidate-training.v1"
+        ):
+            raise ValueError("original candidate training report required")
+        # Detach caller-owned inputs before using their training cost declarations.
+        training = json.loads(study._bytes(training_report))
+        if training.get("report_hash") != study._sha(
+            study._bytes({k: v for k, v in training.items() if k != "report_hash"})
+        ):
+            raise ValueError("training report hash mismatch")
+        p = policy.to_dict()
+        if (
+            training.get("policy_hash") != policy.policy_hash
+            or training.get("label_comparison_hash") != p["label_comparison_hash"]
+        ):
+            raise ValueError("training report/policy identity mismatch")
+        if (
+            training.get("sample_count") != len(p["training_sample_hashes"])
+            or training.get("fit", {}).get("status") != "completed"
+            or training["fit"].get("unknown_fit_work_until_outcome") is not False
+        ):
+            raise ValueError("completed training fit required")
+        if len(training["label_invocations"]) != 2 * training["sample_count"]:
+            raise ValueError(
+                "original analysis and fresh replay required for every training model"
+            )
+        if any(
+            i.get("unknown_execution_work") is not False or i.get("work") is None
+            for i in training["label_invocations"]
+        ):
+            raise ValueError("known historical label generation work required")
+        for value in (
+            training["wall_ns"],
+            training["cpu_ns"],
+            training["fit"]["wall_ns"],
+            training["label_generation_wall_ns"],
+        ):
+            if type(value) is not int or value < 0:
+                raise ValueError("known nonnegative historical training costs required")
+        frozen = policy._json
     original = baseline.detached_analysis_snapshot()
     candidates = tuple(
         design.FiberFrameDesignCandidate(
@@ -294,15 +305,16 @@ def compare_rc_control_candidate_search(
         raise ValueError(
             "duplicate physical alternatives are not new search candidates"
         )
-    if set(identities.values()) & set(p["training_model_identities"]):
+    if p is not None and set(identities.values()) & set(p["training_model_identities"]):
         raise ValueError("training/evaluation physical model overlap")
     pool = []
     for key, model in models.items():
-        _, context = control_candidate_features(model, request)
-        if context != p["context_hash"]:
-            raise ValueError(
-                "training/search direct-control or fixed model context mismatch"
-            )
+        if p is not None:
+            _, context = control_candidate_features(model, request)
+            if context != p["context_hash"]:
+                raise ValueError(
+                    "training/search direct-control or fixed model context mismatch"
+                )
         quantities = design.calculate_fiber_frame_member_quantities(model)
         estimate = design._estimate(quantities, prices)
         assert estimate is not None
@@ -327,43 +339,48 @@ def compare_rc_control_candidate_search(
         return row["material_estimate"]["total"], row["candidate_id"]
 
     deterministic = [r["candidate_id"] for r in sorted(alternatives, key=price_key)]
-    rank_start = perf_counter_ns()
-    predicted = []
-    for row in alternatives:
-        prediction = policy.predict(models[row["candidate_id"]], request)
-        screens = (
-            None
-            if prediction["abstained"]
-            else study._screens(
-                prediction["performance"],
-                history_limits,
-                material_limits,
-                terminal_limits,
+    predicted: list[dict] = []
+    learned, ranking, rank_wall = [], None, 0
+    if uses_policy:
+        assert policy is not None
+        rank_start = perf_counter_ns()
+        predicted = []
+        for row in alternatives:
+            prediction = policy.predict(models[row["candidate_id"]], request)
+            screens = (
+                None
+                if prediction["abstained"]
+                else study._screens(
+                    prediction["performance"],
+                    history_limits,
+                    material_limits,
+                    terminal_limits,
+                )
             )
-        )
-        tier = (
-            1
-            if screens is None
-            else 0
-            if all(s["status"] == "pass" for s in screens.values())
-            else 2
-        )
-        predicted.append(
-            {
-                "candidate_id": row["candidate_id"],
-                "prediction": prediction,
-                "predicted_screens": screens,
-                "ranking_tier": tier,
-                "estimate": row["material_estimate"]["total"],
-            }
-        )
-    learned, ranking = candidate_ranking(predicted, ranking_strategy)
-    rank_wall = perf_counter_ns() - rank_start
-    if policy._json != frozen:
-        raise ValueError("policy changed while ranking")
+            tier = (
+                1
+                if screens is None
+                else 0
+                if all(s["status"] == "pass" for s in screens.values())
+                else 2
+            )
+            predicted.append(
+                {
+                    "candidate_id": row["candidate_id"],
+                    "prediction": prediction,
+                    "predicted_screens": screens,
+                    "ranking_tier": tier,
+                    "estimate": row["material_estimate"]["total"],
+                }
+            )
+        learned, ranking = candidate_ranking(predicted, ranking_strategy)
+        rank_wall = perf_counter_ns() - rank_start
+        if policy._json != frozen:
+            raise ValueError("policy changed while ranking")
     plans = {
         name: {"ordering": order, "shortlist": order[: full_analysis_budget - 1]}
         for name, order in (("price_order", deterministic), ("learned_order", learned))
+        if only_strategy is None or only_strategy == name
     }
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
@@ -377,8 +394,8 @@ def compare_rc_control_candidate_search(
         "schema_version": "experimental-rc-control-candidate-search-plan.v2",
         "source_revision": source_revision,
         "control_request": request.to_dict(),
-        "policy_hash": policy.policy_hash,
-        "training_report_hash": training["report_hash"],
+        "policy_hash": None if policy is None else policy.policy_hash,
+        "training_report_hash": None if training is None else training["report_hash"],
         "price_table_hash": prices.price_table_hash,
         "pool": pool,
         "plans": plans,
@@ -388,18 +405,22 @@ def compare_rc_control_candidate_search(
         "predictions": predicted,
         "full_analysis_budget_per_arm": full_analysis_budget,
         "oracle_after_online_arms": evaluate_exhaustive_oracle,
-        "original_training_and_pool_models_disjoint": True,
+        "original_training_and_pool_models_disjoint": None if p is None else True,
         "independent_project_geometry_history_split": False,
     }
     if ranking is not None:
         plan["schema_version"] = "experimental-rc-control-candidate-search-plan.v3"
         plan["ranking"] = ranking
+    if only_strategy is not None:
+        plan["schema_version"] = "experimental-rc-control-candidate-strategy-plan.v1"
+        plan["strategy"] = only_strategy
     if reuse_line_search_assembly:
         plan["line_search_assembly_reuse"] = "rc-control-immediate-line-search-reuse.v1"
     plan["plan_hash"] = study._sha(study._bytes(plan))
     study._save(root, "plan.json", study._bytes(plan))
-    study._save(root, "policy.json", study._bytes(p))
-    study._save(root, "historical-training.json", study._bytes(training))
+    if uses_policy:
+        study._save(root, "policy.json", study._bytes(p))
+        study._save(root, "historical-training.json", study._bytes(training))
     arm_results = {}
     comparisons = {}
     by_id = {c.candidate_id: c for c in candidates}
@@ -480,7 +501,7 @@ def compare_rc_control_candidate_search(
         if evaluate_exhaustive_oracle
         else None
     )
-    if policy._json != frozen:
+    if policy is not None and policy._json != frozen:
         raise ValueError("policy changed during full path verification")
     report = {
         "schema_version": "experimental-rc-control-candidate-search.v3",
@@ -489,9 +510,9 @@ def compare_rc_control_candidate_search(
         "candidate_denominator": len(pool),
         "arms": arm_results,
         "oracle": oracle,
-        "candidate_coverage_audit": _coverage_audit(
-            plan, comparisons.get("exhaustive_oracle")
-        ),
+        "candidate_coverage_audit": None
+        if not uses_policy
+        else _coverage_audit(plan, comparisons.get("exhaustive_oracle")),
         "candidate_cost_optimality_audit": candidate_cost_optimality_audit(
             plan, comparisons
         ),
@@ -509,9 +530,38 @@ def compare_rc_control_candidate_search(
             "workbench_search_review_integrated": False,
         },
     }
+    if only_strategy is not None:
+        report["schema_version"] = "experimental-rc-control-candidate-strategy.v1"
+        report["strategy"] = only_strategy
+        report["timing_scope"] = (
+            "single_strategy_preparation_ranking_full_reference_and_IO_excluding_final_report_write"
+        )
     study._save(
         root,
         "result.json",
         study._bytes(report | {"report_hash": study._sha(study._bytes(report))}),
     )
     return report | {"report_hash": study._sha(study._bytes(report))}
+
+
+def compare_rc_control_candidate_search(*args, **kwargs):
+    """Compare both frozen rankings, optionally followed by a separate oracle."""
+    if "only_strategy" in kwargs:
+        raise ValueError(
+            "use run_rc_control_candidate_strategy for standalone execution"
+        )
+    return _run_candidate_search(*args, **kwargs)
+
+
+def run_rc_control_candidate_strategy(*args, strategy, **kwargs):
+    """Run one complete online strategy without another arm or oracle results.
+
+    Price order must receive no policy or historical training artifacts. Learned
+    order retains policy validation, feature extraction, prediction and ranking.
+    Both retain the same full reference comparison and fresh verification.
+    """
+    if strategy not in ("price_order", "learned_order"):
+        raise ValueError("supported standalone strategy required")
+    if "only_strategy" in kwargs:
+        raise ValueError("strategy is the sole standalone strategy selector")
+    return _run_candidate_search(*args, only_strategy=strategy, **kwargs)

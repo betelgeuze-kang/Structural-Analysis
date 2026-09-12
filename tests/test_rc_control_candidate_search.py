@@ -78,6 +78,66 @@ def search_inputs(trained):
     return args
 
 
+@pytest.mark.parametrize("strategy", ["price_order", "learned_order"])
+def test_standalone_runs_only_requested_arm_with_fresh_verification(
+    trained, tmp_path, monkeypatch, strategy
+):
+    args = search_inputs(trained)
+    if strategy == "price_order":
+        args.pop("policy")
+        args.pop("training_report")
+
+        def forbidden(*a, **kw):
+            pytest.fail("price-only path must not extract learning features or predict")
+
+        monkeypatch.setattr(search, "control_candidate_features", forbidden)
+        monkeypatch.setattr(learning.RCControlCandidatePolicy, "predict", forbidden)
+    root = tmp_path / strategy
+    result = search.run_rc_control_candidate_strategy(
+        **args, strategy=strategy, output_directory=root
+    )
+    assert result["schema_version"] == "experimental-rc-control-candidate-strategy.v1"
+    assert set(result["arms"]) == {strategy}
+    assert result["oracle"] is None
+    assert result["arms"][strategy]["selected_full_reference_verified"]
+    assert result["arms"][strategy]["selected_candidate_id"] == "cheap"
+    comparison = json.loads((root / strategy / "comparison.json").read_bytes())
+    assert len(comparison["rows"]) == 2
+    assert all(row["full_reference_verification_pass"] for row in comparison["rows"])
+    assert sum(len(row["invocations"]) for row in comparison["rows"]) == 4
+    plan = json.loads((root / "plan.json").read_bytes())
+    assert set(plan["plans"]) == {strategy}
+    assert plan["strategy"] == strategy
+    assert not (root / "exhaustive_oracle").exists()
+    if strategy == "price_order":
+        assert plan["predictions"] == []
+        assert plan["policy_hash"] is None and plan["training_report_hash"] is None
+        assert result["historical_training_cost"] is None
+        assert result["ranking_wall_ns"] == 0
+        assert not (root / "policy.json").exists()
+    else:
+        assert plan["predictions"]
+        assert result["historical_training_cost"] == args["training_report"]
+
+
+@pytest.mark.parametrize("mode", ["price_with_policy", "oracle", "invalid_strategy"])
+def test_standalone_rejects_cross_strategy_inputs_before_output(
+    trained, tmp_path, mode
+):
+    args = search_inputs(trained)
+    strategy = "price_order" if mode == "price_with_policy" else "learned_order"
+    if mode == "oracle":
+        args["evaluate_exhaustive_oracle"] = True
+    if mode == "invalid_strategy":
+        strategy = "oracle"
+    root = tmp_path / mode
+    with pytest.raises(ValueError):
+        search.run_rc_control_candidate_strategy(
+            **args, strategy=strategy, output_directory=root
+        )
+    assert not root.exists()
+
+
 def test_actual_training_labels_include_preload_all_epochs_and_fresh_verification(
     trained,
 ):
