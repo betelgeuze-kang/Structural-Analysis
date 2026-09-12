@@ -1,0 +1,198 @@
+{
+  "observation": {
+    "attempted_steps": 72,
+    "candidate_search_executed": false,
+    "centered_feature_rank": 3,
+    "constant_feature_columns": 156,
+    "evaluation_wall_ns": 6653958183,
+    "feature_columns": 163,
+    "fit_wall_ns": 2254867,
+    "fresh_verifications": 6,
+    "geometry_groups": [
+      [
+        "holdout-a"
+      ],
+      [
+        "holdout-b"
+      ],
+      [
+        "train-a"
+      ],
+      [
+        "train-b"
+      ],
+      [
+        "train-c"
+      ],
+      [
+        "train-d"
+      ],
+      [
+        "validation-a"
+      ],
+      [
+        "validation-b"
+      ]
+    ],
+    "holdout_numerical_paths": 0,
+    "holdout_predictions": {
+      "holdout-a": {
+        "abstained": true,
+        "joint_geometry_history_generalization": false,
+        "performance": null,
+        "physical_result_authority": false,
+        "policy_hash": "sha256:18960594557fd12e3d538d79edcaa0801a4b6a9da23c7e0db4dfe103f913ae64",
+        "reason": "outside_training_feature_bounds",
+        "uncertainty_calibrated": false
+      },
+      "holdout-b": {
+        "abstained": true,
+        "joint_geometry_history_generalization": false,
+        "performance": null,
+        "physical_result_authority": false,
+        "policy_hash": "sha256:18960594557fd12e3d538d79edcaa0801a4b6a9da23c7e0db4dfe103f913ae64",
+        "reason": "outside_training_feature_bounds",
+        "uncertainty_calibrated": false
+      }
+    },
+    "independent_physical_validation": false,
+    "invocation_count": 12,
+    "joint_geometry_history_generalization": false,
+    "known_phase_sum_ns": 20013265150,
+    "label_generation_wall_ns": 13303986157,
+    "net_savings_proved": false,
+    "policy_hash": "sha256:18960594557fd12e3d538d79edcaa0801a4b6a9da23c7e0db4dfe103f913ae64",
+    "prediction_wall_ns": 14332815,
+    "reference_rows": 6,
+    "source_revision": "75d720f3e9096d1be7921dc4f3c4432974abfb9d",
+    "split_counts": {
+      "holdout": 2,
+      "train": 4,
+      "validation": 2
+    },
+    "total_wall_scope": "sum_of_disjoint_training_prediction_and_validation_intervals_excludes_campaign_preparation_and_final_audit",
+    "training_rows": 4,
+    "training_wall_ns": 13344974152,
+    "validation": {
+      "validation-a": {
+        "abstained": false,
+        "errors": {
+          "maximum_absolute_fiber_strain": {
+            "actual": 2.3136976466579944e-06,
+            "learned": 2.6942873076744915e-06,
+            "learned_absolute_error": 3.805896610164971e-07,
+            "mean_absolute_error": 2.097297798286824e-07,
+            "training_mean": 2.103967866829312e-06
+          },
+          "maximum_concrete_compressive_damage": {
+            "actual": 0.0,
+            "learned": 0.0,
+            "learned_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "training_mean": 0.0
+          },
+          "maximum_concrete_tensile_damage": {
+            "actual": 0.0,
+            "learned": 0.0,
+            "learned_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "training_mean": 0.0
+          },
+          "maximum_steel_accumulated_plastic_strain": {
+            "actual": 0.0,
+            "learned": 0.0,
+            "learned_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "training_mean": 0.0
+          },
+          "maximum_translation_m": {
+            "actual": 3.1015127535978035e-05,
+            "learned": 3.163896831930603e-05,
+            "learned_absolute_error": 6.238407833279941e-07,
+            "mean_absolute_error": 1.2979369336399028e-06,
+            "training_mean": 3.231306446961794e-05
+          },
+          "terminal_maximum_absolute_fiber_strain": {
+            "actual": 5.784244116644987e-07,
+            "learned": 6.73571826918623e-07,
+            "learned_absolute_error": 9.514741525412428e-08,
+            "mean_absolute_error": 5.243244495717071e-08,
+            "training_mean": 5.25991966707328e-07
+          },
+          "terminal_maximum_translation_m": {
+            "actual": 7.753781883994505e-06,
+            "learned": 7.909742079826509e-06,
+            "learned_absolute_error": 1.559601958320036e-07,
+            "mean_absolute_error": 3.244842334099808e-07,
+            "training_mean": 8.078266117404486e-06
+          }
+        },
+        "reason": "in_training_feature_bounds_uncalibrated",
+        "verified": true
+      },
+      "validation-b": {
+        "abstained": false,
+        "errors": {
+          "maximum_absolute_fiber_strain": {
+            "actual": 1.2583858046030456e-06,
+            "learned": 1.369563252620806e-06,
+            "learned_absolute_error": 1.111774480177604e-07,
+            "mean_absolute_error": 8.455820622262664e-07,
+            "training_mean": 2.103967866829312e-06
+          },
+          "maximum_concrete_compressive_damage": {
+            "actual": 0.0,
+            "learned": 0.0,
+            "learned_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "training_mean": 0.0
+          },
+          "maximum_concrete_tensile_damage": {
+            "actual": 0.0,
+            "learned": 0.0,
+            "learned_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "training_mean": 0.0
+          },
+          "maximum_steel_accumulated_plastic_strain": {
+            "actual": 0.0,
+            "learned": 0.0,
+            "learned_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "training_mean": 0.0
+          },
+          "maximum_translation_m": {
+            "actual": 3.0324873658174718e-05,
+            "learned": 3.2374405842744236e-05,
+            "learned_absolute_error": 2.049532184569518e-06,
+            "mean_absolute_error": 1.98819081144322e-06,
+            "training_mean": 3.231306446961794e-05
+          },
+          "terminal_maximum_absolute_fiber_strain": {
+            "actual": 3.1459645115076145e-07,
+            "learned": 3.423908131552014e-07,
+            "learned_absolute_error": 2.7794362004439942e-08,
+            "mean_absolute_error": 2.1139551555656654e-07,
+            "training_mean": 5.25991966707328e-07
+          },
+          "terminal_maximum_translation_m": {
+            "actual": 7.5812184145436745e-06,
+            "learned": 8.093601460686059e-06,
+            "learned_absolute_error": 5.123830461423846e-07,
+            "mean_absolute_error": 4.970477028608117e-07,
+            "training_mean": 8.078266117404486e-06
+          }
+        },
+        "reason": "in_training_feature_bounds_uncalibrated",
+        "verified": true
+      }
+    }
+  },
+  "packet": {
+    "bytes": 10297526,
+    "files": 79,
+    "inventory_sha256": "507d4a94419714f1073844ab68fd51592f3f214755f93740c095434d4c62b711",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-learning-m281iyj9"
+  },
+  "local_tests_passed": 93
+}
