@@ -84,6 +84,10 @@ jobs:
             src/structural_analysis/benchmark/rc_control_reuse.py \
             src/structural_analysis/benchmark/rc_control_cost_search.py \
             src/structural_analysis/benchmark/rc_control_local_search_cli.py \
+            src/structural_analysis/execution/rc_result_repository.py \
+            src/structural_analysis/execution/local_runtime_doctor.py \
+            tests/test_rc_control_persistence.py \
+            tests/test_rc_local_resources.py \
             tests/test_rc_control_local_research.py > rc-local-format.diff
 
       - name: Retain local RC formatting diagnostic
@@ -113,6 +117,8 @@ jobs:
           tests/test_measured_response_split.py
           tests/test_rc_control_design.py
           tests/test_rc_control_local_research.py
+          tests/test_rc_control_persistence.py
+          tests/test_rc_local_resources.py
           tests/test_rc_control_candidate_search.py
           tests/test_rc_control_candidate_cost.py
           tests/test_rc_search_http.py

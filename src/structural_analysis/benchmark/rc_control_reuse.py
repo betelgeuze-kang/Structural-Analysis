@@ -1,23 +1,29 @@
-"""Bounded, process-local reuse of results that this session actually verified.
+"""Bounded reuse of internally verified originals with optional local persistence.
 
-No file/receipt import, pickle, persistent cache, network authentication, or new
-engineering authority is provided. A trusted caller owns each session. Reuse
-retains original solver bytes and reports zero *new* numerical work. Scientific
+No file/receipt import, pickle or new engineering authority is provided. An
+optional tenant-authorized repository retains trusted session originals across
+processes. Reuse reports zero new numerical work, not new verification. Scientific
 strategy comparisons continue to use the existing fresh-comparison entry point.
 """
 
 from __future__ import annotations
 
 from collections import OrderedDict
+from contextlib import ExitStack
 from dataclasses import asdict, dataclass
 import json
+import platform
+import sysconfig
 import os
 from pathlib import Path
 import re
 import sys
 import threading
 from time import perf_counter_ns, process_time_ns
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from structural_analysis.execution.rc_result_repository import RCResultRepository
 
 import numpy as np
 import scipy
@@ -34,6 +40,22 @@ from structural_analysis.model.schema import CanonicalModel
 
 class NewAnalysisRequired(ValueError):
     """No eligible local result exists and new numerical work is not permitted."""
+
+
+def _native_numeric_identity() -> list[tuple[str, str]]:
+    paths = set()
+    for package in (np, scipy):
+        root = Path(package.__file__).resolve().parent
+        for library_root in (root, root.parent / (root.name + ".libs")):
+            if library_root.is_dir():
+                paths.update(
+                    path for path in library_root.rglob("*")
+                    if path.is_file() and (
+                        ".so" in path.name or path.suffix in (".pyd", ".dll", ".dylib")
+                    )
+                )
+    return [(str(path), study._sha(path.read_bytes())) for path in sorted(paths)]
+
 
 
 def _runtime_fingerprint() -> str:
@@ -54,6 +76,12 @@ def _runtime_fingerprint() -> str:
                 "platform": sys.platform,
                 "numpy": np.__version__,
                 "scipy": scipy.__version__,
+                "machine": platform.machine(),
+                "processor": platform.processor(),
+                "byteorder": sys.byteorder,
+                "python_executable": sys.executable,
+                "platform_tag": sysconfig.get_platform(),
+                "native_numeric_libraries": _native_numeric_identity(),
                 "thread_environment": {
                     k: os.environ.get(k)
                     for k in (
@@ -129,6 +157,8 @@ class _Snapshot:
         if study._sha(study._bytes(value)) != self.seal:
             raise ValueError("local snapshot integrity mismatch")
         row = json.loads(self.row_bytes)
+        if _work({"rows": [row]})["unknown_work"]:
+            raise ValueError("local snapshot contains unknown numerical work")
         if (
             row["status"] != "verified"
             or row["full_reference_verification_pass"] is not True
@@ -145,9 +175,10 @@ class _Snapshot:
 class RCControlResultSession:
     """Serial, bounded LRU of verified physics in one trusted interpreter.
 
-    ``scope_id`` is an ownership label, NOT authentication. Do not expose this
-    object directly to untrusted callers. No existing directory or user-supplied
-    receipt can populate it. Closing/restarting the process discards reuse.
+    ``scope_id`` alone is NOT authentication. Do not expose this object directly
+    to untrusted callers. Persistent reads require the repository's host-issued
+    tenant credential. No user-supplied receipt can populate either store. Without
+    a repository, closing the process still discards reuse.
     """
 
     def __init__(
@@ -157,6 +188,7 @@ class RCControlResultSession:
         scope_id: str,
         max_entries: int = 32,
         max_bytes: int = 64 * 1024 * 1024,
+        repository: RCResultRepository | None = None,
     ) -> None:
         if type(source_revision) is not str or not re.fullmatch(
             r"[0-9a-f]{40}", source_revision
@@ -167,6 +199,13 @@ class RCControlResultSession:
             raise ValueError("max_entries must be an integer in [1, 128]")
         if type(max_bytes) is not int or not 1 <= max_bytes <= 1024**3:
             raise ValueError("max_bytes must be an integer in [1, 1073741824]")
+        if repository is not None:
+            from structural_analysis.execution.rc_result_repository import RCResultRepository
+
+            if type(repository) is not RCResultRepository:
+                raise ValueError("exact persistent RC repository required")
+            repository._authorize(scope_id)
+        self._repository = repository
         self._source_revision = source_revision
         self._scope_id = scope_id
         self._max_entries, self._max_bytes = max_entries, max_bytes
@@ -263,43 +302,58 @@ class RCControlResultSession:
         fresh: bool = False,
         allow_new_analysis: bool = True,
     ) -> dict[str, Any]:
-        """Return a new evaluation; hits rescreen/reprice but never claim new replay.
+        """Reuse internally published originals, never call it a fresh replay.
 
-        Fresh misses execute the existing virgin analysis AND full reference
-        verification. Failures are exported but never cached. Cache import and
-        cross-process reuse are deliberately unsupported in this first slice.
+        Persistent admission follows successful evaluation-report publication.
+        A failed disk write is an error, never a successful empty cache. Existing
+        scientific comparison APIs are unchanged and always execute fresh paths.
         """
+        wall, cpu = perf_counter_ns(), process_time_ns()
+        stages: dict[str, int] = {}
+        mark = perf_counter_ns()
         if type(fresh) is not bool or type(allow_new_analysis) is not bool:
             raise ValueError("explicit boolean execution options required")
-        model, request, history_limits, material_limits, terminal_limits, prices = (
-            _inputs(
-                model, request, history_limits, material_limits, terminal_limits, prices
-            )
+        model, request, history_limits, material_limits, terminal_limits, prices = _inputs(
+            model, request, history_limits, material_limits, terminal_limits, prices
         )
-        with self._lock:
-            wall, cpu = perf_counter_ns(), process_time_ns()
+        stages["input_validation_ns"] = perf_counter_ns() - mark
+        with ExitStack() as stack:
+            mark = perf_counter_ns()
+            stack.enter_context(self._lock)
+            stages["thread_lock_wait_ns"] = perf_counter_ns() - mark
+            mark = perf_counter_ns()
             self._check_context(scope_id)
             key = self._key(model, request)
+            if self._repository is not None:
+                self._repository._authorize(scope_id)
+            stages["context_and_key_ns"] = perf_counter_ns() - mark
+            mark = perf_counter_ns()
+            if self._repository is not None:
+                stack.enter_context(self._repository.reservation(key, scope_id))
+            stages["process_lock_wait_ns"] = perf_counter_ns() - mark
+            mark = perf_counter_ns()
             entry = None if fresh else self._entries.get(key)
+            origin = "memory" if entry is not None else None
+            if entry is None and not fresh and self._repository is not None:
+                entry = self._repository._load(key, scope_id)
+                if entry is not None:
+                    origin = "durable_original"
             if entry is not None:
                 entry.check()
                 if entry.key != key:
                     raise ValueError("local snapshot physics key mismatch")
             elif not allow_new_analysis:
                 raise NewAnalysisRequired("new analysis budget required")
+            stages["lookup_and_original_integrity_ns"] = perf_counter_ns() - mark
             root = Path(output_directory)
             root.mkdir(parents=True, exist_ok=False)
             origin_work = None
             new_entry = None
+            mark = perf_counter_ns()
             if entry is None:
                 row = study._evaluate_design_row(
-                    model,
-                    None,
-                    request,
-                    root=root,
-                    prices=prices,
-                    history_limits=history_limits,
-                    material_limits=material_limits,
+                    model, None, request, root=root, prices=prices,
+                    history_limits=history_limits, material_limits=material_limits,
                     terminal_limits=terminal_limits,
                 )
                 new_work = _work({"rows": [row]})
@@ -319,24 +373,22 @@ class RCControlResultSession:
                     row["performance"], history_limits, material_limits, terminal_limits
                 )
                 row["selection_eligible"] = all(
-                    s["status"] == "pass" for s in row["screens"].values()
+                    value["status"] == "pass" for value in row["screens"].values()
                 )
                 new_work = _work({"rows": []})
                 new_work["known_counters"] = {
-                    k: 0
-                    for k in (
-                        "attempted_step_count",
-                        "known_linear_solve_count",
-                        "known_newton_iteration_count",
-                        "unknown_solver_work_attempt_count",
+                    k: 0 for k in (
+                        "attempted_step_count", "known_linear_solve_count",
+                        "known_newton_iteration_count", "unknown_solver_work_attempt_count",
                     )
                 }
                 mode = "verified_original_reused"
-                self._entries.move_to_end(key)
+                if key in self._entries:
+                    self._entries.move_to_end(key)
+            stages["evaluation_or_reuse_with_original_io_ns"] = perf_counter_ns() - mark
             report = {
                 "schema_version": "local-rc-control-evaluation.v1",
-                "physics_key": key,
-                "scope_id": self._scope_id,
+                "physics_key": key, "scope_id": self._scope_id,
                 "source_revision": self._source_revision,
                 "source_revision_is_attestation": False,
                 "runtime_fingerprint": self._runtime,
@@ -344,40 +396,59 @@ class RCControlResultSession:
                 "request": request.to_dict(),
                 "history_limits": asdict(history_limits),
                 "material_limits": asdict(material_limits),
-                "terminal_limits": None
-                if terminal_limits is None
-                else asdict(terminal_limits),
+                "terminal_limits": None if terminal_limits is None else asdict(terminal_limits),
                 "prices": None if prices is None else asdict(prices),
-                "mode": mode,
-                "row": row,
-                "new_work": new_work,
-                "original_work_not_recharged": origin_work,
+                "mode": mode, "reuse_origin": origin, "row": row,
+                "new_work": new_work, "original_work_not_recharged": origin_work,
                 "original_snapshot_hash": None if entry is None else entry.seal,
                 "retained_for_reuse": entry is not None or new_entry is not None,
-                "fresh_reference_verification_this_call": entry is None
-                and row["full_reference_verification_pass"] is True,
+                "persistent_repository_enabled": self._repository is not None,
+                "persistence_receipt": "persistence.json" if self._repository is not None else None,
+                "fresh_reference_verification_this_call": entry is None and row["full_reference_verification_pass"] is True,
+                "stage_wall_ns": stages,
                 "total_wall_ns": perf_counter_ns() - wall,
                 "total_process_cpu_ns": process_time_ns() - cpu,
-                "timing_scope": "local_call_including_context_checks_and_original_export_excluding_final_report_write",
+                "timing_scope": "local_call_before_final_report_and_persistent_publication_see_completion_sidecar",
                 "claims": {
-                    "independent_physical_validation": False,
-                    "design_authority": False,
-                    "confirmed_currency_savings": False,
-                    "performance_improvement": False,
-                    "release_approved": False,
-                    "persistent_cache": False,
+                    "independent_physical_validation": False, "design_authority": False,
+                    "confirmed_currency_savings": False, "performance_improvement": False,
+                    "release_approved": False, "persistent_cache": self._repository is not None,
                 },
             }
             design._finite_tree(report)
             report["report_hash"] = study._sha(study._bytes(report))
+            mark = perf_counter_ns()
             study._save(root, "evaluation.json", study._bytes(report))
-            # Failed publication never admits a new entry. A forced fresh run
-            # does not overwrite the first successful original for this key.
-            if new_entry is not None and key not in self._entries:
+            report_write_ns = perf_counter_ns() - mark
+            mark = perf_counter_ns()
+            if self._repository is not None:
+                admitted = entry is not None and origin == "durable_original"
+                publish = new_entry if new_entry is not None else entry
+                if publish is not None and not admitted:
+                    admitted = self._repository._publish(publish, scope_id)
+                study._save(root, "persistence.json", study._bytes({
+                    "schema_version": "local-rc-persistence-outcome.v1",
+                    "evaluation_hash": report["report_hash"],
+                    "physics_key": key, "admitted": admitted,
+                    "new_verification_credit": False,
+                }))
+            storage_ns = perf_counter_ns() - mark
+            completion = {
+                "schema_version": "local-rc-evaluation-completion.v1",
+                "evaluation_hash": report["report_hash"],
+                "report_write_ns": report_write_ns,
+                "persistence_and_receipt_ns": storage_ns,
+                "wall_ns_before_completion_write": perf_counter_ns() - wall,
+                "process_cpu_ns_before_completion_write": process_time_ns() - cpu,
+                "scope": "complete_local_evaluation_except_this_final_sidecar_write",
+            }
+            study._save(root, "completion.json", study._bytes(completion))
+            retain = new_entry if new_entry is not None else entry
+            if retain is not None and key not in self._entries and retain.byte_length <= self._max_bytes:
                 while self._entries and (
                     len(self._entries) >= self._max_entries
-                    or self.retained_bytes + new_entry.byte_length > self._max_bytes
+                    or self.retained_bytes + retain.byte_length > self._max_bytes
                 ):
                     self._entries.popitem(last=False)
-                self._entries[key] = new_entry
+                self._entries[key] = retain
             return report
