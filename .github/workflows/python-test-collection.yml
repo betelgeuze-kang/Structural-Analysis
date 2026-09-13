@@ -80,6 +80,7 @@ jobs:
       - name: Run development contracts from the committed checkout
         run: >-
           python -m pytest -q --junitxml=development-contracts.xml
+          tests/test_bounded_rc_fiber_direct_control_api.py
           tests/test_rc_control_warm_start.py
           tests/test_rc_control_learning.py
           tests/test_rc_control_learning_split.py

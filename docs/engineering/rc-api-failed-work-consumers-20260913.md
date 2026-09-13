@@ -29,3 +29,17 @@ final test bytes and source identities are bound in the
 This change updates tests only. No solver, tolerance, failure status or protected
 receipt changes. The previous remote failure remains a failure; a new hosted
 pass and full roadmap qualification are not inferred from this local module.
+
+## Earlier detection in development CI
+
+The direct-control API module is now included in the independent development
+contract lane, immediately before the warm-start module. Its 95 tests previously
+ran only in later broader lanes, allowing the two stale expectations to escape
+the earlier 1,065-test development pass. The roster now contains 43 modules and
+collects 1,160 tests without errors in 6.02 seconds. Workflow contract tests pass
+18 cases in 0.49 seconds and require the API module explicitly. All existing
+full-suite gates and the diagnostic lane's independence remain unchanged.
+
+This is a roster/collection verification, not a complete new-roster execution.
+The earlier 1,065-test run and 95-test API module pass retain their own source
+identities. Source/log hashes are in the [roster receipt](rc-api-early-ci-20260913.json).
