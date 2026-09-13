@@ -1,5 +1,9 @@
 # RC learning and candidate-search evidence index
 
+The [published 5a hosted lanes](hosted-5a-completed-ci-20260914.md) retain
+completed diagnostic successes and all four skipped full-shard executions;
+they do not qualify later local revisions or close external evidence.
+
 The [causal three-state seed observation](rc-quadratic-seed-steps-20260914.md)
 uses 20 retained training parents: 78 to 73 linear solves, but 17 slower
 proposal arms and no full-path or learned benefit claim.
