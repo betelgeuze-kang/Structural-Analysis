@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createHash } from 'node:crypto'
 import { validateRcControlSearch } from '../../src/workbench-v2/model/rcControlSearchSchema'
-import { fields } from '../../src/workbench-v2/model/rcJobSchema'
+import { fields, document, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
 import { layoutFiles, layoutRead } from './layoutSearchFixture'
 function changed(raw: Uint8Array, edits: Record<string,string>, key: string): Uint8Array {
   const values = new Map([...fields(new TextDecoder().decode(raw))].map(([k,v]) => [k,v.value]))
@@ -9,6 +9,25 @@ function changed(raw: Uint8Array, edits: Record<string,string>, key: string): Ui
   const encode = () => `{${[...values].sort(([a],[b]) => a < b ? -1 : 1).map(([k,v]) => `${JSON.stringify(k)}:${v}`).join(',')}}`
   values.set(key, JSON.stringify(`sha256:${createHash('sha256').update(encode()).digest('hex')}`))
   return new TextEncoder().encode(encode())
+}
+for (const clock of ['wall', 'cpu']) {
+  test(`RC layout rejects rehashed training with erased parent ${clock} time`, async () => {
+    const training = JSON.parse(layoutFiles['historical-training.json'].toString())
+    if (clock === 'wall') training.wall_ns = training.label_generation_wall_ns = training.fit.wall_ns = 0
+    else training.cpu_ns = training.fit.cpu_ns = 0
+    const t = changed(layoutFiles['historical-training.json'], {
+      wall_ns: JSON.stringify(training.wall_ns), cpu_ns: JSON.stringify(training.cpu_ns),
+      label_generation_wall_ns: JSON.stringify(training.label_generation_wall_ns), fit: JSON.stringify(training.fit),
+    }, 'report_hash')
+    const p = changed(layoutFiles['plan.json'], { training_report_hash: JSON.stringify(document(t).value.report_hash) }, 'plan_hash')
+    const r = changed(layoutFiles['result.json'], { plan_hash: JSON.stringify(document(p).value.plan_hash),
+      historical_training_cost: new TextDecoder().decode(t) }, 'report_hash')
+    for (const [bytes, field] of [[t, 'report_hash'], [p, 'plan_hash'], [r, 'report_hash']] as const) {
+      const doc = document(bytes); await selfHash(doc.raw, doc.value, field)
+    }
+    await expect(validateRcControlSearch(r, async path => path === 'plan.json' ? p
+      : path === 'historical-training.json' ? t : layoutRead(path))).rejects.toThrow('search_training_interval_invalid')
+  })
 }
 test('RC layout search verifies original full-path histories and preserves original reports', async () => {
   const review = await validateRcControlSearch(layoutFiles['result.json'],layoutRead)

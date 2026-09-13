@@ -16,6 +16,36 @@ function changed(raw: string, changes: Record<string, string>, hashField: string
   values.set(hashField, JSON.stringify(hash(serialize())))
   return new TextEncoder().encode(serialize())
 }
+for (const mutation of ['erased_wall', 'erased_cpu', 'wrong_phase', 'raised', 'invalid_clock']) {
+  test(`RC search rejects rehashed historical training ${mutation}`, async () => {
+    const trainingRaw = readFileSync(root + 'historical-training.json', 'utf8')
+    const training = JSON.parse(trainingRaw)
+    if (mutation === 'erased_wall') {
+      training.wall_ns = training.label_generation_wall_ns = training.fit.wall_ns = 0
+    } else if (mutation === 'erased_cpu') training.cpu_ns = training.fit.cpu_ns = 0
+    else if (mutation === 'wrong_phase') training.label_invocations[1].phase = 'analysis'
+    else if (mutation === 'raised') training.label_invocations[0].status = 'raised'
+    else training.label_invocations[0].wall_ns = true
+    const reboundTraining = changed(trainingRaw, {
+      wall_ns: JSON.stringify(training.wall_ns), cpu_ns: JSON.stringify(training.cpu_ns),
+      label_generation_wall_ns: JSON.stringify(training.label_generation_wall_ns),
+      fit: JSON.stringify(training.fit), label_invocations: JSON.stringify(training.label_invocations),
+    }, 'report_hash')
+    const text = new TextDecoder().decode(reboundTraining)
+    const plan = changed(readFileSync(root + 'plan.json', 'utf8'), {
+      training_report_hash: JSON.stringify(JSON.parse(text).report_hash),
+    }, 'plan_hash')
+    const report = changed(original.toString(), {
+      plan_hash: JSON.stringify(document(plan).value.plan_hash), historical_training_cost: text,
+    }, 'report_hash')
+    for (const [bytes, field] of [[reboundTraining, 'report_hash'], [plan, 'plan_hash'], [report, 'report_hash']] as const) {
+      const doc = document(bytes)
+      await selfHash(doc.raw, doc.value, field)
+    }
+    await expect(validateRcControlSearch(report, async path => path === 'plan.json' ? plan
+      : path === 'historical-training.json' ? reboundTraining : read(path))).rejects.toThrow('search_training_interval_invalid')
+  })
+}
 test('RC search validates original pool, full-path designs, costs and later coverage', async () => {
   const review = await validateRcControlSearch(original, read)
   expect(Object.keys(review.designs).sort()).toEqual(['exhaustive_oracle', 'learned_order', 'price_order'])

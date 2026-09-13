@@ -1,3 +1,4 @@
+import { validateRcTrainingIntervals } from './rcTrainingCost'
 import { validateRcLayoutSearch } from './rcLayoutSearchSchema'
 import { sha256Bytes } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
@@ -125,6 +126,7 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
       && training.fit?.status === 'completed' && training.fit.unknown_fit_work_until_outcome === false
       && [training.wall_ns, training.cpu_ns, training.label_generation_wall_ns, training.fit.wall_ns, training.fit.cpu_ns].every(nat), 'search_training_binding_invalid')
     searchWork([{ invocations: training.label_invocations }])
+    validateRcTrainingIntervals(training)
   }
   const ids: string[] = plan.pool.slice(1).map((r: RcObject) => r.candidate_id)
   const compareId = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0

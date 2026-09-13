@@ -1,3 +1,4 @@
+import { validateRcTrainingIntervals } from './rcTrainingCost'
 import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
 import { artifactMaximum, validateRcStudyControl, validateRcStudyLimits, verifyRcDesignCandidate, verifyQuantities, type RcDesignReview, type StudyRead } from './rcControlDesignSchema'
@@ -74,6 +75,7 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
     check(!plan.pool.some((r: RcObject) => loadedPolicy.training_model_identities.includes(r.model_identity)) && Array.isArray(training.label_invocations) && training.label_invocations.length === 2 * training.sample_count
       && training.label_invocations.every((r: RcObject, i: number) => r.phase === (i % 2 ? 'verification' : 'analysis') && r.status === 'returned'), 'layout_training_work_invalid')
     work([{ invocations: training.label_invocations }])
+    validateRcTrainingIntervals(training)
   }
   const common = { control_request: plan.control_request, history_limits: plan.history_limits, material_limits: plan.material_limits, terminal_limits: plan.terminal_limits, prices, price_table_hash: plan.price_table_hash }
   validateRcStudyLimits(common)

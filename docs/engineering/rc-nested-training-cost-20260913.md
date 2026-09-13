@@ -25,3 +25,26 @@ the four-pair ratio stays null and the comparable budget-11 stratum remains
 The adjacent JSON records the reproduction and retained packet. This change
 supports full-cost integrity; it does not establish learned net savings, external
 physics, new-head hosted qualification or roadmap completion.
+
+## Workbench consumer consistency
+
+The Workbench candidate, standalone cohort/process and layout search consumers
+now apply the same sequential child-interval containment rule. The process-cost
+panel was already connected; this follow-up fixes its upstream input validation.
+A shared validator checks returned analysis/verification phases, safe child clocks,
+wall containment in generation/total, and CPU containment including fit.
+
+Before the fix, five deliberately mutated training records still passed the
+complete candidate-search consumer after all training, plan and report hashes
+were recomputed and independently checked. They erased parent wall/CPU costs,
+changed a verification to analysis, marked an invocation raised, or used a boolean
+child clock. All now reject. Two additional layout parent-cost regressions reject
+through the same public review entry point.
+
+The final candidate/cohort/layout selection passes 141 contract tests in 24.8 s;
+TypeScript and diff checks pass. This invokes the real frontend validators on
+retained source artifacts, not a new browser-rendering or numerical campaign.
+The earlier candidate/cohort-only selection passed 76 tests before the helper was
+shared with layouts. The adjacent `rc-workbench-training-cost-20260913.json`
+records the retained source/log packet. Normal original comparisons remain valid;
+no new timing result, external validation or learned gain is claimed.
