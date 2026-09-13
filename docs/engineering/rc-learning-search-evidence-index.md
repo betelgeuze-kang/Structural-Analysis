@@ -14,6 +14,11 @@ completes 30–80 mm with exact restart binding. All 400 nodal/steel-group
 comparisons over the complete segmented history pass the 1% screen; the maximum
 is still 0.733736% at 24 mm. This bounded finer-pair agreement does not qualify
 the earlier 32-layer history, concrete fiber histories or independent physics.
+The [concrete cell-projection audit](planar-concrete-projection-20260914.md)
+then finds 12.330094% tensile-damage and 1.937147% compressive-damage group
+differences near cells with mixed damaged/undamaged fine children. This distinct
+field comparison prevents nodal/steel agreement from being generalized to all
+material histories; it is not a measured physical-error estimate.
 
 The [3e2cc1dba hosted Python/runtime capture](hosted-3e-python-runtime-20260914.md)
 records 1,217 development, 96 runtime Python, 706 guarded frontend and 36 actual
