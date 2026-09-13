@@ -216,3 +216,115 @@ def test_changed_comparison_hash_rejects():
     report["arms"]["proposal"]["entries"][0] = {}
     with pytest.raises(ValueError, match="comparison hash"):
         analyze_rc_control_step_work(report, contexts)
+
+
+def parent_inputs():
+    import json
+
+    report, contexts = inputs()
+    context = contexts["secant"][0]
+    report.update(
+        schema_version="experimental-rc-control-parent-step-comparison.v1",
+        initial_parent_hash="sha256:" + "0" * 64,
+        compiled_problem_contract_hash="sha256:" + "a" * 64,
+        source_target_index=0,
+        source_request=deepcopy(report["request"]),
+        accepted_context_artifact={
+            "sha256": _hash(context),
+            "byte_length": len(
+                json.dumps(context, sort_keys=True, separators=(",", ":")).encode()
+            ),
+        },
+    )
+    report["request"]["targets_m"] = [0.1]
+    for path in [*report["arms"].values(), report["fresh_reference"]]:
+        path.update(
+            schema_version="experimental-rc-control-parent-step-path.v1",
+            initial_parent_hash=report["initial_parent_hash"],
+            supplied_prefix_target_count=1,
+            accepted_target_count=1,
+            requested_targets_m=[0.1],
+            entries=path["entries"][:1],
+            preload_reexecuted=False,
+            wall_ns=100,
+        )
+    for comparison in report["comparisons"].values():
+        comparison.clear()
+        comparison["step_response_pass"] = True
+    return sign(report), context
+
+
+def test_parent_step_work_includes_recovery_without_training_admission():
+    from structural_analysis.benchmark.rc_control_step_work import (
+        analyze_rc_control_parent_step_work,
+    )
+
+    report, context = parent_inputs()
+    invocations = report["arms"]["proposal"]["entries"][0]["invocations"]
+    invocations.insert(0, deepcopy(invocations[0]))
+    invocations[0]["status"] = "failed"
+    report["arms"]["proposal"]["wall_ns"] = 123
+    sign(report)
+    original = deepcopy((report, context))
+    result = analyze_rc_control_parent_step_work(report, context)
+    assert result["proposal_minus_secant_work"] == {
+        "core_calls": 1,
+        "newton_iterations": 2,
+        "linear_solves": 2,
+    }
+    assert result["proposal_minus_secant_wall_ns"] == 23
+    assert result["local_context_binding_checked"]
+    assert not result["causal_training_labels_admitted"]
+    assert not result["source_authentication_performed"]
+    assert not result["complete_path_performance_evidence"]
+    assert (report, context) == original
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda r, c: r["comparisons"]["proposal"].update(step_response_pass=False),
+        lambda r, c: r.update(reference_repeat_exact=False),
+        lambda r, c: r["arms"]["proposal"].update(status="incomplete"),
+        lambda r, c: r["arms"]["proposal"].update(
+            initial_parent_hash="sha256:" + "f" * 64
+        ),
+        lambda r, c: r["arms"]["proposal"]["entries"][0].update(
+            parent_hash="sha256:" + "f" * 64
+        ),
+        lambda r, c: r["arms"]["proposal"].update(supplied_prefix_target_count=True),
+        lambda r, c: r["arms"]["proposal"].update(wall_ns=0),
+        lambda r, c: r["arms"]["proposal"].update(wall_ns=True),
+        lambda r, c: r["arms"]["proposal"]["entries"][0]["invocations"][0].update(
+            unknown_work=True
+        ),
+        lambda r, c: r["arms"]["proposal"]["entries"][0]["invocations"][0][
+            "work"
+        ].update(linear_solves=-1),
+        lambda r, c: r["accepted_context_artifact"].update(byte_length=True),
+        lambda r, c: c["accepted_augmented_coordinates_m"][0].__setitem__(0, 1.0),
+        lambda r, c: r.update(source_target_index=True),
+        lambda r, c: r["request"].update(control_global_dof=3),
+    ],
+)
+def test_parent_step_rejects_failed_unknown_or_mismatched_sources(mutation):
+    from structural_analysis.benchmark.rc_control_step_work import (
+        analyze_rc_control_parent_step_work,
+    )
+
+    report, context = parent_inputs()
+    mutation(report, context)
+    sign(report)
+    with pytest.raises(ValueError):
+        analyze_rc_control_parent_step_work(report, context)
+
+
+def test_parent_step_rejects_report_tampering():
+    from structural_analysis.benchmark.rc_control_step_work import (
+        analyze_rc_control_parent_step_work,
+    )
+
+    report, context = parent_inputs()
+    report["arms"]["proposal"]["wall_ns"] = 1
+    with pytest.raises(ValueError, match="hash differs"):
+        analyze_rc_control_parent_step_work(report, context)

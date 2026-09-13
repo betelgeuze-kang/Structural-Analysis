@@ -248,3 +248,106 @@ def analyze_rc_control_step_work(report, contexts):
         "independent_physical_validation": False,
     }
     return result | {"report_hash": _hash(result)}
+
+
+def analyze_rc_control_parent_step_work(report, context):
+    """Observe one supplied-parent experiment; never admit it for training.
+
+    The canonical context binding is checked locally. Original campaign access,
+    independence, parent reachability and training permission remain separate.
+    All attempts, including failed attempts before recovery, contribute work.
+    """
+    if report["report_hash"] != _hash(
+        {k: v for k, v in report.items() if k != "report_hash"}
+    ):
+        raise ValueError("original comparison hash differs")
+    if (
+        report["schema_version"] != "experimental-rc-control-parent-step-comparison.v1"
+        or report["all_execution_work_reported"] is not True
+        or report["reference_repeat_exact"] is not True
+        or set(report["arms"]) != {"reference", *_ARMS}
+        or set(report["comparisons"]) != set(report["arms"])
+        or any(
+            c.get("step_response_pass") is not True
+            for c in report["comparisons"].values()
+        )
+    ):
+        raise ValueError("complete supplied-parent comparisons required")
+    binding = report["accepted_context_artifact"]
+    raw = json.dumps(
+        context,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    if (
+        binding["sha256"] != _hash(context)
+        or type(binding["byte_length"]) is not int
+        or binding["byte_length"] != len(raw)
+    ):
+        raise ValueError("supplied accepted context binding differs")
+    parent = _identity(report["initial_parent_hash"])
+    problem = _identity(report["compiled_problem_contract_hash"])
+    index = _natural(report["source_target_index"])
+    targets = report["source_request"]["targets_m"]
+    if index >= len(targets) or report["request"]["targets_m"] != [targets[index]]:
+        raise ValueError("source target differs")
+    if (
+        context["control_global_dof"] != report["request"]["control_global_dof"]
+        or context["control_global_dof"]
+        != report["source_request"]["control_global_dof"]
+    ):
+        raise ValueError("source control differs")
+    work, times = {}, {}
+    for name, path in {
+        **report["arms"],
+        "fresh-reference": report["fresh_reference"],
+    }.items():
+        if (
+            path["schema_version"] != "experimental-rc-control-parent-step-path.v1"
+            or path["status"] != "complete"
+            or type(path["accepted_target_count"]) is not int
+            or path["accepted_target_count"] != 1
+            or path["requested_targets_m"] != [targets[index]]
+            or path["initial_parent_hash"] != parent
+            or path["source_problem_hash"] != problem
+            or type(path["supplied_prefix_target_count"]) is not int
+            or path["supplied_prefix_target_count"] != index + 1
+            or path["preload_reexecuted"] is not False
+            or len(path["entries"]) != 1
+        ):
+            raise ValueError(
+                "same supplied parent and complete one-target arms required"
+            )
+        entry = path["entries"][0]
+        if (
+            type(entry["target_index"]) is not int
+            or entry["target_index"] != 0
+            or entry["parent_hash"] != parent
+        ):
+            raise ValueError("one-target entry parent differs")
+        _prefix(context, {**entry, "target_index": index}, path, targets, index)
+        work[name] = _counts(entry)
+        times[name] = _natural(path["wall_ns"])
+        if not times[name]:
+            raise ValueError("positive whole-arm time required")
+    result = {
+        "schema_version": "rc-control-parent-step-work-observation.v1",
+        "source_comparison_hash": report["report_hash"],
+        "accepted_context_hash": binding["sha256"],
+        "initial_parent_hash": parent,
+        "source_target_index": index,
+        "work": work,
+        "whole_arm_wall_ns": times,
+        "proposal_minus_secant_work": {
+            key: work["proposal"][key] - work["secant"][key] for key in _WORK
+        },
+        "proposal_minus_secant_wall_ns": times["proposal"] - times["secant"],
+        "local_context_binding_checked": True,
+        "source_authentication_performed": False,
+        "causal_training_labels_admitted": False,
+        "complete_path_performance_evidence": False,
+        "independent_physical_validation": False,
+    }
+    return result | {"report_hash": _hash(result)}
