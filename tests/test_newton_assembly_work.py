@@ -305,3 +305,38 @@ def test_actual_rc_path_recording_preserves_step_hashes_and_parent_state(
         assert [r["compensated"] for r in report["calls"]] == raw_calls
         assert report["calls"][-1]["phase"] == "final_observation"
         parent = measured.accepted_checkpoint
+
+
+@pytest.mark.parametrize("raises", [False, True])
+def test_opted_in_dispatch_timing_retains_raised_calls_and_inflight_unknown(
+    monkeypatch, raises
+):
+    from structural_analysis.solvers.nonlinear import assembly_work as module
+
+    ticks = iter([100, 137])
+    monkeypatch.setattr(module, "perf_counter_ns", lambda: next(ticks))
+    recorder = VectorAssemblyWorkRecorder(record_wall_time=True)
+    value = object()
+
+    class Problem:
+        def assemble(self, coordinates):
+            assert recorder.to_dict()["wall_ns"] is None
+            if raises:
+                raise ArithmeticError("test failure")
+            return value
+
+    if raises:
+        with pytest.raises(ArithmeticError):
+            module.assemble_vector(
+                Problem(), None, phase="primary_iteration", recorder=recorder
+            )
+    else:
+        assert (
+            module.assemble_vector(
+                Problem(), None, phase="primary_iteration", recorder=recorder
+            )
+            is value
+        )
+    report = recorder.to_dict()
+    assert report["wall_ns"] == report["calls"][0]["wall_ns"] == 37
+    assert report["calls"][0]["status"] == ("raised" if raises else "returned")

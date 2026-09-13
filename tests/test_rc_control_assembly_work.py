@@ -14,10 +14,11 @@ from structural_analysis.benchmark import rc_control_seed_runtime as runtime
 from structural_analysis.io.neutral.loader import load_neutral_json
 
 
+@pytest.mark.parametrize("timing", [False, True])
 @pytest.mark.parametrize("constant", [False, True])
 @pytest.mark.parametrize("retained", [False, True])
 def test_all_arms_and_preload_keep_exact_steps_with_opted_in_work(
-    tmp_path, constant, retained
+    tmp_path, constant, retained, timing
 ):
     model = load_neutral_json(
         Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
@@ -52,6 +53,7 @@ def test_all_arms_and_preload_keep_exact_steps_with_opted_in_work(
                 proposal=runtime.secant_seed,
                 proposal_identity="sha256:" + "b" * 64,
                 record_assembly_work=enabled,
+                record_assembly_timing=enabled and timing,
                 **kwargs,
             )
         )
@@ -96,7 +98,17 @@ def test_all_arms_and_preload_keep_exact_steps_with_opted_in_work(
         assert summary["dispatch_count"] == sum(summary["phase_counts"].values())
         assert summary["missing_record_count"] == summary["in_flight_count"] == 0
         assert summary["phase_counts"]["final_observation"] == (4 if constant else 3)
-        assert summary["phase_wall_ns"] is None
+        if timing:
+            assert set(summary["phase_wall_ns"]) == set(summary["phase_counts"])
+            assert all(
+                type(v) is int and v >= 0 for v in summary["phase_wall_ns"].values()
+            )
+            assert (
+                sum(summary["phase_wall_ns"].values())
+                <= reports[1]["whole_study_wall_ns"]
+            )
+        else:
+            assert summary["phase_wall_ns"] is None
         assert summary["physical_validation"] is False
         assert (
             summary["source_path_hash"]
@@ -161,3 +173,17 @@ def test_failed_attempt_retains_actual_partial_assembly_work(tmp_path, monkeypat
     assert summary["dispatch_count"] == 2
     assert summary["raised_dispatch_count"] == 1
     assert summary["physical_validation"] is False
+
+
+@pytest.mark.parametrize("value,work", [(True, False), (1, True), ("true", True)])
+def test_invalid_timing_option_rejected_before_output(tmp_path, value, work):
+    with pytest.raises(ValueError, match="assembly timing"):
+        runtime.benchmark_rc_control_seed_paths(
+            None,
+            None,
+            source_revision="a" * 40,
+            output_directory=tmp_path / "absent",
+            record_assembly_work=work,
+            record_assembly_timing=value,
+        )
+    assert not (tmp_path / "absent").exists()

@@ -243,7 +243,9 @@ def _recover_preload(compiled, step, request):
     return response, tuple(float(x) for x in coordinates) + (0.0,)
 
 
-def _preload(compiled, request, root, record_assembly_work=False):
+def _preload(
+    compiled, request, root, record_assembly_work=False, record_assembly_timing=False
+):
     """Retain the reservation, original outcome and recovery before any proposal."""
     inv = dict(
         ordinal=1,
@@ -256,7 +258,11 @@ def _preload(compiled, request, root, record_assembly_work=False):
     _save(root, "preload-started.json", _bytes(inv))
     wall, cpu = perf_counter_ns(), process_time_ns()
     step = attempt = response = coordinates = failure = None
-    assembly_work = VectorAssemblyWorkRecorder() if record_assembly_work else None
+    assembly_work = (
+        VectorAssemblyWorkRecorder(record_wall_time=record_assembly_timing)
+        if record_assembly_work
+        else None
+    )
     try:
         step, attempt = _execute_preload(
             compiled.problem,
@@ -323,6 +329,7 @@ def _path(
     initial_prefix=None,
     record_assembly_work=False,
     reuse_line_search_assembly=False,
+    record_assembly_timing=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -337,7 +344,9 @@ def _path(
     failure = None
     if request.constant_nodal_loads and initial_prefix is None:
         preload_step, preload_response, preload_coordinates, invocation, failure = (
-            _preload(compiled, request, root, record_assembly_work)
+            _preload(
+                compiled, request, root, record_assembly_work, record_assembly_timing
+            )
         )
         preload_invocations.append(invocation)
         if failure is None:
@@ -494,7 +503,9 @@ def _path(
             sw, sc = perf_counter_ns(), process_time_ns()
             step = None
             assembly_work = (
-                VectorAssemblyWorkRecorder() if record_assembly_work else None
+                VectorAssemblyWorkRecorder(record_wall_time=record_assembly_timing)
+                if record_assembly_work
+                else None
             )
             try:
                 step = solve_stateful_fiber_frame2d_displacement_control_step(
@@ -978,6 +989,7 @@ def benchmark_rc_control_seed_paths(
     accepted_context: RCControlSeedContext | None = None,
     record_assembly_work: bool = False,
     reuse_line_search_assembly: bool = False,
+    record_assembly_timing: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -986,6 +998,10 @@ def benchmark_rc_control_seed_paths(
     original prefix, and cannot provide complete-path performance credit.
     """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(record_assembly_timing) is not bool or (
+        record_assembly_timing and not record_assembly_work
+    ):
+        raise ValueError("assembly timing requires explicit work recording")
     if type(record_assembly_work) is not bool:
         raise ValueError("explicit boolean assembly recording required")
     if type(reuse_line_search_assembly) is not bool:
@@ -1258,6 +1274,8 @@ def benchmark_rc_control_seed_paths(
         )
     if record_assembly_work:
         identity["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
+    if record_assembly_timing:
+        identity["assembly_timing_recording"] = True
     if reuse_line_search_assembly:
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
@@ -1281,6 +1299,7 @@ def benchmark_rc_control_seed_paths(
             initial_prefix,
             record_assembly_work,
             reuse_line_search_assembly,
+            record_assembly_timing,
         )
         if initial_prefix is not None:
             unknown = any(

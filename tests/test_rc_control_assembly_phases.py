@@ -87,3 +87,48 @@ def test_reuse_hits_are_not_counted_as_dispatches():
     result = summarize(p)
     assert result["observed_line_search_reuse_hits"] == 3
     assert result["dispatch_count"] == 1
+
+
+def timed_path(status="returned"):
+    from structural_analysis.solvers.nonlinear.assembly_work import (
+        ASSEMBLY_TIMING_SCOPE,
+    )
+
+    p = path(status)
+    work = p["entries"][0]["invocations"][0]["newton_assembly_work"]
+    work["timing_scope"] = ASSEMBLY_TIMING_SCOPE
+    work["wall_ns"] = 17 if status != "started" else None
+    work["calls"][0]["wall_ns"] = work["wall_ns"]
+    return p
+
+
+@pytest.mark.parametrize("status", ["returned", "raised"])
+def test_timed_completed_dispatches_include_failures(status):
+    result = summarize(timed_path(status))
+    assert result["phase_wall_ns"] == {"line_search": 17}
+    assert result["physical_validation"] is False
+
+
+def test_partial_or_mixed_timing_stays_unknown():
+    p = timed_path("started")
+    assert summarize(p)["phase_wall_ns"] is None
+    p = timed_path()
+    p["preload_invocations"] = path()["entries"][0]["invocations"]
+    assert summarize(p)["phase_wall_ns"] is None
+
+
+@pytest.mark.parametrize("value", [True, -1, None, 1.5])
+def test_invalid_timing_value_rejected(value):
+    p = timed_path()
+    p["entries"][0]["invocations"][0]["newton_assembly_work"]["calls"][0]["wall_ns"] = (
+        value
+    )
+    with pytest.raises(ValueError):
+        summarize(p)
+
+
+def test_inconsistent_timing_total_rejected():
+    p = timed_path()
+    p["entries"][0]["invocations"][0]["newton_assembly_work"]["wall_ns"] = 18
+    with pytest.raises(ValueError, match="timing total"):
+        summarize(p)

@@ -2,8 +2,11 @@
 
 from dataclasses import dataclass, field
 from typing import Any
+from time import perf_counter_ns
 
 import numpy as np
+
+ASSEMBLY_TIMING_SCOPE = "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work"
 
 
 @dataclass
@@ -12,12 +15,17 @@ class VectorAssemblyWorkRecorder:
 
     Counts dispatches, including rejected trials and raised calls. One dispatch
     can perform multiple element/material evaluations: these are not counted.
-    No timing, solver completion or physical-validity claim is inferred.
+    Optional timing covers dispatch only, not solver completion or validity.
     """
 
+    record_wall_time: bool = False
     _calls: list[dict[str, Any]] = field(default_factory=list, init=False, repr=False)
     _active: bool = field(default=False, init=False, repr=False)
     _reuse_hit_count: int = field(default=0, init=False, repr=False)
+
+    def __post_init__(self):
+        if type(self.record_wall_time) is not bool:
+            raise ValueError("explicit boolean assembly timing required")
 
     def to_dict(self) -> dict[str, Any]:
         calls = [dict(row) for row in self._calls]
@@ -31,7 +39,13 @@ class VectorAssemblyWorkRecorder:
             "calls": calls,
             "element_material_evaluations": None,
             "outside_newton_assembly_calls": None,
-            "wall_ns": None,
+            "wall_ns": sum(row["wall_ns"] for row in calls)
+            if self.record_wall_time
+            and all(row["status"] != "started" for row in calls)
+            else None,
+            **(
+                {"timing_scope": ASSEMBLY_TIMING_SCOPE} if self.record_wall_time else {}
+            ),
             "solver_completion_inferred": False,
             "physical_validation": False,
             **(
@@ -52,6 +66,7 @@ class VectorAssemblyWorkRecorder:
         }
         self._calls.append(row)
         self._active = True
+        started = perf_counter_ns() if self.record_wall_time else None
         try:
             result = _dispatch(problem, coordinates, compensation)
             row["status"] = "returned"
@@ -60,6 +75,8 @@ class VectorAssemblyWorkRecorder:
             row.update(status="raised", exception_kind=type(exc).__name__)
             raise
         finally:
+            if started is not None:
+                row["wall_ns"] = perf_counter_ns() - started
             self._active = False
 
 
