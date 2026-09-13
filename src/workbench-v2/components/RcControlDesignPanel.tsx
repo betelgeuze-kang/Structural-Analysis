@@ -135,6 +135,18 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
       <h3>Selected candidate: {selected}</h3>
       <p>Model <code>{current.quantities.model_checksum}</code> · result <code>{current.artifacts.result.sha256}</code> · price table <code>{report.price_table_hash}</code></p>
       <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${s.top_bar_count} top and ${s.bottom_bar_count} bottom bars at ${s.bar_area_m2} m²`).join('; ')}</p>
+      <div data-rc-design-discretization={current.candidate_id}>
+        <h4>Selected model discretization</h4>
+        <dl>
+          {models[current.candidate_id].sections.map((s: RcObject) => <div key={s.id} data-rc-design-concrete-layers={s.id}>
+            <dt>Concrete layers through section depth · {s.id}</dt><dd>{shown(s.concrete_layer_count)}</dd>
+          </div>)}
+          {models[current.candidate_id].elements.map((e: RcObject) => <div key={e.id} data-rc-design-integration-points={e.id}>
+            <dt>Integration points along member · {e.id}</dt><dd>{shown(e.integration_order)}</dd>
+          </div>)}
+        </dl>
+        <p>Counts come from this selected model's original artifact. They describe discretization; they do not establish numerical convergence.</p>
+      </div>
       <p>Selection refers to these original artifacts and the unchanged authored control path. It does not launch analysis or confer design approval.</p>
     </div> : null}
     <button type="button" className="wb2-btn" onClick={() => { void download('study', 'comparison') }}>Download original RC comparison</button>

@@ -76,6 +76,16 @@ for (const width of [1440, 390]) {
       await expect(panel.locator('[data-rc-design-summary]')).toHaveAttribute('data-rc-design-summary', 'baseline')
       await panel.getByRole('button', { name: 'Select wider', exact: true }).click()
       await expect(panel.locator('[data-rc-design-selected]')).toContainText('width 0.5 m')
+      const discretization = panel.locator('[data-rc-design-discretization="wider"]')
+      const model = JSON.parse(readFileSync(`${directory}wider/model.json`, 'utf8'))
+      await expect(discretization).toBeVisible()
+      for (const section of model.sections) {
+        await expect(discretization.locator(`[data-rc-design-concrete-layers="${section.id}"] dd`)).toHaveText(String(section.concrete_layer_count))
+      }
+      for (const member of model.elements) {
+        await expect(discretization.locator(`[data-rc-design-integration-points="${member.id}"] dd`)).toHaveText(String(member.integration_order))
+      }
+      expect(await discretization.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true)
       const summary = panel.locator('[data-rc-design-summary="wider"]')
       await expect(summary).toBeVisible()
       for (const [key, value] of [['concrete', report.rows[1].quantities.totals.gross_concrete_volume_m3], ['rebar', report.rows[1].quantities.totals.longitudinal_rebar_mass_kg], ['estimate', report.rows[1].material_estimate.total], ['estimate-change', -report.rows[1].scoped_estimate_reduction], ['strain', report.rows[1].performance.maximum_absolute_fiber_strain]]) {

@@ -1,5 +1,10 @@
 # RC learning and candidate-search evidence index
 
+[Selected-model discretization in Workbench](rc-discretization-workbench-20260914.md)
+now exposes original concrete layer counts and member integration-point counts.
+Seventeen browser tests pass, including actual HTTP review at desktop/mobile
+widths; this UI coverage does not confer numerical or physical qualification.
+
 The [terminal 3e2cc1dba topology capture](hosted-3e-topology-20260914.md)
 records 413 focused and 984 regression passes plus named branch stages. All 27
 observed workflows at that source are terminal; full-suite preparation failures

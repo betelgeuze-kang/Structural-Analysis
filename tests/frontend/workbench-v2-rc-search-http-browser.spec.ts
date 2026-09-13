@@ -64,6 +64,17 @@ test.describe('RC search real HTTP', () => {
       await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Yes')
       await panel.getByRole('button', { name: 'Review Learned order', exact: true }).click()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'cheap')
+      const discretization = panel.locator('[data-rc-design-discretization="cheap"]')
+      const model = JSON.parse(readFileSync(`${fixture}learned_order/cheap/model.json`, 'utf8'))
+      await expect(discretization).toBeVisible()
+      for (const section of model.sections) {
+        await expect(discretization.locator(`[data-rc-design-concrete-layers="${section.id}"] dd`)).toHaveText(String(section.concrete_layer_count))
+      }
+      for (const member of model.elements) {
+        await expect(discretization.locator(`[data-rc-design-integration-points="${member.id}"] dd`)).toHaveText(String(member.integration_order))
+      }
+      expect(await discretization.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true)
+      await discretization.screenshot({ path: `test-results/rc-discretization-http-${width}.png` })
       const settings = panel.locator('[data-rc-design-settings]')
       await settings.locator('summary').click()
       const config = JSON.parse(readFileSync(fixture + 'learned_order/comparison.json', 'utf8')).control_request.solver_config
