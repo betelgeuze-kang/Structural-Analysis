@@ -24,6 +24,8 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
 - [Public archive lineage, independent-case screening and drawing-data roles](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/public-source-lineage-review-20260913.md)
 
+- [Explicit review of previous failed attempts](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/workbench-failure-history-20260913.md)
+
 - [Workbench failed-attempt diagnostics and exact original downloads](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/workbench-failure-diagnostic-review-20260913.md)
 
 - [Durable nonlinear failure diagnostics, attempt isolation and original retrieval](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/durable-failure-diagnostics-20260913.md)

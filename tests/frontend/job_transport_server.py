@@ -2,7 +2,8 @@
 
 All tokens are synthetic test data. The default fixture runs no solver.
 The explicit --nonlinear-failure option executes one real blocked planar solve;
-its adversarial browser payloads never overwrite the durable source artifacts.
+adding --failure-history retries it once and preserves the first diagnostic.
+Its adversarial browser payloads never overwrite the durable source artifacts.
 This is a test fixture, not an application listener or deployment prescription.
 """
 
@@ -37,7 +38,7 @@ class QuietHandler(WSGIRequestHandler):
         pass
 
 
-def main(*, nonlinear_failure=False):
+def main(*, nonlinear_failure=False, failure_history=False):
     root = Path(__file__).resolve().parents[2]
     dist = root / "dist"
     with tempfile.TemporaryDirectory(prefix="structural-job-browser-") as temporary:
@@ -184,6 +185,44 @@ def main(*, nonlinear_failure=False):
                     source_result_hash=source["result_hash"],
                 )
                 mutants[kind] = json.dumps(envelope)
+        if failure_history:
+            assert nonlinear_failure
+            service.resume_failed_job(
+                failed_job.job_id,
+                tenant_id="transport-test",
+                authorization_token="synthetic-memory-only-token",
+                expected_request_hash=failed_job.request.content_hash,
+                expected_checkpoint_hash=None,
+            )
+            retry = service.claim_next(
+                worker_id="worker", authorization_token="synthetic-worker-not-launched"
+            )
+            assert retry is not None and retry.job.attempt == 2
+            try:
+                execute_nonlinear_frame_claim(
+                    service,
+                    retry,
+                    worker_id="worker",
+                    authorization_token="synthetic-worker-not-launched",
+                )
+            except NonlinearFrameWorkerError as exc:
+                assert exc.code == "worker_result_contract_blocked"
+            else:
+                raise AssertionError("Expected second actual nonlinear failure")
+            failed_job = service.get_job(
+                failed_job.job_id,
+                tenant_id="transport-test",
+                authorization_token="synthetic-memory-only-token",
+            )
+            assert (
+                service.read_failure_diagnostic(
+                    failed_job.job_id,
+                    attempt=1,
+                    tenant_id="transport-test",
+                    authorization_token="synthetic-memory-only-token",
+                )
+                == diagnostic
+            )
         job = service.submit_job(
             tenant_id="transport-test",
             authorization_token="synthetic-memory-only-token",
@@ -236,4 +275,7 @@ if __name__ == "__main__":
         "run_stateful_fiber_frame2d_control_path",
         forbidden,
     ):
-        main(nonlinear_failure="--nonlinear-failure" in sys.argv)
+        main(
+            nonlinear_failure="--nonlinear-failure" in sys.argv,
+            failure_history="--failure-history" in sys.argv,
+        )

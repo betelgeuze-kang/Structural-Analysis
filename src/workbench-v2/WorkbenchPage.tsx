@@ -433,6 +433,8 @@ export function WorkbenchPage({
           frame3dArtifacts={jobLoad.frame3dArtifacts}
           rcReview={jobLoad.rcReview}
           failureDiagnostic={jobLoad.failureDiagnostic}
+          jobStatusUrl={jobStatusUrl}
+          jobAuthorization={jobAuthorization}
         />
         {caseV2 ? (
           <RunMonitor

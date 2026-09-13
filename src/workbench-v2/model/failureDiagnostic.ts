@@ -49,9 +49,10 @@ function hash(value: unknown): value is string { return typeof value === 'string
  * hashes preserve its float spellings. ModelIR normalization remains server-owned.
  */
 export async function validateFailureDiagnostic(
-  diagnosticBytes: Uint8Array, requestBytes: Uint8Array, job: WorkbenchJobView,
+  diagnosticBytes: Uint8Array, requestBytes: Uint8Array, job: WorkbenchJobView, attempt = job.attempt,
 ): Promise<FailureDiagnosticReview> {
-  ensure(job.status === 'failed' && job.attempt > 0 && job.result === null && job.evidence === null)
+  ensure(Number.isSafeInteger(attempt) && attempt > 0 && attempt <= job.attempt)
+  ensure(attempt < job.attempt || (job.status === 'failed' && job.result === null && job.evidence === null))
   ensure(diagnosticBytes.byteLength <= 12 * 1024 * 1024 && requestBytes.byteLength <= 16 * 1024 * 1024)
   ensure(requestBytes.byteLength === job.request.byte_length && await sha256Bytes(requestBytes) === job.request.content_hash)
   const requestDoc = document(requestBytes), request = requestDoc.value
@@ -63,7 +64,7 @@ export async function validateFailureDiagnostic(
   const binding = object(envelope.binding)
   exact(binding, ['job_id', 'request_hash', 'attempt', 'source_revision', 'input_checksum', 'configuration_hash'])
   ensure(binding.job_id === job.job_id && binding.request_hash === job.request.content_hash
-    && count(binding.attempt, fields(fields(envelopeDoc.raw).get('binding')!.value).get('attempt')!.value) === job.attempt && binding.source_revision === (request.source_revision ?? null))
+    && count(binding.attempt, fields(fields(envelopeDoc.raw).get('binding')!.value).get('attempt')!.value) === attempt && binding.source_revision === (request.source_revision ?? null))
   ensure(binding.source_revision === null || (typeof binding.source_revision === 'string' && /^[0-9a-f]{40}$/.test(binding.source_revision)))
   ensure(hash(binding.input_checksum) && hash(binding.configuration_hash))
   ensure(typeof envelope.result_bytes_base64 === 'string' && envelope.result_bytes_base64.length <= 11184812)
@@ -133,19 +134,20 @@ export async function validateFailureDiagnostic(
     ensure(steps.filter(step => step.committed).length === committed && count(steps.reduce((sum, step) => sum + step.historyRows, 0)) === historyRows)
     observed = { attempted, committed, replayed, newlyAttempted, historyRows, steps }
   }
-  return { attempt: job.attempt, sourceRevision: binding.source_revision, resultHash: source.result_hash,
+  return { attempt, sourceRevision: binding.source_revision, resultHash: source.result_hash,
     inputChecksum: source.input_checksum, modelIdentityVerification: modelIR ? 'service_normalized_model_ir' : 'browser_raw_neutral_model',
     observed, diagnosticBytes: diagnosticBytes.slice(), resultBytes }
 }
 
-export async function loadFailureDiagnostic(job: WorkbenchJobView, transport: JobReadTransport): Promise<FailureDiagnosticReview | undefined> {
-  const response = await transport.get(`failure-diagnostics/${job.attempt}`)
+export async function loadFailureDiagnostic(job: WorkbenchJobView, transport: JobReadTransport, attempt = job.attempt): Promise<FailureDiagnosticReview | undefined> {
+  if (!Number.isSafeInteger(attempt) || attempt < 1 || attempt > job.attempt) throw new JobArtifactError('failure_attempt_invalid')
+  const response = await transport.get(`failure-diagnostics/${attempt}`)
   if (response.status === 404) return undefined
   if (!response.ok) throw new JobArtifactError(`failure_diagnostic_HTTP_${response.status}`)
   const diagnostic = await readBoundedJobBytes(response, 12 * 1024 * 1024, 'failure diagnostic')
   const requestResponse = await transport.get('request', job.request.media_type)
   if (!requestResponse.ok) throw new JobArtifactError(`failure_request_HTTP_${requestResponse.status}`)
   const request = await readBoundedJobBytes(requestResponse, 16 * 1024 * 1024, 'failure request', job.request.byte_length)
-  try { return await validateFailureDiagnostic(diagnostic, request, job) }
+  try { return await validateFailureDiagnostic(diagnostic, request, job, attempt) }
   catch { throw new JobArtifactError('nonlinear_failure_diagnostic_invalid') }
 }
