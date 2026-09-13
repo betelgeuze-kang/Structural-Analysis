@@ -1,0 +1,56 @@
+{
+  "source_revision": "f8f2f30fab7e6a56b2ff632c7461691c20d89c37",
+  "source_tree": "03b559df492cb0093d0fc820e799d9cf6f951cb6",
+  "source_import_path": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/src/structural_analysis/__init__.py",
+  "clean_before_and_after": true,
+  "python": "3.10.12",
+  "numpy": "1.26.4",
+  "scipy": "1.12.0",
+  "environment": {
+    "PYTHONPATH": "src",
+    "OPENBLAS_CORETYPE": "Haswell",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "passed": 1065,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "pytest_elapsed_seconds": 672.81,
+  "first_attempt": {
+    "outcome": "40 collection errors",
+    "reason": "Existing editable installation resolved another checkout; source was not explicitly selected.",
+    "elapsed_seconds": 6.6,
+    "corrected_by": "Explicit PYTHONPATH=src; no repository installation change."
+  },
+  "scope": "Exact development-contract test roster from python-test-collection.yml; local source, not hosted CI or complete repository suite.",
+  "external_validation_credit": false,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-development-contracts-rcat_m5i",
+  "files": [
+    {
+      "path": "structural-f8-development-command.txt",
+      "bytes": 1715,
+      "sha256": "8c97c918ca8b8e68f4660bc1ad1d20d345d95bdce358345091e171233678b259"
+    },
+    {
+      "path": "structural-f8-development-contracts.log",
+      "bytes": 31383,
+      "sha256": "6170a89f35a3db5b4c3782f212363ed9a62e9600a959e87c71da0abb51e1bb9d"
+    },
+    {
+      "path": "structural-f8-development-contracts.xml",
+      "bytes": 32026,
+      "sha256": "b503e84eaf36951686e55863adf862f497e9cc852c0ad06a75b7a3febe7bc405"
+    },
+    {
+      "path": "structural-f8-development-current-source.log",
+      "bytes": 1233,
+      "sha256": "b2acd3bba9a459e282e5f23cd3426e736b9c32de6685e85905bdd7ae707c2572"
+    },
+    {
+      "path": "structural-f8-development-current-source.xml",
+      "bytes": 156881,
+      "sha256": "ec6efc41d09717b1487356bd924d1761638afaaa6390a8a9666ec7a10ea4191e"
+    }
+  ]
+}

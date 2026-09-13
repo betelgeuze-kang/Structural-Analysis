@@ -124,3 +124,5 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 - [Residual-directed scalar diagnosis](rc-residual-directed-20260913.md): 20 training parents, 40 assemblies, no new residual-gate pass; no policy or speed credit.
 
 - [Basic CI preparation diagnostics](ci-materialization-diagnostics-20260913.md): preserves failed receipt context without relaxing the external gate; 21 local workflow tests pass.
+
+- [Current-source development contracts](development-contracts-20260913.md): all 1,065 local tests pass at f8f2f30fa; first wrong-checkout collection failure retained. Not complete-repository or hosted qualification.
