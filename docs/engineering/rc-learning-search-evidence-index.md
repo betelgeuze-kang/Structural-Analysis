@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Completed full Python baseline and native RC wire migration](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/full-suite-native-wire-20260913.md)
 - [RC immutable section and compiler typing with exact fresh-result comparison](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-typed-contracts-20260913.md)
 - [Explicit intermediate steel layers through analysis, quantities and Workbench validation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-intermediate-steel-layers-20260913.md)
 - [Perimeter reinforcement source and public-input boundary](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-perimeter-source-boundary-20260913.md)

@@ -229,7 +229,17 @@ def test_v3_request_has_explicit_target_and_leaves_original_profiles_unchanged()
         )
 
 
-@pytest.mark.parametrize("schema", ["v1", "v2", "v4"])
+def test_v4_polishing_request_preserves_the_explicit_correction_configuration():
+    assert (
+        process._decode_learning_configuration(
+            deepcopy(CONFIGURATION),
+            request_schema="rc-fiber-learning-process-request.v4",
+        )
+        == CONFIGURATION
+    )
+
+
+@pytest.mark.parametrize("schema", ["v1", "v2", "v999"])
 def test_correction_fields_cannot_be_downgraded_or_promoted_to_unknown_request(schema):
     with pytest.raises(ValueError):
         process._decode_learning_configuration(
