@@ -1780,13 +1780,19 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
             <= float(resources_row["execution_seconds"])
             and resources_row["runtime_limit_seconds"] == RUNTIME_LIMIT_SECONDS
         )
-        peak_memory = bool(
+        resource_identity_pass = bool(
             resources_row["measurement"] == expected_resource_measurement
             and resources_row["observation_authority"] == RESOURCE_OBSERVATION_AUTHORITY
             and resources_row["authority_requires"] == RESOURCE_AUTHORITY_REQUIRES
+            and resources_row["peak_memory_limit_bytes"] == PEAK_MEMORY_LIMIT_BYTES
+        )
+        # A failed resource gate must not hide contradictory measurement metadata.
+        if not resource_identity_pass:
+            errors.append(f"case_gate_derivation_mismatch:{case_id}:resource_identity")
+        peak_memory = bool(
+            resource_identity_pass
             and isinstance(resources_row["peak_memory_bytes"], int)
             and 0 < resources_row["peak_memory_bytes"] <= PEAK_MEMORY_LIMIT_BYTES
-            and resources_row["peak_memory_limit_bytes"] == PEAK_MEMORY_LIMIT_BYTES
         )
         worker_wall = bool(
             finite(row["worker_wall_seconds"])

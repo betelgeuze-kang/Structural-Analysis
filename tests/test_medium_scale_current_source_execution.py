@@ -602,10 +602,30 @@ def test_rebound_impossible_resource_observations_fail_closed(
         validate_medium_scale_execution_receipt(zeroed)
 
 
+@pytest.mark.parametrize("memory_limit_exceeded", [False, True])
 def test_rebound_resource_measurement_must_match_execution_platform(
     full_profile: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+    memory_limit_exceeded: bool,
 ) -> None:
     payload = copy.deepcopy(full_profile)
+    if memory_limit_exceeded:
+        first = payload["cases"][0]
+        first["resources"]["peak_memory_bytes"] = PEAK_MEMORY_LIMIT_BYTES + 1
+        first["gates"]["peak_memory"] = False
+        first["contract_pass"] = False
+        first["technical_execution_credit"] = False
+        rows = {row["case_id"]: row for row in payload["cases"]}
+        monkeypatch.setattr(
+            "structural_analysis.benchmark.medium_scale_execution.run_isolated_case",
+            lambda *, case_id, worker_command: copy.deepcopy(rows[case_id]),
+        )
+        payload = build_medium_scale_execution_receipt(
+            source_commit_sha=SOURCE_SHA,
+            source_tree_clean=True,
+            worker_command=[sys.executable, str(RUNNER)],
+        )
+        assert payload["contract_pass"] is False
     resources = payload["cases"][0]["resources"]
     current = resources["measurement"]
     resources["measurement"] = (
@@ -677,11 +697,16 @@ def test_current_source_workflow_attests_only_non_promoting_main_receipt() -> No
     assert "artifact-digest: ${{ steps.handoff.outputs.artifact-digest }}" in producer
     assert "uses: ./.github/workflows/_technical-evidence-attest.yml" in workflow
     assert 'summary.get("technical_execution_credit_count") == 5' in verifier
-    assert 'summary.get("independent_internal_oracle_comparison_count") == 5' in verifier
+    assert (
+        'summary.get("independent_internal_oracle_comparison_count") == 5' in verifier
+    )
     assert 'summary.get("scientific_medium_benchmark_credit_count") == 0' in verifier
     assert 'summary.get("native_medium_product_authority_count") == 0' in verifier
     assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in verifier
     assert (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
     )
-    assert "subject-path: ${{ runner.temp }}/verified-technical-handoff/${{ inputs.receipt-path }}" in verifier
+    assert (
+        "subject-path: ${{ runner.temp }}/verified-technical-handoff/${{ inputs.receipt-path }}"
+        in verifier
+    )
