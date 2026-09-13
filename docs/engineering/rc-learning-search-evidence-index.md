@@ -24,6 +24,8 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
 - [Public archive lineage, independent-case screening and drawing-data roles](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/public-source-lineage-review-20260913.md)
 
+- [Actual HTTP/Workbench review of retained failed candidates](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-failed-search-workbench-20260913.md)
+
 - [Measured failed Newton work and preserved nonlinear continuation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-failed-newton-work-20260913.md)
 
 - [Repeated additional histories, including eight preserved failed executions](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-staged-history-20260913.md)
