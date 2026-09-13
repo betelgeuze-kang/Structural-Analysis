@@ -1310,6 +1310,99 @@ def _comparisons(
     return comparisons
 
 
+def _material_activity(bundle: Path, row: dict) -> dict:
+    """Describe verified accepted observations, never infer missing activity as zero."""
+    maxima = {
+        "maximum_accumulated_steel_plastic_strain": None,
+        "maximum_concrete_tensile_damage": None,
+        "maximum_concrete_compressive_damage": None,
+    }
+    unavailable = {
+        "available": False,
+        "reason": "history_unavailable_or_unverified",
+        "accepted_step_count": None,
+        "material_observation_count": None,
+        "steel_plasticity_observed": None,
+        "concrete_damage_observed": None,
+        **maxima,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+    }
+    if not all(
+        row.get(key) is True
+        for key in (
+            "resource_eligible",
+            "artifact_contract_pass",
+            "physical_converged",
+            "retained_artifacts_intact",
+        )
+    ):
+        return unavailable
+    identity = row.get("artifacts", {}).get("history.json")
+    if identity is None:
+        return unavailable
+    fields = {
+        "steel": (
+            "uniaxial-combined-hardening-state.v1",
+            {
+                "accumulated_plastic_strain": "maximum_accumulated_steel_plastic_strain",
+            },
+        ),
+        "concrete": (
+            "uniaxial-asymmetric-concrete-damage-state.v1",
+            {
+                "tensile_damage": "maximum_concrete_tensile_damage",
+                "compressive_damage": "maximum_concrete_compressive_damage",
+            },
+        ),
+    }
+    try:
+        raw = (bundle / row["directory"] / "history.json").read_bytes()
+        if {"sha256": _digest(raw), "byte_length": len(raw)} != identity:
+            raise ValueError("history identity changed")
+        history = _json(raw)
+        steps = history["steps"]
+        if not isinstance(steps, list) or not steps:
+            raise ValueError("missing accepted steps")
+        observations = 0
+        for step in steps:
+            states = step["material_states"]
+            if not isinstance(states, list) or not states:
+                raise ValueError("missing material observations")
+            for material in states:
+                kind = material["material_kind"]
+                schema, names = fields[kind]
+                state = material["state"]
+                if state["schema_version"] != schema:
+                    raise ValueError("unknown material state")
+                for name, destination in names.items():
+                    value = state[name]
+                    if (
+                        not _finite(value)
+                        or value < 0
+                        or (kind == "concrete" and value > 1)
+                    ):
+                        raise ValueError("invalid activity value")
+                    maxima[destination] = max(maxima[destination] or 0.0, value)
+                observations += 1
+    except (OSError, ValueError, KeyError, TypeError):
+        return {**unavailable, "reason": "history_changed_or_invalid"}
+    steel = maxima["maximum_accumulated_steel_plastic_strain"]
+    tensile = maxima["maximum_concrete_tensile_damage"]
+    compressive = maxima["maximum_concrete_compressive_damage"]
+    return {
+        **unavailable,
+        **maxima,
+        "available": True,
+        "reason": None,
+        "accepted_step_count": len(steps),
+        "material_observation_count": observations,
+        "steel_plasticity_observed": None if steel is None else steel > 0,
+        "concrete_damage_observed": None
+        if tensile is None
+        else tensile > 0 or compressive > 0,
+    }
+
+
 def run_planar_frame_backend_experiment(
     request_path: Path,
     *,
@@ -1410,6 +1503,9 @@ def run_planar_frame_backend_experiment(
                 artifact_contract_pass=False,
             )
             row["retention_error"] = "saved_slot_artifacts_changed_or_missing"
+    if _history_requested(request):
+        for row in rows:
+            row["material_activity"] = _material_activity(output, row)
     comparisons = _comparisons(output, request, rows, results)
     report = {
         "schema_version": "planar-frame-backend-experiment.v2"
@@ -1457,6 +1553,10 @@ def run_planar_frame_backend_experiment(
         "claim_boundary": CLAIM_BOUNDARY,
     }
     if _history_requested(request):
+        report["material_activity_cost_scope"] = (
+            "included_in_parent_cpu_ns_and_experiment_wall_ns;"
+            "excluded_from_worker_and_per_slot_validation_costs"
+        )
         report["history_comparison_counts"] = {
             "expected_pairs": len(slots)
             // len(request["backends"])

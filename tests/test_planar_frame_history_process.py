@@ -594,3 +594,18 @@ def test_terminal_match_with_middle_history_mismatch_disables_paired_costs(
     )
     assert standalone["step_comparisons"][0]["match"] is False
     assert standalone["step_comparisons"][-1]["match"] is True
+
+
+def test_report_retains_observed_material_activity_from_real_workers(observed):
+    assert observed.report["material_activity_cost_scope"] == (
+        "included_in_parent_cpu_ns_and_experiment_wall_ns;"
+        "excluded_from_worker_and_per_slot_validation_costs"
+    )
+    for row in observed.report["rows"]:
+        activity = row["material_activity"]
+        assert activity["available"] is True
+        assert activity["accepted_step_count"] == 3
+        assert activity["material_observation_count"] > 0
+        assert activity["steel_plasticity_observed"] is False
+        assert activity["concrete_damage_observed"] is False
+        assert activity == process._material_activity(observed.output, row)

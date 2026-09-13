@@ -424,3 +424,10 @@ The [quadratic work decomposition](rc-quadratic-work-decomposition-20260914.md)
 authenticates 1,936 steps: train-b/d have more primary and line-search work,
 masked in inclusive linear counts by fewer terminal solves. No new solves/fits
 or same-parent counterfactual learning labels are claimed.
+
+
+The [accepted-history material activity report](planar-material-activity-20260914.md)
+separates verified zero activity, observed plasticity/damage and unknown failed
+paths. Read-only hash-bound replay classifies 8 undamaged, 9 damaged and 9
+unknown paths from existing packets. Parent scan costs are explicit; no new
+physical validation or AI performance claim is made.
