@@ -1,5 +1,9 @@
 # RC learning and candidate-search evidence index
 
+The [completed cccee runtime/browser lanes](hosted-cccee-runtime-20260914.md)
+record 96 Python, 706 frontend and 26 actual HTTP checks passing, separately
+from failed full-shard preparation and still-live development/topology lanes.
+
 The [published cccee full-shard failures](hosted-cccee-push-ci-20260914.md)
 retain original logs: all four actual repository-suite executions were skipped
 after external-evidence preparation failed. Separate live lanes are not inferred

@@ -121,6 +121,28 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-14)
 
+The [published cccee runtime lanes](hosted-cccee-runtime-20260914.md) now finish
+with 96 Python, 706 frontend and 26 actual HTTP checks passing. The
+[four full repository shards](hosted-cccee-push-ci-20260914.md) still fail before
+actual suite execution in external-evidence preparation. Separate development
+and topology jobs remain live at capture. These results apply to cccee, not the
+subsequent local commits, and do not close independent acceptance.
+
+The [supplied-parent cost observer](rc-parent-step-work-observer-20260914.md)
+now has actual binary64/retained-arithmetic, fallback and abstention integration
+coverage: 61 focused tests pass after fixing a profile-dependent identity-field
+assumption. It keeps training admission and complete-path claims false.
+The [additional 64-parent screen](rc-quadratic-grid-20260914.md) measures 247 to
+239 inclusive linear solves but 50 slower individual proposal arms. The
+[source-bound phase decomposition](rc-quadratic-targets-20260914.md) finds 14 of
+17 linear-work reductions leave primary convergence unchanged; all three primary
+reductions are confined to train-c. The case-exclusion fitting set then has zero
+positive primary-reduction examples when train-c is withheld. No additional
+classifier is fitted, no independent case is claimed and no policy is promoted.
+This narrows M3's next action toward relevant cross-case cost evidence rather
+than further fitting of these same sparse outcomes.
+
+
 The [repeated consumer-cost comparison](rc-strict-string-repeated-20260914.md)
 now separately builds baseline/changed frontends and verifies twelve actual HTTP
 runs on the same 525 MB bundle. Desktop/mobile-width median paired verified-panel
