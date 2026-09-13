@@ -463,3 +463,22 @@ def test_twofold_native_coordinate_changes_trigger_and_run_focused_checks():
     ):
         assert f'- "{path}"' in trigger
     assert workflow.count("tests/test_rc_control_twofold_coordinates.py") == 2
+
+
+def test_frontend_failure_diagnostics_preserve_original_failure_outcome() -> None:
+    workflow = _read("frontend-web-ci.yml")
+    e2e = workflow.split("- name: Workbench v2 E2E", 1)[1].split(
+        "- name: Preserve failed Workbench browser diagnostics", 1
+    )[0]
+    assert "id: workbench_e2e" in e2e
+    assert "--trace=retain-on-failure" in e2e
+    assert "continue-on-error" not in e2e
+    upload = workflow.split("- name: Preserve failed Workbench browser diagnostics", 1)[
+        1
+    ].split("  frontend-required:", 1)[0]
+    assert "if: failure() && steps.workbench_e2e.outcome == 'failure'" in upload
+    assert "test-results/**/trace.zip" in upload
+    assert "test-results/**/error-context.md" in upload
+    assert "retention-days: 7" in upload
+    required = workflow.split("  frontend-required:", 1)[1]
+    assert 'test "$FRONTEND_RESULT" = success' in required

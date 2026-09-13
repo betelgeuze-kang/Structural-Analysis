@@ -1,0 +1,11 @@
+# Workbench CI failure observability and repeated comparison checks
+
+The published source `414098e3f7fb8482d0937caeee8a8be96cd0f4d6` follows a preceding frontend run (`34741505107`, source `5f68c659e878cb851f93b6fc1d569fe95d799f9a`) with 691 passes and two failures to find the verified design-comparison panel. The preceding run exposes no uploaded artifacts through its Actions artifacts endpoint. Logs do not establish whether loading, transport, validation or rendering caused those failures.
+
+Using the repository's pinned Node 24.20.0 E2E runner, both history states and both price states were repeated ten times with two workers: 40 passed in 59.6 seconds. The runner rebuilt TypeScript/Vite and checked viewer delivery. This does not reproduce the hosted failures or establish their cause; timeouts and validation requirements remain unchanged.
+
+The frontend workflow now requests Playwright `retain-on-failure` traces and uploads only trace ZIPs, error-context Markdown and screenshots after the E2E step fails. Artifact names include source SHA, run ID and attempt, with seven-day retention. The required frontend job still requires success; diagnostics do not convert failure to success or rerun until green. The trace may contain synthetic fixture requests and browser state and is diagnostic evidence, not accepted engineering output.
+
+A disposable, deliberately failing synthetic browser test produced a valid trace ZIP with trace records and images, plus error-context Markdown. Its expected exit code was 1. This verifies local capture, not remote artifact-upload success. Workflow/runtime contract tests passed 26 tests in 0.63 seconds. Hosted upload remains to be observed on a future failed E2E run.
+
+The explicit `--with-job-api` runner selection also includes earlier-failure browsing, which was previously only run directly. The official runner passed its four history tests in 37.4 seconds, including the fixture's two actual failed nonlinear attempts and original-byte checks. The ordinary hermetic frontend lane still has no Python solver dependency. Independent physics, learned net benefit, the full Python suite and roadmap closure remain open.

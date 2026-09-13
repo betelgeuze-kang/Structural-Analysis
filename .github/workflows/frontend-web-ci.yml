@@ -216,8 +216,21 @@ jobs:
         run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-prototype-browser-smoke.mjs"
 
       - name: Workbench v2 E2E
+        id: workbench_e2e
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs" --trace=retain-on-failure
+
+      - name: Preserve failed Workbench browser diagnostics
+        if: failure() && steps.workbench_e2e.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: workbench-browser-failure-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/**/trace.zip
+            test-results/**/error-context.md
+            test-results/**/*.png
+          if-no-files-found: warn
+          retention-days: 7
 
   frontend-required:
     name: frontend-required
