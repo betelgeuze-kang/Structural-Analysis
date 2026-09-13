@@ -1,5 +1,12 @@
 # RC learning and candidate-search evidence index
 
+The [cccee topology CI](hosted-cccee-topology-20260914.md) subsequently finished
+successfully: 413 focused tests, the named branch stages and 984 regression tests
+pass with no skipped steps. All cccee workflows are now terminal. This supersedes
+earlier live-wait snapshots, while full-suite preparation failures and independent
+acceptance gaps remain. Later local changes require their own hosted evidence.
+
+
 The [completed cccee development contracts](hosted-cccee-development-20260914.md)
 record 1199 passes in the selected lane. Full shards remain skipped after
 preparation failure; later local changes are not covered by that hosted source.
