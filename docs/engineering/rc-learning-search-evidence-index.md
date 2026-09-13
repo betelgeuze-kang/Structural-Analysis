@@ -4,8 +4,10 @@ The [b8e7c54 hosted runtime result](hosted-b8e-runtime-20260914.md) now records
 96 Python, 706 guarded frontend and 36 actual HTTP passes, plus 1,217 development
 contract passes in its separate lane. This covers the later historical diagnostic
 checkpoint transitions at the published source. The four full repository shards
-still skip their tests after external-evidence preparation fails. Topology's
-regression stage remains live at this update; full acceptance is not established.
+still skip their tests after external-evidence preparation fails. The
+[terminal topology result](hosted-b8e-topology-20260914.md) adds 413 focused and
+984 regression passes plus the named branch stages, without establishing full
+acceptance.
 
 The [two-connectivity planar cohort](planar-topology-cohort-20260914.md) adds 18
 converged lower-load observations, while its [higher-load follow-up](planar-topology-highload-20260914.md)

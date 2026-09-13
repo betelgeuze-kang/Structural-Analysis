@@ -1,0 +1,28 @@
+{
+  "source_revision": "b8e7c54663b6d1f45477f1d99ce623ba596601b3",
+  "run_id": 34776135679,
+  "job_id": 103774473640,
+  "conclusion": "success",
+  "focused_passed": 413,
+  "focused_seconds": 1009.5,
+  "regression_passed": 984,
+  "regression_seconds": 904.93,
+  "branch_stage_passed": [
+    22,
+    86,
+    9,
+    28,
+    16,
+    13,
+    65
+  ],
+  "overlapping_selections_not_distinct_total": true,
+  "skipped_steps": 0,
+  "full_repository_suite_passed": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-b8e-topology-6la051e2",
+    "payload_files": 2,
+    "payload_bytes": 173286,
+    "inventory_sha256": "676a084b1fc187ea622515fd103090e7ad8d4b2ec40eb549d3eec9372f7b3952"
+  }
+}
