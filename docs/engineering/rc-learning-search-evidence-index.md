@@ -1,5 +1,12 @@
 # RC learning and candidate-search evidence index
 
+The [larger planar cohort](planar-larger-cohort-20260914.md) adds eight
+completed observations at 27/48 free equations, four passing full-history
+backend comparisons and four exact repetition pairs. No damage/plasticity or
+clear sparse benefit is observed. [Published cb5495d49 runtime/development CI](hosted-cb-python-runtime-20260914.md)
+passes its selected lanes while full repository shards remain unexecuted after
+external-evidence preparation failures; later local changes are not qualified.
+
 [Selected-model discretization in Workbench](rc-discretization-workbench-20260914.md)
 now exposes original concrete layer counts and member integration-point counts.
 Seventeen browser tests pass, including actual HTTP review at desktop/mobile
