@@ -105,6 +105,8 @@ def _source_identity(source: MeasuredResponseWorkbook, *, retain_response=False)
         "physical_channel_count": len(channels),
         "nonconstant_si_channels": sorted(set(nonconstant_channels)),
     }
+    if source.campaign_aliases:
+        identity["campaign_aliases"] = sorted(source.campaign_aliases)
     return identity, response
 
 
@@ -183,6 +185,8 @@ def validate_measured_response_split_sources(records):
     Records are (case_id, split, measured_source_or_None). Authored cases without
     measured sources remain explicitly uncovered. This screen does not give a
     supplied source/model pair physical validation or training admission.
+    Primary campaign IDs and declared aliases share one namespace, so a later
+    record linking two previously separate names cannot hide cross-split reuse.
     """
     started = perf_counter_ns()
     owners: dict[tuple[str, str], str] = {}
@@ -201,15 +205,20 @@ def validate_measured_response_split_sources(records):
             ("original_workbook", identity["source_sha256"]),
             ("si_observation_content", identity["si_observation_content_sha256"]),
         ]
+        keys.extend(("campaign", alias) for alias in source.campaign_aliases)
         for key in keys:
             if key in owners and owners[key] != split:
-                raise MeasuredSplitLeakageError(
+                error = MeasuredSplitLeakageError(
                     key[0],
                     case_id=case_id,
                     identity=identity,
                     processed_count=len(identities) + 1,
                     elapsed_ns=perf_counter_ns() - started,
                 )
+                if key[0] == "campaign":
+                    error.details["matched_campaign_id"] = key[1]
+                    error.details["previous_split"] = owners[key]
+                raise error
             owners[key] = split
         for trajectory in _force_displacement_trajectories(identity):
             key = ("si_force_displacement_trajectory", trajectory)

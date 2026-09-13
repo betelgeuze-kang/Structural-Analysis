@@ -4,6 +4,7 @@ from dataclasses import replace
 from decimal import localcontext
 import hashlib
 import io
+import itertools
 from pathlib import Path
 import zipfile
 
@@ -36,6 +37,7 @@ def source(
     extra_sensor=False,
     force_values=None,
     displacement_values=None,
+    aliases=(),
 ):
     ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
     rel = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -104,7 +106,71 @@ def source(
         campaign_id=campaign,
         specimen_id="frame",
         test_id=test,
+        campaign_aliases=aliases,
     )
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_declared_campaign_alias_links_different_curves_before_fitting(reverse):
+    first = source(campaign="original")
+    other = source(campaign="archive", changed=True)
+    # Different bytes and responses alone cannot identify this declared lineage.
+    report = validate_measured_response_split_sources(
+        [("a", "train", first), ("b", "holdout", other)]
+    )
+    assert len(report["sources"]) == 2
+    other = replace(other, campaign_aliases=("original",))
+    records = [("a", "train", first), ("b", "holdout", other)]
+    if reverse:
+        records.reverse()
+    with pytest.raises(MeasuredSplitLeakageError, match="measured_campaign") as error:
+        validate_measured_response_split_sources(records)
+    assert error.value.details["matched_campaign_id"] == "original"
+    assert error.value.details["previous_split"] == records[0][1]
+
+
+@pytest.mark.parametrize("order", list(itertools.permutations(range(3))))
+def test_campaign_alias_bridge_rejects_in_every_record_order(order):
+    sources = [
+        source(campaign="a", force_values=["0", "2", "3"]),
+        source(campaign="b", force_values=["0", "4", "5"]),
+        source(campaign="bridge", aliases=("a", "b"), force_values=["0", "6", "7"]),
+    ]
+    records = [(str(i), "holdout" if i == 1 else "train", sources[i]) for i in order]
+    with pytest.raises(MeasuredSplitLeakageError, match="measured_campaign"):
+        validate_measured_response_split_sources(records)
+
+
+def test_aliases_are_retained_without_changing_observation_identity_or_admission():
+    original = source()
+    aliased = replace(original, campaign_aliases=("z-original", "a-archive"))
+    before = measured_response_split_identity(original)
+    after = measured_response_split_identity(aliased)
+    assert after.pop("campaign_aliases") == ["a-archive", "z-original"]
+    assert before == after
+    report = validate_measured_response_split_sources(
+        [("a", "train", original), ("b", "train", aliased)]
+    )
+    assert not report["independent_provenance_verified"]
+    assert not report["training_admission_granted"]
+
+
+@pytest.mark.parametrize(
+    "aliases",
+    [
+        [],
+        "alias",
+        (True,),
+        ("",),
+        ("bad/id",),
+        ("duplicate", "duplicate"),
+        ("experiment",),
+        tuple(f"alias{i}" for i in range(33)),
+    ],
+)
+def test_invalid_campaign_alias_declarations_rejected(aliases):
+    with pytest.raises(ValueError, match="campaign aliases"):
+        source(aliases=aliases)
 
 
 @pytest.mark.parametrize(
@@ -346,7 +412,7 @@ def test_row_subset_same_partition_does_not_hide_later_cross_partition_overlap()
         )
 
 
-@pytest.mark.parametrize("subset", [False, True, "rows"])
+@pytest.mark.parametrize("subset", [False, True, "rows", "alias"])
 def test_actual_learning_entry_rejects_before_compile_solve_fit_or_output(
     tmp_path, monkeypatch, subset
 ):
@@ -377,6 +443,8 @@ def test_actual_learning_entry_rejects_before_compile_solve_fit_or_output(
                     test=name,
                     campaign=name if subset else "experiment",
                     extra_sensor=subset and name == "a",
+                    changed=subset == "alias" and name == "b",
+                    aliases=("original-campaign",) if subset == "alias" else (),
                 )
             ),
         )
@@ -385,6 +453,8 @@ def test_actual_learning_entry_rejects_before_compile_solve_fit_or_output(
     reason = (
         "si_force_displacement_row_subsequence"
         if subset == "rows"
+        else "campaign"
+        if subset == "alias"
         else "si_force_displacement_trajectory"
         if subset
         else "campaign"

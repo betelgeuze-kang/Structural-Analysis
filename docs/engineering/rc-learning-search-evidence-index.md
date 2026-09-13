@@ -6,6 +6,10 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Measured campaign aliases and pre-solve cross-split rejection](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/measured-campaign-aliases-20260913.md)
+
+- [Public archive lineage, independent-case screening and drawing-data roles](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/public-source-lineage-review-20260913.md)
+
 - [Workbench failed-attempt diagnostics and exact original downloads](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/workbench-failure-diagnostic-review-20260913.md)
 
 - [Durable nonlinear failure diagnostics, attempt isolation and original retrieval](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/durable-failure-diagnostics-20260913.md)

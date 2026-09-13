@@ -44,6 +44,23 @@ class MeasuredResponseWorkbook:
     campaign_id: str
     specimen_id: str
     test_id: str
+    campaign_aliases: tuple[str, ...] = ()
+
+    def __post_init__(self):
+        # Reviewed aliases group source campaigns; they never authenticate them.
+        aliases = self.campaign_aliases
+        if (
+            type(aliases) is not tuple
+            or len(aliases) > 32
+            or any(
+                type(value) is not str
+                or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,159}", value)
+                for value in aliases
+            )
+        ):
+            raise ValueError("bounded immutable campaign aliases required")
+        if len(set(aliases)) != len(aliases) or self.campaign_id in aliases:
+            raise ValueError("distinct campaign aliases excluding primary ID required")
 
     def channel_si(self, column_id: str) -> tuple[Decimal, ...]:
         """Convert every original sample, retaining order and signed zero.
@@ -82,6 +99,7 @@ def decode_measured_response_workbook(
     campaign_id: str,
     specimen_id: str,
     test_id: str,
+    campaign_aliases: tuple[str, ...] = (),
 ) -> MeasuredResponseWorkbook:
     """Read every column with an explicit source-bound channel specification.
 
@@ -90,6 +108,9 @@ def decode_measured_response_workbook(
     and the underlying reader requires consecutive columns starting with A.
     Campaign/specimen/test IDs are retained labels, not proof of an independent
     split. Multiple tests of one structure should retain the same campaign ID.
+    Reviewed campaign aliases can bind different archive labels to that same
+    group, including different specimens or differently processed curves. They
+    are bounded caller declarations, not inferred or authenticated provenance.
     """
     if (
         type(raw) is not bytes
@@ -139,4 +160,5 @@ def decode_measured_response_workbook(
         campaign_id=campaign_id,
         specimen_id=specimen_id,
         test_id=test_id,
+        campaign_aliases=campaign_aliases,
     )
