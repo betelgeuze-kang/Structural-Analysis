@@ -227,7 +227,11 @@ for (const [name, viewport] of [
       await expect(panel.locator('[data-job-convergence="unavailable"]')).toHaveText('UNAVAILABLE')
       await expect(panel).toContainText('Job state is orchestration evidence only.')
       await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)
-      await expect(panel.locator('input, select, button, table')).toHaveCount(0)
+      const history = panel.locator('[data-failure-history]')
+      await expect(history).toHaveAttribute('data-failure-history', 'idle')
+      expect(await panel.locator('input, select, button, table').evaluateAll(elements =>
+        elements.filter(element => !element.closest('[data-failure-history]')).length,
+      )).toBe(0)
       // This panel renders identity and authority only. Unit-bearing numerical
       // tables are not implemented here; retain the producer's unit contract.
       for (const [quantity, unit] of [
@@ -243,6 +247,15 @@ for (const [name, viewport] of [
       // Development StrictMode may cancel and repeat the initial status GET;
       // both builds must use only the three read endpoints checked above.
       expect([...new Set(requests)].sort()).toEqual([statusPath, `${statusPath}/result`, `${statusPath}/evidence`].sort())
+      // History is explicit read-only retrieval, not a job mutation or a new result.
+      await history.getByRole('button', { name: 'Review previous attempt' }).click()
+      await expect(history).toHaveAttribute('data-failure-history', 'missing')
+      await expect(panel).toHaveAttribute('data-job-status', 'succeeded')
+      await expect(panel.locator('[data-job-result-ir="verified"]')).toHaveText(`${resultHash.slice(0, 15)}…${resultHash.slice(-8)}`)
+      expect([...new Set(requests)].sort()).toEqual([
+        statusPath, `${statusPath}/result`, `${statusPath}/evidence`,
+        `${statusPath}/failure-diagnostics/${source.job.attempt - 1}`,
+      ].sort())
       await panel.screenshot({ path: testInfo.outputPath(`extended-sparse-${name}.png`) })
     })
   })
