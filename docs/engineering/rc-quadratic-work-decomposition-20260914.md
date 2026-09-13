@@ -52,3 +52,30 @@ contains the profiler, exact cost-summary helper and per-step rows/bindings.
 Validation and aggregation take 15.400538822 s. These intervals exclude final
 packet writing/readback/sealing and are separate from the numerical experiment.
 Both inventories were reread and checked. Full roadmap closure remains open.
+
+## Reusable execution-report summary
+
+Opted-in `record_assembly_work=True` reports now include `assembly_phase_work`
+for reference, secant, proposal and fresh reference. The summary authenticates
+each path's internal hash, validates recorded dispatch order/totals, and counts
+preload and attempted-step invocations. Missing or in-flight dispatch records
+retain observed partial counts but have null complete phase/dispatch totals.
+Raised calls remain counted with an explicit failure count; failed paths do not
+become successful merely because their work is known. Line-search reuse hits
+remain separate from actual dispatches. Per-phase durations, work outside Newton
+and physical/source-file authority remain unavailable or false.
+
+The report separately records `assembly_phase_summary_wall_ns` and includes it
+in the whole-study wall/CPU intervals. This performs additional path validation
+only when recording is explicitly enabled. The default execution and numerical
+algorithm remain unchanged; no runtime selector or reward is switched to these
+counts alone.
+
+Thirty-nine focused tests pass in 29.84 s, covering actual paths with/without
+constant preload, ordinary/retained arithmetic, exact step-byte preservation,
+single-parent runs, missing/in-flight/raised records, inconsistent counts and
+reuse separation. Ruff and diff checks pass. The new summarizer also reads all
+16 authenticated original full-screening paths and reproduces the earlier audit's
+invocation/assembly totals, with zero new solves or fits in that separate check.
+These local checks do not qualify the complete repository suite or external
+physical accuracy.

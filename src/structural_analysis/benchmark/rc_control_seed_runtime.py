@@ -45,6 +45,9 @@ from structural_analysis.benchmark.fiber_frame_runtime import (
     _is_identity_key,
 )
 from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
+from structural_analysis.benchmark.rc_control_assembly_phases import (
+    summarize_rc_control_assembly_phases,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.assembly_work import (
     VectorAssemblyWorkRecorder,
@@ -1394,6 +1397,15 @@ def benchmark_rc_control_seed_paths(
             complete_path_performance_evidence=False,
             causal_training_dataset_admitted=False,
         )
+    if record_assembly_work:
+        summary_started = perf_counter_ns()
+        report["assembly_phase_work"] = {
+            name: summarize_rc_control_assembly_phases(path)
+            for name, path in {**arms, "fresh-reference": fresh}.items()
+        }
+        report["assembly_phase_summary_wall_ns"] = perf_counter_ns() - summary_started
+        report["whole_study_wall_ns"] = perf_counter_ns() - started
+        report["whole_study_cpu_ns"] = process_time_ns() - started_cpu
     report["report_hash"] = _sha(_bytes(report))
     _save(root, "comparison.json", _bytes(report))
     return report

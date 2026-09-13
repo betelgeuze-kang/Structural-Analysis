@@ -90,6 +90,23 @@ def test_all_arms_and_preload_keep_exact_steps_with_opted_in_work(
         reports[1]["assembly_work_recording"]
         == "vector-newton-assembly-dispatch-work.v1"
     )
+    assert "assembly_phase_work" not in reports[0]
+    for arm, summary in reports[1]["assembly_phase_work"].items():
+        assert summary["invocation_count"] == (4 if constant else 3)
+        assert summary["dispatch_count"] == sum(summary["phase_counts"].values())
+        assert summary["missing_record_count"] == summary["in_flight_count"] == 0
+        assert summary["phase_counts"]["final_observation"] == (4 if constant else 3)
+        assert summary["phase_wall_ns"] is None
+        assert summary["physical_validation"] is False
+        assert (
+            summary["source_path_hash"]
+            == json.loads((recorded / arm / "path.json").read_text())["path_hash"]
+        )
+    assert (
+        0
+        <= reports[1]["assembly_phase_summary_wall_ns"]
+        <= reports[1]["whole_study_wall_ns"]
+    )
 
 
 @pytest.mark.parametrize("bad", [1, "true", None])
