@@ -110,6 +110,7 @@ jobs:
           tests/test_rc_control_parent_step.py
           tests/test_measured_response_workbook.py
           tests/test_measured_response_split.py
+          tests/test_aci_column_archive.py
           tests/test_rc_control_design.py
           tests/test_rc_control_candidate_search.py
           tests/test_rc_control_candidate_cost.py
