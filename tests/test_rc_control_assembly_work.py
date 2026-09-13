@@ -156,3 +156,8 @@ def test_failed_attempt_retains_actual_partial_assembly_work(tmp_path, monkeypat
     assert work["call_count"] == 2 and work["exception_count"] == 1
     assert not report["all_execution_work_reported"]
     assert not report["comparisons"]["reference"]["full_history_pass"]
+    summary = report["assembly_phase_work"]["reference"]
+    assert summary["path_status"] == "incomplete"
+    assert summary["dispatch_count"] == 2
+    assert summary["raised_dispatch_count"] == 1
+    assert summary["physical_validation"] is False
