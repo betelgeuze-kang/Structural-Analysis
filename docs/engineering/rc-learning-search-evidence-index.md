@@ -1,5 +1,22 @@
 # RC learning and candidate-search evidence index
 
+The [published cccee full-shard failures](hosted-cccee-push-ci-20260914.md)
+retain original logs: all four actual repository-suite executions were skipped
+after external-evidence preparation failed. Separate live lanes are not inferred
+from this result. New local commits are not qualified by older hosted results.
+
+- [Full quadratic paths](rc-quadratic-full-20260914.md): four related training
+  cases, 16 paths, no demonstrated net runtime gain.
+- [Additional fixed-grid same-parent costs](rc-quadratic-grid-20260914.md): 64
+  previously unmeasured parents, 247 to 239 inclusive linear solves, 50 slower
+  individual proposal intervals; no policy promotion.
+- [Cost-target and case-exclusion diagnosis](rc-quadratic-targets-20260914.md):
+  14 of 17 lower-linear-work rows leave primary work unchanged; all three
+  primary-work reductions occur in train-c. No new fit or training admission.
+- [Reusable supplied-parent observer and actual solver integration](rc-parent-step-work-observer-20260914.md):
+  default/retained arithmetic and fallback paths verified; 61 focused tests pass.
+
+
 The [published 5a hosted lanes](hosted-5a-completed-ci-20260914.md) retain
 completed diagnostic successes and all four skipped full-shard executions;
 they do not qualify later local revisions or close external evidence.
@@ -8,7 +25,7 @@ The [causal three-state seed observation](rc-quadratic-seed-steps-20260914.md)
 uses 20 retained training parents: 78 to 73 linear solves, but 17 slower
 proposal arms and no full-path or learned benefit claim.
 
-[Actual HTTP CI integration](workbench-http-ci-integration-20260913.md) closes the workflow wiring gap; hosted execution remains pending.
+[Actual HTTP CI integration](workbench-http-ci-integration-20260913.md) records workflow wiring; the linked completed 5a hosted lanes include historical HTTP execution. Neither is proof for subsequent local changes.
 
 This index preserves the research links accumulated in the RC learning/search
 section of PR #439 and issue #438. Each linked record retains its own source,
