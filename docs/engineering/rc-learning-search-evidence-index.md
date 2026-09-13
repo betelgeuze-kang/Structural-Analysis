@@ -179,3 +179,10 @@ shows vector-seed work headroom on twenty known training parents: primary rows
 It intentionally uses target answers and omits retained compensation; this is
 neither a learned benefit nor a full-path speedup. The next question is vector
 correction accuracy needed to retain work savings.
+
+
+The [vector correction fraction study](rc-vector-fraction-steps-20260914.md)
+runs 240 calls and passes 180 response comparisons. Recovering 50%, 90% and 99%
+of the exact answer correction saves primary work in only 1, 2 and 8 of twenty
+known training parents. This is answer-leaking sensitivity evidence, not a
+learned accuracy threshold, independent split or net runtime benefit.
