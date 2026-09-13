@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Workbench inspection of original solver failure and exact rollback](rc-failure-inspection-workbench-20260913.md)
+
 - [Full cyclic reinforcement pair and retained failed alternative](rc-reinforcement-full-path-20260913.md)
 
 - [Reinforcement edits, real full-path replay and common-cost regression](rc-reinforcement-design-regression-20260913.md)

@@ -16,6 +16,25 @@ const close = (a: unknown, b: number): boolean => num(a) && Math.abs(a - b) <= 1
 export type StudyRead = (relative: string, maximum: number, expected?: number) => Promise<Uint8Array>
 export interface RcDesignReview { report: RcObject; models: Record<string, RcObject>; displayReport?: RcObject }
 
+/** Interpret an original result already obtained through the verified download. */
+export async function rcDesignBlockedStep(bytes: Uint8Array): Promise<RcObject | null> {
+  const { value: result, raw } = document(bytes)
+  await selfHash(raw, result, 'result_hash')
+  check(/^bounded-rc-fiber-direct-control-result\.v[12]$/.test(result.schema_version), 'study_failure_schema')
+  if (result.status !== 'blocked' || !result.path?.attempts?.length) return null
+  const path = result.path, last = path.attempts[path.attempts.length - 1]
+  if (last.committed !== false) return null
+  const solver = last.solver_work
+  check(solver && typeof solver.detail === 'string' && solver.detail.length > 0 && solver.detail.length <= 1024
+    && num(last.target_control_displacement_m) && Array.isArray(path.accepted_target_prefix_m)
+    && typeof last.rollback_exact === 'boolean' && typeof last.parent_checkpoint_immutable === 'boolean'
+    && hash(last.parent_checkpoint_hash) && hash(last.accepted_checkpoint_hash), 'study_failure_step_invalid')
+  check(!last.rollback_exact || last.accepted_checkpoint_hash === last.parent_checkpoint_hash, 'study_failure_rollback_mismatch')
+  return { reason: solver.detail, target_m: last.target_control_displacement_m,
+    accepted_targets: path.accepted_target_prefix_m.length, rollback_exact: last.rollback_exact,
+    parent_immutable: last.parent_checkpoint_immutable }
+}
+
 export async function verifiedStudyBytes(read: StudyRead, row: RcObject, role: string, profile: 'section' | 'layout' = 'section'): Promise<Uint8Array> {
   const ref = row.artifacts[role]
   check(ROLES.includes(role) && ref, 'study_role_invalid')

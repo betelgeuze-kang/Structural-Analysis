@@ -141,6 +141,20 @@ test('RC study browser rejects changed downloads after an initially valid review
   await expect(page.locator('[data-rc-design-selected]')).toHaveCount(0)
   await expect(page.locator('[data-rc-design-summary]')).toHaveCount(0)
 })
+test('RC study failure inspection preserves unavailable diagnostics and rejects changed originals', async ({ page }) => {
+  await setup(page, false, 'failed')
+  await page.route('**/rc-study/wider/verification-outcome.json', route => route.fulfill({ contentType: 'application/json', body: readFileSync(`${directory}synthetic-failed-verification-outcome.json`) }))
+  await page.goto(`${baseUrl}/#/workbench-v2`)
+  const panel = await waitForRcDesign(page)
+  const details = panel.locator('[data-rc-design-details="wider"]')
+  await details.locator('summary').click()
+  await details.getByRole('button', { name: 'Inspect wider original failure' }).click()
+  await expect(details.locator('[data-rc-design-failure]')).toContainText('No blocked control step is recorded')
+  await expect(panel.getByRole('button', { name: 'Select wider', exact: true })).toBeDisabled()
+  await page.route('**/rc-study/wider/result.json', route => route.fulfill({ contentType: 'application/json', body: '{}' }))
+  await details.getByRole('button', { name: 'Inspect wider original failure' }).click()
+  await expect(page.locator('[data-rc-design="invalid"]')).toBeVisible()
+})
 test('RC study browser validates the origin before invoking the credential callback', async ({ page }) => {
   await page.addInitScript(() => {
     Object.assign(window, { __studyAuthorizationCalls: 0 })

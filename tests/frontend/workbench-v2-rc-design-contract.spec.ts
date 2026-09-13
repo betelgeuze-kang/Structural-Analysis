@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { validateRcDesignStudy } from '../../src/workbench-v2/model/rcControlDesignSchema'
+import { rcDesignBlockedStep, validateRcDesignStudy } from '../../src/workbench-v2/model/rcControlDesignSchema'
 const root = 'tests/frontend/fixtures/rc-control-design/'
 const original = readFileSync(`${root}comparison.json`)
 const hash = (s: string | Uint8Array) => `sha256:${createHash('sha256').update(s).digest('hex')}`
@@ -9,6 +9,34 @@ const read = async (path: string) => new Uint8Array(readFileSync(`${root}${path}
 const constantRoot = 'tests/frontend/fixtures/rc-control-design-constant/'
 const constantOriginal = readFileSync(`${constantRoot}comparison.json`)
 const constantRead = async (path: string) => new Uint8Array(readFileSync(`${constantRoot}${path}`))
+// Synthetic diagnostic parsing cases; numerical evidence is recorded separately.
+const failedStep = () => ({ schema_version: 'bounded-rc-fiber-direct-control-result.v1', status: 'blocked',
+  path: { accepted_target_prefix_m: [-.001], attempts: [{ committed: false, target_control_displacement_m: -.002,
+    rollback_exact: true, parent_checkpoint_immutable: true, parent_checkpoint_hash: `sha256:${'a'.repeat(64)}`,
+    accepted_checkpoint_hash: `sha256:${'a'.repeat(64)}`, solver_work: { detail: 'line_search_failed_to_reduce_residual' } }] } })
+function diagnosticBytes(value: object): Uint8Array {
+  const without = JSON.stringify(value)
+  return new TextEncoder().encode(JSON.stringify({ ...value, result_hash: hash(without) }))
+}
+test('RC failure inspection retains target, recorded reason and rollback without promotion', async () => {
+  expect(await rcDesignBlockedStep(diagnosticBytes(failedStep()))).toEqual({ reason: 'line_search_failed_to_reduce_residual', target_m: -.002,
+    accepted_targets: 1, rollback_exact: true, parent_immutable: true })
+  expect(await rcDesignBlockedStep(await read('baseline/result.json'))).toBeNull()
+})
+test('RC failure inspection rejects original tampering and contradictory rollback', async () => {
+  const bytes = diagnosticBytes(failedStep())
+  await expect(rcDesignBlockedStep(new TextEncoder().encode(new TextDecoder().decode(bytes).replace('residual', 'corrupt')))).rejects.toThrow()
+  const value = failedStep()
+  value.path.attempts[0].accepted_checkpoint_hash = `sha256:${'b'.repeat(64)}`
+  await expect(rcDesignBlockedStep(diagnosticBytes(value))).rejects.toThrow('study_failure_rollback_mismatch')
+})
+test('RC failure inspection does not turn unavailable or mistyped flags into success', async () => {
+  const value = failedStep()
+  value.path.attempts[0].rollback_exact = false
+  expect((await rcDesignBlockedStep(diagnosticBytes(value)))!.rollback_exact).toBe(false)
+  ;(value.path.attempts[0] as any).rollback_exact = 'true'
+  await expect(rcDesignBlockedStep(diagnosticBytes(value))).rejects.toThrow('study_failure_step_invalid')
+})
 function rehash(raw: string): Uint8Array {
   const key = /,"report_hash":"sha256:[a-f0-9]{64}"/
   const without = raw.replace(key, '')

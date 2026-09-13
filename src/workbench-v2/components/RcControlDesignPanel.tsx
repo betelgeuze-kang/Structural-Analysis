@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { loadRcControlDesign, type RcDesignSession } from '../model/rcControlDesignProvider'
+import { rcDesignBlockedStep } from '../model/rcControlDesignSchema'
 import type { JobAuthorizationProvider } from '../model/jobTransport'
 import type { RcObject } from '../model/rcJobSchema'
 const shown = (value: unknown) => typeof value === 'number' ? String(value) : 'UNAVAILABLE'
@@ -31,6 +32,8 @@ export function RcControlDesignPanel({ url, authorize }: { url: string; authoriz
 
 export function RcControlDesignReviewPanel({ session, onInvalid }: { session: RcDesignSession; onInvalid: () => void }): ReactElement {
   const [selected, setSelected] = useState<string | null>(session.report.selected_candidate_id)
+  const [diagnostics, setDiagnostics] = useState<Record<string, RcObject | null>>({})
+  const [inspecting, setInspecting] = useState<string | null>(null)
   const urls = useRef(new Set<string>())
   useEffect(() => () => { for (const value of urls.current) URL.revokeObjectURL(value); urls.current.clear() }, [])
   async function download(candidate: string, role: string) {
@@ -40,6 +43,15 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
       document.body.append(anchor); anchor.click(); anchor.remove()
       window.setTimeout(() => { URL.revokeObjectURL(href); urls.current.delete(href) }, 0)
     } catch { onInvalid() }
+  }
+  async function inspectFailure(candidate: string) {
+    setInspecting(candidate)
+    try {
+      const original = await session.download(candidate, 'result')
+      const detail = await rcDesignBlockedStep(new Uint8Array(await original.arrayBuffer()))
+      setDiagnostics(previous => ({ ...previous, [candidate]: detail }))
+    } catch { onInvalid() }
+    finally { setInspecting(null) }
   }
   const { models } = session
   const report = session.displayReport ?? session.report
@@ -81,6 +93,17 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
     {report.rows.map((row: RcObject) => <details key={row.candidate_id} data-rc-design-details={row.candidate_id} open={selected === row.candidate_id}>
       <summary>{row.candidate_id} — screens, execution cost and original artifacts</summary>
       <p>Result identity <code>{row.artifacts.result?.sha256 ?? 'UNAVAILABLE'}</code>. {row.failure ? `Failure phase: ${row.failure.phase}; kind: ${row.failure.kind}.` : ''}</p>
+      {row.failure && row.artifacts.result ? <div data-rc-design-failure={row.candidate_id}>
+        <button type="button" className="wb2-btn" disabled={inspecting !== null} onClick={() => { void inspectFailure(row.candidate_id) }}>Inspect {row.candidate_id} original failure</button>
+        {inspecting === row.candidate_id ? <p role="status">Checking original result…</p> : null}
+        {Object.prototype.hasOwnProperty.call(diagnostics, row.candidate_id) ? diagnostics[row.candidate_id] ? <p role="status">
+          Recorded solver reason: {diagnostics[row.candidate_id]!.reason}. Target: {shown(diagnostics[row.candidate_id]!.target_m)} m;
+          accepted targets before stop: {diagnostics[row.candidate_id]!.accepted_targets}.
+          Exact rollback reported: {String(diagnostics[row.candidate_id]!.rollback_exact)};
+          parent immutable reported: {String(diagnostics[row.candidate_id]!.parent_immutable)}.
+          This diagnostic does not establish physical collapse or design suitability.
+        </p> : <p role="status">No blocked control step is recorded in this result. Review the verification or execution records for the reported failure.</p> : null}
+      </div> : null}
       <div className="wb2-table-scroll" role="region" aria-label={`${row.candidate_id} RC screens`} tabIndex={0}><table className="wb2-table"><thead><tr><th>Metric</th><th>Maximum</th><th>Change from baseline</th><th>Caller limit</th><th>Status</th></tr></thead><tbody>
         {metrics.map(([key, label]) => <tr key={key} data-rc-design-metric={key}><td>{label}</td><td style={{ whiteSpace: 'nowrap' }}>{shown(row.performance?.[key])}</td><td style={{ whiteSpace: 'nowrap' }} data-rc-design-performance-delta={key}>{shown(typeof row.performance?.[key] === 'number' && typeof report.rows[0].performance?.[key] === 'number' ? row.performance[key] - report.rows[0].performance[key] : null)}</td><td>{shown(row.screens?.[key]?.limit)}</td><td>{row.screens?.[key]?.status ?? 'not requested or unavailable'}</td></tr>)}
       </tbody></table></div>
