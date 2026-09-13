@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
+import subprocess
 import sys
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (
-    ROOT
-    / "scripts"
-    / "build_stateful_nonlinear_no_solve_reaction_only_artifact.py"
+    ROOT / "scripts" / "build_stateful_nonlinear_no_solve_reaction_only_artifact.py"
 )
 SPEC = importlib.util.spec_from_file_location(
     "build_stateful_nonlinear_no_solve_reaction_only_artifact",
@@ -30,25 +32,19 @@ def test_builder_records_state_transition_without_newton_convergence() -> None:
     assert receipt["status"] == "ready"
     assert receipt["contract_pass"] is True
     assert receipt["terminal_disposition"] == "no_solve_reaction_only"
-    assert receipt["engine_v2_terminal_disposition"] == (
-        "no_solve_reaction_only"
-    )
+    assert receipt["engine_v2_terminal_disposition"] == ("no_solve_reaction_only")
     assert receipt["engine_v2_reference"]["terminal_disposition"] == (
         "no_solve_reaction_only"
     )
     assert receipt["engine_v2_reference"]["free_count"] == 0
     assert receipt["engine_v2_reference"]["free_nnz"] == 0
     assert receipt["engine_v2_reference"]["free_csr_row_ptr"] == [0]
-    assert receipt["engine_v2_reference"][
-        "free_csr_column_index_count"
-    ] == 0
-    assert receipt["engine_v2_reference"][
-        "free_csr_global_value_index_count"
-    ] == 0
+    assert receipt["engine_v2_reference"]["free_csr_column_index_count"] == 0
+    assert receipt["engine_v2_reference"]["free_csr_global_value_index_count"] == 0
     assert receipt["engine_v2_reference"]["solver_executed"] is False
-    assert receipt["engine_v2_reference"][
-        "fully_constrained_recurrence_allowed"
-    ] is False
+    assert (
+        receipt["engine_v2_reference"]["fully_constrained_recurrence_allowed"] is False
+    )
     assert receipt["residual_formula"] == "F_internal_minus_F_external"
     assert receipt["load_factors"] == [0.5, 1.0]
     assert receipt["reused_evidence"] is False
@@ -124,11 +120,9 @@ def test_builder_records_state_transition_without_newton_convergence() -> None:
 
 def test_builder_check_reports_missing_artifact(tmp_path: Path) -> None:
     missing = tmp_path / "missing.json"
-    ok, message = (
-        module.check_stateful_nonlinear_no_solve_reaction_only_artifact(
-            repo_root=ROOT,
-            output=missing,
-        )
+    ok, message = module.check_stateful_nonlinear_no_solve_reaction_only_artifact(
+        repo_root=ROOT,
+        output=missing,
     )
 
     assert ok is False
@@ -136,11 +130,72 @@ def test_builder_check_reports_missing_artifact(tmp_path: Path) -> None:
 
 
 def test_committed_no_solve_receipt_matches_builder() -> None:
-    ok, message = (
-        module.check_stateful_nonlinear_no_solve_reaction_only_artifact(
-            repo_root=ROOT
-        )
+    ok, message = module.check_stateful_nonlinear_no_solve_reaction_only_artifact(
+        repo_root=ROOT
     )
 
     assert ok is True
     assert message == "stateful_nonlinear_no_solve_consistent"
+
+
+def test_receipt_survives_unrelated_commit_but_requires_bound_inputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def git(*args):
+        return subprocess.check_output(
+            [
+                "git",
+                "-c",
+                "user.name=Fixture",
+                "-c",
+                "user.email=fixture@example.invalid",
+                *args,
+            ],
+            cwd=tmp_path,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+
+    git("init")
+    source = tmp_path / "input.txt"
+    source.write_text("original input\n")
+    git("add", "input.txt")
+    git("commit", "-m", "source")
+    source_sha = git("rev-parse", "HEAD")
+    checksums = module.input_checksums([Path("input.txt")], repo_root=tmp_path)
+    retained = {
+        "source_commit_sha": source_sha,
+        "input_checksums": checksums,
+        "result": {"reaction": 1.0},
+    }
+    output = tmp_path / "receipt.json"
+    output.write_text(json.dumps(retained))
+    (tmp_path / "unrelated.txt").write_text("documentation\n")
+    git("add", "unrelated.txt")
+    git("commit", "-m", "unrelated")
+    monkeypatch.setattr(
+        module,
+        "build_stateful_nonlinear_no_solve_reaction_only_artifact",
+        lambda **kwargs: {**retained, "source_commit_sha": git("rev-parse", "HEAD")},
+    )
+
+    def check():
+        return module.check_stateful_nonlinear_no_solve_reaction_only_artifact(
+            repo_root=tmp_path,
+            output=output,
+        )
+
+    assert check() == (True, "stateful_nonlinear_no_solve_consistent")
+    for sha in ("HEAD", "0" * 40, True):
+        output.write_text(json.dumps({**retained, "source_commit_sha": sha}))
+        assert check()[0] is False
+    output.write_text(
+        json.dumps({**retained, "input_checksums": {"input.txt": "sha256:" + "0" * 64}})
+    )
+    assert check()[0] is False
+    output.write_text(json.dumps({**retained, "result": {"reaction": 2.0}}))
+    assert check() == (False, "stateful_nonlinear_no_solve_mismatch")
+    output.write_text(json.dumps(retained))
+    source.write_text("changed input\n")
+    assert check() == (False, "stateful_nonlinear_no_solve_source_unbound")
