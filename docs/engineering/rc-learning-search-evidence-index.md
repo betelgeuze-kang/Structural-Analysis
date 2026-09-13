@@ -1,5 +1,12 @@
 # RC learning and candidate-search evidence index
 
+The [terminal 3e2cc1dba topology capture](hosted-3e-topology-20260914.md)
+records 413 focused and 984 regression passes plus named branch stages. All 27
+observed workflows at that source are terminal; full-suite preparation failures
+remain. The [24 mm steel witness audit](planar-steel-witness-20260914.md) locates
+the retained refinement discrepancy at sampled plastic onset in E1, with both
+models yielding at that target. It does not remove the numerical screen failure.
+
 The [3e2cc1dba hosted Python/runtime capture](hosted-3e-python-runtime-20260914.md)
 records 1,217 development, 96 runtime Python, 706 guarded frontend and 36 actual
 HTTP passes at that exact source. All four full repository shards still skip
