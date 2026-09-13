@@ -674,6 +674,18 @@ def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
     )
     for fold in result["folds"]:
         folder = root / f"fold-{fold['index']:04d}"
+        comparison = json.loads((folder / "comparison.json").read_bytes())
+        assert set(comparison["assembly_phase_work"]) == {
+            "reference",
+            "secant",
+            "proposal",
+            "fresh-reference",
+        }
+        assert (
+            0
+            <= comparison["assembly_phase_summary_wall_ns"]
+            <= comparison["whole_study_wall_ns"]
+        )
         score = fold["score"]
         assert score["full_comparison_pass"] and score["proposed_count"] == 0
         assert score["proposal_setup_wall_ns"] == fold["static_model_gate_wall_ns"] > 0
@@ -689,6 +701,17 @@ def test_actual_counterbalanced_repeats_reuse_fit_and_preserve_complete_paths(
                 inv for entry in path["entries"] for inv in entry["invocations"]
             ]
             assert len(invocations) == 5
+            summary = comparison["assembly_phase_work"][arm]
+            assert summary["source_path_hash"] == path["path_hash"]
+            assert summary["invocation_count"] == len(invocations)
+            assert summary["dispatch_count"] == sum(
+                inv["newton_assembly_work"]["call_count"] for inv in invocations
+            )
+            assert summary["observed_line_search_reuse_hits"] == sum(
+                inv["newton_assembly_work"].get("line_search_reuse_hit_count", 0)
+                for inv in invocations
+            )
+            assert summary["phase_wall_ns"] is None
             assert (
                 sum(
                     inv["newton_assembly_work"].get("line_search_reuse_hit_count", 0)

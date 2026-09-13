@@ -88,3 +88,19 @@ gate. Twenty-one workflow/pinning tests pass in 0.75 s. The initial check caught
 the stale 43-file expected count; updating it to the intentional 45-file set
 resolved that assertion. Hosted execution of this registration is still pending;
 earlier CI runs cannot prove it ran.
+
+The actual repeated runtime-selector test now checks phase summaries against
+every original path/invocation, including constant preload and both enabled and
+disabled line-search assembly reuse. It verifies all four arm identities, known
+dispatch/reuse counts and inclusion of summary time in whole-study time. Existing
+fit reuse, three-position arm scheduling, exact baseline/proposal histories and
+secant retention assertions remain in place.
+
+An initial test edit placed the comparison-loading block in the non-recording
+secant test instead of the recording-enabled repeated test. That run produced
+59 passes and three test-authoring failures (one missing optional field and two
+undefined local variables) in 137.52 s. Moving the block to the intended test
+resolved them: the three affected actual-path cases pass in 77.62 s. The 59
+unchanged cases were not needlessly rerun; this is not described as a single
+62-test final run. Ruff and diff checks pass. No solver/selection implementation
+or physical acceptance rule changed in this integration-test follow-up.
