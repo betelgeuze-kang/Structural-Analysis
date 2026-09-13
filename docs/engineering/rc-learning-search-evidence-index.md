@@ -9,6 +9,11 @@ models yielding at that target. It does not remove the numerical screen failure.
 The [128-layer onset reference](planar-plastic-onset-reference-20260914.md)
 reduces the 64-to-128 prefix discrepancy to 0.733736%, while the 32-to-128
 witness discrepancy remains 2.249742%. This does not qualify the later 80 mm history.
+The subsequent [128-layer checkpoint continuation](planar-resumed-reference-20260914.md)
+completes 30–80 mm with exact restart binding. All 400 nodal/steel-group
+comparisons over the complete segmented history pass the 1% screen; the maximum
+is still 0.733736% at 24 mm. This bounded finer-pair agreement does not qualify
+the earlier 32-layer history, concrete fiber histories or independent physics.
 
 The [3e2cc1dba hosted Python/runtime capture](hosted-3e-python-runtime-20260914.md)
 records 1,217 development, 96 runtime Python, 706 guarded frontend and 36 actual
