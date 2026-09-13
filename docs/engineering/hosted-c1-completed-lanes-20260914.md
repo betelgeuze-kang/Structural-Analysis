@@ -35,3 +35,19 @@ The packet and its external inventory are read-only. Inventory SHA-256:
 
 Learned net benefit, independent physical acceptance, full-suite completion,
 main integration and signed owner acceptance remain open.
+
+## Terminal topology receipt before the next push
+
+Topology job `103797718066` subsequently completed successfully. Its original
+log records 413 focused tests in 929.69 seconds, branch selections of
+22/86/9/28/16/13/65 passing tests, and 984 regression tests in 840.14 seconds.
+These selections overlap. All 27 workflow records for this source were then
+confirmed terminal; this means no live run needs cancellation for the next
+development push, not that all 27 workflows passed.
+
+The topology log and terminal workflow listing are retained read-only at
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-c1-terminal-xt7wo_wc`.
+External inventory SHA-256:
+`f2c411093e0dd021a7f14882c414a29fbd8fbf9ee0f8e7e41741e01ecd32c993`.
+The full-suite evidence gate and single hosted browser failure above remain
+open. Later local commits require their own hosted validation.
