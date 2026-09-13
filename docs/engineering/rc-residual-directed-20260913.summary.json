@@ -1,0 +1,242 @@
+{
+  "summary": {
+    "source_revision": "d8b22b206c0edcf66efe45b1a7c07390d9f43a7b",
+    "protocol": {
+      "source_revision": "d8b22b206c0edcf66efe45b1a7c07390d9f43a7b",
+      "cases": [
+        "train-a",
+        "train-b",
+        "train-c",
+        "train-d"
+      ],
+      "target_indices": [
+        1,
+        61,
+        121,
+        181,
+        241
+      ],
+      "arms": [
+        "secant",
+        "tangent_residual_scalar"
+      ],
+      "oracle_uses_accepted_label": false,
+      "prior_coordinate_aggregate_known": true,
+      "new_residuals_inspected_before_roster_freeze": false,
+      "new_policy_fits": 0,
+      "newton_paths": 0,
+      "expected_assembly_calls": 40,
+      "validation_or_holdout_used": false,
+      "scope": "One residual/tangent assembly per seed from the identical original reference parent; no Newton step, no convergence or speed credit."
+    },
+    "bindings": [
+      {
+        "path": "study/training-samples.json",
+        "bytes": 21465421,
+        "sha256": "04dddb8363da70e83cae4cb9943cb55f40a8beab60160f2aa1f1e14c73c0c2cd"
+      },
+      {
+        "path": "inputs/train-a-model.json",
+        "bytes": 2316,
+        "sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d"
+      },
+      {
+        "path": "inputs/train-a-request.json",
+        "bytes": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+      },
+      {
+        "path": "study/train-a/generation/reference/001-1-step.json",
+        "bytes": 249820,
+        "sha256": "1b0e69fcb62c898db184d498cd1928d7182578c6cbd9db821f75c5b24a308fbf"
+      },
+      {
+        "path": "study/train-a/generation/reference/061-1-step.json",
+        "bytes": 255268,
+        "sha256": "0aa813d71dc8bfd8ddd42e2269dacc5aac01d62cba382e5b154905b02174d6e0"
+      },
+      {
+        "path": "study/train-a/generation/reference/121-1-step.json",
+        "bytes": 261662,
+        "sha256": "193b6c213395579e5d7f4465aa6842ca64ecaaee73e6d3068a6e96155711cd07"
+      },
+      {
+        "path": "study/train-a/generation/reference/181-1-step.json",
+        "bytes": 258006,
+        "sha256": "9f4c18f34a83614e29b58f02cf94083f13564daad4124d5836cb16fa0ac7ee10"
+      },
+      {
+        "path": "study/train-a/generation/reference/241-1-step.json",
+        "bytes": 259479,
+        "sha256": "b1001b6780bc85c11353a65a60c0be3482ca94e05256be8cfadd0ae8c877a024"
+      },
+      {
+        "path": "inputs/train-b-model.json",
+        "bytes": 2316,
+        "sha256": "fcf9ad40439fc3fd1c8289904fcfbf7690247b3aeb0d8b55cdb2c25b8bd72377"
+      },
+      {
+        "path": "inputs/train-b-request.json",
+        "bytes": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+      },
+      {
+        "path": "study/train-b/generation/reference/001-1-step.json",
+        "bytes": 238943,
+        "sha256": "ef3161de4b4e55ecc928a00cf2a64cb85ca7e36d1b297a8e23d458f644f79ddc"
+      },
+      {
+        "path": "study/train-b/generation/reference/061-1-step.json",
+        "bytes": 250515,
+        "sha256": "bc63354ea5c74d31a6a0724911d956166e7e1b9ae6a1a3b172cbbe3d151d222b"
+      },
+      {
+        "path": "study/train-b/generation/reference/121-1-step.json",
+        "bytes": 261755,
+        "sha256": "9a78a902f6689db7dfef9db5dee9f0ec50c26cabc8dc8cec4a724429f4066ba7"
+      },
+      {
+        "path": "study/train-b/generation/reference/181-1-step.json",
+        "bytes": 256202,
+        "sha256": "90aabca7ac962069f6bbb0ce6046e5134656b98815db1021f9a9255fc91e921f"
+      },
+      {
+        "path": "study/train-b/generation/reference/241-1-step.json",
+        "bytes": 261315,
+        "sha256": "25e476cb1dcf2241352fc7d5ffcaa60043e2d06aaf7acec04e71574ebd931921"
+      },
+      {
+        "path": "inputs/train-c-model.json",
+        "bytes": 2318,
+        "sha256": "157523e01f5525b00b6da76d182318cfa68c4446aecd323880948a2abad2fb72"
+      },
+      {
+        "path": "inputs/train-c-request.json",
+        "bytes": 5724,
+        "sha256": "089f48bd154481daa914c2fde96980d0c58d4734163b8e5c02bb42f0e47626ea"
+      },
+      {
+        "path": "study/train-c/generation/reference/001-1-step.json",
+        "bytes": 248844,
+        "sha256": "b08fa59aac5b469a9a3db9e53bd43c38823b4f055149407019fbff8d3f5f9a44"
+      },
+      {
+        "path": "study/train-c/generation/reference/061-1-step.json",
+        "bytes": 255857,
+        "sha256": "6690772dee94c6f6aff047b5edd7313771ec10ae904b728c91cb830b06941b19"
+      },
+      {
+        "path": "study/train-c/generation/reference/121-1-step.json",
+        "bytes": 262999,
+        "sha256": "1fd609fa7a95afd861f06919ba7976a329cc694a1660e21e0b3b23ecbb7408c0"
+      },
+      {
+        "path": "study/train-c/generation/reference/181-1-step.json",
+        "bytes": 262284,
+        "sha256": "1a9bd1c4ce81925ed0eae9b7f66743798513104be5742a023d028a84b65dd815"
+      },
+      {
+        "path": "study/train-c/generation/reference/241-1-step.json",
+        "bytes": 260567,
+        "sha256": "d9d2c3a0eecabfd4b6db7b7661fd4e46a18337451f7ce0d0bc1d716b811c11c8"
+      },
+      {
+        "path": "inputs/train-d-model.json",
+        "bytes": 2319,
+        "sha256": "9d871f918523da1546ac27f3e24b9b05ec8a11e4d92794f6d91b0b3b05114460"
+      },
+      {
+        "path": "inputs/train-d-request.json",
+        "bytes": 5936,
+        "sha256": "1290200a0ea7093aec43d6f3a0d7117bd75b67eaa116b339ea5feed0abd6a217"
+      },
+      {
+        "path": "study/train-d/generation/reference/001-1-step.json",
+        "bytes": 240822,
+        "sha256": "988a616143a6e45a3aaa15355d7748671f6a91fa9432173402369a2943ae075d"
+      },
+      {
+        "path": "study/train-d/generation/reference/061-1-step.json",
+        "bytes": 249546,
+        "sha256": "06b7ae57485ac2112a4ed3ab8b3bae7821ebf3f5f444cb460f3f6493bacf0d0c"
+      },
+      {
+        "path": "study/train-d/generation/reference/121-1-step.json",
+        "bytes": 260693,
+        "sha256": "49cd9f250c76361c342de3cd16fb176b27be6595d31bd4d812b8eb50d32f6a02"
+      },
+      {
+        "path": "study/train-d/generation/reference/181-1-step.json",
+        "bytes": 258952,
+        "sha256": "3dbf38139bce15d9243fc8ac094625865546a1c5d1bea1d04c60ee9119c209e6"
+      },
+      {
+        "path": "study/train-d/generation/reference/241-1-step.json",
+        "bytes": 261626,
+        "sha256": "067ae6c66d7a803c7b848ede2bfd0ff13ac99d7222f5d935015d6b88a88bc161"
+      }
+    ],
+    "parent_count": 20,
+    "assembly_calls": 40,
+    "newton_paths": 0,
+    "linear_solves": 0,
+    "new_policy_fits": 0,
+    "wall_ns": 1755283160,
+    "modes": {
+      "tangent_residual_scalar": {
+        "lower_residual_count": 8,
+        "equal_residual_count": 4,
+        "higher_residual_count": 8,
+        "ratios": [
+          1.0039333382904916,
+          0.9999954221196173,
+          1.0000530334082385,
+          1.0007609104929658,
+          0.999999999446898,
+          1.0,
+          0.16575036014628797,
+          1.000009485699419,
+          0.0193073950852246,
+          0.9995643596598175,
+          1.0120032884045522,
+          0.9999856092262799,
+          0.9983123817339267,
+          1.0,
+          1.0000000064943684,
+          1.0,
+          1.0,
+          1.000005032789214,
+          1.0000493027414632,
+          0.999992712717054
+        ]
+      }
+    }
+  },
+  "audit": {
+    "stats": {
+      "secant_gate_passes": 5,
+      "proposed_gate_passes": 5,
+      "new_gate_passes": 0,
+      "lost_gate_passes": 0,
+      "lower_residual": 8,
+      "equal_residual": 4,
+      "higher_residual": 8
+    },
+    "source_and_input_bytes_verified": true,
+    "all_secant_outputs_exactly_match_prior_source": true,
+    "scalar_and_proposal_reconstructed": true,
+    "parent_count": 20,
+    "assembly_calls": 40,
+    "newton_paths": 0,
+    "linear_solves": 0,
+    "fits": 0,
+    "full_path_or_speed_credit": false,
+    "gate_scope": "Residual only; no increment gate or accepted step."
+  },
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-residual-directed-8dzc8mkx",
+    "files": 660,
+    "bytes": 103538388,
+    "inventory_sha256": "3271492cb776a7f016c93cc94c577e5459879f81c5ab52a5cb96ce1b62a32404"
+  }
+}

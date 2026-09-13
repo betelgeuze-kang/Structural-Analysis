@@ -120,3 +120,5 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 - [rc counterbalanced runtime 20260910](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-counterbalanced-runtime-20260910.md)
 - [rc static model gate 20260910](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-static-model-gate-20260910.md)
 - [rc secant abstention 20260910](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-secant-abstention-20260910.md)
+
+- [Residual-directed scalar diagnosis](rc-residual-directed-20260913.md): 20 training parents, 40 assemblies, no new residual-gate pass; no policy or speed credit.
