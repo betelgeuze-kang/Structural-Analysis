@@ -1,0 +1,11 @@
+# Retain measured work on blocked vector Newton returns
+
+The delayed-peak study at `5f754e338aa8d482e2765a8f6e13ab6187d911e9` exposed eight retained failed searches. A small candidate's first reversal returned `line_search_failed_to_reduce_residual` with exact rollback, but non-polished blocked vector returns omitted counters. Both full and prefix strategy accounting therefore stopped on unknown work.
+
+Blocked vector returns now always retain their counted linear-dispatch attempts and recorded Newton-history length. A dispatch that raises is still a linear attempt; an initial singularity can have one attempt and zero completed history rows. Unsupported vector backends have zero dispatches. Exceptions that never return a solution still retain unknown work in the control-path consumer. These counts do not measure every assembly, line-search trial, BLAS kernel or physical convergence.
+
+Only blocked-return metrics change. Displacements, constitutive updates, tolerances, convergence status, failed-step rollback, and acceptance remain governed by the existing solver. The optional terminal-polishing record stays conditional. Original pre-fix experiment hashes and failed rows are not rewritten.
+
+Before the fix, four new counter checks failed with missing `linear_solve_count` for singular, failed-line-search, iteration-limit and unsupported-backend paths. Afterwards, assembly/control-path tests passed 87 tests; the assembly subset passed 19 again after adding independent dispatch observation. Broader polishing/design/layout/history tests returned 147 passes and one stale preload expectation. Updating that expectation to require known positive work while keeping the preload failed and lateral execution forbidden yielded 35 history passes. Ruff and whitespace checks passed. This is accounting regression coverage, not a numerical convergence improvement or new speed measurement.
+
+Current-source numerical continuation and graph consumption must be checked separately before claiming a repaired end-to-end search. The preceding public source `414098e3f7fb8482d0937caeee8a8be96cd0f4d6` frontend run 34747225807 completed with 691 passes and two extended-sparse identity browser failures; its earlier design-comparison failures did not recur in that run. No hosted failure cause or overall CI closure is established.

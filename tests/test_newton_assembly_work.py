@@ -139,7 +139,20 @@ def test_compensated_terminal_rejection_and_exception_still_spend_assembly(mode)
 @pytest.mark.parametrize(
     "kind", ["singular", "line_search", "max_iterations", "unsupported_backend"]
 )
-def test_blocked_paths_count_terminal_observation_without_convergence_credit(kind):
+def test_blocked_paths_count_terminal_observation_without_convergence_credit(
+    kind, monkeypatch
+):
+    import structural_analysis.solvers.nonlinear.newton as solver
+
+    dispatched = []
+    original = solver._solve_vector_increment
+
+    def counted(*args, **kwargs):
+        dispatched.append(kwargs["matrix_backend"])
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(solver, "_solve_vector_increment", counted)
+
     class Problem(Cubic):
         def assemble(self, x):
             if kind in ("singular", "line_search"):
@@ -165,6 +178,15 @@ def test_blocked_paths_count_terminal_observation_without_convergence_credit(kin
     assert report["call_count"] == len(b.calls) == len(a.calls)
     assert report["calls"][-1]["phase"] == "blocked_observation"
     assert not report["solver_completion_inferred"]
+    # A failed linear solve is still an attempted solve; history rows may be zero.
+    expected_solves = 0 if kind == "unsupported_backend" else 1
+    expected_history = 0 if kind in ("singular", "unsupported_backend") else 1
+    assert after.metrics["linear_solve_count"] == expected_solves
+    assert len(dispatched) == 2 * expected_solves
+    assert after.metrics["iteration_count"] == expected_history
+    assert after.metrics["newton_iteration_count"] == len(after.convergence_history)
+    assert after.metrics["contract_pass"] is False
+    assert after.metrics["convergence_claim"] is False
 
 
 @pytest.mark.parametrize("raised", [False, True])

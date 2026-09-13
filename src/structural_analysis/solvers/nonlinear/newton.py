@@ -1287,13 +1287,14 @@ def _blocked_vector_solution(
             "fallback_used": False,
             "contract_pass": False,
             "detail": detail,
+            # Failure does not erase work already performed. Linear attempts
+            # include a solve that raised; iteration counts describe recorded
+            # Newton history rows, which can be empty for an initial singularity.
+            "newton_iteration_count": len(history),
+            "iteration_count": len(history),
+            "linear_solve_count": linear_solve_count,
             **(
-                {
-                    "terminal_polishing": _terminal_polishing_record(),
-                    "newton_iteration_count": len(history),
-                    "iteration_count": len(history),
-                    "linear_solve_count": linear_solve_count,
-                }
+                {"terminal_polishing": _terminal_polishing_record()}
                 if cfg.terminal_polishing
                 else {}
             ),

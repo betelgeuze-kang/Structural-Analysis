@@ -328,7 +328,9 @@ def test_actual_nonconvergence_rolls_back_without_retry_or_candidate_omission(pr
     assert result.final_checkpoint.epoch == 0
     assert result.unattempted_targets_m == TARGETS[1:]
     assert result.metrics["failed_target_count"] == 1
-    assert result.metrics["suffix_work"]["known_linear_solve_count"] == 0
+    assert result.metrics["suffix_work"]["known_linear_solve_count"] == 1
+    assert result.metrics["suffix_work"]["unknown_solver_work_attempt_count"] == 0
+    assert result.to_dict()["attempts"][0]["rollback_exact"] is True
 
 
 def test_self_rehashed_changed_material_memory_rejected_by_full_prefix_replay(

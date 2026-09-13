@@ -192,7 +192,9 @@ def test_failed_actual_preload_retains_work_without_lateral_calls(model, monkeyp
         list(run)
     report = run.report
     assert report["core_invocations_started"] == 1
-    assert report["preload_work"]["unknown_solver_work_attempt_count"] == 1
+    assert report["preload_work"]["unknown_solver_work_attempt_count"] == 0
+    assert report["preload_work"]["known_linear_solve_count"] > 0
+    assert report["preload_work"]["known_newton_iteration_count"] > 0
     assert report["accepted_target_count"] == 0
     assert report["execution_failure"]["attempts"][0]["step"]["committed"] is False
 
