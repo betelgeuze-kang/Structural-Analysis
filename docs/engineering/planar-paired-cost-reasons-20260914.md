@@ -24,3 +24,17 @@ The repaired hosted development lane has not yet run.
 
 Original CI log and verification summary: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-paired-cost-reason-gtwp3p8a`.
 Original log SHA-256: `613f42b988fa4f289c515f575ed32ba9dc17ac7110229a98a0b53024e5053c91`.
+
+## Exact workflow test selection verification
+
+At local source `d6357e73b4a894e2aa48751507a26c925fbeb7b2`, the 17 pytest
+selectors were extracted from the existing Workflow Contract CI command and
+executed unchanged: **165 passed in 10.86 s**. This is the pytest portion locally,
+not the entire hosted workflow or a fresh runner environment. The original
+hosted job 103793727167 had one stale count assertion failure and 164 passes.
+Both original logs are retained at `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-workflow-count-repair-t3jcohyw`.
+Inventory SHA-256: `e62e4e32bbfabf967f304d9e4806d7d670a03c4346c8d068adf0cdda5d71560c`.
+
+PR 439 and issue 438 distinguish the published source from these pending local
+changes. Active topology/runtime jobs were left running, and no new push was
+performed during this observation. Full roadmap acceptance remains incomplete.
