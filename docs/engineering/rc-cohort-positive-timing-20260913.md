@@ -46,3 +46,18 @@ schema, arm membership, oracle, training, quantities, cost, selection and work.
 The combined cohort/search contracts pass **71 tests in 6.6 s**, including the
 three previously failing full-object controls. TypeScript and diff checks pass.
 This strengthens negative-test evidence; it adds no new physical or speed result.
+
+## Completed preceding-source CI
+
+Source `2377ac481494edc4001d4feaec98481564af9320` completed development
+job `103676362657` with **1,061 passed in 1,089.33 s**. Native PR Fast run
+`34739383344` succeeded. Repository Python run `34739383418` failed: all
+four full shards failed exact-source evidence materialization and skipped their
+pytest commands. The inspected shard-0 log records `legal_approval=False`,
+`external_code_to_code_product_replay_not_passed` and
+`external_code_to_code_technical_receipt_not_ready`.
+
+The [CI record](rc-cohort-positive-timing-20260913.ci.json) retains exact source,
+job IDs and downloaded log hashes. Publication waited for the development job
+to terminate; these results precede the positive-time and mutation-helper fixes
+and do not qualify their new head. Full-suite and independent gates stay open.
