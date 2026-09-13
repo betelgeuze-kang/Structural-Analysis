@@ -1,0 +1,253 @@
+{
+  "source_revision": "3c7335cf09f862a7d54d2dff6978854bf3a2a0da",
+  "screen": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-yield-screen-_xhlbl8l",
+    "audit": {
+      "source_revision": "3c7335cf09f862a7d54d2dff6978854bf3a2a0da",
+      "source_files_checked": 458,
+      "rows": [
+        {
+          "case_id": "portal_load_30",
+          "physical_converged": true,
+          "artifact_contract_pass": true,
+          "status": "converged",
+          "retained_history_steps": 4
+        },
+        {
+          "case_id": "portal_load_40",
+          "physical_converged": false,
+          "artifact_contract_pass": true,
+          "status": "not_converged",
+          "retained_history_steps": null
+        },
+        {
+          "case_id": "portal_load_60",
+          "physical_converged": false,
+          "artifact_contract_pass": true,
+          "status": "not_converged",
+          "retained_history_steps": null
+        }
+      ],
+      "initial_audit_correction": "nonconverged slots have no history.json; record null instead of assuming a history file",
+      "boundary": "failed cases retained; missing committed material history does not imply zero plasticity or zero work"
+    },
+    "terminal": {
+      "exit_code": 1,
+      "wall_seconds": 16.098971735002124
+    },
+    "inventory_sha256": "41f940b4d9ee354b57a00111ee8c6c34534ac2416cf261c2eb1524862a523620",
+    "files_excluding_inventory": 504,
+    "bytes_excluding_inventory": 9778856,
+    "failure_reasons": {
+      "portal_load_40": "line_search_failed_to_reduce_residual",
+      "portal_load_60": "line_search_failed_to_reduce_residual"
+    }
+  },
+  "repeated": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-yield-backends-8v_ybru5",
+    "audit": {
+      "source_revision": "3c7335cf09f862a7d54d2dff6978854bf3a2a0da",
+      "source_files_checked": 458,
+      "artifact_identities_checked": 90,
+      "cross_backend_comparisons_recomputed": 6,
+      "same_backend_exact_repeat_pairs": 6,
+      "committed_steps": 36,
+      "rows": [
+        {
+          "slot": 0,
+          "case_id": "portal_load_30",
+          "backend": "numpy_linalg_solve_dense",
+          "material_maxima": {
+            "compressive_damage": 0.44583384340806154,
+            "compressive_history_strain": 0.0014858161857068493,
+            "dissipated_energy_density_mj_per_m3": 0.6800603387560689,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.002984687326379592,
+            "accumulated_plastic_strain": 0.0027202413550242756,
+            "backstress_mpa": 13.601206775121378,
+            "plastic_strain": 0.0027202413550242756
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 1,
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_spsolve_cpu",
+          "material_maxima": {
+            "compressive_damage": 0.4458338434079465,
+            "compressive_history_strain": 0.0014858161857066558,
+            "dissipated_energy_density_mj_per_m3": 0.680060338756053,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.0029846873263795525,
+            "accumulated_plastic_strain": 0.002720241355024212,
+            "backstress_mpa": 13.601206775121058,
+            "plastic_strain": 0.002720241355024212
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 2,
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_splu_cpu_exact_1536",
+          "material_maxima": {
+            "compressive_damage": 0.4458338434079465,
+            "compressive_history_strain": 0.0014858161857066558,
+            "dissipated_energy_density_mj_per_m3": 0.680060338756053,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.0029846873263795525,
+            "accumulated_plastic_strain": 0.002720241355024212,
+            "backstress_mpa": 13.601206775121058,
+            "plastic_strain": 0.002720241355024212
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 3,
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_spsolve_cpu",
+          "material_maxima": {
+            "compressive_damage": 0.4458338434079465,
+            "compressive_history_strain": 0.0014858161857066558,
+            "dissipated_energy_density_mj_per_m3": 0.680060338756053,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.0029846873263795525,
+            "accumulated_plastic_strain": 0.002720241355024212,
+            "backstress_mpa": 13.601206775121058,
+            "plastic_strain": 0.002720241355024212
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 4,
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_splu_cpu_exact_1536",
+          "material_maxima": {
+            "compressive_damage": 0.4458338434079465,
+            "compressive_history_strain": 0.0014858161857066558,
+            "dissipated_energy_density_mj_per_m3": 0.680060338756053,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.0029846873263795525,
+            "accumulated_plastic_strain": 0.002720241355024212,
+            "backstress_mpa": 13.601206775121058,
+            "plastic_strain": 0.002720241355024212
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 5,
+          "case_id": "portal_load_30",
+          "backend": "numpy_linalg_solve_dense",
+          "material_maxima": {
+            "compressive_damage": 0.44583384340806154,
+            "compressive_history_strain": 0.0014858161857068493,
+            "dissipated_energy_density_mj_per_m3": 0.6800603387560689,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.002984687326379592,
+            "accumulated_plastic_strain": 0.0027202413550242756,
+            "backstress_mpa": 13.601206775121378,
+            "plastic_strain": 0.0027202413550242756
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 6,
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_splu_cpu_exact_1536",
+          "material_maxima": {
+            "compressive_damage": 0.4458338434079465,
+            "compressive_history_strain": 0.0014858161857066558,
+            "dissipated_energy_density_mj_per_m3": 0.680060338756053,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.0029846873263795525,
+            "accumulated_plastic_strain": 0.002720241355024212,
+            "backstress_mpa": 13.601206775121058,
+            "plastic_strain": 0.002720241355024212
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 7,
+          "case_id": "portal_load_30",
+          "backend": "numpy_linalg_solve_dense",
+          "material_maxima": {
+            "compressive_damage": 0.44583384340806154,
+            "compressive_history_strain": 0.0014858161857068493,
+            "dissipated_energy_density_mj_per_m3": 0.6800603387560689,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.002984687326379592,
+            "accumulated_plastic_strain": 0.0027202413550242756,
+            "backstress_mpa": 13.601206775121378,
+            "plastic_strain": 0.0027202413550242756
+          },
+          "committed_steps": 4
+        },
+        {
+          "slot": 8,
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_spsolve_cpu",
+          "material_maxima": {
+            "compressive_damage": 0.4458338434079465,
+            "compressive_history_strain": 0.0014858161857066558,
+            "dissipated_energy_density_mj_per_m3": 0.680060338756053,
+            "tensile_damage": 0.9999941562746681,
+            "tensile_history_strain": 0.0029846873263795525,
+            "accumulated_plastic_strain": 0.002720241355024212,
+            "backstress_mpa": 13.601206775121058,
+            "plastic_strain": 0.002720241355024212
+          },
+          "committed_steps": 4
+        }
+      ],
+      "times": [
+        {
+          "case_id": "portal_load_30",
+          "backend": "numpy_linalg_solve_dense",
+          "workload_median_seconds": 3.569267522,
+          "ratio_of_medians_to_dense": 1.0
+        },
+        {
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_spsolve_cpu",
+          "workload_median_seconds": 3.626643692,
+          "ratio_of_medians_to_dense": 1.0160750545164656
+        },
+        {
+          "case_id": "portal_load_30",
+          "backend": "scipy_sparse_splu_cpu_exact_1536",
+          "workload_median_seconds": 7.399369719,
+          "ratio_of_medians_to_dense": 2.0730779280040754
+        }
+      ],
+      "experiment_wall_seconds": 69.39448513,
+      "scope": "Retained-byte audit and recomputed internal comparisons; no fresh Newton solve or independent external validation."
+    },
+    "terminal": {
+      "exit_code": 0,
+      "wall_seconds": 70.82008488599968
+    },
+    "inventory_sha256": "12faea5c7b2efb1817bd5e9e0b4f514826d4113de0c00a710bdbc13ae226f8a3",
+    "files_excluding_inventory": 759,
+    "bytes_excluding_inventory": 16584484
+  },
+  "selection_boundary": "30x chosen after the predeclared 30/40/60 screen; not a blind or independent case",
+  "external_validation": false,
+  "learned_net_benefit": false,
+  "cyclic_public_path_validated": false,
+  "ci_observation": {
+    "source_revision": "3c7335cf09f862a7d54d2dff6978854bf3a2a0da",
+    "native_run": 34733785520,
+    "native_jobs_passed": 15,
+    "python_run": 34733785474,
+    "development_job": 103661416950,
+    "development_tests_passed": 951,
+    "development_seconds": 890.13,
+    "development_log_sha256": "14dbbb1ee9ff2b4d194340b048a45a6d9d1336e1be7a94362f20a19c39e04a84",
+    "full_shards": "failed evidence preparation; full pytest skipped",
+    "inspected_failure_job": 103661416936,
+    "blockers": [
+      "external_code_to_code_product_replay_not_passed",
+      "external_code_to_code_technical_receipt_not_ready"
+    ],
+    "full_suite_pass": false
+  }
+}
