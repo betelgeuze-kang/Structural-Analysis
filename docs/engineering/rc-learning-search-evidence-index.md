@@ -186,3 +186,10 @@ runs 240 calls and passes 180 response comparisons. Recovering 50%, 90% and 99%
 of the exact answer correction saves primary work in only 1, 2 and 8 of twenty
 known training parents. This is answer-leaking sensitivity evidence, not a
 learned accuracy threshold, independent split or net runtime benefit.
+
+
+The [original training-work profile](rc-training-work-profile-20260914.md)
+authenticates eight paths and 1,936 steps without new solves. Of 968 secant steps,
+330 have one primary row and 482 have at least three; each case's top 25 steps
+cover only 16.6% of total primary rows. Target selection must account for this
+broad distribution and preserved terminal costs, without held-out leakage.
