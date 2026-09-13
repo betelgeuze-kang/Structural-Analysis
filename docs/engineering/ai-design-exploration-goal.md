@@ -2020,3 +2020,11 @@ and four small-fixture tests pass after replacing deep Buffer matching with
 exact byte comparison. All 159 successful responses match originals; no new
 solve or fit occurs. Initial unsealed test-output loss is explicitly recorded.
 Independent physics, learned benefit and full repeated user-cost evidence remain open.
+
+
+The [causal quadratic seed diagnostic](rc-quadratic-seed-steps-20260914.md)
+compares 20 original secant parents without answer labels or fits. Sixteen
+proposals and four abstentions reduce aggregate linear solves 78 to 73, while
+one parent regresses and 17 proposal arms take longer. All 60 response checks
+and 20 exact reference repeats pass. A fixed full-path comparison is the next
+useful test; no policy is adopted and independent learning benefit remains open.

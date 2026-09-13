@@ -1,5 +1,9 @@
 # RC learning and candidate-search evidence index
 
+The [causal three-state seed observation](rc-quadratic-seed-steps-20260914.md)
+uses 20 retained training parents: 78 to 73 linear solves, but 17 slower
+proposal arms and no full-path or learned benefit claim.
+
 [Actual HTTP CI integration](workbench-http-ci-integration-20260913.md) closes the workflow wiring gap; hosted execution remains pending.
 
 This index preserves the research links accumulated in the RC learning/search
