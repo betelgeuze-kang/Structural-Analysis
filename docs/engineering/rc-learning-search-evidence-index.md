@@ -437,3 +437,10 @@ The [larger-frame activation screen](planar-larger-activation-20260914.md)
 completes two generated 27/48-equation paths at fixed 10x roof loads with
 observed concrete tensile damage. One dense run per case establishes candidate
 inputs for repeated backend comparison, not speedup or physical validation.
+
+
+The [material-active repeated backend cohort](planar-active-repeat-20260914.md)
+completes 12 paths and eight exact repeat checks. All three 27-equation pairs
+match with no sparse gain; all three 48-equation pairs fail one small terminal
+fiber-stress comparison. Their paired costs remain unavailable, with original
+tolerances and failed observations preserved.
