@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Current-source inventory and bounded material artifact refresh](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/internal-inventory-refresh-20260913.md)
 - [Linux worker peak-memory scope and parent-memory reproduction](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/medium-worker-rss-20260913.md)
 - [Resource identity validation on blocked medium-scale receipts](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/medium-resource-identity-20260913.md)
 - [Completed full Python baseline and native RC wire migration](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/full-suite-native-wire-20260913.md)
