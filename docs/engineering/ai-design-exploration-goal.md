@@ -121,6 +121,16 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-14)
 
+The [actual successful-retry history observation](successful-retry-history-20260914.md)
+now exercises one injected first-attempt linear backend outage, a real failed
+worker/service transition and an unpatched successful retry with identical request
+bytes. Desktop/mobile-width tests preserve the current verified result while
+reviewing original prior-failure bytes. Eight final browser tests pass, and the
+new spec is registered for actual HTTP CI. This advances the bounded local M5
+scenario beyond synthetic succeeded metadata; changed-checkpoint execution,
+production incident evidence and independent physical acceptance remain open.
+
+
 The [cccee topology CI](hosted-cccee-topology-20260914.md) subsequently finished
 successfully: 413 focused tests, the named branch stages and 984 regression tests
 pass with no skipped steps. All cccee workflows are now terminal. This supersedes

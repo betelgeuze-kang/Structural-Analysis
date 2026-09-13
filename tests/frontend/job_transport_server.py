@@ -10,6 +10,7 @@ This is a test fixture, not an application listener or deployment prescription.
 from __future__ import annotations
 
 import json
+from contextlib import nullcontext
 import mimetypes
 import signal
 import sys
@@ -38,7 +39,10 @@ class QuietHandler(WSGIRequestHandler):
         pass
 
 
-def main(*, nonlinear_failure=False, failure_history=False):
+def main(
+    *, nonlinear_failure=False, failure_history=False, failure_history_success=False
+):
+    assert not failure_history_success or (nonlinear_failure and failure_history)
     root = Path(__file__).resolve().parents[2]
     dist = root / "dist"
     with tempfile.TemporaryDirectory(prefix="structural-job-browser-") as temporary:
@@ -106,7 +110,9 @@ def main(*, nonlinear_failure=False, failure_history=False):
             for pattern in model["load_patterns"]:
                 for load in pattern["nodal_loads"]:
                     for key in load["components_si"]:
-                        load["components_si"][key] *= 40
+                        load["components_si"][key] *= (
+                            1 if failure_history_success else 40
+                        )
             model["provenance"]["source_sha256"] = canonical_hash(
                 {key: value for key, value in model.items() if key != "provenance"}
             )
@@ -135,22 +141,39 @@ def main(*, nonlinear_failure=False, failure_history=False):
                 worker_id="worker", authorization_token="synthetic-worker-not-launched"
             )
             assert actual_claim is not None and actual_claim.job.job_id == actual.job_id
-            try:
-                execute_nonlinear_frame_claim(
-                    service,
-                    actual_claim,
-                    worker_id="worker",
-                    authorization_token="synthetic-worker-not-launched",
+            # Exercise the real worker's failure/diagnostic transition. Only the
+            # first attempt has a controlled linear backend outage; the retry
+            # uses the unchanged request and the unpatched numerical solver.
+            import numpy as np
+
+            fault = (
+                patch(
+                    "structural_analysis.solvers.nonlinear.newton._solve_vector_increment",
+                    side_effect=np.linalg.LinAlgError("injected backend outage"),
                 )
+                if failure_history_success
+                else nullcontext()
+            )
+            try:
+                with fault as outage:
+                    execute_nonlinear_frame_claim(
+                        service,
+                        actual_claim,
+                        worker_id="worker",
+                        authorization_token="synthetic-worker-not-launched",
+                    )
             except NonlinearFrameWorkerError as exc:
                 assert exc.code == "worker_result_contract_blocked"
             else:
                 raise AssertionError("Expected actual nonlinear failure")
+            if failure_history_success:
+                assert outage.call_count == 1
             failed_job = service.get_job(
                 actual.job_id,
                 tenant_id="transport-test",
                 authorization_token="synthetic-memory-only-token",
             )
+            assert failed_job.status == "failed" and failed_job.attempt == 1
             diagnostic = service.read_failure_diagnostic(
                 actual.job_id,
                 attempt=1,
@@ -198,6 +221,7 @@ def main(*, nonlinear_failure=False, failure_history=False):
                 worker_id="worker", authorization_token="synthetic-worker-not-launched"
             )
             assert retry is not None and retry.job.attempt == 2
+            assert retry.request_bytes == actual_claim.request_bytes
             try:
                 execute_nonlinear_frame_claim(
                     service,
@@ -206,13 +230,19 @@ def main(*, nonlinear_failure=False, failure_history=False):
                     authorization_token="synthetic-worker-not-launched",
                 )
             except NonlinearFrameWorkerError as exc:
+                assert not failure_history_success
                 assert exc.code == "worker_result_contract_blocked"
             else:
-                raise AssertionError("Expected second actual nonlinear failure")
+                assert failure_history_success, (
+                    "Expected second actual nonlinear failure"
+                )
             failed_job = service.get_job(
                 failed_job.job_id,
                 tenant_id="transport-test",
                 authorization_token="synthetic-memory-only-token",
+            )
+            assert failed_job.status == (
+                "succeeded" if failure_history_success else "failed"
             )
             assert (
                 service.read_failure_diagnostic(
@@ -276,6 +306,9 @@ if __name__ == "__main__":
         forbidden,
     ):
         main(
-            nonlinear_failure="--nonlinear-failure" in sys.argv,
-            failure_history="--failure-history" in sys.argv,
+            nonlinear_failure="--nonlinear-failure" in sys.argv
+            or "--failure-history-success" in sys.argv,
+            failure_history="--failure-history" in sys.argv
+            or "--failure-history-success" in sys.argv,
+            failure_history_success="--failure-history-success" in sys.argv,
         )

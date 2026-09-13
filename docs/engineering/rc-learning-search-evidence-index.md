@@ -1,5 +1,9 @@
 # RC learning and candidate-search evidence index
 
+[Successful retry with preserved failure history](successful-retry-history-20260914.md)
+now has actual local service/browser coverage under a controlled first-attempt
+backend outage; eight browser checks pass, with hosted execution still pending.
+
 The [cccee topology CI](hosted-cccee-topology-20260914.md) subsequently finished
 successfully: 413 focused tests, the named branch stages and 984 regression tests
 pass with no skipped steps. All cccee workflows are now terminal. This supersedes
