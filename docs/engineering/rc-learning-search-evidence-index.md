@@ -451,3 +451,10 @@ reconstructs 24 observations from six hash-verified histories. The small stress
 mismatch originates in already different section strains/curvatures; terminal
 fiber subtraction and elastic stress conversion reproduce exactly. No material
 patch, tolerance relaxation or sole upstream root cause is established.
+
+
+The [upstream Newton witness audit](planar-newton-origin-20260914.md)
+exactly reconstructs eight section states from original nodal observations.
+Both 13-row traces have identical branch/gate schedules; their first increments
+already differ despite equal saved initial displacement and residual arrays.
+Initial tangent-system identity and backward error remain to be checked.

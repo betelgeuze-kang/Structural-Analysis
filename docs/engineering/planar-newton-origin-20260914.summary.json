@@ -1,0 +1,390 @@
+{
+  "source_revision": "5606dac91151fc193a8f5376d592ee799837d689",
+  "source_files_verified": 461,
+  "original_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-active-repeat-izsxcjoo",
+  "observations": [
+    {
+      "slot": 2,
+      "epoch": 1,
+      "element_displacements": [
+        0.0005470991319649593,
+        -2.729939472765341e-07,
+        -6.684775969218764e-05,
+        0.0005464874170651766,
+        -7.945159520548483e-06,
+        -7.178968571546131e-05
+      ],
+      "basic_deformations": [
+        -6.117075420159826e-07,
+        -6.492971800554833e-05,
+        -6.987164402882201e-05
+      ],
+      "section_generalized_strains": [
+        -1.5292688550399565e-07,
+        -1.2354815058184198e-06
+      ]
+    },
+    {
+      "slot": 2,
+      "epoch": 2,
+      "element_displacements": [
+        0.0010944450756662735,
+        -5.968245024447959e-07,
+        -0.00013372967002001773,
+        0.0010932219902593345,
+        -1.594135193639859e-05,
+        -0.00014361378622453473
+      ],
+      "basic_deformations": [
+        -1.2230559751146949e-06,
+        -0.00012989353698856853,
+        -0.00013977765319308553
+      ],
+      "section_generalized_strains": [
+        -3.057639937786737e-07,
+        -2.4710290511292498e-06
+      ]
+    },
+    {
+      "slot": 2,
+      "epoch": 3,
+      "element_displacements": [
+        0.0016420380017228013,
+        -9.715614281129709e-07,
+        -0.00020064575700191067,
+        0.0016402038909084492,
+        -2.3988648895298308e-05,
+        -0.00021547232815940265
+      ],
+      "basic_deformations": [
+        -1.8340445910322904e-06,
+        -0.00019489148249668357,
+        -0.00020971805365417554
+      ],
+      "section_generalized_strains": [
+        -4.585111477580726e-07,
+        -3.706642789372993e-06
+      ]
+    },
+    {
+      "slot": 2,
+      "epoch": 4,
+      "element_displacements": [
+        0.00219201184818897,
+        -1.3467186955389303e-06,
+        -0.00026764735196850386,
+        0.002189570669932007,
+        -3.204498794034598e-05,
+        -0.0002874264200243265
+      ],
+      "basic_deformations": [
+        -2.44106045892402e-06,
+        -0.0002599727799737032,
+        -0.00027975184802952585
+      ],
+      "section_generalized_strains": [
+        -6.10265114731005e-07,
+        -4.9447670139556575e-06
+      ]
+    },
+    {
+      "slot": 3,
+      "epoch": 1,
+      "element_displacements": [
+        0.0005470991319649591,
+        -2.729939472765356e-07,
+        -6.684775969218765e-05,
+        0.0005464874170651766,
+        -7.945159520548483e-06,
+        -7.178968571546131e-05
+      ],
+      "basic_deformations": [
+        -6.117075420158742e-07,
+        -6.492971800554834e-05,
+        -6.987164402882201e-05
+      ],
+      "section_generalized_strains": [
+        -1.5292688550396855e-07,
+        -1.2354815058184164e-06
+      ]
+    },
+    {
+      "slot": 3,
+      "epoch": 2,
+      "element_displacements": [
+        0.0010944450756662544,
+        -5.968245024448999e-07,
+        -0.00013372967002001762,
+        0.0010932219902593156,
+        -1.5941351936398547e-05,
+        -0.00014361378622453457
+      ],
+      "basic_deformations": [
+        -1.223055975114478e-06,
+        -0.00012989353698856845,
+        -0.0001397776531930854
+      ],
+      "section_generalized_strains": [
+        -3.057639937786195e-07,
+        -2.4710290511292362e-06
+      ]
+    },
+    {
+      "slot": 3,
+      "epoch": 3,
+      "element_displacements": [
+        0.0016420380017227675,
+        -9.715614281129427e-07,
+        -0.00020064575700191043,
+        0.0016402038909084154,
+        -2.3988648895298058e-05,
+        -0.00021547232815940248
+      ],
+      "basic_deformations": [
+        -1.8340445910322904e-06,
+        -0.00019489148249668338,
+        -0.00020971805365417544
+      ],
+      "section_generalized_strains": [
+        -4.585111477580726e-07,
+        -3.7066427893730133e-06
+      ]
+    },
+    {
+      "slot": 3,
+      "epoch": 4,
+      "element_displacements": [
+        0.0021920118481888523,
+        -1.3467186955408273e-06,
+        -0.00026764735196847984,
+        0.0021895706699319247,
+        -3.204498794034857e-05,
+        -0.0002874264200243145
+      ],
+      "basic_deformations": [
+        -2.4410604588888918e-06,
+        -0.000259972779973679,
+        -0.00027975184802951365
+      ],
+      "section_generalized_strains": [
+        -6.102651147222229e-07,
+        -4.944767013958666e-06
+      ]
+    }
+  ],
+  "newton_comparisons": [
+    {
+      "load_step": 1,
+      "iteration": 0,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": true,
+      "free_displacements_m_difference_linf": 0.0,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.209238430557093e-17,
+      "residual_kn_exact": true,
+      "residual_kn_difference_linf": 0.0
+    },
+    {
+      "load_step": 1,
+      "iteration": 1,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 3.209238430557093e-17,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.2054056064707674e-17,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 8.135714324453147e-13
+    },
+    {
+      "load_step": 1,
+      "iteration": 2,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 0,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": true,
+      "increment_gate_passed": true,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 1.0842021724855044e-19,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.036159634860788e-19,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 4.796163466380676e-13
+    },
+    {
+      "load_step": 2,
+      "iteration": 0,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 1.0842021724855044e-19,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 4.228388472693467e-17,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 4.796163466380676e-13
+    },
+    {
+      "load_step": 2,
+      "iteration": 1,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 4.2500725161431774e-17,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 1.3455965400081815e-17,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 3.254285729781259e-12
+    },
+    {
+      "load_step": 2,
+      "iteration": 2,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 0,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": true,
+      "increment_gate_passed": true,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 4.336808689942018e-17,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 2.5279051135250184e-18,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 9.663381206337363e-13
+    },
+    {
+      "load_step": 3,
+      "iteration": 0,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 4.336808689942018e-17,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.2959746043559335e-17,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 9.663381206337363e-13
+    },
+    {
+      "load_step": 3,
+      "iteration": 1,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 7.19910242530375e-17,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.1836911227745154e-17,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 2.3803181647963356e-12
+    },
+    {
+      "load_step": 3,
+      "iteration": 2,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 0,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": true,
+      "increment_gate_passed": true,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 7.41594285980085e-17,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.4341421739121393e-16,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 7.499778575947857e-11
+    },
+    {
+      "load_step": 4,
+      "iteration": 0,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 7.41594285980085e-17,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.4407155943827483e-16,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 7.499778575947857e-11
+    },
+    {
+      "load_step": 4,
+      "iteration": 1,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 3.449931312848875e-16,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 5.65985721289429e-16,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 1.2591883091772615e-10
+    },
+    {
+      "load_step": 4,
+      "iteration": 2,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 1,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": false,
+      "increment_gate_passed": false,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 5.169475958410885e-16,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 6.638345702053464e-16,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 8.991207778308308e-11
+    },
+    {
+      "load_step": 4,
+      "iteration": 3,
+      "line_search_alpha": 1.0,
+      "line_search_attempt_count": 0,
+      "accepted": true,
+      "committed": true,
+      "residual_gate_passed": true,
+      "increment_gate_passed": true,
+      "free_displacements_m_exact": false,
+      "free_displacements_m_difference_linf": 3.2612801348363973e-16,
+      "newton_increment_m_exact": false,
+      "newton_increment_m_difference_linf": 3.156513465412286e-16,
+      "residual_kn_exact": false,
+      "residual_kn_difference_linf": 8.502354376105359e-11
+    }
+  ],
+  "scope": "Frozen-source kinematic reconstruction only; no nonlinear solve, stiffness assembly or linear solve performed. First observed divergence is the first Newton increment with identical saved initial state/residual; linear system identity and backward error not yet established.",
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-newton-origin-mnop74bf",
+    "inventory_sha256": "740632214df2ffe43f475131790e6ed9019234ec6876aa3380c5776198fe514b"
+  }
+}
