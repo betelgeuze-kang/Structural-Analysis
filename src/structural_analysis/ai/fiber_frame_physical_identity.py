@@ -55,7 +55,7 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
 
     authored_elements = {row["id"]: row for row in snapshot.elements}
     authored_sections = {row["id"]: row for row in snapshot.sections}
-    members = []
+    members: list[dict[str, Any]] = []
     for member in problem.members:
         element = member.element
         section = authored_sections[authored_elements[member.member_id]["section"]]

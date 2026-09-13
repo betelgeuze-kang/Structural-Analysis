@@ -271,7 +271,7 @@ class FiberFrameCandidatePrediction:
             )
 
     def to_dict(self) -> dict[str, Any]:
-        result = {
+        result: dict[str, Any] = {
             "maximum_translation_m": self.maximum_translation_m,
             "maximum_absolute_fiber_strain": self.maximum_absolute_fiber_strain,
             "ood": self.ood,
@@ -752,7 +752,7 @@ def _validated_training_report(
         train_hashes, train_identities, sample_hashes = [], set(), set()
         case_ids, splits = set(), set()
         physical_ids = set()
-        group_owners = {}
+        group_owners: dict[tuple[str, str], str] = {}
         for sample in samples:
             if (
                 type(sample) is not dict
@@ -1092,6 +1092,7 @@ def train_fiber_frame_candidate_policy(
                         target_profile=target_profile, history_label_source=label_source
                     )
                     _validate_history_label_source(body)
+                    assert label_source is not None
                     row["history_label_source_hash"] = label_source["source_hash"]
                 samples.append({**body, "sample_hash": canonical_hash(body)})
                 row["status"] = "ready"
@@ -1120,7 +1121,7 @@ def train_fiber_frame_candidate_policy(
         train_wall = perf_counter_ns() - train_started
     else:
         failure = {"kind": "one_or_more_label_cases_blocked"}
-    report = {
+    report: dict[str, Any] = {
         "schema_version": CANDIDATE_HISTORY_LEARNING_SCHEMA
         if history_target
         else CANDIDATE_LEARNING_SCHEMA,
@@ -1140,7 +1141,7 @@ def train_fiber_frame_candidate_policy(
             ),
             "training_wall_ns": train_wall,
             "full_analysis_request_count": sum(
-                row["analysis_requested"] for row in rows
+                row["analysis_requested"] is True for row in rows
             ),
             "known_solver_execution_count": sum(
                 row["solver_executed"] is True for row in rows

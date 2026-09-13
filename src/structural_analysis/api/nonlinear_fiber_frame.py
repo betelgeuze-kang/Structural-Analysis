@@ -12,7 +12,7 @@ from dataclasses import dataclass, field, replace
 import json
 import math
 import re
-from typing import Any, Mapping
+from typing import Any, Mapping, NoReturn
 
 import numpy as np
 
@@ -741,6 +741,7 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
                 f"{path}/id",
                 "Material IDs must be unique.",
             )
+        material: BilinearCombinedHardeningSteel | AsymmetricConcreteDamageMaterial
         material_type = row.get("type")
         try:
             if material_type == "bilinear_combined_hardening_steel":
@@ -983,8 +984,8 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
                 "Parallel or duplicate member connectivity is unsupported.",
             )
         section_id = _stable_id(row["section"], f"{path}/section")
-        section = sections.get(section_id)
-        if section is None:
+        member_section = sections.get(section_id)
+        if member_section is None:
             _fail_compile(
                 "rc_fiber_frame_member_section_reference_invalid",
                 f"{path}/section",
@@ -1010,14 +1011,14 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
             node_i=node_index[node_i_id],
             node_j=node_index[node_j_id],
             element=StatefulFiberBeam2D(
-                section=section,
+                section=member_section,
                 length_m=length,
                 integration_order=integration_order,
                 element_id=member_id,
             ),
         )
         members.append(member)
-        section_by_member.append(section)
+        section_by_member.append(member_section)
         member_ids.add(member_id)
         used_sections.add(section_id)
         adjacency[node_i_id].add(node_j_id)
@@ -1804,7 +1805,7 @@ def _integer_range(value: Any, path: str, minimum: int, maximum: int) -> int:
     return value
 
 
-def _fail_compile(kind: str, path: str, detail: str) -> None:
+def _fail_compile(kind: str, path: str, detail: str) -> NoReturn:
     raise _PublicRCFiberFrameCompileError(kind, path, detail)
 
 

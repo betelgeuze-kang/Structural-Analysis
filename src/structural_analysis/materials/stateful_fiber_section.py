@@ -16,7 +16,7 @@ import hashlib
 import json
 import math
 import struct
-from typing import Any, Iterable, Literal
+from typing import Any, Iterable, Literal, cast
 
 import numpy as np
 
@@ -349,7 +349,7 @@ class StatefulRCFiberSection:
             ),
         )
 
-    def validate_state(self, state: StatefulFiberSectionState) -> None:
+    def validate_state(self, state: object) -> None:
         if type(state) is not StatefulFiberSectionState:
             raise ValueError("state type is invalid")
         if state.section_id != self.section_id:
@@ -373,9 +373,10 @@ class StatefulRCFiberSection:
 
     def dissipated_energy_mj_per_m(
         self,
-        state: StatefulFiberSectionState,
+        state: object,
     ) -> float:
         self.validate_state(state)
+        state = cast(StatefulFiberSectionState, state)
         return math.fsum(
             fiber.area_m2 * float(fiber_state.dissipated_energy_density_mj_per_m3)
             for fiber, fiber_state in zip(
@@ -388,14 +389,14 @@ class StatefulRCFiberSection:
     def integrate(
         self,
         generalized_strain: Any,
-        committed_state: StatefulFiberSectionState,
+        committed_state: object,
     ) -> StatefulFiberSectionResponse:
         return self._integrate(generalized_strain, committed_state)
 
     def integrate_with_material_runtime(
         self,
         generalized_strain: Any,
-        committed_state: StatefulFiberSectionState,
+        committed_state: object,
         *,
         material_runtime: MaterialTrialRuntimeRecorder,
     ) -> StatefulFiberSectionResponse:
@@ -414,12 +415,13 @@ class StatefulRCFiberSection:
     def _integrate(
         self,
         generalized_strain: Any,
-        committed_state: StatefulFiberSectionState,
+        committed_state: object,
         *,
         material_runtime: MaterialTrialRuntimeRecorder | None = None,
         _fiber_strain_values=None,
     ) -> StatefulFiberSectionResponse:
         self.validate_state(committed_state)
+        committed_state = cast(StatefulFiberSectionState, committed_state)
         generalized = _generalized_vector(
             generalized_strain,
             name="generalized_strain",

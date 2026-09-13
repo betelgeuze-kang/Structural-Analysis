@@ -15,7 +15,7 @@ import json
 import math
 import re
 from time import perf_counter_ns
-from typing import Any
+from typing import Any, TypedDict
 
 from structural_analysis.api import nonlinear_fiber_frame as public_api
 from structural_analysis.benchmark import (
@@ -339,6 +339,11 @@ def calculate_fiber_frame_member_quantities(
     return {**payload, "quantity_hash": canonical_hash(payload)}
 
 
+class _HistoryOptions(TypedDict, total=False):
+    history_limits: FiberFrameHistoryLimits
+    material_history_limits: FiberFrameMaterialHistoryLimits
+
+
 def compare_public_rc_fiber_frame_designs(
     baseline: CanonicalModel,
     candidates: Sequence[FiberFrameDesignCandidate],
@@ -394,7 +399,7 @@ def compare_public_rc_fiber_frame_designs(
         raise FiberFrameDesignError(
             "different candidate IDs cannot repeat the same physical model"
         )
-    history_options = (
+    history_options: _HistoryOptions = (
         {"history_limits": history_limits} if history_limits is not None else {}
     )
     if material_history_limits is not None:

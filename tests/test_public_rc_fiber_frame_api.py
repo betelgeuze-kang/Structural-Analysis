@@ -483,3 +483,27 @@ def test_model_snapshot_is_not_mutated_by_compile(solved) -> None:
         restart_checkpoint_chain=b"not-json",
     )
     assert model.canonical_payload() == before
+
+
+def test_compiler_keeps_each_member_bound_to_its_own_section(tmp_path):
+    payload = _payload()
+    payload["nodes"].append({"id": "N3", "coordinates": [6.0, 0.0, 0.0]})
+    payload["sections"].append({**payload["sections"][0], "id": "RC2", "width_m": 0.5})
+    payload["elements"].append(
+        {**payload["elements"][0], "id": "M2", "nodes": ["N2", "N3"], "section": "RC2"}
+    )
+    model = _write_model(tmp_path / "mixed-sections.json", payload)
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(model)
+    assert compiled is not None, blockers
+    assert [section.section_id for section in compiled.section_by_member] == [
+        "RC1",
+        "RC2",
+    ]
+    for member, section in zip(
+        compiled.problem.members, compiled.section_by_member, strict=True
+    ):
+        assert member.element.section is section
+    assert (
+        compiled.section_by_member[0].contract_hash
+        != compiled.section_by_member[1].contract_hash
+    )

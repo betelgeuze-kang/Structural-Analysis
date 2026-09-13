@@ -11,9 +11,12 @@ import numpy as np
 class AxialCurvatureSectionState(Protocol):
     """Immutable section state consumed by a beam integration point."""
 
-    step_index: int
-    axial_strain: float
-    curvature_z_per_m: float
+    @property
+    def step_index(self) -> int: ...
+    @property
+    def axial_strain(self) -> float: ...
+    @property
+    def curvature_z_per_m(self) -> float: ...
 
     @property
     def state_hash(self) -> str: ...
@@ -27,12 +30,18 @@ class AxialCurvatureSectionState(Protocol):
 class AxialCurvatureSectionResponse(Protocol):
     """Conjugate ``[N, M]`` response with a consistent ``2 x 2`` tangent."""
 
-    parent_state_hash: str
-    consistent_tangent: np.ndarray
-    yielded_steel_fiber_count: int
-    damaged_concrete_fiber_count: int
-    dissipated_energy_mj_per_m: float
-    state: AxialCurvatureSectionState
+    @property
+    def parent_state_hash(self) -> str: ...
+    @property
+    def consistent_tangent(self) -> np.ndarray: ...
+    @property
+    def yielded_steel_fiber_count(self) -> int: ...
+    @property
+    def damaged_concrete_fiber_count(self) -> int: ...
+    @property
+    def dissipated_energy_mj_per_m(self) -> float: ...
+    @property
+    def state(self) -> AxialCurvatureSectionState: ...
 
     @property
     def resultants(self) -> np.ndarray: ...

@@ -631,7 +631,7 @@ def _bounded_frame3d_direct_control_issues(
     for index, element in enumerate(payload["elements"]):
         base = f"/elements/{index}"
         node_i, node_j = (str(value) for value in element["node_ids"])
-        pair = tuple(sorted((node_i, node_j)))
+        pair = (node_i, node_j) if node_i <= node_j else (node_j, node_i)
         if pair in undirected_pairs:
             yield ModelIRValidationIssue(
                 "bounded_frame3d_parallel_member_unsupported",
@@ -974,7 +974,7 @@ def _bounded_planar_issues(
     for index, element in enumerate(payload["elements"]):
         base = f"/elements/{index}"
         node_i, node_j = (str(value) for value in element["node_ids"])
-        pair = tuple(sorted((node_i, node_j)))
+        pair = (node_i, node_j) if node_i <= node_j else (node_j, node_i)
         if pair in undirected_pairs:
             yield ModelIRValidationIssue(
                 "bounded_planar_parallel_member_unsupported",

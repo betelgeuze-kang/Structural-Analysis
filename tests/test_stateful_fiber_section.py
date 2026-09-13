@@ -283,3 +283,12 @@ def test_section_contracts_fail_closed_for_invalid_geometry_and_state() -> None:
     different_contract = make_rectangular_stateful_rc_fiber_section(width_m=0.5)
     with pytest.raises(ValueError, match="section_contract_hash"):
         different_contract.integrate((0.0, 0.0), initial)
+
+
+@pytest.mark.parametrize("state", [None, {}, object()])
+def test_wide_section_interface_still_rejects_foreign_state(state):
+    section = make_rectangular_stateful_rc_fiber_section()
+    with pytest.raises(ValueError, match="state type is invalid"):
+        section.integrate((0.0, 0.0), state)
+    with pytest.raises(ValueError, match="state type is invalid"):
+        section.dissipated_energy_mj_per_m(state)
