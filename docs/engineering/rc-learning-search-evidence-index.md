@@ -1,5 +1,28 @@
 # RC learning and candidate-search evidence index
 
+The [3e2cc1dba hosted Python/runtime capture](hosted-3e-python-runtime-20260914.md)
+records 1,217 development, 96 runtime Python, 706 guarded frontend and 36 actual
+HTTP passes at that exact source. All four full repository shards still skip
+their actual suites after external-evidence preparation failure. Later local
+reports are not current-head hosted qualification.
+
+The [section quadrature study](planar-section-refinement-20260914.md) identifies
+the original two-layer rectangle's integration sensitivity. Matched
+[nodal](planar-matched-refinement-20260914.md) and
+[section](planar-local-refinement-20260914.md) responses alone do not establish
+[steel-history convergence](planar-steel-refinement-20260914.md): the 16-to-32
+internal steel-state difference is 1.591822% at factor 0.75. The research-only
+[32-to-64 comparison](planar-finer-reference-20260914.md) reduces it to 0.241632%
+for that prefix, without extending the public API or proving physical accuracy.
+Both grids still [fail the full factor-1 load path](planar-finer-full-path-20260914.md).
+[Directional checks and one smaller line-search step](planar-refined-direction-20260914.md)
+show local residual improvement but no complete-path recovery. The later
+[32-layer displacement-control study](planar-refined-displacement-20260914.md)
+keeps the distinct control path, proportional loads and attained load factors
+explicit; it is not a same-path acceleration or an independent experiment.
+
+The older observations below retain their original source and measurement scope.
+
 The [b8e7c54 hosted runtime result](hosted-b8e-runtime-20260914.md) now records
 96 Python, 706 guarded frontend and 36 actual HTTP passes, plus 1,217 development
 contract passes in its separate lane. This covers the later historical diagnostic

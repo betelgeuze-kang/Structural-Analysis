@@ -1,0 +1,502 @@
+{
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "records": [
+    {
+      "repeat": 0,
+      "status": "ready",
+      "contract_pass": true,
+      "attempted_steps": 40,
+      "committed_steps": 40,
+      "compile_wall_ns": 493384741,
+      "path_wall_ns": 91767010944,
+      "artifact": "repeat-0.json",
+      "artifact_sha256": "6d685a2e3d7e2b56bf21714705c2e543e94088c9da6c9e209e337cf34f81de65"
+    },
+    {
+      "repeat": 1,
+      "status": "ready",
+      "contract_pass": true,
+      "attempted_steps": 40,
+      "committed_steps": 40,
+      "compile_wall_ns": 474980067,
+      "path_wall_ns": 92038819861,
+      "artifact": "repeat-1.json",
+      "artifact_sha256": "6d685a2e3d7e2b56bf21714705c2e543e94088c9da6c9e209e337cf34f81de65"
+    }
+  ],
+  "experiment_wall_ns": 196454322404,
+  "repeat_full_path_bytes_equal": true,
+  "physical_validation": false,
+  "public_result_authority": false,
+  "load_control_equivalence_proved": false,
+  "observations": [
+    {
+      "repeat": 0,
+      "status": "ready",
+      "committed_steps": 40,
+      "points": [
+        {
+          "control_m": 0.002,
+          "accepted_load_factor": 0.1411536301075942
+        },
+        {
+          "control_m": 0.004,
+          "accepted_load_factor": 0.2558995329190675
+        },
+        {
+          "control_m": 0.006,
+          "accepted_load_factor": 0.331921872655737
+        },
+        {
+          "control_m": 0.008,
+          "accepted_load_factor": 0.39408342927429885
+        },
+        {
+          "control_m": 0.01,
+          "accepted_load_factor": 0.45081515334324124
+        },
+        {
+          "control_m": 0.012,
+          "accepted_load_factor": 0.5049632429326747
+        },
+        {
+          "control_m": 0.014,
+          "accepted_load_factor": 0.5539470817177058
+        },
+        {
+          "control_m": 0.016,
+          "accepted_load_factor": 0.5828838755999035
+        },
+        {
+          "control_m": 0.018,
+          "accepted_load_factor": 0.6070460565571728
+        },
+        {
+          "control_m": 0.02,
+          "accepted_load_factor": 0.6321142242187632
+        },
+        {
+          "control_m": 0.022,
+          "accepted_load_factor": 0.6522755249019965
+        },
+        {
+          "control_m": 0.024,
+          "accepted_load_factor": 0.671761675239995
+        },
+        {
+          "control_m": 0.026,
+          "accepted_load_factor": 0.6795085450614708
+        },
+        {
+          "control_m": 0.028,
+          "accepted_load_factor": 0.6845143630464153
+        },
+        {
+          "control_m": 0.03,
+          "accepted_load_factor": 0.6914987365581093
+        },
+        {
+          "control_m": 0.032,
+          "accepted_load_factor": 0.7011296249256039
+        },
+        {
+          "control_m": 0.034,
+          "accepted_load_factor": 0.7122263277126047
+        },
+        {
+          "control_m": 0.036,
+          "accepted_load_factor": 0.7235600028910659
+        },
+        {
+          "control_m": 0.038,
+          "accepted_load_factor": 0.7342197440735022
+        },
+        {
+          "control_m": 0.04,
+          "accepted_load_factor": 0.7418644522576942
+        },
+        {
+          "control_m": 0.042,
+          "accepted_load_factor": 0.7504304783010314
+        },
+        {
+          "control_m": 0.044,
+          "accepted_load_factor": 0.7581282747549272
+        },
+        {
+          "control_m": 0.046,
+          "accepted_load_factor": 0.7631434240180813
+        },
+        {
+          "control_m": 0.048,
+          "accepted_load_factor": 0.767427325061432
+        },
+        {
+          "control_m": 0.05,
+          "accepted_load_factor": 0.7709664659712353
+        },
+        {
+          "control_m": 0.052,
+          "accepted_load_factor": 0.7745059542684383
+        },
+        {
+          "control_m": 0.054,
+          "accepted_load_factor": 0.7778226406215738
+        },
+        {
+          "control_m": 0.056,
+          "accepted_load_factor": 0.7800628814379529
+        },
+        {
+          "control_m": 0.058,
+          "accepted_load_factor": 0.7822308854236107
+        },
+        {
+          "control_m": 0.06,
+          "accepted_load_factor": 0.7845011005687711
+        },
+        {
+          "control_m": 0.062,
+          "accepted_load_factor": 0.7869885901352216
+        },
+        {
+          "control_m": 0.064,
+          "accepted_load_factor": 0.7894331306926835
+        },
+        {
+          "control_m": 0.066,
+          "accepted_load_factor": 0.7908057717412251
+        },
+        {
+          "control_m": 0.068,
+          "accepted_load_factor": 0.792013270024591
+        },
+        {
+          "control_m": 0.07,
+          "accepted_load_factor": 0.7931321838991802
+        },
+        {
+          "control_m": 0.072,
+          "accepted_load_factor": 0.7943242385930628
+        },
+        {
+          "control_m": 0.074,
+          "accepted_load_factor": 0.7955587483293478
+        },
+        {
+          "control_m": 0.076,
+          "accepted_load_factor": 0.7968761642149871
+        },
+        {
+          "control_m": 0.078,
+          "accepted_load_factor": 0.7980364139469716
+        },
+        {
+          "control_m": 0.08,
+          "accepted_load_factor": 0.7990589271706917
+        }
+      ],
+      "last_accepted": {
+        "control_m": 0.08,
+        "accepted_load_factor": 0.7990589271706917
+      },
+      "failed_target_m": null,
+      "terminal_reason": "equilibrium_control_and_increment_converged",
+      "terminal_solution_metrics": {
+        "case_id": "public_corotational_general_65505db3e689e2695411@direct-control-dof=15@target=0.08",
+        "control_mode": "direct_displacement_control",
+        "control_global_dof": 15,
+        "control_free_index": 9,
+        "target_control_displacement_m": 0.08,
+        "final_control_displacement_m": 0.08,
+        "control_error_m": 0.0,
+        "solved_load_factor": 0.7990589271706917,
+        "residual_kn": [
+          -1.7493562154413667e-10,
+          -3.502123036014382e-10,
+          -1.3599787962448318e-11,
+          3.038877594008227e-09,
+          1.2799546311725862e-08,
+          1.2487646472436609e-09,
+          -6.0992988437647e-11,
+          4.480966708797496e-10,
+          -1.9966250874858815e-11,
+          -7.275957614183426e-12,
+          1.1489191820146516e-09,
+          -1.5361933947133366e-11
+        ],
+        "relative_residual": 8.533030874483908e-12,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "augmented_formula": "[R_f(q,lambda);w*(q_control-q_target)]=0",
+        "augmented_formula_hash": "sha256:286617812c79b5e00b329e43b88edd5070c48e98f5e49e04c6dba7d276c45432",
+        "load_factor_column_formula": "dR_f/dlambda=S_f*(K_fp*ubar_p-F_ref_f)",
+        "tangent_definition": "material_plus_geometric_consistent",
+        "globalization": "backtracking_augmented_merit_line_search",
+        "terminal_reason": "equilibrium_control_and_increment_converged",
+        "solver_executed": true,
+        "iteration_count": 5,
+        "linear_solve_count": 5,
+        "line_search_step_count": 4,
+        "line_search_used": false,
+        "residual_tolerance": 1e-10,
+        "control_tolerance_m": 1e-12,
+        "increment_tolerance_m": 1e-12,
+        "load_factor_increment_tolerance": 1e-12,
+        "final_free_increment_abs_m": 1.3009842106595942e-13,
+        "final_load_factor_increment_abs": 9.352894382363024e-13,
+        "residual_gate_passed": true,
+        "control_gate_passed": true,
+        "increment_gate_passed": true,
+        "regularization_used": false,
+        "fallback_used": false,
+        "matrix_backend": "numpy_linalg_solve_dense",
+        "stiffness_storage": "numpy_dense_augmented_ndarray",
+        "profile": "dense-augmented-consistent-direct-displacement-control.v1",
+        "contract_pass": true
+      },
+      "total_history_rows": 223,
+      "total_line_search_attempts": 183,
+      "accepted_chain_checked": true
+    },
+    {
+      "repeat": 1,
+      "status": "ready",
+      "committed_steps": 40,
+      "points": [
+        {
+          "control_m": 0.002,
+          "accepted_load_factor": 0.1411536301075942
+        },
+        {
+          "control_m": 0.004,
+          "accepted_load_factor": 0.2558995329190675
+        },
+        {
+          "control_m": 0.006,
+          "accepted_load_factor": 0.331921872655737
+        },
+        {
+          "control_m": 0.008,
+          "accepted_load_factor": 0.39408342927429885
+        },
+        {
+          "control_m": 0.01,
+          "accepted_load_factor": 0.45081515334324124
+        },
+        {
+          "control_m": 0.012,
+          "accepted_load_factor": 0.5049632429326747
+        },
+        {
+          "control_m": 0.014,
+          "accepted_load_factor": 0.5539470817177058
+        },
+        {
+          "control_m": 0.016,
+          "accepted_load_factor": 0.5828838755999035
+        },
+        {
+          "control_m": 0.018,
+          "accepted_load_factor": 0.6070460565571728
+        },
+        {
+          "control_m": 0.02,
+          "accepted_load_factor": 0.6321142242187632
+        },
+        {
+          "control_m": 0.022,
+          "accepted_load_factor": 0.6522755249019965
+        },
+        {
+          "control_m": 0.024,
+          "accepted_load_factor": 0.671761675239995
+        },
+        {
+          "control_m": 0.026,
+          "accepted_load_factor": 0.6795085450614708
+        },
+        {
+          "control_m": 0.028,
+          "accepted_load_factor": 0.6845143630464153
+        },
+        {
+          "control_m": 0.03,
+          "accepted_load_factor": 0.6914987365581093
+        },
+        {
+          "control_m": 0.032,
+          "accepted_load_factor": 0.7011296249256039
+        },
+        {
+          "control_m": 0.034,
+          "accepted_load_factor": 0.7122263277126047
+        },
+        {
+          "control_m": 0.036,
+          "accepted_load_factor": 0.7235600028910659
+        },
+        {
+          "control_m": 0.038,
+          "accepted_load_factor": 0.7342197440735022
+        },
+        {
+          "control_m": 0.04,
+          "accepted_load_factor": 0.7418644522576942
+        },
+        {
+          "control_m": 0.042,
+          "accepted_load_factor": 0.7504304783010314
+        },
+        {
+          "control_m": 0.044,
+          "accepted_load_factor": 0.7581282747549272
+        },
+        {
+          "control_m": 0.046,
+          "accepted_load_factor": 0.7631434240180813
+        },
+        {
+          "control_m": 0.048,
+          "accepted_load_factor": 0.767427325061432
+        },
+        {
+          "control_m": 0.05,
+          "accepted_load_factor": 0.7709664659712353
+        },
+        {
+          "control_m": 0.052,
+          "accepted_load_factor": 0.7745059542684383
+        },
+        {
+          "control_m": 0.054,
+          "accepted_load_factor": 0.7778226406215738
+        },
+        {
+          "control_m": 0.056,
+          "accepted_load_factor": 0.7800628814379529
+        },
+        {
+          "control_m": 0.058,
+          "accepted_load_factor": 0.7822308854236107
+        },
+        {
+          "control_m": 0.06,
+          "accepted_load_factor": 0.7845011005687711
+        },
+        {
+          "control_m": 0.062,
+          "accepted_load_factor": 0.7869885901352216
+        },
+        {
+          "control_m": 0.064,
+          "accepted_load_factor": 0.7894331306926835
+        },
+        {
+          "control_m": 0.066,
+          "accepted_load_factor": 0.7908057717412251
+        },
+        {
+          "control_m": 0.068,
+          "accepted_load_factor": 0.792013270024591
+        },
+        {
+          "control_m": 0.07,
+          "accepted_load_factor": 0.7931321838991802
+        },
+        {
+          "control_m": 0.072,
+          "accepted_load_factor": 0.7943242385930628
+        },
+        {
+          "control_m": 0.074,
+          "accepted_load_factor": 0.7955587483293478
+        },
+        {
+          "control_m": 0.076,
+          "accepted_load_factor": 0.7968761642149871
+        },
+        {
+          "control_m": 0.078,
+          "accepted_load_factor": 0.7980364139469716
+        },
+        {
+          "control_m": 0.08,
+          "accepted_load_factor": 0.7990589271706917
+        }
+      ],
+      "last_accepted": {
+        "control_m": 0.08,
+        "accepted_load_factor": 0.7990589271706917
+      },
+      "failed_target_m": null,
+      "terminal_reason": "equilibrium_control_and_increment_converged",
+      "terminal_solution_metrics": {
+        "case_id": "public_corotational_general_65505db3e689e2695411@direct-control-dof=15@target=0.08",
+        "control_mode": "direct_displacement_control",
+        "control_global_dof": 15,
+        "control_free_index": 9,
+        "target_control_displacement_m": 0.08,
+        "final_control_displacement_m": 0.08,
+        "control_error_m": 0.0,
+        "solved_load_factor": 0.7990589271706917,
+        "residual_kn": [
+          -1.7493562154413667e-10,
+          -3.502123036014382e-10,
+          -1.3599787962448318e-11,
+          3.038877594008227e-09,
+          1.2799546311725862e-08,
+          1.2487646472436609e-09,
+          -6.0992988437647e-11,
+          4.480966708797496e-10,
+          -1.9966250874858815e-11,
+          -7.275957614183426e-12,
+          1.1489191820146516e-09,
+          -1.5361933947133366e-11
+        ],
+        "relative_residual": 8.533030874483908e-12,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "augmented_formula": "[R_f(q,lambda);w*(q_control-q_target)]=0",
+        "augmented_formula_hash": "sha256:286617812c79b5e00b329e43b88edd5070c48e98f5e49e04c6dba7d276c45432",
+        "load_factor_column_formula": "dR_f/dlambda=S_f*(K_fp*ubar_p-F_ref_f)",
+        "tangent_definition": "material_plus_geometric_consistent",
+        "globalization": "backtracking_augmented_merit_line_search",
+        "terminal_reason": "equilibrium_control_and_increment_converged",
+        "solver_executed": true,
+        "iteration_count": 5,
+        "linear_solve_count": 5,
+        "line_search_step_count": 4,
+        "line_search_used": false,
+        "residual_tolerance": 1e-10,
+        "control_tolerance_m": 1e-12,
+        "increment_tolerance_m": 1e-12,
+        "load_factor_increment_tolerance": 1e-12,
+        "final_free_increment_abs_m": 1.3009842106595942e-13,
+        "final_load_factor_increment_abs": 9.352894382363024e-13,
+        "residual_gate_passed": true,
+        "control_gate_passed": true,
+        "increment_gate_passed": true,
+        "regularization_used": false,
+        "fallback_used": false,
+        "matrix_backend": "numpy_linalg_solve_dense",
+        "stiffness_storage": "numpy_dense_augmented_ndarray",
+        "profile": "dense-augmented-consistent-direct-displacement-control.v1",
+        "contract_pass": true
+      },
+      "total_history_rows": 223,
+      "total_line_search_attempts": 183,
+      "accepted_chain_checked": true
+    }
+  ],
+  "constant_axial_load": false,
+  "training_fits": 0,
+  "failed_speed_ratio": null,
+  "original_load_control_failure_repaired": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-refined-displacement-61gurys3",
+    "payload_files": 7,
+    "payload_bytes": 403495119,
+    "inventory_sha256": "304016d55852bd3f7bec1d39033210e9d6da40ec1a97bfda6f02ffebe90f2a05"
+  }
+}
