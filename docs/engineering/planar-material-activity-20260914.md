@@ -42,3 +42,22 @@ lane; hosted execution of this change is still pending.
 
 AI net benefit, external physical validation, main integration and signed owner
 acceptance remain open roadmap requirements.
+
+## Late comparison invalidation
+
+A regression reuses real worker outputs, then changes a checkpoint after the
+parent retention check but immediately before paired comparison. The existing
+comparison correctly rejects the artifacts and invalidates both rows, but the
+previous ordering had already generated an available material summary. The
+regression failed with `available=True` on the invalidated row.
+
+Material activity is now computed after paired comparison, using its final
+validation flags. The same case must retain unknown material flags rather than
+zero or positive evidence. Numerical mismatches alone remain distinct from
+artifact corruption. The test launches only its two fixture workers and reuses
+their saved bytes for the fault injection; it does not simulate physical damage
+or claim additional physical validation.
+
+After the ordering fix, the backend/history/material-activity selection passes
+177 tests in 42.36 seconds, including the reproduced regression. Ruff and diff
+checks pass. This local change is not yet verified by hosted CI.

@@ -648,3 +648,48 @@ def test_paired_cost_rejection_preserves_comparison_and_reason(
     assert pair["paired_workload_wall_difference_ns"] is None
     assert pair["paired_worker_cpu_difference_ns"] is None
     assert rows == before  # A valid mismatch is not artifact corruption.
+
+
+def test_late_comparison_corruption_invalidates_material_activity(
+    observed, tmp_path, monkeypatch
+):
+    request = deepcopy(observed.request)
+    for case in request["cases"]:
+        original = next(
+            c for c in observed.manifest["cases"] if c["case_id"] == case["case_id"]
+        )
+        (tmp_path / case["model_file"]).write_bytes(
+            (observed.output / original["input_file"]).read_bytes()
+        )
+    request_path = tmp_path / "request.json"
+    request_path.write_bytes(process._bytes(request))
+    monkeypatch.setattr(process, "_freeze_source", lambda directory: {})
+
+    def cached_slot(bundle, slot, manifest, timeout):
+        row = deepcopy(observed.report["rows"][slot["slot_index"]])
+        row.pop("material_activity", None)
+        directory = bundle / row["directory"]
+        shutil.copytree(observed.output / row["directory"], directory)
+        return row, json.loads((directory / "result.json").read_bytes())
+
+    compare = process._comparisons
+
+    def corrupt_then_compare(bundle, request, rows, results):
+        # Simulate a file changing after retention checks, before comparison.
+        (bundle / rows[0]["directory"] / "checkpoint.json").write_bytes(b"{}")
+        return compare(bundle, request, rows, results)
+
+    monkeypatch.setattr(process, "_run_slot", cached_slot)
+    monkeypatch.setattr(process, "_comparisons", corrupt_then_compare)
+    report = process.run_planar_frame_backend_experiment(
+        request_path, source_revision=REVISION, output_directory=tmp_path / "experiment"
+    )
+    assert (
+        report["comparisons"][0]["unavailable_reason"]
+        == "saved_artifact_comparison_failed"
+    )
+    for row in report["rows"]:
+        assert row["artifact_contract_pass"] is False
+        assert row["material_activity"]["available"] is False
+        assert row["material_activity"]["steel_plasticity_observed"] is None
+        assert row["material_activity"]["concrete_damage_observed"] is None

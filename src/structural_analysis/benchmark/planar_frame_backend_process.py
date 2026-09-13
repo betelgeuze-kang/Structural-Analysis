@@ -1505,10 +1505,12 @@ def run_planar_frame_backend_experiment(
                 artifact_contract_pass=False,
             )
             row["retention_error"] = "saved_slot_artifacts_changed_or_missing"
+    # Comparison can invalidate rows when retained files change after checking.
+    # Material observations must use those final validation flags.
+    comparisons = _comparisons(output, request, rows, results)
     if _history_requested(request):
         for row in rows:
             row["material_activity"] = _material_activity(output, row)
-    comparisons = _comparisons(output, request, rows, results)
     report = {
         "schema_version": "planar-frame-backend-experiment.v2"
         if _history_requested(request)
