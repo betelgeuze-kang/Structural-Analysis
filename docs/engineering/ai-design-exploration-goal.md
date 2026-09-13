@@ -119,6 +119,26 @@ Workbench original-artifact review pass 115 distinct selected Python tests and
 42 frontend tests. Source reconstruction, external training admission, learned
 net benefit, hosted and independent acceptance remain open.
 
+### Current evidence interpretation (2026-09-13)
+
+The requirement table below retains earlier experiments and open acceptance
+criteria. Its historical favorable observations must be read together with these
+subsequent source-bound results; this is a status reconciliation, not new execution.
+
+| Requirement | Evidence that changes the next action | Still required |
+| --- | --- | --- |
+| M1 / public planar | [Mixed backend cohort](planar-mixed-cohort-20260913.md): 27 declared executions, nine converged and eighteen failed; only the converged case has speed ratios, and sparse was slower. All are related generated portals. | Broader independent cases, accepted histories and failure coverage; do not count repetitions as independent structures. |
+| M3 / learned warm starts | [Envelope admission](rc-envelope-results-20260913.md): nine comparisons, 36 paths and 27 full-history checks passed, but validation proposal/secant time averaged 1.070003; holdout made no learned proposals. | A changed learning target or admission model with independently held-out benefit and complete costs; repeating the same unchanged policy is not a closure action. |
+| M4 / learned candidate order | [Standalone process cohort](rc-layout-standalone-costs-20260913.md): four comparable pairs were about 23.47% slower after charging historical training once; two budget-2 pairs had unequal outcomes, so the six-pair aggregate ratio remains unavailable. | Comparable performance/estimate outcomes and net benefit on new case families; preserve earlier known-pool favorable observations with their own scope. |
+| M4 / multi-fidelity execution | [Material-nonlinear staged screening](rc-layout-staged-nonlinear-20260913.md): deterministic prefix screening reduced process sums by about 3.61% and 15.62% in two related conditions, with full fresh acceptance retained; another earlier condition was slower. No AI participated. | Determine when prefix work pays on new geometries/histories before adopting an unconditional strategy; independent physical validation and total HTTP/UI costs remain open. |
+| M5 / failure review | [Actual desktop/mobile failure review](workbench-failure-diagnostic-review-20260913.md) exposes original diagnostics and downloads for the current failed attempt. | Historical-attempt navigation and whole-user-flow cost evidence; failed diagnostics do not become accepted engineering results. |
+| External data for M1/M3 | [ACI/PEER A1 comparison](aci-peer-history-lineage-20260913.md) matches all 866 ordered displacements after conversion while retaining force-scale differences. The 326-record ACI table is not 326 new independent cases. | Specimen-level source/model/rights review and campaign-isolated admission; no measured training admission follows from capture or matching labels. |
+
+R1 current-main projection, R2 signed production execution and owner integration,
+and P1–P3's broader material, cyclic, 3D and hardware-dependent acceptance retain
+their full scope. Positive timing and mutation-test fixes improve software
+contracts without closing those requirements or qualifying a release.
+
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; a separate 707702 RC cyclic-control seed observation completes 18/18 paths but secant fails all six fixed-tolerance comparisons; shared terminal polishing at 3f6c952d5 also completes 18 paths but fails all six comparisons despite smaller force errors; exact-rational strain at d81cd8e90 completes another 18 paths with all six comparisons still failing, and original-parent diagnostics isolate remaining M2 section differences to finite accepted coordinates; native twofold parent increments at d2ecdaa25 complete 18 further paths with 339/262 repeatable mismatches and still 0/6 fixed physical passes; stable material stress probes complete six more paths with 263/244 mismatches and 0/2 fixed physical passes; direct coordinate-to-fiber trials complete six further paths with 79/75 mismatches and still 0/2 fixed physical passes; retained rational material inputs complete six more paths with 49/40 mismatches and still 0/2 passes; rational force/tangent assembly completes six further paths with 23/5 mismatches and 0/2 full passes; retained terminal-coordinate correction completes six more paths with 3/0 mismatches and 1/2 full passes; bounded second correction completes six further paths with zero mismatches and 2/2 passes; its three fresh repeats per geometry complete 18 more paths with 6/6 fixed comparisons passing and locally measured deterministic secant timing; broader families and independent evidence remain |
