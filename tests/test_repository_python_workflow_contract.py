@@ -144,6 +144,11 @@ def test_all_supported_events_run_the_complete_pytest_suite() -> None:
     assert hosted_hip_source < pristine_ledger < materialize < full_suite
     assert "--deselect" in workflow[full_suite:]
     for command in (
+        "python scripts/build_phase2_state_updated_steel_material_artifacts.py",
+        "python scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
+        "python scripts/build_phase2_state_updated_composite_section_artifacts.py",
+        "python scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+        "python scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
         "python scripts/build_fracture_energy_concrete_benchmark.py",
         "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",

@@ -1,5 +1,9 @@
 # Reaction-only provenance and fracture-energy source refresh
 
+Update: the protected reaction-only receipt was subsequently restored to the PR
+base; the corrected checker and fresh local validation remain. CI regenerates
+the receipt in its ephemeral runner. See [the CI boundary correction](package-preparation-ci-boundary-20260913.md).
+
 The remaining reaction-only baseline failure combined stale Newton input hashes
 with a commit self-reference: its checker compared the generation commit directly
 with the current HEAD. Committing an otherwise unchanged generated receipt would

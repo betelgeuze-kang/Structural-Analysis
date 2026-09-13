@@ -169,6 +169,13 @@ jobs:
         id: materialize
         shell: bash
         run: |
+          # Refresh internal source-bound summaries only in the ephemeral runner.
+          # Protected checked-in evidence remains unchanged by the development PR.
+          python scripts/build_phase2_state_updated_steel_material_artifacts.py
+          python scripts/build_phase2_state_updated_bilinear_link_artifacts.py
+          python scripts/build_phase2_state_updated_composite_section_artifacts.py
+          python scripts/build_phase2_state_updated_concrete_damage_artifacts.py
+          python scripts/build_phase2_adaptive_newton_continuation_artifacts.py
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "CI product replay; external execution bytes reused without freshness credit."

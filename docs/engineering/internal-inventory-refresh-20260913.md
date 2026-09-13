@@ -1,5 +1,9 @@
 # Current-source inventory and bounded material artifact refresh
 
+Update: the five protected material summaries were subsequently restored to the
+PR base; their fresh local results are retained, and CI now regenerates them in
+its ephemeral runner. See [the CI boundary correction](package-preparation-ci-boundary-20260913.md).
+
 This refresh resolves two diagnosed stale-data groups from the failed full Python
 baseline at `df60b7d3913f8fe095788f07ace95302d02f6cd3`. It was calculated from
 parent source `c60b83ce3e302770a8d3cfa1247bedd1254f2ccd`. The full suite has not
