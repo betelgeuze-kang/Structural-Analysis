@@ -1,5 +1,7 @@
 # RC learning and candidate-search evidence index
 
+[Actual HTTP CI integration](workbench-http-ci-integration-20260913.md) closes the workflow wiring gap; hosted execution remains pending.
+
 This index preserves the research links accumulated in the RC learning/search
 section of PR #439 and issue #438. Each linked record retains its own source,
 measurement scope and outstanding gates. Older observations are not current-head

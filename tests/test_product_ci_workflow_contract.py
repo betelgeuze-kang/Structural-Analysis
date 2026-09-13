@@ -482,3 +482,27 @@ def test_frontend_failure_diagnostics_preserve_original_failure_outcome() -> Non
     assert "retention-days: 7" in upload
     required = workflow.split("  frontend-required:", 1)[1]
     assert 'test "$FRONTEND_RESULT" = success' in required
+
+
+def test_workbench_http_ci_installs_python_and_runs_real_transport_specs() -> None:
+    workflow = _read("runtime-input-viewer-ci.yml")
+    job = workflow.split("  frontend-contracts:\n", 1)[1]
+    install = job.index("python -m pip install -e .[dev]")
+    execute = job.index("- name: Workbench actual HTTP integration")
+    assert job.index("actions/setup-python@") < install < execute
+    step = job[execute:].split("- name:", 2)[1]
+    for name in (
+        "job-api", "failure-diagnostic", "failure-history",
+        "rc-search-http", "rc-cohort-http",
+    ):
+        assert f"tests/frontend/workbench-v2-{name}-browser.spec.ts" in step
+    assert "node_modules/@playwright/test/cli.js test" in step
+    assert "continue-on-error" not in job
+    assert "path: test-results/" in job
+    for source in (
+        "src/workbench-v2/components/**",
+        "src/structural_analysis/execution/**",
+        "tests/frontend/*transport_server.py",
+        "tests/frontend/fixtures/**",
+    ):
+        assert workflow.count(f'      - "{source}"') == 2

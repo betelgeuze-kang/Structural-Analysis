@@ -5,6 +5,10 @@ on:
     paths:
       - "src/structural_analysis/io/midas/**"
       - "src/workbench-v2/model/**"
+      - "src/workbench-v2/components/**"
+      - "src/structural_analysis/execution/**"
+      - "tests/frontend/*transport_server.py"
+      - "tests/frontend/fixtures/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
       - "src/structure-viewer/viewer-contracts.js"
       - "src/structure-viewer/viewer-ingest.js"
@@ -37,6 +41,10 @@ on:
     paths:
       - "src/structural_analysis/io/midas/**"
       - "src/workbench-v2/model/**"
+      - "src/workbench-v2/components/**"
+      - "src/structural_analysis/execution/**"
+      - "tests/frontend/*transport_server.py"
+      - "tests/frontend/fixtures/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
       - "src/structure-viewer/viewer-contracts.js"
       - "src/structure-viewer/viewer-ingest.js"
@@ -150,6 +158,14 @@ jobs:
           node-version: "24.20.0"
           cache: npm
 
+      - name: Set up Python for artifact HTTP integration
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.10"
+
+      - name: Install artifact HTTP application
+        run: python -m pip install -e .[dev]
+
       - name: Install frontend dependencies
         run: >-
           npm ci --ignore-scripts --engine-strict
@@ -181,6 +197,26 @@ jobs:
           code=$?
           tail -n 200 workbench-v2-e2e.log
           exit "$code"
+
+      - name: Workbench actual HTTP integration
+        run: >-
+          node --loader ./scripts/json-module-loader.mjs
+          node_modules/@playwright/test/cli.js test
+          tests/frontend/workbench-v2-job-api-browser.spec.ts
+          tests/frontend/workbench-v2-failure-diagnostic-browser.spec.ts
+          tests/frontend/workbench-v2-failure-history-browser.spec.ts
+          tests/frontend/workbench-v2-rc-search-http-browser.spec.ts
+          tests/frontend/workbench-v2-rc-cohort-http-browser.spec.ts
+          --workers=1 --reporter=line
+
+      - name: Upload actual HTTP test artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: workbench-http-${{ github.run_id }}
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload Workbench E2E log
         if: always()

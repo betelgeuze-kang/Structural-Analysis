@@ -1,0 +1,25 @@
+# Workbench actual HTTP CI integration
+
+The 704-test hermetic frontend suite does not include the five actual HTTP
+specifications gated by `--with-job-api`. The completed c8e4fbc2a frontend jobs
+therefore prove their declared 704 tests, not execution of those extra HTTP tests.
+Local HTTP evidence remains separately valid.
+
+Runtime Input and Viewer CI now installs Python 3.10 and the application in its
+frontend job, and executes the five real HTTP specifications in a separate step
+after guarded E2E. The separate command retains the setup-python interpreter in
+PATH; it does not change the sanitized environment of the hermetic runner.
+The job retains test-results artifacts and fails on integration test failure.
+Both push and PR path filters include components, execution code, transport
+servers and fixtures so changes to the integration reach this lane.
+
+The exact five-specification command passes 24 local tests in 1.2 minutes:
+job API, failure diagnostics, failure history, RC candidate search and strategy
+cohort HTTP. The workflow contract suite passes 18 tests; Ruff and diff checks
+pass. No solver or frontend production code changes in this patch. Local fixture
+and loopback results are not production identity, deployment or independent
+physical validation. Hosted execution of this new step is still required.
+
+Logs and the implementation patch are retained at `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-http-ci-integration-y6o49_g2` with an adjacent
+SHA-256 inventory. The change is prepared locally while c8e4fbc2a topology CI
+finishes; its prior results must not be relabeled as validation of this change.
