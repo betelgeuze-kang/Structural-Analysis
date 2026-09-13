@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Workbench display of the recorded numerical settings](rc-analysis-settings-workbench-20260913.md)
+
 - [Explicit line-search refinement and full smaller-bar reanalysis](rc-reinforcement-linesearch-20260913.md)
 
 - [Workbench inspection of original solver failure and exact rollback](rc-failure-inspection-workbench-20260913.md)

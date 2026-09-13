@@ -55,6 +55,8 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
   }
   const { models } = session
   const report = session.displayReport ?? session.report
+  const config = report.control_request.solver_config
+  const newton = config.newton
   const current = report.rows.find((r: RcObject) => r.candidate_id === selected)
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
@@ -62,6 +64,22 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
     <p>{report.control_request.targets_m.length} authored targets per design · {report.verified_count}/{report.candidate_denominator} designs have complete stored verification · execution {report.status}</p>
     {report.control_request.constant_nodal_loads ? <p data-rc-design-constants>Constant nodal loads (node, FX kN, FY kN, MZ kN·m): {report.control_request.constant_nodal_loads.map((r: RcObject) => `${r.node_id}, ${r.FX_kN}, ${r.FY_kN}, ${r.MZ_kNm}`).join('; ')}. Every analysis and fresh verification includes its own preload. Path screens include that accepted preload.</p> : null}
     <p>Source declaration <code>{report.source_revision}</code> · report <code data-rc-design-hash>{report.report_hash}</code></p>
+    <details data-rc-design-settings>
+      <summary>Analysis settings used for this comparison</summary>
+      <p>These recorded settings apply to each design's analysis and fresh verification. A different setting can change convergence; results from different settings are separate observations.</p>
+      <dl>
+        {[
+          ['residual', 'Relative residual tolerance', String(newton.residual_tolerance)],
+          ['increment', 'Increment tolerance in solver coordinates', String(newton.increment_tolerance)],
+          ['control', 'Control displacement tolerance (m)', String(config.control_tolerance_m)],
+          ['iterations', 'Maximum Newton iterations per step', String(newton.max_iterations)],
+          ['line-search', 'Backtracking step fractions', newton.line_search_alphas.map(String).join(', ')],
+          ['polishing', 'Terminal polishing', String(newton.terminal_polishing)],
+          ['backend', 'Matrix solver', newton.matrix_backend],
+          ['load-scale', 'Load-factor coordinate scale (m)', String(config.load_factor_coordinate_scale_m)],
+        ].map(([key, label, value]) => <div key={key} data-rc-design-setting={key}><dt>{label}</dt><dd style={{ marginInlineStart: 0, overflowWrap: 'anywhere' }}>{value}</dd></div>)}
+      </dl>
+    </details>
     <p>{report.prices ? `Declared prices: ${report.prices.currency} · ${report.prices.as_of} · ${report.prices.source}` : 'Prices unavailable; no cost-based candidate can be selected.'}</p>
     <p data-rc-design-recommendation>Lowest declared estimate among verified candidates passing all screens: {report.selected_candidate_id ?? 'UNAVAILABLE'}. Current selection: {selected ?? 'none'}.</p>
     {current?.selection_eligible === true && current.full_reference_verification_pass === true && report.prices ? <section aria-label="Selected RC candidate summary" data-rc-design-summary={current.candidate_id}>

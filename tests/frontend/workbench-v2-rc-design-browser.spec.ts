@@ -55,6 +55,21 @@ for (const width of [1440, 390]) {
       await setup(page)
       await page.goto(`${baseUrl}/#/workbench-v2`)
       const panel = await waitForRcDesign(page)
+      const settings = panel.locator('[data-rc-design-settings]')
+      await settings.locator('summary').click()
+      const config = report.control_request.solver_config, newton = config.newton
+      const expectedSettings = {
+        residual: String(newton.residual_tolerance), increment: String(newton.increment_tolerance),
+        control: String(config.control_tolerance_m), iterations: String(newton.max_iterations),
+        'line-search': newton.line_search_alphas.map(String).join(', '), polishing: String(newton.terminal_polishing),
+        backend: newton.matrix_backend, 'load-scale': String(config.load_factor_coordinate_scale_m),
+      }
+      for (const [key, value] of Object.entries(expectedSettings)) {
+        const entry = settings.locator(`[data-rc-design-setting="${key}"] dd`)
+        await expect(entry).toHaveText(String(value))
+        expect(await entry.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true)
+      }
+      await settings.locator('summary').click()
       await expect(panel.locator('[data-rc-design-candidate]')).toHaveCount(3)
       await expect(panel.getByRole('button', { name: 'Select invalid', exact: true })).toBeDisabled()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'baseline')
