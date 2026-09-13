@@ -148,3 +148,12 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 - Development CI now explicitly includes the direct-control API failure-work module: [43-module roster receipt](rc-api-early-ci-20260913.json), 1,160 tests collected, 18 workflow tests passed; new-roster full execution remains pending.
 
 - [Historical training intervals retain all recorded sequential work](rc-nested-training-cost-20260913.md)
+
+
+The [full cyclic reinforcement candidate observation](rc-rebar-candidate-full-20260913.md)
+completes 5,324 attempted steps and 21,194 Newton/linear solves including training,
+both online arms and a separate complete oracle. Both rankings select the same
+finite-pool minimum with zero missed cheaper feasible candidates. Training adds
+434.422 s and yields no demonstrated learned advantage. Same-family model
+identity separation is not an independent project/geometry/history campaign;
+M1–M5 and independent acceptance remain open.

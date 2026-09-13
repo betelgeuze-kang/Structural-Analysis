@@ -1979,3 +1979,12 @@ The packet and audit are immutable; no learned model or external training row
 was admitted. This advances roadmap items 1 and 5 within the bounded public
 scope. It does not close independent validation, learned net benefit, the wider
 planar/material/3D scope, current-main issue projection or supplemental acceptance.
+
+
+The [full cyclic reinforcement candidate observation](rc-rebar-candidate-full-20260913.md)
+completes 5,324 attempted steps and 21,194 Newton/linear solves including training,
+both online arms and a separate complete oracle. Both rankings select the same
+finite-pool minimum with zero missed cheaper feasible candidates. Training adds
+434.422 s and yields no demonstrated learned advantage. Same-family model
+identity separation is not an independent project/geometry/history campaign;
+M1–M5 and independent acceptance remain open.
