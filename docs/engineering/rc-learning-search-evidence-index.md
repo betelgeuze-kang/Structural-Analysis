@@ -263,3 +263,9 @@ reference repeats passing. Linear solves fall 3,681 to 3,635, but assembly
 work and time rise in two cases; no runtime or learned gain is established.
 These original requests have no constant-load preload. The separate audited
 packet is sealed; independent repeated performance and the full roadmap remain open.
+
+
+The [quadratic work decomposition](rc-quadratic-work-decomposition-20260914.md)
+authenticates 1,936 steps: train-b/d have more primary and line-search work,
+masked in inclusive linear counts by fewer terminal solves. No new solves/fits
+or same-parent counterfactual learning labels are claimed.

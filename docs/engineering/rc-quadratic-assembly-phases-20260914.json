@@ -1,0 +1,171 @@
+{
+  "source_revision": "53aba2aeb8fe42f6e09bf2b3c7216737dbcef1de",
+  "numerical_source_revision": "259697d6ee946057bec3e8bfbe35ac155929e205",
+  "input_packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-full-r7wempke",
+    "inventory_sha256": "8ac7698e73346eefcd759b0110633df510fad08df4d63b2dcae998299d312369",
+    "files": 23924,
+    "bytes": 1415485590
+  },
+  "input_bindings": [
+    {
+      "path": "train-a/secant/path.json",
+      "bytes": 14046784,
+      "sha256": "b29063e16bccc16b6d74b5f1a6815f3919a6b7bb758c9862d8df472500383f23"
+    },
+    {
+      "path": "train-a/proposal/path.json",
+      "bytes": 14052568,
+      "sha256": "626e2227372ff5496305d8ccafb50b3bad824fecd4c4eba0a0733113c61c86dd"
+    },
+    {
+      "path": "train-b/secant/path.json",
+      "bytes": 13977400,
+      "sha256": "807f96d0a9c67e85bc854a87fb5c0aef9de3565108c29bf3371c6a1501971258"
+    },
+    {
+      "path": "train-b/proposal/path.json",
+      "bytes": 13986739,
+      "sha256": "f356a261842bb053286cad50f1c56eb9f07198339f591618e54a20d5000e2484"
+    },
+    {
+      "path": "train-c/secant/path.json",
+      "bytes": 14054323,
+      "sha256": "be2635fd4c40e88ecaa513a8e315479b6e3d653f379ba139352d0637ed9540b0"
+    },
+    {
+      "path": "train-c/proposal/path.json",
+      "bytes": 14060322,
+      "sha256": "49bb3effd9c2a68cee9ba230e189655fdae2125a8200f12d497afb6103d57121"
+    },
+    {
+      "path": "train-d/secant/path.json",
+      "bytes": 13963467,
+      "sha256": "dc89fc0b17e78d8c1e87b7933a1325aeb180464f6508484f028fc0667a20e6ac"
+    },
+    {
+      "path": "train-d/proposal/path.json",
+      "bytes": 13970927,
+      "sha256": "1bdb63712c90c27e9b77cdb12e86dc722a6612ae2d799bae24a881e678a5d06e"
+    }
+  ],
+  "cases": [
+    {
+      "case": "train-a",
+      "arms": {
+        "secant": {
+          "phase_counts": {
+            "primary_iteration": 578,
+            "line_search": 336,
+            "terminal_refinement": 484,
+            "final_observation": 242
+          },
+          "linear_solves": 969
+        },
+        "proposal": {
+          "phase_counts": {
+            "primary_iteration": 571,
+            "line_search": 329,
+            "terminal_refinement": 483,
+            "final_observation": 242
+          },
+          "linear_solves": 957
+        }
+      },
+      "fewer_linear_more_assembly_steps": [],
+      "more_assembly_steps": 19,
+      "less_assembly_steps": 27
+    },
+    {
+      "case": "train-b",
+      "arms": {
+        "secant": {
+          "phase_counts": {
+            "primary_iteration": 478,
+            "line_search": 236,
+            "terminal_refinement": 480,
+            "final_observation": 242
+          },
+          "linear_solves": 870
+        },
+        "proposal": {
+          "phase_counts": {
+            "primary_iteration": 488,
+            "line_search": 246,
+            "terminal_refinement": 482,
+            "final_observation": 242
+          },
+          "linear_solves": 863
+        }
+      },
+      "fewer_linear_more_assembly_steps": [
+        23
+      ],
+      "more_assembly_steps": 15,
+      "less_assembly_steps": 2
+    },
+    {
+      "case": "train-c",
+      "arms": {
+        "secant": {
+          "phase_counts": {
+            "primary_iteration": 616,
+            "line_search": 374,
+            "terminal_refinement": 479,
+            "final_observation": 242
+          },
+          "linear_solves": 990
+        },
+        "proposal": {
+          "phase_counts": {
+            "primary_iteration": 594,
+            "line_search": 352,
+            "terminal_refinement": 482,
+            "final_observation": 242
+          },
+          "linear_solves": 971
+        }
+      },
+      "fewer_linear_more_assembly_steps": [],
+      "more_assembly_steps": 21,
+      "less_assembly_steps": 41
+    },
+    {
+      "case": "train-d",
+      "arms": {
+        "secant": {
+          "phase_counts": {
+            "primary_iteration": 471,
+            "line_search": 229,
+            "terminal_refinement": 482,
+            "final_observation": 242
+          },
+          "linear_solves": 852
+        },
+        "proposal": {
+          "phase_counts": {
+            "primary_iteration": 477,
+            "line_search": 235,
+            "terminal_refinement": 482,
+            "final_observation": 242
+          },
+          "linear_solves": 844
+        }
+      },
+      "fewer_linear_more_assembly_steps": [],
+      "more_assembly_steps": 11,
+      "less_assembly_steps": 4
+    }
+  ],
+  "new_solves": 0,
+  "new_fits": 0,
+  "phase_timings_available": false,
+  "same_native_parent_comparison": false,
+  "validation_and_aggregation_wall_ns": 900338737,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-assembly-phases-rl7cq301",
+    "inventory_sha256": "646d0ff572a9eda36f9f9d270807bb790c2366953b3e87c22e2e6c927fcabe49",
+    "files": 2,
+    "bytes": 290941
+  }
+}
