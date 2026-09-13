@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Full cyclic reinforcement pair and retained failed alternative](rc-reinforcement-full-path-20260913.md)
+
 - [Reinforcement edits, real full-path replay and common-cost regression](rc-reinforcement-design-regression-20260913.md)
 
 - [Readable selected RC quantity/cost summary and exact source values](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-selected-summary-20260913.md)

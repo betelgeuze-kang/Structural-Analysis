@@ -121,6 +121,14 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-13)
 
+The [full cyclic reinforcement comparison](rc-reinforcement-full-path-20260913.md)
+at frozen `94302f49a` verifies baseline and fewer-bars designs across 242 targets
+and fresh full-path replay. A smaller-bar-area alternative blocks at its eighth
+attempt and remains in the denominator with quantities and known work. The
+comparison is incomplete (2/3 verified), with 984 attempted steps and 3,924 known
+Newton/linear counts including verification. This advances M2 beyond small
+reinforcement fixtures without claiming feasible material savings or full closure.
+
 The requirement table below retains earlier experiments and open acceptance
 criteria. Its historical favorable observations must be read together with these
 subsequent source-bound results; this is a status reconciliation, not new execution.
