@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Readable selected RC quantity/cost summary and exact source values](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-selected-summary-20260913.md)
+
 - [Actual HTTP and desktop/mobile review of the new geometry results](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-staged-geometry-workbench-20260913.md)
 
 - [Repeated staged screening on two new L-frame geometries](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-staged-geometry-20260913.md)
