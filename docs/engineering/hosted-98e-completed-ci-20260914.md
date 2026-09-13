@@ -33,3 +33,12 @@ Separately, the later local failed-assembly test now asserts the new summary's
 incomplete path status, two observed dispatches and one raised dispatch, with
 physical validation false. The focused actual-exception check passes in 1.89 s;
 it extends the prior 39-test summary verification without changing the solver.
+
+Topology job 103759452735 subsequently completed successfully. Its separately
+sealed [receipt](hosted-98e-topology-20260914.json) records 413 focused passes
+in 1,018.87 s, branch selections of 22/86/9/28/16/13/65 passes and 984 regression
+passes in 899.34 s, with no skipped job steps. Selections overlap. Five original
+metadata/log/script/summary files total 191,072 bytes and pass inventory readback.
+An exact-head listing returned no unfinished workflows before the next branch
+publication. The four skipped repository shards still prevent a full-suite claim;
+this terminal topology result does not qualify the subsequent local changes.
