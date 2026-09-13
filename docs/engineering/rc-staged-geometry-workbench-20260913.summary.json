@@ -1,0 +1,798 @@
+{
+  "observations": [
+    {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-staged-geometry-workbench-OWBpzT",
+      "inventory_sha256": "aa7e018424278a3b2e3d058f999cb62ba151cb6c11f8c7107ba46f6ee878cb1a",
+      "summary": {
+        "source_revision": "fba10d0035ad89ce3bbc8fc1acac48c84a0406a5",
+        "original_source_revisions": [
+          "0efd85afdfe33314c70fcfdc26802d81159e0bc0"
+        ],
+        "observations": [
+          {
+            "name": "short",
+            "strategy": "price_order",
+            "width": 1440,
+            "report_hash": "sha256:9313e3c48efa294747b922c4bca015e5feacf398ff0d815a97e74cc4264f6d00",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [
+              {
+                "path": "price_order/middle/baseline/model.json",
+                "bytes": 1483,
+                "sha256": "145ec8154c6d60a229f1b1b1dbb52df585a0d29d29ca03978385478dfc7ec477"
+              },
+              {
+                "path": "price_order/middle/baseline/result.json",
+                "bytes": 1739621,
+                "sha256": "2f67b7f46589dd80bd66a38cedfab9d4c167f7252b022b519c289fa6426e4508"
+              },
+              {
+                "path": "price_order/middle/baseline/checkpoint.json",
+                "bytes": 35994,
+                "sha256": "4328757b32cea3e6d9ff9839d86d163b25533a3545b98a5d34069cb5b660d3db"
+              },
+              {
+                "path": "price_order/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "02262f5e7f66f1afdc1df0607c02b645ab7a26d624b22ff0d51231586a4ee673"
+              },
+              {
+                "path": "result.json",
+                "bytes": 4515,
+                "sha256": "99cbc8ab946339d06a902e65ae5b7751df8363213eac9ca7fb67b0e1c940db80"
+              },
+              {
+                "path": "plan.json",
+                "bytes": 12273,
+                "sha256": "0cd0c5f76e46be1366d69704f2785b0077fb8cf43564bb4a5f71f573e814fe86"
+              },
+              {
+                "path": "price-table.json",
+                "bytes": 133,
+                "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+              },
+              {
+                "path": "pool/large.json",
+                "bytes": 1483,
+                "sha256": "b5fb1b7ae329c2fd7ca929e2bf0a93277252d195dc1e23dce85af110f1cd29c0"
+              },
+              {
+                "path": "pool/outside.json",
+                "bytes": 1469,
+                "sha256": "0636d4add737b5be2d4fdd6206af12a9c2f1dd4db5ee9c71b300ffe608210314"
+              },
+              {
+                "path": "price_order/prefix/small/decision.json",
+                "bytes": 1082,
+                "sha256": "9f7aedd75661908742d2a1b080526040f4de2474a07d073ebe6e4e252adade67"
+              },
+              {
+                "path": "price_order/prefix/small/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/small/row.json",
+                "bytes": 4769,
+                "sha256": "385233d85c387a4d227eea42a76f744e1a42fd07d9a5d11a03e188e2953601c2"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/model.json",
+                "bytes": 1470,
+                "sha256": "b3b8603548e8129ca33b5b6e3b48a75164098b518a74b9ee4f35ac24dab569e0"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/result.json",
+                "bytes": 662875,
+                "sha256": "fc09e728e4f5922bfe49b755ad839cf940bfc9907137adc2e8a82683ae3ee44f"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/checkpoint.json",
+                "bytes": 33435,
+                "sha256": "a9616ea0635cca59db4e518d69ace8ae94818cbc8541563eaf35daa53441b51c"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "26abb170dc90eef23da3b10097e710e12cb7a9dfad2f19c0c45afa73226b5984"
+              },
+              {
+                "path": "price_order/prefix/middle/decision.json",
+                "bytes": 997,
+                "sha256": "ab03c3786b9ef24b5440024653c4cdc76ba81a4c9134bb983ce0440963700919"
+              },
+              {
+                "path": "price_order/prefix/middle/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/middle/row.json",
+                "bytes": 4726,
+                "sha256": "27a0f1cd7e688dbc6ae2b12228804e8aef46bbadf6ecf5098bfbd9484d4dc212"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/model.json",
+                "bytes": 1483,
+                "sha256": "145ec8154c6d60a229f1b1b1dbb52df585a0d29d29ca03978385478dfc7ec477"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/result.json",
+                "bytes": 656937,
+                "sha256": "ec7a340b56d2dbf6cf876708b4f805461e3fe0579f901bb8a06c09725e5c418e"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/checkpoint.json",
+                "bytes": 33419,
+                "sha256": "002b858c94596819356fae2905eba22de112d45db5d5d4da700fe83e2cdd0d35"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "06e93c6405e3ffd7869736c892cc6ed6da782a5fd25f3a9a9a50e731fc2602fb"
+              },
+              {
+                "path": "price_order/decisions/00.json",
+                "bytes": 1114,
+                "sha256": "14c0afbe3a9559ff42a02dce47fe3a6375b0aff04c46b7fd709ac5bbe85d2d56"
+              },
+              {
+                "path": "price_order/decisions/01.json",
+                "bytes": 1109,
+                "sha256": "501a834a25f5389f6be46b81d72d3d274046422e53d8b90ed863069229fc34aa"
+              },
+              {
+                "path": "price_order/decisions/02.json",
+                "bytes": 1110,
+                "sha256": "58bf12eebfbb7bd5b627ed30868243c78fd6fe6247267c99e69acf76cdefaae0"
+              },
+              {
+                "path": "price_order/decisions/03.json",
+                "bytes": 1124,
+                "sha256": "b6bddbe3da3f75ba268839bec9839152057e09b84bef9230797aaafa6c13e73e"
+              },
+              {
+                "path": "price_order/decisions/04.json",
+                "bytes": 1126,
+                "sha256": "4c48be12e295fdf8977c8dbaddb31f8e63b6fe829e4547927d67f9228287f1d3"
+              }
+            ],
+            "review_wall_ns": 12084165377,
+            "outer_panel_fits_viewport": true
+          },
+          {
+            "name": "short",
+            "strategy": "price_order",
+            "width": 390,
+            "report_hash": "sha256:9313e3c48efa294747b922c4bca015e5feacf398ff0d815a97e74cc4264f6d00",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [
+              {
+                "path": "price_order/middle/baseline/model.json",
+                "bytes": 1483,
+                "sha256": "145ec8154c6d60a229f1b1b1dbb52df585a0d29d29ca03978385478dfc7ec477"
+              },
+              {
+                "path": "price_order/middle/baseline/result.json",
+                "bytes": 1739621,
+                "sha256": "2f67b7f46589dd80bd66a38cedfab9d4c167f7252b022b519c289fa6426e4508"
+              },
+              {
+                "path": "price_order/middle/baseline/checkpoint.json",
+                "bytes": 35994,
+                "sha256": "4328757b32cea3e6d9ff9839d86d163b25533a3545b98a5d34069cb5b660d3db"
+              },
+              {
+                "path": "price_order/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "02262f5e7f66f1afdc1df0607c02b645ab7a26d624b22ff0d51231586a4ee673"
+              },
+              {
+                "path": "result.json",
+                "bytes": 4515,
+                "sha256": "99cbc8ab946339d06a902e65ae5b7751df8363213eac9ca7fb67b0e1c940db80"
+              },
+              {
+                "path": "plan.json",
+                "bytes": 12273,
+                "sha256": "0cd0c5f76e46be1366d69704f2785b0077fb8cf43564bb4a5f71f573e814fe86"
+              },
+              {
+                "path": "price-table.json",
+                "bytes": 133,
+                "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+              },
+              {
+                "path": "pool/large.json",
+                "bytes": 1483,
+                "sha256": "b5fb1b7ae329c2fd7ca929e2bf0a93277252d195dc1e23dce85af110f1cd29c0"
+              },
+              {
+                "path": "pool/outside.json",
+                "bytes": 1469,
+                "sha256": "0636d4add737b5be2d4fdd6206af12a9c2f1dd4db5ee9c71b300ffe608210314"
+              },
+              {
+                "path": "price_order/prefix/small/decision.json",
+                "bytes": 1082,
+                "sha256": "9f7aedd75661908742d2a1b080526040f4de2474a07d073ebe6e4e252adade67"
+              },
+              {
+                "path": "price_order/prefix/small/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/small/row.json",
+                "bytes": 4769,
+                "sha256": "385233d85c387a4d227eea42a76f744e1a42fd07d9a5d11a03e188e2953601c2"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/model.json",
+                "bytes": 1470,
+                "sha256": "b3b8603548e8129ca33b5b6e3b48a75164098b518a74b9ee4f35ac24dab569e0"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/result.json",
+                "bytes": 662875,
+                "sha256": "fc09e728e4f5922bfe49b755ad839cf940bfc9907137adc2e8a82683ae3ee44f"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/checkpoint.json",
+                "bytes": 33435,
+                "sha256": "a9616ea0635cca59db4e518d69ace8ae94818cbc8541563eaf35daa53441b51c"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "26abb170dc90eef23da3b10097e710e12cb7a9dfad2f19c0c45afa73226b5984"
+              },
+              {
+                "path": "price_order/prefix/middle/decision.json",
+                "bytes": 997,
+                "sha256": "ab03c3786b9ef24b5440024653c4cdc76ba81a4c9134bb983ce0440963700919"
+              },
+              {
+                "path": "price_order/prefix/middle/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/middle/row.json",
+                "bytes": 4726,
+                "sha256": "27a0f1cd7e688dbc6ae2b12228804e8aef46bbadf6ecf5098bfbd9484d4dc212"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/model.json",
+                "bytes": 1483,
+                "sha256": "145ec8154c6d60a229f1b1b1dbb52df585a0d29d29ca03978385478dfc7ec477"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/result.json",
+                "bytes": 656937,
+                "sha256": "ec7a340b56d2dbf6cf876708b4f805461e3fe0579f901bb8a06c09725e5c418e"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/checkpoint.json",
+                "bytes": 33419,
+                "sha256": "002b858c94596819356fae2905eba22de112d45db5d5d4da700fe83e2cdd0d35"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "06e93c6405e3ffd7869736c892cc6ed6da782a5fd25f3a9a9a50e731fc2602fb"
+              },
+              {
+                "path": "price_order/decisions/00.json",
+                "bytes": 1114,
+                "sha256": "14c0afbe3a9559ff42a02dce47fe3a6375b0aff04c46b7fd709ac5bbe85d2d56"
+              },
+              {
+                "path": "price_order/decisions/01.json",
+                "bytes": 1109,
+                "sha256": "501a834a25f5389f6be46b81d72d3d274046422e53d8b90ed863069229fc34aa"
+              },
+              {
+                "path": "price_order/decisions/02.json",
+                "bytes": 1110,
+                "sha256": "58bf12eebfbb7bd5b627ed30868243c78fd6fe6247267c99e69acf76cdefaae0"
+              },
+              {
+                "path": "price_order/decisions/03.json",
+                "bytes": 1124,
+                "sha256": "b6bddbe3da3f75ba268839bec9839152057e09b84bef9230797aaafa6c13e73e"
+              },
+              {
+                "path": "price_order/decisions/04.json",
+                "bytes": 1126,
+                "sha256": "4c48be12e295fdf8977c8dbaddb31f8e63b6fe829e4547927d67f9228287f1d3"
+              }
+            ],
+            "review_wall_ns": 12514853833,
+            "outer_panel_fits_viewport": true
+          },
+          {
+            "name": "tall",
+            "strategy": "price_order",
+            "width": 1440,
+            "report_hash": "sha256:f8e6aca8e42bdd83c16423fe180ea5cb57f0770e1e93ff28b3593cc393df1e8c",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [
+              {
+                "path": "price_order/middle/baseline/model.json",
+                "bytes": 1469,
+                "sha256": "07bbbf8b7a0eb8615ddb47cacab5d9ade5d6bf55292e1fba63d1ffcfce5dcd35"
+              },
+              {
+                "path": "price_order/middle/baseline/result.json",
+                "bytes": 1741028,
+                "sha256": "f14ca8ea52bc9a1b8f34ef67a9f3c9eb665ade17b5fc7a9527a670e9066a23b6"
+              },
+              {
+                "path": "price_order/middle/baseline/checkpoint.json",
+                "bytes": 36029,
+                "sha256": "92943d13413434c578e1ae9b42c361c5384342a7e83fb0b62eaec72f60a3c1a6"
+              },
+              {
+                "path": "price_order/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "88e9679334e95c3e7a01e2d1b9c893c2222f8f668ff38e4246f9b5050edaff9e"
+              },
+              {
+                "path": "result.json",
+                "bytes": 4515,
+                "sha256": "99777e41ade69297261e5c95a0231b856404180f42a99968e563417cb4601fe9"
+              },
+              {
+                "path": "plan.json",
+                "bytes": 12310,
+                "sha256": "b9ba35f624836e74e8eb2e3d81234a3e9dbd9f38a618138aa37518262a135b99"
+              },
+              {
+                "path": "price-table.json",
+                "bytes": 133,
+                "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+              },
+              {
+                "path": "pool/large.json",
+                "bytes": 1469,
+                "sha256": "33f0f4f8267782bd947ace5259502cf80c311f03c1242bf42ad5c27ece9c27bf"
+              },
+              {
+                "path": "pool/outside.json",
+                "bytes": 1469,
+                "sha256": "14354de2b228ea5ac6e6b3de472f104b85c674932345965c02375810a45f802c"
+              },
+              {
+                "path": "price_order/prefix/small/decision.json",
+                "bytes": 1082,
+                "sha256": "8bb8f513015d2cb3409f3aa7eb07e09222f4937d91144c7bb58c32d8a918e262"
+              },
+              {
+                "path": "price_order/prefix/small/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/small/row.json",
+                "bytes": 4702,
+                "sha256": "2b7bfaa5277293a63b7a038da3e7320f0689099e33de64014c4f08b522aa5bd6"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/model.json",
+                "bytes": 1470,
+                "sha256": "1781f4b38b1888a528d03fe2e8d402dd873499936efa189b3569386f98e85d23"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/result.json",
+                "bytes": 665345,
+                "sha256": "02d348a286a988a1bdca18b14e98834ff3ef0ad5d20bd2fb1aae019df475c4a1"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/checkpoint.json",
+                "bytes": 33446,
+                "sha256": "81d9dcddc3b7ed43ff4a333fab004ce44f8d748f09cf281d6827134db066b943"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "bf6f650b175cdf9fa17841d5dc47c1c5aa7ea299f182efe48c6766a6362e4ba7"
+              },
+              {
+                "path": "price_order/prefix/middle/decision.json",
+                "bytes": 997,
+                "sha256": "94ef2da9c63d789f14ac13933a896a9cd18d933fa295155e85a40b0d603e68d4"
+              },
+              {
+                "path": "price_order/prefix/middle/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/middle/row.json",
+                "bytes": 4793,
+                "sha256": "7fb56376883165c08eda1f02264839173e9d2ddc2d85aaa63bc6532aa06c28bf"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/model.json",
+                "bytes": 1469,
+                "sha256": "07bbbf8b7a0eb8615ddb47cacab5d9ade5d6bf55292e1fba63d1ffcfce5dcd35"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/result.json",
+                "bytes": 657676,
+                "sha256": "8da5c2e2e6be5e9b8f54d33707f1ab046a6cfcc94e022f82bb35c69f97f26438"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/checkpoint.json",
+                "bytes": 33432,
+                "sha256": "5902b6e111442cbdb21dd8928bb378ae1a689fbdacdcfc7e384dd27b156aadb8"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "ea7d0e08730c14d9e28eaffd50ff12add604441d8328a213e1dc664330b87547"
+              },
+              {
+                "path": "price_order/decisions/00.json",
+                "bytes": 1114,
+                "sha256": "d3d1413967c4d6899ddc19f18d7a0238cf7018029dbefac16edef5a3fe7e5e96"
+              },
+              {
+                "path": "price_order/decisions/01.json",
+                "bytes": 1109,
+                "sha256": "e21524168d5409761c3ee9f4f3423ab055225c409d28f9f4c5d3cf19708a892f"
+              },
+              {
+                "path": "price_order/decisions/02.json",
+                "bytes": 1110,
+                "sha256": "76a8d434070b991f14d73f7ebf0b2c47ee2d99009ffe94eb593428f4fe502424"
+              },
+              {
+                "path": "price_order/decisions/03.json",
+                "bytes": 1124,
+                "sha256": "d37b80f60564639dd31d474ecd62898c309777a800362d41f364aef7a2caa9f6"
+              },
+              {
+                "path": "price_order/decisions/04.json",
+                "bytes": 1126,
+                "sha256": "13ce2a82a15f9c06d53e735faf8c6c3fb3380b8a6ba085289de639d8c7e09a07"
+              }
+            ],
+            "review_wall_ns": 12066920105,
+            "outer_panel_fits_viewport": true
+          },
+          {
+            "name": "tall",
+            "strategy": "price_order",
+            "width": 390,
+            "report_hash": "sha256:f8e6aca8e42bdd83c16423fe180ea5cb57f0770e1e93ff28b3593cc393df1e8c",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [
+              {
+                "path": "price_order/middle/baseline/model.json",
+                "bytes": 1469,
+                "sha256": "07bbbf8b7a0eb8615ddb47cacab5d9ade5d6bf55292e1fba63d1ffcfce5dcd35"
+              },
+              {
+                "path": "price_order/middle/baseline/result.json",
+                "bytes": 1741028,
+                "sha256": "f14ca8ea52bc9a1b8f34ef67a9f3c9eb665ade17b5fc7a9527a670e9066a23b6"
+              },
+              {
+                "path": "price_order/middle/baseline/checkpoint.json",
+                "bytes": 36029,
+                "sha256": "92943d13413434c578e1ae9b42c361c5384342a7e83fb0b62eaec72f60a3c1a6"
+              },
+              {
+                "path": "price_order/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "88e9679334e95c3e7a01e2d1b9c893c2222f8f668ff38e4246f9b5050edaff9e"
+              },
+              {
+                "path": "result.json",
+                "bytes": 4515,
+                "sha256": "99777e41ade69297261e5c95a0231b856404180f42a99968e563417cb4601fe9"
+              },
+              {
+                "path": "plan.json",
+                "bytes": 12310,
+                "sha256": "b9ba35f624836e74e8eb2e3d81234a3e9dbd9f38a618138aa37518262a135b99"
+              },
+              {
+                "path": "price-table.json",
+                "bytes": 133,
+                "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+              },
+              {
+                "path": "pool/large.json",
+                "bytes": 1469,
+                "sha256": "33f0f4f8267782bd947ace5259502cf80c311f03c1242bf42ad5c27ece9c27bf"
+              },
+              {
+                "path": "pool/outside.json",
+                "bytes": 1469,
+                "sha256": "14354de2b228ea5ac6e6b3de472f104b85c674932345965c02375810a45f802c"
+              },
+              {
+                "path": "price_order/prefix/small/decision.json",
+                "bytes": 1082,
+                "sha256": "8bb8f513015d2cb3409f3aa7eb07e09222f4937d91144c7bb58c32d8a918e262"
+              },
+              {
+                "path": "price_order/prefix/small/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/small/row.json",
+                "bytes": 4702,
+                "sha256": "2b7bfaa5277293a63b7a038da3e7320f0689099e33de64014c4f08b522aa5bd6"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/model.json",
+                "bytes": 1470,
+                "sha256": "1781f4b38b1888a528d03fe2e8d402dd873499936efa189b3569386f98e85d23"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/result.json",
+                "bytes": 665345,
+                "sha256": "02d348a286a988a1bdca18b14e98834ff3ef0ad5d20bd2fb1aae019df475c4a1"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/checkpoint.json",
+                "bytes": 33446,
+                "sha256": "81d9dcddc3b7ed43ff4a333fab004ce44f8d748f09cf281d6827134db066b943"
+              },
+              {
+                "path": "price_order/prefix/small/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "bf6f650b175cdf9fa17841d5dc47c1c5aa7ea299f182efe48c6766a6362e4ba7"
+              },
+              {
+                "path": "price_order/prefix/middle/decision.json",
+                "bytes": 997,
+                "sha256": "94ef2da9c63d789f14ac13933a896a9cd18d933fa295155e85a40b0d603e68d4"
+              },
+              {
+                "path": "price_order/prefix/middle/request.json",
+                "bytes": 478,
+                "sha256": "75b6ef5dad556da492898c0c56bdc6902f124f3565a8741267ac0f88facfc2a6"
+              },
+              {
+                "path": "price_order/prefix/middle/row.json",
+                "bytes": 4793,
+                "sha256": "7fb56376883165c08eda1f02264839173e9d2ddc2d85aaa63bc6532aa06c28bf"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/model.json",
+                "bytes": 1469,
+                "sha256": "07bbbf8b7a0eb8615ddb47cacab5d9ade5d6bf55292e1fba63d1ffcfce5dcd35"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/result.json",
+                "bytes": 657676,
+                "sha256": "8da5c2e2e6be5e9b8f54d33707f1ab046a6cfcc94e022f82bb35c69f97f26438"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/checkpoint.json",
+                "bytes": 33432,
+                "sha256": "5902b6e111442cbdb21dd8928bb378ae1a689fbdacdcfc7e384dd27b156aadb8"
+              },
+              {
+                "path": "price_order/prefix/middle/baseline/verification.json",
+                "bytes": 1047,
+                "sha256": "ea7d0e08730c14d9e28eaffd50ff12add604441d8328a213e1dc664330b87547"
+              },
+              {
+                "path": "price_order/decisions/00.json",
+                "bytes": 1114,
+                "sha256": "d3d1413967c4d6899ddc19f18d7a0238cf7018029dbefac16edef5a3fe7e5e96"
+              },
+              {
+                "path": "price_order/decisions/01.json",
+                "bytes": 1109,
+                "sha256": "e21524168d5409761c3ee9f4f3423ab055225c409d28f9f4c5d3cf19708a892f"
+              },
+              {
+                "path": "price_order/decisions/02.json",
+                "bytes": 1110,
+                "sha256": "76a8d434070b991f14d73f7ebf0b2c47ee2d99009ffe94eb593428f4fe502424"
+              },
+              {
+                "path": "price_order/decisions/03.json",
+                "bytes": 1124,
+                "sha256": "d37b80f60564639dd31d474ecd62898c309777a800362d41f364aef7a2caa9f6"
+              },
+              {
+                "path": "price_order/decisions/04.json",
+                "bytes": 1126,
+                "sha256": "13ce2a82a15f9c06d53e735faf8c6c3fb3380b8a6ba085289de639d8c7e09a07"
+              }
+            ],
+            "review_wall_ns": 12449751253,
+            "outer_panel_fits_viewport": true
+          }
+        ],
+        "http_exact_responses": 256,
+        "original_downloads": 112,
+        "review_wall_ns": 49115690568,
+        "download_action_pacing_ms": 250,
+        "review_scope": "navigation_validation_selection_downloads_including_250ms_action_pacing_excludes_server_startup_browser_launch_screenshots_and_teardown",
+        "new_numerical_paths": 0,
+        "new_policy_fits": 0,
+        "page_errors": [],
+        "independent_physical_validation": false,
+        "net_savings_proved": false
+      }
+    },
+    {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-staged-geometry-display-MDv2Me",
+      "inventory_sha256": "2dc9b1ecd2ef7e8529725fe8afe950c7a656f4d9eff8e6db6627ed2d5b98a442",
+      "summary": {
+        "source_revision": "fba10d0035ad89ce3bbc8fc1acac48c84a0406a5",
+        "original_source_revisions": [
+          "0efd85afdfe33314c70fcfdc26802d81159e0bc0"
+        ],
+        "observations": [
+          {
+            "name": "short",
+            "strategy": "price_order",
+            "width": 1440,
+            "displayed_quantities_and_cost": {
+              "concrete_m3": 1.092,
+              "rebar_kg": 110.58138,
+              "estimate": 219.78137999999998
+            },
+            "performance_fields_matched": 4,
+            "report_hash": "sha256:9313e3c48efa294747b922c4bca015e5feacf398ff0d815a97e74cc4264f6d00",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [],
+            "review_wall_ns": 1089848837,
+            "outer_panel_fits_viewport": true
+          },
+          {
+            "name": "short",
+            "strategy": "price_order",
+            "width": 390,
+            "displayed_quantities_and_cost": {
+              "concrete_m3": 1.092,
+              "rebar_kg": 110.58138,
+              "estimate": 219.78137999999998
+            },
+            "performance_fields_matched": 4,
+            "report_hash": "sha256:9313e3c48efa294747b922c4bca015e5feacf398ff0d815a97e74cc4264f6d00",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [],
+            "review_wall_ns": 1491872671,
+            "outer_panel_fits_viewport": true
+          },
+          {
+            "name": "tall",
+            "strategy": "price_order",
+            "width": 1440,
+            "displayed_quantities_and_cost": {
+              "concrete_m3": 1.3559999999999999,
+              "rebar_kg": 137.31534,
+              "estimate": 272.91533999999996
+            },
+            "performance_fields_matched": 4,
+            "report_hash": "sha256:f8e6aca8e42bdd83c16423fe180ea5cb57f0770e1e93ff28b3593cc393df1e8c",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [],
+            "review_wall_ns": 1000604830,
+            "outer_panel_fits_viewport": true
+          },
+          {
+            "name": "tall",
+            "strategy": "price_order",
+            "width": 390,
+            "displayed_quantities_and_cost": {
+              "concrete_m3": 1.3559999999999999,
+              "rebar_kg": 137.31534,
+              "estimate": 272.91533999999996
+            },
+            "performance_fields_matched": 4,
+            "report_hash": "sha256:f8e6aca8e42bdd83c16423fe180ea5cb57f0770e1e93ff28b3593cc393df1e8c",
+            "selected_candidate": "middle",
+            "prefix_rejected": [
+              "small"
+            ],
+            "cost_skipped": [
+              "large",
+              "outside"
+            ],
+            "outside_horizon": [],
+            "other_strategy_run": false,
+            "oracle_run": false,
+            "downloads": [],
+            "review_wall_ns": 1491169523,
+            "outer_panel_fits_viewport": true
+          }
+        ],
+        "http_exact_responses": 208,
+        "original_downloads": 0,
+        "review_wall_ns": 5073495861,
+        "download_action_pacing_ms": 0,
+        "review_scope": "navigation_validation_selection_and_numeric_display_checks_excludes_server_startup_browser_launch_screenshots_and_teardown",
+        "new_numerical_paths": 0,
+        "new_policy_fits": 0,
+        "page_errors": [],
+        "independent_physical_validation": false,
+        "net_savings_proved": false
+      }
+    }
+  ],
+  "earlier_display_observation_retained": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-staged-geometry-display-BABmYu",
+  "earlier_display_scope_note": "Generic observer timing label was corrected in a fresh run; previous originals remain unchanged."
+}
