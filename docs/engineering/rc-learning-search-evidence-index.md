@@ -472,3 +472,38 @@ completes four full paths and matches 7,350 timed calls to recorder phase counts
 The proposal uses fewer inclusive linear solves but more assembly time and a
 longer arm in this single instrumented observation. No learned gain, independent
 validation or removal of mandatory verification is claimed.
+
+
+The [optional assembly timer](rc-assembly-timing-option-20260914.md) reaches
+full control benchmarks, runtime policy selection and the ordered reuse CLI.
+The [order-balanced timer observation](rc-assembly-timing-overhead-20260914.md)
+preserves 112 original step records across 32 paths. Its small runtime spread
+does not resolve timer overhead or establish speedup; defaults remain untimed.
+
+
+The [remeshed geometry split screen](rc-remeshed-geometry-split-screen-20260914.md)
+first reproduces, then rejects straight-member subdivision aliases across
+train/holdout groups. It affects conservative grouping only, not the solver
+mesh, physical acceptance or authenticated project provenance. This does not
+retroactively qualify an existing training corpus.
+
+
+The yielded-prefix comparison has distinct arithmetic outcomes:
+
+| Evidence | Result and retained limit |
+| --- | --- |
+| [Binary64 execution](rc-yielded-reuse-timing-gate-20260914.md) | Four paths and 64 steps; secant/reference history mismatches stop execution before reuse, so paired cost stays null. |
+| [Force witness reconstruction](rc-yielded-force-origin-20260914.md) | Original M2 strain/force arithmetic replays exactly for 32 observations; this does not re-solve Newton or all constitutive responses. |
+| [Newton acceptance audit](rc-yielded-newton-origin-20260914.md) | Causal secant proposals and 32 saved convergence decisions are consistent; different Newton paths still fail the separate response comparison. |
+| [Retained-arithmetic reuse](rc-yielded-retained-reuse-timing-20260914.md) | Sixteen paths and 256 identical baseline/reuse steps pass; two ordered repeats observe about 20% lower enclosing cost with 210 fewer dispatches per benchmark. One authored path, no learned policy or general speedup claim. |
+
+The retained-arithmetic observation does not replace the failed binary64
+observation. Neither establishes independent physical validity, unseen-case
+learned benefit, or release qualification.
+
+
+[Completed c1 CI receipts](hosted-c1-completed-lanes-20260914.md) distinguish
+development/topology passes from full-suite preparation failure and one hosted
+browser failure. The [browser diagnostic preservation repair](runtime-browser-diagnostic-preservation-20260914.md)
+retains future failed traces before subsequent HTTP tests replace their output.
+These source-specific receipts do not qualify later commits automatically.
