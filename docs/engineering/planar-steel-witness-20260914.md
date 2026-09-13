@@ -32,3 +32,40 @@ Two payload files, 44,193 bytes; inventory SHA-256:
 `e2e4f48a83d616ee6bdeb5991eaabda73a3da7818d4adff663e154a23c45768c`.
 The retained `audit.py` checks source path identities and regenerates the audit.
 No independent physical validation or training-reference qualification follows.
+
+## Repository reproducer
+
+The fixed-source audit is now available as
+`scripts/audit_planar_steel_refinement_witness.py`. It accepts the two retained
+path files at any filesystem location, verifies their fixed original SHA-256
+identities before parsing, and writes the witness report to standard output.
+It does not accept arbitrary model pairs or grant general geometry equivalence.
+The immutable source pair and its documented model construction define its scope.
+
+```sh
+python3 scripts/audit_planar_steel_refinement_witness.py \
+  /path/to/original-32-layer-path.json \
+  /path/to/original-64-layer-path.json > witness.json
+```
+
+Source identities are `6d685a2e3d7e2b56bf21714705c2e543e94088c9da6c9e209e337cf34f81de65`
+and `e552852440e2ff8d98cc23a1283550c3d2dacf09de528e87794fbef22cc48932`.
+Even formatting-only changes fail source identity. The runtime checks use explicit
+exceptions, not Python assertions, and verify the full accepted checkpoint chain,
+forty targets, element/section/fiber bindings and unique steel observations.
+No solver or trained model is imported.
+
+Six focused synthetic integrity tests pass, covering identity-before-decode,
+formatting-only identity changes, valid positional extraction, uncommitted trials,
+steel-state mismatch and duplicate observations. They are input-boundary tests,
+not structural benchmarks. Ruff checks pass for the script and tests.
+
+An actual invocation on the retained 32/64-layer files reproduces the original
+witness, first nonzero plastic targets and all forty observation rows exactly.
+No new structural solves or fits occurred. The executable snapshot and resulting
+report are retained at:
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-portable-steel-audit-93o530hu`
+
+Inventory SHA-256:
+`2a13f242a541ced8da233d8d53ed891e211c919cbbb3426a8bad9648c56f28d9`.
+The existing 1.512258% numerical discrepancy and qualification boundaries remain.
