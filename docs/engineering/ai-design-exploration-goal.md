@@ -1926,3 +1926,20 @@ model decisions with no new solve/fit/label in that separate observation. The
 option is not part of the earlier 32-path experiment and has no measured saved
 runtime claim. Active learned-path benefit, full repository qualification,
 external independent evidence and the full roadmap remain open.
+
+## 2026-09-13: mixed-outcome public planar runtime evidence
+
+The [observed failed-path diagnostics](planar-failed-path-diagnostics-20260913.md)
+retain attempted/committed steps, history-row counts and exact failed-step
+rollback without accepted result authority or a total-work claim. Relevant local
+integration, extended sparse and history checks passed 161 tests.
+The [frozen mixed cohort](planar-mixed-cohort-20260913.md) at abe9f2abf then ran
+three related geometry/load variants on three CPU backends, three times each:
+27 declared/API-entered/artifact-valid slots, nine converged and eighteen failed.
+All valid failure timings are retained; failed groups have null speed ratios.
+Six converged full-history comparisons passed; twelve failed comparisons remain
+unavailable. Sparse backends did not accelerate the converged small case.
+The packet and audit are immutable; no learned model or external training row
+was admitted. This advances roadmap items 1 and 5 within the bounded public
+scope. It does not close independent validation, learned net benefit, the wider
+planar/material/3D scope, current-main issue projection or supplemental acceptance.

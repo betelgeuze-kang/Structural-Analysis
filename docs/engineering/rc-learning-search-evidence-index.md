@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Mixed converged and failed public planar repeated cohort](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/planar-mixed-cohort-20260913.md)
+
 - [Blocked public planar path diagnostics and exact rollback](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/planar-failed-path-diagnostics-20260913.md)
 
 - [Public planar parity with observed steel plasticity and compressive damage](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/planar-yielded-backends-20260913.md)
