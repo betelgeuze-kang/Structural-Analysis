@@ -1,0 +1,177 @@
+{
+  "source_revision": "1aefe06d6994b5fd8a535922bc7cb510dcea7fab",
+  "rows": [
+    {
+      "case": "train-b",
+      "arms": {
+        "reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1165,
+          "newton_assemblies": 2228,
+          "unknown_work": false,
+          "wall_ns": 80651728503,
+          "proposal_wall_ns": 463665
+        },
+        "secant": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 870,
+          "newton_assemblies": 1436,
+          "unknown_work": false,
+          "wall_ns": 61069907180,
+          "proposal_wall_ns": 745249388
+        },
+        "proposal": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 863,
+          "newton_assemblies": 1458,
+          "unknown_work": false,
+          "wall_ns": 62330455417,
+          "proposal_wall_ns": 767148119
+        },
+        "fresh-reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1165,
+          "newton_assemblies": 2228,
+          "unknown_work": false,
+          "wall_ns": 81305498402,
+          "proposal_wall_ns": 462022
+        }
+      },
+      "comparisons": {
+        "reference": true,
+        "secant": true,
+        "proposal": true
+      },
+      "reference_repeat_exact": true,
+      "proposal_used": 236,
+      "abstentions": 6,
+      "proposal_to_secant_wall_ratio": 1.0206410701310649
+    }
+  ],
+  "new_fits": 0,
+  "campaign_wall_ns": 291799840275,
+  "full_paths_executed": 4,
+  "independent_validation": false,
+  "policy_adopted": false,
+  "repeated_runtime_claim": false,
+  "assembly_phase_timing": [
+    {
+      "arm": "fresh-reference",
+      "phase": "final_observation",
+      "dispatches": 242,
+      "wall_ns": 6287988026
+    },
+    {
+      "arm": "fresh-reference",
+      "phase": "line_search",
+      "dispatches": 705,
+      "wall_ns": 18314433713
+    },
+    {
+      "arm": "fresh-reference",
+      "phase": "primary_iteration",
+      "dispatches": 803,
+      "wall_ns": 20764021810
+    },
+    {
+      "arm": "fresh-reference",
+      "phase": "terminal_refinement",
+      "dispatches": 478,
+      "wall_ns": 12494279528
+    },
+    {
+      "arm": "proposal",
+      "phase": "final_observation",
+      "dispatches": 242,
+      "wall_ns": 6391917226
+    },
+    {
+      "arm": "proposal",
+      "phase": "line_search",
+      "dispatches": 246,
+      "wall_ns": 6479974715
+    },
+    {
+      "arm": "proposal",
+      "phase": "primary_iteration",
+      "dispatches": 488,
+      "wall_ns": 12678968908
+    },
+    {
+      "arm": "proposal",
+      "phase": "terminal_refinement",
+      "dispatches": 482,
+      "wall_ns": 12648702265
+    },
+    {
+      "arm": "reference",
+      "phase": "final_observation",
+      "dispatches": 242,
+      "wall_ns": 6251111996
+    },
+    {
+      "arm": "reference",
+      "phase": "line_search",
+      "dispatches": 705,
+      "wall_ns": 18091196057
+    },
+    {
+      "arm": "reference",
+      "phase": "primary_iteration",
+      "dispatches": 803,
+      "wall_ns": 20660264450
+    },
+    {
+      "arm": "reference",
+      "phase": "terminal_refinement",
+      "dispatches": 478,
+      "wall_ns": 12388127422
+    },
+    {
+      "arm": "secant",
+      "phase": "final_observation",
+      "dispatches": 242,
+      "wall_ns": 6252869052
+    },
+    {
+      "arm": "secant",
+      "phase": "line_search",
+      "dispatches": 236,
+      "wall_ns": 6072921940
+    },
+    {
+      "arm": "secant",
+      "phase": "primary_iteration",
+      "dispatches": 478,
+      "wall_ns": 12288344782
+    },
+    {
+      "arm": "secant",
+      "phase": "terminal_refinement",
+      "dispatches": 480,
+      "wall_ns": 12404616190
+    }
+  ],
+  "timing_boundary": "Dispatch wrapper including recorder bookkeeping; excludes append overhead; enclosing path/study times include all instrumentation. One inspected training case, not repeated speed or training-label evidence.",
+  "audit_validation_wall_ns": 11982521795,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-phase-time-hk84km8j",
+    "inventory_sha256": "fd19b10d3cdbca34e9f1bab5ce65de666548eb441248f16fb6b109a7decb9266",
+    "files": 6479,
+    "bytes": 430522703
+  },
+  "audit_through_inventory_readback_wall_ns": 12790492468,
+  "audit_timing_scope": "validation includes source/input/step/hash/response/proposal checks; through_inventory additionally includes audit/log writes, inventory construction and complete readback; excludes final receipt write and chmod; nested intervals must not be summed"
+}

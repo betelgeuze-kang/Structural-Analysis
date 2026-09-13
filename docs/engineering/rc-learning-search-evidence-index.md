@@ -465,3 +465,10 @@ reproduces both saved first increments through the production solve paths.
 Four initial matrix entries differ; crossed solves also retain small differences.
 High-precision dense-system comparison is numerical evidence only, and the
 original terminal comparison remains failed without tolerance changes.
+
+
+The [instrumented train-b phase timing](rc-quadratic-phase-time-20260914.md)
+completes four full paths and matches 7,350 timed calls to recorder phase counts.
+The proposal uses fewer inclusive linear solves but more assembly time and a
+longer arm in this single instrumented observation. No learned gain, independent
+validation or removal of mandatory verification is claimed.
