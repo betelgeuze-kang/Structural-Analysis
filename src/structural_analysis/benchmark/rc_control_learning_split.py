@@ -51,6 +51,45 @@ def geometry_shape_signature(model):
     """
     payload = fiber_frame_physical_model_payload(model)
     coordinates = np.asarray(payload["node_coordinates_m"], dtype=float)
+    edges = [tuple(member["nodes"]) for member in payload["members"]]
+    signature = _distance_signature(
+        coordinates, edges, len(payload["fixed_global_dofs"])
+    )
+    protected = {dof // 3 for dof in payload["fixed_global_dofs"]}
+    active = set(range(len(coordinates)))
+    while True:
+        for node in sorted(active - protected):
+            incident = [edge for edge in edges if node in edge]
+            if len(incident) != 2:
+                continue
+            neighbors = [edge[1] if edge[0] == node else edge[0] for edge in incident]
+            if neighbors[0] == neighbors[1]:
+                continue
+            left, right = (coordinates[n] - coordinates[node] for n in neighbors)
+            lengths = [float(np.linalg.norm(v)) for v in (left, right)]
+            if not all(math.isfinite(v) and v > 0 for v in lengths):
+                continue
+            # Opposite unit directions identify only an interior straight node.
+            if np.linalg.norm(left / lengths[0] + right / lengths[1]) > 1e-10:
+                continue
+            for edge in incident:
+                edges.remove(edge)
+            edges.append(tuple(neighbors))
+            active.remove(node)
+            break
+        else:
+            break
+    ordered = sorted(active)
+    index = {node: i for i, node in enumerate(ordered)}
+    signature["collinear_reduced_shape"] = _distance_signature(
+        coordinates[ordered],
+        [(index[a], index[b]) for a, b in edges],
+        len(payload["fixed_global_dofs"]),
+    )
+    return signature
+
+
+def _distance_signature(coordinates, edges, restraint_count):
     distances = sorted(
         float(np.linalg.norm(a - b))
         for i, a in enumerate(coordinates)
@@ -64,20 +103,25 @@ def geometry_shape_signature(model):
     ):
         raise ValueError("finite nondegenerate model geometry required")
     degrees = [0] * len(coordinates)
-    for member in payload["members"]:
-        for node in member["nodes"]:
+    for edge in edges:
+        for node in edge:
             degrees[node] += 1
     return {
         "node_count": len(coordinates),
-        "member_count": len(payload["members"]),
+        "member_count": len(edges),
         "sorted_degrees": sorted(degrees),
-        "restraint_count": len(payload["fixed_global_dofs"]),
+        "restraint_count": restraint_count,
         "normalized_pair_distances": [d / diameter for d in distances],
     }
 
 
 def geometry_shapes_overlap(left, right):
     """Shared conservative shape comparison for explicit split contracts."""
+    if "collinear_reduced_shape" in left and "collinear_reduced_shape" in right:
+        if geometry_shapes_overlap(
+            left["collinear_reduced_shape"], right["collinear_reduced_shape"]
+        ):
+            return True
     topology = all(
         left[k] == right[k]
         for k in ("node_count", "member_count", "sorted_degrees", "restraint_count")
@@ -132,11 +176,13 @@ def validate_control_learning_split_shapes(cases):
             }
         )
     return {
-        "schema_version": "rc-control-learning-conservative-shape-screen.v1",
+        "schema_version": "rc-control-learning-conservative-shape-screen.v2",
         "cases": records,
         "comparison_relative_tolerance": 1e-10,
         "comparison_absolute_tolerance": 1e-12,
         "tolerances_apply_only_to_split_screen_not_physical_acceptance": True,
         "independent_provenance": False,
         "geometry_screen_is_physical_equivalence_test": False,
+        "unrestrained_collinear_subdivision_screened": True,
+        "collinear_unit_direction_tolerance": 1e-10,
     }
