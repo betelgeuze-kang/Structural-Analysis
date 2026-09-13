@@ -213,3 +213,17 @@ def test_aggregate_clock_overflow_is_not_serialized_as_an_inexact_browser_number
     pair['learned_order']['runtime']['wall_ns'] = 2**53 - 1
     with pytest.raises(ValueError, match='safe integer'):
         compare([pair])
+
+
+@pytest.mark.parametrize("strategy", ["price_order", "learned_order"])
+def test_zero_cli_interval_cannot_be_hidden_inside_positive_cohort(strategy):
+    pair = paired()
+    execution = pair[strategy]
+    report = execution["report"]
+    report["online_and_optional_oracle_wall_ns"] = 0
+    report["ranking_wall_ns"] = 0
+    report["arms"][strategy]["wall_ns"] = 0
+    execution["runtime"]["wall_ns"] = 0
+    rebind(execution)
+    with pytest.raises(ValueError, match="positive.*wall"):
+        compare([pair, paired(1)])

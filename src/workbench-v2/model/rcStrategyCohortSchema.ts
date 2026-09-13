@@ -63,7 +63,7 @@ export async function validateRcStrategyCohort(raw: Uint8Array, sourceRead: Stud
         && runtime.strategy === strategy && runtime.report_hash === report.report_hash
         && runtime.scope === 'argument_parsing_input_reads_preparation_ranking_full_reference_and_report_persistence'
         && same(runtime.excludes, excludes) && runtime.new_training_fit_count === 0 && runtime.net_savings_proved === false
-        && [runtime.wall_ns, runtime.cpu_ns].every(nat)
+        && [runtime.wall_ns, runtime.cpu_ns].every(nat) && runtime.wall_ns > 0
         && runtime.wall_ns >= report.online_and_optional_oracle_wall_ns && runtime.cpu_ns >= report.online_and_optional_oracle_cpu_ns
         && report.ranking_wall_ns + arm.wall_ns <= report.online_and_optional_oracle_wall_ns, 'cohort_runtime_invalid')
       // This schema has only constrained ASCII strings, safe integers and a string array.

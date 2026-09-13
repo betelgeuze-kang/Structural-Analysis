@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { validateRcStrategyCohort } from '../../src/workbench-v2/model/rcStrategyCohortSchema'
 import { cohortBytes } from './rc-cohort-fixture'
 import { rebind } from './rc-search-standalone-fixture'
+import { document, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
 import { createHash } from 'node:crypto'
 
 const original = cohortBytes('cohort.json')
@@ -13,7 +14,7 @@ test('Python cohort validates both original designs, runtime digests and once-co
   expect(review.cost).toEqual(review.manifest.cost_accounting)
   expect(review.cost.net_savings_proved).toBe(false)
 })
-for (const mutation of ['training', 'ratio', 'pair_count', 'path', 'report_hash', 'extra_claim', 'physical_bytes', 'runtime_clock']) {
+for (const mutation of ['training', 'ratio', 'pair_count', 'path', 'report_hash', 'extra_claim', 'physical_bytes', 'runtime_clock', 'runtime_zero']) {
   test(`cohort rejects rehashed or replaced ${mutation}`, async () => {
     const m = JSON.parse(new TextDecoder().decode(original)); let runtime: Uint8Array | null = null
     if (mutation === 'training') m.cost_accounting.historical_training_wall_ns_counted_once = 0
@@ -22,13 +23,16 @@ for (const mutation of ['training', 'ratio', 'pair_count', 'path', 'report_hash'
     if (mutation === 'path') m.pairs[0].price_order.runtime.path = '../runtime.json'
     if (mutation === 'report_hash') m.pairs[0].price_order.report_hash = m.pairs[0].learned_order.report_hash
     if (mutation === 'extra_claim') m.net_savings_proved = true
-    if (mutation === 'runtime_clock') {
-      const r = JSON.parse(new TextDecoder().decode(cohortBytes(m.pairs[0].price_order.runtime.path))); r.wall_ns = true
+    if (mutation === 'runtime_clock' || mutation === 'runtime_zero') {
+      const r = JSON.parse(new TextDecoder().decode(cohortBytes(m.pairs[0].price_order.runtime.path))); r.wall_ns = mutation === 'runtime_zero' ? 0 : true
       runtime = new TextEncoder().encode(JSON.stringify(r))
       m.pairs[0].price_order.runtime.byte_length = runtime.byteLength
       m.pairs[0].price_order.runtime.sha256 = `sha256:${createHash('sha256').update(runtime).digest('hex')}`
     }
+    delete m.report_hash
     const raw = rebind(new TextDecoder().decode(original), m, 'report_hash')
+    const rebound = document(raw)
+    await selfHash(rebound.raw, rebound.value, 'report_hash')
     const read = async (p: string) => {
       if (mutation === 'physical_bytes' && p.endsWith('/cheap/checkpoint.json')) return new Uint8Array([...cohortBytes(p), 32])
       return runtime && p === m.pairs[0].price_order.runtime.path ? runtime : cohortBytes(p)

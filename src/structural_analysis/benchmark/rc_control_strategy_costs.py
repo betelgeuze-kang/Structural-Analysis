@@ -75,6 +75,8 @@ def _execution(execution, strategy):
         or runtime["new_training_fit_count"] != 0
     ):
         raise ValueError("completed known execution and bound runtime required")
+    if _nat(runtime["wall_ns"]) == 0:
+        raise ValueError("positive CLI wall interval required for cost comparison")
     work = arm["execution_work"].get("known_counters", {})
     for key in (
         "attempted_step_count",

@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Positive CLI intervals and effective cohort mutation tests](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-cohort-positive-timing-20260913.md)
+
 - [ACI/PEER A1 ordered response comparison and shared lineage](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/aci-peer-history-lineage-20260913.md)
 
 - [Lossless positional ACI reader and visually reviewed test conventions](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/aci-positional-reader-20260913.md)
