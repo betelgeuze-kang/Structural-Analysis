@@ -444,3 +444,10 @@ completes 12 paths and eight exact repeat checks. All three 27-equation pairs
 match with no sparse gain; all three 48-equation pairs fail one small terminal
 fiber-stress comparison. Their paired costs remain unavailable, with original
 tolerances and failed observations preserved.
+
+
+The [fixed stress witness audit](planar-stress-cancellation-20260914.md)
+reconstructs 24 observations from six hash-verified histories. The small stress
+mismatch originates in already different section strains/curvatures; terminal
+fiber subtraction and elastic stress conversion reproduce exactly. No material
+patch, tolerance relaxation or sole upstream root cause is established.
