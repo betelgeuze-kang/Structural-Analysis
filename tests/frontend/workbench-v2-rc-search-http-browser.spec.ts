@@ -8,6 +8,12 @@ const credentials = { tenantId: 'transport-test', bearerToken: 'synthetic-search
 const path = '/v1/rc-search/regression/result.json'
 const fixture = 'tests/frontend/fixtures/rc-control-search-cost/'
 
+function expectOriginalBytes(actual: Buffer, expected: Buffer) {
+  expect(actual.byteLength).toBe(expected.byteLength)
+  // Avoid expanding large solver-result buffers into per-byte matcher objects.
+  expect(actual.equals(expected)).toBe(true)
+}
+
 test.describe('RC search real HTTP', () => {
   let server: ChildProcess, origin: string, receipt: string
   test.beforeAll(async () => {
@@ -76,11 +82,11 @@ test.describe('RC search real HTTP', () => {
       for (const role of ['model', 'result', 'checkpoint', 'verification']) {
         const pending = page.waitForEvent('download')
         await panel.getByRole('button', { name: `Download cheap ${role}`, exact: true }).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(readFileSync(`${fixture}learned_order/cheap/${role}.json`))
+        expectOriginalBytes(await readFile((await (await pending).path())!), readFileSync(`${fixture}learned_order/cheap/${role}.json`))
       }
       const pending = page.waitForEvent('download')
       await panel.getByRole('button', { name: 'Download search result', exact: true }).click()
-      expect(await readFile((await (await pending).path())!)).toEqual(readFileSync(fixture + 'result.json'))
+      expectOriginalBytes(await readFile((await (await pending).path())!), readFileSync(fixture + 'result.json'))
       const bounds = await panel.boundingBox(); expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
       await panel.screenshot({ path: `test-results/rc-search-real-http-${width}.png` })
     })
@@ -93,7 +99,7 @@ test.describe('RC search real HTTP', () => {
     expect((await request.post(origin + path, { headers, data: '{}' })).status()).toBe(405)
     expect((await request.get(origin + '/v1/rc-search/regression/provenance.json', { headers })).status()).toBe(404)
     const response = await request.get(origin + path, { headers })
-    expect(response.status()).toBe(200); expect(await response.body()).toEqual(readFileSync(fixture + 'result.json'))
+    expect(response.status()).toBe(200); expectOriginalBytes(await response.body(), readFileSync(fixture + 'result.json'))
     expect(response.headers()['cache-control']).toBe('no-store')
   })
   test('hides selection after an actual credential rejection', async ({ page }) => {

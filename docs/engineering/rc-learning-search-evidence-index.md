@@ -157,3 +157,11 @@ finite-pool minimum with zero missed cheaper feasible candidates. Training adds
 434.422 s and yields no demonstrated learned advantage. Same-family model
 identity separation is not an independent project/geometry/history campaign;
 M1–M5 and independent acceptance remain open.
+
+
+The [full-history actual HTTP observation](rc-rebar-full-http-20260914.md)
+loads the 525 MB original candidate graph at desktop/mobile widths. Four full-data
+and four small-fixture tests pass after replacing deep Buffer matching with
+exact byte comparison. All 159 successful responses match originals; no new
+solve or fit occurs. Initial unsealed test-output loss is explicitly recorded.
+Independent physics, learned benefit and full repeated user-cost evidence remain open.
