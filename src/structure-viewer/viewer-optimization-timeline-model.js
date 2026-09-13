@@ -66,7 +66,7 @@ export function buildOptimizationTimelineModel(changesPayload = {}) {
 }
 
 export function resolveOptimizationTimelineStep(model = {}, stepIndex = -1) {
-  const steps = Array.isArray(model.steps) ? model.steps : [];
+  const steps = Array.isArray(model?.steps) ? model.steps : [];
   const index = Math.max(-1, Math.min(steps.length - 1, Math.round(safeNumber(stepIndex, -1))));
   return steps.find((step) => step.index === index) || steps[0] || null;
 }
@@ -201,7 +201,7 @@ export function buildTimelineStepHighlights({
 export function resolveFirstTimelineStepIndexForStage(model = {}, stageKey = '') {
   const stage = normalizeText(stageKey);
   if (!stage) return -1;
-  const steps = Array.isArray(model.steps) ? model.steps : [];
+  const steps = Array.isArray(model?.steps) ? model.steps : [];
   const match = steps.find((step) => step.index >= 0 && step.stage === stage);
   return match?.index ?? -1;
 }

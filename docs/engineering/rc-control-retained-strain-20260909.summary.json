@@ -1,0 +1,192 @@
+{
+  "schema_version": "rc-retained-strain-observation.v1",
+  "source_revision": "e7ade453688bb0851d2d69ce3ba0758ea8cf4b01",
+  "source_files_verified_against_git": 423,
+  "unchanged_original_input_hashes_verified": true,
+  "all_original_record_gates_and_parent_chains_pass": true,
+  "all_six_terminal_native_reopens_exact": true,
+  "all_reference_fresh_histories_and_checkpoints_exact": true,
+  "full_comparisons_recomputed": true,
+  "main_work": {
+    "core_calls": 1452,
+    "linear_solves": 6079,
+    "newton_iterations": 6079
+  },
+  "main_polishing_work_included": {
+    "attempted": 1452,
+    "accepted": 1164,
+    "assembly_call_count": 1446,
+    "linear_solve_count": 1164
+  },
+  "development_probe_parent_seconds": 393.162760297,
+  "independent_exact_coordinate_fiber_strains_verified": 121968,
+  "retained_sub_float_strain_components_nonzero": 111776,
+  "independent_100_digit_stresses_verified": 121968,
+  "separate_original_material_state_replays": {
+    "concrete": 104544,
+    "steel": 17424
+  },
+  "all_replayed_state_updates_and_branch_decisions_exact": true,
+  "max_retained_minus_original_rounded_input_absolute": {
+    "concrete/stress_mpa": 9.186926737606095e-15,
+    "concrete/consistent_tangent_mpa": 9.094947017729282e-12,
+    "steel/stress_mpa": 8.526512829121202e-14,
+    "steel/consistent_tangent_mpa": 0.0
+  },
+  "audit_wall_seconds": 25.01065578,
+  "repeat_admission": false,
+  "claims": {
+    "independent_validation": false,
+    "accepted_acceleration": false,
+    "native_material_state_precision_repair": false
+  },
+  "cases": {
+    "base": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 4.656612873077393e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 35,
+          "support_reactions": 14
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 71.493029848,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1159,
+            "newton_iterations": 1159
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 199,
+            "assembly_call_count": 240,
+            "linear_solve_count": 199
+          },
+          "native_checkpoint_hash": "sha256:9bd73b155aa2fcc6b392684fdace505fbd4ec0021b8c4ea379b717dc3298edad"
+        },
+        "secant": {
+          "wall_seconds": 50.861708754,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 766,
+            "newton_iterations": 766
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 188,
+            "assembly_call_count": 242,
+            "linear_solve_count": 188
+          },
+          "native_checkpoint_hash": "sha256:54f204205e6f447fa6bb3feaa5dfe947e0cdaffe2e55eb77709bf429512fc7db"
+        },
+        "fresh-reference": {
+          "wall_seconds": 71.735372849,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1159,
+            "newton_iterations": 1159
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 199,
+            "assembly_call_count": 240,
+            "linear_solve_count": 199
+          },
+          "native_checkpoint_hash": "sha256:9bd73b155aa2fcc6b392684fdace505fbd4ec0021b8c4ea379b717dc3298edad"
+        }
+      }
+    },
+    "long": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 4.656612873077393e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 28,
+          "support_reactions": 12
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 68.570427465,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1118,
+            "newton_iterations": 1118
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 184,
+            "assembly_call_count": 241,
+            "linear_solve_count": 184
+          },
+          "native_checkpoint_hash": "sha256:539811b9349eec4d06ea669ebc3112e6209b2e13900a2dd24570b1d15e7ec800"
+        },
+        "secant": {
+          "wall_seconds": 49.880658476,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 759,
+            "newton_iterations": 759
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 210,
+            "assembly_call_count": 242,
+            "linear_solve_count": 210
+          },
+          "native_checkpoint_hash": "sha256:40e116736373f305df3bbd6ecd9ad939969bedd53fd637da5a49188dbf386acf"
+        },
+        "fresh-reference": {
+          "wall_seconds": 69.039661595,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1118,
+            "newton_iterations": 1118
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 184,
+            "assembly_call_count": 241,
+            "linear_solve_count": 184
+          },
+          "native_checkpoint_hash": "sha256:539811b9349eec4d06ea669ebc3112e6209b2e13900a2dd24570b1d15e7ec800"
+        }
+      }
+    }
+  },
+  "compatibility": {
+    "exact_step_pairs": 45,
+    "exact_history_checkpoint_pairs": 15,
+    "source_paths_verified": true,
+    "separate_work": {
+      "core_calls": 90,
+      "linear_solves": 214,
+      "newton_iterations": 214
+    }
+  },
+  "audit_parent_wall_seconds": 26.923621323,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-retained-strain.378uz_ln",
+    "file_count": 9787,
+    "total_bytes": 488523035,
+    "inventory_sha256": "0628acd78438aa2678487908745cc5431adf07ec424289c7c4615e5d3f00c6ca",
+    "all_files_reread_exact": true
+  },
+  "validation": {
+    "related_tests": 213,
+    "seconds": 36.69,
+    "retained_profile_tests": 16,
+    "hosted_full_suite_acceptance": false
+  },
+  "next_scope": "Retain the new rational-input stress profile and address original force/tangent accumulation precision, with fixed comparisons and full solve/recovery costs; no postprocessed accepted-force replacement."
+}

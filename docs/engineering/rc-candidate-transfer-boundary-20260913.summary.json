@@ -1,0 +1,117 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-candidate-transfer-boundary-stpq4b98",
+    "files": 20,
+    "bytes": 107839,
+    "inventory_sha256": "47059c60f5fd0a2e28931fbdbb05a489b082c5f51c641ea3c617fd6c7cd0a708"
+  },
+  "observation": {
+    "source_revision": "7b16c1b1d1b54eedaf8e31caf930fb200f057d5d",
+    "original_inventory_sha256": "7c1093a24ca556df50f0bc2a9623a547ea1b1b5e030c1cf26f5c6944aaebe826",
+    "policy_hash": "sha256:032c4601a78023ed36629d84fa259b9fbd86b5daf12b1a1f973f7c65feed7c17",
+    "variants": [
+      {
+        "id": "original",
+        "context_hash": "sha256:74b513626fa250297369bf4e5e37da3a9a4e5139e037acaf05e9e7ba99486cf1",
+        "prediction": {
+          "policy_hash": "sha256:032c4601a78023ed36629d84fa259b9fbd86b5daf12b1a1f973f7c65feed7c17",
+          "performance": {
+            "terminal_maximum_translation_m": 0.00022438122293580356,
+            "terminal_maximum_absolute_fiber_strain": 7.479374097860124e-05,
+            "maximum_translation_m": 0.004006531707495469,
+            "maximum_absolute_fiber_strain": 0.0003376854525102055,
+            "maximum_steel_accumulated_plastic_strain": 0.0,
+            "maximum_concrete_tensile_damage": 0.0,
+            "maximum_concrete_compressive_damage": 0.0
+          },
+          "abstained": false,
+          "reason": "in_training_feature_bounds_uncalibrated",
+          "physical_result_authority": false,
+          "uncertainty_calibrated": false
+        },
+        "model_sha256": "f789eaf00534db81130fa09b7c086eb7f22694e79784309959207b0f16e749b0",
+        "request_sha256": "0625f276a78223e38089dee26f8f648c2977f3ba7a7af435f4f0bfb110c704df"
+      },
+      {
+        "id": "width_047",
+        "context_hash": "sha256:74b513626fa250297369bf4e5e37da3a9a4e5139e037acaf05e9e7ba99486cf1",
+        "prediction": {
+          "policy_hash": "sha256:032c4601a78023ed36629d84fa259b9fbd86b5daf12b1a1f973f7c65feed7c17",
+          "performance": {
+            "terminal_maximum_translation_m": 0.0002066203431068066,
+            "terminal_maximum_absolute_fiber_strain": 6.887344770226894e-05,
+            "maximum_translation_m": 0.004005531289951202,
+            "maximum_absolute_fiber_strain": 0.00033176515923387324,
+            "maximum_steel_accumulated_plastic_strain": 0.0,
+            "maximum_concrete_tensile_damage": 0.0,
+            "maximum_concrete_compressive_damage": 0.0
+          },
+          "abstained": false,
+          "reason": "in_training_feature_bounds_uncalibrated",
+          "physical_result_authority": false,
+          "uncertainty_calibrated": false
+        },
+        "model_sha256": "1c053f6a5ecec2dd7387db6b91b8822a41ccf71109f8d4dc008deac9bad2008a",
+        "request_sha256": "0625f276a78223e38089dee26f8f648c2977f3ba7a7af435f4f0bfb110c704df",
+        "independent_split_rejection": "split_leakage: transformed_or_scaled_geometry_shape"
+      },
+      {
+        "id": "length_330",
+        "context_hash": "sha256:4dc302c435c806abb603e704a5475272d0f7356b76655ada8111337c2238efc7",
+        "prediction": {
+          "policy_hash": "sha256:032c4601a78023ed36629d84fa259b9fbd86b5daf12b1a1f973f7c65feed7c17",
+          "performance": null,
+          "abstained": true,
+          "reason": "control_or_fixed_model_context_mismatch",
+          "physical_result_authority": false,
+          "uncertainty_calibrated": false
+        },
+        "model_sha256": "ffa50689d9b1b9111781cd1be7820006e86897bb1fc385fcbfa308cabcf90bbf",
+        "request_sha256": "0625f276a78223e38089dee26f8f648c2977f3ba7a7af435f4f0bfb110c704df",
+        "independent_split_rejection": "split_leakage: transformed_or_scaled_geometry_shape"
+      },
+      {
+        "id": "history_amplitude_110pct",
+        "context_hash": "sha256:017acca55a4cfec4602ae5f119fd0ed4b6d16ee80aac3f7e4edbe873a64eb1f3",
+        "prediction": {
+          "policy_hash": "sha256:032c4601a78023ed36629d84fa259b9fbd86b5daf12b1a1f973f7c65feed7c17",
+          "performance": null,
+          "abstained": true,
+          "reason": "control_or_fixed_model_context_mismatch",
+          "physical_result_authority": false,
+          "uncertainty_calibrated": false
+        },
+        "model_sha256": "f789eaf00534db81130fa09b7c086eb7f22694e79784309959207b0f16e749b0",
+        "request_sha256": "3fd008a24d4d272697a60738caf1a6089ad1527e832b11379f163d92d8b4d522",
+        "independent_split_rejection": "split_leakage: transformed_or_scaled_geometry_shape"
+      },
+      {
+        "id": "metadata_renamed_case",
+        "context_hash": "sha256:74b513626fa250297369bf4e5e37da3a9a4e5139e037acaf05e9e7ba99486cf1",
+        "prediction": {
+          "policy_hash": "sha256:032c4601a78023ed36629d84fa259b9fbd86b5daf12b1a1f973f7c65feed7c17",
+          "performance": {
+            "terminal_maximum_translation_m": 0.00022438122293580356,
+            "terminal_maximum_absolute_fiber_strain": 7.479374097860124e-05,
+            "maximum_translation_m": 0.004006531707495469,
+            "maximum_absolute_fiber_strain": 0.0003376854525102055,
+            "maximum_steel_accumulated_plastic_strain": 0.0,
+            "maximum_concrete_tensile_damage": 0.0,
+            "maximum_concrete_compressive_damage": 0.0
+          },
+          "abstained": false,
+          "reason": "in_training_feature_bounds_uncalibrated",
+          "physical_result_authority": false,
+          "uncertainty_calibrated": false
+        },
+        "model_sha256": "bf0d9c2b669f36db646dcd70c446f68da478cb392cf0096f9dcc99af91ffda67",
+        "request_sha256": "0625f276a78223e38089dee26f8f648c2977f3ba7a7af435f4f0bfb110c704df",
+        "independent_split_rejection": "split_leakage: transformed_or_scaled_geometry_shape"
+      }
+    ],
+    "new_fits": 0,
+    "new_solves": 0,
+    "independent_generalization": false,
+    "scope": "preanalysis policy applicability and split screens only"
+  }
+}

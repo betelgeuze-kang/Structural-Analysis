@@ -1,0 +1,466 @@
+{
+  "observation": {
+    "attempted_steps": 480,
+    "cohorts": [
+      {
+        "all_comparable": false,
+        "budgets": [
+          2,
+          3,
+          5
+        ],
+        "historical_training_once_wall_ns": 13289224020,
+        "learned_including_training_wall_ns": 89426199945,
+        "learned_process_wall_ns": 76136975925,
+        "online_process_ratio": null,
+        "pair_count": 6,
+        "price_process_wall_ns": 75778400665,
+        "subsets_overlap_do_not_sum": true,
+        "training_inclusive_ratio": null
+      },
+      {
+        "all_comparable": true,
+        "budgets": [
+          3
+        ],
+        "historical_training_once_wall_ns": 13289224020,
+        "learned_including_training_wall_ns": 36227803844,
+        "learned_process_wall_ns": 22938579824,
+        "online_process_ratio": 0.99907390659418,
+        "pair_count": 2,
+        "price_process_wall_ns": 22959842783,
+        "subsets_overlap_do_not_sum": true,
+        "training_inclusive_ratio": 1.5778768254817452
+      },
+      {
+        "all_comparable": true,
+        "budgets": [
+          5
+        ],
+        "historical_training_once_wall_ns": 13289224020,
+        "learned_including_training_wall_ns": 50135460801,
+        "learned_process_wall_ns": 36846236781,
+        "online_process_ratio": 1.0172287390107047,
+        "pair_count": 2,
+        "price_process_wall_ns": 36222174392,
+        "subsets_overlap_do_not_sum": true,
+        "training_inclusive_ratio": 1.3841096411946179
+      },
+      {
+        "all_comparable": true,
+        "budgets": [
+          3,
+          5
+        ],
+        "historical_training_once_wall_ns": 13289224020,
+        "learned_including_training_wall_ns": 73074040625,
+        "learned_process_wall_ns": 59784816605,
+        "online_process_ratio": 1.0101855167967244,
+        "pair_count": 4,
+        "price_process_wall_ns": 59182017175,
+        "subsets_overlap_do_not_sum": true,
+        "training_inclusive_ratio": 1.2347338619588037
+      }
+    ],
+    "current_source_files_match_frozen_manifest": true,
+    "executions": [
+      {
+        "budget": 2,
+        "execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 24,
+            "known_linear_solve_count": 48,
+            "known_newton_iteration_count": 48,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b2-o0-price_order",
+        "online_wall_ns": 6701815617,
+        "order": 0,
+        "plan_hash": "sha256:c79579b2180a35bab4e2f050f3554c1f289d245696b62491daed266f6d721b22",
+        "process_wall_ns": 8524438761,
+        "ranking_wall_ns": 0,
+        "report_hash": "sha256:9da2decd8288e3412f458489014224fa8bd1063d7716d323753c053b9b14bb87",
+        "return_code": 0,
+        "selected_candidate_id": null,
+        "selected_estimate": null,
+        "strategy": "price_order"
+      },
+      {
+        "budget": 2,
+        "execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 24,
+            "known_linear_solve_count": 48,
+            "known_newton_iteration_count": 48,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b2-o0-learned_order",
+        "online_wall_ns": 6765347570,
+        "order": 0,
+        "plan_hash": "sha256:cc163625521e41ab3eaef29d7b973d62305151eeb04ee455bc73f59d29a493e2",
+        "process_wall_ns": 8164989420,
+        "ranking_wall_ns": 15008097,
+        "report_hash": "sha256:8e1e5109c1a4082f07d5cfd8bfbe8a8b6febfc0959c95c953bf6fb907bbb18bc",
+        "return_code": 0,
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216,
+        "strategy": "learned_order"
+      },
+      {
+        "budget": 2,
+        "execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 24,
+            "known_linear_solve_count": 48,
+            "known_newton_iteration_count": 48,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b2-o1-learned_order",
+        "online_wall_ns": 6765492091,
+        "order": 1,
+        "plan_hash": "sha256:cc163625521e41ab3eaef29d7b973d62305151eeb04ee455bc73f59d29a493e2",
+        "process_wall_ns": 8187169900,
+        "ranking_wall_ns": 15646878,
+        "report_hash": "sha256:02eb126cd34767f0dd9059bbddb6e45e972efbd88ed9d4befb36891c09310cbc",
+        "return_code": 0,
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216,
+        "strategy": "learned_order"
+      },
+      {
+        "budget": 2,
+        "execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 24,
+            "known_linear_solve_count": 48,
+            "known_newton_iteration_count": 48,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b2-o1-price_order",
+        "online_wall_ns": 6683188130,
+        "order": 1,
+        "plan_hash": "sha256:c79579b2180a35bab4e2f050f3554c1f289d245696b62491daed266f6d721b22",
+        "process_wall_ns": 8071944729,
+        "ranking_wall_ns": 0,
+        "report_hash": "sha256:b309ba95e14c6aea5ef52cff5991395d0fa8b303dbbdcfe8ee863228a582de2d",
+        "return_code": 0,
+        "selected_candidate_id": null,
+        "selected_estimate": null,
+        "strategy": "price_order"
+      },
+      {
+        "budget": 3,
+        "execution_work": {
+          "api_invocation_count": 6,
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b3-o0-price_order",
+        "online_wall_ns": 9965976205,
+        "order": 0,
+        "plan_hash": "sha256:b9500ea42efe0587ca27a89bbaabfb95346128051bd31e667c82155ca12fe554",
+        "process_wall_ns": 11365537933,
+        "ranking_wall_ns": 0,
+        "report_hash": "sha256:080cd0f4f0b3df6e138ff08d764c5d71aba84752fe5e83f295755225b4196930",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "price_order"
+      },
+      {
+        "budget": 3,
+        "execution_work": {
+          "api_invocation_count": 6,
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b3-o0-learned_order",
+        "online_wall_ns": 10077013166,
+        "order": 0,
+        "plan_hash": "sha256:cf188911833799868744beefda091bf1429a672a2ef8cec9c4cf19e6d27767f8",
+        "process_wall_ns": 11476183382,
+        "ranking_wall_ns": 14959525,
+        "report_hash": "sha256:3e2a5f719891469cdc2826bb2012dfbcad5c2491ecf241dc906be4630dfc7395",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "learned_order"
+      },
+      {
+        "budget": 3,
+        "execution_work": {
+          "api_invocation_count": 6,
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b3-o1-learned_order",
+        "online_wall_ns": 10056971545,
+        "order": 1,
+        "plan_hash": "sha256:cf188911833799868744beefda091bf1429a672a2ef8cec9c4cf19e6d27767f8",
+        "process_wall_ns": 11462396442,
+        "ranking_wall_ns": 14998886,
+        "report_hash": "sha256:a9e659c15f51ddedaecde19c0220497ae6b917a06faa56a4b2611de86ba235d3",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "learned_order"
+      },
+      {
+        "budget": 3,
+        "execution_work": {
+          "api_invocation_count": 6,
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b3-o1-price_order",
+        "online_wall_ns": 10176472612,
+        "order": 1,
+        "plan_hash": "sha256:b9500ea42efe0587ca27a89bbaabfb95346128051bd31e667c82155ca12fe554",
+        "process_wall_ns": 11594304850,
+        "ranking_wall_ns": 0,
+        "report_hash": "sha256:90c170a28892768606889efac21709a0432e353967f79dffc58226afa2154ef7",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "price_order"
+      },
+      {
+        "budget": 5,
+        "execution_work": {
+          "api_invocation_count": 10,
+          "known_counters": {
+            "attempted_step_count": 60,
+            "known_linear_solve_count": 120,
+            "known_newton_iteration_count": 120,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b5-o0-price_order",
+        "online_wall_ns": 16808854930,
+        "order": 0,
+        "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+        "process_wall_ns": 18231475531,
+        "ranking_wall_ns": 0,
+        "report_hash": "sha256:c80644bc04fc72065d23a833fd7d9c23cc9e11ff1144fd754884af20631c5676",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "price_order"
+      },
+      {
+        "budget": 5,
+        "execution_work": {
+          "api_invocation_count": 10,
+          "known_counters": {
+            "attempted_step_count": 60,
+            "known_linear_solve_count": 120,
+            "known_newton_iteration_count": 120,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b5-o0-learned_order",
+        "online_wall_ns": 17106387113,
+        "order": 0,
+        "plan_hash": "sha256:b5f63a9bb274ad5f6a0d984527625baf06b93391aa7322625e32be5908ea3f3e",
+        "process_wall_ns": 18528143450,
+        "ranking_wall_ns": 14982625,
+        "report_hash": "sha256:9ebc4eece5fb02ac805490e13b8c692f86fc4ec89aa9ef37f583ecc4f05e7bfb",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "learned_order"
+      },
+      {
+        "budget": 5,
+        "execution_work": {
+          "api_invocation_count": 10,
+          "known_counters": {
+            "attempted_step_count": 60,
+            "known_linear_solve_count": 120,
+            "known_newton_iteration_count": 120,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b5-o1-learned_order",
+        "online_wall_ns": 16894623050,
+        "order": 1,
+        "plan_hash": "sha256:b5f63a9bb274ad5f6a0d984527625baf06b93391aa7322625e32be5908ea3f3e",
+        "process_wall_ns": 18318093331,
+        "ranking_wall_ns": 15196603,
+        "report_hash": "sha256:44232a9b9f43d965d4f31e93926e8e30cc9f252b60d1d162a3c0b6875846b659",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "learned_order"
+      },
+      {
+        "budget": 5,
+        "execution_work": {
+          "api_invocation_count": 10,
+          "known_counters": {
+            "attempted_step_count": 60,
+            "known_linear_solve_count": 120,
+            "known_newton_iteration_count": 120,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "id": "b5-o1-price_order",
+        "online_wall_ns": 16589756540,
+        "order": 1,
+        "plan_hash": "sha256:df1cfc5917acfab31259e638128d8e01a54552317777a16b02802f165b99a474",
+        "process_wall_ns": 17990698861,
+        "ranking_wall_ns": 0,
+        "report_hash": "sha256:4f757d0509ddb7039624d131bf6405448d699e5be0c17965ded79ab4d0021206",
+        "return_code": 0,
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999,
+        "strategy": "price_order"
+      }
+    ],
+    "full_verified_rows": 40,
+    "historical_training_report_hash": "sha256:446b9f49cbf694818e11adad5e8eaa10d5617eb6a4d63747daf52e8a8b345419",
+    "host_isolated": false,
+    "independent_generalization": false,
+    "independent_physical_validation": false,
+    "invocations": 80,
+    "net_savings_proved": false,
+    "new_fit_count": 0,
+    "new_oracle_paths": 0,
+    "original_row_artifact_checks": 320,
+    "pairs": [
+      {
+        "budget": 2,
+        "comparable": false,
+        "learned_estimate": 289.8216,
+        "learned_process_wall_ns": 8164989420,
+        "learned_report_hash": "sha256:8e1e5109c1a4082f07d5cfd8bfbe8a8b6febfc0959c95c953bf6fb907bbb18bc",
+        "learned_selection": "large",
+        "order": 0,
+        "price_estimate": null,
+        "price_process_wall_ns": 8524438761,
+        "price_report_hash": "sha256:9da2decd8288e3412f458489014224fa8bd1063d7716d323753c053b9b14bb87",
+        "price_selection": null,
+        "process_ratio": null
+      },
+      {
+        "budget": 2,
+        "comparable": false,
+        "learned_estimate": 289.8216,
+        "learned_process_wall_ns": 8187169900,
+        "learned_report_hash": "sha256:02eb126cd34767f0dd9059bbddb6e45e972efbd88ed9d4befb36891c09310cbc",
+        "learned_selection": "large",
+        "order": 1,
+        "price_estimate": null,
+        "price_process_wall_ns": 8071944729,
+        "price_report_hash": "sha256:b309ba95e14c6aea5ef52cff5991395d0fa8b303dbbdcfe8ee863228a582de2d",
+        "price_selection": null,
+        "process_ratio": null
+      },
+      {
+        "budget": 3,
+        "comparable": true,
+        "learned_estimate": 246.34835999999999,
+        "learned_process_wall_ns": 11476183382,
+        "learned_report_hash": "sha256:3e2a5f719891469cdc2826bb2012dfbcad5c2491ecf241dc906be4630dfc7395",
+        "learned_selection": "middle",
+        "order": 0,
+        "price_estimate": 246.34835999999999,
+        "price_process_wall_ns": 11365537933,
+        "price_report_hash": "sha256:080cd0f4f0b3df6e138ff08d764c5d71aba84752fe5e83f295755225b4196930",
+        "price_selection": "middle",
+        "process_ratio": 1.0097351704470352
+      },
+      {
+        "budget": 3,
+        "comparable": true,
+        "learned_estimate": 246.34835999999999,
+        "learned_process_wall_ns": 11462396442,
+        "learned_report_hash": "sha256:a9e659c15f51ddedaecde19c0220497ae6b917a06faa56a4b2611de86ba235d3",
+        "learned_selection": "middle",
+        "order": 1,
+        "price_estimate": 246.34835999999999,
+        "price_process_wall_ns": 11594304850,
+        "price_report_hash": "sha256:90c170a28892768606889efac21709a0432e353967f79dffc58226afa2154ef7",
+        "price_selection": "middle",
+        "process_ratio": 0.9886229998515176
+      },
+      {
+        "budget": 5,
+        "comparable": true,
+        "learned_estimate": 246.34835999999999,
+        "learned_process_wall_ns": 18528143450,
+        "learned_report_hash": "sha256:9ebc4eece5fb02ac805490e13b8c692f86fc4ec89aa9ef37f583ecc4f05e7bfb",
+        "learned_selection": "middle",
+        "order": 0,
+        "price_estimate": 246.34835999999999,
+        "price_process_wall_ns": 18231475531,
+        "price_report_hash": "sha256:c80644bc04fc72065d23a833fd7d9c23cc9e11ff1144fd754884af20631c5676",
+        "price_selection": "middle",
+        "process_ratio": 1.0162722934024488
+      },
+      {
+        "budget": 5,
+        "comparable": true,
+        "learned_estimate": 246.34835999999999,
+        "learned_process_wall_ns": 18318093331,
+        "learned_report_hash": "sha256:44232a9b9f43d965d4f31e93926e8e30cc9f252b60d1d162a3c0b6875846b659",
+        "learned_selection": "middle",
+        "order": 1,
+        "price_estimate": 246.34835999999999,
+        "price_process_wall_ns": 17990698861,
+        "price_report_hash": "sha256:4f757d0509ddb7039624d131bf6405448d699e5be0c17965ded79ab4d0021206",
+        "price_selection": "middle",
+        "process_ratio": 1.0181979851105019
+      }
+    ],
+    "protocol_fixed_before_first_execution": true,
+    "reference_rows": 40,
+    "repeated_orders": 2,
+    "same_known_geometry_history": true,
+    "source_revision": "596e058f167e8663f62e3bc3e8c6ab0bff18807a",
+    "training_wall_ns_counted_once_per_cohort": 13289224020,
+    "transport_and_workbench_included": false
+  },
+  "packet": {
+    "bytes": 123863173,
+    "files": 1406,
+    "inventory_sha256": "840fde16b826e61941b24e47fcd522a22b388c9b90c08b74d09540eccb5e0233",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-costs-y3fu39g2"
+  }
+}

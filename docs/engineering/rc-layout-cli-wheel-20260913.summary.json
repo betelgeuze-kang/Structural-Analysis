@@ -1,0 +1,653 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-cli-wheel-sqm5jtac/evidence",
+    "files": 86,
+    "bytes": 6761292,
+    "inventory_sha256": "d87792a7948f48f851676fb473576b197617050711cd375aba11427f2eb4d973",
+    "excluded": "mutable virtual environment; installed package list and wheel retained"
+  },
+  "wheel": {
+    "wheel": "structural_analysis-0.3.0-py3-none-any.whl",
+    "bytes": 1954538,
+    "sha256": "fa9fbc5f7c375d55f66e3590d266b8335ad337f783702d8f53530d4b86cd1ff9",
+    "record_entries_checked": 463,
+    "python_sources_matched": 320
+  },
+  "audit": {
+    "source_revision": "15e7901d0d1ccae058359e2b4234eea88bc3554d",
+    "package_module_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-cli-wheel-sqm5jtac/venv/lib/python3.10/site-packages/structural_analysis/benchmark/rc_control_design.py",
+    "admitted_originals": 52,
+    "admission_wall_ns": 154807117,
+    "new_solver_calls_during_admission": 0,
+    "process": {
+      "return_code": 0,
+      "wall_ns": 9712619685,
+      "system_site_packages": true,
+      "pythonpath_removed": true
+    },
+    "runtime": {
+      "schema_version": "experimental-rc-control-layout-strategy-runtime.v1",
+      "source_revision": "15e7901d0d1ccae058359e2b4234eea88bc3554d",
+      "strategy": "price_order",
+      "execution": "staged",
+      "report_hash": "sha256:91cfa263e8dfd095e6955dcf96df402f7bca2edc0cfb2247ff2b019d75308ff7",
+      "wall_ns": 9175074112,
+      "cpu_ns": 9167595041,
+      "scope": "argument_parsing_input_reads_preparation_strategy_and_report_persistence",
+      "excludes": [
+        "interpreter_startup_and_module_imports",
+        "runtime_sidecar_and_stdout",
+        "transport_and_workbench_review"
+      ],
+      "new_training_fit_count": 0,
+      "net_savings_proved": false
+    },
+    "arm": {
+      "comparison_hash": "sha256:9b6b9edf4d6f4fb1d8bd614dfc15f7806ee8b8f2bd96274f44c317094a205690",
+      "comparison_path": "price_order/comparison.json",
+      "cost_pruning": {
+        "considered_candidate_ids": [
+          "baseline",
+          "small",
+          "middle",
+          "large",
+          "outside"
+        ],
+        "decision_wall_ns": 5037781,
+        "decisions": [
+          {
+            "action": "execute_full_reference",
+            "artifact": {
+              "byte_length": 1114,
+              "path": "decisions/00.json",
+              "sha256": "sha256:195875eb88ace1eed355384d06006a9e166e1aa4e253a996de1ca261bb6616d5"
+            },
+            "candidate_id": "baseline"
+          },
+          {
+            "action": "execute_prefix_screen",
+            "artifact": {
+              "byte_length": 1109,
+              "path": "decisions/01.json",
+              "sha256": "sha256:274885ccd9e20a66e63a0d4e991caee3daf8a21acc76a55e06267b055150c2a6"
+            },
+            "candidate_id": "small"
+          },
+          {
+            "action": "execute_prefix_screen",
+            "artifact": {
+              "byte_length": 1110,
+              "path": "decisions/02.json",
+              "sha256": "sha256:e66ea9ecbe2b4898c54309b43d97fbab2ffed6f392014acd340249a7f7f314b4"
+            },
+            "candidate_id": "middle"
+          },
+          {
+            "action": "skip_cost_dominated",
+            "artifact": {
+              "byte_length": 1124,
+              "path": "decisions/03.json",
+              "sha256": "sha256:e32302b680314187c3724dc99672881aa6db571f3877055608fabb89abd96266"
+            },
+            "candidate_id": "large"
+          },
+          {
+            "action": "skip_cost_dominated",
+            "artifact": {
+              "byte_length": 1126,
+              "path": "decisions/04.json",
+              "sha256": "sha256:786190f2af933e2bd846e604cf0db1671e3d379cee247f5384ea05a0a1d35d34"
+            },
+            "candidate_id": "outside"
+          }
+        ],
+        "evaluated_candidate_ids": [
+          "baseline",
+          "middle"
+        ],
+        "global_cost_optimality_proved": false,
+        "outside_consideration_horizon_candidate_ids": [],
+        "profile": "verified-incumbent-strict-cost.v1",
+        "skipped_cost_dominated_candidate_ids": [
+          "large",
+          "outside"
+        ],
+        "unevaluated_candidate_ids": [
+          "small",
+          "large",
+          "outside"
+        ],
+        "unevaluated_physical_feasibility": "unknown"
+      },
+      "cpu_ns": 9141684522,
+      "execution_work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 32,
+          "known_linear_solve_count": 64,
+          "known_newton_iteration_count": 64,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "prefix_screening": {
+        "decisions": [
+          {
+            "action": "reject_history_maximum",
+            "artifact": {
+              "byte_length": 1081,
+              "path": "prefix/small/decision.json",
+              "sha256": "sha256:a1d848d3a7fd4a717127dc56232cec1545cc3a1e4d248a77ae880b34952c0ac4"
+            },
+            "candidate_id": "small"
+          },
+          {
+            "action": "execute_full_reference",
+            "artifact": {
+              "byte_length": 995,
+              "path": "prefix/middle/decision.json",
+              "sha256": "sha256:da4f6ca2549b9ed3b8719c90b6714fc438e9347eb7159809fca0245565edcc54"
+            },
+            "candidate_id": "middle"
+          }
+        ],
+        "full_history_acceptance_from_prefix": false,
+        "full_reference_execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 24,
+            "known_linear_solve_count": 48,
+            "known_newton_iteration_count": 48,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "full_reference_request_count": 2,
+        "prefix_execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 8,
+            "known_linear_solve_count": 16,
+            "known_newton_iteration_count": 16,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "prefix_request_count": 2,
+        "rejected_history_maximum_candidate_ids": [
+          "small"
+        ]
+      },
+      "request_count": 2,
+      "selected_candidate_id": "middle",
+      "status": "completed",
+      "unknown_work_until_outcome": false,
+      "wall_ns": 9148987981
+    },
+    "physical_comparisons": [
+      {
+        "path": "price_order/baseline/baseline/result.json",
+        "exact_response_history": true,
+        "exact_terminal_response": true
+      },
+      {
+        "path": "price_order/middle/baseline/result.json",
+        "exact_response_history": true,
+        "exact_terminal_response": true
+      },
+      {
+        "path": "price_order/prefix/small/baseline/result.json",
+        "exact_response_history": true,
+        "exact_terminal_response": true
+      },
+      {
+        "path": "price_order/prefix/middle/baseline/result.json",
+        "exact_response_history": true,
+        "exact_terminal_response": true
+      }
+    ],
+    "independent_physical_validation": false,
+    "clean_machine_installation": false,
+    "learned_net_benefit": false
+  },
+  "repository_ci_snapshot": {
+    "run_id": 34723974528,
+    "source_revision": "dea625b1a023954a3c2f7a39168f9f55cddcdc6a",
+    "jobs": [
+      {
+        "id": 103635136476,
+        "name": "pytest-development-contracts",
+        "status": "in_progress",
+        "conclusion": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install package and test tools",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run development contracts from the committed checkout",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "name": "Retain development contract results even on test failure",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Post Set up Python",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Post Checkout",
+            "status": "pending",
+            "conclusion": null
+          }
+        ]
+      },
+      {
+        "id": 103635136520,
+        "name": "pytest-full-shard-0",
+        "status": "completed",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install package and test tools",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Validate pristine commercial gap ledger",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Materialize exact current-source test evidence",
+            "status": "completed",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Describe failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Set up Python",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635136536,
+        "name": "pytest-collection",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install package and test tools",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Validate hosted HIP receipt source binding",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Collect complete repository test suite",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635136558,
+        "name": "pytest-full-shard-2",
+        "status": "completed",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install package and test tools",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Validate pristine commercial gap ledger",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Materialize exact current-source test evidence",
+            "status": "completed",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Describe failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Set up Python",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635136561,
+        "name": "pytest-full-shard-3",
+        "status": "completed",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install package and test tools",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Validate pristine commercial gap ledger",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Materialize exact current-source test evidence",
+            "status": "completed",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Describe failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Set up Python",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635136575,
+        "name": "pytest-full-shard-1",
+        "status": "completed",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install package and test tools",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Validate pristine commercial gap ledger",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Materialize exact current-source test evidence",
+            "status": "completed",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Describe failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload failed materialization diagnostics",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run materialized repository test suite shard",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Set up Python",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Checkout",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103636365910,
+        "name": "pytest-full",
+        "status": "completed",
+        "conclusion": "failure",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Require every deterministic repository test shard",
+            "status": "completed",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ],
+    "failed_shard_logs": [
+      {
+        "job_id": 103635136520,
+        "path": "/tmp/structural-dea625-job-103635136520.log",
+        "sha256": "327485a636bdee17d6f9c68c1ffebcf07466f773cc7a482c5434cef190fa53f9",
+        "blockers": [
+          "2026-09-12T23:07:14.2538348Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-12T23:07:14.2539400Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      },
+      {
+        "job_id": 103635136558,
+        "path": "/tmp/structural-dea625-job-103635136558.log",
+        "sha256": "1e4ac0a4a3508a18c9e3e8262f3476f10d893f66b1f51654c410d3c043c5ae2f",
+        "blockers": [
+          "2026-09-12T23:06:17.2721598Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-12T23:06:17.2722572Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      },
+      {
+        "job_id": 103635136561,
+        "path": "/tmp/structural-dea625-job-103635136561.log",
+        "sha256": "0e90a8def1b6dc29311d49d8bf980259b6577863238dd9b7d4333a7ae6b8a663",
+        "blockers": [
+          "2026-09-12T23:01:40.1033510Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-12T23:01:40.1034037Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      },
+      {
+        "job_id": 103635136575,
+        "path": "/tmp/structural-dea625-job-103635136575.log",
+        "sha256": "032eec68b71155bc19f207ba1afd336c1f251d2de0426a3ffe0951295a4b51e0",
+        "blockers": [
+          "2026-09-12T23:07:32.4449980Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-12T23:07:32.4450624Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-staged-amplitudes-km0zu82q",
+    "files": 1097,
+    "bytes": 143026015,
+    "inventory_sha256": "83f7f988d3444e616e15af20700f65eba1c34f151b947f39e101d8643b16cb63"
+  },
+  "audit": {
+    "source_revision": "dea625b1a023954a3c2f7a39168f9f55cddcdc6a",
+    "source_files_checked": 645,
+    "counters": {
+      "artifact_bindings": 328,
+      "full_rows": 20,
+      "prefix_rows": 8,
+      "cost_decisions": 40,
+      "prefix_decisions": 8,
+      "exact_full_repeats": 14,
+      "exact_prefix_matches": 8
+    },
+    "executions": [
+      {
+        "stem": "amplitude_060-o0-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 8530697374,
+        "call_wall_ns": 6723040817,
+        "full_rows": 2,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 24,
+            "known_linear_solve_count": 48,
+            "known_newton_iteration_count": 48,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 4
+        },
+        "case": "amplitude_060",
+        "selected_candidate_id": "small",
+        "selected_estimate": 188.38404
+      },
+      {
+        "stem": "amplitude_060-o0-staged",
+        "mode": "staged",
+        "process_wall_ns": 9956040811,
+        "call_wall_ns": 8131039143,
+        "full_rows": 2,
+        "prefix_rows": 1,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 28,
+            "known_linear_solve_count": 56,
+            "known_newton_iteration_count": 56,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 6
+        },
+        "case": "amplitude_060",
+        "selected_candidate_id": "small",
+        "selected_estimate": 188.38404
+      },
+      {
+        "stem": "amplitude_060-o1-staged",
+        "mode": "staged",
+        "process_wall_ns": 9703736575,
+        "call_wall_ns": 7935273060,
+        "full_rows": 2,
+        "prefix_rows": 1,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 28,
+            "known_linear_solve_count": 56,
+            "known_newton_iteration_count": 56,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 6
+        },
+        "case": "amplitude_060",
+        "selected_candidate_id": "small",
+        "selected_estimate": 188.38404
+      },
+      {
+        "stem": "amplitude_060-o1-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 8515346384,
+        "call_wall_ns": 6712495098,
+        "full_rows": 2,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 24,
+            "known_linear_solve_count": 48,
+            "known_newton_iteration_count": 48,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 4
+        },
+        "case": "amplitude_060",
+        "selected_candidate_id": "small",
+        "selected_estimate": 188.38404
+      },
+      {
+        "stem": "amplitude_140-o0-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 15044994209,
+        "call_wall_ns": 13272581905,
+        "full_rows": 4,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 48,
+            "known_linear_solve_count": 96,
+            "known_newton_iteration_count": 96,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "case": "amplitude_140",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      },
+      {
+        "stem": "amplitude_140-o0-staged",
+        "mode": "staged",
+        "process_wall_ns": 12385815519,
+        "call_wall_ns": 10573376593,
+        "full_rows": 2,
+        "prefix_rows": 3,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 10
+        },
+        "case": "amplitude_140",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      },
+      {
+        "stem": "amplitude_140-o1-staged",
+        "mode": "staged",
+        "process_wall_ns": 12260992018,
+        "call_wall_ns": 10464152150,
+        "full_rows": 2,
+        "prefix_rows": 3,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 10
+        },
+        "case": "amplitude_140",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      },
+      {
+        "stem": "amplitude_140-o1-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 15358173299,
+        "call_wall_ns": 13522205952,
+        "full_rows": 4,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 48,
+            "known_linear_solve_count": 96,
+            "known_newton_iteration_count": 96,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "case": "amplitude_140",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      }
+    ],
+    "process_sums_ns": {
+      "pruned": 47449211266,
+      "staged": 44306584923
+    },
+    "paired_staged_over_pruned": {
+      "amplitude_060": [
+        1.1670840465334271,
+        1.1395586435841223
+      ],
+      "amplitude_140": [
+        0.8232515976370889,
+        0.7983366106956442
+      ]
+    },
+    "ratio_of_process_sums": 0.9337686284102289,
+    "enclosing_campaign_wall_ns": 91757110393,
+    "audit_wall_ns": 2611379407,
+    "audit_solver_calls": 0,
+    "independent_cases": false,
+    "learned_net_benefit": false
+  }
+}

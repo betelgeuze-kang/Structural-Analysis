@@ -1,0 +1,350 @@
+{
+  "protocol": {
+    "versions": {
+      "baseline": "5a0def37655a095c2bd25028b0be74142a6eebe2",
+      "changed": "427b6c242cf66d80d0f39ad14c1ef75bf854f443"
+    },
+    "viewports": [
+      1440,
+      390
+    ],
+    "repetitions": 3,
+    "order": [
+      "baseline",
+      "changed",
+      "changed",
+      "baseline",
+      "baseline",
+      "changed"
+    ],
+    "profiler": false,
+    "fresh_browser_context_per_test": true,
+    "shared_snapshot_per_server": true,
+    "independent_structure_claim": false
+  },
+  "rows": [
+    {
+      "index": 0,
+      "version": "baseline",
+      "width": 1440,
+      "directory": "00-baseline-1440",
+      "verifiedMs": 16461.387574,
+      "throughDownloadsMs": 18743.223563,
+      "responses": 79,
+      "server_snapshot_load_ns": 457566983,
+      "server_wall_ns": 20494976837,
+      "server_cpu_ns": 867998649,
+      "server_peak_rss_kib": 633992
+    },
+    {
+      "index": 1,
+      "version": "changed",
+      "width": 1440,
+      "directory": "01-changed-1440",
+      "verifiedMs": 14279.806922000003,
+      "throughDownloadsMs": 16979.996959000004,
+      "responses": 79,
+      "server_snapshot_load_ns": 458153079,
+      "server_wall_ns": 18581482979,
+      "server_cpu_ns": 845488960,
+      "server_peak_rss_kib": 633184
+    },
+    {
+      "index": 2,
+      "version": "changed",
+      "width": 1440,
+      "directory": "02-changed-1440",
+      "verifiedMs": 14278.897805,
+      "throughDownloadsMs": 16531.735049999996,
+      "responses": 79,
+      "server_snapshot_load_ns": 463530501,
+      "server_wall_ns": 18088342388,
+      "server_cpu_ns": 856857399,
+      "server_peak_rss_kib": 633704
+    },
+    {
+      "index": 3,
+      "version": "baseline",
+      "width": 1440,
+      "directory": "03-baseline-1440",
+      "verifiedMs": 16268.632880999998,
+      "throughDownloadsMs": 18524.880798,
+      "responses": 79,
+      "server_snapshot_load_ns": 458881858,
+      "server_wall_ns": 20190031287,
+      "server_cpu_ns": 851444438,
+      "server_peak_rss_kib": 633548
+    },
+    {
+      "index": 4,
+      "version": "baseline",
+      "width": 1440,
+      "directory": "04-baseline-1440",
+      "verifiedMs": 16301.540861999994,
+      "throughDownloadsMs": 18952.598052999994,
+      "responses": 79,
+      "server_snapshot_load_ns": 459642613,
+      "server_wall_ns": 20609141230,
+      "server_cpu_ns": 850262389,
+      "server_peak_rss_kib": 633768
+    },
+    {
+      "index": 5,
+      "version": "changed",
+      "width": 1440,
+      "directory": "05-changed-1440",
+      "verifiedMs": 14281.790248000005,
+      "throughDownloadsMs": 16511.498760000002,
+      "responses": 79,
+      "server_snapshot_load_ns": 458127706,
+      "server_wall_ns": 18168851047,
+      "server_cpu_ns": 845122949,
+      "server_peak_rss_kib": 633740
+    },
+    {
+      "index": 6,
+      "version": "baseline",
+      "width": 390,
+      "directory": "06-baseline-390",
+      "verifiedMs": 16161.839272000012,
+      "throughDownloadsMs": 18297.11533900001,
+      "responses": 79,
+      "server_snapshot_load_ns": 458418998,
+      "server_wall_ns": 19345192856,
+      "server_cpu_ns": 843469199,
+      "server_peak_rss_kib": 633424
+    },
+    {
+      "index": 7,
+      "version": "changed",
+      "width": 390,
+      "directory": "07-changed-390",
+      "verifiedMs": 15131.968766000005,
+      "throughDownloadsMs": 17151.81091999999,
+      "responses": 79,
+      "server_snapshot_load_ns": 457132254,
+      "server_wall_ns": 18182446615,
+      "server_cpu_ns": 848635259,
+      "server_peak_rss_kib": 633640
+    },
+    {
+      "index": 8,
+      "version": "changed",
+      "width": 390,
+      "directory": "08-changed-390",
+      "verifiedMs": 15191.834919999994,
+      "throughDownloadsMs": 17015.403003999993,
+      "responses": 79,
+      "server_snapshot_load_ns": 459473703,
+      "server_wall_ns": 18043685673,
+      "server_cpu_ns": 854721309,
+      "server_peak_rss_kib": 633032
+    },
+    {
+      "index": 9,
+      "version": "baseline",
+      "width": 390,
+      "directory": "09-baseline-390",
+      "verifiedMs": 16097.685732000013,
+      "throughDownloadsMs": 18104.71164600001,
+      "responses": 79,
+      "server_snapshot_load_ns": 470530789,
+      "server_wall_ns": 19143174268,
+      "server_cpu_ns": 873080339,
+      "server_peak_rss_kib": 633284
+    },
+    {
+      "index": 10,
+      "version": "baseline",
+      "width": 390,
+      "directory": "10-baseline-390",
+      "verifiedMs": 16079.291548999987,
+      "throughDownloadsMs": 17828.730003000004,
+      "responses": 79,
+      "server_snapshot_load_ns": 460948620,
+      "server_wall_ns": 18861695942,
+      "server_cpu_ns": 847383838,
+      "server_peak_rss_kib": 633372
+    },
+    {
+      "index": 11,
+      "version": "changed",
+      "width": 390,
+      "directory": "11-changed-390",
+      "verifiedMs": 15108.124772999989,
+      "throughDownloadsMs": 16992.85194699999,
+      "responses": 79,
+      "server_snapshot_load_ns": 459910411,
+      "server_wall_ns": 18015397736,
+      "server_cpu_ns": 851130138,
+      "server_peak_rss_kib": 633792
+    }
+  ],
+  "comparisons": [
+    {
+      "width": 1440,
+      "metrics": {
+        "verifiedMs": {
+          "versions": {
+            "baseline": {
+              "values": [
+                16461.387574,
+                16268.632880999998,
+                16301.540861999994
+              ],
+              "median": 16301.540861999994,
+              "min": 16268.632880999998,
+              "max": 16461.387574,
+              "sample_stdev": 103.10858210662698
+            },
+            "changed": {
+              "values": [
+                14279.806922000003,
+                14278.897805,
+                14281.790248000005
+              ],
+              "median": 14279.806922000003,
+              "min": 14278.897805,
+              "max": 14281.790248000005,
+              "sample_stdev": 1.479093317444256
+            }
+          },
+          "paired_changed_over_baseline": [
+            0.8674728577896008,
+            0.8776950042112148,
+            0.8761006317686099
+          ],
+          "median_paired_ratio": 0.8761006317686099
+        },
+        "throughDownloadsMs": {
+          "versions": {
+            "baseline": {
+              "values": [
+                18743.223563,
+                18524.880798,
+                18952.598052999994
+              ],
+              "median": 18743.223563,
+              "min": 18524.880798,
+              "max": 18952.598052999994,
+              "sample_stdev": 213.87429731633452
+            },
+            "changed": {
+              "values": [
+                16979.996959000004,
+                16531.735049999996,
+                16511.498760000002
+              ],
+              "median": 16531.735049999996,
+              "min": 16511.498760000002,
+              "max": 16979.996959000004,
+              "sample_stdev": 264.83919931395485
+            }
+          },
+          "paired_changed_over_baseline": [
+            0.9059272489562208,
+            0.8924070945592704,
+            0.8711997539243127
+          ],
+          "median_paired_ratio": 0.8924070945592704
+        }
+      }
+    },
+    {
+      "width": 390,
+      "metrics": {
+        "verifiedMs": {
+          "versions": {
+            "baseline": {
+              "values": [
+                16161.839272000012,
+                16097.685732000013,
+                16079.291548999987
+              ],
+              "median": 16097.685732000013,
+              "min": 16079.291548999987,
+              "max": 16161.839272000012,
+              "sample_stdev": 43.33618433299289
+            },
+            "changed": {
+              "values": [
+                15131.968766000005,
+                15191.834919999994,
+                15108.124772999989
+              ],
+              "median": 15131.968766000005,
+              "min": 15108.124772999989,
+              "max": 15191.834919999994,
+              "sample_stdev": 43.12748757597964
+            }
+          },
+          "paired_changed_over_baseline": [
+            0.9362776421255325,
+            0.9437278856674839,
+            0.9396013951833346
+          ],
+          "median_paired_ratio": 0.9396013951833346
+        },
+        "throughDownloadsMs": {
+          "versions": {
+            "baseline": {
+              "values": [
+                18297.11533900001,
+                18104.71164600001,
+                17828.730003000004
+              ],
+              "median": 18104.71164600001,
+              "min": 17828.730003000004,
+              "max": 18297.11533900001,
+              "sample_stdev": 235.43218108153795
+            },
+            "changed": {
+              "values": [
+                17151.81091999999,
+                17015.403003999993,
+                16992.85194699999
+              ],
+              "median": 17015.403003999993,
+              "min": 16992.85194699999,
+              "max": 17151.81091999999,
+              "sample_stdev": 86.0073880707296
+            }
+          },
+          "paired_changed_over_baseline": [
+            0.937405192142019,
+            0.9398328643228799,
+            0.9531162311696142
+          ],
+          "median_paired_ratio": 0.9398328643228799
+        }
+      }
+    }
+  ],
+  "successful_byte_verified_responses": 948,
+  "new_solves": 0,
+  "new_fits": 0,
+  "independent_structures": 0,
+  "warm_source_storage_not_controlled": true,
+  "broad_speedup_proven": false,
+  "runtime": {
+    "node": "v24.20.0",
+    "vite": "8.0.16",
+    "playwright": "1.56.1"
+  },
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-paired-ui-a9bol7is",
+    "inventory_sha256": "98d76d02d6333f2591b2017eedd07f417c75a2c7fa87c190a3bf461bdcb65897",
+    "files": 1432,
+    "bytes": 297084052,
+    "external_dependency_links": [
+      {
+        "path": "baseline/node_modules",
+        "target": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/node_modules"
+      },
+      {
+        "path": "changed/node_modules",
+        "target": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/node_modules"
+      }
+    ]
+  }
+}

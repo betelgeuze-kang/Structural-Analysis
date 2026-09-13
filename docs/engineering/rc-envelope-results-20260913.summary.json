@@ -1,0 +1,285 @@
+{
+  "schema_version": "rc-envelope-audited-completion.v1",
+  "source_revision": "c72ff7b0012d1c4a4287bde82ec1a51dbc876fb2",
+  "cases": [
+    {
+      "case_id": "train-b",
+      "repetitions": 3,
+      "interpretation": "manual-rule tuning case",
+      "policy_file": "study/fit-0001-policy.json",
+      "ratios": [
+        1.022057311198266,
+        1.0252780341372767,
+        1.026212781714576
+      ],
+      "mean_ratio": 1.0245160423500397,
+      "ratio_of_summed_path_times": 1.024520737077756,
+      "secant_path_wall_ns": 177655463626,
+      "proposal_path_and_setup_wall_ns": 182011706540,
+      "proposed_targets": 147,
+      "abstained_targets": 579,
+      "static_model_rejected_repetitions": 0
+    },
+    {
+      "case_id": "validation",
+      "repetitions": 3,
+      "interpretation": "authored case; not blind external validation",
+      "policy_file": "integrated-policy.json",
+      "ratios": [
+        1.0709884748988765,
+        1.0682880893013127,
+        1.070732743198143
+      ],
+      "mean_ratio": 1.0700031024661107,
+      "ratio_of_summed_path_times": 1.0700076320150018,
+      "secant_path_wall_ns": 183222032410,
+      "proposal_path_and_setup_wall_ns": 196048973032,
+      "proposed_targets": 147,
+      "abstained_targets": 579,
+      "static_model_rejected_repetitions": 0
+    },
+    {
+      "case_id": "holdout",
+      "repetitions": 3,
+      "interpretation": "authored case; not blind external validation",
+      "policy_file": "integrated-policy.json",
+      "ratios": [
+        1.0005725118502713,
+        1.0128445913488466,
+        0.9984957324140749
+      ],
+      "mean_ratio": 1.0039709452043977,
+      "ratio_of_summed_path_times": 1.0039510299346943,
+      "secant_path_wall_ns": 165899830382,
+      "proposal_path_and_setup_wall_ns": 166555305578,
+      "proposed_targets": 0,
+      "abstained_targets": 726,
+      "static_model_rejected_repetitions": 3
+    }
+  ],
+  "complete_slots": 9,
+  "complete_paths": 36,
+  "full_history_comparisons_passed": 27,
+  "known_work": {
+    "core_calls": 8712,
+    "linear_solves": 36615,
+    "newton_iterations": 36615
+  },
+  "original_failed_parent_wall_ns": 269484319911,
+  "resumed_parent_wall_ns": 2106268096198,
+  "numerical_parent_wall_ns": 2375752416109,
+  "audit_internal_wall_ns": 1215800404332,
+  "audit_parent_wall_ns": 1217231818576,
+  "numeric_plus_audit_parent_wall_ns": 3592984234685,
+  "cost_scope": "Original failed numeric parent plus resumed numeric parent plus audit parent. Nested path, fit, and audit internal clocks are not added again. Excludes historical research, finalization/sealing, and remote CI costs.",
+  "historical_cost_provenance_file": "historical-costs.json",
+  "complete_research_lifecycle_cost_ns": null,
+  "same_solver_assembly_response_replays": 8712,
+  "native_terminal_reopens": 36,
+  "material_snapshots_reconstructed": 1452,
+  "actual_policy_consultation_count": 300,
+  "envelope_permission_count": 516,
+  "new_fits": 0,
+  "new_training_labels": 0,
+  "newton_solves_in_audit": 0,
+  "original_record_reconstruction_completed": true,
+  "independent_physical_validation": false,
+  "independent_project_provenance": false,
+  "net_savings_proved": false,
+  "automatic_promotion": false,
+  "support_bindings": [
+    {
+      "path": "completion-support/rc-envelope-completed-records.json",
+      "original": "/tmp/rc-envelope-completed-records.json",
+      "bytes": 6413,
+      "sha256": "8cbeea4b1418a555952559c2800c1c87ce37bc7a5eb0b34b09f721e88be46c2a"
+    },
+    {
+      "path": "completion-support/summarize-rc-envelope-completed-records.py",
+      "original": "/tmp/summarize-rc-envelope-completed-records.py",
+      "bytes": 5063,
+      "sha256": "1d845457aaf00dc892fcf0f70d005381cc2e55eb1d374de4ba40f3f7818c2d46"
+    },
+    {
+      "path": "completion-support/rc-envelope-capture-overhead-bound.json",
+      "original": "/tmp/rc-envelope-capture-overhead-bound.json",
+      "bytes": 2541,
+      "sha256": "79da1bdb7d2cd1978c62e5fd331b714589d941e4c3f97e927bb35041e6175e10"
+    },
+    {
+      "path": "completion-support/finalize-rc-envelope-campaign.py",
+      "original": "/tmp/finalize-rc-envelope-campaign.py",
+      "bytes": 7382,
+      "sha256": "86351eebdb95a3ea416fe893ff6970579b7e21698e46eccc32a0ac94e8cf2359"
+    },
+    {
+      "path": "completion-support/audit-parent-stderr",
+      "original": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-parent-10guf078/stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "completion-support/audit-parent-stdout",
+      "original": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-parent-10guf078/stdout",
+      "bytes": 299,
+      "sha256": "70b21f9f9f6e6220a16063d9e31a45f7fb5865dad4770a07204a4c77249af0b6"
+    },
+    {
+      "path": "completion-support/audit-parent-launcher.py",
+      "original": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-parent-10guf078/launcher.py",
+      "bytes": 2502,
+      "sha256": "5de209b6d18d4f0140dba9167ba346d73d348907e1d28be5bbeb5ca79dbf7b75"
+    },
+    {
+      "path": "completion-support/audit-parent-outcome.json",
+      "original": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-parent-10guf078/outcome.json",
+      "bytes": 188,
+      "sha256": "0d64a1e2eddc8213c07751b3c6500e89058f64c9c3805d910d1b85de84d3d76a"
+    },
+    {
+      "path": "completion-support/audit-parent-started.json",
+      "original": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-parent-10guf078/started.json",
+      "bytes": 326,
+      "sha256": "d51344b90eb56d22d7c892fc7549981c8d65b6300e11fe9396969da878bfcbae"
+    },
+    {
+      "path": "completion-support/audit-parent-audit.py",
+      "original": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-parent-10guf078/audit.py",
+      "bytes": 22770,
+      "sha256": "1f6ecb2a61de297ec68e89f509f71ce76ea0147db415cc0f0b6b1c124b21c15e"
+    },
+    {
+      "path": "completion-support/diagnostic.json",
+      "original": "/tmp/structural-e924-ci-failure-f_3ec2uv/diagnostic.json",
+      "bytes": 2822,
+      "sha256": "304db55a1c1cdc393f198c918064575135127ce8d2f5dfdb39884ea2ebcb5869"
+    },
+    {
+      "path": "completion-support/artifact.zip",
+      "original": "/tmp/structural-e924-ci-failure-f_3ec2uv/artifact.zip",
+      "bytes": 37647,
+      "sha256": "6b1ce014246b09e4ca88a001f43a8f4ab2259ce5f863c1d5b8793d6601f5f606"
+    },
+    {
+      "path": "completion-support/shard3.log",
+      "original": "/tmp/structural-e924-ci-failure-f_3ec2uv/shard3.log",
+      "bytes": 96988,
+      "sha256": "b48a8b2283d38b15034a76c7803dbf969455aaa05c4e813101461b0704d23eb4"
+    },
+    {
+      "path": "completion-support/workflow-terminal.json",
+      "original": "/tmp/structural-e924-ci-failure-f_3ec2uv/workflow-terminal.json",
+      "bytes": 1571,
+      "sha256": "6b242f517d1e2c4680e0e8334b4152337e2788dfac1243f91072b7c5a19b6081"
+    },
+    {
+      "path": "completion-support/development-contracts-summary.json",
+      "original": "/tmp/structural-e924-ci-failure-f_3ec2uv/development-contracts-summary.json",
+      "bytes": 889,
+      "sha256": "e2de23dc0e5d96cb46c09656fa640682420737d461022c7ffb3f36978acb3827"
+    },
+    {
+      "path": "completion-support/development-contracts.zip",
+      "original": "/tmp/structural-e924-ci-failure-f_3ec2uv/development-contracts.zip",
+      "bytes": 13079,
+      "sha256": "0e27079bf914664bdb9c170d8e3f53f9299adf1009ace95adc2f575459fb8a2b"
+    },
+    {
+      "path": "completion-support/development-contracts.log",
+      "original": "/tmp/structural-e924-ci-failure-f_3ec2uv/development-contracts.log",
+      "bytes": 94756,
+      "sha256": "e5c77d56f06e4fd928c10ef5e19d224cfed7fa6d3757c8c48a47ae6a752276cc"
+    }
+  ],
+  "completion_file": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-cqsa_xrd/completion.json",
+  "completion_sha256": "8c63992f6028647df455be56b565b239b993f359085a7b0fe41f1311f61178dd",
+  "sealed_packets": [
+    {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-resume-f0nrbjdg",
+      "files": 47453,
+      "bytes": 2679121607,
+      "inventory_sha256": "114b540066af399cc6588af8a40df0c75a25edb7b1720f27196835cc26bf73da"
+    },
+    {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-cqsa_xrd",
+      "files": 42,
+      "bytes": 504728,
+      "inventory_sha256": "ad73bc202b7a8d898da377ca0dfb6d217a250428c3fa264c186dc77921896e26"
+    },
+    {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-audit-parent-10guf078",
+      "files": 6,
+      "bytes": 26085,
+      "inventory_sha256": "429d31e95b0f17ce4b39b0e796f1bef5f8043febe163c41d6ce52bd85e22cd98"
+    }
+  ],
+  "sealing_wall_ns": 3643975561,
+  "same_solver_recovery_material_integrations": 731808,
+  "source_manifest_files_verified": 638,
+  "ci_development_contracts": {
+    "schema_version": "rc-development-contract-ci-observation.v1",
+    "head_sha": "e9241dd5801144bc1690e9f26ca6fb47c5292e23",
+    "tested_pr_merge_checkout_sha": "d5b19e0b759dcbf7ffab85ebc1b599170515cede",
+    "run_id": 34714939922,
+    "job_id": 103610425612,
+    "artifact_id": 10304803230,
+    "junit_totals": {
+      "tests": 777,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "reported_pytest_seconds": 905.66,
+    "junit_time_seconds": 905.65,
+    "test_scope": "Workflow-selected development contracts; not the complete repository test suite.",
+    "artifact_zip_sha256": "0e27079bf914664bdb9c170d8e3f53f9299adf1009ace95adc2f575459fb8a2b",
+    "junit_sha256": "de08264b529baa08039e8675c4521f6770363d927d09e39c83716191989b4010",
+    "log_sha256": "e5c77d56f06e4fd928c10ef5e19d224cfed7fa6d3757c8c48a47ae6a752276cc",
+    "independent_physical_validation": false,
+    "full_repository_pass": false
+  },
+  "ci_workflow_terminal": {
+    "schema_version": "repository-python-terminal-observation.v1",
+    "head_sha": "e9241dd5801144bc1690e9f26ca6fb47c5292e23",
+    "run_id": 34714939922,
+    "run_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34714939922",
+    "workflow_conclusion": "failure",
+    "development_contracts": "success",
+    "development_junit_test_count": 777,
+    "collection": "success",
+    "full_shards": [
+      {
+        "id": 103610425672,
+        "name": "pytest-full-shard-3",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34714939922/job/103610425672",
+        "preparation": "failure",
+        "repository_tests": "skipped"
+      },
+      {
+        "id": 103610425689,
+        "name": "pytest-full-shard-1",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34714939922/job/103610425689",
+        "preparation": "failure",
+        "repository_tests": "skipped"
+      },
+      {
+        "id": 103610425708,
+        "name": "pytest-full-shard-0",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34714939922/job/103610425708",
+        "preparation": "failure",
+        "repository_tests": "skipped"
+      },
+      {
+        "id": 103610425774,
+        "name": "pytest-full-shard-2",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34714939922/job/103610425774",
+        "preparation": "failure",
+        "repository_tests": "skipped"
+      }
+    ],
+    "detailed_failure_artifact_inspected_for_shard": 3,
+    "all_shards_same_root_cause_claimed": false,
+    "full_repository_pass": false
+  },
+  "overall_roadmap_complete": false
+}

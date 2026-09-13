@@ -3,10 +3,16 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import replace
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
 
+from structural_analysis.api import nonlinear_fiber_frame as public_api
+import structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_result_adapter as result_adapter
+from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology import (
+    solver_generalized_to_physical_3dof,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_result_adapter import (
     FIBER_FRAME_NONLINEAR_RESULT_CLAIM_BOUNDARY,
     FiberFrameNonlinearResultAdapterError,
@@ -19,7 +25,11 @@ from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_result_adapte
 from structural_analysis.assembly.stateful_fiber_frame2d_kinematic_state_chain import (
     FIBER_FRAME_STATE_IR_USAGE_PROFILE,
 )
-from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.engine_v2.contracts._canonical import (
+    array_data_hash,
+    canonical_hash,
+    immutable_array,
+)
 from structural_analysis.engine_v2.contracts.nonlinear_recovery import (
     NonlinearRecoveryError,
     create_nonlinear_recovery_candidate,
@@ -29,6 +39,7 @@ from structural_analysis.engine_v2.contracts.nonlinear_result import (
     NonlinearResultIRError,
     validate_nonlinear_numerical_result_ir,
 )
+from structural_analysis.io.neutral.loader import load_neutral_json
 from tests.test_stateful_fiber_frame2d_nonlinear_terminal_receipt import _artifacts
 
 
@@ -175,6 +186,81 @@ def test_same_source_replays_to_same_adapter_and_result_hash(artifacts) -> None:
     assert second.adapter_hash == first.adapter_hash
     assert second.source_binding.binding_hash == first.source_binding.binding_hash
     assert second.numerical_result.result_hash == first.numerical_result.result_hash
+
+
+def test_inverse_scaling_roundoff_preserves_exact_source_bindings() -> None:
+    model = load_neutral_json(
+        Path(__file__).resolve().parents[1]
+        / "examples/public_rc_fiber_frame_cantilever.json"
+    )
+    model.sections[0]["width_m"] = 0.35
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    compiled, unsupported, _ = public_api._compile(model)
+    assert compiled is not None and unsupported == []
+    execution = public_api._run_load_path(
+        compiled, config, restart_checkpoint_chain=None
+    )
+    assert execution.path.contract_pass is True
+    authority = public_api._create_authority_artifacts(
+        model, compiled, execution, config
+    )
+    adapter = authority.adapter
+    source = adapter.source_binding
+    terminal_state = source._kinematic_chain.committed_states[-1]
+    original_solution = execution.path.steps[-1].trial_solution.free_displacements_m
+    # A fixed FP64 witness demonstrates the inverse-scaling loss without making
+    # BLAS-dependent terminal Newton bits a cross-platform test requirement.
+    witness = np.float64(float.fromhex("-0x1.883c43ed1a6e3p-11"))
+    reconstructed_witness = (witness * np.float64(1.0 / 3.0)) * np.float64(3.0)
+    assert witness != reconstructed_witness
+    assert abs(witness - reconstructed_witness) == abs(np.spacing(witness))
+    assert (
+        array_data_hash(original_solution)
+        == source._terminal_receipt.step_receipts[-1].source_solution_data_hash
+    )
+    projected_physical = solver_generalized_to_physical_3dof(
+        source._topology_plan,
+        execution.path.steps[-1].trial_assembly.generalized_coordinates_m,
+    )
+    np.testing.assert_array_equal(
+        projected_physical,
+        terminal_state.array("checkpoint_displacement_physical_3dof"),
+    )
+    assert validate_fiber_frame_nonlinear_numerical_result_adapter(adapter) is adapter
+
+
+def test_exact_physical_forward_mapping_rejects_one_ulp_tamper(
+    artifacts, monkeypatch
+) -> None:
+    adapter = artifacts[-1]
+    source = adapter.source_binding
+    forward_mapping = result_adapter.solver_generalized_to_physical_3dof
+
+    def changed_physical_mapping(plan, coordinates):
+        projected = forward_mapping(plan, coordinates).copy()
+        projected[4] = np.nextafter(projected[4], np.inf)
+        return immutable_array(projected, dtype="<f8")
+
+    monkeypatch.setattr(
+        result_adapter,
+        "solver_generalized_to_physical_3dof",
+        changed_physical_mapping,
+    )
+    with pytest.raises(
+        FiberFrameNonlinearResultAdapterError,
+        match="fiber_frame_result_terminal_solution_mismatch",
+    ):
+        create_fiber_frame_nonlinear_numerical_result_adapter(
+            source._problem,
+            source._topology_plan,
+            source._physical_scaling,
+            source._checkpoint_chain,
+            source._kinematic_chain,
+            source._material_chain,
+            source._execution_state_binding,
+            source._load_path,
+            source._terminal_receipt,
+        )
 
 
 def test_in_memory_source_and_result_tampering_fail_closed(artifacts) -> None:

@@ -1,0 +1,114 @@
+{
+  "protocol": {
+    "source_revision": "46de89e4322e1a5b42bff1e0e6f6f3121ef3c6a4",
+    "cases": [
+      "train-a",
+      "train-b",
+      "train-c",
+      "train-d"
+    ],
+    "training_only": true,
+    "heldout_reads": 0,
+    "independent_project_claim": false,
+    "features": "target, target increment, previous target increment, current 7 augmented coordinates, last 7 coordinate increments",
+    "label": "same secant path primary convergence rows >= 3",
+    "fit": "standardized ridge least squares via augmented SVD; unpenalized intercept; ridge 1; score threshold 0.5",
+    "folds": "leave one original training case out; fixed four folds; no parameter selection",
+    "baseline": "always predict >=3 primary rows",
+    "initial_step_excluded": "no secant seed at target index zero",
+    "new_solves": 0,
+    "policy_adoption": false
+  },
+  "data_preparation_wall_ns": 70627935999,
+  "profile_binding": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-training-work-profile-k02xbv1s",
+    "inventory_sha256": "ea5f5afa599de2b2e75c746da05e888ce4e8c40204ffc74e1d4b975dd50db448",
+    "files": 660,
+    "bytes": 104723808
+  },
+  "rows": 964,
+  "new_solves": 0,
+  "fits": 4,
+  "physical_validation": false,
+  "net_savings_proven": false,
+  "folds": [
+    {
+      "excluded_training_case": "train-a",
+      "train_rows": 723,
+      "test_rows": 241,
+      "fit_wall_ns": 978032,
+      "batch_transform_predict_wall_ns": 171396,
+      "normal_residual_max": 7.487344078072056e-13,
+      "tp": 108,
+      "tn": 96,
+      "fp": 11,
+      "fn": 26,
+      "baseline_tp": 134,
+      "baseline_fp": 107
+    },
+    {
+      "excluded_training_case": "train-b",
+      "train_rows": 723,
+      "test_rows": 241,
+      "fit_wall_ns": 726594,
+      "batch_transform_predict_wall_ns": 159315,
+      "normal_residual_max": 8.355295622042291e-13,
+      "tp": 47,
+      "tn": 88,
+      "fp": 50,
+      "fn": 56,
+      "baseline_tp": 103,
+      "baseline_fp": 138
+    },
+    {
+      "excluded_training_case": "train-c",
+      "train_rows": 723,
+      "test_rows": 241,
+      "fit_wall_ns": 705913,
+      "batch_transform_predict_wall_ns": 160416,
+      "normal_residual_max": 8.208989044078407e-13,
+      "tp": 106,
+      "tn": 80,
+      "fp": 15,
+      "fn": 40,
+      "baseline_tp": 146,
+      "baseline_fp": 95
+    },
+    {
+      "excluded_training_case": "train-d",
+      "train_rows": 723,
+      "test_rows": 241,
+      "fit_wall_ns": 711463,
+      "batch_transform_predict_wall_ns": 161015,
+      "normal_residual_max": 6.274980535181385e-13,
+      "tp": 65,
+      "tn": 53,
+      "fp": 89,
+      "fn": 34,
+      "baseline_tp": 99,
+      "baseline_fp": 142
+    }
+  ],
+  "failed_preparation": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-work-gate-_kfq9o_w",
+    "inventory_sha256": "63f8c2f9f88ea5eb56911607440fbb11a46f920b86e6c702f0f58b319b119724",
+    "fits": 0,
+    "solves": 0
+  },
+  "audit": {
+    "original_input_bytes": true,
+    "train_only_scaling": true,
+    "all_predictions_recomputed": true,
+    "confusion_counts_recomputed": true,
+    "numpy_version": "1.26.4",
+    "python_version": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "audit_fits": 0,
+    "audit_solves": 0
+  },
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-work-gate-plbuv9o8",
+    "inventory_sha256": "a86c7c89f7c5ee00dcf34b92fabf5de4cd8120ac2c5595ce16fb1a8f556dae30",
+    "files": 7,
+    "bytes": 1198639
+  }
+}

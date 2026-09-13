@@ -1,0 +1,152 @@
+{
+  "source_before": "acd586e54aef44cd39cfa82fbc181fcfa6cf7ee2",
+  "source_after": "ce26ae36acd4c9611511cf02ddc9c8a6c67bbc64",
+  "source_files_per_version": 458,
+  "runs": 16,
+  "committed_steps": 64,
+  "pairs": [
+    {
+      "case": 0,
+      "backend": "numpy_linalg_solve_dense",
+      "order": 0,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.9146269444124097,
+      "process_ratio": 0.9606913954124916
+    },
+    {
+      "case": 0,
+      "backend": "numpy_linalg_solve_dense",
+      "order": 1,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.9277883370666262,
+      "process_ratio": 0.9606506739078373
+    },
+    {
+      "case": 0,
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "order": 0,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.9481728094233028,
+      "process_ratio": 0.9603701643369998
+    },
+    {
+      "case": 0,
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "order": 1,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.9517928830751374,
+      "process_ratio": 0.9736329364975048
+    },
+    {
+      "case": 1,
+      "backend": "numpy_linalg_solve_dense",
+      "order": 0,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.924916158118195,
+      "process_ratio": 0.965193525668713
+    },
+    {
+      "case": 1,
+      "backend": "numpy_linalg_solve_dense",
+      "order": 1,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.9018781351338087,
+      "process_ratio": 0.9320057045725618
+    },
+    {
+      "case": 1,
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "order": 0,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.9393759278168938,
+      "process_ratio": 0.9509361440825045
+    },
+    {
+      "case": 1,
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "order": 1,
+      "result_and_checkpoint_bytes_equal": true,
+      "api_ratio": 0.9389890925930499,
+      "process_ratio": 0.9509413922945712
+    }
+  ],
+  "summaries": [
+    {
+      "case": 0,
+      "backend": "numpy_linalg_solve_dense",
+      "costs": {
+        "before": {
+          "api_ns": 4031153751,
+          "process_ns": 7636953547
+        },
+        "after": {
+          "api_ns": 3713387637,
+          "process_ns": 7336600065
+        }
+      },
+      "api_sum_ratio": 0.9211724152369102,
+      "process_sum_ratio": 0.9606710345753003
+    },
+    {
+      "case": 0,
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "costs": {
+        "before": {
+          "api_ns": 11579349405,
+          "process_ns": 15146562303
+        },
+        "after": {
+          "api_ns": 11000253675,
+          "process_ns": 14646746139
+        }
+      },
+      "api_sum_ratio": 0.9499889234061851,
+      "process_sum_ratio": 0.9670013463120273
+    },
+    {
+      "case": 1,
+      "backend": "numpy_linalg_solve_dense",
+      "costs": {
+        "before": {
+          "api_ns": 5076822651,
+          "process_ns": 8738615524
+        },
+        "after": {
+          "api_ns": 4636616211,
+          "process_ns": 8287786639
+        }
+      },
+      "api_sum_ratio": 0.9132909557293102,
+      "process_sum_ratio": 0.9484095754342516
+    },
+    {
+      "case": 1,
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "costs": {
+        "before": {
+          "api_ns": 12694717403,
+          "process_ns": 16348621069
+        },
+        "after": {
+          "api_ns": 11922657770,
+          "process_ns": 15546537580
+        }
+      },
+      "api_sum_ratio": 0.9391826057650131,
+      "process_sum_ratio": 0.9509387681312831
+    }
+  ],
+  "scope": "fresh-process public API including internal validation, plus separate launch-to-exit wall; no history export or browser; setup and audit excluded",
+  "external_validation": false,
+  "ai_used": false,
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-section-cache-5n8m9tgs",
+    "inventory_sha256": "2d9c4afe626b72f6a1ad207a666a77cc18caab6ec29cf98f1e94879eb3e4a6ee",
+    "file_count_excluding_inventory": 1007,
+    "bytes_excluding_inventory": 20636417
+  },
+  "focused_tests": {
+    "passed": 37,
+    "seconds": 6.78
+  }
+}

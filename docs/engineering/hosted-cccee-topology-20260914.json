@@ -1,0 +1,30 @@
+{
+  "head": "cccee909a8f4eb11c63724888db19617412fb859",
+  "jobs": [
+    {
+      "id": 103764907167,
+      "run_id": 34772638050,
+      "name": "topology-contract",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T18:01:04.5581728Z ======================= 413 passed in 730.42s (0:12:10) ========================",
+        "2026-09-13T18:01:20.6998534Z 22 passed in 15.66s",
+        "2026-09-13T18:02:35.2379911Z 86 passed in 74.04s (0:01:14)",
+        "2026-09-13T18:03:40.3619731Z 9 passed in 64.63s (0:01:04)",
+        "2026-09-13T18:04:36.8997740Z 28 passed in 56.02s",
+        "2026-09-13T18:04:38.4881755Z 16 passed in 1.09s",
+        "2026-09-13T18:04:40.0771807Z 13 passed in 1.09s",
+        "2026-09-13T18:05:20.9083220Z 65 passed in 38.81s",
+        "2026-09-13T18:16:25.1145044Z 984 passed in 663.88s (0:11:03)"
+      ]
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-cccee-topology-eou2_pzm",
+    "inventory_sha256": "f60aa04a0b8e0970de46c1f1cd0b7ea8f6a32b61125f4233ba5e8703ba0569ec",
+    "files": 5,
+    "bytes": 191266
+  }
+}

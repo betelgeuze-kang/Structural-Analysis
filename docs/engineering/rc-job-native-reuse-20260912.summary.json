@@ -1,0 +1,104 @@
+{
+  "schema": "rc-durable-native-reuse-integration.v1",
+  "base_revision": "157f6e4507627dbab9c5158af043154e98b36ae8",
+  "sources": [
+    {
+      "path": ".github/workflows/python-test-collection.yml",
+      "sha256": "d61de1ac011ffae3a89d510e76539fcbac08ffa150849ea0b88cb16ee9ac00bc"
+    },
+    {
+      "path": "src/structural_analysis/execution/rc_fiber_direct_control_worker.py",
+      "sha256": "14b365c6aa32bc4f2ffa038451051d360c88dd4390a23af249589d37560b09d7"
+    },
+    {
+      "path": "src/structural_analysis/execution/rc_fiber_job_contract.py",
+      "sha256": "a8f734a24b1104f29d1a9655bca0a13f9e766ebae01f983b3f647318cd5b6054"
+    },
+    {
+      "path": "src/structural_analysis/schemas/job_request_v3.schema.json",
+      "sha256": "09a6792043ed4812c449ac6215d3e59bd9d723e7cc4cd9f6d67eb40e5134ccc8"
+    },
+    {
+      "path": "src/workbench-v2/components/RcJobResultPanel.tsx",
+      "sha256": "217b239c938514c09f5a545b24ddc5d07c3f29fd63b6719117b37314adb07f77"
+    },
+    {
+      "path": "src/workbench-v2/model/rcJobSchema.ts",
+      "sha256": "48d65032821413daf3a31aa164ad50578059d1c929327fe6711ab501e27cdc11"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-rc-job-contract.spec.ts",
+      "sha256": "616d7ee1e164e21f00cd65004b0a10cb8f089fffd2da9aa17e988c6ce03b3347"
+    },
+    {
+      "path": "tests/test_rc_constant_load_durable.py",
+      "sha256": "0b7f9a4ce925506ee080e0749ad91b9e3a94e44dd8df22da0fafb127e3953d98"
+    },
+    {
+      "path": "tests/test_repository_python_workflow_contract.py",
+      "sha256": "9f45746d620519a6f1a374e927ef87aef66de0a8c588dcef289600c3ff5b453c"
+    }
+  ],
+  "python_distinct_tests_passed_after_fixture_repair": 171,
+  "ci_contract_tests": 14,
+  "frontend_contract_tests": 12,
+  "browser_viewports": [
+    1440,
+    390
+  ],
+  "browser_network": "local Vite with intercepted stored-artifact routes, not a production API",
+  "worker_execution": "real in-process durable workers and fresh source verification, service reopened between chunk claims",
+  "submission_form_added": false,
+  "default_reuse_enabled": false,
+  "speedup_claimed": false,
+  "ai_net_benefit_proved": false,
+  "external_physics_proved": false,
+  "jobs": [
+    {
+      "directory": "split",
+      "job_id": "job_9250d9f39e365b90ca92bc28a1192754",
+      "reuse": false,
+      "chunk_targets": 1,
+      "known_core_calls": 18,
+      "known_newton_iterations": 36,
+      "confirmed_api_invocations": 6,
+      "unknown_work": false
+    },
+    {
+      "directory": "full",
+      "job_id": "job_ababd9231baaa81bb6d6aa29c3005be0",
+      "reuse": false,
+      "chunk_targets": 3,
+      "known_core_calls": 8,
+      "known_newton_iterations": 16,
+      "confirmed_api_invocations": 2,
+      "unknown_work": false
+    },
+    {
+      "directory": "reuse-split",
+      "job_id": "job_fb5a56bc971ab8c77b4abe70f654071f",
+      "reuse": true,
+      "chunk_targets": 1,
+      "known_core_calls": 18,
+      "known_newton_iterations": 36,
+      "confirmed_api_invocations": 6,
+      "unknown_work": false
+    },
+    {
+      "directory": "reuse-full",
+      "job_id": "job_2bae651a19e5760f17bef06075907f89",
+      "reuse": true,
+      "chunk_targets": 3,
+      "known_core_calls": 8,
+      "known_newton_iterations": 16,
+      "confirmed_api_invocations": 2,
+      "unknown_work": false
+    }
+  ],
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-job-reuse-c0o8xcz4",
+    "files": 44,
+    "bytes": 1656435,
+    "inventory_sha256": "743989fe3cbbb7237284d63a38a5c5e59e68e4285b1548ffed2cd65582e5be81"
+  }
+}

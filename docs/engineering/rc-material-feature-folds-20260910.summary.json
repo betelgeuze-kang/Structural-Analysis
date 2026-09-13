@@ -1,0 +1,241 @@
+{
+  "schema_version": "rc-material-feature-fold-observation.v1",
+  "source_revision": "b08b51cde7af2a1f36d6f05bbdba063f3720863a",
+  "protocol": {
+    "source_revision": "b08b51cde7af2a1f36d6f05bbdba063f3720863a",
+    "feature_profile": "accepted-fiber-state-secant-correction.v1",
+    "training_rows": 964,
+    "training_cases": 4,
+    "fits": 5,
+    "ridge": 1e-06,
+    "ood_margin": 0.1,
+    "hyperparameter_search": false,
+    "structural_solver_calls_permitted": 0,
+    "material_integrations_permitted": 0,
+    "read_evaluation_responses": false,
+    "evaluation_metadata_present_in_original_plan": true,
+    "independent_campaign": false,
+    "performance_claim_permitted": false,
+    "policy_promotion": false,
+    "baseline": "same original secant correction labels; unchanged legacy features plus committed material scalars",
+    "preparation_wall_ns": 2259104857
+  },
+  "worker": {
+    "pid": 967420,
+    "status": "completed",
+    "training_model_preparation_wall_ns": 21453871,
+    "original_step_read_wall_ns": 121317747,
+    "derivation_wall_ns": 33715374151,
+    "full_training_fit_wall_ns": 40617815,
+    "fit_count": 5,
+    "structural_solver_calls": 0,
+    "material_integrations": 0,
+    "material_feature_count": 408,
+    "original_policy_unchanged": true,
+    "source_labels_unchanged": true,
+    "evaluation_responses_read": false,
+    "wall_ns_through_reports": 37855142885,
+    "cpu_ns": 37842070736,
+    "peak_rss_kib": 726180
+  },
+  "process": {
+    "worker_pid": 967420,
+    "parent_pid": 967415,
+    "exit_code": 0,
+    "parent_wall_ns": 38268458467,
+    "terminal": true
+  },
+  "original_audit": {
+    "schema_version": "rc-material-fold-original-audit.v1",
+    "pid": 967803,
+    "original_parent_vectors_verified": 964,
+    "original_labels_unchanged": true,
+    "legacy_feature_prefix_unchanged": true,
+    "fold_metrics_reproduced_exact": true,
+    "source_files_exact": 439,
+    "original_files_exact": 976,
+    "worker_and_parent_absent": true,
+    "folds": [
+      {
+        "case_id": "train-a",
+        "train_count": 723,
+        "withheld_count": 241,
+        "range_eligible_count": 0,
+        "train_rmse_ratios_noncontrolled": [
+          0.6514980659194413,
+          0.40483211797305,
+          0.505693457291401,
+          0.479537227549404,
+          0.5056934572913664,
+          0.3956849784448891
+        ],
+        "withheld_rmse_ratios_noncontrolled": [
+          126.68099300478063,
+          350.0118835799654,
+          185.38484730649807,
+          33.282025924327314,
+          185.38484736504915,
+          187.1991690403502
+        ],
+        "normal_equation_relative_residual": 1.1699341835613964e-11,
+        "regularized_normal_system_condition_estimate": 107423508363.8943
+      },
+      {
+        "case_id": "train-b",
+        "train_count": 723,
+        "withheld_count": 241,
+        "range_eligible_count": 241,
+        "train_rmse_ratios_noncontrolled": [
+          0.715054271555426,
+          0.3900661260022143,
+          0.5398710535561727,
+          0.546237128514466,
+          0.5398710535562289,
+          0.3732805235871694
+        ],
+        "withheld_rmse_ratios_noncontrolled": [
+          45.39046040145731,
+          130.7917514737812,
+          216.2485602139617,
+          94.7508725788977,
+          216.2485602074024,
+          50.13992113395632
+        ],
+        "normal_equation_relative_residual": 1.1705699074272456e-11,
+        "regularized_normal_system_condition_estimate": 107466421050.61038
+      },
+      {
+        "case_id": "train-c",
+        "train_count": 723,
+        "withheld_count": 241,
+        "range_eligible_count": 0,
+        "train_rmse_ratios_noncontrolled": [
+          0.641771153415659,
+          0.4268010733802805,
+          0.5286076374458203,
+          0.5077957951939108,
+          0.5286076374458019,
+          0.41172216021787916
+        ],
+        "withheld_rmse_ratios_noncontrolled": [
+          766.2185704315202,
+          2453.834076285725,
+          2043.8762823850452,
+          794.8096811851088,
+          2043.876282329384,
+          3397.9104828547415
+        ],
+        "normal_equation_relative_residual": 1.3097262917219104e-11,
+        "regularized_normal_system_condition_estimate": 105272932395.57158
+      },
+      {
+        "case_id": "train-d",
+        "train_count": 723,
+        "withheld_count": 241,
+        "range_eligible_count": 0,
+        "train_rmse_ratios_noncontrolled": [
+          0.7128876877193625,
+          0.3904440158654665,
+          0.5401624630930015,
+          0.547594951812993,
+          0.5401624630929835,
+          0.37817066440833214
+        ],
+        "withheld_rmse_ratios_noncontrolled": [
+          102.3089434234728,
+          237.6006615424143,
+          27.431938961576325,
+          118.71469072987455,
+          27.43193898938759,
+          209.8712916254749
+        ],
+        "normal_equation_relative_residual": 9.388128870525944e-12,
+        "regularized_normal_system_condition_estimate": 104762817157.53703
+      }
+    ],
+    "fit_count": 0,
+    "structural_solver_calls": 0,
+    "material_integrations": 0,
+    "audit_wall_ns": 3835879788,
+    "audit_cpu_ns": 2728137311,
+    "peak_rss_kib": 2480636
+  },
+  "fold_costs": [
+    {
+      "case_id": "train-a",
+      "fit_wall_ns": 26393326,
+      "prediction_and_metrics_wall_ns": 4826252
+    },
+    {
+      "case_id": "train-b",
+      "fit_wall_ns": 29446679,
+      "prediction_and_metrics_wall_ns": 5103491
+    },
+    {
+      "case_id": "train-c",
+      "fit_wall_ns": 28117744,
+      "prediction_and_metrics_wall_ns": 5310088
+    },
+    {
+      "case_id": "train-d",
+      "fit_wall_ns": 28250068,
+      "prediction_and_metrics_wall_ns": 5288288
+    }
+  ],
+  "diagnostic_wall_ns": 730426273,
+  "verification": {
+    "source_revision": "b08b51cde7af2a1f36d6f05bbdba063f3720863a",
+    "recording_of_observed_tool_results": true,
+    "focused_tests": [
+      {
+        "files": [
+          "tests/test_rc_control_learning.py",
+          "tests/test_rc_control_history_features.py",
+          "tests/test_rc_control_training_diagnostics.py",
+          "tests/test_rc_constant_studies.py",
+          "tests/test_rc_seed_original_audit.py"
+        ],
+        "passed": 64,
+        "seconds": 98.28
+      },
+      {
+        "files": [
+          "tests/test_rc_control_warm_start.py",
+          "tests/test_rc_constant_repetition_summary.py"
+        ],
+        "passed": 32,
+        "seconds": 6.51
+      }
+    ],
+    "distinct_passed": 96,
+    "initial_overlapping_material_tests": {
+      "passed": 2,
+      "seconds": 37.88
+    },
+    "ruff": "passed",
+    "mypy_source_files": 4,
+    "mypy": "passed",
+    "diff_check": "passed",
+    "audit_process_confirmed_absent": 967803,
+    "full_hosted_suite_passed": false
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-material-folds-cc9g9069",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-material-folds-cc9g9069.inventory.json",
+    "inventory_sha256": "c9cddfaa140fe71196904da9f3ad4b01500bda733ad687e172c2482e00e545c2",
+    "file_count": 1441,
+    "total_bytes": 352537623,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T21:52:38.383960+00:00",
+    "seal_wall_ns": 531176745,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "decisions": {
+    "promoted": false,
+    "full_path_evaluation_admitted": false,
+    "external_training_admitted": false,
+    "net_runtime_benefit_proven": false,
+    "full_roadmap_complete": false,
+    "reason": "Every non-controlled correction RMSE worsens on the sole range-eligible withheld case; no runtime evaluation of this unchanged candidate."
+  }
+}

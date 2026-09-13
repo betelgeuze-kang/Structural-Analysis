@@ -1,0 +1,95 @@
+{
+  "source_revision": "5606dac91151fc193a8f5376d592ee799837d689",
+  "source_files_verified": 461,
+  "free_equations": 48,
+  "matrix_exact": false,
+  "matrix_difference_linf": 4.656612873077393e-10,
+  "residual_exact": true,
+  "saved_initial_residuals_match": true,
+  "dense_reproduces_saved_increment": true,
+  "sparse_reproduces_saved_increment": true,
+  "condition_number_inf": 3243.9244017849805,
+  "metrics": {
+    "saved_dense": {
+      "linear_residual_linf": 4.547473508864641e-13,
+      "normwise_backward_error": 3.3528962026518044e-17,
+      "difference_to_80_digit_reference_linf": 1.691355389077387e-17
+    },
+    "saved_sparse": {
+      "linear_residual_linf": 1.8189894035458565e-12,
+      "normwise_backward_error": 1.3411584810607555e-16,
+      "difference_to_80_digit_reference_linf": 1.5395670849294163e-17
+    },
+    "recomputed_dense": {
+      "linear_residual_linf": 4.547473508864641e-13,
+      "normwise_backward_error": 3.3528962026518044e-17,
+      "difference_to_80_digit_reference_linf": 1.691355389077387e-17
+    },
+    "recomputed_sparse": {
+      "linear_residual_linf": 1.8189894035458565e-12,
+      "normwise_backward_error": 1.3411584810607555e-16,
+      "difference_to_80_digit_reference_linf": 1.5395670849294163e-17
+    },
+    "rounded_high_precision": {
+      "linear_residual_linf": 9.094947017729282e-13,
+      "normwise_backward_error": 6.705792405303698e-17,
+      "difference_to_80_digit_reference_linf": 0.0
+    }
+  },
+  "sparse_factorization_diagnostic": {
+    "schema_version": "sparse-superlu-factorization-diagnostic.v1",
+    "status": "pass",
+    "contract_pass": true,
+    "failure_code": null,
+    "backend": "scipy_superlu_splu_cpu",
+    "ordering": "COLAMD",
+    "condition_estimate_method": "exact_inverse_column_solve_matrix_1_norm.v1",
+    "policy": {
+      "policy_id": "public_sparse_factorization_fail_closed.v1",
+      "maximum_condition_number_1": 1000000000000.0,
+      "minimum_normalized_absolute_pivot": 1e-14,
+      "maximum_backward_error": 1e-12,
+      "maximum_exact_condition_equations": 256,
+      "regularization_allowed": false,
+      "fallback_allowed": false,
+      "policy_hash": "sha256:ed5b57b4fc1cf30c4d9cc8bb3e1201e92d7d9b2de510488d3dcf2e609a2f3347"
+    },
+    "equation_count": 48,
+    "input_nnz": 528,
+    "input_pattern_hash": "sha256:f386d815238aa0c6929151f8329c2c1dc18a482b58d81a6ec28c5736ab584f79",
+    "input_numeric_hash": "sha256:b0b4772e61bd9bac70b9214bc77572e5fb9cdd6ca1d0f96073ca181aa355dd2f",
+    "rhs_hash": "sha256:e0f007de6f74be53f90d576b2187459723faeab4edf56492a1db5abef8071037",
+    "factor_l_nnz": 530,
+    "factor_u_nnz": 544,
+    "factor_fill_ratio": 2.034090909090909,
+    "absolute_pivot_minimum": 28582.69534988292,
+    "absolute_pivot_maximum": 5299087.503667992,
+    "normalized_absolute_pivot_minimum": 0.005393890048069253,
+    "condition_number_1": 3243.9244017848923,
+    "backward_error": 6.720942987132467e-17,
+    "solution_hash": "sha256:fbfe72950a139b249116e6f01d66fcef93e1f6ceceeca9df19116a5b725af7a9",
+    "permutation_row_hash": "sha256:1f6b75c123d81977b9dceb98eb87825702da98039c3988108ade8080a4671c9e",
+    "permutation_column_hash": "sha256:b3ea79d299ba30966fd987a025837998aa77da853e93050df3703b7f8d2aeb22",
+    "checks": {
+      "factorization_succeeded": true,
+      "solution_finite": true,
+      "condition_number_within_policy": true,
+      "normalized_pivot_within_policy": true,
+      "backward_error_within_policy": true,
+      "regularization_not_used": true,
+      "fallback_not_used": true
+    },
+    "regularization_used": false,
+    "fallback_used": false,
+    "diagnostic_hash": "sha256:dff450365ce022551fd483963bb65759ff8b117b122524beac97d2605cf259f0"
+  },
+  "cross_sparse_on_dense_matrix_difference_to_saved_dense_linf": 2.1033522146218786e-17,
+  "cross_dense_on_sparse_matrix_difference_to_saved_sparse_linf": 1.0299920638612292e-17,
+  "matrix_changed_entry_count": 4,
+  "elapsed_seconds": 1.0613723900023615,
+  "scope": "Two fixed initial assemblies, four production-path float64 linear solves and one 80-digit solve of the reconstructed float64 matrix. No full nonlinear replay or independent physical reference. Does not change original failed terminal comparison.",
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-initial-system-production-edsjg60y",
+    "inventory_sha256": "3bc5d7f8bf6e17f0198c21914b39694969fb337179094c78d7ee0d27879d13c9"
+  }
+}

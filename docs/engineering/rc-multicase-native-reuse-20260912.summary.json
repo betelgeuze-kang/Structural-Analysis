@@ -1,0 +1,144 @@
+{
+  "schema": "rc-multicase-native-reuse-prefix-observation.v1",
+  "base_revision": "34fa0ff127954fab9b7bce602a2887b6e63128b0",
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-multicase-reuse-l_6nkxwz",
+  "case_count": 4,
+  "benchmark_count": 16,
+  "path_count": 64,
+  "targets_per_path": 16,
+  "native_step_pairs_exact": 512,
+  "core_calls": 1024,
+  "inclusive_newton_iterations": 5656,
+  "linear_solves": 5656,
+  "full_history_comparisons_passed": 48,
+  "baseline_assembly_dispatches": 5728,
+  "reuse_assembly_dispatches": 4212,
+  "reuse_hits": 1516,
+  "dispatch_reduction_fraction": 0.26466480446927376,
+  "rows": [
+    {
+      "case_id": "train-a",
+      "lengths_m": [
+        2.0,
+        1.5
+      ],
+      "target_count": 16,
+      "last_target_m": -0.0064,
+      "max_accumulated_plastic_strain": 0.00010080443757763632,
+      "max_tensile_damage": 0.9988030584829747,
+      "max_compressive_damage": 0.0,
+      "baseline_dispatches": 1620,
+      "reuse_dispatches": 1184,
+      "reuse_hits": 436,
+      "dispatch_reduction_fraction": 0.2691358024691358,
+      "wall_ratios": [
+        0.7924357565557972,
+        0.7929247245606474
+      ],
+      "pooled_case_wall_ratio": 0.7926798670378001,
+      "timing_limitation": "final 24-test rerun overlapped first case; not acceleration evidence"
+    },
+    {
+      "case_id": "train-b",
+      "lengths_m": [
+        3.0,
+        2.5
+      ],
+      "target_count": 16,
+      "last_target_m": -0.0064,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.962753156718007,
+      "max_compressive_damage": 0.0,
+      "baseline_dispatches": 1260,
+      "reuse_dispatches": 932,
+      "reuse_hits": 328,
+      "dispatch_reduction_fraction": 0.26031746031746034,
+      "wall_ratios": [
+        0.8128292583578233,
+        0.814481317312639
+      ],
+      "pooled_case_wall_ratio": 0.8136546704003484,
+      "timing_limitation": "two pairs on nonisolated host; preliminary observation only"
+    },
+    {
+      "case_id": "train-c",
+      "lengths_m": [
+        1.75,
+        2.5
+      ],
+      "target_count": 16,
+      "last_target_m": -0.00576,
+      "max_accumulated_plastic_strain": 0.00034871622994845194,
+      "max_tensile_damage": 0.9995567184887567,
+      "max_compressive_damage": 0.0,
+      "baseline_dispatches": 1580,
+      "reuse_dispatches": 1164,
+      "reuse_hits": 416,
+      "dispatch_reduction_fraction": 0.26329113924050634,
+      "wall_ratios": [
+        0.7975021530379836,
+        0.7984646433644104
+      ],
+      "pooled_case_wall_ratio": 0.7979818256274558,
+      "timing_limitation": "two pairs on nonisolated host; preliminary observation only"
+    },
+    {
+      "case_id": "train-d",
+      "lengths_m": [
+        3.25,
+        1.25
+      ],
+      "target_count": 16,
+      "last_target_m": -0.007040000000000001,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.9554260881301974,
+      "max_compressive_damage": 0.0,
+      "baseline_dispatches": 1268,
+      "reuse_dispatches": 932,
+      "reuse_hits": 336,
+      "dispatch_reduction_fraction": 0.26498422712933756,
+      "wall_ratios": [
+        0.8135519848089746,
+        0.8110910513066343
+      ],
+      "pooled_case_wall_ratio": 0.8123284718208011,
+      "timing_limitation": "two pairs on nonisolated host; preliminary observation only"
+    }
+  ],
+  "source_and_record_audit_seconds": 1.973405078,
+  "audit_fits": 0,
+  "audit_newton_solves": 0,
+  "learned_policy": false,
+  "new_measured_training_rows": 0,
+  "independent_physical_validation": false,
+  "full_242_target_validation": false,
+  "new_structure_family": false,
+  "all_cases_completed": true,
+  "first_case_timing_confounded_by_targeted_test_overlap": true,
+  "pooled_cohort_speedup_claim": false,
+  "test_result": {
+    "passed": 24,
+    "seconds": 18.85,
+    "initial_collection_error": "reserved pytest parameter request; renamed before numerical study"
+  },
+  "postlaunch_edit": "runner constant-load summary label now derives actual request; all four executed cases have no preload, so their labels and numerical execution are unchanged",
+  "evidence_inventory": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-multicase-reuse-l_6nkxwz.inventory.json",
+    "sha256": "fd8b10ab49ecb820552a0fdd22c7d95dfb410b5911f4877a5ddb2f1f2543391b",
+    "files": 6754,
+    "bytes": 328742459
+  },
+  "hosted_base_ci": {
+    "head_sha": "34fa0ff127954fab9b7bce602a2887b6e63128b0",
+    "tested_merge_sha": "775ccd942a5ced349cd6938a41d83db99620e809",
+    "run_id": 34690570776,
+    "development_modules": 24,
+    "development_passes": 522,
+    "full_shards_preparation_failed": 4,
+    "full_shards_actual_tests_skipped": 4,
+    "artifact_id": 10297213396,
+    "artifact_bytes": 9209,
+    "artifact_sha256": "11acabfc89c8d7b298d8ea834888bff7f944557a3011f266343c0ce9fa4ca166",
+    "new_runner_extension_in_this_hosted_run": false
+  }
+}

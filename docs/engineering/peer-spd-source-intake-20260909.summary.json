@@ -1,0 +1,129 @@
+{
+  "schema_version": "peer-spd-source-intake-audit.v1",
+  "original_property_records": 253,
+  "original_cells_per_record": 44,
+  "all_11132_original_property_cells_preserved": true,
+  "duplicate_source_labels_preserved": [
+    "# Intermediate Bars",
+    "No. hoop sets",
+    "Spacing (mm)"
+  ],
+  "metadata_screen": {
+    "configuration": "C",
+    "failure_code": "1",
+    "splice_length_mm": "0",
+    "axial_load_kn": "0",
+    "candidate_record_numbers": [
+      "104",
+      "181",
+      "182",
+      "196",
+      "201",
+      "203",
+      "206"
+    ],
+    "implies_physics_admission": false
+  },
+  "specimen": {
+    "source_id": "PEER-SPD-104",
+    "source_version": "1",
+    "name": "Saatcioglu and Ozcebe 1989, U1",
+    "force_displacement_title": "Saatcioglu and Ozcebe 1989, Spec. U1",
+    "original_reference": "Saatcioglu, Murat; and Ozcebe, Guney, \"Response of Reinforced Concrete Columns to Simulated Seismic Loading,\" American Concrete Institute, ACI Structural Journal, January - February, 1989, pp. 3-12.",
+    "source_history_url": "http://depts.washington.edu/columdat/rectcol/txfiles/saatu1.txt",
+    "measured_pair_count": 1751,
+    "comparison_basis": "equivalent_cantilever_top_displacement_mm_and_lateral_load_kN",
+    "p_delta_code": "2",
+    "p_delta_description": "Shear provided",
+    "normalized_decimal_source_values": {
+      "concrete_strength_mpa": "43.6",
+      "corner_yield_stress_mpa": "430",
+      "width_mm": "350",
+      "depth_mm": "350",
+      "equivalent_cantilever_length_mm": "1000",
+      "axial_load_kn": "0",
+      "corner_bar_diameter_mm": "25",
+      "close_hoop_spacing_mm": "150"
+    },
+    "longitudinal_bar_count": "8",
+    "property_numeric_fields_crosschecked_with_xml": 8,
+    "history_sha256": "428e991e1a7c2aeef05ecf644a2be341803cb30e71d488d517d41dd1b714d873",
+    "property_table_sha256": "295ef353428f6a4589fd5737688aed5f9da76309924cb774c1faa8c2564ec3a6",
+    "original_initial_pair_preserved": [
+      "0",
+      "0.0005"
+    ],
+    "displacement_range_mm": [
+      "-58.9",
+      "84"
+    ],
+    "lateral_load_range_kn": [
+      "-251.3",
+      "276.2"
+    ],
+    "sampled_increment_sign_changes": 47,
+    "sign_changes_are_not_verified_commanded_loading_reversals": true
+  },
+  "conflicts": [
+    {
+      "field": "wide_hoop_diameter_mm",
+      "table": "0",
+      "html": "10",
+      "xml": "0",
+      "resolution": "unresolved; all originals retained"
+    }
+  ],
+  "reported_zero_strength_fields": [
+    "corner_ultimate_strength_mpa",
+    "intermediate_ultimate_strength_mpa",
+    "transverse_ultimate_strength_mpa"
+  ],
+  "xml_copyright_field": "",
+  "training_admitted": false,
+  "independent_physics_validation": false,
+  "remaining_requirements": [
+    "source-specific reuse basis",
+    "original paper/drawing and provenance review",
+    "resolve table/HTML/XML metadata conflicts",
+    "review reported zero material strength fields",
+    "original commanded loading protocol; sensor observations are not automatically targets",
+    "reviewed constitutive parameters and model physics compatibility",
+    "campaign-level deduplication and frozen train/calibration/evaluation partition"
+  ],
+  "parser_module": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/src/structural_analysis/io/peer_structural_performance.py",
+  "parser_source_sha256": "f5af0e376ec6eab4f8bca92c6bb946b07c9341def49489d1d920c9e1a9d2f619",
+  "numerical_newton_fit_material_compile_or_commit_calls": 0,
+  "audit_wall_seconds": 0.015637913,
+  "implementation_revision": "e1a9a003a0002c3200bae14d5e225a7b10de9c97",
+  "validation": {
+    "recorded_at_utc": "2026-09-09T13:35:25.185976+00:00",
+    "implementation_revision": "e1a9a003a0002c3200bae14d5e225a7b10de9c97",
+    "parser_git_blob_matches_audited_source": true,
+    "focused_tests_final": {
+      "passed": 12,
+      "seconds": 1.56
+    },
+    "focused_tests_initial": {
+      "passed": 12,
+      "seconds": 1.61
+    },
+    "ruff_format_diff_passed": true,
+    "final_mypy_one_file_passed": true,
+    "initial_mypy_failure": "Decimal tuple exponent can also denote nonfinite values; explicit integer guard added before unit conversion",
+    "successful_original_record_audit_exit_code": 0,
+    "successful_audit_parent_wall_seconds": null,
+    "successful_audit_internal_wall_seconds": 0.015637913,
+    "initial_original_record_audit_exit_code": 1,
+    "initial_audit_failure": "Harness expected TSV wide hoop diameter 10. Original TSV and XML both say 0; HTML says 10. Corrected source assertion preserves that unresolved conflict. No source record or parser value was altered.",
+    "newton_fit_material_compile_or_commit_calls": 0,
+    "raw_external_files_not_committed_to_repository": true,
+    "training_admitted": false
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-public-intake.b74grmgi",
+    "file_count": 20,
+    "total_bytes": 166739,
+    "inventory_sha256": "55ea2cc927574e49cb8896a15cd8bb88ca9512e520242d737fcb7a7ebf815e14",
+    "all_files_reread_exact": true
+  }
+}

@@ -106,7 +106,8 @@ from structural_analysis.model_ir.types import ModelIRDocument
 from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_MATRIX_BACKEND,
     VECTOR_MATRIX_BACKENDS,
-    VECTOR_SPARSE_MATRIX_BACKEND,
+    VECTOR_SPARSE_MATRIX_BACKENDS,
+    sparse_factorization_policy_for_backend,
     NewtonRaphsonConfig,
 )
 
@@ -721,25 +722,15 @@ def validate_nonlinear_frame_result(
     exact_replay = bool(result.metrics.get("exact_checkpoint_chain_replay"))
     fallback_count = int(result.metrics.get("fallback_count", 0))
     regularization_count = int(result.metrics.get("regularization_count", 0))
-    sparse_selected = (
-        result.configuration.get("matrix_backend") == VECTOR_SPARSE_MATRIX_BACKEND
-    )
-    solver_executed = result.metrics.get("solver_executed") is True
-    no_solve_contract = result.metrics.get("no_solve_contract_pass") is True
-    sparse_execution_contract = bool(
-        not sparse_selected
-        or (not solver_executed and no_solve_contract)
-        or (
-            solver_executed
-            and result.metrics.get("sparse_backend_used") is True
-            and result.metrics.get("native_sparse_assembly_used") is True
-            and result.metrics.get("sparse_factorization_diagnostics_passed") is True
-            and int(result.metrics.get("sparse_factorization_count", 0)) > 0
-            and len(result.metrics.get("sparse_factorization_diagnostic_hashes", ()))
-            == int(result.metrics.get("sparse_factorization_count", 0))
-            and isinstance(result.metrics.get("sparse_factorization_policy_hash"), str)
-            and result.metrics["sparse_factorization_policy_hash"].startswith("sha256:")
+    sparse_execution_contract = (
+        _corotational_backend_contract(
+            result.configuration,
+            result.metrics,
+            result.convergence_history,
+            result.contract_bindings,
         )
+        if result.profile != FIXED_CHORD_SERIAL_PROFILE
+        else True
     )
     ready = bool(
         result.status == "ready"
@@ -818,6 +809,17 @@ def validate_nonlinear_frame_manifest(payload: Mapping[str, Any]) -> dict[str, A
             normalized["contract_bindings"],
         ),
     )
+    if (
+        normalized["status"] == "ready"
+        and normalized["profile"] != FIXED_CHORD_SERIAL_PROFILE
+        and not _corotational_backend_contract(
+            normalized["configuration"],
+            normalized["metrics"],
+            normalized["convergence_history"],
+            normalized["contract_bindings"],
+        )
+    ):
+        raise ValueError("sparse backend declaration differs from execution policy")
     return normalized
 
 
@@ -930,7 +932,7 @@ def _analyze_corotational_portal(
         "matrix_backend": config.matrix_backend,
         "stiffness_storage": (
             "scipy_sparse_csr"
-            if config.matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+            if config.matrix_backend in VECTOR_SPARSE_MATRIX_BACKENDS
             else "numpy_dense_ndarray"
         ),
         "restart_supplied": restart is not None,
@@ -1097,6 +1099,7 @@ def _analyze_corotational_portal(
                 "solver_executed": execution is not None,
                 "exact_engineering_recovery": False,
                 "exact_checkpoint_chain_replay": False,
+                "observed_load_path": _corotational_observed_load_path(execution),
                 **_corotational_linear_solver_metrics(
                     execution,
                     matrix_backend=config.matrix_backend,
@@ -1421,7 +1424,25 @@ def _compile_portal(
     section_materials: dict[str, tuple[str, str]] = {}
     for index, row in enumerate(model.sections):
         path = f"/sections/{index}"
-        _keys(row, _SECTION_KEYS, path)
+        _keys(
+            row,
+            _SECTION_KEYS
+            | (
+                {"intermediate_steel_layers"}
+                if "intermediate_steel_layers" in row
+                else set()
+            ),
+            path,
+        )
+        if (
+            "intermediate_steel_layers" in row
+            and type(row["intermediate_steel_layers"]) is not list
+        ):
+            _fail(
+                "intermediate_steel_layers_invalid",
+                path,
+                "Expected an explicit nonempty layer list.",
+            )
         section_id = _stable(row["id"], f"{path}/id")
         if section_id in sections or row["type"] != "rectangular_rc_fiber_section":
             _fail(
@@ -1461,6 +1482,7 @@ def _compile_portal(
                     row["bottom_bar_count"], f"{path}/bottom_bar_count", 1, 64
                 ),
                 bar_area_m2=_positive(row["bar_area_m2"], f"{path}/bar_area_m2"),
+                intermediate_steel_layers=row.get("intermediate_steel_layers"),
                 section_id=section_id,
                 steel=steel[1],
                 concrete=concrete[1],
@@ -2620,13 +2642,181 @@ def _artifact_hash(data: bytes | bytearray | memoryview) -> str:
     return "sha256:" + hashlib.sha256(bytes(data)).hexdigest()
 
 
+def _corotational_backend_contract(
+    configuration: Mapping[str, Any],
+    metrics: Mapping[str, Any],
+    convergence_history: Any,
+    contract_bindings: Mapping[str, Any],
+) -> bool:
+    """Bind declared backend to executed diagnostics without granting replay credit."""
+    backend = configuration.get("matrix_backend")
+    count = metrics.get("sparse_factorization_count")
+    hashes = metrics.get("sparse_factorization_diagnostic_hashes")
+    if backend == VECTOR_MATRIX_BACKEND:
+        return bool(
+            configuration.get("stiffness_storage") == "numpy_dense_ndarray"
+            and metrics.get("sparse_backend_used") is False
+            and metrics.get("native_sparse_assembly_used") is False
+            and type(count) is int
+            and count == 0
+            and isinstance(hashes, (list, tuple))
+            and not hashes
+            and metrics.get("sparse_factorization_policy_hash") is None
+        )
+    if backend not in VECTOR_SPARSE_MATRIX_BACKENDS:
+        return False
+    if configuration.get("stiffness_storage") != "scipy_sparse_csr":
+        return False
+    if (
+        metrics.get("solver_executed") is False
+        and metrics.get("no_solve_contract_pass") is True
+    ):
+        bounded_plan = contract_bindings.get("bounded_planar_execution_plan")
+        return bool(
+            metrics.get("sparse_backend_used") is False
+            and metrics.get("native_sparse_assembly_used") is False
+            and type(count) is int
+            and count == 0
+            and isinstance(hashes, (list, tuple))
+            and not hashes
+            and metrics.get("sparse_factorization_policy_hash") is None
+            and metrics.get("sparse_factorization_diagnostics_passed") is False
+            and all(
+                metrics.get(name) is None
+                for name in (
+                    "sparse_factorization_max_condition_number_1",
+                    "sparse_factorization_min_normalized_absolute_pivot",
+                    "sparse_factorization_max_backward_error",
+                )
+            )
+            and isinstance(convergence_history, (list, tuple))
+            and not convergence_history
+            and metrics.get("terminal_physical_residual_trace_status") == "unavailable"
+            and metrics.get("terminal_physical_residual_trace_reason")
+            == "no_free_equations_no_convergence_claim"
+            and metrics.get("terminal_physical_residual_trace_hash") is None
+            and isinstance(configuration.get("equation_scaling"), Mapping)
+            and configuration["equation_scaling"].get("status") == "unavailable"
+            and "physical_equation_scaling_binding_hash" not in contract_bindings
+            and "terminal_physical_residual_trace_hash" not in contract_bindings
+            and (
+                bounded_plan is None
+                or (
+                    isinstance(bounded_plan, Mapping)
+                    and bounded_plan.get("equation_scaling_status") == "unavailable"
+                )
+            )
+        )
+    policy = sparse_factorization_policy_for_backend(backend)
+    if not isinstance(convergence_history, (list, tuple)) or not convergence_history:
+        return False
+    equation_count = None
+    for row in convergence_history:
+        if not isinstance(row, Mapping):
+            return False
+        for name in ("free_displacements_m", "residual_kn", "newton_increment_m"):
+            values = row.get(name)
+            if not isinstance(values, (list, tuple)):
+                return False
+            if equation_count is None:
+                equation_count = len(values)
+            if len(values) != equation_count:
+                return False
+    if (
+        equation_count is None
+        or not 1 <= equation_count <= policy.maximum_exact_condition_equations
+    ):
+        return False
+    if not (
+        metrics.get("solver_executed") is True
+        and metrics.get("sparse_backend_used") is True
+        and metrics.get("native_sparse_assembly_used") is True
+        and metrics.get("sparse_factorization_diagnostics_passed") is True
+        and type(count) is int
+        and count > 0
+        and count == len(convergence_history)
+        and isinstance(hashes, (list, tuple))
+        and len(hashes) == count
+        and all(
+            isinstance(value, str) and re.fullmatch(r"sha256:[0-9a-f]{64}", value)
+            for value in hashes
+        )
+        and metrics.get("sparse_factorization_policy_hash") == policy.policy_hash
+    ):
+        return False
+    for name, lower, upper in (
+        (
+            "sparse_factorization_max_condition_number_1",
+            0.0,
+            policy.maximum_condition_number_1,
+        ),
+        (
+            "sparse_factorization_min_normalized_absolute_pivot",
+            policy.minimum_normalized_absolute_pivot,
+            1.0,
+        ),
+        (
+            "sparse_factorization_max_backward_error",
+            0.0,
+            policy.maximum_backward_error,
+        ),
+    ):
+        value = metrics.get(name)
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or not lower <= value <= upper
+        ):
+            return False
+    return True
+
+
+def _corotational_observed_load_path(
+    execution: _CorotationalExecution | None,
+) -> dict[str, Any] | None:
+    """Retained path diagnostics, not total API work or accepted result authority."""
+    if execution is None:
+        return None
+    steps = execution.path.steps
+    return {
+        "scope": "returned_load_path_including_replayed_prefix",
+        "total_api_work_accounted": False,
+        "attempted_step_count": len(steps),
+        "committed_step_count": sum(step.committed for step in steps),
+        "replayed_prefix_step_count": execution.replayed_prefix_step_count,
+        "newly_attempted_step_count": execution.newly_solved_step_count,
+        # A history row is not a count of all solves or line-search assemblies.
+        "convergence_history_row_count": sum(
+            len(step.trial_solution.convergence_history) for step in steps
+        ),
+        "steps": [
+            {
+                "target_load_factor": step.metrics["target_load_factor"],
+                "committed": step.committed,
+                "terminal_reason": step.metrics.get("terminal_reason"),
+                "convergence_history_row_count": len(
+                    step.trial_solution.convergence_history
+                ),
+                "failed_step_rollback_exact": (
+                    step.accepted_checkpoint.canonical_bytes()
+                    == step.parent_checkpoint.canonical_bytes()
+                    if not step.committed
+                    else None
+                ),
+            }
+            for step in steps
+        ],
+    }
+
+
 def _corotational_linear_solver_metrics(
     execution: _CorotationalExecution | None,
     *,
     matrix_backend: str,
 ) -> dict[str, Any]:
     steps = execution.path.steps if execution is not None else ()
-    sparse_selected = matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+    sparse_selected = matrix_backend in VECTOR_SPARSE_MATRIX_BACKENDS
     factorization_count = sum(
         int(step.metrics.get("sparse_factorization_count", 0)) for step in steps
     )

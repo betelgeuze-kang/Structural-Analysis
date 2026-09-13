@@ -398,7 +398,27 @@ def test_updated_axis_objectivity_force_transform_and_geometric_tangent_pass(
     assert tangent["pass"] is True
     assert tangent["yielded_link_count"] == 1
     assert tangent["link_geometric_tangent_inf_norm_kn_per_m"] > 0.0
-    assert tangent["frame_link_geometric_split_error_kn_per_m"] == 0.0
+    # The split evaluates fl(fl(F + L) - F) - L. Zero is the exact-real
+    # identity; three floating operations and the row-norm accumulation may
+    # leave roundoff. Include the reported component norms' rounding in the
+    # n+4 budget, retaining both dimensional scaling and the producer's cap.
+    global_dofs = 3 * len(result["geometry"]["node_coordinates_m"])
+    unit_roundoff = np.finfo(np.float64).eps / 2.0
+    operation_count = global_dofs + 4
+    gamma = operation_count * unit_roundoff / (1.0 - operation_count * unit_roundoff)
+    split_roundoff_bound = (
+        2.0
+        * gamma
+        * (
+            tangent["frame_geometric_tangent_inf_norm_kn_per_m"]
+            + tangent["link_geometric_tangent_inf_norm_kn_per_m"]
+        )
+    )
+    assert (
+        0.0
+        <= tangent["frame_link_geometric_split_error_kn_per_m"]
+        <= min(split_roundoff_bound, 1.0e-8)
+    )
     assert 0.0 <= tangent["relative_inf_error"] <= tangent["relative_tolerance"]
     reverse_tangent = result["same_parent_reverse_frame_link_tangent"]
     assert reverse_tangent["pass"] is True

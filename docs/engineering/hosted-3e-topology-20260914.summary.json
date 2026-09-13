@@ -1,0 +1,107 @@
+{
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "job_id": 103780489493,
+  "conclusion": "success",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v6",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v6",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python -m pip install -e .[dev]",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Ruff",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compile",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Corotational focused type check",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Focused topology, scaling, and nonlinear-state binding tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Corotational portal J1-J5 branch coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Corotational portal engineering recovery branch coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Corotational direct displacement control branch coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Corotational native sparse assembly branch coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Sparse factorization diagnostics branch coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Unified nonlinear frame API contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Fiber-frame regression neighborhood",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-python@v6",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v6",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "all_observed_source_workflows_terminal": true,
+  "observed_run_count": 27,
+  "full_repository_tests_passed": false,
+  "independent_physical_validation": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-3e-topology-terminal-k5y61evi",
+    "payload_files": 3,
+    "payload_bytes": 562794,
+    "inventory_sha256": "8ea0ec9869e2033878779a1ecbcff6d703aca3d6d21b30e8ddae3d18edf90da3"
+  }
+}

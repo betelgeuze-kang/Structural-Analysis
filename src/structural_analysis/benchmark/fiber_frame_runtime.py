@@ -18,7 +18,7 @@ import re
 from statistics import fmean, median, pstdev
 from time import perf_counter_ns
 from types import MappingProxyType
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
@@ -49,7 +49,6 @@ from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_execution_sta
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_recovery import (
     create_fiber_frame_nonlinear_engineering_result_ir,
-    create_fiber_frame_nonlinear_recovery_operator,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_result_adapter import (
     create_fiber_frame_nonlinear_numerical_result_adapter,
@@ -67,10 +66,21 @@ from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
     solve_stateful_fiber_frame2d_load_step,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.trial_runtime import (
+    MATERIAL_TRIAL_TIMING_SCOPE,
+    MaterialTrialRuntimeRecorder,
+    MaterialTrialTimingError,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_INCREMENT_TIMING_SCOPE,
     NewtonRaphsonConfig,
 )
+
+if TYPE_CHECKING:
+    from structural_analysis.ai.fiber_frame_warm_start_features import (
+        FiberFrameWarmStartModelFeatures,
+    )
 
 
 FIBER_FRAME_RUNTIME_BENCHMARK_SCHEMA_VERSION = (
@@ -83,6 +93,11 @@ FIBER_FRAME_RUNTIME_INJECTED_CLOCK_PROFILE = "volatile-caller-injected-monotonic
 FIBER_FRAME_REFERENCE_STRATEGY = "accepted_checkpoint_newton"
 FIBER_FRAME_NON_AI_STRATEGY = "deterministic_secant_warm_start"
 FIBER_FRAME_AI_STRATEGY = "opt_in_ai_displacement_warm_start"
+MATERIAL_RUNTIME_ACCOUNTING_SCOPE = (
+    "measured_runs_attempted_newton_terminal_and_guard_assembly_material_trials;"
+    "excludes_warmups_compilation_checkpoint_validation_and_full_j1_j5_replays;"
+    "subset_of_inclusive_assembly_time_not_an_additional_cost"
+)
 
 FIBER_FRAME_RUNTIME_CLAIM_BOUNDARY = MappingProxyType(
     {
@@ -127,6 +142,7 @@ class FiberFrameWarmStartInput:
     physical_coordinate_scale: tuple[float, ...]
     parent_free_coordinates_m: tuple[float, ...]
     previous_free_coordinates_m: tuple[float, ...] | None
+    model_features: FiberFrameWarmStartModelFeatures | None = None
 
 
 @dataclass(frozen=True)
@@ -177,8 +193,13 @@ class FiberFrameRuntimeBenchmarkConfig:
     damping_factors: tuple[float, ...] = (1.0, 0.5, 0.25)
     response_absolute_tolerance: float = 1.0e-10
     response_relative_tolerance: float = 1.0e-8
+    terminal_polishing: bool = False
 
     def __post_init__(self) -> None:
+        if type(self.terminal_polishing) is not bool:
+            raise FiberFrameRuntimeBenchmarkError(
+                "terminal_polishing must be a boolean"
+            )
         if type(self.repetitions) is not int or not 1 <= self.repetitions <= 50:
             raise FiberFrameRuntimeBenchmarkError("repetitions must be in [1, 50]")
         if (
@@ -241,6 +262,7 @@ class FiberFrameRuntimeBenchmarkConfig:
             "damping_factors": list(self.damping_factors),
             "response_absolute_tolerance": self.response_absolute_tolerance,
             "response_relative_tolerance": self.response_relative_tolerance,
+            **({"terminal_polishing": True} if self.terminal_polishing else {}),
         }
 
 
@@ -377,6 +399,7 @@ def benchmark_public_rc_fiber_frame_warm_starts(
         residual_tolerance=cfg.residual_tolerance,
         increment_tolerance=cfg.increment_tolerance_m,
         max_iterations=cfg.maximum_iterations,
+        terminal_polishing=measure_cfg.terminal_polishing,
     )
     coordinate_binding_hash = canonical_hash(
         {
@@ -592,6 +615,9 @@ def benchmark_public_rc_fiber_frame_warm_starts(
         int(row["verification_wall_ns"]) + int(row["comparison_wall_ns"])
         for row in run_rows
     )
+    material_total = _aggregate_material_trial(
+        [_run_material_trial(row) for row in run_rows]
+    )
     payload: dict[str, Any] = {
         "schema_version": FIBER_FRAME_RUNTIME_BENCHMARK_SCHEMA_VERSION,
         "report_hash": "sha256:" + "0" * 64,
@@ -659,6 +685,7 @@ def benchmark_public_rc_fiber_frame_warm_starts(
         "summaries": summaries,
         "observed_comparisons": comparisons,
         "calculation_cost_accounting": {
+            "linear_solve_scope": VECTOR_INCREMENT_TIMING_SCOPE,
             "individual_solve_wall_time": {
                 strategy: {
                     "selected_solver_wall_ns": summaries[strategy][
@@ -682,6 +709,9 @@ def benchmark_public_rc_fiber_frame_warm_starts(
                     "attempted_terminal_trial_assembly_wall_ns": summaries[strategy][
                         "attempted_terminal_trial_assembly_wall_ns"
                     ],
+                    "attempted_material_trial_wall_ns": summaries[strategy][
+                        "attempted_material_trial_wall_ns"
+                    ],
                     "attempted_residual_assembly_call_count": summaries[strategy][
                         "attempted_residual_assembly_call_count"
                     ],
@@ -702,11 +732,18 @@ def benchmark_public_rc_fiber_frame_warm_starts(
             "failure_recovery_wall_ns": recovery_total,
             "candidate_search_wall_ns": None,
             "candidate_search_reason": "one_model_runtime_comparison_only",
-            "material_update_wall_ns": None,
-            "material_update_reason": (
-                "constitutive_trial_updates_are_included_in_assembly_and_not_"
-                "separately_instrumented"
+            "material_update_wall_ns": (
+                material_total["wall_ns"]
+                if material_total["coverage_complete"]
+                else None
             ),
+            "material_update_reason": (
+                "measured_material_integrate_api_calls"
+                if material_total["coverage_complete"]
+                else "material_trial_coverage_incomplete"
+            ),
+            "material_update_scope": MATERIAL_RUNTIME_ACCOUNTING_SCOPE,
+            "material_trial": material_total,
             "io_wall_ns": None,
             "io_reason": "model_loading_and_report_persistence_not_run_by_benchmark",
             "cpu_process_time_ns": None,
@@ -832,6 +869,7 @@ def _run_strategy(
                 "warm-start proposal mutated the accepted checkpoint"
             )
 
+        guard_material = MaterialTrialRuntimeRecorder(clock_ns=clock_ns)
         guard_started = _tick(clock_ns)
         guarded_seed, guard_row = _guard_proposal(
             problem,
@@ -841,6 +879,7 @@ def _run_strategy(
             benchmark_config,
             solver_config,
             clock_ns=clock_ns,
+            material_runtime=guard_material,
         )
         guard_ns = _elapsed(clock_ns, guard_started)
         guard_wall_ns += guard_ns
@@ -939,6 +978,7 @@ def _run_strategy(
                 "inference_wall_ns": inference_ns,
                 "guard_wall_ns": guard_ns,
                 "guard": guard_row,
+                "guard_material_trial": guard_material.to_dict(),
                 "seeded_attempt": _attempt_payload(seeded_attempt),
                 "baseline_attempt": _attempt_payload(baseline_attempt),
                 "baseline_recovery": _attempt_payload(recovery_attempt),
@@ -1018,11 +1058,15 @@ def _timed_solve(
             runtime_recorder=runtime,
         )
     except Exception as exc:
+        if isinstance(exc, MaterialTrialTimingError):
+            raise
+        _check_material_timing(runtime)
         if not capture_failure:
             raise
         result = None
         exception_type = type(exc).__name__
     else:
+        _check_material_timing(runtime)
         exception_type = None
     wall_ns = _elapsed(clock_ns, started)
     return _Attempt(
@@ -1040,6 +1084,18 @@ def _timed_solve(
     )
 
 
+def _check_material_timing(
+    runtime: StatefulFiberFrame2DLoadStepRuntimeRecorder,
+) -> None:
+    # An outer timing finally can replace an inner instrumentation exception.
+    # Never classify that attempt as a recoverable physical solver failure.
+    if (
+        runtime.newton.material.timing_error_count
+        or runtime.terminal_material.timing_error_count
+    ):
+        raise MaterialTrialTimingError("material trial timing failed during solve")
+
+
 def _guard_proposal(
     problem: StatefulFiberFrame2DProblem,
     parent: Any,
@@ -1049,6 +1105,7 @@ def _guard_proposal(
     solver_config: NewtonRaphsonConfig,
     *,
     clock_ns: Callable[[], int],
+    material_runtime: MaterialTrialRuntimeRecorder | None = None,
 ) -> tuple[tuple[float, ...] | None, dict[str, Any]]:
     if proposal is None:
         return None, {
@@ -1075,6 +1132,7 @@ def _guard_proposal(
             parent,
             target_load_factor=target_load_factor,
             trial_free_coordinates_m=parent_coordinates,
+            material_runtime=material_runtime,
         )
     finally:
         baseline_wall_ns = _elapsed(clock_ns, baseline_started)
@@ -1101,6 +1159,7 @@ def _guard_proposal(
                 parent,
                 target_load_factor=target_load_factor,
                 trial_free_coordinates_m=damped,
+                material_runtime=material_runtime,
             )
             relative_residual = _relative_residual(problem, assembly.residual_kn)
         except (TypeError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
@@ -1202,6 +1261,22 @@ def _ai_proposal(
 ) -> tuple[tuple[float, ...] | None, float | None, bool | None, str]:
     if policy is None:
         return None, None, None, "policy_unavailable"
+    model_features = None
+    try:
+        model_feature_profile = getattr(policy, "model_feature_profile", None)
+        if model_feature_profile is not None:
+            from structural_analysis.ai.fiber_frame_warm_start_features import (
+                MODEL_FEATURE_PROFILE,
+                fiber_frame_warm_start_model_features,
+            )
+
+            if model_feature_profile != MODEL_FEATURE_PROFILE:
+                return None, None, None, "policy_model_feature_profile_unsupported"
+            # Only immutable authored geometry/material/load metadata is read.
+            # This call is inside the existing inference timing interval.
+            model_features = fiber_frame_warm_start_model_features(problem)
+    except Exception:
+        return None, None, None, "policy_model_feature_preparation_failed"
     parent = checkpoints[-1]
     previous = checkpoints[-2] if len(checkpoints) >= 2 else None
     policy_input = FiberFrameWarmStartInput(
@@ -1222,6 +1297,7 @@ def _ai_proposal(
         previous_free_coordinates_m=(
             _free_coordinates(problem, previous) if previous is not None else None
         ),
+        model_features=model_features,
     )
     try:
         proposal = policy.propose(policy_input)
@@ -1316,11 +1392,9 @@ def _verify_selected_path(
             terminal,
             result_id=f"result.public_rc_fiber_frame.{digest}",
         )
-        recovery = create_fiber_frame_nonlinear_recovery_operator(numerical_adapter)
         engineering = create_fiber_frame_nonlinear_engineering_result_ir(
             engineering_result_id=f"engineering.public_rc_fiber_frame.{digest}",
             source_adapter=numerical_adapter,
-            recovery_operator=recovery,
         )
     except (TypeError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
         return (
@@ -1404,6 +1478,167 @@ def _verify_reference_solver_episode(
     }
 
 
+def _path_comparison_snapshot(
+    path: StatefulFiberFrame2DLoadPathResult,
+) -> dict[str, Any]:
+    """Detach exactly the checkpoint and trial fields used by path comparison.
+
+    Canonical checkpoint bytes retain signed zero and every material-state bit.
+    This transport snapshot is not an independently replayed solver authority.
+    """
+
+    checkpoints = (
+        path.initial_checkpoint,
+        *(step.accepted_checkpoint for step in path.steps if step.committed),
+    )
+    payload = {
+        "schema_version": "public-rc-fiber-frame-path-comparison-snapshot.v1",
+        "status": path.status,
+        "contract_pass": path.contract_pass,
+        "checkpoints": [
+            {
+                **checkpoint.to_dict(),
+                "canonical_bytes_hex": checkpoint.canonical_bytes().hex(),
+            }
+            for checkpoint in checkpoints
+        ],
+        "trial_assemblies": [step.trial_assembly.to_dict() for step in path.steps],
+    }
+    payload["snapshot_hash"] = canonical_hash(payload)
+    return deepcopy(payload)
+
+
+def _comparison_json_value(value: Any, *, depth: int = 0) -> None:
+    """Reject unbounded, non-JSON and non-finite transport values."""
+
+    if depth > 32:
+        raise FiberFrameRuntimeBenchmarkError(
+            "comparison snapshot nesting exceeds limit"
+        )
+    if type(value) is dict:
+        if len(value) > 100_000 or any(type(key) is not str for key in value):
+            raise FiberFrameRuntimeBenchmarkError(
+                "comparison snapshot object is invalid"
+            )
+        for child in value.values():
+            _comparison_json_value(child, depth=depth + 1)
+    elif type(value) is list:
+        if len(value) > 100_000:
+            raise FiberFrameRuntimeBenchmarkError(
+                "comparison snapshot array exceeds limit"
+            )
+        for child in value:
+            _comparison_json_value(child, depth=depth + 1)
+    elif type(value) is str:
+        if len(value) > 8 * 1024 * 1024:
+            raise FiberFrameRuntimeBenchmarkError(
+                "comparison snapshot string exceeds limit"
+            )
+    elif type(value) in (int, float):
+        if not math.isfinite(value):
+            raise FiberFrameRuntimeBenchmarkError(
+                "comparison snapshot number is not finite"
+            )
+    elif value is not None and type(value) is not bool:
+        raise FiberFrameRuntimeBenchmarkError("comparison snapshot value is not JSON")
+
+
+def _validate_comparison_checkpoint(row: dict[str, Any]) -> None:
+    # Reuse the checkpoint schema and existing typed canonical encoders.  No
+    # problem is available here: source/model/replay authority remains separate.
+    from dataclasses import fields
+
+    from structural_analysis.assembly import (
+        stateful_fiber_frame2d_checkpoint_io as codec,
+    )
+    from structural_analysis.assembly.stateful_fiber_frame2d_state import (
+        StatefulFiberFrame2DCheckpoint,
+    )
+    from structural_analysis.elements.stateful_fiber_beam2d_state import (
+        StatefulFiberBeam2DState,
+    )
+    from structural_analysis.materials.concrete_damage import ConcreteDamageState
+    from structural_analysis.materials.stateful_fiber_section import (
+        StatefulFiberSectionState,
+    )
+    from structural_analysis.materials.uniaxial_plasticity import (
+        UniaxialPlasticityState,
+    )
+
+    if type(row) is not dict or type(row.get("canonical_bytes_hex")) is not str:
+        raise FiberFrameRuntimeBenchmarkError("comparison checkpoint bytes are missing")
+    payload = {key: value for key, value in row.items() if key != "canonical_bytes_hex"}
+    raw = codec._artifact_json_bytes(payload)
+    if len(raw) > codec.STATEFUL_FIBER_FRAME2D_CHECKPOINT_MAX_BYTES:
+        raise FiberFrameRuntimeBenchmarkError(
+            "comparison checkpoint exceeds byte limit"
+        )
+    codec._validate_schema(payload)
+    classes = {
+        "stateful-fiber-frame2d-checkpoint.v1": StatefulFiberFrame2DCheckpoint,
+        "stateful-fiber-beam2d-state.v1": StatefulFiberBeam2DState,
+        "stateful-rc-fiber-section-state.v1": StatefulFiberSectionState,
+        "uniaxial-combined-hardening-state.v1": UniaxialPlasticityState,
+        "uniaxial-asymmetric-concrete-damage-state.v1": ConcreteDamageState,
+    }
+
+    def restore(item: dict[str, Any]) -> Any:
+        cls = classes[item["schema_version"]]
+        # Schema validation already requires mandatory wire fields. Optional
+        # native expansion fields are omitted by the original v1 encoder.
+        values = {
+            field.name: item[field.name]
+            for field in fields(cls)
+            if field.init and field.name in item
+        }
+        for key in ("element_states", "integration_point_states", "fiber_states"):
+            if key in values:
+                values[key] = tuple(restore(child) for child in values[key])
+        for key in ("global_displacements", "local_displacements"):
+            if key in values:
+                values[key] = tuple(values[key])
+        restored = cls(**values)
+        codec._require_roundtrip(item, restored, path="comparison checkpoint")
+        return restored
+
+    restored = restore(payload)
+    if restored.canonical_bytes().hex() != row["canonical_bytes_hex"]:
+        raise FiberFrameRuntimeBenchmarkError(
+            "comparison checkpoint canonical bytes disagree with fields"
+        )
+
+
+def _validate_path_comparison_snapshot(snapshot: Any) -> None:
+    if type(snapshot) is not dict or set(snapshot) != {
+        "schema_version",
+        "status",
+        "contract_pass",
+        "checkpoints",
+        "trial_assemblies",
+        "snapshot_hash",
+    }:
+        raise FiberFrameRuntimeBenchmarkError("comparison snapshot fields are invalid")
+    _comparison_json_value(snapshot)
+    if (
+        snapshot["schema_version"]
+        != "public-rc-fiber-frame-path-comparison-snapshot.v1"
+        or snapshot["status"] not in ("ready", "blocked")
+        or type(snapshot["contract_pass"]) is not bool
+        or type(snapshot["checkpoints"]) is not list
+        or not 1 <= len(snapshot["checkpoints"]) <= 65
+        or type(snapshot["trial_assemblies"]) is not list
+        or not 0 <= len(snapshot["trial_assemblies"]) <= 64
+        or any(type(row) is not dict for row in snapshot["trial_assemblies"])
+    ):
+        raise FiberFrameRuntimeBenchmarkError("comparison snapshot contract is invalid")
+    if snapshot["snapshot_hash"] != canonical_hash(
+        {key: value for key, value in snapshot.items() if key != "snapshot_hash"}
+    ):
+        raise FiberFrameRuntimeBenchmarkError("comparison snapshot hash does not match")
+    for row in snapshot["checkpoints"]:
+        _validate_comparison_checkpoint(row)
+
+
 def _compare_paths(
     reference: StatefulFiberFrame2DLoadPathResult,
     candidate: StatefulFiberFrame2DLoadPathResult,
@@ -1411,24 +1646,48 @@ def _compare_paths(
     absolute_tolerance: float,
     relative_tolerance: float,
 ) -> dict[str, Any]:
-    reference_checkpoints = (
-        reference.initial_checkpoint,
-        *(step.accepted_checkpoint for step in reference.steps if step.committed),
+    return _compare_path_comparison_snapshots(
+        _path_comparison_snapshot(reference),
+        _path_comparison_snapshot(candidate),
+        absolute_tolerance=absolute_tolerance,
+        relative_tolerance=relative_tolerance,
     )
-    candidate_checkpoints = (
-        candidate.initial_checkpoint,
-        *(step.accepted_checkpoint for step in candidate.steps if step.committed),
-    )
+
+
+def _compare_path_comparison_snapshots(
+    reference: dict[str, Any],
+    candidate: dict[str, Any],
+    *,
+    absolute_tolerance: float,
+    relative_tolerance: float,
+) -> dict[str, Any]:
+    """Compare internally validated transport data using the legacy response rule.
+
+    Rehashed contradictions are rejected; this is not source authentication or a
+    substitute for the worker's full selected-path and reference-episode replay.
+    """
+
+    for tolerance in (absolute_tolerance, relative_tolerance):
+        if (
+            type(tolerance) not in (int, float)
+            or not math.isfinite(tolerance)
+            or tolerance < 0
+        ):
+            raise FiberFrameRuntimeBenchmarkError("comparison tolerance is invalid")
+    _validate_path_comparison_snapshot(reference)
+    _validate_path_comparison_snapshot(candidate)
+    reference_checkpoints = reference["checkpoints"]
+    candidate_checkpoints = candidate["checkpoints"]
     schedule_match = tuple(
-        (checkpoint.epoch, checkpoint.load_factor)
+        (checkpoint["epoch"], checkpoint["load_factor"])
         for checkpoint in reference_checkpoints
     ) == tuple(
-        (checkpoint.epoch, checkpoint.load_factor)
+        (checkpoint["epoch"], checkpoint["load_factor"])
         for checkpoint in candidate_checkpoints
     )
     structure_match = len(reference_checkpoints) == len(candidate_checkpoints)
     exact_checkpoint_match = structure_match and all(
-        left.canonical_bytes() == right.canonical_bytes()
+        left["canonical_bytes_hex"] == right["canonical_bytes_hex"]
         for left, right in zip(
             reference_checkpoints, candidate_checkpoints, strict=True
         )
@@ -1444,9 +1703,11 @@ def _compare_paths(
         for left, right in zip(
             reference_checkpoints, candidate_checkpoints, strict=True
         ):
-            left_displacement = np.asarray(left.global_displacements, dtype=np.float64)
+            left_displacement = np.asarray(
+                left["global_displacements"], dtype=np.float64
+            )
             right_displacement = np.asarray(
-                right.global_displacements, dtype=np.float64
+                right["global_displacements"], dtype=np.float64
             )
             abs_difference, rel_difference = _array_difference(
                 left_displacement,
@@ -1469,8 +1730,8 @@ def _compare_paths(
                 rel_difference,
                 within_tolerance,
             ) = _numeric_payload_difference(
-                [row.to_dict() for row in left.element_states],
-                [row.to_dict() for row in right.element_states],
+                left["element_states"],
+                right["element_states"],
                 absolute_tolerance=absolute_tolerance,
                 relative_tolerance=relative_tolerance,
             )
@@ -1478,14 +1739,16 @@ def _compare_paths(
             material_tolerance_match = material_tolerance_match and within_tolerance
             material_max_abs = max(material_max_abs, abs_difference)
             material_max_rel = max(material_max_rel, rel_difference)
-    trial_response_structure_match = len(reference.steps) == len(candidate.steps)
+    trial_response_structure_match = len(reference["trial_assemblies"]) == len(
+        candidate["trial_assemblies"]
+    )
     trial_response_tolerance_match = trial_response_structure_match
     trial_response_max_abs = 0.0
     trial_response_max_rel = 0.0
     if trial_response_structure_match:
         for left_step, right_step in zip(
-            reference.steps,
-            candidate.steps,
+            reference["trial_assemblies"],
+            candidate["trial_assemblies"],
             strict=True,
         ):
             (
@@ -1494,8 +1757,8 @@ def _compare_paths(
                 rel_difference,
                 within_tolerance,
             ) = _numeric_payload_difference(
-                left_step.trial_assembly.to_dict(),
-                right_step.trial_assembly.to_dict(),
+                left_step,
+                right_step,
                 absolute_tolerance=absolute_tolerance,
                 relative_tolerance=relative_tolerance,
             )
@@ -1514,9 +1777,9 @@ def _compare_paths(
                 rel_difference,
             )
     response_match = bool(
-        reference.status == candidate.status == "ready"
-        and reference.contract_pass
-        and candidate.contract_pass
+        reference["status"] == candidate["status"] == "ready"
+        and reference["contract_pass"]
+        and candidate["contract_pass"]
         and schedule_match
         and structure_match
         and material_structure_match
@@ -1681,6 +1944,8 @@ def _strategy_summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
         int(row["attempted_stateful_runtime"]["terminal_trial_assembly_wall_ns"])
         for row in rows
     ]
+    material_rows = [_run_material_trial(row) for row in rows]
+    material_total = _aggregate_material_trial(material_rows)
     attempted_residual_assembly_count = [
         int(row["attempted_newton_runtime"]["assemble_call_count"])
         + int(row["attempted_stateful_runtime"]["terminal_trial_assembly_call_count"])
@@ -1712,6 +1977,13 @@ def _strategy_summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
         "attempted_terminal_trial_assembly_wall_ns": _distribution(
             attempted_terminal_assembly
         ),
+        "attempted_material_trial_wall_ns": (
+            _distribution([row["wall_ns"] for row in material_rows])
+            if material_total["coverage_complete"]
+            else _unmeasured_distribution("material_trial_coverage_incomplete")
+        ),
+        "material_trial": material_total,
+        "material_trial_accounting_scope": MATERIAL_RUNTIME_ACCOUNTING_SCOPE,
         "attempted_residual_assembly_call_count": _distribution(
             attempted_residual_assembly_count
         ),
@@ -1845,6 +2117,9 @@ def _aggregate_newton_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
         "exception_run_count",
         "assemble_call_count",
         "assemble_exception_count",
+        "linear_solve_wall_ns",
+        "linear_solve_call_count",
+        "linear_solve_exception_count",
     )
     payload: dict[str, Any] = {
         name: sum(int(attempt.newton_runtime.get(name, 0)) for attempt in attempts)
@@ -1852,16 +2127,17 @@ def _aggregate_newton_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
     }
     payload.update(
         {
-            "linear_solve_wall_ns": None,
-            "linear_solve_reason": "not_separately_instrumented",
-            "linear_solve_call_count": None,
-            "linear_solve_exception_count": None,
+            "linear_solve_reason": "measured_increment_backend",
+            "linear_solve_scope": VECTOR_INCREMENT_TIMING_SCOPE,
+            "material_trial": _aggregate_material_trial(
+                [attempt.newton_runtime.get("material_trial") for attempt in attempts]
+            ),
         }
     )
     return payload
 
 
-def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, int]:
+def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
     fields = (
         "total_wall_ns",
         "terminal_trial_assembly_wall_ns",
@@ -1872,10 +2148,88 @@ def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, int]:
         "terminal_trial_assembly_call_count",
         "terminal_trial_assembly_exception_count",
     )
-    return {
+    payload = {
         name: sum(int(attempt.stateful_runtime.get(name, 0)) for attempt in attempts)
         for name in fields
     }
+    return {
+        **payload,
+        "terminal_material_trial": _aggregate_material_trial(
+            [
+                attempt.stateful_runtime.get("terminal_material_trial")
+                for attempt in attempts
+            ]
+        ),
+    }
+
+
+def _aggregate_material_trial(rows: Sequence[Any]) -> dict[str, Any]:
+    """Sum observed subsets, retaining missing/unsupported coverage as unavailable."""
+
+    payload = MaterialTrialRuntimeRecorder().to_dict()
+    totals = (
+        "wall_ns",
+        "call_count",
+        "exception_count",
+        "timing_error_count",
+        "instrumented_section_call_count",
+        "unmeasured_section_call_count",
+    )
+    material_fields = ("wall_ns", "call_count", "exception_count")
+    reasons: set[str] = set()
+    for row in rows:
+        if not isinstance(row, Mapping):
+            reasons.add("material_trial_metadata_missing")
+            continue
+        materials = row.get("materials")
+        valid = (
+            row.get("schema_version") == payload["schema_version"]
+            and row.get("scope") == MATERIAL_TRIAL_TIMING_SCOPE
+            and type(row.get("coverage_complete")) is bool
+            and isinstance(row.get("unavailable_reasons"), list)
+            and all(isinstance(value, str) for value in row["unavailable_reasons"])
+            and all(type(row.get(key)) is int and row[key] >= 0 for key in totals)
+            and isinstance(materials, Mapping)
+            and all(
+                isinstance(materials.get(kind), Mapping)
+                and all(
+                    type(materials[kind].get(key)) is int and materials[kind][key] >= 0
+                    for key in material_fields
+                )
+                for kind in ("steel", "concrete")
+            )
+        )
+        if not valid or any(
+            row[key] != sum(materials[kind][key] for kind in ("steel", "concrete"))
+            for key in material_fields
+        ):
+            reasons.add("material_trial_metadata_invalid")
+            continue
+        for key in totals:
+            payload[key] += row[key]
+        for kind in ("steel", "concrete"):
+            for key in material_fields:
+                payload["materials"][kind][key] += materials[kind][key]
+        reasons.update(row["unavailable_reasons"])
+        if not row["coverage_complete"]:
+            reasons.add("material_trial_coverage_incomplete")
+        if row["unmeasured_section_call_count"]:
+            reasons.add("section_material_trial_instrumentation_unavailable")
+        if row["timing_error_count"]:
+            reasons.add("material_trial_clock_invalid")
+    payload["coverage_complete"] = not reasons
+    payload["unavailable_reasons"] = sorted(reasons)
+    return payload
+
+
+def _run_material_trial(row: Mapping[str, Any]) -> dict[str, Any]:
+    return _aggregate_material_trial(
+        [
+            row["attempted_newton_runtime"].get("material_trial"),
+            row["attempted_stateful_runtime"].get("terminal_material_trial"),
+            *(step.get("guard_material_trial") for step in row["steps"]),
+        ]
+    )
 
 
 def _attempt_payload(attempt: _Attempt | None) -> dict[str, Any] | None:
@@ -1910,6 +2264,18 @@ def _attempt_payload(attempt: _Attempt | None) -> dict[str, Any] | None:
         "exception_type": attempt.exception_type,
         "convergence_iteration_count": len(
             attempt.result.trial_solution.convergence_history
+        ),
+        **(
+            {
+                "terminal_polishing": deepcopy(
+                    attempt.result.trial_solution.metrics["terminal_polishing"]
+                ),
+                "linear_solve_count": attempt.result.trial_solution.metrics[
+                    "linear_solve_count"
+                ],
+            }
+            if "terminal_polishing" in attempt.result.trial_solution.metrics
+            else {}
         ),
     }
 
@@ -1981,6 +2347,14 @@ def _solver_config_payload(config: NewtonRaphsonConfig) -> dict[str, Any]:
         "max_iterations": config.max_iterations,
         "matrix_backend": config.matrix_backend,
         "line_search_alphas": list(config.line_search_alphas),
+        **(
+            {
+                "terminal_polishing": True,
+                "terminal_polishing_profile": "newton-vector-terminal-polishing.v1",
+            }
+            if config.terminal_polishing
+            else {}
+        ),
     }
 
 

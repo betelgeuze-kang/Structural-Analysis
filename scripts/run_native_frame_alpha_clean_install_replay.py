@@ -116,7 +116,7 @@ def _extract_verified_archive(
         manifest_names = [
             info.filename
             for info in archive.infolist()
-            if info.filename.endswith("/manifest.json")
+            if info.filename.count("/") == 1 and info.filename.endswith("/manifest.json")
         ]
         if len(manifest_names) != 1:
             raise CleanInstallReplayError("archive_manifest_count_invalid")

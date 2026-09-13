@@ -1,0 +1,211 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-viewer-runtime-delivery-B7MO8G",
+    "files": 6,
+    "bytes": 242118,
+    "inventory_sha256": "45f40d1dfe681d0a837365f54eab144eb47aeede93c2cfd398fff87b3de37fa8"
+  },
+  "observation": {
+    "undefined_initLog_observed": false,
+    "console_messages": [
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing."
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[GroupMarkerNotSet(crbug.com/242999)!:A0302C00AC1F0000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader (about:flags#enable-unsafe-swiftshader) flag to opt in to lower security guarantees for trusted content."
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Code-check companion hydration failed: implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json Error: HTTP 404\n    at iz (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:4902:1593)\n    at async bR (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:4881:2002)\n    at async xR (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:4881:2429)\n    at async _z (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:4902:18706)\n    at async http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:6074:16692"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Drawing comparison presentation failed: TypeError: Cannot read properties of null (reading 'steps')\n    at aw (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:3903:32844)\n    at YW (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:6034:6059)\n    at aG (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:6034:11076)\n    at _z (http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:4902:18825)\n    at async http://127.0.0.1:44023/assets/structureViewer-D7OsPheE.js:6074:16692"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[buildUI] data.meta?.material_catalog_summary: 6"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[buildUI] data.materials: 6"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[buildUI] data.elements: 12728"
+      }
+    ],
+    "source_revision": "e2f214ff6417e34e9b221b1d8ead79704c18df29",
+    "original_source_revisions": [
+      "d11248ce06627c8466ae348a88f91a3b167ce05e",
+      "5c1110737cc94d7decb19f02001bf155bef0ff72"
+    ],
+    "observations": [
+      {
+        "viewer_source": "canonical MIDAS33 optimized roundtrip raw model",
+        "name": "price",
+        "strategy": "price_order",
+        "width": 1440,
+        "report_hash": "sha256:6b8b60ca342c0a5c86f6561737cf51284b091d5b4756948be97d0423d17ba0f0",
+        "selected_candidate": "middle",
+        "cost_skipped": [
+          "large",
+          "outside"
+        ],
+        "outside_horizon": [],
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [
+          {
+            "path": "price_order/middle/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "ae676aa07e9c71d8a46d55306bdd7a92dc5d9d7c1690ad78e86d39fb06624f13"
+          },
+          {
+            "path": "price_order/middle/baseline/result.json",
+            "bytes": 1653528,
+            "sha256": "d0ff376dba6897f04fa74a31059db89051600c7b05a705f4ad0cb98d3db86499"
+          },
+          {
+            "path": "price_order/middle/baseline/checkpoint.json",
+            "bytes": 35069,
+            "sha256": "834d71f156020ce2e04eeff158a07140e4bdb0d8433b7f4c14458b3e79d77f0a"
+          },
+          {
+            "path": "price_order/middle/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "991d93dae08760ccb6d75751a2827ee0d2941f25805e438629579477dbf243d2"
+          },
+          {
+            "path": "result.json",
+            "bytes": 3231,
+            "sha256": "a363c0ab5bf18856dd5444c9834df575de639f8033ba94ebba7c180e4ddbfeb6"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 12000,
+            "sha256": "2ee94f79e8519f2795dd3e99eea1503cdd19729c45e25e7a4289fabe0d9860fb"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          },
+          {
+            "path": "pool/large.json",
+            "bytes": 1462,
+            "sha256": "db44ba2870d27061f8a5bfa9e1a1778c80c0b505fedf73e473c83347fe0dba18"
+          },
+          {
+            "path": "pool/outside.json",
+            "bytes": 1462,
+            "sha256": "c75a12fdbd7eac519379b72692c8d747ae73a56e5662417a402a21c31a7fa19c"
+          },
+          {
+            "path": "price_order/decisions/00.json",
+            "bytes": 1115,
+            "sha256": "e2e84989ac94daab3b7f855191d9d7a405a142203055127a9a0dcf37d529a14a"
+          },
+          {
+            "path": "price_order/decisions/01.json",
+            "bytes": 1111,
+            "sha256": "69991dc61bcedd72e457ea3006aca71b55717902870d090a469555026d4ab2b1"
+          },
+          {
+            "path": "price_order/decisions/02.json",
+            "bytes": 1112,
+            "sha256": "a7869deab42059b245bd3c311da9a34dd4b3258e4d888b12924ccae8c2d422f8"
+          },
+          {
+            "path": "price_order/decisions/03.json",
+            "bytes": 1126,
+            "sha256": "9773739c63b6a64ba768b3dc00835e7868049adc2d7c39f02a3d01271a1d81d9"
+          },
+          {
+            "path": "price_order/decisions/04.json",
+            "bytes": 1128,
+            "sha256": "9cd6c0f392f1aa05a8611260d7a4bb071367571c86680f66b8165f7183e350a0"
+          }
+        ],
+        "review_wall_ns": 7813265350,
+        "outer_panel_fits_viewport": true
+      }
+    ],
+    "http_exact_responses": 42,
+    "original_downloads": 14,
+    "review_wall_ns": 7813265350,
+    "download_action_pacing_ms": 250,
+    "review_scope": "navigation_validation_selection_downloads_including_250ms_action_pacing_excludes_server_startup_browser_launch_screenshots_and_teardown",
+    "new_numerical_paths": 0,
+    "new_policy_fits": 0,
+    "page_errors": [],
+    "independent_physical_validation": false,
+    "net_savings_proved": false
+  },
+  "runtime_assets": [
+    {
+      "path": "index.data.js",
+      "bytes": 6960999,
+      "sha256": "8b2cfd6ace2cd9abfe7ce597b15f8ced9c89c5935b9fa6122ab313975319bd8d"
+    },
+    {
+      "path": "index.midas33.data.js",
+      "bytes": 11466006,
+      "sha256": "652062ff9a17a1950c5cd667afe6ab92d161612ad9e6acd44a38215d030c0cdc"
+    },
+    {
+      "path": "index.real_drawing_private.data.js",
+      "bytes": 9286561,
+      "sha256": "7c73b2ddb6bf6691dc17268117ff6b16895a59c23024432234803ff58aaa6399"
+    },
+    {
+      "path": "charts.data.js",
+      "bytes": 8863308,
+      "sha256": "5f28c02101df4ead6d55d0f7095087b5b0f055504034368a8c6a4161695a5cc9"
+    },
+    {
+      "path": "panel_zone.data.js",
+      "bytes": 64569,
+      "sha256": "c51bcc72f09b3a9d4283a6fbdb1cb646955b83d9b58fc6e5ee89d2d10486b69c"
+    },
+    {
+      "path": "optimization_history.data.js",
+      "bytes": 8647,
+      "sha256": "432550acdfbed606f4304712cc6474fdc329934412f2afd04047e0fe59924136"
+    },
+    {
+      "path": "drawings/manifest.json",
+      "bytes": 1348,
+      "sha256": "25b3a2bc254936e1a3d2f8c366b72278581769e39c95209bfe5d1b6c00e7ad3b"
+    }
+  ],
+  "runtime_asset_bytes": 36651438
+}

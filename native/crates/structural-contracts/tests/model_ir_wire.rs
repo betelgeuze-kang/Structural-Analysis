@@ -141,6 +141,7 @@ fn exact_integer_guard_covers_every_integer_property_in_the_schema() {
     assert_eq!(
         integer_properties,
         [
+            "bar_count",
             "bottom_bar_count",
             "concrete_layer_count",
             "index",
@@ -299,4 +300,60 @@ fn schema_report_is_explicitly_not_a_semantic_or_solver_claim() {
     let serialized = serde_json::to_string(&report).expect("serialized report");
     assert!(!serialized.contains("analysis_ready"));
     assert!(!serialized.contains("semantics_valid"));
+}
+
+fn intermediate_layer_wire_fixture() -> Value {
+    let path = repository_root().join("examples/bounded_planar_frame_alpha.model-ir.v2.json");
+    let mut value: Value =
+        serde_json::from_slice(&std::fs::read(path).expect("planar fixture")).expect("JSON");
+    value["sections"][0] = json!({
+        "id": "RC1", "index": 0, "family_id": "rectangular_rc_fiber_2d",
+        "parameter_set_version": "1", "steel_material_id": "STEEL",
+        "concrete_material_id": "CONCRETE", "source_id": null, "extensions": {},
+        "parameters": {
+            "width_m": 0.4, "depth_m": 0.5, "cover_m": 0.05,
+            "concrete_layer_count": 8, "top_bar_count": 2, "bottom_bar_count": 2,
+            "bar_area_m2": 0.0002,
+            "intermediate_steel_layers": [{"y_m": 0.0, "bar_count": 2}]
+        }
+    });
+    value
+}
+
+#[test]
+fn intermediate_steel_layers_are_preserved_in_wire_identity() {
+    let value = intermediate_layer_wire_fixture();
+    let document = parse_value(&value);
+    assert_eq!(
+        document.value()["sections"][0]["parameters"]["intermediate_steel_layers"],
+        value["sections"][0]["parameters"]["intermediate_steel_layers"]
+    );
+    let mut changed = value;
+    changed["sections"][0]["parameters"]["intermediate_steel_layers"][0]["bar_count"] = json!(3);
+    assert_ne!(
+        document.semantic_hash(),
+        parse_value(&changed).semantic_hash()
+    );
+}
+
+#[test]
+fn intermediate_steel_layers_reject_invalid_wire_values() {
+    let invalid = [
+        json!(null),
+        json!([]),
+        json!([{"y_m": 0.0, "bar_count": 2.0}]),
+        json!([{"y_m": 0.0, "bar_count": true}]),
+        json!([{"y_m": 0.0, "bar_count": 0}]),
+        json!([{"y_m": 0.0, "bar_count": 65}]),
+        json!([{"y_m": 0.0}]),
+        json!([{"y_m": "zero", "bar_count": 2}]),
+        json!([{"y_m": 0.0, "bar_count": 2, "extra": 1}]),
+        json!(vec![json!({"y_m": 0.0, "bar_count": 2}); 33]),
+    ];
+    for layers in invalid {
+        let mut value = intermediate_layer_wire_fixture();
+        value["sections"][0]["parameters"]["intermediate_steel_layers"] = layers;
+        let report = validate_model_ir_v2_wire(&value).expect("schema report");
+        assert!(!report.schema_valid, "unexpectedly accepted {value}");
+    }
 }

@@ -63,6 +63,10 @@ function RootRouter(): ReactElement {
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobStatusUrl,
     window.location.origin,
   )
+  const designComparisonUrl = import.meta.env.VITE_DESIGN_COMPARISON_URL
+    || window.__STRUCTURAL_WORKBENCH_CONFIG__?.designComparisonUrl
+  const candidateSearchProcessUrl = import.meta.env.VITE_CANDIDATE_SEARCH_PROCESS_URL
+    || window.__STRUCTURAL_WORKBENCH_CONFIG__?.candidateSearchProcessUrl
   const nativeFrameResultUrl = resolveSameOriginJobUrl(
     import.meta.env.VITE_NATIVE_FRAME_RESULT_URL
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameResultUrl,
@@ -104,6 +108,12 @@ function RootRouter(): ReactElement {
   ) : (
     <WorkbenchPage
       jobStatusUrl={jobStatusUrl}
+      jobAuthorization={window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobAuthorization}
+      rcControlStrategyCohortUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlStrategyCohortUrl}
+      rcControlSearchUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlSearchUrl}
+      rcControlDesignUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlDesignUrl}
+      designComparisonUrl={designComparisonUrl}
+      candidateSearchProcessUrl={candidateSearchProcessUrl}
       nativeFrameResultUrl={nativeFrameResultUrl}
       nativeFrameReportUrl={nativeFrameReportUrl}
       nativeFrameBundleUrl={nativeFrameBundleUrl}

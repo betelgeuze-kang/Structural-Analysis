@@ -474,14 +474,19 @@ export function parseNativeJsonStrict(text: string): unknown {
     while (position < text.length && /[\t\n\r ]/.test(text[position])) position += 1
   }
 
-  function stringToken(): string {
+  function stringToken(decode = true): string {
     if (text[position] !== '"') fail()
     const start = position
+    let escaped = false
     position += 1
     while (position < text.length) {
       const character = text[position]
       if (character === '"') {
         position += 1
+        // Only object keys need decoding during duplicate-key scanning.
+        // The complete document is decoded once after strict validation.
+        if (!decode) return ''
+        if (!escaped) return text.slice(start + 1, position - 1)
         try {
           return JSON.parse(text.slice(start, position)) as string
         } catch {
@@ -489,6 +494,7 @@ export function parseNativeJsonStrict(text: string): unknown {
         }
       }
       if (character === '\\') {
+        escaped = true
         position += 1
         const escape = text[position]
         if (escape === 'u') {
@@ -524,7 +530,7 @@ export function parseNativeJsonStrict(text: string): unknown {
     const character = text[position]
     if (character === '{') object()
     else if (character === '[') array()
-    else if (character === '"') void stringToken()
+    else if (character === '"') void stringToken(false)
     else if (character === 't') literal('true')
     else if (character === 'f') literal('false')
     else if (character === 'n') literal('null')

@@ -1,0 +1,30 @@
+{
+  "artifacts": [
+    {
+      "byte_length": 3279,
+      "path": "checkpoint.json",
+      "sha256": "sha256:0dd5e27de8019c2d6cbcf667ceecfbc6907442070a0f4bd0fb15b1f5a1de2a4e"
+    },
+    {
+      "byte_length": 2469,
+      "path": "evidence.json",
+      "sha256": "sha256:713f03939594d3977f34b2708c98396cae4bf5213a5349ab865eb4c1aece775f"
+    },
+    {
+      "byte_length": 1711,
+      "path": "job.json",
+      "sha256": "sha256:07aaa6d035d1be6578caa22296b1a3c8be8d4f0b79dbcc59ed423933fe4841a1"
+    },
+    {
+      "byte_length": 77536,
+      "path": "result.json",
+      "sha256": "sha256:af163e17972084dc725a104f41ff16a6bf6e4d2c7914998dd81271ac806299fc"
+    }
+  ],
+  "fixture_scope": "same-operator bounded candidate execution with actual process loss; no independent numerical or release authority",
+  "job_view_serialization": "canonical serialization of preserved resume observation job object",
+  "origin": "/tmp/structural-frame3d-job-observation.udq06dtm",
+  "raw_result_and_evidence_bytes_preserved": true,
+  "schema_version": "frame3d-workbench-fixture-provenance.v1",
+  "source_revision": "f456217aa7e5fe120bbcf86530e5217b5a4720fc"
+}

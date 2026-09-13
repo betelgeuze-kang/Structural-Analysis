@@ -1,0 +1,106 @@
+{
+  "head": "98e3bc2c3eb0c96ec4dfa5c8544c829c6005d0f7",
+  "jobs": [
+    {
+      "id": 103759452847,
+      "run_id": 34770631587,
+      "name": "pytest-development-contracts",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T17:23:16.0177346Z 1176 passed in 840.12s (0:14:00)"
+      ]
+    },
+    {
+      "id": 103759452904,
+      "run_id": 34770631587,
+      "name": "pytest-full-shard-1",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "selected_log_lines": [
+        "2026-09-13T17:09:02.9223874Z 1 passed in 4.77s",
+        "2026-09-13T17:16:03.3845374Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T17:16:03.3846475Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103759452967,
+      "run_id": 34770631587,
+      "name": "pytest-full-shard-0",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "selected_log_lines": [
+        "2026-09-13T17:10:47.1715962Z 1 passed in 5.42s",
+        "2026-09-13T17:16:17.7922821Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T17:16:17.7924067Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103759452987,
+      "run_id": 34770631587,
+      "name": "pytest-full-shard-2",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "selected_log_lines": [
+        "2026-09-13T17:11:13.3303035Z 1 passed in 3.58s",
+        "2026-09-13T17:14:45.5403585Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T17:14:45.5404489Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103759452739,
+      "run_id": 34770631563,
+      "name": "frontend-contracts",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T17:19:32.7390671Z \u001b[1A\u001b[2K  706 passed (10.8m)",
+        "2026-09-13T17:21:31.1212288Z \u001b[1A\u001b[2K  26 passed (2.0m)"
+      ]
+    },
+    {
+      "id": 103759452884,
+      "run_id": 34770631563,
+      "name": "python-contracts",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T17:08:22.9986341Z 96 passed in 12.74s"
+      ]
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-98e-completed-ci-eitjzgnq",
+    "inventory_sha256": "f689cb08fafbc949df4ae025f2e3314bd0234b58584276b51813f027fcb4ec5f",
+    "files": 16,
+    "bytes": 615748
+  },
+  "previously_captured_shard3": {
+    "job_id": 103759452930,
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-98e-shard3-isgrkb5q",
+    "inventory_sha256": "502f47ca6e09febe93ff325accc891627ebe6d42e24cd3f3b28e76c70b986567",
+    "files": 3,
+    "bytes": 114406
+  }
+}

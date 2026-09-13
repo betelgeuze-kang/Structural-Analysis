@@ -1,0 +1,148 @@
+{
+  "cases": {
+    "member_feature": {
+      "committed_step_count_per_result": 4,
+      "counterfactual_matches_full_main_result": true,
+      "support_N1_UX_N": {
+        "counterfactual": 4.964244685421869e-07,
+        "current": -1.3753172320614404e-12,
+        "main": 4.964244685421869e-07
+      }
+    },
+    "settlement": {
+      "committed_step_count_per_result": 4,
+      "counterfactual_matches_full_main_result": true,
+      "support_N1_UX_N": {
+        "counterfactual": -999.9999996368759,
+        "current": -1000.0000000000011,
+        "main": -999.9999996368759
+      }
+    }
+  },
+  "claims": {
+    "external_reference_executed": false,
+    "fixed_comparison_tolerances_changed": false,
+    "full_ci_pass": false,
+    "independent_physical_validation": false,
+    "product_solver_changed": false,
+    "speedup": false
+  },
+  "cli": {
+    "actual_exit_code": 1,
+    "command": [
+      "python3",
+      "-B",
+      "scripts/build_internal_license_due_diligence.py",
+      "--external-code-receipt",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-license-replay.1t45cnyu/ai-code.json",
+      "--external-modal-receipt",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-license-replay.1t45cnyu/ai-modal.json",
+      "--out",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-attribution.ikbz9yv_/current-cli-license.json",
+      "--fail-blocked"
+    ],
+    "expected_exit_code": 1,
+    "inventory_builder_sha256": "cbedefd273ce505ee5fb6bf660deb4b0cae1d37730d0afea62438a7405255afe",
+    "parent_elapsed_ns": 37385521,
+    "source_sha": "9899de5455d62713496eb1e778191613c70c59f8"
+  },
+  "cli_fix_source": "9899de5455d62713496eb1e778191613c70c59f8",
+  "counterfactual": {
+    "counterfactual_only": true,
+    "overridden_modules": [
+      "structural_analysis.elements.corotational_frame2d_basic",
+      "structural_analysis.elements.corotational_frame2d",
+      "structural_analysis.elements.stateful_corotational_fiber_beam2d",
+      "structural_analysis.elements"
+    ],
+    "override": "main kinematics function code with current module globals, before receipt import",
+    "override_source_sha": "4de4e3f55aae1d267cf704cec7d7533f3a627498",
+    "product_acceptance_credit": false
+  },
+  "current_source": "7bdfb6e190d0ffcc67d1f55ba9571f30bbd32868",
+  "files": [
+    {
+      "bytes": 1727,
+      "path": "counterfactual-worker.py",
+      "sha256": "be27169856752da737a23d14af093c64e5903009e3aae9a0e2b287bf0b3f960e"
+    },
+    {
+      "bytes": 8144,
+      "path": "counterfactual.json",
+      "sha256": "b31257226566b789bbd5f5771e874ccc7b08654a60b247d26e36639041290d5c"
+    },
+    {
+      "bytes": 11674,
+      "path": "current-cli-license.json",
+      "sha256": "a10e86f8fe821977192947d78639ed88c077109b0ff7f71933f84b1a2b31769f"
+    },
+    {
+      "bytes": 757,
+      "path": "current-cli-process.json",
+      "sha256": "dd3d1ef2a6b989d886f881a0476b27e7a5e5c218ac4501b6a259cf27419848b4"
+    },
+    {
+      "bytes": 255,
+      "path": "current-cli.log",
+      "sha256": "e5e10605186a408aa3fa09bfa93f1eacef768b0f2eed27b56fff70131c579a37"
+    },
+    {
+      "bytes": 7657,
+      "path": "current.json",
+      "sha256": "b4bfb4f90e8de0862c05edff18cedb4936132f6af87dc9fc1ae3d19d9d2ee9ab"
+    },
+    {
+      "bytes": 187,
+      "path": "current.log",
+      "sha256": "aa788a61ce5778900a20d295797777db33140e2e542eb73896d0cddd58b0006a"
+    },
+    {
+      "bytes": 13008,
+      "path": "main-corotational_frame2d_basic.py",
+      "sha256": "832c68d2c36530d12886121c5eec29aae8cc7ee974b0331d48d2fb2df8c8d7cd"
+    },
+    {
+      "bytes": 181,
+      "path": "processes.json",
+      "sha256": "21ff5aeda5cda3959d5a33ea72dc6edaae32b0537d5ac25b3325953a3c5b913a"
+    },
+    {
+      "bytes": 7669,
+      "path": "r2-main.json",
+      "sha256": "22acecafeb929a23bbabb38e909ef6c7cfd9a4b4d1054728345fd9d857c06a05"
+    },
+    {
+      "bytes": 184,
+      "path": "r2-main.log",
+      "sha256": "942f017a26d6c674682fcf9c667147e8b5e3ff6e2bec5f4fc4e4f8e0c2197453"
+    },
+    {
+      "bytes": 1582,
+      "path": "worker.py",
+      "sha256": "e5cf64f717c92095aad6ccf68af7adeb7bfa45631381e87db0e3924a4e90c66e"
+    }
+  ],
+  "kinematics_change_commit": "e2f6967ec84893aa83f3e56616ede3ff7f9b4f10",
+  "main_based_source": "f788a3c55964ef963f8145835e188d4a3f3792da",
+  "processes": [
+    {
+      "name": "current",
+      "parent_elapsed_ns": 3523988550,
+      "returncode": 0
+    },
+    {
+      "name": "r2-main",
+      "parent_elapsed_ns": 3878572337,
+      "returncode": 0
+    }
+  ],
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-attribution.ikbz9yv_",
+  "schema": "local-planar-kinematics-attribution.v1",
+  "tests": {
+    "command": "python3 -m pytest -q tests/test_build_internal_license_due_diligence.py tests/test_corotational_frame2d_stable_kinematics.py",
+    "elapsed_seconds": 1.82,
+    "limitations": "Existing receipt fixtures exercise complete/blocked text and JSON behavior; live copied failed receipts separately confirm exit 1 and blocker output.",
+    "new_cli_cases": 4,
+    "passed": 43
+  }
+}

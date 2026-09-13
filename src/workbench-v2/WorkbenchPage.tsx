@@ -1,3 +1,7 @@
+import { RcStrategyCohortPanel } from './components/RcStrategyCohortPanel'
+import { RcControlSearchPanel } from './components/RcControlSearchPanel'
+import { RcControlDesignPanel } from './components/RcControlDesignPanel'
+import { RcHistoryFilePanel } from './components/RcHistoryFilePanel'
 import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
@@ -18,6 +22,10 @@ import { ExportPanel } from './components/ExportPanel'
 import { EvidenceReaderPanel } from './components/EvidenceReaderPanel'
 import { BenchmarkBrowser } from './components/BenchmarkBrowser'
 import { ComparePanel } from './components/ComparePanel'
+import { DesignComparisonPanel } from './components/DesignComparisonPanel'
+import { loadDesignComparison, type DesignComparisonLoadResult } from './model/designComparisonProvider'
+import { CandidateSearchProcessPanel } from './components/CandidateSearchProcessPanel'
+import { loadCandidateProcessReview, type CandidateProcessLoadResult } from './model/candidateProcessProvider'
 import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import { JobServicePanel } from './components/JobServicePanel'
 import { EquationScalingPanel } from './components/EquationScalingPanel'
@@ -33,6 +41,7 @@ import {
   type ReviewDraftState,
 } from './model/reviewDraft'
 import { loadWorkbenchJob, type JobLoadResult } from './model/jobProvider'
+import type { JobAuthorizationProvider } from './model/jobTransport'
 import {
   loadNativeFrameBundle,
   loadNativeFrameJob,
@@ -46,8 +55,17 @@ import {
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
-  /** Same-origin authenticated status endpoint; no bearer credential is stored in the browser. */
+  /** Same-origin manifest for one raw-byte-bound physical design comparison. */
+  designComparisonUrl?: string
+  rcControlStrategyCohortUrl?: string
+  rcControlSearchUrl?: string
+  rcControlDesignUrl?: string
+  /** Same-origin completed candidate search process review manifest. */
+  candidateSearchProcessUrl?: string
+  /** Same-origin authenticated status endpoint. */
   jobStatusUrl?: string
+  /** Optional host credential callback, used in memory for one load, never persisted. */
+  jobAuthorization?: JobAuthorizationProvider
   /** Same-origin canonical bounded native Frame3D ResultIR artifact. */
   nativeFrameResultUrl?: string
   /** Same-origin canonical ReportIR; when configured it must bind exactly to the ResultIR. */
@@ -68,7 +86,13 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 
 export function WorkbenchPage({
   initialProviderMode = 'demo',
+  designComparisonUrl,
+  rcControlStrategyCohortUrl,
+  rcControlSearchUrl,
+  rcControlDesignUrl,
+  candidateSearchProcessUrl,
   jobStatusUrl,
+  jobAuthorization,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
   nativeFrameBundleUrl,
@@ -117,6 +141,18 @@ export function WorkbenchPage({
     errors: [],
   })
   const [compareIds, setCompareIds] = useState<string[]>([])
+  const [designComparisonLoad, setDesignComparisonLoad] = useState<DesignComparisonLoadResult>({ status: designComparisonUrl ? 'loading' : 'unconfigured', bundle: null, errors: [] })
+  const [candidateProcessState, setCandidateProcessState] = useState<{ url: string | undefined; load: CandidateProcessLoadResult }>({
+    url: candidateSearchProcessUrl,
+    load: { status: candidateSearchProcessUrl ? 'loading' : 'unconfigured', bundle: null, errors: [] },
+  })
+  const [selectedCandidateSlotKey, setSelectedCandidateSlotKey] = useState<string | null>(null)
+  // Do not expose a previous URL's selected report during the render before effect cleanup.
+  const candidateProcessLoad: CandidateProcessLoadResult = candidateProcessState.url === candidateSearchProcessUrl
+    ? candidateProcessState.load : { status: candidateSearchProcessUrl ? 'loading' : 'unconfigured', bundle: null, errors: [] }
+  const selectedCandidateSlot = useMemo(() => candidateProcessLoad.status === 'verified'
+    ? candidateProcessLoad.bundle?.slots.find((slot) => slot.key === selectedCandidateSlotKey) ?? null : null,
+  [candidateProcessLoad, selectedCandidateSlotKey])
   const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
     () => new Map(),
   )
@@ -225,9 +261,33 @@ export function WorkbenchPage({
     }
     const controller = new AbortController()
     setJobLoad({ status: 'loading', job: null, errors: [] })
-    loadWorkbenchJob(jobStatusUrl, controller.signal).then(setJobLoad)
+    loadWorkbenchJob(jobStatusUrl, controller.signal, jobAuthorization).then((result) => {
+      if (!controller.signal.aborted) setJobLoad(result)
+    })
     return () => controller.abort()
-  }, [jobStatusUrl])
+  }, [jobStatusUrl, jobAuthorization])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setDesignComparisonLoad({ status: designComparisonUrl ? 'loading' : 'unconfigured', bundle: null, errors: [] })
+    loadDesignComparison(designComparisonUrl, controller.signal).then((loaded) => {
+      if (!controller.signal.aborted) setDesignComparisonLoad(loaded)
+    })
+    return () => controller.abort()
+  }, [designComparisonUrl])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setSelectedCandidateSlotKey(null)
+    setCandidateProcessState({ url: candidateSearchProcessUrl, load: { status: candidateSearchProcessUrl ? 'loading' : 'unconfigured', bundle: null, errors: [] } })
+    loadCandidateProcessReview(candidateSearchProcessUrl, controller.signal).then((loaded) => {
+      if (!controller.signal.aborted) {
+        setCandidateProcessState({ url: candidateSearchProcessUrl, load: loaded })
+        setSelectedCandidateSlotKey(loaded.bundle?.slots.find((slot) => slot.phase === 'measured')?.key ?? loaded.bundle?.slots[0]?.key ?? null)
+      }
+    })
+    return () => controller.abort()
+  }, [candidateSearchProcessUrl])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -369,6 +429,12 @@ export function WorkbenchPage({
           errors={jobLoad.errors}
           artifactStatus={jobLoad.artifactStatus}
           engineeringResultIr={jobLoad.engineeringResultIr}
+          frame3dResult={jobLoad.frame3dResult}
+          frame3dArtifacts={jobLoad.frame3dArtifacts}
+          rcReview={jobLoad.rcReview}
+          failureDiagnostic={jobLoad.failureDiagnostic}
+          jobStatusUrl={jobStatusUrl}
+          jobAuthorization={jobAuthorization}
         />
         {caseV2 ? (
           <RunMonitor
@@ -383,6 +449,7 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-results" className="wb2-section">
+        <RcHistoryFilePanel />
         <NativeFrameArtifactsPanel
           load={nativeFrameLoad}
           comparisonLoad={nativeFrameComparisonLoad}
@@ -406,6 +473,11 @@ export function WorkbenchPage({
 
       <div id="wb2-sec-compare" className="wb2-section">
         <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
+        {rcControlStrategyCohortUrl ? <RcStrategyCohortPanel url={rcControlStrategyCohortUrl} authorize={jobAuthorization} /> : null}
+        {rcControlSearchUrl ? <RcControlSearchPanel url={rcControlSearchUrl} authorize={jobAuthorization} /> : null}
+        {rcControlDesignUrl ? <RcControlDesignPanel url={rcControlDesignUrl} authorize={jobAuthorization} /> : null}
+        {designComparisonUrl || (!candidateSearchProcessUrl && !rcControlDesignUrl && !rcControlSearchUrl && !rcControlStrategyCohortUrl) ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
+        {candidateSearchProcessUrl ? <CandidateSearchProcessPanel load={candidateProcessLoad} selectedSlot={selectedCandidateSlot} onSelect={setSelectedCandidateSlotKey} /> : null}
       </div>
 
       {/* Verification layer: capabilities + evidence + benchmarks */}
@@ -446,6 +518,9 @@ export function WorkbenchPage({
             convergenceAvailable={state.convergenceAvailable}
             blockers={warnings}
             comparisonRows={comparisonRows}
+            designComparison={designComparisonLoad.status === 'verified' ? designComparisonLoad.bundle : null}
+            candidateProcessReview={candidateProcessLoad.status === 'verified' ? candidateProcessLoad.bundle : null}
+            selectedCandidateSlot={selectedCandidateSlot}
             viewerDeepLink={viewerDeepLink}
             baseUrl={baseUrl}
             reviewDraftState={reviewDraftState}

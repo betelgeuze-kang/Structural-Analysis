@@ -1,0 +1,156 @@
+{
+  "measured_subsets": {
+    "audit": {
+      "schema_version": "measured-response-subset-original-audit.v1",
+      "pid": 1028729,
+      "source_revision": "41f59017ab6e98da029dfa4b21a66b503cb4ff83",
+      "source_files": [
+        {
+          "path": "src/structural_analysis/benchmark/measured_response_split.py",
+          "sha256": "2871c8858ff9cbb01a3779e389b190180206ed70c2f88b92885c25fabc4556a4"
+        },
+        {
+          "path": "src/structural_analysis/benchmark/rc_control_learning.py",
+          "sha256": "42f1e98a14f816d0726280f534f9e0e8a0bb8afc9603a73d61a0308e14b138cd"
+        },
+        {
+          "path": "src/structural_analysis/io/measured_response_workbook.py",
+          "sha256": "f812e2155e0c68ffcdad8b106884d7a1c9e7bebee3e56c76899b5cfd5cb8a54f"
+        },
+        {
+          "path": "src/structural_analysis/io/measured_numeric_workbook.py",
+          "sha256": "83ba27bd23539c21e0e2ed50178f146a39df39357a94f2d13e274341ce476fde"
+        },
+        {
+          "path": "src/structural_analysis/io/measured_drift_load.py",
+          "sha256": "0e359441b16a7f4ff2751cb472170716cd3887c386b623eb10574bdcc874c7a9"
+        },
+        {
+          "path": "tests/test_measured_response_split.py",
+          "sha256": "388bef227f77cca4a577ed9d48a9effd43f3461396d5bba5a602358cfeb64289"
+        },
+        {
+          "path": "examples/sera_arista_unretrofitted_channels.json",
+          "sha256": "adc1a1198bf9569b012002793002875ad0acbd062fe1148651a40e958965b22c"
+        }
+      ],
+      "original_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+      "derived_alias_sha256": "3cdf31a62ce0dc7305e61fdab3c8a8cccbf0513d5147b9b7523173a5b960bc38",
+      "original_channels": 116,
+      "derived_alias_channels": 2,
+      "observation_rows": 4059,
+      "original_xml_tokens_and_independent_rational_values_checked": 8118,
+      "previous_revision": "66c3a1d46b5c1202a0d9c1f15147401ef793efea",
+      "previous_cross_split_screen_passed": true,
+      "new_rejections": [
+        {
+          "order": "full-first",
+          "reason": "si_force_displacement_trajectory",
+          "case_id": "subset",
+          "measured_sources_processed": 2,
+          "screen_wall_ns": 1550417149,
+          "structural_calls": 0,
+          "training_fits": 0
+        },
+        {
+          "order": "subset-first",
+          "reason": "si_force_displacement_trajectory",
+          "case_id": "full",
+          "measured_sources_processed": 2,
+          "screen_wall_ns": 1564139875,
+          "structural_calls": 0,
+          "training_fits": 0
+        },
+        {
+          "order": "actual-learning-entry",
+          "reason": "si_force_displacement_trajectory",
+          "case_id": "subset",
+          "measured_sources_processed": 2,
+          "screen_wall_ns": 1564073636,
+          "structural_calls": 0,
+          "training_fits": 0
+        }
+      ],
+      "same_training_split_passed": true,
+      "decoder_wall_ns": 2125201828,
+      "process_wall_ns": 11100271863,
+      "process_cpu_ns": 11061634773,
+      "peak_rss_kib": 514728,
+      "structural_calls": 0,
+      "training_fits": 0,
+      "training_admitted": false,
+      "physical_correspondence_verified": false,
+      "original_unchanged": true,
+      "derivative_is_locally_constructed_overlap_probe": true,
+      "placeholder_model_tests_preflight_only": true
+    },
+    "seal": {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-subset-30vb7o_e",
+      "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-subset-30vb7o_e.inventory.json",
+      "inventory_sha256": "cd5642fa7cff7097cdfcbce9ced6ce5b0f7bb108d4aad42f3538e9e08192b5ae",
+      "file_count": 17,
+      "total_bytes": 6383403,
+      "all_files_reread_exact": true,
+      "sealed_at_utc": "2026-09-10T01:45:26.236108+00:00",
+      "seal_wall_ns": 13504220,
+      "immutable_by_workflow_not_filesystem_permissions": true
+    }
+  },
+  "candidate_json": {
+    "audit": {
+      "source_revision": "4d345a423b7a4ab1acba4d03fe8c118756526f1c",
+      "previous_revision": "66c3a1d46b5c1202a0d9c1f15147401ef793efea",
+      "policy_hash": "sha256:9914a6bd490df99b5c0aa58f7e7c3f722a85a1890a36706e38111cafaed6c581",
+      "normal_policy_dict_and_hash_unchanged": true,
+      "probes": [
+        {
+          "probe": 0,
+          "old_accepted_same_policy_hash": true,
+          "new_error": "invalid JSON object: duplicate JSON key: ridge"
+        },
+        {
+          "probe": 1,
+          "old_accepted_same_policy_hash": true,
+          "new_error": "invalid JSON object: duplicate JSON key: ridge"
+        },
+        {
+          "probe": 2,
+          "old_accepted_same_policy_hash": true,
+          "new_error": "invalid JSON object: duplicate JSON key: ridge"
+        },
+        {
+          "probe": 3,
+          "old_accepted_same_policy_hash": true,
+          "new_error": "invalid JSON object: duplicate JSON key: hidden"
+        },
+        {
+          "probe": 4,
+          "old_accepted_same_policy_hash": true,
+          "new_error": "invalid JSON object: non-finite JSON number: NaN"
+        }
+      ],
+      "structural_calls": 0,
+      "training_fits": 0,
+      "wall_ns": 27918999,
+      "validation": {
+        "candidate_tests": 32,
+        "seconds": 11.34,
+        "ruff_passed": true,
+        "mypy_sources": 2
+      }
+    },
+    "seal": {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-candidate-json-ylgj19db",
+      "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-candidate-json-ylgj19db.inventory.json",
+      "inventory_sha256": "acd2c8e8f13474cc6f6dcd00381103930f805667cda3a3cc9669e49bb1aecae0",
+      "file_count": 18,
+      "total_bytes": 435028,
+      "all_files_reread_exact": true,
+      "sealed_at_utc": "2026-09-10T01:45:26.263390+00:00",
+      "seal_wall_ns": 2516153,
+      "immutable_by_workflow_not_filesystem_permissions": true
+    }
+  },
+  "schema_version": "rc-learning-input-review.v1",
+  "roadmap_complete": false
+}

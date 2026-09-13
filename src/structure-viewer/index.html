@@ -5181,13 +5181,21 @@ function formatCodecheckHydrationLabel(summary=null){
   if(!summary||!summary.hydrated_count)return'';
   return`code-check DCR on ${summary.hydrated_count}/${summary.element_count} members (${summary.coverage_pct}%)`;
 }
-async function hydrateModelDataFromCodecheckCompanion(modelData=null,companionPath='',combination=''){
+async function hydrateModelDataFromCodecheckCompanion(modelData=null,companionPath='',combination='',{
+  rootPayload=null,
+  allCombinations=false,
+}={}){
   if(!modelData||!normalizeSelectionValue(companionPath))return null;
   const combo=normalizeSelectionValue(combination)||getActiveCodecheckCombinationName();
   try{
     const result=await tryFetchArtifact(companionPath);
-    const companionMap=buildElementDcrMapFromModelMeta({},result?.payload,{combination:combo});
-    const localMap=buildElementDcrMapFromModelMeta(modelData?.meta||{},lastNormalizedRootPayload,{combination:combo});
+    const companionMeta=result?.payload?.model?.metadata||{};
+    const companionMap=allCombinations
+      ?buildElementDcrMapAllCombinations(companionMeta,result?.payload)
+      :buildElementDcrMapFromModelMeta(companionMeta,result?.payload,{combination:combo});
+    const localMap=allCombinations
+      ?buildElementDcrMapAllCombinations(modelData?.meta||{},rootPayload)
+      :buildElementDcrMapFromModelMeta(modelData?.meta||{},rootPayload,{combination:combo});
     const merged=mergeElementDcrMaps(localMap,companionMap);
     return hydrateModelElementsWithCodecheckDcr(modelData,merged,{combination:combo});
   }catch(err){
@@ -5209,7 +5217,7 @@ async function applyFullCodecheckHydration(modelData=null,{
   const localSummary=hydrateModelElementsWithCodecheckDcr(modelData,localMap,{combination:combo});
   const paths=resolveCodecheckCompanionPaths(workspace);
   const companionPath=companionRole==='baseline'?paths.baseline:paths.optimized;
-  const companionSummary=await hydrateModelDataFromCodecheckCompanion(modelData,companionPath,combo);
+  const companionSummary=await hydrateModelDataFromCodecheckCompanion(modelData,companionPath,combo,{rootPayload,allCombinations});
   const summary=companionSummary||localSummary;
   window.__STRUCTURE_VIEWER_CODECHECK_DCR_HYDRATION__=summary;
   return summary;
@@ -5973,7 +5981,6 @@ async function loadWorkspaceResolvedModelData(){
         }
       }
     }catch(err){
-      initLog(`workspace preset ERROR ${err&&err.message||err}`);
       console.warn(`[Viewer] Unable to resolve workspace preset ${workspacePreset}:`,err);
     }
   }
@@ -18450,7 +18457,7 @@ function setOptimizationTimelineStep(value='-1'){
   const metaNode=document.querySelector('[data-optimization-timeline-meta]');
   const slider=document.getElementById('viewer-optimization-timeline-slider');
   if(slider instanceof HTMLInputElement)slider.value=String(optimizationTimelineStepIndex);
-  if(labelNode)labelNode.textContent=step?.label||'Baseline';
+  if(labelNode)labelNode.textContent=model?.status==='ready'?(step?.label||'Baseline'):'Optimization history unavailable';
   if(metaNode){
     const parts=[];
     if(step){
@@ -18465,7 +18472,7 @@ function setOptimizationTimelineStep(value='-1'){
     if(optimizationTimelineStepIndex>=0&&highlightState?.matchCount){
       parts.push(`${highlightState.matchCount} members highlighted`);
     }
-    metaNode.textContent=parts.join(' · ')||'Cumulative cost delta --';
+    metaNode.textContent=model?.status==='ready'?(parts.join(' · ')||'Cumulative cost delta --'):'No optimization change history loaded';
   }
   applyOptimizationTimelineStepHighlights(optimizationTimelineStepIndex);
   window.__STRUCTURE_VIEWER_OPTIMIZATION_TIMELINE__={

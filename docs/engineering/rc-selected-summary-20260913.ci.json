@@ -1,0 +1,31 @@
+{
+  "source_revision": "0efd85afdfe33314c70fcfdc26802d81159e0bc0",
+  "python_run": 34740368308,
+  "python_conclusion": "failure",
+  "development_job": 103678943481,
+  "development_passed": 1063,
+  "development_seconds": 1105.44,
+  "native_run": 34740368254,
+  "native_conclusion": "success",
+  "full_shard_jobs": [
+    103678943419,
+    103678943428,
+    103678943447,
+    103678943476
+  ],
+  "full_shards_failed_step": "Materialize exact current-source test evidence",
+  "full_shards_pytest_step": "skipped",
+  "new_head_qualification": false,
+  "logs": [
+    {
+      "path": "/tmp/structural-0efd-development.log",
+      "bytes": 95580,
+      "sha256": "0cf7de7686191a7a376ec399b25b3a4fbba548fa62529c5cc22038b6cb965343"
+    },
+    {
+      "path": "/tmp/structural-0efd-shard0.log",
+      "bytes": 98220,
+      "sha256": "3be3407c84c76260a415ceb8fd007acd393cad048171f4176b77afb10e4bd060"
+    }
+  ]
+}

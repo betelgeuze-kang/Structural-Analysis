@@ -1,0 +1,17 @@
+{
+  "published_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "pending_local_revision": "efa19e84694f4e31a0289d6248385b5d386e1d83",
+  "topology_observation": "completed / success",
+  "pr439_body_verified": true,
+  "issue438_body_verified": true,
+  "published_head_unchanged": true,
+  "draft_open_unchanged": true,
+  "pushed": false,
+  "merged": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-refinement-github-sync-bli1gpn6",
+    "payload_files": 8,
+    "payload_bytes": 422794,
+    "inventory_sha256": "27095f1754f9f6f469fb71f8262eb791c9621c3c370ab53b1337a91294712e2d"
+  }
+}

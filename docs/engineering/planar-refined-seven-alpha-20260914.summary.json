@@ -1,0 +1,35 @@
+{
+  "records": [
+    {
+      "layers": 32,
+      "status": "blocked",
+      "contract_pass": false,
+      "committed_steps": 3,
+      "path_wall_ns": 14987751901,
+      "artifact": "layers-32.json",
+      "artifact_sha256": "03c312cd6ed3a77cdcc42f7c6a70d079731f2142f21fbd29465b72d932f2af64"
+    }
+  ],
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "accepted_prefix_exactly_reproduced": true,
+  "rollback_exact": true,
+  "failed_relative_residual": 0.10941515852494162,
+  "terminal_reason": "line_search_failed_to_reduce_residual",
+  "total_history_rows": 28,
+  "total_line_search_attempts": 45,
+  "failed_step_accepted_alphas": [
+    1.0,
+    0.015625,
+    0.0
+  ],
+  "failed_speed_ratio": null,
+  "independent_physical_validation": false,
+  "training_fits": 0,
+  "public_defaults_changed": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-refined-seven-alpha-mf8lniht",
+    "payload_files": 6,
+    "payload_bytes": 20658358,
+    "inventory_sha256": "061a061245a591a6435d2af2c18afe55be05f8d51ba29082ef45e71f89cff1eb"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "head": "5a0def37655a095c2bd25028b0be74142a6eebe2",
+  "jobs": [
+    {
+      "id": 103753935641,
+      "run_id": 34768595973,
+      "name": "pytest-development-contracts",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T16:49:46.0300552Z 1176 passed in 1103.94s (0:18:23)"
+      ]
+    },
+    {
+      "id": 103753935783,
+      "run_id": 34768595973,
+      "name": "pytest-full-shard-3",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "selected_log_lines": [
+        "2026-09-13T16:32:54.3039389Z 1 passed in 5.20s",
+        "2026-09-13T16:38:24.9956408Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T16:38:24.9957528Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103753935784,
+      "run_id": 34768595973,
+      "name": "pytest-full-shard-1",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "selected_log_lines": [
+        "2026-09-13T16:33:07.4131863Z 1 passed in 5.16s",
+        "2026-09-13T16:38:36.2264408Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T16:38:36.2265708Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103753935803,
+      "run_id": 34768595973,
+      "name": "pytest-full-shard-0",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "selected_log_lines": [
+        "2026-09-13T16:33:08.8685422Z 1 passed in 4.93s",
+        "2026-09-13T16:40:13.1561084Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T16:40:13.1561785Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103753935842,
+      "run_id": 34768595973,
+      "name": "pytest-full-shard-2",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "selected_log_lines": [
+        "2026-09-13T16:33:28.4974773Z 1 passed in 5.29s",
+        "2026-09-13T16:39:00.9784320Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T16:39:00.9785243Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103753935711,
+      "run_id": 34768596010,
+      "name": "frontend-contracts",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T16:40:20.1119478Z \u001b[1A\u001b[2K  704 passed (10.2m)",
+        "2026-09-13T16:42:22.3227804Z \u001b[1A\u001b[2K  26 passed (2.0m)"
+      ]
+    },
+    {
+      "id": 103753935857,
+      "run_id": 34768596010,
+      "name": "python-contracts",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T16:30:44.9545224Z 96 passed in 13.91s"
+      ]
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-5a-completed-ci-xgcufsu5",
+    "inventory_sha256": "faebffac4fd9b8fd36b78c63d9edb1b95f57d566db91485df484bead72523fa2",
+    "files": 18,
+    "bytes": 717504
+  }
+}

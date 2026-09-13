@@ -1,0 +1,295 @@
+{
+  "claim_boundary": "Local correctness and original source consistency only; no full hosted pass, independent physical validation, performance improvement or release authority.",
+  "frontend": {
+    "added_regressions": "Hold actual suite response for 5500ms for both intact and corrupted bytes, assert no physical rows/downloads during loading, then validate exact verified byte export or actual byte length mismatch with no rows/downloads.",
+    "build_checks": "Each original wrapper invocation ran tsc --noEmit, Vite build with root base, and workbench viewer production delivery verification; all passed. Production workbench asset remains workbench-Vo2uO4z8.js.",
+    "change": "Only candidate test loading boundary gets 60s; first observed terminal status is checked synchronously with panel diagnostic. Global timeout, production loading/strict parsing/hashes/schema and later UI/artifact assertions unchanged.",
+    "checks": [
+      {
+        "elapsed_reported": "32.6s",
+        "log": "baseline.log",
+        "name": "original desktop exact artifacts and corrupt suite browser baseline",
+        "passed": 2
+      },
+      {
+        "elapsed_reported": "1.5m",
+        "log": "focused.log",
+        "name": "candidate browser full retained checks plus delayed normal and corrupted transport",
+        "passed": 17,
+        "workers": 3
+      },
+      {
+        "elapsed_reported": "18.7s",
+        "log": "extended-sparse.log",
+        "name": "unchanged extended sparse job browser desktop mobile and tamper",
+        "passed": 3
+      },
+      {
+        "elapsed_reported": "27.9s",
+        "log": "delayed-final.log",
+        "name": "final delayed regressions after immediate rejection capture and eventual Promise collection",
+        "overlap": "Same two delayed cases already included in the 17-case focused run; repeated because their failure cleanup changed.",
+        "passed": 2
+      }
+    ],
+    "ci_observations": [
+      {
+        "candidate_load_assertion_failures": 10,
+        "conclusion": "failure",
+        "extended_sparse_mobile_assertion_failures": 1,
+        "job_id": 102278770368,
+        "retained_log": "ci011-pull-frontend.log"
+      },
+      {
+        "candidate_load_assertion_failures": 10,
+        "conclusion": "failure",
+        "extended_sparse_mobile_assertion_failures": 0,
+        "job_id": 102278760369,
+        "retained_log": "ci011-push-frontend.log"
+      }
+    ],
+    "node": {
+      "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "version": "24.20.0"
+    },
+    "numerical_solver_calls": 0,
+    "observer_unrelated_error": "All three diagnostic pages retained SyntaxError: Unexpected token <. Baseline trace shows missing optional iframe index.midas33.data.js served the existing static fallback HTML. Candidate requests have no failures, and candidate terminal verification/byte-length rejection are directly observed. No viewer error repair or broad clean-browser claim.",
+    "playwright": "1.56.1 Chromium 1194",
+    "remaining": "Current hosted runner logs contain no retained DOM or final loader status. Local sixfold CPU throttle demonstrates legitimate load beyond old 5s assertion but does not prove the exact hosted delay mechanism. The separate extended sparse mobile failure remains unreproduced locally and was not modified.",
+    "source_change_review": "Independent read-only review found no integrity or scope blocker; suggested immediate rejected-Promise capture in held-response tests, now implemented and the two affected cases rerun.",
+    "source_head": "0113110186d6cd22c9ce3995e8a031556f02b50f"
+  },
+  "frontend_observed_loading": [
+    {
+      "corrupt": false,
+      "fixture_bytes": 16768526,
+      "fixture_files": 72,
+      "name": "baseline",
+      "page_errors": [
+        "SyntaxError: Unexpected token '<'"
+      ],
+      "panel": "verified",
+      "request_failures": [],
+      "states": [
+        {
+          "at_ms": 345.69999998807907,
+          "status": "loading",
+          "text": "Candidate search \u00b7 process reviewLoading candidate search review\u2026"
+        },
+        {
+          "at_ms": 2505.7999999970198,
+          "status": "verified",
+          "text": "Candidate search \u00b7 process reviewStored bundle integrity verified. Search outcome: ready. Each attempt uses a fresh worker. This review does not run a solver or grant engineering approval.Source b4681"
+        }
+      ],
+      "throttle": 1
+    },
+    {
+      "corrupt": false,
+      "fixture_bytes": 16768526,
+      "fixture_files": 72,
+      "name": "cpu-throttle-6",
+      "page_errors": [
+        "SyntaxError: Unexpected token '<'"
+      ],
+      "panel": "verified",
+      "request_failures": [],
+      "states": [
+        {
+          "at_ms": 1128.5,
+          "status": "loading",
+          "text": "Candidate search \u00b7 process reviewLoading candidate search review\u2026"
+        },
+        {
+          "at_ms": 9105.39999999106,
+          "status": "verified",
+          "text": "Candidate search \u00b7 process reviewStored bundle integrity verified. Search outcome: ready. Each attempt uses a fresh worker. This review does not run a solver or grant engineering approval.Source b4681"
+        }
+      ],
+      "throttle": 6
+    },
+    {
+      "corrupt": true,
+      "fixture_bytes": 16768526,
+      "fixture_files": 72,
+      "name": "cpu-throttle-6-corrupt-suite",
+      "page_errors": [
+        "SyntaxError: Unexpected token '<'"
+      ],
+      "panel": "invalid",
+      "request_failures": [],
+      "states": [
+        {
+          "at_ms": 1057.6000000089407,
+          "status": "loading",
+          "text": "Candidate search \u00b7 process reviewLoading candidate search review\u2026"
+        },
+        {
+          "at_ms": 3050.9000000059605,
+          "status": "invalid",
+          "text": "Candidate search \u00b7 process reviewUNAVAILABLE \u2014 candidate process byte length mismatch"
+        }
+      ],
+      "throttle": 6
+    }
+  ],
+  "frontend_retention": {
+    "bytes": 25289103,
+    "files": 35,
+    "fresh_verification_reported_pass": true,
+    "inventory_sha256": "f68eb287ee11c8da02af70408afa1250faa8d7f3dcf91ec6075902ae321ac993",
+    "root": "/tmp/structural-frontend-loading-ci.nW5cVFqy",
+    "verification": {
+      "inventory_sha256": "f68eb287ee11c8da02af70408afa1250faa8d7f3dcf91ec6075902ae321ac993",
+      "pid": 615684,
+      "status": "pass",
+      "verified_bytes": 25289103,
+      "verified_files": 35
+    }
+  },
+  "hosted_base_results": {
+    "canonical_contract_runs": [
+      "success",
+      "success"
+    ],
+    "engine_v2_contract": "success",
+    "four_way_determinism_aggregate": "success",
+    "full_hosted_pass": false,
+    "source_head": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+    "topology": {
+      "failed": 3,
+      "job_id": 102278770109,
+      "log_sha256": "9a93c2fc30396d17baa3162aafc0babdac63ff6a94cfd20ca19f643f2ac14571",
+      "passed": 409,
+      "retained_log": "/tmp/structural-ci011-topology-final.log",
+      "seconds": 1204.52
+    }
+  },
+  "schema_version": "topology-and-candidate-ci-regressions.v1",
+  "source_base": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+  "topology": {
+    "audit": {
+      "checks": 1286,
+      "claims": {
+        "independent_physical_validation": false,
+        "performance_improvement": false,
+        "saved_consistency_only": true
+      },
+      "errors": [],
+      "new_solver_calls_by_audit": 0,
+      "observed_benchmark_builds": 6,
+      "observed_committed_path_steps": 540,
+      "observed_direct_forced_step_calls": 6,
+      "observed_path_calls": 14,
+      "pid": 615239,
+      "rows": [
+        {
+          "final_material": {
+            "compressive_damaged_concrete_state_count": 6,
+            "concrete_fiber_state_count": 48,
+            "maximum_compressive_damage": 0.3689645175068269,
+            "maximum_concrete_dissipated_energy_density_mj_per_m3": 0.003560889934662281,
+            "maximum_steel_accumulated_plastic_strain": 0.0001995368483846203,
+            "maximum_steel_dissipated_energy_density_mj_per_m3": 0.03990736967692406,
+            "maximum_tensile_damage": 0.99283100401457,
+            "plastified_steel_state_count": 2,
+            "steel_fiber_state_count": 48,
+            "tensile_damaged_concrete_state_count": 37
+          },
+          "maximum_residual_inf_norm_kn": 1.2144880656705936e-09,
+          "maximum_vector_balance_error_kn": 1.2144916183842724e-09,
+          "original_worker_wall_ns": 79990184096,
+          "source_file_count": 563,
+          "split_error_kn_per_m": 8.881784197001252e-16,
+          "split_global_dofs": 9,
+          "split_roundoff_bound_kn_per_m": 7.807724310740089e-14,
+          "step60_increment_state_count": 0,
+          "step60_max_tensile_increment": 1.1102230246251565e-16,
+          "tensile_evolution_steps": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "variant": "current"
+        },
+        {
+          "final_material": {
+            "compressive_damaged_concrete_state_count": 6,
+            "concrete_fiber_state_count": 48,
+            "maximum_compressive_damage": 0.368964517506828,
+            "maximum_concrete_dissipated_energy_density_mj_per_m3": 0.003560889934662284,
+            "maximum_steel_accumulated_plastic_strain": 0.00019953684838461933,
+            "maximum_steel_dissipated_energy_density_mj_per_m3": 0.03990736967692386,
+            "maximum_tensile_damage": 0.99283100401457,
+            "plastified_steel_state_count": 2,
+            "steel_fiber_state_count": 48,
+            "tensile_damaged_concrete_state_count": 37
+          },
+          "maximum_residual_inf_norm_kn": 1.2132765903061227e-09,
+          "maximum_vector_balance_error_kn": 1.2132801430198015e-09,
+          "original_worker_wall_ns": 78840394757,
+          "source_file_count": 563,
+          "split_error_kn_per_m": 0.0,
+          "split_global_dofs": 9,
+          "split_roundoff_bound_kn_per_m": 7.807724310748808e-14,
+          "step60_increment_state_count": 4,
+          "step60_max_tensile_increment": 1.5543122344752192e-15,
+          "tensile_evolution_steps": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            60
+          ],
+          "variant": "legacy_kinematics"
+        }
+      ],
+      "status": "passed",
+      "wall_ns": 1736516980
+    },
+    "focused_tests": {
+      "additional_numerical_work": "Original benchmark builders and standalone test exercises execute again; no instrumentation-based total solver count for pytest.",
+      "elapsed_seconds": 76.13,
+      "full_suite_pass": false,
+      "passed": 26
+    },
+    "schema_version": "topology-stable-kinematics-regression-observation.v1",
+    "source_base": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+    "source_changes": "Three tests only; production physics, source materialincrement threshold and solver/benchmark gates unchanged."
+  },
+  "topology_retention": {
+    "file_count": 1170,
+    "inventory_bytes": 250876,
+    "inventory_sha256": "19a40dccac2a71d55cb408c71d5da928ca8ce3efe92dda9b5e4988d4398ecac2",
+    "root": "/tmp/structural-topology-stable-diagnostic.ou6jfafs",
+    "scope": "Fresh-process file-set and every-byte hash recheck; no numerical calls.",
+    "sealer_pid": 615610,
+    "status": "passed",
+    "total_bytes": 389460393,
+    "verification_wall_ns": 358751391,
+    "verifier_pid": 615689
+  }
+}

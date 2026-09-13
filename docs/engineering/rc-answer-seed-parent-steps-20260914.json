@@ -1,0 +1,815 @@
+{
+  "source_revision": "c62d0b67fc0599ef027a16e9de6114c960d2a24a",
+  "stats": {
+    "primary_rows": {
+      "secant_sum": 46,
+      "proposal_sum": 20,
+      "lower": 15,
+      "equal": 5,
+      "higher": 0
+    },
+    "linear_solves": {
+      "secant_sum": 78,
+      "proposal_sum": 47,
+      "lower": 16,
+      "equal": 4,
+      "higher": 0
+    },
+    "newton_assemblies": {
+      "secant_sum": 132,
+      "proposal_sum": 80,
+      "lower": 15,
+      "equal": 5,
+      "higher": 0
+    },
+    "arm_wall_ns": {
+      "secant_sum": 5489816930,
+      "proposal_sum": 4155957798,
+      "lower": 15,
+      "equal": 0,
+      "higher": 5
+    }
+  },
+  "core_calls": 80,
+  "linear_solves_all_arms": 345,
+  "newton_assembly_dispatches_all_arms": 624,
+  "additional_proposal_assembly_dispatches": 0,
+  "answer_leakage": true,
+  "learned_benefit_proven": false,
+  "response_comparisons_passed": 60,
+  "fresh_reference_exact_repeats": 20,
+  "whole_original_paths": 0,
+  "fits": 0,
+  "heldout_cases": 0,
+  "total_element_integrations": null,
+  "one_step_timing_is_full_path_speedup": false,
+  "rows": [
+    {
+      "case": "train-a",
+      "index": 1,
+      "arms": {
+        "reference": {
+          "primary_rows": 6,
+          "linear_solves": 8,
+          "newton_assemblies": 16,
+          "arm_wall_ns": 492459226,
+          "proposal_wall_ns": 1930,
+          "recovery_wall_ns": 45935343
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 294807201,
+          "proposal_wall_ns": 3052217,
+          "recovery_wall_ns": 45320726
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 195247847,
+          "proposal_wall_ns": 3270013,
+          "recovery_wall_ns": 45257394
+        },
+        "fresh-reference": {
+          "primary_rows": 6,
+          "linear_solves": 8,
+          "newton_assemblies": 16,
+          "arm_wall_ns": 543518280,
+          "proposal_wall_ns": 1860,
+          "recovery_wall_ns": 45543132
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 61,
+      "arms": {
+        "reference": {
+          "primary_rows": 4,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "arm_wall_ns": 356883498,
+          "proposal_wall_ns": 1890,
+          "recovery_wall_ns": 47156518
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 308239787,
+          "proposal_wall_ns": 3024196,
+          "recovery_wall_ns": 47079116
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 204533892,
+          "proposal_wall_ns": 4194229,
+          "recovery_wall_ns": 46521190
+        },
+        "fresh-reference": {
+          "primary_rows": 4,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "arm_wall_ns": 357000302,
+          "proposal_wall_ns": 1730,
+          "recovery_wall_ns": 47029904
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 121,
+      "arms": {
+        "reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 441145064,
+          "proposal_wall_ns": 1930,
+          "recovery_wall_ns": 47988122
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 312386939,
+          "proposal_wall_ns": 3106598,
+          "recovery_wall_ns": 47886630
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 209897870,
+          "proposal_wall_ns": 5218249,
+          "recovery_wall_ns": 47671493
+        },
+        "fresh-reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 440742137,
+          "proposal_wall_ns": 1830,
+          "recovery_wall_ns": 47933152
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 181,
+      "arms": {
+        "reference": {
+          "primary_rows": 3,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 309490753,
+          "proposal_wall_ns": 1980,
+          "recovery_wall_ns": 47539981
+        },
+        "secant": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 259554031,
+          "proposal_wall_ns": 3084658,
+          "recovery_wall_ns": 47539930
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 210426507,
+          "proposal_wall_ns": 6224217,
+          "recovery_wall_ns": 47348325
+        },
+        "fresh-reference": {
+          "primary_rows": 3,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 307040023,
+          "proposal_wall_ns": 1910,
+          "recovery_wall_ns": 47298094
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 241,
+      "arms": {
+        "reference": {
+          "primary_rows": 4,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "arm_wall_ns": 387785988,
+          "proposal_wall_ns": 1850,
+          "recovery_wall_ns": 47711276
+        },
+        "secant": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 260241667,
+          "proposal_wall_ns": 3048446,
+          "recovery_wall_ns": 47462989
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 212317344,
+          "proposal_wall_ns": 7090461,
+          "recovery_wall_ns": 47501281
+        },
+        "fresh-reference": {
+          "primary_rows": 4,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "arm_wall_ns": 400710708,
+          "proposal_wall_ns": 1800,
+          "recovery_wall_ns": 47707456
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 1,
+      "arms": {
+        "reference": {
+          "primary_rows": 2,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 242930686,
+          "proposal_wall_ns": 1840,
+          "recovery_wall_ns": 45404231
+        },
+        "secant": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 196009933,
+          "proposal_wall_ns": 3088288,
+          "recovery_wall_ns": 45391030
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 196324451,
+          "proposal_wall_ns": 3346085,
+          "recovery_wall_ns": 45205225
+        },
+        "fresh-reference": {
+          "primary_rows": 2,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 241653621,
+          "proposal_wall_ns": 1820,
+          "recovery_wall_ns": 45083092
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 61,
+      "arms": {
+        "reference": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 253231973,
+          "proposal_wall_ns": 2070,
+          "recovery_wall_ns": 46895164
+        },
+        "secant": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 203608630,
+          "proposal_wall_ns": 3095068,
+          "recovery_wall_ns": 46721519
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 205456304,
+          "proposal_wall_ns": 4299072,
+          "recovery_wall_ns": 46903415
+        },
+        "fresh-reference": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 251788401,
+          "proposal_wall_ns": 1930,
+          "recovery_wall_ns": 46814451
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 121,
+      "arms": {
+        "reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 437659821,
+          "proposal_wall_ns": 1960,
+          "recovery_wall_ns": 48051627
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 310607497,
+          "proposal_wall_ns": 3088267,
+          "recovery_wall_ns": 47617625
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 209524181,
+          "proposal_wall_ns": 5331432,
+          "recovery_wall_ns": 47729878
+        },
+        "fresh-reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 438810989,
+          "proposal_wall_ns": 1990,
+          "recovery_wall_ns": 47704787
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 181,
+      "arms": {
+        "reference": {
+          "primary_rows": 2,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 256904242,
+          "proposal_wall_ns": 1890,
+          "recovery_wall_ns": 47627575
+        },
+        "secant": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 207877405,
+          "proposal_wall_ns": 3131000,
+          "recovery_wall_ns": 47530633
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 209994779,
+          "proposal_wall_ns": 6246538,
+          "recovery_wall_ns": 47306257
+        },
+        "fresh-reference": {
+          "primary_rows": 2,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 256298698,
+          "proposal_wall_ns": 1870,
+          "recovery_wall_ns": 47522073
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 241,
+      "arms": {
+        "reference": {
+          "primary_rows": 5,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 438862319,
+          "proposal_wall_ns": 2110,
+          "recovery_wall_ns": 47568085
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 361221515,
+          "proposal_wall_ns": 3080608,
+          "recovery_wall_ns": 47644977
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 212380077,
+          "proposal_wall_ns": 7331439,
+          "recovery_wall_ns": 47661237
+        },
+        "fresh-reference": {
+          "primary_rows": 5,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 438726205,
+          "proposal_wall_ns": 2010,
+          "recovery_wall_ns": 47501793
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 1,
+      "arms": {
+        "reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 418857973,
+          "proposal_wall_ns": 2081,
+          "recovery_wall_ns": 45929778
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 297190117,
+          "proposal_wall_ns": 3083008,
+          "recovery_wall_ns": 45731293
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 197426575,
+          "proposal_wall_ns": 3371986,
+          "recovery_wall_ns": 45513697
+        },
+        "fresh-reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 418740784,
+          "proposal_wall_ns": 1930,
+          "recovery_wall_ns": 45810675
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 61,
+      "arms": {
+        "reference": {
+          "primary_rows": 4,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "arm_wall_ns": 358755279,
+          "proposal_wall_ns": 2050,
+          "recovery_wall_ns": 47247247
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 310351485,
+          "proposal_wall_ns": 3040586,
+          "recovery_wall_ns": 47500694
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 207252047,
+          "proposal_wall_ns": 4400845,
+          "recovery_wall_ns": 47122984
+        },
+        "fresh-reference": {
+          "primary_rows": 4,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "arm_wall_ns": 358956255,
+          "proposal_wall_ns": 1930,
+          "recovery_wall_ns": 47273468
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 121,
+      "arms": {
+        "reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 443362763,
+          "proposal_wall_ns": 2110,
+          "recovery_wall_ns": 48223305
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 314529481,
+          "proposal_wall_ns": 3061668,
+          "recovery_wall_ns": 48058271
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 209892946,
+          "proposal_wall_ns": 5338203,
+          "recovery_wall_ns": 47653969
+        },
+        "fresh-reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 469768421,
+          "proposal_wall_ns": 1920,
+          "recovery_wall_ns": 47988520
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 181,
+      "arms": {
+        "reference": {
+          "primary_rows": 4,
+          "linear_solves": 6,
+          "newton_assemblies": 11,
+          "arm_wall_ns": 446622855,
+          "proposal_wall_ns": 2010,
+          "recovery_wall_ns": 48017211
+        },
+        "secant": {
+          "primary_rows": 2,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 260928295,
+          "proposal_wall_ns": 3078028,
+          "recovery_wall_ns": 47888786
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 211438233,
+          "proposal_wall_ns": 6342051,
+          "recovery_wall_ns": 47703721
+        },
+        "fresh-reference": {
+          "primary_rows": 4,
+          "linear_solves": 6,
+          "newton_assemblies": 11,
+          "arm_wall_ns": 387439418,
+          "proposal_wall_ns": 2010,
+          "recovery_wall_ns": 47694021
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 241,
+      "arms": {
+        "reference": {
+          "primary_rows": 4,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "arm_wall_ns": 387901811,
+          "proposal_wall_ns": 2100,
+          "recovery_wall_ns": 47834476
+        },
+        "secant": {
+          "primary_rows": 2,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 260756135,
+          "proposal_wall_ns": 3045257,
+          "recovery_wall_ns": 47844546
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 212916669,
+          "proposal_wall_ns": 7224526,
+          "recovery_wall_ns": 47683022
+        },
+        "fresh-reference": {
+          "primary_rows": 4,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "arm_wall_ns": 389282414,
+          "proposal_wall_ns": 1940,
+          "recovery_wall_ns": 47780555
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 1,
+      "arms": {
+        "reference": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 243589047,
+          "proposal_wall_ns": 1990,
+          "recovery_wall_ns": 45611072
+        },
+        "secant": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 196581734,
+          "proposal_wall_ns": 3095768,
+          "recovery_wall_ns": 45599273
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 197491860,
+          "proposal_wall_ns": 3444267,
+          "recovery_wall_ns": 45263842
+        },
+        "fresh-reference": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 243756072,
+          "proposal_wall_ns": 1940,
+          "recovery_wall_ns": 45539390
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 61,
+      "arms": {
+        "reference": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 252404300,
+          "proposal_wall_ns": 1970,
+          "recovery_wall_ns": 46693625
+        },
+        "secant": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 203228266,
+          "proposal_wall_ns": 3089979,
+          "recovery_wall_ns": 46551340
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 204611025,
+          "proposal_wall_ns": 4429376,
+          "recovery_wall_ns": 46786578
+        },
+        "fresh-reference": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 251012061,
+          "proposal_wall_ns": 1970,
+          "recovery_wall_ns": 46605282
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 121,
+      "arms": {
+        "reference": {
+          "primary_rows": 5,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 435036913,
+          "proposal_wall_ns": 1890,
+          "recovery_wall_ns": 47678052
+        },
+        "secant": {
+          "primary_rows": 3,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 308519248,
+          "proposal_wall_ns": 3073818,
+          "recovery_wall_ns": 47292661
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 225459264,
+          "proposal_wall_ns": 5378713,
+          "recovery_wall_ns": 47074975
+        },
+        "fresh-reference": {
+          "primary_rows": 5,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 437407615,
+          "proposal_wall_ns": 1960,
+          "recovery_wall_ns": 47441427
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 181,
+      "arms": {
+        "reference": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 307070668,
+          "proposal_wall_ns": 1910,
+          "recovery_wall_ns": 47515389
+        },
+        "secant": {
+          "primary_rows": 2,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "arm_wall_ns": 259701116,
+          "proposal_wall_ns": 3073808,
+          "recovery_wall_ns": 47568690
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 211326423,
+          "proposal_wall_ns": 6352252,
+          "recovery_wall_ns": 47347764
+        },
+        "fresh-reference": {
+          "primary_rows": 3,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "arm_wall_ns": 309088419,
+          "proposal_wall_ns": 1850,
+          "recovery_wall_ns": 47693964
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 241,
+      "arms": {
+        "reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 436549330,
+          "proposal_wall_ns": 1870,
+          "recovery_wall_ns": 47609932
+        },
+        "secant": {
+          "primary_rows": 4,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "arm_wall_ns": 363476448,
+          "proposal_wall_ns": 3095099,
+          "recovery_wall_ns": 47396226
+        },
+        "proposal": {
+          "primary_rows": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "arm_wall_ns": 212039504,
+          "proposal_wall_ns": 7393702,
+          "recovery_wall_ns": 47587571
+        },
+        "fresh-reference": {
+          "primary_rows": 5,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "arm_wall_ns": 437908199,
+          "proposal_wall_ns": 2020,
+          "recovery_wall_ns": 47663224
+        }
+      }
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-answer-seed-parent-steps-r4y5g0rh",
+    "inventory_sha256": "92878955234eba44fa4d60911e6a177b89380633d0666726470a64b4ebec4d22",
+    "files": 1322,
+    "bytes": 134681119
+  },
+  "numerical_campaign_wall_ns": 26230190332
+}

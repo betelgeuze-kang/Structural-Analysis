@@ -1,0 +1,171 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-process-strategy-cohort-9jcctkrl",
+    "files": 587,
+    "bytes": 21831531,
+    "inventory_sha256": "539c0acdbd9100b4a45e8a303c257e277c238d9bab2b89a4df388ae5098d6453"
+  },
+  "observation": {
+    "source_revision": "bea69d0b7819c6646243f079f361e59dd05a92c0",
+    "cohort_report_hash": "sha256:fe56efb76779f4a2b2b27bba4e7059434afafa9359621592dcf6c0f6a62aef75",
+    "original_inventory_checks": 576,
+    "exported_files": 578,
+    "exported_bytes": 21651704,
+    "successful_http_responses": 578,
+    "denied_http_responses": 6,
+    "cost_accounting": {
+      "distinct_historical_training_wall_ns": {
+        "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f": 2761753795
+      },
+      "excluded": [
+        "interpreter_startup_and_module_imports",
+        "runtime_sidecar_and_stdout",
+        "transport_and_workbench_review",
+        "separate_audits"
+      ],
+      "historical_training_wall_ns_counted_once": 2761753795,
+      "independent_generalization": false,
+      "learned_cli_interval_sum_ns": 24592134089,
+      "learned_plus_historical_interval_sum_ns": 27353887884,
+      "learned_plus_historical_over_price_ratio": null,
+      "net_savings_proved": false,
+      "original_physical_artifacts_replayed": false,
+      "pair_count": 4,
+      "pairs": [
+        {
+          "learned_cli_wall_ns": 2661750176,
+          "learned_over_price_cli_ratio": null,
+          "learned_report_hash": "sha256:b74afd162943c2ea88ca38761130c57429d4e0419f4a37cdc73651b94307a8ab",
+          "learned_runtime_digest": "sha256:90b59dacd2ba10bdf47e3ff40297abee3c05ca6690b17ea049f219b2ced35d2d",
+          "price_cli_wall_ns": 2624248747,
+          "price_report_hash": "sha256:78b25baf591b2436e3e1d9fbf71cff242e3abbf8f6aaa3843ae827bc843fc53f",
+          "price_runtime_digest": "sha256:65d65e42018adc61805ef1265c8e8dcb1b05dcb81aef54d99f6a767a598286c6",
+          "recorded_selection_comparable": false,
+          "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f"
+        },
+        {
+          "learned_cli_wall_ns": 2691514947,
+          "learned_over_price_cli_ratio": null,
+          "learned_report_hash": "sha256:81e81308b378597e4b2b2c9f402c6c64c800998a4602456a890208282e635bcf",
+          "learned_runtime_digest": "sha256:fc14c5f2d0dc530a2614e9409b7b66c8d46c28c115da313d04ed7700718c9e63",
+          "price_cli_wall_ns": 2656235451,
+          "price_report_hash": "sha256:8bfa78da1ffc3578643ca373b4ea510e693377360321da07f0b1c0c1846f0ed5",
+          "price_runtime_digest": "sha256:31a5175f62f63ed946f5a4e5f9bd3076720334319b90db55d9f07be695c7b4ea",
+          "recorded_selection_comparable": false,
+          "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f"
+        },
+        {
+          "learned_cli_wall_ns": 9606801805,
+          "learned_over_price_cli_ratio": 1.0065299293730483,
+          "learned_report_hash": "sha256:44c97f35f8503b3df5e334c1a670a786f6835909aa4255e15fbab7b4376fc793",
+          "learned_runtime_digest": "sha256:eb42598d88524ddbe3b55c1a34deea5b7975b5aed43b8943db2cdadb9a132474",
+          "price_cli_wall_ns": 9544477044,
+          "price_report_hash": "sha256:be91a91fb16fd1d8c9068c762556a7c1035e5c41c734732bbbed028f8ac927f1",
+          "price_runtime_digest": "sha256:21bc3d2694c749cd7141ac2cbd1bdaa5dbb10f0958bd34be17655ba8e9782424",
+          "recorded_selection_comparable": true,
+          "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f"
+        },
+        {
+          "learned_cli_wall_ns": 9632067161,
+          "learned_over_price_cli_ratio": 0.9959852784450755,
+          "learned_report_hash": "sha256:999a4111aab4c6e10fabd6914ca42e041a3957a9d3e458b97fa88c4ecf14dc03",
+          "learned_runtime_digest": "sha256:c04fcf40210e1f20dd7ee7e3b41835e07dbaa5b76fc188a26ae249e4d831e041",
+          "price_cli_wall_ns": 9670893104,
+          "price_report_hash": "sha256:47671cc53f0cbca64000da5cc7a588387f44a90d51c87c4b81bc70bd28a59d88",
+          "price_runtime_digest": "sha256:034603284ae2526d7f6ae9e37560151a581b13203e2902787c575fe92b46737e",
+          "recorded_selection_comparable": true,
+          "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f"
+        }
+      ],
+      "price_cli_interval_sum_ns": 24495854346,
+      "runtime_digest_is_attestation": false,
+      "schema_version": "experimental-rc-control-strategy-cost-cohort.v1",
+      "scope": "sum_of_cli_intervals_plus_distinct_historical_training_not_campaign_elapsed",
+      "uncomparable_pair_count": 2
+    },
+    "process_cost_accounting": {
+      "cli_accounting_digest": "sha256:dffe210f12451df88b2dbfef2d5d621251a31422f1357616ae63065d3565f4eb",
+      "distinct_historical_training_wall_ns": {
+        "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f": 2761753795
+      },
+      "excluded": [
+        "transport_and_workbench_review",
+        "separate_audits",
+        "campaign_preparation"
+      ],
+      "historical_training_wall_ns_counted_once": 2761753795,
+      "independent_generalization": false,
+      "learned_plus_historical_interval_sum_ns": 32961062481,
+      "learned_plus_historical_over_price_ratio": null,
+      "learned_process_interval_sum_ns": 30199308686,
+      "net_savings_proved": false,
+      "original_physical_artifacts_replayed": false,
+      "outside_cli_interval_is_startup_only": false,
+      "pair_count": 4,
+      "pairs": [
+        {
+          "learned_outside_cli_wall_ns": 1435811635,
+          "learned_over_price_process_ratio": null,
+          "learned_process_digest": "sha256:10b8f846a09ff690421fcfd45accc0bbcf3c01944bcbbe9ecf1eb3c592aa6c14",
+          "learned_process_wall_ns": 4097561811,
+          "learned_report_hash": "sha256:b74afd162943c2ea88ca38761130c57429d4e0419f4a37cdc73651b94307a8ab",
+          "price_outside_cli_wall_ns": 1800439848,
+          "price_process_digest": "sha256:b454d85cd7e8a797868b08dd66e4041313721b8d6e39a9e5100088888aec428d",
+          "price_process_wall_ns": 4424688595,
+          "price_report_hash": "sha256:78b25baf591b2436e3e1d9fbf71cff242e3abbf8f6aaa3843ae827bc843fc53f",
+          "recorded_selection_comparable": false
+        },
+        {
+          "learned_outside_cli_wall_ns": 1384047702,
+          "learned_over_price_process_ratio": null,
+          "learned_process_digest": "sha256:7760664b037a803c6b4b9b136d8d9208b5c1bc2f1a53c31acc59563e14b5c1cc",
+          "learned_process_wall_ns": 4075562649,
+          "learned_report_hash": "sha256:81e81308b378597e4b2b2c9f402c6c64c800998a4602456a890208282e635bcf",
+          "price_outside_cli_wall_ns": 1415229941,
+          "price_process_digest": "sha256:57aa63a2d0c70d84e106eb006b5d0270ed7413a26502ce244e5dcb562cd81ecb",
+          "price_process_wall_ns": 4071465392,
+          "price_report_hash": "sha256:8bfa78da1ffc3578643ca373b4ea510e693377360321da07f0b1c0c1846f0ed5",
+          "recorded_selection_comparable": false
+        },
+        {
+          "learned_outside_cli_wall_ns": 1393668795,
+          "learned_over_price_process_ratio": 1.0055699995230383,
+          "learned_process_digest": "sha256:82b4c4bc47fd7f1560de49fb0b236e7b975aaa1e9dcf964707fdcd3177055247",
+          "learned_process_wall_ns": 11000470600,
+          "learned_report_hash": "sha256:44c97f35f8503b3df5e334c1a670a786f6835909aa4255e15fbab7b4376fc793",
+          "price_outside_cli_wall_ns": 1395060338,
+          "price_process_digest": "sha256:4f854f78fd50156b438e8a3891031ef5c14ae0bdb428073a5881472fc6437ec8",
+          "price_process_wall_ns": 10939537382,
+          "price_report_hash": "sha256:be91a91fb16fd1d8c9068c762556a7c1035e5c41c734732bbbed028f8ac927f1",
+          "recorded_selection_comparable": true
+        },
+        {
+          "learned_outside_cli_wall_ns": 1393646465,
+          "learned_over_price_process_ratio": 0.9959252885926931,
+          "learned_process_digest": "sha256:3f8333210435c78d635c5b9cccc29355ad1289c243288ca004798aef0476b1ff",
+          "learned_process_wall_ns": 11025713626,
+          "learned_report_hash": "sha256:999a4111aab4c6e10fabd6914ca42e041a3957a9d3e458b97fa88c4ecf14dc03",
+          "price_outside_cli_wall_ns": 1399930935,
+          "price_process_digest": "sha256:882d4b357be7e16e8d3c36e5d5f269ea3202a580a0fbd014ddbce2011f6dd41d",
+          "price_process_wall_ns": 11070824039,
+          "price_report_hash": "sha256:47671cc53f0cbca64000da5cc7a588387f44a90d51c87c4b81bc70bd28a59d88",
+          "recorded_selection_comparable": true
+        }
+      ],
+      "price_process_interval_sum_ns": 30506515408,
+      "process_digest_is_attestation": false,
+      "schema_version": "experimental-rc-control-process-cost-cohort.v1",
+      "scope": "sum_of_process_intervals_plus_distinct_historical_training_not_campaign_elapsed",
+      "uncomparable_pair_count": 2
+    },
+    "wall_ns": 544914108,
+    "scope": "original_snapshot_read_create_export_reopen_HTTP_and_shutdown_excluding_source_copy_receipt_and_seal",
+    "listener_closed": true,
+    "solver_calls": 0,
+    "fits": 0,
+    "browser_executed": false,
+    "independent_physical_validation": false
+  },
+  "local_tests_passed": 82,
+  "workbench_v2_process_display_connected": false
+}

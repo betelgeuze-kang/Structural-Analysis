@@ -1,0 +1,113 @@
+{
+  "schema_version": "rc-runtime-selection-original-audit.v1",
+  "pid": 1085253,
+  "source_revision": "3d4ecef4b737703717522ef385bdc6004eba56e1",
+  "source_files_verified": 445,
+  "original_training_rows": 964,
+  "newton_solves_in_audit": 0,
+  "fits_in_audit": 0,
+  "all_training_partitions_preprocessing_and_ridge_stationarity_checked": true,
+  "all_candidate_scores_and_selection_reconstructed": true,
+  "all_original_processes_absent": true,
+  "runtime_work": {
+    "core_calls": 7744,
+    "linear_solves": 35194,
+    "newton_iterations": 35194
+  },
+  "candidates": [
+    {
+      "ridge": 10000.0,
+      "score": 1.0479234187497932,
+      "proposed_count": 241,
+      "fold_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "ridge": 1000000.0,
+      "score": 1.0490943527630177,
+      "proposed_count": 241,
+      "fold_indices": [
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  ],
+  "selected_strategy": "secant",
+  "selected_ridge": null,
+  "selected_score": 1.0,
+  "same_solver_assembly_response_replays": 7744,
+  "same_solver_recovery_material_integrations": 650496,
+  "stored_proposals_reconstructed": 1936,
+  "material_snapshots_reconstructed": 1936,
+  "native_terminal_reopens": 32,
+  "parent": {
+    "parent_pid": 1073200,
+    "worker_pid": 1073676,
+    "exit_code": 0,
+    "parent_wall_ns": 2702226514417
+  },
+  "independent_campaign": false,
+  "independent_physical_validation": false,
+  "wall_ns": 1102511117214,
+  "cpu_ns": 1100625171453,
+  "peak_rss_kib": 433296,
+  "completed_full_paths": 32,
+  "full_history_comparisons_passed": 24,
+  "reference_repeats_exact": 8,
+  "maximum_relative_ridge_stationarity_residual": 6.829938987808197e-15,
+  "material_checks": {
+    "independent_assembly_rebuilds": {
+      "section_replays": 46464,
+      "member_replays": 15488,
+      "material_integrations": 0,
+      "newton_solves": 0,
+      "state_commits": 0,
+      "assembly_replays": 7744
+    },
+    "independent_assembly_rebuild_seconds": 162.930531976,
+    "terminal_candidate_pairs_verified": 15393,
+    "terminal_accepted_pairs_verified": 12149,
+    "projection_counts": {
+      "coordinates": 107751,
+      "nonzero_projection_error": 12053
+    },
+    "maximum_twofold_projection_error": 6.018531076210112e-36,
+    "material_base_law_replays": {
+      "concrete": 557568,
+      "steel": 92928
+    },
+    "exact_fiber_inputs_checked": 650496,
+    "retained_low_strain_components_nonzero": 650496,
+    "independent_100_digit_stresses_checked": 650496,
+    "native_material_state_and_branch_replays_exact": true,
+    "rounded_base_vs_retained_stress_differences": {
+      "concrete/stress_mpa": 1.480411908911462e-14,
+      "concrete/consistent_tangent_mpa": 9.094947017729282e-12,
+      "steel/stress_mpa": 1.7053025658242404e-13,
+      "steel/consistent_tangent_mpa": 0.0
+    }
+  },
+  "audit_parent": {
+    "parent_pid": 1073983,
+    "worker_pid": 1085253,
+    "exit_code": 0,
+    "parent_wall_ns": 1102776161520
+  },
+  "candidate_promoted": false,
+  "net_savings_proved": false,
+  "includes_static_model_abstention_optimization": false,
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-secant-abstention-fhn1qvyq",
+  "seal": {
+    "inventory_sha256": "df41ee6c060fe8dd5e5bb4586c6c801177b5d5d7ec56929ec37bdc1bc08ed064",
+    "files": 47072,
+    "bytes": 2731657488,
+    "inventory_and_reread_wall_ns": 5418526949,
+    "all_original_processes_absent_at_seal": true
+  }
+}

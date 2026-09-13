@@ -1,0 +1,77 @@
+{
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "jobs": [
+    {
+      "id": 103780489001,
+      "name": "frontend-contracts",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316768/job/103780489001"
+    },
+    {
+      "id": 103780489133,
+      "name": "python-contracts",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316768/job/103780489133"
+    },
+    {
+      "id": 103780489879,
+      "name": "pytest-development-contracts",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316962/job/103780489879"
+    },
+    {
+      "id": 103780490002,
+      "name": "pytest-full-shard-1",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316962/job/103780490002"
+    },
+    {
+      "id": 103780490007,
+      "name": "pytest-full-shard-2",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316962/job/103780490007"
+    },
+    {
+      "id": 103780490051,
+      "name": "pytest-full-shard-3",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316962/job/103780490051"
+    },
+    {
+      "id": 103780490075,
+      "name": "pytest-full-shard-0",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316962/job/103780490075"
+    },
+    {
+      "id": 103782268115,
+      "name": "pytest-full",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34778316962/job/103782268115"
+    }
+  ],
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-3e-terminal-python-1h8nq47c",
+    "payload_files": 16,
+    "payload_bytes": 689176,
+    "inventory_sha256": "a98fcbbff58c3a2942b750b5599bf0acb8f5a2c82669d4fa84ce8b97a64a63d9"
+  },
+  "full_repository_tests_completed": false,
+  "independent_physical_validation": false
+}

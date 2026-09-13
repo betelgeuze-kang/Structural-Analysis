@@ -1,0 +1,51 @@
+{
+  "observation": {
+    "admissions": [
+      {
+        "admission_wall_ns": 44856105,
+        "artifacts": 49,
+        "id": "o0-full",
+        "report_hash": "sha256:ca7aa65349b119095e70107dd04e930a2c3ba39aa50e19e81851cb662c55ae29"
+      },
+      {
+        "admission_wall_ns": 129274273,
+        "artifacts": 38,
+        "id": "o0-pruned",
+        "report_hash": "sha256:6b8b60ca342c0a5c86f6561737cf51284b091d5b4756948be97d0423d17ba0f0"
+      },
+      {
+        "admission_wall_ns": 126719791,
+        "artifacts": 38,
+        "id": "o1-pruned",
+        "report_hash": "sha256:44dbb193c4308c3706bc82afdc9d7eb53227fb50dbe15785a0ea3e994182c8f3"
+      },
+      {
+        "admission_wall_ns": 36759969,
+        "artifacts": 49,
+        "id": "o1-full",
+        "report_hash": "sha256:546426ec11b10e2145b42f78cc8b71f8db4dc007f9fefe1736eb890736cc3448"
+      }
+    ],
+    "earlier_cost_observation_excludes_this_delivery": true,
+    "http_responses": 174,
+    "http_transfer_and_teardown_wall_ns": 85615955,
+    "independent_physical_validation": false,
+    "net_savings_proved": false,
+    "new_fits": 0,
+    "new_numerical_paths": 0,
+    "new_predictions": 0,
+    "original_graph_bytes_changed": false,
+    "original_inventory_sha256": "2d3ae9245605e9df04c8c4b79a603ace82b8344a0c18abbf4d2c346c66e9970b",
+    "original_numerical_source_revision": "d11248ce06627c8466ae348a88f91a3b167ce05e",
+    "original_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-cost-pruned-pntrrwsy",
+    "source_revision": "3bc9d7409853d4db81646955f2f9196c695f2f6f",
+    "strategy_executions_reviewed": 4,
+    "workbench_review_executed": false
+  },
+  "packet": {
+    "bytes": 130427614,
+    "files": 818,
+    "inventory_sha256": "997a747130bd075344a9e7000ee665a5a3b8fcfb2305f7486844f8bd113d481d",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-cost-pruned-http-qrzs4ei7"
+  }
+}

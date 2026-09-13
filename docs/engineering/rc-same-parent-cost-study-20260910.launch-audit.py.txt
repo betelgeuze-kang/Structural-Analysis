@@ -1,0 +1,49 @@
+"""Wait for the existing numerical processes, then run one original-record audit."""
+from pathlib import Path
+import hashlib,json,os,subprocess,sys,time,traceback
+
+root=Path(__file__).resolve().parent
+read=lambda p:json.loads(p.read_bytes())
+def save(name,data):
+    with (root/name).open('x') as f:json.dump(data,f,indent=2,allow_nan=False);f.write('\n')
+def identity(pid):
+    p=Path('/proc')/str(pid)
+    try:
+        stat=(p/'stat').read_text();fields=stat[stat.rindex(')')+2:].split()
+        return {'start_ticks':fields[19],'cmdline':(p/'cmdline').read_bytes().decode().split('\0')[:-1]}
+    except FileNotFoundError:return None
+
+started=time.perf_counter_ns();declaration=read(root/'process-started.json');original={k:declaration[k] for k in ('parent_pid','worker_pid')}
+identities={str(pid):identity(pid) for pid in original.values()}
+worker=identities[str(original['worker_pid'])]
+if worker is not None:assert worker['cmdline']==['/usr/bin/python3','-B',str(root/'run.py'),'worker']
+save('audit-supervisor-started.json',{'pid':os.getpid(),'original_processes':original,'original_identities':identities,'automatic_numerical_restart':False,'maximum_audit_attempts':1})
+child=None
+try:
+    while True:
+        live=False
+        for pid in original.values():
+            current=identity(pid)
+            if current is None:continue
+            if current!=identities[str(pid)]:raise RuntimeError('Original PID identity changed; refusing audit launch')
+            live=True
+        if not live:break
+        time.sleep(5)
+    terminal=read(root/'process-outcome.json')
+    assert terminal['exit_code']==0 and all(terminal[k]==original[k] for k in original)
+    script=root/'audit.py';script_sha=hashlib.sha256(script.read_bytes()).hexdigest()
+    assert script_sha==read(root/'audit-adaptation.json')['generated_auditor_sha256']
+    audit_start=time.perf_counter_ns()
+    env=dict(os.environ,OPENBLAS_NUM_THREADS='1',OPENBLAS_CORETYPE='Haswell',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1',PYTHONDONTWRITEBYTECODE='1')
+    with (root/'audit-attempt-1.log').open('xb') as output:
+        child=subprocess.Popen([sys.executable,'-B',str(script)],env=env,stdout=output,stderr=subprocess.STDOUT)
+        save('audit-attempt-1-started.json',{'parent_pid':os.getpid(),'worker_pid':child.pid,'script_sha256':script_sha,'original_processes_absent':True,'unknown_work_until_outcome':True})
+        print('audit worker',child.pid,flush=True)
+        code=child.wait()
+    save('audit-attempt-1-outcome.json',{'parent_pid':os.getpid(),'worker_pid':child.pid,'exit_code':code,'parent_wall_ns':time.perf_counter_ns()-audit_start})
+    save('audit-supervisor-outcome.json',{'pid':os.getpid(),'status':'completed' if code==0 else 'audit_failed','exit_code':code,'wall_ns_including_wait':time.perf_counter_ns()-started})
+    print('audit exit',code,flush=True)
+except BaseException as exc:
+    save('audit-supervisor-exception.json',{'pid':os.getpid(),'exception_kind':type(exc).__name__,'wall_ns_including_wait':time.perf_counter_ns()-started,'audit_child_pid':None if child is None else child.pid,'audit_child_poll':None if child is None else child.poll()})
+    raise
+raise SystemExit(code)

@@ -412,7 +412,8 @@
         "return_code": {"const": 0},
         "stdout_sha256": {"$ref": "#/$defs/hash"},
         "stderr_sha256": {"$ref": "#/$defs/hash"},
-        "driver_sha256": {"$ref": "#/$defs/hash"}
+        "driver_sha256": {"$ref": "#/$defs/hash"},
+        "runtime_binding": {"const":{"schema_version":"pinned-opensees-wheel-execution.v1","wheel_hashes":{"openseespy-3.7.1.2-py3-none-any.whl":"sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65","openseespylinux-3.7.1.2-py3-none-any.whl":"sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"},"member_manifest_hash":"sha256:691f984baac307ce223eb511991834800490158f61376b89eccfd402f26d38bb","member_count":24,"module_origins":{"openseespy":{"path":"openseespy/__init__.py","sha256":"sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"openseespy.opensees":{"path":"openseespy/opensees/__init__.py","sha256":"sha256:b4c234a20c235bb4a8ed9f780a9ac2d5b2534c42ad499054882ba8c8e94bed1d"},"openseespylinux":{"path":"openseespylinux/__init__.py","sha256":"sha256:a03f746f4b5476f383668e3de9528011d8d51a1e6806762c56018424d2cd6ea2"},"openseespylinux.opensees":{"path":"openseespylinux/opensees.so","sha256":"sha256:b0985e344fb76d2f445c2b3046c37676aa02d8c632d66345a4bc927a56fee25f"}},"isolated_interpreter":true,"private_wheel_extraction":true,"members_verified_before_and_after":true,"binding_hash":"sha256:8aee1f57133280ddabf6ee88ee7b2310d090d887bb98eaeb9ca6d383084d6594"}}
       }
     },
     "calculixOutputs": {

@@ -125,6 +125,11 @@ _EXPECTED_SYSTEM_BY_OS_LABEL = {
 _SHA256_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
+# Bounded-planar values below include the stable small-chord evaluation from
+# e2f6967ec. The 2026-09-09 fixed-source comparison isolates that one-file cause;
+# Linux CPython 3.12 / pinned NumPy-SciPy supplies the exact writer readback.
+# Semantic policy, fixtures and solver gates are unchanged. See
+# docs/engineering/planar-stable-kinematics-goldens-20260909.md.
 EXPECTED_GOLDENS = {
     "model_ir_content_hash": (
         "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610"
@@ -175,22 +180,22 @@ EXPECTED_GOLDENS = {
         "sha256:78c19f52f7328f8e639debdb3ea64e9779c3cc7d7c0690bf387009355df4bc2c"
     ),
     "bounded_planar_result_hash": (
-        "sha256:117c90503a60a188758992fd0e1234796a1cb1913725ffa87f9d33b4f5f7c5b6"
+        "sha256:96d13af855b8f3092c19e0381d7aa7e8bcbc633a6657519907ac7c35f5fa1a00"
     ),
     "bounded_planar_semantic_hash": (
-        "sha256:95493872569eb1ec292f7fda2e49334a09a7826073beb7b8a437c856201e0707"
+        "sha256:2e46e8d9087548523a2ead1dff41a323fe013c55d91b93a05edb2e353b95ea5c"
     ),
     "bounded_planar_replay_result_hash": (
-        "sha256:e1b1cc5400c072ebb18b0bcf7c6e455190c77e3ac088c805888f5c7d6a3772d6"
+        "sha256:d091945e291e1d604748df77c4493a3c6684bdfcdd3710ac6f0adc4ba8a6a391"
     ),
     "bounded_planar_checkpoint_artifact_hash": (
-        "sha256:0d10a6029a91012164dc56098aaef790e57db5358b92de7b8255edfac3961547"
+        "sha256:9b72adbb65ef53815381d765dce6d98cce8f13ca4d4a1b3043cc0a9e4ab44895"
     ),
     "bounded_planar_checkpoint_chain_hash": (
-        "sha256:cf48452dcb62e320b88406c56472c85dfbcf4c342e31ea1525d0e329e1b5cb90"
+        "sha256:66286b7d5b72e33c63007eceefa405d163f678157d76038a0a03eb7f552b109b"
     ),
     "bounded_planar_engineering_result_hash": (
-        "sha256:cc5bd7a004b0cb1de0c87982e8bb2f7fe83f7f97da8ee30725e8a10b55ae83aa"
+        "sha256:75640a03207718d40f2d414055bca8bb576009d85f0ba06c0fc929b89503498a"
     ),
     "bounded_planar_execution_topology_plan_hash": (
         "sha256:58c8f22de77b6474777cbaa1dbe5afc8b0b641314d0f4aea5bdbcebee1f51f94"
@@ -202,7 +207,7 @@ EXPECTED_GOLDENS = {
         "sha256:2dd5dc37376146201d8203e38b2c9a872019a79142326952a176842d29d32f78"
     ),
     "bounded_planar_terminal_residual_trace_hash": (
-        "sha256:3ff6e9971d4bd727ddff4507d18377e1f96d33031011765a3379638dcca5cc7c"
+        "sha256:773434306d7878d1c9ed5b7d10116baa7ae792c928a0beaf748f413c61991f70"
     ),
     "bounded_planar_model_ir_content_hash": (
         "sha256:4703d9137223345322db05cc37e8e53eb453d9bc67f12e88864c390ba3de66b7"
@@ -220,22 +225,22 @@ EXPECTED_GOLDENS = {
         "sha256:bcc7c5c3e7b26c4c1d907e73ec352d4269f1be966c5e7f8e68132455ced6f1dd"
     ),
     "bounded_planar_settlement_result_hash": (
-        "sha256:d1a1d9c51cf87d64b917ba789e4724b901ef2ca161d67943613248a98bbaf537"
+        "sha256:95c2b8bc8db441c7d85a3e08ae13a5c1a9a72a4f89e4a03dfd10465c91ada16a"
     ),
     "bounded_planar_settlement_semantic_hash": (
         "sha256:13a8bbaaac06627b438d2166e122988e815ab6e7d2c47fe74bfaab779a3b1ea3"
     ),
     "bounded_planar_settlement_replay_result_hash": (
-        "sha256:98e01640847327ca70cfac42cf89741235693cd1ba8b3638bceaf2df03eba006"
+        "sha256:84693a966b1148fce4eefa1db78209aba6afd34f648351ae297ba28a485c9a55"
     ),
     "bounded_planar_settlement_checkpoint_artifact_hash": (
-        "sha256:fbb7c5d068fc0ae8ad7a617e4f72d083e48a85f52644de25449767f1eafbbc13"
+        "sha256:9f4085b794812c3e61a8727c2782a33a2e6731b68e32e4d24760435e3a75c897"
     ),
     "bounded_planar_settlement_checkpoint_chain_hash": (
-        "sha256:e48590b945cffadbf5e4edac2288565793c39ea383416b76dad50d1794b2d477"
+        "sha256:ec73e09bf2dc5edd346c6ff341e320584d18a72384237754602eb96debae4f63"
     ),
     "bounded_planar_settlement_engineering_result_hash": (
-        "sha256:c0ea91d8b117f960350c784d17f74a17e0f39073f172dd3dae645d2fc18c5002"
+        "sha256:a6e90b1167de05e24192eaa2439c7b60f27099d51eb3480cdefd4cd4cd0f961e"
     ),
     "bounded_planar_settlement_execution_topology_plan_hash": (
         "sha256:3dfd67bf543c98a63b2cb559857166e43c57dcfee616822e06749e283dd34fb6"
@@ -247,7 +252,7 @@ EXPECTED_GOLDENS = {
         "sha256:f36fc4a552c10a5c16cca842633bd0dbda813fcaf833627c41c249b35ac29efd"
     ),
     "bounded_planar_settlement_terminal_residual_trace_hash": (
-        "sha256:9ee4b06c17f4c3a084c53732fa7a7457a6e005f0dc7d2bb2b2c2644b410f542a"
+        "sha256:1207eb938890b4dc9c42441440d32e076f45866d38d84b44af647abbe53d5669"
     ),
     "bounded_planar_settlement_model_ir_content_hash": (
         "sha256:a3745cf7a6e2023465bbcd232a620fa96e3bdf2a31976bb082a38f1e64176e06"

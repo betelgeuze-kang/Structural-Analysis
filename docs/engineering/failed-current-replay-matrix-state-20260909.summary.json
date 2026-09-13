@@ -1,0 +1,265 @@
+{
+  "claims": {
+    "classification_and_pure_consumer_contracts_verified": true,
+    "full_binding_validation_executed_locally": false,
+    "full_ci_pass": false,
+    "independent_physical_validation": false,
+    "replay_pass_repaired": false
+  },
+  "hosted_base_failure": {
+    "classification": "All three jobs stop in current-source V&V matrix materialization at the same replay-only row validator. No separate verify first cause was observed.",
+    "head_sha": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+    "jobs": [
+      {
+        "actual_pytest_pass_summaries": [
+          {
+            "line": 721,
+            "text": "2026-09-08T23:38:55.2280728Z 1 passed in 5.00s"
+          }
+        ],
+        "api_record_sha256": "8224457612e0f161deb8bfc8405e408ddb333fc62d3304881b1d8eb709dc5ca5",
+        "earlier_log_error_markers": [],
+        "failed_steps": [
+          {
+            "conclusion": "failure",
+            "name": "Materialize exact current-source test evidence",
+            "number": 6
+          }
+        ],
+        "failing_function": "_validate_status",
+        "first_exception": "BoundedPlanarVVMatrixError: matrix_status_replay_only_row_invalid",
+        "head_sha": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+        "job_conclusion": "failure",
+        "job_id": 102278770521,
+        "job_status": "completed",
+        "key": "full-pytest-shard0",
+        "log_byte_length": 91745,
+        "log_sha256": "28b2e6751be284d01ce4c69ef7b45bf5ced552d7916685e9add6ce21c29abc53",
+        "run_id": 34291482375,
+        "skipped_steps": [
+          {
+            "name": "Run materialized repository test suite shard",
+            "number": 7
+          },
+          {
+            "name": "Post Set up Python",
+            "number": 13
+          }
+        ],
+        "source_file": "scripts/build_bounded_planar_external_vv_matrix.py",
+        "source_line": 2116,
+        "traceback_log_lines": [
+          767,
+          781
+        ],
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34291482375/job/102278770521"
+      },
+      {
+        "actual_pytest_pass_summaries": [],
+        "api_record_sha256": "79c85e2c9b6e0f1bdaaa5281dd8b697aa7c86269ac6984c54d74dadd5c26e0e5",
+        "earlier_log_error_markers": [],
+        "failed_steps": [
+          {
+            "conclusion": "failure",
+            "name": "Materialize exact current-source V&V inputs",
+            "number": 5
+          }
+        ],
+        "failing_function": "_validate_status",
+        "first_exception": "BoundedPlanarVVMatrixError: matrix_status_replay_only_row_invalid",
+        "head_sha": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+        "job_conclusion": "failure",
+        "job_id": 102279093601,
+        "job_status": "completed",
+        "key": "legacy-contract-core",
+        "log_byte_length": 91544,
+        "log_sha256": "6875d09671e4fb1c0760f68f5de532fc1aef1d5d78ab0e5abcbcfbc450480288",
+        "run_id": 34291482329,
+        "skipped_steps": [
+          {
+            "name": "Deterministic legacy evidence contracts shard",
+            "number": 6
+          },
+          {
+            "name": "Post Set up Python",
+            "number": 11
+          }
+        ],
+        "source_file": "scripts/build_bounded_planar_external_vv_matrix.py",
+        "source_line": 2116,
+        "traceback_log_lines": [
+          777,
+          791
+        ],
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34291482329/job/102279093601"
+      },
+      {
+        "actual_pytest_pass_summaries": [],
+        "api_record_sha256": "9f16ac8fc747b2db20c87e027d7657976c8045e3b4aaabee5e1d36968bfa1335",
+        "earlier_log_error_markers": [],
+        "failed_steps": [
+          {
+            "conclusion": "failure",
+            "name": "Materialize exact current-source test evidence",
+            "number": 9
+          }
+        ],
+        "failing_function": "_validate_status",
+        "first_exception": "BoundedPlanarVVMatrixError: matrix_status_replay_only_row_invalid",
+        "head_sha": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+        "job_conclusion": "failure",
+        "job_id": 102278770367,
+        "job_status": "completed",
+        "key": "verify",
+        "log_byte_length": 121988,
+        "log_sha256": "afd00f349f77902c75e59b21861c0c1681e8c98a6220b198db8e0be3e129b045",
+        "run_id": 34291482320,
+        "skipped_steps": [
+          {
+            "name": "Build current-HEAD readiness snapshot",
+            "number": 10
+          },
+          {
+            "name": "Upload current-HEAD readiness snapshot",
+            "number": 11
+          },
+          {
+            "name": "Validate product CI ownership boundaries",
+            "number": 12
+          },
+          {
+            "name": "Verify structural core Python lane",
+            "number": 13
+          },
+          {
+            "name": "Materialize deterministic structural-scope audit candidate",
+            "number": 14
+          },
+          {
+            "name": "Upload structural-scope audit candidate",
+            "number": 15
+          },
+          {
+            "name": "PR quality gate",
+            "number": 16
+          },
+          {
+            "name": "Post Set up Node",
+            "number": 32
+          },
+          {
+            "name": "Post Set up Python",
+            "number": 33
+          }
+        ],
+        "source_file": "scripts/build_bounded_planar_external_vv_matrix.py",
+        "source_line": 2116,
+        "traceback_log_lines": [
+          1075,
+          1089
+        ],
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34291482320/job/102278770367"
+      }
+    ],
+    "next_action": "Proceed with the separately owned V&V replay-only row classifier fix and focused verification, then inspect the new exact-head materialization jobs and the downstream suites they previously skipped. Do not label the skipped pytest lanes passed or infer independent physical validation from materialization.",
+    "pytest_execution": "Full shard0 ran only its separate prerequisite commercial-ledger test: 1 passed in 5.00s. Its materialized repository suite shard was skipped. Legacy contract-core deterministic contracts shard was skipped. Verify structural-core lane and PR quality gate were skipped; no pytest result was observed there.",
+    "schema_version": "ci-first-failure-classification.v1",
+    "scope": "Read-only GitHub job API and retained logs for exactly three completed jobs; no repository, protected evidence or environment file read; no repository edit, test execution or remote mutation."
+  },
+  "hosted_failure_retention": {
+    "bytes": 326293,
+    "files": 10,
+    "inventory_sha256": "1fac6cf1b5efdf0113f569158ebb868b4ac5ef9c1e65600852d0b5c34961c9fd",
+    "root": "/tmp/structural-ci011-failure-classification.OyLasvnq"
+  },
+  "implementation": {
+    "base_source_revision": "0113110186d6cd22c9ce3995e8a031556f02b50f",
+    "changed_files": {
+      "scripts/build_bounded_planar_external_vv_matrix.py": {
+        "byte_length": 110063,
+        "sha256": "008c9df2ba94ecfa6dc2b1052f9dc00db5717d160fabf09588ed2d13b345e97e"
+      },
+      "scripts/build_bounded_planar_external_vv_matrix_from_operator_bundle.py": {
+        "byte_length": 24091,
+        "sha256": "e30ec2bdb9c8d25198c74c0560dad816bd94171b7debe289f50f83b4a75da0e7"
+      },
+      "scripts/nonpromotion_authority_policy.py": {
+        "byte_length": 28885,
+        "sha256": "4f505ffb7c6aed6b30257bebfeb9102ca640d5bcaad1754cc8e6c2c849b52ee0"
+      },
+      "src/structural_analysis/schemas/bounded_planar_external_vv_matrix_status_v1.schema.json": {
+        "byte_length": 43424,
+        "sha256": "e62a2f89b4afd456be2c527589c9e71906b994268e12e4b447a02cb454118611"
+      },
+      "tests/test_build_bounded_planar_external_vv_matrix.py": {
+        "byte_length": 46274,
+        "sha256": "a519ac0de3cbeee4a98d0aeb315e05620b31d6ddb0442668263b59d161f112af"
+      },
+      "tests/test_build_bounded_planar_external_vv_matrix_from_operator_bundle.py": {
+        "byte_length": 25590,
+        "sha256": "c83e5e5b6da67ba0edd1b25029fafd8656e93d34523ab1922e0a889957687fe0"
+      },
+      "tests/test_nonpromotion_authority_policy.py": {
+        "byte_length": 16284,
+        "sha256": "ff9b39324a706ab7cdd666bd9552285f1f3146038838495b033161531c6032c6"
+      }
+    },
+    "old_ci_failure_inventory": "original-ci-failure-inventory.json",
+    "scope_limits": [
+      "Synthetic row/count/schema/nonpromotion tests only.",
+      "Operator composition substitutes signature/source boundaries and full validator; tests real row/count/blocker composition, not signature or source-evidence acceptance.",
+      "Existing full source/replay/evidence validation gates retained.",
+      "Protected original evidence not read or regenerated.",
+      "No solver/public analyses, commit or remote writes.",
+      "No fresh CI result inferred."
+    ],
+    "status": "focused_contract_tests_passed",
+    "test_runs": [
+      {
+        "deselected": 23,
+        "failed": 2,
+        "log": "red.log",
+        "reason": "Expected regression: false replay was classified as current_product_replay_only."
+      },
+      {
+        "deselected": 21,
+        "log": "green-first.log",
+        "passed": 45
+      },
+      {
+        "deselected": 141,
+        "failed": 2,
+        "log": "green-consumers-first.log",
+        "passed": 75,
+        "reason": "Test-only helper import path failed; no production assertion failed."
+      },
+      {
+        "deselected": 14,
+        "log": "operator-corrected.log",
+        "passed": 2
+      },
+      {
+        "deselected": 141,
+        "log": "final.log",
+        "passed": 77
+      }
+    ],
+    "validation": {
+      "diff_check": true,
+      "format_check_four_formatted_python_files": true,
+      "independent_readonly_review": "No remaining source defect reported after promotion and method-specific freshness fixes.",
+      "ruff_check_six_python_files": true
+    }
+  },
+  "retention": {
+    "current_changed_source_files_match": 7,
+    "inventory_sha256": "e15c9e499497cd6814bb762553507eab256e8189349a0a45898f593b8deea783",
+    "new_numerical_calls": 0,
+    "pid": 619069,
+    "root": "/tmp/structural-matrix-failed-replay.UgRtkg",
+    "status": "passed",
+    "verified_bytes": 55266,
+    "verified_files": 9
+  },
+  "schema_version": "failed-current-replay-matrix-state-observation.v1"
+}

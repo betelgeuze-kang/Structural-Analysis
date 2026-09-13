@@ -1,0 +1,128 @@
+{
+  "schema": "rc-design-native-reuse-integration.v1",
+  "base_revision": "f9cfed9bdd182834b17abd80571fd4dd5a356cf0",
+  "sources": [
+    {
+      "path": "src/structural_analysis/api/rc_fiber_frame_direct_control.py",
+      "sha256": "d7ddb54f58778e6a12ac0591b073ff1e6a05e076a15abd74a4b865c13c71e73f"
+    },
+    {
+      "path": "src/structural_analysis/assembly/stateful_fiber_frame2d_control_path.py",
+      "sha256": "569d82304a8739f386af9961d1f55185dbaa50333c915ac61a3624db56ca064c"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_candidate_cli.py",
+      "sha256": "e8d297053eff675b55c160eb1e63dc17d11f107eb9b1c57bcebccd4491d99ce9"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_candidate_search.py",
+      "sha256": "c765087fc5a4d6ad3dc21a3d588ca06183ea70ef19255b7a680efb1539e78fe3"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_design.py",
+      "sha256": "54f2752cf4b33e89dad40d61f1ea447a9efaf13751a31daf09ba884a5d161fcb"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_design_cli.py",
+      "sha256": "64e71b22f4a37535ca9d00db60a939a2f64eef794886bdc5c88f0fc42356043b"
+    },
+    {
+      "path": "src/workbench-v2/model/rcControlDesignSchema.ts",
+      "sha256": "e722abf28a69b8e230b2e7cef804f30639a0d52e4b086daf54e9ada026e2f90f"
+    },
+    {
+      "path": "src/workbench-v2/model/rcControlSearchSchema.ts",
+      "sha256": "d3bb80d3cfb1664f4f87dbf58383027a4e0c65cfc361316ff50238188f482f09"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-rc-design-contract.spec.ts",
+      "sha256": "f175864d4324c8e0225d7247fe51100bd4b07566ca59681bf901dd010e026b85"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-rc-search-contract.spec.ts",
+      "sha256": "033369864de013df1392b623488b22784d5024ac5417ccfa7eac44403948282a"
+    },
+    {
+      "path": "tests/test_bounded_rc_fiber_direct_control_api.py",
+      "sha256": "08584a4222a06b283464cf57cf22e56a4e34e022cc882a5e244e2b106524f0c4"
+    },
+    {
+      "path": "tests/test_rc_control_candidate_search.py",
+      "sha256": "6b63a2c8ea4cbe5095c299a3058cd18ccfdb69870e42cd2d504d8193d714db77"
+    },
+    {
+      "path": "tests/test_rc_control_design.py",
+      "sha256": "f611cb405f637667366ef8e9c0b988733673bf434b46b3e1d107da1512a5ccbc"
+    }
+  ],
+  "local_python_tests": 231,
+  "local_frontend_tests": 59,
+  "typescript_pass": true,
+  "mypy_source_files_pass": 6,
+  "browser_render_tested": false,
+  "workbench_validator_executed_on_real_artifacts": true,
+  "price_inputs": "synthetic development values, not market quotes",
+  "ai_net_benefit_proved": false,
+  "external_validation": false,
+  "training": {
+    "step_executions": 24,
+    "models": 3,
+    "reuse_enabled": false
+  },
+  "search_runs": [
+    {
+      "directory": "search",
+      "profile": "rc-control-immediate-line-search-reuse.v1",
+      "arms": [
+        {
+          "arm": "price_order",
+          "verified_rows": 2,
+          "step_executions": 16,
+          "selected_candidate_id": "cheap"
+        },
+        {
+          "arm": "learned_order",
+          "verified_rows": 2,
+          "step_executions": 16,
+          "selected_candidate_id": "cheap"
+        },
+        {
+          "arm": "exhaustive_oracle",
+          "verified_rows": 4,
+          "step_executions": 32,
+          "selected_candidate_id": "cheap"
+        }
+      ]
+    },
+    {
+      "directory": "cli-search",
+      "profile": "rc-control-immediate-line-search-reuse.v1",
+      "arms": [
+        {
+          "arm": "price_order",
+          "verified_rows": 2,
+          "step_executions": 16,
+          "selected_candidate_id": "cheap"
+        },
+        {
+          "arm": "learned_order",
+          "verified_rows": 2,
+          "step_executions": 16,
+          "selected_candidate_id": "cheap"
+        },
+        {
+          "arm": "exhaustive_oracle",
+          "verified_rows": 4,
+          "step_executions": 32,
+          "selected_candidate_id": "cheap"
+        }
+      ]
+    }
+  ],
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-design-reuse-m6w8w0or",
+    "files": 224,
+    "bytes": 4734778,
+    "inventory_sha256": "1a57c1f388976680a7f2a3d96c29be476d940b62ccc6e2aec5e1441d0447497c"
+  }
+}

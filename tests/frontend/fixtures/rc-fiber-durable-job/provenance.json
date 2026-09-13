@@ -1,0 +1,32 @@
+{
+  "source_root": "/tmp/structural-rc-durable-worker-m82neh3y",
+  "source_job": "split-chunk-3/job.json",
+  "source_revision_is_attestation": false,
+  "original_blobs": {
+    "request": {
+      "byte_length": 2285,
+      "content_hash": "sha256:0bd7b8603fb306adf2a78772b2a4184beff4aac1bfc26e06e4955f2000771820",
+      "media_type": "application/json",
+      "role": "request"
+    },
+    "checkpoint": {
+      "byte_length": 52905,
+      "content_hash": "sha256:19d94ea4c391a6310eb587e7a95a94c3dc3651c00f5aa916fcf657cb8ebd7d85",
+      "media_type": "application/vnd.structural-analysis.rc-fiber-job-checkpoint+json",
+      "role": "checkpoint"
+    },
+    "result": {
+      "byte_length": 932568,
+      "content_hash": "sha256:15b32f857af632b8c643826b7cb3c6135412c06f005029137bb5a4ec24c8c5b9",
+      "media_type": "application/vnd.structural-analysis.rc-fiber-job-result+json",
+      "role": "result"
+    },
+    "evidence": {
+      "byte_length": 2386,
+      "content_hash": "sha256:e19ab73107c4b111e1f75cebb5f34ba9666a293d40fa684c3dbc2097e72e6b32",
+      "media_type": "application/json",
+      "role": "evidence"
+    }
+  },
+  "scope": "Retained three-target development reversal fixture; zero new numerical calls; not independent physical or performance evidence."
+}

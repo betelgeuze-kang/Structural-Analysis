@@ -98,6 +98,9 @@ def synthetic_workbench(tmp_path: Path) -> Path:
         'const submissionUrl = "/api/v1/frame3d/jobs";\n', encoding="utf-8"
     )
     (assets / "app.css").write_text("body { color: #111; }\n", encoding="utf-8")
+    drawings = workbench / "src/structure-viewer/drawings"
+    drawings.mkdir(parents=True)
+    (drawings / "manifest.json").write_text('{"drawings": []}\n', encoding="utf-8")
     return workbench
 
 
@@ -627,7 +630,7 @@ def test_workstation_distribution_binds_static_build_and_extracted_host_smoke(
         "frame_alpha_workstation_distribution_manifest_v2.schema.json"
     ).validate(manifest)
     assert manifest["workbench"]["submission_url"] == "/api/v1/frame3d/jobs"
-    assert manifest["workbench"]["file_count"] == 3
+    assert manifest["workbench"]["file_count"] == 4
     assert manifest["license"]["third_party_redistribution_clearance"] == (
         "not_established"
     )
@@ -646,7 +649,7 @@ def test_workstation_distribution_binds_static_build_and_extracted_host_smoke(
 
     with zipfile.ZipFile(archive) as package:
         names = package.namelist()
-        assert len(names) == len(set(names)) == 19
+        assert len(names) == len(set(names)) == 20
         assert names[-1].endswith("/manifest.json")
         assert any(name.endswith("/LICENSE") for name in names)
         assert any(name.endswith("/SBOM.native-license.json") for name in names)
@@ -730,7 +733,9 @@ def test_workstation_distribution_rejects_static_build_without_submission_endpoi
         )
 
 
+@pytest.mark.parametrize("asset", ["assets/app.js", "src/structure-viewer/drawings/manifest.json"])
 def test_workstation_distribution_rejects_packaged_asset_tampering(
+    asset: str,
     tmp_path: Path,
     built_workstation_archives: tuple[Path, Path, dict[str, object]],
 ) -> None:
@@ -742,7 +747,7 @@ def test_workstation_distribution_rejects_packaged_asset_tampering(
     ):
         for info in original.infolist():
             payload = original.read(info)
-            if info.filename.endswith("/workbench/assets/app.js"):
+            if info.filename.endswith(f"/workbench/{asset}"):
                 payload += b"\n"
             changed.writestr(info, payload)
 
@@ -764,3 +769,23 @@ def test_workstation_manifest_schema_rejects_browser_authority_promotion(
         _validator(
             "frame_alpha_workstation_distribution_manifest_v2.schema.json"
         ).validate(promoted)
+
+
+@pytest.mark.parametrize("extra_root", ["second-package", ""])
+def test_workstation_distribution_rejects_ambiguous_or_unlisted_manifest(
+    tmp_path: Path,
+    built_workstation_archives: tuple[Path, Path, dict[str, object]],
+    extra_root: str,
+) -> None:
+    source, _, _ = built_workstation_archives
+    output = tmp_path / "ambiguous.zip"
+    with zipfile.ZipFile(source) as original, zipfile.ZipFile(
+        output, "x", compression=zipfile.ZIP_DEFLATED
+    ) as changed:
+        for info in original.infolist():
+            changed.writestr(info, original.read(info))
+        name = f"{extra_root}/manifest.json" if extra_root else "manifest.json"
+        info, content = distribution._zip_entry(name, b"{}\n", executable=False)
+        changed.writestr(info, content)
+    with pytest.raises(distribution.DistributionError):
+        distribution.verify_workstation_distribution(archive_path=output)

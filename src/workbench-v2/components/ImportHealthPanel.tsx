@@ -50,7 +50,7 @@ export function ImportHealthPanel({ model }: ImportHealthPanelProps): ReactEleme
           </dl>
 
           {summary.issues.length ? (
-            <div className="wb2-table-wrap">
+            <div className="wb2-table-scroll" role="region" aria-label="Import health diagnostics" tabIndex={0}>
               <table className="wb2-table" data-wb2-import-health-table>
                 <thead>
                   <tr>

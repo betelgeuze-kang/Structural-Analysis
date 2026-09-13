@@ -1,0 +1,133 @@
+{
+  "source_revision": "5c80b7abc7e5a6c6ddb202cdb19733687c320562",
+  "runs": [
+    {
+      "id": "b3-o0-price_order",
+      "width": 1440,
+      "strategy": "price_order",
+      "selected": null,
+      "page_errors": []
+    },
+    {
+      "id": "b3-o0-learned_order",
+      "width": 1440,
+      "strategy": "learned_order",
+      "selected": "w047",
+      "page_errors": []
+    },
+    {
+      "id": "b3-o0-price_order",
+      "width": 390,
+      "strategy": "price_order",
+      "selected": null,
+      "page_errors": []
+    },
+    {
+      "id": "b3-o0-learned_order",
+      "width": 390,
+      "strategy": "learned_order",
+      "selected": "w047",
+      "page_errors": []
+    }
+  ],
+  "response_count": 172,
+  "download_count": 24,
+  "wall_ms": 7100.37194,
+  "delivery": "browser route interception of inventory-verified original bytes; not real HTTP backend in this observation",
+  "solver_calls": 0,
+  "fits": 0,
+  "independent_validation": false,
+  "browser_process_closed": true,
+  "preview_process_terminal": true,
+  "source_archive_sha256": "4e1b090497860bf3a25fdc4877bf929c4d6143913d738e5e67c8c4fcb06067c3",
+  "failed_observer_v1_wall_ms": null,
+  "validation": {
+    "schema_version": "standalone-workbench-original-validation.v1",
+    "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-standalone-strategy-hmxpb46v",
+    "executions": [
+      {
+        "id": "b3-o0-price_order",
+        "strategy": "price_order",
+        "reads": 38,
+        "selected": null,
+        "estimate": null,
+        "report_hash": "sha256:78b25baf591b2436e3e1d9fbf71cff242e3abbf8f6aaa3843ae827bc843fc53f",
+        "pool_minimum": null
+      },
+      {
+        "id": "b3-o0-learned_order",
+        "strategy": "learned_order",
+        "reads": 40,
+        "selected": "w047",
+        "estimate": 157.51079999999996,
+        "report_hash": "sha256:b74afd162943c2ea88ca38761130c57429d4e0419f4a37cdc73651b94307a8ab",
+        "pool_minimum": null
+      },
+      {
+        "id": "b3-o1-learned_order",
+        "strategy": "learned_order",
+        "reads": 40,
+        "selected": "w047",
+        "estimate": 157.51079999999996,
+        "report_hash": "sha256:81e81308b378597e4b2b2c9f402c6c64c800998a4602456a890208282e635bcf",
+        "pool_minimum": null
+      },
+      {
+        "id": "b3-o1-price_order",
+        "strategy": "price_order",
+        "reads": 38,
+        "selected": null,
+        "estimate": null,
+        "report_hash": "sha256:8bfa78da1ffc3578643ca373b4ea510e693377360321da07f0b1c0c1846f0ed5",
+        "pool_minimum": null
+      },
+      {
+        "id": "b11-o0-price_order",
+        "strategy": "price_order",
+        "reads": 102,
+        "selected": "w047",
+        "estimate": 157.51079999999996,
+        "report_hash": "sha256:be91a91fb16fd1d8c9068c762556a7c1035e5c41c734732bbbed028f8ac927f1",
+        "pool_minimum": null
+      },
+      {
+        "id": "b11-o0-learned_order",
+        "strategy": "learned_order",
+        "reads": 104,
+        "selected": "w047",
+        "estimate": 157.51079999999996,
+        "report_hash": "sha256:44c97f35f8503b3df5e334c1a670a786f6835909aa4255e15fbab7b4376fc793",
+        "pool_minimum": null
+      },
+      {
+        "id": "b11-o1-learned_order",
+        "strategy": "learned_order",
+        "reads": 104,
+        "selected": "w047",
+        "estimate": 157.51079999999996,
+        "report_hash": "sha256:999a4111aab4c6e10fabd6914ca42e041a3957a9d3e458b97fa88c4ecf14dc03",
+        "pool_minimum": null
+      },
+      {
+        "id": "b11-o1-price_order",
+        "strategy": "price_order",
+        "reads": 102,
+        "selected": "w047",
+        "estimate": 157.51079999999996,
+        "report_hash": "sha256:47671cc53f0cbca64000da5cc7a588387f44a90d51c87c4b81bc70bd28a59d88",
+        "pool_minimum": null
+      }
+    ],
+    "wall_ms": 719.2330199999999,
+    "solver_calls": 0,
+    "fits": 0,
+    "browser_executed": false,
+    "independent_physical_validation": false
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-standalone-workbench-jAH7gm",
+    "file_count": 18,
+    "byte_count": 52700148,
+    "inventory_sha256": "a10c3620ae6f1a39694d478cdcb6d0cdda0dbc254d3248f5ccc7b587bb24b6fc"
+  }
+}

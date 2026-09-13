@@ -13,9 +13,10 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from functools import lru_cache
 import hashlib
+import json
 import math
 import struct
-from typing import Any, Iterable, Literal
+from typing import Any, Iterable, Literal, cast
 
 import numpy as np
 
@@ -30,6 +31,7 @@ from structural_analysis.materials.uniaxial_plasticity import (
     UniaxialPlasticityResponse,
     UniaxialPlasticityState,
 )
+from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
 
 
 STATEFUL_FIBER_SECTION_SCHEMA_VERSION = "phase2-stateful-rc-fiber-section.v1"
@@ -230,6 +232,7 @@ class StatefulFiberSectionResponse:
     damaged_concrete_fiber_count: int
     dissipated_energy_mj_per_m: float
     state: StatefulFiberSectionState
+    force_accumulation: str = "binary64"
 
     @property
     def resultants(self) -> np.ndarray:
@@ -242,6 +245,11 @@ class StatefulFiberSectionResponse:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **(
+                {"force_accumulation": self.force_accumulation}
+                if self.force_accumulation != "binary64"
+                else {}
+            ),
             "parent_state_hash": self.parent_state_hash,
             "generalized_strain": {
                 "axial_strain": self.axial_strain,
@@ -292,18 +300,39 @@ class StatefulRCFiberSection:
 
     @property
     def contract_hash(self) -> str:
-        return canonical_hash(
-            {
-                "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
-                "section_id": self.section_id,
-                "strain_relation": FIBER_SECTION_STRAIN_RELATION,
-                "resultant_definition": FIBER_SECTION_RESULTANT_DEFINITION,
-                "tangent_definition": FIBER_SECTION_TANGENT_DEFINITION,
-                "fibers": [fiber.to_dict() for fiber in self.fibers],
-                "steel": asdict(self.steel),
-                "concrete": asdict(self.concrete),
-            }
-        )
+        return self._base_contract_hash()
+
+    def _base_contract_hash(self) -> str:
+        """Base section identity, available without accessing a property descriptor."""
+        payload = {
+            "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
+            "section_id": self.section_id,
+            "strain_relation": FIBER_SECTION_STRAIN_RELATION,
+            "resultant_definition": FIBER_SECTION_RESULTANT_DEFINITION,
+            "tangent_definition": FIBER_SECTION_TANGENT_DEFINITION,
+            "fibers": [fiber.to_dict() for fiber in self.fibers],
+            "steel": asdict(self.steel),
+            "concrete": asdict(self.concrete),
+        }
+        # Key by freshly captured content, never by section_id or object identity.
+        # State validation still observes replaced or even forcibly mutated inputs.
+        rows = [*payload["fibers"], payload["steel"], payload["concrete"]]
+        if any(
+            type(row) is not dict
+            or any(
+                type(key) is not str
+                or type(value) not in (str, int, float, bool, type(None))
+                for key, value in row.items()
+            )
+            for row in rows
+        ):
+            return canonical_hash(payload)
+        try:
+            encoded = json.dumps(payload, allow_nan=False, separators=(",", ":"))
+        except (TypeError, ValueError):
+            # Keep the canonical encoder's supported types and error semantics.
+            return canonical_hash(payload)
+        return _section_contract_hash_from_json(encoded)
 
     def initial_state(self) -> StatefulFiberSectionState:
         return StatefulFiberSectionState(
@@ -320,7 +349,7 @@ class StatefulRCFiberSection:
             ),
         )
 
-    def validate_state(self, state: StatefulFiberSectionState) -> None:
+    def validate_state(self, state: object) -> None:
         if type(state) is not StatefulFiberSectionState:
             raise ValueError("state type is invalid")
         if state.section_id != self.section_id:
@@ -344,9 +373,10 @@ class StatefulRCFiberSection:
 
     def dissipated_energy_mj_per_m(
         self,
-        state: StatefulFiberSectionState,
+        state: object,
     ) -> float:
         self.validate_state(state)
+        state = cast(StatefulFiberSectionState, state)
         return math.fsum(
             fiber.area_m2 * float(fiber_state.dissipated_energy_density_mj_per_m3)
             for fiber, fiber_state in zip(
@@ -359,13 +389,54 @@ class StatefulRCFiberSection:
     def integrate(
         self,
         generalized_strain: Any,
-        committed_state: StatefulFiberSectionState,
+        committed_state: object,
+    ) -> StatefulFiberSectionResponse:
+        return self._integrate(generalized_strain, committed_state)
+
+    def integrate_with_material_runtime(
+        self,
+        generalized_strain: Any,
+        committed_state: object,
+        *,
+        material_runtime: MaterialTrialRuntimeRecorder,
+    ) -> StatefulFiberSectionResponse:
+        if type(material_runtime) is not MaterialTrialRuntimeRecorder:
+            raise ValueError("material_runtime must be MaterialTrialRuntimeRecorder")
+        if type(self).integrate is not StatefulRCFiberSection.integrate:
+            # An inherited optional capability must not bypass a subclass's
+            # custom numerical integration contract.
+            material_runtime.mark_unmeasured_section_call()
+            return self.integrate(generalized_strain, committed_state)
+        material_runtime.mark_instrumented_section_call()
+        return self._integrate(
+            generalized_strain, committed_state, material_runtime=material_runtime
+        )
+
+    def _integrate(
+        self,
+        generalized_strain: Any,
+        committed_state: object,
+        *,
+        material_runtime: MaterialTrialRuntimeRecorder | None = None,
+        _fiber_strain_values=None,
     ) -> StatefulFiberSectionResponse:
         self.validate_state(committed_state)
+        committed_state = cast(StatefulFiberSectionState, committed_state)
         generalized = _generalized_vector(
             generalized_strain,
             name="generalized_strain",
         )
+        if _fiber_strain_values is not None:
+            if getattr(self, "coordinate_fiber_strain_evaluation", None) not in (
+                "coordinate-to-fiber-single-round.v1",
+                "retained-rational-strain-stress80-original-state.v1",
+            ):
+                raise ValueError(
+                    "fiber strain override requires explicit coordinate profile"
+                )
+            values = np.asarray(_fiber_strain_values, dtype=np.float64)
+            if values.shape != (len(self.fibers),) or not np.all(np.isfinite(values)):
+                raise ValueError("finite strain for every original fiber required")
         axial_strain = float(generalized[0])
         curvature = float(generalized[1])
         fiber_strains: list[float] = []
@@ -383,32 +454,68 @@ class StatefulRCFiberSection:
             committed_state.fiber_states,
             strict=True,
         ):
-            strain = axial_strain - curvature * fiber.y_m
+            strain = (
+                axial_strain - curvature * fiber.y_m
+                if _fiber_strain_values is None
+                else float(values[len(fiber_strains)])
+            )
+            material_strain = (
+                _fiber_strain_values[len(fiber_strains)]
+                if getattr(self, "coordinate_fiber_strain_evaluation", None)
+                == "retained-rational-strain-stress80-original-state.v1"
+                else strain
+            )
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
-                steel_response = self.steel.integrate(strain, parent)
+                steel_response = (
+                    self.steel.integrate(material_strain, parent)
+                    if material_runtime is None
+                    else material_runtime.observe(
+                        "steel", self.steel.integrate, material_strain, parent
+                    )
+                )
                 yielded_count += int(steel_response.yielded)
                 response: FiberResponse = steel_response
             else:
                 assert type(parent) is ConcreteDamageState
-                concrete_response = self.concrete.integrate(strain, parent)
+                concrete_response = (
+                    self.concrete.integrate(material_strain, parent)
+                    if material_runtime is None
+                    else material_runtime.observe(
+                        "concrete", self.concrete.integrate, material_strain, parent
+                    )
+                )
                 damaged_count += int(concrete_response.damage_evolved)
                 response = concrete_response
             stress = float(response.stress_mpa)
             algorithmic_tangent = float(response.consistent_tangent_mpa)
-            force = stress * fiber.area_m2 * _MPA_M2_TO_KN
-            stiffness = algorithmic_tangent * fiber.area_m2 * _MPA_M2_TO_KN
-            axial_force += force
-            moment -= force * fiber.y_m
-            tangent[0, 0] += stiffness
-            tangent[0, 1] -= stiffness * fiber.y_m
-            tangent[1, 0] -= stiffness * fiber.y_m
-            tangent[1, 1] += stiffness * fiber.y_m**2
+            if getattr(self, "force_accumulation", "binary64") == "binary64":
+                force = stress * fiber.area_m2 * _MPA_M2_TO_KN
+                stiffness = algorithmic_tangent * fiber.area_m2 * _MPA_M2_TO_KN
+                axial_force += force
+                moment -= force * fiber.y_m
+                tangent[0, 0] += stiffness
+                tangent[0, 1] -= stiffness * fiber.y_m
+                tangent[1, 0] -= stiffness * fiber.y_m
+                tangent[1, 1] += stiffness * fiber.y_m**2
             fiber_strains.append(strain)
             fiber_stresses.append(stress)
             responses.append(response)
             next_states.append(response.state)
 
+        accumulation = getattr(self, "force_accumulation", "binary64")
+        if accumulation != "binary64":
+            from structural_analysis.solvers.nonlinear.rational_accumulation import (
+                PROFILE,
+                section_values,
+                rounded,
+            )
+
+            if accumulation != PROFILE:
+                raise ValueError("unsupported section force accumulation")
+            exact_force, exact_tangent = section_values(self.fibers, responses)
+            axial_force, moment = rounded(exact_force)
+            tangent = rounded(exact_tangent)
         strain_array = np.asarray(fiber_strains, dtype=np.float64)
         stress_array = np.asarray(fiber_stresses, dtype=np.float64)
         for array in (tangent, strain_array, stress_array):
@@ -422,6 +529,7 @@ class StatefulRCFiberSection:
             fiber_states=tuple(next_states),
         )
         return StatefulFiberSectionResponse(
+            force_accumulation=accumulation,
             parent_state_hash=committed_state.state_hash,
             axial_strain=axial_strain,
             curvature_z_per_m=curvature,
@@ -438,6 +546,12 @@ class StatefulRCFiberSection:
         )
 
 
+@lru_cache(maxsize=128)
+def _section_contract_hash_from_json(encoded: str) -> str:
+    """Reuse canonicalization for an identical, immutable content snapshot."""
+    return canonical_hash(json.loads(encoded))
+
+
 def make_rectangular_stateful_rc_fiber_section(
     *,
     width_m: float = 0.4,
@@ -447,6 +561,7 @@ def make_rectangular_stateful_rc_fiber_section(
     top_bar_count: int = 4,
     bottom_bar_count: int = 4,
     bar_area_m2: float = 3.87e-4,
+    intermediate_steel_layers: list[dict[str, Any]] | None = None,
     section_id: str = "rectangular_rc_stateful_fiber_section",
     steel: BilinearCombinedHardeningSteel | None = None,
     concrete: AsymmetricConcreteDamageMaterial | None = None,
@@ -491,6 +606,33 @@ def make_rectangular_stateful_rc_fiber_section(
             ),
         )
     )
+    if intermediate_steel_layers is not None:
+        if (
+            type(intermediate_steel_layers) is not list
+            or not 1 <= len(intermediate_steel_layers) <= 32
+        ):
+            raise ValueError("intermediate_steel_layers must contain 1 to 32 rows")
+        previous = -0.5 * depth + cover
+        for index, row in enumerate(intermediate_steel_layers):
+            if type(row) is not dict or set(row) != {"y_m", "bar_count"}:
+                raise ValueError("intermediate steel row requires y_m and bar_count")
+            y = _finite(row["y_m"], name="intermediate steel y_m")
+            count = row["bar_count"]
+            if type(count) is not int or not 1 <= count <= 64:
+                raise ValueError("intermediate steel bar_count must be 1 to 64")
+            if not previous < y < 0.5 * depth - cover:
+                raise ValueError(
+                    "intermediate steel rows must increase strictly between outer layers"
+                )
+            previous = y
+            fibers.append(
+                StatefulSectionFiber(
+                    fiber_id=f"steel-intermediate-{index:02d}",
+                    y_m=y,
+                    area_m2=count * bar_area,
+                    material_kind="steel",
+                )
+            )
     return StatefulRCFiberSection(
         fibers=tuple(fibers),
         steel=steel or BilinearCombinedHardeningSteel(),

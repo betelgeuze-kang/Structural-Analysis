@@ -1,0 +1,88 @@
+{
+  "source_revision": "6885cd7af8c24b2bf8f2dde753ce38f8ba2a4439",
+  "original_numerical_source_revision": "3d4ecef4b737703717522ef385bdc6004eba56e1",
+  "prior_diagnostic_inventory_sha256": "987ed7249a04d6c9ff18a813d972788f97b4de6bdca3f04b0cab1d3592199fc5",
+  "model_declarations_preflighted": 6,
+  "models_with_gate_evaluation": 4,
+  "gate_evaluations": 8,
+  "rejected": 6,
+  "not_rejected": 2,
+  "gates": [
+    {
+      "fold": 0,
+      "case_id": "train-a",
+      "gate_hash": "sha256:4a3929e2c6c0f45cf0fbd17ef006f3a78bd6029960af5cf66ee8906dec720da6",
+      "status": "rejected",
+      "wall_ns": 2236936
+    },
+    {
+      "fold": 1,
+      "case_id": "train-b",
+      "gate_hash": "sha256:e459a140ec17ac141a66776bfa83fe9206ffbd67fc46a7be98c3aa101fe2db59",
+      "status": "not_rejected",
+      "wall_ns": 2213614
+    },
+    {
+      "fold": 2,
+      "case_id": "train-c",
+      "gate_hash": "sha256:d7a54f93909a98cc9b3cbbe719b0ac0d6de01d6c097dc88f8ebdacd67a643c33",
+      "status": "rejected",
+      "wall_ns": 2206224
+    },
+    {
+      "fold": 3,
+      "case_id": "train-d",
+      "gate_hash": "sha256:96f9e0230aa1193435b234f55ad0e18a5009a07e8e6e1ce39dc521ef769c670c",
+      "status": "rejected",
+      "wall_ns": 2234905
+    },
+    {
+      "fold": 4,
+      "case_id": "train-a",
+      "gate_hash": "sha256:21543ea925549cbc151aed0ef6a5f806544562d90abc1d7bbc8b0ee530105bd6",
+      "status": "rejected",
+      "wall_ns": 2236806
+    },
+    {
+      "fold": 5,
+      "case_id": "train-b",
+      "gate_hash": "sha256:a7ce29efc504635be12da1a4ca33b4b2475714e40af26d22d38e0bd9b959deb2",
+      "status": "not_rejected",
+      "wall_ns": 2206185
+    },
+    {
+      "fold": 6,
+      "case_id": "train-c",
+      "gate_hash": "sha256:931505b241cf8b8d7ae2ac580cf1f7d5afb9033c402b61f6bed4b1ac6cab9dde",
+      "status": "rejected",
+      "wall_ns": 2237486
+    },
+    {
+      "fold": 7,
+      "case_id": "train-d",
+      "gate_hash": "sha256:6e3c1ea9d1b21a04ff9b437b5b29a3cc65cfe2f45973ae65b216dc25843748b8",
+      "status": "rejected",
+      "wall_ns": 2222565
+    }
+  ],
+  "all_original_diagnostic_violations_reproduced": true,
+  "new_newton_solves": 0,
+  "new_fits": 0,
+  "new_labels": 0,
+  "saved_runtime_measured": false,
+  "separate_test_runs": {
+    "runtime_suite_passed": 40,
+    "runtime_suite_seconds": 67.06,
+    "expanded_step_checks_passed": 2,
+    "expanded_step_checks_seconds": 35.23,
+    "step_checks_overlap_runtime_suite": true
+  },
+  "audit_wall_ns": 918561542,
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-static-model-gate-cwc8wzwi",
+  "seal": {
+    "inventory_sha256": "d2c51bb0cda648c6dcd51be50d409e682c8df4ddcfb7b59fa83f72605e5d87ac",
+    "files": 79,
+    "bytes": 11322290
+  },
+  "original_test_step_pairs_byte_equal": 20
+}

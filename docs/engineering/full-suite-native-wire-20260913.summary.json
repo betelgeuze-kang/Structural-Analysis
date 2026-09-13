@@ -1,0 +1,70 @@
+{
+  "baseline_source_head": "df60b7d3913f8fe095788f07ace95302d02f6cd3",
+  "baseline": {
+    "passed": 11084,
+    "failed": 130,
+    "skipped": 52,
+    "xml": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "130",
+      "skipped": "52",
+      "tests": "11266",
+      "time": "6590.386",
+      "timestamp": "2026-09-13T09:13:08.567656+09:00",
+      "hostname": "betelgeuze-X570S-AORUS-ELITE"
+    },
+    "terminal": {
+      "exit_code": 1,
+      "elapsed_seconds": 6594.595455782997,
+      "final_head": "df60b7d3913f8fe095788f07ace95302d02f6cd3",
+      "final_git_status": ""
+    },
+    "evidence_materialized_before_run": false,
+    "raw_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-full-pytest-j2jsy4p3",
+    "files": {
+      "protocol.json": "242381ac17410e47a9e742d3b3e470be31954c5b9473995e83f628dcae43ed18",
+      "pytest.log": "6fecc98e90a08f3eaabdf342bd7a6f00a7d69a1bece9ca888993a8264dd096a9",
+      "full.xml": "fa6045c5774d7c3c1d3fb8163c036b7eeac4208d620c48738c41510ccaa9fde9",
+      "terminal.json": "a1652f8583a05077ac12aecefb362cc67a7bf63c066f98cb198f886299ef1de0",
+      "failures.json": "c7cd702c78309004a8e2ae88ee2eaa0153ff58c3290ef677b3b37e35656e9a69"
+    },
+    "failure_counts_by_module": {
+      "tests.test_build_bounded_planar_external_linear_case_package": 4,
+      "tests.test_build_bounded_planar_external_modal_buckling_case_package": 7,
+      "tests.test_build_bounded_planar_external_negative_case_package": 5,
+      "tests.test_build_bounded_planar_external_nonlinear_material_recovery_case_package": 5,
+      "tests.test_build_bounded_planar_external_scaling_case_package": 6,
+      "tests.test_build_bounded_planar_external_vv_matrix": 13,
+      "tests.test_build_bounded_planar_external_vv_matrix_from_operator_bundle": 12,
+      "tests.test_build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt": 1,
+      "tests.test_build_phase2_adaptive_newton_continuation_artifacts": 1,
+      "tests.test_build_phase2_state_updated_bilinear_link_artifacts": 1,
+      "tests.test_build_phase2_state_updated_composite_section_artifacts": 1,
+      "tests.test_build_phase2_state_updated_concrete_damage_artifacts": 1,
+      "tests.test_build_phase2_state_updated_steel_material_artifacts": 1,
+      "tests.test_build_product_state": 2,
+      "tests.test_build_source_quarry_inventory": 4,
+      "tests.test_build_stateful_nonlinear_no_solve_reaction_only_artifact": 1,
+      "tests.test_external_code_to_code_technical_receipt": 5,
+      "tests.test_external_modal_buckling_technical_receipt": 2,
+      "tests.test_fiber_frame_secant_correction_learning_process": 1,
+      "tests.test_fracture_energy_concrete": 1,
+      "tests.test_ingest_bounded_planar_external_linear_results": 6,
+      "tests.test_ingest_bounded_planar_external_modal_buckling_results": 5,
+      "tests.test_ingest_bounded_planar_external_negative_results": 8,
+      "tests.test_ingest_bounded_planar_external_scaling_results": 3,
+      "tests.test_medium_scale_current_source_execution": 3,
+      "tests.test_promote_external_vv_level2": 7,
+      "tests.test_validate_external_vv_operator_attestation": 24
+    }
+  },
+  "focused_after_changes": {
+    "python_learning_process_passed": 67,
+    "native_contracts_passed": 31,
+    "native_wire_included": 11,
+    "native_invalid_layer_cases": 10,
+    "full_suite_rerun": false
+  },
+  "remaining_status": "Full suite and hosted integration not qualified; remaining baseline failures require preparation and individual diagnosis."
+}

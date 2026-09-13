@@ -2687,7 +2687,21 @@ def _exact_keys(value: Mapping[str, Any], expected: set[str], path: str) -> None
 
 
 def _config_payload(config: NewtonRaphsonConfig) -> dict[str, Any]:
+    if type(config.terminal_polishing) is not bool:
+        _fail(
+            "fiber_frame_episode_polishing_config_invalid",
+            "/config/terminal_polishing",
+            "Polishing must be an exact boolean.",
+        )
     return {
+        **(
+            {
+                "terminal_polishing": True,
+                "terminal_polishing_profile": "newton-vector-terminal-polishing.v1",
+            }
+            if config.terminal_polishing
+            else {}
+        ),
         "residual_tolerance": config.residual_tolerance,
         "increment_tolerance": config.increment_tolerance,
         "max_iterations": config.max_iterations,

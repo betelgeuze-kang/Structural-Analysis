@@ -1,0 +1,41 @@
+{
+  "parent_source_head": "f81995bcb515d0cc54d9fd732c8a1e910bb9dd7b",
+  "working_tree_patch": true,
+  "parent_allocation_bytes": 268435456,
+  "before": {
+    "worker_peak": [
+      102924288,
+      "Linux /proc/self/status VmHWM"
+    ],
+    "legacy_ru_maxrss_bytes": 102924288
+  },
+  "with_parent_allocation": {
+    "worker_peak": [
+      103632896,
+      "Linux /proc/self/status VmHWM"
+    ],
+    "legacy_ru_maxrss_bytes": 283901952
+  },
+  "case_contract_pass": true,
+  "case_resources": {
+    "authority_requires": "verified_exact_source_github_provenance_attestation",
+    "execution_seconds": 1.677311755993287,
+    "measurement": "Linux /proc/self/status VmHWM",
+    "observation_authority": "non_authoritative_pre_attestation_observation",
+    "peak_memory_bytes": 121503744,
+    "peak_memory_limit_bytes": 1073741824,
+    "runtime_limit_seconds": 30.0
+  },
+  "raw_root": "/tmp/structural-worker-rss-0ohape9v",
+  "raw_sha256": {
+    "case.json": "111e8d87696dac97fbde06ea526066b1808ac8d2b975d861c05dbd44ab1d2e43",
+    "observation.json": "c373fedb64618b3d793b9aea40af23011f4dfa6d038f02800ebeba48275f1652"
+  },
+  "validation": {
+    "medium_scale_tests_passed": 54,
+    "workflow_contract_tests_passed": 6,
+    "full_suite_rerun": false,
+    "initial_missing_Path_import_fixed": true,
+    "schema_hash_pin_updated": true
+  }
+}

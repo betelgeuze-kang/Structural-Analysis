@@ -1,0 +1,396 @@
+{
+  "schema_version": "mendeley-rc-drift-load-intake.v1",
+  "source_audit": {
+    "schema_version": "mendeley-drift-load-source-audit.v1",
+    "source_commit": "bbe578509bfb8c35fe1ddfa490a0e71addde907c",
+    "reader_sha256": "0e359441b16a7f4ff2751cb472170716cd3887c386b623eb10574bdcc874c7a9",
+    "dataset_doi": "10.17632/ntpr9v5h8b.1",
+    "dataset_version": 1,
+    "attribution": "Han, Sang Whan; Lee, Chang Seok (2019), Mendeley Data, V1, doi:10.17632/ntpr9v5h8b.1",
+    "license": {
+      "id": "01d9c749-3c4d-4431-9df3-620b2dcfe144",
+      "short_name": "CC BY 4.0",
+      "full_name": "Creative Commons Attribution 4.0 International",
+      "description": "You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.",
+      "url": "http://creativecommons.org/licenses/by/4.0",
+      "category": "Creative",
+      "customer_id": null
+    },
+    "related_paper_doi": "10.1016/j.engstruct.2019.03.108",
+    "all_publisher_checksums_match": true,
+    "all_numeric_tokens_and_decimal_tuples_exact": true,
+    "file_count": 6,
+    "point_count": 31848,
+    "exact_decimal_cells": 63696,
+    "original_csv_bytes": 573405,
+    "files": [
+      {
+        "file": "Hys_B10x.csv",
+        "source_file_id": "3b78d2f8-0e95-4647-974f-62c745b1ff86",
+        "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/3b78d2f8-0e95-4647-974f-62c745b1ff86",
+        "sha256": "4832c13d92604df0079bd6f103935d23b8a266efcef95278229eddf097771188",
+        "bytes": 115855,
+        "point_count": 6400,
+        "exact_decimal_cells": 12800,
+        "trailing_blank_records": 1,
+        "first_tokens": [
+          "0.00133",
+          "0.06450"
+        ],
+        "last_tokens": [
+          "-0.79667",
+          "0.82560"
+        ],
+        "reported_drift_range": [
+          "-1.53733",
+          "1.53867"
+        ],
+        "load_kn_range": [
+          "-151.48470",
+          "152.63280"
+        ],
+        "local_label_group": "B10",
+        "campaign_group": "han-lee-2019-ntpr9v5h8b",
+        "split": null
+      },
+      {
+        "file": "Hys_B10y.csv",
+        "source_file_id": "e66fa59a-7b33-43f0-8d85-23e84c1fe20e",
+        "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/e66fa59a-7b33-43f0-8d85-23e84c1fe20e",
+        "sha256": "e4a60fccd0e8e9a8d294724f5d0be582d34629ef4c5d28df92a798756c2a20a9",
+        "bytes": 113825,
+        "point_count": 6400,
+        "exact_decimal_cells": 12800,
+        "trailing_blank_records": 1,
+        "first_tokens": [
+          "0.00000",
+          "6.13714"
+        ],
+        "last_tokens": [
+          "-0.76333",
+          "-60.84627"
+        ],
+        "reported_drift_range": [
+          "-0.78400",
+          "0.79667"
+        ],
+        "load_kn_range": [
+          "-89.90259",
+          "89.43424"
+        ],
+        "local_label_group": "B10",
+        "campaign_group": "han-lee-2019-ntpr9v5h8b",
+        "split": null
+      },
+      {
+        "file": "Hys_B20x.csv",
+        "source_file_id": "ea8fe9e2-2697-47b7-bd68-f266d16ef645",
+        "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/ea8fe9e2-2697-47b7-bd68-f266d16ef645",
+        "sha256": "c535973b93debc06c6d42e989efe1ba23d9d29f961ae85bc552d2642bb944b9b",
+        "bytes": 123706,
+        "point_count": 6800,
+        "exact_decimal_cells": 13600,
+        "trailing_blank_records": 1,
+        "first_tokens": [
+          "0.00133",
+          "-0.95460"
+        ],
+        "last_tokens": [
+          "-0.43533",
+          "51.27750"
+        ],
+        "reported_drift_range": [
+          "-1.53533",
+          "1.53667"
+        ],
+        "load_kn_range": [
+          "-156.70602",
+          "155.18700"
+        ],
+        "local_label_group": "B20",
+        "campaign_group": "han-lee-2019-ntpr9v5h8b",
+        "split": null
+      },
+      {
+        "file": "Hys_B20y.csv",
+        "source_file_id": "695994b9-5bc3-46d5-8928-78d9379b4cbe",
+        "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/695994b9-5bc3-46d5-8928-78d9379b4cbe",
+        "sha256": "7040b169eda24c803b487a58f74fbdad0c35bc36094380ea3fcfb4e7867e8baf",
+        "bytes": 122271,
+        "point_count": 6900,
+        "exact_decimal_cells": 13800,
+        "trailing_blank_records": 1,
+        "first_tokens": [
+          "0.00267",
+          "9.65874"
+        ],
+        "last_tokens": [
+          "-0.37933",
+          "2.87635"
+        ],
+        "reported_drift_range": [
+          "-0.78333",
+          "0.77933"
+        ],
+        "load_kn_range": [
+          "-98.51367",
+          "97.69448"
+        ],
+        "local_label_group": "B20",
+        "campaign_group": "han-lee-2019-ntpr9v5h8b",
+        "split": null
+      },
+      {
+        "file": "Hys_U10x.csv",
+        "source_file_id": "a252c027-e9a1-4fe3-91b7-1c1c55af358a",
+        "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/a252c027-e9a1-4fe3-91b7-1c1c55af358a",
+        "sha256": "44c1069b6adeb451b9a437ad01d4f7bf0d1d680e127ecece5bec10513c57cb3f",
+        "bytes": 45292,
+        "point_count": 2498,
+        "exact_decimal_cells": 4996,
+        "trailing_blank_records": 1,
+        "first_tokens": [
+          "0.00133",
+          "-1.32870"
+        ],
+        "last_tokens": [
+          "0.00133",
+          "-44.36923"
+        ],
+        "reported_drift_range": [
+          "-1.53667",
+          "2.15133"
+        ],
+        "load_kn_range": [
+          "-158.81190",
+          "162.72060"
+        ],
+        "local_label_group": "U10",
+        "campaign_group": "han-lee-2019-ntpr9v5h8b",
+        "split": null
+      },
+      {
+        "file": "Hys_U20x.csv",
+        "source_file_id": "ecc3e85f-689a-47f8-a64e-ea53f7269980",
+        "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/ecc3e85f-689a-47f8-a64e-ea53f7269980",
+        "sha256": "9a33a382e6d247a64e8f181e0e3e57463848ca72eb21e9612ebac527b9024557",
+        "bytes": 52456,
+        "point_count": 2850,
+        "exact_decimal_cells": 5700,
+        "trailing_blank_records": 1,
+        "first_tokens": [
+          "0.00133",
+          "8.17053"
+        ],
+        "last_tokens": [
+          "1.49400",
+          "4.30028"
+        ],
+        "reported_drift_range": [
+          "-1.54200",
+          "1.70133"
+        ],
+        "load_kn_range": [
+          "-184.82305",
+          "184.89719"
+        ],
+        "local_label_group": "U20",
+        "campaign_group": "han-lee-2019-ntpr9v5h8b",
+        "split": null
+      }
+    ],
+    "source_scope": "six channel files, four filename labels, one provisional original campaign group",
+    "drift_scale": null,
+    "reference_length_m": null,
+    "time_or_synchronization_channel_present": false,
+    "biaxial_channels_aligned": false,
+    "traces_resampled_or_trimmed": false,
+    "canonical_models_created": 0,
+    "newton_calls": 0,
+    "fit_calls": 0,
+    "training_admission": false,
+    "independent_physical_validation": false,
+    "remaining": [
+      "Original specimen geometry, reinforcement and material response must be checked.",
+      "Drift scale and reference length are not established by the CSV header.",
+      "A shared time/step reference is not supplied for biaxial channel alignment.",
+      "The paper concerns short lap splices; current-profile compatibility is not established.",
+      "Original loading commands, calibration assumptions and campaign splits remain required."
+    ],
+    "internal_elapsed_ns": 133520319
+  },
+  "reader_checks": {
+    "source_commit": "bbe578509bfb8c35fe1ddfa490a0e71addde907c",
+    "checks": [
+      {
+        "name": "tests",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_measured_drift_load.py",
+          "tests/test_peer_structural_performance.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 2287896043,
+        "log_sha256": "152680302ffa6bbb0459ca2b3b2868c9f319a6b78ea3e92c1b10a8428761e445"
+      },
+      {
+        "name": "ruff",
+        "command": [
+          "python3",
+          "-m",
+          "ruff",
+          "check",
+          "src/structural_analysis/io/measured_drift_load.py",
+          "tests/test_measured_drift_load.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 27039626,
+        "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      },
+      {
+        "name": "format",
+        "command": [
+          "python3",
+          "-m",
+          "ruff",
+          "format",
+          "--check",
+          "src/structural_analysis/io/measured_drift_load.py",
+          "tests/test_measured_drift_load.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 26356749,
+        "log_sha256": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938"
+      },
+      {
+        "name": "mypy",
+        "command": [
+          "python3",
+          "-m",
+          "mypy",
+          "--follow-imports=silent",
+          "src/structural_analysis/io/measured_drift_load.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 2443216341,
+        "log_sha256": "5d4b6d285b77932e3d08212c3b4974d0a803f98ec60408ac6ccf6a063fa6c19e"
+      },
+      {
+        "name": "diff-check",
+        "command": [
+          "git",
+          "diff",
+          "--check",
+          "HEAD~1",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 3675100,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "audit_process": {
+    "exit_code": 0,
+    "parent_elapsed_ns": 1533306707,
+    "script_sha256": "04aa2fdc0786fd70590b2af56a63d6cd7c40a60c0323919209224f7a7be6b322"
+  },
+  "publisher_file_observations": [
+    {
+      "file": "Hys_B10x.csv",
+      "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/3b78d2f8-0e95-4647-974f-62c745b1ff86",
+      "method": "read-only in-app browser visible FILE INFORMATION",
+      "observed_license": "CC BY 4.0",
+      "observed_sha256": "4832c13d92604df0079bd6f103935d23b8a266efcef95278229eddf097771188",
+      "observed_uploaded_date": "16 Feb 2019"
+    },
+    {
+      "file": "Hys_B10y.csv",
+      "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/e66fa59a-7b33-43f0-8d85-23e84c1fe20e",
+      "method": "read-only in-app browser visible FILE INFORMATION",
+      "observed_license": "CC BY 4.0",
+      "observed_sha256": "e4a60fccd0e8e9a8d294724f5d0be582d34629ef4c5d28df92a798756c2a20a9",
+      "observed_uploaded_date": "16 Feb 2019"
+    },
+    {
+      "file": "Hys_B20x.csv",
+      "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/ea8fe9e2-2697-47b7-bd68-f266d16ef645",
+      "method": "read-only in-app browser visible FILE INFORMATION",
+      "observed_license": "CC BY 4.0",
+      "observed_sha256": "c535973b93debc06c6d42e989efe1ba23d9d29f961ae85bc552d2642bb944b9b",
+      "observed_uploaded_date": "16 Feb 2019"
+    },
+    {
+      "file": "Hys_B20y.csv",
+      "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/695994b9-5bc3-46d5-8928-78d9379b4cbe",
+      "method": "read-only in-app browser visible FILE INFORMATION",
+      "observed_license": "CC BY 4.0",
+      "observed_sha256": "7040b169eda24c803b487a58f74fbdad0c35bc36094380ea3fcfb4e7867e8baf",
+      "observed_uploaded_date": "16 Feb 2019"
+    },
+    {
+      "file": "Hys_U10x.csv",
+      "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/a252c027-e9a1-4fe3-91b7-1c1c55af358a",
+      "method": "read-only in-app browser visible FILE INFORMATION",
+      "observed_license": "CC BY 4.0",
+      "observed_sha256": "44c1069b6adeb451b9a437ad01d4f7bf0d1d680e127ecece5bec10513c57cb3f",
+      "observed_uploaded_date": "16 Feb 2019"
+    },
+    {
+      "file": "Hys_U20x.csv",
+      "file_page": "https://data.mendeley.com/datasets/ntpr9v5h8b/1/files/ecc3e85f-689a-47f8-a64e-ea53f7269980",
+      "method": "read-only in-app browser visible FILE INFORMATION",
+      "observed_license": "CC BY 4.0",
+      "observed_sha256": "9a33a382e6d247a64e8f181e0e3e57463848ca72eb21e9612ebac527b9024557",
+      "observed_uploaded_date": "16 Feb 2019"
+    }
+  ],
+  "attempt_notes": {
+    "schema_version": "public-source-intake-attempt-notes.v1",
+    "mendeley": {
+      "api_path_probe": "404; no source file accepted from this endpoint",
+      "bundle_probe": "403; no JavaScript evaluated",
+      "visible_browser_file_listing": "six original file links and per-file licenses/checksums inspected successfully",
+      "initial_embedded_json_inspection": "JSON decoder reported extra data; parsed only the literal initial JSON value without executing trailing page JavaScript",
+      "initial_row_preview": "trailing empty CSV record detected; retained explicitly by reader",
+      "initial_reader_tests": "48 passed in 1.75 s; initial format check requested reformatting of the test file; final checks retained separately"
+    },
+    "zenodo_1205887": {
+      "landing_page": "429 in browsing tool; no dataset files downloaded in this pass",
+      "primary_description": "uniaxial lap-splice research; original reference-unit compatibility not established"
+    },
+    "southampton_503281": {
+      "landing_and_readme": "HTTP 200 original bytes retained",
+      "scope": "three circular column labels; carbon, austenitic stainless and duplex stainless reinforcement per author README",
+      "mat_files_downloaded": false,
+      "reuse_and_reconstruction": "not established"
+    },
+    "cora_DATA3379": {
+      "primary_search_description": "precast recycled-aggregate columns with demountable column-shoe connections",
+      "landing_fetch": "502 in browsing tool; no original files captured"
+    },
+    "related_paper": {
+      "original_doi": "10.1016/j.engstruct.2019.03.108",
+      "publisher_preview_url": "https://www.sciencedirect.com/science/article/pii/S0141029618333443",
+      "observed_primary_search_abstract": "four full-scale specimens with short lap splices under unidirectional/bidirectional loading",
+      "full_original_paper_retrieved": false,
+      "related_2023_paper_url": "https://repo.nzsee.org.nz/bitstream/handle/nzsee/2616/Han.pdf?isAllowed=y&sequence=1",
+      "related_paper_scope": "different NC/HC specimen names; not assigned to the 2019 CSVs"
+    }
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-archive-intake.0zk0q8qz",
+    "file_count": 30,
+    "total_bytes": 1333718,
+    "inventory_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-archive-intake.0zk0q8qz-inventory.json",
+    "inventory_sha256": "54f88fabc24bd38c4ca7a1ada7d2dc640ec6ebd62eb5be33ea5eb322011470da",
+    "all_reread_exact": true
+  },
+  "training_admission": false,
+  "independent_physical_validation": false,
+  "release_authority": false
+}

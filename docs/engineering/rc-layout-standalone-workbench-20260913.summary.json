@@ -1,0 +1,231 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-workbench-MCXNYp",
+    "files": 8,
+    "bytes": 709161,
+    "inventory_sha256": "aa0bbf69619533e39889a0d230c5982a1b247ca4f426046f4eb2d3e91c47fd61"
+  },
+  "observation": {
+    "source_revision": "20af6f674e63a748f6e707c0dac5ee22a6cf61f4",
+    "original_source_revision": "596e058f167e8663f62e3bc3e8c6ab0bff18807a",
+    "observations": [
+      {
+        "strategy": "price_order",
+        "width": 1440,
+        "report_hash": "sha256:080cd0f4f0b3df6e138ff08d764c5d71aba84752fe5e83f295755225b4196930",
+        "selected_candidate": "middle",
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [
+          {
+            "path": "price_order/middle/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "ae676aa07e9c71d8a46d55306bdd7a92dc5d9d7c1690ad78e86d39fb06624f13"
+          },
+          {
+            "path": "price_order/middle/baseline/result.json",
+            "bytes": 1653528,
+            "sha256": "d0ff376dba6897f04fa74a31059db89051600c7b05a705f4ad0cb98d3db86499"
+          },
+          {
+            "path": "price_order/middle/baseline/checkpoint.json",
+            "bytes": 35069,
+            "sha256": "834d71f156020ce2e04eeff158a07140e4bdb0d8433b7f4c14458b3e79d77f0a"
+          },
+          {
+            "path": "price_order/middle/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "991d93dae08760ccb6d75751a2827ee0d2941f25805e438629579477dbf243d2"
+          },
+          {
+            "path": "result.json",
+            "bytes": 2372,
+            "sha256": "5d4b55cc055ab89b694b17442dcae1c7b0cafb7bd7f04f9c70c5fe3ac8ac3c7f"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 11753,
+            "sha256": "e1826a490bb56492a2bfb8c4baecd5ffa3b949f9c58ece501e37663bce708316"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          }
+        ],
+        "review_wall_ns": 1613971475,
+        "outer_panel_fits_viewport": true
+      },
+      {
+        "strategy": "price_order",
+        "width": 390,
+        "report_hash": "sha256:080cd0f4f0b3df6e138ff08d764c5d71aba84752fe5e83f295755225b4196930",
+        "selected_candidate": "middle",
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [
+          {
+            "path": "price_order/middle/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "ae676aa07e9c71d8a46d55306bdd7a92dc5d9d7c1690ad78e86d39fb06624f13"
+          },
+          {
+            "path": "price_order/middle/baseline/result.json",
+            "bytes": 1653528,
+            "sha256": "d0ff376dba6897f04fa74a31059db89051600c7b05a705f4ad0cb98d3db86499"
+          },
+          {
+            "path": "price_order/middle/baseline/checkpoint.json",
+            "bytes": 35069,
+            "sha256": "834d71f156020ce2e04eeff158a07140e4bdb0d8433b7f4c14458b3e79d77f0a"
+          },
+          {
+            "path": "price_order/middle/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "991d93dae08760ccb6d75751a2827ee0d2941f25805e438629579477dbf243d2"
+          },
+          {
+            "path": "result.json",
+            "bytes": 2372,
+            "sha256": "5d4b55cc055ab89b694b17442dcae1c7b0cafb7bd7f04f9c70c5fe3ac8ac3c7f"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 11753,
+            "sha256": "e1826a490bb56492a2bfb8c4baecd5ffa3b949f9c58ece501e37663bce708316"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          }
+        ],
+        "review_wall_ns": 1948332187,
+        "outer_panel_fits_viewport": true
+      },
+      {
+        "strategy": "learned_order",
+        "width": 1440,
+        "report_hash": "sha256:3e2a5f719891469cdc2826bb2012dfbcad5c2491ecf241dc906be4630dfc7395",
+        "selected_candidate": "middle",
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [
+          {
+            "path": "learned_order/middle/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "ae676aa07e9c71d8a46d55306bdd7a92dc5d9d7c1690ad78e86d39fb06624f13"
+          },
+          {
+            "path": "learned_order/middle/baseline/result.json",
+            "bytes": 1653528,
+            "sha256": "d0ff376dba6897f04fa74a31059db89051600c7b05a705f4ad0cb98d3db86499"
+          },
+          {
+            "path": "learned_order/middle/baseline/checkpoint.json",
+            "bytes": 35069,
+            "sha256": "834d71f156020ce2e04eeff158a07140e4bdb0d8433b7f4c14458b3e79d77f0a"
+          },
+          {
+            "path": "learned_order/middle/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "991d93dae08760ccb6d75751a2827ee0d2941f25805e438629579477dbf243d2"
+          },
+          {
+            "path": "result.json",
+            "bytes": 7197,
+            "sha256": "56a24d02f91c1c01789a2b1e62a8f016ff576d2a8dffc94acd53d2c49856f5e7"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 16288,
+            "sha256": "5b57e1d6d405915ba79f8e318ae92ef1fee58109911798385b96b3421bbe95ad"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          },
+          {
+            "path": "policy.json",
+            "bytes": 13482,
+            "sha256": "48b4f759fbf0c54ed77d07e6e9d511c37099686c6ffcaa4dcbaf6eed2a3f543d"
+          },
+          {
+            "path": "historical-training.json",
+            "bytes": 3176,
+            "sha256": "717cf720a9e85dc77c2066a869c0baf1490c54c6164e898530abd1e3acf4dcae"
+          }
+        ],
+        "review_wall_ns": 1711839133,
+        "outer_panel_fits_viewport": true
+      },
+      {
+        "strategy": "learned_order",
+        "width": 390,
+        "report_hash": "sha256:3e2a5f719891469cdc2826bb2012dfbcad5c2491ecf241dc906be4630dfc7395",
+        "selected_candidate": "middle",
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [
+          {
+            "path": "learned_order/middle/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "ae676aa07e9c71d8a46d55306bdd7a92dc5d9d7c1690ad78e86d39fb06624f13"
+          },
+          {
+            "path": "learned_order/middle/baseline/result.json",
+            "bytes": 1653528,
+            "sha256": "d0ff376dba6897f04fa74a31059db89051600c7b05a705f4ad0cb98d3db86499"
+          },
+          {
+            "path": "learned_order/middle/baseline/checkpoint.json",
+            "bytes": 35069,
+            "sha256": "834d71f156020ce2e04eeff158a07140e4bdb0d8433b7f4c14458b3e79d77f0a"
+          },
+          {
+            "path": "learned_order/middle/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "991d93dae08760ccb6d75751a2827ee0d2941f25805e438629579477dbf243d2"
+          },
+          {
+            "path": "result.json",
+            "bytes": 7197,
+            "sha256": "56a24d02f91c1c01789a2b1e62a8f016ff576d2a8dffc94acd53d2c49856f5e7"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 16288,
+            "sha256": "5b57e1d6d405915ba79f8e318ae92ef1fee58109911798385b96b3421bbe95ad"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          },
+          {
+            "path": "policy.json",
+            "bytes": 13482,
+            "sha256": "48b4f759fbf0c54ed77d07e6e9d511c37099686c6ffcaa4dcbaf6eed2a3f543d"
+          },
+          {
+            "path": "historical-training.json",
+            "bytes": 3176,
+            "sha256": "717cf720a9e85dc77c2066a869c0baf1490c54c6164e898530abd1e3acf4dcae"
+          }
+        ],
+        "review_wall_ns": 2036532551,
+        "outer_panel_fits_viewport": true
+      }
+    ],
+    "http_exact_responses": 152,
+    "original_downloads": 32,
+    "review_wall_ns": 7310675346,
+    "review_scope": "navigation_validation_selection_downloads_excludes_server_startup_browser_launch_screenshots_and_teardown",
+    "new_numerical_paths": 0,
+    "new_policy_fits": 0,
+    "page_errors": [],
+    "independent_physical_validation": false,
+    "net_savings_proved": false
+  }
+}

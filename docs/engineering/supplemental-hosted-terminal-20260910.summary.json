@@ -1,0 +1,454 @@
+{
+  "schema_version": "supplemental-hosted-terminal-observation.v1",
+  "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+  "base_sha": "4de4e3f55aae1d267cf704cec7d7533f3a627498",
+  "merge_sha": "e76bb929f3a0d2987f2d8e7e3479995ebd97a50a",
+  "merge_tree_matches_head": true,
+  "tree_sha": "d322d18227fbdd2b62d1ea46efccba75531572ec",
+  "pr_number": 440,
+  "pr_state": "open",
+  "pr_draft": true,
+  "runs": [
+    {
+      "id": 34363325328,
+      "name": "CI",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325328",
+      "updated_at": "2026-09-09T15:45:20Z"
+    },
+    {
+      "id": 34363325247,
+      "name": "Repository Python Tests",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325247",
+      "updated_at": "2026-09-09T16:27:24Z"
+    }
+  ],
+  "inspected_logs": [
+    {
+      "id": 102505610756,
+      "name": "verify",
+      "conclusion": "success",
+      "log_sha256": "3c3b713e2a4fbca4c6edf4a30c0578d12528cf6eec6228b59899c9af071358d6",
+      "log_bytes": 424598,
+      "test_summary_lines": [
+        "2026-09-09T15:45:15.1133637Z 93 passed, 1 skipped in 8.48s",
+        "2026-09-09T15:45:15.1156076Z \u001b[1A\u001b[2K  2 skipped",
+        "2026-09-09T15:45:15.1156304Z   3 passed (1.5m)",
+        "2026-09-09T15:45:15.1203994Z 1128 passed, 7 skipped in 3707.57s (1:01:47)",
+        "2026-09-09T15:45:15.1208749Z 76 passed, 2 deselected in 4.79s"
+      ]
+    },
+    {
+      "id": 102505610470,
+      "name": "pytest-collection",
+      "conclusion": "success",
+      "log_sha256": "96e73139b7be3f4cbc13669e8ab5e02464377c0674d2616d38fa9b486934d5d4",
+      "log_bytes": 1079522,
+      "test_summary_lines": [
+        "2026-09-09T14:26:05.6903483Z 7055 tests collected in 42.29s"
+      ]
+    },
+    {
+      "id": 102505610770,
+      "name": "pytest-full-shard-1",
+      "conclusion": "success",
+      "log_sha256": "5f47fe972cba2a66218d54c4461ef772bb797a6070440b89b1684cb1b4fe2a26",
+      "log_bytes": 95639,
+      "test_summary_lines": [
+        "2026-09-09T14:26:02.7574220Z 1 passed in 5.08s",
+        "2026-09-09T15:37:14.4148902Z 1593 passed, 16 skipped, 82 subtests passed in 3729.68s (1:02:09)"
+      ]
+    },
+    {
+      "id": 102505610932,
+      "name": "pytest-full-shard-0",
+      "conclusion": "success",
+      "log_sha256": "853e15dfc3a7d7f7ba910a114752fdb23a9d3f910e9cb4570d4144b5f9f32e7f",
+      "log_bytes": 96458,
+      "test_summary_lines": [
+        "2026-09-09T14:25:48.6301661Z 1 passed in 5.77s",
+        "2026-09-09T15:51:37.5289198Z 2045 passed, 21 skipped in 4715.17s (1:18:35)"
+      ]
+    },
+    {
+      "id": 102505610963,
+      "name": "pytest-full-shard-3",
+      "conclusion": "success",
+      "log_sha256": "41f35fb4e6bbd65d02a3bb938072dbb025f40c27346ec1344eed6788a7940185",
+      "log_bytes": 96266,
+      "test_summary_lines": [
+        "2026-09-09T14:26:36.4371434Z 1 passed in 5.11s",
+        "2026-09-09T16:21:25.2458836Z 1827 passed, 12 skipped, 1 deselected, 55 subtests passed in 6345.60s (1:45:45)"
+      ]
+    },
+    {
+      "id": 102505610969,
+      "name": "pytest-full-shard-2",
+      "conclusion": "success",
+      "log_sha256": "757b56db209258e0fab7200d446761d53d6c64359bd8fd0067a061c2003fb3c8",
+      "log_bytes": 95571,
+      "test_summary_lines": [
+        "2026-09-09T14:26:19.6323863Z 1 passed in 5.02s",
+        "2026-09-09T16:09:26.6598255Z 1536 passed, 3 skipped, 1 deselected in 5647.65s (1:34:07)"
+      ]
+    },
+    {
+      "id": 102549530505,
+      "name": "pytest-full",
+      "conclusion": "success",
+      "log_sha256": "18efae5ce86ab32f184ab7e11fcae54ae7e7a67904071d3889bda1fb5821cc2c",
+      "log_bytes": 2283,
+      "test_summary_lines": []
+    }
+  ],
+  "repository_tests": {
+    "collected": 7055,
+    "passed": 7001,
+    "skipped": 52,
+    "deselected": 2,
+    "subtests_passed_separate": 137
+  },
+  "checks_snapshot": [
+    {
+      "id": 102549530505,
+      "name": "pytest-full",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325247/job/102549530505"
+    },
+    {
+      "id": 102532783075,
+      "name": "legacy-evidence-complete",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325281/job/102532783075"
+    },
+    {
+      "id": 102507050728,
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363745976/job/102507050728"
+    },
+    {
+      "id": 102507018925,
+      "name": "native-merge-product",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102507018925"
+    },
+    {
+      "id": 102506970452,
+      "name": "frontend-required",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325497/job/102506970452"
+    },
+    {
+      "id": 102506700279,
+      "name": "python-oracle-parity",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506700279"
+    },
+    {
+      "id": 102506699897,
+      "name": "frame-alpha-cli-and-workstation-distribution-linux-x86_64-gnu",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506699897"
+    },
+    {
+      "id": 102506699887,
+      "name": "frame-alpha-cli-and-workstation-distribution-windows-x86_64-msvc",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506699887"
+    },
+    {
+      "id": 102506699866,
+      "name": "build-package",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506699866"
+    },
+    {
+      "id": 102506699848,
+      "name": "bounded-product-e2e",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506699848"
+    },
+    {
+      "id": 102506699832,
+      "name": "checkpoint-restart",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506699832"
+    },
+    {
+      "id": 102506699769,
+      "name": "rust-cpp-integration",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506699769"
+    },
+    {
+      "id": 102506670656,
+      "name": "native-pr-fast",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506670656"
+    },
+    {
+      "id": 102506444159,
+      "name": "frontend-required",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363287674/job/102506444159"
+    },
+    {
+      "id": 102506257244,
+      "name": "modelir-golden",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506257244"
+    },
+    {
+      "id": 102506257142,
+      "name": "rust-quality",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506257142"
+    },
+    {
+      "id": 102506256982,
+      "name": "cpp-quality",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506256982"
+    },
+    {
+      "id": 102506256846,
+      "name": "dependency-boundary",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506256846"
+    },
+    {
+      "id": 102506256646,
+      "name": "abi-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102506256646"
+    },
+    {
+      "id": 102506149400,
+      "name": "legacy-evidence-shard-package-ingest",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325281/job/102506149400"
+    },
+    {
+      "id": 102506149321,
+      "name": "legacy-evidence-shard-matrix-tail",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325281/job/102506149321"
+    },
+    {
+      "id": 102506149291,
+      "name": "legacy-evidence-shard-contract-core",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325281/job/102506149291"
+    },
+    {
+      "id": 102506149234,
+      "name": "legacy-evidence-shard-operator-attestation",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325281/job/102506149234"
+    },
+    {
+      "id": 102505613713,
+      "name": "live-exact-main",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325315/job/102505613713"
+    },
+    {
+      "id": 102505611841,
+      "name": "offline-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325315/job/102505611841"
+    },
+    {
+      "id": 102505611758,
+      "name": "scope-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325337/job/102505611758"
+    },
+    {
+      "id": 102505611630,
+      "name": "topology-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325423/job/102505611630"
+    },
+    {
+      "id": 102505610969,
+      "name": "pytest-full-shard-2",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325247/job/102505610969"
+    },
+    {
+      "id": 102505610963,
+      "name": "pytest-full-shard-3",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325247/job/102505610963"
+    },
+    {
+      "id": 102505610932,
+      "name": "pytest-full-shard-0",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325247/job/102505610932"
+    },
+    {
+      "id": 102505610860,
+      "name": "workflow-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325310/job/102505610860"
+    },
+    {
+      "id": 102505610770,
+      "name": "pytest-full-shard-1",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325247/job/102505610770"
+    },
+    {
+      "id": 102505610756,
+      "name": "verify",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325328/job/102505610756"
+    },
+    {
+      "id": 102505610724,
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325497/job/102505610724"
+    },
+    {
+      "id": 102505610714,
+      "name": "supplemental-artifact-identity",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325365/job/102505610714"
+    },
+    {
+      "id": 102505610704,
+      "name": "molecular-quarantine",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325348/job/102505610704"
+    },
+    {
+      "id": 102505610470,
+      "name": "pytest-collection",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325247/job/102505610470"
+    },
+    {
+      "id": 102505610391,
+      "name": "legacy-evidence",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325281/job/102505610391"
+    },
+    {
+      "id": 102505610167,
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325327/job/102505610167"
+    },
+    {
+      "id": 102505609996,
+      "name": "git-lfs-integrity",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325350/job/102505609996"
+    },
+    {
+      "id": 102505609767,
+      "name": "canonical-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325245/job/102505609767"
+    },
+    {
+      "id": 102505482538,
+      "name": "workflow-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363287749/job/102505482538"
+    },
+    {
+      "id": 102505482478,
+      "name": "verify",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363287742/job/102505482478"
+    },
+    {
+      "id": 102505480902,
+      "name": "canonical-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363287790/job/102505480902"
+    },
+    {
+      "id": 102505480811,
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363287674/job/102505480811"
+    }
+  ],
+  "check_count": 45,
+  "checks_success": 44,
+  "checks_skipped": 1,
+  "expected_skipped_check": "live-exact-main",
+  "all_check_internal_claims_audited": false,
+  "actual_signed_product_state_execution_proved": false,
+  "live_main_issue_state_receipt_proved": false,
+  "independent_physical_validation": false,
+  "release_authority": false,
+  "full_R1_R2_complete": false,
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-r2-ci-terminal-0zq5qlra",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-r2-ci-terminal-0zq5qlra.inventory.json",
+    "inventory_sha256": "e83f608650f5b2450dd2f55fc715dd3f197e1543155ffa46cdbef18cd44dd990",
+    "file_count": 18,
+    "total_bytes": 2217163,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T16:54:13.720095+00:00",
+    "seal_wall_ns": 4901485,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

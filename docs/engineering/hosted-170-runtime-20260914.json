@@ -1,0 +1,32 @@
+{
+  "head": "17010d495d651d3d53407db4dfc7b9dcee0867ad",
+  "run_id": 34774223474,
+  "jobs": [
+    {
+      "id": 103769241955,
+      "name": "python-contracts",
+      "conclusion": "success",
+      "passed_lines": [
+        "2026-09-13T18:21:26.1507253Z All checks passed!",
+        "2026-09-13T18:21:40.3013739Z 96 passed in 13.50s"
+      ],
+      "skipped_steps": []
+    },
+    {
+      "id": 103769241851,
+      "name": "frontend-contracts",
+      "conclusion": "success",
+      "passed_lines": [
+        "2026-09-13T18:29:03.3932257Z \u001b[1A\u001b[2K  706 passed (8.7m)",
+        "2026-09-13T18:30:44.3970853Z \u001b[1A\u001b[2K  26 passed (1.7m)"
+      ],
+      "skipped_steps": []
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-170-runtime-nfk9uj7w",
+    "files": 5,
+    "bytes": 193620,
+    "inventory_sha256": "b1eab67c7717149fc78efd06863c40ef351c4e3c644fa5894f12a4287c7f6eaa"
+  }
+}

@@ -1,0 +1,663 @@
+{
+  "fixed_modes": [
+    {
+      "changed_constant_pattern_rejected": true,
+      "checkpoint_io_wall_ns": 104598845,
+      "checkpoints": [
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 0,
+          "load_factor": 0.2813333333333336,
+          "relative_equilibrium": 1.8947806286936006e-16,
+          "support_axial_kn": 600.0000000000001,
+          "target_m": -0.0001
+        },
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 0,
+          "load_factor": -0.2813333333333312,
+          "relative_equilibrium": 1.8947806286936006e-16,
+          "support_axial_kn": 599.9999999999999,
+          "target_m": 0.0001
+        },
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 4,
+          "load_factor": -13.651435680763866,
+          "relative_equilibrium": 1.6105635343895603e-15,
+          "support_axial_kn": 599.9999999999998,
+          "target_m": 0.01
+        },
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 3,
+          "load_factor": 10.496010634404469,
+          "relative_equilibrium": 3.315866100213801e-16,
+          "support_axial_kn": 600.0,
+          "target_m": -0.005
+        }
+      ],
+      "constant_external_loads": [
+        [
+          6,
+          -600.0
+        ]
+      ],
+      "core_calls": 7,
+      "experimental_training_admitted": false,
+      "failed_control_rollback_exact": true,
+      "independent_physics_validation": false,
+      "mode": "constant-binary64",
+      "peak_rss_kib": 105692,
+      "performance_claim": false,
+      "preload_error_m": -8.131516293641283e-20,
+      "preload_expected_axial_displacement_m": -0.00023020257826887662,
+      "preload_runtime": {
+        "active": false,
+        "completed_run_count": 1,
+        "exception_run_count": 0,
+        "newton": {
+          "active": false,
+          "assemble_call_count": 5,
+          "assemble_exception_count": 0,
+          "assemble_wall_ns": 59065785,
+          "completed_run_count": 1,
+          "exception_run_count": 0,
+          "linear_solve_call_count": 3,
+          "linear_solve_exception_count": 0,
+          "linear_solve_reason": "measured_increment_backend",
+          "linear_solve_scope": "vector_increment_backend_including_conversion_and_sparse_diagnostics",
+          "linear_solve_wall_ns": 62732,
+          "material_trial": {
+            "call_count": 420,
+            "coverage_complete": true,
+            "exception_count": 0,
+            "instrumented_section_call_count": 30,
+            "materials": {
+              "concrete": {
+                "call_count": 360,
+                "exception_count": 0,
+                "wall_ns": 4674024
+              },
+              "steel": {
+                "call_count": 60,
+                "exception_count": 0,
+                "wall_ns": 370451
+              }
+            },
+            "schema_version": "material-trial-runtime.v1",
+            "scope": "steel_and_concrete_integrate_api_calls_excluding_fiber_accumulation_and_section_assembly",
+            "timing_error_count": 0,
+            "unavailable_reasons": [],
+            "unmeasured_section_call_count": 0,
+            "wall_ns": 5044475
+          },
+          "run_count": 1,
+          "total_wall_ns": 59526979,
+          "unattributed_wall_ns": 398462
+        },
+        "run_count": 1,
+        "terminal_material_trial": {
+          "call_count": 84,
+          "coverage_complete": true,
+          "exception_count": 0,
+          "instrumented_section_call_count": 6,
+          "materials": {
+            "concrete": {
+              "call_count": 72,
+              "exception_count": 0,
+              "wall_ns": 923087
+            },
+            "steel": {
+              "call_count": 12,
+              "exception_count": 0,
+              "wall_ns": 72193
+            }
+          },
+          "schema_version": "material-trial-runtime.v1",
+          "scope": "steel_and_concrete_integrate_api_calls_excluding_fiber_accumulation_and_section_assembly",
+          "timing_error_count": 0,
+          "unavailable_reasons": [],
+          "unmeasured_section_call_count": 0,
+          "wall_ns": 995280
+        },
+        "terminal_trial_assembly_call_count": 1,
+        "terminal_trial_assembly_exception_count": 0,
+        "terminal_trial_assembly_wall_ns": 11925202,
+        "total_wall_ns": 76619177,
+        "unattributed_wall_ns": 5166996
+      },
+      "problem_hash": "sha256:46a8a7aa3180ac70f66d10123392ab7d372697542d275cd05583af894e0fc7af",
+      "records": [
+        {
+          "accepted_state_hash": "sha256:f2915cf7717f5ef26f90b4c760d62adb610b1d0b1c10696dc135abce5fdaa917",
+          "committed": true,
+          "linear_solves": 3,
+          "name": "preload",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:9dc8a14c0d6ff0ce8af3bf4831cefdf73f0fac8033a0d8cebfdd55f011b1f9cd",
+          "wall_ns": 81578237
+        },
+        {
+          "accepted_state_hash": "sha256:f2915cf7717f5ef26f90b4c760d62adb610b1d0b1c10696dc135abce5fdaa917",
+          "committed": false,
+          "linear_solves": 2,
+          "name": "intentional-failed-control",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:f2915cf7717f5ef26f90b4c760d62adb610b1d0b1c10696dc135abce5fdaa917",
+          "wall_ns": 72516766
+        },
+        {
+          "accepted_state_hash": "sha256:cce5e6891de06cd8fc06847eec02cfbdbc9d2664344523c5a67b13f1978669c7",
+          "committed": true,
+          "linear_solves": 3,
+          "name": "control-0",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:f2915cf7717f5ef26f90b4c760d62adb610b1d0b1c10696dc135abce5fdaa917",
+          "wall_ns": 74891982
+        },
+        {
+          "accepted_state_hash": "sha256:eb33d3d4d34ec723a5493c6c9b660bbc79c5a0cd97236690344dbe829d69b9f8",
+          "committed": true,
+          "linear_solves": 2,
+          "name": "control-1",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:cce5e6891de06cd8fc06847eec02cfbdbc9d2664344523c5a67b13f1978669c7",
+          "wall_ns": 74496339
+        },
+        {
+          "accepted_state_hash": "sha256:3e2e8473c8a5cbdd385940568a75e08460ce275224a97ca98a8020897c8d4579",
+          "committed": true,
+          "linear_solves": 7,
+          "name": "control-2",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:eb33d3d4d34ec723a5493c6c9b660bbc79c5a0cd97236690344dbe829d69b9f8",
+          "wall_ns": 179230099
+        },
+        {
+          "accepted_state_hash": "sha256:2733b0858408bff8ae292b94b07499958f01f15447fe206781e48ded10b13085",
+          "committed": true,
+          "linear_solves": 8,
+          "name": "control-3",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:3e2e8473c8a5cbdd385940568a75e08460ce275224a97ca98a8020897c8d4579",
+          "wall_ns": 224539352
+        },
+        {
+          "accepted_state_hash": "sha256:2733b0858408bff8ae292b94b07499958f01f15447fe206781e48ded10b13085",
+          "committed": true,
+          "linear_solves": 8,
+          "name": "restart-control",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:3e2e8473c8a5cbdd385940568a75e08460ce275224a97ca98a8020897c8d4579",
+          "wall_ns": 224846902
+        }
+      ],
+      "reference_external_loads": [
+        [
+          6,
+          0.0
+        ],
+        [
+          7,
+          -10.0
+        ]
+      ],
+      "restart_exact": true,
+      "wall_ns_through_report": 1191199728
+    },
+    {
+      "changed_constant_pattern_rejected": true,
+      "checkpoint_io_wall_ns": 117037734,
+      "checkpoints": [
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 0,
+          "load_factor": 0.2813333333333337,
+          "relative_equilibrium": 5.815265964244006e-18,
+          "support_axial_kn": 600.0,
+          "target_m": -0.0001
+        },
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 0,
+          "load_factor": -0.2813333333333328,
+          "relative_equilibrium": 1.2335811384723962e-17,
+          "support_axial_kn": 600.0,
+          "target_m": 0.0001
+        },
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 4,
+          "load_factor": -13.651435680763866,
+          "relative_equilibrium": 2.204154663132715e-17,
+          "support_axial_kn": 600.0,
+          "target_m": 0.01
+        },
+        {
+          "axial_kn": -600.0,
+          "damaged_integration_points": 3,
+          "load_factor": 10.496010634404469,
+          "relative_equilibrium": 1.8835713629624454e-17,
+          "support_axial_kn": 600.0,
+          "target_m": -0.005
+        }
+      ],
+      "constant_external_loads": [
+        [
+          6,
+          -600.0
+        ]
+      ],
+      "core_calls": 7,
+      "experimental_training_admitted": false,
+      "failed_control_rollback_exact": true,
+      "independent_physics_validation": false,
+      "mode": "constant-retained",
+      "peak_rss_kib": 106272,
+      "performance_claim": false,
+      "preload_error_m": 0.0,
+      "preload_expected_axial_displacement_m": -0.00023020257826887662,
+      "preload_runtime": {
+        "active": false,
+        "completed_run_count": 1,
+        "exception_run_count": 0,
+        "newton": {
+          "active": false,
+          "assemble_call_count": 6,
+          "assemble_exception_count": 0,
+          "assemble_wall_ns": 158901276,
+          "completed_run_count": 1,
+          "exception_run_count": 0,
+          "linear_solve_call_count": 3,
+          "linear_solve_exception_count": 0,
+          "linear_solve_reason": "measured_increment_backend",
+          "linear_solve_scope": "vector_increment_backend_including_conversion_and_sparse_diagnostics",
+          "linear_solve_wall_ns": 102942,
+          "material_trial": {
+            "call_count": 504,
+            "coverage_complete": true,
+            "exception_count": 0,
+            "instrumented_section_call_count": 36,
+            "materials": {
+              "concrete": {
+                "call_count": 432,
+                "exception_count": 0,
+                "wall_ns": 16137862
+              },
+              "steel": {
+                "call_count": 72,
+                "exception_count": 0,
+                "wall_ns": 1419036
+              }
+            },
+            "schema_version": "material-trial-runtime.v1",
+            "scope": "steel_and_concrete_integrate_api_calls_excluding_fiber_accumulation_and_section_assembly",
+            "timing_error_count": 0,
+            "unavailable_reasons": [],
+            "unmeasured_section_call_count": 0,
+            "wall_ns": 17556898
+          },
+          "run_count": 1,
+          "total_wall_ns": 160282590,
+          "unattributed_wall_ns": 1278372
+        },
+        "run_count": 1,
+        "terminal_material_trial": {
+          "call_count": 84,
+          "coverage_complete": true,
+          "exception_count": 0,
+          "instrumented_section_call_count": 6,
+          "materials": {
+            "concrete": {
+              "call_count": 72,
+              "exception_count": 0,
+              "wall_ns": 2660126
+            },
+            "steel": {
+              "call_count": 12,
+              "exception_count": 0,
+              "wall_ns": 233768
+            }
+          },
+          "schema_version": "material-trial-runtime.v1",
+          "scope": "steel_and_concrete_integrate_api_calls_excluding_fiber_accumulation_and_section_assembly",
+          "timing_error_count": 0,
+          "unavailable_reasons": [],
+          "unmeasured_section_call_count": 0,
+          "wall_ns": 2893894
+        },
+        "terminal_trial_assembly_call_count": 1,
+        "terminal_trial_assembly_exception_count": 0,
+        "terminal_trial_assembly_wall_ns": 26499780,
+        "total_wall_ns": 194636174,
+        "unattributed_wall_ns": 7853804
+      },
+      "problem_hash": "sha256:ad3e65bd7ec16c85e0ecd74e8e24bbf22dba821756e907e923e9bee2eb5232c2",
+      "records": [
+        {
+          "accepted_state_hash": "sha256:9f922cc62c37a932b16fa2858638406b9839ddf3facd1ccd5fca42482f246b3d",
+          "committed": true,
+          "linear_solves": 3,
+          "name": "preload",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:2d962fe6790c0f208a9e2dea68e16163f5ab06d1a3566ff022e26b91f30a0ba4",
+          "wall_ns": 201312787
+        },
+        {
+          "accepted_state_hash": "sha256:9f922cc62c37a932b16fa2858638406b9839ddf3facd1ccd5fca42482f246b3d",
+          "committed": false,
+          "linear_solves": 2,
+          "name": "intentional-failed-control",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:9f922cc62c37a932b16fa2858638406b9839ddf3facd1ccd5fca42482f246b3d",
+          "wall_ns": 174099753
+        },
+        {
+          "accepted_state_hash": "sha256:e1b5d21874d06abc22b6f8e5bc5c82254fae95e9a11e4aa8c5440003bff67430",
+          "committed": true,
+          "linear_solves": 3,
+          "name": "control-0",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:9f922cc62c37a932b16fa2858638406b9839ddf3facd1ccd5fca42482f246b3d",
+          "wall_ns": 198321251
+        },
+        {
+          "accepted_state_hash": "sha256:fd4a139d18c5dd051d8420bc5e5e5874be9349a030f5b990779b50747063d71a",
+          "committed": true,
+          "linear_solves": 3,
+          "name": "control-1",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:e1b5d21874d06abc22b6f8e5bc5c82254fae95e9a11e4aa8c5440003bff67430",
+          "wall_ns": 199164767
+        },
+        {
+          "accepted_state_hash": "sha256:b83e564a71105c8af3727ab2fc6de16e3b7eb879fedde480939468a4bb94e4f3",
+          "committed": true,
+          "linear_solves": 7,
+          "name": "control-2",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:fd4a139d18c5dd051d8420bc5e5e5874be9349a030f5b990779b50747063d71a",
+          "wall_ns": 452885815
+        },
+        {
+          "accepted_state_hash": "sha256:a7f6c907a4edc644b99ef47d0bf220acb084eb4dc1fe66e99799c666b78f25a6",
+          "committed": true,
+          "linear_solves": 8,
+          "name": "control-3",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:b83e564a71105c8af3727ab2fc6de16e3b7eb879fedde480939468a4bb94e4f3",
+          "wall_ns": 560854366
+        },
+        {
+          "accepted_state_hash": "sha256:a7f6c907a4edc644b99ef47d0bf220acb084eb4dc1fe66e99799c666b78f25a6",
+          "committed": true,
+          "linear_solves": 8,
+          "name": "restart-control",
+          "newton_iterations": null,
+          "parent_state_hash": "sha256:b83e564a71105c8af3727ab2fc6de16e3b7eb879fedde480939468a4bb94e4f3",
+          "wall_ns": 561617100
+        }
+      ],
+      "reference_external_loads": [
+        [
+          6,
+          0.0
+        ],
+        [
+          7,
+          -10.0
+        ]
+      ],
+      "restart_exact": true,
+      "wall_ns_through_report": 2651956678
+    }
+  ],
+  "full_roadmap_complete": false,
+  "independent_physics_validation": false,
+  "legacy_current_result_sha256": "389a800c5c4227271ecacab95b511a1e962c2aed42cd62915a6ed75825e64010",
+  "legacy_original_result_sha256": "389a800c5c4227271ecacab95b511a1e962c2aed42cd62915a6ed75825e64010",
+  "legacy_result_bytes": 679582,
+  "legacy_result_bytes_exact": true,
+  "processes": [
+    {
+      "mode": "legacy-original",
+      "parent_wall_ns": 1828516613,
+      "pid": 916468,
+      "return_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "mode": "legacy-current",
+      "parent_wall_ns": 1562008947,
+      "pid": 916470,
+      "return_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "mode": "constant-binary64",
+      "parent_wall_ns": 2539701444,
+      "pid": 916472,
+      "return_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "mode": "constant-retained",
+      "parent_wall_ns": 4023605321,
+      "pid": 916534,
+      "return_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "public_request_integration": false,
+  "source_files_match_git_unchanged": 598,
+  "source_revision": "b91557cee8822e07a8cab196e6934d43f6133acb",
+  "total_core_calls": 18,
+  "training_fits": 0,
+  "cost_audit": {
+    "core_calls": 18,
+    "accepted_calls": 16,
+    "intentional_failed_control_calls": 2,
+    "newton_iteration_count": 75,
+    "linear_solve_count": 75,
+    "initial_worker_field_issue": "Worker used nonexistent metrics.iterations and preserved null; this separate audit reads original newton_iteration_count and linear_solve_count without rerunning any solve.",
+    "unknown_counts": false,
+    "entries": [
+      {
+        "mode": "legacy-original",
+        "name": "force",
+        "source_file": "legacy-original/result.json",
+        "source_sha256": "389a800c5c4227271ecacab95b511a1e962c2aed42cd62915a6ed75825e64010",
+        "committed": true,
+        "iteration_count": 2,
+        "newton_iteration_count": 2,
+        "linear_solve_count": 2
+      },
+      {
+        "mode": "legacy-original",
+        "name": "direct",
+        "source_file": "legacy-original/result.json",
+        "source_sha256": "389a800c5c4227271ecacab95b511a1e962c2aed42cd62915a6ed75825e64010",
+        "committed": true,
+        "iteration_count": 2,
+        "newton_iteration_count": 2,
+        "linear_solve_count": 2
+      },
+      {
+        "mode": "legacy-current",
+        "name": "force",
+        "source_file": "legacy-current/result.json",
+        "source_sha256": "389a800c5c4227271ecacab95b511a1e962c2aed42cd62915a6ed75825e64010",
+        "committed": true,
+        "iteration_count": 2,
+        "newton_iteration_count": 2,
+        "linear_solve_count": 2
+      },
+      {
+        "mode": "legacy-current",
+        "name": "direct",
+        "source_file": "legacy-current/result.json",
+        "source_sha256": "389a800c5c4227271ecacab95b511a1e962c2aed42cd62915a6ed75825e64010",
+        "committed": true,
+        "iteration_count": 2,
+        "newton_iteration_count": 2,
+        "linear_solve_count": 2
+      },
+      {
+        "mode": "constant-binary64",
+        "name": "preload",
+        "source_file": "constant-binary64/preload.json",
+        "source_sha256": "1734ab5db3d93df626ed09b6c3608fe31e4c903bb11d40e8b2dc29c773b9d5c6",
+        "committed": true,
+        "iteration_count": 3,
+        "newton_iteration_count": 3,
+        "linear_solve_count": 3
+      },
+      {
+        "mode": "constant-binary64",
+        "name": "intentional-failed-control",
+        "source_file": "constant-binary64/intentional-failed-control.json",
+        "source_sha256": "c68b3104f1fc46c1860195e1712f58ceaaec8eb50f72c15b8b88e84ae8f67e2d",
+        "committed": false,
+        "iteration_count": 2,
+        "newton_iteration_count": 2,
+        "linear_solve_count": 2
+      },
+      {
+        "mode": "constant-binary64",
+        "name": "control-0",
+        "source_file": "constant-binary64/control-0.json",
+        "source_sha256": "a698b3241f775cd21e6f56f56ed6aefbf751a660b54ab598917a4bbf3c71f620",
+        "committed": true,
+        "iteration_count": 3,
+        "newton_iteration_count": 3,
+        "linear_solve_count": 3
+      },
+      {
+        "mode": "constant-binary64",
+        "name": "control-1",
+        "source_file": "constant-binary64/control-1.json",
+        "source_sha256": "79a921436bb6baf2b9a7b214c5b09fb7acac0d352517748493dddc68946683f7",
+        "committed": true,
+        "iteration_count": 2,
+        "newton_iteration_count": 2,
+        "linear_solve_count": 2
+      },
+      {
+        "mode": "constant-binary64",
+        "name": "control-2",
+        "source_file": "constant-binary64/control-2.json",
+        "source_sha256": "e4b3bfc1ef39b4da438f67b09bc7f43bf4cd0fbca52f6a9f6681465c33c62b53",
+        "committed": true,
+        "iteration_count": 7,
+        "newton_iteration_count": 7,
+        "linear_solve_count": 7
+      },
+      {
+        "mode": "constant-binary64",
+        "name": "control-3",
+        "source_file": "constant-binary64/control-3.json",
+        "source_sha256": "24932f59a2070f9eee224b05d6945f44667e2e7d61829da17f1f1ef08848280a",
+        "committed": true,
+        "iteration_count": 8,
+        "newton_iteration_count": 8,
+        "linear_solve_count": 8
+      },
+      {
+        "mode": "constant-binary64",
+        "name": "restart-control",
+        "source_file": "constant-binary64/restart-control.json",
+        "source_sha256": "24932f59a2070f9eee224b05d6945f44667e2e7d61829da17f1f1ef08848280a",
+        "committed": true,
+        "iteration_count": 8,
+        "newton_iteration_count": 8,
+        "linear_solve_count": 8
+      },
+      {
+        "mode": "constant-retained",
+        "name": "preload",
+        "source_file": "constant-retained/preload.json",
+        "source_sha256": "739eca3182e683e27ee85f70e24a2b271cbb1abf45dd3868ea3c64cb30d0cb8d",
+        "committed": true,
+        "iteration_count": 3,
+        "newton_iteration_count": 3,
+        "linear_solve_count": 3
+      },
+      {
+        "mode": "constant-retained",
+        "name": "intentional-failed-control",
+        "source_file": "constant-retained/intentional-failed-control.json",
+        "source_sha256": "5f5cf218c405bbd0ee457790295113959effeac855f8bbaa3e41e3b0e7da20d2",
+        "committed": false,
+        "iteration_count": 2,
+        "newton_iteration_count": 2,
+        "linear_solve_count": 2
+      },
+      {
+        "mode": "constant-retained",
+        "name": "control-0",
+        "source_file": "constant-retained/control-0.json",
+        "source_sha256": "04201ecd864a3a1885b3e06e1c77724717cf730be4d5e80d92f2363865b2cd8d",
+        "committed": true,
+        "iteration_count": 3,
+        "newton_iteration_count": 3,
+        "linear_solve_count": 3
+      },
+      {
+        "mode": "constant-retained",
+        "name": "control-1",
+        "source_file": "constant-retained/control-1.json",
+        "source_sha256": "fa0620f4cd71874aad35e1af00fca6f8bb94a350c37e4ae372da031bb593ffdf",
+        "committed": true,
+        "iteration_count": 3,
+        "newton_iteration_count": 3,
+        "linear_solve_count": 3
+      },
+      {
+        "mode": "constant-retained",
+        "name": "control-2",
+        "source_file": "constant-retained/control-2.json",
+        "source_sha256": "aaaa318165e0b149a5293ec1831d56d6dbb75afbd89765abe9ab9028dd92f843",
+        "committed": true,
+        "iteration_count": 7,
+        "newton_iteration_count": 7,
+        "linear_solve_count": 7
+      },
+      {
+        "mode": "constant-retained",
+        "name": "control-3",
+        "source_file": "constant-retained/control-3.json",
+        "source_sha256": "3ad6627524296fc3f96c77b22005bbc29cf4e5b542b8c08b93749d73fc22ea87",
+        "committed": true,
+        "iteration_count": 8,
+        "newton_iteration_count": 8,
+        "linear_solve_count": 8
+      },
+      {
+        "mode": "constant-retained",
+        "name": "restart-control",
+        "source_file": "constant-retained/restart-control.json",
+        "source_sha256": "3ad6627524296fc3f96c77b22005bbc29cf4e5b542b8c08b93749d73fc22ea87",
+        "committed": true,
+        "iteration_count": 8,
+        "newton_iteration_count": 8,
+        "linear_solve_count": 8
+      }
+    ]
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-loads-o0uliqgm",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-loads-o0uliqgm.inventory.json",
+    "inventory_sha256": "072b0c0ccf2fe689ca5bcdc4db6e0a89f8623e4577a4476db6091fec3daedee2",
+    "file_count": 38,
+    "total_bytes": 6491931,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T18:58:30.527700+00:00",
+    "seal_wall_ns": 12332924,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

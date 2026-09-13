@@ -44,11 +44,12 @@ const SOURCE_FAMILIES: [&str; 9] = [
     "time_functions",
     "construction_stages",
 ];
-const EXACT_INTEGER_FIELDS: [&str; 5] = [
+const EXACT_INTEGER_FIELDS: [&str; 6] = [
     "index",
     "concrete_layer_count",
     "top_bar_count",
     "bottom_bar_count",
+    "bar_count",
     "integration_order",
 ];
 

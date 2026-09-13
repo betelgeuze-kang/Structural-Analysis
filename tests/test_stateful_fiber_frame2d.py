@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 import structural_analysis.assembly.stateful_fiber_frame2d_solver as solver_module
+import structural_analysis.solvers.nonlinear.newton as newton_module
 from structural_analysis.assembly import (
     STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES,
     STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_STORAGE_PROFILE,
@@ -185,6 +186,10 @@ def test_load_step_runtime_sidecar_does_not_change_numerical_payload() -> None:
     )
 
     assert measured.to_dict() == baseline.to_dict()
+    assert (
+        measured.accepted_checkpoint.canonical_bytes()
+        == baseline.accepted_checkpoint.canonical_bytes()
+    )
     assert runtime.run_count == 1
     assert runtime.completed_run_count == 1
     assert runtime.exception_run_count == 0
@@ -209,12 +214,58 @@ def test_load_step_runtime_sidecar_does_not_change_numerical_payload() -> None:
     runtime_payload = runtime.to_dict()
     assert runtime_payload["active"] is False
     assert runtime_payload["newton"]["active"] is False
-    assert runtime_payload["newton"]["linear_solve_wall_ns"] is None
-    assert runtime_payload["newton"]["linear_solve_call_count"] is None
-    assert runtime_payload["newton"]["linear_solve_exception_count"] is None
-    assert runtime_payload["newton"]["linear_solve_reason"] == (
-        "not_separately_instrumented"
+    assert runtime_payload["newton"]["linear_solve_wall_ns"] > 0
+    assert runtime_payload["newton"]["linear_solve_call_count"] == len(
+        measured.trial_solution.convergence_history
     )
+    assert runtime_payload["newton"]["linear_solve_exception_count"] == 0
+    assert (
+        runtime_payload["newton"]["linear_solve_reason"] == "measured_increment_backend"
+    )
+    assert runtime.newton.total_wall_ns == (
+        runtime.newton.assemble_wall_ns
+        + runtime.newton.increment.wall_ns
+        + runtime.newton.unattributed_wall_ns
+    )
+    # Constitutive calls are a subset of inclusive assembly time. Subtracting
+    # them from the Newton total again would double-charge the same work.
+    for material, assemblies, inclusive_wall in (
+        (
+            runtime_payload["newton"]["material_trial"],
+            expected_newton_assemblies,
+            runtime.newton.assemble_wall_ns,
+        ),
+        (
+            runtime_payload["terminal_material_trial"],
+            runtime.terminal_trial_assembly_call_count,
+            runtime.terminal_trial_assembly_wall_ns,
+        ),
+    ):
+        assert material["coverage_complete"] is True
+        assert material["unavailable_reasons"] == []
+        assert 0 < material["wall_ns"] <= inclusive_wall
+        assert material["exception_count"] == material["timing_error_count"] == 0
+        assert material["unmeasured_section_call_count"] == 0
+        assert material["instrumented_section_call_count"] == assemblies * sum(
+            member.element.integration_order for member in problem.members
+        )
+        for kind in ("steel", "concrete"):
+            expected_calls = assemblies * sum(
+                member.element.integration_order
+                * sum(
+                    fiber.material_kind == kind
+                    for fiber in member.element.section.fibers
+                )
+                for member in problem.members
+            )
+            assert material["materials"][kind]["call_count"] == expected_calls
+            assert material["materials"][kind]["wall_ns"] > 0
+        assert material["call_count"] == sum(
+            row["call_count"] for row in material["materials"].values()
+        )
+        assert material["wall_ns"] == sum(
+            row["wall_ns"] for row in material["materials"].values()
+        )
 
 
 def test_load_step_runtime_sidecar_accounts_for_pre_newton_exception() -> None:
@@ -238,6 +289,8 @@ def test_load_step_runtime_sidecar_accounts_for_pre_newton_exception() -> None:
     assert runtime.newton.run_count == 0
     assert runtime.terminal_trial_assembly_call_count == 0
     assert runtime.to_dict()["active"] is False
+    assert runtime.to_dict()["newton"]["material_trial"]["call_count"] == 0
+    assert runtime.to_dict()["terminal_material_trial"]["call_count"] == 0
 
 
 def test_load_step_runtime_sidecar_accounts_for_newton_assembly_exception(
@@ -276,6 +329,8 @@ def test_load_step_runtime_sidecar_accounts_for_newton_assembly_exception(
     assert runtime.terminal_trial_assembly_call_count == 0
     assert runtime.to_dict()["active"] is False
     assert runtime.to_dict()["newton"]["active"] is False
+    assert runtime.to_dict()["newton"]["material_trial"]["call_count"] == 0
+    assert runtime.to_dict()["terminal_material_trial"]["call_count"] == 0
 
 
 def test_load_step_rejects_invalid_initial_guess_before_newton_and_preserves_parent(
@@ -892,3 +947,122 @@ def test_checkpoint_chain_artifact_rejects_broken_lineage_and_tamper() -> None:
         match="invalid|does not match",
     ):
         load_stateful_fiber_frame2d_checkpoint_chain_bytes(artifact, wrong_problem)
+
+
+class _TimingLinearProblem:
+    case_id = "linear-increment-timing-contract"
+
+    def __init__(self, size: int = 2, singular: bool = False) -> None:
+        self.size = size
+        self.singular = singular
+
+    def reference_force_scale(self) -> float:
+        return 1.0
+
+    def initial_free_displacements_m(self) -> np.ndarray:
+        return np.zeros(self.size)
+
+    def assemble(self, displacement: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        tangent = np.eye(self.size) * (0.0 if self.singular else 2.0)
+        return tangent @ displacement - np.ones(self.size), tangent
+
+
+@pytest.mark.parametrize("backend", newton_module.VECTOR_MATRIX_BACKENDS)
+def test_vector_increment_timing_preserves_dense_and_sparse_solution(
+    backend: str,
+) -> None:
+    problem = _TimingLinearProblem()
+    config = newton_module.NewtonRaphsonConfig(matrix_backend=backend)
+    baseline = newton_module.newton_raphson_vector(problem, config=config)
+    ticks = iter(range(0, 1000, 10))
+    recorder = newton_module.VectorIncrementRuntimeRecorder(
+        clock_ns=lambda: next(ticks)
+    )
+    measured = newton_module.newton_raphson_vector(
+        problem, config=config, increment_runtime=recorder
+    )
+    assert measured.status == baseline.status == "ready"
+    assert (
+        measured.free_displacements_m.tobytes()
+        == baseline.free_displacements_m.tobytes()
+    )
+    assert measured.metrics == baseline.metrics
+    assert measured.convergence_history == baseline.convergence_history
+    assert measured.line_search_history == baseline.line_search_history
+    assert recorder.call_count == 2
+    assert recorder.exception_count == 0
+    assert recorder.wall_ns == 20
+
+
+@pytest.mark.parametrize("backend", newton_module.VECTOR_MATRIX_BACKENDS)
+def test_vector_increment_timing_counts_blocked_singular_backend(backend: str) -> None:
+    problem = _TimingLinearProblem(singular=True)
+    config = newton_module.NewtonRaphsonConfig(matrix_backend=backend)
+    baseline = newton_module.newton_raphson_vector(problem, config=config)
+    ticks = iter([0, 10])
+    recorder = newton_module.VectorIncrementRuntimeRecorder(
+        clock_ns=lambda: next(ticks)
+    )
+    measured = newton_module.newton_raphson_vector(
+        problem, config=config, increment_runtime=recorder
+    )
+    assert measured.status == baseline.status == "blocked"
+    assert measured.metrics == baseline.metrics
+    assert measured.unsupported_features == baseline.unsupported_features
+    assert recorder.call_count == recorder.exception_count == 1
+    assert recorder.wall_ns == 10
+
+
+def test_vector_increment_timing_does_not_count_reaction_only_as_a_solve() -> None:
+    def forbidden_clock() -> int:
+        raise AssertionError("no increment backend should run")
+
+    recorder = newton_module.VectorIncrementRuntimeRecorder(clock_ns=forbidden_clock)
+    measured = newton_module.newton_raphson_vector(
+        _TimingLinearProblem(size=0), increment_runtime=recorder
+    )
+    assert measured.status == "ready"
+    assert measured.metrics["solver_executed"] is False
+    assert recorder.call_count == recorder.exception_count == recorder.wall_ns == 0
+
+
+def test_vector_increment_timing_retains_unexpected_exception_and_can_be_reused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ticks = iter(range(0, 1000, 10))
+    recorder = newton_module.VectorIncrementRuntimeRecorder(
+        clock_ns=lambda: next(ticks)
+    )
+    with monkeypatch.context() as patch:
+
+        def fail(*args: object, **kwargs: object) -> None:
+            raise RuntimeError("backend failure")
+
+        patch.setattr(newton_module, "_solve_vector_increment", fail)
+        with pytest.raises(RuntimeError, match="backend failure"):
+            newton_module.newton_raphson_vector(
+                _TimingLinearProblem(), increment_runtime=recorder
+            )
+    assert recorder.call_count == recorder.exception_count == 1
+    assert recorder.wall_ns == 10
+    result = newton_module.newton_raphson_vector(
+        _TimingLinearProblem(), increment_runtime=recorder
+    )
+    assert result.status == "ready"
+    assert recorder.call_count == 3
+    assert recorder.exception_count == 1
+    assert recorder.wall_ns == 30
+
+
+@pytest.mark.parametrize("ticks", ([True], [0, -1]))
+def test_vector_increment_invalid_clock_is_not_a_solver_failure(
+    ticks: list[object],
+) -> None:
+    values = iter(ticks)
+    recorder = newton_module.VectorIncrementRuntimeRecorder(
+        clock_ns=lambda: next(values)
+    )
+    with pytest.raises(RuntimeError, match="increment clock_ns"):
+        newton_module.newton_raphson_vector(
+            _TimingLinearProblem(), increment_runtime=recorder
+        )

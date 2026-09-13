@@ -63,8 +63,7 @@ def execute_nonlinear_frame_claim(
     if claim.job.status != "running":
         _fail("worker_claim_not_running", "The supplied claim is not active.")
     if checkpoint_step_budget is not None and (
-        type(checkpoint_step_budget) is not int
-        or not 1 <= checkpoint_step_budget <= 64
+        type(checkpoint_step_budget) is not int or not 1 <= checkpoint_step_budget <= 64
     ):
         _fail(
             "worker_checkpoint_budget_invalid",
@@ -179,6 +178,16 @@ def execute_nonlinear_frame_claim(
             lease_token=claim.lease_token,
             error_code="nonlinear_frame_contract_blocked",
             retriable=False,
+            nonlinear_failure_result_bytes=(
+                _canonical_json_bytes(result.to_dict())
+                if result.status == "blocked"
+                and config.profile
+                in {
+                    "corotational_one_bay_portal.v1",
+                    "corotational_connected_frame2d.v1",
+                }
+                else None
+            ),
         )
         _fail(
             "worker_result_contract_blocked",

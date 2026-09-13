@@ -1,0 +1,3050 @@
+{
+  "record_url": "https://zenodo.org/records/10501212",
+  "record_doi": "10.5281/zenodo.10501212",
+  "raw_source_files": 11,
+  "raw_source_bytes": 8496172,
+  "all_publisher_md5_values_match": true,
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-zenodo-drawing-intake.4urv2oe1",
+    "file_count": 28,
+    "bytes": 10644403,
+    "inventory_sha256": "b2a85a7395f15ed72af10705e95dc1b7c36ce361153e62963c43c1ee1e1def75",
+    "files": [
+      {
+        "path": "10501212-metadata.json",
+        "bytes": 11757,
+        "sha256": "92e65ef1b0afc2799ae96e62dd1d82e37147b16cc546297e69b00839e9b3d2c0"
+      },
+      {
+        "path": "2653488-metadata.json",
+        "bytes": 8163,
+        "sha256": "f910392f47a2c78a3f7e3cf4a353394b76e7b827169fefe24fda8b44788c39e4"
+      },
+      {
+        "path": "Comments on the data.pdf",
+        "bytes": 79771,
+        "sha256": "2ea09cb8fa0123d8af1a65b50415c09d92b2591a3be3a8cdc378030aad09ff3d"
+      },
+      {
+        "path": "SERA-ARISTA_Column naming.jpg",
+        "bytes": 136642,
+        "sha256": "d2f11e02139769494f292a1a826801361780e119aa7d1b9dc094665cc887041c"
+      },
+      {
+        "path": "SERA-ARISTA_General view.JPG",
+        "bytes": 1190306,
+        "sha256": "b3b1696cdc2a5cf196c847d7a576c857308f012c9ebfeb9031dcf02f02a06423"
+      },
+      {
+        "path": "SERA-ARISTA_Specimen_Geometry.jpg",
+        "bytes": 261243,
+        "sha256": "0c18deec5bdc8db3e392beaf2b0e26f69ec3daa93534182c2f48b0a23129b81a"
+      },
+      {
+        "path": "SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+        "bytes": 6089522,
+        "sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee"
+      },
+      {
+        "path": "SERA-ARISTA_Unretrofitted_Potentiometers_NorthFrame.jpg",
+        "bytes": 112781,
+        "sha256": "70f766c971941307c05807d38495321434fab6eece1f70c96978dcc4ed652b2a"
+      },
+      {
+        "path": "SERA-ARISTA_Unretrofitted_Potentiometers_SouthFrame.jpg",
+        "bytes": 114864,
+        "sha256": "26b126ac349a65ab2ac8df752a7f0d7ca7017538f6e9b43761849ab76235ef85"
+      },
+      {
+        "path": "SERA-ARISTA_Unretrofitted_StrainGage_BaseSection.jpg",
+        "bytes": 136120,
+        "sha256": "613129506b7158f6710c09efe01041d96ceacc86419ecc44d1631b42b68da517"
+      },
+      {
+        "path": "SERA-ARISTA_Unretrofitted_StrainGage_End-SpliceSection.jpg",
+        "bytes": 125394,
+        "sha256": "54e9d739053379580c95d1f2ed2d9e718022ca379041acdf66b8c22630230038"
+      },
+      {
+        "path": "SERA-ARISTA_Unretrofitted_StrainGage_Top3rdSection.jpg",
+        "bytes": 116816,
+        "sha256": "8018b7ee496d04c14b52b889ed66a94af0b41ea88368b98ff4bc4e889ade2830"
+      },
+      {
+        "path": "SERA-ARISTA_Unretrofitted_StrainGage_TopSection.jpg",
+        "bytes": 132713,
+        "sha256": "37a6368f793a1386129f6c8961febd5d4fcd39cd1e34d6e053c41f1c5981b711"
+      },
+      {
+        "path": "analysis-runtime.json",
+        "bytes": 771,
+        "sha256": "03445e1e6fe83e93706ca8f33c3013db47456e6d4c665e541c9b5be7a031de57"
+      },
+      {
+        "path": "comments-page1.png",
+        "bytes": 130474,
+        "sha256": "14bdd2b44eab33b4392104e338066d09b9c78fb7fb504a18bdae89c5d5d9286b"
+      },
+      {
+        "path": "comments.txt",
+        "bytes": 977,
+        "sha256": "13a83518d325870bc573cadcdb4971b4063d413a73f10a8135bb5b2d769e61f4"
+      },
+      {
+        "path": "download-plan.json",
+        "bytes": 4426,
+        "sha256": "bd99e6383ad7efe6c07a019775e4b212d964c244db87d27478518efd8395f3e8"
+      },
+      {
+        "path": "downloads.json",
+        "bytes": 5921,
+        "sha256": "c7a526844afeefc091f09c832f05daf9cda6fc5a08afd81de3b7f512e57ff0b9"
+      },
+      {
+        "path": "frame-observation-checks.json",
+        "bytes": 1687,
+        "sha256": "139cfb890d4911bfeb7af09aada7ec691b22f34775bb25aaae3be2b7763a770e"
+      },
+      {
+        "path": "frame-observations.json",
+        "bytes": 1670353,
+        "sha256": "fc8e21597eb8e68444f478daf4b44fe8dd1b3b5297dbc47324895da816917201"
+      },
+      {
+        "path": "frame-observations.py",
+        "bytes": 2992,
+        "sha256": "5608767bf589de6f4d5a8faf35cdf88fe65e169c16ccd11d5d78a9b7fe83350f"
+      },
+      {
+        "path": "frame-plot.py",
+        "bytes": 2060,
+        "sha256": "74439ded0e7557a2a6e65296214110ea449eafb12542655a06b45ac6f77e65c6"
+      },
+      {
+        "path": "interpretation.json",
+        "bytes": 1314,
+        "sha256": "70673d2da909e3e3473fabd3b51431214678ec08950d3dea53c2d8efae5cfdb2"
+      },
+      {
+        "path": "reference-height-check.json",
+        "bytes": 521,
+        "sha256": "9342ae2adf5e5bf156c3922b24592626cd98a3223f1a0623e15f20e9e2687267"
+      },
+      {
+        "path": "retrieval.json",
+        "bytes": 381,
+        "sha256": "6951d5f75a9b85656ec832e5b1b5416d91d3493f5e5736ce28d7d3abd895a61a"
+      },
+      {
+        "path": "unretrofitted-response.png",
+        "bytes": 233258,
+        "sha256": "ec7adaf1eb70dabdcc64388f4a69cdb7e576cd02a6426425e0ca2044eb503d58"
+      },
+      {
+        "path": "xlsx-inspection.json",
+        "bytes": 69870,
+        "sha256": "72e9549e900cbc2237ad365953fa6454c49730136c05d20592974d864051855f"
+      },
+      {
+        "path": "xlsx-inspection.py",
+        "bytes": 3306,
+        "sha256": "1d3d5c6583f48618f4cff2d686dee1284f7ee9be7c8476de2b757ce4524ccb12"
+      }
+    ]
+  },
+  "interpretation": {
+    "campaign_group": "sera-arista-palios-2020-zenodo10501212",
+    "test_state": "unretrofitted-low-level-cyclic",
+    "split": null,
+    "new_physical_model_created": false,
+    "external_training_admission": false,
+    "independent_validation_credit": false,
+    "dataset_license": "CC-BY-4.0 as declared by Zenodo metadata",
+    "paper_license_separate": "Ktisis metadata lists Springer rights and CC-BY-NC-ND-4.0; full paper not obtained",
+    "drawing_observations": {
+      "story_count": 3,
+      "column_lines": 6,
+      "story_height_annotation_m": 2.0,
+      "overall_height_annotation_m": 6.0,
+      "column_section_m": [
+        0.25,
+        0.25
+      ],
+      "beam_section_m": [
+        0.2,
+        0.33
+      ],
+      "slab_thickness_m": 0.14
+    },
+    "remaining_reconstruction": [
+      "Original material strengths and reinforcement/bar dimensions",
+      "Bond-slip and lap-splice mechanics compatible with reference model",
+      "Loading and axial/gravity boundary conditions",
+      "Authoritative drift/instrument reference heights",
+      "Full sensor/channel crosswalk and acquisition protocol",
+      "Whole-history support beyond existing bounded learning target count"
+    ],
+    "metadata_only_candidate": {
+      "zenodo_record": 2653488,
+      "declared_license": "afl-3.0",
+      "files_downloaded": false,
+      "training_admission": false
+    }
+  },
+  "workbook_inspection": {
+    "source_file": "SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+    "source_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+    "xlsx_members": 12,
+    "uncompressed_bytes": 23964941,
+    "sheets": [
+      {
+        "sheet": "Sheet1",
+        "xml_member": "xl/worksheets/sheet1.xml",
+        "declared_dimension": "A1:DL4063",
+        "xml_row_count": 4063,
+        "cells_with_values": 471045,
+        "cell_type_counts": {
+          "s": 201,
+          "n": 471107
+        },
+        "formula_count": 0,
+        "formulas_without_cached_value": 0,
+        "first_six_rows": [
+          {
+            "row": 1,
+            "cells": [
+              {
+                "cell": "A1",
+                "type": "s",
+                "value": "Top Disp (mm)",
+                "formula": null
+              },
+              {
+                "cell": "B1",
+                "type": "s",
+                "value": "Base Shear (kN)",
+                "formula": null
+              },
+              {
+                "cell": "C1",
+                "type": "s",
+                "value": "Top Drift (%)",
+                "formula": null
+              },
+              {
+                "cell": "D1",
+                "type": "s",
+                "value": "Drift 1st Story (%)",
+                "formula": null
+              },
+              {
+                "cell": "E1",
+                "type": "s",
+                "value": "Shear 1st Story (kN)",
+                "formula": null
+              },
+              {
+                "cell": "F1",
+                "type": "s",
+                "value": "Drift 2nd Story (%)",
+                "formula": null
+              },
+              {
+                "cell": "G1",
+                "type": "s",
+                "value": "Shear 2nd Story (kN)",
+                "formula": null
+              },
+              {
+                "cell": "H1",
+                "type": "s",
+                "value": "Drift 3rd Story (%)",
+                "formula": null
+              },
+              {
+                "cell": "I1",
+                "type": "s",
+                "value": "Shear 3rd Story (kN)",
+                "formula": null
+              },
+              {
+                "cell": "J1",
+                "type": "s",
+                "value": "Data points",
+                "formula": null
+              },
+              {
+                "cell": "K1",
+                "type": "s",
+                "value": "BAR STRAIN - column C1 (%)",
+                "formula": null
+              },
+              {
+                "cell": "S1",
+                "type": "s",
+                "value": "BAR STRAIN - column C2  (%)",
+                "formula": null
+              },
+              {
+                "cell": "AE1",
+                "type": "s",
+                "value": "BAR STRAIN - column C5  (%)",
+                "formula": null
+              },
+              {
+                "cell": "AQ1",
+                "type": "s",
+                "value": "BAR STRAIN - column C6  (%)",
+                "formula": null
+              },
+              {
+                "cell": "BA1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "BE1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "BI1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "BM1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "BQ1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "BU1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "BY1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "CB1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "CE1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "CH1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "CL1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "CP1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "CT1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "CX1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "DA1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "DE1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              },
+              {
+                "cell": "DI1",
+                "type": "s",
+                "value": "INTERFACE DISPLACEMENT (mm)",
+                "formula": null
+              }
+            ]
+          },
+          {
+            "row": 2,
+            "cells": [
+              {
+                "cell": "K2",
+                "type": "s",
+                "value": "east side",
+                "formula": null
+              },
+              {
+                "cell": "O2",
+                "type": "s",
+                "value": "west side",
+                "formula": null
+              },
+              {
+                "cell": "S2",
+                "type": "s",
+                "value": "east side",
+                "formula": null
+              },
+              {
+                "cell": "Y2",
+                "type": "s",
+                "value": "west side",
+                "formula": null
+              },
+              {
+                "cell": "AE2",
+                "type": "s",
+                "value": "east side",
+                "formula": null
+              },
+              {
+                "cell": "AK2",
+                "type": "s",
+                "value": "west side",
+                "formula": null
+              },
+              {
+                "cell": "AQ2",
+                "type": "s",
+                "value": "east side",
+                "formula": null
+              },
+              {
+                "cell": "AV2",
+                "type": "s",
+                "value": "west side",
+                "formula": null
+              },
+              {
+                "cell": "BA2",
+                "type": "s",
+                "value": "1st STORY",
+                "formula": null
+              },
+              {
+                "cell": "BE2",
+                "type": "s",
+                "value": "1st STORY",
+                "formula": null
+              },
+              {
+                "cell": "BI2",
+                "type": "s",
+                "value": "1st STORY",
+                "formula": null
+              },
+              {
+                "cell": "BM2",
+                "type": "s",
+                "value": "1st STORY",
+                "formula": null
+              },
+              {
+                "cell": "BQ2",
+                "type": "s",
+                "value": "1st STORY",
+                "formula": null
+              },
+              {
+                "cell": "BU2",
+                "type": "s",
+                "value": "1st STORY",
+                "formula": null
+              },
+              {
+                "cell": "BY2",
+                "type": "s",
+                "value": "2nd STORY",
+                "formula": null
+              },
+              {
+                "cell": "CB2",
+                "type": "s",
+                "value": "2nd STORY",
+                "formula": null
+              },
+              {
+                "cell": "CE2",
+                "type": "s",
+                "value": "2nd STORY",
+                "formula": null
+              },
+              {
+                "cell": "CH2",
+                "type": "s",
+                "value": "2nd STORY",
+                "formula": null
+              },
+              {
+                "cell": "CL2",
+                "type": "s",
+                "value": "2nd STORY",
+                "formula": null
+              },
+              {
+                "cell": "CP2",
+                "type": "s",
+                "value": "2nd STORY",
+                "formula": null
+              },
+              {
+                "cell": "CT2",
+                "type": "s",
+                "value": "3rd STORY",
+                "formula": null
+              },
+              {
+                "cell": "CX2",
+                "type": "s",
+                "value": "3rd STORY",
+                "formula": null
+              },
+              {
+                "cell": "DA2",
+                "type": "s",
+                "value": "3rd STORY",
+                "formula": null
+              },
+              {
+                "cell": "DE2",
+                "type": "s",
+                "value": "3rd STORY",
+                "formula": null
+              },
+              {
+                "cell": "DI2",
+                "type": "s",
+                "value": "3rd STORY",
+                "formula": null
+              }
+            ]
+          },
+          {
+            "row": 3,
+            "cells": [
+              {
+                "cell": "K3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "M3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "O3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "Q3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "S3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "U3",
+                "type": "s",
+                "value": "ENDsplice",
+                "formula": null
+              },
+              {
+                "cell": "W3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "Y3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "AA3",
+                "type": "s",
+                "value": "ENDsplice",
+                "formula": null
+              },
+              {
+                "cell": "AC3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "AE3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "AG3",
+                "type": "s",
+                "value": "ENDsplice",
+                "formula": null
+              },
+              {
+                "cell": "AI3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "AK3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "AM3",
+                "type": "s",
+                "value": "ENDsplice",
+                "formula": null
+              },
+              {
+                "cell": "AO3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "AQ3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "AS3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "AU3",
+                "type": "s",
+                "value": "TOP 3rd",
+                "formula": null
+              },
+              {
+                "cell": "AV3",
+                "type": "s",
+                "value": "BASE",
+                "formula": null
+              },
+              {
+                "cell": "AX3",
+                "type": "s",
+                "value": "TOP",
+                "formula": null
+              },
+              {
+                "cell": "AZ3",
+                "type": "s",
+                "value": "TOP 3rd",
+                "formula": null
+              },
+              {
+                "cell": "BA3",
+                "type": "s",
+                "value": "column C1",
+                "formula": null
+              },
+              {
+                "cell": "BE3",
+                "type": "s",
+                "value": "column C2",
+                "formula": null
+              },
+              {
+                "cell": "BI3",
+                "type": "s",
+                "value": "column C3",
+                "formula": null
+              },
+              {
+                "cell": "BM3",
+                "type": "s",
+                "value": "column C4",
+                "formula": null
+              },
+              {
+                "cell": "BQ3",
+                "type": "s",
+                "value": "column C5",
+                "formula": null
+              },
+              {
+                "cell": "BU3",
+                "type": "s",
+                "value": "column C6",
+                "formula": null
+              },
+              {
+                "cell": "BY3",
+                "type": "s",
+                "value": "column C1",
+                "formula": null
+              },
+              {
+                "cell": "CB3",
+                "type": "s",
+                "value": "column C2",
+                "formula": null
+              },
+              {
+                "cell": "CE3",
+                "type": "s",
+                "value": "column C3",
+                "formula": null
+              },
+              {
+                "cell": "CH3",
+                "type": "s",
+                "value": "column C4",
+                "formula": null
+              },
+              {
+                "cell": "CL3",
+                "type": "s",
+                "value": "column C5",
+                "formula": null
+              },
+              {
+                "cell": "CP3",
+                "type": "s",
+                "value": "column C6",
+                "formula": null
+              },
+              {
+                "cell": "CT3",
+                "type": "s",
+                "value": "column C1",
+                "formula": null
+              },
+              {
+                "cell": "CX3",
+                "type": "s",
+                "value": "column C2",
+                "formula": null
+              },
+              {
+                "cell": "DA3",
+                "type": "s",
+                "value": "column C3",
+                "formula": null
+              },
+              {
+                "cell": "DE3",
+                "type": "s",
+                "value": "column C5",
+                "formula": null
+              },
+              {
+                "cell": "DI3",
+                "type": "s",
+                "value": "column C6",
+                "formula": null
+              }
+            ]
+          },
+          {
+            "row": 4,
+            "cells": [
+              {
+                "cell": "K4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "L4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "M4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "N4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "O4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "P4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "Q4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "R4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "S4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "T4",
+                "type": "s",
+                "value": "SG3",
+                "formula": null
+              },
+              {
+                "cell": "U4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "V4",
+                "type": "s",
+                "value": "SG3",
+                "formula": null
+              },
+              {
+                "cell": "W4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "X4",
+                "type": "s",
+                "value": "SG3",
+                "formula": null
+              },
+              {
+                "cell": "Y4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "Z4",
+                "type": "s",
+                "value": "SG4",
+                "formula": null
+              },
+              {
+                "cell": "AA4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "AB4",
+                "type": "s",
+                "value": "SG4",
+                "formula": null
+              },
+              {
+                "cell": "AC4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "AD4",
+                "type": "s",
+                "value": "SG4",
+                "formula": null
+              },
+              {
+                "cell": "AE4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "AF4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "AG4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "AH4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "AI4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "AJ4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "AK4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "AL4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "AM4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "AN4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "AO4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "AP4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "AQ4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "AR4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "AS4",
+                "type": "s",
+                "value": "SG1",
+                "formula": null
+              },
+              {
+                "cell": "AT4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "AU4",
+                "type": "s",
+                "value": "SG5",
+                "formula": null
+              },
+              {
+                "cell": "AV4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "AW4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "AX4",
+                "type": "s",
+                "value": "SG2",
+                "formula": null
+              },
+              {
+                "cell": "AY4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "AZ4",
+                "type": "s",
+                "value": "SG6",
+                "formula": null
+              },
+              {
+                "cell": "BA4",
+                "type": "s",
+                "value": "base-east side (#6)",
+                "formula": null
+              },
+              {
+                "cell": "BB4",
+                "type": "s",
+                "value": "top-east side  (#12)",
+                "formula": null
+              },
+              {
+                "cell": "BC4",
+                "type": "s",
+                "value": "base-west side  (#5)",
+                "formula": null
+              },
+              {
+                "cell": "BD4",
+                "type": "s",
+                "value": "top-west side  (#11)",
+                "formula": null
+              },
+              {
+                "cell": "BE4",
+                "type": "s",
+                "value": "base-east side  (#42)",
+                "formula": null
+              },
+              {
+                "cell": "BF4",
+                "type": "s",
+                "value": "top-east side  (#48)",
+                "formula": null
+              },
+              {
+                "cell": "BG4",
+                "type": "s",
+                "value": "base-west side  (#41)",
+                "formula": null
+              },
+              {
+                "cell": "BH4",
+                "type": "s",
+                "value": "top-west side  (#47)",
+                "formula": null
+              },
+              {
+                "cell": "BI4",
+                "type": "s",
+                "value": "base-east side  (#4)",
+                "formula": null
+              },
+              {
+                "cell": "BJ4",
+                "type": "s",
+                "value": "top-east side  (#10)",
+                "formula": null
+              },
+              {
+                "cell": "BK4",
+                "type": "s",
+                "value": "base-west side  (#3)",
+                "formula": null
+              },
+              {
+                "cell": "BL4",
+                "type": "s",
+                "value": "top-west side  (#9)",
+                "formula": null
+              },
+              {
+                "cell": "BM4",
+                "type": "s",
+                "value": "base-east side (#40)",
+                "formula": null
+              },
+              {
+                "cell": "BN4",
+                "type": "s",
+                "value": "top-east side  (#46)",
+                "formula": null
+              },
+              {
+                "cell": "BO4",
+                "type": "s",
+                "value": "base-west side  (#39)",
+                "formula": null
+              },
+              {
+                "cell": "BP4",
+                "type": "s",
+                "value": "top-west side  (#45)",
+                "formula": null
+              },
+              {
+                "cell": "BQ4",
+                "type": "s",
+                "value": "base-east side  (#2)",
+                "formula": null
+              },
+              {
+                "cell": "BR4",
+                "type": "s",
+                "value": "top-east side  (#8)",
+                "formula": null
+              },
+              {
+                "cell": "BS4",
+                "type": "s",
+                "value": "base-west side  (#1)",
+                "formula": null
+              },
+              {
+                "cell": "BT4",
+                "type": "s",
+                "value": "top-west side  (#7)",
+                "formula": null
+              },
+              {
+                "cell": "BU4",
+                "type": "s",
+                "value": "base-east side  (#38)",
+                "formula": null
+              },
+              {
+                "cell": "BV4",
+                "type": "s",
+                "value": "top-east side  (#44)",
+                "formula": null
+              },
+              {
+                "cell": "BW4",
+                "type": "s",
+                "value": "base-west side  (#37)",
+                "formula": null
+              },
+              {
+                "cell": "BX4",
+                "type": "s",
+                "value": "top-west side  (#43)",
+                "formula": null
+              },
+              {
+                "cell": "BY4",
+                "type": "s",
+                "value": "base-east side  (#18)",
+                "formula": null
+              },
+              {
+                "cell": "BZ4",
+                "type": "s",
+                "value": "top-east side  (#24)",
+                "formula": null
+              },
+              {
+                "cell": "CA4",
+                "type": "s",
+                "value": "base-west side  (#17)",
+                "formula": null
+              },
+              {
+                "cell": "CB4",
+                "type": "s",
+                "value": "base-east side  (#54)",
+                "formula": null
+              },
+              {
+                "cell": "CC4",
+                "type": "s",
+                "value": "top-east side  (#60)",
+                "formula": null
+              },
+              {
+                "cell": "CD4",
+                "type": "s",
+                "value": "base-west side  (#53)",
+                "formula": null
+              },
+              {
+                "cell": "CE4",
+                "type": "s",
+                "value": "base-east side  (#16)",
+                "formula": null
+              },
+              {
+                "cell": "CF4",
+                "type": "s",
+                "value": "base-west side  (#15)",
+                "formula": null
+              },
+              {
+                "cell": "CG4",
+                "type": "s",
+                "value": "top-west side  (#21)",
+                "formula": null
+              },
+              {
+                "cell": "CH4",
+                "type": "s",
+                "value": "base-east side  (#52)",
+                "formula": null
+              },
+              {
+                "cell": "CI4",
+                "type": "s",
+                "value": "top-east side  (#58)",
+                "formula": null
+              },
+              {
+                "cell": "CJ4",
+                "type": "s",
+                "value": "base-west side  (#51)",
+                "formula": null
+              },
+              {
+                "cell": "CK4",
+                "type": "s",
+                "value": "top-west side  (#57)",
+                "formula": null
+              },
+              {
+                "cell": "CL4",
+                "type": "s",
+                "value": "base-east side  (#14)",
+                "formula": null
+              },
+              {
+                "cell": "CM4",
+                "type": "s",
+                "value": "top-east side  (#20)",
+                "formula": null
+              },
+              {
+                "cell": "CN4",
+                "type": "s",
+                "value": "base-west side  (#13)",
+                "formula": null
+              },
+              {
+                "cell": "CO4",
+                "type": "s",
+                "value": "top-west side  (#19)",
+                "formula": null
+              },
+              {
+                "cell": "CP4",
+                "type": "s",
+                "value": "base-east side  (#50)",
+                "formula": null
+              },
+              {
+                "cell": "CQ4",
+                "type": "s",
+                "value": "top-east side  (#56)",
+                "formula": null
+              },
+              {
+                "cell": "CR4",
+                "type": "s",
+                "value": "base-west side  (#49)",
+                "formula": null
+              },
+              {
+                "cell": "CS4",
+                "type": "s",
+                "value": "top-west side  (#55)",
+                "formula": null
+              },
+              {
+                "cell": "CT4",
+                "type": "s",
+                "value": "base-east side  (#30)",
+                "formula": null
+              },
+              {
+                "cell": "CU4",
+                "type": "s",
+                "value": "top-east side  (#36)",
+                "formula": null
+              },
+              {
+                "cell": "CV4",
+                "type": "s",
+                "value": "base-west side  (#29)",
+                "formula": null
+              },
+              {
+                "cell": "CW4",
+                "type": "s",
+                "value": "top-west side  (#35)",
+                "formula": null
+              },
+              {
+                "cell": "CX4",
+                "type": "s",
+                "value": "base-east side  (#64)",
+                "formula": null
+              },
+              {
+                "cell": "CY4",
+                "type": "s",
+                "value": "base-west side  (#63)",
+                "formula": null
+              },
+              {
+                "cell": "CZ4",
+                "type": "s",
+                "value": "top-west side  (#67)",
+                "formula": null
+              },
+              {
+                "cell": "DA4",
+                "type": "s",
+                "value": "base-east side  (#28)",
+                "formula": null
+              },
+              {
+                "cell": "DB4",
+                "type": "s",
+                "value": "top-east side  (#34)",
+                "formula": null
+              },
+              {
+                "cell": "DC4",
+                "type": "s",
+                "value": "base-west side  (#27)",
+                "formula": null
+              },
+              {
+                "cell": "DD4",
+                "type": "s",
+                "value": "top-west side  (#33)",
+                "formula": null
+              },
+              {
+                "cell": "DE4",
+                "type": "s",
+                "value": "base-east side  (#26)",
+                "formula": null
+              },
+              {
+                "cell": "DF4",
+                "type": "s",
+                "value": "top-east side  (#32)",
+                "formula": null
+              },
+              {
+                "cell": "DG4",
+                "type": "s",
+                "value": "base-west side  (#25)",
+                "formula": null
+              },
+              {
+                "cell": "DH4",
+                "type": "s",
+                "value": "top-west side  (#31)",
+                "formula": null
+              },
+              {
+                "cell": "DI4",
+                "type": "s",
+                "value": "base-east side  (#62)",
+                "formula": null
+              },
+              {
+                "cell": "DJ4",
+                "type": "s",
+                "value": "top-east side  (#66)",
+                "formula": null
+              },
+              {
+                "cell": "DK4",
+                "type": "s",
+                "value": "base-west side  (#61)",
+                "formula": null
+              },
+              {
+                "cell": "DL4",
+                "type": "s",
+                "value": "top-west side  (#65)",
+                "formula": null
+              }
+            ]
+          },
+          {
+            "row": 5,
+            "cells": [
+              {
+                "cell": "A5",
+                "type": "n",
+                "value": "-1.6720000887289602E-2",
+                "formula": null
+              },
+              {
+                "cell": "B5",
+                "type": "n",
+                "value": "0.329063180834055",
+                "formula": null
+              },
+              {
+                "cell": "C5",
+                "type": "n",
+                "value": "-2.8195617010606501E-4",
+                "formula": null
+              },
+              {
+                "cell": "D5",
+                "type": "n",
+                "value": "9.8445621642424003E-5",
+                "formula": null
+              },
+              {
+                "cell": "E5",
+                "type": "n",
+                "value": "0.329063180834055",
+                "formula": null
+              },
+              {
+                "cell": "F5",
+                "type": "n",
+                "value": "-1.34165818595516E-3",
+                "formula": null
+              },
+              {
+                "cell": "G5",
+                "type": "n",
+                "value": "-1.94622112531215",
+                "formula": null
+              },
+              {
+                "cell": "H5",
+                "type": "n",
+                "value": "3.7689127481585998E-4",
+                "formula": null
+              },
+              {
+                "cell": "I5",
+                "type": "n",
+                "value": "1.4807423353195199",
+                "formula": null
+              },
+              {
+                "cell": "J5",
+                "type": "n",
+                "value": "1",
+                "formula": null
+              },
+              {
+                "cell": "K5",
+                "type": "n",
+                "value": "1.05726789873837E-4",
+                "formula": null
+              },
+              {
+                "cell": "L5",
+                "type": "n",
+                "value": "-1.21468522060942E-4",
+                "formula": null
+              },
+              {
+                "cell": "M5",
+                "type": "n",
+                "value": "-9.0197171612977603E-4",
+                "formula": null
+              },
+              {
+                "cell": "N5",
+                "type": "n",
+                "value": "-8.1776112020015698E-4",
+                "formula": null
+              },
+              {
+                "cell": "O5",
+                "type": "n",
+                "value": "5.5844315754175703E-4",
+                "formula": null
+              },
+              {
+                "cell": "P5",
+                "type": "n",
+                "value": "2.5164199626445601E-4",
+                "formula": null
+              },
+              {
+                "cell": "Q5",
+                "type": "n",
+                "value": "-1.4781922635465801E-3",
+                "formula": null
+              },
+              {
+                "cell": "R5",
+                "type": "n",
+                "value": "5.1772059540487801E-4",
+                "formula": null
+              },
+              {
+                "cell": "S5",
+                "type": "n",
+                "value": "2.6150633789680899E-3",
+                "formula": null
+              },
+              {
+                "cell": "T5",
+                "type": "n",
+                "value": "6.4253054921628095E-4",
+                "formula": null
+              },
+              {
+                "cell": "U5",
+                "type": "n",
+                "value": "9.2790629803240598E-4",
+                "formula": null
+              },
+              {
+                "cell": "V5",
+                "type": "n",
+                "value": "2.2262468075752201E-4",
+                "formula": null
+              },
+              {
+                "cell": "W5",
+                "type": "n",
+                "value": "-7.1910836789868795E-4",
+                "formula": null
+              },
+              {
+                "cell": "X5",
+                "type": "n",
+                "value": "-7.2187110134549397E-4",
+                "formula": null
+              },
+              {
+                "cell": "Y5",
+                "type": "n",
+                "value": "1.11826556206047E-3",
+                "formula": null
+              },
+              {
+                "cell": "Z5",
+                "type": "n",
+                "value": "-1.4876666948437701E-3",
+                "formula": null
+              },
+              {
+                "cell": "AA5",
+                "type": "n",
+                "value": "5.7343227269779904E-4",
+                "formula": null
+              },
+              {
+                "cell": "AB5",
+                "type": "n",
+                "value": "5.0954218536168399E-4",
+                "formula": null
+              },
+              {
+                "cell": "AC5",
+                "type": "n",
+                "value": "5.13158974668383E-4",
+                "formula": null
+              },
+              {
+                "cell": "AD5",
+                "type": "n",
+                "value": "-7.6346387144177899E-5",
+                "formula": null
+              },
+              {
+                "cell": "AE5",
+                "type": "n",
+                "value": "2.95237800000007E-4",
+                "formula": null
+              },
+              {
+                "cell": "AF5",
+                "type": "n",
+                "value": "1.0047609E-3",
+                "formula": null
+              },
+              {
+                "cell": "AG5",
+                "type": "n",
+                "value": "2.4285689999999999E-4",
+                "formula": null
+              },
+              {
+                "cell": "AH5",
+                "type": "n",
+                "value": "1.9523790000000599E-4",
+                "formula": null
+              },
+              {
+                "cell": "AI5",
+                "type": "n",
+                "value": "4.7619000000008802E-5",
+                "formula": null
+              },
+              {
+                "cell": "AJ5",
+                "type": "n",
+                "value": "-1.65258468844052E-3",
+                "formula": null
+              },
+              {
+                "cell": "AK5",
+                "type": "n",
+                "value": "2.85713999999984E-5",
+                "formula": null
+              },
+              {
+                "cell": "AL5",
+                "type": "n",
+                "value": "1.6190460000000301E-4",
+                "formula": null
+              },
+              {
+                "cell": "AM5",
+                "type": "n",
+                "value": "3.3333300000000998E-5",
+                "formula": null
+              },
+              {
+                "cell": "AN5",
+                "type": "n",
+                "value": "2.33333099999993E-4",
+                "formula": null
+              },
+              {
+                "cell": "AO5",
+                "type": "n",
+                "value": "7.9523730000000104E-4",
+                "formula": null
+              },
+              {
+                "cell": "AP5",
+                "type": "n",
+                "value": "4.6770281610079102E-4",
+                "formula": null
+              },
+              {
+                "cell": "AQ5",
+                "type": "n",
+                "value": "5.7060171207189505E-4",
+                "formula": null
+              },
+              {
+                "cell": "AR5",
+                "type": "n",
+                "value": "1.3873273004651101E-3",
+                "formula": null
+              },
+              {
+                "cell": "AS5",
+                "type": "n",
+                "value": "-3.8250832435721501E-4",
+                "formula": null
+              },
+              {
+                "cell": "AT5",
+                "type": "n",
+                "value": "-1.9818816069837701E-3",
+                "formula": null
+              },
+              {
+                "cell": "AU5",
+                "type": "n",
+                "value": "-5.8738770926296702E-4",
+                "formula": null
+              },
+              {
+                "cell": "AV5",
+                "type": "n",
+                "value": "4.0906727456599401E-4",
+                "formula": null
+              },
+              {
+                "cell": "AW5",
+                "type": "n",
+                "value": "9.14457840966434E-4",
+                "formula": null
+              },
+              {
+                "cell": "AX5",
+                "type": "n",
+                "value": "1.12440717518516E-4",
+                "formula": null
+              },
+              {
+                "cell": "AY5",
+                "type": "n",
+                "value": "-1.1556853680605101E-3",
+                "formula": null
+              },
+              {
+                "cell": "AZ5",
+                "type": "n",
+                "value": "8.0218262398243096E-4",
+                "formula": null
+              },
+              {
+                "cell": "BA5",
+                "type": "n",
+                "value": "5.5695399641990696E-3",
+                "formula": null
+              },
+              {
+                "cell": "BB5",
+                "type": "n",
+                "value": "2.4315966796884E-3",
+                "formula": null
+              },
+              {
+                "cell": "BC5",
+                "type": "n",
+                "value": "-2.43520385742713E-4",
+                "formula": null
+              },
+              {
+                "cell": "BD5",
+                "type": "n",
+                "value": "-1.12318725586213E-3",
+                "formula": null
+              },
+              {
+                "cell": "BE5",
+                "type": "n",
+                "value": "-3.2311584472921601E-4",
+                "formula": null
+              },
+              {
+                "cell": "BF5",
+                "type": "n",
+                "value": "3.2329907226547099E-4",
+                "formula": null
+              },
+              {
+                "cell": "BG5",
+                "type": "n",
+                "value": "-4.0379592895512E-4",
+                "formula": null
+              },
+              {
+                "cell": "BH5",
+                "type": "n",
+                "value": "-2.4380072021656899E-4",
+                "formula": null
+              },
+              {
+                "cell": "BI5",
+                "type": "n",
+                "value": "0",
+                "formula": null
+              },
+              {
+                "cell": "BJ5",
+                "type": "n",
+                "value": "5.6306549072182598E-4",
+                "formula": null
+              },
+              {
+                "cell": "BK5",
+                "type": "n",
+                "value": "-6.4595068359096796E-4",
+                "formula": null
+              },
+              {
+                "cell": "BL5",
+                "type": "n",
+                "value": "8.1209197997367296E-5",
+                "formula": null
+              },
+              {
+                "cell": "BM5",
+                "type": "n",
+                "value": "8.0363494873836303E-5",
+                "formula": null
+              },
+              {
+                "cell": "BN5",
+                "type": "n",
+                "value": "-2.3399999999895699E-4",
+                "formula": null
+              },
+              {
+                "cell": "BO5",
+                "type": "n",
+                "value": "-3.5527136788005001E-15",
+                "formula": null
+              },
+              {
+                "cell": "BP5",
+                "type": "n",
+                "value": "-2.5933333331451498E-5",
+                "formula": null
+              },
+              {
+                "cell": "BQ5",
+                "type": "n",
+                "value": "-1.45004919433767E-3",
+                "formula": null
+              },
+              {
+                "cell": "BR5",
+                "type": "n",
+                "value": "-4.5777261257171596E-3",
+                "formula": null
+              },
+              {
+                "cell": "BS5",
+                "type": "n",
+                "value": "-2.41985595703653E-4",
+                "formula": null
+              },
+              {
+                "cell": "BT5",
+                "type": "n",
+                "value": "-4.8443206787318599E-4",
+                "formula": null
+              },
+              {
+                "cell": "BU5",
+                "type": "n",
+                "value": "3.2121118164241098E-4",
+                "formula": null
+              },
+              {
+                "cell": "BV5",
+                "type": "n",
+                "value": "-1.6121563720616899E-4",
+                "formula": null
+              },
+              {
+                "cell": "BW5",
+                "type": "n",
+                "value": "-1.7763568394002501E-15",
+                "formula": null
+              },
+              {
+                "cell": "BX5",
+                "type": "n",
+                "value": "-8.4737663765728204E-3",
+                "formula": null
+              },
+              {
+                "cell": "BY5",
+                "type": "n",
+                "value": "-4.6950201415896199E-4",
+                "formula": null
+              },
+              {
+                "cell": "BZ5",
+                "type": "n",
+                "value": "-3.1346398926146402E-4",
+                "formula": null
+              },
+              {
+                "cell": "CA5",
+                "type": "n",
+                "value": "3.5527136788005001E-15",
+                "formula": null
+              },
+              {
+                "cell": "CB5",
+                "type": "n",
+                "value": "-1.38631004333512E-2",
+                "formula": null
+              },
+              {
+                "cell": "CC5",
+                "type": "n",
+                "value": "3.1262152099635898E-3",
+                "formula": null
+              },
+              {
+                "cell": "CD5",
+                "type": "n",
+                "value": "1.5690917968669301E-4",
+                "formula": null
+              },
+              {
+                "cell": "CE5",
+                "type": "n",
+                "value": "-1.78019205729285E-3",
+                "formula": null
+              },
+              {
+                "cell": "CF5",
+                "type": "n",
+                "value": "-1.56880523675795E-4",
+                "formula": null
+              },
+              {
+                "cell": "CG5",
+                "type": "n",
+                "value": "3.5527136788005001E-15",
+                "formula": null
+              },
+              {
+                "cell": "CH5",
+                "type": "n",
+                "value": "3.4326350933408599E-2",
+                "formula": null
+              },
+              {
+                "cell": "CI5",
+                "type": "n",
+                "value": "7.0560000000021699E-3",
+                "formula": null
+              },
+              {
+                "cell": "CJ5",
+                "type": "n",
+                "value": "-1.72460142006781E-3",
+                "formula": null
+              },
+              {
+                "cell": "CK5",
+                "type": "n",
+                "value": "-3.1725000000015801E-4",
+                "formula": null
+              },
+              {
+                "cell": "CL5",
+                "type": "n",
+                "value": "-6.4290743605614998E-3",
+                "formula": null
+              },
+              {
+                "cell": "CM5",
+                "type": "n",
+                "value": "6.61499999994319E-5",
+                "formula": null
+              },
+              {
+                "cell": "CN5",
+                "type": "n",
+                "value": "4.0741547942161602E-2",
+                "formula": null
+              },
+              {
+                "cell": "CO5",
+                "type": "n",
+                "value": "-1.8310546875E-4",
+                "formula": null
+              },
+              {
+                "cell": "CP5",
+                "type": "n",
+                "value": "-1.023E-2",
+                "formula": null
+              },
+              {
+                "cell": "CQ5",
+                "type": "n",
+                "value": "6.6000000000006097E-3",
+                "formula": null
+              },
+              {
+                "cell": "CR5",
+                "type": "n",
+                "value": "-3.8849999999968098E-4",
+                "formula": null
+              },
+              {
+                "cell": "CS5",
+                "type": "n",
+                "value": "6.103515625E-5",
+                "formula": null
+              },
+              {
+                "cell": "CT5",
+                "type": "n",
+                "value": "-5.3515932137124099E-2",
+                "formula": null
+              },
+              {
+                "cell": "CU5",
+                "type": "n",
+                "value": "2.0562624696563201E-2",
+                "formula": null
+              },
+              {
+                "cell": "CV5",
+                "type": "n",
+                "value": "4.6854726858777299E-2",
+                "formula": null
+              },
+              {
+                "cell": "CW5",
+                "type": "n",
+                "value": "-2.1947785370458699E-2",
+                "formula": null
+              },
+              {
+                "cell": "CX5",
+                "type": "n",
+                "value": "-6.0555342898702201E-2",
+                "formula": null
+              },
+              {
+                "cell": "CY5",
+                "type": "n",
+                "value": "3.1386051490782702E-3",
+                "formula": null
+              },
+              {
+                "cell": "CZ5",
+                "type": "n",
+                "value": "1.5991601239970302E-2",
+                "formula": null
+              },
+              {
+                "cell": "DA5",
+                "type": "n",
+                "value": "-3.8910746574401897E-2",
+                "formula": null
+              },
+              {
+                "cell": "DB5",
+                "type": "n",
+                "value": "-2.65799113800209E-3",
+                "formula": null
+              },
+              {
+                "cell": "DC5",
+                "type": "n",
+                "value": "-5.3160062250762898E-2",
+                "formula": null
+              },
+              {
+                "cell": "DD5",
+                "type": "n",
+                "value": "8.1080555589817999E-2",
+                "formula": null
+              },
+              {
+                "cell": "DE5",
+                "type": "n",
+                "value": "1.0178765154478201E-3",
+                "formula": null
+              },
+              {
+                "cell": "DF5",
+                "type": "n",
+                "value": "3.0517578125E-5",
+                "formula": null
+              },
+              {
+                "cell": "DG5",
+                "type": "n",
+                "value": "-2.2730966481256899E-3",
+                "formula": null
+              },
+              {
+                "cell": "DH5",
+                "type": "n",
+                "value": "-1.52587890625E-4",
+                "formula": null
+              },
+              {
+                "cell": "DI5",
+                "type": "n",
+                "value": "1.7970470603156499E-2",
+                "formula": null
+              },
+              {
+                "cell": "DJ5",
+                "type": "n",
+                "value": "5.79833984375E-4",
+                "formula": null
+              },
+              {
+                "cell": "DK5",
+                "type": "n",
+                "value": "3.2074874772548799E-2",
+                "formula": null
+              },
+              {
+                "cell": "DL5",
+                "type": "n",
+                "value": "-2.74658203125E-4",
+                "formula": null
+              }
+            ]
+          },
+          {
+            "row": 6,
+            "cells": [
+              {
+                "cell": "A6",
+                "type": "n",
+                "value": "-3.3822968602180502E-2",
+                "formula": null
+              },
+              {
+                "cell": "B6",
+                "type": "n",
+                "value": "3.8941415399313",
+                "formula": null
+              },
+              {
+                "cell": "C6",
+                "type": "n",
+                "value": "-5.7037046546678702E-4",
+                "formula": null
+              },
+              {
+                "cell": "D6",
+                "type": "n",
+                "value": "1.6319171231182099E-3",
+                "formula": null
+              },
+              {
+                "cell": "E6",
+                "type": "n",
+                "value": "3.8941415399313",
+                "formula": null
+              },
+              {
+                "cell": "F6",
+                "type": "n",
+                "value": "-2.3524353637750899E-3",
+                "formula": null
+              },
+              {
+                "cell": "G6",
+                "type": "n",
+                "value": "-3.0447997450828601",
+                "formula": null
+              },
+              {
+                "cell": "H6",
+                "type": "n",
+                "value": "-1.0319671791452201E-3",
+                "formula": null
+              },
+              {
+                "cell": "I6",
+                "type": "n",
+                "value": "-0.96528899669647195",
+                "formula": null
+              },
+              {
+                "cell": "J6",
+                "type": "n",
+                "value": "2",
+                "formula": null
+              },
+              {
+                "cell": "K6",
+                "type": "n",
+                "value": "2.6531418588459401E-4",
+                "formula": null
+              },
+              {
+                "cell": "L6",
+                "type": "n",
+                "value": "8.3003494914500001E-4",
+                "formula": null
+              },
+              {
+                "cell": "M6",
+                "type": "n",
+                "value": "4.79238906061653E-4",
+                "formula": null
+              },
+              {
+                "cell": "N6",
+                "type": "n",
+                "value": "-1.07960587441921E-3",
+                "formula": null
+              },
+              {
+                "cell": "O6",
+                "type": "n",
+                "value": "1.4169307469129501E-4",
+                "formula": null
+              },
+              {
+                "cell": "P6",
+                "type": "n",
+                "value": "-1.98449224859479E-4",
+                "formula": null
+              },
+              {
+                "cell": "Q6",
+                "type": "n",
+                "value": "-1.2386700245735901E-5",
+                "formula": null
+              },
+              {
+                "cell": "R6",
+                "type": "n",
+                "value": "-1.1193405165966599E-3",
+                "formula": null
+              },
+              {
+                "cell": "S6",
+                "type": "n",
+                "value": "-1.8365658913917799E-3",
+                "formula": null
+              },
+              {
+                "cell": "T6",
+                "type": "n",
+                "value": "-6.1369714225529605E-4",
+                "formula": null
+              },
+              {
+                "cell": "U6",
+                "type": "n",
+                "value": "5.61627143195273E-4",
+                "formula": null
+              },
+              {
+                "cell": "V6",
+                "type": "n",
+                "value": "-6.5962719261645499E-5",
+                "formula": null
+              },
+              {
+                "cell": "W6",
+                "type": "n",
+                "value": "1.20818489700072E-3",
+                "formula": null
+              },
+              {
+                "cell": "X6",
+                "type": "n",
+                "value": "3.36043358598277E-4",
+                "formula": null
+              },
+              {
+                "cell": "Y6",
+                "type": "n",
+                "value": "1.8637763302952E-3",
+                "formula": null
+              },
+              {
+                "cell": "Z6",
+                "type": "n",
+                "value": "9.7161936450600595E-4",
+                "formula": null
+              },
+              {
+                "cell": "AA6",
+                "type": "n",
+                "value": "-1.9927788200136299E-4",
+                "formula": null
+              },
+              {
+                "cell": "AB6",
+                "type": "n",
+                "value": "1.3922145899489501E-3",
+                "formula": null
+              },
+              {
+                "cell": "AC6",
+                "type": "n",
+                "value": "-1.1211874988079101E-4",
+                "formula": null
+              },
+              {
+                "cell": "AD6",
+                "type": "n",
+                "value": "-1.4336129319518799E-3",
+                "formula": null
+              },
+              {
+                "cell": "AE6",
+                "type": "n",
+                "value": "-1.3333319999999301E-4",
+                "formula": null
+              },
+              {
+                "cell": "AF6",
+                "type": "n",
+                "value": "3.3809489999999997E-4",
+                "formula": null
+              },
+              {
+                "cell": "AG6",
+                "type": "n",
+                "value": "-9.0476099999999701E-5",
+                "formula": null
+              },
+              {
+                "cell": "AH6",
+                "type": "n",
+                "value": "5.2380900000002797E-5",
+                "formula": null
+              },
+              {
+                "cell": "AI6",
+                "type": "n",
+                "value": "4.7619000000008802E-5",
+                "formula": null
+              },
+              {
+                "cell": "AJ6",
+                "type": "n",
+                "value": "-1.17206069374047E-3",
+                "formula": null
+              },
+              {
+                "cell": "AK6",
+                "type": "n",
+                "value": "-1.6190460000000301E-4",
+                "formula": null
+              },
+              {
+                "cell": "AL6",
+                "type": "n",
+                "value": "1.9047599999999001E-5",
+                "formula": null
+              },
+              {
+                "cell": "AM6",
+                "type": "n",
+                "value": "-1.095237E-4",
+                "formula": null
+              },
+              {
+                "cell": "AN6",
+                "type": "n",
+                "value": "4.2857099999991997E-5",
+                "formula": null
+              },
+              {
+                "cell": "AO6",
+                "type": "n",
+                "value": "1.761903E-4",
+                "formula": null
+              },
+              {
+                "cell": "AP6",
+                "type": "n",
+                "value": "8.3856846032664197E-4",
+                "formula": null
+              },
+              {
+                "cell": "AQ6",
+                "type": "n",
+                "value": "-9.9500136739016004E-5",
+                "formula": null
+              },
+              {
+                "cell": "AR6",
+                "type": "n",
+                "value": "-2.2326979648113299E-3",
+                "formula": null
+              },
+              {
+                "cell": "AS6",
+                "type": "n",
+                "value": "1.0518977842056199E-3",
+                "formula": null
+              },
+              {
+                "cell": "AT6",
+                "type": "n",
+                "value": "2.6624845431458201E-3",
+                "formula": null
+              },
+              {
+                "cell": "AU6",
+                "type": "n",
+                "value": "-3.4093156268000599E-4",
+                "formula": null
+              },
+              {
+                "cell": "AV6",
+                "type": "n",
+                "value": "6.1884512771219003E-4",
+                "formula": null
+              },
+              {
+                "cell": "AW6",
+                "type": "n",
+                "value": "5.6274350044354803E-4",
+                "formula": null
+              },
+              {
+                "cell": "AX6",
+                "type": "n",
+                "value": "-9.0589025042932399E-4",
+                "formula": null
+              },
+              {
+                "cell": "AY6",
+                "type": "n",
+                "value": "-1.85417674959395E-3",
+                "formula": null
+              },
+              {
+                "cell": "AZ6",
+                "type": "n",
+                "value": "4.7872154885530603E-4",
+                "formula": null
+              },
+              {
+                "cell": "BA6",
+                "type": "n",
+                "value": "1.2436106801032999E-2",
+                "formula": null
+              },
+              {
+                "cell": "BB6",
+                "type": "n",
+                "value": "-8.10532226562799E-4",
+                "formula": null
+              },
+              {
+                "cell": "BC6",
+                "type": "n",
+                "value": "-2.43520385742713E-4",
+                "formula": null
+              },
+              {
+                "cell": "BD6",
+                "type": "n",
+                "value": "-3.2091064453432201E-4",
+                "formula": null
+              },
+              {
+                "cell": "BE6",
+                "type": "n",
+                "value": "4.8467376708849502E-4",
+                "formula": null
+              },
+              {
+                "cell": "BF6",
+                "type": "n",
+                "value": "3.2329907226547099E-4",
+                "formula": null
+              },
+              {
+                "cell": "BG6",
+                "type": "n",
+                "value": "4.0379592895512E-4",
+                "formula": null
+              },
+              {
+                "cell": "BH6",
+                "type": "n",
+                "value": "5.6886834716607403E-4",
+                "formula": null
+              },
+              {
+                "cell": "BI6",
+                "type": "n",
+                "value": "0",
+                "formula": null
+              },
+              {
+                "cell": "BJ6",
+                "type": "n",
+                "value": "-1.04569305420021E-3",
+                "formula": null
+              },
+              {
+                "cell": "BK6",
+                "type": "n",
+                "value": "1.61487670901295E-4",
+                "formula": null
+              },
+              {
+                "cell": "BL6",
+                "type": "n",
+                "value": "8.9330117797814502E-4",
+                "formula": null
+              },
+              {
+                "cell": "BM6",
+                "type": "n",
+                "value": "-7.2327145385742099E-4",
+                "formula": null
+              },
+              {
+                "cell": "BN6",
+                "type": "n",
+                "value": "-2.3399999999895699E-4",
+                "formula": null
+              },
+              {
+                "cell": "BO6",
+                "type": "n",
+                "value": "-3.5527136788005001E-15",
+                "formula": null
+              },
+              {
+                "cell": "BP6",
+                "type": "n",
+                "value": "7.5206666666893796E-4",
+                "formula": null
+              },
+              {
+                "cell": "BQ6",
+                "type": "n",
+                "value": "1.6111657714823501E-4",
+                "formula": null
+              },
+              {
+                "cell": "BR6",
+                "type": "n",
+                "value": "-1.5259683132171601E-3",
+                "formula": null
+              },
+              {
+                "cell": "BS6",
+                "type": "n",
+                "value": "-2.41985595703653E-4",
+                "formula": null
+              },
+              {
+                "cell": "BT6",
+                "type": "n",
+                "value": "3.2295471191190499E-4",
+                "formula": null
+              },
+              {
+                "cell": "BU6",
+                "type": "n",
+                "value": "3.2121118164241098E-4",
+                "formula": null
+              },
+              {
+                "cell": "BV6",
+                "type": "n",
+                "value": "-9.6729382324234304E-4",
+                "formula": null
+              },
+              {
+                "cell": "BW6",
+                "type": "n",
+                "value": "-1.7763568394002501E-15",
+                "formula": null
+              },
+              {
+                "cell": "BX6",
+                "type": "n",
+                "value": "5.2456588952363202E-3",
+                "formula": null
+              },
+              {
+                "cell": "BY6",
+                "type": "n",
+                "value": "-4.6950201415896199E-4",
+                "formula": null
+              },
+              {
+                "cell": "BZ6",
+                "type": "n",
+                "value": "-3.1346398926146402E-4",
+                "formula": null
+              },
+              {
+                "cell": "CA6",
+                "type": "n",
+                "value": "-1.5646594238241101E-3",
+                "formula": null
+              },
+              {
+                "cell": "CB6",
+                "type": "n",
+                "value": "-6.0308403015163501E-3",
+                "formula": null
+              },
+              {
+                "cell": "CC6",
+                "type": "n",
+                "value": "-3.12621520995648E-3",
+                "formula": null
+              },
+              {
+                "cell": "CD6",
+                "type": "n",
+                "value": "1.5690917968669301E-4",
+                "formula": null
+              },
+              {
+                "cell": "CE6",
+                "type": "n",
+                "value": "-1.78019205729285E-3",
+                "formula": null
+              },
+              {
+                "cell": "CF6",
+                "type": "n",
+                "value": "-1.56880523675795E-4",
+                "formula": null
+              },
+              {
+                "cell": "CG6",
+                "type": "n",
+                "value": "3.5527136788005001E-15",
+                "formula": null
+              },
+              {
+                "cell": "CH6",
+                "type": "n",
+                "value": "-2.7083085680866099E-2",
+                "formula": null
+              },
+              {
+                "cell": "CI6",
+                "type": "n",
+                "value": "4.1160000000015603E-3",
+                "formula": null
+              },
+              {
+                "cell": "CJ6",
+                "type": "n",
+                "value": "-1.2698558329248001E-2",
+                "formula": null
+              },
+              {
+                "cell": "CK6",
+                "type": "n",
+                "value": "1.0574999999946E-4",
+                "formula": null
+              },
+              {
+                "cell": "CL6",
+                "type": "n",
+                "value": "-3.5360238597107199E-2",
+                "formula": null
+              },
+              {
+                "cell": "CM6",
+                "type": "n",
+                "value": "6.61499999994319E-5",
+                "formula": null
+              },
+              {
+                "cell": "CN6",
+                "type": "n",
+                "value": "-1.9836574792861899E-3",
+                "formula": null
+              },
+              {
+                "cell": "CO6",
+                "type": "n",
+                "value": "1.220703125E-4",
+                "formula": null
+              },
+              {
+                "cell": "CP6",
+                "type": "n",
+                "value": "-1.023E-2",
+                "formula": null
+              },
+              {
+                "cell": "CQ6",
+                "type": "n",
+                "value": "3.40000000000096E-3",
+                "formula": null
+              },
+              {
+                "cell": "CR6",
+                "type": "n",
+                "value": "3.8850000000145702E-4",
+                "formula": null
+              },
+              {
+                "cell": "CS6",
+                "type": "n",
+                "value": "-2.44140625E-4",
+                "formula": null
+              },
+              {
+                "cell": "CT6",
+                "type": "n",
+                "value": "-2.07510601793005E-2",
+                "formula": null
+              },
+              {
+                "cell": "CU6",
+                "type": "n",
+                "value": "1.2653928831133299E-2",
+                "formula": null
+              },
+              {
+                "cell": "CV6",
+                "type": "n",
+                "value": "5.6225531912487803E-2",
+                "formula": null
+              },
+              {
+                "cell": "CW6",
+                "type": "n",
+                "value": "-2.1947785370458699E-2",
+                "formula": null
+              },
+              {
+                "cell": "CX6",
+                "type": "n",
+                "value": "-4.6472641050910597E-2",
+                "formula": null
+              },
+              {
+                "cell": "CY6",
+                "type": "n",
+                "value": "-1.4124734694672E-2",
+                "formula": null
+              },
+              {
+                "cell": "CZ6",
+                "type": "n",
+                "value": "6.6160934354236603E-2",
+                "formula": null
+              },
+              {
+                "cell": "DA6",
+                "type": "n",
+                "value": "7.62701034545898E-4",
+                "formula": null
+              },
+              {
+                "cell": "DB6",
+                "type": "n",
+                "value": "1.4540771961678601E-2",
+                "formula": null
+              },
+              {
+                "cell": "DC6",
+                "type": "n",
+                "value": "-4.8427781061798097E-2",
+                "formula": null
+              },
+              {
+                "cell": "DD6",
+                "type": "n",
+                "value": "2.5141890965629798E-3",
+                "formula": null
+              },
+              {
+                "cell": "DE6",
+                "type": "n",
+                "value": "6.6769213744341194E-2",
+                "formula": null
+              },
+              {
+                "cell": "DF6",
+                "type": "n",
+                "value": "3.0517578125E-5",
+                "formula": null
+              },
+              {
+                "cell": "DG6",
+                "type": "n",
+                "value": "-2.4220321162193002E-2",
+                "formula": null
+              },
+              {
+                "cell": "DH6",
+                "type": "n",
+                "value": "4.57763671875E-4",
+                "formula": null
+              },
+              {
+                "cell": "DI6",
+                "type": "n",
+                "value": "1.6407844870734298E-2",
+                "formula": null
+              },
+              {
+                "cell": "DJ6",
+                "type": "n",
+                "value": "-3.0517578125E-5",
+                "formula": null
+              },
+              {
+                "cell": "DK6",
+                "type": "n",
+                "value": "-5.4762368892431502E-3",
+                "formula": null
+              },
+              {
+                "cell": "DL6",
+                "type": "n",
+                "value": "3.0517578125E-5",
+                "formula": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "elapsed_ns": 1785322170,
+    "formulas_executed": false,
+    "original_file_modified": false,
+    "numeric_values_converted_or_resampled": false
+  },
+  "channel_checks": {
+    "source_file": "SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+    "source_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+    "sheet": "Sheet1",
+    "source_range": "A5:J4063",
+    "observation_rows": 4059,
+    "preserved_numeric_tokens": 40590,
+    "point_identifiers_first_last": [
+      "1",
+      "4059"
+    ],
+    "point_identifiers_contiguous_one_based": true,
+    "max_abs_top_disp_minus_60_times_top_drift_percent_mm": "0.57044731706230380",
+    "max_abs_top_disp_minus_20_times_sum_story_drift_percent_mm": "1.75272154931582440",
+    "max_abs_base_shear_minus_first_story_shear_kn": "0E-15",
+    "top_mm_per_percent_ratio_range_away_from_zero": [
+      "59.299999999999605995461758380486307264221201853138",
+      "59.300000000000366900371138004702633665106951348562"
+    ],
+    "reported_channel_extrema": {
+      "A": [
+        "-48.295309066772496",
+        "48.325037002563498"
+      ],
+      "B": [
+        "-262.01049613952603",
+        "266.62706756591803"
+      ],
+      "C": [
+        "-0.81442342439751203",
+        "0.81492473866043003"
+      ],
+      "D": [
+        "-1.02080676222095",
+        "1.0381587428750201"
+      ],
+      "E": [
+        "-262.01049613952603",
+        "266.62706756591803"
+      ],
+      "F": [
+        "-1.03198086041861",
+        "1.04495384532553"
+      ],
+      "G": [
+        "-218.87540435791001",
+        "226.40148544311501"
+      ],
+      "H": [
+        "-0.45237388017881702",
+        "0.440186218894207"
+      ],
+      "I": [
+        "-131.16424560546901",
+        "132.42819213867199"
+      ],
+      "J": [
+        "1",
+        "4059"
+      ]
+    },
+    "sampling_interval_seconds": null,
+    "original_signal_changed": false,
+    "solver_admission": false,
+    "training_admission": false,
+    "elapsed_ns": 1096126994
+  },
+  "drift_reference_height_check": {
+    "source_file": "SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+    "source_range": "Sheet1!A5:C4063",
+    "reported_drawing_overall_height_m": "6.00",
+    "inferred_data_top_drift_reference_height_m": "5.93",
+    "max_abs_A_mm_minus_59_3_times_C_percent_mm": "7.9086E-14",
+    "origin": "algebraic consistency inference from existing numeric channels, not a documented instrument reference point",
+    "sensor_height_authoritatively_confirmed": false,
+    "channels_changed": false,
+    "possible_half_slab_offset_not_used": true
+  },
+  "downloads": [
+    {
+      "name": "Comments on the data.pdf",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/Comments%20on%20the%20data.pdf/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/Comments%20on%20the%20data.pdf/content",
+      "bytes": 79771,
+      "publisher_md5": "md5:a160b955d2e14962c70e6bd557de46b7",
+      "md5_match": true,
+      "sha256": "2ea09cb8fa0123d8af1a65b50415c09d92b2591a3be3a8cdc378030aad09ff3d",
+      "elapsed_ns": 1485124003
+    },
+    {
+      "name": "SERA-ARISTA_Unretrofitted_Potentiometers_SouthFrame.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_Potentiometers_SouthFrame.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_Potentiometers_SouthFrame.jpg/content",
+      "bytes": 114864,
+      "publisher_md5": "md5:f0d43c7fdcc86aff442ebe94e92c413e",
+      "md5_match": true,
+      "sha256": "26b126ac349a65ab2ac8df752a7f0d7ca7017538f6e9b43761849ab76235ef85",
+      "elapsed_ns": 1668869464
+    },
+    {
+      "name": "SERA-ARISTA_Unretrofitted_StrainGage_Top3rdSection.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_Top3rdSection.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_Top3rdSection.jpg/content",
+      "bytes": 116816,
+      "publisher_md5": "md5:69bb3bfeee4442a57dc100fb068cdd69",
+      "md5_match": true,
+      "sha256": "8018b7ee496d04c14b52b889ed66a94af0b41ea88368b98ff4bc4e889ade2830",
+      "elapsed_ns": 1706405764
+    },
+    {
+      "name": "SERA-ARISTA_Column naming.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Column%20naming.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Column%20naming.jpg/content",
+      "bytes": 136642,
+      "publisher_md5": "md5:7ea97721b1f6b3c604e33b5d68b903bc",
+      "md5_match": true,
+      "sha256": "d2f11e02139769494f292a1a826801361780e119aa7d1b9dc094665cc887041c",
+      "elapsed_ns": 1621889792
+    },
+    {
+      "name": "SERA-ARISTA_Unretrofitted_StrainGage_End-SpliceSection.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_End-SpliceSection.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_End-SpliceSection.jpg/content",
+      "bytes": 125394,
+      "publisher_md5": "md5:db70a38780f3cf06b5dde9b023d00e38",
+      "md5_match": true,
+      "sha256": "54e9d739053379580c95d1f2ed2d9e718022ca379041acdf66b8c22630230038",
+      "elapsed_ns": 1607486508
+    },
+    {
+      "name": "SERA-ARISTA_Specimen_Geometry.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Specimen_Geometry.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Specimen_Geometry.jpg/content",
+      "bytes": 261243,
+      "publisher_md5": "md5:dd40c77fb47a85bc422538ec30c212ba",
+      "md5_match": true,
+      "sha256": "0c18deec5bdc8db3e392beaf2b0e26f69ec3daa93534182c2f48b0a23129b81a",
+      "elapsed_ns": 2020058818
+    },
+    {
+      "name": "SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx/content",
+      "bytes": 6089522,
+      "publisher_md5": "md5:d5080e689327c8e314114e6af415d3d1",
+      "md5_match": true,
+      "sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+      "elapsed_ns": 16703050283
+    },
+    {
+      "name": "SERA-ARISTA_General view.JPG",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_General%20view.JPG/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_General%20view.JPG/content",
+      "bytes": 1190306,
+      "publisher_md5": "md5:132cd0295db596e15ad38075dcd2246f",
+      "md5_match": true,
+      "sha256": "b3b1696cdc2a5cf196c847d7a576c857308f012c9ebfeb9031dcf02f02a06423",
+      "elapsed_ns": 4749970842
+    },
+    {
+      "name": "SERA-ARISTA_Unretrofitted_Potentiometers_NorthFrame.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_Potentiometers_NorthFrame.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_Potentiometers_NorthFrame.jpg/content",
+      "bytes": 112781,
+      "publisher_md5": "md5:ec709e40292e31ffe42c0fb1e7c78083",
+      "md5_match": true,
+      "sha256": "70f766c971941307c05807d38495321434fab6eece1f70c96978dcc4ed652b2a",
+      "elapsed_ns": 1733372852
+    },
+    {
+      "name": "SERA-ARISTA_Unretrofitted_StrainGage_TopSection.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_TopSection.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_TopSection.jpg/content",
+      "bytes": 132713,
+      "publisher_md5": "md5:b75a21456994c40f778357875ac5bffe",
+      "md5_match": true,
+      "sha256": "37a6368f793a1386129f6c8961febd5d4fcd39cd1e34d6e053c41f1c5981b711",
+      "elapsed_ns": 1653078134
+    },
+    {
+      "name": "SERA-ARISTA_Unretrofitted_StrainGage_BaseSection.jpg",
+      "status": 200,
+      "url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_BaseSection.jpg/content",
+      "final_url": "https://zenodo.org/api/records/10501212/files/SERA-ARISTA_Unretrofitted_StrainGage_BaseSection.jpg/content",
+      "bytes": 136120,
+      "publisher_md5": "md5:8f42c6ca5de3506903615b98a8774488",
+      "md5_match": true,
+      "sha256": "613129506b7158f6710c09efe01041d96ceacc86419ecc44d1631b42b68da517",
+      "elapsed_ns": 1712971538
+    }
+  ]
+}

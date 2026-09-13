@@ -1,0 +1,57 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-dataset-7eplwl7u",
+    "files": 11,
+    "bytes": 78625,
+    "inventory_sha256": "5604ef23457dc9b99c83ac333641211baa3529a848979682f8c893adcd4f3aef"
+  },
+  "observation": {
+    "source_revision": "c2a824af848d27c2b9b6640b701c5cf8ca43c486",
+    "dataset_report_hash": "sha256:d4e8f32f4dcd1d46b8da3b287f2f932ed43a7c16df914fd97510686a462be30e",
+    "split_counts": {
+      "train": 2,
+      "validation": 1,
+      "holdout": 1
+    },
+    "geometry_groups": [
+      [
+        "holdout"
+      ],
+      [
+        "train-a"
+      ],
+      [
+        "train-b"
+      ],
+      [
+        "validation"
+      ]
+    ],
+    "training_case_ids": [
+      "train-a",
+      "train-b"
+    ],
+    "constant_feature_columns": 156,
+    "outside_training_minmax": {
+      "holdout": [
+        "total_length_m",
+        "gross_concrete_volume_m3",
+        "longitudinal_rebar_volume_m3",
+        "rotation_coordinate_scale_m",
+        "node_1_relative_x_m",
+        "node_2_relative_x_m",
+        "node_2_relative_y_m"
+      ],
+      "train-a": [],
+      "train-b": [],
+      "validation": []
+    },
+    "normalization_computed_from_training_only": true,
+    "response_policy_fitted": false,
+    "new_numerical_solves": 0,
+    "project_provenance_authenticated": false,
+    "independent_load_history_split": false,
+    "joint_geometry_history_split": false
+  },
+  "local_tests_passed": 54
+}

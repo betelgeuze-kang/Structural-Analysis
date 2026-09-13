@@ -1,0 +1,18 @@
+{
+  "source_revision": "d8b22b206c0edcf66efe45b1a7c07390d9f43a7b",
+  "workflow": "CI",
+  "run_id": 34749003150,
+  "job_id": 103701978068,
+  "failed_step": "Materialize exact current-source test evidence",
+  "log_sha256": "25ea7e69a0a39234ad2c5e71e4d8e24443eaf12111a452f808d350c13a52cc4f",
+  "blockers": [
+    "external_code_to_code_product_replay_not_passed",
+    "external_code_to_code_technical_receipt_not_ready"
+  ],
+  "local_tests": {
+    "passed": 21,
+    "scope": "repository Python workflow and current-head readiness workflow contracts; both context scripts executed"
+  },
+  "external_failure_resolved": false,
+  "hosted_upload_verified": false
+}

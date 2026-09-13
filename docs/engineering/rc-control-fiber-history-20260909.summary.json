@@ -1,0 +1,550 @@
+{
+  "schema_version": "rc-fiber-history-observation.v1",
+  "diagnostic_source_revision": "0cb963e4c30c02506898e0dd68be2b96d9746522",
+  "original_source_revision": "de7b0d634a30921fff7c0b562cf1e0f09d1e13ed",
+  "source_files_verified_against_git": 419,
+  "cases": {
+    "base": {
+      "schema_version": "rc-control-fiber-history-attribution.v1",
+      "original_source_revision": "de7b0d634a30921fff7c0b562cf1e0f09d1e13ed",
+      "compiled_problem_contract_hash": "sha256:47e4d26b824374f6559ba8cec71668c955f501f30987ca88009f85bf6fe0cad0",
+      "target_count": 242,
+      "work": {
+        "model_compilations": 2,
+        "original_step_force_replays": 484,
+        "section_integrations": 0,
+        "element_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0,
+        "material_trial_calls": 243936,
+        "concrete_trial_calls": 209088,
+        "original_material_responses_verified": 40656,
+        "steel_trial_calls": 34848,
+        "additional_original_step_force_replays": 484
+      },
+      "wall_ns": 32583425590,
+      "scope": "two ordered original-law counterfactuals; finite single-round fiber inputs and unchanged native parents; no solve or commit",
+      "claims": {
+        "unique_causal_attribution": false,
+        "repaired_solver": false,
+        "independent_validation": false
+      },
+      "actual_material_call_counts": {
+        "StableStressConcrete": 209088,
+        "AsymmetricConcreteDamageMaterial": 209088,
+        "StableStressSteel": 34848,
+        "BilinearCombinedHardeningSteel": 34848
+      },
+      "actual_forbidden_call_counts": {},
+      "failed_field_order_groups": {
+        "reference_parent_then_history/member/M1": {
+          "failures": 176,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 176,
+            "external_load_difference": 0,
+            "parent_history_difference": 140,
+            "reference_fiber_projection_rounding": 166,
+            "reference_generalized_strain_evaluation": 176,
+            "finite_coordinate_difference": 176,
+            "candidate_generalized_strain_evaluation": 176,
+            "candidate_fiber_projection_rounding": 170
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 2,
+            "external_load_difference": 0,
+            "parent_history_difference": 52,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 10,
+            "finite_coordinate_difference": 100,
+            "candidate_generalized_strain_evaluation": 12,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 9.946828025593953e-11,
+            "external_load_difference": 0,
+            "parent_history_difference": 3.4473015251110853e-10,
+            "reference_fiber_projection_rounding": 8.352036992179432e-11,
+            "reference_generalized_strain_evaluation": 2.7888332646788033e-10,
+            "finite_coordinate_difference": 6.257042221706901e-10,
+            "candidate_generalized_strain_evaluation": 2.940270904038166e-10,
+            "candidate_fiber_projection_rounding": 8.684441331572683e-11
+          }
+        },
+        "history_then_candidate_parent/member/M1": {
+          "failures": 176,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 176,
+            "external_load_difference": 0,
+            "parent_history_difference": 138,
+            "reference_fiber_projection_rounding": 170,
+            "reference_generalized_strain_evaluation": 176,
+            "finite_coordinate_difference": 176,
+            "candidate_generalized_strain_evaluation": 176,
+            "candidate_fiber_projection_rounding": 172
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 2,
+            "external_load_difference": 0,
+            "parent_history_difference": 50,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 10,
+            "finite_coordinate_difference": 104,
+            "candidate_generalized_strain_evaluation": 10,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 9.946828025593953e-11,
+            "external_load_difference": 0,
+            "parent_history_difference": 3.435105362669358e-10,
+            "reference_fiber_projection_rounding": 8.352036992179432e-11,
+            "reference_generalized_strain_evaluation": 2.6965948467720963e-10,
+            "finite_coordinate_difference": 6.261512748664783e-10,
+            "candidate_generalized_strain_evaluation": 2.940256876231412e-10,
+            "candidate_fiber_projection_rounding": 8.684441331572683e-11
+          }
+        },
+        "reference_parent_then_history/reaction": {
+          "failures": 80,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 80,
+            "external_load_difference": 0,
+            "parent_history_difference": 63,
+            "reference_fiber_projection_rounding": 75,
+            "reference_generalized_strain_evaluation": 80,
+            "finite_coordinate_difference": 80,
+            "candidate_generalized_strain_evaluation": 80,
+            "candidate_fiber_projection_rounding": 77
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 1,
+            "external_load_difference": 0,
+            "parent_history_difference": 23,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 5,
+            "finite_coordinate_difference": 45,
+            "candidate_generalized_strain_evaluation": 6,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 9.946828025593953e-11,
+            "external_load_difference": 0,
+            "parent_history_difference": 3.4473015251110853e-10,
+            "reference_fiber_projection_rounding": 8.352036992179432e-11,
+            "reference_generalized_strain_evaluation": 2.7888332646788033e-10,
+            "finite_coordinate_difference": 6.257042221706901e-10,
+            "candidate_generalized_strain_evaluation": 2.940270904038166e-10,
+            "candidate_fiber_projection_rounding": 8.684441331572683e-11
+          }
+        },
+        "history_then_candidate_parent/reaction": {
+          "failures": 80,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 80,
+            "external_load_difference": 0,
+            "parent_history_difference": 62,
+            "reference_fiber_projection_rounding": 77,
+            "reference_generalized_strain_evaluation": 80,
+            "finite_coordinate_difference": 80,
+            "candidate_generalized_strain_evaluation": 80,
+            "candidate_fiber_projection_rounding": 78
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 1,
+            "external_load_difference": 0,
+            "parent_history_difference": 22,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 5,
+            "finite_coordinate_difference": 47,
+            "candidate_generalized_strain_evaluation": 5,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 9.946828025593953e-11,
+            "external_load_difference": 0,
+            "parent_history_difference": 3.435105362669358e-10,
+            "reference_fiber_projection_rounding": 8.352036992179432e-11,
+            "reference_generalized_strain_evaluation": 2.6965948467720963e-10,
+            "finite_coordinate_difference": 6.261512748664783e-10,
+            "candidate_generalized_strain_evaluation": 2.940256876231412e-10,
+            "candidate_fiber_projection_rounding": 8.684441331572683e-11
+          }
+        },
+        "reference_parent_then_history/member/M2": {
+          "failures": 7,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 7,
+            "external_load_difference": 0,
+            "parent_history_difference": 0,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 5,
+            "finite_coordinate_difference": 7,
+            "candidate_generalized_strain_evaluation": 5,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 0,
+            "external_load_difference": 0,
+            "parent_history_difference": 0,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 0,
+            "finite_coordinate_difference": 7,
+            "candidate_generalized_strain_evaluation": 0,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 3.4463978172788618e-12,
+            "external_load_difference": 0,
+            "parent_history_difference": 0,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 1.5380176130342946e-12,
+            "finite_coordinate_difference": 1.276722791718498e-10,
+            "candidate_generalized_strain_evaluation": 9.463547738252767e-13,
+            "candidate_fiber_projection_rounding": 0
+          }
+        },
+        "history_then_candidate_parent/member/M2": {
+          "failures": 7,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 7,
+            "external_load_difference": 0,
+            "parent_history_difference": 0,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 5,
+            "finite_coordinate_difference": 7,
+            "candidate_generalized_strain_evaluation": 5,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 0,
+            "external_load_difference": 0,
+            "parent_history_difference": 0,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 0,
+            "finite_coordinate_difference": 7,
+            "candidate_generalized_strain_evaluation": 0,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 3.4463978172788618e-12,
+            "external_load_difference": 0,
+            "parent_history_difference": 0,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 1.5380176130342946e-12,
+            "finite_coordinate_difference": 1.276722791718498e-10,
+            "candidate_generalized_strain_evaluation": 9.463547738252767e-13,
+            "candidate_fiber_projection_rounding": 0
+          }
+        }
+      },
+      "original_failed_fields": {
+        "member/M1": 176,
+        "reaction": 80,
+        "member/M2": 7
+      },
+      "largest_abs_counts_all_failed_fields": {
+        "reference_parent_then_history": {
+          "force_and_section_arithmetic": 3,
+          "external_load_difference": 0,
+          "parent_history_difference": 75,
+          "reference_fiber_projection_rounding": 0,
+          "reference_generalized_strain_evaluation": 15,
+          "finite_coordinate_difference": 152,
+          "candidate_generalized_strain_evaluation": 18,
+          "candidate_fiber_projection_rounding": 0
+        },
+        "history_then_candidate_parent": {
+          "force_and_section_arithmetic": 3,
+          "external_load_difference": 0,
+          "parent_history_difference": 72,
+          "reference_fiber_projection_rounding": 0,
+          "reference_generalized_strain_evaluation": 15,
+          "finite_coordinate_difference": 158,
+          "candidate_generalized_strain_evaluation": 15,
+          "candidate_fiber_projection_rounding": 0
+        }
+      },
+      "max_component_abs_si_all_failed_fields": {
+        "reference_parent_then_history": {
+          "force_and_section_arithmetic": 9.946828025593953e-11,
+          "external_load_difference": 0,
+          "parent_history_difference": 3.4473015251110853e-10,
+          "reference_fiber_projection_rounding": 8.352036992179432e-11,
+          "reference_generalized_strain_evaluation": 2.7888332646788033e-10,
+          "finite_coordinate_difference": 6.257042221706901e-10,
+          "candidate_generalized_strain_evaluation": 2.940270904038166e-10,
+          "candidate_fiber_projection_rounding": 8.684441331572683e-11
+        },
+        "history_then_candidate_parent": {
+          "force_and_section_arithmetic": 9.946828025593953e-11,
+          "external_load_difference": 0,
+          "parent_history_difference": 3.435105362669358e-10,
+          "reference_fiber_projection_rounding": 8.352036992179432e-11,
+          "reference_generalized_strain_evaluation": 2.6965948467720963e-10,
+          "finite_coordinate_difference": 6.261512748664783e-10,
+          "candidate_generalized_strain_evaluation": 2.940256876231412e-10,
+          "candidate_fiber_projection_rounding": 8.684441331572683e-11
+        }
+      }
+    },
+    "long": {
+      "schema_version": "rc-control-fiber-history-attribution.v1",
+      "original_source_revision": "de7b0d634a30921fff7c0b562cf1e0f09d1e13ed",
+      "compiled_problem_contract_hash": "sha256:8069fefebea445ae2f1cd4f52d8a48cbb48c8744694273988d90c3f1af857db8",
+      "target_count": 242,
+      "work": {
+        "model_compilations": 2,
+        "original_step_force_replays": 484,
+        "section_integrations": 0,
+        "element_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0,
+        "material_trial_calls": 243936,
+        "concrete_trial_calls": 209088,
+        "original_material_responses_verified": 40656,
+        "steel_trial_calls": 34848,
+        "additional_original_step_force_replays": 484
+      },
+      "wall_ns": 32662829435,
+      "scope": "two ordered original-law counterfactuals; finite single-round fiber inputs and unchanged native parents; no solve or commit",
+      "claims": {
+        "unique_causal_attribution": false,
+        "repaired_solver": false,
+        "independent_validation": false
+      },
+      "actual_material_call_counts": {
+        "StableStressConcrete": 209088,
+        "AsymmetricConcreteDamageMaterial": 209088,
+        "StableStressSteel": 34848,
+        "BilinearCombinedHardeningSteel": 34848
+      },
+      "actual_forbidden_call_counts": {},
+      "failed_field_order_groups": {
+        "reference_parent_then_history/member/M1": {
+          "failures": 165,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 165,
+            "external_load_difference": 0,
+            "parent_history_difference": 123,
+            "reference_fiber_projection_rounding": 165,
+            "reference_generalized_strain_evaluation": 165,
+            "finite_coordinate_difference": 165,
+            "candidate_generalized_strain_evaluation": 165,
+            "candidate_fiber_projection_rounding": 163
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 7,
+            "external_load_difference": 0,
+            "parent_history_difference": 35,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 11,
+            "finite_coordinate_difference": 104,
+            "candidate_generalized_strain_evaluation": 8,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 1.222370353085959e-10,
+            "external_load_difference": 0,
+            "parent_history_difference": 1.7926223160201635e-10,
+            "reference_fiber_projection_rounding": 7.444662170680912e-11,
+            "reference_generalized_strain_evaluation": 1.7557271685891213e-10,
+            "finite_coordinate_difference": 3.942495495739903e-10,
+            "candidate_generalized_strain_evaluation": 2.571419867160153e-10,
+            "candidate_fiber_projection_rounding": 8.086895350898102e-11
+          }
+        },
+        "history_then_candidate_parent/member/M1": {
+          "failures": 165,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 165,
+            "external_load_difference": 0,
+            "parent_history_difference": 123,
+            "reference_fiber_projection_rounding": 165,
+            "reference_generalized_strain_evaluation": 165,
+            "finite_coordinate_difference": 165,
+            "candidate_generalized_strain_evaluation": 165,
+            "candidate_fiber_projection_rounding": 163
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 7,
+            "external_load_difference": 0,
+            "parent_history_difference": 35,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 11,
+            "finite_coordinate_difference": 104,
+            "candidate_generalized_strain_evaluation": 8,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 1.222370353085959e-10,
+            "external_load_difference": 0,
+            "parent_history_difference": 1.8931830100512826e-10,
+            "reference_fiber_projection_rounding": 7.444662170680912e-11,
+            "reference_generalized_strain_evaluation": 1.7920943182960142e-10,
+            "finite_coordinate_difference": 3.82008939813628e-10,
+            "candidate_generalized_strain_evaluation": 2.5690490784096515e-10,
+            "candidate_fiber_projection_rounding": 8.086895350898102e-11
+          }
+        },
+        "reference_parent_then_history/reaction": {
+          "failures": 79,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 79,
+            "external_load_difference": 0,
+            "parent_history_difference": 58,
+            "reference_fiber_projection_rounding": 79,
+            "reference_generalized_strain_evaluation": 79,
+            "finite_coordinate_difference": 79,
+            "candidate_generalized_strain_evaluation": 79,
+            "candidate_fiber_projection_rounding": 78
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 3,
+            "external_load_difference": 0,
+            "parent_history_difference": 15,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 5,
+            "finite_coordinate_difference": 52,
+            "candidate_generalized_strain_evaluation": 4,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 1.222370353085959e-10,
+            "external_load_difference": 0,
+            "parent_history_difference": 1.7926223160201635e-10,
+            "reference_fiber_projection_rounding": 7.444662170680912e-11,
+            "reference_generalized_strain_evaluation": 1.7557271685891213e-10,
+            "finite_coordinate_difference": 3.942495495739903e-10,
+            "candidate_generalized_strain_evaluation": 2.571419867160153e-10,
+            "candidate_fiber_projection_rounding": 8.086895350898102e-11
+          }
+        },
+        "history_then_candidate_parent/reaction": {
+          "failures": 79,
+          "nonzero_counts": {
+            "force_and_section_arithmetic": 79,
+            "external_load_difference": 0,
+            "parent_history_difference": 58,
+            "reference_fiber_projection_rounding": 79,
+            "reference_generalized_strain_evaluation": 79,
+            "finite_coordinate_difference": 79,
+            "candidate_generalized_strain_evaluation": 79,
+            "candidate_fiber_projection_rounding": 78
+          },
+          "largest_abs_counts": {
+            "force_and_section_arithmetic": 3,
+            "external_load_difference": 0,
+            "parent_history_difference": 15,
+            "reference_fiber_projection_rounding": 0,
+            "reference_generalized_strain_evaluation": 5,
+            "finite_coordinate_difference": 52,
+            "candidate_generalized_strain_evaluation": 4,
+            "candidate_fiber_projection_rounding": 0
+          },
+          "max_abs_si": {
+            "force_and_section_arithmetic": 1.222370353085959e-10,
+            "external_load_difference": 0,
+            "parent_history_difference": 1.8931830100512826e-10,
+            "reference_fiber_projection_rounding": 7.444662170680912e-11,
+            "reference_generalized_strain_evaluation": 1.7920943182960142e-10,
+            "finite_coordinate_difference": 3.82008939813628e-10,
+            "candidate_generalized_strain_evaluation": 2.5690490784096515e-10,
+            "candidate_fiber_projection_rounding": 8.086895350898102e-11
+          }
+        }
+      },
+      "original_failed_fields": {
+        "member/M1": 165,
+        "reaction": 79
+      },
+      "largest_abs_counts_all_failed_fields": {
+        "reference_parent_then_history": {
+          "force_and_section_arithmetic": 10,
+          "external_load_difference": 0,
+          "parent_history_difference": 50,
+          "reference_fiber_projection_rounding": 0,
+          "reference_generalized_strain_evaluation": 16,
+          "finite_coordinate_difference": 156,
+          "candidate_generalized_strain_evaluation": 12,
+          "candidate_fiber_projection_rounding": 0
+        },
+        "history_then_candidate_parent": {
+          "force_and_section_arithmetic": 10,
+          "external_load_difference": 0,
+          "parent_history_difference": 50,
+          "reference_fiber_projection_rounding": 0,
+          "reference_generalized_strain_evaluation": 16,
+          "finite_coordinate_difference": 156,
+          "candidate_generalized_strain_evaluation": 12,
+          "candidate_fiber_projection_rounding": 0
+        }
+      },
+      "max_component_abs_si_all_failed_fields": {
+        "reference_parent_then_history": {
+          "force_and_section_arithmetic": 1.222370353085959e-10,
+          "external_load_difference": 0,
+          "parent_history_difference": 1.7926223160201635e-10,
+          "reference_fiber_projection_rounding": 7.444662170680912e-11,
+          "reference_generalized_strain_evaluation": 1.7557271685891213e-10,
+          "finite_coordinate_difference": 3.942495495739903e-10,
+          "candidate_generalized_strain_evaluation": 2.571419867160153e-10,
+          "candidate_fiber_projection_rounding": 8.086895350898102e-11
+        },
+        "history_then_candidate_parent": {
+          "force_and_section_arithmetic": 1.222370353085959e-10,
+          "external_load_difference": 0,
+          "parent_history_difference": 1.8931830100512826e-10,
+          "reference_fiber_projection_rounding": 7.444662170680912e-11,
+          "reference_generalized_strain_evaluation": 1.7920943182960142e-10,
+          "finite_coordinate_difference": 3.82008939813628e-10,
+          "candidate_generalized_strain_evaluation": 2.5690490784096515e-10,
+          "candidate_fiber_projection_rounding": 8.086895350898102e-11
+        }
+      }
+    }
+  },
+  "work": {
+    "model_compilations": 4,
+    "original_step_force_replays": 968,
+    "section_integrations": 0,
+    "element_integrations": 0,
+    "newton_solves": 0,
+    "state_commits": 0,
+    "material_trial_calls": 487872,
+    "concrete_trial_calls": 418176,
+    "original_material_responses_verified": 81312,
+    "steel_trial_calls": 69696,
+    "additional_original_step_force_replays": 968
+  },
+  "actual_material_call_counts": {
+    "StableStressConcrete": 418176,
+    "AsymmetricConcreteDamageMaterial": 418176,
+    "StableStressSteel": 69696,
+    "BilinearCombinedHardeningSteel": 69696
+  },
+  "all_original_inputs_match_sealed_inventory": true,
+  "all_original_endpoints_verified": true,
+  "all_native_parents_immutable": true,
+  "all_exact_decompositions_close": true,
+  "claims": {
+    "new_equilibrium_solution": false,
+    "repaired_solver": false,
+    "accepted_acceleration": false,
+    "independent_validation": false
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-fiber-history.i35wsok9",
+    "file_count": 436,
+    "total_bytes": 18671308,
+    "inventory_sha256": "78fb4a5af6780bfb6e9a5b41a897cafa124866479d6703732f522e8ad78b959f",
+    "all_files_reread_exact": true
+  },
+  "validation": {
+    "related_tests": 92,
+    "seconds": 13.41,
+    "new_focused_tests": 7,
+    "ruff": "pass",
+    "diff_check": "pass",
+    "hosted_full_suite_acceptance": false
+  },
+  "next_scope": "Original solve precision at fixed native parents, including end-to-end generalized-to-fiber evaluation and persistent history sensitivity; projection-only or postprocessed-force changes are not sufficient evidence of repair."
+}

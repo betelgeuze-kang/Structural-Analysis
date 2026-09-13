@@ -179,6 +179,7 @@ def _archive(
         "binary": {"path": binary_path},
         "files": [
             {"path": binary_path, "executable": True},
+            {"path": "workbench/drawings/manifest.json", "executable": False},
             {
                 "path": "examples/frame-alpha-cantilever.model-ir.json",
                 "executable": False,
@@ -191,6 +192,9 @@ def _archive(
     }
     archive = tmp_path / f"frame-alpha-workstation-{platform}.zip"
     with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED) as package:
+        package.writestr(
+            f"{package_id}/workbench/drawings/manifest.json", b'{"drawings": []}\n'
+        )
         executable = zipfile.ZipInfo(f"{package_id}/{binary_path}")
         executable.external_attr = (stat.S_IFREG | 0o755) << 16
         package.writestr(executable, binary)

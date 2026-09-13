@@ -30,6 +30,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_chain_io imp
 from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology import (
     FIBER_FRAME_EXECUTION_TOPOLOGY_SCHEMA_VERSION,
     FiberFrameNonlinearExecutionTopologyPlan,
+    solver_generalized_to_physical_3dof,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_kinematic_state_chain import (
     FIBER_FRAME_NONLINEAR_KINEMATIC_STATE_CHAIN_SCHEMA_VERSION,
@@ -556,23 +557,30 @@ def _build_source_binding(
         "canonical_displacement_si",
     )
     final_step = terminal_receipt.step_receipts[-1]
+    terminal_trial = load_path.steps[-1]
     source_free_solution = immutable_array(
-        terminal_state.array("solver_generalized_coordinates_m")[
-            topology_plan.array("free_solver_dofs")
-        ],
+        terminal_trial.trial_solution.free_displacements_m,
         dtype="<f8",
+    )
+    # J3 reconstructs generalized coordinates from committed physical bytes.
+    # The inverse scaling can differ from the original J5 coordinate by one ULP.
+    # Bind the original Newton bytes to J5 and compare the forward projection in
+    # the committed physical coordinate space, without a numerical tolerance.
+    source_physical_displacement = solver_generalized_to_physical_3dof(
+        topology_plan,
+        terminal_trial.trial_assembly.generalized_coordinates_m,
     )
     if (
         not np.array_equal(
-            source_free_solution,
-            load_path.steps[-1].trial_solution.free_displacements_m,
+            source_physical_displacement,
+            terminal_state.array("checkpoint_displacement_physical_3dof"),
         )
         or array_data_hash(source_free_solution) != final_step.source_solution_data_hash
     ):
         _fail(
             "fiber_frame_result_terminal_solution_mismatch",
             "/terminal_displacement",
-            "Terminal J3 displacement does not equal the J5 free solution bytes.",
+            "Terminal J3 physical displacement or J5 source solution bytes differ.",
         )
 
     reduced = _build_reduced_system_receipt(topology_plan, terminal_receipt)

@@ -1,0 +1,334 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-process-costs-ujthvfwa",
+    "source_revision": "e7afc97176e431cb5a4f7058af1bd65341ffb7e8",
+    "files": 7,
+    "bytes": 30359,
+    "inventory_sha256": "04fedf2caaf4ea494e4aef479dc955a278cf2464af4d6074f5efb6eaad4cde39"
+  },
+  "observation": {
+    "schema_version": "rc-original-process-cost-observation.v1",
+    "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-standalone-strategy-hmxpb46v",
+    "input_files": {
+      "protocol.json": {
+        "path": "protocol.json",
+        "bytes": 2162,
+        "sha256": "396b62ceef9eae32bdeaa868394999aa0d0a7e2134547ee24d346d87da1918a7"
+      },
+      "outcomes.json": {
+        "path": "outcomes.json",
+        "bytes": 1175,
+        "sha256": "e869ae26c537c22a039b9053f6752849bdc318a6cb46c9333d3af24d6b67aae8"
+      },
+      "b3-o0-price_order/result.json": {
+        "path": "b3-o0-price_order/result.json",
+        "bytes": 2401,
+        "sha256": "1ddcebe217bcb92eee2100cfb9ea6ae9ae06884cefb46546387f7a970988d0c5"
+      },
+      "b3-o0-price_order/plan.json": {
+        "path": "b3-o0-price_order/plan.json",
+        "bytes": 22573,
+        "sha256": "90888e2fae7e5c80afd452f3bdfb9889d724e887b2d6b4dd118b262b49bdf5c7"
+      },
+      "b3-o0-price_order/strategy-runtime.json": {
+        "path": "b3-o0-price_order/strategy-runtime.json",
+        "bytes": 616,
+        "sha256": "c8a6f101ac6e63707abf01d330af5ac0867ece08b6f37cd2bec30599e066c031"
+      },
+      "b3-o0-learned_order/result.json": {
+        "path": "b3-o0-learned_order/result.json",
+        "bytes": 7217,
+        "sha256": "b3506580141e408faf9259ad73e7d54daf0bca7023a00571b5aa4b546e476b6b"
+      },
+      "b3-o0-learned_order/plan.json": {
+        "path": "b3-o0-learned_order/plan.json",
+        "bytes": 37029,
+        "sha256": "5eb559bcf9d88b2e19e314dd675a7aae01e09ef688e2e156948e393cd1e1f739"
+      },
+      "b3-o0-learned_order/strategy-runtime.json": {
+        "path": "b3-o0-learned_order/strategy-runtime.json",
+        "bytes": 618,
+        "sha256": "6caf3527313cf0b1cfd0b0b8a73bde7d9eca2e80a5e29a54a5445fc98bff2009"
+      },
+      "b3-o1-price_order/result.json": {
+        "path": "b3-o1-price_order/result.json",
+        "bytes": 2401,
+        "sha256": "b84deaea1bcf40a26086979186546a6078b50aa0da58852c132694df3b037dc7"
+      },
+      "b3-o1-price_order/plan.json": {
+        "path": "b3-o1-price_order/plan.json",
+        "bytes": 22573,
+        "sha256": "90888e2fae7e5c80afd452f3bdfb9889d724e887b2d6b4dd118b262b49bdf5c7"
+      },
+      "b3-o1-price_order/strategy-runtime.json": {
+        "path": "b3-o1-price_order/strategy-runtime.json",
+        "bytes": 616,
+        "sha256": "ab21dcccf61c35e25bc41e0c9e28d5ca69493c339a5df7d78dcbad99234afc68"
+      },
+      "b3-o1-learned_order/result.json": {
+        "path": "b3-o1-learned_order/result.json",
+        "bytes": 7217,
+        "sha256": "48e8e086d37c170267c2028ecb78515d4e8627955e26f54677b5a29b1031c38a"
+      },
+      "b3-o1-learned_order/plan.json": {
+        "path": "b3-o1-learned_order/plan.json",
+        "bytes": 37029,
+        "sha256": "5eb559bcf9d88b2e19e314dd675a7aae01e09ef688e2e156948e393cd1e1f739"
+      },
+      "b3-o1-learned_order/strategy-runtime.json": {
+        "path": "b3-o1-learned_order/strategy-runtime.json",
+        "bytes": 618,
+        "sha256": "b7669557f9b3e829bce88853cf67a5baf3330d76c5be54d99d462ad11f8e3347"
+      },
+      "b11-o0-price_order/result.json": {
+        "path": "b11-o0-price_order/result.json",
+        "bytes": 2435,
+        "sha256": "a69b1bbca66d22a40d92c4ff38403fda009984d6228b5822fff3daaa8b0084ef"
+      },
+      "b11-o0-price_order/plan.json": {
+        "path": "b11-o0-price_order/plan.json",
+        "bytes": 22630,
+        "sha256": "1a83bd954c58e40d007f10c49bd2ba9b9cef9e88e19c811939f564f8fe78f22a"
+      },
+      "b11-o0-price_order/strategy-runtime.json": {
+        "path": "b11-o0-price_order/strategy-runtime.json",
+        "bytes": 616,
+        "sha256": "3b499149510bf079c459b757ba6b87df15e8347d832e4bd61d38bac57aac60d3"
+      },
+      "b11-o0-learned_order/result.json": {
+        "path": "b11-o0-learned_order/result.json",
+        "bytes": 7340,
+        "sha256": "7d0c464fb4a3ee930e7d089a43f6cdbdcb5649c403814393ef2dcadd7b8ac34e"
+      },
+      "b11-o0-learned_order/plan.json": {
+        "path": "b11-o0-learned_order/plan.json",
+        "bytes": 37086,
+        "sha256": "63e53e5ebed914f7615fb1bb4e8252dd6e3fffd6fe581b1deea6463dead27bdc"
+      },
+      "b11-o0-learned_order/strategy-runtime.json": {
+        "path": "b11-o0-learned_order/strategy-runtime.json",
+        "bytes": 618,
+        "sha256": "334ddae2403a3ea871776a3f11ae46ea89f68bd77ca2485024ae9b5888c17b34"
+      },
+      "b11-o1-price_order/result.json": {
+        "path": "b11-o1-price_order/result.json",
+        "bytes": 2435,
+        "sha256": "89d93d189f500df6b4b9fe8350a133366c9e5b63474712bb3c2bd7a6f8f3194e"
+      },
+      "b11-o1-price_order/plan.json": {
+        "path": "b11-o1-price_order/plan.json",
+        "bytes": 22630,
+        "sha256": "1a83bd954c58e40d007f10c49bd2ba9b9cef9e88e19c811939f564f8fe78f22a"
+      },
+      "b11-o1-price_order/strategy-runtime.json": {
+        "path": "b11-o1-price_order/strategy-runtime.json",
+        "bytes": 616,
+        "sha256": "aee7d847efc6b4206b71a2cc8d812cf4ccdd1336847b0b0ece5388e4880c25b5"
+      },
+      "b11-o1-learned_order/result.json": {
+        "path": "b11-o1-learned_order/result.json",
+        "bytes": 7340,
+        "sha256": "e40a505b9b77068c6c2ae74559bb5a4d28957546710fccebb623db8380a0a9eb"
+      },
+      "b11-o1-learned_order/plan.json": {
+        "path": "b11-o1-learned_order/plan.json",
+        "bytes": 37086,
+        "sha256": "63e53e5ebed914f7615fb1bb4e8252dd6e3fffd6fe581b1deea6463dead27bdc"
+      },
+      "b11-o1-learned_order/strategy-runtime.json": {
+        "path": "b11-o1-learned_order/strategy-runtime.json",
+        "bytes": 618,
+        "sha256": "2168a5916aa3b87c866e08261135a1fe73be365ebb0f0220f56a66b8a7fbf1b7"
+      }
+    },
+    "process_observations": [
+      {
+        "report_hash": "sha256:78b25baf591b2436e3e1d9fbf71cff242e3abbf8f6aaa3843ae827bc843fc53f",
+        "runtime_digest": "sha256:65d65e42018adc61805ef1265c8e8dcb1b05dcb81aef54d99f6a767a598286c6",
+        "wall_ns": 4424688595,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      },
+      {
+        "report_hash": "sha256:b74afd162943c2ea88ca38761130c57429d4e0419f4a37cdc73651b94307a8ab",
+        "runtime_digest": "sha256:90b59dacd2ba10bdf47e3ff40297abee3c05ca6690b17ea049f219b2ced35d2d",
+        "wall_ns": 4097561811,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      },
+      {
+        "report_hash": "sha256:8bfa78da1ffc3578643ca373b4ea510e693377360321da07f0b1c0c1846f0ed5",
+        "runtime_digest": "sha256:31a5175f62f63ed946f5a4e5f9bd3076720334319b90db55d9f07be695c7b4ea",
+        "wall_ns": 4071465392,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      },
+      {
+        "report_hash": "sha256:81e81308b378597e4b2b2c9f402c6c64c800998a4602456a890208282e635bcf",
+        "runtime_digest": "sha256:fc14c5f2d0dc530a2614e9409b7b66c8d46c28c115da313d04ed7700718c9e63",
+        "wall_ns": 4075562649,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      },
+      {
+        "report_hash": "sha256:be91a91fb16fd1d8c9068c762556a7c1035e5c41c734732bbbed028f8ac927f1",
+        "runtime_digest": "sha256:21bc3d2694c749cd7141ac2cbd1bdaa5dbb10f0958bd34be17655ba8e9782424",
+        "wall_ns": 10939537382,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      },
+      {
+        "report_hash": "sha256:44c97f35f8503b3df5e334c1a670a786f6835909aa4255e15fbab7b4376fc793",
+        "runtime_digest": "sha256:eb42598d88524ddbe3b55c1a34deea5b7975b5aed43b8943db2cdadb9a132474",
+        "wall_ns": 11000470600,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      },
+      {
+        "report_hash": "sha256:47671cc53f0cbca64000da5cc7a588387f44a90d51c87c4b81bc70bd28a59d88",
+        "runtime_digest": "sha256:034603284ae2526d7f6ae9e37560151a581b13203e2902787c575fe92b46737e",
+        "wall_ns": 11070824039,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      },
+      {
+        "report_hash": "sha256:999a4111aab4c6e10fabd6914ca42e041a3957a9d3e458b97fa88c4ecf14dc03",
+        "runtime_digest": "sha256:c04fcf40210e1f20dd7ee7e3b41835e07dbaa5b76fc188a26ae249e4d831e041",
+        "wall_ns": 11025713626,
+        "return_code": 0,
+        "scope": "subprocess_launch_through_exit_including_startup_and_stdout"
+      }
+    ],
+    "all_pairs": {
+      "schema_version": "experimental-rc-control-process-cost-cohort.v1",
+      "cli_accounting_digest": "sha256:dffe210f12451df88b2dbfef2d5d621251a31422f1357616ae63065d3565f4eb",
+      "pairs": [
+        {
+          "price_report_hash": "sha256:78b25baf591b2436e3e1d9fbf71cff242e3abbf8f6aaa3843ae827bc843fc53f",
+          "learned_report_hash": "sha256:b74afd162943c2ea88ca38761130c57429d4e0419f4a37cdc73651b94307a8ab",
+          "price_process_digest": "sha256:b454d85cd7e8a797868b08dd66e4041313721b8d6e39a9e5100088888aec428d",
+          "learned_process_digest": "sha256:10b8f846a09ff690421fcfd45accc0bbcf3c01944bcbbe9ecf1eb3c592aa6c14",
+          "price_process_wall_ns": 4424688595,
+          "learned_process_wall_ns": 4097561811,
+          "price_outside_cli_wall_ns": 1800439848,
+          "learned_outside_cli_wall_ns": 1435811635,
+          "recorded_selection_comparable": false,
+          "learned_over_price_process_ratio": null
+        },
+        {
+          "price_report_hash": "sha256:8bfa78da1ffc3578643ca373b4ea510e693377360321da07f0b1c0c1846f0ed5",
+          "learned_report_hash": "sha256:81e81308b378597e4b2b2c9f402c6c64c800998a4602456a890208282e635bcf",
+          "price_process_digest": "sha256:57aa63a2d0c70d84e106eb006b5d0270ed7413a26502ce244e5dcb562cd81ecb",
+          "learned_process_digest": "sha256:7760664b037a803c6b4b9b136d8d9208b5c1bc2f1a53c31acc59563e14b5c1cc",
+          "price_process_wall_ns": 4071465392,
+          "learned_process_wall_ns": 4075562649,
+          "price_outside_cli_wall_ns": 1415229941,
+          "learned_outside_cli_wall_ns": 1384047702,
+          "recorded_selection_comparable": false,
+          "learned_over_price_process_ratio": null
+        },
+        {
+          "price_report_hash": "sha256:be91a91fb16fd1d8c9068c762556a7c1035e5c41c734732bbbed028f8ac927f1",
+          "learned_report_hash": "sha256:44c97f35f8503b3df5e334c1a670a786f6835909aa4255e15fbab7b4376fc793",
+          "price_process_digest": "sha256:4f854f78fd50156b438e8a3891031ef5c14ae0bdb428073a5881472fc6437ec8",
+          "learned_process_digest": "sha256:82b4c4bc47fd7f1560de49fb0b236e7b975aaa1e9dcf964707fdcd3177055247",
+          "price_process_wall_ns": 10939537382,
+          "learned_process_wall_ns": 11000470600,
+          "price_outside_cli_wall_ns": 1395060338,
+          "learned_outside_cli_wall_ns": 1393668795,
+          "recorded_selection_comparable": true,
+          "learned_over_price_process_ratio": 1.0055699995230383
+        },
+        {
+          "price_report_hash": "sha256:47671cc53f0cbca64000da5cc7a588387f44a90d51c87c4b81bc70bd28a59d88",
+          "learned_report_hash": "sha256:999a4111aab4c6e10fabd6914ca42e041a3957a9d3e458b97fa88c4ecf14dc03",
+          "price_process_digest": "sha256:882d4b357be7e16e8d3c36e5d5f269ea3202a580a0fbd014ddbce2011f6dd41d",
+          "learned_process_digest": "sha256:3f8333210435c78d635c5b9cccc29355ad1289c243288ca004798aef0476b1ff",
+          "price_process_wall_ns": 11070824039,
+          "learned_process_wall_ns": 11025713626,
+          "price_outside_cli_wall_ns": 1399930935,
+          "learned_outside_cli_wall_ns": 1393646465,
+          "recorded_selection_comparable": true,
+          "learned_over_price_process_ratio": 0.9959252885926931
+        }
+      ],
+      "pair_count": 4,
+      "uncomparable_pair_count": 2,
+      "price_process_interval_sum_ns": 30506515408,
+      "learned_process_interval_sum_ns": 30199308686,
+      "distinct_historical_training_wall_ns": {
+        "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f": 2761753795
+      },
+      "historical_training_wall_ns_counted_once": 2761753795,
+      "learned_plus_historical_interval_sum_ns": 32961062481,
+      "learned_plus_historical_over_price_ratio": null,
+      "scope": "sum_of_process_intervals_plus_distinct_historical_training_not_campaign_elapsed",
+      "excluded": [
+        "transport_and_workbench_review",
+        "separate_audits",
+        "campaign_preparation"
+      ],
+      "outside_cli_interval_is_startup_only": false,
+      "process_digest_is_attestation": false,
+      "original_physical_artifacts_replayed": false,
+      "net_savings_proved": false,
+      "independent_generalization": false
+    },
+    "budget11_stratum": {
+      "schema_version": "experimental-rc-control-process-cost-cohort.v1",
+      "cli_accounting_digest": "sha256:a7f87ee19821740b5ecea7ac103cbda868885546a0b1b332b5e038403f3ac2a3",
+      "pairs": [
+        {
+          "price_report_hash": "sha256:be91a91fb16fd1d8c9068c762556a7c1035e5c41c734732bbbed028f8ac927f1",
+          "learned_report_hash": "sha256:44c97f35f8503b3df5e334c1a670a786f6835909aa4255e15fbab7b4376fc793",
+          "price_process_digest": "sha256:4f854f78fd50156b438e8a3891031ef5c14ae0bdb428073a5881472fc6437ec8",
+          "learned_process_digest": "sha256:82b4c4bc47fd7f1560de49fb0b236e7b975aaa1e9dcf964707fdcd3177055247",
+          "price_process_wall_ns": 10939537382,
+          "learned_process_wall_ns": 11000470600,
+          "price_outside_cli_wall_ns": 1395060338,
+          "learned_outside_cli_wall_ns": 1393668795,
+          "recorded_selection_comparable": true,
+          "learned_over_price_process_ratio": 1.0055699995230383
+        },
+        {
+          "price_report_hash": "sha256:47671cc53f0cbca64000da5cc7a588387f44a90d51c87c4b81bc70bd28a59d88",
+          "learned_report_hash": "sha256:999a4111aab4c6e10fabd6914ca42e041a3957a9d3e458b97fa88c4ecf14dc03",
+          "price_process_digest": "sha256:882d4b357be7e16e8d3c36e5d5f269ea3202a580a0fbd014ddbce2011f6dd41d",
+          "learned_process_digest": "sha256:3f8333210435c78d635c5b9cccc29355ad1289c243288ca004798aef0476b1ff",
+          "price_process_wall_ns": 11070824039,
+          "learned_process_wall_ns": 11025713626,
+          "price_outside_cli_wall_ns": 1399930935,
+          "learned_outside_cli_wall_ns": 1393646465,
+          "recorded_selection_comparable": true,
+          "learned_over_price_process_ratio": 0.9959252885926931
+        }
+      ],
+      "pair_count": 2,
+      "uncomparable_pair_count": 0,
+      "price_process_interval_sum_ns": 22010361421,
+      "learned_process_interval_sum_ns": 22026184226,
+      "distinct_historical_training_wall_ns": {
+        "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f": 2761753795
+      },
+      "historical_training_wall_ns_counted_once": 2761753795,
+      "learned_plus_historical_interval_sum_ns": 24787938021,
+      "learned_plus_historical_over_price_ratio": 1.126194047742893,
+      "scope": "sum_of_process_intervals_plus_distinct_historical_training_not_campaign_elapsed",
+      "excluded": [
+        "transport_and_workbench_review",
+        "separate_audits",
+        "campaign_preparation"
+      ],
+      "outside_cli_interval_is_startup_only": false,
+      "process_digest_is_attestation": false,
+      "original_physical_artifacts_replayed": false,
+      "net_savings_proved": false,
+      "independent_generalization": false
+    },
+    "strata_overlap_do_not_sum": true,
+    "physical_artifacts_replayed": false,
+    "new_fits": 0,
+    "new_solves": 0,
+    "independent_physical_validation": false
+  }
+}

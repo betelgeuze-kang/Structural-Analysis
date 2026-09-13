@@ -1,0 +1,386 @@
+{
+  "source_revision": "29af2b0f9bcd481058cae1cabb192b91f65c4506",
+  "counts": {
+    "api_entered": 18,
+    "artifact_contract_pass": 18,
+    "declared": 18,
+    "launched": 18,
+    "physical_converged": 9,
+    "resource_eligible": 18
+  },
+  "source_files_checked": 461,
+  "artifact_identities_checked": 162,
+  "comparison_count": 12,
+  "exact_converged_repeat_pairs": 6,
+  "exact_failed_diagnostic_repeat_pairs": 6,
+  "summary": [
+    {
+      "case_id": "two_story",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.581542109,
+      "converged_workload_ratio_to_dense": null,
+      "workload_seconds_by_repeat": [
+        2.604480158,
+        2.569320606,
+        2.581542109
+      ],
+      "workload_population_std_seconds": 0.014574381345155395
+    },
+    {
+      "case_id": "two_story",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.598251265,
+      "converged_workload_ratio_to_dense": null,
+      "workload_seconds_by_repeat": [
+        2.636723042,
+        2.598251265,
+        2.574269117
+      ],
+      "workload_population_std_seconds": 0.025724423751535812
+    },
+    {
+      "case_id": "two_story",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.742018224,
+      "converged_workload_ratio_to_dense": null,
+      "workload_seconds_by_repeat": [
+        2.79915449,
+        2.706087628,
+        2.742018224
+      ],
+      "workload_population_std_seconds": 0.03832173944072436
+    },
+    {
+      "case_id": "two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 4.38995167,
+      "converged_workload_ratio_to_dense": 1.0,
+      "workload_seconds_by_repeat": [
+        4.343794151,
+        4.38995167,
+        4.406043208
+      ],
+      "workload_population_std_seconds": 0.026382652660897475
+    },
+    {
+      "case_id": "two_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 4.420747729,
+      "converged_workload_ratio_to_dense": 1.0070151248384929,
+      "workload_seconds_by_repeat": [
+        4.48744407,
+        4.367314827,
+        4.420747729
+      ],
+      "workload_population_std_seconds": 0.04914209775141046
+    },
+    {
+      "case_id": "two_bay",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 10.70970969,
+      "converged_workload_ratio_to_dense": 2.4395962632545336,
+      "workload_seconds_by_repeat": [
+        10.70970969,
+        10.685346205,
+        10.732449122
+      ],
+      "workload_population_std_seconds": 0.019233494970253086
+    }
+  ],
+  "experiment_wall_seconds": 128.305575933,
+  "scope": "Retained-byte audit and recomputed internal comparisons; generated two-story and two-bay topology variants, not independent projects or external physical validation. Failure timings retained; no speed ratio for nonconverged groups.",
+  "material_maxima_by_case": {
+    "two_story": null,
+    "two_bay": {
+      "compressive_damage": 0,
+      "compressive_history_strain": 0.0005729762030182632,
+      "dissipated_energy_density_mj_per_m3": 0.002755146172828513,
+      "tensile_damage": 0.973963347604064,
+      "tensile_history_strain": 0.0006780609905521467,
+      "accumulated_plastic_strain": 0,
+      "backstress_mpa": 0,
+      "plastic_strain": 0
+    }
+  },
+  "failed_path_observations": [
+    {
+      "slot": 0,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 1,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 2,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 6,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 7,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 8,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 12,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 13,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    },
+    {
+      "slot": 14,
+      "case_id": "two_story",
+      "observed_load_path": {
+        "attempted_step_count": 2,
+        "committed_step_count": 1,
+        "convergence_history_row_count": 10,
+        "newly_attempted_step_count": 2,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.5,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      }
+    }
+  ],
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-topology-highload-ltygx_ms",
+    "payload_files": 845,
+    "payload_bytes": 19207583,
+    "inventory_sha256": "b0892015b420debae2ff4cdeb4506bfaecf1cc9c69112ae848a95a2c3646a56a"
+  }
+}

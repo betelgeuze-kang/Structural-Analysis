@@ -1,0 +1,132 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-full-flow-strategy-q1_jdt6p",
+    "files": 1129,
+    "bytes": 29808111,
+    "inventory_sha256": "22019da5549eed8cf5ea950c6159948767178043b2d3494571d0c191441b9e7f"
+  },
+  "observation": {
+    "source_revision": "561a1483af6045cb4e4ce0b9e62fd8495905b6ed",
+    "measured_flows": [
+      {
+        "id": "b11-o0-price_order",
+        "budget": 11,
+        "strategy": "price_order",
+        "return_code": 0,
+        "analysis_process_wall_ns": 11328861353,
+        "review_return_code": 0,
+        "review_process_wall_ns": 3294344418,
+        "full_flow_wall_ns": 14623331725,
+        "report_hash": "sha256:2b856bc0a37920018fccd5ba955cdac168e2faa952fd478dcf3c848d21ea7e72"
+      },
+      {
+        "id": "b11-o0-learned_order",
+        "budget": 11,
+        "strategy": "learned_order",
+        "return_code": 0,
+        "analysis_process_wall_ns": 11064206249,
+        "review_return_code": 0,
+        "review_process_wall_ns": 3306671467,
+        "full_flow_wall_ns": 14371034561,
+        "report_hash": "sha256:701847e27c3fd315c64c509242922e24b964670eced66764f75eb3a66f11c756"
+      },
+      {
+        "id": "b11-o1-learned_order",
+        "budget": 11,
+        "strategy": "learned_order",
+        "return_code": 0,
+        "analysis_process_wall_ns": 11123289379,
+        "review_return_code": 0,
+        "review_process_wall_ns": 3249922758,
+        "full_flow_wall_ns": 14373376963,
+        "report_hash": "sha256:d1c99d85ef3b5903dfbf69b67b82a2d422271d73a117d599e95e169a21594222"
+      },
+      {
+        "id": "b11-o1-price_order",
+        "budget": 11,
+        "strategy": "price_order",
+        "return_code": 0,
+        "analysis_process_wall_ns": 10999815030,
+        "review_return_code": 0,
+        "review_process_wall_ns": 3248283173,
+        "full_flow_wall_ns": 14248227158,
+        "report_hash": "sha256:6b21b6371f1e5afd7cc989d5a9851c5375ec4697effea6127200e46d8523d073"
+      }
+    ],
+    "price_full_flow_sum_ns": 28871558883,
+    "learned_full_flow_sum_ns": 28744411524,
+    "historical_training_counted_once_ns": 2761753795,
+    "learned_over_price_online_ratio": 0.9955961034346896,
+    "learned_plus_historical_over_price_ratio": 1.0912526561754619,
+    "analysis_process_costs": {
+      "schema_version": "experimental-rc-control-process-cost-cohort.v1",
+      "cli_accounting_digest": "sha256:ca55e9f8e50581fe7b4b9361c9f150fbd4a0a6cd8ea59c993267e62dc0f76b3e",
+      "pairs": [
+        {
+          "price_report_hash": "sha256:2b856bc0a37920018fccd5ba955cdac168e2faa952fd478dcf3c848d21ea7e72",
+          "learned_report_hash": "sha256:701847e27c3fd315c64c509242922e24b964670eced66764f75eb3a66f11c756",
+          "price_process_digest": "sha256:e58b1862d9e7c334f9ebe87a2592a24d46d0c12b4036821d06f17dcb20968d2d",
+          "learned_process_digest": "sha256:08a59d51e67126cf96d72d8a03db23a00b80eea00a90a8935434fe9f68fa10cd",
+          "price_process_wall_ns": 11328861353,
+          "learned_process_wall_ns": 11064206249,
+          "price_outside_cli_wall_ns": 1776844859,
+          "learned_outside_cli_wall_ns": 1395011667,
+          "recorded_selection_comparable": true,
+          "learned_over_price_process_ratio": 0.9766388610687766
+        },
+        {
+          "price_report_hash": "sha256:6b21b6371f1e5afd7cc989d5a9851c5375ec4697effea6127200e46d8523d073",
+          "learned_report_hash": "sha256:d1c99d85ef3b5903dfbf69b67b82a2d422271d73a117d599e95e169a21594222",
+          "price_process_digest": "sha256:7e7a16d46ed3c1278751746e1d5d9e51129c6beac4aa2966b927a7c4ccb59d7e",
+          "learned_process_digest": "sha256:d8dd69ba5caabe3c95fee7260276627e05b2c82da78c575d661dc5d604293fdb",
+          "price_process_wall_ns": 10999815030,
+          "learned_process_wall_ns": 11123289379,
+          "price_outside_cli_wall_ns": 1403359750,
+          "learned_outside_cli_wall_ns": 1410547752,
+          "recorded_selection_comparable": true,
+          "learned_over_price_process_ratio": 1.011225129573838
+        }
+      ],
+      "pair_count": 2,
+      "uncomparable_pair_count": 0,
+      "price_process_interval_sum_ns": 22328676383,
+      "learned_process_interval_sum_ns": 22187495628,
+      "distinct_historical_training_wall_ns": {
+        "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f": 2761753795
+      },
+      "historical_training_wall_ns_counted_once": 2761753795,
+      "learned_plus_historical_interval_sum_ns": 24949249423,
+      "learned_plus_historical_over_price_ratio": 1.1173635640129203,
+      "scope": "sum_of_process_intervals_plus_distinct_historical_training_not_campaign_elapsed",
+      "excluded": [
+        "transport_and_workbench_review",
+        "separate_audits",
+        "campaign_preparation"
+      ],
+      "outside_cli_interval_is_startup_only": false,
+      "process_digest_is_attestation": false,
+      "original_physical_artifacts_replayed": false,
+      "net_savings_proved": false,
+      "independent_generalization": false
+    },
+    "core_calls": 704,
+    "newton_and_linear_solves": 1760,
+    "result_rows": 44,
+    "full_paths_including_fresh_verification": 88,
+    "http_responses": 428,
+    "downloads": 16,
+    "scope": "before_analysis_process_launch_through_review_process_exit",
+    "excluded": [
+      "historical_training_counted_once_separately",
+      "source_and_input_preparation",
+      "production_build",
+      "separate_audits",
+      "human_review_think_time"
+    ],
+    "same_known_family": true,
+    "independent_generalization": false,
+    "new_fits": 0,
+    "separate_numerical_replay_in_audit": false,
+    "net_savings_proved": false
+  }
+}

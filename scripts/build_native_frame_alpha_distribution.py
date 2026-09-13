@@ -1249,7 +1249,7 @@ def verify_distribution(*, archive_path: Path) -> dict[str, Any]:
         names = [info.filename for info in infos]
         if len(names) != len(set(names)):
             raise DistributionError("archive_duplicate_path")
-        manifest_names = [name for name in names if name.endswith("/manifest.json")]
+        manifest_names = [name for name in names if name.count("/") == 1 and name.endswith("/manifest.json")]
         if len(manifest_names) != 1:
             raise DistributionError("archive_manifest_count_invalid")
         root_name = PurePosixPath(manifest_names[0]).parts[0]
@@ -1557,7 +1557,7 @@ def verify_workstation_distribution(*, archive_path: Path) -> dict[str, Any]:
         names = [info.filename for info in infos]
         if len(names) != len(set(names)):
             raise DistributionError("workstation_archive_duplicate_path")
-        manifest_names = [name for name in names if name.endswith("/manifest.json")]
+        manifest_names = [name for name in names if name.count("/") == 1 and name.endswith("/manifest.json")]
         if len(manifest_names) != 1:
             raise DistributionError("workstation_archive_manifest_count_invalid")
         root_name = PurePosixPath(manifest_names[0]).parts[0]

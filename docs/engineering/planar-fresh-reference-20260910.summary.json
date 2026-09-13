@@ -1,0 +1,224 @@
+{
+  "schema_version": "bounded-planar-fresh-opensees-reference-observation.v1",
+  "original_audit": {
+    "schema_version": "bounded-planar-fresh-reference-resolution-audit.v1",
+    "source_revision": "8dea62f1efb4dd3f5f45f51abf313b323af88b35",
+    "original_driver_sha256": "5f98d42b489b0d47c4516672e2c2921eecea122d513fc4644e9db8f599443ad3",
+    "verified_product_source_file_count": 595,
+    "source_files_unchanged": true,
+    "fresh_runtime_version": "3.7.1",
+    "runtime_packages": [
+      {
+        "distribution": "openseespy",
+        "version": "3.7.1.2",
+        "filename": "openseespy-3.7.1.2-py3-none-any.whl",
+        "sha256": "1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+        "bytes": 5337,
+        "metadata_url": "https://pypi.org/pypi/openseespy/3.7.1.2/json"
+      },
+      {
+        "distribution": "openseespylinux",
+        "version": "3.7.1.2",
+        "filename": "openseespylinux-3.7.1.2-py3-none-any.whl",
+        "sha256": "63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a",
+        "bytes": 58094841,
+        "metadata_url": "https://pypi.org/pypi/openseespylinux/3.7.1.2/json"
+      }
+    ],
+    "original_process": {
+      "pid": 865949,
+      "exit_code": 0,
+      "parent_wall_ns": 55429140,
+      "all_processes_exited": true,
+      "stdout_sha256": "a423f3f4d89ba4891097ef684f55070400f681db10669a63cc669377c3ce2423",
+      "stderr_sha256": "28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea"
+    },
+    "fixed_comparison_count": 17,
+    "fixed_comparisons_passed": 15,
+    "cases": [
+      {
+        "case": "bounded_planar_member_feature",
+        "applied_horizontal_force_N": 0.0,
+        "reference_support_horizontal_balance_N": "4.9642271998835696411589424315025098621845245361328125E-7",
+        "reference_free_N2_UX_residual_N": "-4.9642271998835696411589424315025098621845245361328125E-7",
+        "reference_all_node_horizontal_balance_N": "0E-59",
+        "product_support_horizontal_balance_N": "-1.3753172320614404089411664244835264980792999267578125E-12",
+        "fixed_statics_tolerance_N": "2.000000000000000072864394630995483158331094131199279217980802059173583984375E-10",
+        "failed_metric": {
+          "quantity": "support_N1_UX_N",
+          "product_value": -1.3753172320614404e-12,
+          "reference_value": 4.96422719988357e-07,
+          "absolute_error": 4.96424095305589e-07,
+          "relative_error": 1.000002770455857,
+          "absolute_tolerance": 1e-10,
+          "relative_tolerance": 1e-10,
+          "contract_pass": false
+        }
+      },
+      {
+        "case": "bounded_planar_settlement",
+        "applied_horizontal_force_N": 1000.0,
+        "reference_support_horizontal_balance_N": "3.631245135693461634218692779541015625E-7",
+        "reference_free_N2_UX_residual_N": "-3.6312453044473613772424869239330291748046875E-7",
+        "reference_all_node_horizontal_balance_N": "-1.687538997430237941443920135498046875E-14",
+        "product_support_horizontal_balance_N": "-1.136868377216160297393798828125E-12",
+        "fixed_statics_tolerance_N": "1.001000000000000029877034006531300036613174597732722759246826171875E-7",
+        "failed_metric": {
+          "quantity": "support_N1_UX_N",
+          "product_value": -1000.0000000000011,
+          "reference_value": -999.9999996368755,
+          "absolute_error": 3.631256504377234e-07,
+          "relative_error": 3.631256505695832e-10,
+          "absolute_tolerance": 1e-10,
+          "relative_tolerance": 1e-10,
+          "contract_pass": false
+        }
+      }
+    ],
+    "instrumented_baseline_payloads_exact": true,
+    "diagnostic_analyze_calls": 24,
+    "diagnostic_failed_analyze_calls": 16,
+    "diagnostic_failed_states_excluded": true,
+    "stricter_diagnostic_tolerances_kN": [
+      "1.0e-12",
+      "1.0e-14"
+    ],
+    "strict_iteration_limit": 80,
+    "strict_test_counter_reported": 81,
+    "strict_counter_is_total_Newton_work": false,
+    "validation": {
+      "initial_pytest": {
+        "exit_code": 2,
+        "numerical_execution": false,
+        "reason": "Python resolved /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/src/structural_analysis/__init__.py from the original checkout. This worktree src was not on PYTHONPATH; both selected modules could not import.",
+        "elapsed_reported_s": 1.99
+      },
+      "final_pytest": {
+        "command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 -m pytest -q tests/test_bounded_planar_horizontal_equilibrium.py tests/test_corotational_frame2d_stable_kinematics.py",
+        "exit_code": 0,
+        "passed": 36,
+        "elapsed_reported_s": 7.05,
+        "new_statics_cases": 5,
+        "prior_decimal_kinematics_cases": 31
+      },
+      "ruff_check_pass": true,
+      "ruff_format_check_pass": true,
+      "git_diff_check_pass": true
+    },
+    "claims": {
+      "actual_local_opensees_execution": true,
+      "full_external_receipt_refreshed": false,
+      "calculix_rerun": false,
+      "independent_operator_or_hardware": false,
+      "verification_level_2": false,
+      "reference_or_tolerance_changed": false,
+      "release_approval": false
+    }
+  },
+  "stored_reference_comparison": {
+    "stored_receipt_path": "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+    "stored_receipt_sha256": "f106cf556e5956ef62e582db6eaad2bef5edeccda2190b3be85853d0e032318b",
+    "fresh_product_comparison_sha256": "4debb7ae2ec88a5f0dd32ea7c32e3487296cf2a792b613cf3c86a704acb32dad",
+    "all_17_stored_reference_values_equal_fresh": true,
+    "matched_metrics": [
+      [
+        "bounded_planar_member_feature_load_path",
+        "node_N2_UX_m"
+      ],
+      [
+        "bounded_planar_member_feature_load_path",
+        "node_N2_UY_m"
+      ],
+      [
+        "bounded_planar_member_feature_load_path",
+        "support_N1_UX_N"
+      ],
+      [
+        "bounded_planar_member_feature_load_path",
+        "support_N1_UY_N"
+      ],
+      [
+        "bounded_planar_member_feature_load_path",
+        "support_N1_RZ_N_m"
+      ],
+      [
+        "bounded_planar_member_feature_load_path",
+        "support_N2_RZ_N_m"
+      ],
+      [
+        "bounded_planar_member_feature_load_path",
+        "member_E1_end_i_MZ_N_m"
+      ],
+      [
+        "bounded_planar_member_feature_load_path",
+        "member_E1_end_j_MZ_N_m"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "node_N2_UX_m"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "node_N2_UY_m"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "support_N1_UX_N"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "support_N1_UY_N"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "support_N1_RZ_N_m"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "support_N2_UY_N"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "support_N2_RZ_N_m"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "member_E1_end_i_MZ_N_m"
+      ],
+      [
+        "bounded_planar_prescribed_settlement_load_path",
+        "member_E1_end_j_MZ_N_m"
+      ]
+    ],
+    "stored_receipt_modified": false
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-reference._42rebm3",
+    "file_count": 62,
+    "total_bytes": 242356950,
+    "inventory_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-reference._42rebm3-inventory.json",
+    "inventory_sha256": "eef59d4444dadb040879684ca7c30d5a109f84a0cd78ae2e8b63969ac60df764",
+    "all_files_reread_exact": true,
+    "absent_execution_pids": [
+      865949,
+      865946,
+      866055,
+      866172,
+      866171,
+      866173
+    ],
+    "sealed_at_utc": "2026-09-09T16:05:53.986992+00:00",
+    "seal_wall_ns": 457800289,
+    "external_packages_outside_repository": true,
+    "independent_operator_validation": false
+  },
+  "claims": {
+    "actual_local_opensees_execution": true,
+    "full_external_receipt_refreshed": false,
+    "calculix_rerun": false,
+    "independent_operator_or_hardware": false,
+    "verification_level_2": false,
+    "reference_or_tolerance_changed": false,
+    "release_approval": false
+  }
+}

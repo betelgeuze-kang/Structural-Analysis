@@ -1,0 +1,192 @@
+{
+  "schema_version": "rc-direct-fiber-observation.v1",
+  "source_revision": "2821165054f1107ca512fc428830d8f156b55ffd",
+  "source_files_verified_against_git": 421,
+  "unchanged_original_input_hashes_verified": true,
+  "all_original_record_gates_and_parent_chains_pass": true,
+  "all_six_terminal_native_reopens_exact": true,
+  "all_reference_fresh_histories_and_checkpoints_exact": true,
+  "full_comparisons_recomputed": true,
+  "main_work": {
+    "core_calls": 1452,
+    "linear_solves": 6068,
+    "newton_iterations": 6068
+  },
+  "main_polishing_work_included": {
+    "attempted": 1452,
+    "accepted": 1153,
+    "assembly_call_count": 1452,
+    "linear_solve_count": 1153
+  },
+  "development_probe_parent_seconds": 370.898584583,
+  "independent_exact_coordinate_fiber_strains_verified": 121968,
+  "separate_original_material_state_replays": {
+    "concrete": 104544,
+    "steel": 17424
+  },
+  "all_replayed_state_updates_and_branch_decisions_exact": true,
+  "max_stable_minus_original_same_input_absolute": {
+    "concrete/stress_mpa": 9.186926750840985e-15,
+    "concrete/consistent_tangent_mpa": 7.275957614183426e-12,
+    "steel/stress_mpa": 5.684341886080802e-14,
+    "steel/consistent_tangent_mpa": 0.0
+  },
+  "audit_wall_seconds": 21.152453522,
+  "repeat_admission": false,
+  "claims": {
+    "independent_validation": false,
+    "accepted_acceleration": false,
+    "native_material_state_precision_repair": false
+  },
+  "cases": {
+    "base": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 6.984919309616089e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 54,
+          "support_reactions": 25
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 67.751038624,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1151,
+            "newton_iterations": 1151
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 191,
+            "assembly_call_count": 242,
+            "linear_solve_count": 191
+          },
+          "native_checkpoint_hash": "sha256:b07a21ec0498fde94066db5d2d7b230f9c9eb5cfe02c344d1658687e437d2dcd"
+        },
+        "secant": {
+          "wall_seconds": 48.095359704,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 769,
+            "newton_iterations": 769
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 191,
+            "assembly_call_count": 242,
+            "linear_solve_count": 191
+          },
+          "native_checkpoint_hash": "sha256:ee5a86d9ac6b213658285668e5ec4493658ef7ceaa441933544aedde43568cfa"
+        },
+        "fresh-reference": {
+          "wall_seconds": 67.969774561,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1151,
+            "newton_iterations": 1151
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 191,
+            "assembly_call_count": 242,
+            "linear_solve_count": 191
+          },
+          "native_checkpoint_hash": "sha256:b07a21ec0498fde94066db5d2d7b230f9c9eb5cfe02c344d1658687e437d2dcd"
+        }
+      }
+    },
+    "long": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 4.656612873077393e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 51,
+          "support_reactions": 24
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 64.234525607,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1118,
+            "newton_iterations": 1118
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 184,
+            "assembly_call_count": 242,
+            "linear_solve_count": 184
+          },
+          "native_checkpoint_hash": "sha256:adeebcc6dd9b64d62d6d8ae94bd937de634b37ae52b4e7d75ba5859887a67cfd"
+        },
+        "secant": {
+          "wall_seconds": 46.841900974,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 761,
+            "newton_iterations": 761
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 212,
+            "assembly_call_count": 242,
+            "linear_solve_count": 212
+          },
+          "native_checkpoint_hash": "sha256:2e1fbe343130095311ee77cea8e8cd25f50b98c233d26e1ab2d1d2a52d31476d"
+        },
+        "fresh-reference": {
+          "wall_seconds": 64.414864653,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1118,
+            "newton_iterations": 1118
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 184,
+            "assembly_call_count": 242,
+            "linear_solve_count": 184
+          },
+          "native_checkpoint_hash": "sha256:adeebcc6dd9b64d62d6d8ae94bd937de634b37ae52b4e7d75ba5859887a67cfd"
+        }
+      }
+    }
+  },
+  "compatibility": {
+    "exact_step_pairs": 36,
+    "exact_history_checkpoint_pairs": 12,
+    "source_paths_verified": true,
+    "separate_work": {
+      "core_calls": 72,
+      "linear_solves": 172,
+      "newton_iterations": 172
+    }
+  },
+  "audit_parent_wall_seconds": 23.170223927,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-direct-fiber.84pa6t3b",
+    "file_count": 9662,
+    "total_bytes": 462488048,
+    "inventory_sha256": "e4eec3542f60c42b59cbd1b0c819fa5665aa071aca73653981cee98df60b38c5",
+    "all_files_reread_exact": true
+  },
+  "validation": {
+    "initial_related_tests": 191,
+    "initial_seconds": 29.55,
+    "later_focused_timing_tests": 36,
+    "later_seconds": 5.97,
+    "direct_profile_tests": 14,
+    "hosted_full_suite_acceptance": false
+  },
+  "next_scope": "Separate remaining accepted-coordinate and persistent native material-history effects under the actual direct-fiber profile before additional original solver precision work."
+}

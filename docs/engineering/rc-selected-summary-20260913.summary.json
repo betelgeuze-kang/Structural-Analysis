@@ -1,0 +1,138 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-staged-geometry-summary-vGs5zP",
+    "inventory_sha256": "33feea6bc1a89ee86946883fc0279efacc040f0efebf0792c90d2f0350deb786"
+  },
+  "observation": {
+    "source_revision": "55b23b41410315eab1c2252502ee78e31016a84a",
+    "original_source_revisions": [
+      "0efd85afdfe33314c70fcfdc26802d81159e0bc0"
+    ],
+    "observations": [
+      {
+        "name": "short",
+        "strategy": "price_order",
+        "width": 1440,
+        "displayed_quantities_and_cost": {
+          "concrete_m3": 1.092,
+          "rebar_kg": 110.58138,
+          "estimate": 219.78137999999998
+        },
+        "performance_fields_matched": 4,
+        "summary_original_and_rounded_fields_matched": 5,
+        "report_hash": "sha256:9313e3c48efa294747b922c4bca015e5feacf398ff0d815a97e74cc4264f6d00",
+        "selected_candidate": "middle",
+        "prefix_rejected": [
+          "small"
+        ],
+        "cost_skipped": [
+          "large",
+          "outside"
+        ],
+        "outside_horizon": [],
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [],
+        "review_wall_ns": 1102630010,
+        "outer_panel_fits_viewport": true
+      },
+      {
+        "name": "short",
+        "strategy": "price_order",
+        "width": 390,
+        "displayed_quantities_and_cost": {
+          "concrete_m3": 1.092,
+          "rebar_kg": 110.58138,
+          "estimate": 219.78137999999998
+        },
+        "performance_fields_matched": 4,
+        "summary_original_and_rounded_fields_matched": 5,
+        "report_hash": "sha256:9313e3c48efa294747b922c4bca015e5feacf398ff0d815a97e74cc4264f6d00",
+        "selected_candidate": "middle",
+        "prefix_rejected": [
+          "small"
+        ],
+        "cost_skipped": [
+          "large",
+          "outside"
+        ],
+        "outside_horizon": [],
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [],
+        "review_wall_ns": 1500068009,
+        "outer_panel_fits_viewport": true
+      },
+      {
+        "name": "tall",
+        "strategy": "price_order",
+        "width": 1440,
+        "displayed_quantities_and_cost": {
+          "concrete_m3": 1.3559999999999999,
+          "rebar_kg": 137.31534,
+          "estimate": 272.91533999999996
+        },
+        "performance_fields_matched": 4,
+        "summary_original_and_rounded_fields_matched": 5,
+        "report_hash": "sha256:f8e6aca8e42bdd83c16423fe180ea5cb57f0770e1e93ff28b3593cc393df1e8c",
+        "selected_candidate": "middle",
+        "prefix_rejected": [
+          "small"
+        ],
+        "cost_skipped": [
+          "large",
+          "outside"
+        ],
+        "outside_horizon": [],
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [],
+        "review_wall_ns": 1070824053,
+        "outer_panel_fits_viewport": true
+      },
+      {
+        "name": "tall",
+        "strategy": "price_order",
+        "width": 390,
+        "displayed_quantities_and_cost": {
+          "concrete_m3": 1.3559999999999999,
+          "rebar_kg": 137.31534,
+          "estimate": 272.91533999999996
+        },
+        "performance_fields_matched": 4,
+        "summary_original_and_rounded_fields_matched": 5,
+        "report_hash": "sha256:f8e6aca8e42bdd83c16423fe180ea5cb57f0770e1e93ff28b3593cc393df1e8c",
+        "selected_candidate": "middle",
+        "prefix_rejected": [
+          "small"
+        ],
+        "cost_skipped": [
+          "large",
+          "outside"
+        ],
+        "outside_horizon": [],
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [],
+        "review_wall_ns": 1589868072,
+        "outer_panel_fits_viewport": true
+      }
+    ],
+    "http_exact_responses": 208,
+    "original_downloads": 0,
+    "review_wall_ns": 5263390144,
+    "download_action_pacing_ms": 0,
+    "review_scope": "navigation_validation_selection_and_numeric_display_checks_excludes_server_startup_browser_launch_screenshots_and_teardown",
+    "new_numerical_paths": 0,
+    "new_policy_fits": 0,
+    "page_errors": [],
+    "independent_physical_validation": false,
+    "net_savings_proved": false
+  },
+  "local_browser_regression": {
+    "passed": 12,
+    "seconds": 39.8
+  },
+  "build": "TypeScript, production Vite and viewer delivery passed",
+  "new_physics_or_speed_claim": false
+}

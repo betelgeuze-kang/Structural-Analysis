@@ -1,0 +1,449 @@
+{
+  "schema_version": "rc-constant-history-stream-observation.v1",
+  "observation": {
+    "external_experiments_admitted": 0,
+    "independent_physical_validation": false,
+    "learned_fits": 0,
+    "original_full_resumed_record_pairs": 2024,
+    "original_prefix_record_pairs": 514,
+    "performance_comparison": false,
+    "processes": [
+      {
+        "case": "monotonic",
+        "child": {
+          "bytes": 44866286,
+          "child_iteration_and_output_ns": 24723611488,
+          "history_sha256": "e0cd3598b7721f63ab534fe090483a6b9fd6321e106206d63866d011f8c54f45",
+          "peak_rss_kib": 103788,
+          "record_count": 1012,
+          "report": {
+            "accepted_target_count": 1010,
+            "claims": {
+              "design_authority": false,
+              "experimental_small_displacement_rc_control": true,
+              "general_cyclic_validation": false,
+              "global_capacity_verified": false,
+              "hashes_authenticate_source": false,
+              "independent_physical_validation": false,
+              "performance_improvement": false,
+              "production_promotion_eligible": false,
+              "public_j1_j5_authority": false,
+              "release_approved": false
+            },
+            "core_invocations_started": 1011,
+            "emitted_transition_count": 1011,
+            "failure": null,
+            "header_sha256": "sha256:48e7c6a2bbc4e37453d8daf2b8048bce905d648655aa20f23d2ee8956634d3cb",
+            "last_emitted_checkpoint_hash": "sha256:fe94cff6e2b33609cfa1a4b7028ddb70221e3c6a03219f32b7ce7e5ebb77b516",
+            "last_record_hash": "sha256:0e9f1b763deb03e717550f4aa20cc667c90768c19b120cde61be5bc7a878a0f6",
+            "new_work": {
+              "attempted_step_count": 1011,
+              "known_linear_solve_count": 2022,
+              "known_newton_iteration_count": 2022,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "preload_work": {
+              "attempted_step_count": 1,
+              "known_linear_solve_count": 2,
+              "known_newton_iteration_count": 2,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replay_work": {
+              "attempted_step_count": 0,
+              "known_linear_solve_count": 0,
+              "known_newton_iteration_count": 0,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replayed_transition_count": 0,
+            "requested_target_count": 1010,
+            "response_reassembly_attempts": 1011,
+            "response_reassembly_verified_count": 1011,
+            "schema_version": "rc-fiber-control-history-report.v1",
+            "status": "ready",
+            "storage_durability_verified": false,
+            "total_work": {
+              "attempted_step_count": 1011,
+              "known_linear_solve_count": 2022,
+              "known_newton_iteration_count": 2022,
+              "unknown_solver_work_attempt_count": 0
+            }
+          }
+        },
+        "parent_wall_ns": 26102146496,
+        "phase": "full",
+        "returncode": 0
+      },
+      {
+        "case": "monotonic",
+        "child": {
+          "bytes": 11370661,
+          "child_iteration_and_output_ns": 6337716676,
+          "history_sha256": "d397ac062e08cb1dce65412b350b8d0f48f4389a5a3157012d5b62f10d5ce8cb",
+          "peak_rss_kib": 103828,
+          "record_count": 257,
+          "report": {
+            "accepted_target_count": 255,
+            "claims": {
+              "design_authority": false,
+              "experimental_small_displacement_rc_control": true,
+              "general_cyclic_validation": false,
+              "global_capacity_verified": false,
+              "hashes_authenticate_source": false,
+              "independent_physical_validation": false,
+              "performance_improvement": false,
+              "production_promotion_eligible": false,
+              "public_j1_j5_authority": false,
+              "release_approved": false
+            },
+            "core_invocations_started": 256,
+            "emitted_transition_count": 256,
+            "failure": null,
+            "header_sha256": "sha256:48e7c6a2bbc4e37453d8daf2b8048bce905d648655aa20f23d2ee8956634d3cb",
+            "last_emitted_checkpoint_hash": "sha256:c40b2632f9cf019a507305dbb0c1a7b88c175ed163963e36f3c73f5ad2b19048",
+            "last_record_hash": "sha256:2d7168b016fdd74592da8ae5b3d17bd195d21a0e828233553ce83ff36c40621f",
+            "new_work": {
+              "attempted_step_count": 256,
+              "known_linear_solve_count": 512,
+              "known_newton_iteration_count": 512,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "preload_work": {
+              "attempted_step_count": 1,
+              "known_linear_solve_count": 2,
+              "known_newton_iteration_count": 2,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replay_work": {
+              "attempted_step_count": 0,
+              "known_linear_solve_count": 0,
+              "known_newton_iteration_count": 0,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replayed_transition_count": 0,
+            "requested_target_count": 1010,
+            "response_reassembly_attempts": 256,
+            "response_reassembly_verified_count": 256,
+            "schema_version": "rc-fiber-control-history-report.v1",
+            "status": "paused",
+            "storage_durability_verified": false,
+            "total_work": {
+              "attempted_step_count": 256,
+              "known_linear_solve_count": 512,
+              "known_newton_iteration_count": 512,
+              "unknown_solver_work_attempt_count": 0
+            }
+          }
+        },
+        "parent_wall_ns": 7721245136,
+        "phase": "prefix",
+        "returncode": 0
+      },
+      {
+        "case": "monotonic",
+        "child": {
+          "bytes": 44866286,
+          "child_iteration_and_output_ns": 24615798185,
+          "history_sha256": "e0cd3598b7721f63ab534fe090483a6b9fd6321e106206d63866d011f8c54f45",
+          "peak_rss_kib": 104168,
+          "record_count": 1012,
+          "report": {
+            "accepted_target_count": 1010,
+            "claims": {
+              "design_authority": false,
+              "experimental_small_displacement_rc_control": true,
+              "general_cyclic_validation": false,
+              "global_capacity_verified": false,
+              "hashes_authenticate_source": false,
+              "independent_physical_validation": false,
+              "performance_improvement": false,
+              "production_promotion_eligible": false,
+              "public_j1_j5_authority": false,
+              "release_approved": false
+            },
+            "core_invocations_started": 1011,
+            "emitted_transition_count": 1011,
+            "failure": null,
+            "header_sha256": "sha256:48e7c6a2bbc4e37453d8daf2b8048bce905d648655aa20f23d2ee8956634d3cb",
+            "last_emitted_checkpoint_hash": "sha256:fe94cff6e2b33609cfa1a4b7028ddb70221e3c6a03219f32b7ce7e5ebb77b516",
+            "last_record_hash": "sha256:0e9f1b763deb03e717550f4aa20cc667c90768c19b120cde61be5bc7a878a0f6",
+            "new_work": {
+              "attempted_step_count": 755,
+              "known_linear_solve_count": 1510,
+              "known_newton_iteration_count": 1510,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "preload_work": {
+              "attempted_step_count": 1,
+              "known_linear_solve_count": 2,
+              "known_newton_iteration_count": 2,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replay_work": {
+              "attempted_step_count": 256,
+              "known_linear_solve_count": 512,
+              "known_newton_iteration_count": 512,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replayed_transition_count": 256,
+            "requested_target_count": 1010,
+            "response_reassembly_attempts": 1011,
+            "response_reassembly_verified_count": 1011,
+            "schema_version": "rc-fiber-control-history-report.v1",
+            "status": "ready",
+            "storage_durability_verified": false,
+            "total_work": {
+              "attempted_step_count": 1011,
+              "known_linear_solve_count": 2022,
+              "known_newton_iteration_count": 2022,
+              "unknown_solver_work_attempt_count": 0
+            }
+          }
+        },
+        "parent_wall_ns": 26009455715,
+        "phase": "resume",
+        "returncode": 0
+      },
+      {
+        "case": "cyclic",
+        "child": {
+          "bytes": 44903261,
+          "child_iteration_and_output_ns": 24603709329,
+          "history_sha256": "6a426234f7b54ba146b8449ab4b12a4e4ce2b7740f9a4508790115e36c7be636",
+          "peak_rss_kib": 103756,
+          "record_count": 1012,
+          "report": {
+            "accepted_target_count": 1010,
+            "claims": {
+              "design_authority": false,
+              "experimental_small_displacement_rc_control": true,
+              "general_cyclic_validation": false,
+              "global_capacity_verified": false,
+              "hashes_authenticate_source": false,
+              "independent_physical_validation": false,
+              "performance_improvement": false,
+              "production_promotion_eligible": false,
+              "public_j1_j5_authority": false,
+              "release_approved": false
+            },
+            "core_invocations_started": 1011,
+            "emitted_transition_count": 1011,
+            "failure": null,
+            "header_sha256": "sha256:5a6f944ef9d4ca32d4dbea67d4e9d5dc865010d0fcc9d4039dca601e38b2d5e5",
+            "last_emitted_checkpoint_hash": "sha256:a9d56caad2a09b3e9542bdc6415083468692c58d79268d933cc2830d954de865",
+            "last_record_hash": "sha256:bdcc4c29bbb561f7980f424046aaa0a4e0c50b2eb4f5244bd037548db2040933",
+            "new_work": {
+              "attempted_step_count": 1011,
+              "known_linear_solve_count": 2022,
+              "known_newton_iteration_count": 2022,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "preload_work": {
+              "attempted_step_count": 1,
+              "known_linear_solve_count": 2,
+              "known_newton_iteration_count": 2,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replay_work": {
+              "attempted_step_count": 0,
+              "known_linear_solve_count": 0,
+              "known_newton_iteration_count": 0,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replayed_transition_count": 0,
+            "requested_target_count": 1010,
+            "response_reassembly_attempts": 1011,
+            "response_reassembly_verified_count": 1011,
+            "schema_version": "rc-fiber-control-history-report.v1",
+            "status": "ready",
+            "storage_durability_verified": false,
+            "total_work": {
+              "attempted_step_count": 1011,
+              "known_linear_solve_count": 2022,
+              "known_newton_iteration_count": 2022,
+              "unknown_solver_work_attempt_count": 0
+            }
+          }
+        },
+        "parent_wall_ns": 25990651235,
+        "phase": "full",
+        "returncode": 0
+      },
+      {
+        "case": "cyclic",
+        "child": {
+          "bytes": 11372728,
+          "child_iteration_and_output_ns": 6251079565,
+          "history_sha256": "7e098003d97857c360035bd25bbf436e7886b008c85c95236cd6f5b3901ca780",
+          "peak_rss_kib": 103764,
+          "record_count": 257,
+          "report": {
+            "accepted_target_count": 255,
+            "claims": {
+              "design_authority": false,
+              "experimental_small_displacement_rc_control": true,
+              "general_cyclic_validation": false,
+              "global_capacity_verified": false,
+              "hashes_authenticate_source": false,
+              "independent_physical_validation": false,
+              "performance_improvement": false,
+              "production_promotion_eligible": false,
+              "public_j1_j5_authority": false,
+              "release_approved": false
+            },
+            "core_invocations_started": 256,
+            "emitted_transition_count": 256,
+            "failure": null,
+            "header_sha256": "sha256:5a6f944ef9d4ca32d4dbea67d4e9d5dc865010d0fcc9d4039dca601e38b2d5e5",
+            "last_emitted_checkpoint_hash": "sha256:a5bfd28a4e341a05ea2fa100daaa47653e7c0b9756d6100cf70831ca77e56251",
+            "last_record_hash": "sha256:66d29cf2ae4b8f012fd120c78b212eb6b8e83838380b6563933b398f7b96f8d8",
+            "new_work": {
+              "attempted_step_count": 256,
+              "known_linear_solve_count": 512,
+              "known_newton_iteration_count": 512,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "preload_work": {
+              "attempted_step_count": 1,
+              "known_linear_solve_count": 2,
+              "known_newton_iteration_count": 2,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replay_work": {
+              "attempted_step_count": 0,
+              "known_linear_solve_count": 0,
+              "known_newton_iteration_count": 0,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replayed_transition_count": 0,
+            "requested_target_count": 1010,
+            "response_reassembly_attempts": 256,
+            "response_reassembly_verified_count": 256,
+            "schema_version": "rc-fiber-control-history-report.v1",
+            "status": "paused",
+            "storage_durability_verified": false,
+            "total_work": {
+              "attempted_step_count": 256,
+              "known_linear_solve_count": 512,
+              "known_newton_iteration_count": 512,
+              "unknown_solver_work_attempt_count": 0
+            }
+          }
+        },
+        "parent_wall_ns": 7629949354,
+        "phase": "prefix",
+        "returncode": 0
+      },
+      {
+        "case": "cyclic",
+        "child": {
+          "bytes": 44903261,
+          "child_iteration_and_output_ns": 24535692304,
+          "history_sha256": "6a426234f7b54ba146b8449ab4b12a4e4ce2b7740f9a4508790115e36c7be636",
+          "peak_rss_kib": 103996,
+          "record_count": 1012,
+          "report": {
+            "accepted_target_count": 1010,
+            "claims": {
+              "design_authority": false,
+              "experimental_small_displacement_rc_control": true,
+              "general_cyclic_validation": false,
+              "global_capacity_verified": false,
+              "hashes_authenticate_source": false,
+              "independent_physical_validation": false,
+              "performance_improvement": false,
+              "production_promotion_eligible": false,
+              "public_j1_j5_authority": false,
+              "release_approved": false
+            },
+            "core_invocations_started": 1011,
+            "emitted_transition_count": 1011,
+            "failure": null,
+            "header_sha256": "sha256:5a6f944ef9d4ca32d4dbea67d4e9d5dc865010d0fcc9d4039dca601e38b2d5e5",
+            "last_emitted_checkpoint_hash": "sha256:a9d56caad2a09b3e9542bdc6415083468692c58d79268d933cc2830d954de865",
+            "last_record_hash": "sha256:bdcc4c29bbb561f7980f424046aaa0a4e0c50b2eb4f5244bd037548db2040933",
+            "new_work": {
+              "attempted_step_count": 755,
+              "known_linear_solve_count": 1510,
+              "known_newton_iteration_count": 1510,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "preload_work": {
+              "attempted_step_count": 1,
+              "known_linear_solve_count": 2,
+              "known_newton_iteration_count": 2,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replay_work": {
+              "attempted_step_count": 256,
+              "known_linear_solve_count": 512,
+              "known_newton_iteration_count": 512,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "replayed_transition_count": 256,
+            "requested_target_count": 1010,
+            "response_reassembly_attempts": 1011,
+            "response_reassembly_verified_count": 1011,
+            "schema_version": "rc-fiber-control-history-report.v1",
+            "status": "ready",
+            "storage_durability_verified": false,
+            "total_work": {
+              "attempted_step_count": 1011,
+              "known_linear_solve_count": 2022,
+              "known_newton_iteration_count": 2022,
+              "unknown_solver_work_attempt_count": 0
+            }
+          }
+        },
+        "parent_wall_ns": 25896332791,
+        "phase": "resume",
+        "returncode": 0
+      }
+    ],
+    "source_file_count": 428,
+    "source_revision": "f8dcfbb6af25e95e3a550558b28db94f69d9c7bc",
+    "source_unchanged": true,
+    "total_parent_wall_ns": 119349780727,
+    "total_work": {
+      "attempted_step_count": 4556,
+      "known_linear_solve_count": 9112,
+      "known_newton_iteration_count": 9112,
+      "unknown_solver_work_attempt_count": 0
+    }
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-stream-m1el__kd",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-stream-m1el__kd.inventory.json",
+    "inventory_sha256": "d6acfd47878e519a58f3f2dded3da2156d3585c1961b67ff309494f5c2d79464",
+    "file_count": 466,
+    "total_bytes": 211132385,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T20:04:16.774715+00:00",
+    "seal_wall_ns": 410182622,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "verification": {
+    "tests": {
+      "command": "PYTHONPATH=src python3 -m pytest tests/test_rc_fiber_control_history.py tests/test_rc_constant_load_public_path.py tests/test_rc_fiber_history_archive.py tests/test_rc_fiber_frame_direct_control_request.py",
+      "passed": 130,
+      "seconds": 49.38,
+      "new_stream_tests": 35
+    },
+    "ruff_check": true,
+    "ruff_format_check": true,
+    "mypy_one_source": true,
+    "git_diff_check": true,
+    "initial_failures": [
+      "initial ad hoc loader call passed str instead of pathlib.Path; no solve",
+      "first test selection stopped on wrong expected legacy checkpoint key; fixed test to final_checkpoint"
+    ],
+    "earlier_29_test_selection_overlaps_final": true
+  },
+  "remaining": [
+    "Measured-to-model material/rebar/loading/sensor correspondence",
+    "Measured traces are not command histories",
+    "Paged Workbench and durable HTTP consumers",
+    "Constant-load learning study admission and independent campaign splits",
+    "Learned advantage over deterministic baselines including full costs",
+    "Independent verification, hosted acceptance, licensing and full-roadmap closure"
+  ]
+}

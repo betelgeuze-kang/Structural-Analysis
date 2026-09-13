@@ -1,0 +1,292 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-viewer-preset-recovery-Sm2ZpV",
+    "files": 6,
+    "bytes": 252017,
+    "inventory_sha256": "16ea94e779d9bcdd0113b8fae6bf33d3f3270441621f2abc8f765ee0b17df183"
+  },
+  "observation": {
+    "undefined_initLog_observed": false,
+    "console_messages": [
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing."
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[GroupMarkerNotSet(crbug.com/242999)!:A0302C0034200000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader (about:flags#enable-unsafe-swiftshader) flag to opt in to lower security guarantees for trusted content."
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Preset sidecar unavailable for midas33_optimized: Error: failed to load preset sidecar ./index.midas33.data.js\n    at i.onerror (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:3803:8901)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to resolve workspace preset midas33_optimized: Error: HTTP 404\n    at v_ (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:3803:6599)\n    at async cz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:3328)\n    at async lz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:4743)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16601"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to load workspace artifact ../../implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json: Error: HTTP 404\n    at iz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:1593)\n    at async cz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:3769)\n    at async lz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:4743)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16601"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to resolve preset payload midas33_optimized: Error: HTTP 404\n    at v_ (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:3803:6599)\n    at async lz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:5108)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16601"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[loadInitialModelData] Checking embedded payload..."
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to load optional embedded data script: Error: failed to load embedded data script ./index.data.js\n    at r.onerror (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:3803:8417)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[loadInitialModelData] readEmbeddedPayload result: null"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to load ../../implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json: Error: HTTP 404\n    at iz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:1593)\n    at async lz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:6354)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16601"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to load ../../implementation/phase1/release/visualization/optimized_drawing_review_summary.json: Error: HTTP 404\n    at iz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:1593)\n    at async lz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:6354)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16601"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to load ../../implementation/phase1/release/visualization/structural_optimization_viewer.json: Error: HTTP 404\n    at iz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:1593)\n    at async lz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:6354)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16601"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Code-check companion hydration failed: implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json Error: HTTP 404\n    at iz (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:1593)\n    at async bR (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4881:2002)\n    at async xR (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4881:2429)\n    at async _z (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:18706)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16692"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Drawing comparison presentation failed: TypeError: Cannot read properties of null (reading 'steps')\n    at aw (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:3903:32844)\n    at YW (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6034:6059)\n    at aG (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6034:11076)\n    at _z (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:4902:18825)\n    at async http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:16692"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[buildUI] data.meta?.material_catalog_summary: 0"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[buildUI] data.materials: 0"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "log",
+        "text": "[buildUI] data.elements: 944"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      },
+      {
+        "name": "price",
+        "width": 1440,
+        "type": "warning",
+        "text": "[Viewer] Unable to load drawing catalog manifest; using built-in defaults. Error: HTTP 404\n    at bK (http://127.0.0.1:45749/assets/structureViewer-D7OsPheE.js:6074:18068)"
+      }
+    ],
+    "source_revision": "8391374c7430395ff86b24dc6502adc3b800a6e3",
+    "original_source_revisions": [
+      "d11248ce06627c8466ae348a88f91a3b167ce05e",
+      "5c1110737cc94d7decb19f02001bf155bef0ff72"
+    ],
+    "observations": [
+      {
+        "name": "price",
+        "strategy": "price_order",
+        "width": 1440,
+        "report_hash": "sha256:6b8b60ca342c0a5c86f6561737cf51284b091d5b4756948be97d0423d17ba0f0",
+        "selected_candidate": "middle",
+        "cost_skipped": [
+          "large",
+          "outside"
+        ],
+        "outside_horizon": [],
+        "other_strategy_run": false,
+        "oracle_run": false,
+        "downloads": [
+          {
+            "path": "price_order/middle/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "ae676aa07e9c71d8a46d55306bdd7a92dc5d9d7c1690ad78e86d39fb06624f13"
+          },
+          {
+            "path": "price_order/middle/baseline/result.json",
+            "bytes": 1653528,
+            "sha256": "d0ff376dba6897f04fa74a31059db89051600c7b05a705f4ad0cb98d3db86499"
+          },
+          {
+            "path": "price_order/middle/baseline/checkpoint.json",
+            "bytes": 35069,
+            "sha256": "834d71f156020ce2e04eeff158a07140e4bdb0d8433b7f4c14458b3e79d77f0a"
+          },
+          {
+            "path": "price_order/middle/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "991d93dae08760ccb6d75751a2827ee0d2941f25805e438629579477dbf243d2"
+          },
+          {
+            "path": "result.json",
+            "bytes": 3231,
+            "sha256": "a363c0ab5bf18856dd5444c9834df575de639f8033ba94ebba7c180e4ddbfeb6"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 12000,
+            "sha256": "2ee94f79e8519f2795dd3e99eea1503cdd19729c45e25e7a4289fabe0d9860fb"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          },
+          {
+            "path": "pool/large.json",
+            "bytes": 1462,
+            "sha256": "db44ba2870d27061f8a5bfa9e1a1778c80c0b505fedf73e473c83347fe0dba18"
+          },
+          {
+            "path": "pool/outside.json",
+            "bytes": 1462,
+            "sha256": "c75a12fdbd7eac519379b72692c8d747ae73a56e5662417a402a21c31a7fa19c"
+          },
+          {
+            "path": "price_order/decisions/00.json",
+            "bytes": 1115,
+            "sha256": "e2e84989ac94daab3b7f855191d9d7a405a142203055127a9a0dcf37d529a14a"
+          },
+          {
+            "path": "price_order/decisions/01.json",
+            "bytes": 1111,
+            "sha256": "69991dc61bcedd72e457ea3006aca71b55717902870d090a469555026d4ab2b1"
+          },
+          {
+            "path": "price_order/decisions/02.json",
+            "bytes": 1112,
+            "sha256": "a7869deab42059b245bd3c311da9a34dd4b3258e4d888b12924ccae8c2d422f8"
+          },
+          {
+            "path": "price_order/decisions/03.json",
+            "bytes": 1126,
+            "sha256": "9773739c63b6a64ba768b3dc00835e7868049adc2d7c39f02a3d01271a1d81d9"
+          },
+          {
+            "path": "price_order/decisions/04.json",
+            "bytes": 1128,
+            "sha256": "9cd6c0f392f1aa05a8611260d7a4bb071367571c86680f66b8165f7183e350a0"
+          }
+        ],
+        "review_wall_ns": 5375645905,
+        "outer_panel_fits_viewport": true
+      }
+    ],
+    "http_exact_responses": 42,
+    "original_downloads": 14,
+    "review_wall_ns": 5375645905,
+    "download_action_pacing_ms": 250,
+    "review_scope": "navigation_validation_selection_downloads_including_250ms_action_pacing_excludes_server_startup_browser_launch_screenshots_and_teardown",
+    "new_numerical_paths": 0,
+    "new_policy_fits": 0,
+    "page_errors": [],
+    "independent_physical_validation": false,
+    "net_savings_proved": false
+  }
+}

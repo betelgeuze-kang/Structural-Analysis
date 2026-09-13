@@ -1,0 +1,44 @@
+{
+  "base_revision": "b25bf0899bd1f8af8076924a870c493cd31bd567",
+  "local_changes_present_during_tests": true,
+  "workflow_contract": {
+    "passed": 161,
+    "wall_s": 10.87
+  },
+  "initial_nested_manifest_tests": {
+    "passed": 58,
+    "failed": 1,
+    "wall_s": 38.32,
+    "failure": "fixture_file_count_still_expected_three"
+  },
+  "final_package_and_workflow_tests": {
+    "passed": 75,
+    "wall_s": 44.62
+  },
+  "logs": [
+    {
+      "path": "/tmp/structural-workflow-contract-repair-bvf3k9_m.log",
+      "bytes": 261,
+      "sha256": "f7ec37b78df061ce998933118bad7d7b7e6fb7e78643ccaee9e72f7d1324656c"
+    },
+    {
+      "path": "/tmp/structural-nested-manifest-tests.log",
+      "bytes": 713,
+      "sha256": "debb0c3c4da074a54bfa6b2b7e5648c2e229833b47a14f7653452e33932ffd41"
+    },
+    {
+      "path": "/tmp/structural-nested-manifest-final-tests.log",
+      "bytes": 180,
+      "sha256": "ed95c360d073a128232b20d5df2d9201fb3f0caef3dca0916950befed4b7b266"
+    },
+    {
+      "path": "/tmp/structural-native-clean-install-34722859635.log",
+      "bytes": 162442,
+      "sha256": "ec99cd4a90cc9a0967dd5d5fad2801baa1d2a2207080fd4a58896e1e585910cb"
+    }
+  ],
+  "hosted_current_head_acceptance": false,
+  "windows_execution_performed_locally": false,
+  "independent_physical_validation": false,
+  "release_approval": false
+}

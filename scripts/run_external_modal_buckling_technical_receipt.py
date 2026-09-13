@@ -102,6 +102,8 @@ CLAIM_BOUNDARY = (
 )
 
 SOURCE_PATHS = (
+    Path("scripts/pinned_opensees_runtime.py"),
+    Path("scripts/pinned_opensees_wheel_members.json"),
     Path("scripts/run_external_modal_buckling_technical_receipt.py"),
     Path("scripts/run_external_code_to_code_technical_receipt.py"),
     SCHEMA_PATH,
@@ -625,16 +627,17 @@ def _run_opensees_modal(
     *,
     python_executable: Path,
     python_path: Path,
+    wheel_paths: list[Path],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    environment = dict(os.environ)
-    environment["PYTHONPATH"] = str(python_path.resolve())
-    completed = subprocess.run(
-        [str(python_executable.resolve()), "-c", OPENSEES_MODAL_DRIVER],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=environment,
-    )
+    try:
+        completed, binding = external_base.execute_pinned_opensees(
+            python_executable=python_executable,
+            supplied_runtime_root=python_path,
+            wheels=wheel_paths,
+            driver=OPENSEES_MODAL_DRIVER,
+        )
+    except external_base.PinnedOpenSeesRuntimeError as exc:
+        raise ExternalModalBucklingReceiptError(str(exc)) from exc
     prefix = "MODAL_BUCKLING_JSON="
     rows = [
         row[len(prefix) :]
@@ -668,6 +671,7 @@ def _run_opensees_modal(
         "stdout_sha256": _text_hash(completed.stdout),
         "stderr_sha256": _text_hash(completed.stderr),
         "driver_sha256": _text_hash(OPENSEES_MODAL_DRIVER),
+        "runtime_binding": binding,
     }
 
 
@@ -852,6 +856,7 @@ def build_external_modal_buckling_technical_receipt(
     opensees, opensees_outputs = _run_opensees_modal(
         python_executable=python_executable,
         python_path=opensees_python_path,
+        wheel_paths=[path for path in external_assets if path.suffix == ".whl"],
     )
     calculix, calculix_outputs = _run_calculix_buckling(
         binary=calculix_binary,
@@ -1202,6 +1207,14 @@ def validate_external_modal_buckling_technical_receipt(
     if payload["artifact_hash"] != _artifact_hash(payload):
         raise ExternalModalBucklingReceiptError("receipt_artifact_hash_invalid")
     checksums = payload["internal_source"]["input_checksums"]
+    binding = payload["runtimes"]["opensees"]["execution_outputs"].get(
+        "runtime_binding"
+    )
+    if binding is not None:
+        try:
+            external_base.validate_binding(binding)
+        except external_base.PinnedOpenSeesRuntimeError as exc:
+            raise ExternalModalBucklingReceiptError(str(exc)) from exc
     if payload["internal_source"]["source_set_hash"] != _hash_value(checksums):
         raise ExternalModalBucklingReceiptError("receipt_source_set_hash_invalid")
     if require_current_sources and checksums != _source_checksums(repo_root):
@@ -1217,6 +1230,14 @@ def validate_external_modal_buckling_technical_receipt(
         executed_now = replay[
             "external_runtime_executed_in_this_generation"
         ]
+        if (
+            executed_now
+            and "scripts/pinned_opensees_runtime.py" in checksums
+            and binding is None
+        ):
+            raise ExternalModalBucklingReceiptError(
+                "opensees_current_execution_binding_missing"
+            )
         execution_source_commit = replay.get(
             "external_execution_source_commit_sha"
         )

@@ -173,3 +173,21 @@ console.log(JSON.stringify({{ stage }}));
 """
     )
     assert payload["stage"] == "stage_b"
+
+
+def test_missing_timeline_has_no_step_stage_or_delivery_evidence() -> None:
+    payload = _run(
+        f"""
+import {{
+  resolveOptimizationTimelineStep,
+  resolveFirstTimelineStepIndexForStage,
+  buildOptimizationTimelineDeliveryRows,
+}} from {json.dumps(str(TIMELINE))};
+console.log(JSON.stringify([null, undefined, {{}}].map(model => ({{
+  step: resolveOptimizationTimelineStep(model, 0),
+  stage: resolveFirstTimelineStepIndexForStage(model, 'stage_b'),
+  rows: buildOptimizationTimelineDeliveryRows(model),
+}}))));
+"""
+    )
+    assert payload == [{"step": None, "stage": -1, "rows": []}] * 3

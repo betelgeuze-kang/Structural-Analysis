@@ -1,0 +1,26 @@
+{
+  "run_id": 34434309082,
+  "event": "pull_request",
+  "head_sha": "bb88bbe8d7d4769001b13bb5861141edeacff888",
+  "tested_merge_sha": "78c3c6800d654fcdd60c9b84ffcda5b27e921dfa",
+  "base_sha": "4de4e3f55aae1d267cf704cec7d7533f3a627498",
+  "development_job_id": 102736578729,
+  "tests": 336,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "pytest_wall_seconds": 373.31,
+  "artifact_id": 10135854380,
+  "artifact_sha256": "sha256:4a653d0fe3349825ed0502c4ac617b63f85d80ef54b6d39bcba2bf495310b905",
+  "full_shards_materialization": "all four failed",
+  "full_shards_pytest": "all four skipped",
+  "aggregate": "failure",
+  "inspected_failure_log_job": 102736578529,
+  "observed_blockers": [
+    "external_code_to_code_product_replay_not_passed",
+    "external_code_to_code_technical_receipt_not_ready"
+  ],
+  "qualification": false,
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-development-ci-1t4__7r7",
+  "packet_inventory_sha256": "41298ce7272698059a4abcaec4f9e2576efb7576265ef11e142334982bb72ba5"
+}

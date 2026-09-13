@@ -167,6 +167,19 @@ function publishedResult(): Record<string, unknown> {
     status: 'ready',
     contract_pass: true,
     profile: 'corotational_one_bay_portal.v1',
+    configuration: {
+      profile: 'corotational_one_bay_portal.v1',
+      matrix_backend: 'numpy_linalg_solve_dense',
+      stiffness_storage: 'numpy_dense_ndarray',
+    },
+    metrics: {
+      sparse_backend_used: false,
+      native_sparse_assembly_used: false,
+      sparse_factorization_count: 0,
+      sparse_factorization_diagnostic_hashes: [],
+      sparse_factorization_policy_hash: null,
+    },
+    convergence_history: [],
     source_result_hash: engineeringResultIr.engineering_result_hash,
     contract_bindings: {
       engineering_result_hash: engineeringResultIr.engineering_result_hash,

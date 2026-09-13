@@ -1,0 +1,179 @@
+{
+  "production_change": "strict string scan avoids individual decoding of values and unescaped keys; final JSON decoding retained",
+  "hosted_head": "5a0def37655a095c2bd25028b0be74142a6eebe2",
+  "contracts_passed": 112,
+  "build_passed": true,
+  "whole_path_solves_added": 0,
+  "new_fits": 0,
+  "repeated_performance_proven": false,
+  "observations": [
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-worker-profile-czsctmhz",
+      "verified_ms": 16491.680244,
+      "samples": 14845,
+      "profile_duration_us": 15960675,
+      "sampled_self_intervals_us": [
+        {
+          "name": "p",
+          "line": 0,
+          "column": 869,
+          "us": 3278487
+        },
+        {
+          "name": "i",
+          "line": 7,
+          "column": 53598,
+          "us": 2910276
+        },
+        {
+          "name": "Gn",
+          "line": 7,
+          "column": 55910,
+          "us": 2035216
+        },
+        {
+          "name": "f",
+          "line": 0,
+          "column": 811,
+          "us": 1741263
+        },
+        {
+          "name": "(idle)",
+          "line": -1,
+          "column": -1,
+          "us": 1191364
+        },
+        {
+          "name": "c",
+          "line": 7,
+          "column": 54210,
+          "us": 871876
+        },
+        {
+          "name": "Vn",
+          "line": 7,
+          "column": 53463,
+          "us": 726146
+        },
+        {
+          "name": "r",
+          "line": 7,
+          "column": 53539,
+          "us": 558974
+        },
+        {
+          "name": "W",
+          "line": 7,
+          "column": 56377,
+          "us": 339032
+        },
+        {
+          "name": "zr",
+          "line": 7,
+          "column": 114381,
+          "us": 284877
+        }
+      ],
+      "verified_http_responses": 79,
+      "snapshot_bytes": 525181454,
+      "snapshot_artifacts": 75
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-worker-profile-0bxvkj10",
+      "verified_ms": 15355.652433,
+      "samples": 13847,
+      "profile_duration_us": 14844308,
+      "sampled_self_intervals_us": [
+        {
+          "name": "p",
+          "line": 0,
+          "column": 869,
+          "us": 3282632
+        },
+        {
+          "name": "Gn",
+          "line": 7,
+          "column": 55971,
+          "us": 2024496
+        },
+        {
+          "name": "i",
+          "line": 7,
+          "column": 53598,
+          "us": 1719693
+        },
+        {
+          "name": "f",
+          "line": 0,
+          "column": 811,
+          "us": 1698176
+        },
+        {
+          "name": "(idle)",
+          "line": -1,
+          "column": -1,
+          "us": 1314052
+        },
+        {
+          "name": "c",
+          "line": 7,
+          "column": 54271,
+          "us": 819106
+        },
+        {
+          "name": "Vn",
+          "line": 7,
+          "column": 53463,
+          "us": 737262
+        },
+        {
+          "name": "r",
+          "line": 7,
+          "column": 53539,
+          "us": 579875
+        },
+        {
+          "name": "W",
+          "line": 7,
+          "column": 56438,
+          "us": 347544
+        },
+        {
+          "name": "zr",
+          "line": 7,
+          "column": 114442,
+          "us": 296680
+        }
+      ],
+      "verified_http_responses": 79,
+      "snapshot_bytes": 525181454,
+      "snapshot_artifacts": 75
+    }
+  ],
+  "packets": [
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-worker-profile-czsctmhz",
+      "inventory_sha256": "89ebfc7654100c33c8340cdbd4aed9027f55898ebc90fcf5aa97364219df6dfa",
+      "files": 13,
+      "bytes": 1421012
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-worker-profile-0bxvkj10",
+      "inventory_sha256": "5d895a8aa6eb7e136c3f6d73a7e81d38d07a6dfad6e23819d65bead9141eea40",
+      "files": 14,
+      "bytes": 1412139
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-strict-string-checks-kzya6bq1",
+      "inventory_sha256": "170c75e1e568a737fbb9e71c8020946817833ab9dd597c6c45a41eb3a8343cda",
+      "files": 6,
+      "bytes": 25368
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-worker-profile-8ujdgnoq",
+      "inventory_sha256": "6d05fbd12d5748e5df8182e6a542f2246919376e466b19c541c3e02eb2d3162b",
+      "files": 10,
+      "bytes": 187570
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-study-nid6nmlm",
+  "original_subdirectory": "after-design",
+  "authored_model": true,
+  "experimental_training_admission": false,
+  "independent_validation": false,
+  "files": {
+    "baseline/analysis-outcome.json": "02c38641599d6dd24b69116ee94c5850c7d1b47363c46e7317e52b17812a711d",
+    "baseline/analysis-started.json": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+    "baseline/checkpoint.json": "e956f2acdce4412e608941b3a925fa385bda77bcea3a4cf0687808d10d7a6303",
+    "baseline/model.json": "63821cab1a53efb97bf9081d579fd6e9371d046d21018f31859f577a8523755f",
+    "baseline/result.json": "3db559f037f6388e6fb8e8c2e5b5418575d8ae38bb2a16aeb6d837cf951b3737",
+    "baseline/verification-outcome.json": "f683c05c1d8afa0639e170bbb32770a74831d69a2f7bc9c2c26474381990f965",
+    "baseline/verification-started.json": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+    "baseline/verification.json": "d2c4d3125dac8452f75f08c02c45add03a6d9fd90088ea90f24d9f708b01b2c7",
+    "comparison.json": "1fb7e3f8ceb46487f00d9d97efdbe6cacbb0f1460b99824072637643c6e4ee1c",
+    "request.json": "ef457141fa2377907b47f4a9215d3e76560ca62d72833cb70d4467bd2d9971ab",
+    "wider/analysis-outcome.json": "466452ceaa5e0cea1467421b7b4675dd493eff143fb8364d9a60d915c9c87ca1",
+    "wider/analysis-started.json": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800",
+    "wider/checkpoint.json": "6b8842c2595cf126a28c41ac5251c05e74dd29c4805696e31a695a429e2451c2",
+    "wider/model.json": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc",
+    "wider/result.json": "121e7d09f6363ef10b9192594b2f79486a3c6f0b0f59f798ec02aae379bebf4d",
+    "wider/verification-outcome.json": "69f856621f5f515e56ffaceb093ff418a65cf306ee7f0d3a392d2ec658fdb70e",
+    "wider/verification-started.json": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70",
+    "wider/verification.json": "fea0d27b829cc2f51df41d414fead00149405359d652c0a548b87f4aef058aa7"
+  }
+}

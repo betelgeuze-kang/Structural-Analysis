@@ -1,0 +1,31 @@
+{
+  "source_revision": "2377ac481494edc4001d4feaec98481564af9320",
+  "repository_python_run": 34739383418,
+  "repository_python_conclusion": "failure",
+  "development_job": 103676362657,
+  "development_passed": 1061,
+  "development_seconds": 1089.33,
+  "native_pr_fast_run": 34739383344,
+  "native_pr_fast_conclusion": "success",
+  "full_shards": {
+    "0": 103676362697,
+    "1": 103676362687,
+    "2": 103676362737,
+    "3": 103676362788
+  },
+  "full_shards_failed_step": "Materialize exact current-source test evidence",
+  "full_shards_pytest_step": "skipped",
+  "logs": [
+    {
+      "path": "/tmp/structural-2377-development.log",
+      "bytes": 95494,
+      "sha256": "95fbbc737522f66f97e260dc7ce45849697aeaebc54582f31a576be62df7fb4d"
+    },
+    {
+      "path": "/tmp/structural-2377-shard0.log",
+      "bytes": 98211,
+      "sha256": "8d970cc9ea2725eeef6da84ba8b298fc2d119e86b8180b59897f1c566d8be45d"
+    }
+  ],
+  "new_head_hosted_qualification": false
+}

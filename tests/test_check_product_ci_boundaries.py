@@ -92,6 +92,101 @@ def test_classification_assigns_exact_product_ownership() -> None:
         == "molecular_quarantine"
     )
 
+    assert (
+        module.classify_path(
+            "tests/test_material_trial_runtime.py", quarantined_paths=set()
+        )
+        == "core"
+    )
+    for name in (
+        "runtime_benchmark",
+        "runtime_suite",
+        "runtime_process",
+        "runtime_strategy",
+        "strategy_process",
+        "design",
+        "design_cli",
+        "warm_start_learning",
+        "warm_start_features",
+        "conditioned_warm_start_learning",
+        "conditioned_runtime",
+        "conditioned_learning_process",
+        "secant_correction_warm_start_learning",
+        "secant_correction_learning_process",
+        "warm_start_data",
+        "physical_identity",
+        "learning_study",
+        "learning_process",
+        "candidate_learning",
+        "candidate_search",
+        "candidate_search_suite",
+        "candidate_process",
+        "candidate_process_contract",
+        "candidate_material_contract",
+        "design_assembly",
+        "candidate_material_row_order",
+        "candidate_stop",
+        "candidate_stop_process",
+        "candidate_stop_suite",
+        "candidate_review",
+        "history_design",
+        "constitutive_history",
+        "constitutive_history_integration",
+        "material_history_design",
+        "material_history_design_integration",
+    ):
+        assert (
+            module.classify_path(
+                f"tests/test_fiber_frame_{name}.py", quarantined_paths=set()
+            )
+            == "core"
+        )
+
+    assert (
+        module.classify_path(
+            "tests/test_stateful_fiber_frame2d_nonlinear_history.py",
+            quarantined_paths=set(),
+        )
+        == "core"
+    )
+    assert (
+        module.classify_path(
+            "tests/test_planar_frame_public_sparse_integration.py",
+            quarantined_paths=set(),
+        )
+        == "core"
+    )
+    assert (
+        module.classify_path(
+            "tests/test_frame3d_persisted_process_restart.py", quarantined_paths=set()
+        )
+        == "core"
+    )
+    for path in (
+        "tests/test_frame3d_direct_control_request.py",
+        "tests/test_bounded_frame3d_direct_control_cli.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+    for extended_sparse_test in (
+        "tests/test_planar_frame_extended_sparse.py",
+        "tests/test_planar_frame_backend_process.py",
+        "tests/test_planar_frame_backend_comparison.py",
+        "tests/test_planar_frame_history_comparison.py",
+        "tests/test_planar_frame_history_process.py",
+        "tests/test_corotational_checkpoint_transition_recovery.py",
+        "tests/test_corotational_fiber_frame_sparse_state.py",
+        "tests/test_planar_frame_sparse_state_integration.py",
+        "tests/test_durable_extended_sparse.py",
+        "tests/test_corotational_engineering_validation_reuse.py",
+        "tests/test_extended_sparse_newton.py",
+        "tests/test_corotational_frame2d_stable_kinematics.py",
+    ):
+        assert (
+            module.classify_path(extended_sparse_test, quarantined_paths=set())
+            == "core"
+        )
+
     for structural_benchmark_path in (
         "scripts/build_analytic_frame_verification_artifact.py",
         "scripts/build_medium_benchmark_corpus_plan.py",
@@ -469,13 +564,8 @@ def test_boundary_report_blocks_ubuntu_latest_alias(tmp_path: Path) -> None:
     )
 
     assert payload["contract_pass"] is False
-    assert (
-        "workflow_not_github_hosted:.github/workflows/ci.yml"
-        in payload["blockers"]
-    )
-    assert payload["workflow_contracts"][0]["runner_labels"] == [
-        "ubuntu-latest"
-    ]
+    assert "workflow_not_github_hosted:.github/workflows/ci.yml" in payload["blockers"]
+    assert payload["workflow_contracts"][0]["runner_labels"] == ["ubuntu-latest"]
 
 
 def test_boundary_report_blocks_unknown_runner_label(tmp_path: Path) -> None:

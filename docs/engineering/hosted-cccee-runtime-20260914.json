@@ -1,0 +1,32 @@
+{
+  "head": "cccee909a8f4eb11c63724888db19617412fb859",
+  "run_id": 34772637958,
+  "jobs": [
+    {
+      "id": 103764906977,
+      "name": "python-contracts",
+      "conclusion": "success",
+      "passed_lines": [
+        "2026-09-13T17:47:55.8518560Z All checks passed!",
+        "2026-09-13T17:48:07.4949378Z 96 passed in 10.85s"
+      ],
+      "skipped_steps": []
+    },
+    {
+      "id": 103764907118,
+      "name": "frontend-contracts",
+      "conclusion": "success",
+      "passed_lines": [
+        "2026-09-13T18:03:28.6267573Z \u001b[1A\u001b[2K  706 passed (12.1m)",
+        "2026-09-13T18:05:52.1732540Z \u001b[1A\u001b[2K  26 passed (2.4m)"
+      ],
+      "skipped_steps": []
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-cccee-runtime-qhzup6no",
+    "files": 5,
+    "bytes": 193828,
+    "inventory_sha256": "c6ac311ca7701fabaec9f9f7eddda6c899a83c6ada0ca3608d4caf6544b6f285"
+  }
+}

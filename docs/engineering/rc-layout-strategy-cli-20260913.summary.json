@@ -1,0 +1,346 @@
+{
+  "test_source_base": "a82b6ad0fce805de2b958764625eea104481841b",
+  "cli_changes_present_during_tests": true,
+  "focused_cli_tests": {
+    "passed": 16,
+    "wall_s": 50.57,
+    "log_path": "/tmp/structural-layout-strategy-cli-tests.log",
+    "log_sha256": "55b8a4f51fbc2c31c3bce5147f510750af10787374d42550b0b2141ae6c9f1f0"
+  },
+  "hosted_installation": {
+    "run_id": 34723974649,
+    "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34723974649",
+    "head_sha": "dea625b1a023954a3c2f7a39168f9f55cddcdc6a",
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 103634762566,
+        "name": "build-windows-x86_64-msvc",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout exact source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Workbench build runtime",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build baseline and ephemeral update workstation generations",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload exact-source workstation archive",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Workbench build runtime",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Checkout exact source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103634762705,
+        "name": "build-linux-x86_64-gnu",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout exact source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Workbench build runtime",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build baseline and ephemeral update workstation generations",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload exact-source workstation archive",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Workbench build runtime",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Checkout exact source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635179772,
+        "name": "clean-install-windows-x86_64-msvc",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout exact verifier source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Download package built on the separate coordinate",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prove build outputs are absent and replay extracted package",
+            "conclusion": "success"
+          },
+          {
+            "name": "Replay verified install update and explicit rollback",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload clean-install replay receipt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Checkout exact verifier source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635179790,
+        "name": "clean-install-linux-x86_64-gnu",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout exact verifier source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Download package built on the separate coordinate",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prove build outputs are absent and replay extracted package",
+            "conclusion": "success"
+          },
+          {
+            "name": "Replay verified install update and explicit rollback",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload clean-install replay receipt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Checkout exact verifier source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635490666,
+        "name": "packaged-browser-replay",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout exact browser-control source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up browser control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Download Linux package",
+            "conclusion": "success"
+          },
+          {
+            "name": "Download Linux clean-install receipt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Reverify and safely extract exact package",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned browser control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload, submit, run, poll, and verify packaged ResultIR in Chromium",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload packaged browser receipt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload non-authoritative packaged browser failure diagnostic",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Set up browser control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Checkout exact browser-control source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635490701,
+        "name": "compare-linux-windows",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Checkout exact comparison source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Download exact Linux clean-install receipt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Download exact Windows clean-install receipt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Require exact same-source Linux and Windows ResultIR",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload cross-platform comparison receipt",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python control plane",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Checkout exact comparison source without LFS",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 103635841386,
+        "name": "produce-unprivileged",
+        "status": "completed",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 103635841452,
+        "name": "attest-fresh-hosted-no-repository-code",
+        "status": "completed",
+        "conclusion": "skipped",
+        "steps": []
+      }
+    ]
+  },
+  "new_cli_hosted_acceptance": false,
+  "release_approved": false,
+  "independent_physical_validation": false,
+  "learned_net_benefit": false
+}
