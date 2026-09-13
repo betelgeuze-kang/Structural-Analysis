@@ -130,3 +130,5 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 - [Residual correction actual step costs](rc-residual-parent-steps-20260913.md): 80 calls, 60 passing response comparisons; unchanged primary/assembly work plus 20 proposal assemblies. No adoption or full-path benefit.
 
 - [Hosted CI failure retention](ci-materialization-hosted-20260913.md): actual failed basic-CI run uploads exactly four allowed files; downloaded context matches its source. External comparison remains blocked.
+
+- [Direct-control API failure work consumers](rc-api-failed-work-consumers-20260913.md): two hosted stale expectations reproduced and corrected; module 95 passed, final strengthened pair 2 passed. Failed results remain blocked.

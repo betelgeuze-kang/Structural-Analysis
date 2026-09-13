@@ -526,19 +526,24 @@ def blocked(retained, model):
     return result
 
 
-def test_actual_zero_iteration_budget_failure_is_retained_with_unknown_work(blocked):
+def test_actual_zero_iteration_budget_failure_retains_measured_work(blocked):
     assert blocked.result.contract_pass is False
     call = blocked.calls[0]
     assert call["step"]["committed"] is False
     assert call["step"]["metrics"]["rollback_exact"] is True
     assert _bytes(call["parent_before"]) == _bytes(call["parent_after"])
     assert _bytes(call["step"]["accepted_checkpoint"]) == _bytes(call["parent_before"])
-    assert "iteration_count" not in call["step"]["trial_solution"]["metrics"]
+    metrics = call["step"]["trial_solution"]["metrics"]
+    # max_iterations=0 still evaluates the initial Newton state and dispatches
+    # its increment solve before returning the blocked result.
+    assert metrics["iteration_count"] == metrics["newton_iteration_count"] == 1
+    assert len(call["step"]["trial_solution"]["convergence_history"]) == 1
+    assert metrics["linear_solve_count"] == 1
     assert blocked.payload["metrics"]["control_work"] == {
         "attempted_step_count": 1,
-        "known_linear_solve_count": 0,
-        "known_newton_iteration_count": 0,
-        "unknown_solver_work_attempt_count": 1,
+        "known_linear_solve_count": 1,
+        "known_newton_iteration_count": 1,
+        "unknown_solver_work_attempt_count": 0,
     }
 
 
@@ -914,7 +919,7 @@ def test_valid_different_result_cannot_replace_the_requested_complete_path(
     assert report.to_dict()["solver_replay_performed"] is False
 
 
-def test_failed_attempt_work_cannot_be_removed_by_rehashing_all_nested_receipts(
+def test_failed_attempt_work_cannot_be_forged_by_rehashing_all_nested_receipts(
     blocked, monkeypatch
 ):
     calls = _stub_expected_source(blocked, monkeypatch)
@@ -922,6 +927,7 @@ def test_failed_attempt_work_cannot_be_removed_by_rehashing_all_nested_receipts(
     path = supplied["path"]
     attempt = path["attempts"][0]
     attempt["step"]["trial_solution"]["metrics"]["iteration_count"] = 17
+    attempt["step"]["trial_solution"]["metrics"]["newton_iteration_count"] = 17
     attempt["step"]["trial_solution"]["metrics"]["linear_solve_count"] = 17
     attempt["solver_work"]["iteration_count"] = 17
     attempt["solver_work"]["linear_solve_count"] = 17
@@ -942,7 +948,11 @@ def test_failed_attempt_work_cannot_be_removed_by_rehashing_all_nested_receipts(
     assert len(calls) == 1
     assert report.artifact_contract_pass is False
     assert report.to_dict()["replay_control_work"]["attempted_step_count"] == 1
-    assert report.to_dict()["replay_control_work"]["known_newton_iteration_count"] == 0
+    replay_work = report.to_dict()["replay_control_work"]
+    assert replay_work == blocked.payload["metrics"]["control_work"]
+    assert replay_work["known_newton_iteration_count"] == 1
+    assert replay_work["known_linear_solve_count"] == 1
+    assert replay_work["unknown_solver_work_attempt_count"] == 0
 
 
 def test_raised_source_reexecution_cannot_claim_zero_unknown_work(small, monkeypatch):
