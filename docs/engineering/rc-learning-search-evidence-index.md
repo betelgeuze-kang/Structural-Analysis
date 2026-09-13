@@ -431,3 +431,9 @@ separates verified zero activity, observed plasticity/damage and unknown failed
 paths. Read-only hash-bound replay classifies 8 undamaged, 9 damaged and 9
 unknown paths from existing packets. Parent scan costs are explicit; no new
 physical validation or AI performance claim is made.
+
+
+The [larger-frame activation screen](planar-larger-activation-20260914.md)
+completes two generated 27/48-equation paths at fixed 10x roof loads with
+observed concrete tensile damage. One dense run per case establishes candidate
+inputs for repeated backend comparison, not speedup or physical validation.
