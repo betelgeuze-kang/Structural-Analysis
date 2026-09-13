@@ -1,5 +1,16 @@
 # AI design exploration implementation register
 
+Latest bounded evidence is consolidated in the
+[evidence index](rc-learning-search-evidence-index.md). The published b8e7c54
+source passes 1,217 development, 96 runtime Python, 706 guarded frontend and 36
+actual HTTP tests; its full repository shards never execute after external
+evidence preparation fails. New local planar connectivity, failed-load-path,
+line-search/grid and partial displacement-control studies retain all outcomes
+and costs without promoting a new solver policy. Public data alias/confinement
+reviews add no independent training rows. M1–M5/P1–P3/R1–R2 remain unchanged and
+open; these observations do not replace their independent validation or net
+learned-benefit completion criteria.
+
 The [real RC search HTTP mount](rc-search-http-integration-20260910.md) now
 serves pinned, immutable candidate artifacts with per-request tenant authorization.
 Actual loopback browser/API tests pass at desktop/mobile widths with no response

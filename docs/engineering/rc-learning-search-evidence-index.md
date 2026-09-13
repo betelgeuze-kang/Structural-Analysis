@@ -1,5 +1,30 @@
 # RC learning and candidate-search evidence index
 
+The [b8e7c54 hosted runtime result](hosted-b8e-runtime-20260914.md) now records
+96 Python, 706 guarded frontend and 36 actual HTTP passes, plus 1,217 development
+contract passes in its separate lane. This covers the later historical diagnostic
+checkpoint transitions at the published source. The four full repository shards
+still skip their tests after external-evidence preparation fails. Topology's
+regression stage remains live at this update; full acceptance is not established.
+
+The [two-connectivity planar cohort](planar-topology-cohort-20260914.md) adds 18
+converged lower-load observations, while its [higher-load follow-up](planar-topology-highload-20260914.md)
+retains nine converged multi-bay tensile-damage paths and nine exact-rollback
+multi-story failures. No sparse gain or independent-project evidence follows.
+[Iteration](planar-two-story-failure-diagnostic-20260914.md) and
+[directional](planar-two-story-direction-20260914.md) diagnostics narrow the
+failure, but [longer line-search and finer-grid pilots](planar-globalization-pilots-20260914.md)
+do not complete it. Two exact repeated [displacement-control paths](planar-displacement-pilot-20260914.md)
+reach 20 mm and factor 0.5145102, then fail at 22 mm. Neither failed load control
+nor the alternate partial path proves capacity or a general recovery policy.
+
+The [rounded ACI/PEER force audit](aci-peer-rounded-force-hypothesis-20260914.md)
+reproduces the same specimen's exported values without correcting either source.
+[A1 model admission](aci-peer-a1-model-admission-20260914.md) remains held on
+cyclic high-strength confinement correspondence and original-source conditions.
+The complete roadmap, independent corpus, learned net savings and R1/R2 remain
+open. These new local records are not covered by the older published CI head.
+
 The [17010d495 topology CI](hosted-170-topology-20260914.md) subsequently finishes
 with 413 focused and 984 regression passes plus the named branch stages. All
 17010d495 workflows are now terminal, superseding earlier live snapshots. Full
