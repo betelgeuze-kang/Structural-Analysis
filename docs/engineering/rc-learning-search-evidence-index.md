@@ -134,3 +134,5 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 - [Direct-control API failure work consumers](rc-api-failed-work-consumers-20260913.md): two hosted stale expectations reproduced and corrected; module 95 passed, final strengthened pair 2 passed. Failed results remain blocked.
 
 - Development CI now explicitly includes the direct-control API failure-work module: [43-module roster receipt](rc-api-early-ci-20260913.json), 1,160 tests collected, 18 workflow tests passed; new-roster full execution remains pending.
+
+- [Historical training intervals retain all recorded sequential work](rc-nested-training-cost-20260913.md)

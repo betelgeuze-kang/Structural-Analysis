@@ -208,10 +208,50 @@ def test_rehashed_unknown_historical_label_work_rejects():
         compare([pair])
 
 
+@pytest.mark.parametrize(
+    "mutation", ["erased_wall", "erased_cpu", "wrong_phase", "raised"]
+)
+def test_rehashed_training_cannot_erase_or_relabel_recorded_invocations(mutation):
+    pair = paired()
+    learned = pair["learned_order"]
+    historical = learned["report"]["historical_training_cost"]
+    if mutation == "erased_wall":
+        # Preserve the actual child clocks while making every parent zero.
+        historical["wall_ns"] = historical["label_generation_wall_ns"] = 0
+        historical["fit"]["wall_ns"] = 0
+    elif mutation == "erased_cpu":
+        historical["cpu_ns"] = historical["fit"]["cpu_ns"] = 0
+    elif mutation == "wrong_phase":
+        historical["label_invocations"][1]["phase"] = "analysis"
+    else:
+        historical["label_invocations"][0]["status"] = "raised"
+    historical = bind(historical, "report_hash")
+    learned["report"]["historical_training_cost"] = historical
+    learned["plan"]["training_report_hash"] = historical["report_hash"]
+    rebind(learned)
+    with pytest.raises(ValueError, match="historical"):
+        compare([pair])
+
+
+@pytest.mark.parametrize("clock", ["wall_ns", "process_cpu_ns"])
+@pytest.mark.parametrize("value", [None, True, -1, 1.5, 2**53])
+def test_invalid_historical_child_clock_cannot_hide_in_valid_parent(clock, value):
+    pair = paired()
+    learned = pair["learned_order"]
+    historical = learned["report"]["historical_training_cost"]
+    historical["label_invocations"][0][clock] = value
+    historical = bind(historical, "report_hash")
+    learned["report"]["historical_training_cost"] = historical
+    learned["plan"]["training_report_hash"] = historical["report_hash"]
+    rebind(learned)
+    with pytest.raises(ValueError, match="safe integer"):
+        compare([pair])
+
+
 def test_aggregate_clock_overflow_is_not_serialized_as_an_inexact_browser_number():
     pair = paired()
-    pair['learned_order']['runtime']['wall_ns'] = 2**53 - 1
-    with pytest.raises(ValueError, match='safe integer'):
+    pair["learned_order"]["runtime"]["wall_ns"] = 2**53 - 1
+    with pytest.raises(ValueError, match="safe integer"):
         compare([pair])
 
 

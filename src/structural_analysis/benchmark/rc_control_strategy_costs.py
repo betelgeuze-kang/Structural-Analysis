@@ -208,13 +208,18 @@ def compare_rc_control_strategy_costs(pairs):
             or len(labels) != 2 * samples
         ):
             raise ValueError("complete historical label denominator required")
-        for invocation in labels:
+        label_wall, label_cpu = 0, 0
+        for index, invocation in enumerate(labels):
             work = invocation.get("work")
             if (
                 invocation.get("unknown_execution_work") is not False
                 or type(work) is not dict
+                or invocation.get("status") != "returned"
+                or invocation.get("phase") != ("analysis", "verification")[index % 2]
             ):
                 raise ValueError("known historical label work required")
+            label_wall += _nat(invocation.get("wall_ns"))
+            label_cpu += _nat(invocation.get("process_cpu_ns"))
             for key in (
                 "attempted_step_count",
                 "known_linear_solve_count",
@@ -224,10 +229,15 @@ def compare_rc_control_strategy_costs(pairs):
                 _nat(work.get(key))
             if work["unknown_solver_work_attempt_count"] != 0:
                 raise ValueError("known historical label work required")
+        # The producer runs every analysis/replay sequentially, then fits.
+        # These are nested intervals: validate containment, never add a parent
+        # to its children. Rehashing a smaller parent cannot erase recorded work.
+        generation_wall = _nat(historical["label_generation_wall_ns"])
         if (
-            _nat(historical["label_generation_wall_ns"])
-            + _nat(historical["fit"]["wall_ns"])
-            > upfront
+            _nat(label_wall) > generation_wall
+            or generation_wall + _nat(historical["fit"]["wall_ns"]) > upfront
+            or _nat(label_cpu) + _nat(historical["fit"]["cpu_ns"])
+            > _nat(historical["cpu_ns"])
         ):
             raise ValueError("historical training subintervals exceed total")
         training[historical["report_hash"]] = upfront

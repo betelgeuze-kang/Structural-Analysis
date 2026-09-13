@@ -1,0 +1,18 @@
+{
+  "base_head": "1bd0f77b4a8ff8bf17834e0e0d013899630b745b",
+  "reproduction": {
+    "original_training_wall_ns": 2715988518,
+    "retained_child_wall_ns": 2695884138,
+    "formerly_accepted_training_wall_ns": 0,
+    "rehashing_performed": true,
+    "controlled_metadata_not_new_timing": true
+  },
+  "verification": {
+    "tests_passed": 46,
+    "original_execution_count": 8,
+    "original_accounting_objects_unchanged": true,
+    "new_solver_calls": 0,
+    "new_fits": 0
+  },
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-nested-training-cost-ppmafife"
+}
