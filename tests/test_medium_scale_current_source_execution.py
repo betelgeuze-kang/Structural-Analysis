@@ -19,6 +19,7 @@ from structural_analysis.benchmark.medium_scale_execution import (
     PROFILE_ID,
     PEAK_MEMORY_LIMIT_BYTES,
     _oracle_model_payload,
+    _peak_memory,
     _sha256_json,
     _strict_json_loads,
     _symmetric_extreme_eigen_diagnostics,
@@ -38,6 +39,39 @@ from structural_analysis.benchmark.medium_scale_independent_oracle import (
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts" / "run_medium_scale_current_source_profile.py"
 SOURCE_SHA = "a" * 40
+
+
+def test_linux_peak_memory_uses_worker_address_space(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(sys, "platform", "linux")
+
+    def read_status(path, *, encoding):
+        assert path == Path("/proc/self/status")
+        assert encoding == "ascii"
+        return "Name:\tpython\nVmHWM:\t  123456 kB\nVmRSS:\t120000 kB\n"
+
+    monkeypatch.setattr(Path, "read_text", read_status)
+    assert _peak_memory() == (123456 * 1024, "Linux /proc/self/status VmHWM")
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        "",
+        "VmHWM: 0 kB",
+        "VmHWM: -1 kB",
+        "VmHWM: 12 MB",
+        "VmHWM: 1.5 kB",
+        "VmHWM: 12 kB\nVmHWM: 13 kB",
+    ],
+)
+def test_linux_peak_memory_rejects_missing_or_malformed_observation(
+    monkeypatch: pytest.MonkeyPatch,
+    status: str,
+):
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setattr(Path, "read_text", lambda *args, **kwargs: status)
+    with pytest.raises(ValueError, match="linux_worker_peak_memory_unavailable"):
+        _peak_memory()
 
 
 @pytest.mark.parametrize(
