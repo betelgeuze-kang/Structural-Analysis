@@ -20,8 +20,14 @@ The [four full Python shard logs](failure-history-boundaries-20260914.md) separa
 show failed external-evidence preparation and skipped repository test execution.
 Contract-job success does not override those missing full-suite results or
 resolve the external product-replay/technical-receipt requirements.
-Topology job 103748509126 remained live in its regression neighborhood when
-inspected; no terminal conclusion is inferred here.
+Topology job 103748509126 subsequently completed successfully: 413 focused tests
+in 1,014.56 s, named branch checks (22/86/9/28/16/13/65), and 984 regression
+checks in 891.03 s. These selections overlap and are not summed as independent
+coverage. The [terminal receipt](hosted-58f-topology-20260914.json) binds original
+job metadata/log and summary (three files, 174,301 bytes), all reread before
+sealing. It contains no skipped workflow step. A subsequent exact-head workflow
+listing returns no live runs; this ends the publication wait, not the full-suite
+or independent-verification requirements.
 
 The [receipt](hosted-58f-contracts-20260914.json) binds the three official job
 responses, original logs, collection script and summary. All eight files /

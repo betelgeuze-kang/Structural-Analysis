@@ -227,3 +227,9 @@ The [public flexural-beam source inspection](public-flexural-beam-source-2026091
 acquires an author's pinned 725-row CSV and verifies original bytes. It lacks
 campaign identifiers and full response histories; file-use permission remains
 unconfirmed. Zero rows are admitted and no source code or new fit is executed.
+
+
+The [58f6f2eb7 terminal topology receipt](hosted-58f-topology-20260914.json)
+confirms 413 focused and 984 regression passes plus named branch checks from
+original logs. All workflows for that source head are now terminal. Full Python
+repository tests still lack execution after failed external-evidence preparation.
