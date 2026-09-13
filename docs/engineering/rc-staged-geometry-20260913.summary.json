@@ -1,0 +1,377 @@
+{
+  "source_revision": "0efd85afdfe33314c70fcfdc26802d81159e0bc0",
+  "cases": {
+    "vertical_075": {
+      "pairs": [
+        {
+          "order": 0,
+          "pruned_ns": 15133392097,
+          "staged_ns": 14431865540,
+          "comparable": true,
+          "ratio": 0.953643799585483,
+          "selected": "middle"
+        },
+        {
+          "order": 1,
+          "pruned_ns": 15082562491,
+          "staged_ns": 14682620858,
+          "comparable": true,
+          "ratio": 0.973483177461479,
+          "selected": "middle"
+        },
+        {
+          "order": 2,
+          "pruned_ns": 15132826282,
+          "staged_ns": 14581815501,
+          "comparable": true,
+          "ratio": 0.9635883759760456,
+          "selected": "middle"
+        }
+      ],
+      "ratio_of_sums": 0.963560674856131
+    },
+    "vertical_125": {
+      "pairs": [
+        {
+          "order": 0,
+          "pruned_ns": 15332691121,
+          "staged_ns": 14632220921,
+          "comparable": true,
+          "ratio": 0.9543152474362038,
+          "selected": "middle"
+        },
+        {
+          "order": 1,
+          "pruned_ns": 15082071403,
+          "staged_ns": 14431249437,
+          "comparable": true,
+          "ratio": 0.9568479720981466,
+          "selected": "middle"
+        },
+        {
+          "order": 2,
+          "pruned_ns": 15283275899,
+          "staged_ns": 14632057866,
+          "comparable": true,
+          "ratio": 0.9573901539628288,
+          "selected": "middle"
+        }
+      ],
+      "ratio_of_sums": 0.9561795151804124
+    }
+  },
+  "observations": [
+    {
+      "stem": "vertical_075-o0-pruned",
+      "case": "vertical_075",
+      "order": 0,
+      "mode": "pruned",
+      "pid": 340141,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 15133392097,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 219.78137999999998,
+      "full_rows": 3,
+      "work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 218,
+          "known_newton_iteration_count": 218,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_075-o0-staged",
+      "case": "vertical_075",
+      "order": 0,
+      "mode": "staged",
+      "pid": 340170,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 14431865540,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 219.78137999999998,
+      "full_rows": 2,
+      "work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 32,
+          "known_linear_solve_count": 208,
+          "known_newton_iteration_count": 208,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_075-o1-staged",
+      "case": "vertical_075",
+      "order": 1,
+      "mode": "staged",
+      "pid": 340196,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 14682620858,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 219.78137999999998,
+      "full_rows": 2,
+      "work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 32,
+          "known_linear_solve_count": 208,
+          "known_newton_iteration_count": 208,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_075-o1-pruned",
+      "case": "vertical_075",
+      "order": 1,
+      "mode": "pruned",
+      "pid": 340220,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 15082562491,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 219.78137999999998,
+      "full_rows": 3,
+      "work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 218,
+          "known_newton_iteration_count": 218,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_075-o2-pruned",
+      "case": "vertical_075",
+      "order": 2,
+      "mode": "pruned",
+      "pid": 340276,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 15132826282,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 219.78137999999998,
+      "full_rows": 3,
+      "work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 218,
+          "known_newton_iteration_count": 218,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_075-o2-staged",
+      "case": "vertical_075",
+      "order": 2,
+      "mode": "staged",
+      "pid": 340320,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 14581815501,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 219.78137999999998,
+      "full_rows": 2,
+      "work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 32,
+          "known_linear_solve_count": 208,
+          "known_newton_iteration_count": 208,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_125-o0-pruned",
+      "case": "vertical_125",
+      "order": 0,
+      "mode": "pruned",
+      "pid": 340359,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 15332691121,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 272.91533999999996,
+      "full_rows": 3,
+      "work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 220,
+          "known_newton_iteration_count": 220,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_125-o0-staged",
+      "case": "vertical_125",
+      "order": 0,
+      "mode": "staged",
+      "pid": 340389,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 14632220921,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 272.91533999999996,
+      "full_rows": 2,
+      "work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 32,
+          "known_linear_solve_count": 210,
+          "known_newton_iteration_count": 210,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_125-o1-staged",
+      "case": "vertical_125",
+      "order": 1,
+      "mode": "staged",
+      "pid": 340435,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 14431249437,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 272.91533999999996,
+      "full_rows": 2,
+      "work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 32,
+          "known_linear_solve_count": 210,
+          "known_newton_iteration_count": 210,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_125-o1-pruned",
+      "case": "vertical_125",
+      "order": 1,
+      "mode": "pruned",
+      "pid": 340460,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 15082071403,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 272.91533999999996,
+      "full_rows": 3,
+      "work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 220,
+          "known_newton_iteration_count": 220,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_125-o2-pruned",
+      "case": "vertical_125",
+      "order": 2,
+      "mode": "pruned",
+      "pid": 340488,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 15283275899,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 272.91533999999996,
+      "full_rows": 3,
+      "work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 220,
+          "known_newton_iteration_count": 220,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    {
+      "stem": "vertical_125-o2-staged",
+      "case": "vertical_125",
+      "order": 2,
+      "mode": "staged",
+      "pid": 340528,
+      "return_code": 0,
+      "timed_out": false,
+      "parent_wall_ns": 14632057866,
+      "eligible": true,
+      "selected": "middle",
+      "estimate": 272.91533999999996,
+      "full_rows": 2,
+      "work": {
+        "api_invocation_count": 8,
+        "known_counters": {
+          "attempted_step_count": 32,
+          "known_linear_solve_count": 210,
+          "known_newton_iteration_count": 210,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    }
+  ],
+  "full_rows": 30,
+  "prefix_rows": 12,
+  "full_rows_with_observed_material_nonlinearity": 30,
+  "exact_full_repeat_matches": 24,
+  "exact_prefix_history_matches": 12,
+  "admitted_artifact_count": 540,
+  "campaign_wall_ns": 178440414886,
+  "audit_wall_ns": 3789215786,
+  "audit_new_solves": 0,
+  "new_fits": 0,
+  "independent_physical_validation": false,
+  "python_version": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+  "thread_environment": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-staged-geometry-5moe4vqm",
+    "inventory_sha256": "fbf9a3e7ba616b60a6184048f5d95485c04890de8be3cdd1967eed9c6f4f59bd",
+    "payload_file_count": 1320,
+    "payload_bytes": 166233268,
+    "protocol_sha256": "8a57ec37f6fa42111e92830b8a0887444dcdc3ad31ddf8c12e17514ff9ed2036"
+  }
+}
