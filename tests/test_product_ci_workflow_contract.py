@@ -492,7 +492,7 @@ def test_workbench_http_ci_installs_python_and_runs_real_transport_specs() -> No
     assert job.index("actions/setup-python@") < install < execute
     step = job[execute:].split("- name:", 2)[1]
     for name in (
-        "job-api", "failure-diagnostic", "failure-history", "successful-retry-history",
+        "job-api", "failure-diagnostic", "failure-history", "successful-retry-history", "checkpoint-retry-history",
         "rc-search-http", "rc-cohort-http",
     ):
         assert f"tests/frontend/workbench-v2-{name}-browser.spec.ts" in step

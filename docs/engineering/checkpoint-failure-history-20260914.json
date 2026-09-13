@@ -1,0 +1,29 @@
+{
+  "source_head": "b3b94db26fe3c176941f9646fed3b374aea7bbc6",
+  "command": [
+    "/tmp/structural-history-node-y43_kt7k/bin/node",
+    "--loader",
+    "./scripts/json-module-loader.mjs",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "tests/frontend/workbench-v2-checkpoint-retry-history-browser.spec.ts",
+    "tests/frontend/workbench-v2-successful-retry-history-browser.spec.ts",
+    "tests/frontend/workbench-v2-failure-history-browser.spec.ts",
+    "tests/frontend/workbench-v2-failure-diagnostic-browser.spec.ts",
+    "--workers=1",
+    "--reporter=line",
+    "--output=/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-checkpoint-history-spirx9k5/final-browser-results"
+  ],
+  "exit_code": 0,
+  "runner_wall_ns": 83803203275,
+  "fault_injection": "first attempt linear backend outage, real second-attempt checkpoint, unpatched third attempt",
+  "request_bytes_identical": true,
+  "independent_physical_validation": false,
+  "fresh_frontend_build": true,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-checkpoint-history-spirx9k5",
+    "files": 29,
+    "bytes": 52885047,
+    "inventory_sha256": "90af8c995c78b7727eacfa3aa682d36f2f5aafacedbdd4cc7f80c0c563c3319b"
+  }
+}

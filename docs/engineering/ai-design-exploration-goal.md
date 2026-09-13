@@ -121,6 +121,16 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-14)
 
+The [checkpoint-progress failure-history fix](checkpoint-failure-history-20260914.md)
+reproduces a real three-attempt service sequence: injected first failure, saved
+checkpoint, then unpatched success with identical request bytes. Authenticated
+historical checkpoint/body bindings let Workbench verify the original failure
+without substituting the current checkpoint. Twenty-six backend/workflow and
+22 fresh-build browser checks pass; invalid/missing bindings still reject. This
+covers the bounded no-checkpoint-to-generated-checkpoint scenario, not all restart
+histories, production incidents, independent physics or full M5 acceptance.
+
+
 The [actual successful-retry history observation](successful-retry-history-20260914.md)
 now exercises one injected first-attempt linear backend outage, a real failed
 worker/service transition and an unpatched successful retry with identical request

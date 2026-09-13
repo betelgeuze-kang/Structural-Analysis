@@ -208,6 +208,7 @@ jobs:
           tests/frontend/workbench-v2-failure-diagnostic-browser.spec.ts
           tests/frontend/workbench-v2-failure-history-browser.spec.ts
           tests/frontend/workbench-v2-successful-retry-history-browser.spec.ts
+          tests/frontend/workbench-v2-checkpoint-retry-history-browser.spec.ts
           tests/frontend/workbench-v2-rc-search-http-browser.spec.ts
           tests/frontend/workbench-v2-rc-cohort-http-browser.spec.ts
           --workers=1 --reporter=line

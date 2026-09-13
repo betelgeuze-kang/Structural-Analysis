@@ -50,11 +50,17 @@ function hash(value: unknown): value is string { return typeof value === 'string
  */
 export async function validateFailureDiagnostic(
   diagnosticBytes: Uint8Array, requestBytes: Uint8Array, job: WorkbenchJobView, attempt = job.attempt,
+  transportBinding?: { diagnosticHash: string; checkpointHash: string | null },
 ): Promise<FailureDiagnosticReview> {
   ensure(Number.isSafeInteger(attempt) && attempt > 0 && attempt <= job.attempt)
   ensure(attempt < job.attempt || (job.status === 'failed' && job.result === null && job.evidence === null))
   ensure(diagnosticBytes.byteLength <= 12 * 1024 * 1024 && requestBytes.byteLength <= 16 * 1024 * 1024)
   ensure(requestBytes.byteLength === job.request.byte_length && await sha256Bytes(requestBytes) === job.request.content_hash)
+  if (transportBinding) {
+    ensure(hash(transportBinding.diagnosticHash) && await sha256Bytes(diagnosticBytes) === transportBinding.diagnosticHash)
+    ensure(transportBinding.checkpointHash === null || hash(transportBinding.checkpointHash))
+    if (attempt === job.attempt) ensure(transportBinding.checkpointHash === (job.checkpoint?.content_hash ?? null))
+  }
   const requestDoc = document(requestBytes), request = requestDoc.value
   ensure(request.schema_version === 'structural-analysis-job-request.v1' && request.operation === 'nonlinear_frame')
   const envelopeDoc = document(diagnosticBytes), envelope = envelopeDoc.value
@@ -96,8 +102,9 @@ export async function validateFailureDiagnostic(
     ['scaled_residual_tolerance', 'residual_tolerance'], ['solver_coordinate_increment_tolerance_m', 'increment_tolerance_m'],
     ['maximum_iterations', 'maximum_iterations'], ['matrix_backend', 'matrix_backend'],
   ]) ensure(configuration[key] === authored[authoredKey])
-  ensure(configuration.restart_supplied === (job.checkpoint !== null)
-    && configuration.restart_checkpoint_artifact_hash === (job.checkpoint?.content_hash ?? null))
+  const checkpointHash = transportBinding ? transportBinding.checkpointHash : (job.checkpoint?.content_hash ?? null)
+  ensure(configuration.restart_supplied === (checkpointHash !== null)
+    && configuration.restart_checkpoint_artifact_hash === checkpointHash)
   ensure(await sha256Hex(fields(sourceDoc.raw).get('configuration')!.value) === binding.configuration_hash)
   const model = object(request.model)
   const modelIR = model.schema_version === 'structural-analysis-model-ir.v2'
@@ -148,6 +155,16 @@ export async function loadFailureDiagnostic(job: WorkbenchJobView, transport: Jo
   const requestResponse = await transport.get('request', job.request.media_type)
   if (!requestResponse.ok) throw new JobArtifactError(`failure_request_HTTP_${requestResponse.status}`)
   const request = await readBoundedJobBytes(requestResponse, 16 * 1024 * 1024, 'failure request', job.request.byte_length)
-  try { return await validateFailureDiagnostic(diagnostic, request, job, attempt) }
+  try {
+    // Only the authenticated attempt endpoint supplies this binding. Absent
+    // headers retain the older, strict current-checkpoint comparison.
+    const diagnosticHash = response.headers.get('x-structural-diagnostic-sha256')
+    const checkpoint = response.headers.get('x-structural-diagnostic-checkpoint')
+    ensure((diagnosticHash === null) === (checkpoint === null))
+    const binding = diagnosticHash === null ? undefined : {
+      diagnosticHash, checkpointHash: checkpoint === 'none' ? null : checkpoint!,
+    }
+    return await validateFailureDiagnostic(diagnostic, request, job, attempt, binding)
+  }
   catch { throw new JobArtifactError('nonlinear_failure_diagnostic_invalid') }
 }

@@ -40,8 +40,14 @@ class QuietHandler(WSGIRequestHandler):
 
 
 def main(
-    *, nonlinear_failure=False, failure_history=False, failure_history_success=False
+    *,
+    nonlinear_failure=False,
+    failure_history=False,
+    failure_history_success=False,
+    failure_history_checkpoint=False,
 ):
+    if failure_history_checkpoint:
+        nonlinear_failure = failure_history = failure_history_success = True
     assert not failure_history_success or (nonlinear_failure and failure_history)
     root = Path(__file__).resolve().parents[2]
     dist = root / "dist"
@@ -228,6 +234,7 @@ def main(
                     retry,
                     worker_id="worker",
                     authorization_token="synthetic-worker-not-launched",
+                    checkpoint_step_budget=1 if failure_history_checkpoint else None,
                 )
             except NonlinearFrameWorkerError as exc:
                 assert not failure_history_success
@@ -235,6 +242,29 @@ def main(
             else:
                 assert failure_history_success, (
                     "Expected second actual nonlinear failure"
+                )
+            if failure_history_checkpoint:
+                checkpointed = service.get_job(
+                    failed_job.job_id,
+                    tenant_id="transport-test",
+                    authorization_token="synthetic-memory-only-token",
+                )
+                assert (
+                    checkpointed.status == "checkpointed"
+                    and checkpointed.checkpoint is not None
+                )
+                continued = service.claim_next(
+                    worker_id="worker",
+                    authorization_token="synthetic-worker-not-launched",
+                )
+                assert continued is not None and continued.job.attempt == 3
+                assert continued.request_bytes == actual_claim.request_bytes
+                assert continued.checkpoint_bytes is not None
+                execute_nonlinear_frame_claim(
+                    service,
+                    continued,
+                    worker_id="worker",
+                    authorization_token="synthetic-worker-not-launched",
                 )
             failed_job = service.get_job(
                 failed_job.job_id,
@@ -311,4 +341,5 @@ if __name__ == "__main__":
             failure_history="--failure-history" in sys.argv
             or "--failure-history-success" in sys.argv,
             failure_history_success="--failure-history-success" in sys.argv,
+            failure_history_checkpoint="--failure-history-checkpoint" in sys.argv,
         )

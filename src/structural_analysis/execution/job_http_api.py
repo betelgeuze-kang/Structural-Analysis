@@ -162,15 +162,32 @@ class DurableJobHttpApi:
                 _api_fail(
                     "diagnostic_request_invalid", 400, "Specify an attempt and no body."
                 )
+            diagnostic = self.service.read_failure_diagnostic(
+                job_id,
+                attempt=ordinal,
+                tenant_id=tenant_id,
+                authorization_token=token,
+            )
+            # The service has rebuilt these bytes against the immutable attempt
+            # record, including its original checkpoint, before returning them.
+            envelope = json.loads(diagnostic)
+            source = json.loads(
+                base64.b64decode(envelope["result_bytes_base64"], validate=True)
+            )
+            checkpoint_hash = source["configuration"][
+                "restart_checkpoint_artifact_hash"
+            ]
             return JobHttpResponse(
                 200,
-                _headers("application/json"),
-                self.service.read_failure_diagnostic(
-                    job_id,
-                    attempt=ordinal,
-                    tenant_id=tenant_id,
-                    authorization_token=token,
+                MappingProxyType(
+                    {
+                        **_headers("application/json"),
+                        "x-structural-diagnostic-sha256": "sha256:"
+                        + hashlib.sha256(diagnostic).hexdigest(),
+                        "x-structural-diagnostic-checkpoint": checkpoint_hash or "none",
+                    }
                 ),
+                diagnostic,
             )
         if operation == "rc-invocations" and method == "GET":
             if body:

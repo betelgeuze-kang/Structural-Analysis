@@ -1,6 +1,7 @@
 """Real failed Newton execution, durable attempts, authorization and atomicity."""
 
 import base64
+import hashlib
 import json
 
 import pytest
@@ -84,6 +85,8 @@ def test_actual_failure_survives_reopen_and_retry_with_exact_http_bytes(tmp_path
     }
     response = api.handle("GET", url, headers=headers)
     assert response.status == 200 and response.body == original
+    assert response.headers["x-structural-diagnostic-checkpoint"] == "none"
+    assert response.headers["x-structural-diagnostic-sha256"] == "sha256:" + hashlib.sha256(original).hexdigest()
     assert api.handle("GET", url).status == 401
     assert (
         api.handle(
