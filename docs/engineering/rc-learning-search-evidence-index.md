@@ -214,3 +214,10 @@ pass fourteen tests. Synthetic successful-current and changed-checkpoint job vie
 cover consumer rules over actual failure bytes; actual successful retries and
 changed-checkpoint end-to-end history remain unqualified. Four current hosted
 Python shard logs confirm evidence preparation failures and skipped test execution.
+
+
+The [published 58f6f2eb7 contract results](hosted-58f-contracts-20260914.md)
+verify 1,176 development, 96 Runtime Python, 704 guarded frontend and 24 actual
+HTTP test passes from original source-bound logs. Full Python shards still skip
+execution after external-evidence preparation fails; later local commits are not
+covered by these hosted results.
