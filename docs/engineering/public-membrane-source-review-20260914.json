@@ -1,0 +1,43 @@
+{
+  "record_url": "https://zenodo.org/records/15463610",
+  "doi": "10.5281/zenodo.15463610",
+  "observed_via": "web-rendered landing page; metadata below is an authored observation, not archived API JSON",
+  "published": "2025-05-19",
+  "version": "v1",
+  "resource_type": "Dataset",
+  "file_name": "DATABASE_ZENODO_CatenaryAction.xlsx",
+  "listed_size": "129.9 kB",
+  "listed_md5": "0aea2e10d5d25faee8166d3ace6d5f60",
+  "file_bytes_acquired": false,
+  "checksum_verified": false,
+  "license_verified": false,
+  "training_rows_admitted": 0,
+  "new_fits": 0,
+  "new_solves": 0,
+  "original_campaign_mapping_verified": false,
+  "model_compatibility_verified": false,
+  "related_paper": "https://www.sciencedirect.com/science/article/pii/S0141029625021017",
+  "other_lead": {
+    "doi": "10.5281/zenodo.6759404",
+    "institutional_url": "https://publications.rwth-aachen.de/record/954408?ln=de",
+    "institutional_type": "Contribution to a book/Contribution to a conference proceedings",
+    "raw_dataset_verified": false
+  },
+  "existing_duplicate": "ntpr9v5h8b.1 already documented in mendeley-rc-drift-load-intake-20260909.md",
+  "acquisition": [
+    {
+      "url": "https://zenodo.org/api/records/15463610",
+      "error": "The read operation timed out"
+    },
+    {
+      "url": "https://zenodo.org/records/15463610/files/DATABASE_ZENODO_CatenaryAction.xlsx?download=1",
+      "error": "The read operation timed out"
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-public-membrane-qqb5n76k",
+    "inventory_sha256": "7b57bd7c1fc7698d852566e3599e25f2955768cc4f014f7811d002086fba0ade",
+    "files": 2,
+    "bytes": 1397
+  }
+}
