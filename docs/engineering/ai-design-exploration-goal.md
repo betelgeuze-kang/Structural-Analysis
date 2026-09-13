@@ -119,6 +119,22 @@ Workbench original-artifact review pass 115 distinct selected Python tests and
 42 frontend tests. Source reconstruction, external training admission, learned
 net benefit, hosted and independent acceptance remain open.
 
+### Current evidence interpretation (2026-09-14)
+
+The [gated learned vector execution](rc-gated-vector-steps-20260914.md) now
+connects four new case-excluded correction fits to the frozen work classifier.
+Twenty same-parent comparisons pass all sixty response checks, but gated
+correction increases inclusive linear solves 78 to 84 and Newton assemblies
+132 to 140. Oracle headroom and classifier accuracy do not justify adoption;
+training work reduction and independent full-cost benefit remain open.
+
+The [previous-failure boundary tests](failure-history-boundaries-20260914.md)
+pass fourteen selected checks, including two new tests with synthetic succeeded
+and changed-checkpoint views over real failure bytes. They qualify consumer
+branching only; actual successful retry and changed-checkpoint end-to-end
+history remain unqualified. The current 58f6f2eb7 hosted full Python shards
+again stop in external-evidence preparation, before repository test execution.
+
 ### Current evidence interpretation (2026-09-13)
 
 The [explicit line-search follow-up](rc-reinforcement-linesearch-20260913.md)

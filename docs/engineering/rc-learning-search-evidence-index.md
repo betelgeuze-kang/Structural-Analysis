@@ -207,3 +207,10 @@ connects four new learned correction fits to the frozen work gate on twenty
 original secant parents. Nine proposals and eleven abstentions increase linear
 solves 78 to 84 and assemblies 132 to 140; 60 response comparisons pass. No
 policy adoption, net benefit or independent validation is claimed.
+
+
+The [previous-failure boundary checks](failure-history-boundaries-20260914.md)
+pass fourteen tests. Synthetic successful-current and changed-checkpoint job views
+cover consumer rules over actual failure bytes; actual successful retries and
+changed-checkpoint end-to-end history remain unqualified. Four current hosted
+Python shard logs confirm evidence preparation failures and skipped test execution.

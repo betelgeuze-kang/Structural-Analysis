@@ -3,6 +3,8 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { waitForJobService } from './jobServiceBrowserWait'
+import { validateFailureDiagnostic } from '../../src/workbench-v2/model/failureDiagnostic'
+import { validateWorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 
 let server: ChildProcess, origin: string, job: any
 const credentials = { tenantId: 'transport-test', bearerToken: 'synthetic-memory-only-token' }
@@ -66,3 +68,42 @@ for (const kind of ['missing', 'wrong_attempt']) test(`historical ${kind} leaves
   await expect(history.locator('[data-failure-diagnostic]')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Failed attempt 2', exact: true })).toBeVisible()
 })
+
+// These two tests vary job-view metadata only. They validate the consumer boundary,
+// not an actually successful retry or a newly generated restart checkpoint.
+for (const state of ['succeeded', 'changed_checkpoint'] as const) {
+  test(`historical consumer contract for synthetic ${state} view`, async ({ request }) => {
+    const headers = { 'X-Structural-Tenant': credentials.tenantId, Authorization: `Bearer ${credentials.bearerToken}` }
+    const diagnostic = await request.get(`${origin}/v1/jobs/${job.job_id}/failure-diagnostics/1`, { headers })
+    const sourceRequest = await request.get(`${origin}/v1/jobs/${job.job_id}/request`, { headers })
+    expect(diagnostic.status()).toBe(200)
+    expect(sourceRequest.status()).toBe(200)
+    const bytes = await diagnostic.body(), requestBytes = await sourceRequest.body()
+    const view = structuredClone(job)
+    if (state === 'succeeded') {
+      view.status = 'succeeded'
+      view.progress.completed_steps = view.progress.total_steps
+      view.can_resume = false
+      view.error_code = null
+      view.result = { ...view.request, role: 'result' }
+      view.evidence = { ...view.request, role: 'evidence' }
+    } else {
+      view.checkpoint = { ...view.request, role: 'checkpoint' }
+      view.can_resume = true
+    }
+    const validated = validateWorkbenchJobView(view)
+    expect(validated.errors).toEqual([])
+    expect(validated.ok).toBe(true)
+    const before = JSON.stringify(view)
+    if (state === 'succeeded') {
+      const historical = await validateFailureDiagnostic(bytes, requestBytes, validated.value!, 1)
+      expect(historical.attempt).toBe(1)
+      expect(Buffer.from(historical.diagnosticBytes).equals(bytes)).toBe(true)
+      // Success never authorizes reading a failure as the current accepted result.
+      await expect(validateFailureDiagnostic(bytes, requestBytes, validated.value!)).rejects.toThrow('nonlinear_failure_diagnostic_invalid')
+    } else {
+      await expect(validateFailureDiagnostic(bytes, requestBytes, validated.value!, 1)).rejects.toThrow('nonlinear_failure_diagnostic_invalid')
+    }
+    expect(JSON.stringify(view)).toBe(before)
+  })
+}

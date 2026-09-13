@@ -1,0 +1,22 @@
+{
+  "source_head": "28209c76643e00b4648a25dc9cfffe416768087a",
+  "source_patch": "patch.diff",
+  "production_change": false,
+  "tests_passed": 14,
+  "new_contract_tests": 2,
+  "tsc_passed": true,
+  "success_state_is_synthetic": true,
+  "changed_checkpoint_is_synthetic": true,
+  "real_successful_retry_verified": false,
+  "independent_physics_verified": false,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-boundaries-lfskxj2m",
+    "inventory_sha256": "0733f1da2cd855bcbc6ceaaf2b89911a3fd9de2197da4b2bb3414a24233fa6fd",
+    "files": 15,
+    "bytes": 386100
+  },
+  "ci_shard_packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-58f-shards-ele0o0c8",
+    "inventory_sha256": "2ed91ac0451587f050292b8d26de37a3227b34c67b33376284b9dd1cce4c79fb"
+  }
+}
