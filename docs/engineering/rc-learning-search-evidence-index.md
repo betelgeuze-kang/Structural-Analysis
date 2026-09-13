@@ -193,3 +193,10 @@ authenticates eight paths and 1,936 steps without new solves. Of 968 secant step
 330 have one primary row and 482 have at least three; each case's top 25 steps
 cover only 16.6% of total primary rows. Target selection must account for this
 broad distribution and preserved terminal costs, without held-out leakage.
+
+
+The [training-only work gate](rc-work-gate-training-20260914.md) fits four fixed
+17-feature models on same-arm authenticated contexts. It finds 326 of 482
+multi-iteration steps but misses 156; case accuracy ranges from 49% to 85%.
+No gate is activated and no net savings are claimed. Failed initial lineage
+checking and its exact semantic correction are preserved.
