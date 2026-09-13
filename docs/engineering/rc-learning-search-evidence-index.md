@@ -6,6 +6,7 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [RC immutable section and compiler typing with exact fresh-result comparison](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-typed-contracts-20260913.md)
 - [Explicit intermediate steel layers through analysis, quantities and Workbench validation](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-intermediate-steel-layers-20260913.md)
 - [Perimeter reinforcement source and public-input boundary](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-perimeter-source-boundary-20260913.md)
 - [Content-keyed section identity reuse and matched public API costs](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/planar-section-cache-20260913.md)
