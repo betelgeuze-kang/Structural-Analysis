@@ -28,3 +28,5 @@ See the [source-bound observation](ci-materialization-diagnostics-20260913.json)
 This closes missing basic-CI diagnostic retention, not the external comparison
 failure, complete test execution, independent validation, or roadmap integration.
 Protected checked-in receipts were not changed.
+
+Follow-up: [actual hosted failure retention](ci-materialization-hosted-20260913.md) now verifies both successful diagnostic steps and the exact four downloaded files at f8f2f30fa. The external comparison failure remains unchanged.

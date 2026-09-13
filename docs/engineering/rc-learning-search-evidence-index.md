@@ -128,3 +128,5 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 - [Current-source development contracts](development-contracts-20260913.md): all 1,065 local tests pass at f8f2f30fa; first wrong-checkout collection failure retained. Not complete-repository or hosted qualification.
 
 - [Residual correction actual step costs](rc-residual-parent-steps-20260913.md): 80 calls, 60 passing response comparisons; unchanged primary/assembly work plus 20 proposal assemblies. No adoption or full-path benefit.
+
+- [Hosted CI failure retention](ci-materialization-hosted-20260913.md): actual failed basic-CI run uploads exactly four allowed files; downloaded context matches its source. External comparison remains blocked.
