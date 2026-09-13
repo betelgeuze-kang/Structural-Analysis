@@ -162,6 +162,63 @@ def test_original_artifacts_and_report_are_bound(actual):
     assert report["source_revision_is_attestation"] is False
 
 
+@pytest.mark.parametrize(
+    "changes,total_bar_area",
+    [
+        ({"top_bar_count": 3, "bottom_bar_count": 3}, 6 * 0.000387),
+        ({"bar_area_m2": 0.000300}, 8 * 0.000300),
+    ],
+    ids=["bar-count", "bar-area"],
+)
+def test_reinforcement_change_reanalyzes_path_and_common_cost(
+    tmp_path, changes, total_bar_area
+):
+    args = inputs()
+    original = args["baseline"].canonical_payload()
+    args["candidates"] = (
+        design.FiberFrameDesignCandidate(
+            "reinforcement", (design.FiberFrameSectionChange("RC1", **changes),)
+        ),
+    )
+    root = tmp_path / "reinforcement"
+    report = study.compare_rc_control_designs(**args, output_directory=root)
+    assert args["baseline"].canonical_payload() == original
+    assert report["status"] == "complete"
+    assert report["verified_count"] == 2
+    baseline, changed = report["rows"]
+    # Independently use the authored 2 m + 1.5 m members and steel density.
+    mass_delta = (total_bar_area - 8 * 0.000387) * 3.5 * 7850
+    assert changed["quantity_delta"]["gross_concrete_volume_m3"] == 0
+    assert changed["quantity_delta"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+        mass_delta
+    )
+    assert changed["scoped_estimate_reduction"] == pytest.approx(-mass_delta)
+    assert (
+        baseline["material_estimate"]["price_table_hash"]
+        == changed["material_estimate"]["price_table_hash"]
+    )
+    results = []
+    for row in (baseline, changed):
+        assert row["full_reference_verification_pass"] is True
+        assert row["performance"]["accepted_epoch_count"] == 3
+        assert [i["phase"] for i in row["invocations"]] == ["analysis", "verification"]
+        assert sum(i["work"]["attempted_step_count"] for i in row["invocations"]) == 6
+        assert all(not i["unknown_execution_work"] for i in row["invocations"])
+        result = json.loads((root / row["artifacts"]["result"]["path"]).read_bytes())
+        assert result["request"]["restart_input_sha256"] is None
+        assert result["path"]["initial_checkpoint"]["epoch"] == 0
+        results.append(result)
+    baseline_factor = results[0]["response_history"][-1]["load_factor"]
+    changed_factor = results[1]["response_history"][-1]["load_factor"]
+    assert changed_factor < baseline_factor
+    assert changed_factor != pytest.approx(baseline_factor, rel=1e-6, abs=1e-12)
+    model = json.loads((root / changed["artifacts"]["model"]["path"]).read_bytes())
+    section = next(s for s in model["sections"] if s["id"] == "RC1")
+    assert all(section[name] == value for name, value in changes.items())
+    assert report["selected_candidate_id"] == "reinforcement"
+    assert report["claims"]["confirmed_currency_savings"] is False
+
+
 def retained_api_doubles(actual, monkeypatch, *, reject=False, raises=False):
     """Decision plumbing only: replay saved artifacts, not new physical evidence."""
     report, root = actual
