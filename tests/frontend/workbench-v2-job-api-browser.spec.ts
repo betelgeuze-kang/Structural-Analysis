@@ -11,11 +11,12 @@ test.describe('real durable API browser authentication', () => {
   let server: ChildProcess
   let origin: string
   let realJob: WorkbenchJobView
+  let failedJob: WorkbenchJobView
   test.beforeAll(async () => {
     server = spawn('python3', ['-B', 'tests/frontend/job_transport_server.py'], {
       env: { ...process.env, PYTHONPATH: resolve('src') }, stdio: ['ignore', 'pipe', 'pipe'],
     })
-    const ready = await new Promise<{ origin: string; job: WorkbenchJobView }>((resolveReady, reject) => {
+    const ready = await new Promise<{ origin: string; job: WorkbenchJobView; failed_job: WorkbenchJobView }>((resolveReady, reject) => {
       let output = ''
       let error = ''
       const timer = setTimeout(() => reject(new Error(`test API startup timed out: ${error}`)), 15000)
@@ -31,6 +32,7 @@ test.describe('real durable API browser authentication', () => {
     })
     origin = ready.origin
     realJob = ready.job
+    failedJob = ready.failed_job
   })
   test.afterAll(async () => {
     if (!server || server.exitCode !== null || server.signalCode !== null) return
@@ -46,6 +48,8 @@ test.describe('real durable API browser authentication', () => {
     await page.goto(`${origin}/#/workbench-v2`)
     await waitForJobService(page)
     await expect(page.locator('[data-job-service]')).toHaveAttribute('data-job-status', 'queued')
+    await expect(page.locator('[data-job-error-code]')).toHaveText('none reported')
+    await expect(page.locator('[data-job-failure-scope]')).toHaveCount(0)
     await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)
     // These network reads also exercise the real WSGI original-request route.
     // The page above tests the host callback -> provider -> actual API chain.
@@ -70,4 +74,20 @@ test.describe('real durable API browser authentication', () => {
     await expect(page.locator('[data-job-service]')).toContainText('HTTP 401')
     await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)
   })
+  for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    test(`shows durable failure without numerical authority at width ${viewport.width}`, async ({ page }) => {
+      await page.setViewportSize(viewport)
+      await page.addInitScript(({ path, credentials }) => {
+        window.__STRUCTURAL_WORKBENCH_CONFIG__ = { jobStatusUrl: path, jobAuthorization: () => credentials }
+      }, { path: `/v1/jobs/${failedJob.job_id}`, credentials })
+      await page.goto(`${origin}/#/workbench-v2`)
+      await waitForJobService(page)
+      await expect(page.locator('[data-job-service]')).toHaveAttribute('data-job-status', 'failed')
+      await expect(page.locator('[data-job-error-code]')).toHaveText('synthetic_transport_failure')
+      await expect(page.locator('[data-job-failure-scope]')).toContainText('does not include every attempted calculation')
+      await expect(page.locator('[data-job-convergence]')).toHaveAttribute('data-job-convergence', 'unavailable')
+      await expect(page.locator('[data-job-result-ir]')).toHaveAttribute('data-job-result-ir', 'unavailable')
+      await expect(page.locator('[data-rc-job-review], [data-frame3d-job-review]')).toHaveCount(0)
+    })
+  }
 })

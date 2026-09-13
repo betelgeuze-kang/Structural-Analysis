@@ -70,6 +70,8 @@ export function JobServicePanel({
       </p>
       <dl className="wb2-kv">
         <dt>Job</dt><dd className="wb2-mono">{job.job_id}</dd>
+        <dt>Last service failure</dt>
+        <dd data-job-error-code>{job.error_code ?? 'none reported'}</dd>
         <dt>Request</dt><dd className="wb2-mono">{shortHash(job.request.content_hash)}</dd>
         <dt>Checkpoint</dt><dd className="wb2-mono">{job.checkpoint ? shortHash(job.checkpoint.content_hash) : 'none'}</dd>
         <dt>Result</dt><dd className="wb2-mono">{job.result ? shortHash(job.result.content_hash) : 'not published'}</dd>
@@ -90,6 +92,12 @@ export function JobServicePanel({
             : 'UNAVAILABLE'}
         </dd></> : null}
       </dl>
+      {job.error_code ? (
+        <p className="wb2-muted" data-job-failure-scope>
+          The service recorded this failure code. Saved progress does not include
+          every attempted calculation; detailed solver failure history is not available in this view.
+        </p>
+      ) : null}
       <p className="wb2-muted" data-job-authority={job.result_authority}>
         {verifiedRC ? 'Job state is orchestration evidence only. The RC review below inspects stored experimental solver artifacts.' : verified3D
           ? 'Job state is orchestration evidence only. The bounded 3D review below uses separately validated candidate API artifacts.'

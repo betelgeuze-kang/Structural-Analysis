@@ -71,6 +71,24 @@ def main():
                 },
             },
         )
+        # Exercise an actual durable failure transition without executing a solver.
+        claim = service.claim_next(
+            worker_id="worker", authorization_token="synthetic-worker-not-launched"
+        )
+        assert claim is not None
+        failed_job = service.fail_job(
+            claim.job.job_id,
+            worker_id="worker",
+            authorization_token="synthetic-worker-not-launched",
+            lease_token=claim.lease_token,
+            error_code="synthetic_transport_failure",
+        )
+        job = service.submit_job(
+            tenant_id="transport-test",
+            authorization_token="synthetic-memory-only-token",
+            idempotency_key="browser-queued-transport-fixture",
+            request=json.loads(claim.request_bytes),
+        )
         api = DurableJobWSGIApplication(service)
 
         def application(environ, start_response):
@@ -101,6 +119,7 @@ def main():
                     {
                         "origin": f"http://127.0.0.1:{server.server_port}",
                         "job": job.to_dict(),
+                        "failed_job": failed_job.to_dict(),
                     }
                 ),
                 flush=True,
