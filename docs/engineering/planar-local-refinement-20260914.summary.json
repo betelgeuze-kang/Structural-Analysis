@@ -1,0 +1,297 @@
+{
+  "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-matched-refinement-7q_xoc5w",
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "source_artifacts": [
+    {
+      "name": "layers-8.json",
+      "sha256": "183ffdf46404028d31931280d6e637a3d460f0605d5111bb362c1d6dc7cb10e2"
+    },
+    {
+      "name": "layers-16.json",
+      "sha256": "e1ead16a36168c2e4d408eba0d9ff62cea07a43ba8abe7487d6493cbaf9cd725"
+    },
+    {
+      "name": "layers-32.json",
+      "sha256": "f581fe2de44f7687c1dcb4afefd9bfe0c197c7e4da8b30d32302bbb51ec97f4c"
+    }
+  ],
+  "comparisons": [
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.25,
+      "matched_section_count": 18,
+      "metrics": {
+        "axial_strain": {
+          "normalizer": 6.660939124181198e-05,
+          "absolute_infinity_difference": 3.580306550074587e-07,
+          "relative_group_difference": 0.00537507772301507,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 0,
+          "unit": "1"
+        },
+        "curvature_z_per_m": {
+          "normalizer": 0.0006178798611752159,
+          "absolute_infinity_difference": 8.77667584615752e-06,
+          "relative_group_difference": 0.014204502197990665,
+          "within_exploratory_one_percent": false,
+          "witness_member": "E3",
+          "witness_integration_index": 2,
+          "unit": "1/m"
+        },
+        "axial_force_kn": {
+          "normalizer": 520.8321519979763,
+          "absolute_infinity_difference": 2.79951329763432,
+          "relative_group_difference": 0.005375077723015067,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 1,
+          "unit": "kN"
+        },
+        "moment_z_kn_m": {
+          "normalizer": 144.95154483634857,
+          "absolute_infinity_difference": 0.28282458251626963,
+          "relative_group_difference": 0.0019511663903656962,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E2",
+          "witness_integration_index": 0,
+          "unit": "kNm"
+        }
+      }
+    },
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.5,
+      "matched_section_count": 18,
+      "metrics": {
+        "axial_strain": {
+          "normalizer": 0.00012953273194771242,
+          "absolute_infinity_difference": 2.2520820084359627e-06,
+          "relative_group_difference": 0.01738620018718547,
+          "within_exploratory_one_percent": false,
+          "witness_member": "E1",
+          "witness_integration_index": 0,
+          "unit": "1"
+        },
+        "curvature_z_per_m": {
+          "normalizer": 0.0019660760178065685,
+          "absolute_infinity_difference": 2.2822660948262734e-05,
+          "relative_group_difference": 0.011608229153684806,
+          "within_exploratory_one_percent": false,
+          "witness_member": "E3",
+          "witness_integration_index": 2,
+          "unit": "1/m"
+        },
+        "axial_force_kn": {
+          "normalizer": 1302.3585448980873,
+          "absolute_infinity_difference": 10.38555421084402,
+          "relative_group_difference": 0.007974420140696903,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E6",
+          "witness_integration_index": 1,
+          "unit": "kN"
+        },
+        "moment_z_kn_m": {
+          "normalizer": 344.89680156767866,
+          "absolute_infinity_difference": 1.093141049765535,
+          "relative_group_difference": 0.0031694728533196597,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E5",
+          "witness_integration_index": 0,
+          "unit": "kNm"
+        }
+      }
+    },
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.75,
+      "matched_section_count": 18,
+      "metrics": {
+        "axial_strain": {
+          "normalizer": 0.0011082993604358826,
+          "absolute_infinity_difference": 2.419394422181753e-05,
+          "relative_group_difference": 0.021829791738129583,
+          "within_exploratory_one_percent": false,
+          "witness_member": "E3",
+          "witness_integration_index": 0,
+          "unit": "1"
+        },
+        "curvature_z_per_m": {
+          "normalizer": 0.0071893647825758845,
+          "absolute_infinity_difference": 0.00012834301620784448,
+          "relative_group_difference": 0.017851788035418106,
+          "within_exploratory_one_percent": false,
+          "witness_member": "E6",
+          "witness_integration_index": 2,
+          "unit": "1/m"
+        },
+        "axial_force_kn": {
+          "normalizer": 2405.5861056661292,
+          "absolute_infinity_difference": 39.01260864892174,
+          "relative_group_difference": 0.01621750664298869,
+          "within_exploratory_one_percent": false,
+          "witness_member": "E2",
+          "witness_integration_index": 0,
+          "unit": "kN"
+        },
+        "moment_z_kn_m": {
+          "normalizer": 634.617394029386,
+          "absolute_infinity_difference": 5.309433337861265,
+          "relative_group_difference": 0.008366353314317463,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 2,
+          "unit": "kNm"
+        }
+      }
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.25,
+      "matched_section_count": 18,
+      "metrics": {
+        "axial_strain": {
+          "normalizer": 6.661135809634307e-05,
+          "absolute_infinity_difference": 8.980578642363929e-08,
+          "relative_group_difference": 0.0013482053059742313,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 0,
+          "unit": "1"
+        },
+        "curvature_z_per_m": {
+          "normalizer": 0.0006157957803601372,
+          "absolute_infinity_difference": 2.0840808150786577e-06,
+          "relative_group_difference": 0.0033843700810353393,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 2,
+          "unit": "1/m"
+        },
+        "axial_force_kn": {
+          "normalizer": 520.8475312269258,
+          "absolute_infinity_difference": 0.7022094052037104,
+          "relative_group_difference": 0.0013482053059742122,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 1,
+          "unit": "kN"
+        },
+        "moment_z_kn_m": {
+          "normalizer": 144.9186740541515,
+          "absolute_infinity_difference": 0.05537402696861449,
+          "relative_group_difference": 0.00038210415138026295,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E1",
+          "witness_integration_index": 2,
+          "unit": "kNm"
+        }
+      }
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.5,
+      "matched_section_count": 18,
+      "metrics": {
+        "axial_strain": {
+          "normalizer": 0.00012977366753104863,
+          "absolute_infinity_difference": 2.409355833362108e-07,
+          "relative_group_difference": 0.0018565829872887458,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E1",
+          "witness_integration_index": 0,
+          "unit": "1"
+        },
+        "curvature_z_per_m": {
+          "normalizer": 0.0019624326600596823,
+          "absolute_infinity_difference": 4.0581796664010406e-06,
+          "relative_group_difference": 0.002067933208101837,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E4",
+          "witness_integration_index": 2,
+          "unit": "1/m"
+        },
+        "axial_force_kn": {
+          "normalizer": 1303.9873143512677,
+          "absolute_infinity_difference": 1.8231795111830138,
+          "relative_group_difference": 0.0013981573985557088,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E4",
+          "witness_integration_index": 1,
+          "unit": "kN"
+        },
+        "moment_z_kn_m": {
+          "normalizer": 344.8247088151346,
+          "absolute_infinity_difference": 0.20290924322789294,
+          "relative_group_difference": 0.0005884417155751894,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E2",
+          "witness_integration_index": 2,
+          "unit": "kNm"
+        }
+      }
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.75,
+      "matched_section_count": 18,
+      "metrics": {
+        "axial_strain": {
+          "normalizer": 0.0010998052462471986,
+          "absolute_infinity_difference": 9.905643363561367e-06,
+          "relative_group_difference": 0.009006724960952693,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 0,
+          "unit": "1"
+        },
+        "curvature_z_per_m": {
+          "normalizer": 0.007134128182695307,
+          "absolute_infinity_difference": 5.523659988057768e-05,
+          "relative_group_difference": 0.007742585844555015,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E3",
+          "witness_integration_index": 2,
+          "unit": "1/m"
+        },
+        "axial_force_kn": {
+          "normalizer": 2397.73933430233,
+          "absolute_infinity_difference": 12.912102444729385,
+          "relative_group_difference": 0.005385115162439631,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E2",
+          "witness_integration_index": 2,
+          "unit": "kN"
+        },
+        "moment_z_kn_m": {
+          "normalizer": 634.6628819832698,
+          "absolute_infinity_difference": 0.6875600556596169,
+          "relative_group_difference": 0.0010833468841143627,
+          "within_exploratory_one_percent": true,
+          "witness_member": "E4",
+          "witness_integration_index": 0,
+          "unit": "kNm"
+        }
+      }
+    }
+  ],
+  "assembly_calls": 0,
+  "structural_solves": 0,
+  "training_fits": 0,
+  "aggregation_wall_ns": 508910,
+  "metric_scope": "Same exploratory 1% group-infinity refinement screen applied to corresponding member/section resultants and generalized strains. Not pointwise relative error, physical validation or fiber-state correspondence.",
+  "independent_physical_validation": false,
+  "fiber_state_correspondence_verified": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-local-refinement-y5iu7p_3",
+    "payload_files": 2,
+    "payload_bytes": 123864,
+    "inventory_sha256": "e4b5f85d16e85ea7e12c0bd77cb1a23fc1bdfd5004e871a49ab3d4a8c60c5e76"
+  }
+}
