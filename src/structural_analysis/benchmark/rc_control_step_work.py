@@ -288,7 +288,11 @@ def analyze_rc_control_parent_step_work(report, context):
     ):
         raise ValueError("supplied accepted context binding differs")
     parent = _identity(report["initial_parent_hash"])
-    problem = _identity(report["compiled_problem_contract_hash"])
+    # Default binary64 reports bind the compiled problem through the canonical
+    # context and each arm; the extra top-level field is profile-dependent.
+    problem = _identity(context["problem_contract_hash"])
+    if report.get("compiled_problem_contract_hash", problem) != problem:
+        raise ValueError("reported compiled problem differs from accepted context")
     index = _natural(report["source_target_index"])
     targets = report["source_request"]["targets_m"]
     if index >= len(targets) or report["request"]["targets_m"] != [targets[index]]:

@@ -46,6 +46,32 @@ training label automatically.
 ## Integration boundary
 
 At this change's preparation, the published `cccee909a8f4eb11c63724888db19617412fb859`
-CI remained active: repository run `34772638019`, runtime run `34772637958`,
+CI remained active: repository Python run `34772638006`, runtime run `34772637958`,
 and execution-topology run `34772638050`. Their outcomes are not evidence for
 this subsequent local change. No push was issued to interrupt these runs.
+
+## Current solver integration follow-up
+
+The initial archived replay covered retained-arithmetic reports only. Adding
+observer assertions to existing real solver tests exposed an unsupported
+assumption: the default binary64 report does not carry a top-level
+`compiled_problem_contract_hash`. Its canonical accepted context and all four
+paths still bind that same problem. The observer now uses the hash-bound context
+identity, checks every path against it, and requires the optional top-level
+identity to match when present. A conflicting or null supplied identity rejects.
+No solver, source report schema or original numerical artifact was changed.
+
+The integration assertions exercise binary64 and retained arithmetic with a
+constant preload, valid proposals, invalid-proposal fallback and abstention to
+secant. They compare actual original arm wall times, work totals and source
+indices. They keep training and full-path performance claims false.
+
+The first combined run exposed **3 failures and 56 passes in 11.18 s**. The three
+failures were the newly asserted binary64 cases, not numerical solver failures.
+The corrected final result is recorded below.
+
+Final verification:
+`PYTHONPATH=src python3 -m pytest -q tests/test_rc_control_parent_step.py tests/test_rc_control_step_work.py`
+— **61 passed in 11.05 s**. Ruff and `git diff --check` also passed.
+This includes fresh numerical executions through both supported arithmetic
+profiles; it does not establish independent physical validity or speedup.

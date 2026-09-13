@@ -304,6 +304,8 @@ def test_parent_step_work_includes_recovery_without_training_admission():
         lambda r, c: r["accepted_context_artifact"].update(byte_length=True),
         lambda r, c: c["accepted_augmented_coordinates_m"][0].__setitem__(0, 1.0),
         lambda r, c: r.update(source_target_index=True),
+        lambda r, c: r.update(compiled_problem_contract_hash="sha256:" + "f" * 64),
+        lambda r, c: r.update(compiled_problem_contract_hash=None),
         lambda r, c: r["request"].update(control_global_dof=3),
     ],
 )

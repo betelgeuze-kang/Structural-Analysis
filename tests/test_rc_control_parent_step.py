@@ -11,6 +11,9 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )
 from structural_analysis.benchmark import rc_control_seed_runtime as runtime
+from structural_analysis.benchmark.rc_control_step_work import (
+    analyze_rc_control_parent_step_work,
+)
 from structural_analysis.io.neutral.loader import load_neutral_json
 
 
@@ -133,6 +136,20 @@ def test_actual_same_parent_step_keeps_original_prefix_and_avoids_second_preload
     assert parents[0] == origin[3]
     assert prefixes[0] == runtime._bytes(origin[4].to_dict())
     assert calls == 4
+    observed = analyze_rc_control_parent_step_work(report, origin[4].to_dict())
+    assert sum(w["core_calls"] for w in observed["work"].values()) == calls
+    assert observed["proposal_minus_secant_work"] == {
+        "core_calls": 0,
+        "newton_iterations": 0,
+        "linear_solves": 0,
+    }
+    assert observed["initial_parent_hash"] == report["initial_parent_hash"]
+    assert observed["source_target_index"] == 2
+    assert not observed["causal_training_labels_admitted"]
+    assert not observed["complete_path_performance_evidence"]
+    for name, wall_ns in observed["whole_arm_wall_ns"].items():
+        path = json.loads((tmp_path / "paired" / name / "path.json").read_bytes())
+        assert wall_ns == path["wall_ns"]
     secant = json.loads((tmp_path / "paired/secant/000-1-step.json").read_bytes())
     assert secant["accepted_checkpoint"] == origin[-1]["accepted_checkpoint"]
     assert secant["trial_assembly"] == origin[-1]["trial_assembly"]
@@ -207,6 +224,10 @@ def test_invalid_proposal_uses_original_parent_fallback(origin, tmp_path):
     assert entry["proposal_decision"] == "invalid_proposal_to_reference"
     assert entry["parent_hash"] == report["initial_parent_hash"]
     assert len(entry["invocations"]) == 1 and not entry["invocations"][0]["seed_used"]
+    observed = analyze_rc_control_parent_step_work(report, origin[4].to_dict())
+    assert observed["work"]["proposal"] == observed["work"]["reference"]
+    assert observed["whole_arm_wall_ns"]["proposal"] > 0
+    assert not observed["causal_training_labels_admitted"]
 
 
 def test_abstention_reproduces_secant_from_same_parent(origin, tmp_path):
@@ -224,3 +245,7 @@ def test_abstention_reproduces_secant_from_same_parent(origin, tmp_path):
     assert steps[0]["parent_checkpoint"] == steps[1]["parent_checkpoint"]
     assert steps[0]["accepted_checkpoint"] == steps[1]["accepted_checkpoint"]
     assert steps[0]["trial_assembly"] == steps[1]["trial_assembly"]
+    observed = analyze_rc_control_parent_step_work(report, origin[4].to_dict())
+    assert observed["work"]["proposal"] == observed["work"]["secant"]
+    assert observed["whole_arm_wall_ns"]["proposal"] > 0
+    assert not observed["complete_path_performance_evidence"]
