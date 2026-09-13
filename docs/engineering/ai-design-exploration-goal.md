@@ -121,6 +121,13 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-14)
 
+The [17010d495 topology CI](hosted-170-topology-20260914.md) subsequently finishes
+with 413 focused and 984 regression passes plus the named branch stages. All
+17010d495 workflows are now terminal, superseding earlier live snapshots. Full
+repository preparation failures and independent acceptance remain open; the later
+retry/history code requires its own hosted validation.
+
+
 The [17010d495 development/full-shard capture](hosted-170-development-20260914.md)
 records 1217 development passes while all four full-suite executions remain
 skipped after external-evidence preparation failures. Main and Draft PR #440
