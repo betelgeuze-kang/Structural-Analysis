@@ -171,3 +171,11 @@ The [ETH reversed-axial source review](eth-reversed-axial-source-review-20260914
 separates a CW steel material-test lead from QST exclusions, member bond/crack
 mechanisms and inferred stress labels. Raw-file access remains unresolved;
 no rows or independent physical-validation credit are admitted.
+
+
+The [accepted-answer seed diagnostic](rc-answer-seed-parent-steps-20260914.md)
+shows vector-seed work headroom on twenty known training parents: primary rows
+46 to 20 and Newton assemblies 132 to 80, with 60 passing response comparisons.
+It intentionally uses target answers and omits retained compensation; this is
+neither a learned benefit nor a full-path speedup. The next question is vector
+correction accuracy needed to retain work savings.
