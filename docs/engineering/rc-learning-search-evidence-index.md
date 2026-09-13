@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Blocked public planar path diagnostics and exact rollback](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/planar-failed-path-diagnostics-20260913.md)
+
 - [Public planar parity with observed steel plasticity and compressive damage](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/planar-yielded-backends-20260913.md)
 - [Package preparation, exact similarity and protected CI boundary](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/package-preparation-ci-boundary-20260913.md)
 - [Reaction-only provenance and fracture-energy source refresh](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/reaction-fracture-source-binding-20260913.md)

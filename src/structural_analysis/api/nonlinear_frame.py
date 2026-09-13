@@ -1099,6 +1099,7 @@ def _analyze_corotational_portal(
                 "solver_executed": execution is not None,
                 "exact_engineering_recovery": False,
                 "exact_checkpoint_chain_replay": False,
+                "observed_load_path": _corotational_observed_load_path(execution),
                 **_corotational_linear_solver_metrics(
                     execution,
                     matrix_backend=config.matrix_backend,
@@ -2769,6 +2770,44 @@ def _corotational_backend_contract(
         ):
             return False
     return True
+
+
+def _corotational_observed_load_path(
+    execution: _CorotationalExecution | None,
+) -> dict[str, Any] | None:
+    """Retained path diagnostics, not total API work or accepted result authority."""
+    if execution is None:
+        return None
+    steps = execution.path.steps
+    return {
+        "scope": "returned_load_path_including_replayed_prefix",
+        "total_api_work_accounted": False,
+        "attempted_step_count": len(steps),
+        "committed_step_count": sum(step.committed for step in steps),
+        "replayed_prefix_step_count": execution.replayed_prefix_step_count,
+        "newly_attempted_step_count": execution.newly_solved_step_count,
+        # A history row is not a count of all solves or line-search assemblies.
+        "convergence_history_row_count": sum(
+            len(step.trial_solution.convergence_history) for step in steps
+        ),
+        "steps": [
+            {
+                "target_load_factor": step.metrics["target_load_factor"],
+                "committed": step.committed,
+                "terminal_reason": step.metrics.get("terminal_reason"),
+                "convergence_history_row_count": len(
+                    step.trial_solution.convergence_history
+                ),
+                "failed_step_rollback_exact": (
+                    step.accepted_checkpoint.canonical_bytes()
+                    == step.parent_checkpoint.canonical_bytes()
+                    if not step.committed
+                    else None
+                ),
+            }
+            for step in steps
+        ],
+    }
 
 
 def _corotational_linear_solver_metrics(

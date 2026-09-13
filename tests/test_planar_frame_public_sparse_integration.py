@@ -225,6 +225,7 @@ def test_public_portal_rejects_other_physical_candidate_checkpoint(
     _assert_no_result_authority(rejected)
     source = rejected.to_dict()["result_ir"]
     assert source["metrics"]["solver_executed"] is False
+    assert source["metrics"]["observed_load_path"] is None
     assert source["input_checksum"] == candidate.content_hash
     assert (
         source["canonical_model_checksum"]
@@ -321,6 +322,71 @@ def test_nested_validation_does_not_change_valid_result_manifest_or_hash(
     before = deepcopy(validated.to_dict())
     assert validate_planar_frame_result(validated).engineering_result_authority is True
     assert validated.to_dict() == before
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+@pytest.mark.parametrize("load_multiplier,maximum_iterations", [(1, 1), (40, 40)])
+def test_failed_path_retains_observed_work_without_result_authority(
+    backend, load_multiplier, maximum_iterations, monkeypatch
+) -> None:
+    executions = []
+    original = nonlinear_frame_api._run_corotational_path
+
+    def capture(*args, **kwargs):
+        execution = original(*args, **kwargs)
+        executions.append(execution)
+        return execution
+
+    monkeypatch.setattr(nonlinear_frame_api, "_run_corotational_path", capture)
+    payload = _payload()
+    for pattern in payload["load_patterns"]:
+        for load in pattern["nodal_loads"]:
+            for component in load["components_si"]:
+                load["components_si"][component] *= load_multiplier
+    document = parse_model_ir_v2(
+        _bind_generated_source(payload), require_analysis_ready=True
+    )
+    result = analyze_planar_frame(
+        document,
+        PlanarFrameConfig(
+            load_steps=4, maximum_iterations=maximum_iterations, matrix_backend=backend
+        ),
+    )
+    _assert_no_result_authority(result)
+    assert len(executions) == 1
+    execution = executions[0]
+    steps = execution.path.steps
+    assert not steps[-1].committed
+    committed = sum(step.committed for step in steps)
+    assert committed == len(steps) - 1
+    if load_multiplier == 1:
+        assert committed == 0
+    else:
+        assert committed > 0
+    source = result.to_dict()["result_ir"]
+    observed = source["metrics"]["observed_load_path"]
+    assert observed["scope"] == "returned_load_path_including_replayed_prefix"
+    assert observed["total_api_work_accounted"] is False
+    assert observed["attempted_step_count"] == len(steps)
+    assert observed["committed_step_count"] == committed
+    assert observed["replayed_prefix_step_count"] == 0
+    assert observed["newly_attempted_step_count"] == len(steps)
+    count = sum(len(step.trial_solution.convergence_history) for step in steps)
+    assert count > 0
+    assert observed["convergence_history_row_count"] == count
+    for row, step in zip(observed["steps"], steps, strict=True):
+        assert row == {
+            "target_load_factor": step.metrics["target_load_factor"],
+            "committed": step.committed,
+            "terminal_reason": step.metrics["terminal_reason"],
+            "convergence_history_row_count": len(step.trial_solution.convergence_history),
+            "failed_step_rollback_exact": None if step.committed else True,
+        }
+    assert source["convergence_history"] == []
+    assert (
+        execution.path.final_checkpoint.canonical_bytes()
+        == steps[-1].parent_checkpoint.canonical_bytes()
+    )
 
 
 def _assert_no_result_authority(result) -> None:
