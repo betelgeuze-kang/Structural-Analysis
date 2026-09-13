@@ -23,3 +23,18 @@ The packet contains 3 files, 143740 bytes. Its adjacent `-inventory.json` SHA-25
 is `56b3519ad541a80afc7f1fcc9d8fe161ca937d34d600fdbb96455e79c0a1c11c`.
 The run head and terminal job status were checked before sealing. No tolerance,
 external-validation authority or protected evidence artifact was changed.
+
+## Subsequently completed full shards
+
+All four full shards in Repository Python Tests run `34772638006` subsequently
+finished with the same two original-log blockers above, at `Materialize exact
+current-source test evidence`. In every shard, `Run materialized repository test
+suite shard` was skipped. Thus the complete repository suite did not execute.
+The independent development-contract job was still live when these terminal
+shards were captured; its result must not be inferred from the shard failures.
+
+The [four-shard receipt](hosted-cccee-shards-20260914.json) retains each job ID,
+failed/skipped step names and original blocker lines. Its read-only packet is
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-cccee-shards-2p2xb6hv`:
+9 files, 418772 bytes, adjacent inventory SHA-256
+`72b99fa14e93c0434e32bce8a57dfb9c8e73d5f5bb1ae0d08f645af17f604c42`.
