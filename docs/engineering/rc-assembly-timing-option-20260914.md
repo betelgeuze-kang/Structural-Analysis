@@ -65,3 +65,32 @@ separate actual HTTP suite passed all 36 tests. The detailed failure was read
 from artifact `10326641095` (`workbench-v2-e2e.log`); this observation does not
 establish the cause or justify changing the timeout. This published run does
 not verify the local timing implementation.
+
+## Reuse experiment command
+
+The existing `scripts/diagnose_rc_control_line_search_reuse.py` runner exposes
+`--record-assembly-timing`. It forwards the option to both baseline and reuse
+arms in every repetition and records enabled timing in the study summary.
+Detailed phase durations remain in each benchmark's `comparison.json` and
+its original invocation outcomes. The enclosing comparison includes timer
+cost; dispatch durations cannot be interpreted as total user-time savings.
+Without the flag, existing runs remain untimed.
+
+For a new, nonexistent output directory, append the flag to the existing
+small, yielded-prefix or supplied-model command, for example:
+
+```sh
+PYTHONPATH=src python3 scripts/diagnose_rc_control_line_search_reuse.py \
+  /tmp/rc-reuse-timed-new-study --case small --arithmetic binary64 \
+  --repetitions 2 --record-assembly-timing
+```
+
+The runner continues to refuse existing output directories and requires an
+even repetition count. Supplied models retain the supplied full request;
+the timing option does not alter targets, preload or arithmetic selection.
+
+The reuse-runner suite passes 28 tests in 31.84 seconds. Actual supplied-input
+paths cover timed and untimed retained arithmetic, both execution orders,
+constant preload, exact baseline/reuse step bytes and recorded phase totals.
+Nonboolean timing rejects before output. The CLI help exposes the flag;
+Ruff and diff checks pass. This does not establish learned benefit or speedup.

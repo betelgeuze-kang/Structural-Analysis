@@ -98,7 +98,9 @@ def experiment_request(case, constant):
 
 def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "both",
         implementation: str = "native", *, model_path: Path | None = None,
-        request_path: Path | None = None):
+        request_path: Path | None = None, record_assembly_timing: bool = False):
+    if type(record_assembly_timing) is not bool:
+        raise ValueError("explicit boolean assembly timing required")
     if type(repetitions) is not int or repetitions < 2 or repetitions % 2:
         raise ValueError("a positive even number of order-balanced repetitions required")
     supplied = model_path is not None or request_path is not None
@@ -145,6 +147,7 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
                             model, request, source_revision=source_revision,
                             output_directory=destination, proposal=runtime.secant_seed,
                             proposal_identity=identity, record_assembly_work=True,
+                            record_assembly_timing=record_assembly_timing,
                             reuse_line_search_assembly=enabled and implementation == "native",
                             **arithmetic_kwargs,
                         )
@@ -207,6 +210,8 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
         summary["supplied_request_sha256"] = hashlib.sha256(request_raw).hexdigest()
         summary["supplied_target_count"] = len(supplied_request.targets_m)
         summary["supplied_constant_load_count"] = len(supplied_request.constant_nodal_loads)
+    if record_assembly_timing:
+        summary["assembly_timing_recording"] = True
     (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
 
@@ -219,6 +224,9 @@ if __name__ == "__main__":
     parser.add_argument("--request", type=Path)
     parser.add_argument("--arithmetic", choices=("both", "binary64", "retained"), default="both")
     parser.add_argument("--implementation", choices=("native", "wrapper"), default="native")
+    parser.add_argument("--record-assembly-timing", action="store_true",
+                        help="record phase dispatch durations; enclosing times include instrumentation")
     args = parser.parse_args()
     run(args.output, args.repetitions, args.case, args.arithmetic, args.implementation,
-        model_path=args.model, request_path=args.request)
+        model_path=args.model, request_path=args.request,
+        record_assembly_timing=args.record_assembly_timing)

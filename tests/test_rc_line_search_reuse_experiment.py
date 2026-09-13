@@ -147,15 +147,18 @@ def test_supplied_case_requires_explicit_paired_inputs(tmp_path, has_model, has_
     assert not output.exists()
 
 
-def test_supplied_case_preserves_preload_and_targets_through_native_comparison(tmp_path):
+@pytest.mark.parametrize("timing", [False, True])
+def test_supplied_case_preserves_preload_and_targets_through_native_comparison(tmp_path, timing):
     request = experiment.experiment_request("small", True)
     request_path = tmp_path / "request.json"
     request_path.write_text(json.dumps(request.to_dict()))
     model_path = Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
     output = tmp_path / "study"
     experiment.run(output, 2, case="supplied", arithmetic="retained",
-                   model_path=model_path, request_path=request_path)
+                   model_path=model_path, request_path=request_path,
+                   record_assembly_timing=timing)
     summary = json.loads((output / "summary.json").read_bytes())
+    assert ("assembly_timing_recording" in summary) is timing
     assert summary["supplied_target_count"] == 3
     assert summary["supplied_constant_load_count"] == 1
     assert summary["supplied_request_sha256"] == experiment.hashlib.sha256(
@@ -166,3 +169,18 @@ def test_supplied_case_preserves_preload_and_targets_through_native_comparison(t
         assert row["native_step_bytes_exact"]
         assert row["baseline"]["step_count"] == row["reuse"]["step_count"] == 16
         assert row["reuse"]["reused_dispatches"] > 0
+        for strategy in ("baseline", "reuse"):
+            report = json.loads((output / row[strategy]["directory"] / "comparison.json").read_bytes())
+            for phase in report["assembly_phase_work"].values():
+                if timing:
+                    assert 0 <= sum(phase["phase_wall_ns"].values()) <= report["whole_study_wall_ns"]
+                else:
+                    assert phase["phase_wall_ns"] is None
+
+
+@pytest.mark.parametrize("timing", [None, 1, "true"])
+def test_invalid_timing_rejects_before_experiment_output(tmp_path, timing):
+    output = tmp_path / "absent"
+    with pytest.raises(ValueError, match="boolean assembly timing"):
+        experiment.run(output, 2, record_assembly_timing=timing)
+    assert not output.exists()
