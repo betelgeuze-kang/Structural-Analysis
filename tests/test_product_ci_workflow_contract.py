@@ -42,6 +42,24 @@ def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     assert 'OMP_NUM_THREADS: "1"' in quality_gate
 
 
+def test_engineering_recovery_coverage_includes_checkpoint_transition_contract() -> (
+    None
+):
+    workflow = _read("fiber-frame-execution-topology-ci.yml")
+    step = workflow.split(
+        "- name: Corotational portal engineering recovery branch coverage", 1
+    )[1].split("- name:", 1)[0]
+    assert "--branch" in step
+    assert "--fail-under=90" in step
+    assert "tests/test_corotational_checkpoint_transition_recovery.py" in step
+    assert "tests/test_corotational_fiber_frame_engineering_recovery.py" in step
+    assert "tests/test_corotational_fiber_frame_general.py" in step
+    assert (
+        '- "tests/test_corotational_checkpoint_transition_recovery.py"'
+        in (workflow.split("permissions:", 1)[0])
+    )
+
+
 def test_workflow_contract_runs_raw_ancestry_regressions_from_full_checkout() -> None:
     workflow = _read("workflow-contract-ci.yml")
 
@@ -138,9 +156,9 @@ def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
         "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7" in setup_node
     )
 
-    repository_steps = workflow.split(
-        "- name: Build evidence bundle (read-only)", 1
-    )[1].split("  frontend-required:", 1)[0]
+    repository_steps = workflow.split("- name: Build evidence bundle (read-only)", 1)[
+        1
+    ].split("  frontend-required:", 1)[0]
     assert '"$TRUSTED_NPM_CLI" run ' not in repository_steps
     assert "npm run " not in repository_steps
     assert "npx " not in repository_steps
@@ -148,10 +166,7 @@ def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
     assert '"$GITHUB_WORKSPACE/node_modules/typescript/bin/tsc"' in repository_steps
     assert '"$GITHUB_WORKSPACE/node_modules/vite/bin/vite.js"' in repository_steps
     assert '"$GITHUB_WORKSPACE/node_modules/playwright/cli.js"' in repository_steps
-    assert (
-        '"$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"'
-        in repository_steps
-    )
+    assert '"$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"' in repository_steps
     assert repository_steps.count("/usr/bin/env -i") >= 7
 
 
@@ -433,3 +448,37 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
     assert "self-hosted" not in workflow
     assert "does not exercise" in workflow
     assert "hipcc" not in workflow
+
+
+def test_twofold_native_coordinate_changes_trigger_and_run_focused_checks():
+    workflow = _read("fiber-frame-execution-topology-ci.yml")
+    trigger = workflow.split("permissions:", 1)[0]
+    for path in (
+        "src/structural_analysis/solvers/nonlinear/twofold_coordinates.py",
+        "src/structural_analysis/schemas/stateful_fiber_frame2d_twofold_checkpoint_v1.schema.json",
+        "src/structural_analysis/assembly/stateful_fiber_frame2d_state.py",
+        "src/structural_analysis/assembly/stateful_fiber_frame2d_checkpoint_io.py",
+        "src/structural_analysis/elements/stateful_fiber_beam2d_state.py",
+        "tests/test_rc_control_twofold_coordinates.py",
+    ):
+        assert f'- "{path}"' in trigger
+    assert workflow.count("tests/test_rc_control_twofold_coordinates.py") == 2
+
+
+def test_frontend_failure_diagnostics_preserve_original_failure_outcome() -> None:
+    workflow = _read("frontend-web-ci.yml")
+    e2e = workflow.split("- name: Workbench v2 E2E", 1)[1].split(
+        "- name: Preserve failed Workbench browser diagnostics", 1
+    )[0]
+    assert "id: workbench_e2e" in e2e
+    assert "--trace=retain-on-failure" in e2e
+    assert "continue-on-error" not in e2e
+    upload = workflow.split("- name: Preserve failed Workbench browser diagnostics", 1)[
+        1
+    ].split("  frontend-required:", 1)[0]
+    assert "if: failure() && steps.workbench_e2e.outcome == 'failure'" in upload
+    assert "test-results/**/trace.zip" in upload
+    assert "test-results/**/error-context.md" in upload
+    assert "retention-days: 7" in upload
+    required = workflow.split("  frontend-required:", 1)[1]
+    assert 'test "$FRONTEND_RESULT" = success' in required

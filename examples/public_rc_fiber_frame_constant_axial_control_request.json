@@ -1,0 +1,11 @@
+{
+  "schema_version": "bounded-rc-fiber-direct-control-request.v2",
+  "control_global_dof": 4,
+  "targets_m": [-0.00001, -0.00002, 0.00001],
+  "constant_nodal_loads": [
+    {"node_id": "N2", "FX_kN": -600.0, "FY_kN": 0.0, "MZ_kNm": 0.0}
+  ],
+  "allow_reversals": true,
+  "maximum_reversals": 2,
+  "maximum_targets": 6
+}

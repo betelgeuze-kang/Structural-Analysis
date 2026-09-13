@@ -1,4 +1,12 @@
 import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
+import { validateFrame3DJobResult, type Frame3DJobReview } from './frame3dJobSchema'
+import { parseNativeJsonStrict } from './nativeFrameProvider'
+import { loadRcJobReview, type RcJobReview } from './rcJobReview'
+import { loadFailureDiagnostic, type FailureDiagnosticReview } from './failureDiagnostic'
+import {
+  createJobReadTransport, JobArtifactError, readBoundedJobBytes,
+  type JobAuthorizationProvider, type JobReadTransport,
+} from './jobTransport'
 import {
   validateWorkbenchJobView,
   type JobArtifactReference,
@@ -13,6 +21,16 @@ export interface JobLoadResult {
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
   engineeringResultIr?: EngineeringResultIrManifest
+  frame3dResult?: Frame3DJobReview
+  frame3dArtifacts?: Frame3DJobArtifacts
+  rcReview?: RcJobReview
+  failureDiagnostic?: FailureDiagnosticReview
+}
+
+export interface Frame3DJobArtifacts {
+  resultBytes: Uint8Array
+  evidenceBytes: Uint8Array
+  checkpointBytes: Uint8Array
 }
 
 export interface EngineeringResultIrManifest {
@@ -60,32 +78,55 @@ export interface EngineeringArrayDescriptor {
 const JOB_VIEW_MAX_BYTES = 256 * 1024
 const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
-const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
-
-export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promise<JobLoadResult> {
-  if (!url) return { status: 'unconfigured', job: null, errors: [] }
+// Python SparseFactorizationPolicy canonical hashes: unchanged diagnostic gates,
+// with only the explicitly selected exact-condition equation limit differing.
+const PLANAR_SPARSE_POLICIES: Record<string, { maximumEquations: number; hash: string }> = {
+  scipy_sparse_spsolve_cpu: {
+    maximumEquations: 256,
+    hash: 'sha256:ed5b57b4fc1cf30c4d9cc8bb3e1201e92d7d9b2de510488d3dcf2e609a2f3347',
+  },
+  scipy_sparse_splu_cpu_exact_1536: {
+    maximumEquations: 1536,
+    hash: 'sha256:dd4755cbb4469dff802b102b506b2a67f07272104931eb96b37b0fefa4d326b1',
+  },
+}
+export async function loadWorkbenchJob(
+  url: string, signal?: AbortSignal, authorize?: JobAuthorizationProvider,
+): Promise<JobLoadResult> {
+  if (!url || signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+  const callerSignal = signal
+  const controller = new AbortController()
+  const abort = () => controller.abort()
+  callerSignal?.addEventListener('abort', abort, { once: true })
+  signal = controller.signal
+  let job: WorkbenchJobView | null = null
   try {
-    const response = await fetch(url, {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-      signal,
-    })
+    const transport = await createJobReadTransport(url, signal, authorize)
+    const response = await transport.get()
     if (response.status === 404) return { status: 'missing', job: null, errors: ['job not found'] }
     if (!response.ok) return { status: 'error', job: null, errors: [`job API returned HTTP ${response.status}`] }
-    const viewBytes = await boundedBytes(response, JOB_VIEW_MAX_BYTES, 'job view')
+    const viewBytes = await readBoundedJobBytes(response, JOB_VIEW_MAX_BYTES, 'job view')
     const validation = validateWorkbenchJobView(parseJson(viewBytes, 'job view'))
     if (!validation.ok || !validation.value) {
       return { status: 'invalid', job: null, errors: validation.errors, artifactStatus: 'invalid' }
     }
-    const job = validation.value
+    job = validation.value
+    if (job.status === 'failed' && job.attempt > 0) {
+      const failureDiagnostic = await loadFailureDiagnostic(job, transport)
+      if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+      return { status: 'ready', job, errors: [], artifactStatus: 'not_published', failureDiagnostic }
+    }
     if (job.status !== 'succeeded' || !job.result || !job.evidence) {
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
     }
+    if (job.result.media_type === 'application/vnd.structural-analysis.rc-fiber-job-result+json') {
+      const rcReview = await loadRcJobReview(job, transport, callerSignal)
+      if (callerSignal?.aborted) { rcReview.dispose(); return { status: 'unconfigured', job: null, errors: [] } }
+      return { status: 'ready', job, errors: [], artifactStatus: 'verified', rcReview }
+    }
     const [result, evidence] = await Promise.all([
-      fetchArtifact(url, job.result, RESULT_MAX_BYTES, signal),
-      fetchArtifact(url, job.evidence, EVIDENCE_MAX_BYTES, signal),
+      fetchArtifact(transport, job.result, RESULT_MAX_BYTES),
+      fetchArtifact(transport, job.evidence, EVIDENCE_MAX_BYTES),
     ])
     const artifactErrors = [...result.errors, ...evidence.errors]
     if (artifactErrors.length) {
@@ -93,8 +134,6 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
     }
     const resultPayload = result.value
     const evidencePayload = evidence.value
-    const resultValidation = await validatePublishedEngineeringResultIr(resultPayload, artifactErrors)
-    const resultIr = resultValidation.value
     if (
       !record(evidencePayload)
       || evidencePayload.schema_version !== 'structural-analysis-job-completion-evidence.v1'
@@ -104,14 +143,44 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       || evidencePayload.result_artifact_hash !== job.result.content_hash
       || evidencePayload.contract_pass !== true
       || evidencePayload.solver_truth_owner !== 'structural_analysis_core'
-      || evidencePayload.validator_id !== 'structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result'
-      || !validCoreValidationReport(evidencePayload.validation_report, resultPayload)
     ) {
       artifactErrors.push('published completion evidence binding is invalid')
     }
     if (artifactErrors.length) {
       return { status: 'invalid', job, errors: artifactErrors, artifactStatus: 'invalid' }
     }
+    if (record(resultPayload) && resultPayload.schema_version === 'bounded-frame3d-job-result.v1') {
+      if (result.integrityUnavailable || evidence.integrityUnavailable) {
+        return { status: 'invalid', job, errors: ['3D artifact integrity verification is unavailable'], artifactStatus: 'integrity_unavailable' }
+      }
+      try {
+        const frame3dResult = await validateFrame3DJobResult(resultPayload, evidencePayload, job)
+        if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+        if (!result.bytes || !evidence.bytes) throw new JobArtifactError('3D original artifact bytes are unavailable')
+        return {
+          status: 'ready', job, errors: [], artifactStatus: 'verified', frame3dResult,
+          frame3dArtifacts: {
+            resultBytes: result.bytes.slice(),
+            evidenceBytes: evidence.bytes.slice(),
+            checkpointBytes: frame3dResult.terminalCheckpointBytes.slice(),
+          },
+        }
+      } catch (error: unknown) {
+        if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+        return { status: 'invalid', job, errors: [(error as Error)?.message || 'published 3D result contract is invalid'], artifactStatus: 'invalid' }
+      }
+    }
+    const resultValidation = await validatePublishedEngineeringResultIr(resultPayload, artifactErrors)
+    const resultIr = resultValidation.value
+    if (
+      !record(evidencePayload)
+      || evidencePayload.validator_id !== 'structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result'
+      || !validCoreValidationReport(evidencePayload.validation_report, resultPayload)
+    ) artifactErrors.push('published completion evidence binding is invalid')
+    if (artifactErrors.length) {
+      return { status: 'invalid', job, errors: artifactErrors, artifactStatus: 'invalid' }
+    }
+    if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
     return {
       status: 'ready',
       job,
@@ -122,52 +191,49 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       engineeringResultIr: resultIr ?? undefined,
     }
   } catch (error: unknown) {
-    if ((error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
+    if (signal?.aborted || (error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
+    if (error instanceof JobArtifactError) return { status: 'invalid', job, errors: [error.message], artifactStatus: 'invalid' }
     return { status: 'error', job: null, errors: ['job API request failed'] }
+  } finally {
+    // Stop sibling reads on any terminal outcome and release the caller link.
+    callerSignal?.removeEventListener('abort', abort)
+    controller.abort()
   }
 }
 
 async function fetchArtifact(
-  statusUrl: string,
+  transport: JobReadTransport,
   reference: JobArtifactReference,
   maximumBytes: number,
-  signal?: AbortSignal,
-): Promise<{ value: unknown; errors: string[]; integrityUnavailable: boolean }> {
-  const response = await fetch(`${statusUrl}/${reference.role}`, {
-    method: 'GET',
-    credentials: 'include',
-    cache: 'no-store',
-    headers: { Accept: reference.media_type },
-    signal,
-  })
-  if (!response.ok) return { value: null, errors: [`${reference.role} HTTP ${response.status}`], integrityUnavailable: false }
-  const bytes = await boundedBytes(response, maximumBytes, reference.role)
+): Promise<{ value: unknown; bytes: Uint8Array | null; errors: string[]; integrityUnavailable: boolean }> {
+  if (reference.byte_length > maximumBytes) throw new JobArtifactError(`${reference.role}_too_large`)
+  const response = await transport.get(reference.role, reference.media_type)
+  if (!response.ok) return { value: null, bytes: null, errors: [`${reference.role} HTTP ${response.status}`], integrityUnavailable: false }
+  const bytes = await readBoundedJobBytes(response, maximumBytes, reference.role, reference.byte_length)
   if (bytes.byteLength !== reference.byte_length) {
-    return { value: null, errors: [`${reference.role} byte length mismatch`], integrityUnavailable: false }
+    return { value: null, bytes: null, errors: [`${reference.role} byte length mismatch`], integrityUnavailable: false }
   }
   const digest = await sha256Bytes(bytes)
   if (digest !== null && digest !== reference.content_hash) {
-    return { value: null, errors: [`${reference.role} sha256 mismatch`], integrityUnavailable: false }
+    return { value: null, bytes: null, errors: [`${reference.role} sha256 mismatch`], integrityUnavailable: false }
   }
-  return { value: parseJson(bytes, reference.role), errors: [], integrityUnavailable: digest === null }
-}
-
-async function boundedBytes(response: Response, maximumBytes: number, label: string): Promise<Uint8Array> {
-  const contentType = response.headers.get('content-type') ?? ''
-  if (!JSON_CONTENT_TYPE.test(contentType)) throw new Error(`${label.replace(' ', '_')}_content_type_invalid`)
-  const declared = Number(response.headers.get('content-length'))
-  if (Number.isFinite(declared) && declared > maximumBytes) throw new Error(`${label.replace(' ', '_')}_too_large`)
-  const bytes = new Uint8Array(await response.arrayBuffer())
-  if (bytes.byteLength > maximumBytes) throw new Error(`${label.replace(' ', '_')}_too_large`)
-  return bytes
+  return { value: parseJson(bytes, reference.role), bytes, errors: [], integrityUnavailable: digest === null }
 }
 
 function parseJson(bytes: Uint8Array, label: string): unknown {
   try {
-    return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
+    const value = parseNativeJsonStrict(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
+    finiteJsonTree(value)
+    return value
   } catch {
-    throw new Error(`${label.replace(' ', '_')}_json_invalid`)
+    throw new JobArtifactError(`${label.replace(' ', '_')}_json_invalid`)
   }
+}
+
+function finiteJsonTree(value: unknown, depth = 0): void {
+  if (depth > 64 || (typeof value === 'number' && !Number.isFinite(value))) throw new JobArtifactError('job_json_invalid')
+  if (Array.isArray(value)) value.forEach((item) => finiteJsonTree(item, depth + 1))
+  else if (record(value)) Object.values(value).forEach((item) => finiteJsonTree(item, depth + 1))
 }
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -189,6 +255,10 @@ async function validatePublishedEngineeringResultIr(
     )
   ) {
     errors.push('published result contract is unsupported')
+    return { value: null, integrityUnavailable: false }
+  }
+  if (!validPublishedPlanarBackend(value)) {
+    errors.push('published planar backend contract is invalid')
     return { value: null, integrityUnavailable: false }
   }
   const ir = value.engineering_result_ir
@@ -242,6 +312,69 @@ async function validatePublishedEngineeringResultIr(
     return { value: null, integrityUnavailable }
   }
   return { value: manifest, integrityUnavailable }
+}
+
+function validPublishedPlanarBackend(value: Record<string, unknown>): boolean {
+  // Typed API results must retain the complete execution declaration; deleting
+  // backend metadata cannot turn an invalid solver contract into a projection.
+  const config = value.configuration
+  const metrics = value.metrics
+  const history = value.convergence_history
+  if (!record(config) || !record(metrics) || !Array.isArray(history) || config.profile !== value.profile) return false
+  const backend = config.matrix_backend
+  const hashes = metrics.sparse_factorization_diagnostic_hashes
+  const count = metrics.sparse_factorization_count
+  const noSparseExecution = metrics.sparse_backend_used === false
+    && metrics.native_sparse_assembly_used === false
+    && count === 0
+    && Array.isArray(hashes) && hashes.length === 0
+    && metrics.sparse_factorization_policy_hash === null
+  if (backend === 'numpy_linalg_solve_dense') {
+    return config.stiffness_storage === 'numpy_dense_ndarray' && noSparseExecution
+  }
+  if (typeof backend !== 'string' || !Object.prototype.hasOwnProperty.call(PLANAR_SPARSE_POLICIES, backend)
+    || config.stiffness_storage !== 'scipy_sparse_csr') return false
+  if (metrics.solver_executed === false && metrics.no_solve_contract_pass === true) {
+    const bindings = value.contract_bindings
+    if (!record(bindings)) return false
+    const plan = bindings.bounded_planar_execution_plan
+    return noSparseExecution
+      && metrics.sparse_factorization_diagnostics_passed === false
+      && ['sparse_factorization_max_condition_number_1', 'sparse_factorization_min_normalized_absolute_pivot', 'sparse_factorization_max_backward_error']
+        .every((name) => metrics[name] === null)
+      && history.length === 0
+      && metrics.terminal_physical_residual_trace_status === 'unavailable'
+      && metrics.terminal_physical_residual_trace_reason === 'no_free_equations_no_convergence_claim'
+      && metrics.terminal_physical_residual_trace_hash === null
+      && record(config.equation_scaling) && config.equation_scaling.status === 'unavailable'
+      && !('physical_equation_scaling_binding_hash' in bindings)
+      && !('terminal_physical_residual_trace_hash' in bindings)
+      && (plan === undefined || plan === null || (record(plan) && plan.equation_scaling_status === 'unavailable'))
+  }
+  const policy = PLANAR_SPARSE_POLICIES[backend]
+  if (metrics.solver_executed !== true || metrics.sparse_backend_used !== true
+    || metrics.native_sparse_assembly_used !== true || metrics.sparse_factorization_diagnostics_passed !== true
+    || !integerInRange(count, 1) || count !== history.length
+    || !Array.isArray(hashes) || hashes.length !== count || !hashes.every(hash)
+    || metrics.sparse_factorization_policy_hash !== policy.hash) return false
+  let equationCount: number | undefined
+  for (const row of history) {
+    if (!record(row)) return false
+    for (const name of ['free_displacements_m', 'residual_kn', 'newton_increment_m']) {
+      const vector = row[name]
+      if (!Array.isArray(vector)) return false
+      equationCount ??= vector.length
+      if (vector.length !== equationCount || !vector.every((number) => typeof number === 'number' && Number.isFinite(number))) return false
+    }
+  }
+  return integerInRange(equationCount, 1, policy.maximumEquations)
+    && finiteInRange(metrics.sparse_factorization_max_condition_number_1, 0, 1e12)
+    && finiteInRange(metrics.sparse_factorization_min_normalized_absolute_pivot, 1e-14, 1)
+    && finiteInRange(metrics.sparse_factorization_max_backward_error, 0, 1e-12)
+}
+
+function finiteInRange(value: unknown, minimum: number, maximum: number): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value >= minimum && value <= maximum
 }
 
 function validEngineeringResultIrShape(value: unknown): value is Record<string, unknown> {

@@ -3,6 +3,7 @@ name: Native Frame Alpha Clean Install
 on:
   pull_request:
     paths:
+      - "scripts/with-ubuntu-apt-sources.sh"
       - ".github/workflows/native-frame-alpha-clean-install.yml"
       - ".github/workflows/_technical-evidence-attest.yml"
       - "native/**"
@@ -25,6 +26,7 @@ on:
   push:
     branches: ["main"]
     paths:
+      - "scripts/with-ubuntu-apt-sources.sh"
       - ".github/workflows/native-frame-alpha-clean-install.yml"
       - ".github/workflows/_technical-evidence-attest.yml"
       - "native/**"
@@ -431,7 +433,7 @@ jobs:
           set -euo pipefail
           npm ci --ignore-scripts --engine-strict --prefer-offline --no-audit --no-fund \
             --registry=https://registry.npmjs.org/ --strict-ssl=true
-          npx --no-install playwright install --with-deps chromium
+          bash scripts/with-ubuntu-apt-sources.sh npx --no-install playwright install --with-deps chromium
 
       - name: Upload, submit, run, poll, and verify packaged ResultIR in Chromium
         shell: bash

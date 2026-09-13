@@ -579,3 +579,39 @@ def test_ai_namespace_exports_real_controller_and_adapter_symbols() -> None:
     assert ai.create_fiber_frame_solver_episode_adapter is (
         create_fiber_frame_solver_episode_adapter
     )
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_episode_config_identity_distinguishes_polishing_without_legacy_fields(enabled):
+    from structural_analysis.ai.fiber_frame_solver_episode_adapter import (
+        _config_payload,
+    )
+
+    config = NewtonRaphsonConfig(terminal_polishing=enabled)
+    expected = {
+        "residual_tolerance": 1e-10,
+        "increment_tolerance": 1e-12,
+        "max_iterations": 25,
+        "line_search_alphas": [1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125],
+        "matrix_backend": "numpy_linalg_solve_dense",
+    }
+    if enabled:
+        expected.update(
+            terminal_polishing=True,
+            terminal_polishing_profile="newton-vector-terminal-polishing.v1",
+        )
+    assert _config_payload(config) == expected
+
+
+@pytest.mark.parametrize("value", [1, None, "true"])
+def test_episode_config_rejects_mutated_nonboolean_polishing(value):
+    from structural_analysis.ai.fiber_frame_solver_episode_adapter import (
+        _config_payload,
+    )
+
+    config = NewtonRaphsonConfig()
+    object.__setattr__(config, "terminal_polishing", value)
+    with pytest.raises(
+        FiberFrameSolverEpisodeAdapterError, match="polishing_config_invalid"
+    ):
+        _config_payload(config)

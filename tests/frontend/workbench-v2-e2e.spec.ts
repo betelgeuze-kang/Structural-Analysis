@@ -533,10 +533,13 @@ test.describe('Workbench v2 — commercial layout, review draft, benchmarks', ()
     }
   })
 
-  test('Compare section is an honest placeholder, never synthesized', async ({ page }) => {
+  test('unconfigured benchmark and physical comparisons expose no synthesized results', async ({ page }) => {
     await open(page)
     const compare = page.locator('#wb2-sec-compare')
-    await expect(compare.locator('[data-wb2-unavailable]')).toBeVisible()
+    await expect(compare.locator('[data-compare-panel] [data-compare-empty]')).toBeVisible()
+    await expect(compare.locator('[data-compare-row]')).toHaveCount(0)
+    await expect(compare.locator('[data-design-comparison="unconfigured"] [data-wb2-unavailable]')).toBeVisible()
+    await expect(compare.locator('[data-design-candidate]')).toHaveCount(0)
   })
 
   test('reviewer draft persists locally and never becomes an automated verdict', async ({ page }) => {

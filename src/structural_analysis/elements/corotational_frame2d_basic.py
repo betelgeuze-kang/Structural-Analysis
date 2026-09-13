@@ -39,6 +39,7 @@ COROTATIONAL_FRAME2D_BASIC_FORCE_ORDER = (
     "moment_j_kN_m",
 )
 COROTATIONAL_FRAME2D_ANGLE_BRANCH_POLICY = "principal_atan2_current_minus_initial.v1"
+_SMALL_RELATIVE_CHORD_CHANGE = math.sqrt(math.sqrt(np.finfo(np.float64).eps))
 
 
 def _finite_scalar(value: Any, *, name: str) -> float:
@@ -243,23 +244,47 @@ def corotational_frame2d_basic_kinematics(
         ],
         dtype=np.float64,
     )
-    current_chord = initial_chord + chord_difference @ displacements
+    relative_translation = chord_difference @ displacements
+    current_chord = initial_chord + relative_translation
     current_length = float(np.linalg.norm(current_chord))
     if not math.isfinite(current_length) or current_length <= 1.0e-9 * initial_length:
         raise ValueError("frame element current chord is degenerate")
 
     cosine = float(current_chord[0] / current_length)
     sine = float(current_chord[1] / current_length)
-    current_angle = math.atan2(current_chord[1], current_chord[0])
-    raw_angle_change = current_angle - initial_angle
-    angle_change = math.atan2(
-        math.sin(raw_angle_change),
-        math.cos(raw_angle_change),
-    )
+    if (
+        math.hypot(*relative_translation)
+        <= _SMALL_RELATIVE_CHORD_CHANGE * initial_length
+    ):
+        # In this regime subtracting chord lengths can lose at least a quarter
+        # of the float64 significand. Evaluate (L**2-L0**2)/(L+L0) instead,
+        # retaining translations smaller than one ulp of the chord. Scaling
+        # bounds the products; it does not change the kinematic equation.
+        length_scale = max(initial_length, current_length)
+        x, y = initial_chord / length_scale
+        dx, dy = relative_translation / length_scale
+        extension = length_scale * (
+            math.fsum((2.0 * x * dx, 2.0 * y * dy, dx * dx, dy * dy))
+            / (current_length / length_scale + initial_length / length_scale)
+        )
+        # cross(d0, d0+du) = cross(d0, du) avoids subtracting absolute angles.
+        relative_cross = math.fsum((x * dy, -y * dx))
+        relative_dot = math.fsum((x * x, y * y, x * dx, y * dy))
+        angle_change = math.atan2(relative_cross, relative_dot)
+    else:
+        # For large chord motion the expanded squared-length terms can cancel,
+        # particularly under finite rigid rotation. Preserve the direct norm
+        # evaluation and the signed principal-angle boundary at a half turn.
+        extension = current_length - initial_length
+        current_angle = math.atan2(current_chord[1], current_chord[0])
+        raw_angle_change = current_angle - initial_angle
+        angle_change = math.atan2(
+            math.sin(raw_angle_change), math.cos(raw_angle_change)
+        )
 
     basic_deformations = np.asarray(
         [
-            current_length - initial_length,
+            extension,
             displacements[2] - angle_change,
             displacements[5] - angle_change,
         ],

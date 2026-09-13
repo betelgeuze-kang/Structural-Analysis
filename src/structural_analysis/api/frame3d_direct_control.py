@@ -7,7 +7,7 @@ from importlib import resources
 import json
 import math
 from types import MappingProxyType
-from typing import Any, Literal, Mapping, NoReturn
+from typing import Any, Callable, Literal, Mapping, NoReturn
 
 from jsonschema import Draft202012Validator
 
@@ -23,6 +23,9 @@ from structural_analysis.assembly.stateful_corotational_frame3d_displacement_con
     StatefulCorotationalFrame3DDisplacementControlCyclicResumeBinding,
     StatefulCorotationalFrame3DDisplacementControlError,
     StatefulCorotationalFrame3DDisplacementControlResumeBinding,
+    _target_chain_advance_payload,
+    _target_chain_cutback_payload,
+    _target_chain_genesis_hash,
     run_stateful_corotational_frame3d_displacement_control_path,
     validate_stateful_corotational_frame3d_displacement_control_resume_binding,
 )
@@ -197,6 +200,11 @@ class BoundedFrame3DDirectControlResult:
         repr=False,
         compare=False,
     )
+    _target_chain_proofs: tuple[Mapping[str, Any], ...] = field(
+        default=(),
+        repr=False,
+        compare=False,
+    )
 
     def __post_init__(self) -> None:
         for name in (
@@ -209,6 +217,7 @@ class BoundedFrame3DDirectControlResult:
             "checkpoint_artifact",
             "authority",
             "warnings",
+            "_target_chain_proofs",
         ):
             object.__setattr__(self, name, _deep_freeze_json(getattr(self, name)))
 
@@ -221,13 +230,27 @@ class BoundedFrame3DDirectControlResult:
         return _result_payload(self, include_result_hash=True)
 
 
+class _BeforeSolveAttemptError(RuntimeError):
+    """Keep external orchestration failures outside numerical error conversion."""
+
+    def __init__(self, original: Exception) -> None:
+        self.original = original
+        super().__init__(str(original))
+
+
 def analyze_bounded_frame3d_direct_control_model_ir(
     document: ModelIRDocument,
     config: BoundedFrame3DDirectControlConfig,
     *,
     restart_checkpoint_artifact: bytes | bytearray | memoryview | None = None,
+    before_solve_attempt: Callable[[], None] | None = None,
 ) -> BoundedFrame3DDirectControlResult:
-    """Run one source-bound bounded Frame3D direct-control request."""
+    """Run one source-bound bounded Frame3D direct-control request.
+
+    The optional orchestration hook runs before each numerical attempt, including
+    adaptive retries. Hook failures propagate before the next attempt starts.
+    The hook is outside the immutable numerical configuration and resume hash.
+    """
 
     if type(document) is not ModelIRDocument:
         _fail(
@@ -250,6 +273,18 @@ def analyze_bounded_frame3d_direct_control_model_ir(
             "/restart_checkpoint_artifact",
             "restart checkpoint artifact must be bytes-like",
         )
+    if before_solve_attempt is not None and not callable(before_solve_attempt):
+        raise ValueError("before_solve_attempt must be callable or None")
+    execution_options: dict[str, Any] = {}
+    if before_solve_attempt is not None:
+
+        def invoke_before_solve_attempt() -> None:
+            try:
+                before_solve_attempt()
+            except Exception as error:
+                raise _BeforeSolveAttemptError(error) from error
+
+        execution_options["before_solve_attempt"] = invoke_before_solve_attempt
     try:
         adapter = adapt_bounded_frame3d_direct_control_model_ir_v2(document)
     except BoundedFrame3DDirectControlModelIRAdapterError as error:
@@ -330,6 +365,7 @@ def analyze_bounded_frame3d_direct_control_model_ir(
                 config=config.solver_config,
                 resume_from=resume_from,
                 resume_binding=resume_binding,
+                **execution_options,
             )
         )
         final_checkpoint = solver_result.final_checkpoint
@@ -353,6 +389,8 @@ def analyze_bounded_frame3d_direct_control_model_ir(
             + config.solver_config.frame_config.residual_absolute_tolerance_kn
             / equation_scaling.reference_force_kn
         )
+    except _BeforeSolveAttemptError as error:
+        raise error.original
     except (
         StatefulCorotationalFrame3DDisplacementControlError,
         StatefulCorotationalFrame3DSparseError,
@@ -503,6 +541,76 @@ def analyze_bounded_frame3d_direct_control_model_ir(
             "release_eligible": False,
         }
     )
+    target_chain_proofs: list[dict[str, Any]] = []
+    if (
+        before_solve_attempt is not None
+        and config.solver_config.allow_direction_reversal
+    ):
+        previous_chain = (
+            resume_binding.accepted_target_chain_hash
+            if type(resume_binding)
+            is StatefulCorotationalFrame3DDisplacementControlCyclicResumeBinding
+            else _target_chain_genesis_hash(
+                model=model,
+                config=config.solver_config,
+                control_global_dof=control_global_dof,
+                checkpoint=solver_result.checkpoints[0],
+            )
+        )
+        previous_direction = (
+            resume_binding.last_completed_leg_direction_sign
+            if type(resume_binding)
+            is StatefulCorotationalFrame3DDisplacementControlCyclicResumeBinding
+            else None
+        )
+        previous_target = accepted_coordinate
+        accepted_step_iterator = iter(
+            step for step in solver_result.steps if step.committed
+        )
+        for local_index, checkpoint_hash in enumerate(
+            solver_result.completed_requested_target_checkpoint_hashes
+        ):
+            accepted_steps = []
+            for step in accepted_step_iterator:
+                accepted_steps.append(step)
+                if step.accepted_checkpoint.checkpoint_hash == checkpoint_hash:
+                    break
+            target = config.control_targets[local_index]
+            direction = 1 if target > previous_target else -1
+            target_index = prior_cumulative_target_count + local_index + 1
+            cutbacks = tuple(
+                row
+                for row in solver_result.target_cutback_history
+                if row.cumulative_target_index == target_index
+            )
+            preimage = _target_chain_advance_payload(
+                previous_chain_hash=previous_chain,
+                cumulative_target_index=target_index,
+                authored_target=target,
+                leg_direction_sign=direction,
+                reversal_from_previous_leg=previous_direction is not None
+                and direction != previous_direction,
+                requested_boundary_checkpoint_hash=checkpoint_hash,
+                accepted_steps=tuple(accepted_steps),
+                cutback_attempts=cutbacks,
+            )
+            target_chain_proofs.append(
+                {
+                    "preimage": preimage,
+                    "cutback_history": [
+                        _target_chain_cutback_payload(row) for row in cutbacks
+                    ],
+                }
+            )
+            previous_chain = canonical_hash(preimage)
+            previous_target, previous_direction = target, direction
+        if (
+            target_chain_proofs
+            and previous_chain != solver_result.accepted_target_chain_hash
+        ):
+            raise ValueError(
+                "retained target-chain preimage differs from the actual solver chain"
+            )
     provisional = BoundedFrame3DDirectControlResult(
         schema_version=BOUNDED_FRAME3D_DIRECT_CONTROL_RESULT_SCHEMA_VERSION,
         profile=BOUNDED_FRAME3D_DIRECT_CONTROL_API_PROFILE,
@@ -527,6 +635,7 @@ def analyze_bounded_frame3d_direct_control_model_ir(
             "engineering_design_review_required",
         ),
         _checkpoint_artifact_bytes=artifact_bytes,
+        _target_chain_proofs=tuple(target_chain_proofs),
     )
     result = BoundedFrame3DDirectControlResult(
         **{

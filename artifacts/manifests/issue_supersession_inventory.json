@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-08-31T19:26:46Z",
+  "observed_at": "2026-09-07T22:45:28Z",
   "observation_source": "gh_cli_read_only_current_github_state",
-  "observed_open_issue_count": 7,
+  "observed_open_issue_count": 9,
   "open_issue_numbers": [
     247,
     258,
@@ -11,9 +11,11 @@
     290,
     291,
     293,
-    297
+    297,
+    433,
+    435
   ],
-  "open_issue_projection_sha256": "sha256:4f7175ef1eb4989c7bf9dd12362840abfcfff60607e2e4d10239ffbeb2deacb5",
+  "open_issue_projection_sha256": "sha256:1fd456cc45c9af8993dc6ec6d0307e36d5207834d1e22286cd26852bd4ac30b0",
   "open_issues": [
     {
       "number": 247,
@@ -154,6 +156,38 @@
         "legal_authority"
       ],
       "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 433,
+      "title": "Detect ambiguous supplemental uploads and preserve bounded transport diagnostics",
+      "state": "open",
+      "updated_at": "2026-09-07T01:05:50Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/433",
+      "body_sha256": "sha256:edfa696e0292b3ad5c274a5cd5da63bd52f20467935acee196944bc6595db867",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [432],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_producer_transport_verification_tests_and_reviewed_pr_integration",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 435,
+      "title": "Prepare a tested exact-ID supplemental consumer boundary before Product State wiring",
+      "state": "open",
+      "updated_at": "2026-09-07T01:14:57Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/435",
+      "body_sha256": "sha256:d32b82a702327561f4fcd8c6b87d0d97634a604e29fcd9c7d6cf58524f9fd9be",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [434],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_exact_id_consumer_boundary_and_offline_transport_archive_regressions",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
       "current_product_authority": false
     }
   ],

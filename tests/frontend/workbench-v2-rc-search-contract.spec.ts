@@ -1,0 +1,244 @@
+import { expect, test } from '@playwright/test'
+import { costOptimality } from '../../src/workbench-v2/model/rcControlSearchCost'
+import { readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { validateRcControlSearch } from '../../src/workbench-v2/model/rcControlSearchSchema'
+import { fields, document, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
+const root = 'tests/frontend/fixtures/rc-control-search/'
+const read = async (path: string) => new Uint8Array(readFileSync(root + path))
+const original = readFileSync(root + 'result.json')
+const hash = (s: string) => `sha256:${createHash('sha256').update(s).digest('hex')}`
+function changed(raw: string, changes: Record<string, string>, hashField: string): Uint8Array {
+  const values = new Map([...fields(raw)].map(([k, v]) => [k, v.value]))
+  values.delete(hashField)
+  for (const [key, value] of Object.entries(changes)) values.set(key, value)
+  const serialize = () => `{${[...values].sort(([a], [b]) => a < b ? -1 : 1).map(([k, v]) => `${JSON.stringify(k)}:${v}`).join(',')}}`
+  values.set(hashField, JSON.stringify(hash(serialize())))
+  return new TextEncoder().encode(serialize())
+}
+test('RC search validates original pool, full-path designs, costs and later coverage', async () => {
+  const review = await validateRcControlSearch(original, read)
+  expect(Object.keys(review.designs).sort()).toEqual(['exhaustive_oracle', 'learned_order', 'price_order'])
+  expect(review.plan.pool).toHaveLength(4)
+  for (const name of ['learned_order', 'price_order']) {
+    expect(review.report.arms[name].selected_candidate_id).toBe('cheap')
+    expect(review.report.arms[name].execution_work.known_counters.attempted_step_count).toBe(32)
+    expect(review.report.candidate_coverage_audit.arms[name].missed_feasible_candidate_ids).toEqual(['middle', 'costly'])
+  }
+  expect(review.designs.learned_order.models.cheap.sections[0].width_m).toBe(.36)
+  expect(review.report.historical_training_cost.sample_count).toBe(3)
+  expect(review.costOptimality.pool_minimum_feasible_candidate_ids).toEqual(['cheap'])
+  expect(review.costOptimality.arms.learned_order.missed_cheaper_feasible_count).toBe(0)
+})
+test('RC search without an oracle preserves unavailable counts and avoids oracle reads', async () => {
+  const directory = 'tests/frontend/fixtures/rc-control-search-no-oracle/'
+  const paths: string[] = []
+  const review = await validateRcControlSearch(readFileSync(directory + 'result.json'), async p => { paths.push(p); return new Uint8Array(readFileSync(directory + p)) })
+  expect(paths.some(p => p.includes('exhaustive_oracle'))).toBe(false)
+  expect(review.report.oracle).toBeNull()
+  expect(review.report.candidate_coverage_audit.arms.learned_order.false_safe_count).toBeNull()
+  expect(review.report.candidate_coverage_audit.arms.price_order.missed_feasible_count).toBeNull()
+  expect(review.plan.pool).toHaveLength(4)
+  expect(review.costOptimality.pool_minimum_feasible_estimate).toBeNull()
+  expect(review.costOptimality.arms.learned_order.selected_minus_pool_minimum_estimate).toBeNull()
+})
+
+for (const suffix of ['', '-no-oracle']) {
+  test(`RC search v3 verifies original exported cost audit ${suffix || 'with oracle'}`, async () => {
+    const dir = `tests/frontend/fixtures/rc-control-search-cost${suffix}/`
+    const review = await validateRcControlSearch(readFileSync(dir + 'result.json'), async p => new Uint8Array(readFileSync(dir + p)))
+    expect(review.report.schema_version).toBe('experimental-rc-control-candidate-search.v3')
+    expect(review.report.candidate_cost_optimality_audit).toEqual(review.costOptimality)
+    expect(review.costOptimality.arms.price_order.selected_minus_pool_minimum_estimate).toBe(suffix ? null : 0)
+  })
+}
+for (const [name, mutate] of [
+  ['gap', (a: any) => { a.arms.learned_order.selected_minus_pool_minimum_estimate = 1 }],
+  ['cheaper missed count', (a: any) => { a.arms.learned_order.missed_cheaper_feasible_count = 2 }],
+  ['minimum', (a: any) => { a.pool_minimum_feasible_estimate = 0 }],
+  ['baseline exclusion', (a: any) => { a.baseline_included = false }],
+  ['global optimum', (a: any) => { a.global_design_optimality_proved = true }],
+] as const) {
+  test(`RC search v3 rejects a rehashed cost ${name}`, async () => {
+    const dir = 'tests/frontend/fixtures/rc-control-search-cost/'
+    const original = readFileSync(dir + 'result.json', 'utf8'), audit = JSON.parse(original).candidate_cost_optimality_audit
+    mutate(audit)
+    const raw = changed(original, { candidate_cost_optimality_audit: JSON.stringify(audit) }, 'report_hash')
+    await expect(validateRcControlSearch(raw, async p => new Uint8Array(readFileSync(dir + p)))).rejects.toThrow('search_cost_optimality_invalid')
+  })
+}
+test('RC search v3 refuses zero cost gap when an oracle was not run', async () => {
+  const dir = 'tests/frontend/fixtures/rc-control-search-cost-no-oracle/'
+  const original = readFileSync(dir + 'result.json', 'utf8'), audit = JSON.parse(original).candidate_cost_optimality_audit
+  audit.arms.price_order.selected_minus_pool_minimum_estimate = 0
+  const raw = changed(original, { candidate_cost_optimality_audit: JSON.stringify(audit) }, 'report_hash')
+  await expect(validateRcControlSearch(raw, async p => new Uint8Array(readFileSync(dir + p)))).rejects.toThrow('search_cost_optimality_invalid')
+})
+for (const path of ['plan.json', 'policy.json', 'historical-training.json', 'pool/middle.json', 'price_order/cheap/result.json', 'learned_order/baseline/checkpoint.json', 'exhaustive_oracle/costly/verification.json']) {
+  test(`RC search rejects changed original ${path}`, async () => {
+    await expect(validateRcControlSearch(original, async p => {
+      const bytes = await read(p)
+      if (p !== path) return bytes
+      // Metadata has a logical document hash, while payload references bind
+      // exact bytes. Mutate metadata content, not insignificant outer whitespace.
+      return ['plan.json', 'policy.json', 'historical-training.json'].includes(path)
+        ? new TextEncoder().encode(new TextDecoder().decode(bytes).replace('\"schema_version\":\"', '\"schema_version\":\"tampered-'))
+        : new Uint8Array(Buffer.concat([bytes, Buffer.from(' ')]))
+    })).rejects.toThrow()
+  })
+}
+for (const [name, field, mutate] of [
+  ['coverage', 'candidate_coverage_audit', (v: any) => { v.arms.learned_order.missed_feasible_count = 0 }],
+  ['selected candidate', 'arms', (v: any) => { v.learned_order.selected_candidate_id = 'middle' }],
+  ['hidden work', 'arms', (v: any) => { v.learned_order.execution_work.known_counters.attempted_step_count = 0 }],
+  ['path escape', 'arms', (v: any) => { v.price_order.comparison_path = '../comparison.json' }],
+  ['promotion claim', 'claims', (v: any) => { v.net_savings_proved = true }],
+  ['duplicate training accounting', 'historical_training_cost_counted_once_outside_online_arms', (_v: any) => false],
+] as const) {
+  test(`RC search rejects rehashed ${name}`, async () => {
+    const value = JSON.parse(original.toString())[field]
+    const next = mutate(value) ?? value
+    const raw = changed(original.toString(), { [field]: JSON.stringify(next) }, 'report_hash')
+    await expect(validateRcControlSearch(raw, read)).rejects.toThrow()
+  })
+}
+test('RC search rejects a rehashed ranking inconsistent with predictions and prices', async () => {
+  const rawPlan = readFileSync(root + 'plan.json', 'utf8'), plans = JSON.parse(rawPlan).plans
+  plans.learned_order.ordering.reverse()
+  const plan = changed(rawPlan, { plans: JSON.stringify(plans) }, 'plan_hash')
+  const result = changed(original.toString(), { plan_hash: JSON.stringify(JSON.parse(new TextDecoder().decode(plan)).plan_hash) }, 'report_hash')
+  await expect(validateRcControlSearch(result, p => p === 'plan.json' ? Promise.resolve(plan) : read(p))).rejects.toThrow('search_ranking_invalid')
+})
+test('RC search refuses duplicate keys and oversized reports before any artifact read', async () => {
+  let calls = 0
+  const counted = async (p: string) => { calls++; return read(p) }
+  await expect(validateRcControlSearch(new TextEncoder().encode(original.toString().replace('{', '{"schema_version":"duplicate",')), counted)).rejects.toThrow()
+  await expect(validateRcControlSearch(new Uint8Array(2 * 1024 ** 2 + 1), counted)).rejects.toThrow('search_report_too_large')
+  expect(calls).toBe(0)
+})
+
+test('RC search cost arithmetic distinguishes loss, ties and unknown outcomes in controlled inputs', () => {
+  // These are mathematical controls, not validated experimental artifacts.
+  const pool = ['baseline', 'cheap', 'middle'].map((candidate_id, i) => ({ candidate_id,
+    material_estimate: { total: [300, 100, 200][i], currency: 'KRW', scope: 'test' } }))
+  const rows = pool.map(p => ({ ...p, full_reference_verification_pass: true, screens: { limit: { status: 'pass' } } }))
+  const plan = { pool, price_table_hash: 'common', history_limits: { limit: 1 }, material_limits: {}, terminal_limits: null,
+    plans: { price_order: { shortlist: ['cheap'] }, learned_order: { shortlist: ['middle'] } } }
+  const reports = { price_order: { selected_candidate_id: 'cheap' }, learned_order: { selected_candidate_id: 'middle' },
+    exhaustive_oracle: { report_hash: 'oracle', rows } }
+  const cost = costOptimality(plan, reports)
+  expect(cost.arms.price_order.selected_minus_pool_minimum_estimate).toBe(0)
+  expect(cost.arms.learned_order.selected_minus_pool_minimum_estimate).toBe(100)
+  expect(cost.arms.learned_order.missed_cheaper_feasible_candidate_ids).toEqual(['cheap'])
+  rows[0].full_reference_verification_pass = false
+  expect(costOptimality(plan, reports).arms.learned_order.selected_minus_pool_minimum_estimate).toBeNull()
+  rows[0].full_reference_verification_pass = true
+  for (const row of pool) row.material_estimate.total = 0
+  const ties = costOptimality(plan, reports)
+  expect(ties.pool_minimum_feasible_candidate_ids).toEqual(['baseline', 'cheap', 'middle'])
+  expect(ties.arms.learned_order.matches_pool_minimum).toBe(true)
+})
+
+// Controlled ranking metadata exercises schedule reconstruction, not prediction quality.
+import { candidateRanking, CHEAPER_BOUNDARY_RANKING, LEGACY_RANKING } from '../../src/workbench-v2/model/rcControlCandidateRanking'
+function rankingControl(candidate_id: string, estimate: number, value: number | null, limit = 100) {
+  return { candidate_id, estimate, ranking_tier: value === null ? 1 : value <= limit ? 0 : 2,
+    predicted_screens: value === null ? null : { limit: { value, limit, status: value <= limit ? 'pass' : 'fail' } } }
+}
+test('boundary ranking retains a seed and explores cheaper unknowns and near-limit failures', () => {
+  const rows = [rankingControl('expensive', 300, 80), rankingControl('far', 50, 200), rankingControl('near', 100, 101), rankingControl('seed', 200, 90), rankingControl('unknown', 150, null)]
+  const originalRows = structuredClone(rows)
+  expect(candidateRanking(rows, LEGACY_RANKING).ordering).toEqual(['seed', 'expensive', 'unknown', 'far', 'near'])
+  const ranked = candidateRanking(rows, CHEAPER_BOUNDARY_RANKING)
+  expect(ranked.ordering).toEqual(['seed', 'unknown', 'near', 'far', 'expensive'])
+  expect(ranked.detail!.rows.find((r: any) => r.candidate_id === 'near').relative_exceedance).toBe(1 / 101)
+  expect(ranked.detail!.rows.find((r: any) => r.candidate_id === 'unknown').relative_exceedance).toBeNull()
+  expect(ranked.detail!.uncertainty_calibrated).toBe(false)
+  expect(ranked.detail!.physical_result_authority).toBe(false)
+  expect(rows).toEqual(originalRows)
+  expect(candidateRanking(rows.filter(r => r.ranking_tier !== 0), CHEAPER_BOUNDARY_RANKING).ordering).toEqual(['unknown', 'far', 'near'])
+})
+test('boundary ranking handles zero limits, worst constraint and deterministic ties', () => {
+  const rows: any[] = [rankingControl('near_b', 100, 101), rankingControl('near_a', 100, 101), rankingControl('zero', 10, 1e-300, 0), rankingControl('seed', 200, 0, 0), rankingControl('multiple', 90, 100.01)]
+  rows[4].predicted_screens.second = { value: 1e300, limit: 1e-300, status: 'fail' }
+  const ranked = candidateRanking(rows, CHEAPER_BOUNDARY_RANKING)
+  expect(ranked.ordering).toEqual(['seed', 'near_a', 'near_b', 'zero', 'multiple'])
+  expect(ranked.detail!.rows.find((r: any) => r.candidate_id === 'zero').relative_exceedance).toBe(1)
+})
+function boundaryMetadata(mutate?: (plan: any) => void) {
+  const raw = readFileSync(root + 'plan.json', 'utf8'), plan = JSON.parse(raw)
+  plan.schema_version = 'experimental-rc-control-candidate-search-plan.v3'
+  plan.ranking = candidateRanking(plan.predictions, CHEAPER_BOUNDARY_RANKING).detail
+  mutate?.(plan)
+  const encoded = changed(raw, { schema_version: JSON.stringify(plan.schema_version), ranking: JSON.stringify(plan.ranking) }, 'plan_hash')
+  const result = changed(original.toString(), { plan_hash: JSON.stringify(JSON.parse(new TextDecoder().decode(encoded)).plan_hash) }, 'report_hash')
+  return { result, read: (path: string) => path === 'plan.json' ? Promise.resolve(encoded) : read(path) }
+}
+test('new ranking metadata binds an unchanged controlled schedule to original full results', async () => {
+  const input = boundaryMetadata()
+  const review = await validateRcControlSearch(input.result, input.read)
+  expect(review.plan.ranking.predicted_feasible_seed_id).toBe('cheap')
+  expect(review.report.arms.learned_order.selected_candidate_id).toBe('cheap')
+})
+for (const [name, mutate] of [
+  ['seed', (p: any) => { p.ranking.predicted_feasible_seed_id = 'costly' }],
+  ['distance', (p: any) => { p.ranking.rows[0].relative_exceedance = .25 }],
+  ['role', (p: any) => { p.ranking.rows[0].role = 'cheaper_unpredicted' }],
+  ['uncertainty claim', (p: any) => { p.ranking.uncertainty_calibrated = true }],
+  ['unsupported strategy', (p: any) => { p.ranking.strategy = 'unknown' }],
+  ['old version with new metadata', (p: any) => { p.schema_version = 'experimental-rc-control-candidate-search-plan.v2' }],
+] as const) {
+  test(`boundary ranking refuses rehashed ${name}`, async () => {
+    const input = boundaryMetadata(mutate)
+    await expect(validateRcControlSearch(input.result, input.read)).rejects.toThrow()
+  })
+}
+
+for (const profile of ['unknown', 'rc-control-immediate-line-search-reuse.v1']) {
+  test(`RC search rejects rehashed reuse profile mismatch: ${profile}`, async () => {
+    const plan = changed(readFileSync(root + 'plan.json', 'utf8'), { line_search_assembly_reuse: JSON.stringify(profile) }, 'plan_hash')
+    const result = changed(original.toString(), { plan_hash: JSON.stringify(JSON.parse(new TextDecoder().decode(plan)).plan_hash) }, 'report_hash')
+    await expect(validateRcControlSearch(result, p => p === 'plan.json' ? Promise.resolve(plan) : read(p))).rejects.toThrow(profile === 'unknown' ? 'search_reuse_profile_invalid' : 'search_comparison_binding_invalid')
+  })
+}
+
+for (const strategy of ['price_order', 'learned_order'] as const) {
+  test(`standalone ${strategy} validates original designs and reads only its graph`, async () => {
+    const { standaloneFixture } = await import('./rc-search-standalone-fixture')
+    const fixture = standaloneFixture(strategy), paths: string[] = []
+    const review = await validateRcControlSearch(fixture.report, async p => { paths.push(p); return fixture.read(p) })
+    expect(Object.keys(review.designs)).toEqual([strategy])
+    expect(review.designs[strategy].report.selected_candidate_id).toBe('cheap')
+    expect(review.costOptimality.arms[strategy].selected_minus_pool_minimum_estimate).toBeNull()
+    expect(paths.some(p => p.startsWith(strategy === 'price_order' ? 'learned_order/' : 'price_order/'))).toBe(false)
+    expect(paths.includes('policy.json')).toBe(strategy === 'learned_order')
+    expect(paths.includes('historical-training.json')).toBe(strategy === 'learned_order')
+  })
+}
+for (const mutation of ['strategy', 'schema', 'other_arm', 'oracle', 'training', 'quantity', 'cost', 'selection', 'work']) {
+  test(`standalone rejects rehashed ${mutation}`, async () => {
+    const { standaloneFixture, rebind } = await import('./rc-search-standalone-fixture')
+    const f = standaloneFixture('price_order'), d = JSON.parse(new TextDecoder().decode(f.report))
+    const changes: Record<string, unknown> = {}
+    if (mutation === 'strategy') changes.strategy = 'learned_order'
+    if (mutation === 'schema') changes.schema_version = 'experimental-rc-control-candidate-search.v3'
+    if (mutation === 'other_arm') changes.arms = { ...d.arms, learned_order: d.arms.price_order }
+    if (mutation === 'oracle') changes.oracle = d.arms.price_order
+    if (mutation === 'training') changes.historical_training_cost = {}
+    if (mutation === 'cost') { d.candidate_cost_optimality_audit.arms.price_order.selected_minus_pool_minimum_estimate = 0; changes.candidate_cost_optimality_audit = d.candidate_cost_optimality_audit }
+    if (mutation === 'selection') { d.arms.price_order.selected_candidate_id = 'middle'; changes.arms = d.arms }
+    if (mutation === 'work') { d.arms.price_order.execution_work.known_counters.attempted_step_count = 0; changes.arms = d.arms }
+    let plan = f.plan
+    if (mutation === 'quantity') {
+      const p = JSON.parse(new TextDecoder().decode(plan)); p.pool[0].quantities.concrete_volume_m3 = 999
+      plan = rebind(new TextDecoder().decode(plan), { pool: p.pool }, 'plan_hash')
+      changes.plan_hash = JSON.parse(new TextDecoder().decode(plan)).plan_hash
+    }
+    const report = rebind(new TextDecoder().decode(f.report), changes, 'report_hash')
+    for (const [raw, field] of [[plan, 'plan_hash'], [report, 'report_hash']] as const) {
+      const doc = document(raw)
+      await selfHash(doc.raw, doc.value, field)
+    }
+    await expect(validateRcControlSearch(report, async p => p === 'plan.json' ? plan : f.read(p))).rejects.toThrow()
+  })
+}

@@ -1,0 +1,299 @@
+{
+  "schema_version": "rc-twofold-coordinate-observation.v1",
+  "status": "completed_fixed_physical_comparisons_failed",
+  "source_revision": "d2ecdaa25a5b1d68cab8508753a939bd3edfa870",
+  "coordinate_precision": "twofold-increment",
+  "strain_evaluation": "exact-rational",
+  "raw_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-twofold.8GlymCUN",
+  "source_files_verified_against_git": 415,
+  "inputs_identical_to_preceding_sealed_observation": true,
+  "target_count": 242,
+  "serial_fresh_processes": 6,
+  "complete_paths": 18,
+  "all_reference_fresh_histories_and_checkpoints_exact": true,
+  "all_repeated_histories_exact": true,
+  "all_native_terminal_reopens_and_repetitions_exact": true,
+  "original_increment_and_native_bindings_pass": true,
+  "independent_exact_strain_points": 26136,
+  "original_work": {
+    "core_calls": 4356,
+    "linear_solves": 18144,
+    "newton_iterations": 18144
+  },
+  "terminal_polishing_work_included": {
+    "attempted": 4356,
+    "accepted": 3399,
+    "assembly_call_count": 4356,
+    "assembly_exception_count": 0,
+    "linear_solve_count": 3399,
+    "linear_solve_exception_count": 0
+  },
+  "parent_wall_seconds": 934.746751357,
+  "case_summary": {
+    "base": {
+      "secant_full_history_passes": 0,
+      "secant_mismatch_counts": [
+        339,
+        339,
+        339
+      ],
+      "paths": {
+        "reference": {
+          "median_wall_seconds": 56.322093095,
+          "sample_stdev_wall_seconds": 0.4684203089490105,
+          "work_per_repeat": {
+            "core_calls": 242,
+            "linear_solves": 1155,
+            "newton_iterations": 1155
+          },
+          "polishing_work_per_repeat": {
+            "attempted": 242,
+            "accepted": 195,
+            "assembly_call_count": 242,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 195,
+            "linear_solve_exception_count": 0
+          }
+        },
+        "secant": {
+          "median_wall_seconds": 40.462766309,
+          "sample_stdev_wall_seconds": 0.39060688676397276,
+          "work_per_repeat": {
+            "core_calls": 242,
+            "linear_solves": 761,
+            "newton_iterations": 761
+          },
+          "polishing_work_per_repeat": {
+            "attempted": 242,
+            "accepted": 183,
+            "assembly_call_count": 242,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 183,
+            "linear_solve_exception_count": 0
+          }
+        },
+        "fresh-reference": {
+          "median_wall_seconds": 56.439768164,
+          "sample_stdev_wall_seconds": 0.4499005980629769,
+          "work_per_repeat": {
+            "core_calls": 242,
+            "linear_solves": 1155,
+            "newton_iterations": 1155
+          },
+          "polishing_work_per_repeat": {
+            "attempted": 242,
+            "accepted": 195,
+            "assembly_call_count": 242,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 195,
+            "linear_solve_exception_count": 0
+          }
+        }
+      }
+    },
+    "long": {
+      "secant_full_history_passes": 0,
+      "secant_mismatch_counts": [
+        262,
+        262,
+        262
+      ],
+      "paths": {
+        "reference": {
+          "median_wall_seconds": 53.415414627,
+          "sample_stdev_wall_seconds": 0.08644630620406435,
+          "work_per_repeat": {
+            "core_calls": 242,
+            "linear_solves": 1109,
+            "newton_iterations": 1109
+          },
+          "polishing_work_per_repeat": {
+            "attempted": 242,
+            "accepted": 175,
+            "assembly_call_count": 242,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 175,
+            "linear_solve_exception_count": 0
+          }
+        },
+        "secant": {
+          "median_wall_seconds": 39.633568824,
+          "sample_stdev_wall_seconds": 0.3593813258094047,
+          "work_per_repeat": {
+            "core_calls": 242,
+            "linear_solves": 759,
+            "newton_iterations": 759
+          },
+          "polishing_work_per_repeat": {
+            "attempted": 242,
+            "accepted": 210,
+            "assembly_call_count": 242,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 210,
+            "linear_solve_exception_count": 0
+          }
+        },
+        "fresh-reference": {
+          "median_wall_seconds": 53.619805983,
+          "sample_stdev_wall_seconds": 0.26317814594746414,
+          "work_per_repeat": {
+            "core_calls": 242,
+            "linear_solves": 1109,
+            "newton_iterations": 1109
+          },
+          "polishing_work_per_repeat": {
+            "attempted": 242,
+            "accepted": 175,
+            "assembly_call_count": 242,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 175,
+            "linear_solve_exception_count": 0
+          }
+        }
+      }
+    }
+  },
+  "post_main_section_diagnostics": {
+    "scope": "post-main-run constitutive diagnostics, not new equilibrium paths or benchmark costs",
+    "source_revision": "d2ecdaa25a5b1d68cab8508753a939bd3edfa870",
+    "cases": {
+      "base": {
+        "work": {
+          "model_compilations": 1,
+          "integration_counts_scope": "eight explicit attribution evaluations per integration point; model compilation and state decoding are separately timed within whole wall/cpu",
+          "newton_solves": 0,
+          "state_commits": 0,
+          "original_section_responses_verified": 2904,
+          "section_integrations": 11616,
+          "fiber_integrations": 162624
+        },
+        "observed_integrate_calls": {
+          "section": 11616,
+          "concrete": 139392,
+          "steel": 23232
+        },
+        "failure_groups": {
+          "M2/moment_z_Nm": {
+            "count": 1,
+            "parent_history_nonzero_count": 0,
+            "max_parent_history_abs": 0,
+            "max_finite_coordinate_abs": 1.234568003383174e-10
+          }
+        },
+        "attribution_order_changes_on_failed_values": {},
+        "zero_kinematic_field_order_pairs": 5808,
+        "max_component_sum_residual_N_Nm": 0,
+        "wall_seconds": 12.395701495
+      },
+      "long": {
+        "work": {
+          "model_compilations": 1,
+          "integration_counts_scope": "eight explicit attribution evaluations per integration point; model compilation and state decoding are separately timed within whole wall/cpu",
+          "newton_solves": 0,
+          "state_commits": 0,
+          "original_section_responses_verified": 2904,
+          "section_integrations": 11616,
+          "fiber_integrations": 162624
+        },
+        "observed_integrate_calls": {
+          "section": 11616,
+          "concrete": 139392,
+          "steel": 23232
+        },
+        "failure_groups": {
+          "M2/moment_z_Nm": {
+            "count": 1,
+            "parent_history_nonzero_count": 0,
+            "max_parent_history_abs": 0,
+            "max_finite_coordinate_abs": 1.0486056467584604e-10
+          }
+        },
+        "attribution_order_changes_on_failed_values": {},
+        "zero_kinematic_field_order_pairs": 5808,
+        "max_component_sum_residual_N_Nm": 0,
+        "wall_seconds": 12.640339388
+      }
+    },
+    "work": {
+      "model_compilations": 2,
+      "newton_solves": 0,
+      "state_commits": 0,
+      "original_section_responses_verified": 5808,
+      "section_integrations": 23232,
+      "fiber_integrations": 325248
+    },
+    "parent_wall_seconds": 25.484865101
+  },
+  "default_compatibility": {
+    "preceding_source_revision": "d81cd8e9033024afcd4f800e63217ecc9abbe091",
+    "candidate_source_revision": "d2ecdaa25a5b1d68cab8508753a939bd3edfa870",
+    "preceding_source_files_verified_against_git": 413,
+    "outcomes": [
+      {
+        "label": "preceding",
+        "profile": "matrix",
+        "exit_code": 0
+      },
+      {
+        "label": "candidate",
+        "profile": "matrix",
+        "exit_code": 0
+      },
+      {
+        "label": "preceding",
+        "profile": "exact-rational",
+        "exit_code": 0
+      },
+      {
+        "label": "candidate",
+        "profile": "exact-rational",
+        "exit_code": 0
+      }
+    ],
+    "history_and_checkpoint_pairs_exact": 6,
+    "direct_element_response_pairs_exact": 12,
+    "all_four_runs_work": {
+      "core_calls": 36,
+      "newton_iterations": 92,
+      "linear_solves": 92
+    },
+    "actual_imports_and_source_revisions_verified": true,
+    "scope": "binary64 defaults for matrix and exact-rational; byte compatibility is not independent physical qualification"
+  },
+  "validation": {
+    "broader_tests": 706,
+    "broader_seconds": 434.49,
+    "broader_scope": "loaded implementation before final rounding-boundary normalization",
+    "post_normalization_tests": 77,
+    "post_normalization_seconds": 16.16,
+    "focused_twofold_tests_in_post_normalization_suite": 27,
+    "interrupted_run_passes": 234,
+    "interruption_reason": "root filesystem had only 66 MB available; rerun on separate volume",
+    "lint_and_diff": "pass",
+    "hosted_general_ci": "implementation d2ecdaa25 CI verify failed before tests: legal_approval=False; no hosted/full-suite acceptance claim",
+    "hosted_full_test_and_legacy_evidence_shards": "inspected shards fail during current-source input materialization at legal_approval=False; aggregate failures follow; code tests not reached"
+  },
+  "sealed_inventory": {
+    "file_count": 26923,
+    "total_bytes": 1305731219,
+    "inventory_sha256": "3f9b534e6ec5132f6781e68d34ea4313020400bf218ef2b5b4be8f4b1ceaf768",
+    "all_files_reread_exact": true,
+    "excluded_subtrees": [
+      "test-tmp"
+    ]
+  },
+  "inventory_scope": "all retained observation/source/audit/compatibility and run logs; test-tmp scratch excluded and retained separately in place",
+  "claims": {
+    "repaired_solver": false,
+    "accepted_acceleration": false,
+    "independent_physical_validation": false,
+    "new_learned_policy": false,
+    "public_api_or_workbench_precision_admission": false,
+    "release_approval": false
+  },
+  "remaining_work": [
+    "original member-force and support-reaction attribution and verified numerical repair",
+    "independent corpus and physical validation",
+    "full roadmap M1-M5/P1-P3/R1/R2 and external licensing/hardware/owner requirements"
+  ]
+}

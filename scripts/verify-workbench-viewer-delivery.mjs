@@ -6,6 +6,7 @@ const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = path.join(rootDir, 'dist')
 const workbenchEntry = path.join(distDir, 'index.html')
 const viewerEntry = path.join(distDir, 'src', 'structure-viewer', 'index.html')
+const runtimeAssets = JSON.parse(readFileSync(path.join(rootDir, 'src/structure-viewer/viewer-runtime-assets.json'), 'utf8'))
 const legacySentinels = [
   'Structural Signal Desk',
   'native-authoring-controls',
@@ -51,6 +52,13 @@ function verifyAssetReferences(html, label) {
 
 const workbenchHtml = readRequiredFile(workbenchEntry, 'Workbench entry')
 const viewerHtml = readRequiredFile(viewerEntry, 'Viewer entry')
+if (!Array.isArray(runtimeAssets) || !runtimeAssets.length || new Set(runtimeAssets).size !== runtimeAssets.length) fail('Invalid runtime asset manifest')
+for (const relative of runtimeAssets) {
+  if (typeof relative !== 'string' || !/^[a-zA-Z0-9_./-]+$/.test(relative) || relative.split('/').some(part => !part || part === '.' || part === '..')) fail('Invalid runtime asset path')
+  const source = path.join(rootDir, 'src/structure-viewer', relative)
+  const emitted = path.join(distDir, 'src/structure-viewer', relative)
+  if (!existsSync(emitted) || !statSync(emitted).isFile() || !readFileSync(source).equals(readFileSync(emitted))) fail(`Runtime asset missing or changed: ${relative}`)
+}
 
 if (!workbenchHtml.includes('<div id="root"></div>')) {
   fail('Workbench entry does not contain the React product-shell root')
@@ -108,5 +116,7 @@ console.log(JSON.stringify({
   legacy_chunk: path.relative(rootDir, legacyChunkPath),
   workbench_asset_count: workbenchAssets.length,
   viewer_asset_count: viewerAssets.length,
+  runtime_asset_count: runtimeAssets.length,
+  runtime_asset_bytes: runtimeAssets.reduce((sum, relative) => sum + statSync(path.join(distDir, 'src/structure-viewer', relative)).size, 0),
   legacy_marker_count: legacySentinels.length,
 }))

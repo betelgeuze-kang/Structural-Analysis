@@ -1,0 +1,148 @@
+{
+  "schema": "aci-table-discovery-audit.v1",
+  "raw_sha256": "4498a324673fc02d29ac139949c162d98937b2704734b93a007445846b8354d7",
+  "raw_bytes": 431262,
+  "data_rows": 326,
+  "physical_csv_fields": 59,
+  "named_headers": 58,
+  "empty_trailing_column": true,
+  "duplicate_header_positions": {
+    "Bar dia. [in.]": [
+      14,
+      16,
+      19
+    ]
+  },
+  "metadata_alignment_verified": false,
+  "misalignment_witnesses": [
+    {
+      "zero_based_position": 4,
+      "header": "Data File",
+      "metadata": "\"raw\":\"SUBSTRING_INDEX(rectangular.DataFile, \\\"\\/\\\", -1)\",\"hide\":\"hide\""
+    },
+    {
+      "zero_based_position": 5,
+      "header": "Section depth (h) [in.]",
+      "metadata": "\"desc\":\"History of laterals loads and displacements at loading points\",\"width\":\"100\",\"type\":\"tool\",\"name\":\"inDEED\",\"link_format\":\"\\/tools\\/indeed\\/invoke?params=file:{p}\",\"param\":\"rectangular.DataFile\",\"link_label\":\"rectangular.DataFile_label\",\"dl\":\"rectangular.DataFile\""
+    },
+    {
+      "zero_based_position": 6,
+      "header": "Section width (b) [in.]",
+      "metadata": "\"unit\":\"in.\",\"desc\":\"dimension in direction of primary load\",\"fmt\":\"%.2f\""
+    },
+    {
+      "zero_based_position": 9,
+      "header": "Clear Cover cc [in.]",
+      "metadata": "\"unit\":\"in.\",\"desc\":\"Effective depth in secondary direction (dimension from compression face to centroid of outermost layer of tension steel)\",\"fmt\":\"%.2f\""
+    },
+    {
+      "zero_based_position": 10,
+      "header": "lc [in.]",
+      "metadata": "\"unit\":\"in.\",\"desc\":\"Clear cover to out of transverse reinf.\",\"fmt\":\"%.2f\""
+    },
+    {
+      "zero_based_position": 57,
+      "header": "Vp2/Vo2",
+      "metadata": "\"unit\":\"kips\",\"desc\":\"Vo2=ACI 369R-11 shear capcity in primary load direction with k=1 (low deformations), with Vs fully effective for s\\/d<0.75, Vs=0 for s\\/d>1.0 and interpolated in between\",\"fmt\":\"%.2f\""
+    },
+    {
+      "zero_based_position": 58,
+      "header": "",
+      "metadata": "\"fmt\":\"%.2f\""
+    }
+  ],
+  "candidate_crosswalk": [
+    {
+      "peer_record": 64,
+      "aci_record": 49,
+      "author": "Ono",
+      "specimen": "CA025C",
+      "reference": "Ono;A. S.;Nobuaki; Adachi;Hiromi; Sakamaki;Yoshio (1989). \"Elasto-Plastic Behavior of Reinforced Concrete Column With Fluctuating Axial Force.\" Transactions of the Japan Concrete Institute 11: 239-246.",
+      "scope": "reviewed archive label/reference correspondence; physical values and curve bytes not yet equated"
+    },
+    {
+      "peer_record": 65,
+      "aci_record": 50,
+      "author": "Ono",
+      "specimen": "CA060C",
+      "reference": "Ono;A. S.;Nobuaki; Adachi;Hiromi; Sakamaki;Yoshio (1989). \"Elasto-Plastic Behavior of Reinforced Concrete Column With Fluctuating Axial Force.\" Transactions of the Japan Concrete Institute 11: 239-246.",
+      "scope": "reviewed archive label/reference correspondence; physical values and curve bytes not yet equated"
+    },
+    {
+      "peer_record": 104,
+      "aci_record": 187,
+      "author": "Saatcioglu and Ozcebe",
+      "specimen": "U1",
+      "reference": "Saatcioglu;M. O.;Guney (1989). Response of Reinforced Concrete Columns to Simulated Seismic Loading. ACI Structural Journal. 86: 3-12.",
+      "scope": "reviewed archive label/reference correspondence; physical values and curve bytes not yet equated"
+    },
+    {
+      "peer_record": 105,
+      "aci_record": 188,
+      "author": "Saatcioglu and Ozcebe",
+      "specimen": "U3",
+      "reference": "Saatcioglu;M. O.;Guney (1989). Response of Reinforced Concrete Columns to Simulated Seismic Loading. ACI Structural Journal. 86: 3-12.",
+      "scope": "reviewed archive label/reference correspondence; physical values and curve bytes not yet equated"
+    },
+    {
+      "peer_record": 181,
+      "aci_record": 254,
+      "author": "Matamoros et al.",
+      "specimen": "C5-00N",
+      "reference": "Matamoros;A. B. (1999). Study of Drift Limits for High-Strength Concrete Columns. Department of Civil Engineering. Urbana (Illinois);University of Illinois at Urbana-Champaign. Doctor of Philosophy: 484.",
+      "scope": "reviewed archive label/reference correspondence; physical values and curve bytes not yet equated"
+    },
+    {
+      "peer_record": 201,
+      "aci_record": 272,
+      "author": "Thomsen and Wallace",
+      "specimen": "A1",
+      "reference": "Thomson;J. W.;John (1994). \"Lateral Load Behavior of Reinforced Concrete Columns Constructed Using High-Strength Materials.\" ACI Structural Journal 91(5): 605-615.",
+      "scope": "reviewed archive label/reference correspondence; physical values and curve bytes not yet equated"
+    }
+  ],
+  "same_specimen_name_a1_rows": [
+    {
+      "aci_record": "40",
+      "author": "Pandey"
+    },
+    {
+      "aci_record": "216",
+      "author": "Wehbe et al."
+    },
+    {
+      "aci_record": "272",
+      "author": "Thomsen and Wallace"
+    }
+  ],
+  "unique_literal_references": 67,
+  "unique_references_are_not_independent_campaign_count": true,
+  "source_file_link_count": 326,
+  "curves_acquired": 0,
+  "training_rows_admitted": 0,
+  "source_reuse_terms_verified": false,
+  "source_revision": "c6eabea198add8b1421abfcb499b8e3ec4a1a4c4",
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-aci-table-fsumox41",
+  "source_fetch": {
+    "source_url": "https://www.dropbox.com/scl/fo/zkqvb1rctq261pktl3pqq/AKI9sRhFNXHwh_AnZJF0WS4/NEES_Database__ACI_369_Rectangular_Columns.csv?rlkey=vooilhz10q29dqpivq360pznv&dl=1",
+    "source_role": "archive_property_table",
+    "admitted_for_training": false,
+    "status": 200,
+    "content_type": "application/binary",
+    "byte_length": 431262,
+    "sha256": "4498a324673fc02d29ac139949c162d98937b2704734b93a007445846b8354d7",
+    "elapsed_ns": 3451605536
+  },
+  "archived_about_fetch": {
+    "source_url": "https://www.dropbox.com/scl/fo/zkqvb1rctq261pktl3pqq/AOx-aHi8vShE-1hZzY-NGKA/datacenterhub%20-%20Resources_%20NEES_%20ACI%20369%20Rectangular%20Column%20Database_%20About.html?rlkey=vooilhz10q29dqpivq360pznv&dl=1",
+    "status": 200,
+    "byte_length": 65167,
+    "sha256": "8aa8be3b52ace2e43cd2d3955dd43afa4bb879f23cb818a332f6c6a7fa8d090b",
+    "elapsed_ns": 2554898430
+  },
+  "archived_about_reuse_terms": "Licensed under heading present; no license text or link found by HTML inspection",
+  "browser_observation": "Publisher-linked anonymous Dropbox folder listed CSV, data directory, archived page, 255.pdf and SIVARAMAKRISHNAN-THESIS.pdf; original acquisition used public file download URLs after browser path discovery",
+  "inventory_sha256": "d5aee62e645a943e5e627fc4c78c58b7b94bce7dc89320dee3a70e72edf3bf99",
+  "packet_payload_files": 9,
+  "packet_payload_bytes": 513018
+}

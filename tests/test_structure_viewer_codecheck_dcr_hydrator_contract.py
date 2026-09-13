@@ -82,3 +82,87 @@ console.log(JSON.stringify({{ dcr: merged.get('12')?.dcr, source: merged.get('12
     )
     assert payload["dcr"] == 1.1
     assert payload["source"] == "b"
+
+
+def test_companion_hydration_preserves_model_root_and_combination_scope() -> None:
+    payload = _run(
+        f"""
+import fs from 'node:fs';
+import * as hydrator from {json.dumps(str(HYDRATOR))};
+const html = fs.readFileSync('src/structure-viewer/index.html', 'utf8');
+const start = html.indexOf('async function hydrateModelDataFromCodecheckCompanion(');
+const end = html.indexOf('function buildContourCompareSafetyReceipt(', start);
+if (start < 0 || end < start) throw Error('hydration functions missing');
+const root = (a, b) => ({{case_context: {{load_combination_codecheck_table_by_name: {{
+  A: {{table_rows: [{{member_id: 'same-id', dcr: a}}]}},
+  B: {{table_rows: [{{member_id: 'same-id', dcr: b}}]}},
+}}}}}});
+const results = [];
+for (const [allCombinations, companionB, missingRoot, unavailable] of [
+  [false, 1.2, false, false], [true, 1.2, false, false],
+  [true, 1.8, false, false], [true, 1.2, true, false],
+  [true, 1.2, false, true],
+]) {{
+  const sourceRoot = missingRoot ? null : root(0.3, 1.4);
+  const optimizedRoot = root(9, 10);
+  const companionRoot = root(0.5, companionB);
+  const globals = {{
+    ...hydrator,
+    normalizeSelectionValue: x => String(x ?? '').trim(),
+    getActiveCodecheckCombinationName: () => 'A',
+    tryFetchArtifact: async () => {{
+      if (unavailable) throw Error('companion unavailable');
+      return {{payload: companionRoot}};
+    }},
+    lastNormalizedRootPayload: optimizedRoot,
+    workspaceState: {{}}, window: {{}}, console,
+  }};
+  const run = new Function(...Object.keys(globals), html.slice(start, end) + ';return applyFullCodecheckHydration;')(...Object.values(globals));
+  const model = {{elements: [{{id: 'same-id'}}], meta: {{}}}};
+  await run(model, {{rootPayload: sourceRoot, companionRole: 'baseline', allCombinations}});
+  results.push({{dcr: model.elements[0].dcr, combination: model.elements[0].codecheck_combination}});
+}}
+console.log(JSON.stringify(results));
+"""
+    )
+    assert payload == [
+        {"dcr": 0.5, "combination": "A"},
+        {"dcr": 1.4, "combination": "B"},
+        {"dcr": 1.8, "combination": "B"},
+        {"dcr": 1.2, "combination": "B"},
+        {"dcr": 1.4, "combination": "B"},
+    ]
+
+
+def test_companion_hydration_reads_canonical_metadata_without_root_case_context() -> None:
+    payload = _run(
+        f"""
+import fs from 'node:fs';
+import * as hydrator from {json.dumps(str(HYDRATOR))};
+const html = fs.readFileSync('src/structure-viewer/index.html', 'utf8');
+const start = html.indexOf('async function hydrateModelDataFromCodecheckCompanion(');
+const end = html.indexOf('async function applyFullCodecheckHydration(', start);
+if (start < 0 || end < start) throw Error('companion function missing');
+const original = JSON.parse(fs.readFileSync({json.dumps(str(BASELINE_JSON))}, 'utf8'));
+if (original.case_context) throw Error('expected canonical metadata-only original');
+const results = [];
+for (const allCombinations of [false, true]) {{
+  const expected = allCombinations
+    ? hydrator.buildElementDcrMapAllCombinations(original.model.metadata, original)
+    : hydrator.buildElementDcrMapFromModelMeta(original.model.metadata, original, {{combination: 'KDS_ULS_1'}});
+  const globals = {{...hydrator, normalizeSelectionValue: x => String(x ?? '').trim(),
+    getActiveCodecheckCombinationName: () => 'KDS_ULS_1',
+    tryFetchArtifact: async () => ({{payload: original}}), console}};
+  const run = new Function(...Object.keys(globals), html.slice(start, end) + ';return hydrateModelDataFromCodecheckCompanion;')(...Object.values(globals));
+  const model = {{elements: [...expected.keys()].map(id => ({{id}})), meta: {{}}}};
+  const summary = await run(model, 'canonical-original.json', 'KDS_ULS_1', {{rootPayload: null, allCombinations}});
+  results.push({{expected: expected.size, hydrated: summary.hydrated_count,
+    exact: model.elements.every(e => e.dcr === expected.get(e.id).dcr && e.codecheck_combination === expected.get(e.id).combination)}});
+}}
+console.log(JSON.stringify(results));
+"""
+    )
+    for row in payload:
+        assert row["expected"] >= 200
+        assert row["hydrated"] == row["expected"]
+        assert row["exact"]

@@ -1,0 +1,280 @@
+{
+  "schema_version": "rc-terminal-twofold-observation.v1",
+  "source_revision": "aedcf1b0efcf12f7f2bcd7d6c5a50db74b847f03",
+  "source_files_verified_against_git": 431,
+  "unchanged_original_input_hashes_verified": true,
+  "all_original_record_gates_and_parent_chains_pass": true,
+  "all_six_terminal_native_reopens_exact": true,
+  "all_reference_fresh_histories_and_checkpoints_exact": true,
+  "full_comparisons_recomputed": true,
+  "independent_rational_assembly_verification": {
+    "section_replays": 8712,
+    "member_replays": 2904,
+    "material_integrations": 0,
+    "newton_solves": 0,
+    "state_commits": 0,
+    "assembly_replays": 1452
+  },
+  "independent_rational_assembly_wall_seconds": 31.113194844,
+  "terminal_compensated_candidates_exact": 1452,
+  "terminal_compensated_accepted_exact": 1439,
+  "main_work": {
+    "core_calls": 1452,
+    "linear_solves": 6354,
+    "newton_iterations": 6354
+  },
+  "main_polishing_work_included": {
+    "attempted": 1452,
+    "accepted": 1439,
+    "assembly_call_count": 1452,
+    "linear_solve_count": 1439
+  },
+  "development_probe_parent_seconds": 502.38858577,
+  "independent_exact_coordinate_fiber_strains_verified": 121968,
+  "retained_sub_float_strain_components_nonzero": 121968,
+  "independent_100_digit_stresses_verified": 121968,
+  "separate_original_material_state_replays": {
+    "concrete": 104544,
+    "steel": 17424
+  },
+  "all_replayed_state_updates_and_branch_decisions_exact": true,
+  "max_retained_minus_original_rounded_input_absolute": {
+    "concrete/stress_mpa": 9.186926727679928e-15,
+    "concrete/consistent_tangent_mpa": 7.275957614183426e-12,
+    "steel/stress_mpa": 1.1368683772161603e-13,
+    "steel/consistent_tangent_mpa": 0.0
+  },
+  "audit_wall_seconds": 57.302836015,
+  "repeat_admission": false,
+  "claims": {
+    "independent_validation": false,
+    "accepted_acceleration": false,
+    "native_material_state_precision_repair": false
+  },
+  "cases": {
+    "base": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 2.3283064365386963e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 2,
+          "support_reactions": 1
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 92.769936041,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1201,
+            "newton_iterations": 1201
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 241,
+            "assembly_call_count": 242,
+            "linear_solve_count": 241
+          },
+          "native_checkpoint_hash": "sha256:4529200d0e0a8578542a4551257bc82ceb1ccee5b4624b8748bc3500612e37d8"
+        },
+        "secant": {
+          "wall_seconds": 64.495295868,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 820,
+            "newton_iterations": 820
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 242,
+            "assembly_call_count": 242,
+            "linear_solve_count": 242
+          },
+          "native_checkpoint_hash": "sha256:ec50bfb0213becba6bd36d212a4d4b55197c55e5371e5a746e9d66ed3cb60bc3"
+        },
+        "fresh-reference": {
+          "wall_seconds": 93.233861878,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1201,
+            "newton_iterations": 1201
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 241,
+            "assembly_call_count": 242,
+            "linear_solve_count": 241
+          },
+          "native_checkpoint_hash": "sha256:4529200d0e0a8578542a4551257bc82ceb1ccee5b4624b8748bc3500612e37d8"
+        }
+      }
+    },
+    "long": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": true,
+        "maximum_absolute_difference_mixed_SI_fields": 2.3283064365386963e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": true,
+        "structure_match": true,
+        "mismatch_counts": {}
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 88.723187633,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1171,
+            "newton_iterations": 1171
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 237,
+            "assembly_call_count": 242,
+            "linear_solve_count": 237
+          },
+          "native_checkpoint_hash": "sha256:fc72d35eeb86729a9447efaf5d36fe349472cbcc22dfb20b097a4e4d55ca1640"
+        },
+        "secant": {
+          "wall_seconds": 63.053129962,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 790,
+            "newton_iterations": 790
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 241,
+            "assembly_call_count": 242,
+            "linear_solve_count": 241
+          },
+          "native_checkpoint_hash": "sha256:b2d9c2970bc290efd86d2763c57ee7de6e03e9f39596d3a5246ebbaf14c99ceb"
+        },
+        "fresh-reference": {
+          "wall_seconds": 88.579937487,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1171,
+            "newton_iterations": 1171
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 237,
+            "assembly_call_count": 242,
+            "linear_solve_count": 237
+          },
+          "native_checkpoint_hash": "sha256:fc72d35eeb86729a9447efaf5d36fe349472cbcc22dfb20b097a4e4d55ca1640"
+        }
+      }
+    }
+  },
+  "compatibility": {
+    "exact_step_pairs": 63,
+    "exact_history_checkpoint_pairs": 21,
+    "source_paths_verified": true,
+    "separate_work": {
+      "core_calls": 126,
+      "linear_solves": 306,
+      "newton_iterations": 306
+    }
+  },
+  "audit_parent_wall_seconds": 59.252405474,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-terminal-twofold.7sz3md_7",
+    "file_count": 10049,
+    "total_bytes": 522854203,
+    "inventory_sha256": "147807671357a7d223c0bae11d4885380c0ae879b226c34951f2754f7ca9efa8",
+    "all_files_reread_exact": true
+  },
+  "validation": {
+    "related_tests": 313,
+    "seconds": 57.92,
+    "terminal_twofold_tests": 6,
+    "legacy_optional_field_corruption_test": 1,
+    "initial_related_tests_passed": 310,
+    "initial_related_tests_failed": 2,
+    "initial_related_seconds": 57.12,
+    "hosted_full_suite_acceptance": false,
+    "post_observation_binding_guard": {
+      "description": "Reject metrics-only compensation declaration when actual solution compensation is absent",
+      "numerical_source_includes_guard": false,
+      "focused_tests_passed": 68,
+      "seconds": 11.23,
+      "terminal_twofold_tests_included": 7,
+      "full_numerical_observation_rerun": false
+    }
+  },
+  "preimplementation_boundary_probe": {
+    "work": {
+      "model_compilations": 2,
+      "selected_integrate_entries": 3360,
+      "base_integrate_entries": 3360,
+      "frame_trial_assemblies": 40,
+      "dense_linear_solves": 80
+    },
+    "newton_solves": 0,
+    "state_commits": 0,
+    "function_seconds": 1.890682399,
+    "parent_seconds": 4.337705936,
+    "evidence": {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-newton-boundary.zvlzbj06",
+      "file_count": 5,
+      "total_bytes": 24928648,
+      "inventory_sha256": "dedb71385c6369e5cd7543b2c6a8029c6c41b1a85fd89d311269910726dff72c",
+      "all_files_reread_exact": true
+    },
+    "failed_initial_attempt": {
+      "exit_code": 1,
+      "reason": "noncanonical JSON passed to native checkpoint loader before first frame trial",
+      "model_compilations": 1,
+      "frame_trial_assemblies": 0,
+      "material_integrate_entries": 0,
+      "linear_solves": 0,
+      "elapsed_time_not_recorded": true
+    }
+  },
+  "additional_refinement_probe": {
+    "work": {
+      "model_compilations": 1,
+      "selected_integrate_entries": 336,
+      "base_integrate_entries": 336,
+      "frame_trial_assemblies": 4,
+      "dense_linear_solves": 2
+    },
+    "newton_solves": 0,
+    "state_commits": 0,
+    "function_seconds": 0.199089904,
+    "process_startup_time_not_recorded": true,
+    "rows": [
+      {
+        "arm": "reference",
+        "original_residual_linf": 5.368453624154143e-14,
+        "candidate_residual_linf": 1.51843381738653e-14,
+        "strict_improvement": true,
+        "residual_gate": true,
+        "increment_gate": true,
+        "candidate_increment_linf_m": 1.4705405296130457e-19,
+        "original_M1_axial_N": 5.325454871304651e-11,
+        "candidate_M1_axial_N": 5.316293404663541e-12
+      },
+      {
+        "arm": "secant",
+        "original_residual_linf": 6.956875971514332e-14,
+        "candidate_residual_linf": 6.029924555133495e-14,
+        "strict_improvement": true,
+        "residual_gate": true,
+        "increment_gate": true,
+        "candidate_increment_linf_m": 2.358219610498821e-19,
+        "original_M1_axial_N": -6.956875971514331e-11,
+        "candidate_M1_axial_N": 6.029924555133494e-11
+      }
+    ],
+    "paired_axial_difference_N": 5.49829521466714e-11,
+    "claim": "two original-parent local trials, not accepted full histories"
+  },
+  "next_scope": "Implement bounded additional retained-coordinate terminal refinement, keeping the same original native parent, strict residual/increment gates and complete attempt/recovery costs. Then rerun both complete fixed-comparison histories before admitting repeated timing."
+}

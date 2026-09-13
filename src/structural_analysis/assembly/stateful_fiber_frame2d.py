@@ -7,6 +7,7 @@ import math
 from typing import Any
 
 import numpy as np
+from structural_analysis.solvers.nonlinear import twofold_coordinates as twofold
 
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
@@ -17,6 +18,7 @@ from structural_analysis.elements.stateful_fiber_beam2d import (
     StatefulFiberBeam2DState,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
 from structural_analysis.solvers.nonlinear.newton import (
     RESIDUAL_FORMULA,
 )
@@ -120,8 +122,20 @@ class StatefulFiberFrame2DProblem:
     fixed_global_dofs: tuple[int, ...]
     reference_external_loads: tuple[tuple[int, float], ...]
     rotation_coordinate_scale_m: float
+    coordinate_precision: str = "binary64"
+    terminal_coordinate_precision: str = "binary64"
+    terminal_refinement_limit: int = 1
+    # Independently applied dead/preload forces; never multiplied by lambda.
+    constant_external_loads: tuple[tuple[int, float], ...] = ()
 
     def __post_init__(self) -> None:
+        if type(
+            self.coordinate_precision
+        ) is not str or self.coordinate_precision not in (
+            "binary64",
+            "twofold-increment",
+        ):
+            raise ValueError("unsupported frame coordinate precision")
         normalized_case_id = str(self.case_id).strip()
         if not normalized_case_id:
             raise ValueError("case_id must be non-empty")
@@ -148,6 +162,44 @@ class StatefulFiberFrame2DProblem:
             type(member) is StatefulFiberFrame2DMember for member in self.members
         ):
             raise ValueError("members contains an invalid member")
+        if any(
+            m.element.coordinate_precision != self.coordinate_precision
+            for m in self.members
+        ):
+            raise ValueError("frame and member coordinate precision differ")
+        profiles = {
+            getattr(m.element.section, "force_accumulation", "binary64")
+            for m in self.members
+        }
+        if len(profiles) != 1 or not profiles <= {
+            "binary64",
+            "rational-fiber-to-frame.v1",
+        }:
+            raise ValueError("frame requires one supported force accumulation profile")
+        if (
+            self.terminal_coordinate_precision not in ("binary64", "twofold")
+            or type(self.terminal_coordinate_precision) is not str
+        ):
+            raise ValueError("unsupported terminal coordinate precision")
+        if (
+            type(self.terminal_refinement_limit) is not int
+            or not 1 <= self.terminal_refinement_limit <= 4
+        ):
+            raise ValueError("terminal refinement limit must be an integer from 1 to 4")
+        if (
+            self.terminal_refinement_limit != 1
+            and self.terminal_coordinate_precision != "twofold"
+        ):
+            raise ValueError(
+                "additional terminal refinement requires twofold coordinates"
+            )
+        if self.terminal_coordinate_precision == "twofold" and (
+            self.coordinate_precision != "twofold-increment"
+            or profiles != {"rational-fiber-to-frame.v1"}
+        ):
+            raise ValueError(
+                "twofold terminal correction requires rational assembly and native twofold coordinates"
+            )
         member_ids: set[str] = set()
         node_count = len(coordinates)
         for member in self.members:
@@ -198,6 +250,21 @@ class StatefulFiberFrame2DProblem:
             "reference_external_loads",
             tuple(sorted(loads)),
         )
+        if type(self.constant_external_loads) is not tuple:
+            raise ValueError("constant_external_loads must be a tuple")
+        constants: list[tuple[int, float]] = []
+        constant_dofs: set[int] = set()
+        for row in self.constant_external_loads:
+            if type(row) is not tuple or len(row) != 2 or type(row[0]) is not int:
+                raise ValueError("each constant external load must be (dof, value)")
+            dof = row[0]
+            if not 0 <= dof < global_dof_count or dof in constant_dofs:
+                raise ValueError("constant external load DOFs must be valid and unique")
+            constant_dofs.add(dof)
+            constants.append((dof, _finite(row[1], name="constant external load")))
+        if constants and not any(value != 0.0 for _, value in constants):
+            raise ValueError("declared constant loads must include a nonzero load")
+        object.__setattr__(self, "constant_external_loads", tuple(sorted(constants)))
         object.__setattr__(
             self,
             "rotation_coordinate_scale_m",
@@ -243,7 +310,34 @@ class StatefulFiberFrame2DProblem:
                 "reference_external_loads": [
                     [dof, value] for dof, value in self.reference_external_loads
                 ],
+                **(
+                    {
+                        "external_loading_profile": "constant-plus-proportional.v1",
+                        "constant_external_loads": [
+                            list(row) for row in self.constant_external_loads
+                        ],
+                    }
+                    if self.constant_external_loads
+                    else {}
+                ),
                 "rotation_coordinate_scale_m": self.rotation_coordinate_scale_m,
+                **(
+                    {"coordinate_precision": self.coordinate_precision}
+                    if self.coordinate_precision != "binary64"
+                    else {}
+                ),
+                **(
+                    {
+                        "terminal_coordinate_precision": self.terminal_coordinate_precision
+                    }
+                    if self.terminal_coordinate_precision != "binary64"
+                    else {}
+                ),
+                **(
+                    {"terminal_refinement_limit": self.terminal_refinement_limit}
+                    if self.terminal_refinement_limit != 1
+                    else {}
+                ),
                 "transformation": STATEFUL_FIBER_FRAME2D_TRANSFORMATION,
             }
         )
@@ -283,7 +377,18 @@ class StatefulFiberFrame2DProblem:
         generalized = (
             self.physical_coordinate_scale * self.reference_external_load_vector()
         )
-        return max(float(np.linalg.norm(generalized, ord=np.inf)), 1.0)
+        reference = max(float(np.linalg.norm(generalized, ord=np.inf)), 1.0)
+        if not self.constant_external_loads:
+            return reference
+        constant = self.physical_coordinate_scale * self.constant_external_load_vector()
+        return max(reference, float(np.linalg.norm(constant, ord=np.inf)))
+
+    def constant_external_load_vector(self) -> np.ndarray:
+        external = np.zeros(self.global_dof_count, dtype=np.float64)
+        for dof, value in self.constant_external_loads:
+            external[dof] = value
+        external.setflags(write=False)
+        return external
 
 
 @dataclass(frozen=True)
@@ -322,14 +427,28 @@ class StatefulFiberFrame2DAssembly:
     reactions_global: np.ndarray
     member_assemblies: tuple[StatefulFiberFrame2DMemberAssembly, ...]
     trial_element_states: tuple[StatefulFiberBeam2DState, ...]
+    generalized_coordinate_compensation_m: np.ndarray | None = None
+    force_accumulation: str = "binary64"
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **(
+                {"force_accumulation": self.force_accumulation}
+                if self.force_accumulation != "binary64"
+                else {}
+            ),
             "residual_formula": RESIDUAL_FORMULA,
             "parent_checkpoint_hash": self.parent_checkpoint_hash,
             "target_load_factor": self.target_load_factor,
             "free_global_dofs": list(self.free_global_dofs),
             "generalized_coordinates_m": self.generalized_coordinates_m.tolist(),
+            **(
+                {
+                    "generalized_coordinate_compensation_m": self.generalized_coordinate_compensation_m.tolist()
+                }
+                if self.generalized_coordinate_compensation_m is not None
+                else {}
+            ),
             "global_displacements": self.global_displacements.tolist(),
             "residual_kn": self.residual_kn.tolist(),
             "jacobian_kn_per_m": self.jacobian_kn_per_m.tolist(),
@@ -343,6 +462,20 @@ class StatefulFiberFrame2DAssembly:
         }
 
 
+def _expanded_frame_coordinates(problem, free, compensation):
+    high, low = twofold.validate(free, compensation)
+    if high.shape != (len(problem.free_global_dofs),):
+        raise ValueError("native free coordinate shape differs")
+    q = np.zeros(problem.global_dof_count)
+    q_low = np.zeros(problem.global_dof_count)
+    q[list(problem.free_global_dofs)] = high
+    q_low[list(problem.free_global_dofs)] = low
+    physical, physical_low = twofold.transform(
+        np.diag(problem.physical_coordinate_scale), q, q_low
+    )
+    return q, q_low, physical, physical_low
+
+
 def initial_stateful_fiber_frame2d_checkpoint(
     problem: StatefulFiberFrame2DProblem,
 ) -> StatefulFiberFrame2DCheckpoint:
@@ -354,6 +487,12 @@ def initial_stateful_fiber_frame2d_checkpoint(
         load_factor=0.0,
         parent_state_hash=None,
         global_displacements=(0.0,) * problem.global_dof_count,
+        free_coordinates_m=(0.0,) * len(problem.free_global_dofs)
+        if problem.coordinate_precision != "binary64"
+        else None,
+        free_coordinate_compensation_m=(0.0,) * len(problem.free_global_dofs)
+        if problem.coordinate_precision != "binary64"
+        else None,
         element_states=tuple(
             member.element.initial_state() for member in problem.members
         ),
@@ -378,6 +517,33 @@ def validate_stateful_fiber_frame2d_checkpoint(
         raise ValueError("checkpoint global displacement count does not match problem")
     if len(checkpoint.element_states) != len(problem.members):
         raise ValueError("checkpoint element-state count does not match problem")
+    expanded = problem.coordinate_precision != "binary64"
+    if expanded != (checkpoint.free_coordinates_m is not None):
+        raise ValueError("checkpoint coordinate precision does not match problem")
+    physical_low = None
+    if expanded:
+        if (
+            checkpoint.free_coordinates_m is None
+            or checkpoint.free_coordinate_compensation_m is None
+        ):
+            raise ValueError("expanded checkpoint requires both coordinate components")
+        _, _, physical, physical_low = _expanded_frame_coordinates(
+            problem,
+            checkpoint.free_coordinates_m,
+            checkpoint.free_coordinate_compensation_m,
+        )
+        if not np.array_equal(physical, checkpoint.global_displacements):
+            raise ValueError(
+                "native coordinates do not match checkpoint displacement projection"
+            )
+        if checkpoint.epoch == 0 and any(
+            v != 0
+            for v in (
+                *checkpoint.free_coordinates_m,
+                *checkpoint.free_coordinate_compensation_m,
+            )
+        ):
+            raise ValueError("epoch-zero expanded coordinates must be zero")
     global_displacements = np.asarray(
         checkpoint.global_displacements,
         dtype=np.float64,
@@ -406,19 +572,41 @@ def validate_stateful_fiber_frame2d_checkpoint(
         if element_state.step_index != checkpoint.step_index:
             raise ValueError("checkpoint and element step indices do not match")
         global_dofs = problem.member_global_dofs(member)
-        expected_local = (
-            problem.member_transformation(member)
-            @ global_displacements[list(global_dofs)]
-        )
-        if not np.allclose(
-            expected_local,
-            element_state.local_displacements,
-            rtol=0.0,
-            atol=1.0e-13,
-        ):
-            raise ValueError(
-                "element local displacement does not match checkpoint global state"
+        if expanded:
+            if (
+                physical_low is None
+                or element_state.local_displacement_compensation is None
+            ):
+                raise ValueError(
+                    "expanded checkpoint requires local coordinate compensation"
+                )
+            expected_local, expected_low = twofold.transform(
+                problem.member_transformation(member),
+                global_displacements[list(global_dofs)],
+                physical_low[list(global_dofs)],
             )
+            if not np.array_equal(
+                expected_local, element_state.local_displacements
+            ) or not np.array_equal(
+                expected_low, element_state.local_displacement_compensation
+            ):
+                raise ValueError(
+                    "element twofold coordinates do not match checkpoint native state"
+                )
+        else:
+            expected_local = (
+                problem.member_transformation(member)
+                @ global_displacements[list(global_dofs)]
+            )
+            if not np.allclose(
+                expected_local,
+                element_state.local_displacements,
+                rtol=0.0,
+                atol=1.0e-13,
+            ):
+                raise ValueError(
+                    "element local displacement does not match checkpoint global state"
+                )
 
 
 def assemble_stateful_fiber_frame2d(
@@ -427,9 +615,16 @@ def assemble_stateful_fiber_frame2d(
     *,
     target_load_factor: float,
     trial_free_coordinates_m: Any,
+    trial_free_coordinate_compensation_m: Any = None,
+    material_runtime: MaterialTrialRuntimeRecorder | None = None,
 ) -> StatefulFiberFrame2DAssembly:
     """Assemble one trial from the exact immutable committed checkpoint."""
 
+    if (
+        material_runtime is not None
+        and type(material_runtime) is not MaterialTrialRuntimeRecorder
+    ):
+        raise ValueError("material_runtime must be MaterialTrialRuntimeRecorder")
     validate_stateful_fiber_frame2d_checkpoint(problem, accepted_checkpoint)
     load_factor = _finite(target_load_factor, name="target_load_factor")
     free_dofs = problem.free_global_dofs
@@ -443,11 +638,37 @@ def assemble_stateful_fiber_frame2d(
     generalized = np.zeros(problem.global_dof_count, dtype=np.float64)
     generalized[list(free_dofs)] = free
     global_displacements = scale * generalized
+    generalized_low = physical_low = None
+    if problem.coordinate_precision != "binary64":
+        if trial_free_coordinate_compensation_m is None:
+            raise ValueError("twofold trial coordinates require both components")
+        generalized, generalized_low, global_displacements, physical_low = (
+            _expanded_frame_coordinates(
+                problem, free, trial_free_coordinate_compensation_m
+            )
+        )
+    elif trial_free_coordinate_compensation_m is not None:
+        raise ValueError("unexpected trial coordinate compensation")
     internal = np.zeros(problem.global_dof_count, dtype=np.float64)
     tangent = np.zeros(
         (problem.global_dof_count, problem.global_dof_count),
         dtype=np.float64,
     )
+    accumulation = getattr(
+        problem.members[0].element.section, "force_accumulation", "binary64"
+    )
+    if accumulation != "binary64":
+        from fractions import Fraction as F
+        from structural_analysis.solvers.nonlinear.rational_accumulation import (
+            transformed,
+            rounded,
+        )
+
+        exact_internal = [F() for _ in range(problem.global_dof_count)]
+        exact_tangent = [
+            [F() for _ in range(problem.global_dof_count)]
+            for _ in range(problem.global_dof_count)
+        ]
     member_rows: list[StatefulFiberFrame2DMemberAssembly] = []
     trial_states: list[StatefulFiberBeam2DState] = []
 
@@ -460,17 +681,55 @@ def assemble_stateful_fiber_frame2d(
         transformation = problem.member_transformation(member)
         member_global_displacements = global_displacements[list(global_dofs)]
         local_displacements = transformation @ member_global_displacements
-        response = member.element.integrate(local_displacements, parent)
+        coordinate_kwargs = {}
+        if physical_low is not None:
+            local_displacements, local_low = twofold.transform(
+                transformation,
+                member_global_displacements,
+                physical_low[list(global_dofs)],
+            )
+            coordinate_kwargs["local_displacement_compensation"] = local_low
+
+        if material_runtime is None:
+            response = member.element.integrate(
+                local_displacements, parent, **coordinate_kwargs
+            )
+        else:
+            response = member.element.integrate(
+                local_displacements,
+                parent,
+                material_runtime=material_runtime,
+                **coordinate_kwargs,
+            )
         if response.parent_state_hash != parent.state_hash:
             raise ValueError(
                 "element response parent_state_hash does not match checkpoint parent"
             )
-        internal_global = transformation.T @ response.internal_force_local
-        tangent_global = (
-            transformation.T @ response.consistent_tangent_local @ transformation
-        )
-        internal[list(global_dofs)] += internal_global
-        tangent[np.ix_(global_dofs, global_dofs)] += tangent_global
+        if accumulation != "binary64":
+            if (
+                response.rational_force_local is None
+                or response.rational_tangent_local is None
+            ):
+                raise ValueError(
+                    "rational frame requires exact element force and tangent"
+                )
+            rf, rk = transformed(
+                transformation,
+                response.rational_force_local,
+                response.rational_tangent_local,
+            )
+            internal_global, tangent_global = rounded(rf), rounded(rk)
+            for i, gi in enumerate(global_dofs):
+                exact_internal[gi] += rf[i]
+                for j, gj in enumerate(global_dofs):
+                    exact_tangent[gi][gj] += rk[i][j]
+        else:
+            internal_global = transformation.T @ response.internal_force_local
+            tangent_global = (
+                transformation.T @ response.consistent_tangent_local @ transformation
+            )
+            internal[list(global_dofs)] += internal_global
+            tangent[np.ix_(global_dofs, global_dofs)] += tangent_global
         member_rows.append(
             StatefulFiberFrame2DMemberAssembly(
                 member_id=member.member_id,
@@ -483,24 +742,54 @@ def assemble_stateful_fiber_frame2d(
         )
         trial_states.append(response.state)
 
-    external = load_factor * problem.reference_external_load_vector()
-    physical_residual = internal - external
-    free_scale = scale[list(free_dofs)]
-    residual = free_scale * physical_residual[list(free_dofs)]
-    jacobian = (
-        free_scale[:, None]
-        * tangent[np.ix_(free_dofs, free_dofs)]
-        * free_scale[None, :]
-    )
+    if accumulation != "binary64":
+        exact_external = [
+            F(load_factor) * F(float(v))
+            for v in problem.reference_external_load_vector()
+        ]
+        if problem.constant_external_loads:
+            for dof, value in problem.constant_external_loads:
+                exact_external[dof] += F(value)
+        exact_residual = [
+            i - e for i, e in zip(exact_internal, exact_external, strict=True)
+        ]
+        internal, external = rounded(exact_internal), rounded(exact_external)
+        physical_residual = rounded(exact_residual)
+        residual = rounded([F(float(scale[i])) * exact_residual[i] for i in free_dofs])
+        jacobian = rounded(
+            [
+                [
+                    F(float(scale[i])) * exact_tangent[i][j] * F(float(scale[j]))
+                    for j in free_dofs
+                ]
+                for i in free_dofs
+            ]
+        )
+    else:
+        external = load_factor * problem.reference_external_load_vector()
+        if problem.constant_external_loads:
+            external = external + problem.constant_external_load_vector()
+        physical_residual = internal - external
+        free_scale = scale[list(free_dofs)]
+        residual = free_scale * physical_residual[list(free_dofs)]
+        jacobian = (
+            free_scale[:, None]
+            * tangent[np.ix_(free_dofs, free_dofs)]
+            * free_scale[None, :]
+        )
     reactions = np.zeros(problem.global_dof_count, dtype=np.float64)
     reactions[list(problem.fixed_global_dofs)] = physical_residual[
         list(problem.fixed_global_dofs)
     ]
     return StatefulFiberFrame2DAssembly(
+        force_accumulation=accumulation,
         parent_checkpoint_hash=accepted_checkpoint.state_hash,
         target_load_factor=load_factor,
         free_global_dofs=free_dofs,
         generalized_coordinates_m=_readonly(generalized),
+        generalized_coordinate_compensation_m=_readonly(generalized_low)
+        if generalized_low is not None
+        else None,
         global_displacements=_readonly(global_displacements),
         residual_kn=_readonly(residual),
         jacobian_kn_per_m=_readonly(jacobian),

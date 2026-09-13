@@ -1,0 +1,170 @@
+{
+  "plan_source_revision": "e9dd26ed8d85795c74153eac2df6626b2cc1a148",
+  "source_files_match_git_and_unchanged": 596,
+  "inputs_unchanged": true,
+  "coordinate_order": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    "scaled_load_factor_coordinate"
+  ],
+  "folds": [
+    {
+      "case": "train-a",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 0,
+      "ood": 241,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        1.0662416792402436,
+        0.6712180755081967,
+        1.8755275831561953,
+        1.6668419004485715,
+        1.0,
+        1.8755275681331,
+        0.6846077777896072
+      ],
+      "range_violations_by_feature": {
+        "rotation_coordinate_scale_m": 241
+      },
+      "fit_wall_ns": 7317439
+    },
+    {
+      "case": "train-b",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 241,
+      "ood": 0,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        1.0337703743846336,
+        1.1844423661630707,
+        1.5134706025663855,
+        1.4594434315279814,
+        1.0,
+        1.5134706045005057,
+        1.550499397160897
+      ],
+      "range_violations_by_feature": {},
+      "fit_wall_ns": 6477713
+    },
+    {
+      "case": "train-c",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 0,
+      "ood": 241,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        1.148223755451394,
+        0.7713521451731404,
+        1.4697394349587813,
+        1.325010391818343,
+        1.0,
+        1.4697394349587232,
+        0.838489306522614
+      ],
+      "range_violations_by_feature": {
+        "node_1_x_m": 241,
+        "node_2_x_m": 241,
+        "member_0_length_m": 241,
+        "accepted_augmented_coordinate_0": 21,
+        "accepted_augmented_coordinate_2": 16,
+        "accepted_augmented_coordinate_3": 50,
+        "accepted_augmented_coordinate_5": 16,
+        "previous_augmented_increment_0": 15,
+        "previous_augmented_increment_2": 51,
+        "previous_augmented_increment_3": 175,
+        "previous_augmented_increment_5": 51,
+        "previous_augmented_increment_6": 1
+      },
+      "fit_wall_ns": 6073514
+    },
+    {
+      "case": "train-d",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 0,
+      "ood": 241,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        1.9263127522379966,
+        3.709950279684596,
+        3.1663310132595495,
+        6.159990797114467,
+        1.0,
+        3.1663310093140584,
+        3.5623955440411077
+      ],
+      "range_violations_by_feature": {
+        "node_1_x_m": 241,
+        "node_2_x_m": 241,
+        "node_2_y_m": 241,
+        "rotation_coordinate_scale_m": 241,
+        "member_0_length_m": 241,
+        "member_1_length_m": 241
+      },
+      "fit_wall_ns": 6289924
+    }
+  ],
+  "diagnostic_wall_ns": 406709568,
+  "process": {
+    "pid": 900865,
+    "return_code": 0,
+    "parent_wall_ns": 2164532493,
+    "stdout_sha256": "a75027bfd2b0171624559f0ee9f243184eae8ccb28d43332e2580117fe88fc7d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "worker": {
+    "pid": 900865,
+    "wall_ns_through_report_write": 416051169,
+    "peak_rss_kib": 198460,
+    "original_policy_unchanged": true,
+    "fit_count": 4,
+    "structural_solver_calls": 0
+  },
+  "validation_holdout_samples_read": 0,
+  "structural_solver_calls": 0,
+  "policy_promoted": false,
+  "independent_project_split": false,
+  "ungated_predictions_not_runtime_proposals": true,
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-train-folds-h7tzgfkb",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-train-folds-h7tzgfkb.inventory.json",
+    "inventory_sha256": "6f7d8655d7dcf86cab42086bd063030cc8f0b978faaf002f7648d3e63b986259",
+    "file_count": 18,
+    "total_bytes": 22478923,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T18:07:33.763728+00:00",
+    "seal_wall_ns": 41861905,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "ci": [
+    {
+      "run": 34385591191,
+      "job": 102580908428,
+      "head": "e3476809ccf16b1b803bf1d20db2d52bdbe380d6",
+      "browser_install_succeeded": true,
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "blocker_lines": [
+        "2026-09-09T17:58:22.3202785Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-09T17:58:22.3203934Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "run": 34385597715,
+      "job": 102580929980,
+      "head": "e3476809ccf16b1b803bf1d20db2d52bdbe380d6",
+      "browser_install_succeeded": true,
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "blocker_lines": [
+        "2026-09-09T18:01:29.4788964Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-09T18:01:29.4790972Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    }
+  ]
+}

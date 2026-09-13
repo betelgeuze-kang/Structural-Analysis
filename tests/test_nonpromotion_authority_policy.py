@@ -251,6 +251,39 @@ def test_bounded_summary_rejects_transplanted_known_keys(key: str) -> None:
     assert promoted_authority_violations({"bounded_planar_external_vv": {"summary": {key: True}}}, policy)
 
 
+@pytest.mark.parametrize("summary_key", ("summary", "stored_summary"))
+def test_failed_replay_count_is_nonpromoting_at_exact_summary_paths(summary_key: str) -> None:
+    policy = load_authority_policy(ROOT / POLICY_PATH)
+    payload = {
+        "bounded_planar_external_vv": {
+            summary_key: {"current_product_replay_failed_count": 2}
+        }
+    }
+    assert promoted_authority_violations(payload, policy) == []
+
+
+@pytest.mark.parametrize("parent", ("claims", "operator_intake_binding", "execution_package_binding"))
+def test_failed_replay_count_does_not_expand_other_authority_paths(parent: str) -> None:
+    policy = load_authority_policy(ROOT / POLICY_PATH)
+    payload = {
+        "bounded_planar_external_vv": {
+            parent: {"current_product_replay_failed_count": 2}
+        }
+    }
+    assert promoted_authority_violations(payload, policy)
+
+
+@pytest.mark.parametrize("summary_key", ("summary", "stored_summary"))
+def test_failed_replay_count_does_not_allow_similar_summary_claims(summary_key: str) -> None:
+    policy = load_authority_policy(ROOT / POLICY_PATH)
+    payload = {
+        "bounded_planar_external_vv": {
+            summary_key: {"current_product_replay_failed_approved": True}
+        }
+    }
+    assert promoted_authority_violations(payload, policy)
+
+
 def test_execution_package_rejects_sigstore_field_transplant() -> None:
     policy = load_authority_policy(ROOT / POLICY_PATH)
     payload = {"bounded_planar_external_vv": {"execution_package_binding": {"sigstore_attestations_reverified": True}}}

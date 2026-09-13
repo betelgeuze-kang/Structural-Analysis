@@ -1,0 +1,29 @@
+{
+  "source_revision": "e281ebb1f488cc295a9bada3d6d32b7d8ea6dff1",
+  "original_intake_inventory_sha256": "c69e062ac70ae8a674b52ab7ff72a16508772689d0e0d4e0f66352a565481e30",
+  "full_points": 744,
+  "exact_derivative_points": 548,
+  "derivative_scope": "locally generated audit workbooks; published subset retains its original numeric spellings",
+  "published_rounded_subset_with_false_campaign_labels": "not detected by exact row screen",
+  "published_subset_with_known_campaign": "rejected before solver work",
+  "content_identity_unchanged": true,
+  "structural_calls": 0,
+  "training_fits": 0,
+  "training_admitted": false,
+  "independent_validation": false,
+  "audit_wall_ns": 424760339,
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-row-subsequence-wmm8qizn",
+  "seal": {
+    "inventory_sha256": "67eff605fd63c023755a6559b2aece9ccc67856c81b8a31095e1226678929983",
+    "files": 21,
+    "bytes": 157344
+  },
+  "rejection_screen_ns": [
+    6155043,
+    6237045
+  ],
+  "matched_index_sha256": [
+    "5dea9fa45f8ca81182e34555187b407fb427356ce3bf1ab5993f24a82de79135",
+    "5dea9fa45f8ca81182e34555187b407fb427356ce3bf1ab5993f24a82de79135"
+  ]
+}

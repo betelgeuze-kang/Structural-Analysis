@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from itertools import pairwise
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -22,7 +23,11 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from release_evidence_metadata import git_head, input_checksums  # noqa: E402
+from release_evidence_metadata import (  # noqa: E402
+    commit_bound_input_metadata,
+    git_head,
+    input_checksums,
+)
 from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION  # noqa: E402
 from structural_analysis.assembly.stateful_axial import (  # noqa: E402
     StatefulAxialChainProblem,
@@ -163,13 +168,13 @@ def _step_receipt(step: Any) -> dict[str, Any]:
     assembly = step.trial_assembly
     reaction_balance_abs_kn = abs(float(np.sum(assembly.reactions_kn)))
     parent_binding_exact = bool(
-        step.parent_state.state_hash == assembly.parent_state_hash
+        step.parent_state.state_hash
+        == assembly.parent_state_hash
         == step_metrics["parent_state_hash"]
         == step_metrics["trial_parent_state_hash"]
     )
     accepted_binding_exact = bool(
-        step.accepted_state.state_hash
-        == step_metrics["accepted_state_hash_after"]
+        step.accepted_state.state_hash == step_metrics["accepted_state_hash_after"]
     )
     contract_pass = bool(
         step.status == "ready"
@@ -319,9 +324,7 @@ def _case_receipt(
         "increment_norm_applicable": any(
             step["increment_norm_applicable"] is True for step in steps
         ),
-        "convergence_claim": any(
-            step["convergence_claim"] is True for step in steps
-        ),
+        "convergence_claim": any(step["convergence_claim"] is True for step in steps),
         "regularization_count": sum(
             step["regularization_used"] is True for step in steps
         ),
@@ -340,8 +343,7 @@ def build_stateful_nonlinear_no_solve_reaction_only_artifact(
     engine_v2_reference = _engine_v2_fully_constrained_reference()
     engine_v2_disposition = str(engine_v2_reference["terminal_disposition"])
     engine_v2_terminal_disposition_aligned = bool(
-        engine_v2_disposition
-        == NO_SOLVE_REACTION_ONLY_DISPOSITION
+        engine_v2_disposition == NO_SOLVE_REACTION_ONLY_DISPOSITION
         and engine_v2_reference["free_count"] == 0
         and engine_v2_reference["free_nnz"] == 0
         and engine_v2_reference["free_csr_row_ptr"] == [0]
@@ -376,15 +378,13 @@ def build_stateful_nonlinear_no_solve_reaction_only_artifact(
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "input_checksums": input_checksums(
             [
+                Path("scripts/release_evidence_metadata.py"),
                 Path("src/structural_analysis/assembly/stateful_axial.py"),
                 Path(
                     "src/structural_analysis/engine_v2/contracts/"
                     "execution_plan_reduced_csr.py"
                 ),
-                Path(
-                    "src/structural_analysis/engine_v2/contracts/"
-                    "execution_plan.py"
-                ),
+                Path("src/structural_analysis/engine_v2/contracts/execution_plan.py"),
                 Path("src/structural_analysis/solvers/nonlinear/newton.py"),
                 Path("src/structural_analysis/solvers/nonlinear/__init__.py"),
                 SCHEMA_PATH,
@@ -500,10 +500,24 @@ def check_stateful_nonlinear_no_solve_reaction_only_artifact(
         existing = _read_json(path)
     except Exception as exc:
         return False, (
-            f"stateful_nonlinear_no_solve_unreadable:{output}:"
-            f"{exc.__class__.__name__}"
+            f"stateful_nonlinear_no_solve_unreadable:{output}:{exc.__class__.__name__}"
         )
-    if _strip_volatile(existing) != _strip_volatile(expected):
+    source_sha = existing.get("source_commit_sha")
+    if not isinstance(source_sha, str) or not re.fullmatch(r"[0-9a-f]{40}", source_sha):
+        return False, "stateful_nonlinear_no_solve_source_invalid"
+    # Use the builder's fixed input set, never paths supplied by the receipt.
+    binding = commit_bound_input_metadata(
+        [Path(path) for path in expected["input_checksums"]],
+        repo_root=repo_root,
+        source_commit_sha=source_sha,
+    )
+    if not binding["source_input_provenance"]["contract_pass"] or binding[
+        "input_checksums"
+    ] != existing.get("input_checksums"):
+        return False, "stateful_nonlinear_no_solve_source_unbound"
+    comparable = dict(existing)
+    comparable["source_commit_sha"] = expected["source_commit_sha"]
+    if _strip_volatile(comparable) != _strip_volatile(expected):
         return False, "stateful_nonlinear_no_solve_mismatch"
     return True, "stateful_nonlinear_no_solve_consistent"
 

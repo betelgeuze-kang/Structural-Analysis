@@ -1,0 +1,11 @@
+# Explicit review of previous failed attempts
+
+Workbench permits an explicit read of an earlier attempt through the existing authenticated failure-diagnostic endpoint. The current job status, result and evidence references remain unchanged. Input changes cancel pending reads and clear the previous review. Missing or invalid history affects only the history panel.
+
+The diagnostic must bind to the requested earlier attempt, current immutable job/request, original bytes and existing configuration/authority checks. The current-attempt validator retains its failed-job and null-result requirements. Earlier records remain diagnostic-only; no accepted engineering result is reconstructed. Checkpoint binding remains strict: records with a different checkpoint from the current job are withheld.
+
+The opt-in fixture performs a real planar failed attempt, resumes the durable job and executes a second failed attempt. It asserts that the first diagnostic bytes are unchanged. Desktop and mobile browser tests retrieve attempt 1 while displaying current failed attempt 2, compare the original download with authenticated server bytes, reject the current attempt as history, and isolate missing or wrong-attempt payloads.
+
+Validation: pinned Node 24.20.0 TypeScript, production build and viewer delivery passed. The existing current-failure suite and new history suite passed 12 browser tests in 39.5 seconds. These fixture groups execute three actual nonlinear failed paths in total, not twelve independent physical cases. Python fixture Ruff checks passed. Successful-current-job history, changed-checkpoint history and independent physical validation are not qualified by these tests.
+
+The preceding published source `5f68c659e878cb851f93b6fc1d569fe95d799f9a` has a failed Frontend Web CI run 34741505107: 691 browser tests passed and two design-comparison browser assertions failed. A focused local rerun with the preview server running passed all 79 design-comparison tests in 13.7 seconds; it does not establish the cause of the hosted failures. An initial local invocation without that server had connection-refused errors and is not counted as product verification. This is separate from the focused history verification and remains an integration finding, not an AI performance result. No learned speed benefit or release eligibility is claimed.

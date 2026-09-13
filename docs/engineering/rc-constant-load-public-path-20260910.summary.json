@@ -1,0 +1,248 @@
+{
+  "source_commit": "4fe2ee248ff152ff330139a6308d532049d31449",
+  "baseline_commit": "b2ec2a4f3",
+  "source_file_count": 1339,
+  "source_before_after_git_exact": true,
+  "legacy_comparisons": [
+    {
+      "file": "full.checkpoint.json",
+      "bytes": 6828,
+      "sha256": "d9d39a9d0f6d4a0c8209d7c14664185ea48a5811dd6bf81e4848c57a4f43a106",
+      "exact": true
+    },
+    {
+      "file": "full.result.json",
+      "bytes": 139816,
+      "sha256": "de8846f51578d55fdcbe35e91134994018211cd3f7f76986c008fa03ebd2ce8a",
+      "exact": true
+    },
+    {
+      "file": "prefix.checkpoint.json",
+      "bytes": 6024,
+      "sha256": "5ba0bbfc1f4336d8b3eb3357eacf6d326ab1aeb2e177c775efd323476b6d5cae",
+      "exact": true
+    },
+    {
+      "file": "prefix.result.json",
+      "bytes": 59045,
+      "sha256": "c97e187935744290b49d3ccd4b8a72caffbf7f360c0410e461566b716369a66f",
+      "exact": true
+    },
+    {
+      "file": "resumed.checkpoint.json",
+      "bytes": 6828,
+      "sha256": "d9d39a9d0f6d4a0c8209d7c14664185ea48a5811dd6bf81e4848c57a4f43a106",
+      "exact": true
+    },
+    {
+      "file": "resumed.result.json",
+      "bytes": 140307,
+      "sha256": "6304b1b2bb137d0cc4fc9321af1780e2080649b1c81e2818ca13d8e33efffd70",
+      "exact": true
+    }
+  ],
+  "legacy_total_equal_bytes": 358848,
+  "processes": [
+    {
+      "label": "legacy-original",
+      "source": "b2ec2a4f3",
+      "exit_code": 0,
+      "parent_wall_ns": 2286770555
+    },
+    {
+      "label": "legacy-current",
+      "source": "4fe2ee248ff152ff330139a6308d532049d31449",
+      "exit_code": 0,
+      "parent_wall_ns": 1947818167
+    },
+    {
+      "label": "constant-current",
+      "source": "4fe2ee248ff152ff330139a6308d532049d31449",
+      "exit_code": 0,
+      "parent_wall_ns": 2363236309
+    }
+  ],
+  "reports": {
+    "legacy-original": {
+      "mode": "legacy",
+      "calls": [
+        {
+          "name": "full",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 233164033,
+          "work": {
+            "attempted_step_count": 3,
+            "known_linear_solve_count": 6,
+            "known_newton_iteration_count": 6,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 3
+        },
+        {
+          "name": "prefix",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 75295408,
+          "work": {
+            "attempted_step_count": 1,
+            "known_linear_solve_count": 2,
+            "known_newton_iteration_count": 2,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 1
+        },
+        {
+          "name": "resumed",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 186457221,
+          "work": {
+            "attempted_step_count": 3,
+            "known_linear_solve_count": 6,
+            "known_newton_iteration_count": 6,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 3
+        }
+      ],
+      "worker_interval_ns": 595843641,
+      "max_rss_kib": 107408
+    },
+    "legacy-current": {
+      "mode": "legacy",
+      "calls": [
+        {
+          "name": "full",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 184744518,
+          "work": {
+            "attempted_step_count": 3,
+            "known_linear_solve_count": 6,
+            "known_newton_iteration_count": 6,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 3
+        },
+        {
+          "name": "prefix",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 72510938,
+          "work": {
+            "attempted_step_count": 1,
+            "known_linear_solve_count": 2,
+            "known_newton_iteration_count": 2,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 1
+        },
+        {
+          "name": "resumed",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 178015079,
+          "work": {
+            "attempted_step_count": 3,
+            "known_linear_solve_count": 6,
+            "known_newton_iteration_count": 6,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 3
+        }
+      ],
+      "worker_interval_ns": 535668205,
+      "max_rss_kib": 105008
+    },
+    "constant-current": {
+      "mode": "constant",
+      "calls": [
+        {
+          "name": "full",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 217874134,
+          "work": {
+            "attempted_step_count": 4,
+            "known_linear_solve_count": 8,
+            "known_newton_iteration_count": 8,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 4
+        },
+        {
+          "name": "prefix",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 106131242,
+          "work": {
+            "attempted_step_count": 2,
+            "known_linear_solve_count": 4,
+            "known_newton_iteration_count": 4,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 2
+        },
+        {
+          "name": "resumed",
+          "status": "ready",
+          "contract_pass": true,
+          "wall_ns": 250619106,
+          "work": {
+            "attempted_step_count": 4,
+            "known_linear_solve_count": 8,
+            "known_newton_iteration_count": 8,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "reassemblies": 4
+        },
+        {
+          "name": "validation",
+          "wall_ns": 247769645,
+          "work": {
+            "attempted_step_count": 4,
+            "known_linear_solve_count": 8,
+            "known_newton_iteration_count": 8,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "contract_pass": true,
+          "reassemblies": 4
+        },
+        {
+          "name": "failed-preload",
+          "status": "invalid_execution",
+          "contract_pass": false,
+          "wall_ns": 32601239,
+          "work": {
+            "attempted_step_count": 1,
+            "known_linear_solve_count": 0,
+            "known_newton_iteration_count": 0,
+            "unknown_solver_work_attempt_count": 1
+          },
+          "reassemblies": 0
+        }
+      ],
+      "worker_interval_ns": 992679731,
+      "max_rss_kib": 106388
+    }
+  },
+  "limits": [
+    "authored local fixture, not U3",
+    "no independent physical validation or training admission",
+    "one observation, no repeated timing claim",
+    "failed preload has unknown Newton/linear counters",
+    "v2 durable/topology/Workbench and long histories remain open"
+  ],
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-public-q3_aqs0p",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-public-q3_aqs0p.inventory.json",
+    "inventory_sha256": "9bb9bcb47a30cb11b7e6a7cfb8b25bcc6647a7d1faae07c2372c3cc3d90de175",
+    "file_count": 41,
+    "total_bytes": 52990949,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T19:16:50.629640+00:00",
+    "seal_wall_ns": 104820282,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

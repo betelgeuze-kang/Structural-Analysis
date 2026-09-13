@@ -931,7 +931,7 @@
     },
     "third_party_redistribution_clearance": "not_established"
   },
-  "generated_at": "2026-08-28T07:42:07.240125+00:00",
+  "generated_at": "2026-09-08T23:10:41.495880+00:00",
   "schema_version": "runtime-sbom.v1",
   "source_files": {
     "cargo_lock": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.lock",
@@ -945,7 +945,7 @@
     "cargo_toml": "73badcc7336768424ef718dd1bb7f3f62eff4da09d18cee7b1d915c2e74f4eea",
     "package_json": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
     "package_lock": "059137a6850ede29433965a2b9d49e580bd00080c010a516c17a21fa08720d99",
-    "pyproject": "02a29524cd3add6bf0f853b2570e4be80684c5fb2170f0b6d1bca83cb6044209",
+    "pyproject": "ac8911e7db8e8cccb0aafa037ecc88381764ffdd2f853425472d3bbfe6e56b5b",
     "repository_license": "2cb0e9dff0aa63dee5f398a0dd7f3471d67a94178c935b5fb6b94a6ac5fd7778"
   }
 }

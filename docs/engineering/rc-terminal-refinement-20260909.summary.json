@@ -1,0 +1,230 @@
+{
+  "schema_version": "rc-terminal-refinement-observation.v1",
+  "source_revision": "93e589f1ba121f41afa0879f96f4c1c72f5190c7",
+  "source_files_verified_against_git": 431,
+  "unchanged_original_input_hashes_verified": true,
+  "all_original_record_gates_and_parent_chains_pass": true,
+  "all_six_terminal_native_reopens_exact": true,
+  "all_reference_fresh_histories_and_checkpoints_exact": true,
+  "full_comparisons_recomputed": true,
+  "independent_rational_assembly_verification": {
+    "section_replays": 8712,
+    "member_replays": 2904,
+    "material_integrations": 0,
+    "newton_solves": 0,
+    "state_commits": 0,
+    "assembly_replays": 1452
+  },
+  "independent_rational_assembly_wall_seconds": 30.216095302,
+  "terminal_compensated_candidates_exact": 2898,
+  "terminal_compensated_accepted_exact": 2325,
+  "twofold_projection_counts": {
+    "coordinates": 20286,
+    "nonzero_projection_error": 2234
+  },
+  "maximum_twofold_projection_error_m": 3.009265538105056e-36,
+  "main_work": {
+    "core_calls": 1452,
+    "linear_solves": 7240,
+    "newton_iterations": 7240
+  },
+  "main_polishing_work_included": {
+    "attempted": 1452,
+    "accepted": 1446,
+    "attempt_count": 2898,
+    "accepted_correction_count": 2325,
+    "assembly_call_count": 2898,
+    "assembly_exception_count": 0,
+    "linear_solve_count": 2325,
+    "linear_solve_exception_count": 0
+  },
+  "development_probe_parent_seconds": 548.422143515,
+  "independent_exact_coordinate_fiber_strains_verified": 121968,
+  "retained_sub_float_strain_components_nonzero": 121968,
+  "independent_100_digit_stresses_verified": 121968,
+  "separate_original_material_state_replays": {
+    "concrete": 104544,
+    "steel": 17424
+  },
+  "all_replayed_state_updates_and_branch_decisions_exact": true,
+  "max_retained_minus_original_rounded_input_absolute": {
+    "concrete/stress_mpa": 9.186926724371205e-15,
+    "concrete/consistent_tangent_mpa": 7.275957614183426e-12,
+    "steel/stress_mpa": 8.526512829121202e-14,
+    "steel/consistent_tangent_mpa": 0.0
+  },
+  "audit_wall_seconds": 56.589922165,
+  "repeat_admission": true,
+  "claims": {
+    "independent_validation": false,
+    "accepted_acceleration": false,
+    "native_material_state_precision_repair": false
+  },
+  "cases": {
+    "base": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": true,
+        "maximum_absolute_difference_mixed_SI_fields": 2.546585164964199e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": true,
+        "structure_match": true,
+        "mismatch_counts": {}
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 101.330692978,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 242,
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "native_checkpoint_hash": "sha256:eb0dc0bf55c83df93ef08b273ff41a9de4985041716cbae6ccd44ece419b067d"
+        },
+        "secant": {
+          "wall_seconds": 72.548357056,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 969,
+            "newton_iterations": 969
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 242,
+            "attempt_count": 484,
+            "accepted_correction_count": 391,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 391,
+            "linear_solve_exception_count": 0
+          },
+          "native_checkpoint_hash": "sha256:0574aae62c983b70d257160572cc6ab6db59b9577786cf54a2e484ddde068629"
+        },
+        "fresh-reference": {
+          "wall_seconds": 100.730441998,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 242,
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "native_checkpoint_hash": "sha256:eb0dc0bf55c83df93ef08b273ff41a9de4985041716cbae6ccd44ece419b067d"
+        }
+      }
+    },
+    "long": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": true,
+        "maximum_absolute_difference_mixed_SI_fields": 2.3283064365386963e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": true,
+        "structure_match": true,
+        "mismatch_counts": {}
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 96.095010339,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 239,
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "native_checkpoint_hash": "sha256:9a10607e4bd409543a9d33c52509ee59cd0c7ebd928d3b1097014f9824849d94"
+        },
+        "secant": {
+          "wall_seconds": 70.349864617,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 933,
+            "newton_iterations": 933
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 242,
+            "attempt_count": 484,
+            "accepted_correction_count": 384,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 384,
+            "linear_solve_exception_count": 0
+          },
+          "native_checkpoint_hash": "sha256:5eaf4993a2d4d1cbc4dbbac935d6a8023942a81823b5c068d443fdd7330d0f54"
+        },
+        "fresh-reference": {
+          "wall_seconds": 95.823964142,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 239,
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "native_checkpoint_hash": "sha256:9a10607e4bd409543a9d33c52509ee59cd0c7ebd928d3b1097014f9824849d94"
+        }
+      }
+    }
+  },
+  "compatibility": {
+    "exact_step_pairs": 72,
+    "exact_history_checkpoint_pairs": 24,
+    "source_paths_verified": true,
+    "separate_work": {
+      "core_calls": 144,
+      "linear_solves": 356,
+      "newton_iterations": 356
+    }
+  },
+  "audit_parent_wall_seconds": 58.549593067,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-terminal-refinement.ufizghqu",
+    "file_count": 10168,
+    "total_bytes": 534888502,
+    "inventory_sha256": "b3a7a20e71ee4332bd0391923404199b8490999be8d1f92e265436f675d8ad05",
+    "all_files_reread_exact": true
+  },
+  "validation": {
+    "related_tests": 208,
+    "seconds": 52.46,
+    "focused_tests": 21,
+    "focused_seconds": 13.01,
+    "hosted_full_suite_acceptance": false
+  }
+}

@@ -23,6 +23,11 @@ from structural_analysis.execution.nonlinear_frame_worker import (
     NonlinearFrameWorkerError,
     execute_nonlinear_frame_claim,
 )
+from structural_analysis.execution.rc_fiber_direct_control_worker import (
+    RCFiberDirectControlWorkerError,
+    execute_rc_fiber_direct_control_claim,
+)
+
 __all__ = [
     "JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION",
     "JOB_REQUEST_SCHEMA_VERSION",
@@ -38,7 +43,9 @@ __all__ = [
     "JobHttpResponse",
     "JobView",
     "NonlinearFrameWorkerError",
+    "RCFiberDirectControlWorkerError",
     "build_job_completion_evidence",
     "execute_nonlinear_frame_claim",
+    "execute_rc_fiber_direct_control_claim",
     "validate_job_view",
 ]

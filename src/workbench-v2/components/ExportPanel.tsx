@@ -8,6 +8,8 @@ import {
 import { canonicalJson, sha256Hex } from '../model/checksum'
 import { evidenceManifestUrl, type EvidenceManifest } from '../model/evidence/evidenceSources'
 import { BooleanEvidenceValueText, EvidenceValueText } from './EngineeringValueText'
+import type { VerifiedDesignComparison } from '../model/designComparisonSchema'
+import type { CandidateProcessSlot, VerifiedCandidateProcessReview } from '../model/candidateProcessSchema'
 
 export interface ComparisonRow {
   id: string
@@ -30,6 +32,10 @@ interface ExportPanelProps {
   blockers: string[]
   /** Benchmark rows the reviewer selected for comparison. */
   comparisonRows: ComparisonRow[]
+  /** Exact validated object also rendered by the physical comparison panel. */
+  designComparison?: VerifiedDesignComparison | null
+  candidateProcessReview?: VerifiedCandidateProcessReview | null
+  selectedCandidateSlot?: CandidateProcessSlot | null
   /** Deep link into the viewer for the current selection. */
   viewerDeepLink: string
   /** Base URL used to locate the published evidence manifest. */
@@ -92,6 +98,9 @@ export function ExportPanel({
   convergenceAvailable,
   blockers,
   comparisonRows,
+  designComparison = null,
+  candidateProcessReview = null,
+  selectedCandidateSlot = null,
   viewerDeepLink,
   baseUrl,
   reviewDraftState,
@@ -143,6 +152,22 @@ export function ExportPanel({
         exported_at: new Date().toISOString(),
         immutable_analysis_core: immutableAnalysisCore,
         immutable_analysis_core_sha256: immutableAnalysisCoreSha256,
+        physical_design_comparison: designComparison,
+        ...(candidateProcessReview ? { candidate_process_review: {
+          manifest: candidateProcessReview.manifest,
+          suite: candidateProcessReview.suite,
+          manifest_url: candidateProcessReview.manifestUrl,
+          suite_url: candidateProcessReview.suiteUrl,
+          selection: selectedCandidateSlot ? {
+            key: selectedCandidateSlot.key,
+            case_id: selectedCandidateSlot.caseId,
+            phase: selectedCandidateSlot.phase,
+            repetition: selectedCandidateSlot.repetition,
+            strategy: selectedCandidateSlot.strategy,
+          } : null,
+          selected_run: selectedCandidateSlot?.run ?? null,
+          physical_design_comparison: selectedCandidateSlot?.comparison ?? null,
+        } } : {}),
         review_envelope: reviewEnvelope,
         review_envelope_sha256: reviewEnvelopeSha256,
         // Compatibility fields remain explicit while consumers migrate to the
@@ -211,6 +236,8 @@ export function ExportPanel({
         <li>provenance + source checksum + exact source commit</li>
         <li>displayed blockers ({blockers.length})</li>
         <li>selected comparison rows ({comparisonRows.length})</li>
+        <li>physical design comparison: {designComparison ? `${designComparison.report.rows.length} source-bound alternatives` : 'unavailable'}</li>
+        {candidateProcessReview ? <li>candidate process review: whole search and the currently selected attempt; original bytes can also be downloaded in the search panel</li> : null}
         <li>viewer deep link + reviewer draft + persistence receipt</li>
         <li>evidence manifest reference (checksum + commit, if published)</li>
       </ul>

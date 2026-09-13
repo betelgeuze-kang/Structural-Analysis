@@ -100,10 +100,29 @@ deterministic secant and explicitly opted-in predictor arms against the same
 compiled problem, load history and Newton configuration. Runtime remains a
 volatile sidecar: Newton total and assembly work, the stateful terminal trial
 assembly, guard evaluation, inference, fallback and J1--J5 verification are
-separate fields. Isolated linear-solve time remains `null` because the canonical
-Newton kernel is not instrumented. Unmeasured data generation, training, I/O,
-CPU/GPU work, memory, quantities and currency also remain `null` with reasons. A source revision is required
-for the measurement contract, caller-injected clocks are non-evidentiary, and no
+separate fields. The optional increment recorder now measures the existing vector
+backend call, including matrix conversion and sparse factorization diagnostics,
+and counts failed calls. This is not isolated BLAS/LAPACK kernel timing; the
+declared scope is carried in the runtime report. Unmeasured data generation, training, I/O,
+CPU/GPU work, memory, quantities and currency also remain `null` with reasons in
+that in-process report. The separate `fiber_frame_runtime_process` wrapper now
+records whole-suite CPU, worker peak RSS, and bounded input/report file I/O in a
+byte-bound sidecar. Its learning-study workload additionally measures physical
+label generation, whole training attempts and frozen evaluation with separate
+phase CPU/wall intervals. Peak memory is observed for the whole worker, not
+attributed to individual phases or strategies within that study. The additional
+`fiber_frame_strategy_process_suite` experiment runs each frozen strategy across
+all declared cases, warmups and repetitions in its own fresh worker. It validates
+full checkpoint/trial snapshots across workers and observes each worker's CPU,
+RSS and bounded input/report I/O. The reference worker also includes separate
+baseline episode checks, so its peak does not establish an equal-scope memory
+advantage. Parent comparison CPU is a subset of parent orchestration CPU; peaks
+are never summed or subtracted. Historical training costs require separately
+bound study artifacts and are not rerun by this experiment.
+See `rc-fiber-design-experiments.md`
+for exact scopes and remaining unavailable resources.
+A source revision is required for the measurement contract, caller-injected
+clocks are non-evidentiary, and no
 positive timing ratio is a correctness gate. The existing baseline-only
 SolverEpisode schema is verified on the reference path in a separately timed,
 non-comparable phase; candidate warm starts are not mislabeled as baseline
@@ -138,6 +157,42 @@ Exit: matched response/history/recovery within predetermined tolerances, rollbac
 parity for injected failures, and measured net savings including inference and
 fallback. A local passing unit test is not that performance evidence.
 
+The explicit `model_conditioning=True` research path now adds pre-analysis node
+geometry, actual reference loads and fiber positions/areas to the displacement
+history. This distinguishes different models even at the all-zero first step.
+Its separate v2 policy learns physical displacement/rotation increments in m/rad
+and converts them to the current model's solver coordinates; each input's scale
+must match its declared rotation length. Preprocessing and feature ranges still
+use training rows only. Different lengths and sections may share one policy, but
+topology, oriented connectivity, integration/fiber-kind layout and material laws
+remain a fixed context. Changed context or out-of-range values take the guarded
+fallback. The default v1 path is retained for comparison. This representation
+change requires repeated complete-cost observations and independently grouped
+corpora before any generalization or speed claim; it does not satisfy those gates.
+The fixed-source two-repeat observation in
+`rc-fiber-conditioned-warm-start-20260908.md` passed all 12 strategy paths and four
+reference checks, including first-step load-OOD fallback, but learned remained
+slower than secant in both cases. The default therefore stays unchanged and the
+net-performance and independent-corpus gates remain open.
+
+The subsequent [step-work observation](rc-step-work-observation-20260910.md)
+distinguishes iteration differences along separate accepted trajectories from
+same-parent comparisons. Every observed lower-work learned step in the completed
+secant-abstention study has a different origin; those rows are not admitted as
+causal strategy labels. The next learning target needs unchanged native parents
+and accepted prefixes, followed by complete-path cost verification.
+
+The completed [same-parent iteration-cost study](rc-parent-iteration-cost-20260910.md)
+now covers all 968 original parents. Of 241 actual learned proposals, none lowers
+primary convergence rows. The 28 lower inclusive counts mostly reflect fewer
+accepted terminal refinements after their trial assembly was already computed;
+all 28 have higher total step time. Do not train the next selector on that
+inclusive-count proxy. Preserve separate primary rows, line-search trials,
+terminal assembly/solve work and measured costs, and obtain actual positive
+examples from a different proposal or harder supported cases before fitting.
+The current policy and the existing secant baseline remain unchanged. This
+diagnosis closes neither net benefit nor independent-corpus validation.
+
 ### 4. Connect multi-fidelity selection and cost review
 
 Select promising, uncertain and near-limit candidates for full analysis. Report
@@ -152,6 +207,17 @@ verification status. Hard structural/detailing violations reject a final candida
 adding an optimization penalty does not waive them. Include labor/fabrication only
 with defined scope and prevent double counting. No verified quote or detailed
 takeoff means no confirmed currency savings claim.
+
+The whole candidate-process review connects the saved experiment to Workbench
+through a portable manifest. Frozen inputs, every declared slot, later oracle
+predecessors and complete cost summaries must validate before display. Each
+online attempt links to its existing physical comparison; changing the viewed
+case, phase, repetition or strategy performs no new analysis. Shared training is
+charged once per artifact, with online budgets, warmups and oracle requests shown
+separately. Failed attempts retain unknown totals and validated subtotals. Browser
+downloads preserve original suite/comparison bytes; browser integrity verification
+and Python input-plan validation remain distinct from independent physical replay.
+See `rc-fiber-design-experiments.md` for configuration and transport limits.
 
 ## Verification and integration
 

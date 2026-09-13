@@ -1,0 +1,1295 @@
+{
+  "schema_version": "measured-response-workbook-source-map.v1",
+  "source_url": "https://zenodo.org/records/10501212",
+  "source_file": "SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+  "expected_source_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+  "sheet_name": "Sheet1",
+  "campaign_id": "sera-arista-palios-2020-zenodo10501212",
+  "specimen_id": "sera-arista-three-storey-frame",
+  "test_id": "unretrofitted-cyclic",
+  "channels": [
+    {
+      "column_id": "A",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "Top Disp (mm)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "B",
+      "quantity": "force",
+      "source_unit": "kN",
+      "expected_header": [
+        "Base Shear (kN)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "C",
+      "quantity": "drift_ratio",
+      "source_unit": "%",
+      "expected_header": [
+        "Top Drift (%)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "D",
+      "quantity": "drift_ratio",
+      "source_unit": "%",
+      "expected_header": [
+        "Drift 1st Story (%)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "E",
+      "quantity": "force",
+      "source_unit": "kN",
+      "expected_header": [
+        "Shear 1st Story (kN)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "F",
+      "quantity": "drift_ratio",
+      "source_unit": "%",
+      "expected_header": [
+        "Drift 2nd Story (%)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "G",
+      "quantity": "force",
+      "source_unit": "kN",
+      "expected_header": [
+        "Shear 2nd Story (kN)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "H",
+      "quantity": "drift_ratio",
+      "source_unit": "%",
+      "expected_header": [
+        "Drift 3rd Story (%)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "I",
+      "quantity": "force",
+      "source_unit": "kN",
+      "expected_header": [
+        "Shear 3rd Story (kN)",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "J",
+      "quantity": "observation_index",
+      "source_unit": "1",
+      "expected_header": [
+        "Data points",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "column_id": "K",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        "BAR STRAIN - column C1 (%)",
+        "east side",
+        "BASE",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "L",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "M",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "N",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "O",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        "west side",
+        "BASE",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "P",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "Q",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "R",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "S",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        "BAR STRAIN - column C2  (%)",
+        "east side",
+        "BASE",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "T",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG3"
+      ]
+    },
+    {
+      "column_id": "U",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "ENDsplice",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "V",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG3"
+      ]
+    },
+    {
+      "column_id": "W",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "X",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG3"
+      ]
+    },
+    {
+      "column_id": "Y",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        "west side",
+        "BASE",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "Z",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG4"
+      ]
+    },
+    {
+      "column_id": "AA",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "ENDsplice",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "AB",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG4"
+      ]
+    },
+    {
+      "column_id": "AC",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "AD",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG4"
+      ]
+    },
+    {
+      "column_id": "AE",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        "BAR STRAIN - column C5  (%)",
+        "east side",
+        "BASE",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "AF",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "AG",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "ENDsplice",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "AH",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "AI",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "AJ",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "AK",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        "west side",
+        "BASE",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "AL",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "AM",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "ENDsplice",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "AN",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "AO",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "AP",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "AQ",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        "BAR STRAIN - column C6  (%)",
+        "east side",
+        "BASE",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "AR",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "AS",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG1"
+      ]
+    },
+    {
+      "column_id": "AT",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "AU",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP 3rd",
+        "SG5"
+      ]
+    },
+    {
+      "column_id": "AV",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        "west side",
+        "BASE",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "AW",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "AX",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP",
+        "SG2"
+      ]
+    },
+    {
+      "column_id": "AY",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "AZ",
+      "quantity": "strain",
+      "source_unit": "%",
+      "expected_header": [
+        null,
+        null,
+        "TOP 3rd",
+        "SG6"
+      ]
+    },
+    {
+      "column_id": "BA",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "1st STORY",
+        "column C1",
+        "base-east side (#6)"
+      ]
+    },
+    {
+      "column_id": "BB",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#12)"
+      ]
+    },
+    {
+      "column_id": "BC",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#5)"
+      ]
+    },
+    {
+      "column_id": "BD",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#11)"
+      ]
+    },
+    {
+      "column_id": "BE",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "1st STORY",
+        "column C2",
+        "base-east side  (#42)"
+      ]
+    },
+    {
+      "column_id": "BF",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#48)"
+      ]
+    },
+    {
+      "column_id": "BG",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#41)"
+      ]
+    },
+    {
+      "column_id": "BH",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#47)"
+      ]
+    },
+    {
+      "column_id": "BI",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "1st STORY",
+        "column C3",
+        "base-east side  (#4)"
+      ]
+    },
+    {
+      "column_id": "BJ",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#10)"
+      ]
+    },
+    {
+      "column_id": "BK",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#3)"
+      ]
+    },
+    {
+      "column_id": "BL",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#9)"
+      ]
+    },
+    {
+      "column_id": "BM",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "1st STORY",
+        "column C4",
+        "base-east side (#40)"
+      ]
+    },
+    {
+      "column_id": "BN",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#46)"
+      ]
+    },
+    {
+      "column_id": "BO",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#39)"
+      ]
+    },
+    {
+      "column_id": "BP",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#45)"
+      ]
+    },
+    {
+      "column_id": "BQ",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "1st STORY",
+        "column C5",
+        "base-east side  (#2)"
+      ]
+    },
+    {
+      "column_id": "BR",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#8)"
+      ]
+    },
+    {
+      "column_id": "BS",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#1)"
+      ]
+    },
+    {
+      "column_id": "BT",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#7)"
+      ]
+    },
+    {
+      "column_id": "BU",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "1st STORY",
+        "column C6",
+        "base-east side  (#38)"
+      ]
+    },
+    {
+      "column_id": "BV",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#44)"
+      ]
+    },
+    {
+      "column_id": "BW",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#37)"
+      ]
+    },
+    {
+      "column_id": "BX",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#43)"
+      ]
+    },
+    {
+      "column_id": "BY",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "2nd STORY",
+        "column C1",
+        "base-east side  (#18)"
+      ]
+    },
+    {
+      "column_id": "BZ",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#24)"
+      ]
+    },
+    {
+      "column_id": "CA",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#17)"
+      ]
+    },
+    {
+      "column_id": "CB",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "2nd STORY",
+        "column C2",
+        "base-east side  (#54)"
+      ]
+    },
+    {
+      "column_id": "CC",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#60)"
+      ]
+    },
+    {
+      "column_id": "CD",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#53)"
+      ]
+    },
+    {
+      "column_id": "CE",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "2nd STORY",
+        "column C3",
+        "base-east side  (#16)"
+      ]
+    },
+    {
+      "column_id": "CF",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#15)"
+      ]
+    },
+    {
+      "column_id": "CG",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#21)"
+      ]
+    },
+    {
+      "column_id": "CH",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "2nd STORY",
+        "column C4",
+        "base-east side  (#52)"
+      ]
+    },
+    {
+      "column_id": "CI",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#58)"
+      ]
+    },
+    {
+      "column_id": "CJ",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#51)"
+      ]
+    },
+    {
+      "column_id": "CK",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#57)"
+      ]
+    },
+    {
+      "column_id": "CL",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "2nd STORY",
+        "column C5",
+        "base-east side  (#14)"
+      ]
+    },
+    {
+      "column_id": "CM",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#20)"
+      ]
+    },
+    {
+      "column_id": "CN",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#13)"
+      ]
+    },
+    {
+      "column_id": "CO",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#19)"
+      ]
+    },
+    {
+      "column_id": "CP",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "2nd STORY",
+        "column C6",
+        "base-east side  (#50)"
+      ]
+    },
+    {
+      "column_id": "CQ",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#56)"
+      ]
+    },
+    {
+      "column_id": "CR",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#49)"
+      ]
+    },
+    {
+      "column_id": "CS",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#55)"
+      ]
+    },
+    {
+      "column_id": "CT",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "3rd STORY",
+        "column C1",
+        "base-east side  (#30)"
+      ]
+    },
+    {
+      "column_id": "CU",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#36)"
+      ]
+    },
+    {
+      "column_id": "CV",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#29)"
+      ]
+    },
+    {
+      "column_id": "CW",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#35)"
+      ]
+    },
+    {
+      "column_id": "CX",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "3rd STORY",
+        "column C2",
+        "base-east side  (#64)"
+      ]
+    },
+    {
+      "column_id": "CY",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#63)"
+      ]
+    },
+    {
+      "column_id": "CZ",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#67)"
+      ]
+    },
+    {
+      "column_id": "DA",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "3rd STORY",
+        "column C3",
+        "base-east side  (#28)"
+      ]
+    },
+    {
+      "column_id": "DB",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#34)"
+      ]
+    },
+    {
+      "column_id": "DC",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#27)"
+      ]
+    },
+    {
+      "column_id": "DD",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#33)"
+      ]
+    },
+    {
+      "column_id": "DE",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "3rd STORY",
+        "column C5",
+        "base-east side  (#26)"
+      ]
+    },
+    {
+      "column_id": "DF",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#32)"
+      ]
+    },
+    {
+      "column_id": "DG",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#25)"
+      ]
+    },
+    {
+      "column_id": "DH",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#31)"
+      ]
+    },
+    {
+      "column_id": "DI",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        "INTERFACE DISPLACEMENT (mm)",
+        "3rd STORY",
+        "column C6",
+        "base-east side  (#62)"
+      ]
+    },
+    {
+      "column_id": "DJ",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-east side  (#66)"
+      ]
+    },
+    {
+      "column_id": "DK",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "base-west side  (#61)"
+      ]
+    },
+    {
+      "column_id": "DL",
+      "quantity": "displacement",
+      "source_unit": "mm",
+      "expected_header": [
+        null,
+        null,
+        null,
+        "top-west side  (#65)"
+      ]
+    }
+  ],
+  "scope": "Explicit original header and reported-unit mapping only; no commanded loading or physical sensor-to-model mapping.",
+  "dataset_license": "CC-BY-4.0 as declared by the retained Zenodo metadata; not transferred to the paper or thesis",
+  "measurement_reference_height_resolved": false,
+  "specimen_material_reinforcement_loads_resolved": false,
+  "bond_slip_model_correspondence_resolved": false,
+  "independent_training_split_assigned": false,
+  "training_admitted": false
+}

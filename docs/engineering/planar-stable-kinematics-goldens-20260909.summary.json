@@ -1,0 +1,239 @@
+{
+  "additional_calls_per_unchanged_test_writer": {
+    "cpu_fgmres": 1,
+    "explicit_validation": 4,
+    "public_api": 4
+  },
+  "additional_standard_golden_test_runs": 2,
+  "claims": {
+    "fixtures_or_gates_changed": false,
+    "full_canonical_dag_verified": false,
+    "hosted_matrix_verified": false,
+    "independent_physical_validation": false,
+    "local_source_consistency": true,
+    "performance_improvement": false,
+    "physics_source_changed_this_slice": false,
+    "production_or_release_authority": false,
+    "semantic_policy_changed": false
+  },
+  "environments": {
+    "blas_omp_mkl_threads": 1,
+    "diagnostic_python": "3.10.12",
+    "local_platform": "Linux x86_64",
+    "numpy": "1.26.4",
+    "openblas_coretype": "Haswell",
+    "original_hosted_python": "3.10.21",
+    "pythonhashseed": 0,
+    "reference_python": "3.12.14",
+    "scipy": "1.12.0"
+  },
+  "golden_count": 46,
+  "golden_updates": {
+    "bounded_planar_checkpoint_artifact_hash": {
+      "expected": "sha256:0d10a6029a91012164dc56098aaef790e57db5358b92de7b8255edfac3961547",
+      "observed": "sha256:9b72adbb65ef53815381d765dce6d98cce8f13ca4d4a1b3043cc0a9e4ab44895"
+    },
+    "bounded_planar_checkpoint_chain_hash": {
+      "expected": "sha256:cf48452dcb62e320b88406c56472c85dfbcf4c342e31ea1525d0e329e1b5cb90",
+      "observed": "sha256:66286b7d5b72e33c63007eceefa405d163f678157d76038a0a03eb7f552b109b"
+    },
+    "bounded_planar_engineering_result_hash": {
+      "expected": "sha256:cc5bd7a004b0cb1de0c87982e8bb2f7fe83f7f97da8ee30725e8a10b55ae83aa",
+      "observed": "sha256:75640a03207718d40f2d414055bca8bb576009d85f0ba06c0fc929b89503498a"
+    },
+    "bounded_planar_replay_result_hash": {
+      "expected": "sha256:e1b1cc5400c072ebb18b0bcf7c6e455190c77e3ac088c805888f5c7d6a3772d6",
+      "observed": "sha256:d091945e291e1d604748df77c4493a3c6684bdfcdd3710ac6f0adc4ba8a6a391"
+    },
+    "bounded_planar_result_hash": {
+      "expected": "sha256:117c90503a60a188758992fd0e1234796a1cb1913725ffa87f9d33b4f5f7c5b6",
+      "observed": "sha256:96d13af855b8f3092c19e0381d7aa7e8bcbc633a6657519907ac7c35f5fa1a00"
+    },
+    "bounded_planar_semantic_hash": {
+      "expected": "sha256:95493872569eb1ec292f7fda2e49334a09a7826073beb7b8a437c856201e0707",
+      "observed": "sha256:2e46e8d9087548523a2ead1dff41a323fe013c55d91b93a05edb2e353b95ea5c"
+    },
+    "bounded_planar_settlement_checkpoint_artifact_hash": {
+      "expected": "sha256:fbb7c5d068fc0ae8ad7a617e4f72d083e48a85f52644de25449767f1eafbbc13",
+      "observed": "sha256:9f4085b794812c3e61a8727c2782a33a2e6731b68e32e4d24760435e3a75c897"
+    },
+    "bounded_planar_settlement_checkpoint_chain_hash": {
+      "expected": "sha256:e48590b945cffadbf5e4edac2288565793c39ea383416b76dad50d1794b2d477",
+      "observed": "sha256:ec73e09bf2dc5edd346c6ff341e320584d18a72384237754602eb96debae4f63"
+    },
+    "bounded_planar_settlement_engineering_result_hash": {
+      "expected": "sha256:c0ea91d8b117f960350c784d17f74a17e0f39073f172dd3dae645d2fc18c5002",
+      "observed": "sha256:a6e90b1167de05e24192eaa2439c7b60f27099d51eb3480cdefd4cd4cd0f961e"
+    },
+    "bounded_planar_settlement_replay_result_hash": {
+      "expected": "sha256:98e01640847327ca70cfac42cf89741235693cd1ba8b3638bceaf2df03eba006",
+      "observed": "sha256:84693a966b1148fce4eefa1db78209aba6afd34f648351ae297ba28a485c9a55"
+    },
+    "bounded_planar_settlement_result_hash": {
+      "expected": "sha256:d1a1d9c51cf87d64b917ba789e4724b901ef2ca161d67943613248a98bbaf537",
+      "observed": "sha256:95c2b8bc8db441c7d85a3e08ae13a5c1a9a72a4f89e4a03dfd10465c91ada16a"
+    },
+    "bounded_planar_settlement_terminal_residual_trace_hash": {
+      "expected": "sha256:9ee4b06c17f4c3a084c53732fa7a7457a6e005f0dc7d2bb2b2c2644b410f542a",
+      "observed": "sha256:1207eb938890b4dc9c42441440d32e076f45866d38d84b44af647abbe53d5669"
+    },
+    "bounded_planar_terminal_residual_trace_hash": {
+      "expected": "sha256:3ff6e9971d4bd727ddff4507d18377e1f96d33031011765a3379638dcca5cc7c",
+      "observed": "sha256:773434306d7878d1c9ed5b7d10116baa7ae792c928a0beaf748f413c61991f70"
+    }
+  },
+  "isolated_cause_commit": "e2f6967ec84893aa83f3e56616ede3ff7f9b4f10",
+  "isolated_source_file": "src/structural_analysis/elements/corotational_frame2d_basic.py",
+  "main_comparison_source": "4de4e3f55aae1d267cf704cec7d7533f3a627498",
+  "observed_api_calls": 14,
+  "observed_explicit_validations": 14,
+  "precision": {
+    "formula_reference": "absolute 90-digit chord-length and angle differences; no production rationalized formula copied",
+    "new_public_analysis_calls": 0,
+    "new_solver_calls": 0,
+    "precision_decimal_digits": 90,
+    "rows": [
+      {
+        "angle_bound_rad": 2.0647161065122079e-19,
+        "chord_m": [
+          3.5999999999999996,
+          0.0
+        ],
+        "decimal_reference_angle_rad": -5.81165917994638e-05,
+        "decimal_reference_extension_m": 9.632581731590876e-11,
+        "delta_m": [
+          -5.983243017429504e-09,
+          -0.0002092197303658932
+        ],
+        "forward_error_bound_m": 6.445468399710829e-23,
+        "legacy_absolute_error_m": 2.031641710734109e-16,
+        "legacy_error_over_bound": 3152046.6547089997,
+        "legacy_error_over_stable_error": 1209158951.5384614,
+        "legacy_extension_m": 9.632561415173768e-11,
+        "saved_input": "main",
+        "stable_absolute_error_m": 1.6802106192483375e-25,
+        "stable_angle_absolute_error_rad": 0.0,
+        "stable_angle_rad": -5.81165917994638e-05,
+        "stable_extension_m": 9.632581731590892e-11
+      },
+      {
+        "angle_bound_rad": 2.0647161065122093e-19,
+        "chord_m": [
+          3.5999999999999996,
+          0.0
+        ],
+        "decimal_reference_angle_rad": -5.811659179946384e-05,
+        "decimal_reference_extension_m": 9.63258427088948e-11,
+        "delta_m": [
+          -5.983242992036526e-09,
+          -0.00020921973036589332
+        ],
+        "forward_error_bound_m": 6.445468390689437e-23,
+        "legacy_absolute_error_m": 2.155320527301334e-16,
+        "legacy_error_over_bound": 3343931.575887833,
+        "legacy_error_over_stable_error": 641384033.2307693,
+        "legacy_extension_m": 9.632605824094753e-11,
+        "saved_input": "current",
+        "stable_absolute_error_m": 3.360421238496675e-25,
+        "stable_angle_absolute_error_rad": 6.776263578034403e-21,
+        "stable_angle_rad": -5.8116591799463835e-05,
+        "stable_extension_m": 9.632584270889447e-11
+      }
+    ],
+    "source_inputs_unchanged": {
+      "/tmp/structural-planar-golden-diagnostic.3x4vgyit/current/output/call-1-result.json": true,
+      "/tmp/structural-planar-golden-diagnostic.3x4vgyit/main/output/call-1-result.json": true,
+      "examples/bounded_planar_frame_alpha.model-ir.v2.json": true,
+      "src/structural_analysis/elements/corotational_frame2d_basic.py": true
+    },
+    "source_revision": "91f75dde94ab4503606017baee4df5e461aa87a4"
+  },
+  "retention": {
+    "file_count": 2484,
+    "inventory_bytes": 573873,
+    "inventory_sha256": "e71c883f2991a77722941c44c5abd2c2adaff1c1d2de27460b8d4ac8222506c9",
+    "root": "/tmp/structural-planar-golden-refresh-observation.7tuz7gre",
+    "scope": "Fresh-process file-set and every-byte hash recheck; no numerical calls.",
+    "sealer_pid": 608968,
+    "status": "passed",
+    "total_bytes": 49951273,
+    "verification_wall_ns": 126231453,
+    "verifier_pid": 608997
+  },
+  "saved_audit": {
+    "additional_actual_golden_tests": 2,
+    "additional_public_calls_per_test_in_unchanged_generator": 4,
+    "audit_wall_ns": 95248675,
+    "binary_artifact_count": 8,
+    "checks": 2415,
+    "claims": {
+      "hosted_matrix_receipt": false,
+      "independent_physical_validation": false,
+      "performance_improvement": false,
+      "unsigned_saved_consistency_only": true
+    },
+    "errors": [],
+    "golden_value_count": 46,
+    "new_numerical_calls_by_this_audit": 0,
+    "observed_diagnostic_reference_public_calls": 14,
+    "observed_explicit_validations": 14,
+    "pid": 607726,
+    "schema_version": "planar-golden-refresh-saved-audit.v1",
+    "status": "passed",
+    "updated_value_count": 13
+  },
+  "sbom_refresh": {
+    "component_count": 76,
+    "files": {
+      "implementation/phase1/production_runtime_packaging_manifest.json": {
+        "bytes": 2947,
+        "sha256": "e747d78c2adcc1e7a2d09dbb380969318b49dedef32ec7be2c2315f63ea7370f"
+      },
+      "implementation/phase1/runtime_sbom.json": {
+        "bytes": 32069,
+        "sha256": "62dafb38067a8b2968ed260e75bd2a9fbc196f050319b84f5e5c15c14a58636c"
+      }
+    },
+    "manifest_changed_paths": [
+      "/artifacts/sbom/sha256"
+    ],
+    "parent_child_raw_sha256_exact": true,
+    "real_source_normalized_rebuild_exact": true,
+    "sbom_changed_paths": [
+      "/generated_at",
+      "/source_hashes/pyproject"
+    ],
+    "scope": "Pure SBOM producer only; no full packaging builder/validator or DAG. No protected probe inputs.",
+    "status": "passed"
+  },
+  "schema_version": "planar-stable-kinematics-golden-refresh.v1",
+  "source_base": "91f75dde94ab4503606017baee4df5e461aa87a4",
+  "source_defined_total": {
+    "cpu_fgmres": 3,
+    "explicit_validation": 22,
+    "public_api": 22
+  },
+  "tests": [
+    {
+      "elapsed_seconds": 1.58,
+      "group": "stable_kinematics",
+      "passed": 31
+    },
+    {
+      "elapsed_seconds": 0.32,
+      "group": "temporary_fixture_runtime_packaging",
+      "passed": 7
+    },
+    {
+      "elapsed_seconds": 4.07,
+      "group": "golden_writer_workflow_semantic_policy_py312",
+      "passed": 4
+    },
+    {
+      "elapsed_seconds": 5.96,
+      "group": "golden_writer_workflow_semantic_policy_py310",
+      "passed": 4
+    }
+  ],
+  "unchanged_binary_artifact_count": 8
+}

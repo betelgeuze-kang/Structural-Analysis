@@ -1,0 +1,299 @@
+{
+  "source_head": "c14709180697a2e62c4a40aedc93a88cad76298f",
+  "seal": {
+    "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-soesianawati-primary-mcjxytz9",
+    "file_count": 21,
+    "bytes": 4457161,
+    "inventory_sha256": "b4a734122697ba3e892231358672e34895719f1d357b730e7935cc944ce941e3",
+    "all_files_reread": true,
+    "sealed_unix_ns": 1789026720586002416,
+    "immutable_by_workflow_not_permissions": true
+  },
+  "correspondence": {
+    "schema": "soesianawati-nist-source-correspondence.v1",
+    "nist_pdf_sha256": "2dbd0b88a3e8578c30f3de5e4b2728eb157b389d2d495be8f153109d8a951f0c",
+    "reviewed_pdf_pages": [
+      9,
+      11,
+      15,
+      49,
+      53,
+      105
+    ],
+    "reviewed_printed_pages": [
+      1,
+      3,
+      7,
+      41,
+      45,
+      97
+    ],
+    "source_role": "NIST dataset compiler; secondary account of the 1986 physical experiment",
+    "original_1986_fulltext_retrieved": false,
+    "numeric_metadata_comparisons": 60,
+    "cohort": [
+      {
+        "peer_id": 7,
+        "specimen": 1,
+        "matched_fields": {
+          "materialProperties/concreteStrength": "46.5",
+          "loading/axialLoad": "744",
+          "materialProperties/longitudinalSteel/corner/yieldStress": "446",
+          "materialProperties/longitudinalSteel/intermediate/yieldStress": "446",
+          "materialProperties/transverseSteel/yieldStress": "364",
+          "geometry/width": "400",
+          "geometry/depth": "400",
+          "geometry/lInflection": "1600",
+          "geometry/lMeasured": "1600",
+          "longitudinalReinforcement/numberOfBars": "12",
+          "longitudinalReinforcement/diameter": "16",
+          "longitudinalReinforcement/reinforcementRatio": "0.0151",
+          "transverseReinforcement/closeSpacing/numberHoopSets": "5",
+          "transverseReinforcement/closeSpacing/barDiameter": "7",
+          "transverseReinforcement/closeSpacing/hoopSpacing": "85"
+        },
+        "nist_outer_hoop_sets": 6,
+        "nist_outer_spacing_mm": "170",
+        "nist_transverse_ratio": "0.0086",
+        "peer_transverse_ratio": "0.009",
+        "ratios_automatically_reconciled": false
+      },
+      {
+        "peer_id": 8,
+        "specimen": 2,
+        "matched_fields": {
+          "materialProperties/concreteStrength": "44.0",
+          "loading/axialLoad": "2112",
+          "materialProperties/longitudinalSteel/corner/yieldStress": "446",
+          "materialProperties/longitudinalSteel/intermediate/yieldStress": "446",
+          "materialProperties/transverseSteel/yieldStress": "360",
+          "geometry/width": "400",
+          "geometry/depth": "400",
+          "geometry/lInflection": "1600",
+          "geometry/lMeasured": "1600",
+          "longitudinalReinforcement/numberOfBars": "12",
+          "longitudinalReinforcement/diameter": "16",
+          "longitudinalReinforcement/reinforcementRatio": "0.0151",
+          "transverseReinforcement/closeSpacing/numberHoopSets": "8",
+          "transverseReinforcement/closeSpacing/barDiameter": "8",
+          "transverseReinforcement/closeSpacing/hoopSpacing": "78"
+        },
+        "nist_outer_hoop_sets": 5,
+        "nist_outer_spacing_mm": "156",
+        "nist_transverse_ratio": "0.0122",
+        "peer_transverse_ratio": "0.012",
+        "ratios_automatically_reconciled": false
+      },
+      {
+        "peer_id": 9,
+        "specimen": 3,
+        "matched_fields": {
+          "materialProperties/concreteStrength": "44.0",
+          "loading/axialLoad": "2112",
+          "materialProperties/longitudinalSteel/corner/yieldStress": "446",
+          "materialProperties/longitudinalSteel/intermediate/yieldStress": "446",
+          "materialProperties/transverseSteel/yieldStress": "364",
+          "geometry/width": "400",
+          "geometry/depth": "400",
+          "geometry/lInflection": "1600",
+          "geometry/lMeasured": "1600",
+          "longitudinalReinforcement/numberOfBars": "12",
+          "longitudinalReinforcement/diameter": "16",
+          "longitudinalReinforcement/reinforcementRatio": "0.0151",
+          "transverseReinforcement/closeSpacing/numberHoopSets": "7",
+          "transverseReinforcement/closeSpacing/barDiameter": "7",
+          "transverseReinforcement/closeSpacing/hoopSpacing": "91"
+        },
+        "nist_outer_hoop_sets": 5,
+        "nist_outer_spacing_mm": "182",
+        "nist_transverse_ratio": "0.0080",
+        "peer_transverse_ratio": "0.008",
+        "ratios_automatically_reconciled": false
+      },
+      {
+        "peer_id": 10,
+        "specimen": 4,
+        "matched_fields": {
+          "materialProperties/concreteStrength": "40.0",
+          "loading/axialLoad": "1920",
+          "materialProperties/longitudinalSteel/corner/yieldStress": "446",
+          "materialProperties/longitudinalSteel/intermediate/yieldStress": "446",
+          "materialProperties/transverseSteel/yieldStress": "255",
+          "geometry/width": "400",
+          "geometry/depth": "400",
+          "geometry/lInflection": "1600",
+          "geometry/lMeasured": "1600",
+          "longitudinalReinforcement/numberOfBars": "12",
+          "longitudinalReinforcement/diameter": "16",
+          "longitudinalReinforcement/reinforcementRatio": "0.0151",
+          "transverseReinforcement/closeSpacing/numberHoopSets": "7",
+          "transverseReinforcement/closeSpacing/barDiameter": "6",
+          "transverseReinforcement/closeSpacing/hoopSpacing": "94"
+        },
+        "nist_outer_hoop_sets": 5,
+        "nist_outer_spacing_mm": "186",
+        "nist_transverse_ratio": "0.0057",
+        "peer_transverse_ratio": "0.006",
+        "ratios_automatically_reconciled": false
+      }
+    ],
+    "equivalent_cantilever": {
+      "length_m": "1.6",
+      "force": "NIST tabulated H is half central actuator force 2H; do not halve H again",
+      "displacement": "central stub displacement relative to end supports; do not halve",
+      "axial_load_kn": "744",
+      "axial_load_is_measured_history": false,
+      "p_delta_correction_inferred": false,
+      "exact_nist_disk_to_peer_file_identity_verified": false
+    },
+    "unit1_history": {
+      "pairs": 744,
+      "displacement_mm": [
+        "-98.059",
+        "97.854"
+      ],
+      "force_kn": [
+        "-186.22",
+        "199.59"
+      ],
+      "raw_sensor_status": "not authenticated",
+      "actuator_command_status": "not authenticated"
+    },
+    "cover": {
+      "nist_clear_cover_to_transverse_bar_mm": "13",
+      "peer_xml_location": "longitudinalReinforcement/*/clearCover",
+      "longitudinal_bar_centres_inferred": false
+    },
+    "unit1_damage_metadata": {
+      "crushing": {
+        "value": "39.2",
+        "units": "mm"
+      },
+      "spalling": {
+        "value": "58.8",
+        "units": "mm"
+      },
+      "buckling": {
+        "value": "78.4",
+        "units": "mm"
+      },
+      "longBarFracture": {
+        "value": "98",
+        "units": "mm"
+      },
+      "spiralFracture": {
+        "value": "0",
+        "units": "mm"
+      },
+      "lossAxial": {
+        "value": "98",
+        "units": "mm"
+      }
+    },
+    "source_limitations": [
+      "NIST p.1 says most histories digitized from published plots; No.1 acquisition route is not individually identified.",
+      "NIST p.3 warns transverse ratio definitions differ; preserve published ratios, derive model confinement only from authenticated geometry.",
+      "NIST p.41 says 93 specimens whereas p.1 and p.97 say 107; no corpus count is admitted from these totals.",
+      "Original disk not retrieved; no RECTCOL.EXE or third-party code executed.",
+      "Canterbury item copyright is reserved for study/research; no redistribution grant for its fulltext is established.",
+      "Full constitutive curves, command history, force/PDelta processing and damage-scope model adequacy remain open."
+    ],
+    "prior_inventory_sha256": "c69e062ac70ae8a674b52ab7ff72a16508772689d0e0d4e0f66352a565481e30",
+    "bound_prior_files": [
+      {
+        "path": "peer-7.xml",
+        "bytes": 3093,
+        "sha256": "79dd73aa7701d88af6f0277e8770925805e15064eee10ede4fbdaaf8dcdc93d8"
+      },
+      {
+        "path": "peer-8.xml",
+        "bytes": 3094,
+        "sha256": "f5330ae4bf965a8fb26bdc5353965a8b85e830076dc481515de96ef93e388fc4"
+      },
+      {
+        "path": "peer-9.xml",
+        "bytes": 3094,
+        "sha256": "14fd52ca42c20a6e2153741d116f6943a0e25b0cfd10d4846c0a5d94a1d8eac2"
+      },
+      {
+        "path": "peer-10.xml",
+        "bytes": 3090,
+        "sha256": "0e46e64607e890d94d6452bf03cb9e873066da80399339f8b828fb4f73e9f2d0"
+      },
+      {
+        "path": "peer-7-history.txt",
+        "bytes": 11702,
+        "sha256": "fbf9c667452503dc76795615dd25dcdb650e2e67872b9d821c365c812e15aa98"
+      }
+    ],
+    "structural_solver_calls": 0,
+    "training_fits": 0,
+    "training_admitted": false,
+    "independent_physical_validation": false,
+    "wall_seconds": 0.01371353300055489
+  },
+  "fetches": [
+    {
+      "url": "https://ir.canterbury.ac.nz/items/9253a543-e522-4f64-9dde-6148c54036ba/full",
+      "final_url": "https://ir.canterbury.ac.nz/items/9253a543-e522-4f64-9dde-6148c54036ba/full",
+      "status": 403,
+      "bytes": 5658,
+      "sha256": "dd727fa1c5f8deb8bd9e8c16902ac67b24ddf937a9cea750978ccfab807398d7",
+      "path": "item.html",
+      "seconds": 0.3292251820093952
+    },
+    {
+      "url": "https://ir.canterbury.ac.nz/bitstream/handle/10092/3643/Thesis_fulltext.pdf?sequence=1&isAllowed=y",
+      "final_url": "https://ir.canterbury.ac.nz/bitstream/handle/10092/3643/Thesis_fulltext.pdf?sequence=1&isAllowed=y",
+      "status": 403,
+      "bytes": 5778,
+      "sha256": "e4add8deae1c978b03135b23e40c9d8c3754f741f20105bd93b3e0be7be1797a",
+      "path": "thesis-fetch.txt",
+      "seconds": 0.04680289700627327
+    },
+    {
+      "url": "https://ir.canterbury.ac.nz/bitstreams/7b30cecb-c23d-4efc-8219-a4a39a04e82f/download",
+      "discovered_via": "official item page browser download link",
+      "final_url": "https://ir.canterbury.ac.nz/bitstreams/7b30cecb-c23d-4efc-8219-a4a39a04e82f/download",
+      "status": 403,
+      "bytes": 5706,
+      "sha256": "6460d478fa97c70cfd0544ecab10573441807df469156f34e0d296a4d188432c",
+      "path": "current-download-fetch.txt",
+      "seconds": 0.03772089202539064
+    },
+    {
+      "url": "https://ir.canterbury.ac.nz/server/api/core/bitstreams/7b30cecb-c23d-4efc-8219-a4a39a04e82f/content",
+      "discovered_via": "DSpace public content API using official download bitstream ID",
+      "final_url": "https://ir.canterbury.ac.nz/server/api/core/bitstreams/7b30cecb-c23d-4efc-8219-a4a39a04e82f/content",
+      "status": 403,
+      "bytes": 5751,
+      "sha256": "b23d24ed9db42e5c3ae91407dd8d23fc98568de661ba7eb37de899de6b2acac6",
+      "path": "api-content-fetch.txt",
+      "seconds": 0.0405465769872535
+    },
+    {
+      "url": "https://nehrpsearch.nist.gov/static/files/NIST/PB97153522.pdf",
+      "final_url": "https://nehrpsearch.nist.gov/static/files/NIST/PB97153522.pdf",
+      "status": 200,
+      "bytes": 3494541,
+      "sha256": "2dbd0b88a3e8578c30f3de5e4b2728eb157b389d2d495be8f153109d8a951f0c",
+      "path": "nist-5984.pdf",
+      "seconds": 2.0526037710078526
+    }
+  ],
+  "browser_observations": {
+    "canterbury_item_url": "https://ir.canterbury.ac.nz/items/9253a543-e522-4f64-9dde-6148c54036ba/full",
+    "observation_kind": "manual record of browser accessibility output, not raw HTML",
+    "download_link": "https://ir.canterbury.ac.nz/bitstreams/7b30cecb-c23d-4efc-8219-a4a39a04e82f/download",
+    "title": "Limited ductility design of reinforced concrete columns.",
+    "author": "Soesianawati, M. T.",
+    "year": 1986,
+    "doi": "10.26021/2554",
+    "file_name": "Thesis_fulltext.pdf",
+    "displayed_size": "11.54 MB",
+    "rights": "Copyright reserved; private study and research purposes",
+    "browser_download_outcome": "net::ERR_BLOCKED_BY_CLIENT",
+    "web_pdf_outcome": "content length too large: 12095511",
+    "fulltext_bytes_retrieved": false
+  }
+}

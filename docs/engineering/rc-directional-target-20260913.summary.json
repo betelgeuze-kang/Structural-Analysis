@@ -1,0 +1,408 @@
+{
+  "coordinate_diagnostic": {
+    "source_revision": "340d26c53ac6ee7412a740a02e9064ba3cf06b3b",
+    "input_bindings": [
+      {
+        "path": "study/training-samples.json",
+        "bytes": 21465421,
+        "sha256": "04dddb8363da70e83cae4cb9943cb55f40a8beab60160f2aa1f1e14c73c0c2cd",
+        "absolute_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-training-expansion.vdyyju94/study/training-samples.json"
+      },
+      {
+        "path": "study/policy.json",
+        "bytes": 91291,
+        "sha256": "558ece8f060749db579b9e297a09b08cbef164df37273c38bb031553f162ef41",
+        "absolute_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-training-expansion.vdyyju94/study/policy.json"
+      }
+    ],
+    "input_inventory_sha256": "0526defa221f9106038fb35c87d3bc32daa9bcabefb6cd7269bd12a92217e6e4",
+    "historical_policy_hash_for_order_and_scale": "sha256:a43e21fb85cb2fcd8f80150709bf6a520e40a39d30dfaa8eb8e384e6ff35e800",
+    "policy_feature_width": 92,
+    "sample_count": 964,
+    "cases": {
+      "train-a": {
+        "native_augmented_coordinates": {
+          "rows": 241,
+          "before": 3.3553166178302905e-07,
+          "oracle_after_ratio": 0.27368862474738404,
+          "bounded_oracle_after_ratio": 0.27368862474738404,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        },
+        "historical_train_target_scale": {
+          "rows": 241,
+          "before": 1576.6617376068245,
+          "oracle_after_ratio": 0.9032976647690348,
+          "bounded_oracle_after_ratio": 0.9032976647690348,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        }
+      },
+      "train-b": {
+        "native_augmented_coordinates": {
+          "rows": 241,
+          "before": 2.1072456333019502e-07,
+          "oracle_after_ratio": 0.16860920039920757,
+          "bounded_oracle_after_ratio": 0.16860920039920757,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        },
+        "historical_train_target_scale": {
+          "rows": 241,
+          "before": 691.3167447957966,
+          "oracle_after_ratio": 0.8998608282198239,
+          "bounded_oracle_after_ratio": 0.8998608282198239,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        }
+      },
+      "train-c": {
+        "native_augmented_coordinates": {
+          "rows": 241,
+          "before": 6.399494604256325e-07,
+          "oracle_after_ratio": 0.17388672389467486,
+          "bounded_oracle_after_ratio": 0.17388672389467486,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        },
+        "historical_train_target_scale": {
+          "rows": 241,
+          "before": 3164.2198694941376,
+          "oracle_after_ratio": 0.7517053565925403,
+          "bounded_oracle_after_ratio": 0.7517053565925403,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        }
+      },
+      "train-d": {
+        "native_augmented_coordinates": {
+          "rows": 241,
+          "before": 1.3870903473711588e-07,
+          "oracle_after_ratio": 0.20067727146012904,
+          "bounded_oracle_after_ratio": 0.20067727146012904,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        },
+        "historical_train_target_scale": {
+          "rows": 241,
+          "before": 419.27955932004704,
+          "oracle_after_ratio": 0.9741230591322911,
+          "bounded_oracle_after_ratio": 0.9741230591322911,
+          "outside_unit_correction_interval": 0,
+          "zero_direction": 0
+        }
+      }
+    },
+    "fixed_control_excluded_from_projection": 4,
+    "bounded_correction_interval": [
+      -1.0,
+      1.0
+    ],
+    "direction_definition": "secant minus last accepted augmented coordinates, with prescribed control component zero",
+    "oracle_uses_each_rows_accepted_answer": true,
+    "learned_policy_fits": 0,
+    "structural_solves": 0,
+    "heldout_or_validation_observations_read": false,
+    "physical_residual_or_iteration_benefit_verified": false,
+    "historical_source_coordinate_labels_only": true,
+    "wall_ns": 717067405
+  },
+  "residual_probe": {
+    "source_revision": "340d26c53ac6ee7412a740a02e9064ba3cf06b3b",
+    "protocol": {
+      "source_revision": "340d26c53ac6ee7412a740a02e9064ba3cf06b3b",
+      "cases": [
+        "train-a",
+        "train-b",
+        "train-c",
+        "train-d"
+      ],
+      "target_indices": [
+        1,
+        61,
+        121,
+        181,
+        241
+      ],
+      "arms": [
+        "secant",
+        "native_augmented_coordinates",
+        "historical_train_target_scale"
+      ],
+      "oracle_uses_accepted_label": true,
+      "prior_coordinate_aggregate_known": true,
+      "new_residuals_inspected_before_roster_freeze": false,
+      "new_policy_fits": 0,
+      "newton_paths": 0,
+      "expected_assembly_calls": 60,
+      "validation_or_holdout_used": false,
+      "scope": "One residual/tangent assembly per seed from the identical original reference parent; no Newton step, no convergence or speed credit."
+    },
+    "bindings": [
+      {
+        "path": "study/policy.json",
+        "bytes": 91291,
+        "sha256": "558ece8f060749db579b9e297a09b08cbef164df37273c38bb031553f162ef41"
+      },
+      {
+        "path": "study/training-samples.json",
+        "bytes": 21465421,
+        "sha256": "04dddb8363da70e83cae4cb9943cb55f40a8beab60160f2aa1f1e14c73c0c2cd"
+      },
+      {
+        "path": "inputs/train-a-model.json",
+        "bytes": 2316,
+        "sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d"
+      },
+      {
+        "path": "inputs/train-a-request.json",
+        "bytes": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+      },
+      {
+        "path": "study/train-a/generation/reference/001-1-step.json",
+        "bytes": 249820,
+        "sha256": "1b0e69fcb62c898db184d498cd1928d7182578c6cbd9db821f75c5b24a308fbf"
+      },
+      {
+        "path": "study/train-a/generation/reference/061-1-step.json",
+        "bytes": 255268,
+        "sha256": "0aa813d71dc8bfd8ddd42e2269dacc5aac01d62cba382e5b154905b02174d6e0"
+      },
+      {
+        "path": "study/train-a/generation/reference/121-1-step.json",
+        "bytes": 261662,
+        "sha256": "193b6c213395579e5d7f4465aa6842ca64ecaaee73e6d3068a6e96155711cd07"
+      },
+      {
+        "path": "study/train-a/generation/reference/181-1-step.json",
+        "bytes": 258006,
+        "sha256": "9f4c18f34a83614e29b58f02cf94083f13564daad4124d5836cb16fa0ac7ee10"
+      },
+      {
+        "path": "study/train-a/generation/reference/241-1-step.json",
+        "bytes": 259479,
+        "sha256": "b1001b6780bc85c11353a65a60c0be3482ca94e05256be8cfadd0ae8c877a024"
+      },
+      {
+        "path": "inputs/train-b-model.json",
+        "bytes": 2316,
+        "sha256": "fcf9ad40439fc3fd1c8289904fcfbf7690247b3aeb0d8b55cdb2c25b8bd72377"
+      },
+      {
+        "path": "inputs/train-b-request.json",
+        "bytes": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+      },
+      {
+        "path": "study/train-b/generation/reference/001-1-step.json",
+        "bytes": 238943,
+        "sha256": "ef3161de4b4e55ecc928a00cf2a64cb85ca7e36d1b297a8e23d458f644f79ddc"
+      },
+      {
+        "path": "study/train-b/generation/reference/061-1-step.json",
+        "bytes": 250515,
+        "sha256": "bc63354ea5c74d31a6a0724911d956166e7e1b9ae6a1a3b172cbbe3d151d222b"
+      },
+      {
+        "path": "study/train-b/generation/reference/121-1-step.json",
+        "bytes": 261755,
+        "sha256": "9a78a902f6689db7dfef9db5dee9f0ec50c26cabc8dc8cec4a724429f4066ba7"
+      },
+      {
+        "path": "study/train-b/generation/reference/181-1-step.json",
+        "bytes": 256202,
+        "sha256": "90aabca7ac962069f6bbb0ce6046e5134656b98815db1021f9a9255fc91e921f"
+      },
+      {
+        "path": "study/train-b/generation/reference/241-1-step.json",
+        "bytes": 261315,
+        "sha256": "25e476cb1dcf2241352fc7d5ffcaa60043e2d06aaf7acec04e71574ebd931921"
+      },
+      {
+        "path": "inputs/train-c-model.json",
+        "bytes": 2318,
+        "sha256": "157523e01f5525b00b6da76d182318cfa68c4446aecd323880948a2abad2fb72"
+      },
+      {
+        "path": "inputs/train-c-request.json",
+        "bytes": 5724,
+        "sha256": "089f48bd154481daa914c2fde96980d0c58d4734163b8e5c02bb42f0e47626ea"
+      },
+      {
+        "path": "study/train-c/generation/reference/001-1-step.json",
+        "bytes": 248844,
+        "sha256": "b08fa59aac5b469a9a3db9e53bd43c38823b4f055149407019fbff8d3f5f9a44"
+      },
+      {
+        "path": "study/train-c/generation/reference/061-1-step.json",
+        "bytes": 255857,
+        "sha256": "6690772dee94c6f6aff047b5edd7313771ec10ae904b728c91cb830b06941b19"
+      },
+      {
+        "path": "study/train-c/generation/reference/121-1-step.json",
+        "bytes": 262999,
+        "sha256": "1fd609fa7a95afd861f06919ba7976a329cc694a1660e21e0b3b23ecbb7408c0"
+      },
+      {
+        "path": "study/train-c/generation/reference/181-1-step.json",
+        "bytes": 262284,
+        "sha256": "1a9bd1c4ce81925ed0eae9b7f66743798513104be5742a023d028a84b65dd815"
+      },
+      {
+        "path": "study/train-c/generation/reference/241-1-step.json",
+        "bytes": 260567,
+        "sha256": "d9d2c3a0eecabfd4b6db7b7661fd4e46a18337451f7ce0d0bc1d716b811c11c8"
+      },
+      {
+        "path": "inputs/train-d-model.json",
+        "bytes": 2319,
+        "sha256": "9d871f918523da1546ac27f3e24b9b05ec8a11e4d92794f6d91b0b3b05114460"
+      },
+      {
+        "path": "inputs/train-d-request.json",
+        "bytes": 5936,
+        "sha256": "1290200a0ea7093aec43d6f3a0d7117bd75b67eaa116b339ea5feed0abd6a217"
+      },
+      {
+        "path": "study/train-d/generation/reference/001-1-step.json",
+        "bytes": 240822,
+        "sha256": "988a616143a6e45a3aaa15355d7748671f6a91fa9432173402369a2943ae075d"
+      },
+      {
+        "path": "study/train-d/generation/reference/061-1-step.json",
+        "bytes": 249546,
+        "sha256": "06b7ae57485ac2112a4ed3ab8b3bae7821ebf3f5f444cb460f3f6493bacf0d0c"
+      },
+      {
+        "path": "study/train-d/generation/reference/121-1-step.json",
+        "bytes": 260693,
+        "sha256": "49cd9f250c76361c342de3cd16fb176b27be6595d31bd4d812b8eb50d32f6a02"
+      },
+      {
+        "path": "study/train-d/generation/reference/181-1-step.json",
+        "bytes": 258952,
+        "sha256": "3dbf38139bce15d9243fc8ac094625865546a1c5d1bea1d04c60ee9119c209e6"
+      },
+      {
+        "path": "study/train-d/generation/reference/241-1-step.json",
+        "bytes": 261626,
+        "sha256": "067ae6c66d7a803c7b848ede2bfd0ff13ac99d7222f5d935015d6b88a88bc161"
+      }
+    ],
+    "oracle_rows_sha256": "eba0452f8f817abc897e848d2fbb599e4d5e394283db081435ec33d2d53b49ea",
+    "parent_count": 20,
+    "assembly_calls": 60,
+    "newton_paths": 0,
+    "linear_solves": 0,
+    "new_policy_fits": 0,
+    "wall_ns": 2425804414,
+    "modes": {
+      "native_augmented_coordinates": {
+        "lower_residual_count": 2,
+        "equal_residual_count": 3,
+        "higher_residual_count": 15,
+        "ratios": [
+          5.473293626103818,
+          13.39972353011708,
+          53.43441899020234,
+          35.219517215219774,
+          6.484581656853735,
+          1.0,
+          0.16425131439091362,
+          16.96748945653787,
+          0.0193073950852246,
+          119.37531952475089,
+          2.9134194102518505,
+          1.0760406020604518,
+          45.4859232141859,
+          5.9672316580536116,
+          5.3097882598071795,
+          1.0,
+          1.0,
+          35.926137727939185,
+          40.53395105057981,
+          49.11408723206426
+        ]
+      },
+      "historical_train_target_scale": {
+        "lower_residual_count": 7,
+        "equal_residual_count": 3,
+        "higher_residual_count": 10,
+        "ratios": [
+          1.004805539680826,
+          0.9999991006891772,
+          1.0224413838404844,
+          1.0008675715253217,
+          1.0000000024150655,
+          1.0,
+          0.16575036014628797,
+          0.9998546085953951,
+          0.0193073950852246,
+          1.1948589018158435,
+          1.0160127251291908,
+          0.9999888907787047,
+          1.4864191650059446,
+          0.9999999875549029,
+          1.0000000136974263,
+          1.0,
+          1.0,
+          0.99997325642092,
+          1.0002012133419385,
+          1.0002468307381787
+        ]
+      }
+    }
+  },
+  "recount": {
+    "parent_count": 20,
+    "explicit_residual_tangent_dispatches": 60,
+    "full_source_archive_and_inputs_rechecked": true,
+    "gate_scope": "Residual gate only, with each original request tolerance; no increment gate or completed Newton path tested.",
+    "stats": {
+      "secant": {
+        "residual_gate_passed": 5,
+        "new_gate_passes_vs_secant": 0,
+        "lost_gate_passes_vs_secant": 0,
+        "lower_on_secant_gate_failure": 0,
+        "higher_on_secant_gate_failure": 0
+      },
+      "native_augmented_coordinates": {
+        "residual_gate_passed": 5,
+        "new_gate_passes_vs_secant": 0,
+        "lost_gate_passes_vs_secant": 0,
+        "lower_on_secant_gate_failure": 0,
+        "higher_on_secant_gate_failure": 15
+      },
+      "historical_train_target_scale": {
+        "residual_gate_passed": 5,
+        "new_gate_passes_vs_secant": 0,
+        "lost_gate_passes_vs_secant": 0,
+        "lower_on_secant_gate_failure": 5,
+        "higher_on_secant_gate_failure": 10
+      }
+    },
+    "independent_physical_validation": false
+  },
+  "packets": [
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-directional-target-kjqvittj",
+      "files": 3,
+      "bytes": 728896,
+      "inventory_sha256": "dc521f3ee720950234ca2f46d4b84ad9be9cff2957a0b946043e85cb1200edc4"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-directional-residual-6awforhk",
+      "files": 657,
+      "bytes": 103375898,
+      "inventory_sha256": "d1655a50d9f1e32be599b80236614542f6340ed8934604527eaff6e67a85e3cf"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-directional-residual-97ff7j_j",
+      "files": 659,
+      "bytes": 103462767,
+      "inventory_sha256": "b7e9a6522ceff4bedf090913dde73dc7ca734dd8a3c876411d446d7dd60af3a2"
+    }
+  ],
+  "scope": "Training-only oracle diagnostics; no new policy, no held-out performance, no speed or independent physics credit."
+}

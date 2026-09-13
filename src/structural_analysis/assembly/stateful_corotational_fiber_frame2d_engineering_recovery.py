@@ -22,19 +22,30 @@ from jsonschema import Draft202012Validator, validators
 import numpy as np
 
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
+    StatefulCorotationalFiberFrame2DAssembly,
     StatefulCorotationalFiberFrame2DProblem,
     assemble_stateful_corotational_fiber_frame2d,
+    validate_stateful_corotational_fiber_frame2d_checkpoint,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 import (
     CorotationalFiberFrameJ1J5Adapter,
-    validate_corotational_fiber_frame_j1_j5_adapter,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
     CorotationalFiberFrameGeneralJ1J5Adapter,
-    validate_corotational_fiber_frame_general_j1_j5_adapter,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
     StatefulCorotationalFiberFrame2DLoadPathResult,
+)
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_sparse_state import (
+    StatefulCorotationalFiberFrame2DSparseAssembly,
+    assemble_stateful_corotational_fiber_frame2d_sparse_state,
+)
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state import (
+    StatefulCorotationalFiberFrame2DCheckpoint,
+)
+from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND,
+    VECTOR_MATRIX_BACKENDS,
 )
 from structural_analysis.engine_v2.contracts._canonical import (
     array_content_hash,
@@ -333,12 +344,13 @@ def create_corotational_fiber_frame_engineering_result_ir(
 ) -> CorotationalFiberFrameEngineeringResultIR:
     """Replay and freeze exact SI engineering results for a bounded profile."""
 
-    adapter = _validate_source_adapter(source_adapter)
+    adapter = source_adapter
+    source_manifest_before = _validated_source_manifest(adapter)
     result_kind, authority_profile, authority_axes, limitations = _source_profile(
         adapter
     )
     result_id = _stable_id(engineering_result_id, "/engineering_result_id")
-    replay = _recover(adapter)
+    replay = _recover(adapter, source_manifest_before=source_manifest_before)
     descriptors = _descriptors(replay.arrays, replay.order_hashes)
     array_bundle_hash = canonical_hash([row.to_dict() for row in descriptors])
     catalog = default_result_quantity_catalog()
@@ -384,7 +396,7 @@ def create_corotational_fiber_frame_engineering_result_ir(
             "/source_adapter/compiler_hash",
             "Recovery lost the retained compiler identity.",
         )
-    return validate_corotational_fiber_frame_engineering_result_ir(result)
+    return _validate_result_against_replay(result, adapter, replay)
 
 
 def validate_corotational_fiber_frame_engineering_result_ir(
@@ -396,18 +408,34 @@ def validate_corotational_fiber_frame_engineering_result_ir(
             "/",
             "Expected exact CorotationalFiberFrameEngineeringResultIR.",
         )
-    adapter = _validate_source_adapter(result._adapter)
+    adapter = result._adapter
+    source_manifest_before = _validated_source_manifest(adapter)
+    replay = _recover(adapter, source_manifest_before=source_manifest_before)
+    return _validate_result_against_replay(result, adapter, replay)
+
+
+def _validate_result_against_replay(
+    result: CorotationalFiberFrameEngineeringResultIR,
+    adapter: CorotationalEngineeringSourceAdapter,
+    replay: _RecoveryReplay,
+) -> CorotationalFiberFrameEngineeringResultIR:
+    """Check a result against recovery freshly completed by the current caller.
+
+    Public validation always obtains new source validation and recovery first.
+    Construction can reuse its own replay without solving the same recovery twice.
+    No replay or validation state is retained beyond this call.
+    """
     result_kind, authority_profile, authority_axes, limitations = _source_profile(
         adapter
     )
-    replay = _recover(adapter)
     expected_descriptors = _descriptors(replay.arrays, replay.order_hashes)
     expected_bundle_hash = canonical_hash(
         [row.to_dict() for row in expected_descriptors]
     )
     catalog_hash = default_result_quantity_catalog().catalog_hash
     expected_metadata = (
-        result.schema_version
+        result._adapter is adapter
+        and result.schema_version
         == COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION
         and _stable_id(result.engineering_result_id, "/engineering_result_id")
         == result.engineering_result_id
@@ -619,13 +647,18 @@ def _detached_array_shapes(counts: Mapping[str, int]) -> Mapping[str, tuple[int,
     )
 
 
-def _validate_source_adapter(
+def _validated_source_manifest(
     adapter: CorotationalEngineeringSourceAdapter,
-) -> CorotationalEngineeringSourceAdapter:
+) -> dict[str, Any]:
+    """Validate all retained epochs and serialize through an exact class method.
+
+    The unbound call preserves the module validator boundary even if an instance
+    shadows ``to_manifest``. Both pre- and post-recovery checks use this path.
+    """
     if type(adapter) is CorotationalFiberFrameJ1J5Adapter:
-        return validate_corotational_fiber_frame_j1_j5_adapter(adapter)
+        return CorotationalFiberFrameJ1J5Adapter.to_manifest(adapter)
     if type(adapter) is CorotationalFiberFrameGeneralJ1J5Adapter:
-        return validate_corotational_fiber_frame_general_j1_j5_adapter(adapter)
+        return CorotationalFiberFrameGeneralJ1J5Adapter.to_manifest(adapter)
     _fail(
         "corotational_engineering_source_adapter_type_invalid",
         "/source_adapter",
@@ -657,8 +690,11 @@ def _source_profile(
     )
 
 
-def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
-    source_manifest_before = adapter.to_manifest()
+def _recover(
+    adapter: CorotationalEngineeringSourceAdapter,
+    *,
+    source_manifest_before: Mapping[str, Any],
+) -> _RecoveryReplay:
     problem: StatefulCorotationalFiberFrame2DProblem = adapter._compilation._problem
     path = adapter._path
     if not path.steps:
@@ -673,11 +709,24 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
     scale = np.asarray(problem.physical_coordinate_scale, dtype=np.float64)
     terminal_displacement = np.asarray(terminal.global_displacements, dtype=np.float64)
     terminal_generalized = terminal_displacement / scale
-    replay = assemble_stateful_corotational_fiber_frame2d(
+    extended_sparse = (
+        terminal_step.trial_solution.config.matrix_backend
+        == VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND
+    )
+    assemble_terminal = (
+        assemble_stateful_corotational_fiber_frame2d_sparse_state
+        if extended_sparse
+        else assemble_stateful_corotational_fiber_frame2d
+    )
+    replay = assemble_terminal(
         problem,
         parent,
         target_load_factor=terminal.load_factor,
-        trial_free_coordinates_m=terminal_generalized[list(problem.free_global_dofs)],
+        trial_free_coordinates_m=(
+            terminal_step.trial_solution.free_displacements_m
+            if extended_sparse
+            else terminal_generalized[list(problem.free_global_dofs)]
+        ),
     )
     terminal_assembly_hash = canonical_hash(replay.to_dict())
     if (
@@ -695,6 +744,156 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
             "Independent terminal assembly differs from the accepted transition.",
         )
 
+    no_solve_terminal = bool(
+        terminal_step.metrics.get("no_solve_contract_pass") is True
+        and terminal_step.trial_solution.metrics.get("solver_executed") is False
+        and terminal_step.trial_solution.metrics.get("convergence_claim") is False
+        and terminal_step.trial_solution.metrics.get("relative_residual") is None
+        and terminal_step.trial_solution.metrics.get("residual_gate_passed") is None
+        and terminal_step.trial_solution.metrics.get("increment_gate_passed") is None
+    )
+    recovered = _project_recovery(
+        problem,
+        terminal,
+        replay,
+        terminal_assembly_hash=terminal_assembly_hash,
+        residual_tolerance=terminal_step.trial_solution.config.residual_tolerance,
+        solver_relative_residual=(
+            None
+            if no_solve_terminal
+            else _finite_metric(
+                terminal_step.trial_solution.metrics.get("relative_residual")
+            )
+        ),
+    )
+    if _validated_source_manifest(adapter) != source_manifest_before:
+        _fail(
+            "corotational_recovery_source_mutated",
+            "/source_adapter",
+            "Recovery changed the retained J1-J5 source.",
+        )
+    return recovered
+
+
+def recover_corotational_checkpoint_transition(
+    problem: StatefulCorotationalFiberFrame2DProblem,
+    parent: StatefulCorotationalFiberFrame2DCheckpoint,
+    terminal: StatefulCorotationalFiberFrame2DCheckpoint,
+    *,
+    matrix_backend: str,
+    residual_tolerance: float,
+) -> _RecoveryReplay:
+    """Reassemble one stored committed transition without a Newton solve.
+
+    This verifies physical equilibrium, engineering consistency, and exact child
+    state bytes. It supplies no independent solver/convergence authority. The
+    existing ``solver_terminal_relative_residual`` metric contains the replay's
+    physical residual here, rather than a separately observed solver metric.
+    Physical-to-solver coordinate conversion must round-trip exactly.
+    """
+    if (
+        type(problem) is not StatefulCorotationalFiberFrame2DProblem
+        or type(parent) is not StatefulCorotationalFiberFrame2DCheckpoint
+        or type(terminal) is not StatefulCorotationalFiberFrame2DCheckpoint
+        or type(matrix_backend) is not str
+        or matrix_backend not in VECTOR_MATRIX_BACKENDS
+        or type(residual_tolerance) not in (int, float)
+        or not math.isfinite(_finite_metric(residual_tolerance))
+        or residual_tolerance <= 0.0
+    ):
+        _fail(
+            "corotational_recovery_transition_input_invalid",
+            "/transition",
+            "Exact problem/checkpoints, supported backend and positive tolerance required.",
+        )
+    try:
+        # Revalidate constructor invariants as well as model/material bindings;
+        # frozen dataclasses can still contain subsequently mutated nested state.
+        replace(problem)
+        for checkpoint in (parent, terminal):
+            replace(checkpoint)
+            validate_stateful_corotational_fiber_frame2d_checkpoint(problem, checkpoint)
+        if (
+            terminal.parent_state_hash != parent.state_hash
+            or terminal.epoch != parent.epoch + 1
+            or terminal.step_index != parent.step_index + 1
+            or not terminal.load_factor > parent.load_factor >= 0.0
+        ):
+            raise ValueError("checkpoint ancestry or monotonic transition mismatch")
+        before = (
+            problem.contract_hash,
+            parent.canonical_bytes(),
+            terminal.canonical_bytes(),
+        )
+        with np.errstate(over="raise", invalid="raise", divide="raise"):
+            displacement = np.asarray(terminal.global_displacements, dtype=np.float64)
+            generalized = displacement / problem.physical_coordinate_scale
+        assembler = (
+            assemble_stateful_corotational_fiber_frame2d_sparse_state
+            if matrix_backend == VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND
+            else assemble_stateful_corotational_fiber_frame2d
+        )
+        replay = assembler(
+            problem,
+            parent,
+            target_load_factor=terminal.load_factor,
+            trial_free_coordinates_m=generalized[list(problem.free_global_dofs)],
+        )
+        if (
+            replay.parent_checkpoint_hash != parent.state_hash
+            or not _exact_array(replay.global_displacements, displacement)
+            or tuple(state.canonical_bytes() for state in replay.trial_element_states)
+            != tuple(state.canonical_bytes() for state in terminal.element_states)
+        ):
+            _fail(
+                "corotational_recovery_terminal_replay_mismatch",
+                "/transition/replay",
+                "Reassembly differs from the stored child displacement or material state.",
+            )
+        recovered = _project_recovery(
+            problem,
+            terminal,
+            replay,
+            terminal_assembly_hash=canonical_hash(replay.to_dict()),
+            residual_tolerance=residual_tolerance,
+            solver_relative_residual=None,
+        )
+        replace(problem)
+        for checkpoint in (parent, terminal):
+            replace(checkpoint)
+            validate_stateful_corotational_fiber_frame2d_checkpoint(problem, checkpoint)
+        if before != (
+            problem.contract_hash,
+            parent.canonical_bytes(),
+            terminal.canonical_bytes(),
+        ):
+            _fail(
+                "corotational_recovery_source_mutated",
+                "/transition",
+                "Recovery changed the retained problem or checkpoint bytes.",
+            )
+        return recovered
+    except CorotationalFiberFrameEngineeringRecoveryError:
+        raise
+    except (ValueError, TypeError, AttributeError, ArithmeticError) as exc:
+        _fail(
+            "corotational_recovery_transition_input_invalid",
+            "/transition",
+            str(exc),
+        )
+
+
+def _project_recovery(
+    problem: StatefulCorotationalFiberFrame2DProblem,
+    terminal: StatefulCorotationalFiberFrame2DCheckpoint,
+    replay: StatefulCorotationalFiberFrame2DAssembly
+    | StatefulCorotationalFiberFrame2DSparseAssembly,
+    *,
+    terminal_assembly_hash: str,
+    residual_tolerance: float,
+    solver_relative_residual: float | None,
+) -> _RecoveryReplay:
+    """Project a freshly reassembled transition through all engineering gates."""
     node_count = len(problem.node_coordinates_m)
     member_count = len(problem.members)
     displacement = np.asarray(replay.global_displacements).reshape(node_count, 3)
@@ -944,20 +1143,10 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         external_scatter, replay.external_loads_global
     )
     free_residual_relative = _linf(replay.residual_kn) / problem.reference_force_scale()
-    no_solve_terminal = bool(
-        terminal_step.metrics.get("no_solve_contract_pass") is True
-        and terminal_step.trial_solution.metrics.get("solver_executed") is False
-        and terminal_step.trial_solution.metrics.get("convergence_claim") is False
-        and terminal_step.trial_solution.metrics.get("relative_residual") is None
-        and terminal_step.trial_solution.metrics.get("residual_gate_passed") is None
-        and terminal_step.trial_solution.metrics.get("increment_gate_passed") is None
-    )
     terminal_relative_residual = (
         free_residual_relative
-        if no_solve_terminal
-        else _finite_metric(
-            terminal_step.trial_solution.metrics.get("relative_residual")
-        )
+        if solver_relative_residual is None
+        else solver_relative_residual
     )
     if (
         not state_bytes_exact
@@ -972,10 +1161,8 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
         or section_error > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
         or fiber_error > COROTATIONAL_FIBER_FRAME_ENGINEERING_FIBER_STRAIN_TOLERANCE
-        or free_residual_relative
-        > terminal_step.trial_solution.config.residual_tolerance
-        or terminal_relative_residual
-        > terminal_step.trial_solution.config.residual_tolerance
+        or free_residual_relative > residual_tolerance
+        or terminal_relative_residual > residual_tolerance
     ):
         _fail(
             "corotational_recovery_consistency_gate_failed",
@@ -1035,12 +1222,6 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
             "solver_terminal_relative_residual": terminal_relative_residual,
         }
     )
-    if adapter.to_manifest() != source_manifest_before:
-        _fail(
-            "corotational_recovery_source_mutated",
-            "/source_adapter",
-            "Recovery changed the retained J1-J5 source.",
-        )
     return _RecoveryReplay(
         terminal_assembly_hash=terminal_assembly_hash,
         arrays=arrays,
@@ -1229,6 +1410,7 @@ __all__ = [
     "CorotationalFiberFrameEngineeringRecoveryError",
     "CorotationalFiberFrameEngineeringResultIR",
     "create_corotational_fiber_frame_engineering_result_ir",
+    "recover_corotational_checkpoint_transition",
     "validate_corotational_fiber_frame_engineering_result_ir",
     "validate_corotational_fiber_frame_engineering_result_manifest",
 ]

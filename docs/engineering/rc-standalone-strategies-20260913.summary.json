@@ -1,0 +1,141 @@
+{
+  "schema_version": "standalone-strategy-original-audit.v1",
+  "source_revision": "24a8e924a2561d54fcfc90158bafb78e57c28b1a",
+  "source_files": 623,
+  "input_files": 5,
+  "executions": [
+    {
+      "id": "b3-o0-price_order",
+      "budget": 3,
+      "strategy": "price_order",
+      "parent_wall_ns": 4424688595,
+      "cli_wall_ns": 2624248747,
+      "selected": null,
+      "estimate": null,
+      "verified_selection": false
+    },
+    {
+      "id": "b3-o0-learned_order",
+      "budget": 3,
+      "strategy": "learned_order",
+      "parent_wall_ns": 4097561811,
+      "cli_wall_ns": 2661750176,
+      "selected": "w047",
+      "estimate": 157.51079999999996,
+      "verified_selection": true
+    },
+    {
+      "id": "b3-o1-learned_order",
+      "budget": 3,
+      "strategy": "learned_order",
+      "parent_wall_ns": 4075562649,
+      "cli_wall_ns": 2691514947,
+      "selected": "w047",
+      "estimate": 157.51079999999996,
+      "verified_selection": true
+    },
+    {
+      "id": "b3-o1-price_order",
+      "budget": 3,
+      "strategy": "price_order",
+      "parent_wall_ns": 4071465392,
+      "cli_wall_ns": 2656235451,
+      "selected": null,
+      "estimate": null,
+      "verified_selection": false
+    },
+    {
+      "id": "b11-o0-price_order",
+      "budget": 11,
+      "strategy": "price_order",
+      "parent_wall_ns": 10939537382,
+      "cli_wall_ns": 9544477044,
+      "selected": "w047",
+      "estimate": 157.51079999999996,
+      "verified_selection": true
+    },
+    {
+      "id": "b11-o0-learned_order",
+      "budget": 11,
+      "strategy": "learned_order",
+      "parent_wall_ns": 11000470600,
+      "cli_wall_ns": 9606801805,
+      "selected": "w047",
+      "estimate": 157.51079999999996,
+      "verified_selection": true
+    },
+    {
+      "id": "b11-o1-learned_order",
+      "budget": 11,
+      "strategy": "learned_order",
+      "parent_wall_ns": 11025713626,
+      "cli_wall_ns": 9632067161,
+      "selected": "w047",
+      "estimate": 157.51079999999996,
+      "verified_selection": true
+    },
+    {
+      "id": "b11-o1-price_order",
+      "budget": 11,
+      "strategy": "price_order",
+      "parent_wall_ns": 11070824039,
+      "cli_wall_ns": 9670893104,
+      "selected": "w047",
+      "estimate": 157.51079999999996,
+      "verified_selection": true
+    }
+  ],
+  "pairs": [
+    {
+      "budget": 3,
+      "order": 0,
+      "equal_or_better_verified_selected_estimate": false,
+      "learned_over_price_parent_wall_ratio": null
+    },
+    {
+      "budget": 3,
+      "order": 1,
+      "equal_or_better_verified_selected_estimate": false,
+      "learned_over_price_parent_wall_ratio": null
+    },
+    {
+      "budget": 11,
+      "order": 0,
+      "equal_or_better_verified_selected_estimate": true,
+      "learned_over_price_parent_wall_ratio": 1.0055699995230383
+    },
+    {
+      "budget": 11,
+      "order": 1,
+      "equal_or_better_verified_selected_estimate": true,
+      "learned_over_price_parent_wall_ratio": 0.9959252885926931
+    }
+  ],
+  "result_rows": 56,
+  "core_calls": 896,
+  "newton_and_linear_solves": 2236,
+  "original_artifact_byte_checks": 448,
+  "distinct_physical_models": 11,
+  "repeated_model_native_checkpoint_exact_matches": 45,
+  "historical_training_wall_ns_counted_once": 2761753795,
+  "new_fits": 0,
+  "audit_new_solver_calls": 0,
+  "independent_generalization": false,
+  "independent_physical_validation": false,
+  "net_savings_proved": false,
+  "audit_wall_ns": 1328441994,
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-standalone-strategy-hmxpb46v",
+    "file_count": 1468,
+    "byte_count": 76741630,
+    "inventory_sha256": "9d99cdce0f6115905c729696b742af59b004412fce7a29de750cc7b0920b95aa"
+  },
+  "process_outcome": {
+    "return_code": 0,
+    "parent_wall_ns": 60707557695,
+    "worker_count": 8,
+    "source_revision": "24a8e924a2561d54fcfc90158bafb78e57c28b1a"
+  },
+  "audit_v1_failed_before_physics_checks": true,
+  "audit_v1_cost_separately_metered": false
+}

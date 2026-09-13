@@ -1,0 +1,251 @@
+{
+  "source_revision": "2fa9ae0d7e5928eace28538f9ae1434085151f09",
+  "original_observation": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-search-cost-2__vnvta/search-no-oracle",
+  "report_hash": "sha256:0078e80fe3d14b9a0e8c3deda04ade13d02cca82367c999790e8f8913e2fd0be",
+  "files": [
+    {
+      "path": "historical-training.json",
+      "bytes": 2377,
+      "sha256": "b000b6f2e4672e8479918db1ae041aa1d4936bb6d0440dd88fff88fa1a18268a"
+    },
+    {
+      "path": "learned_order/baseline/analysis-outcome.json",
+      "bytes": 254,
+      "sha256": "083217bd96af3ba2d98b27fa385b97042362e23b3a011d9cdc0a7fe6ebe4d911"
+    },
+    {
+      "path": "learned_order/baseline/analysis-started.json",
+      "bytes": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    {
+      "path": "learned_order/baseline/checkpoint.json",
+      "bytes": 12295,
+      "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+    },
+    {
+      "path": "learned_order/baseline/model.json",
+      "bytes": 1323,
+      "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+    },
+    {
+      "path": "learned_order/baseline/result.json",
+      "bytes": 357258,
+      "sha256": "1ce830e69451cbd211925b0440afdb160679b09276a78aabb72b4797ce154540"
+    },
+    {
+      "path": "learned_order/baseline/verification-outcome.json",
+      "bytes": 258,
+      "sha256": "07bf603fd0e5dcbf573671ba8e8e595424542186de9664e97dd5dc66cfb8374e"
+    },
+    {
+      "path": "learned_order/baseline/verification-started.json",
+      "bytes": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    {
+      "path": "learned_order/baseline/verification.json",
+      "bytes": 1047,
+      "sha256": "d158459e56570cf6e103d838159bb383c85c44bfd5ee2c1ee3ba52b584011ff0"
+    },
+    {
+      "path": "learned_order/cheap/analysis-outcome.json",
+      "bytes": 254,
+      "sha256": "f15bdc564bd9fe7f1cc4b040d13f515dcba96f5426c72f12d0b636cf9a6d745b"
+    },
+    {
+      "path": "learned_order/cheap/analysis-started.json",
+      "bytes": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    {
+      "path": "learned_order/cheap/checkpoint.json",
+      "bytes": 12426,
+      "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+    },
+    {
+      "path": "learned_order/cheap/model.json",
+      "bytes": 1323,
+      "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+    },
+    {
+      "path": "learned_order/cheap/result.json",
+      "bytes": 357893,
+      "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+    },
+    {
+      "path": "learned_order/cheap/verification-outcome.json",
+      "bytes": 258,
+      "sha256": "0b83ab59a78ef7efe54e72f49410d0a46f4e7f384b9b7aecd4fef60e278e644b"
+    },
+    {
+      "path": "learned_order/cheap/verification-started.json",
+      "bytes": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    {
+      "path": "learned_order/cheap/verification.json",
+      "bytes": 1047,
+      "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+    },
+    {
+      "path": "learned_order/comparison.json",
+      "bytes": 11820,
+      "sha256": "7937325da8db6608b689d3b7216d0d1d343515f2b77cbca9ef1a0c6f827b48ac"
+    },
+    {
+      "path": "learned_order/request.json",
+      "bytes": 1604,
+      "sha256": "1d87a768708135c8e00c2d63e844e3600eb3973d73ddf69fd20dd5c56066220a"
+    },
+    {
+      "path": "learned_order-outcome.json",
+      "bytes": 571,
+      "sha256": "c1b3cc7dad04cd962470f97af0ff1dee7e608937b2891a8a1c0728daa53bf586"
+    },
+    {
+      "path": "learned_order-started.json",
+      "bytes": 91,
+      "sha256": "10be691272c76dc85567c40d640c9783770d31fecd9287fb743fde605fbbe18d"
+    },
+    {
+      "path": "plan.json",
+      "bytes": 13246,
+      "sha256": "57bfd73f645f84e1725344e922aa11957af81fe8c0e97924c496b1885378c896"
+    },
+    {
+      "path": "policy.json",
+      "bytes": 9088,
+      "sha256": "05b9e4ef46798aff53daacc4d407e93e101adc7baedcc08e54713be16b4e51c4"
+    },
+    {
+      "path": "pool/baseline.json",
+      "bytes": 1323,
+      "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+    },
+    {
+      "path": "pool/cheap.json",
+      "bytes": 1323,
+      "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+    },
+    {
+      "path": "pool/costly.json",
+      "bytes": 1322,
+      "sha256": "52826e2b26710031d8b183feb9db475588d22f76c041fa956abd6054a7c356cc"
+    },
+    {
+      "path": "pool/middle.json",
+      "bytes": 1323,
+      "sha256": "ef4f475bd1dba67ee8dcff339de620dd47340150dbcfc1d38f78dd17f2a9abd2"
+    },
+    {
+      "path": "price_order/baseline/analysis-outcome.json",
+      "bytes": 254,
+      "sha256": "6b7add065eacbaa82f3576df739f382fb6b1dd48d5c1b34896cbb7bb8da72d9f"
+    },
+    {
+      "path": "price_order/baseline/analysis-started.json",
+      "bytes": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    {
+      "path": "price_order/baseline/checkpoint.json",
+      "bytes": 12295,
+      "sha256": "4b23a4e3d9efc3006090f492f1e28d74beaa4733f04348d4c70aa83b0455c189"
+    },
+    {
+      "path": "price_order/baseline/model.json",
+      "bytes": 1323,
+      "sha256": "2993978865f183feacd689844b1eb5c87d0f659378919296434b0783e23162c2"
+    },
+    {
+      "path": "price_order/baseline/result.json",
+      "bytes": 357258,
+      "sha256": "1ce830e69451cbd211925b0440afdb160679b09276a78aabb72b4797ce154540"
+    },
+    {
+      "path": "price_order/baseline/verification-outcome.json",
+      "bytes": 258,
+      "sha256": "df2656b700864c50bb6fb1a155b6daeda5d2da26430ce1edea1c3748a504ba9a"
+    },
+    {
+      "path": "price_order/baseline/verification-started.json",
+      "bytes": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    {
+      "path": "price_order/baseline/verification.json",
+      "bytes": 1047,
+      "sha256": "d158459e56570cf6e103d838159bb383c85c44bfd5ee2c1ee3ba52b584011ff0"
+    },
+    {
+      "path": "price_order/cheap/analysis-outcome.json",
+      "bytes": 254,
+      "sha256": "3df26f8b7593415f0b1891a3f170ab71682c6cf5f4cfd305e3aae295066a0d5a"
+    },
+    {
+      "path": "price_order/cheap/analysis-started.json",
+      "bytes": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    {
+      "path": "price_order/cheap/checkpoint.json",
+      "bytes": 12426,
+      "sha256": "5b5a3e3f831341306557d6f5b3960c80ef2b0ce1c97a2db8eb82a03f479c206a"
+    },
+    {
+      "path": "price_order/cheap/model.json",
+      "bytes": 1323,
+      "sha256": "c4037a8353c8a1d44c88403502f7c8fb32e48a2a4fb09f63db2eaeee671f595a"
+    },
+    {
+      "path": "price_order/cheap/result.json",
+      "bytes": 357893,
+      "sha256": "de67287b2fbe953a9a3c6d5bfecbdc0099050f2322527c16e4a0d467c509e445"
+    },
+    {
+      "path": "price_order/cheap/verification-outcome.json",
+      "bytes": 258,
+      "sha256": "006db845a6ac1956961a6130cdceb0165f451ecf4a2628a8fc3d5021a53b199a"
+    },
+    {
+      "path": "price_order/cheap/verification-started.json",
+      "bytes": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    {
+      "path": "price_order/cheap/verification.json",
+      "bytes": 1047,
+      "sha256": "8d91f7dfb28100c96cb0afae639c87eec09bef0c5f38a3ef46aab93a4a972771"
+    },
+    {
+      "path": "price_order/comparison.json",
+      "bytes": 11820,
+      "sha256": "cba4714ac7fe45f8edf59f6dd6f1e8c812c59a333a3f2120a49324712d6e68d6"
+    },
+    {
+      "path": "price_order/request.json",
+      "bytes": 1604,
+      "sha256": "1d87a768708135c8e00c2d63e844e3600eb3973d73ddf69fd20dd5c56066220a"
+    },
+    {
+      "path": "price_order-outcome.json",
+      "bytes": 569,
+      "sha256": "e4f18fde67be3249050a330d2f3be2ee50f1bdb49b3596b61a72bc6ad71e9fff"
+    },
+    {
+      "path": "price_order-started.json",
+      "bytes": 91,
+      "sha256": "10be691272c76dc85567c40d640c9783770d31fecd9287fb743fde605fbbe18d"
+    },
+    {
+      "path": "result.json",
+      "bytes": 7485,
+      "sha256": "751200c531d05720b394d13fa168616f94c5ac279014a34359e85df6587c25dd"
+    }
+  ],
+  "same_authored_development_cases": true,
+  "new_training_fit": false,
+  "synthetic_prices_not_quotes": true,
+  "independent_validation": false
+}

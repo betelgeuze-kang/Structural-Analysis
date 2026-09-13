@@ -1,0 +1,199 @@
+{
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-staged-workfix-6sj9jacs",
+  "source_revision": "5d24fc23f974e67326fee1499a362e5cffb4c2f0",
+  "protocol_sha256": "a820ac4cc9d572daed791627ac56e087bc111b8ea59adceeb3335e77a82c0791",
+  "inventory_sha256": "85cea9ed0aaf320e11b33d31363aad3079d241633475ad9915ca201fa9ccea2e",
+  "payload_files": 906,
+  "payload_bytes": 123689359,
+  "audit": {
+    "source_revision": "5d24fc23f974e67326fee1499a362e5cffb4c2f0",
+    "observations": [
+      {
+        "stem": "delayed_peak-o0-pruned",
+        "case": "delayed_peak",
+        "order": 0,
+        "mode": "pruned",
+        "pid": 19318,
+        "return_code": 0,
+        "timed_out": false,
+        "parent_wall_ns": 14882188234,
+        "comparable": true,
+        "selected": "middle",
+        "estimate": 246.34835999999999,
+        "work": {
+          "api_invocation_count": 6,
+          "known_counters": {
+            "attempted_step_count": 28,
+            "known_linear_solve_count": 222,
+            "known_newton_iteration_count": 222,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "candidate_statuses": [
+          {
+            "candidate_id": "baseline",
+            "status": "verified",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "small",
+            "status": "verification_blocked",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "middle",
+            "status": "verified",
+            "selection_eligible": true
+          }
+        ]
+      },
+      {
+        "stem": "delayed_peak-o0-staged",
+        "case": "delayed_peak",
+        "order": 0,
+        "mode": "staged",
+        "pid": 19396,
+        "return_code": 0,
+        "timed_out": false,
+        "parent_wall_ns": 19487982942,
+        "comparable": true,
+        "selected": "middle",
+        "estimate": 246.34835999999999,
+        "work": {
+          "api_invocation_count": 10,
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 294,
+            "known_newton_iteration_count": 294,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "candidate_statuses": [
+          {
+            "candidate_id": "baseline",
+            "status": "verified",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "small",
+            "status": "verification_blocked",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "middle",
+            "status": "verified",
+            "selection_eligible": true
+          }
+        ]
+      },
+      {
+        "stem": "delayed_peak-o1-staged",
+        "case": "delayed_peak",
+        "order": 1,
+        "mode": "staged",
+        "pid": 19438,
+        "return_code": 0,
+        "timed_out": false,
+        "parent_wall_ns": 19287105790,
+        "comparable": true,
+        "selected": "middle",
+        "estimate": 246.34835999999999,
+        "work": {
+          "api_invocation_count": 10,
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 294,
+            "known_newton_iteration_count": 294,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "candidate_statuses": [
+          {
+            "candidate_id": "baseline",
+            "status": "verified",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "small",
+            "status": "verification_blocked",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "middle",
+            "status": "verified",
+            "selection_eligible": true
+          }
+        ]
+      },
+      {
+        "stem": "delayed_peak-o1-pruned",
+        "case": "delayed_peak",
+        "order": 1,
+        "mode": "pruned",
+        "pid": 19493,
+        "return_code": 0,
+        "timed_out": false,
+        "parent_wall_ns": 14831704661,
+        "comparable": true,
+        "selected": "middle",
+        "estimate": 246.34835999999999,
+        "work": {
+          "api_invocation_count": 6,
+          "known_counters": {
+            "attempted_step_count": 28,
+            "known_linear_solve_count": 222,
+            "known_newton_iteration_count": 222,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "candidate_statuses": [
+          {
+            "candidate_id": "baseline",
+            "status": "verified",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "small",
+            "status": "verification_blocked",
+            "selection_eligible": false
+          },
+          {
+            "candidate_id": "middle",
+            "status": "verified",
+            "selection_eligible": true
+          }
+        ]
+      }
+    ],
+    "pairs": [
+      {
+        "order": 0,
+        "comparable": true,
+        "pruned_ns": 14882188234,
+        "staged_ns": 19487982942,
+        "ratio": 1.309483701965115
+      },
+      {
+        "order": 1,
+        "comparable": true,
+        "pruned_ns": 14831704661,
+        "staged_ns": 19287105790,
+        "ratio": 1.3003971040979185
+      }
+    ],
+    "ratio_of_sums": 1.3049481220457904,
+    "admitted_artifacts": 196,
+    "failed_original_physical_history_matches": 6,
+    "full_verified_rows": 8,
+    "exact_full_repeat_matches": 6,
+    "campaign_wall_ns": 68489584045,
+    "audit_wall_ns": 2549722034,
+    "new_fits": 0,
+    "audit_solves": 0,
+    "independent_physical_validation": false
+  }
+}

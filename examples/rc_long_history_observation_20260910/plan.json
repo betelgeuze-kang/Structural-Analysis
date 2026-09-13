@@ -1,0 +1,44 @@
+{
+  "schema_version": "rc-long-history-observation-plan.v1",
+  "source_revision": "e246e4fd541c90c811276716e782e88b7f77a8ac",
+  "profile": "experimental-rc-fiber-history-archive.v1",
+  "original_model_path": "examples/public_rc_fiber_frame_cantilever.json",
+  "model_sha256": "b642e14a56ca88b74dfbbb6749f7b4b87199ef1aafb94c5265ec35b89eab7968",
+  "cases": [
+    {
+      "case_id": "monotonic",
+      "targets_file": "monotonic-targets.json",
+      "targets_sha256": "22712d4767716dcd41d788062370a261a99e1691987cb00367130655db27b7af",
+      "target_count": 4059,
+      "control_global_dof": 4,
+      "maximum_targets": 4096,
+      "allow_reversals": false,
+      "maximum_reversals": 0,
+      "stop_after_prefix": 1379
+    },
+    {
+      "case_id": "cyclic",
+      "targets_file": "cyclic-targets.json",
+      "targets_sha256": "b418b77da3cca67b84513000207657eb6981df4a6f0221f7f1b879a9e8ea9d9f",
+      "target_count": 4059,
+      "control_global_dof": 4,
+      "maximum_targets": 4096,
+      "allow_reversals": true,
+      "maximum_reversals": 20,
+      "stop_after_prefix": 1379
+    }
+  ],
+  "phase_order": [
+    "full",
+    "prefix",
+    "resume"
+  ],
+  "nominal_original_target_calls": 18994,
+  "source_kind": "authored single-model monotonic and cyclic development histories",
+  "public_experimental_data_used": false,
+  "physical_validation_claim": false,
+  "exclusive_host_timing": false,
+  "automatic_retries": false,
+  "performance_comparison_claim": false,
+  "scope": "Check 4059-point execution, original recovery, full-prefix restart, all artifact bytes and all run costs. This does not qualify material yielding or independent physical data."
+}

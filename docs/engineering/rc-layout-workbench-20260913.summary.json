@@ -1,0 +1,140 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-workbench-SHD6Eo",
+    "files": 5,
+    "bytes": 386978,
+    "inventory_sha256": "c59eb67ba959678ad12308b466d6cf9fb39e3d5248b396eab0efbe0e2279a184"
+  },
+  "observation": {
+    "source_revision": "c5a8dc978be558692dd8f748f75b5beee4c38c57",
+    "report_hash": "sha256:6804c5f19ae7d6526fbabe28c545457ea23b73c86faeada8845b45bf7e7d2b0f",
+    "observations": [
+      {
+        "width": 1440,
+        "learned_selected": "large",
+        "oracle_selected": "middle",
+        "downloads": [
+          {
+            "path": "learned_order/large/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "db44ba2870d27061f8a5bfa9e1a1778c80c0b505fedf73e473c83347fe0dba18"
+          },
+          {
+            "path": "learned_order/large/baseline/result.json",
+            "bytes": 1656005,
+            "sha256": "38e15c94b53febc550086478b18c05778047bfd67275aeeb4af1b47432ac4b74"
+          },
+          {
+            "path": "learned_order/large/baseline/checkpoint.json",
+            "bytes": 35138,
+            "sha256": "d334b17b21f505aa1ee07f7960e1fe7a31ecad2e8e2c02b3b40b5f0aed8801c9"
+          },
+          {
+            "path": "learned_order/large/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "9ae607b0ebef210175d27073a94083c6eddbd8693b1900a0169f006ff051fc72"
+          },
+          {
+            "path": "result.json",
+            "bytes": 9001,
+            "sha256": "685eede3f3915e48ed99d4978c3fe96a0af35fc91b53fce0f0305375004d4f40"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 16335,
+            "sha256": "5a6d7c0d910d0ebfc1b78c72b7718c611d6da49e8980e287c484c2873ea4114d"
+          },
+          {
+            "path": "policy.json",
+            "bytes": 13482,
+            "sha256": "48b4f759fbf0c54ed77d07e6e9d511c37099686c6ffcaa4dcbaf6eed2a3f543d"
+          },
+          {
+            "path": "historical-training.json",
+            "bytes": 3176,
+            "sha256": "717cf720a9e85dc77c2066a869c0baf1490c54c6164e898530abd1e3acf4dcae"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          },
+          {
+            "path": "exhaustive_oracle/comparison.json",
+            "bytes": 23973,
+            "sha256": "064cac232c468ec203bd66d3cabfcee179b4a8fbb8c02020e45211be67e2c7ab"
+          }
+        ],
+        "outer_panel_fits_viewport": true
+      },
+      {
+        "width": 390,
+        "learned_selected": "large",
+        "oracle_selected": "middle",
+        "downloads": [
+          {
+            "path": "learned_order/large/baseline/model.json",
+            "bytes": 1462,
+            "sha256": "db44ba2870d27061f8a5bfa9e1a1778c80c0b505fedf73e473c83347fe0dba18"
+          },
+          {
+            "path": "learned_order/large/baseline/result.json",
+            "bytes": 1656005,
+            "sha256": "38e15c94b53febc550086478b18c05778047bfd67275aeeb4af1b47432ac4b74"
+          },
+          {
+            "path": "learned_order/large/baseline/checkpoint.json",
+            "bytes": 35138,
+            "sha256": "d334b17b21f505aa1ee07f7960e1fe7a31ecad2e8e2c02b3b40b5f0aed8801c9"
+          },
+          {
+            "path": "learned_order/large/baseline/verification.json",
+            "bytes": 1047,
+            "sha256": "9ae607b0ebef210175d27073a94083c6eddbd8693b1900a0169f006ff051fc72"
+          },
+          {
+            "path": "result.json",
+            "bytes": 9001,
+            "sha256": "685eede3f3915e48ed99d4978c3fe96a0af35fc91b53fce0f0305375004d4f40"
+          },
+          {
+            "path": "plan.json",
+            "bytes": 16335,
+            "sha256": "5a6d7c0d910d0ebfc1b78c72b7718c611d6da49e8980e287c484c2873ea4114d"
+          },
+          {
+            "path": "policy.json",
+            "bytes": 13482,
+            "sha256": "48b4f759fbf0c54ed77d07e6e9d511c37099686c6ffcaa4dcbaf6eed2a3f543d"
+          },
+          {
+            "path": "historical-training.json",
+            "bytes": 3176,
+            "sha256": "717cf720a9e85dc77c2066a869c0baf1490c54c6164e898530abd1e3acf4dcae"
+          },
+          {
+            "path": "price-table.json",
+            "bytes": 133,
+            "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+          },
+          {
+            "path": "exhaustive_oracle/comparison.json",
+            "bytes": 23973,
+            "sha256": "064cac232c468ec203bd66d3cabfcee179b4a8fbb8c02020e45211be67e2c7ab"
+          }
+        ],
+        "outer_panel_fits_viewport": true
+      }
+    ],
+    "http_exact_responses": 178,
+    "original_downloads": 20,
+    "review_wall_ns": 4581091581,
+    "review_scope": "two_viewports_navigation_verification_selection_and_downloads_excludes_server_startup_browser_launch_and_teardown",
+    "page_errors": [],
+    "new_numerical_paths": 0,
+    "new_policy_fits": 0,
+    "independent_physical_validation": false,
+    "net_savings_proved": false
+  },
+  "distinct_local_tests_passed": 80
+}

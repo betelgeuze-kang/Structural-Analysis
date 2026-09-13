@@ -29,6 +29,16 @@ def _pytest_targets(commands: list[list[str]]) -> set[str]:
     return targets
 
 
+def test_material_trial_timing_stays_in_fiber_frame_regression_workflow() -> None:
+    source = (
+        REPO_ROOT / ".github/workflows/fiber-frame-execution-topology-ci.yml"
+    ).read_text()
+    regression = source.split("      - name: Fiber-frame regression neighborhood\n", 1)[
+        1
+    ]
+    assert "tests/test_material_trial_runtime.py" in regression
+
+
 def test_full_workflow_delegation_removes_only_pytest_commands() -> None:
     gate = _load_quality_gate_module()
     inline = gate._command_groups("full")
@@ -165,15 +175,11 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_check_pr_issue_metadata.py" in targets
     assert "tests/test_check_repository_hygiene_inventory.py" in targets
     assert "tests/test_prune_ignored_test_experiments.py" in targets
-    assert (
-        "tests/test_build_bounded_planar_external_linear_case_package.py" in targets
-    )
+    assert "tests/test_build_bounded_planar_external_linear_case_package.py" in targets
     assert (
         "tests/test_build_bounded_planar_external_negative_case_package.py" in targets
     )
-    assert (
-        "tests/test_build_bounded_planar_external_scaling_case_package.py" in targets
-    )
+    assert "tests/test_build_bounded_planar_external_scaling_case_package.py" in targets
     assert "tests/test_ingest_bounded_planar_external_linear_results.py" in targets
     assert "tests/test_ingest_bounded_planar_external_negative_results.py" in targets
     assert "tests/test_ingest_bounded_planar_external_scaling_results.py" in targets
@@ -182,8 +188,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         in targets
     )
     assert (
-        "tests/test_ingest_bounded_planar_external_modal_buckling_results.py"
-        in targets
+        "tests/test_ingest_bounded_planar_external_modal_buckling_results.py" in targets
     )
     assert "tests/test_build_bounded_planar_external_vv_matrix.py" in targets
     assert "tests/test_build_internal_license_due_diligence.py" in targets
@@ -238,6 +243,27 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_stateful_fiber_section.py" in targets
     assert "tests/test_stateful_fiber_beam2d.py" in targets
     assert "tests/test_stateful_fiber_frame2d.py" in targets
+    assert "tests/test_stateful_fiber_frame2d_displacement_control.py" in targets
+    assert "tests/test_stateful_fiber_frame2d_control_path.py" in targets
+    assert "tests/test_bounded_rc_fiber_direct_control_api.py" in targets
+    assert "tests/test_rc_fiber_frame_direct_control_request.py" in targets
+    assert "tests/test_rc_fiber_frame_direct_control_cli.py" in targets
+    assert "tests/test_rc_control_design.py" in targets
+    assert "tests/test_rc_control_warm_start.py" in targets
+    assert "tests/test_rc_control_learning.py" in targets
+    assert "tests/test_rc_control_learning_split.py" in targets
+    assert "tests/test_rc_control_section_error.py" in targets
+    assert "tests/test_rc_control_force_error.py" in targets
+    assert "tests/test_rc_control_fiber_history.py" in targets
+    assert "tests/test_fiber_beam2d_exact_strain.py" in targets
+    assert "tests/test_rc_control_twofold_coordinates.py" in targets
+    assert "tests/test_rc_control_stable_stress.py" in targets
+    assert "tests/test_rc_control_direct_fiber.py" in targets
+    assert "tests/test_rc_control_retained_strain.py" in targets
+    assert "tests/test_rc_control_rational_accumulation.py" in targets
+    assert "tests/test_rc_rational_history.py" in targets
+    assert "tests/test_rc_terminal_twofold.py" in targets
+    assert "tests/test_material_trial_runtime.py" in targets
     assert "tests/test_stateful_fiber_frame2d_execution_topology.py" in targets
     assert "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py" in targets
     assert "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py" in targets
@@ -250,6 +276,43 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_stateful_fiber_frame2d_nonlinear_recovery.py" in targets
     assert "tests/test_public_rc_fiber_frame_api.py" in targets
     assert "tests/test_fiber_frame_solver_episode_adapter.py" in targets
+    for name in (
+        "runtime_benchmark",
+        "runtime_suite",
+        "runtime_process",
+        "runtime_strategy",
+        "strategy_process",
+        "design",
+        "design_cli",
+        "warm_start_learning",
+        "warm_start_features",
+        "conditioned_warm_start_learning",
+        "conditioned_runtime",
+        "conditioned_learning_process",
+        "warm_start_data",
+        "physical_identity",
+        "learning_study",
+        "learning_process",
+        "candidate_learning",
+        "candidate_search",
+        "candidate_search_suite",
+        "candidate_process",
+        "candidate_process_contract",
+        "candidate_review",
+        "history_design",
+    ):
+        assert f"tests/test_fiber_frame_{name}.py" in targets
+    assert "tests/test_stateful_fiber_frame2d_nonlinear_history.py" in targets
+    assert "tests/test_planar_frame_public_sparse_integration.py" in targets
+    assert "tests/test_planar_frame_extended_sparse.py" in targets
+    assert "tests/test_extended_sparse_newton.py" in targets
+    assert "tests/test_corotational_frame2d_stable_kinematics.py" in targets
+    assert "tests/test_frame3d_persisted_process_restart.py" in targets
+    assert "tests/test_frame3d_direct_control_request.py" in targets
+    assert "tests/test_bounded_frame3d_direct_control_cli.py" in targets
+    assert "tests/test_frame3d_job_service.py" in targets
+    assert "tests/test_frame3d_durable_worker.py" in targets
+    assert "tests/test_frame3d_execution_attempt_hook.py" in targets
     assert "tests/test_stateful_fiber_frame2d_material_state_bundle.py" in targets
     assert (
         "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py"
@@ -608,3 +671,9 @@ def test_pr_quality_gate_owns_scientific_medium_benchmark_contracts() -> None:
     ]
     assert post_main_status_check not in commands
     assert post_main_status_check in gate._command_groups("full")
+
+
+def test_cyclic_learning_source_triggers_its_hosted_regression_lane():
+    workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/fiber-frame-execution-topology-ci.yml').read_text()
+    assert '      - "src/structural_analysis/benchmark/rc_control_learning.py"' in workflow
+    assert '            tests/test_rc_control_learning.py ' in workflow

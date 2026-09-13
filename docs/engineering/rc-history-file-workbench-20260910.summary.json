@@ -1,0 +1,101 @@
+{
+  "schema_version": "rc-history-file-workbench-observation.v1",
+  "verification": {
+    "source_revision": "21d8f14e0a5998ca9bfccfb43c1ab5e3a79837e6",
+    "source_file_count": 76,
+    "final_tests_passed": 44,
+    "final_test_seconds": 56.4,
+    "new_tests": 22,
+    "tsc_no_emit": true,
+    "vite_build": true,
+    "viewer_delivery": true,
+    "initial_browser_attempt": {
+      "passed": 32,
+      "failed": 2,
+      "failure": "Node test worker heap exhaustion while generic deep equality enumerated a 44903261-byte download; changed assertion to Buffer.equals without changing original bytes or memory limits"
+    },
+    "initial_contract_attempt": {
+      "passed": 16,
+      "failed": 3,
+      "failure": "section resultants are named fields, not positional array; fixed projection access"
+    },
+    "intermediate_contract_tests": {
+      "passed": 19,
+      "seconds": 14.4,
+      "overlaps_final": true
+    },
+    "source_snapshot_after_tests_committed_unchanged": true,
+    "fixture": {
+      "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-stream-m1el__kd",
+      "source_revision": "f8dcfbb6af25e95e3a550558b28db94f69d9c7bc",
+      "original_path": "cyclic/full/history.ndjson",
+      "original_bytes": 44903261,
+      "original_sha256": "6a426234f7b54ba146b8449ab4b12a4e4ce2b7740f9a4508790115e36c7be636",
+      "gzip_bytes": 4076451,
+      "gzip_sha256": "91eb00f5af059f8f5a82d79d6b7486080607f4944dd50920a49c1176bb5706ac",
+      "record_count": 1012,
+      "lateral_target_count": 1010,
+      "independent_physical_validation": false
+    },
+    "built_assets": [
+      {
+        "path": "dist/assets/rcHistoryFile.worker-COb08olX.js",
+        "bytes": 169728,
+        "sha256": "3093f293975f3f5dc92b395ffcb6840cc84a26efd1112dcf4a45047942de5c7d"
+      },
+      {
+        "path": "dist/assets/workbench--mDpWKyy.css",
+        "bytes": 57544,
+        "sha256": "d8205dc6a0176457a8b562b3a0caf0f4c9f9aeeb089b61648efcc2b49c35429d"
+      },
+      {
+        "path": "dist/assets/workbench-CspgtNl_.js",
+        "bytes": 737145,
+        "sha256": "d358e1b242efc6fd1440d0534254d31c700b115cf395a68f96069a7f114b3656"
+      },
+      {
+        "path": "dist/assets/rcJobReview.worker-DIOn9FrH.js",
+        "bytes": 174286,
+        "sha256": "8df73eb4c4dca9a723007a4fba92ab9bd8f231996a44f9bcb5bdd41ab2e1fbbe"
+      }
+    ],
+    "browser_viewports": [
+      [
+        1440,
+        1000
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "actual_mobile_hardware": false,
+    "new_structural_solves": 0,
+    "new_learning_fits": 0,
+    "independent_physical_validation": false,
+    "full_roadmap_complete": false,
+    "preceding_hosted": {
+      "source_revision": "a7f699cfcee670abb6cf8ac8c8b1dc532f728372",
+      "ci": 34398910777,
+      "repository_tests": 34398910740,
+      "original_failed_prerequisites": [
+        "external_code_to_code_product_replay_not_passed",
+        "external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    "final_screenshots_visually_reviewed": true,
+    "final_runner_exit_code": 0,
+    "runner_closes_ephemeral_server_after_tests": true
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-file-workbench-x153t1pr",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-file-workbench-x153t1pr.inventory.json",
+    "inventory_sha256": "eae28c661b1171de7dbc5ce31ce24c10f74b2ee19f7dbc00835012d3b320098f",
+    "file_count": 103,
+    "total_bytes": 7516942,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T20:24:58.816112+00:00",
+    "seal_wall_ns": 19596214,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

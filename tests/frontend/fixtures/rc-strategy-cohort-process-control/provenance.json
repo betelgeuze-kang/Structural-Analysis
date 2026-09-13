@@ -1,0 +1,5 @@
+{
+  "controlled_process_clocks": true,
+  "child_graph": "rc-strategy-cohort-control",
+  "new_physical_evidence": false
+}

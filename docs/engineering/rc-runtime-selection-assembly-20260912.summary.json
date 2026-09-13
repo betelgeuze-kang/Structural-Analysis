@@ -1,0 +1,320 @@
+{
+  "base_commit": "2329c91b73ad9c3baf87a72a74d9cd51211356c6",
+  "source_state": "base plus retained source files",
+  "source_files": [
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_runtime_selection.py",
+      "bytes": 30708,
+      "sha256": "d7cd15e49cfa3d4db9b496954e77039c8be3757b405d2e1af39ba359dde81d1e"
+    },
+    {
+      "path": "tests/test_rc_control_runtime_selection.py",
+      "bytes": 33716,
+      "sha256": "4a5367e379f3c1a1812c50a7700bdb8e6e3cb1edabe59be509949ed8dc0c886b"
+    }
+  ],
+  "local_tests": {
+    "passed": 58,
+    "seconds": 118.91,
+    "command": "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=src python3 -m pytest -q tests/test_rc_control_runtime_selection.py"
+  },
+  "repeated_fixture": {
+    "training_cases": 2,
+    "withheld_case_fits": 2,
+    "folds": 6,
+    "complete_paths": 24,
+    "runtime_core_calls": 120,
+    "original_label_generation_cost_excluded": true,
+    "synthetic_caller_revision_is_attestation": false,
+    "rows": [
+      {
+        "fold": 0,
+        "case": "train-a",
+        "arms": {
+          "reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "secant": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "proposal": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "fresh-reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          }
+        }
+      },
+      {
+        "fold": 1,
+        "case": "train-a",
+        "arms": {
+          "reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "secant": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "proposal": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "fresh-reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          }
+        }
+      },
+      {
+        "fold": 2,
+        "case": "train-a",
+        "arms": {
+          "reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "secant": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "proposal": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "fresh-reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          }
+        }
+      },
+      {
+        "fold": 3,
+        "case": "train-b",
+        "arms": {
+          "reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "secant": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "proposal": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "fresh-reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          }
+        }
+      },
+      {
+        "fold": 4,
+        "case": "train-b",
+        "arms": {
+          "reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "secant": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "proposal": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "fresh-reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          }
+        }
+      },
+      {
+        "fold": 5,
+        "case": "train-b",
+        "arms": {
+          "reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "secant": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "proposal": {
+            "numerical_invocations": 5,
+            "assembly_calls": 24,
+            "by_phase": {
+              "primary_iteration": 7,
+              "line_search": 2,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          },
+          "fresh-reference": {
+            "numerical_invocations": 5,
+            "assembly_calls": 30,
+            "by_phase": {
+              "primary_iteration": 10,
+              "line_search": 5,
+              "terminal_refinement": 10,
+              "final_observation": 5
+            }
+          }
+        }
+      }
+    ]
+  },
+  "new_training_labels_in_selection": 0,
+  "independent_validation": false,
+  "net_savings_proved": false,
+  "selected_strategy": "secant",
+  "seal": {
+    "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-runtime-assembly-4q1napo9",
+    "files": 1168,
+    "bytes": 63621317,
+    "inventory_sha256": "9a4df1e1fd7253cbc8a9dc65215bdaabb680fcdab186f506b6783e74543a0641",
+    "all_files_reread": true,
+    "sealed_unix_ns": 1789207501812254575
+  }
+}

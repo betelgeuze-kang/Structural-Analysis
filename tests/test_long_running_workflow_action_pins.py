@@ -38,9 +38,10 @@ def test_exact_reviewed_action_pins_are_retained() -> None:
     setup_python = "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1"
     upload = "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
 
-    assert sources["repository_python"].count(checkout) == 2
-    assert sources["repository_python"].count(setup_python) == 2
-    assert upload not in sources["repository_python"]
+    assert sources["repository_python"].count(checkout) == 3
+    assert sources["repository_python"].count(setup_python) == 3
+    # Development results and failed-materialization diagnostics are retained.
+    assert sources["repository_python"].count(upload) == 2
 
     assert sources["legacy_evidence"].count(checkout) == 2
     assert sources["legacy_evidence"].count(setup_python) == 2

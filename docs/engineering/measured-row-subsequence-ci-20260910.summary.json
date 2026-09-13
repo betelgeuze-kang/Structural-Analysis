@@ -1,0 +1,64 @@
+{
+  "run_id": 34436261770,
+  "head_sha": "b2f86a3b8217c8d32641153c0e68881b06d41fcc",
+  "tested_merge_sha": "e77fc067855d979fac08c46166b3c3de17451bdf",
+  "development_job_id": 102741846362,
+  "tests": 346,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "pytest_wall_seconds": 351.04,
+  "junit_artifact_id": 10136424764,
+  "junit_zip_sha256": "sha256:c80de58797afaafde1fe744a04a01221cb14870e0d4113061e1d7cdbd51cefa3",
+  "full_suite_qualified": false,
+  "job_snapshot": [
+    {
+      "id": 102741846098,
+      "name": "pytest-collection",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 102741846306,
+      "name": "pytest-full-shard-1",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 102741846330,
+      "name": "pytest-full-shard-0",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 102741846336,
+      "name": "pytest-full-shard-3",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 102741846341,
+      "name": "pytest-full-shard-2",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 102741846362,
+      "name": "pytest-development-contracts",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 102743791244,
+      "name": "pytest-full",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-row-screen-ci-v6s62xoy",
+  "seal": {
+    "inventory_sha256": "d84df98bc798c258c4c08f03d37e2526b80fa80efa48e2758413deeffbac9b0f",
+    "files": 7,
+    "bytes": 182610
+  }
+}

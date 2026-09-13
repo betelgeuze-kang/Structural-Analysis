@@ -36,6 +36,11 @@ from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 from source_bound_python_inventory import (  # noqa: E402
     expand_local_python_sources,
 )
+from pinned_opensees_runtime import (  # noqa: E402
+    PinnedOpenSeesRuntimeError,
+    execute_pinned_opensees,
+    validate_binding,
+)
 from structural_analysis import ANALYSIS_ENGINE_VERSION  # noqa: E402
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model  # noqa: E402
 from structural_analysis.api.frame3d_direct_control import (  # noqa: E402
@@ -379,6 +384,9 @@ CLAIM_BOUNDARY = (
 )
 SOURCE_PATHS = (
     Path("scripts/run_external_code_to_code_technical_receipt.py"),
+    Path("scripts/pinned_opensees_runtime.py"),
+    Path("scripts/pinned_opensees_wheel_members.json"),
+    Path("tests/test_pinned_opensees_runtime.py"),
     SCHEMA_PATH,
     Path("tests/test_external_code_to_code_technical_receipt.py"),
     Path("src/structural_analysis/api/core.py"),
@@ -454,9 +462,38 @@ SOURCE_PATHS = (
 
 OPENSEES_DRIVER = r'''
 import json
+from time import perf_counter_ns
 import openseespy.opensees as ops
 
-payload = {"runtime_version": ops.version()}
+payload = {"runtime_version": ops.version(), "load_path_attempts": {}}
+
+
+def run_planar_load_path(case_id):
+    # A failed analyze reverts the domain. Continuing the old four-call loop
+    # would retry the failed target, not advance to the next load step.
+    attempts = []
+    payload["load_path_attempts"][case_id] = attempts
+    codes = []
+    for target in (0.25, 0.5, 0.75, 1.0):
+        previous_load_factor = ops.getTime()
+        started = perf_counter_ns()
+        code = int(ops.analyze(1))
+        elapsed = perf_counter_ns() - started
+        codes.append(code)
+        attempts.append({
+            "target_load_factor": target,
+            "previous_load_factor": previous_load_factor,
+            "achieved_load_factor": ops.getTime(),
+            "analyze_return_code": code,
+            "analyze_wall_ns": elapsed,
+            "test_iterations_reported": ops.testIter(),
+            "test_norms_reported": list(ops.testNorms()),
+        })
+        if code != 0:
+            break
+    return codes
+
+
 ops.wipe()
 ops.model("basic", "-ndm", 1, "-ndf", 1)
 for tag in (0, 1, 2):
@@ -526,9 +563,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["public_corotational_portal_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["public_corotational_portal_analyze_codes"] = run_planar_load_path(
+    "public_corotational_portal"
+)
 ops.reactions()
 payload["public_corotational_portal"] = {
     "node_displacements": {
@@ -578,9 +615,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["bounded_planar_member_feature_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["bounded_planar_member_feature_analyze_codes"] = run_planar_load_path(
+    "bounded_planar_member_feature"
+)
 ops.reactions()
 member_feature_local_force = ops.eleResponse(4, "localForce")
 payload["bounded_planar_member_feature"] = {
@@ -639,9 +676,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["bounded_planar_settlement_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["bounded_planar_settlement_analyze_codes"] = run_planar_load_path(
+    "bounded_planar_settlement"
+)
 ops.reactions()
 settlement_local_force = ops.eleResponse(5, "localForce")
 payload["bounded_planar_settlement"] = {
@@ -1234,16 +1271,17 @@ def _run_opensees(
     *,
     python_executable: Path,
     python_path: Path,
+    wheel_paths: list[Path],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    environment = dict(os.environ)
-    environment["PYTHONPATH"] = str(python_path.resolve())
-    completed = subprocess.run(
-        [str(python_executable.resolve()), "-c", OPENSEES_DRIVER],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=environment,
-    )
+    try:
+        completed, binding = execute_pinned_opensees(
+            python_executable=python_executable,
+            supplied_runtime_root=python_path,
+            wheels=wheel_paths,
+            driver=OPENSEES_DRIVER,
+        )
+    except PinnedOpenSeesRuntimeError as exc:
+        raise ExternalCodeToCodeReceiptError(str(exc)) from exc
     prefix = "CODE_TO_CODE_JSON="
     rows = [row[len(prefix) :] for row in completed.stdout.splitlines() if row.startswith(prefix)]
     if completed.returncode != 0 or len(rows) != 1:
@@ -1259,6 +1297,7 @@ def _run_opensees(
         "stdout_sha256": _text_hash(completed.stdout),
         "stderr_sha256": _text_hash(completed.stderr),
         "driver_sha256": _text_hash(OPENSEES_DRIVER),
+        "runtime_binding": binding,
     }
 
 
@@ -1278,8 +1317,10 @@ def _run_calculix(
     *,
     binary: Path,
     library_dir: Path,
+    raw_output_dir: Path | None = None,
+    runtime_environment: dict[str, str] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    environment = dict(os.environ)
+    environment = dict(os.environ if runtime_environment is None else runtime_environment)
     previous = environment.get("LD_LIBRARY_PATH", "")
     environment["LD_LIBRARY_PATH"] = (
         str(library_dir.resolve()) + (os.pathsep + previous if previous else "")
@@ -1291,6 +1332,11 @@ def _run_calculix(
         text=True,
         env=environment,
     )
+    if raw_output_dir is not None:
+        raw_output_dir.mkdir(parents=True, exist_ok=True)
+        for name, text in (("version.stdout", version.stdout), ("version.stderr", version.stderr)):
+            with (raw_output_dir / name).open("x", encoding="utf-8") as stream:
+                stream.write(text)
     version_match = re.search(r"Version\s+(\d+\.\d+)", version.stdout + version.stderr)
     if (
         version.returncode not in (0, 201)
@@ -1318,6 +1364,14 @@ def _run_calculix(
         )
         dat_path = root / f"{job_name}.dat"
         frd_path = root / f"{job_name}.frd"
+        if raw_output_dir is not None:
+            for suffix, text in (("stdout", completed.stdout), ("stderr", completed.stderr)):
+                with (raw_output_dir / f"{job_name}.{suffix}").open("x", encoding="utf-8") as stream:
+                    stream.write(text)
+            for source in (deck, dat_path, frd_path):
+                if source.is_file():
+                    with (raw_output_dir / source.name).open("xb") as stream:
+                        stream.write(source.read_bytes())
         if (
             completed.returncode != 0
             or not dat_path.is_file()
@@ -3247,34 +3301,16 @@ def _expected_claims(
     }
 
 
-def build_external_code_to_code_technical_receipt(
+def calculate_external_reference_comparisons(
     *,
     repo_root: Path,
-    python_executable: Path,
-    opensees_python_path: Path,
-    opensees_license_path: Path,
-    calculix_binary: Path,
-    calculix_library_dir: Path,
-    calculix_license_path: Path,
-    external_assets: list[Path],
-) -> dict[str, Any]:
-    repo_root = repo_root.resolve()
-    assets = _external_asset_rows(external_assets)
-    opensees_license = opensees_license_path.read_text(encoding="utf-8")
-    calculix_license = calculix_license_path.read_text(encoding="utf-8")
-    if "Commercial redistribution" not in opensees_license:
-        raise ExternalCodeToCodeReceiptError("opensees_license_posture_invalid")
-    if "License: GPL-2" not in calculix_license:
-        raise ExternalCodeToCodeReceiptError("calculix_license_posture_invalid")
-
-    opensees, opensees_outputs = _run_opensees(
-        python_executable=python_executable,
-        python_path=opensees_python_path,
-    )
-    calculix, calculix_outputs = _run_calculix(
-        binary=calculix_binary,
-        library_dir=calculix_library_dir,
-    )
+    opensees: dict[str, Any],
+    opensees_outputs: dict[str, Any],
+    calculix: dict[str, Any],
+    calculix_outputs: dict[str, Any],
+    opensees_reference_name: str = "OpenSees 3.7.1",
+) -> list[dict[str, Any]]:
+    """Run every product case with the existing metric and acceptance policies."""
     modal = solve_modal_modes(
         np.asarray([[2.0, -1.0], [-1.0, 1.0]], dtype=np.float64),
         np.eye(2, dtype=np.float64),
@@ -3305,7 +3341,7 @@ def build_external_code_to_code_technical_receipt(
         _case(
             case_id="two_dof_shear_modal",
             analysis_type="modal",
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=modal.schema_version,
             metrics=[
                 _comparison(
@@ -3322,7 +3358,7 @@ def build_external_code_to_code_technical_receipt(
         _case(
             case_id="cantilever_tip_load",
             analysis_type="linear_static",
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(cantilever["solver"]),
             metrics=[
                 _comparison(
@@ -3350,7 +3386,7 @@ def build_external_code_to_code_technical_receipt(
         _case(
             case_id="public_corotational_portal_load_path",
             analysis_type="corotational_elastic_stateful_load_path",
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(portal["solver_id"]),
             metrics=_public_corotational_portal_metrics(
                 portal,
@@ -3370,7 +3406,7 @@ def build_external_code_to_code_technical_receipt(
         _case(
             case_id="bounded_planar_member_feature_load_path",
             analysis_type="corotational_elastic_member_feature_load_path",
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(member_feature["solver_id"]),
             metrics=_bounded_planar_member_feature_metrics(
                 member_feature,
@@ -3392,7 +3428,7 @@ def build_external_code_to_code_technical_receipt(
             analysis_type=(
                 "corotational_elastic_prescribed_settlement_load_path"
             ),
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(settlement["solver_id"]),
             metrics=_bounded_planar_settlement_metrics(
                 settlement,
@@ -3412,7 +3448,7 @@ def build_external_code_to_code_technical_receipt(
         _case(
             case_id="spatial_frame3d_cantilever_combined_load",
             analysis_type="corotational_elastic_spatial_frame3d_load_path",
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(spatial_frame3d["solver_id"]),
             metrics=_spatial_frame3d_metrics(
                 spatial_frame3d,
@@ -3431,7 +3467,7 @@ def build_external_code_to_code_technical_receipt(
             analysis_type=(
                 "corotational_frame3d_direct_displacement_control_axial_yield"
             ),
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(frame3d_direct_control["solver_id"]),
             metrics=_frame3d_direct_control_axial_yield_metrics(
                 frame3d_direct_control,
@@ -3455,7 +3491,7 @@ def build_external_code_to_code_technical_receipt(
             analysis_type=(
                 "corotational_frame3d_cyclic_direct_displacement_control_axial_reversal"
             ),
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(frame3d_cyclic_direct_control["solver_id"]),
             metrics=_frame3d_direct_control_cyclic_axial_reversal_metrics(
                 frame3d_cyclic_direct_control,
@@ -3479,7 +3515,7 @@ def build_external_code_to_code_technical_receipt(
             analysis_type=(
                 "corotational_frame3d_rotational_direct_control_torsion"
             ),
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(frame3d_torsion_direct_control["solver_id"]),
             metrics=_frame3d_direct_control_torsion_metrics(
                 frame3d_torsion_direct_control,
@@ -3503,7 +3539,7 @@ def build_external_code_to_code_technical_receipt(
             analysis_type=(
                 "corotational_frame3d_bending_rotational_direct_control"
             ),
-            reference_solver="OpenSees 3.7.1",
+            reference_solver=opensees_reference_name,
             product_solver_id=str(frame3d_bending_direct_control["solver_id"]),
             metrics=_frame3d_direct_control_bending_rotation_metrics(
                 frame3d_bending_direct_control,
@@ -3561,6 +3597,45 @@ def build_external_code_to_code_technical_receipt(
             ),
         ),
     ]
+    return cases
+
+
+def build_external_code_to_code_technical_receipt(
+    *,
+    repo_root: Path,
+    python_executable: Path,
+    opensees_python_path: Path,
+    opensees_license_path: Path,
+    calculix_binary: Path,
+    calculix_library_dir: Path,
+    calculix_license_path: Path,
+    external_assets: list[Path],
+) -> dict[str, Any]:
+    repo_root = repo_root.resolve()
+    assets = _external_asset_rows(external_assets)
+    opensees_license = opensees_license_path.read_text(encoding="utf-8")
+    calculix_license = calculix_license_path.read_text(encoding="utf-8")
+    if "Commercial redistribution" not in opensees_license:
+        raise ExternalCodeToCodeReceiptError("opensees_license_posture_invalid")
+    if "License: GPL-2" not in calculix_license:
+        raise ExternalCodeToCodeReceiptError("calculix_license_posture_invalid")
+
+    opensees, opensees_outputs = _run_opensees(
+        python_executable=python_executable,
+        python_path=opensees_python_path,
+        wheel_paths=[path for path in external_assets if path.suffix == ".whl"],
+    )
+    calculix, calculix_outputs = _run_calculix(
+        binary=calculix_binary,
+        library_dir=calculix_library_dir,
+    )
+    cases = calculate_external_reference_comparisons(
+        repo_root=repo_root,
+        opensees=opensees,
+        opensees_outputs=opensees_outputs,
+        calculix=calculix,
+        calculix_outputs=calculix_outputs,
+    )
     checksums = _source_checksums(repo_root)
     technical_pass = bool(
         all(row["contract_pass"] is True for row in cases)
@@ -3653,91 +3728,9 @@ def build_external_code_to_code_technical_receipt(
     return payload
 
 
-def validate_external_code_to_code_technical_receipt(
-    payload: dict[str, Any],
-    *,
-    repo_root: Path,
-    require_current_sources: bool,
-    allow_known_claim_boundary_migration: bool = False,
-) -> dict[str, Any]:
-    if allow_known_claim_boundary_migration:
-        candidate_boundary = payload.get("claim_boundary")
-        candidate_hash = (
-            "sha256:"
-            + hashlib.sha256(candidate_boundary.encode("utf-8")).hexdigest()
-            if isinstance(candidate_boundary, str)
-            else None
-        )
-        if (
-            candidate_boundary != CLAIM_BOUNDARY
-            and candidate_hash not in KNOWN_LEGACY_CLAIM_BOUNDARY_HASHES
-        ):
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_claim_boundary_invalid"
-            )
-    schema = _read_json(repo_root / SCHEMA_PATH)
-    try:
-        Draft202012Validator.check_schema(schema)
-        Draft202012Validator(schema).validate(payload)
-    except (SchemaError, ValidationError) as exc:
-        raise ExternalCodeToCodeReceiptError("receipt_schema_invalid") from exc
-    if payload["artifact_hash"] != _artifact_hash(payload):
-        raise ExternalCodeToCodeReceiptError("receipt_artifact_hash_invalid")
-    checksums = payload["internal_source"]["input_checksums"]
-    if payload["internal_source"]["source_set_hash"] != _hash_value(checksums):
-        raise ExternalCodeToCodeReceiptError("receipt_source_set_hash_invalid")
-    if require_current_sources and checksums != _source_checksums(repo_root):
-        raise ExternalCodeToCodeReceiptError("receipt_sources_stale")
-    replay = payload.get("replay_provenance")
-    if replay is None:
-        if require_current_sources:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_provenance_missing"
-            )
-    else:
-        reused = replay["external_execution_reused"]
-        executed_now = replay[
-            "external_runtime_executed_in_this_generation"
-        ]
-        execution_source_commit = replay.get(
-            "external_execution_source_commit_sha"
-        )
-        reason = replay["reuse_reason"]
-        if reused is executed_now:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_execution_state_invalid"
-            )
-        if reused and (not isinstance(reason, str) or not reason.strip()):
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_reason_missing"
-            )
-        if not reused and reason is not None:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_reason_unexpected"
-            )
-        if (
-            execution_source_commit is not None
-            and (
-                not isinstance(execution_source_commit, str)
-                or re.fullmatch(r"[0-9a-f]{40}", execution_source_commit)
-                is None
-            )
-        ) or (
-            executed_now
-            and execution_source_commit != payload["source_commit_sha"]
-        ):
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_execution_source_invalid"
-            )
-    expected_assets = {
-        name: policy["sha256"] for name, policy in EXTERNAL_ASSET_POLICY.items()
-    }
-    stored_assets = {
-        row["filename"]: row["sha256"] for row in payload["external_assets"]
-    }
-    if stored_assets != expected_assets:
-        raise ExternalCodeToCodeReceiptError("receipt_external_assets_invalid")
-    for case in payload["comparisons"]:
+def validate_external_comparison_cases(cases: list[dict[str, Any]]) -> None:
+    """Recompute the existing per-metric and per-case acceptance contracts."""
+    for case in cases:
         frame3d_case = (
             case["case_id"] == "spatial_frame3d_cantilever_combined_load"
         )
@@ -3881,6 +3874,109 @@ def validate_external_code_to_code_technical_receipt(
         )
         if case["contract_pass"] is not expected_case_pass:
             raise ExternalCodeToCodeReceiptError("receipt_case_pass_invalid")
+
+
+def validate_external_code_to_code_technical_receipt(
+    payload: dict[str, Any],
+    *,
+    repo_root: Path,
+    require_current_sources: bool,
+    allow_known_claim_boundary_migration: bool = False,
+) -> dict[str, Any]:
+    if allow_known_claim_boundary_migration:
+        candidate_boundary = payload.get("claim_boundary")
+        candidate_hash = (
+            "sha256:"
+            + hashlib.sha256(candidate_boundary.encode("utf-8")).hexdigest()
+            if isinstance(candidate_boundary, str)
+            else None
+        )
+        if (
+            candidate_boundary != CLAIM_BOUNDARY
+            and candidate_hash not in KNOWN_LEGACY_CLAIM_BOUNDARY_HASHES
+        ):
+            raise ExternalCodeToCodeReceiptError(
+                "receipt_claim_boundary_invalid"
+            )
+    schema = _read_json(repo_root / SCHEMA_PATH)
+    try:
+        Draft202012Validator.check_schema(schema)
+        Draft202012Validator(schema).validate(payload)
+    except (SchemaError, ValidationError) as exc:
+        raise ExternalCodeToCodeReceiptError("receipt_schema_invalid") from exc
+    if payload["artifact_hash"] != _artifact_hash(payload):
+        raise ExternalCodeToCodeReceiptError("receipt_artifact_hash_invalid")
+    checksums = payload["internal_source"]["input_checksums"]
+    binding = payload["runtimes"]["opensees"]["execution_outputs"].get(
+        "runtime_binding"
+    )
+    if binding is not None:
+        try:
+            validate_binding(binding)
+        except PinnedOpenSeesRuntimeError as exc:
+            raise ExternalCodeToCodeReceiptError(str(exc)) from exc
+    if payload["internal_source"]["source_set_hash"] != _hash_value(checksums):
+        raise ExternalCodeToCodeReceiptError("receipt_source_set_hash_invalid")
+    if require_current_sources and checksums != _source_checksums(repo_root):
+        raise ExternalCodeToCodeReceiptError("receipt_sources_stale")
+    replay = payload.get("replay_provenance")
+    if replay is None:
+        if require_current_sources:
+            raise ExternalCodeToCodeReceiptError(
+                "receipt_replay_provenance_missing"
+            )
+    else:
+        reused = replay["external_execution_reused"]
+        executed_now = replay[
+            "external_runtime_executed_in_this_generation"
+        ]
+        if (
+            executed_now
+            and "scripts/pinned_opensees_runtime.py" in checksums
+            and binding is None
+        ):
+            raise ExternalCodeToCodeReceiptError(
+                "opensees_current_execution_binding_missing"
+            )
+        execution_source_commit = replay.get(
+            "external_execution_source_commit_sha"
+        )
+        reason = replay["reuse_reason"]
+        if reused is executed_now:
+            raise ExternalCodeToCodeReceiptError(
+                "receipt_replay_execution_state_invalid"
+            )
+        if reused and (not isinstance(reason, str) or not reason.strip()):
+            raise ExternalCodeToCodeReceiptError(
+                "receipt_replay_reason_missing"
+            )
+        if not reused and reason is not None:
+            raise ExternalCodeToCodeReceiptError(
+                "receipt_replay_reason_unexpected"
+            )
+        if (
+            execution_source_commit is not None
+            and (
+                not isinstance(execution_source_commit, str)
+                or re.fullmatch(r"[0-9a-f]{40}", execution_source_commit)
+                is None
+            )
+        ) or (
+            executed_now
+            and execution_source_commit != payload["source_commit_sha"]
+        ):
+            raise ExternalCodeToCodeReceiptError(
+                "receipt_replay_execution_source_invalid"
+            )
+    expected_assets = {
+        name: policy["sha256"] for name, policy in EXTERNAL_ASSET_POLICY.items()
+    }
+    stored_assets = {
+        row["filename"]: row["sha256"] for row in payload["external_assets"]
+    }
+    if stored_assets != expected_assets:
+        raise ExternalCodeToCodeReceiptError("receipt_external_assets_invalid")
+    validate_external_comparison_cases(payload["comparisons"])
     expected_technical_pass = bool(
         all(row["contract_pass"] is True for row in payload["comparisons"])
         and all(

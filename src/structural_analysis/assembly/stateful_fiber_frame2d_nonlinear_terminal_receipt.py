@@ -15,6 +15,7 @@ retains scalar gates and canonical binary identities rather than JSON vectors.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from copy import deepcopy
 from dataclasses import dataclass, replace
 import math
 import re
@@ -237,6 +238,7 @@ class FiberFrameNonlinearTerminalStepReceipt:
     convergence_gate_passed: bool
     jacobian_audit: FiberFrameNonlinearJacobianAuditReceipt
     extensions: Mapping[str, Any]
+    terminal_polishing: Mapping[str, Any] | None = None
 
     def to_manifest(self) -> dict[str, Any]:
         validate_fiber_frame_nonlinear_terminal_step_receipt(self)
@@ -303,6 +305,7 @@ class FiberFrameNonlinearTerminalReceipt:
     terminal_governing_dof: str
     step_receipts: tuple[FiberFrameNonlinearTerminalStepReceipt, ...]
     extensions: Mapping[str, Any]
+    terminal_polishing: bool = False
 
     def to_manifest(self) -> dict[str, Any]:
         validate_fiber_frame_nonlinear_terminal_receipt_shape(self)
@@ -580,9 +583,10 @@ def validate_fiber_frame_nonlinear_terminal_step_receipt(
         "regularization_count",
     ):
         _index(getattr(receipt, name), f"/solver/{name}")
+    extra_solves = _validate_terminal_polishing(receipt)
     if (
         receipt.iteration_count < 1
-        or receipt.linear_solve_count != receipt.iteration_count
+        or receipt.linear_solve_count != receipt.iteration_count + extra_solves
     ):
         _fail(
             "terminal_step_iteration_count_invalid",
@@ -783,6 +787,7 @@ def validate_fiber_frame_nonlinear_terminal_receipt_shape(
             "/solver/max_iterations",
             "Solver iteration cap exceeds the v1 bound.",
         )
+    _validate_polishing_flag(receipt.terminal_polishing)
     _validate_line_search_alphas(receipt.solver_line_search_alphas)
     expected_config_hash = canonical_hash(_solver_config_payload(receipt))
     if receipt.solver_config_hash != expected_config_hash:
@@ -804,6 +809,28 @@ def validate_fiber_frame_nonlinear_terminal_receipt_shape(
     previous_load = 0.0
     for index, row in enumerate(receipt.step_receipts, start=1):
         validate_fiber_frame_nonlinear_terminal_step_receipt(row)
+        if (row.terminal_polishing is not None) != receipt.terminal_polishing:
+            _fail(
+                "terminal_receipt_polishing_mismatch",
+                "/step_receipts",
+                "Each step must bind the selected polishing configuration.",
+            )
+        if row.iteration_count > receipt.solver_max_iterations + 1:
+            _fail(
+                "terminal_receipt_iteration_cap_exceeded",
+                "/step_receipts",
+                "A step exceeds the selected Newton iteration budget.",
+            )
+        if (
+            row.terminal_polishing is not None
+            and row.terminal_polishing["status"] == "skipped"
+            and row.iteration_count != receipt.solver_max_iterations + 1
+        ):
+            _fail(
+                "terminal_receipt_polishing_mismatch",
+                "/step_receipts",
+                "Polishing is skipped only at the iteration budget.",
+            )
         if row.step_index != index or row.epoch != index:
             _fail(
                 "terminal_receipt_step_position_invalid",
@@ -1165,6 +1192,7 @@ def _validate_and_replay_sources(
 
 
 def _validate_source_config(config: NewtonRaphsonConfig) -> None:
+    _validate_polishing_flag(config.terminal_polishing)
     if config.residual_tolerance != FIBER_FRAME_NONLINEAR_SCALED_RESIDUAL_TOLERANCE:
         _fail(
             "terminal_source_residual_tolerance_invalid",
@@ -1268,6 +1296,7 @@ def _build_terminal_receipt(
         solver_increment_tolerance_m=config.increment_tolerance,
         solver_max_iterations=config.max_iterations,
         solver_line_search_alphas=config.line_search_alphas,
+        terminal_polishing=config.terminal_polishing,
         accepted_step_count=len(rows),
         terminal_epoch=last.epoch,
         terminal_load_factor=last.target_load_factor,
@@ -1445,6 +1474,11 @@ def _build_step_receipt(
         convergence_gate_passed=residual_gate and increment_gate and audit.passed,
         jacobian_audit=audit,
         extensions=MappingProxyType({}),
+        terminal_polishing=(
+            MappingProxyType(deepcopy(metrics["terminal_polishing"]))
+            if solution.config.terminal_polishing
+            else None
+        ),
     )
     result = replace(
         provisional,
@@ -1542,9 +1576,246 @@ def _build_jacobian_audit(
     return validate_fiber_frame_nonlinear_jacobian_audit_receipt(result)
 
 
+def _validate_polishing_flag(value: Any) -> None:
+    if type(value) is not bool:
+        _fail(
+            "terminal_polishing_config_invalid",
+            "/solver/terminal_polishing",
+            "Polishing must be an exact boolean.",
+        )
+
+
+def _polishing_config_profile(enabled: bool) -> dict[str, Any]:
+    _validate_polishing_flag(enabled)
+    return (
+        {
+            "profile": "stateful_fiber_frame2d_dense_or_sparse_cpu_newton.v2",
+            "terminal_polishing": True,
+        }
+        if enabled
+        else {"profile": "stateful_fiber_frame2d_dense_or_sparse_cpu_newton.v1"}
+    )
+
+
+def _decode_polishing_profile(solver: Mapping[str, Any]) -> bool:
+    if "terminal_polishing" not in solver and "profile" not in solver:
+        return False
+    if (
+        solver.get("terminal_polishing") is not True
+        or solver.get("profile") != _polishing_config_profile(True)["profile"]
+    ):
+        _fail(
+            "terminal_polishing_config_invalid",
+            "/solver",
+            "The enabled polishing profile and true flag must occur together.",
+        )
+    return True
+
+
+def _validate_terminal_polishing(
+    receipt: FiberFrameNonlinearTerminalStepReceipt,
+) -> int:
+    """Check stored attempted-work consistency; full validation still replays it."""
+    row = receipt.terminal_polishing
+    if row is None:
+        return 0
+    path = "/solver/terminal_polishing"
+    if not isinstance(row, Mapping):
+        _fail("terminal_polishing_invalid", path, "Expected polishing diagnostics.")
+    scalars = (
+        "original_residual_linf",
+        "candidate_residual_linf",
+        "original_relative_residual",
+        "candidate_relative_residual",
+        "candidate_increment_abs_m",
+    )
+    arrays = (
+        "original_free_displacements_m",
+        "candidate_free_displacements_m",
+        "original_residual_kn",
+        "candidate_residual_kn",
+        "proposed_correction_m",
+        "candidate_newton_increment_m",
+    )
+    counts = (
+        "assembly_call_count",
+        "assembly_exception_count",
+        "linear_solve_count",
+        "linear_solve_exception_count",
+    )
+    _exact_keys(
+        row,
+        {
+            "schema_version",
+            "enabled",
+            "status",
+            "attempted",
+            "accepted",
+            "reason",
+            "source_iteration",
+            "candidate_iteration",
+            "sparse_factorization_diagnostic",
+            "error_type",
+            "error_message",
+            *scalars,
+            *arrays,
+            *counts,
+        },
+        path,
+    )
+
+    def require(condition: bool, detail: str) -> None:
+        if not condition:
+            _fail("terminal_polishing_invalid", path, detail)
+
+    require(
+        row["schema_version"] == "newton-vector-terminal-polishing.v1"
+        and row["enabled"] is True,
+        "Unsupported polishing profile.",
+    )
+    require(
+        row["status"] in ("accepted", "rejected", "skipped"),
+        "A converged step must have reached the polishing decision.",
+    )
+    for key in ("accepted", "attempted"):
+        require(type(row[key]) is bool, "Decision flags must be exact booleans.")
+    require(
+        row["accepted"] == (row["status"] == "accepted")
+        and row["attempted"] == (row["status"] != "skipped"),
+        "Polishing status and decision flags disagree.",
+    )
+    _nonempty(row["reason"], path + "/reason")
+    source_iteration = _index(row["source_iteration"], path + "/source_iteration")
+    candidate_iteration = _positive_index(
+        row["candidate_iteration"], path + "/candidate_iteration"
+    )
+    require(
+        candidate_iteration == source_iteration + 1
+        and receipt.iteration_count == source_iteration + 1 + int(row["accepted"]),
+        "Polishing iteration identities differ from the selected history.",
+    )
+    for key in counts:
+        require(
+            _index(row[key], path + "/" + key) <= 1,
+            "At most one assembly and one linear solve may be attempted.",
+        )
+    require(
+        row["assembly_exception_count"] <= row["assembly_call_count"]
+        and row["linear_solve_exception_count"] <= row["linear_solve_count"]
+        and row["linear_solve_count"] <= row["assembly_call_count"],
+        "Attempted work and exception counts disagree.",
+    )
+    for key in scalars:
+        if row[key] is not None:
+            _nonnegative(row[key], path + "/" + key)
+    width = None
+    for key in arrays:
+        value = row[key]
+        if value is None:
+            continue
+        require(
+            type(value) is list and len(value) > 0,
+            "Polishing vectors must be nonempty JSON arrays.",
+        )
+        if width is None:
+            width = len(value)
+        require(len(value) == width, "Polishing vectors have inconsistent dimensions.")
+        for component in value:
+            _finite(component, path + "/" + key)
+    require(
+        all(
+            row[key] is not None
+            for key in (
+                "original_residual_linf",
+                "original_relative_residual",
+                "original_free_displacements_m",
+                "original_residual_kn",
+                "proposed_correction_m",
+            )
+        ),
+        "Original converged state diagnostics are required.",
+    )
+    require(
+        row["original_relative_residual"]
+        <= FIBER_FRAME_NONLINEAR_SCALED_RESIDUAL_TOLERANCE,
+        "The original state must pass the unchanged residual gate.",
+    )
+    for vector, norm in (
+        ("original_residual_kn", "original_residual_linf"),
+        ("candidate_residual_kn", "candidate_residual_linf"),
+        ("candidate_newton_increment_m", "candidate_increment_abs_m"),
+    ):
+        if row[vector] is not None:
+            require(
+                row[norm] is not None and max(abs(x) for x in row[vector]) == row[norm],
+                "Stored vector and norm disagree.",
+            )
+    for key in ("error_type", "error_message"):
+        require(
+            row[key] is None or type(row[key]) is str,
+            "Error diagnostics must be strings or null.",
+        )
+    require(
+        (row["error_type"] is None) == (row["error_message"] is None),
+        "Error diagnostics must occur together.",
+    )
+    diagnostic = row["sparse_factorization_diagnostic"]
+    require(
+        diagnostic is None or type(diagnostic) is dict,
+        "Sparse attempted-work diagnostic must be an object or null.",
+    )
+    if diagnostic is not None:
+        require(
+            row["linear_solve_count"] == 1,
+            "A sparse diagnostic requires an attempted linear solve.",
+        )
+        # canonical_hash rejects nonfinite or non-JSON diagnostics.  Rejected
+        # diagnostic contract_pass=False does not invalidate the selected path.
+        canonical_hash(diagnostic)
+    if row["status"] == "skipped":
+        require(
+            row["reason"] == "max_iterations_exhausted"
+            and all(row[key] == 0 for key in counts)
+            and all(
+                row[key] is None
+                for key in (
+                    "candidate_free_displacements_m",
+                    "candidate_residual_kn",
+                    "candidate_newton_increment_m",
+                    "candidate_residual_linf",
+                    "candidate_relative_residual",
+                    "candidate_increment_abs_m",
+                    "sparse_factorization_diagnostic",
+                    "error_type",
+                    "error_message",
+                )
+            ),
+            "Skipped polishing cannot report attempted work.",
+        )
+    if row["accepted"]:
+        require(
+            all(row[key] is not None for key in scalars + arrays)
+            and row["assembly_call_count"] == row["linear_solve_count"] == 1
+            and row["assembly_exception_count"]
+            == row["linear_solve_exception_count"]
+            == 0
+            and row["error_type"] is None
+            and row["candidate_residual_linf"] < row["original_residual_linf"]
+            and row["candidate_relative_residual"]
+            <= FIBER_FRAME_NONLINEAR_SCALED_RESIDUAL_TOLERANCE
+            and row["candidate_increment_abs_m"]
+            <= FIBER_FRAME_NONLINEAR_INCREMENT_TOLERANCE_M
+            and row["candidate_increment_abs_m"]
+            == receipt.solver_coordinate_increment_linf_m
+            and (diagnostic is None or diagnostic.get("contract_pass") is True),
+            "Accepted polishing must satisfy the unchanged convergence gates.",
+        )
+    return row["linear_solve_count"] - int(row["accepted"])
+
+
 def _config_payload_from_config(config: NewtonRaphsonConfig) -> dict[str, Any]:
     return {
-        "profile": "stateful_fiber_frame2d_dense_or_sparse_cpu_newton.v1",
+        **_polishing_config_profile(config.terminal_polishing),
         "residual_tolerance": config.residual_tolerance,
         "increment_tolerance_m": config.increment_tolerance,
         "max_iterations": config.max_iterations,
@@ -1557,7 +1828,7 @@ def _solver_config_payload(
     receipt: FiberFrameNonlinearTerminalReceipt,
 ) -> dict[str, Any]:
     return {
-        "profile": "stateful_fiber_frame2d_dense_or_sparse_cpu_newton.v1",
+        **_polishing_config_profile(receipt.terminal_polishing),
         "residual_tolerance": receipt.solver_residual_tolerance,
         "increment_tolerance_m": receipt.solver_increment_tolerance_m,
         "max_iterations": receipt.solver_max_iterations,
@@ -1685,6 +1956,10 @@ def _step_payload(
         "jacobian_audit": receipt.jacobian_audit.to_manifest(),
         "extensions": dict(receipt.extensions),
     }
+    if receipt.terminal_polishing is not None:
+        payload["solver"]["terminal_polishing"] = deepcopy(
+            dict(receipt.terminal_polishing)
+        )
     if not include_step_receipt_hash:
         payload.pop("step_receipt_hash")
     return payload
@@ -1763,6 +2038,8 @@ def _terminal_payload(
         "claim_boundary": dict(FIBER_FRAME_NONLINEAR_TERMINAL_CLAIM_BOUNDARY),
         "extensions": dict(receipt.extensions),
     }
+    if receipt.terminal_polishing:
+        payload["solver"].update(_polishing_config_profile(True))
     if not include_terminal_receipt_hash:
         payload.pop("terminal_receipt_hash")
     return payload
@@ -1827,6 +2104,7 @@ def _terminal_from_manifest(
     }
     _exact_keys(bindings, binding_keys, "/bindings")
     solver = _manifest_object(manifest["solver"], "/solver")
+    polishing = _decode_polishing_profile(solver)
     _exact_keys(
         solver,
         {
@@ -1841,7 +2119,8 @@ def _terminal_from_manifest(
             "increment_tolerance_m",
             "max_iterations",
             "line_search_alphas",
-        },
+        }
+        | ({"profile", "terminal_polishing"} if polishing else set()),
         "/solver",
     )
     terminal = _manifest_object(manifest["terminal"], "/terminal")
@@ -1940,6 +2219,7 @@ def _terminal_from_manifest(
         solver_increment_tolerance_m=solver["increment_tolerance_m"],
         solver_max_iterations=solver["max_iterations"],
         solver_line_search_alphas=tuple(alphas),
+        terminal_polishing=polishing,
         accepted_step_count=terminal["accepted_step_count"],
         terminal_epoch=terminal["terminal_epoch"],
         terminal_load_factor=terminal["terminal_load_factor"],
@@ -2041,7 +2321,8 @@ def _step_from_manifest(
             "line_search_step_count",
             "fallback_count",
             "regularization_count",
-        },
+        }
+        | ({"terminal_polishing"} if "terminal_polishing" in solver else set()),
         "/solver",
     )
     obs = _manifest_object(manifest["observations"], "/observations")
@@ -2135,6 +2416,17 @@ def _step_from_manifest(
         residual_gate_passed=gates["residual_gate_passed"],
         increment_gate_passed=gates["increment_gate_passed"],
         convergence_gate_passed=gates["convergence_gate_passed"],
+        terminal_polishing=(
+            MappingProxyType(
+                deepcopy(
+                    _manifest_object(
+                        solver["terminal_polishing"], "/solver/terminal_polishing"
+                    )
+                )
+            )
+            if "terminal_polishing" in solver
+            else None
+        ),
         jacobian_audit=audit,
         extensions=_manifest_extensions(manifest["extensions"]),
     )

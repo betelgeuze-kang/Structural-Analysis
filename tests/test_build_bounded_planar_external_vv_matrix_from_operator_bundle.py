@@ -30,6 +30,109 @@ builder = _load("operator_attested_matrix_tests", SCRIPT)
 operator_fixture = _load("operator_attested_matrix_fixture", OPERATOR_FIXTURE)
 
 
+@pytest.mark.parametrize("replace_failed_row", (False, True))
+def test_failed_replay_summary_survives_operator_row_composition(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, replace_failed_row: bool
+) -> None:
+    """Synthetic composition only: no signatures, receipts or physical proof."""
+    pure_rows = _load(
+        "operator_matrix_synthetic_replay_rows",
+        ROOT / "tests/test_build_bounded_planar_external_vv_matrix.py",
+    )
+
+    revision = "a" * 40
+    failed = pure_rows._synthetic_replay_requirement(tmp_path)
+    baseline = {"source_commit_sha": revision, "requirements": [failed]}
+    original = deepcopy(baseline)
+    intake = {
+        "intake_contract_pass": True,
+        "fresh_external_runtime_execution": True,
+        "source_commit_sha": revision,
+        "attestation_id": "synthetic",
+        "attestation_sha256": "sha256:" + "a" * 64,
+        "signature": {
+            "signed_payload_sha256": "sha256:" + "b" * 64,
+            "public_key_sha256": "sha256:" + "c" * 64,
+            "signature_sha256": "sha256:" + "d" * 64,
+        },
+    }
+    boundaries = []
+
+    def synthetic_intake(*_args, **_kwargs):
+        boundaries.append("intake")
+        return deepcopy(intake)
+
+    def synthetic_core(*, receipt_id, **_kwargs):
+        boundaries.append(receipt_id)
+        cases = (
+            ["synthetic_case"]
+            if replace_failed_row and receipt_id == "code_to_code"
+            else ["unrelated_" + receipt_id]
+        )
+        return {
+            "receipt_id": receipt_id,
+            "path": receipt_id + ".json",
+            "artifact_hash": "sha256:" + "f" * 64,
+            "case_ids": cases,
+            "external_engine_invoked_case_ids": cases,
+            "fresh_current_source_external_execution": False,
+            "external_execution_reused": True,
+        }
+
+    def validate_composition(payload, repo_root, *, verified_operator_context):
+        # Exercise the real shared row/count guards at the existing full
+        # validator boundary. Source/signature validation is explicitly outside
+        # this isolated orchestration fixture and is not credited by this test.
+        boundaries.append("validate")
+        assert repo_root == tmp_path
+        assert (
+            verified_operator_context["receipt_bindings"] == payload["receipt_bindings"]
+        )
+        for row in payload["requirements"]:
+            builder.matrix_builder._validate_requirement_status(row)
+        builder.matrix_builder._validate_requirement_summary(
+            payload["summary"], payload["requirements"]
+        )
+        assert payload["artifact_hash"] == builder.matrix_builder._artifact_hash(
+            payload
+        )
+
+    monkeypatch.setattr(
+        builder, "validate_external_vv_operator_attestation", synthetic_intake
+    )
+    monkeypatch.setattr(builder, "_core_binding", synthetic_core)
+    monkeypatch.setattr(
+        builder.matrix_builder,
+        "build_bounded_planar_external_vv_matrix",
+        lambda **_kwargs: deepcopy(baseline),
+    )
+    monkeypatch.setattr(
+        builder.matrix_builder, "_validate_status", validate_composition
+    )
+    payload = builder.build_operator_attested_matrix(
+        {"bundle": {"code_to_code": {}, "modal_buckling": {}}},
+        bundle_root=tmp_path,
+        expected_source_commit_sha=revision,
+        repo_root=tmp_path,
+    )
+
+    assert baseline == original
+    assert boundaries == ["intake", "code_to_code", "modal_buckling", "validate"]
+    assert payload["status"] == "blocked"
+    assert payload["claims"]["bounded_planar_profile_level_2"] is False
+    assert payload["summary"]["technical_reference_present_count"] == 1
+    if replace_failed_row:
+        assert "current_product_replay_failed_count" not in payload["summary"]
+        assert "current_product_replay_failed" not in payload["blockers"]
+        assert payload["summary"]["current_product_replay_only_count"] == 1
+        assert payload["requirements"][0]["evidence"][0]["receipt_id"] == "code_to_code"
+    else:
+        assert payload["summary"]["current_product_replay_failed_count"] == 1
+        assert "current_product_replay_failed" in payload["blockers"]
+        assert payload["summary"]["current_product_replay_only_count"] == 0
+        assert payload["requirements"] == [failed]
+
+
 def test_signed_core_bundle_without_runtime_bytes_gets_no_fresh_credit(
     tmp_path: Path,
 ) -> None:
@@ -109,9 +212,7 @@ def test_signed_linear_supplement_adds_only_its_two_exact_cases(
         matrix["supplemental_receipt_bindings"][0]["external_execution_reused"] is False
     )
     assert (
-        matrix["supplemental_receipt_bindings"][0][
-            "runtime_asset_metadata_sealed"
-        ]
+        matrix["supplemental_receipt_bindings"][0]["runtime_asset_metadata_sealed"]
         is False
     )
     assert matrix["claims"]["bounded_planar_profile_level_2"] is False

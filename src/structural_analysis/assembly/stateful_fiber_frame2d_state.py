@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import hashlib
 import math
 import struct
+from structural_analysis.solvers.nonlinear import twofold_coordinates as twofold
 from typing import Any, Literal
 
 from structural_analysis.elements.stateful_fiber_beam2d_state import (
@@ -51,6 +52,8 @@ class StatefulFiberFrame2DCheckpoint:
     element_states: tuple[StatefulFiberBeam2DState, ...]
     role: Literal["committed"] = "committed"
     state_hash: str = ""
+    free_coordinates_m: tuple[float, ...] | None = None
+    free_coordinate_compensation_m: tuple[float, ...] | None = None
 
     def __post_init__(self) -> None:
         normalized_case_id = str(self.case_id).strip()
@@ -119,6 +122,20 @@ class StatefulFiberFrame2DCheckpoint:
                 "element_states must be a non-empty tuple of "
                 "StatefulFiberBeam2DState values"
             )
+        if (self.free_coordinates_m is None) != (
+            self.free_coordinate_compensation_m is None
+        ):
+            raise ValueError("both native coordinate components are required")
+        if self.free_coordinates_m is not None:
+            high, low = twofold.validate(
+                self.free_coordinates_m, self.free_coordinate_compensation_m
+            )
+            object.__setattr__(
+                self, "free_coordinates_m", tuple(float(v) for v in high)
+            )
+            object.__setattr__(
+                self, "free_coordinate_compensation_m", tuple(float(v) for v in low)
+            )
         computed = self.compute_state_hash()
         if self.state_hash and self.state_hash != computed:
             raise ValueError("checkpoint state_hash does not match canonical bytes")
@@ -151,6 +168,16 @@ class StatefulFiberFrame2DCheckpoint:
         for state in self.element_states:
             encoded = state.canonical_bytes()
             chunks.extend((struct.pack("<Q", len(encoded)), encoded))
+        if self.free_coordinates_m is not None:
+            count = len(self.free_coordinates_m)
+            chunks.extend(
+                (
+                    b"twofold-free-v1\0",
+                    struct.pack("<Q", count),
+                    struct.pack(f"<{count}d", *self.free_coordinates_m),
+                    struct.pack(f"<{count}d", *self.free_coordinate_compensation_m),
+                )
+            )
         return b"".join(chunks)
 
     def compute_state_hash(self) -> str:
@@ -158,7 +185,21 @@ class StatefulFiberFrame2DCheckpoint:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "schema_version": STATEFUL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_VERSION,
+            "schema_version": (
+                STATEFUL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_VERSION
+                if self.free_coordinates_m is None
+                else "stateful-fiber-frame2d-twofold-checkpoint.v1"
+            ),
+            **(
+                {
+                    "free_coordinates_m": list(self.free_coordinates_m),
+                    "free_coordinate_compensation_m": list(
+                        self.free_coordinate_compensation_m
+                    ),
+                }
+                if self.free_coordinates_m is not None
+                else {}
+            ),
             "role": self.role,
             "case_id": self.case_id,
             "problem_contract_hash": self.problem_contract_hash,

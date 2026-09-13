@@ -1,0 +1,369 @@
+{
+  "schema_version": "rc-control-design-workbench-development-observation.v1",
+  "source_revision": "4b200e28f75de3a7bfbb8c506e46e4c5e00fc8ce",
+  "source_revision_is_attestation": false,
+  "raw_observation": {
+    "status": "pass",
+    "raw_root": "/tmp/structural-rc-design-workbench._gxwboqp",
+    "file_count": 56,
+    "byte_length": 2032031,
+    "inventory_sha256": "a457f4205fbd583cfd798d6db7681e3c4c0b56c4ac18d6bd49f3439bc18d760f",
+    "inventory_path": "/tmp/structural-rc-design-workbench._gxwboqp-inventory.json",
+    "independent_inventory_reread_pass": true
+  },
+  "source_validation": {
+    "status": "pass",
+    "final_source_revision": "4b200e28f75de3a7bfbb8c506e46e4c5e00fc8ce",
+    "source_files": 13,
+    "built_assets": 14,
+    "original_observation_source_files": 12,
+    "no_numerical_calls": true
+  },
+  "observation": {
+    "status": "pass",
+    "no_numerical_calls": true,
+    "original_solver_source": "8d6328df0a50d057c57c3a15a83ba42f0a60b381",
+    "original_report_hash": "sha256:f6e1c5a3baefd9b5cfe5399bdc2c1598a3a43d602b58c7f1a89219af28a6b9e9",
+    "receipts": [
+      {
+        "width": 1440,
+        "height": 1000,
+        "load_ms_observation_not_benchmark": 5014.539414,
+        "candidates": [
+          {
+            "id": "baseline",
+            "model": "sha256:46f30d51fb008f689eff87aefb3796d053cac7ec2646f84ad561dd6cfb2da047",
+            "result": "sha256:7ecebf8e5befd3d63000239292d21c45ce78ae9b7cc75221575c99b01dd7e6b2",
+            "performance": {
+              "accepted_epoch_count": 242,
+              "maximum_absolute_fiber_strain": 0.00673359938409962,
+              "maximum_concrete_compressive_damage": 0.13048993532825948,
+              "maximum_concrete_tensile_damage": 0.9999999999661977,
+              "maximum_load_factor": 1.4559225182750202,
+              "maximum_steel_accumulated_plastic_strain": 0.009756536290480443,
+              "maximum_translation_m": 0.0369080277236107,
+              "minimum_load_factor": -1.4448270517247108,
+              "terminal_load_factor": 1.3828147147200147,
+              "terminal_maximum_absolute_fiber_strain": 0.006248975199707587,
+              "terminal_maximum_translation_m": 0.03502721927961557
+            },
+            "estimate": 169.0626
+          },
+          {
+            "id": "wider",
+            "model": "sha256:8a47e50ca5866f69c692f7f14dec9a58839a4926e6440209c26af8c7bcb4f05f",
+            "result": "sha256:dc60eec4971fcfcc03bf0ce85debe601d86fbc6933e1f8f43d6099e7c197695d",
+            "performance": {
+              "accepted_epoch_count": 242,
+              "maximum_absolute_fiber_strain": 0.006910772834072973,
+              "maximum_concrete_compressive_damage": 0,
+              "maximum_concrete_tensile_damage": 0.9999999999806434,
+              "maximum_load_factor": 1.4820382343461793,
+              "maximum_steel_accumulated_plastic_strain": 0.009696158513282031,
+              "maximum_translation_m": 0.03752410958100018,
+              "minimum_load_factor": -1.454671812270657,
+              "terminal_load_factor": 1.385664770495088,
+              "terminal_maximum_absolute_fiber_strain": 0.006334866837586623,
+              "terminal_maximum_translation_m": 0.03549062710305566
+            },
+            "estimate": 190.0626
+          }
+        ],
+        "downloads": [
+          {
+            "role": "model",
+            "sha256": "sha256:8a47e50ca5866f69c692f7f14dec9a58839a4926e6440209c26af8c7bcb4f05f",
+            "byte_length": 1462
+          },
+          {
+            "role": "result",
+            "sha256": "sha256:dc60eec4971fcfcc03bf0ce85debe601d86fbc6933e1f8f43d6099e7c197695d",
+            "byte_length": 65799680
+          },
+          {
+            "role": "checkpoint",
+            "sha256": "sha256:20b68908d3b2feb5670bb2666aa27562824272415e15fb5c5fb33cc56b739aaa",
+            "byte_length": 127294
+          },
+          {
+            "role": "verification",
+            "sha256": "sha256:85cb6bdc8bd6f0b5d09030ff31a503ca15a3306f9b2042e3bedb051412ba206f",
+            "byte_length": 1055
+          }
+        ],
+        "comparison": {
+          "sha256": "sha256:0df5f92a399ce42cf7faa7c2107c1723eddefab3417577fa51c297ca2f430b05",
+          "byte_length": 16246
+        },
+        "page_errors": [],
+        "viewport_bound": true
+      },
+      {
+        "width": 390,
+        "height": 1000,
+        "load_ms_observation_not_benchmark": 4427.048559000001,
+        "candidates": [
+          {
+            "id": "baseline",
+            "model": "sha256:46f30d51fb008f689eff87aefb3796d053cac7ec2646f84ad561dd6cfb2da047",
+            "result": "sha256:7ecebf8e5befd3d63000239292d21c45ce78ae9b7cc75221575c99b01dd7e6b2",
+            "performance": {
+              "accepted_epoch_count": 242,
+              "maximum_absolute_fiber_strain": 0.00673359938409962,
+              "maximum_concrete_compressive_damage": 0.13048993532825948,
+              "maximum_concrete_tensile_damage": 0.9999999999661977,
+              "maximum_load_factor": 1.4559225182750202,
+              "maximum_steel_accumulated_plastic_strain": 0.009756536290480443,
+              "maximum_translation_m": 0.0369080277236107,
+              "minimum_load_factor": -1.4448270517247108,
+              "terminal_load_factor": 1.3828147147200147,
+              "terminal_maximum_absolute_fiber_strain": 0.006248975199707587,
+              "terminal_maximum_translation_m": 0.03502721927961557
+            },
+            "estimate": 169.0626
+          },
+          {
+            "id": "wider",
+            "model": "sha256:8a47e50ca5866f69c692f7f14dec9a58839a4926e6440209c26af8c7bcb4f05f",
+            "result": "sha256:dc60eec4971fcfcc03bf0ce85debe601d86fbc6933e1f8f43d6099e7c197695d",
+            "performance": {
+              "accepted_epoch_count": 242,
+              "maximum_absolute_fiber_strain": 0.006910772834072973,
+              "maximum_concrete_compressive_damage": 0,
+              "maximum_concrete_tensile_damage": 0.9999999999806434,
+              "maximum_load_factor": 1.4820382343461793,
+              "maximum_steel_accumulated_plastic_strain": 0.009696158513282031,
+              "maximum_translation_m": 0.03752410958100018,
+              "minimum_load_factor": -1.454671812270657,
+              "terminal_load_factor": 1.385664770495088,
+              "terminal_maximum_absolute_fiber_strain": 0.006334866837586623,
+              "terminal_maximum_translation_m": 0.03549062710305566
+            },
+            "estimate": 190.0626
+          }
+        ],
+        "downloads": [
+          {
+            "role": "model",
+            "sha256": "sha256:8a47e50ca5866f69c692f7f14dec9a58839a4926e6440209c26af8c7bcb4f05f",
+            "byte_length": 1462
+          },
+          {
+            "role": "result",
+            "sha256": "sha256:dc60eec4971fcfcc03bf0ce85debe601d86fbc6933e1f8f43d6099e7c197695d",
+            "byte_length": 65799680
+          },
+          {
+            "role": "checkpoint",
+            "sha256": "sha256:20b68908d3b2feb5670bb2666aa27562824272415e15fb5c5fb33cc56b739aaa",
+            "byte_length": 127294
+          },
+          {
+            "role": "verification",
+            "sha256": "sha256:85cb6bdc8bd6f0b5d09030ff31a503ca15a3306f9b2042e3bedb051412ba206f",
+            "byte_length": 1055
+          }
+        ],
+        "comparison": {
+          "sha256": "sha256:0df5f92a399ce42cf7faa7c2107c1723eddefab3417577fa51c297ca2f430b05",
+          "byte_length": 16246
+        },
+        "page_errors": [],
+        "viewport_bound": true
+      }
+    ],
+    "served": [
+      {
+        "relative": "comparison.json",
+        "byte_length": 16246
+      },
+      {
+        "relative": "baseline/analysis-outcome.json",
+        "byte_length": 262
+      },
+      {
+        "relative": "baseline/analysis-started.json",
+        "byte_length": 81
+      },
+      {
+        "relative": "baseline/checkpoint.json",
+        "byte_length": 127345
+      },
+      {
+        "relative": "baseline/model.json",
+        "byte_length": 1462
+      },
+      {
+        "relative": "baseline/result.json",
+        "byte_length": 65492069
+      },
+      {
+        "relative": "baseline/verification.json",
+        "byte_length": 1055
+      },
+      {
+        "relative": "baseline/verification-outcome.json",
+        "byte_length": 266
+      },
+      {
+        "relative": "baseline/verification-started.json",
+        "byte_length": 85
+      },
+      {
+        "relative": "wider/analysis-outcome.json",
+        "byte_length": 262
+      },
+      {
+        "relative": "wider/analysis-started.json",
+        "byte_length": 81
+      },
+      {
+        "relative": "wider/checkpoint.json",
+        "byte_length": 127294
+      },
+      {
+        "relative": "wider/model.json",
+        "byte_length": 1462
+      },
+      {
+        "relative": "wider/result.json",
+        "byte_length": 65799680
+      },
+      {
+        "relative": "wider/verification.json",
+        "byte_length": 1055
+      },
+      {
+        "relative": "wider/verification-outcome.json",
+        "byte_length": 266
+      },
+      {
+        "relative": "wider/verification-started.json",
+        "byte_length": 85
+      },
+      {
+        "relative": "wider/model.json",
+        "byte_length": 1462
+      },
+      {
+        "relative": "wider/result.json",
+        "byte_length": 65799680
+      },
+      {
+        "relative": "wider/checkpoint.json",
+        "byte_length": 127294
+      },
+      {
+        "relative": "wider/verification.json",
+        "byte_length": 1055
+      },
+      {
+        "relative": "comparison.json",
+        "byte_length": 16246
+      },
+      {
+        "relative": "baseline/analysis-outcome.json",
+        "byte_length": 262
+      },
+      {
+        "relative": "baseline/analysis-started.json",
+        "byte_length": 81
+      },
+      {
+        "relative": "baseline/checkpoint.json",
+        "byte_length": 127345
+      },
+      {
+        "relative": "baseline/model.json",
+        "byte_length": 1462
+      },
+      {
+        "relative": "baseline/result.json",
+        "byte_length": 65492069
+      },
+      {
+        "relative": "baseline/verification.json",
+        "byte_length": 1055
+      },
+      {
+        "relative": "baseline/verification-outcome.json",
+        "byte_length": 266
+      },
+      {
+        "relative": "baseline/verification-started.json",
+        "byte_length": 85
+      },
+      {
+        "relative": "wider/analysis-outcome.json",
+        "byte_length": 262
+      },
+      {
+        "relative": "wider/analysis-started.json",
+        "byte_length": 81
+      },
+      {
+        "relative": "wider/checkpoint.json",
+        "byte_length": 127294
+      },
+      {
+        "relative": "wider/model.json",
+        "byte_length": 1462
+      },
+      {
+        "relative": "wider/result.json",
+        "byte_length": 65799680
+      },
+      {
+        "relative": "wider/verification.json",
+        "byte_length": 1055
+      },
+      {
+        "relative": "wider/verification-outcome.json",
+        "byte_length": 266
+      },
+      {
+        "relative": "wider/verification-started.json",
+        "byte_length": 85
+      },
+      {
+        "relative": "wider/model.json",
+        "byte_length": 1462
+      },
+      {
+        "relative": "wider/result.json",
+        "byte_length": 65799680
+      },
+      {
+        "relative": "wider/checkpoint.json",
+        "byte_length": 127294
+      },
+      {
+        "relative": "wider/verification.json",
+        "byte_length": 1055
+      }
+    ]
+  },
+  "prior_functional_observation_source": "f5026e9edbef6e4dfd7b7b2ffab2f9b0528639c4",
+  "initial_full_test_selection": {
+    "passed": 24,
+    "failed": 5
+  },
+  "final_focused_tests": {
+    "passed": 44,
+    "elapsed_seconds": 29.9,
+    "includes_build_and_types": true
+  },
+  "claims": {
+    "browser_numerical_execution": false,
+    "independent_validation": false,
+    "confirmed_savings": false,
+    "hardware_qualification": false,
+    "release_approval": false
+  },
+  "remaining": [
+    "actual authenticated production/service mount qualification",
+    "broader RC physical families and compatible learned candidate search",
+    "independent validation and design/price evidence",
+    "full M1-M5/P1-P3/R1/R2 acceptance and explicit external dependencies"
+  ]
+}

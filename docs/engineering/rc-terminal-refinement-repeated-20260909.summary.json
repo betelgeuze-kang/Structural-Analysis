@@ -1,0 +1,736 @@
+{
+  "schema_version": "rc-terminal-refinement-repeated-observation.v1",
+  "source_revision": "93e589f1ba121f41afa0879f96f4c1c72f5190c7",
+  "main_evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-terminal-refinement.ufizghqu",
+    "file_count": 10168,
+    "total_bytes": 534888502,
+    "inventory_sha256": "b3a7a20e71ee4332bd0391923404199b8490999be8d1f92e265436f675d8ad05",
+    "all_files_reread_exact": true
+  },
+  "repeat_count_per_geometry": 3,
+  "full_secant_comparisons_passed": 6,
+  "completed_paths": 18,
+  "exact_original_step_pairs": 4356,
+  "exact_original_history_checkpoint_pairs": 18,
+  "all_original_inputs_and_frozen_sources_exact": true,
+  "all_recorded_workers_and_audits_terminal_zero": true,
+  "full_work": {
+    "core_calls": 4356,
+    "linear_solves": 21720,
+    "newton_iterations": 21720
+  },
+  "included_polishing_work": {
+    "attempt_count": 8694,
+    "accepted_correction_count": 6975,
+    "assembly_call_count": 8694,
+    "assembly_exception_count": 0,
+    "linear_solve_count": 6975,
+    "linear_solve_exception_count": 0
+  },
+  "separate_material_audit_base_integrations": {
+    "concrete": 313632,
+    "steel": 52272
+  },
+  "timing": {
+    "base": {
+      "reference": {
+        "samples": [
+          100.491022262,
+          100.590448534,
+          101.060073585
+        ],
+        "median": 100.590448534,
+        "minimum": 100.491022262,
+        "maximum": 101.060073585,
+        "sample_standard_deviation": 0.30393329320170787
+      },
+      "secant": {
+        "samples": [
+          72.394105836,
+          72.414209488,
+          73.434371606
+        ],
+        "median": 72.414209488,
+        "minimum": 72.394105836,
+        "maximum": 73.434371606,
+        "sample_standard_deviation": 0.5948792280874735
+      },
+      "fresh-reference": {
+        "samples": [
+          100.781120967,
+          100.559892819,
+          101.945366257
+        ],
+        "median": 100.781120967,
+        "minimum": 100.559892819,
+        "maximum": 101.945366257,
+        "sample_standard_deviation": 0.7443056760227665
+      },
+      "paired_reference_over_secant_ratio": {
+        "samples": [
+          1.3881105526691653,
+          1.38909820662572,
+          1.376195797347067
+        ],
+        "median": 1.3881105526691653,
+        "minimum": 1.376195797347067,
+        "maximum": 1.38909820662572,
+        "sample_standard_deviation": 0.007181098104482752
+      },
+      "paired_saved_seconds": {
+        "samples": [
+          28.096916426000007,
+          28.176239046000006,
+          27.625701979
+        ],
+        "median": 28.096916426000007,
+        "minimum": 27.625701979,
+        "maximum": 28.176239046000006,
+        "sample_standard_deviation": 0.29760885830402706
+      },
+      "all_three_secant_paths_faster": true
+    },
+    "long": {
+      "reference": {
+        "samples": [
+          94.309434777,
+          95.400100705,
+          94.35255426
+        ],
+        "median": 94.35255426,
+        "minimum": 94.309434777,
+        "maximum": 95.400100705,
+        "sample_standard_deviation": 0.6176251574574986
+      },
+      "secant": {
+        "samples": [
+          69.697009485,
+          70.193903129,
+          69.283987437
+        ],
+        "median": 69.697009485,
+        "minimum": 69.283987437,
+        "maximum": 70.193903129,
+        "sample_standard_deviation": 0.45560163010565624
+      },
+      "fresh-reference": {
+        "samples": [
+          94.703814593,
+          95.609633976,
+          94.190127058
+        ],
+        "median": 94.703814593,
+        "minimum": 94.190127058,
+        "maximum": 95.609633976,
+        "sample_standard_deviation": 0.7187238144195487
+      },
+      "paired_reference_over_secant_ratio": {
+        "samples": [
+          1.3531345960732653,
+          1.359093830837087,
+          1.3618233844551006
+        ],
+        "median": 1.359093830837087,
+        "minimum": 1.3531345960732653,
+        "maximum": 1.3618233844551006,
+        "sample_standard_deviation": 0.0044433093047913244
+      },
+      "paired_saved_seconds": {
+        "samples": [
+          24.61242529200001,
+          25.206197575999994,
+          25.068566823000012
+        ],
+        "median": 25.068566823000012,
+        "minimum": 24.61242529200001,
+        "maximum": 25.206197575999994,
+        "sample_standard_deviation": 0.3107981246513889
+      },
+      "all_three_secant_paths_faster": true
+    }
+  },
+  "rows": [
+    {
+      "repeat": 1,
+      "case": "base",
+      "arm_order": [
+        "reference",
+        "secant"
+      ],
+      "worker_parent_seconds": 279.508963756,
+      "whole_study_seconds": 277.652296707,
+      "paths": {
+        "reference": {
+          "wall_seconds": 100.491022262,
+          "cpu_seconds": 100.474937113,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 84799128363,
+            "core_cpu_ns": 84793697506,
+            "proposal_wall_ns": 462749,
+            "proposal_cpu_ns": 427471,
+            "recovery_wall_ns": 12218766077,
+            "recovery_cpu_ns": 12218067519
+          },
+          "path_overhead_wall_ns": 3472665073
+        },
+        "secant": {
+          "wall_seconds": 72.394105836,
+          "cpu_seconds": 72.371380447,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 969,
+            "newton_iterations": 969
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 391,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 391,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 55788976978,
+            "core_cpu_ns": 55775101426,
+            "proposal_wall_ns": 858549670,
+            "proposal_cpu_ns": 858417821,
+            "recovery_wall_ns": 12278505301,
+            "recovery_cpu_ns": 12275682662
+          },
+          "path_overhead_wall_ns": 3468073887
+        },
+        "fresh-reference": {
+          "wall_seconds": 100.781120967,
+          "cpu_seconds": 100.76425617,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 84835728866,
+            "core_cpu_ns": 84829733757,
+            "proposal_wall_ns": 459853,
+            "proposal_cpu_ns": 425310,
+            "recovery_wall_ns": 12325389710,
+            "recovery_cpu_ns": 12324532952
+          },
+          "path_overhead_wall_ns": 3619542538
+        }
+      },
+      "secant_full_comparison_pass": true
+    },
+    {
+      "repeat": 1,
+      "case": "long",
+      "arm_order": [
+        "secant",
+        "reference"
+      ],
+      "worker_parent_seconds": 264.491480512,
+      "whole_study_seconds": 262.67500406,
+      "paths": {
+        "reference": {
+          "wall_seconds": 94.309434777,
+          "cpu_seconds": 94.294888973,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 78795200345,
+            "core_cpu_ns": 78789955387,
+            "proposal_wall_ns": 461573,
+            "proposal_cpu_ns": 415840,
+            "recovery_wall_ns": 12095475864,
+            "recovery_cpu_ns": 12094730526
+          },
+          "path_overhead_wall_ns": 3418296995
+        },
+        "secant": {
+          "wall_seconds": 69.697009485,
+          "cpu_seconds": 69.646484703,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 933,
+            "newton_iterations": 933
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 384,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 384,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 53241980141,
+            "core_cpu_ns": 53213795768,
+            "proposal_wall_ns": 848297077,
+            "proposal_cpu_ns": 847910370,
+            "recovery_wall_ns": 12166311430,
+            "recovery_cpu_ns": 12160304783
+          },
+          "path_overhead_wall_ns": 3440420837
+        },
+        "fresh-reference": {
+          "wall_seconds": 94.703814593,
+          "cpu_seconds": 94.660047893,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 79165460449,
+            "core_cpu_ns": 79136799727,
+            "proposal_wall_ns": 465416,
+            "proposal_cpu_ns": 418040,
+            "recovery_wall_ns": 12096540484,
+            "recovery_cpu_ns": 12092780678
+          },
+          "path_overhead_wall_ns": 3441348244
+        }
+      },
+      "secant_full_comparison_pass": true
+    },
+    {
+      "repeat": 2,
+      "case": "base",
+      "arm_order": [
+        "secant",
+        "reference"
+      ],
+      "worker_parent_seconds": 279.464134176,
+      "whole_study_seconds": 277.647641563,
+      "paths": {
+        "reference": {
+          "wall_seconds": 100.590448534,
+          "cpu_seconds": 100.56568223,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 84760827253,
+            "core_cpu_ns": 84751798541,
+            "proposal_wall_ns": 455979,
+            "proposal_cpu_ns": 421420,
+            "recovery_wall_ns": 12296295687,
+            "recovery_cpu_ns": 12295234479
+          },
+          "path_overhead_wall_ns": 3532869615
+        },
+        "secant": {
+          "wall_seconds": 72.414209488,
+          "cpu_seconds": 72.375858238,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 969,
+            "newton_iterations": 969
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 391,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 391,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 55811274377,
+            "core_cpu_ns": 55803439872,
+            "proposal_wall_ns": 858980788,
+            "proposal_cpu_ns": 858928432,
+            "recovery_wall_ns": 12301102527,
+            "recovery_cpu_ns": 12299630445
+          },
+          "path_overhead_wall_ns": 3442851796
+        },
+        "fresh-reference": {
+          "wall_seconds": 100.559892819,
+          "cpu_seconds": 100.548465796,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 84711459180,
+            "core_cpu_ns": 84705966340,
+            "proposal_wall_ns": 456729,
+            "proposal_cpu_ns": 420980,
+            "recovery_wall_ns": 12297111765,
+            "recovery_cpu_ns": 12296439300
+          },
+          "path_overhead_wall_ns": 3550865145
+        }
+      },
+      "secant_full_comparison_pass": true
+    },
+    {
+      "repeat": 2,
+      "case": "long",
+      "arm_order": [
+        "reference",
+        "secant"
+      ],
+      "worker_parent_seconds": 266.982341529,
+      "whole_study_seconds": 265.17825808,
+      "paths": {
+        "reference": {
+          "wall_seconds": 95.400100705,
+          "cpu_seconds": 95.384162615,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 79649337706,
+            "core_cpu_ns": 79644014059,
+            "proposal_wall_ns": 470637,
+            "proposal_cpu_ns": 433501,
+            "recovery_wall_ns": 12235648910,
+            "recovery_cpu_ns": 12234956148
+          },
+          "path_overhead_wall_ns": 3514643452
+        },
+        "secant": {
+          "wall_seconds": 70.193903129,
+          "cpu_seconds": 70.170728328,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 933,
+            "newton_iterations": 933
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 384,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 384,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 53643672278,
+            "core_cpu_ns": 53640540594,
+            "proposal_wall_ns": 855182429,
+            "proposal_cpu_ns": 855234943,
+            "recovery_wall_ns": 12216001716,
+            "recovery_cpu_ns": 12215371399
+          },
+          "path_overhead_wall_ns": 3479046706
+        },
+        "fresh-reference": {
+          "wall_seconds": 95.609633976,
+          "cpu_seconds": 95.597931419,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 79841117280,
+            "core_cpu_ns": 79835364533,
+            "proposal_wall_ns": 467790,
+            "proposal_cpu_ns": 430570,
+            "recovery_wall_ns": 12310524982,
+            "recovery_cpu_ns": 12309798209
+          },
+          "path_overhead_wall_ns": 3457523924
+        }
+      },
+      "secant_full_comparison_pass": true
+    },
+    {
+      "repeat": 3,
+      "case": "base",
+      "arm_order": [
+        "reference",
+        "secant"
+      ],
+      "worker_parent_seconds": 282.32299539,
+      "whole_study_seconds": 280.510184314,
+      "paths": {
+        "reference": {
+          "wall_seconds": 101.060073585,
+          "cpu_seconds": 100.885711963,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 85213159587,
+            "core_cpu_ns": 85064400608,
+            "proposal_wall_ns": 480165,
+            "proposal_cpu_ns": 428580,
+            "recovery_wall_ns": 12325152189,
+            "recovery_cpu_ns": 12305516107
+          },
+          "path_overhead_wall_ns": 3521281644
+        },
+        "secant": {
+          "wall_seconds": 73.434371606,
+          "cpu_seconds": 73.387653426,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 969,
+            "newton_iterations": 969
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 391,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 391,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 56531835813,
+            "core_cpu_ns": 56509319810,
+            "proposal_wall_ns": 871589825,
+            "proposal_cpu_ns": 871512803,
+            "recovery_wall_ns": 12474559370,
+            "recovery_cpu_ns": 12470653945
+          },
+          "path_overhead_wall_ns": 3556386598
+        },
+        "fresh-reference": {
+          "wall_seconds": 101.945366257,
+          "cpu_seconds": 101.929358757,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1355,
+            "newton_iterations": 1355
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 395,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 395,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 85825253815,
+            "core_cpu_ns": 85819759776,
+            "proposal_wall_ns": 469278,
+            "proposal_cpu_ns": 424681,
+            "recovery_wall_ns": 12451567191,
+            "recovery_cpu_ns": 12450967404
+          },
+          "path_overhead_wall_ns": 3668075973
+        }
+      },
+      "secant_full_comparison_pass": true
+    },
+    {
+      "repeat": 3,
+      "case": "long",
+      "arm_order": [
+        "secant",
+        "reference"
+      ],
+      "worker_parent_seconds": 263.809678963,
+      "whole_study_seconds": 261.805840095,
+      "paths": {
+        "reference": {
+          "wall_seconds": 94.35255426,
+          "cpu_seconds": 94.338856822,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 78741117451,
+            "core_cpu_ns": 78737617436,
+            "proposal_wall_ns": 462500,
+            "proposal_cpu_ns": 427810,
+            "recovery_wall_ns": 12152635654,
+            "recovery_cpu_ns": 12152236045
+          },
+          "path_overhead_wall_ns": 3458338655
+        },
+        "secant": {
+          "wall_seconds": 69.283987437,
+          "cpu_seconds": 69.265465266,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 933,
+            "newton_iterations": 933
+          },
+          "polishing": {
+            "attempt_count": 484,
+            "accepted_correction_count": 384,
+            "assembly_call_count": 484,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 384,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 52862857536,
+            "core_cpu_ns": 52859676498,
+            "proposal_wall_ns": 841297627,
+            "proposal_cpu_ns": 841325114,
+            "recovery_wall_ns": 12118201880,
+            "recovery_cpu_ns": 12117448189
+          },
+          "path_overhead_wall_ns": 3461630394
+        },
+        "fresh-reference": {
+          "wall_seconds": 94.190127058,
+          "cpu_seconds": 94.156189259,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1314,
+            "newton_iterations": 1314
+          },
+          "polishing": {
+            "attempt_count": 481,
+            "accepted_correction_count": 380,
+            "assembly_call_count": 481,
+            "assembly_exception_count": 0,
+            "linear_solve_count": 380,
+            "linear_solve_exception_count": 0
+          },
+          "separate_recorded_times_ns": {
+            "core_wall_ns": 78611764881,
+            "core_cpu_ns": 78607062645,
+            "proposal_wall_ns": 458249,
+            "proposal_cpu_ns": 423900,
+            "recovery_wall_ns": 12086607102,
+            "recovery_cpu_ns": 12086020910
+          },
+          "path_overhead_wall_ns": 3491296826
+        }
+      },
+      "secant_full_comparison_pass": true
+    }
+  ],
+  "cost_seconds": {
+    "full_worker_parent": 1636.579594326,
+    "whole_studies": 1625.469224819,
+    "all_paths": 1601.411176774,
+    "core_invocations": 1312.830152299,
+    "proposal": 5.139468334,
+    "original_recovery": 220.446397839,
+    "separate_audit_parents": 178.779586648,
+    "whole_repeat_driver_including_audits_and_setup": 1815.485318109
+  },
+  "scope": "same two declared synthetic development geometries, same local host and frozen source, three fresh repetitions; not independent validation or broad speedup",
+  "claims": {
+    "repeated_local_secant_comparison_accepted": true,
+    "learned_acceleration": false,
+    "independent_physics_validation": false,
+    "hosted_full_suite_acceptance": false,
+    "roadmap_complete": false
+  },
+  "summary_reverification_wall_seconds": 59.829561192,
+  "initial_summary_verification_failure": {
+    "reason": "Generic path JSON hash was incorrectly used for a native step; corrected to the original canonical_hash without changing data",
+    "log": "initial-summary-verification-failure.log",
+    "newton_solves": 0,
+    "native_commits": 0,
+    "original_records_unchanged": true,
+    "elapsed_time_not_recorded": true
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-terminal-refinement.ufizghqu-repeated",
+    "file_count": 27515,
+    "total_bytes": 1484583871,
+    "inventory_sha256": "39fba148f4ea5e5882bd950794ccda684af9b5b8c06c44b7f52a3bcc6518e210",
+    "all_files_reread_exact": true
+  },
+  "report_revision_before_commit": "6f534805b16d60bebc70433c0bdd48f5ce40e96a"
+}

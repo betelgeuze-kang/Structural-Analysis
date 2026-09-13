@@ -1,9 +1,33 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
+import subprocess
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_delivery_rejects_missing_or_modified_runtime_asset(tmp_path, changed):
+    source = tmp_path / "src/structure-viewer"
+    emitted = tmp_path / "dist/src/structure-viewer"
+    scripts = tmp_path / "scripts"
+    for directory in (source, emitted, scripts):
+        directory.mkdir(parents=True)
+    (source / "viewer-runtime-assets.json").write_text(json.dumps(["data.js"]))
+    (source / "data.js").write_bytes(b"original data")
+    (emitted / "index.html").write_text("viewer entry")
+    (tmp_path / "dist/index.html").write_text("workbench entry")
+    if changed:
+        (emitted / "data.js").write_bytes(b"different data")
+    target = scripts / "verify-workbench-viewer-delivery.mjs"
+    target.write_bytes((ROOT / "scripts/verify-workbench-viewer-delivery.mjs").read_bytes())
+    result = subprocess.run(["node", str(target)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "Runtime asset missing or changed: data.js" in result.stderr
 
 
 def _read(relative_path: str) -> str:
