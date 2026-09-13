@@ -585,6 +585,7 @@ def test_terminal_match_with_middle_history_mismatch_disables_paired_costs(
     (pair,) = process._comparisons(contexts[0].bundle, observed.request, rows, results)
     assert pair["comparison"]["physical_si_match"] is True
     assert pair["history_comparison"]["full_history_match"] is False
+    assert pair["unavailable_reason"] == "full_history_mismatch"
     assert pair["paired_workload_wall_difference_ns"] is None
     assert pair["paired_worker_cpu_difference_ns"] is None
     standalone = compare_planar_frame_histories(
@@ -609,3 +610,41 @@ def test_report_retains_observed_material_activity_from_real_workers(observed):
         assert activity["steel_plasticity_observed"] is False
         assert activity["concrete_damage_observed"] is False
         assert activity == process._material_activity(observed.output, row)
+
+
+@pytest.mark.parametrize(
+    "terminal_match,resources,reason",
+    [
+        (False, True, "terminal_si_mismatch"),
+        (True, False, "worker_resources_unavailable"),
+        (False, False, "terminal_si_mismatch"),
+    ],
+)
+def test_paired_cost_rejection_preserves_comparison_and_reason(
+    observed, monkeypatch, terminal_match, resources, reason
+):
+    from structural_analysis.benchmark import planar_frame_backend_comparison
+
+    comparison = deepcopy(observed.report["comparisons"][0]["comparison"])
+    comparison["physical_si_match"] = terminal_match
+    monkeypatch.setattr(
+        planar_frame_backend_comparison,
+        "compare_planar_frame_results",
+        lambda *args, **kwargs: comparison,
+    )
+    rows = deepcopy(observed.report["rows"])
+    rows[1]["resource_eligible"] = resources
+    results = {
+        row["slot_index"]: json.loads(
+            (observed.output / row["directory"] / "result.json").read_bytes()
+        )
+        for row in rows
+    }
+    before = deepcopy(rows)
+    (pair,) = process._comparisons(observed.output, observed.request, rows, results)
+    assert pair["comparison"] == comparison
+    assert pair["history_comparison"]["full_history_match"] is True
+    assert pair["unavailable_reason"] == reason
+    assert pair["paired_workload_wall_difference_ns"] is None
+    assert pair["paired_worker_cpu_difference_ns"] is None
+    assert rows == before  # A valid mismatch is not artifact corruption.

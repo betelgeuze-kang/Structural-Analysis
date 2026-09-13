@@ -1291,14 +1291,16 @@ def _comparisons(
                 comparisons.append(pair)
                 continue
             pair["comparison"] = comparison
-            if (
-                comparison["physical_si_match"] is True
-                and (
-                    not with_history
-                    or pair["history_comparison"]["full_history_match"] is True
-                )
-                and all(r["resource_eligible"] for r in (left, right))
+            if comparison["physical_si_match"] is not True:
+                pair["unavailable_reason"] = "terminal_si_mismatch"
+            elif (
+                with_history
+                and pair["history_comparison"]["full_history_match"] is not True
             ):
+                pair["unavailable_reason"] = "full_history_mismatch"
+            elif not all(r["resource_eligible"] for r in (left, right)):
+                pair["unavailable_reason"] = "worker_resources_unavailable"
+            else:
                 for target, key in (
                     ("paired_workload_wall_difference_ns", "workload_wall_ns"),
                     ("paired_worker_cpu_difference_ns", "worker_cpu_ns"),
