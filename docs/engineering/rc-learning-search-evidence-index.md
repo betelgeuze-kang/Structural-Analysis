@@ -165,3 +165,9 @@ and four small-fixture tests pass after replacing deep Buffer matching with
 exact byte comparison. All 159 successful responses match originals; no new
 solve or fit occurs. Initial unsealed test-output loss is explicitly recorded.
 Independent physics, learned benefit and full repeated user-cost evidence remain open.
+
+
+The [ETH reversed-axial source review](eth-reversed-axial-source-review-20260914.md)
+separates a CW steel material-test lead from QST exclusions, member bond/crack
+mechanisms and inferred stress labels. Raw-file access remains unresolved;
+no rows or independent physical-validation credit are admitted.
