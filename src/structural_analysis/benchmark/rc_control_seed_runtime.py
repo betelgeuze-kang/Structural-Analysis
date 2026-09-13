@@ -83,6 +83,39 @@ def secant_seed(context: RCControlSeedContext) -> tuple[float, ...] | None:
     return tuple(float(x) for x in result)
 
 
+def quadratic_seed(context: RCControlSeedContext) -> tuple[float, ...] | None:
+    """Optional causal benchmark seed; abstain at short history or reversals.
+
+    Only the last three accepted states enter this divided-difference proposal.
+    Returning None leaves fallback authority with the benchmark's explicit
+    proposal_abstention_strategy. This does not select a runtime policy.
+    """
+    if len(context.accepted_targets_m) < 3:
+        return None
+    a, b, c = context.accepted_targets_m[-3:]
+    target = context.target_m
+    h0, h1, advance = b - a, c - b, target - c
+    if (
+        not np.isfinite([a, b, c, target, h0, h1, advance]).all()
+        or h0 == 0
+        or h1 == 0
+        or advance == 0
+        or (h0 > 0) != (h1 > 0)
+        or (h1 > 0) != (advance > 0)
+    ):
+        return None
+    u, v, w = map(np.asarray, context.accepted_augmented_coordinates_m[-3:])
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        first = (v - u) / h0
+        last = (w - v) / h1
+        second = (last - first) / (c - a)
+        result = w + advance * last + advance * (target - b) * second
+    if not np.isfinite(result).all():
+        return None
+    result[context.control_free_index] = target
+    return tuple(float(x) for x in result)
+
+
 def _recover(compiled, step, request):
     """Replay the exact original Newton coordinates against the original parent."""
     parent = step.parent_checkpoint

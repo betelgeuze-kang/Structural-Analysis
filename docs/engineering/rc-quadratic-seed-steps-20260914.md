@@ -60,3 +60,28 @@ quadratic baseline over complete paths before any learned selection experiment.
 It does not justify adopting a runtime policy, selecting thresholds from these
 results, claiming learned gain, or closing independent project/geometry/history
 validation. The full roadmap remains open.
+
+## Reusable optional benchmark function
+
+`rc_control_seed_runtime.quadratic_seed` now exposes this proposal for explicit
+callback use. It does not change `secant_seed`, the default callback selection,
+solver tolerances or the caller's fallback strategy. Its sign comparisons avoid
+underflow when multiplying tiny increments; nonfinite input/overflow abstains.
+These additional numerical boundaries are not part of the archived runner's
+source. All 20 archived parent proposals nevertheless reproduce exactly after
+authenticating the source contexts and recorded events, with zero new solves.
+
+Fourteen focused tests pass in 1.67 s with `PYTHONPATH=src`: nonuniform positive
+and negative paths, polynomial reproduction, exact controlled coordinate,
+unchanged input context, insufficient/duplicate/reversed history, unused older
+states, nonfinite arithmetic and tiny monotone increments. Ruff and diff checks
+pass. An initial invocation without `PYTHONPATH=src` failed collection because
+the installed package did not contain this checkout's benchmark module; it
+executed no tests. The subsequent source-bound invocation is the passing result.
+
+A separate four-case full-path screening run was started from archived source
+`259697d6ee946057bec3e8bfbe35ac155929e205` before this helper was added. It uses
+the frozen original callback and is still being collected. Brief development
+and source-bound unit checks overlapped that run, so its single wall-time
+observations are not isolated repeated performance evidence. The later helper
+must not be represented as the executed source of that earlier experiment.
