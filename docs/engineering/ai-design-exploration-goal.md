@@ -121,6 +121,13 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-14)
 
+The [17010d495 development/full-shard capture](hosted-170-development-20260914.md)
+records 1217 development passes while all four full-suite executions remain
+skipped after external-evidence preparation failures. Main and Draft PR #440
+are unchanged in the current GitHub check. Topology remains live at capture;
+later local history/retry changes are not covered by this older hosted head.
+
+
 The [existing-checkpoint history follow-up](existing-checkpoint-history-20260914.md)
 now checks a real checkpoint A, injected replay failure, advanced checkpoint B
 and successful fourth attempt with identical request bytes. Sixteen final browser
