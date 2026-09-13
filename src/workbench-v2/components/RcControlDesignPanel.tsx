@@ -3,6 +3,7 @@ import { loadRcControlDesign, type RcDesignSession } from '../model/rcControlDes
 import type { JobAuthorizationProvider } from '../model/jobTransport'
 import type { RcObject } from '../model/rcJobSchema'
 const shown = (value: unknown) => typeof value === 'number' ? String(value) : 'UNAVAILABLE'
+const summaryNumber = (value: unknown) => typeof value === 'number' ? String(Number(value.toPrecision(6))) : 'UNAVAILABLE'
 const metrics = [
   ['maximum_translation_m', 'Path translation (m)'], ['maximum_absolute_fiber_strain', 'Path fiber strain'],
   ['maximum_steel_accumulated_plastic_strain', 'Steel accumulated plastic strain'], ['maximum_concrete_tensile_damage', 'Concrete tensile damage'],
@@ -51,6 +52,19 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
     <p>Source declaration <code>{report.source_revision}</code> · report <code data-rc-design-hash>{report.report_hash}</code></p>
     <p>{report.prices ? `Declared prices: ${report.prices.currency} · ${report.prices.as_of} · ${report.prices.source}` : 'Prices unavailable; no cost-based candidate can be selected.'}</p>
     <p data-rc-design-recommendation>Lowest declared estimate among verified candidates passing all screens: {report.selected_candidate_id ?? 'UNAVAILABLE'}. Current selection: {selected ?? 'none'}.</p>
+    {current?.selection_eligible === true && current.full_reference_verification_pass === true && report.prices ? <section aria-label="Selected RC candidate summary" data-rc-design-summary={current.candidate_id}>
+      <h3>Selected candidate: {current.candidate_id}</h3>
+      <dl className="wb2-result-metrics">
+        {[
+          ['concrete', 'Gross concrete', current.quantities?.totals.gross_concrete_volume_m3, 'm³'],
+          ['rebar', 'Longitudinal rebar', current.quantities?.totals.longitudinal_rebar_mass_kg, 'kg'],
+          ['estimate', 'Declared material estimate', current.material_estimate?.total, report.prices.currency],
+          ['estimate-change', 'Estimate change from baseline', typeof current.scoped_estimate_reduction === 'number' ? -current.scoped_estimate_reduction : null, report.prices.currency],
+          ['strain', 'Maximum path fiber strain', current.performance?.maximum_absolute_fiber_strain, ''],
+        ].map(([key, label, value, unit]) => <div className="wb2-result-metric" data-rc-design-summary-field={key} key={key} style={{ minWidth: 0 }}><dt>{label}</dt><dd title={shown(value)}>{summaryNumber(value)} {unit}</dd></div>)}
+      </dl>
+      <p>Summary values are rounded to six significant digits; the comparison and downloads retain original values. Positive estimate change means a higher declared material cost than baseline. Caller limits passed; this is not a verified quote or design approval.</p>
+    </section> : null}
     {session.displayReport ? <p>Arm elapsed {report.total_wall_ns / 1e9} s · process CPU {report.total_process_cpu_ns / 1e9} s. Includes the arm’s original analyses, fresh verification and artifact I/O. Historical training and shared ranking are outside this arm interval.</p>
       : <p>Whole-study elapsed {report.total_wall_ns / 1e9} s · process CPU {report.total_process_cpu_ns / 1e9} s. Includes preparation, original analysis, fresh verification and artifact I/O; excludes final report write. Unknown work remains unknown.</p>}
     <div className="wb2-table-scroll" role="region" aria-label="RC design alternatives" tabIndex={0}>

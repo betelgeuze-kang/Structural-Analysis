@@ -58,8 +58,22 @@ for (const width of [1440, 390]) {
       await expect(panel.locator('[data-rc-design-candidate]')).toHaveCount(3)
       await expect(panel.getByRole('button', { name: 'Select invalid', exact: true })).toBeDisabled()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'baseline')
+      await expect(panel.locator('[data-rc-design-summary]')).toHaveAttribute('data-rc-design-summary', 'baseline')
       await panel.getByRole('button', { name: 'Select wider', exact: true }).click()
       await expect(panel.locator('[data-rc-design-selected]')).toContainText('width 0.5 m')
+      const summary = panel.locator('[data-rc-design-summary="wider"]')
+      await expect(summary).toBeVisible()
+      for (const [key, value] of [['concrete', report.rows[1].quantities.totals.gross_concrete_volume_m3], ['rebar', report.rows[1].quantities.totals.longitudinal_rebar_mass_kg], ['estimate', report.rows[1].material_estimate.total], ['estimate-change', -report.rows[1].scoped_estimate_reduction], ['strain', report.rows[1].performance.maximum_absolute_fiber_strain]]) {
+        const card = summary.locator(`[data-rc-design-summary-field="${key}"]`)
+        await expect(card.locator('dd')).toHaveAttribute('title', String(value))
+        const expected: Record<string, string> = { concrete: '1.05', rebar: '85.0626', estimate: '190.063', 'estimate-change': '21', strain: '3.59559e-7' }
+        await expect(card.locator('dd')).toContainText(expected[String(key)])
+        const box = await card.boundingBox()
+        expect(box!.x).toBeGreaterThanOrEqual(0)
+        expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1)
+        expect(await card.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true)
+      }
+      await summary.screenshot({ path: `test-results/rc-selected-summary-${width}.png` })
       const details = panel.locator('[data-rc-design-details="wider"]')
       await expect(details.locator('[data-rc-design-metric="maximum_translation_m"] td').nth(1)).toHaveText(String(report.rows[1].performance.maximum_translation_m))
       await expect(details.locator('[data-rc-design-performance-delta="maximum_translation_m"]')).toHaveText(String(report.rows[1].performance.maximum_translation_m - report.rows[0].performance.maximum_translation_m))
@@ -125,6 +139,7 @@ test('RC study browser rejects changed downloads after an initially valid review
   await panel.getByRole('button', { name: 'Download baseline result', exact: true }).click()
   await expect(page.locator('[data-rc-design="invalid"]')).toBeVisible()
   await expect(page.locator('[data-rc-design-selected]')).toHaveCount(0)
+  await expect(page.locator('[data-rc-design-summary]')).toHaveCount(0)
 })
 test('RC study browser validates the origin before invoking the credential callback', async ({ page }) => {
   await page.addInitScript(() => {
