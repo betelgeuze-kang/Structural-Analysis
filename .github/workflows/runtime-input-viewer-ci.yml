@@ -192,12 +192,24 @@ jobs:
         run: npm run build
 
       - name: Workbench v2 guarded E2E
+        id: workbench_e2e
         run: |
           set +e
-          npm run verify:workbench-v2-e2e > workbench-v2-e2e.log 2>&1
+          npm run verify:workbench-v2-e2e -- --trace retain-on-failure > workbench-v2-e2e.log 2>&1
           code=$?
           tail -n 200 workbench-v2-e2e.log
           exit "$code"
+
+      - name: Preserve failed Workbench browser diagnostics
+        if: failure() && steps.workbench_e2e.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: workbench-v2-failed-browser-${{ github.run_id }}
+          path: |
+            test-results/**/trace.zip
+            test-results/**/error-context.md
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Workbench actual HTTP integration
         if: ${{ !cancelled() && steps.frontend_build.outcome == 'success' }}

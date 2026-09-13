@@ -508,3 +508,20 @@ def test_workbench_http_ci_installs_python_and_runs_real_transport_specs() -> No
         "tests/frontend/fixtures/**",
     ):
         assert workflow.count(f'      - "{source}"') == 2
+
+
+def test_runtime_browser_failure_diagnostics_precede_http_output_replacement() -> None:
+    job = _read("runtime-input-viewer-ci.yml").split("  frontend-contracts:\n", 1)[1]
+    browser = job.index("- name: Workbench v2 guarded E2E")
+    preserve = job.index("- name: Preserve failed Workbench browser diagnostics")
+    http = job.index("- name: Workbench actual HTTP integration")
+    assert browser < preserve < http
+    execution = job[browser:preserve]
+    assert "id: workbench_e2e" in execution
+    assert "-- --trace retain-on-failure" in execution
+    assert 'exit "$code"' in execution
+    upload = job[preserve:http]
+    assert "if: failure() && steps.workbench_e2e.outcome == 'failure'" in upload
+    assert "test-results/**/trace.zip" in upload
+    assert "test-results/**/error-context.md" in upload
+    assert "retention-days: 7" in upload
