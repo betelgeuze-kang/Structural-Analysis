@@ -1,5 +1,9 @@
 # RC learning and candidate-search evidence index
 
+The [completed cccee development contracts](hosted-cccee-development-20260914.md)
+record 1199 passes in the selected lane. Full shards remain skipped after
+preparation failure; later local changes are not covered by that hosted source.
+
 The [completed cccee runtime/browser lanes](hosted-cccee-runtime-20260914.md)
 record 96 Python, 706 frontend and 26 actual HTTP checks passing, separately
 from failed full-shard preparation and still-live development/topology lanes.
