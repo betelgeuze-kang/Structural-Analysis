@@ -121,3 +121,9 @@ between the experimental table and later model discussion. Axial loading,
 anchorage deformation and buckling/crushing prevent automatic admission as a
 current flexural benchmark. Original control ZIPs and numeric histories remain
 unacquired; the dataset license is not assigned to the separate thesis.
+
+
+The [refined-column metadata observation](refined-column-metadata-20260914.md)
+records a now-visible author-linked Figshare landing page and its CC BY 4.0
+declaration. Files, original specimen correspondence and training admission
+remain unverified; a curated ACI copy is not an independent experiment.
