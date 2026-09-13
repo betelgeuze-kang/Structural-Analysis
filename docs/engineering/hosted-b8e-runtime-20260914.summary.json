@@ -1,0 +1,32 @@
+{
+  "source_revision": "b8e7c54663b6d1f45477f1d99ce623ba596601b3",
+  "run_id": 34776135766,
+  "jobs": [
+    {
+      "id": 103774474147,
+      "name": "python-contracts",
+      "conclusion": "success",
+      "passed": 96,
+      "seconds": 11.35
+    },
+    {
+      "id": 103774474304,
+      "name": "frontend-contracts",
+      "conclusion": "success",
+      "guarded_e2e_passed": 706,
+      "actual_http_passed": 36,
+      "guarded_e2e_display_minutes": 12.4,
+      "actual_http_display_minutes": 4.2
+    }
+  ],
+  "skipped_steps": 0,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-b8e-runtime-vw9rh7pf",
+    "payload_files": 4,
+    "payload_bytes": 181782,
+    "inventory_sha256": "c36955650c66c332a6c2d4575ef2dcf8a0958f3ad79c1eaabdefbabc0e9f4c25"
+  },
+  "full_repository_suite_passed": false,
+  "independent_physical_validation": false,
+  "learned_net_benefit_proved": false
+}
