@@ -692,3 +692,30 @@ test('Workbench provider rejects duplicate artifact keys before typed projection
     expect(loaded.errors).toContain('native Frame3D ResultIR contains a duplicate JSON key')
   })
 })
+
+
+test('strict native parser preserves decoded keys and string values', () => {
+  const strings = ['', 'plain', 'quote"slash\\', '\n\r\t', 'é한😀', '\ud800', '__proto__', 'constructor']
+  for (const key of strings) for (const value of strings) {
+    const raw = `{${JSON.stringify(key)}:${JSON.stringify(value)},"nested":[${JSON.stringify(value)}]}`
+    expect(parseNativeJsonStrict(raw)).toStrictEqual(JSON.parse(raw))
+  }
+  for (const raw of [String.raw`{"a":"\u0061\n\/\\\""}`, String.raw`{"\ud83d\ude00":"\ud800"}`]) {
+    expect(parseNativeJsonStrict(raw)).toStrictEqual(JSON.parse(raw))
+  }
+  for (const raw of [String.raw`{"a":1,"\u0061":2}`, String.raw`{"\u0061":1,"a":2}`, String.raw`{"é":1,"\u00e9":2}`]) {
+    expect(() => parseNativeJsonStrict(raw)).toThrow(/duplicate/)
+  }
+})
+
+test('strict native parser rejects malformed keys and value strings', () => {
+  for (let code = 0; code < 32; code++) {
+    const control = String.fromCharCode(code)
+    expect(() => parseNativeJsonStrict(`{"a":"${control}"}`)).toThrow()
+    expect(() => parseNativeJsonStrict(`{"${control}":0}`)).toThrow()
+  }
+  for (const token of [String.raw`"\q"`, String.raw`"\u123"`, String.raw`"\u12xz"`, String.raw`"unterminated`]) {
+    expect(() => parseNativeJsonStrict(`{"a":${token}}`)).toThrow()
+    expect(() => parseNativeJsonStrict(`{${token}:0}`)).toThrow()
+  }
+})

@@ -233,3 +233,10 @@ The [58f6f2eb7 terminal topology receipt](hosted-58f-topology-20260914.json)
 confirms 413 focused and 984 regression passes plus named branch checks from
 original logs. All workflows for that source head are now terminal. Full Python
 repository tests still lack execution after failed external-evidence preparation.
+
+
+The [strict JSON string profile](rc-strict-string-profile-20260914.md) identifies
+redundant individual string decoding and removes it while retaining strict key/
+value validation. Build and 112 contracts pass; actual 525 MB desktop observations
+validate 79 byte-exact responses per version. Single instrumented 16.49/15.36s
+panel times are not repeated latency or solver-speedup proof.
