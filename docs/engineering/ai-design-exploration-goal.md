@@ -121,6 +121,14 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-14)
 
+The [repeated consumer-cost comparison](rc-strict-string-repeated-20260914.md)
+now separately builds baseline/changed frontends and verifies twelve actual HTTP
+runs on the same 525 MB bundle. Desktop/mobile-width median paired verified-panel
+ratios are 0.876101/0.939601, with all 948 responses matching originals. This
+narrows M5's local consumer-cost gap; independent datasets, actual mobile hardware,
+complete human task costs and external acceptance remain open.
+
+
 The [gated learned vector execution](rc-gated-vector-steps-20260914.md) now
 connects four new case-excluded correction fits to the frozen work classifier.
 Twenty same-parent comparisons pass all sixty response checks, but gated

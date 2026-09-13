@@ -240,3 +240,10 @@ redundant individual string decoding and removes it while retaining strict key/
 value validation. Build and 112 contracts pass; actual 525 MB desktop observations
 validate 79 byte-exact responses per version. Single instrumented 16.49/15.36s
 panel times are not repeated latency or solver-speedup proof.
+
+
+The [repeated full-data parser comparison](rc-strict-string-repeated-20260914.md)
+builds both revisions separately and passes twelve actual desktop/mobile-width
+HTTP observations with 948 byte-exact responses. Median paired verified-panel
+ratios are 0.876101 and 0.939601. This is one local result bundle, not physical
+mobile hardware, broader data coverage or nonlinear/learned speedup evidence.

@@ -51,11 +51,14 @@ def main():
     directories.add_argument("--cohort-directory", type=Path)
     directories.add_argument("--study-directory", type=Path)
     parser.add_argument("--expected-report-hash")
+    parser.add_argument("--frontend-directory", type=Path)
     args = parser.parse_args()
     if (args.cohort_directory or args.study_directory) and not args.expected_report_hash:
         parser.error("original artifact directory requires an explicit report hash")
     root = Path(__file__).resolve().parents[2]
-    dist = root / "dist"
+    dist = (args.frontend_directory or root / "dist").resolve()
+    if not (dist / "index.html").is_file():
+        parser.error("frontend directory requires a built index.html")
     before = time.perf_counter_ns()
     cpu = time.process_time_ns()
     snapshot_root = root / "tests/frontend/fixtures" / args.fixture
