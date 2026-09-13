@@ -1,0 +1,70 @@
+{
+  "repository": "bma114/corroded-RC-beam-moment-capacity",
+  "head": "62b90f61eabedb590d04d696bdade76efb4fcdc4",
+  "license_metadata": null,
+  "root_files": [
+    "Data.csv",
+    "Functions.py",
+    "README.md",
+    "run.py"
+  ],
+  "data_sha256": "2ee0bbe42faefdc7f6cafc05f8d9ef40d6bd5bfc25604f90e56ba4daa9b1758c",
+  "data_bytes": 123992,
+  "row_count_excluding_header": 725,
+  "header": [
+    "Cross_section",
+    "Test_Type",
+    "Sustained Loading",
+    "W (mm)",
+    "D (mm)",
+    "L (mm)",
+    "Side Cover (mm)",
+    "Bottom Cover (mm)",
+    "Top Cover (mm)",
+    "Reinforcement_Design",
+    "Tension Ratio (%)",
+    "Comp Ratio (%)",
+    "Longitudinal_Type",
+    "End_Anchorage",
+    "fy (MPa)",
+    "fsu (MPa)",
+    "Stirrup_Type",
+    "Volumetric Ratio",
+    "Cement_Type",
+    "W/C Ratio",
+    "fc (MPa)",
+    "Corrosion_Method",
+    "Cathode_Type",
+    "Lc (mm)",
+    "Icorr",
+    "Duration (days)",
+    "Solution Concentration",
+    "Immersion Depth (mm)",
+    "Wet_Dry_Ratio",
+    "Mass Loss (%)",
+    "Sample Length (mm)",
+    "Shear Span (mm)",
+    "M_max_exp",
+    "ln(M_max_exp)"
+  ],
+  "column_count_distribution": {
+    "34": 725
+  },
+  "training_admitted_rows": 0,
+  "external_scripts_executed": false,
+  "new_fits": 0,
+  "new_solves": 0,
+  "zero_mass_loss_rows": 149,
+  "mass_loss_range": [
+    0.0,
+    59.04
+  ],
+  "experiment_identifier_column_present": false,
+  "full_response_history_columns_present": false,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-public-beam-source-exk3sc4y",
+    "inventory_sha256": "ed68ad7c74094b50c57ea0688d7b9afe9e3ffe37bfe7ede49ae385e0c8dade41",
+    "files": 7,
+    "bytes": 313656
+  }
+}

@@ -221,3 +221,9 @@ verify 1,176 development, 96 Runtime Python, 704 guarded frontend and 24 actual
 HTTP test passes from original source-bound logs. Full Python shards still skip
 execution after external-evidence preparation fails; later local commits are not
 covered by these hosted results.
+
+
+The [public flexural-beam source inspection](public-flexural-beam-source-20260914.md)
+acquires an author's pinned 725-row CSV and verifies original bytes. It lacks
+campaign identifiers and full response histories; file-use permission remains
+unconfirmed. Zero rows are admitted and no source code or new fit is executed.
