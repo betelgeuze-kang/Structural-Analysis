@@ -32,3 +32,7 @@ work must stay unknown, not zero. Retry/cancellation/lease expiry must not attac
 another attempt's diagnostic. Those persistence, authorization and stale-attempt
 tests are prerequisites to claiming detailed failure-cost visibility in Workbench.
 The current change closes only the missing service-failure display.
+
+The later [durable diagnostic integration](durable-failure-diagnostics-20260913.md)
+implements the local worker attachment, atomic storage and authorized original
+retrieval. The browser projection of those detailed diagnostics remains open.

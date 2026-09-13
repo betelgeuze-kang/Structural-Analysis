@@ -26,7 +26,7 @@ from structural_analysis.execution.job_service import (
 
 JOB_HTTP_API_PROFILE = "structural-analysis-durable-job-http-api.v1"
 _JOB_ROUTE = re.compile(
-    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>request|checkpoint|result|evidence|resume|cancel|rc-invocations)(?:/(?P<ordinal>[1-9][0-9]{0,3}))?)?$"
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>request|checkpoint|result|evidence|resume|cancel|rc-invocations|failure-diagnostics)(?:/(?P<ordinal>[1-9][0-9]{0,3}))?)?$"
 )
 _MAX_HTTP_BODY = 192 * 1024 * 1024
 _MAX_SUBMIT_BODY = 16 * 1024 * 1024
@@ -152,8 +152,26 @@ class DurableJobHttpApi:
         ordinal: int | None = None,
     ) -> JobHttpResponse:
         tenant_id, token = _tenant_credentials(headers)
-        if ordinal is not None and operation != "rc-invocations":
+        if ordinal is not None and operation not in {
+            "rc-invocations",
+            "failure-diagnostics",
+        }:
             _api_fail("route_not_found", 404, "Route does not exist.")
+        if operation == "failure-diagnostics" and method == "GET":
+            if body or ordinal is None:
+                _api_fail(
+                    "diagnostic_request_invalid", 400, "Specify an attempt and no body."
+                )
+            return JobHttpResponse(
+                200,
+                _headers("application/json"),
+                self.service.read_failure_diagnostic(
+                    job_id,
+                    attempt=ordinal,
+                    tenant_id=tenant_id,
+                    authorization_token=token,
+                ),
+            )
         if operation == "rc-invocations" and method == "GET":
             if body:
                 _api_fail(
@@ -508,7 +526,11 @@ def _service_status(code: str) -> int:
         return 401
     if code == "worker_tenant_forbidden":
         return 403
-    if code in {"job_not_found", "rc_invocation_not_recorded"}:
+    if code in {
+        "job_not_found",
+        "rc_invocation_not_recorded",
+        "failure_diagnostic_not_recorded",
+    }:
         return 404
     if code in {
         "idempotency_conflict",

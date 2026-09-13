@@ -105,7 +105,7 @@ class JobServiceError(ValueError):
 
 @dataclass(frozen=True)
 class ArtifactReference:
-    role: Literal["request", "checkpoint", "result", "evidence"]
+    role: Literal["request", "checkpoint", "result", "evidence", "diagnostic"]
     content_hash: str
     byte_length: int
     media_type: str
@@ -1457,6 +1457,7 @@ class DurableJobService:
         lease_token: str,
         error_code: str,
         retriable: bool = False,
+        nonlinear_failure_result_bytes: bytes | None = None,
     ) -> JobView:
         self._authorize_worker(worker_id, authorization_token)
         if type(error_code) is not str or _ERROR_CODE.fullmatch(error_code) is None:
@@ -1472,6 +1473,47 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
+            diagnostic_reference = None
+            if nonlinear_failure_result_bytes is not None:
+                from structural_analysis.execution.nonlinear_failure_diagnostic import (
+                    MAX_DIAGNOSTIC_BYTES,
+                    build_nonlinear_job_failure_diagnostic,
+                )
+
+                diagnostic = build_nonlinear_job_failure_diagnostic(
+                    nonlinear_failure_result_bytes,
+                    job_id=job_id,
+                    request_bytes=self._read_blob(
+                        str(row["request_hash"]),
+                        int(row["request_size"]),
+                        maximum_bytes=_MAX_REQUEST_BYTES,
+                    ),
+                    attempt=int(row["attempt"]),
+                    checkpoint_hash=row["checkpoint_hash"],
+                )
+                ref = self._put_blob(
+                    diagnostic,
+                    role="diagnostic",
+                    media_type="application/json",
+                    maximum_bytes=MAX_DIAGNOSTIC_BYTES,
+                )
+                diagnostic_reference = {
+                    "attempt": int(row["attempt"]),
+                    "content_hash": ref.content_hash,
+                    "byte_length": ref.byte_length,
+                    "checkpoint_hash": row["checkpoint_hash"],
+                }
+                connection.execute(
+                    "INSERT INTO job_failure_diagnostics VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        job_id,
+                        int(row["attempt"]),
+                        ref.content_hash,
+                        ref.byte_length,
+                        row["checkpoint_hash"],
+                        int(row["revision"]) + 1,
+                    ),
+                )
             next_status: JobStatus = (
                 "checkpointed"
                 if retriable and row["checkpoint_hash"] is not None
@@ -1489,10 +1531,84 @@ class DurableJobService:
                     "worker_id": worker_id,
                     "error_code": error_code,
                     "retriable": retriable,
+                    **(
+                        {"failure_diagnostic": diagnostic_reference}
+                        if diagnostic_reference is not None
+                        else {}
+                    ),
                 },
                 updates={"error_code": error_code, **_clear_lease()},
             )
         return self._view(row)
+
+    def read_failure_diagnostic(
+        self,
+        job_id: str,
+        *,
+        attempt: int,
+        tenant_id: str,
+        authorization_token: str,
+    ) -> bytes:
+        """Read one immutable historical attempt; never a successful result slot."""
+        self._authorize_tenant(tenant_id, authorization_token)
+        if type(attempt) is not int or attempt < 1:
+            _fail(
+                "diagnostic_attempt_invalid",
+                "/attempt",
+                "Use a positive exact attempt.",
+            )
+        self.validate_integrity(
+            job_id, tenant_id=tenant_id, authorization_token=authorization_token
+        )
+        with self._connect() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            record = connection.execute(
+                "SELECT * FROM job_failure_diagnostics WHERE job_id = ? AND attempt = ?",
+                (job_id, attempt),
+            ).fetchone()
+        if record is None:
+            _fail(
+                "failure_diagnostic_not_recorded",
+                "/diagnostic",
+                "This attempt has no recorded diagnostic.",
+            )
+        return self._read_failure_record(row, record)
+
+    def _read_failure_record(self, row: sqlite3.Row, record: sqlite3.Row) -> bytes:
+        from structural_analysis.execution.nonlinear_failure_diagnostic import (
+            MAX_DIAGNOSTIC_BYTES,
+            build_nonlinear_job_failure_diagnostic,
+        )
+
+        raw = self._read_blob(
+            str(record["content_hash"]),
+            int(record["byte_length"]),
+            maximum_bytes=MAX_DIAGNOSTIC_BYTES,
+        )
+        try:
+            envelope = _strict_json_object(raw, "/diagnostic")
+            source = base64.b64decode(envelope["result_bytes_base64"], validate=True)
+            rebuilt = build_nonlinear_job_failure_diagnostic(
+                source,
+                job_id=str(row["job_id"]),
+                request_bytes=self._read_blob(
+                    str(row["request_hash"]),
+                    int(row["request_size"]),
+                    maximum_bytes=_MAX_REQUEST_BYTES,
+                ),
+                attempt=int(record["attempt"]),
+                checkpoint_hash=record["checkpoint_hash"],
+            )
+            if raw != rebuilt:
+                raise ValueError("diagnostic differs from immutable request or attempt")
+        except (KeyError, TypeError, ValueError, binascii.Error) as exc:
+            raise JobServiceError(
+                "failure_diagnostic_integrity_failed",
+                "/diagnostic",
+                "Diagnostic identity or request binding changed.",
+            ) from exc
+        return raw
 
     def resume_failed_job(
         self,
@@ -1680,6 +1796,51 @@ class DurableJobService:
                 if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
                 else []
             )
+            failure_records = connection.execute(
+                "SELECT * FROM job_failure_diagnostics WHERE job_id = ? ORDER BY attempt",
+                (job_id,),
+            ).fetchall()
+            diagnostic_events = [
+                event
+                for event in events
+                if "failure_diagnostic"
+                in _strict_json_object(str(event["payload_json"]).encode(), "/event")
+            ]
+            if len(diagnostic_events) != len(failure_records):
+                _fail(
+                    "failure_diagnostic_integrity_failed",
+                    "/diagnostic",
+                    "A diagnostic transition or stored record is missing.",
+                )
+            for record in failure_records:
+                event = next(
+                    (
+                        event
+                        for event in events
+                        if event["revision"] == record["event_revision"]
+                    ),
+                    None,
+                )
+                expected = {
+                    "attempt": record["attempt"],
+                    "content_hash": record["content_hash"],
+                    "byte_length": record["byte_length"],
+                    "checkpoint_hash": record["checkpoint_hash"],
+                }
+                if (
+                    event is None
+                    or event["event_type"] not in {"failed", "attempt_failed_requeued"}
+                    or _strict_json_object(
+                        str(event["payload_json"]).encode(), "/event"
+                    ).get("failure_diagnostic")
+                    != expected
+                ):
+                    _fail(
+                        "failure_diagnostic_integrity_failed",
+                        "/diagnostic",
+                        "Diagnostic differs from its failed transition.",
+                    )
+                self._read_failure_record(row, record)
         refs = self._row_references(row)
         for ref in refs.values():
             if ref is not None:
@@ -1821,6 +1982,17 @@ class DurableJobService:
                     metadata_json TEXT NOT NULL,
                     reservation_event_hash TEXT NOT NULL,
                     PRIMARY KEY (job_id, ordinal)
+                );
+                CREATE TABLE IF NOT EXISTS job_failure_diagnostics (
+                    job_id TEXT NOT NULL REFERENCES jobs(job_id) ON DELETE RESTRICT,
+                    attempt INTEGER NOT NULL CHECK (attempt > 0),
+                    content_hash TEXT NOT NULL,
+                    byte_length INTEGER NOT NULL,
+                    checkpoint_hash TEXT,
+                    event_revision INTEGER NOT NULL,
+                    PRIMARY KEY (job_id, attempt),
+                    FOREIGN KEY (job_id, event_revision)
+                        REFERENCES job_events(job_id, revision) DEFERRABLE INITIALLY DEFERRED
                 );
                 CREATE TABLE IF NOT EXISTS job_execution_budgets (
                     job_id TEXT PRIMARY KEY REFERENCES jobs(job_id) ON DELETE RESTRICT,
@@ -2134,7 +2306,7 @@ class DurableJobService:
         self,
         payload: bytes,
         *,
-        role: Literal["request", "checkpoint", "result", "evidence"],
+        role: Literal["request", "checkpoint", "result", "evidence", "diagnostic"],
         media_type: str,
         maximum_bytes: int,
     ) -> ArtifactReference:

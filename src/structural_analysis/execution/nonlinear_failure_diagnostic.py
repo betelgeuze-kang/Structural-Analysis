@@ -35,7 +35,7 @@ class NonlinearFailureBinding:
     job_id: str
     request_hash: str
     attempt: int
-    source_revision: str
+    source_revision: str | None
     input_checksum: str
     configuration_hash: str
 
@@ -46,8 +46,9 @@ class NonlinearFailureBinding:
             raise ValueError("invalid diagnostic job binding")
         if type(self.attempt) is not int or self.attempt < 1:
             raise ValueError("invalid diagnostic attempt binding")
-        if type(self.source_revision) is not str or not re.fullmatch(
-            r"[0-9a-f]{40}", self.source_revision
+        if self.source_revision is not None and (
+            type(self.source_revision) is not str
+            or not re.fullmatch(r"[0-9a-f]{40}", self.source_revision)
         ):
             raise ValueError("invalid diagnostic source binding")
         for value in (self.request_hash, self.input_checksum, self.configuration_hash):
@@ -247,3 +248,75 @@ def validate_nonlinear_failure_diagnostic(
     if type(payload["result_byte_length"]) is not int or payload != expected:
         raise ValueError("diagnostic source identity or authority mismatch")
     return raw
+
+
+def build_nonlinear_job_failure_diagnostic(
+    result_bytes: bytes,
+    *,
+    job_id: str,
+    request_bytes: bytes,
+    attempt: int,
+    checkpoint_hash: str | None,
+) -> bytes:
+    """Derive the binding from the service's immutable v1 request and lease state.
+
+    Checks authored controls and model identity without executing a solver.
+    Additional core-generated configuration fields remain diagnostic observations.
+    """
+    from structural_analysis.api.nonlinear_frame import NonlinearFrameConfig
+    from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+    from structural_analysis.model_ir import parse_model_ir_v2
+
+    request = strict_json_object_bytes(request_bytes, maximum_bytes=16 * 1024 * 1024)
+    if request.get("schema_version") != "structural-analysis-job-request.v1":
+        raise ValueError("nonlinear diagnostic requires a v1 job request")
+    authored = request["config"]
+    if authored.get("control_mode") != "load_control":
+        raise ValueError("nonlinear diagnostic requires load control")
+    config = NonlinearFrameConfig(
+        **{key: value for key, value in authored.items() if key != "control_mode"}
+    )
+    source = strict_json_object_bytes(result_bytes, maximum_bytes=MAX_RESULT_BYTES)
+    expected = {
+        "profile": config.profile,
+        "load_steps": config.load_steps,
+        "target_load_factors": list(config.target_load_factors),
+        "scaled_residual_tolerance": config.residual_tolerance,
+        "solver_coordinate_increment_tolerance_m": config.increment_tolerance_m,
+        "maximum_iterations": config.maximum_iterations,
+        "matrix_backend": config.matrix_backend,
+        "restart_supplied": checkpoint_hash is not None,
+        "restart_checkpoint_artifact_hash": checkpoint_hash,
+    }
+    actual = source["configuration"]
+    if source.get("profile") != config.profile:
+        raise ValueError("diagnostic profile differs from immutable job request")
+    if canonical_hash({key: actual.get(key) for key in expected}) != canonical_hash(
+        expected
+    ):
+        raise ValueError("diagnostic configuration differs from immutable job request")
+    model = request["model"]
+    if model.get("schema_version") == "structural-analysis-model-ir.v2":
+        input_checksum = parse_model_ir_v2(model).content_hash
+    else:
+        input_checksum = load_neutral_json_bytes(
+            json.dumps(
+                model,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+                ensure_ascii=False,
+            ).encode(),
+            source_path=f"job://{job_id}/canonical-model.json",
+        ).input_checksum
+    return build_nonlinear_failure_diagnostic(
+        result_bytes,
+        binding=NonlinearFailureBinding(
+            job_id=job_id,
+            request_hash=_sha(request_bytes),
+            attempt=attempt,
+            source_revision=request.get("source_revision"),
+            input_checksum=input_checksum,
+            configuration_hash=canonical_hash(actual),
+        ),
+    )

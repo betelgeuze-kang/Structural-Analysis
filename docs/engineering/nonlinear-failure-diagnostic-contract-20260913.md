@@ -31,10 +31,10 @@ and existing public sparse integration module passed 54 tests in 28.01 seconds;
 Ruff and formatting checks passed. These are software-contract checks, not
 independent physical validation or proof of durable publication.
 
-The module is not connected to `fail_job`, HTTP artifact routes or Workbench.
-Remaining integration must atomically bind a diagnostic to its failed attempt
-under a valid lease, preserve previous-attempt records across retries, enforce
-tenant authorization, verify original bytes on retrieval, and validate the same
-diagnostic-only projection in the browser. Job view v1's prohibition on failed
-result/evidence publication remains unchanged. This is one prerequisite for
-failure-cost visibility, not completion of that workflow or the roadmap.
+The subsequent [durable diagnostic integration](durable-failure-diagnostics-20260913.md)
+connects the local nonlinear worker, atomic failed transition and tenant-authorized
+original-byte retrieval. That integration found no source-revision field in job
+request v1, so the binding now permits null for that explicitly unavailable value.
+Detailed Workbench projection remains open. Job view v1's prohibition on failed
+result/evidence publication remains unchanged. The transport and storage checks
+do not complete the failure-cost workflow or the broader roadmap.

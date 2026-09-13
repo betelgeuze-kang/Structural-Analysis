@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Durable nonlinear failure diagnostics, attempt isolation and original retrieval](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/durable-failure-diagnostics-20260913.md)
+
 - [Attempt-bound nonlinear failure diagnostic transport contract](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/nonlinear-failure-diagnostic-contract-20260913.md)
 
 - [Workbench service failure display and diagnostic publication boundary](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/workbench-failure-state-20260913.md)
