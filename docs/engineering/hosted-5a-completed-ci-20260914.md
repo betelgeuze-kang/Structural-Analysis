@@ -31,3 +31,16 @@ the SHA256/length inventory before sealing. The receipt retains exact GitHub
 job/run identifiers and original result lines. Test counts from different
 lanes are not presented as a disjoint total. No new numerical solve or fit
 was performed to capture these logs.
+
+## Terminal topology follow-up
+
+Job 103753935207 subsequently completed successfully. The separately sealed
+[topology receipt](hosted-5a-topology-20260914.json) binds its original run/job
+metadata and log to the same published head. The log records 413 focused tests
+in 1,012.80 s, branch selections of 22/86/9/28/16/13/65 tests, and 984 regression
+tests in 893.56 s. No job steps were skipped. These selections overlap and do
+not form a disjoint total or substitute for the skipped full repository suite.
+The five-file / 191,249-byte packet was reread against its hash/length inventory.
+An exact-head run listing then returned no unfinished workflows before the
+next development-branch publication. This terminal result belongs to 5a0def376,
+not to the later quadratic helper or strict-string optimization.
