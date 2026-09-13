@@ -200,3 +200,10 @@ The [training-only work gate](rc-work-gate-training-20260914.md) fits four fixed
 multi-iteration steps but misses 156; case accuracy ranges from 49% to 85%.
 No gate is activated and no net savings are claimed. Failed initial lineage
 checking and its exact semantic correction are preserved.
+
+
+The [gated vector correction execution](rc-gated-vector-steps-20260914.md)
+connects four new learned correction fits to the frozen work gate on twenty
+original secant parents. Nine proposals and eleven abstentions increase linear
+solves 78 to 84 and assemblies 132 to 140; 60 response comparisons pass. No
+policy adoption, net benefit or independent validation is claimed.
