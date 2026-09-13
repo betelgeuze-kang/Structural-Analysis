@@ -3,7 +3,7 @@ import { costOptimality } from '../../src/workbench-v2/model/rcControlSearchCost
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { validateRcControlSearch } from '../../src/workbench-v2/model/rcControlSearchSchema'
-import { fields } from '../../src/workbench-v2/model/rcJobSchema'
+import { fields, document, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
 const root = 'tests/frontend/fixtures/rc-control-search/'
 const read = async (path: string) => new Uint8Array(readFileSync(root + path))
 const original = readFileSync(root + 'result.json')
@@ -235,6 +235,10 @@ for (const mutation of ['strategy', 'schema', 'other_arm', 'oracle', 'training',
       changes.plan_hash = JSON.parse(new TextDecoder().decode(plan)).plan_hash
     }
     const report = rebind(new TextDecoder().decode(f.report), changes, 'report_hash')
+    for (const [raw, field] of [[plan, 'plan_hash'], [report, 'report_hash']] as const) {
+      const doc = document(raw)
+      await selfHash(doc.raw, doc.value, field)
+    }
     await expect(validateRcControlSearch(report, async p => p === 'plan.json' ? plan : f.read(p))).rejects.toThrow()
   })
 }

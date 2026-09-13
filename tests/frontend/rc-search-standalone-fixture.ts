@@ -6,7 +6,9 @@ export const standaloneRoot = 'tests/frontend/fixtures/rc-control-search-cost-no
 export function rebind(raw: string, changes: Record<string, unknown>, field: string): Uint8Array {
   const values = new Map([...fields(raw)].map(([k, v]) => [k, v.value]))
   values.delete(field)
-  for (const [k, v] of Object.entries(changes)) values.set(k, JSON.stringify(v))
+  // A full replacement object may still contain its previous self-hash.
+  // Exclude it from the new digest just as for fields preserved from raw.
+  for (const [k, v] of Object.entries(changes)) if (k !== field) values.set(k, JSON.stringify(v))
   const serialize = () => `{${[...values].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([k, v]) => `${JSON.stringify(k)}:${v}`).join(',')}}`
   values.set(field, JSON.stringify(`sha256:${createHash('sha256').update(serialize()).digest('hex')}`))
   return new TextEncoder().encode(serialize())

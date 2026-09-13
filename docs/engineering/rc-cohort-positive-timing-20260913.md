@@ -30,3 +30,19 @@ Those rejection tests still pass after reaching the actual content boundary.
 
 This closes a cost-accounting input gap, not learned net benefit, independent
 physical validation, whole-user-flow timing, full hosted CI or the broader roadmap.
+
+## Shared mutation helper follow-up
+
+Three additional controls supplied full replacement objects for a cohort manifest,
+a standalone plan and a standalone result. All three initially failed the actual
+Workbench self-hash validator. The shared `rebind` helper now excludes the target
+hash field from both preserved input fields and replacement fields before hashing.
+The old hash can no longer become part of the new digest when callers supply a
+whole object. Other replacement fields remain intact.
+
+Standalone search mutation tests now explicitly verify the replacement plan and
+result self-hashes before asking the search validator to reject changed strategy,
+schema, arm membership, oracle, training, quantities, cost, selection and work.
+The combined cohort/search contracts pass **71 tests in 6.6 s**, including the
+three previously failing full-object controls. TypeScript and diff checks pass.
+This strengthens negative-test evidence; it adds no new physical or speed result.

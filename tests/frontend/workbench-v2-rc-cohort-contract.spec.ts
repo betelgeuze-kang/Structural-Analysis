@@ -77,3 +77,15 @@ for (const mutation of ['bytes', 'short', 'duplicate', 'bool_exit', 'scope', 'ex
     await expect(validateRcStrategyCohort(raw, async path => path === 'process-observations.json' ? processRaw : processCohortBytes(path))).rejects.toThrow()
   })
 }
+
+for (const path of ['cohort.json', 'pairs/0/price_order/plan.json', 'pairs/0/learned_order/result.json']) {
+  test(`full-object mutation helper produces a valid replacement hash for ${path}`, async () => {
+    const raw = new TextDecoder().decode(cohortBytes(path))
+    const value = JSON.parse(raw), field = path.endsWith('plan.json') ? 'plan_hash' : 'report_hash'
+    const replacement = rebind(raw, { ...value, source_revision: 'b'.repeat(40) }, field)
+    const doc = document(replacement)
+    expect(doc.value.source_revision).toBe('b'.repeat(40))
+    expect(doc.value[field]).not.toBe(value[field])
+    await selfHash(doc.raw, doc.value, field)
+  })
+}
