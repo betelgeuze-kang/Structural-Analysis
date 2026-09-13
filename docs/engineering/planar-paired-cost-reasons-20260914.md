@@ -38,3 +38,13 @@ Inventory SHA-256: `e62e4e32bbfabf967f304d9e4806d7d670a03c4346c8d068adf0cdda5d71
 PR 439 and issue 438 distinguish the published source from these pending local
 changes. Active topology/runtime jobs were left running, and no new push was
 performed during this observation. Full roadmap acceptance remains incomplete.
+
+## Hosted workflow contract repair verified
+
+At published source `c1eaa5d81db6c4b092421bdff8e467044b896a65`,
+[workflow job 103797718205](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34784621162/job/103797718205)
+completed successfully. Its original log records **165 passed in 18.55 s**.
+This verifies the obsolete selection-count failure is repaired in the hosted
+workflow lane; it does not establish development-lane or full-suite success.
+Original log and source-bound summary: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-c1-workflow-pass-keva64h8`.
+Log SHA-256: `730b1a736895acc7cb83e77d50eb2298dddfe2c9ef6d05f6ac6cc87a8d5d846c`.
