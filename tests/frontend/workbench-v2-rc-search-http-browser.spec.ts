@@ -58,6 +58,21 @@ test.describe('RC search real HTTP', () => {
       await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Yes')
       await panel.getByRole('button', { name: 'Review Learned order', exact: true }).click()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'cheap')
+      const settings = panel.locator('[data-rc-design-settings]')
+      await settings.locator('summary').click()
+      const config = JSON.parse(readFileSync(fixture + 'learned_order/comparison.json', 'utf8')).control_request.solver_config
+      const newton = config.newton
+      const expectedSettings = {
+        residual: String(newton.residual_tolerance), increment: String(newton.increment_tolerance),
+        control: String(config.control_tolerance_m), iterations: String(newton.max_iterations),
+        'line-search': newton.line_search_alphas.map(String).join(', '), polishing: String(newton.terminal_polishing),
+        backend: newton.matrix_backend, 'load-scale': String(config.load_factor_coordinate_scale_m),
+      }
+      for (const [key, value] of Object.entries(expectedSettings)) {
+        const entry = settings.locator(`[data-rc-design-setting="${key}"] dd`)
+        await expect(entry).toHaveText(String(value))
+        expect(await entry.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true)
+      }
       for (const role of ['model', 'result', 'checkpoint', 'verification']) {
         const pending = page.waitForEvent('download')
         await panel.getByRole('button', { name: `Download cheap ${role}`, exact: true }).click()

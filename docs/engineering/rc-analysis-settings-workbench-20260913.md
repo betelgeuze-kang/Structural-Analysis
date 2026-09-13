@@ -39,3 +39,24 @@ Review logs, images, script and source patch are preserved at
 Prior source `8b8ef6a16` has hosted frontend/development/topology passes, separately
 retained on GitHub; those are not hosted validation of this new display change.
 Full Python preparation, independent physics and the broader roadmap remain open.
+
+## Actual HTTP settings follow-up
+
+The built Workbench now has a separate actual loopback HTTP regression of all
+eight settings at 1440 and 390 pixels. Browser responses are not intercepted.
+The existing immutable artifact WSGI application enforces synthetic tenant
+credentials, and successful responses are compared with original fixture bytes.
+All four tests pass in 25.3 seconds, including selection, original downloads,
+wrong-tenant/token rejection and method restrictions. The receipt records 159
+successful responses and six denied requests, with zero solver calls and fits.
+TypeScript and diff checks pass. This uses development fixtures and a local
+service, not the 242-target numerical packet or production identity/deployment.
+
+The first attempt had two test failures because the new assertion referenced
+`learned_order/result.json`; the real comparison file is `comparison.json`.
+The corrected test and both attempt logs are retained. Production code was not
+changed during this follow-up. The build succeeds with a bundle-size warning.
+
+Packet: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-settings-http-tp8ktvx1`. Its 7 files are hash-verified; adjacent inventory
+SHA-256: `8c3e718160d2ca2e85f935bd69cd4ceaf167313a4d7eb5f291969192a3b5598f`.
+This extends transport coverage without proving numerical or roadmap closure.
