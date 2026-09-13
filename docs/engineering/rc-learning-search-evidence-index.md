@@ -458,3 +458,10 @@ exactly reconstructs eight section states from original nodal observations.
 Both 13-row traces have identical branch/gate schedules; their first increments
 already differ despite equal saved initial displacement and residual arrays.
 Initial tangent-system identity and backward error remain to be checked.
+
+
+The [initial-system reconstruction](planar-initial-system-20260914.md)
+reproduces both saved first increments through the production solve paths.
+Four initial matrix entries differ; crossed solves also retain small differences.
+High-precision dense-system comparison is numerical evidence only, and the
+original terminal comparison remains failed without tolerance changes.
