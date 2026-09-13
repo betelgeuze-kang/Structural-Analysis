@@ -497,6 +497,8 @@ def test_workbench_http_ci_installs_python_and_runs_real_transport_specs() -> No
     ):
         assert f"tests/frontend/workbench-v2-{name}-browser.spec.ts" in step
     assert "node_modules/@playwright/test/cli.js test" in step
+    assert "!cancelled() && steps.frontend_build.outcome == 'success'" in step
+    assert "- name: Build frontend\n        id: frontend_build" in job
     assert "continue-on-error" not in job
     assert "path: test-results/" in job
     for source in (

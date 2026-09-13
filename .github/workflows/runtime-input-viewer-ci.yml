@@ -188,6 +188,7 @@ jobs:
           && node --check src/structure-viewer/viewer-story-analysis-panel.js
 
       - name: Build frontend
+        id: frontend_build
         run: npm run build
 
       - name: Workbench v2 guarded E2E
@@ -199,6 +200,7 @@ jobs:
           exit "$code"
 
       - name: Workbench actual HTTP integration
+        if: ${{ !cancelled() && steps.frontend_build.outcome == 'success' }}
         run: >-
           node --loader ./scripts/json-module-loader.mjs
           node_modules/@playwright/test/cli.js test
