@@ -6,6 +6,8 @@ measurement scope and outstanding gates. Older observations are not current-head
 qualification, independent physical validation or proof of learned net benefit.
 The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 
+- [Actual ACI archive acquisition, descriptor conflicts and PEER correspondence](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/aci-archive-table-intake-20260913.md)
+
 - [Measured campaign aliases and pre-solve cross-split rejection](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/measured-campaign-aliases-20260913.md)
 
 - [Public archive lineage, independent-case screening and drawing-data roles](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/public-source-lineage-review-20260913.md)

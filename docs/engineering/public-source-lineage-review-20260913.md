@@ -4,6 +4,9 @@ Review date: 2026-09-13; repository source
 `8e45e4648603e12e59c3836a5157ff9dee2956ea`.
 This is a primary-page discovery review, not a downloaded or admitted corpus.
 No source files, numerical labels, training splits or solver behavior changed.
+The subsequent [actual archive acquisition](aci-archive-table-intake-20260913.md)
+supersedes the ACI file-availability limitation below; this initial review and
+its zero-acquisition count retain their original scope.
 
 ## New archive lead and an explicit overlap
 

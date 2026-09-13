@@ -59,4 +59,7 @@ shard-0 log (job `103671705077`) stops in evidence preparation and names
 `external_code_to_code_product_replay_not_passed` and
 `external_code_to_code_technical_receipt_not_ready`. No full-shard numerical-test
 pass is inferred. The development-contract job was still running when inspected.
-These results precede the alias change; no external receipt or tolerance changed.
+That specific development job subsequently completed successfully at
+2026-09-13T04:39:17Z: **1,021 passed in 1,088.27 s**, from its original job log.
+Native PR Fast also succeeded at the same 8e45 source. These results precede the
+alias change; no external receipt or tolerance changed.
