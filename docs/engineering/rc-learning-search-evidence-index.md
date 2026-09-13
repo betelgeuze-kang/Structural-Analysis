@@ -122,3 +122,5 @@ The latest cost-cohort record keeps unmatched pairs and excluded costs visible.
 - [rc secant abstention 20260910](https://github.com/betelgeuze-kang/Structural-Analysis/blob/codex/ai-design-exploration-20260908/docs/engineering/rc-secant-abstention-20260910.md)
 
 - [Residual-directed scalar diagnosis](rc-residual-directed-20260913.md): 20 training parents, 40 assemblies, no new residual-gate pass; no policy or speed credit.
+
+- [Basic CI preparation diagnostics](ci-materialization-diagnostics-20260913.md): preserves failed receipt context without relaxing the external gate; 21 local workflow tests pass.

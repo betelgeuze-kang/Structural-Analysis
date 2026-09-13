@@ -16,24 +16,32 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_failed_materialization_upload_preserves_failure_and_limits_files() -> None:
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name"),
+    [("python-test-collection.yml", "full_shards"), ("ci.yml", "verify")],
+)
+def test_failed_materialization_upload_preserves_failure_and_limits_files(
+    workflow_name: str, job_name: str,
+) -> None:
     workflow = yaml.safe_load(
-        (ROOT / ".github/workflows/python-test-collection.yml").read_text()
+        (ROOT / ".github/workflows" / workflow_name).read_text()
     )
-    job = workflow["jobs"]["full_shards"]
+    job = workflow["jobs"][job_name]
     steps = {step["name"]: step for step in job["steps"]}
     materialize = steps["Materialize exact current-source test evidence"]
     assert materialize["id"] == "materialize"
     assert "--fail-blocked" in materialize["run"]
     assert not job.get("continue-on-error", False)
     assert all(not step.get("continue-on-error", False) for step in job["steps"])
-    assert "if" not in steps["Run materialized repository test suite shard"]
+    gate = "Run materialized repository test suite shard" if job_name == "full_shards" else "Build current-HEAD readiness snapshot"
+    assert "if" not in steps[gate]
     condition = "${{ failure() && steps.materialize.outcome == 'failure' }}"
     assert steps["Describe failed materialization diagnostics"]["if"] == condition
     upload = steps["Upload failed materialization diagnostics"]
     assert upload["if"] == condition
     assert upload["with"]["name"] == (
         "materialization-failure-shard-${{ matrix.shard }}-${{ github.sha }}"
+        if job_name == "full_shards" else "materialization-failure-verify-${{ github.sha }}"
     )
     assert upload["with"]["path"].splitlines() == [
         "materialization-failure-context.json",
@@ -46,13 +54,17 @@ def test_failed_materialization_upload_preserves_failure_and_limits_files() -> N
     assert upload["with"]["retention-days"] == 7
 
 
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name"),
+    [("python-test-collection.yml", "full_shards"), ("ci.yml", "verify")],
+)
 def test_failure_context_is_valid_json_without_generation_or_qualification_credit(
-    tmp_path: Path,
+    tmp_path: Path, workflow_name: str, job_name: str,
 ) -> None:
     workflow = yaml.safe_load(
-        (ROOT / ".github/workflows/python-test-collection.yml").read_text()
+        (ROOT / ".github/workflows" / workflow_name).read_text()
     )
-    step = next(step for step in workflow["jobs"]["full_shards"]["steps"]
+    step = next(step for step in workflow["jobs"][job_name]["steps"]
                 if step["name"] == "Describe failed materialization diagnostics")
     lines = step["run"].splitlines()
     assert lines[0] == "python - <<'PYTHON'" and lines[-1] == "PYTHON"
@@ -60,12 +72,13 @@ def test_failure_context_is_valid_json_without_generation_or_qualification_credi
         [sys.executable, "-c", "\n".join(lines[1:-1])],
         cwd=tmp_path,
         env={"GITHUB_SHA": "a" * 40, "GITHUB_RUN_ID": "123",
-             "GITHUB_RUN_ATTEMPT": "2", "GITHUB_JOB": "full_shards"},
+             "GITHUB_RUN_ATTEMPT": "2", "GITHUB_JOB": job_name},
         check=True,
         capture_output=True,
         text=True,
     )
     payload = json.loads((tmp_path / "materialization-failure-context.json").read_bytes())
+    assert payload["job"] == job_name
     assert payload["workflow_sha"] == "a" * 40
     assert payload["run_id"] == "123" and payload["run_attempt"] == "2"
     assert payload["diagnostic_only"] is True
