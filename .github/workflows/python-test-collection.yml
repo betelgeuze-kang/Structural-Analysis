@@ -118,6 +118,9 @@ jobs:
           tests/test_rc_seed_original_audit.py
           tests/test_pinned_opensees_runtime.py
           tests/test_local_source_reference_comparison.py
+          tests/test_nonlinear_failure_diagnostic.py
+          tests/test_durable_failure_diagnostics.py
+          tests/test_durable_job_service.py
 
       - name: Retain development contract results even on test failure
         if: ${{ always() }}

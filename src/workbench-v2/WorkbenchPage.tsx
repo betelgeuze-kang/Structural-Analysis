@@ -432,6 +432,7 @@ export function WorkbenchPage({
           frame3dResult={jobLoad.frame3dResult}
           frame3dArtifacts={jobLoad.frame3dArtifacts}
           rcReview={jobLoad.rcReview}
+          failureDiagnostic={jobLoad.failureDiagnostic}
         />
         {caseV2 ? (
           <RunMonitor

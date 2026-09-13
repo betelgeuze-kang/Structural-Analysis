@@ -52,7 +52,7 @@ export async function createJobReadTransport(
   signal?.throwIfAborted()
   return {
     async get(role, accept = 'application/json') {
-      if (role !== undefined && !/^(request|checkpoint|result|evidence|rc-invocations(?:\/[1-9][0-9]{0,3})?)$/.test(role)) {
+      if (role !== undefined && !/^(request|checkpoint|result|evidence|rc-invocations(?:\/[1-9][0-9]{0,3})?|failure-diagnostics\/[1-9][0-9]{0,3})$/.test(role)) {
         throw new JobArtifactError('job_artifact_role_invalid')
       }
       signal?.throwIfAborted()

@@ -60,8 +60,8 @@ external evidence preparation: the inspected shard retained `legal_approval=Fals
 these preceding-head CI results do not qualify this implementation. The full
 roadmap and independent verification requirements remain open.
 
-Remaining Workbench integration: fetch the explicit failed attempt, verify its
-original bytes and request/attempt binding in the browser, validate observed-path
-counts, and display partial work with unavailable numerical authority. The current
-panel displays the service failure code only. Detailed failure-cost visibility
-must not be claimed complete until that path is exercised end to end.
+The subsequent [Workbench diagnostic review](workbench-failure-diagnostic-review-20260913.md)
+connects the current failed attempt, checks original bytes and request/attempt
+bindings, validates observed counts and displays partial work without numerical
+authority. Its actual HTTP/browser checks cover original downloads and adverse
+inputs. This is not total execution-cost accounting or historical-attempt navigation.

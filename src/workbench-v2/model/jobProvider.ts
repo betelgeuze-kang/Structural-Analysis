@@ -2,6 +2,7 @@ import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
 import { validateFrame3DJobResult, type Frame3DJobReview } from './frame3dJobSchema'
 import { parseNativeJsonStrict } from './nativeFrameProvider'
 import { loadRcJobReview, type RcJobReview } from './rcJobReview'
+import { loadFailureDiagnostic, type FailureDiagnosticReview } from './failureDiagnostic'
 import {
   createJobReadTransport, JobArtifactError, readBoundedJobBytes,
   type JobAuthorizationProvider, type JobReadTransport,
@@ -23,6 +24,7 @@ export interface JobLoadResult {
   frame3dResult?: Frame3DJobReview
   frame3dArtifacts?: Frame3DJobArtifacts
   rcReview?: RcJobReview
+  failureDiagnostic?: FailureDiagnosticReview
 }
 
 export interface Frame3DJobArtifacts {
@@ -109,6 +111,11 @@ export async function loadWorkbenchJob(
       return { status: 'invalid', job: null, errors: validation.errors, artifactStatus: 'invalid' }
     }
     job = validation.value
+    if (job.status === 'failed' && job.attempt > 0) {
+      const failureDiagnostic = await loadFailureDiagnostic(job, transport)
+      if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+      return { status: 'ready', job, errors: [], artifactStatus: 'not_published', failureDiagnostic }
+    }
     if (job.status !== 'succeeded' || !job.result || !job.evidence) {
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
     }

@@ -35,4 +35,5 @@ The current change closes only the missing service-failure display.
 
 The later [durable diagnostic integration](durable-failure-diagnostics-20260913.md)
 implements the local worker attachment, atomic storage and authorized original
-retrieval. The browser projection of those detailed diagnostics remains open.
+retrieval. The [current-attempt diagnostic review](workbench-failure-diagnostic-review-20260913.md)
+subsequently connects bounded browser validation, display and original downloads.

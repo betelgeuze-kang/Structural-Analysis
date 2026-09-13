@@ -35,6 +35,7 @@ The subsequent [durable diagnostic integration](durable-failure-diagnostics-2026
 connects the local nonlinear worker, atomic failed transition and tenant-authorized
 original-byte retrieval. That integration found no source-revision field in job
 request v1, so the binding now permits null for that explicitly unavailable value.
-Detailed Workbench projection remains open. Job view v1's prohibition on failed
+The [bounded current-attempt Workbench review](workbench-failure-diagnostic-review-20260913.md)
+now consumes that route. Job view v1's prohibition on failed
 result/evidence publication remains unchanged. The transport and storage checks
 do not complete the failure-cost workflow or the broader roadmap.

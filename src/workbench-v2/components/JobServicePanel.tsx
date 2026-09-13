@@ -7,6 +7,8 @@ import { BooleanEvidenceValueText } from './EngineeringValueText'
 import { Frame3DJobResultPanel } from './Frame3DJobResultPanel'
 import { RcJobResultPanel } from './RcJobResultPanel'
 import type { RcJobReview } from '../model/rcJobReview'
+import type { FailureDiagnosticReview } from '../model/failureDiagnostic'
+import { FailureDiagnosticPanel } from './FailureDiagnosticPanel'
 
 interface JobServicePanelProps {
   loadStatus: JobLoadStatus
@@ -17,6 +19,7 @@ interface JobServicePanelProps {
   frame3dResult?: Frame3DJobReview
   frame3dArtifacts?: Frame3DJobArtifacts
   rcReview?: RcJobReview
+  failureDiagnostic?: FailureDiagnosticReview
 }
 
 function chip(job: WorkbenchJobView): ChipState {
@@ -38,6 +41,7 @@ export function JobServicePanel({
   frame3dResult,
   frame3dArtifacts,
   rcReview,
+  failureDiagnostic,
 }: JobServicePanelProps): ReactElement {
   if (loadStatus !== 'ready' || !job) {
     const label = loadStatus === 'loading' ? 'Loading durable job status…' : loadStatus === 'unconfigured'
@@ -92,19 +96,20 @@ export function JobServicePanel({
             : 'UNAVAILABLE'}
         </dd></> : null}
       </dl>
-      {job.error_code ? (
+      {job.error_code && !failureDiagnostic ? (
         <p className="wb2-muted" data-job-failure-scope>
           The service recorded this failure code. Saved progress does not include
           every attempted calculation; detailed solver failure history is not available in this view.
         </p>
       ) : null}
       <p className="wb2-muted" data-job-authority={job.result_authority}>
-        {verifiedRC ? 'Job state is orchestration evidence only. The RC review below inspects stored experimental solver artifacts.' : verified3D
+        {failureDiagnostic ? 'Job state and stored failure diagnostics do not grant numerical or engineering result authority.' : verifiedRC ? 'Job state is orchestration evidence only. The RC review below inspects stored experimental solver artifacts.' : verified3D
           ? 'Job state is orchestration evidence only. The bounded 3D review below uses separately validated candidate API artifacts.'
           : 'Job state is orchestration evidence only. This panel consumes only the verified embedded engineering ResultIR identity and authority axes; it never falls back to top-level result arrays.'}
       </p>
       {verified3D ? <Frame3DJobResultPanel key={`${job.job_id}:${frame3dResult.resultHash}`} jobId={job.job_id} review={frame3dResult} artifacts={frame3dArtifacts} /> : null}
       {verifiedRC ? <RcJobResultPanel key={`${job.job_id}:${rcReview.summary.resultHash}`} jobId={job.job_id} review={rcReview} /> : null}
+      {failureDiagnostic ? <FailureDiagnosticPanel review={failureDiagnostic} /> : null}
     </section>
   )
 }
