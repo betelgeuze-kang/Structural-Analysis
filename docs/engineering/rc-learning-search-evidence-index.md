@@ -255,3 +255,11 @@ builds both revisions separately and passes twelve actual desktop/mobile-width
 HTTP observations with 948 byte-exact responses. Median paired verified-panel
 ratios are 0.876101 and 0.939601. This is one local result bundle, not physical
 mobile hardware, broader data coverage or nonlinear/learned speedup evidence.
+
+
+The [full quadratic screening](rc-quadratic-full-20260914.md) completes 16
+paths / 3,872 core calls, with all 12 history comparisons and four exact
+reference repeats passing. Linear solves fall 3,681 to 3,635, but assembly
+work and time rise in two cases; no runtime or learned gain is established.
+These original requests have no constant-load preload. The separate audited
+packet is sealed; independent repeated performance and the full roadmap remain open.

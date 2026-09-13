@@ -2028,3 +2028,11 @@ proposals and four abstentions reduce aggregate linear solves 78 to 73, while
 one parent regresses and 17 proposal arms take longer. All 60 response checks
 and 20 exact reference repeats pass. A fixed full-path comparison is the next
 useful test; no policy is adopted and independent learning benefit remains open.
+
+
+The [full quadratic screening](rc-quadratic-full-20260914.md) completes 16
+paths / 3,872 core calls, with all 12 history comparisons and four exact
+reference repeats passing. Linear solves fall 3,681 to 3,635, but assembly
+work and time rise in two cases; no runtime or learned gain is established.
+These original requests have no constant-load preload. The separate audited
+packet is sealed; independent repeated performance and the full roadmap remain open.
