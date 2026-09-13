@@ -93,6 +93,8 @@ jobs:
           tests/test_rc_control_iteration_cost.py
           tests/test_newton_assembly_work.py
           tests/test_rc_control_assembly_work.py
+          tests/test_rc_control_assembly_phases.py
+          tests/test_rc_quadratic_seed.py
           tests/test_rc_native_assembly_reuse.py
           tests/test_rc_line_search_reuse_experiment.py
           tests/test_rc_control_search_accounting.py

@@ -79,3 +79,12 @@ reuse separation. Ruff and diff checks pass. The new summarizer also reads all
 invocation/assembly totals, with zero new solves or fits in that separate check.
 These local checks do not qualify the complete repository suite or external
 physical accuracy.
+
+The development-contract CI selection now includes both
+`test_rc_control_assembly_phases.py` and `test_rc_quadratic_seed.py`, increasing
+its explicit file set from 43 to 45. The workflow contract requires both files
+and still preserves the independent diagnostic lane and required full-suite
+gate. Twenty-one workflow/pinning tests pass in 0.75 s. The initial check caught
+the stale 43-file expected count; updating it to the intentional 45-file set
+resolved that assertion. Hosted execution of this registration is still pending;
+earlier CI runs cannot prove it ran.
