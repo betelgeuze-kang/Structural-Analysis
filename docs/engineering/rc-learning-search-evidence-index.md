@@ -20,6 +20,10 @@ show local residual improvement but no complete-path recovery. The later
 [32-layer displacement-control study](planar-refined-displacement-20260914.md)
 keeps the distinct control path, proportional loads and attained load factors
 explicit; it is not a same-path acceleration or an independent experiment.
+Its [full 32-to-64 comparison](planar-displacement-refinement-20260914.md)
+finds a 1.512258% steel internal-state difference at 24 mm despite much smaller
+endpoint differences. The complete history therefore remains outside the
+predeclared numerical screen; no training-reference qualification follows.
 
 The older observations below retain their original source and measurement scope.
 
