@@ -121,6 +121,15 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-14)
 
+The [existing-checkpoint history follow-up](existing-checkpoint-history-20260914.md)
+now checks a real checkpoint A, injected replay failure, advanced checkpoint B
+and successful fourth attempt with identical request bytes. Sixteen final browser
+tests pass and unavailable observed work stays unavailable, not zero. This is
+local fault-injection coverage; hosted execution and independent acceptance remain
+open. Separately, [17010d495 runtime CI](hosted-170-runtime-20260914.md) passes
+96 Python, 706 frontend and 26 HTTP checks at its older published source.
+
+
 The [checkpoint-progress failure-history fix](checkpoint-failure-history-20260914.md)
 reproduces a real three-attempt service sequence: injected first failure, saved
 checkpoint, then unpatched success with identical request bytes. Authenticated

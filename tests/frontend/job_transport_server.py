@@ -45,7 +45,10 @@ def main(
     failure_history=False,
     failure_history_success=False,
     failure_history_checkpoint=False,
+    failure_history_existing_checkpoint=False,
 ):
+    if failure_history_existing_checkpoint:
+        failure_history_checkpoint = True
     if failure_history_checkpoint:
         nonlinear_failure = failure_history = failure_history_success = True
     assert not failure_history_success or (nonlinear_failure and failure_history)
@@ -147,6 +150,24 @@ def main(
                 worker_id="worker", authorization_token="synthetic-worker-not-launched"
             )
             assert actual_claim is not None and actual_claim.job.job_id == actual.job_id
+            if failure_history_existing_checkpoint:
+                original_request = actual_claim.request_bytes
+                saved = execute_nonlinear_frame_claim(
+                    service,
+                    actual_claim,
+                    worker_id="worker",
+                    authorization_token="synthetic-worker-not-launched",
+                    checkpoint_step_budget=1,
+                )
+                assert saved.status == "checkpointed" and saved.checkpoint is not None
+                actual_claim = service.claim_next(
+                    worker_id="worker",
+                    authorization_token="synthetic-worker-not-launched",
+                )
+                assert actual_claim is not None and actual_claim.job.attempt == 2
+                assert actual_claim.request_bytes == original_request
+                assert actual_claim.checkpoint_bytes is not None
+            diagnostic_attempt = actual_claim.job.attempt
             # Exercise the real worker's failure/diagnostic transition. Only the
             # first attempt has a controlled linear backend outage; the retry
             # uses the unchanged request and the unpatched numerical solver.
@@ -179,10 +200,13 @@ def main(
                 tenant_id="transport-test",
                 authorization_token="synthetic-memory-only-token",
             )
-            assert failed_job.status == "failed" and failed_job.attempt == 1
+            assert (
+                failed_job.status == "failed"
+                and failed_job.attempt == diagnostic_attempt
+            )
             diagnostic = service.read_failure_diagnostic(
                 actual.job_id,
-                attempt=1,
+                attempt=diagnostic_attempt,
                 tenant_id="transport-test",
                 authorization_token="synthetic-memory-only-token",
             )
@@ -196,6 +220,10 @@ def main(
                 envelope = json.loads(diagnostic)
                 source = json.loads(base64.b64decode(envelope["result_bytes_base64"]))
                 path = source["metrics"]["observed_load_path"]
+                if path is None:
+                    # A replay failure can have no returned path. Preserve that
+                    # diagnostic; these path-counter mutations do not apply.
+                    continue
                 if kind == "wrong_total":
                     path["convergence_history_row_count"] += 1
                 elif kind == "float_count":
@@ -221,12 +249,14 @@ def main(
                 tenant_id="transport-test",
                 authorization_token="synthetic-memory-only-token",
                 expected_request_hash=failed_job.request.content_hash,
-                expected_checkpoint_hash=None,
+                expected_checkpoint_hash=failed_job.checkpoint.content_hash
+                if failed_job.checkpoint
+                else None,
             )
             retry = service.claim_next(
                 worker_id="worker", authorization_token="synthetic-worker-not-launched"
             )
-            assert retry is not None and retry.job.attempt == 2
+            assert retry is not None and retry.job.attempt == diagnostic_attempt + 1
             assert retry.request_bytes == actual_claim.request_bytes
             try:
                 execute_nonlinear_frame_claim(
@@ -257,9 +287,13 @@ def main(
                     worker_id="worker",
                     authorization_token="synthetic-worker-not-launched",
                 )
-                assert continued is not None and continued.job.attempt == 3
+                assert (
+                    continued is not None
+                    and continued.job.attempt == diagnostic_attempt + 2
+                )
                 assert continued.request_bytes == actual_claim.request_bytes
                 assert continued.checkpoint_bytes is not None
+                assert continued.checkpoint_bytes != actual_claim.checkpoint_bytes
                 execute_nonlinear_frame_claim(
                     service,
                     continued,
@@ -277,7 +311,7 @@ def main(
             assert (
                 service.read_failure_diagnostic(
                     failed_job.job_id,
-                    attempt=1,
+                    attempt=diagnostic_attempt,
                     tenant_id="transport-test",
                     authorization_token="synthetic-memory-only-token",
                 )
@@ -342,4 +376,6 @@ if __name__ == "__main__":
             or "--failure-history-success" in sys.argv,
             failure_history_success="--failure-history-success" in sys.argv,
             failure_history_checkpoint="--failure-history-checkpoint" in sys.argv,
+            failure_history_existing_checkpoint="--failure-history-existing-checkpoint"
+            in sys.argv,
         )
