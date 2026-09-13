@@ -121,6 +121,14 @@ net benefit, hosted and independent acceptance remain open.
 
 ### Current evidence interpretation (2026-09-13)
 
+The [explicit line-search follow-up](rc-reinforcement-linesearch-20260913.md)
+preserves the original smaller-bar failure, then extends only the declared
+backtracking list. Its eight-target diagnostic and separate 242-target baseline/
+smaller-bars pair pass fresh verification at unchanged tolerances. Full-pair work
+is 968 attempted steps and 3,842 Newton/linear counts; diagnostic costs remain
+separate. This is a two-design request-level observation, not a change of solver
+defaults, a repaired original three-design result or a learned speedup.
+
 The [full cyclic reinforcement comparison](rc-reinforcement-full-path-20260913.md)
 at frozen `94302f49a` verifies baseline and fewer-bars designs across 242 targets
 and fresh full-path replay. A smaller-bar-area alternative blocks at its eighth
