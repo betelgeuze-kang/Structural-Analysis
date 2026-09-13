@@ -370,7 +370,7 @@ def test_actual_failed_preload_retains_both_worker_invocations_and_no_checkpoint
     ]
     assert [r["phase"] for r in records] == ["analysis", "verification"]
     for row in records:
-        assert row["unavailable_execution_work"]
+        assert row["unavailable_execution_work"] is False
         work = (
             row["api_result"]["metrics"]["control_work"]
             if row["phase"] == "analysis"
@@ -378,7 +378,9 @@ def test_actual_failed_preload_retains_both_worker_invocations_and_no_checkpoint
         )
         assert (
             work["attempted_step_count"] == 1
-            and work["unknown_solver_work_attempt_count"] == 1
+            and work["unknown_solver_work_attempt_count"] == 0
+            and work["known_linear_solve_count"] > 0
+            and work["known_newton_iteration_count"] > 0
         )
     failed = service.get_job(job.job_id, **TENANT)
     assert failed.status == "failed" and failed.checkpoint is None

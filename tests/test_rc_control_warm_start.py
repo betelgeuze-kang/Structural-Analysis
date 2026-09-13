@@ -1,6 +1,7 @@
 """Optional RC control seeds cannot acquire equilibrium or commit authority."""
 
 from dataclasses import replace
+import json
 
 import numpy as np
 import pytest
@@ -330,11 +331,17 @@ def test_actual_numerically_rejected_seed_records_fallback_cost(tmp_path, absten
     assert entries[0]["committed"] is False and entries[0]["rollback_exact"] is True
     assert entries[1]["seed_used"] is False
     assert all(i["work"]["core_calls"] == 1 for i in entries)
-    assert entries[0]["unknown_work"] is True
-    assert entries[0]["work"]["newton_iterations"] is None
-    assert entries[0]["work"]["linear_solves"] is None
+    assert entries[0]["unknown_work"] is False
+    failed_step = json.loads((tmp_path / "study/proposal/000-1-step.json").read_bytes())
+    failed_work = failed_step["trial_solution"]["metrics"]
+    assert entries[0]["work"]["newton_iterations"] == failed_work["iteration_count"] > 0
+    assert entries[0]["work"]["linear_solves"] == failed_work["linear_solve_count"] > 0
     assert entries[1]["unknown_work"] is False
-    assert report["all_execution_work_reported"] is False
+    assert (
+        sum(i["work"]["linear_solves"] for i in entries)
+        > entries[1]["work"]["linear_solves"]
+    )
+    assert report["all_execution_work_reported"] is True
     assert report["reference_repeat_exact"] is True
 
 
