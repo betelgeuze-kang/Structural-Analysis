@@ -44,3 +44,15 @@ packet and source identities. The four final review intervals total 5.263390144 
 excluding server startup, browser launch, screenshots and teardown. This is not a
 paired performance experiment or a full user-flow speedup. Independent physics,
 learned net benefit, hosted qualification and the complete roadmap remain open.
+
+## Completed preceding-source CI
+
+Source `0efd85afdfe33314c70fcfdc26802d81159e0bc0` completed development job
+`103678943481` with **1,063 passed in 1,105.44 s**. Native PR Fast run
+`34740368254` passed. Repository Python run `34740368308` failed: each of
+its four full shards failed exact-source evidence materialization and skipped
+pytest. The inspected shard-0 log retains `legal_approval=False`, product replay
+not passed and technical receipt not ready. The [CI record](rc-selected-summary-20260913.ci.json)
+binds source/job identities and downloaded log hashes. These results precede the
+new geometry documentation and mobile summary code; they do not qualify the new
+head. Publication waited for the development job to finish without cancellation.
