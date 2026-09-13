@@ -41,3 +41,27 @@ records are covered. Ruff and diff checks pass.
 No policy uses these times as a reward by default. No new independent physical
 validation, learned benefit, main integration or release acceptance is claimed.
 Hosted verification of this local change remains pending.
+
+## Runtime policy selection forwarding
+
+`run_rc_control_runtime_selection` accepts the same optional
+`record_assembly_timing=True` flag and requires explicit work recording before
+training or output creation. Its fixed plan and result identify enabled timing;
+all full-path benchmark arms receive the option. The existing elapsed-time
+selection score includes the instrumentation cost. The score formula, training
+folds, acceptance checks and default untimed behavior remain unchanged.
+
+The focused runtime-selection suite passed 65 tests in 136.03 s. Its actual
+counterbalanced repeated paths cover both ordinary and reused line-search
+assembly, check phase durations against invocation sums and enclosing path
+time, and retain full-history, fit-reuse and secant-selection checks. Invalid
+timing options are rejected before output. Ruff and diff checks passed.
+
+Separately, published source `c1eaa5d81db6c4b092421bdff8e467044b896a65`
+completed Runtime Input and Viewer CI run `34784621141` with a failure:
+705 browser tests passed and one priced design-comparison browser case failed
+because the verified comparison panel was not found within 5 seconds. The
+separate actual HTTP suite passed all 36 tests. The detailed failure was read
+from artifact `10326641095` (`workbench-v2-e2e.log`); this observation does not
+establish the cause or justify changing the timeout. This published run does
+not verify the local timing implementation.

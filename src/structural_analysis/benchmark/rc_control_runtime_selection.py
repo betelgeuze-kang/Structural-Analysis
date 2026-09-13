@@ -251,6 +251,7 @@ def run_rc_control_runtime_selection(
     repetitions=1,
     record_assembly_work=False,
     reuse_line_search_assembly=False,
+    record_assembly_timing=False,
 ):
     """Fit each ridge without one training case, then execute that case's full path.
 
@@ -261,6 +262,10 @@ def run_rc_control_runtime_selection(
     proposal retry before the first fit or output is created.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    if type(record_assembly_timing) is not bool or (
+        record_assembly_timing and not record_assembly_work
+    ):
+        raise ValueError("assembly timing requires explicit work recording")
     if type(record_assembly_work) is not bool:
         raise ValueError("explicit boolean assembly recording required")
     if type(reuse_line_search_assembly) is not bool:
@@ -409,6 +414,9 @@ def run_rc_control_runtime_selection(
     if record_assembly_work:
         plan["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
         plan["selection_score"] += "; opted-in assembly recording costs included"
+    if record_assembly_timing:
+        plan["assembly_timing_recording"] = True
+        plan["selection_score"] += "; opted-in assembly timing costs included"
     if reuse_line_search_assembly:
         plan["line_search_assembly_reuse"] = "rc-control-immediate-line-search-reuse.v1"
         plan["selection_score"] += "; native reuse costs included for every control arm"
@@ -557,6 +565,7 @@ def run_rc_control_runtime_selection(
                         if effective_capture
                         else "all-arms",
                         record_assembly_work=record_assembly_work,
+                        record_assembly_timing=record_assembly_timing,
                         reuse_line_search_assembly=reuse_line_search_assembly,
                         **learning._arithmetic_kwargs(arithmetic_profile),
                     )
@@ -685,6 +694,8 @@ def run_rc_control_runtime_selection(
     }
     if reuse_line_search_assembly:
         result["line_search_assembly_reuse"] = plan["line_search_assembly_reuse"]
+    if record_assembly_timing:
+        result["assembly_timing_recording"] = True
     if record_assembly_work:
         result["assembly_work_recording"] = plan["assembly_work_recording"]
     if static_model_abstention:
