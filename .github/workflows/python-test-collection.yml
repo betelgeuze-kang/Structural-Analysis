@@ -296,6 +296,9 @@ jobs:
           tests/test_rc_control_persistence.py
           tests/test_rc_local_resources.py
           tests/test_rc_refinement_workflow.py
+          tests/test_rc_control_durable_research.py
+          tests/test_local_amd_diagnostic.py
+          tests/test_rc_merge_reconciliation.py
       - name: Check formatting without changing committed bytes
         if: ${{ !cancelled() }}
         run: >-
@@ -307,6 +310,15 @@ jobs:
           src/structural_analysis/benchmark/rc_control_reuse.py
           tests/test_neutral_strict_input.py
           tests/test_rc_control_refinement.py
+          src/structural_analysis/benchmark/rc_control_cost_search.py
+          src/structural_analysis/benchmark/rc_control_local_search_cli.py
+          src/structural_analysis/benchmark/rc_control_durable.py
+          src/structural_analysis/benchmark/rc_control_durable_cli.py
+          src/structural_analysis/benchmark/rc_control_local_batch.py
+          src/structural_analysis/engine_v2_backends/local_amd_diagnostic.py
+          tests/test_rc_control_durable_research.py
+          tests/test_local_amd_diagnostic.py
+          tests/test_rc_merge_reconciliation.py
           > rc-refinement-format.diff
       - name: Check changed Python lint
         if: ${{ !cancelled() }}
@@ -319,6 +331,15 @@ jobs:
           src/structural_analysis/benchmark/rc_control_reuse.py
           tests/test_neutral_strict_input.py
           tests/test_rc_control_refinement.py
+          src/structural_analysis/benchmark/rc_control_cost_search.py
+          src/structural_analysis/benchmark/rc_control_local_search_cli.py
+          src/structural_analysis/benchmark/rc_control_durable.py
+          src/structural_analysis/benchmark/rc_control_durable_cli.py
+          src/structural_analysis/benchmark/rc_control_local_batch.py
+          src/structural_analysis/engine_v2_backends/local_amd_diagnostic.py
+          tests/test_rc_control_durable_research.py
+          tests/test_local_amd_diagnostic.py
+          tests/test_rc_merge_reconciliation.py
           > rc-refinement-lint.json
       - name: Retain original diagnostics
         if: ${{ always() }}

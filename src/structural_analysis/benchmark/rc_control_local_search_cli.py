@@ -47,6 +47,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--tenant-id", default="local-research")
     parser.add_argument("--max-wall-seconds", type=float)
     parser.add_argument("--stop-file", type=Path)
+    parser.add_argument("--reuse-line-search-assembly", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.max_wall_seconds is not None and (
@@ -90,6 +91,7 @@ def main(argv: list[str] | None = None) -> int:
             source_revision=args.source_revision,
             scope_id=args.scope_id,
             repository=repository,
+            reuse_line_search_assembly=args.reuse_line_search_assembly,
         )
         args.output.mkdir(parents=True, exist_ok=False)
         remaining = args.max_new_model_analyses

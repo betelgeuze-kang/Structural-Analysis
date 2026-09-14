@@ -19,6 +19,9 @@ TESTS = {
     "tests/test_rc_control_persistence.py",
     "tests/test_rc_local_resources.py",
     "tests/test_rc_refinement_workflow.py",
+    "tests/test_rc_control_durable_research.py",
+    "tests/test_local_amd_diagnostic.py",
+    "tests/test_rc_merge_reconciliation.py",
 }
 
 

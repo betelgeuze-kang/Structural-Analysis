@@ -17,6 +17,9 @@ from typing import Any
 
 from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.benchmark import rc_control_design as study
+from structural_analysis.benchmark.rc_control_durable import (
+    DurableRCControlResultSession,
+)
 from structural_analysis.benchmark.rc_control_candidate_cost import (
     verified_limit_outcome,
 )
@@ -154,7 +157,7 @@ def run_rc_control_cost_search(
     if stop_requested is not None and not callable(stop_requested):
         raise ValueError("stop request must be a callable")
     stopped = None
-    if type(session) is not RCControlResultSession:
+    if type(session) not in (RCControlResultSession, DurableRCControlResultSession):
         raise ValueError("exact process-local result session required")
     if type(max_new_model_analyses) is not int or not 0 <= max_new_model_analyses <= 17:
         raise ValueError("new-model budget must be an integer in [0, 17]")
@@ -308,9 +311,21 @@ def run_rc_control_cost_search(
         except NewAnalysisRequired:
             record["status"] = "new_analysis_budget_exhausted"
             continue  # A later cheaper candidate may already exist in the session.
-        fresh = evaluation["mode"] == "fresh_reference_and_replay"
+        fresh = (
+            evaluation["new_model_evaluation"]
+            if type(session) is DurableRCControlResultSession
+            else evaluation["mode"] == "fresh_reference_and_replay"
+        )
+        if type(fresh) is not bool:
+            raise ValueError("model-work credit must be an actual boolean")
         used += int(fresh)
-        hits += int(not fresh)
+        hits += int(
+            evaluation["mode"]
+            in (
+                "verified_original_reused",
+                "verified_durable_original_reused",
+            )
+        )
         row = evaluation["row"]
         if (
             row["material_estimate"]
@@ -323,10 +338,17 @@ def run_rc_control_cost_search(
                 "evaluated model/quantity/price/request differs from the frozen pool"
             )
         work = evaluation["new_work"]
+        historical_unknown = (
+            evaluation["historical_unknown_work"]
+            if type(session) is DurableRCControlResultSession
+            else False
+        )
         # An uncounted execution cannot become a price-bound incumbent even
         # when its response/verification fields otherwise look successful.
         outcomes[name] = (
-            None if work["unknown_work"] else verified_limit_outcome(plan, row)
+            None
+            if work["unknown_work"] or historical_unknown
+            else verified_limit_outcome(plan, row)
         )
         record.update(
             status="evaluated",
@@ -339,7 +361,7 @@ def run_rc_control_cost_search(
             },
         )
         invocations += work["api_invocation_count"]
-        unknown_work_stop = work["unknown_work"]
+        unknown_work_stop = work["unknown_work"] or historical_unknown
         for key, value in work["known_counters"].items():
             aggregate[key] += value
     bound = finite_pool_cost_bound(pool, outcomes)
