@@ -428,3 +428,19 @@ def compare_rc_control_designs(
     report["report_hash"] = _sha(_bytes(report))
     _save(root, "comparison.json", _bytes(report))
     return report
+
+
+def _evaluate_design_row(
+    baseline, candidate, request, *, root, prices, history_limits,
+    material_limits, terminal_limits,
+):
+    """Compatibility hook for local reuse; delegate to the current fresh path.
+
+    The original implementation, work counters and verification remain in one
+    place. The complete request includes constant preload and solver settings.
+    Reuse never changes the current scientific comparison's execution policy.
+    """
+    return _reference_design_row(
+        baseline, candidate, request, root, request.api_kwargs() | {"restart": None},
+        prices, history_limits, material_limits, terminal_limits,
+    )

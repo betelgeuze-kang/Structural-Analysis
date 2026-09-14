@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +24,8 @@ def checksum_for_path(path: Path) -> str:
 
 
 def load_neutral_json(path: Path) -> CanonicalModel:
-    raw = path.read_bytes()
+    with path.open("rb") as stream:
+        raw = stream.read(16 * 1024 * 1024 + 1)
     return load_neutral_json_bytes(raw, source_path=str(path))
 
 
@@ -40,8 +42,14 @@ def load_neutral_json_bytes(
     if not encoded or len(encoded) > 16 * 1024 * 1024:
         raise ValueError("Neutral canonical model input exceeds the bounded byte profile.")
     try:
-        payload = json.loads(encoded.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        payload = json.loads(
+            encoded.decode("utf-8"),
+            object_pairs_hook=_unique_object,
+            parse_constant=_invalid_constant,
+            parse_float=_finite_float,
+        )
+        _validate_unicode(payload)
+    except (UnicodeError, json.JSONDecodeError, RecursionError) as exc:
         raise ValueError("Neutral canonical model must be valid UTF-8 JSON.") from exc
     if not isinstance(payload, dict):
         raise ValueError("Neutral canonical model must be a JSON object.")
@@ -51,6 +59,40 @@ def load_neutral_json_bytes(
         source_path=source_path,
         input_checksum=f"sha256:{hashlib.sha256(encoded).hexdigest()}",
     )
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Neutral canonical model has a duplicate JSON key.")
+        result[key] = value
+    return result
+
+
+def _invalid_constant(token: str) -> Any:
+    raise ValueError("Neutral canonical model requires finite JSON numbers.")
+
+
+def _finite_float(token: str) -> float:
+    value = float(token)
+    if not math.isfinite(value):
+        _invalid_constant(token)
+    return value
+
+
+def _validate_unicode(payload: Any) -> None:
+    # The JSON parser accepts escaped lone surrogates; canonical UTF-8 does not.
+    pending = [payload]
+    while pending:
+        value = pending.pop()
+        if isinstance(value, str):
+            value.encode("utf-8")
+        elif isinstance(value, dict):
+            pending.extend(value.keys())
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
 
 
 def _load_neutral_payload(
