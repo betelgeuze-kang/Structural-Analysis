@@ -96,7 +96,7 @@ def test_every_pull_request_collects_the_complete_pytest_suite() -> None:
     assert "paths:" not in workflow
     assert "python -m pytest --collect-only -q" in workflow
     assert "collect:\n    if:" not in workflow
-    assert workflow.count("python -m pip install numpy==1.26.4 scipy==1.12.0") == 3
+    assert workflow.count("python -m pip install numpy==1.26.4 scipy==1.12.0") == 4
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
@@ -298,6 +298,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         "$GITHUB_REPOSITORY/.github/workflows/"
         "product-state-current.yml@refs/heads/main" in workflow
     )
+    assert "Verify product-state workflow execution identity" in workflow
     identity_step = workflow.index("Verify product-state workflow execution identity")
     evidence_step = workflow.index("Verify generated capability surfaces")
     assert identity_step < evidence_step

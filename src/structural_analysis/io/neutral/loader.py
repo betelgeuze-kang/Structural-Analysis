@@ -40,7 +40,9 @@ def load_neutral_json_bytes(
         raise ValueError("Neutral canonical model input must be bytes-like.")
     encoded = bytes(raw)
     if not encoded or len(encoded) > 16 * 1024 * 1024:
-        raise ValueError("Neutral canonical model input exceeds the bounded byte profile.")
+        raise ValueError(
+            "Neutral canonical model input exceeds the bounded byte profile."
+        )
     try:
         payload = json.loads(
             encoded.decode("utf-8"),
@@ -98,9 +100,7 @@ def _validate_unicode(payload: Any) -> None:
 def _load_neutral_payload(
     payload: dict[str, Any], *, source_path: str, input_checksum: str
 ) -> CanonicalModel:
-    schema_version = str(
-        payload.get("schema_version", CANONICAL_MODEL_SCHEMA_VERSION)
-    )
+    schema_version = str(payload.get("schema_version", CANONICAL_MODEL_SCHEMA_VERSION))
     if schema_version != CANONICAL_MODEL_SCHEMA_VERSION:
         raise ValueError(f"Unsupported canonical model schema: {schema_version}")
 
@@ -176,7 +176,9 @@ def _validate_topology(payload: dict[str, Any]) -> list[str]:
             raise ValueError(f"Element {element_id} must reference at least two nodes.")
         missing = [node_id for node_id in connectivity if node_id not in node_ids]
         if missing:
-            raise ValueError(f"Element {element_id} references missing nodes: {missing}")
+            raise ValueError(
+                f"Element {element_id} references missing nodes: {missing}"
+            )
 
     if not node_ids:
         warnings.append("Canonical model has no nodes.")

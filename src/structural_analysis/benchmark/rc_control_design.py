@@ -431,8 +431,15 @@ def compare_rc_control_designs(
 
 
 def _evaluate_design_row(
-    baseline, candidate, request, *, root, prices, history_limits,
-    material_limits, terminal_limits,
+    baseline,
+    candidate,
+    request,
+    *,
+    root,
+    prices,
+    history_limits,
+    material_limits,
+    terminal_limits,
 ):
     """Compatibility hook for local reuse; delegate to the current fresh path.
 
@@ -441,6 +448,13 @@ def _evaluate_design_row(
     Reuse never changes the current scientific comparison's execution policy.
     """
     return _reference_design_row(
-        baseline, candidate, request, root, request.api_kwargs() | {"restart": None},
-        prices, history_limits, material_limits, terminal_limits,
+        baseline,
+        candidate,
+        request,
+        root,
+        request.api_kwargs() | {"restart": None},
+        prices,
+        history_limits,
+        material_limits,
+        terminal_limits,
     )
