@@ -60,6 +60,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--scope-id", default="local-research")
     parser.add_argument("--store-root", type=Path)
     parser.add_argument("--tenant-id", default="local-research")
+    parser.add_argument("--reuse-line-search-assembly", action="store_true")
     args = parser.parse_args(argv)
     try:
         if not re.fullmatch(r"[0-9a-f]{40}", args.source_revision):
@@ -95,6 +96,7 @@ def main(argv: list[str] | None = None) -> int:
             source_revision=args.source_revision,
             scope_id=args.scope_id,
             repository=repository,
+            reuse_line_search_assembly=args.reuse_line_search_assembly,
         )
         report = run_refined_candidate_search(
             model,

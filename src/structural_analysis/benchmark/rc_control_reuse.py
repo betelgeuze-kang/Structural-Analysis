@@ -200,7 +200,11 @@ class RCControlResultSession:
         max_entries: int = 32,
         max_bytes: int = 64 * 1024 * 1024,
         repository: RCResultRepository | None = None,
+        reuse_line_search_assembly: bool = False,
     ) -> None:
+        if type(reuse_line_search_assembly) is not bool:
+            raise ValueError("explicit boolean line-search assembly reuse required")
+        self._reuse_line_search_assembly = reuse_line_search_assembly
         if type(source_revision) is not str or not re.fullmatch(
             r"[0-9a-f]{40}", source_revision
         ):
@@ -235,6 +239,11 @@ class RCControlResultSession:
         return self._scope_id
 
     @property
+    def execution_options(self) -> dict[str, bool]:
+        """Detached options identifying the actual reference and replay path."""
+        return {"reuse_line_search_assembly": self._reuse_line_search_assembly}
+
+    @property
     def retained_bytes(self) -> int:
         with self._lock:
             return sum(entry.byte_length for entry in self._entries.values())
@@ -262,6 +271,7 @@ class RCControlResultSession:
                     "runtime": self._runtime,
                     "scope_id": self._scope_id,
                     "execution": "virgin_reference_then_fresh_full_replay",
+                    "execution_options": self.execution_options,
                 }
             )
         )
@@ -375,6 +385,7 @@ class RCControlResultSession:
                     history_limits=history_limits,
                     material_limits=material_limits,
                     terminal_limits=terminal_limits,
+                    reuse_line_search_assembly=self._reuse_line_search_assembly,
                 )
                 new_work = _work({"rows": [row]})
                 self._check_context(scope_id)
@@ -418,6 +429,7 @@ class RCControlResultSession:
                 "runtime_fingerprint": self._runtime,
                 "model_checksum": model.canonical_model_checksum,
                 "request": request.to_dict(),
+                "execution_options": self.execution_options,
                 "history_limits": asdict(history_limits),
                 "material_limits": asdict(material_limits),
                 "terminal_limits": None

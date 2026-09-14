@@ -440,6 +440,7 @@ def _evaluate_design_row(
     history_limits,
     material_limits,
     terminal_limits,
+    reuse_line_search_assembly: bool = False,
 ):
     """Compatibility hook for local reuse; delegate to the current fresh path.
 
@@ -447,12 +448,17 @@ def _evaluate_design_row(
     place. The complete request includes constant preload and solver settings.
     Reuse never changes the current scientific comparison's execution policy.
     """
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
+    kwargs = request.api_kwargs() | {"restart": None}
+    if reuse_line_search_assembly:
+        kwargs["reuse_line_search_assembly"] = True
     return _reference_design_row(
         baseline,
         candidate,
         request,
         root,
-        request.api_kwargs() | {"restart": None},
+        kwargs,
         prices,
         history_limits,
         material_limits,

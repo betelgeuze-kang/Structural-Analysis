@@ -340,8 +340,9 @@ def test_library_hash_streaming_keeps_identical_digest(tmp_path):
     assert reuse._file_digest(path) == "sha256:" + hashlib.sha256(data).hexdigest()
 
 
+@pytest.mark.parametrize("assembly_reuse", [False, True])
 def test_refinement_cli_separate_process_warm_reprice(
-    control_request, options, tmp_path
+    control_request, options, tmp_path, assembly_reuse
 ):
     import os
     import subprocess
@@ -385,6 +386,8 @@ def test_refinement_cli_separate_process_warm_reprice(
         "--store-root",
         str(tmp_path / "store"),
     ]
+    if assembly_reuse:
+        prefix.append("--reuse-line-search-assembly")
     env = os.environ | {"STRUCTURAL_RC_STORE_TOKEN": "test-only-refinement-store-owner"}
     outputs = []
     for name, budget in [("cold", "6"), ("warm", "0")]:
@@ -403,6 +406,10 @@ def test_refinement_cli_separate_process_warm_reprice(
         )
         assert execution.returncode == 0, execution.stderr
         outputs.append(json.loads(execution.stdout))
+        plan = json.loads((tmp_path / name / "plan.json").read_bytes())
+        assert plan["execution_options"] == {
+            "reuse_line_search_assembly": assembly_reuse
+        }
         experiment_file(exp, options, 200.0)
     assert outputs[0]["new_model_evaluations"] == 6
     assert outputs[1]["new_model_evaluations"] == 0
@@ -437,3 +444,142 @@ def test_refinement_cli_invalid_config(payload, tmp_path):
     path.write_bytes(study._bytes(payload))
     with pytest.raises(ValueError):
         read_refinement(path)
+
+
+@pytest.mark.parametrize("bad", [None, 0, 1, "true", [], {}])
+def test_reuse_execution_option_rejects_before_context(bad, monkeypatch):
+    def forbidden():
+        raise AssertionError("invalid options must not inspect the runtime")
+
+    monkeypatch.setattr(reuse, "_runtime_fingerprint", forbidden)
+    with pytest.raises(ValueError, match="boolean"):
+        reuse.RCControlResultSession(
+            source_revision=SOURCE,
+            scope_id="research",
+            reuse_line_search_assembly=bad,
+        )
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_reference_wrapper_preserves_explicit_assembly_option(
+    model, control_request, options, tmp_path, monkeypatch, enabled
+):
+    captured = []
+
+    def capture(*args):
+        captured.append(args)
+        return {"delegated": True}
+
+    # A delegation test only; the real solver is exercised separately below.
+    monkeypatch.setattr(study, "_reference_design_row", capture)
+    result = study._evaluate_design_row(
+        model,
+        None,
+        control_request,
+        root=tmp_path,
+        **options,
+        terminal_limits=None,
+        reuse_line_search_assembly=enabled,
+    )
+    assert result == {"delegated": True}
+    expected = control_request.api_kwargs() | {"restart": None}
+    if enabled:
+        expected["reuse_line_search_assembly"] = True
+    assert captured[0][4] == expected
+
+
+def test_assembly_option_preserved_across_durable_reuse(
+    model, control_request, options, tmp_path
+):
+    from tests.test_rc_control_persistence import repository
+
+    def make(enabled):
+        return reuse.RCControlResultSession(
+            source_revision=SOURCE,
+            scope_id="research",
+            repository=repository(tmp_path / "store"),
+            reuse_line_search_assembly=enabled,
+        )
+
+    off = make(False)
+    on = make(True)
+    original = shared.evaluate(off, model, control_request, options, tmp_path / "off")
+    with pytest.raises(reuse.NewAnalysisRequired):
+        shared.evaluate(
+            on,
+            model,
+            control_request,
+            options,
+            tmp_path / "wrong-mode",
+            allow_new_analysis=False,
+        )
+    assert not (tmp_path / "wrong-mode").exists()
+    options_copy = on.execution_options
+    options_copy["reuse_line_search_assembly"] = False
+    assert on.execution_options == {"reuse_line_search_assembly": True}
+    result = shared.evaluate(on, model, control_request, options, tmp_path / "on")
+    assert result["physics_key"] != original["physics_key"]
+    assert result["execution_options"] == {"reuse_line_search_assembly": True}
+    assert result["row"]["full_reference_verification_pass"] is True
+    assert original["row"]["full_reference_verification_pass"] is True
+    assert len(result["row"]["invocations"]) == 2
+    for field in ("quantities", "material_estimate", "performance", "screens"):
+        assert result["row"][field] == original["row"][field]
+    warmed = shared.evaluate(
+        make(True),
+        model,
+        control_request,
+        options,
+        tmp_path / "warm",
+        prices=replace(options["prices"], concrete_per_m3=150.0),
+        allow_new_analysis=False,
+    )
+    assert warmed["reuse_origin"] == "durable_original"
+    assert warmed["execution_options"] == result["execution_options"]
+    assert warmed["new_work"]["api_invocation_count"] == 0
+    assert warmed["fresh_reference_verification_this_call"] is False
+    for role, meta in result["row"]["artifacts"].items():
+        assert (tmp_path / "on" / meta["path"]).read_bytes() == (
+            tmp_path / "warm" / warmed["row"]["artifacts"][role]["path"]
+        ).read_bytes()
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_refinement_plan_binds_assembly_option(
+    model, control_request, options, tmp_path, enabled
+):
+    current = reuse.RCControlResultSession(
+        source_revision=SOURCE,
+        scope_id="research",
+        reuse_line_search_assembly=enabled,
+    )
+    result = r.run_rc_refinement(
+        model,
+        control_request,
+        levels=(2, 4, 8),
+        tolerances=tolerances(),
+        session=current,
+        scope_id="research",
+        max_new_model_analyses=0,
+        output_directory=tmp_path / "refinement",
+        **options,
+    )
+    plan = json.loads((tmp_path / "refinement/plan.json").read_bytes())
+    assert plan["execution_options"] == {"reuse_line_search_assembly": enabled}
+    digest = plan.pop("plan_hash")
+    assert digest == study._sha(study._bytes(plan)) == result["plan_hash"]
+    result = r.run_refined_candidate_search(
+        model,
+        (candidate("cheap", 0.35),),
+        control_request,
+        levels=(2, 4, 8),
+        tolerances=tolerances(),
+        session=current,
+        scope_id="research",
+        max_new_model_analyses=0,
+        output_directory=tmp_path / "search",
+        **options,
+    )
+    plan = json.loads((tmp_path / "search/plan.json").read_bytes())
+    assert plan["execution_options"] == {"reuse_line_search_assembly": enabled}
+    assert result["cost_bound"]["pool_minimum_feasible_estimate"] is None
