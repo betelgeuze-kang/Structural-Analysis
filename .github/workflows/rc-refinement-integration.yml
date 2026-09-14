@@ -87,7 +87,9 @@ jobs:
           (root / 'inventory.json').write_text(json.dumps(report, sort_keys=True, indent=2) + '\n')
           PY
       - name: Retain formatter distribution for exact local diagnostics
-        run: python -m pip download --only-binary=:all: --no-deps ruff==0.15.0 --dest "$RUNNER_TEMP/rc-integration-source/tools"
+        run: >-
+          python -m pip download --only-binary=:all: --no-deps ruff==0.15.0
+          --dest "$RUNNER_TEMP/rc-integration-source/tools"
       - name: Preserve integration source diagnostic
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
