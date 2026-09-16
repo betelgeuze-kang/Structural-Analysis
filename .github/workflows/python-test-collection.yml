@@ -92,6 +92,12 @@ jobs:
       - name: Materialize exact current-source test evidence
         shell: bash
         run: |
+          # Recompute source-bound evidence in this ephemeral checkout, then
+          # retain strict current-source validation and numerical replay.
+          python scripts/build_analytic_frame_verification_artifact.py
+          python scripts/build_analytic_frame_verification_artifact.py --check
+          python scripts/build_phase2_whole_model_buckling_artifacts.py
+          python scripts/build_phase2_whole_model_buckling_artifacts.py --check
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
