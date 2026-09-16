@@ -102,7 +102,9 @@ def solve_linear_static_sparse(
 def _stiffness_symmetry_error(stiffness: np.ndarray | csr_matrix) -> float:
     diff = stiffness - stiffness.T
     if hasattr(diff, "toarray"):
-        return float(np.linalg.norm(diff.toarray(), ord=np.inf))
+        # Preserve the infinity norm (maximum absolute row sum) without an
+        # O(n**2) dense temporary.  Only the O(n) row-sum vector is materialized.
+        return float(np.max(np.asarray(abs(diff).sum(axis=1))))
     return float(np.linalg.norm(diff, ord=np.inf))
 
 
