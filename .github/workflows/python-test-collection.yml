@@ -122,6 +122,10 @@ jobs:
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
 
+      - name: Audit analytic evidence before tests
+        id: analytic_preflight
+        run: python scripts/check_ci_analytic_evidence.py --out artifacts/ci/analytic-before.json
+
       - name: Run materialized repository test suite shard
         run: >-
           python scripts/run_pytest_shard.py
@@ -129,10 +133,18 @@ jobs:
           --shard-count 4
           --
           -q
+          --tb=long
           --deselect
           tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
           --deselect
           tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::test_committed_receipt_is_reproducible
+
+      - name: Audit analytic evidence after tests
+        if: ${{ always() && steps.analytic_preflight.outcome == 'success' }}
+        run: >-
+          python scripts/check_ci_analytic_evidence.py
+          --baseline artifacts/ci/analytic-before.json
+          --out artifacts/ci/analytic-after.json
 
   full:
     name: pytest-full
