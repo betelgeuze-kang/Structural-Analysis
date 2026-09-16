@@ -87,8 +87,11 @@ def _assemble_linear_static(
     if not node_ids:
         unsupported.append({"kind": "linear_static_nodes_missing"})
         return None, unsupported
-    if len(set(node_ids)) != len(node_ids):
-        unsupported.append({"kind": "linear_static_duplicate_nodes"})
+    # Check the same effective string keys used by assembly before dictionaries
+    # can overwrite rows or any global stiffness storage is allocated.
+    duplicate_ids = _duplicate_model_ids(model)
+    if duplicate_ids:
+        unsupported.extend(duplicate_ids)
         return None, unsupported
 
     node_index = {node_id: index for index, node_id in enumerate(node_ids)}
@@ -185,6 +188,34 @@ def _assemble_linear_static(
         ),
         [],
     )
+
+
+def _duplicate_model_ids(model: CanonicalModel) -> list[dict[str, Any]]:
+    """Reject ambiguous definitions within each independent entity namespace."""
+
+    issues: list[dict[str, Any]] = []
+    for collection in ("nodes", "elements", "materials", "sections"):
+        first_indices: dict[str, int] = {}
+        for index, row in enumerate(getattr(model, collection)):
+            identifier = str(row.get("id", ""))
+            if identifier in first_indices:
+                first_index = first_indices[identifier]
+                issues.append(
+                    {
+                        "kind": f"linear_static_duplicate_{collection}",
+                        "id": identifier,
+                        "first_index": first_index,
+                        "duplicate_index": index,
+                        "detail": (
+                            f"{collection}[{index}].id duplicates "
+                            f"{collection}[{first_index}].id; "
+                            "implicit identifier overwrite is disabled."
+                        ),
+                    }
+                )
+            else:
+                first_indices[identifier] = index
+    return issues
 
 
 def recover_element_results(
