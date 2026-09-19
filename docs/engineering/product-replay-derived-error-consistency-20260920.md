@@ -61,3 +61,25 @@ Packet:
 Input, refreshed receipt, result, execution script and implementation snapshot
 are inventoried; all listed hashes were re-read. External inventory SHA-256:
 `cf7ced34503825416eb1bcdec8e4256e58f1071a605094f566a6e193ef04c46c`.
+
+## Hosted mismatch localization
+
+A subsequent diagnostic-only change keeps the same replay predicate and appends
+the first rejected field path to `receipt_product_comparisons_stale`. It reports
+structural/list differences and Boolean contract changes, while consistently
+computed relative diagnostics that the predicate accepts do not become spurious
+witnesses. No response values or full receipt payload are printed. A validator
+integration test uses controlled current-comparison output and confirms rejection
+with `path=[0, "contract_pass"]`; it is a synthetic contract test, not a solver
+execution. Nineteen focused tests pass, including that test and the prior replay
+integrity cases; Ruff and diff checks pass. This provides actionable hosted
+failure evidence without changing receipt acceptance or asserting that current
+numerical failures are resolved.
+
+Live source inspection also confirms that main still uses direct chord-length
+subtraction while the development branch retains the small-motion cancellation
+repair in `corotational_frame2d_basic.py`. The prior controlled external arithmetic
+diagnosis (`opensees-corot2d-arithmetic-20260910.md`) already investigates the two
+remaining reference mismatches. No numerical rollback or reference substitution
+was made to force comparison success. The earlier main reproduction and the
+current-branch physical-comparison failures remain distinct.

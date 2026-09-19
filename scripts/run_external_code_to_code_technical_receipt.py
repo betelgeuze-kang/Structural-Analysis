@@ -2584,6 +2584,34 @@ def _product_replay_values_match(stored: Any, current: Any) -> bool:
     return type(stored) is type(current) and stored == current
 
 
+def _product_replay_mismatch_path(stored: Any, current: Any) -> tuple[Any, ...] | None:
+    """Locate a rejected field without changing the acceptance predicate."""
+    if _product_replay_values_match(stored, current):
+        return None
+    if isinstance(stored, dict) and isinstance(current, dict):
+        for key in sorted(stored.keys() | current.keys()):
+            if key not in stored or key not in current:
+                return (key,)
+        consistent_metric = stored.keys() == _REPLAY_METRIC_FIELDS and all(
+            _replay_metric_errors_consistent(metric) for metric in (stored, current)
+        )
+        for key in sorted(stored):
+            if consistent_metric and key == "relative_error":
+                continue
+            child = _product_replay_mismatch_path(stored[key], current[key])
+            if child is not None:
+                return (key, *child)
+    elif isinstance(stored, list) and isinstance(current, list):
+        for index, (left, right) in enumerate(zip(stored, current)):
+            child = _product_replay_mismatch_path(left, right)
+            if child is not None:
+                return (index, *child)
+        if len(stored) != len(current):
+            return (min(len(stored), len(current)),)
+    # Also covers a malformed metric whose leaves separately compare equal.
+    return ()
+
+
 def _case(
     *,
     case_id: str,
@@ -4173,8 +4201,12 @@ def validate_external_code_to_code_technical_receipt(
             payload["comparisons"],
             current_comparisons,
         ):
+            mismatch_path = _product_replay_mismatch_path(
+                payload["comparisons"], current_comparisons,
+            )
             raise ExternalCodeToCodeReceiptError(
-                "receipt_product_comparisons_stale"
+                "receipt_product_comparisons_stale:path="
+                + json.dumps(mismatch_path, ensure_ascii=True)
             )
         if replay["current_product_replay_pass"] is not expected_technical_pass:
             raise ExternalCodeToCodeReceiptError(
