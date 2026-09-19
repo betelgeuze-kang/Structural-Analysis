@@ -204,3 +204,39 @@ def test_refinement_runner_rejects_source_not_matching_identity_or_git(
         else "source identity mismatch",
     ):
         runner.checked_sources(tmp_path, tmp_path)
+
+
+def test_projection_can_observe_response_stress_and_state_history_separately():
+    step = synthetic_step()
+    for member in step["trial_assembly"]["member_assemblies"]:
+        for section in member["element_response"]["fiber_beam_response"][
+            "section_responses"
+        ]:
+            for response in section["fiber_responses"]:
+                response["stress_mpa"] = 2.5
+    observed = sections(step, 2, ("tensile_damage", "stress_mpa"))
+    assert observed["E0:gauss-0"]["values"][0] == {
+        "tensile_damage": 0.0,
+        "stress_mpa": 2.5,
+    }
+
+
+def test_refinement_group_floor_and_local_maximum_are_preserved():
+    from scripts.audit_planar_256_refinement import metric
+
+    result = metric([0.0, 1.0], [1.0, 0.0], 1e-12)
+    assert result["relative_group_difference"] == 1
+    assert result["within_exploratory_one_percent"] is False
+    result = metric([1e-13], [0.0], 1e-12)
+    assert result["relative_group_difference"] == 0.1
+    assert result["denominator_floor"] == 1e-12
+
+
+@pytest.mark.parametrize(
+    "a,b", [([], []), ([0.0], [0.0, 0.0]), ([True], [0.0]), ([float("inf")], [1.0])]
+)
+def test_refinement_group_rejects_incomplete_or_nonfinite_observations(a, b):
+    from scripts.audit_planar_256_refinement import metric
+
+    with pytest.raises(ValueError):
+        metric(a, b, 1e-12)

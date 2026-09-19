@@ -52,3 +52,25 @@ including local maximum discrepancies and localization descriptors. A small
 section mean cannot override the original exploratory 1% group-infinity screen.
 No full-history agreement, material convergence or physical qualification is
 claimed before those comparisons are actually performed.
+
+## Comparison implementation prepared during execution
+
+`scripts/audit_planar_256_refinement.py` pins the frozen experiment protocol and
+original prefix/suffix hashes, requires an explicit hash for the new full path,
+checks forty accepted targets and exact restart correspondence, and compares the
+original ten nodal/steel groups plus all six projected concrete fields. Original
+normalizer floors and the 1% group-infinity screen remain unchanged. Damage fields
+also retain section localization and group threshold-exceedance counts.
+
+The new observer successfully decoded all fourteen hash-verified original
+128-layer prefix steps, including 18 sections and 36 steel points per step.
+Synthetic checks cover group cardinality, nonfinite/boolean values, norm floors,
+local maxima, source/state bindings and response-versus-history field access.
+The combined audit/workflow selection passed 40 tests in 1.84 s. This preflight does not
+constitute a 128/256 comparison: the full 256-layer artifact is still required.
+
+The fine-artifact reader allows up to 2 GiB, separately from the existing
+1 GiB default, because the retained pretty-printed full material history doubles
+its concrete sampling. This input-size allowance changes no numerical criterion.
+The comparator creates a separate output with exclusive creation and performs no
+structural solves, original packet rewrites, AI fitting or physical qualification.

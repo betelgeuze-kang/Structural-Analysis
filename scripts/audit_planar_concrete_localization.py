@@ -32,10 +32,10 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def read_checked(path, digest):
+def read_checked(path, digest, maximum_bytes=1024**3):
     raw = path.read_bytes()
     require(hashlib.sha256(raw).hexdigest() == digest, "source SHA-256 mismatch")
-    return strict_json_object_bytes(raw, maximum_bytes=1024**3)
+    return strict_json_object_bytes(raw, maximum_bytes=maximum_bytes)
 
 
 def validate_path(path):
@@ -62,7 +62,7 @@ def validate_path(path):
     require(path["final_checkpoint"] == previous, "final checkpoint mismatch")
 
 
-def sections(step, layers):
+def sections(step, layers, fields=FIELDS):
     states = step["accepted_checkpoint"]["element_states"]
     accepted = {s["element_id"]: s for s in states}
     require(len(accepted) == len(states), "duplicate element")
@@ -115,7 +115,14 @@ def sections(step, layers):
                     ),
                     "strain location mismatch",
                 )
-                values.append({field: fiber[field] for field in FIELDS})
+                values.append(
+                    {
+                        field: response[field]
+                        if field == "stress_mpa"
+                        else fiber[field]
+                        for field in fields
+                    }
+                )
             out[key] = {"xi": xi, "weight": weight, "values": values}
     require(len(out) == 18, "fixed model requires 18 sections")
     return out
