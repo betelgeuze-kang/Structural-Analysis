@@ -549,3 +549,7 @@ These source-specific receipts do not qualify later commits automatically.
   actual train/search/standalone CLI execution, 57 byte-exact HTTP-handler
   artifacts, 108 Python and 57 frontend checks, with desktop/mobile original
   result downloads. No learned benefit or deployment qualification claimed.
+- [Four-case reinforcement cost observation](rc-reinforcement-cost-campaign-20260920.md):
+  four separate fits, eight order-balanced comparison pairs, including concrete
+  damage; same selections and exact repeated result hashes. Including training,
+  learned execution costs 2.01–2.06× price order in these cases; no promotion.
