@@ -1,4 +1,4 @@
-import { intermediateSteelBarCount } from './rcSteelLayers'
+import { longitudinalSteelArea } from './rcSteelLayers'
 export const DESIGN_SCOPE = 'gross_concrete_and_straight_authored_longitudinal_rebar.v1'
 const REPORT_SCHEMA = 'public-rc-fiber-design-comparison.v1'
 const HISTORY_REPORT_SCHEMA = 'public-rc-fiber-design-comparison.v2'
@@ -454,7 +454,9 @@ function validatePhysicalChanges(baseline: Obj, candidate: Obj, value: unknown):
   const changed = new Set<string>()
   let actualChange = false
   for (const item of list(value, 1, 16)) {
-    const change = exact(item, ['section_id', 'width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2'])
+    const overrides = ['top_bar_area_m2', 'bottom_bar_area_m2'].filter(key => Object.prototype.hasOwnProperty.call(obj(item), key))
+    const change = exact(item, ['section_id', 'width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2', ...overrides])
+    for (const key of overrides) positive(change[key])
     ensure(typeof change.section_id === 'string' && !changed.has(change.section_id), 'section change identity')
     changed.add(change.section_id)
     const section = sections.get(change.section_id)
@@ -525,7 +527,7 @@ export function validateDesignComparisonRow(value: unknown, identity: Obj, price
   const sections = keyed(model.sections, 'id')
   const nodes = keyed(model.nodes, 'id')
   for (const section of sections.values()) {
-    intermediateSteelBarCount(section)
+    longitudinalSteelArea(section)
     for (const key of ['width_m', 'depth_m', 'cover_m', 'bar_area_m2']) positive(section[key])
     for (const key of ['top_bar_count', 'bottom_bar_count']) integer(section[key], 1, 64)
   }
@@ -614,7 +616,7 @@ export function validateDesignComparisonRow(value: unknown, identity: Obj, price
       return list(nodes.get(String(nodeId))!.coordinates, 3, 3).map((value) => { ensure(typeof value === 'number' && Number.isFinite(value), 'node coordinate'); return value })
     })
     const length = Math.hypot(...ends[0].map((value, index) => value - ends[1][index]))
-    const barVolume = (Number(section.top_bar_count) + Number(section.bottom_bar_count) + intermediateSteelBarCount(section)) * Number(section.bar_area_m2) * length
+    const barVolume = longitudinalSteelArea(section) * length
     close(quantity.length_m, length)
     close(quantity.gross_concrete_volume_m3, Number(section.width_m) * Number(section.depth_m) * length)
     close(quantity.longitudinal_rebar_volume_m3, barVolume)

@@ -1,4 +1,4 @@
-import { intermediateSteelBarCount } from './rcSteelLayers'
+import { longitudinalSteelArea } from './rcSteelLayers'
 import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
 
@@ -99,7 +99,7 @@ export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: s
     check(nodes.length === 2 && nodes.every(Boolean) && section, 'study_geometry_invalid')
     const length = Math.hypot(...nodes[0].coordinates.map((v: number, i: number) => v - nodes[1].coordinates[i]))
     const volume = length * section.width_m * section.depth_m
-    const rebar = length * (section.top_bar_count + section.bottom_bar_count + intermediateSteelBarCount(section)) * section.bar_area_m2
+    const rebar = length * longitudinalSteelArea(section)
     const values = [volume, rebar, rebar * 7850]
     const actual = q.members.find((m: RcObject) => m.member_id === member.id)
     check(actual && actual.section_id === member.section && close(actual.length_m, length), 'study_member_identity_invalid')
@@ -238,7 +238,8 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
       check(section, 'study_change_section_invalid')
       for (const [key, value] of Object.entries(change)) {
         if (key === 'section_id') continue
-        check(['width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2'].includes(key), 'study_change_field_invalid')
+        check(['width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2', 'top_bar_area_m2', 'bottom_bar_area_m2'].includes(key), 'study_change_field_invalid')
+        if (key === 'top_bar_area_m2' || key === 'bottom_bar_area_m2') check(num(value) && value > 0, 'study_change_value_invalid')
         if (value !== null) { check(num(value) && value >= 0, 'study_change_value_invalid'); changed ||= section[key] !== value; section[key] = value }
       }
     }

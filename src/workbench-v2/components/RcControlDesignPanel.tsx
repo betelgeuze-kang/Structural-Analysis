@@ -1,3 +1,4 @@
+import { longitudinalSteelDescription } from '../model/rcSteelLayers'
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { loadRcControlDesign, type RcDesignSession } from '../model/rcControlDesignProvider'
 import { rcDesignBlockedStep } from '../model/rcControlDesignSchema'
@@ -134,7 +135,7 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
     {current && models[current.candidate_id] ? <div data-rc-design-selected={selected}>
       <h3>Selected candidate: {selected}</h3>
       <p>Model <code>{current.quantities.model_checksum}</code> · result <code>{current.artifacts.result.sha256}</code> · price table <code>{report.price_table_hash}</code></p>
-      <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${s.top_bar_count} top and ${s.bottom_bar_count} bottom bars at ${s.bar_area_m2} m²`).join('; ')}</p>
+      <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${longitudinalSteelDescription(s)}`).join('; ')}</p>
       <div data-rc-design-discretization={current.candidate_id}>
         <h4>Selected model discretization</h4>
         <dl>

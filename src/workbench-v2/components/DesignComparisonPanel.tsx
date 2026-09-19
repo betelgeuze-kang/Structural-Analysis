@@ -1,3 +1,4 @@
+import { longitudinalSteelDescription } from '../model/rcSteelLayers'
 import type { ReactElement } from 'react'
 import type { DesignComparisonLoadResult } from '../model/designComparisonProvider'
 import type { DesignComparisonRow } from '../model/designComparisonSchema'
@@ -7,7 +8,7 @@ import { EngineeringValueText } from './EngineeringValueText'
 const number = (value: number | null | undefined): ReactElement => <EngineeringValueText value={typeof value === 'number' ? { status: 'available', value } : { status: 'unavailable' }} />
 const change = (metric: string, value: number | null | undefined): ReactElement => <div className="wb2-muted" data-design-delta={metric}>Change: {number(value)}</div>
 const sections = (row: DesignComparisonRow): string => (row.canonical_model.sections as Array<Record<string, unknown>>)
-  .map((section) => `${section.id}: ${section.width_m} × ${section.depth_m} m; bars ${section.top_bar_count}+${section.bottom_bar_count} × ${section.bar_area_m2} m²`).join('; ')
+  .map((section) => `${section.id}: ${section.width_m} × ${section.depth_m} m; ${longitudinalSteelDescription(section)}`).join('; ')
 
 export function DesignComparisonPanel({ load, title = 'Physical design comparison', titleId = 'wb2-design-comparison-title' }: { load: DesignComparisonLoadResult; title?: string; titleId?: string }): ReactElement {
   if (load.status !== 'verified' || !load.bundle) {

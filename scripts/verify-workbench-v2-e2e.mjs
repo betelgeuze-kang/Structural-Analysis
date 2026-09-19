@@ -38,6 +38,7 @@ const specs = [
   'tests/frontend/frame3d-job-browser.spec.ts',
   'tests/frontend/workbench-v2-design-comparison-contract.spec.ts',
   'tests/frontend/workbench-v2-intermediate-steel-contract.spec.ts',
+  'tests/frontend/workbench-v2-unequal-steel-contract.spec.ts',
   'tests/frontend/workbench-v2-candidate-process-contract.spec.ts',
   'tests/frontend/workbench-v2-candidate-process-history-contract.spec.ts',
   'tests/frontend/workbench-v2-candidate-process-browser.spec.ts',

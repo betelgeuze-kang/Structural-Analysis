@@ -73,3 +73,8 @@ The independent development CI lane now selects 58 files, including these
 regressions; full-suite preparation and acceptance requirements remain intact.
 Hosted results for the new source are pending, distinct from the prior published
 1d8f4e7a5 receipt.
+
+[Workbench review integration](rc-unequal-reinforcement-workbench-20260920.md)
+now verifies separate outer-area quantities and labels in both comparison
+surfaces. The original pending UI review item above is superseded for report
+import/display; interactive editing and cross-area learning are still open.

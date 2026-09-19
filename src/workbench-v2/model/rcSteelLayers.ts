@@ -23,3 +23,34 @@ export function intermediateSteelBarCount(section: Record<string, unknown>): num
   }
   return count
 }
+
+const outerAreaFields = ['top_bar_area_m2', 'bottom_bar_area_m2'] as const
+export function outerSteelAreas(section: Record<string, unknown>): [number, number] {
+  const area = (value: unknown): number => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) throw new Error('steel_bar_area_invalid')
+    return value
+  }
+  const common = area(section.bar_area_m2)
+  return outerAreaFields.map(key => Object.prototype.hasOwnProperty.call(section, key) ? area(section[key]) : common) as [number, number]
+}
+
+export function longitudinalSteelArea(section: Record<string, unknown>): number {
+  const [top, bottom] = outerSteelAreas(section)
+  const common = section.bar_area_m2 as number
+  const counts = ['top_bar_count', 'bottom_bar_count'].map(key => {
+    const count = section[key]
+    if (typeof count !== 'number' || !Number.isInteger(count) || count < 1 || count > 64) throw new Error('steel_bar_count_invalid')
+    return count
+  })
+  const middle = intermediateSteelBarCount(section)
+  return top === common && bottom === common
+    ? (counts[0] + counts[1] + middle) * common
+    : counts[0] * top + counts[1] * bottom + middle * common
+}
+
+export function longitudinalSteelDescription(section: Record<string, unknown>): string {
+  const [top, bottom] = outerSteelAreas(section)
+  const middle = intermediateSteelBarCount(section)
+  return `top ${section.top_bar_count} × ${top} m²; bottom ${section.bottom_bar_count} × ${bottom} m²`
+    + (middle ? `; intermediate ${middle} × ${section.bar_area_m2} m²` : '')
+}

@@ -538,3 +538,6 @@ These source-specific receipts do not qualify later commits automatically.
 - [Hosted 1d8f4e7a5 result](hosted-1d8-development-terminal-20260920.md):
   1,293 development checks passed; full-suite evidence preparation still failed.
   This receipt predates the unequal-area implementation.
+- [Workbench unequal-area review](rc-unequal-reinforcement-workbench-20260920.md):
+  corrected UI quantity checks and per-layer labels; 131 frontend checks passed,
+  including actual-report desktop/mobile rendering. No new physical evidence.
