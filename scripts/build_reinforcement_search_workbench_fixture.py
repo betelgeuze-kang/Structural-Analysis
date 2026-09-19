@@ -1,5 +1,6 @@
 """Reproduce a synthetic CLI/search artifact graph for Workbench contract tests."""
 
+import argparse
 import base64
 from dataclasses import asdict
 import gzip
@@ -24,6 +25,9 @@ from structural_analysis.io.neutral.loader import load_neutral_json
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--cost-pruned", action="store_true")
+    pruned = parser.parse_args().cost_pruned
     root = Path(tempfile.mkdtemp(prefix="rc-reinforcement-cli-"))
     source = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     base = load_neutral_json(Path("examples/public_rc_fiber_frame_cantilever.json"))
@@ -98,16 +102,26 @@ def main():
         "--experiment",
         save(
             "evaluation-experiment.json",
-            experiment((candidate("cheaper", 0.00025, 0.00035),)),
+            experiment(
+                (
+                    candidate("cheaper", 0.00025, 0.00035),
+                    candidate("middle", 0.00033, 0.00037),
+                    candidate("costly", 0.00038, 0.00039),
+                )
+                if pruned
+                else (candidate("cheaper", 0.00025, 0.00035),)
+            ),
         ),
         "--policy",
         str(root / "training/policy.json"),
         "--training-report",
         str(root / "training/training.json"),
         "--full-analysis-budget",
-        "2",
+        "3" if pruned else "2",
         *common,
     ]
+    if pruned:
+        search_args.append("--prune-cost-dominated")
     cli.main(
         [
             "search",
@@ -153,7 +167,11 @@ def main():
         name: base64.b64encode(raw).decode("ascii")
         for name, raw in bundle.artifacts.items()
     }
-    target = Path("tests/frontend/fixtures/reinforcement-search-artifacts.json.gz")
+    target = Path(
+        "tests/frontend/fixtures/cost-pruned-search-artifacts.json.gz"
+        if pruned
+        else "tests/frontend/fixtures/reinforcement-search-artifacts.json.gz"
+    )
     target.write_bytes(
         gzip.compress(
             json.dumps(encoded, sort_keys=True, separators=(",", ":")).encode(), mtime=0

@@ -3,11 +3,12 @@ import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
 
 export const RC_STUDY_SCHEMA = 'experimental-rc-control-design-comparison.v1'
+export const RC_PRUNED_STUDY_SCHEMA = 'experimental-rc-control-cost-pruned-design.v1'
 const CLAIMS_STUDY = { experimental_rc_control: true, independent_physical_validation: false, design_authority: false, confirmed_currency_savings: false, performance_improvement: false, release_approved: false }
 const SCOPE = 'gross_concrete_and_straight_authored_longitudinal_rebar.v1'
 const EXCLUDED = ['transverse_reinforcement', 'laps_anchorage_hooks', 'waste', 'formwork', 'labor', 'fabrication', 'transport', 'tax']
 const QUANTITIES = ['gross_concrete_volume_m3', 'longitudinal_rebar_volume_m3', 'longitudinal_rebar_mass_kg']
-const ROLES = ['model', 'result', 'checkpoint', 'verification', 'analysis_started', 'analysis_outcome', 'verification_started', 'verification_outcome']
+const ROLES = ['cost_skip', 'model', 'result', 'checkpoint', 'verification', 'analysis_started', 'analysis_outcome', 'verification_started', 'verification_outcome']
 export const artifactMaximum = (role: string): number => role === 'result' ? 64 * 1024 ** 2 : role === 'checkpoint' ? 128 * 1024 ** 2 : 16 * 1024 ** 2
 const nat = (v: unknown): v is number => Number.isSafeInteger(v) && Number(v) >= 0
 const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
@@ -131,6 +132,14 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
       && same(artifacts[`${phase}_started`]?.value, { phase, status: 'started', unknown_execution_work: true, work: null })
       && same(artifacts[`${phase}_outcome`]?.value, invocation), 'study_invocation_binding_invalid')
   }
+  if (row.status === 'skipped_cost_dominated') {
+    check(report.schema_version === RC_PRUNED_STUDY_SCHEMA && row.candidate_id !== 'baseline'
+      && same(Object.keys(artifacts).sort(), ['cost_skip', 'model']) && row.invocations.length === 0
+      && row.full_reference_verification_pass === false && row.selection_eligible === false
+      && row.performance === null && row.screens === null && row.failure === null, 'study_cost_skip_promotion')
+    return artifacts.model.value
+  }
+  check(!artifacts.cost_skip, 'study_unexpected_cost_skip')
   if (row.full_reference_verification_pass !== true) {
     check(row.full_reference_verification_pass === false && row.selection_eligible === false && row.performance === null && row.screens === null
       && ['invalid_candidate', 'execution_error', 'verification_blocked'].includes(row.status), 'study_unverified_promotion')
@@ -185,9 +194,14 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
 export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): Promise<RcDesignReview> {
   const doc = document(raw), report = doc.value
   await selfHash(doc.raw, report, 'report_hash')
-  check(report.schema_version === RC_STUDY_SCHEMA && same(report.claims, CLAIMS_STUDY) && report.source_revision_is_attestation === false
+  const adaptive = report.schema_version === RC_PRUNED_STUDY_SCHEMA
+  check((adaptive || report.schema_version === RC_STUDY_SCHEMA) && same(report.claims, CLAIMS_STUDY) && report.source_revision_is_attestation === false
     && typeof report.source_revision === 'string' && /^[a-f0-9]{40}$/.test(report.source_revision), 'study_identity_invalid')
   const identityKeys = ['schema_version', 'baseline_checksum', 'candidates', 'control_request', 'history_limits', 'material_limits', 'terminal_limits', 'prices', 'price_table_hash', 'source_revision', 'source_revision_is_attestation']
+  if (adaptive) {
+    check(report.execution_policy === 'strict_verified_cost_dominance_in_authored_order.v1' && report.prices !== null, 'study_cost_policy_invalid')
+    identityKeys.push('execution_policy')
+  } else check(report.execution_policy === undefined && report.cost_pruning === undefined, 'study_unexpected_cost_policy')
   if (report.line_search_assembly_reuse !== undefined) {
     check(report.line_search_assembly_reuse === 'rc-control-immediate-line-search-reuse.v1', 'study_reuse_profile_invalid')
     identityKeys.push('line_search_assembly_reuse')
@@ -221,9 +235,28 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   // Candidates are validated serially. Large histories are not returned to React.
   const rowSlices = rawValues(members.get('rows')!.value)
   const models: Record<string, RcObject> = {}
+  let incumbent: RcObject | null = null
   for (const [i, row] of report.rows.entries()) {
     const model = await verifyRcDesignCandidate(row, rowSlices[i], report, read)
     if (model) models[row.candidate_id] = model
+    if (row.status === 'skipped_cost_dominated') {
+      check(adaptive && incumbent !== null && row.material_estimate.total > incumbent.estimate, 'study_cost_skip_without_prior_authority')
+      const receipt = document(await verifiedStudyBytes(read, row, 'cost_skip')).value
+      check(same(receipt, {
+        schema_version: 'rc-control-strict-cost-skip.v1', candidate_id: row.candidate_id,
+        model_sha256: row.artifacts.model.sha256, candidate_estimate: row.material_estimate.total,
+        price_table_hash: report.price_table_hash, incumbent,
+        reason: 'strictly_more_expensive_than_prior_full_verified_screen_pass',
+        candidate_feasibility: 'not_evaluated', solver_invocation_count: 0,
+      }), 'study_cost_skip_receipt_invalid')
+    }
+    if (adaptive && row.full_reference_verification_pass && row.selection_eligible
+      && row.invocations.every((inv: RcObject) => inv.status === 'returned' && inv.unknown_execution_work === false)
+      && (incumbent === null || row.material_estimate.total < incumbent.estimate)) {
+      incumbent = { candidate_id: row.candidate_id, estimate: row.material_estimate.total,
+        result_sha256: row.artifacts.result.sha256, verification_sha256: row.artifacts.verification.sha256,
+        model_sha256: row.artifacts.model.sha256 }
+    }
   }
   const base = report.rows[0]
   check(base.artifacts.model?.sha256 === report.baseline_checksum || base.status === 'invalid_candidate', 'study_baseline_invalid')
@@ -254,9 +287,21 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   const eligible = report.rows.filter((r: RcObject) => r.selection_eligible)
   if (report.prices !== null) eligible.sort((a: RcObject, b: RcObject) => a.material_estimate.total - b.material_estimate.total || (a.candidate_id < b.candidate_id ? -1 : 1))
   const selected = report.prices !== null && eligible.length ? eligible[0].candidate_id : null
+  const skipped = report.rows.filter((r: RcObject) => r.status === 'skipped_cost_dominated')
+  const resolved = report.rows.every((r: RcObject) => r.full_reference_verification_pass || r.status === 'skipped_cost_dominated')
+  const expectedStatus = adaptive ? (resolved ? (skipped.length ? 'complete_with_cost_exclusions' : 'complete') : 'incomplete')
+    : (report.verified_count === report.rows.length ? 'complete' : 'incomplete')
+  if (adaptive) check(same(report.cost_pruning, {
+    skipped_candidate_ids: skipped.map((r: RcObject) => r.candidate_id), skipped_count: skipped.length,
+    api_invocation_count: report.rows.reduce((n: number, r: RcObject) => n + r.invocations.length, 0),
+    minimum_scoped_estimate_proved_within_declared_candidates: resolved && selected !== null,
+    skipped_candidate_feasibility_known: false,
+    all_requested_models_physically_verified: report.rows.every((r: RcObject) => r.full_reference_verification_pass),
+    saved_wall_time_measured: false,
+  }), 'study_cost_pruning_summary_invalid')
   check(report.selected_candidate_id === selected && report.selection_status === (report.prices === null ? 'prices_unavailable' : selected === null ? 'no_verified_feasible_candidate' : 'selected')
     && report.verified_count === report.rows.filter((r: RcObject) => r.full_reference_verification_pass).length
-    && report.status === (report.verified_count === report.rows.length ? 'complete' : 'incomplete') && nat(report.total_wall_ns) && nat(report.total_process_cpu_ns), 'study_selection_invalid')
+    && report.status === expectedStatus && nat(report.total_wall_ns) && nat(report.total_process_cpu_ns), 'study_selection_invalid')
   return { report, models }
 }
 

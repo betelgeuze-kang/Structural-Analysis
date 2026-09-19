@@ -115,6 +115,7 @@ def test_failed_selection_is_retained_and_blocks_cohort_ratio():
         "price_table_hash",
         "full_analysis_budget_per_arm",
         "line_search_assembly_reuse",
+        "design_execution_policy",
     ],
 )
 def test_rehashed_unmatched_conditions_reject(field):

@@ -46,6 +46,7 @@ def main(argv=None):
         "--ranking-strategy", choices=RANKING_STRATEGIES, default=LEGACY_RANKING
     )
     parser.add_argument("--reuse-line-search-assembly", action="store_true")
+    parser.add_argument("--prune-cost-dominated", action="store_true")
     args = parser.parse_args(argv)
     if args.strategy == "price_order":
         if args.policy is not None or args.training_report is not None:
@@ -57,9 +58,7 @@ def main(argv=None):
     policy = training = None
     if args.strategy == "learned_order":
         assert args.policy is not None and args.training_report is not None
-        policy = load_rc_control_candidate_policy(
-            _read(args.policy, 2 * 1024 * 1024)
-        )
+        policy = load_rc_control_candidate_policy(_read(args.policy, 2 * 1024 * 1024))
         training = strict_json_object_bytes(
             _read(args.training_report, 2 * 1024 * 1024), maximum_bytes=2 * 1024 * 1024
         )
@@ -88,6 +87,7 @@ def main(argv=None):
         full_analysis_budget=args.full_analysis_budget,
         ranking_strategy=args.ranking_strategy,
         reuse_line_search_assembly=args.reuse_line_search_assembly,
+        prune_cost_dominated=args.prune_cost_dominated,
     )
     runtime = {
         "schema_version": "experimental-rc-control-candidate-strategy-runtime.v1",

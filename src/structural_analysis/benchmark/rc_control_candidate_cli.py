@@ -56,6 +56,7 @@ def main(argv=None):
             sub.add_argument("--full-analysis-budget", type=int, default=3)
             sub.add_argument("--evaluate-exhaustive-oracle", action="store_true")
             sub.add_argument("--reuse-line-search-assembly", action="store_true")
+            sub.add_argument("--prune-cost-dominated", action="store_true")
     args = parser.parse_args(argv)
     model = load_neutral_json_bytes(
         _read(args.model, 16 * 1024 * 1024), source_path=str(args.model)
@@ -92,9 +93,7 @@ def main(argv=None):
     else:
         if prices is None:
             raise ValueError("search requires a common price table")
-        policy = load_rc_control_candidate_policy(
-            _read(args.policy, 2 * 1024 * 1024)
-        )
+        policy = load_rc_control_candidate_policy(_read(args.policy, 2 * 1024 * 1024))
         training = strict_json_object_bytes(
             _read(args.training_report, 2 * 1024 * 1024), maximum_bytes=2 * 1024 * 1024
         )
@@ -108,6 +107,7 @@ def main(argv=None):
             evaluate_exhaustive_oracle=args.evaluate_exhaustive_oracle,
             ranking_strategy=args.ranking_strategy,
             reuse_line_search_assembly=args.reuse_line_search_assembly,
+            prune_cost_dominated=args.prune_cost_dominated,
         )
         output = {
             "report_hash": report["report_hash"],

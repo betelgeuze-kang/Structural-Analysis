@@ -216,7 +216,9 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await open(page)
 
     const panel = page.locator('[data-native-frame-artifacts="ready"]')
-    await expect(panel).toHaveAttribute('data-native-frame-integrity', 'pair_verified')
+    // Hosted failure snapshot already contained the verified pair after the
+    // default 5 s assertion expired. Allow bounded asynchronous artifact loading.
+    await expect(panel).toHaveAttribute('data-native-frame-integrity', 'pair_verified', { timeout: 15000 })
     await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-report-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-result-authority]')).toContainText('bounded_candidate')

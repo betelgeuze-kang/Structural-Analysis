@@ -100,14 +100,17 @@ def test_full_labels_and_separate_policy_schema(trained):
         learning.RCControlCandidatePolicy(policy._json)
 
 
-def test_new_policy_executes_unseen_candidate_search_and_oracle(trained, tmp_path):
+@pytest.mark.parametrize("pruned", [False, True])
+def test_new_policy_executes_unseen_candidate_search_and_oracle(
+    trained, tmp_path, pruned
+):
     policy, training, _ = trained
     baseline = design.apply_fiber_frame_section_changes(
         base(), change("evaluation", 0.0003, 0.00035)
     )
     result = search.compare_rc_control_candidate_search(
         baseline,
-        (change("cheaper", 0.00025, 0.00035),),
+        (change("cheaper", 0.00025, 0.00035), change("middle", 0.00033, 0.00037)),
         request(),
         policy=policy,
         training_report=training,
@@ -118,8 +121,9 @@ def test_new_policy_executes_unseen_candidate_search_and_oracle(trained, tmp_pat
         material_limits=design.FiberFrameMaterialHistoryLimits(1, 1, 1),
         source_revision="a" * 40,
         output_directory=tmp_path / "search",
-        full_analysis_budget=2,
+        full_analysis_budget=3,
         evaluate_exhaustive_oracle=True,
+        prune_cost_dominated=pruned,
     )
     assert all(
         arm["selected_full_reference_verified"] for arm in result["arms"].values()
@@ -127,6 +131,23 @@ def test_new_policy_executes_unseen_candidate_search_and_oracle(trained, tmp_pat
     assert all(
         arm["selected_candidate_id"] == "cheaper" for arm in result["arms"].values()
     )
+    for name, arm in result["arms"].items():
+        comparison = json.loads(
+            (tmp_path / "search" / arm["comparison_path"]).read_bytes()
+        )
+        assert arm["request_count"] == 3
+        assert arm["execution_work"]["api_invocation_count"] == (4 if pruned else 6)
+        assert comparison["rows"][-1]["status"] == (
+            "skipped_cost_dominated" if pruned else "verified"
+        )
+        if pruned:
+            assert arm["actual_model_execution_count"] == 2
+            assert arm["cost_excluded_candidate_ids"] == ["middle"]
+    oracle = json.loads(
+        (tmp_path / "search" / result["oracle"]["comparison_path"]).read_bytes()
+    )
+    assert oracle["schema_version"] == "experimental-rc-control-design-comparison.v1"
+    assert all(row["full_reference_verification_pass"] for row in oracle["rows"])
     assert result["claims"]["net_savings_proved"] is False
     assert result["historical_training_cost"]["report_hash"] == training["report_hash"]
 

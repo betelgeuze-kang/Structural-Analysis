@@ -40,6 +40,7 @@ _ROLES = frozenset(
         "analysis_outcome",
         "verification_started",
         "verification_outcome",
+        "cost_skip",
     }
 )
 
@@ -287,11 +288,20 @@ class RcSearchArtifactBundle:
                 or outcome.get("unknown_work_until_outcome") is not False
             ):
                 raise ValueError("completed bounded arm required")
+            adaptive = plan.get("design_execution_policy")
+            if adaptive not in (
+                None,
+                "strict_verified_cost_dominance_in_authored_order.v1",
+            ):
+                raise ValueError("unsupported design execution policy")
+            pruned = adaptive is not None and name != "exhaustive_oracle"
             comparison = _document(read(path, _META_MAX), "report_hash")
-            if (
-                comparison["report_hash"] != outcome.get("comparison_hash")
-                or comparison.get("schema_version")
-                != "experimental-rc-control-design-comparison.v1"
+            if comparison["report_hash"] != outcome.get(
+                "comparison_hash"
+            ) or comparison.get("schema_version") != (
+                "experimental-rc-control-cost-pruned-design.v1"
+                if pruned
+                else "experimental-rc-control-design-comparison.v1"
             ):
                 raise ValueError("comparison identity mismatch")
             rows = comparison.get("rows")
@@ -319,8 +329,22 @@ class RcSearchArtifactBundle:
                     raise ValueError(
                         "standalone comparison differs from declared shortlist"
                     )
+            if pruned and (
+                comparison.get("execution_policy") != adaptive
+                or outcome.get("actual_model_execution_count")
+                != sum(bool(row.get("invocations")) for row in rows)
+                or outcome.get("cost_excluded_candidate_ids")
+                != [
+                    row.get("candidate_id")
+                    for row in rows
+                    if row.get("status") == "skipped_cost_dominated"
+                ]
+            ):
+                raise ValueError("cost exclusion execution binding mismatch")
             for row in rows:
                 refs = row.get("artifacts")
+                if isinstance(refs, dict) and "cost_skip" in refs and not pruned:
+                    raise ValueError("cost skip outside adaptive comparison")
                 if type(refs) is not dict or not set(refs) <= _ROLES:
                     raise ValueError("comparison artifact role invalid")
                 for role, ref in refs.items():

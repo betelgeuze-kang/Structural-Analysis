@@ -195,6 +195,7 @@ def _run_candidate_search(
     evaluate_exhaustive_oracle: bool = False,
     ranking_strategy: str = LEGACY_RANKING,
     reuse_line_search_assembly: bool = False,
+    prune_cost_dominated: bool = False,
     only_strategy: str | None = None,
 ):
     """Compare frozen price-order and learned-order shortlists at the same budget.
@@ -213,11 +214,16 @@ def _run_candidate_search(
     uses_policy = only_strategy != "price_order"
     if not uses_policy and (policy is not None or training_report is not None):
         raise ValueError("price-only execution must not receive learned artifacts")
+    if type(prune_cost_dominated) is not bool:
+        raise ValueError("explicit boolean cost pruning required")
     if type(reuse_line_search_assembly) is not bool:
         raise ValueError("explicit boolean line-search assembly reuse required")
     if type(ranking_strategy) is not str or ranking_strategy not in RANKING_STRATEGIES:
         raise ValueError("supported candidate ranking strategy required")
-    if uses_policy and type(policy) not in (RCControlCandidatePolicy, RCControlReinforcementPolicy):
+    if uses_policy and type(policy) not in (
+        RCControlCandidatePolicy,
+        RCControlReinforcementPolicy,
+    ):
         raise ValueError("direct-control candidate policy required")
     if type(candidates) is not tuple or not 1 <= len(candidates) <= 16:
         raise ValueError("one to sixteen canonical alternatives required")
@@ -250,10 +256,12 @@ def _run_candidate_search(
     training = p = frozen = None
     if uses_policy:
         assert policy is not None
-        if (
-            type(training_report) is not dict
-            or training_report.get("schema_version")
-            != (REINFORCEMENT_TRAINING_SCHEMA if type(policy) is RCControlReinforcementPolicy else "experimental-rc-control-candidate-training.v1")
+        if type(training_report) is not dict or training_report.get(
+            "schema_version"
+        ) != (
+            REINFORCEMENT_TRAINING_SCHEMA
+            if type(policy) is RCControlReinforcementPolicy
+            else "experimental-rc-control-candidate-training.v1"
         ):
             raise ValueError("original candidate training report required")
         # Detach caller-owned inputs before using their training cost declarations.
@@ -313,7 +321,11 @@ def _run_candidate_search(
     pool = []
     for key, model in models.items():
         if p is not None:
-            _, context = (control_reinforcement_features if type(policy) is RCControlReinforcementPolicy else control_candidate_features)(model, request)
+            _, context = (
+                control_reinforcement_features
+                if type(policy) is RCControlReinforcementPolicy
+                else control_candidate_features
+            )(model, request)
             if context != p["context_hash"]:
                 raise ValueError(
                     "training/search direct-control or fixed model context mismatch"
@@ -419,6 +431,10 @@ def _run_candidate_search(
         plan["strategy"] = only_strategy
     if reuse_line_search_assembly:
         plan["line_search_assembly_reuse"] = "rc-control-immediate-line-search-reuse.v1"
+    if prune_cost_dominated:
+        plan["design_execution_policy"] = (
+            "strict_verified_cost_dominance_in_authored_order.v1"
+        )
     plan["plan_hash"] = study._sha(study._bytes(plan))
     study._save(root, "plan.json", study._bytes(plan))
     if uses_policy:
@@ -448,6 +464,11 @@ def _run_candidate_search(
                 source_revision=source_revision,
                 output_directory=root / name,
                 reuse_line_search_assembly=reuse_line_search_assembly,
+                **(
+                    {"prune_cost_dominated": True}
+                    if prune_cost_dominated and name != "exhaustive_oracle"
+                    else {}
+                ),
             )
         except BaseException as exc:
             study._save(
@@ -491,6 +512,13 @@ def _run_candidate_search(
             "execution_work": work,
             "unknown_work_until_outcome": work["unknown_work"],
         }
+        if prune_cost_dominated and name != "exhaustive_oracle":
+            outcome["actual_model_execution_count"] = sum(
+                bool(row["invocations"]) for row in report["rows"]
+            )
+            outcome["cost_excluded_candidate_ids"] = report["cost_pruning"][
+                "skipped_candidate_ids"
+            ]
         study._save(root, name + "-outcome.json", study._bytes(outcome))
         if work["unknown_work"]:
             raise ValueError("unknown numerical work; stop before another search arm")

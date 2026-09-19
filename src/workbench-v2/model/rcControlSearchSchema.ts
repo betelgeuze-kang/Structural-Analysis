@@ -157,6 +157,7 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     const ordering = name === 'price_order' ? [...ids].sort(priceSort) : ranked.ordering
     check(same(plan.plans[name], { ordering, shortlist: ordering.slice(0, plan.full_analysis_budget_per_arm - 1) }), 'search_ranking_invalid')
   }
+  check(plan.design_execution_policy === undefined || plan.design_execution_policy === 'strict_verified_cost_dominance_in_authored_order.v1', 'search_design_policy_invalid')
   const designs: Record<string, RcDesignReview> = {}
   const names: string[] = [...arms, ...(report.oracle ? ['exhaustive_oracle'] : [])]
   for (const name of names) {
@@ -166,6 +167,11 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     const comparisonBytes = await read(outcome.comparison_path, MAX)
     const review = await validateRcDesignStudy(comparisonBytes, (path, max, expected) => read(`${name}/${path}`, max, expected))
     const comparison = review.report
+    const pruned = plan.design_execution_policy !== undefined && name !== 'exhaustive_oracle'
+    check(comparison.schema_version === (pruned ? 'experimental-rc-control-cost-pruned-design.v1' : 'experimental-rc-control-design-comparison.v1'), 'search_design_schema_mismatch')
+    if (pruned) check(outcome.actual_model_execution_count === comparison.rows.filter((r: RcObject) => r.invocations.length > 0).length
+      && same(outcome.cost_excluded_candidate_ids, comparison.cost_pruning.skipped_candidate_ids), 'search_cost_exclusion_count_invalid')
+
     const expected = ['baseline', ...(name === 'exhaustive_oracle' ? plan.plans.price_order.ordering : plan.plans[name].shortlist)]
     check(comparison.report_hash === outcome.comparison_hash && comparison.source_revision === report.source_revision
       && same(comparison.rows.map((r: RcObject) => r.candidate_id), expected) && outcome.request_count === expected.length

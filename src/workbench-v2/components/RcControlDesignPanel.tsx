@@ -62,6 +62,7 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
     <p data-rc-design-authority>Original artifacts and stored full-path verification bindings checked. The browser does not rerun the solver. Caller limits, quantities and prices do not establish independent physical validation, code compliance, a verified quote or design approval.</p>
+    {report.cost_pruning ? <p data-rc-design-cost-pruning>{report.cost_pruning.skipped_count} candidates excluded by verified cost dominance. Their feasibility is not evaluated; no elapsed-time saving is asserted.</p> : null}
     <p>{report.control_request.targets_m.length} authored targets per design · {report.verified_count}/{report.candidate_denominator} designs have complete stored verification · execution {report.status}</p>
     {report.control_request.constant_nodal_loads ? <p data-rc-design-constants>Constant nodal loads (node, FX kN, FY kN, MZ kN·m): {report.control_request.constant_nodal_loads.map((r: RcObject) => `${r.node_id}, ${r.FX_kN}, ${r.FY_kN}, ${r.MZ_kNm}`).join('; ')}. Every analysis and fresh verification includes its own preload. Path screens include that accepted preload.</p> : null}
     <p>Source declaration <code>{report.source_revision}</code> · report <code data-rc-design-hash>{report.report_hash}</code></p>
@@ -106,7 +107,7 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.quantities?.totals.longitudinal_rebar_mass_kg)}<br />Δ {shown(row.quantity_delta?.longitudinal_rebar_mass_kg)}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.material_estimate?.total)} {report.prices?.currency}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.scoped_estimate_reduction)}</td>
-          <td>{row.status}<br /><button type="button" className="wb2-btn" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
+          <td>{row.status === 'skipped_cost_dominated' ? 'Not analyzed: more expensive than a verified feasible design' : row.status}<br /><button type="button" className="wb2-btn" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
         </tr>)}</tbody></table>
     </div>
     {report.rows.map((row: RcObject) => <details key={row.candidate_id} data-rc-design-details={row.candidate_id} open={selected === row.candidate_id}>

@@ -51,3 +51,10 @@ HTTP/Workbench adaptive-report validation and review, plus repeated elapsed-cost
 comparison against exhaustive execution, still require explicit integration.
 Existing viewers must not silently treat excluded models as analyzed. This is
 the first actual execution-skip path, not a closure claim for the full roadmap.
+
+## Delivery follow-up
+
+Candidate search, HTTP and Workbench are now connected in the
+[delivery record](rc-cost-pruned-search-delivery-20260920.md). The earlier
+integration boundary above describes this initial core implementation. Repeated
+elapsed-cost comparison remains open.
