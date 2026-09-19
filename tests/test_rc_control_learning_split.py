@@ -214,3 +214,52 @@ def test_bent_or_supported_midpoint_is_not_collapsed(
 def test_invalid_histories_do_not_acquire_a_shape_identity(targets):
     with pytest.raises(ValueError):
         control_history_turning_points(targets)
+
+
+def test_connected_training_groups_exclude_transitive_aliases(tmp_path):
+    from structural_analysis.benchmark.rc_control_learning_split import (
+        control_training_exclusion_groups,
+    )
+
+    a = make(tmp_path, "a", "train")
+    b = make(
+        tmp_path, "b", "train", lengths=(2.5, 2.0), targets=(-0.018, 0.016, -0.014)
+    )
+    b = RCControlLearningCase(
+        b.case_id,
+        a.project_id,
+        b.geometry_family_id,
+        b.load_history_id,
+        b.split,
+        b.model,
+        b.request,
+    )
+    c = make(
+        tmp_path, "c", "train", lengths=(5.0, 4.0), targets=(-0.012, 0.020, -0.006)
+    )
+    d = make(
+        tmp_path, "d", "train", lengths=(4.0, 3.1), targets=(-0.022, 0.015, -0.013)
+    )
+    evaluation = RCControlLearningCase(
+        "held-out", "held-out", "held-out", "held-out", "holdout", d.model, d.request
+    )
+    result = control_training_exclusion_groups([d, c, b, a, evaluation])
+    assert result["groups"] == [["a", "b", "c"], ["d"]]
+    assert result["independent_provenance"] is False
+    assert result == control_training_exclusion_groups([a, b, c, d])
+    assert {tuple(c["case_ids"]): c["reasons"] for c in result["connections"]} == {
+        ("a", "b"): ["project_id"],
+        ("b", "c"): ["geometry_shape"],
+    }
+
+
+def test_connected_training_groups_join_resampled_history_even_with_new_ids(tmp_path):
+    from structural_analysis.benchmark.rc_control_learning_split import (
+        control_training_exclusion_groups,
+    )
+
+    a = make(tmp_path, "a", "train")
+    b = make(tmp_path, "b", "train", lengths=(3, 2.4), targets=(-0.02, 0.02, -0.02))
+    result = control_training_exclusion_groups([a, b])
+    assert result["groups"] == [["a", "b"]]
+    assert result["connections"][0]["reasons"] == ["history_shape_or_prefix"]

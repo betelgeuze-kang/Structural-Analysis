@@ -252,15 +252,20 @@ def run_rc_control_runtime_selection(
     record_assembly_work=False,
     reuse_line_search_assembly=False,
     record_assembly_timing=False,
+    withholding_strategy="case",
 ):
-    """Fit each ridge without one training case, then execute that case's full path.
+    """Fit each ridge with declared exclusions, then execute each case's full path.
 
     All original cases enter the existing leakage preflight. Only cases already
     declared train may be fitted or executed here; validation/holdout outputs are
-    untouched. Whole-case exclusion is internal tuning, not an independent split.
+    untouched. Default exclusion is one case. Connected-group mode excludes all
+    transitively related training cases and requires at least two groups. Both
+    modes remain internal tuning, not authenticated independent evaluation.
     No structural labels are regenerated. Bounds cover every path and possible
     proposal retry before the first fit or output is created.
     """
+    if withholding_strategy not in ("case", "connected_training_groups"):
+        raise ValueError("supported runtime withholding strategy required")
     wall, cpu = perf_counter_ns(), process_time_ns()
     if type(record_assembly_timing) is not bool or (
         record_assembly_timing and not record_assembly_work
@@ -323,6 +328,21 @@ def run_rc_control_runtime_selection(
         cases, prepared, grouped, source, arithmetic_profile
     )
     case_ids = sorted(training_cases)
+    exclusion_groups = None
+    withheld = {case_id: [case_id] for case_id in case_ids}
+    if withholding_strategy == "connected_training_groups":
+        from structural_analysis.benchmark.rc_control_learning_split import (
+            control_training_exclusion_groups,
+        )
+
+        exclusion_groups = control_training_exclusion_groups(cases)
+        if len(exclusion_groups["groups"]) < 2:
+            raise ValueError(
+                "connected training groups leave no independent fitting group"
+            )
+        withheld = {
+            case_id: group for group in exclusion_groups["groups"] for case_id in group
+        }
     fit_bound = len(case_ids) * len(ridge_grid) + 1
     # Reference and fresh reference use one call per target. Both secant and
     # proposer can retry once; constant preload runs once per path.
@@ -389,6 +409,12 @@ def run_rc_control_runtime_selection(
         "original_label_generation_cost_required_separately": True,
         "automatic_promotion": False,
     }
+    if exclusion_groups is not None:
+        plan["withholding_strategy"] = withholding_strategy
+        plan["training_exclusion_groups"] = exclusion_groups
+        plan["selection_score"] += (
+            "; equal-case weighting retained across connected groups"
+        )
     if static_model_abstention:
         plan["static_model_abstention"] = True
         plan["static_model_gate_profile"] = "rc-material-static-model-gate.v1"
@@ -475,8 +501,11 @@ def run_rc_control_runtime_selection(
         candidate_folds = []
         for held in case_ids:
             case = training_cases[held]
-            rows = [r for r in samples if r["case_id"] != held]
-            policy, fit_index = fit(rows, ridge, {"withheld_training_case": held})
+            rows = [r for r in samples if r["case_id"] not in withheld[held]]
+            purpose = {"withheld_training_case": held}
+            if exclusion_groups is not None:
+                purpose["withheld_training_group"] = withheld[held]
+            policy, fit_index = fit(rows, ridge, purpose)
             frozen = _bytes(policy.to_dict())
             _, compiled, features, _, _ = prepared[held]
             for repetition in range(repetitions):

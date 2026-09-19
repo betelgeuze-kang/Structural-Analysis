@@ -937,3 +937,85 @@ def test_invalid_assembly_timing_rejects_before_training_or_output(
             record_assembly_work=work,
         )
     assert not (tmp_path / "absent").exists()
+
+
+def test_connected_runtime_groups_reject_exhausted_training_before_fit(
+    original, tmp_path, monkeypatch
+):
+    # Both original training cases share a resampled history despite distinct IDs.
+    monkeypatch.setattr(learning, "_fit", lambda *a, **k: pytest.fail("no fit allowed"))
+    root = tmp_path / "grouped"
+    with pytest.raises(ValueError, match="no independent fitting group"):
+        run(root, original, withholding_strategy="connected_training_groups")
+    assert not root.exists()
+
+
+def test_unknown_runtime_withholding_rejects_before_output(original, tmp_path):
+    with pytest.raises(ValueError, match="withholding strategy"):
+        run(tmp_path / "bad", original, withholding_strategy="random_rows")
+    assert not (tmp_path / "bad").exists()
+
+
+def test_connected_runtime_fits_exclude_every_related_case(original, tmp_path):
+    cases, _, _, _ = original
+    payload = json.loads(
+        Path(
+            "examples/public_rc_fiber_frame_l_frame_material_history.json"
+        ).read_bytes()
+    )
+    for node in payload["nodes"]:
+        if node["id"] == "N2":
+            node["coordinates"] = [4.0, 0.0, 0.0]
+        elif node["id"] == "N3":
+            node["coordinates"] = [4.0, 3.1, 0.0]
+    path = tmp_path / "train-c.json"
+    path.write_text(json.dumps(payload))
+    request = replace(cases[0].request, targets_m=(-0.8e-6, -1.5e-6, 1.2e-6, -0.2e-6))
+    c = learning.RCControlLearningCase(
+        "train-c",
+        "train-c",
+        "train-c",
+        "train-c",
+        "train",
+        load_neutral_json(path),
+        request,
+    )
+    cases = [*cases, c]
+    labels = learning.run_rc_control_learning_study(
+        cases,
+        source_revision="a" * 40,
+        output_directory=tmp_path / "labels",
+        feature_profile=learning.MATERIAL_FEATURE_PROFILE,
+        arithmetic_profile="retained-twofold-refinement.v1",
+        fit_solver=learning.SVD_RIDGE_FIT_PROFILE,
+    )
+    policy = learning.RCControlSeedPolicy(json.dumps(labels["policy"]))
+    samples = json.loads((tmp_path / "labels/training-samples.json").read_bytes())
+    root = tmp_path / "grouped"
+    result = run(
+        root,
+        (cases, samples, policy, labels),
+        ridge_grid=(1e4,),
+        maximum_fits=4,
+        maximum_core_calls=200,
+        withholding_strategy="connected_training_groups",
+    )
+    plan = json.loads((root / "plan.json").read_bytes())
+    assert plan["training_exclusion_groups"]["groups"] == [
+        ["train-a", "train-b"],
+        ["train-c"],
+    ]
+    assert not result["validation_or_holdout_execution"]
+    for fold in result["folds"]:
+        fitted = json.loads(
+            (root / f"fit-{fold['fit_index']:04d}-policy.json").read_bytes()
+        )
+        excluded = (
+            {"train-a", "train-b"}
+            if fold["withheld_training_case"] != "train-c"
+            else {"train-c"}
+        )
+        assert set(fitted["training_sample_hashes"]) == {
+            s["sample_hash"] for s in samples if s["case_id"] not in excluded
+        }
+        assert fold["score"]["full_comparison_pass"]

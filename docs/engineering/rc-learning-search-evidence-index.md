@@ -575,3 +575,8 @@ These source-specific receipts do not qualify later commits automatically.
   select the same design with exact retained results, halve API calls and show
   25.6–27.1% lower enclosing process time in this local observation. A no-feasible
   case skips nothing and receives no qualified ratio. No learned benefit claimed.
+- [Connected runtime exclusions](rc-runtime-connected-exclusions-20260920.md):
+  opt-in exclusion of transitively related project/geometry/history cases from
+  each runtime fit, with exact excluded groups in the frozen plan and fit receipts.
+  Real small-case execution verifies complementary sample membership; it remains
+  internal tuning with no independent provenance or learned speedup claim.

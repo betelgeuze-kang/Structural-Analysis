@@ -186,3 +186,58 @@ def validate_control_learning_split_shapes(cases):
         "unrestrained_collinear_subdivision_screened": True,
         "collinear_unit_direction_tolerance": 1e-10,
     }
+
+
+def control_training_exclusion_groups(cases):
+    """Connected groups prevent aliases bridging nominal leave-case-out folds.
+
+    Only declared training cases participate. Shared project/geometry/history IDs,
+    conservative geometry overlap or resampled history/prefix overlap connect a
+    pair. Transitive closure is intentional: indirectly related cases stay out of
+    the same fitting set. This does not authenticate project provenance.
+    """
+    training = sorted((c for c in cases if c.split == "train"), key=lambda c: c.case_id)
+    names = [c.case_id for c in training]
+    if len(names) != len(set(names)) or len(names) < 2:
+        raise ValueError("unique multiple training cases required")
+    shapes = [geometry_shape_signature(c.model) for c in training]
+    histories = [control_history_turning_points(c.request.targets_m) for c in training]
+    parent = list(range(len(training)))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    connections = []
+    for i, left in enumerate(training):
+        for j in range(i + 1, len(training)):
+            right = training[j]
+            reasons = [
+                key
+                for key in ("project_id", "geometry_family_id", "load_history_id")
+                if getattr(left, key) == getattr(right, key)
+            ]
+            if geometry_shapes_overlap(shapes[i], shapes[j]):
+                reasons.append("geometry_shape")
+            if _history_prefix(histories[i], histories[j]) or _history_prefix(
+                histories[j], histories[i]
+            ):
+                reasons.append("history_shape_or_prefix")
+            if reasons:
+                parent[find(j)] = find(i)
+                connections.append(
+                    {"case_ids": [left.case_id, right.case_id], "reasons": reasons}
+                )
+    groups = {}
+    for i, name in enumerate(names):
+        groups.setdefault(find(i), []).append(name)
+    ordered = sorted(groups.values(), key=lambda group: group[0])
+    return {
+        "schema_version": "rc-control-training-exclusion-groups.v1",
+        "groups": ordered,
+        "connections": connections,
+        "transitive_closure": True,
+        "independent_provenance": False,
+    }
