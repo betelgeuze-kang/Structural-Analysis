@@ -86,3 +86,9 @@ record the completed CI, including the layout role-set regression and correction
 that the preserved four-case warm-start corpus has only one connected project
 group. It cannot support the planned grouped tuning by itself. Additional
 defensible source groups are required; no holdout was moved into training.
+
+The [candidate-boundary observation](rc-reinforcement-boundary-20260920.md) now
+includes one actual mixed-feasibility pool and a learned false-pass prediction
+rejected by full reanalysis. It still produces identical online work, two
+no-feasible-design cases and no learned benefit. Its tiny strain-screen crossing
+is not a robust physical boundary or independent generalization result.

@@ -597,3 +597,8 @@ These source-specific receipts do not qualify later commits automatically.
   protocol and 13 original input files verified; all four existing training cases
   share one project group. Group withholding leaves no fitting data. The next
   grouped runtime study requires additional defensible groups, not renamed cases.
+- [Candidate-boundary observation](rc-reinforcement-boundary-20260920.md): four
+  predeclared cases and eight measured pairs, followed by full-pool audits. One
+  pool contains a real narrow false-pass prediction blocked by full reanalysis;
+  two pools have no feasible design. Same online work and higher training-inclusive
+  costs still provide no learned benefit or independent validation.
