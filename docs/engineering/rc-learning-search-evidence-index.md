@@ -1,5 +1,10 @@
 # RC learning and candidate-search evidence index
 
+[Full roadmap status and remaining requirements](structural-roadmap-status-20260920.md)
+separates current implementation, measured benefit, numerical limitations and
+main/independent acceptance dependencies. Historical records below retain their
+own source scope.
+
 The [larger planar cohort](planar-larger-cohort-20260914.md) adds eight
 completed observations at 27/48 free equations, four passing full-history
 backend comparisons and four exact repetition pairs. No damage/plasticity or
