@@ -46,3 +46,25 @@ validation. The Tan/Nguyen input conflicts, incomplete source histories and pape
 licensing remain unresolved; no specimen was admitted to training or reconstructed
 as a qualified physical benchmark. No AI speedup, construction saving or release
 qualification is claimed.
+
+## Original result delivery
+
+The exclusive-output fixture builder ran against committed solver source
+`b6b4507a526c3df1b07abb3dc7392c14282234bd`. Its baseline and asymmetric candidate
+both passed fresh full reference verification; the original report contains
+31,872 bytes, stored as a 6,752-byte deterministic gzip fixture. Decompressed
+SHA-256: `d145dc0d3bf4f61fd8cb1b69c174f841c6e97d2fa623e60b6f2bd450ce74ae6b`.
+This is synthetic internal evidence, not a reconstruction of an external beam.
+
+An additional 88 Workbench checks passed for original report validation,
+comparison delivery and existing reinforcement search. Desktop/mobile browser
+checks load the asymmetric fixture and display its actual centroid distances.
+The first-column section description now wraps within 16 rem so the new geometry
+is readable at a 390-pixel viewport while numeric comparison columns remain in
+the existing horizontal table.
+
+After the wrapping adjustment, 37 centroid/unequal-steel browser checks passed
+and TypeScript checking passed again. The 390-pixel screenshot was inspected:
+both reinforcement areas and the 0.04/0.06 m face-to-centroid distances are readable.
+The total distinct frontend checks across this focused validation are 123;
+repeated checks are not counted as new cases.
