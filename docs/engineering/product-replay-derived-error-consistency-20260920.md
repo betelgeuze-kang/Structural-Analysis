@@ -32,3 +32,32 @@ The source/diagnostic basis is
 `main-product-replay-relative-error-diagnosis-20260920.md`. A hosted run must
 still establish whether this resolves its failure, and the development branch's
 independent external response mismatch is not repaired by this change.
+
+## Final-source regeneration and validation
+
+At committed implementation `bf78fcd15`, a separate process regenerated a product
+replay from the preserved same-operator main external receipt. Refresh (including
+its internal validation) took 154.463367732 s; an additional current-source
+validation with fresh product calculations took 77.320200345 s and succeeded.
+The original external bytes were verified unchanged. This is current-product
+replay, not new external execution: `external_execution_reused=true`, external
+source remains main 234c3122 and its September 14 execution timestamp is preserved.
+
+Crucially, `technical_contract_pass=false` and `current_product_replay_pass=false`
+remain. Both bounded planar member-feature and prescribed-settlement comparisons
+still fail. The fix allows an internally consistent blocked receipt to validate;
+it does not turn those numerical failures into technical passes. No protected
+repository receipt was replaced. New hosted or main validation remains necessary.
+
+The earlier obsolete-code full-file run terminated at 18 passes / six failures
+in 320.80 s: three stored-source mismatches, two replay mismatches and the old
+NumPy scalar rejection. Its loaded implementation predates the final correction;
+it is retained as an unsuccessful intermediate run, not final-code evidence.
+The final-code focused results above and the separate regeneration/validation
+are the applicable evidence. Final full-file stored-receipt acceptance is open.
+
+Packet:
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-current-replay-fix-c7xygcg2`.
+Input, refreshed receipt, result, execution script and implementation snapshot
+are inventoried; all listed hashes were re-read. External inventory SHA-256:
+`cf7ced34503825416eb1bcdec8e4256e58f1071a605094f566a6e193ef04c46c`.
