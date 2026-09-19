@@ -38,3 +38,19 @@ physical accuracy, code compliance or an AI speedup.
 The existing RC design browser suite also passed 13 tests in 50.7 s, covering
 selection, original downloads, strict/unpriced cases, corruption, worker retirement,
 credential-origin checks and deliberately delayed validation.
+
+## Hosted confirmation at 60df039db
+
+Frontend Web CI run
+[35473078294](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/35473078294)
+completed successfully for source `60df039db50ce767e778798f8ba0ae0464eb314a`.
+The main frontend selection passed **738 tests in 10.9 min**. Job 105977497147's
+log explicitly includes the actual boundary prediction check and unselectable
+false-pass candidate at both 1440 px and 390 px. This supplies hosted confirmation
+of the previously local boundary-fixture integration. It does not rerun the
+source numerical campaign or confer physical/design approval.
+
+Workflow Contract and P0 also passed at this source. The full Python shards still
+stop at external replay/technical receipt preparation. Python development tests
+were still running when this frontend receipt was recorded. Later local concrete
+refinement commits are not covered by this hosted source.
