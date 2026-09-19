@@ -534,7 +534,7 @@ These source-specific receipts do not qualify later commits automatically.
 - [Unequal outer reinforcement](rc-unequal-outer-reinforcement-20260920.md):
   separate top/bottom areas now reach public fibers, section changes and steel
   quantities. Physical identity and fixed learned contexts retain the distinction;
-  varying-area learned ranking and Workbench review remain pending.
+  the later learning and Workbench records below supersede its pending delivery boundary.
 - [Hosted 1d8f4e7a5 result](hosted-1d8-development-terminal-20260920.md):
   1,293 development checks passed; full-suite evidence preparation still failed.
   This receipt predates the unequal-area implementation.
@@ -559,5 +559,19 @@ These source-specific receipts do not qualify later commits automatically.
 - [Actual cost-pruned design execution](rc-control-cost-pruned-design-20260920.md):
   opt-in strict cost exclusions based on prior fresh verified feasible results;
   a real comparison preserves selection/results while reducing six API calls to
-  four. Skipped feasibility remains unknown; adaptive Workbench integration and
-  repeated timing remain open.
+  four. Skipped feasibility remains unknown; subsequent delivery and timing are
+  recorded below.
+
+- [Cost-pruned search delivery](rc-cost-pruned-search-delivery-20260920.md):
+  explicit adaptive mode connected through both search CLIs, HTTP and Workbench;
+  original skip receipts verified and downloadable, excluded physical results
+  unavailable, exhaustive oracle retained. No learned benefit implied.
+- [Hosted 82c8a0d47 terminal outcome](hosted-82c-development-terminal-20260920.md):
+  1,574 development checks passed; full evidence preparation remains blocked.
+  Frontend 727/728 passed, with a bounded readiness wait adjusted using its failure
+  snapshot. Subsequent hosted confirmation remains required.
+- [Repeated strict-cost exclusion process study](rc-cost-pruning-process-campaign-20260920.md):
+  five declared cases, ten balanced pairs and 20 actual CLI processes. Four cases
+  select the same design with exact retained results, halve API calls and show
+  25.6–27.1% lower enclosing process time in this local observation. A no-feasible
+  case skips nothing and receives no qualified ratio. No learned benefit claimed.
