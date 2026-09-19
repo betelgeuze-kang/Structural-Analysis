@@ -626,3 +626,7 @@ These source-specific receipts do not qualify later commits automatically.
   804-row CSV/manual acquired with source identities and CC BY 4.0 metadata;
   155 explicit controls across 51 reference prefixes. Scalar endpoints and mixed
   measured/imputed inputs remain outside solver-history training and validation.
+- [Hosted 19f terminal outcome](hosted-19f-terminal-20260920.md): 1,620 development
+  checks and 738 frontend tests passed, including the new material audit contracts.
+  Full repository shards still fail before test execution at external evidence
+  preparation; no independent numerical acceptance is inferred.
