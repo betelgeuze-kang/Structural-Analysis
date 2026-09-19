@@ -92,3 +92,9 @@ includes one actual mixed-feasibility pool and a learned false-pass prediction
 rejected by full reanalysis. It still produces identical online work, two
 no-feasible-design cases and no learned benefit. Its tiny strain-screen crossing
 is not a robust physical boundary or independent generalization result.
+
+[Concrete damage localization](planar-concrete-localization-20260920.md) narrows
+where the retained 64/128-layer differences occur. The original maxima remain
+unchanged; localized damage-onset cells dominate the witness-section discrepancy.
+This informs subsequent mesh investigation without closing material convergence
+or substituting average error for the original local screen.

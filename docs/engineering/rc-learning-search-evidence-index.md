@@ -610,3 +610,7 @@ These source-specific receipts do not qualify later commits automatically.
   1,595 development contracts and frontend checks passed; full-suite shards still
   stop at external replay/technical receipt preparation. Later boundary changes
   require their own hosted run.
+- [Concrete damage localization](planar-concrete-localization-20260920.md): original
+  64/128-layer maxima reproduced exactly; largest tensile witness affects 10 of
+  1,152 cells, with mixed-onset children accounting for most witness-section
+  difference. Small mean differences do not replace the failed local screen.
