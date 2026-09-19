@@ -1,0 +1,153 @@
+{
+  "checked_inputs": [
+    {
+      "byte_length": 5587,
+      "path": "original-plan.json",
+      "sha256": "e9c2f87cffff85338145c6e83e7965c1e7dd245599f6f5035dee3e1a0485e041"
+    },
+    {
+      "byte_length": 2316,
+      "path": "inputs/train-a-model.json",
+      "sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d"
+    },
+    {
+      "byte_length": 5642,
+      "path": "inputs/train-a-request.json",
+      "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+    },
+    {
+      "byte_length": 2316,
+      "path": "inputs/train-b-model.json",
+      "sha256": "fcf9ad40439fc3fd1c8289904fcfbf7690247b3aeb0d8b55cdb2c25b8bd72377"
+    },
+    {
+      "byte_length": 5642,
+      "path": "inputs/train-b-request.json",
+      "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+    },
+    {
+      "byte_length": 2318,
+      "path": "inputs/train-c-model.json",
+      "sha256": "157523e01f5525b00b6da76d182318cfa68c4446aecd323880948a2abad2fb72"
+    },
+    {
+      "byte_length": 5724,
+      "path": "inputs/train-c-request.json",
+      "sha256": "089f48bd154481daa914c2fde96980d0c58d4734163b8e5c02bb42f0e47626ea"
+    },
+    {
+      "byte_length": 2319,
+      "path": "inputs/train-d-model.json",
+      "sha256": "9d871f918523da1546ac27f3e24b9b05ec8a11e4d92794f6d91b0b3b05114460"
+    },
+    {
+      "byte_length": 5936,
+      "path": "inputs/train-d-request.json",
+      "sha256": "1290200a0ea7093aec43d6f3a0d7117bd75b67eaa116b339ea5feed0abd6a217"
+    },
+    {
+      "byte_length": 2316,
+      "path": "inputs/validation-model.json",
+      "sha256": "4f640aaa1e16b3fdaaebffa8907909ba35c62fb3098c033d74b19fbec65cd1d0"
+    },
+    {
+      "byte_length": 6406,
+      "path": "inputs/validation-request.json",
+      "sha256": "ae4aceccf9590162e450bc7399787d622649a142740ffa1a8bec654c1e4ba6a5"
+    },
+    {
+      "byte_length": 2316,
+      "path": "inputs/holdout-model.json",
+      "sha256": "a898e9f3c449abaa3988d3bd807adf93b5e855203c2153a04fd03dc30045fc2e"
+    },
+    {
+      "byte_length": 6742,
+      "path": "inputs/holdout-request.json",
+      "sha256": "64284786e59bb4ad3e611128e2c3623515d807d474fef6bceccc61b21f5fcc81"
+    }
+  ],
+  "evaluation_case_ids_not_grouped": [
+    "validation",
+    "holdout"
+  ],
+  "fit_count": 0,
+  "group_screen": {
+    "connections": [
+      {
+        "case_ids": [
+          "train-a",
+          "train-b"
+        ],
+        "reasons": [
+          "project_id",
+          "load_history_id",
+          "history_shape_or_prefix"
+        ]
+      },
+      {
+        "case_ids": [
+          "train-a",
+          "train-c"
+        ],
+        "reasons": [
+          "project_id"
+        ]
+      },
+      {
+        "case_ids": [
+          "train-a",
+          "train-d"
+        ],
+        "reasons": [
+          "project_id"
+        ]
+      },
+      {
+        "case_ids": [
+          "train-b",
+          "train-c"
+        ],
+        "reasons": [
+          "project_id"
+        ]
+      },
+      {
+        "case_ids": [
+          "train-b",
+          "train-d"
+        ],
+        "reasons": [
+          "project_id"
+        ]
+      },
+      {
+        "case_ids": [
+          "train-c",
+          "train-d"
+        ],
+        "reasons": [
+          "project_id"
+        ]
+      }
+    ],
+    "groups": [
+      [
+        "train-a",
+        "train-b",
+        "train-c",
+        "train-d"
+      ]
+    ],
+    "independent_provenance": false,
+    "schema_version": "rc-control-training-exclusion-groups.v1",
+    "transitive_closure": true
+  },
+  "group_withholding_can_leave_training_data": false,
+  "independent_project_provenance": false,
+  "original_source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
+  "previous_runtime_results_recomputed": false,
+  "protocol_sha256": "733d98281f3ac60958808db119845df6bc40bcd2eb432729f236d293ac3720ff",
+  "schema_version": "rc-runtime-original-training-group-audit.v1",
+  "solver_call_count": 0,
+  "training_case_count": 4
+}

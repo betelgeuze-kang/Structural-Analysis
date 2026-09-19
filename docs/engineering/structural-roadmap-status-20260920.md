@@ -81,3 +81,8 @@ workflow changes to this branch. This supersedes the missing-local-plumbing
 portion of the snapshot above; branch ancestry, authorized merge and operational
 attestation remain unclosed. [Terminal 20a results](hosted-20a-terminal-20260920.md)
 record the completed CI, including the layout role-set regression and correction.
+
+[Original training-group audit](rc-original-training-groups-20260920.md) confirms
+that the preserved four-case warm-start corpus has only one connected project
+group. It cannot support the planned grouped tuning by itself. Additional
+defensible source groups are required; no holdout was moved into training.

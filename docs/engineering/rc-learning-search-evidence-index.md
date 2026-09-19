@@ -593,3 +593,7 @@ These source-specific receipts do not qualify later commits automatically.
 - [Terminal 20a hosted outcome](hosted-20a-terminal-20260920.md): frontend 735 passed;
   development layout readers rejected an erroneously expanded required-role set.
   The optional adaptive receipt is now isolated and affected HTTP paths rerun.
+- [Original training-group audit](rc-original-training-groups-20260920.md):
+  protocol and 13 original input files verified; all four existing training cases
+  share one project group. Group withholding leaves no fitting data. The next
+  grouped runtime study requires additional defensible groups, not renamed cases.

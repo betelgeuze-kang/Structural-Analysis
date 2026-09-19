@@ -263,3 +263,64 @@ def test_connected_training_groups_join_resampled_history_even_with_new_ids(tmp_
     result = control_training_exclusion_groups([a, b])
     assert result["groups"] == [["a", "b"]]
     assert result["connections"][0]["reasons"] == ["history_shape_or_prefix"]
+
+
+def test_original_group_audit_pins_protocol_and_original_input_bytes(tmp_path):
+    import hashlib
+    from scripts.audit_rc_runtime_training_groups import audit
+
+    cases = [
+        make(tmp_path, "a", "train"),
+        make(tmp_path, "b", "train", lengths=(3, 2.4)),
+    ]
+    root = tmp_path / "packet"
+    (root / "inputs").mkdir(parents=True)
+    refs, records = [], []
+
+    def save(name, value):
+        raw = json.dumps(value).encode()
+        (root / name).write_bytes(raw)
+        refs.append(
+            {
+                "destination": name,
+                "bytes": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+            }
+        )
+
+    for c in cases:
+        save(
+            f"inputs/{c.case_id}-model.json",
+            json.loads((tmp_path / f"{c.case_id}.json").read_bytes()),
+        )
+        save(f"inputs/{c.case_id}-request.json", c.request.to_dict())
+        records.append(
+            {
+                k: getattr(c, k)
+                for k in (
+                    "case_id",
+                    "project_id",
+                    "geometry_family_id",
+                    "load_history_id",
+                    "split",
+                )
+            }
+            | {
+                "model_path": f"{c.case_id}-model.json",
+                "request_path": f"{c.case_id}-request.json",
+            }
+        )
+    save("original-plan.json", {"cases": records})
+    raw = json.dumps({"source_revision": "a" * 40, "original_files": refs}).encode()
+    (root / "protocol.json").write_bytes(raw)
+    pin = hashlib.sha256(raw).hexdigest()
+    result = audit(root, pin)
+    assert result["group_screen"]["groups"] == [["a", "b"]]
+    assert result["group_withholding_can_leave_training_data"] is False
+    assert result["fit_count"] == result["solver_call_count"] == 0
+    with pytest.raises(ValueError, match="protocol mismatch"):
+        audit(root, "0" * 64)
+    with (root / "inputs/a-model.json").open("ab") as out:
+        out.write(b" ")
+    with pytest.raises(ValueError, match="input mismatch"):
+        audit(root, pin)
