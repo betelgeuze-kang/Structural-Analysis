@@ -618,3 +618,7 @@ These source-specific receipts do not qualify later commits automatically.
   Git source, unchanged forty-target path and solver criteria; fresh refinement
   completed at forty targets. Actual 128/256 comparison passes 400 nodal/steel
   groups but fails 34/240 concrete groups; tensile damage still differs by 6.68%.
+- [Two common-coordinate material probes](planar-common-material-points-20260920.md):
+  exact replay of both original 128-layer witness histories; derived 256-history
+  values isolate a sampling-location contribution. Post-hoc, two-point diagnostic
+  only; original projected-field failures and physical-validation gaps remain.

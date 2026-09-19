@@ -240,3 +240,30 @@ def test_refinement_group_rejects_incomplete_or_nonfinite_observations(a, b):
 
     with pytest.raises(ValueError):
         metric(a, b, 1e-12)
+
+
+def test_common_point_probe_requires_original_accepted_section():
+    from scripts.probe_planar_common_material_points import section_at
+
+    step = synthetic_step()
+    assert section_at(step, "E0", 0)["generalized_strain"]["axial_strain"] == 0
+    step["trial_assembly"]["member_assemblies"][0]["element_response"][
+        "fiber_beam_response"
+    ]["section_responses"][0]["trial_state"]["fiber_states"][0]["tensile_damage"] = 0.2
+    with pytest.raises(ValueError, match="section binding"):
+        section_at(step, "E0", 0)
+
+
+def test_common_point_probe_rejects_modified_material_before_import(
+    tmp_path, monkeypatch
+):
+    from scripts import probe_planar_common_material_points as probe
+
+    p = tmp_path / "source/structural_analysis/materials/concrete_damage.py"
+    p.parent.mkdir(parents=True)
+    p.write_text('raise RuntimeError("must not execute")')
+    monkeypatch.setattr(
+        probe.subprocess, "check_output", lambda *a, **kw: b"original source"
+    )
+    with pytest.raises(ValueError, match="frozen material source"):
+        probe.material_class(tmp_path)

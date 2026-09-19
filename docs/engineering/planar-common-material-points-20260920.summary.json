@@ -1,0 +1,144 @@
+{
+  "schema": "posthoc-common-material-point-probe.v1",
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "material_sha256": "dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+  "fine_sha256": "ae168bdad5cc4d23f0b246df39b84b1b800458033fe4ba0c9f4acaed7d98b695",
+  "selection": "Two witnesses chosen from the completed 128/256 projection audit; not an untouched evaluation or all-field convergence test.",
+  "derived_fine_values_are_solver_accepted_fibers": false,
+  "structural_solves": 0,
+  "material_integrations": 160,
+  "physical_validation": false,
+  "original_projection_screen_replaced": false,
+  "witnesses": [
+    {
+      "member": "E3",
+      "gauss": 0,
+      "coarse_cell": 101,
+      "y_m": 0.17578125,
+      "coarse_replay_exact": true,
+      "maximum_absolute_differences": {
+        "tensile_history_strain": {
+          "target_m": 0.072,
+          "absolute_difference": 2.3397989301339288e-07
+        },
+        "compressive_history_strain": {
+          "target_m": 0.016,
+          "absolute_difference": 7.759879278100394e-09
+        },
+        "tensile_damage": {
+          "target_m": 0.08,
+          "absolute_difference": 0.0021059957244330407
+        },
+        "compressive_damage": {
+          "target_m": 0.002,
+          "absolute_difference": 0.0
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "target_m": 0.08,
+          "absolute_difference": 5.143064770489585e-07
+        },
+        "stress_mpa": {
+          "target_m": 0.072,
+          "absolute_difference": 0.007019396790401755
+        }
+      },
+      "original_projection_witness_target": {
+        "target_m": 0.078,
+        "coarse_strain": 0.00010078306379245365,
+        "derived_fine_point_strain": 0.00010087941572547152,
+        "coarse_accepted_values": {
+          "tensile_history_strain": 0.00010078306379245365,
+          "compressive_history_strain": 0.0002795423228136649,
+          "tensile_damage": 0.010097998342529446,
+          "compressive_damage": 0.0,
+          "dissipated_energy_density_mj_per_m3": 1.5385147617221924e-06,
+          "stress_mpa": 2.9929606974396723
+        },
+        "derived_fine_point_values": {
+          "tensile_history_strain": 0.00010087941572547152,
+          "compressive_history_strain": 0.0002795345629343868,
+          "tensile_damage": 0.011329295707513065,
+          "compressive_damage": 0.0,
+          "dissipated_energy_density_mj_per_m3": 1.7294152649423644e-06,
+          "stress_mpa": 2.9920956898174955
+        },
+        "absolute_differences": {
+          "tensile_history_strain": 9.635193301787796e-08,
+          "compressive_history_strain": 7.759879278100394e-09,
+          "tensile_damage": 0.001231297364983619,
+          "compressive_damage": 0.0,
+          "dissipated_energy_density_mj_per_m3": 1.90900503220172e-07,
+          "stress_mpa": 0.0008650076221767833
+        }
+      }
+    },
+    {
+      "member": "E3",
+      "gauss": 2,
+      "coarse_cell": 14,
+      "y_m": -0.23203125,
+      "coarse_replay_exact": true,
+      "maximum_absolute_differences": {
+        "tensile_history_strain": {
+          "target_m": 0.002,
+          "absolute_difference": 0.0
+        },
+        "compressive_history_strain": {
+          "target_m": 0.072,
+          "absolute_difference": 2.6638059126993935e-07
+        },
+        "tensile_damage": {
+          "target_m": 0.002,
+          "absolute_difference": 0.0
+        },
+        "compressive_damage": {
+          "target_m": 0.08,
+          "absolute_difference": 0.00029174202852055853
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "target_m": 0.08,
+          "absolute_difference": 5.082573062258457e-06
+        },
+        "stress_mpa": {
+          "target_m": 0.072,
+          "absolute_difference": 0.007991417738100637
+        }
+      },
+      "original_projection_witness_target": {
+        "target_m": 0.072,
+        "coarse_strain": -0.000998336862763495,
+        "derived_fine_point_strain": -0.000998603243354765,
+        "coarse_accepted_values": {
+          "tensile_history_strain": 0.0,
+          "compressive_history_strain": 0.000998336862763495,
+          "tensile_damage": 0.0,
+          "compressive_damage": 0.0,
+          "dissipated_energy_density_mj_per_m3": 0.0,
+          "stress_mpa": -29.95010588290485
+        },
+        "derived_fine_point_values": {
+          "tensile_history_strain": 0.0,
+          "compressive_history_strain": 0.000998603243354765,
+          "tensile_damage": 0.0,
+          "compressive_damage": 0.0,
+          "dissipated_energy_density_mj_per_m3": 0.0,
+          "stress_mpa": -29.95809730064295
+        },
+        "absolute_differences": {
+          "tensile_history_strain": 0.0,
+          "compressive_history_strain": 2.6638059126993935e-07,
+          "tensile_damage": 0.0,
+          "compressive_damage": 0.0,
+          "dissipated_energy_density_mj_per_m3": 0.0,
+          "stress_mpa": 0.007991417738100637
+        }
+      }
+    }
+  ],
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-common-material-points-2pv_4yww",
+    "payload_files": 3,
+    "payload_bytes": 112830,
+    "inventory_sha256": "69488aa7d0e296529d98640986e6c3ff84fcdd7ea1b3a01d33e0303e308bfc9e"
+  }
+}
