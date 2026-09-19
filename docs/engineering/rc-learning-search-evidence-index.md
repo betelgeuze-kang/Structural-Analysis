@@ -521,3 +521,7 @@ These source-specific receipts do not qualify later commits automatically.
   separately declared 8 mm increment path completes 496 steps with steel
   plasticity and concrete damage. Paired/repeated steps are byte exact and
   observed reuse ratios are 0.8203/0.8226. No step-convergence or physical claim.
+- [8 mm / 4 mm increment sensitivity](rc-cantilever-increment-sensitivity-20260920.md):
+  the fine baseline completes all targets but rejects secant on one near-zero
+  moment mismatch. Reference-only common-target comparison observes reaction
+  and material-state sensitivity; fixed-request reuse equality is not convergence.
