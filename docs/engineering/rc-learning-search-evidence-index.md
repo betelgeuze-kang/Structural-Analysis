@@ -630,3 +630,7 @@ These source-specific receipts do not qualify later commits automatically.
   checks and 738 frontend tests passed, including the new material audit contracts.
   Full repository shards still fail before test execution at external evidence
   preparation; no independent numerical acceptance is inferred.
+- [Tan/Nguyen source reconciliation](tan-2019-source-reconciliation-20260920.md):
+  two explicit controls traced to publisher tables/drawing; peak endpoints match,
+  but D10 yield strength differs and stirrup descriptions need reconciliation.
+  Both remain one reviewed source group with no training split or admission.
