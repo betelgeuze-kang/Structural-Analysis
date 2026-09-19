@@ -307,6 +307,21 @@ class RCControlReinforcementPolicy(RCControlCandidatePolicy):
         return self._predict_features(values, context)
 
 
+def load_rc_control_candidate_policy(raw: bytes):
+    """Dispatch only explicitly supported, strictly decoded policy schemas."""
+    if type(raw) is not bytes:
+        raise ValueError("policy bytes required")
+    document = strict_json_object_bytes(raw, maximum_bytes=2 * 1024 * 1024)
+    policy_types = {
+        POLICY_SCHEMA: RCControlCandidatePolicy,
+        REINFORCEMENT_POLICY_SCHEMA: RCControlReinforcementPolicy,
+    }
+    schema = document.get("schema_version")
+    if type(schema) is not str or schema not in policy_types:
+        raise ValueError("supported RC candidate policy schema required")
+    return policy_types[schema](raw.decode("utf-8"))
+
+
 def train_rc_control_candidate_policy(
     baseline: CanonicalModel,
     candidates: tuple[design.FiberFrameDesignCandidate, ...],

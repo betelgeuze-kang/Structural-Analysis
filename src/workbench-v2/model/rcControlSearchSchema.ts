@@ -116,7 +116,8 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     await selfHash(trainingDoc.raw, training, 'report_hash')
     check(policy.policy_hash === plan.policy_hash && training.policy_hash === plan.policy_hash && training.report_hash === plan.training_report_hash
       && same(training, report.historical_training_cost) && training.label_comparison_hash === policy.label_comparison_hash
-      && training.schema_version === 'experimental-rc-control-candidate-training.v1' && training.independent_generalization === false && training.net_savings_proved === false
+      && ((policy.schema_version === 'experimental-rc-control-candidate-policy.v1' && training.schema_version === 'experimental-rc-control-candidate-training.v1')
+        || (policy.schema_version === 'experimental-rc-control-reinforcement-policy.v1' && training.schema_version === 'experimental-rc-control-reinforcement-training.v1')) && training.independent_generalization === false && training.net_savings_proved === false
       && nat(training.sample_count) && training.sample_count >= 2 && training.sample_count <= 17
       && Array.isArray(policy.training_model_identities) && policy.training_model_identities.length === training.sample_count
       && policy.training_model_identities.every(hash) && new Set(policy.training_model_identities).size === training.sample_count

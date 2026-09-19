@@ -545,3 +545,7 @@ These source-specific receipts do not qualify later commits automatically.
   separate 131-feature policy, freshly replayed labels and unseen-candidate
   search/oracle connection; both strategies choose the same candidate in a small
   internal test. No learning benefit or independent generalization established.
+- [Reinforcement-policy delivery](rc-reinforcement-policy-delivery-20260920.md):
+  actual train/search/standalone CLI execution, 57 byte-exact HTTP-handler
+  artifacts, 108 Python and 57 frontend checks, with desktop/mobile original
+  result downloads. No learned benefit or deployment qualification claimed.

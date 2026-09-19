@@ -52,3 +52,9 @@ explicit integration and their own end-to-end tests. Existing Workbench physical
 comparison import/display supports unequal areas separately. Broader train/test
 splits, repeated full-cost trials, independent physics, and licensing/source
 admission remain open. This opt-in learner does not close those requirements.
+
+[CLI and Workbench delivery](rc-reinforcement-policy-delivery-20260920.md) now
+covers the explicit new-policy loader, opt-in training CLI, search/standalone CLI,
+HTTP artifact handler, and desktop/mobile original-result review. It supersedes
+the delivery item above without changing the outstanding performance and
+independent-validation requirements.

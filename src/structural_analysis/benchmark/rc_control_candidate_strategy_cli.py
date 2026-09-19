@@ -17,7 +17,7 @@ from structural_analysis.benchmark.fiber_frame_design_cli import (
     read_design_experiment_with_material_history,
 )
 from structural_analysis.benchmark.rc_control_candidate_learning import (
-    RCControlCandidatePolicy,
+    load_rc_control_candidate_policy,
 )
 from structural_analysis.benchmark.rc_control_candidate_ranking import (
     LEGACY_RANKING,
@@ -57,8 +57,8 @@ def main(argv=None):
     policy = training = None
     if args.strategy == "learned_order":
         assert args.policy is not None and args.training_report is not None
-        policy = RCControlCandidatePolicy(
-            _read(args.policy, 2 * 1024 * 1024).decode("utf-8")
+        policy = load_rc_control_candidate_policy(
+            _read(args.policy, 2 * 1024 * 1024)
         )
         training = strict_json_object_bytes(
             _read(args.training_report, 2 * 1024 * 1024), maximum_bytes=2 * 1024 * 1024

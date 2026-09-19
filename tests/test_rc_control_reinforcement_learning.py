@@ -183,3 +183,16 @@ def test_unused_area_alias_is_rejected_as_duplicate_before_training(tmp_path):
             reinforcement_features=True,
         )
     assert not root.exists()
+
+
+def test_explicit_schema_loader_rejects_unknown_and_ambiguous_documents(trained):
+    policy, _, _ = trained
+    loader = learning.load_rc_control_candidate_policy
+    assert type(loader(policy._json.encode())) is learning.RCControlReinforcementPolicy
+    with pytest.raises(ValueError, match="duplicate"):
+        loader(b'{"schema_version":"unknown",' + policy._json.encode()[1:])
+    for schema in ("unknown", None, [], 1):
+        with pytest.raises(ValueError, match="schema"):
+            loader(json.dumps({"schema_version": schema}).encode())
+    with pytest.raises(ValueError, match="bytes"):
+        loader(policy._json)
