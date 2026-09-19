@@ -1,0 +1,1045 @@
+{
+  "fits": 0,
+  "is_independent_evaluation": false,
+  "policy_changed": false,
+  "records": [
+    {
+      "case_id": "train-a",
+      "fold_index": 0,
+      "ridge": 10000.0,
+      "static_gate": "rejected",
+      "static_violations": [
+        {
+          "feature": "node_1_x_m",
+          "high": 4.0,
+          "index": 2,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "node_2_x_m",
+          "high": 4.0,
+          "index": 4,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "node_2_y_m",
+          "high": 3.1,
+          "index": 5,
+          "low": 2.5,
+          "slack": 0.06000000000000001,
+          "value": 1.5
+        },
+        {
+          "feature": "rotation_coordinate_scale_m",
+          "high": 4.0,
+          "index": 24,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "member_0_length_m",
+          "high": 4.0,
+          "index": 25,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "member_1_length_m",
+          "high": 3.1,
+          "index": 54,
+          "low": 2.5,
+          "slack": 0.06000000000000001,
+          "value": 1.5
+        }
+      ]
+    },
+    {
+      "case_id": "train-b",
+      "feature_violation_frequency": {
+        "member_0_point_1_fiber_10_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_1_fiber_11_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_2_fiber_0_concrete_compressive_history_strain": 5,
+        "member_0_point_2_fiber_10_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_2_fiber_11_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_2_fiber_1_concrete_compressive_history_strain": 5,
+        "member_0_point_2_fiber_9_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_1_point_0_fiber_10_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_0_fiber_13_steel_plastic_strain": 6,
+        "member_1_point_0_fiber_1_concrete_compressive_history_strain": 5,
+        "member_1_point_0_fiber_2_concrete_compressive_history_strain": 5,
+        "member_1_point_0_fiber_6_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_1_fiber_0_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_1_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_2_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_3_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_4_concrete_compressive_history_strain": 6
+      },
+      "fold_index": 3,
+      "noninitial_targets": [
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_1_fiber_10_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 6.816133895863937e-05,
+              "low": 2.1026026886747438e-05,
+              "slack": 4.713531207189193e-06,
+              "value": 1.576952016506058e-05
+            },
+            {
+              "feature": "member_0_point_1_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.107272369362685e-05,
+              "low": 7.008675628915817e-06,
+              "slack": 4.0640480647110337e-07,
+              "value": 5.256506721686862e-06
+            },
+            {
+              "feature": "member_0_point_2_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.5761555226810434e-05,
+              "low": 1.9747235387045815e-05,
+              "slack": 3.6014319839764617e-06,
+              "value": 1.4810426540284362e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_10_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 2.2440279518383403e-05,
+              "low": 1.1848341232227491e-05,
+              "slack": 1.0591938286155912e-06,
+              "value": 8.886255924170618e-06
+            }
+          ],
+          "range_violation_count": 11,
+          "target_m": -0.0015
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": -0.003
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": -0.007
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": -0.003
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": 0.001
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 10,
+          "target_m": 0.004
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.198369199190461e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.0001225002908162515
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.07933603664521e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 8.262718701087917e-05
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": 0.006
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": 0.002
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": -0.002
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": -0.004
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": 0.0
+        }
+      ],
+      "ridge": 10000.0,
+      "static_gate": "not_rejected"
+    },
+    {
+      "case_id": "train-c",
+      "fold_index": 6,
+      "ridge": 10000.0,
+      "static_gate": "rejected",
+      "static_violations": [
+        {
+          "feature": "node_1_x_m",
+          "high": 3.0,
+          "index": 2,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "node_2_x_m",
+          "high": 3.0,
+          "index": 4,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "node_2_y_m",
+          "high": 2.5,
+          "index": 5,
+          "low": 1.5,
+          "slack": 0.1,
+          "value": 3.1
+        },
+        {
+          "feature": "rotation_coordinate_scale_m",
+          "high": 3.0,
+          "index": 24,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "member_0_length_m",
+          "high": 3.0,
+          "index": 25,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "member_1_length_m",
+          "high": 2.5,
+          "index": 54,
+          "low": 1.5,
+          "slack": 0.1,
+          "value": 3.1
+        }
+      ]
+    },
+    {
+      "case_id": "train-a",
+      "fold_index": 9,
+      "ridge": 1000000.0,
+      "static_gate": "rejected",
+      "static_violations": [
+        {
+          "feature": "node_1_x_m",
+          "high": 4.0,
+          "index": 2,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "node_2_x_m",
+          "high": 4.0,
+          "index": 4,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "node_2_y_m",
+          "high": 3.1,
+          "index": 5,
+          "low": 2.5,
+          "slack": 0.06000000000000001,
+          "value": 1.5
+        },
+        {
+          "feature": "rotation_coordinate_scale_m",
+          "high": 4.0,
+          "index": 24,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "member_0_length_m",
+          "high": 4.0,
+          "index": 25,
+          "low": 3.0,
+          "slack": 0.1,
+          "value": 2.0
+        },
+        {
+          "feature": "member_1_length_m",
+          "high": 3.1,
+          "index": 54,
+          "low": 2.5,
+          "slack": 0.06000000000000001,
+          "value": 1.5
+        }
+      ]
+    },
+    {
+      "case_id": "train-b",
+      "feature_violation_frequency": {
+        "member_0_point_1_fiber_10_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_1_fiber_11_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_2_fiber_0_concrete_compressive_history_strain": 5,
+        "member_0_point_2_fiber_10_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_2_fiber_11_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_0_point_2_fiber_1_concrete_compressive_history_strain": 5,
+        "member_0_point_2_fiber_9_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_1_point_0_fiber_10_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_0_fiber_13_steel_plastic_strain": 6,
+        "member_1_point_0_fiber_1_concrete_compressive_history_strain": 5,
+        "member_1_point_0_fiber_2_concrete_compressive_history_strain": 5,
+        "member_1_point_0_fiber_6_concrete_dissipated_energy_density_mj_per_m3": 1,
+        "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3": 11,
+        "member_1_point_1_fiber_0_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_1_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_2_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_3_concrete_compressive_history_strain": 6,
+        "member_1_point_1_fiber_4_concrete_compressive_history_strain": 6
+      },
+      "fold_index": 12,
+      "noninitial_targets": [
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_1_fiber_10_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 6.816133895863937e-05,
+              "low": 2.1026026886747438e-05,
+              "slack": 4.713531207189193e-06,
+              "value": 1.576952016506058e-05
+            },
+            {
+              "feature": "member_0_point_1_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.107272369362685e-05,
+              "low": 7.008675628915817e-06,
+              "slack": 4.0640480647110337e-07,
+              "value": 5.256506721686862e-06
+            },
+            {
+              "feature": "member_0_point_2_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.5761555226810434e-05,
+              "low": 1.9747235387045815e-05,
+              "slack": 3.6014319839764617e-06,
+              "value": 1.4810426540284362e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_10_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 2.2440279518383403e-05,
+              "low": 1.1848341232227491e-05,
+              "slack": 1.0591938286155912e-06,
+              "value": 8.886255924170618e-06
+            }
+          ],
+          "range_violation_count": 11,
+          "target_m": -0.0015
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": -0.003
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": -0.007
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": -0.003
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 4,
+          "target_m": 0.001
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_1_point_0_fiber_7_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 9.760021471342944e-06,
+              "low": 8.011966733122631e-06,
+              "slack": 1.7480547382203134e-07,
+              "value": 1.0670515063921753e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_8_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 7.263739382900564e-06,
+              "low": 6.231529681317602e-06,
+              "slack": 1.0322097015829624e-07,
+              "value": 8.163216095939414e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_9_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 5.188385273500403e-06,
+              "low": 4.4510926295125725e-06,
+              "slack": 7.372926439878305e-08,
+              "value": 5.655917127957076e-06
+            },
+            {
+              "feature": "member_1_point_0_fiber_11_concrete_dissipated_energy_density_mj_per_m3",
+              "high": 1.0376770547000793e-06,
+              "low": 8.90218525902514e-07,
+              "slack": 1.4745852879756536e-08,
+              "value": 6.676638944268853e-07
+            }
+          ],
+          "range_violation_count": 10,
+          "target_m": 0.004
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.198369199190461e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.0001225002908162515
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.07933603664521e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 8.262718701087917e-05
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": 0.006
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": 0.002
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": -0.002
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": -0.004
+        },
+        {
+          "first_violations": [
+            {
+              "feature": "member_0_point_2_fiber_0_concrete_compressive_history_strain",
+              "high": 5.3077604475301845e-05,
+              "low": 0.0,
+              "slack": 5.307760447530185e-06,
+              "value": 6.922123244641779e-05
+            },
+            {
+              "feature": "member_0_point_2_fiber_1_concrete_compressive_history_strain",
+              "high": 9.560054232131487e-05,
+              "low": 0.0,
+              "slack": 9.560054232131488e-06,
+              "value": 0.00016005544715486236
+            },
+            {
+              "feature": "member_1_point_0_fiber_1_concrete_compressive_history_strain",
+              "high": 4.561710133112237e-05,
+              "low": 0.0,
+              "slack": 4.561710133112237e-06,
+              "value": 5.2537732075380855e-05
+            },
+            {
+              "feature": "member_1_point_0_fiber_2_concrete_compressive_history_strain",
+              "high": 6.814666278105834e-05,
+              "low": 0.0,
+              "slack": 6.814666278105834e-06,
+              "value": 0.00010036486075203272
+            }
+          ],
+          "range_violation_count": 14,
+          "target_m": 0.0
+        }
+      ],
+      "ridge": 1000000.0,
+      "static_gate": "not_rejected"
+    },
+    {
+      "case_id": "train-c",
+      "fold_index": 15,
+      "ridge": 1000000.0,
+      "static_gate": "rejected",
+      "static_violations": [
+        {
+          "feature": "node_1_x_m",
+          "high": 3.0,
+          "index": 2,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "node_2_x_m",
+          "high": 3.0,
+          "index": 4,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "node_2_y_m",
+          "high": 2.5,
+          "index": 5,
+          "low": 1.5,
+          "slack": 0.1,
+          "value": 3.1
+        },
+        {
+          "feature": "rotation_coordinate_scale_m",
+          "high": 3.0,
+          "index": 24,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "member_0_length_m",
+          "high": 3.0,
+          "index": 25,
+          "low": 2.0,
+          "slack": 0.1,
+          "value": 4.0
+        },
+        {
+          "feature": "member_1_length_m",
+          "high": 2.5,
+          "index": 54,
+          "low": 1.5,
+          "slack": 0.1,
+          "value": 3.1
+        }
+      ]
+    }
+  ],
+  "schema_version": "posthoc-grouped-material-range-diagnostics.v1",
+  "selection_result_hash": "sha256:02c2514bf7afcc73c092801677f8103830ec07421cced4bc532dde67a845ed87",
+  "solver_calls": 0,
+  "source_revision": "3793d49ff656b8b98843f920651fc1e10568bec7"
+}

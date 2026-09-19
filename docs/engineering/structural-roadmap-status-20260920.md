@@ -114,3 +114,12 @@ canonical design changes, full reference reanalysis and unchanged quantity scope
 Focused implementation checks pass; source-data conflicts and independent physical
 verification remain open. This resolves one geometry representation restriction
 without qualifying the Tan/Nguyen experiments or demonstrating learned acceleration.
+
+## Grouped nonlinear runtime result
+
+The [three-group nonlinear campaign](rc-grouped-runtime-campaign-20260920.md)
+completed 18 counterbalanced folds with full-history comparisons passing, but
+all 216 proposal decisions abstained. Secant remains selected. The audit binds
+complementary training samples to each excluded group and retains initial failed
+protocol costs. Reserved validation/holdout paths remain unexecuted. Material
+history coverage, useful learned benefit and independent validation remain open.

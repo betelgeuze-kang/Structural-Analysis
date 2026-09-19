@@ -1,0 +1,225 @@
+{
+  "abstention_count": 216,
+  "audit_scope": "stored plan, policies, labels, fold receipts and reference material histories; no solver replay",
+  "candidates": [
+    {
+      "case_repeat_scores": [
+        {
+          "case_id": "train-a",
+          "fold_indices": [
+            0,
+            1,
+            2
+          ],
+          "maximum_ratio": 1.0083723345997626,
+          "mean_ratio": 1.0037618081509947,
+          "minimum_ratio": 0.9994639808711087,
+          "ratios": [
+            1.0034491089821131,
+            1.0083723345997626,
+            0.9994639808711087
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.004462401496545347,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b",
+          "fold_indices": [
+            3,
+            4,
+            5
+          ],
+          "maximum_ratio": 1.0442409995868942,
+          "mean_ratio": 1.0272183155257915,
+          "minimum_ratio": 1.0117710358075527,
+          "ratios": [
+            1.0442409995868942,
+            1.0256429111829273,
+            1.0117710358075527
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.016292208600756804,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c",
+          "fold_indices": [
+            6,
+            7,
+            8
+          ],
+          "maximum_ratio": 1.0036767233272406,
+          "mean_ratio": 0.9946858199127195,
+          "minimum_ratio": 0.9890069879803663,
+          "ratios": [
+            0.9890069879803663,
+            1.0036767233272406,
+            0.9913737484305514
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.007875763259143576,
+          "valid_repetitions": 3
+        }
+      ],
+      "fold_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "proposed_count": 0,
+      "ridge": 10000.0,
+      "score": 1.0085553145298352
+    },
+    {
+      "case_repeat_scores": [
+        {
+          "case_id": "train-a",
+          "fold_indices": [
+            9,
+            10,
+            11
+          ],
+          "maximum_ratio": 1.0119440422047206,
+          "mean_ratio": 1.0046669631107517,
+          "minimum_ratio": 0.9904144226546792,
+          "ratios": [
+            1.0116424244728552,
+            1.0119440422047206,
+            0.9904144226546792
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.012343983368549687,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b",
+          "fold_indices": [
+            12,
+            13,
+            14
+          ],
+          "maximum_ratio": 1.0334112295684421,
+          "mean_ratio": 1.021335774519286,
+          "minimum_ratio": 1.0046424959529088,
+          "ratios": [
+            1.0334112295684421,
+            1.0259535980365075,
+            1.0046424959529088
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.01492994403832552,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c",
+          "fold_indices": [
+            15,
+            16,
+            17
+          ],
+          "maximum_ratio": 0.9956614873983637,
+          "mean_ratio": 0.9931633594130836,
+          "minimum_ratio": 0.9893591331371855,
+          "ratios": [
+            0.9893591331371855,
+            0.9956614873983637,
+            0.9944694577037015
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.0033480347768376213,
+          "valid_repetitions": 3
+        }
+      ],
+      "fold_indices": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "proposed_count": 0,
+      "ridge": 1000000.0,
+      "score": 1.0063886990143738
+    }
+  ],
+  "completed_folds": 18,
+  "exclusion_groups": [
+    [
+      "train-a"
+    ],
+    [
+      "train-b"
+    ],
+    [
+      "train-c"
+    ]
+  ],
+  "fit_completed_count": 6,
+  "fold_work": {
+    "core_calls": 936,
+    "linear_solves": 4932,
+    "newton_iterations": 4932
+  },
+  "generation_material_history": [
+    {
+      "case_id": "train-a",
+      "maximum_material_history": {
+        "accumulated_plastic_strain": 7.878049781739777e-05,
+        "compressive_damage": 0.0,
+        "tensile_damage": 0.9986799411612628
+      },
+      "target_count": 12
+    },
+    {
+      "case_id": "train-b",
+      "maximum_material_history": {
+        "accumulated_plastic_strain": 0.0,
+        "compressive_damage": 0.0,
+        "tensile_damage": 0.9716118490865818
+      },
+      "target_count": 12
+    },
+    {
+      "case_id": "train-c",
+      "maximum_material_history": {
+        "accumulated_plastic_strain": 0.0,
+        "compressive_damage": 0.0,
+        "tensile_damage": 0.9040842618818035
+      },
+      "target_count": 12
+    }
+  ],
+  "generation_work": {
+    "core_calls": 117,
+    "linear_solves": 634,
+    "newton_iterations": 634
+  },
+  "independent_validation": false,
+  "learning_wall_ns": 44494589668,
+  "net_savings_proved": false,
+  "parent_wall_ns": 380269559205,
+  "plan_hash": "sha256:eb3a0235184260625da8eadcef5f242d7e3f866e764e267c96a1c2289d56bd2b",
+  "proposal_count": 0,
+  "reserved_evaluation_executed": false,
+  "selected_ridge": null,
+  "selected_strategy": "secant",
+  "selection_result_hash": "sha256:02c2514bf7afcc73c092801677f8103830ec07421cced4bc532dde67a845ed87",
+  "selection_wall_ns": 335712734040,
+  "source_revision": "3793d49ff656b8b98843f920651fc1e10568bec7",
+  "static_gate_counts": {
+    "not_rejected": 6,
+    "rejected": 12
+  },
+  "training_sample_count": 33
+}
