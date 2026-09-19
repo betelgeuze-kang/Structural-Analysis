@@ -614,3 +614,6 @@ These source-specific receipts do not qualify later commits automatically.
   64/128-layer maxima reproduced exactly; largest tensile witness affects 10 of
   1,152 cells, with mixed-onset children accounting for most witness-section
   difference. Small mean differences do not replace the failed local screen.
+- [Frozen 256-layer experiment](planar-256-refinement-20260920.md): verified original
+  Git source, unchanged forty-target path and solver criteria; fresh refinement
+  launched. The initial record is a live-run protocol, not a convergence result.

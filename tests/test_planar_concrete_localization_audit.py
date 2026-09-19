@@ -156,3 +156,51 @@ def test_duplicate_member_not_silently_overwritten():
     )
     with pytest.raises(ValueError, match="duplicate section"):
         sections(step, 2)
+
+
+def test_refinement_runner_rejects_manifest_before_git_or_import(tmp_path, monkeypatch):
+    from scripts import run_planar_256_refinement as runner
+
+    (tmp_path / "inputs-manifest.json").write_bytes(b"{}")
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Git should not be queried for a changed manifest")
+
+    monkeypatch.setattr(runner.subprocess, "check_output", forbidden)
+    with pytest.raises(ValueError, match="manifest changed"):
+        runner.checked_sources(tmp_path, tmp_path)
+
+
+@pytest.mark.parametrize("matching_identity", [False, True])
+def test_refinement_runner_rejects_source_not_matching_identity_or_git(
+    tmp_path, monkeypatch, matching_identity
+):
+    import json
+    from scripts import run_planar_256_refinement as runner
+
+    content = b"print('changed source must never execute')\n"
+    path = tmp_path / "source/structural_analysis/example.py"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(content)
+    identity = {
+        "sha256": "sha256:"
+        + (hashlib.sha256(content).hexdigest() if matching_identity else "0" * 64),
+        "byte_length": len(content),
+    }
+    manifest = json.dumps({"source_files": {"example.py": identity}}).encode()
+    (tmp_path / "inputs-manifest.json").write_bytes(manifest)
+    monkeypatch.setattr(runner, "MANIFEST_SHA256", hashlib.sha256(manifest).hexdigest())
+    monkeypatch.setattr(
+        runner.subprocess,
+        "check_output",
+        lambda *a, **kw: "100644 blob "
+        + "0" * 40
+        + "\tsrc/structural_analysis/example.py\n",
+    )
+    with pytest.raises(
+        ValueError,
+        match="source differs from frozen Git tree"
+        if matching_identity
+        else "source identity mismatch",
+    ):
+        runner.checked_sources(tmp_path, tmp_path)
