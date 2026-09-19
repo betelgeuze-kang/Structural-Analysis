@@ -55,3 +55,19 @@ test('stale common-area quantity is rejected even when numeric totals agree with
   q.totals.longitudinal_rebar_mass_kg = q.members[0].longitudinal_rebar_mass_kg
   expect(() => validateDesignComparisonReport(report, manifest)).toThrow()
 })
+
+test('distinct face-to-centroid distances retain quantities and bound intermediate bars', () => {
+  const asymmetric = { ...section, top_cover_m: 0.08, bottom_cover_m: 0.06 }
+  expect(longitudinalSteelArea(asymmetric)).toBe(longitudinalSteelArea(section))
+  expect(longitudinalSteelDescription(asymmetric)).toContain('face-to-steel centroid top/bottom 0.08/0.06 m')
+  expect(() => longitudinalSteelArea({ ...asymmetric, intermediate_steel_layers: [{ y_m: 0.14, bar_count: 2 }] })).toThrow()
+  expect(() => longitudinalSteelArea({ ...asymmetric, intermediate_steel_layers: [{ y_m: -0.15, bar_count: 2 }] })).toThrow()
+  expect(longitudinalSteelArea({ ...asymmetric, intermediate_steel_layers: [{ y_m: 0.1, bar_count: 2 }] })).toBeCloseTo(0.0003, 12)
+})
+for (const field of ['top_cover_m', 'bottom_cover_m']) {
+  for (const value of [null, true, 0, -1, '0.04', 0.2, NaN, Infinity]) {
+    test(`${field} rejects ${String(value)}`, () => {
+      expect(() => longitudinalSteelArea({ ...section, [field]: value })).toThrow()
+    })
+  }
+}

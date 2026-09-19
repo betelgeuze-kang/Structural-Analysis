@@ -271,8 +271,8 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
       check(section, 'study_change_section_invalid')
       for (const [key, value] of Object.entries(change)) {
         if (key === 'section_id') continue
-        check(['width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2', 'top_bar_area_m2', 'bottom_bar_area_m2'].includes(key), 'study_change_field_invalid')
-        if (key === 'top_bar_area_m2' || key === 'bottom_bar_area_m2') check(num(value) && value > 0, 'study_change_value_invalid')
+        check(['width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2', 'top_bar_area_m2', 'bottom_bar_area_m2', 'top_cover_m', 'bottom_cover_m'].includes(key), 'study_change_field_invalid')
+        if (['top_bar_area_m2', 'bottom_bar_area_m2', 'top_cover_m', 'bottom_cover_m'].includes(key)) check(num(value) && value > 0, 'study_change_value_invalid')
         if (value !== null) { check(num(value) && value >= 0, 'study_change_value_invalid'); changed ||= section[key] !== value; section[key] = value }
       }
     }

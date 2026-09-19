@@ -69,6 +69,14 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
             section["bar_area_m2"] = top
             section["top_bar_area_m2"] = top
             section["bottom_bar_area_m2"] = bottom
+        # Both effective positions fully determine the outer-layer geometry;
+        # intermediate layers have explicit coordinates, independent of cover.
+        # Canonicalize aliases without changing legacy symmetric payloads.
+        top_cover = section.get("top_cover_m", section["cover_m"])
+        bottom_cover = section.get("bottom_cover_m", section["cover_m"])
+        section["cover_m"] = top_cover
+        section.pop("top_cover_m", None)
+        section["bottom_cover_m"] = bottom_cover
         expanded_section = {
             "type": section["type"],
             **(
@@ -86,6 +94,10 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
             ),
             **{name: _physical_float(section[name]) for name in _SECTION_FLOAT_FIELDS},
             **{name: section[name] for name in _SECTION_COUNT_FIELDS},
+            **(
+                {"bottom_cover_m": _physical_float(bottom_cover)}
+                if bottom_cover != top_cover else {}
+            ),
             **{
                 name: _physical_float(section[name])
                 for name in ("top_bar_area_m2", "bottom_bar_area_m2")

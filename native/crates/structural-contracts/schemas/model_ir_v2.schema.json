@@ -515,7 +515,9 @@
           "properties": {
             "width_m": {"$ref": "#/$defs/positiveNumber"},
             "depth_m": {"$ref": "#/$defs/positiveNumber"},
-            "cover_m": {"$ref": "#/$defs/positiveNumber"},
+            "cover_m": {"$ref": "#/$defs/positiveNumber", "description": "Face-to-longitudinal-steel-layer centroid distance in metres, not clear cover."},
+            "top_cover_m": {"$ref": "#/$defs/positiveNumber", "description": "Optional top-face-to-steel-layer centroid distance; defaults to cover_m."},
+            "bottom_cover_m": {"$ref": "#/$defs/positiveNumber", "description": "Optional bottom-face-to-steel-layer centroid distance; defaults to cover_m."},
             "concrete_layer_count": {"type": "integer", "minimum": 2, "maximum": 32},
             "top_bar_count": {"type": "integer", "minimum": 1, "maximum": 64},
             "intermediate_steel_layers": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"type": "object", "additionalProperties": false, "required": ["y_m", "bar_count"], "properties": {"y_m": {"type": "number"}, "bar_count": {"type": "integer", "minimum": 1, "maximum": 64}}}},

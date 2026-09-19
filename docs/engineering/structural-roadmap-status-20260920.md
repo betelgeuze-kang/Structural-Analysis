@@ -105,3 +105,12 @@ comparisons under the existing screen. Concrete failures reduce from 70/240
 (64/128) to 34/240 (128/256), but tensile damage still differs by 6.68%. This
 advances the numerical investigation without closing material-field convergence,
 independent verification, public scope expansion or performance qualification.
+
+## Outer-centroid geometry progress
+
+[Independent outer centroid distances](rc-outer-centroid-distances-20260920.md)
+now connect explicit asymmetric reinforcement positions to public/ModelIR compilation,
+canonical design changes, full reference reanalysis and unchanged quantity scope.
+Focused implementation checks pass; source-data conflicts and independent physical
+verification remain open. This resolves one geometry representation restriction
+without qualifying the Tan/Nguyen experiments or demonstrating learned acceleration.

@@ -1,5 +1,18 @@
+/** Distances are from each concrete face to the longitudinal bar centroid. */
+export function outerSteelCentroidDistances(section: Record<string, unknown>): [number, number] {
+  const depth = section.depth_m
+  const distance = (value: unknown): number => {
+    if (typeof depth !== 'number' || !Number.isFinite(depth) || typeof value !== 'number'
+      || !Number.isFinite(value) || value <= 0 || value >= depth / 2) throw new Error('steel_centroid_distance_invalid')
+    return value
+  }
+  const common = distance(section.cover_m)
+  return ['top_cover_m', 'bottom_cover_m'].map(key => Object.prototype.hasOwnProperty.call(section, key) ? distance(section[key]) : common) as [number, number]
+}
+
 /** Additional longitudinal bars at explicitly authored section-centroid heights. */
 export function intermediateSteelBarCount(section: Record<string, unknown>): number {
+  const [topCover, bottomCover] = outerSteelCentroidDistances(section)
   if (!Object.prototype.hasOwnProperty.call(section, 'intermediate_steel_layers')) return 0
   const layers = section.intermediate_steel_layers
   const depth = section.depth_m
@@ -8,13 +21,13 @@ export function intermediateSteelBarCount(section: Record<string, unknown>): num
     || typeof depth !== 'number' || !Number.isFinite(depth)
     || typeof cover !== 'number' || !Number.isFinite(cover)
     || cover <= 0 || depth <= 2 * cover) throw new Error('intermediate_steel_layers_invalid')
-  let previous = -depth / 2 + cover
+  let previous = -depth / 2 + bottomCover
   let count = 0
   for (const layer of layers) {
     if (!layer || typeof layer !== 'object' || Array.isArray(layer)
       || Object.keys(layer).sort().join(',') !== 'bar_count,y_m'
       || typeof layer.y_m !== 'number' || !Number.isFinite(layer.y_m)
-      || !(previous < layer.y_m && layer.y_m < depth / 2 - cover)
+      || !(previous < layer.y_m && layer.y_m < depth / 2 - topCover)
       || !Number.isInteger(layer.bar_count) || layer.bar_count < 1 || layer.bar_count > 64) {
       throw new Error('intermediate_steel_layer_invalid')
     }
@@ -53,4 +66,6 @@ export function longitudinalSteelDescription(section: Record<string, unknown>): 
   const middle = intermediateSteelBarCount(section)
   return `top ${section.top_bar_count} × ${top} m²; bottom ${section.bottom_bar_count} × ${bottom} m²`
     + (middle ? `; intermediate ${middle} × ${section.bar_area_m2} m²` : '')
+    + (['top_cover_m', 'bottom_cover_m'].some(key => Object.prototype.hasOwnProperty.call(section, key))
+      ? `; face-to-steel centroid top/bottom ${outerSteelCentroidDistances(section).join('/')} m` : '')
 }

@@ -830,7 +830,7 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
         _exact_keys(
             row,
             _SECTION_KEYS
-            | ({"top_bar_area_m2", "bottom_bar_area_m2"} & row.keys())
+            | ({"top_bar_area_m2", "bottom_bar_area_m2", "top_cover_m", "bottom_cover_m"} & row.keys())
             | (
                 {"intermediate_steel_layers"}
                 if "intermediate_steel_layers" in row
@@ -902,6 +902,14 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
                 width_m=_positive_number(row["width_m"], f"{path}/width_m"),
                 depth_m=_positive_number(row["depth_m"], f"{path}/depth_m"),
                 cover_m=_positive_number(row["cover_m"], f"{path}/cover_m"),
+                top_cover_m=(
+                    _positive_number(row["top_cover_m"], f"{path}/top_cover_m")
+                    if "top_cover_m" in row else None
+                ),
+                bottom_cover_m=(
+                    _positive_number(row["bottom_cover_m"], f"{path}/bottom_cover_m")
+                    if "bottom_cover_m" in row else None
+                ),
                 concrete_layer_count=layer_count,
                 top_bar_count=top_bars,
                 bottom_bar_count=bottom_bars,

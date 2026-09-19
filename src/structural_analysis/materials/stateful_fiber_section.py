@@ -557,6 +557,8 @@ def make_rectangular_stateful_rc_fiber_section(
     width_m: float = 0.4,
     depth_m: float = 0.6,
     cover_m: float = 0.05,
+    top_cover_m: float | None = None,
+    bottom_cover_m: float | None = None,
     concrete_layer_count: int = 12,
     top_bar_count: int = 4,
     bottom_bar_count: int = 4,
@@ -568,11 +570,25 @@ def make_rectangular_stateful_rc_fiber_section(
     steel: BilinearCombinedHardeningSteel | None = None,
     concrete: AsymmetricConcreteDamageMaterial | None = None,
 ) -> StatefulRCFiberSection:
+    """Build a section; cover distances are face-to-steel-layer-centroid, in m.
+
+    Optional outer distances override the shared ``cover_m`` independently.
+    They are not clear cover to a stirrup or to a bar surface.
+    """
     width = _positive(width_m, name="width_m")
     depth = _positive(depth_m, name="depth_m")
     cover = _positive(cover_m, name="cover_m")
     if cover >= 0.5 * depth:
         raise ValueError("cover_m must be less than half the section depth")
+    top_cover = cover if top_cover_m is None else _positive(
+        top_cover_m, name="top_cover_m"
+    )
+    bottom_cover = cover if bottom_cover_m is None else _positive(
+        bottom_cover_m, name="bottom_cover_m"
+    )
+    for name, value in (("top_cover_m", top_cover), ("bottom_cover_m", bottom_cover)):
+        if value >= 0.5 * depth:
+            raise ValueError(f"{name} must be less than half the section depth")
     if type(concrete_layer_count) is not int or concrete_layer_count < 2:
         raise ValueError("concrete_layer_count must be an integer of at least 2")
     for name, count in (
@@ -602,13 +618,13 @@ def make_rectangular_stateful_rc_fiber_section(
         (
             StatefulSectionFiber(
                 fiber_id="steel-bottom-layer",
-                y_m=-0.5 * depth + cover,
+                y_m=-0.5 * depth + bottom_cover,
                 area_m2=bottom_bar_count * bottom_area,
                 material_kind="steel",
             ),
             StatefulSectionFiber(
                 fiber_id="steel-top-layer",
-                y_m=0.5 * depth - cover,
+                y_m=0.5 * depth - top_cover,
                 area_m2=top_bar_count * top_area,
                 material_kind="steel",
             ),
@@ -620,7 +636,7 @@ def make_rectangular_stateful_rc_fiber_section(
             or not 1 <= len(intermediate_steel_layers) <= 32
         ):
             raise ValueError("intermediate_steel_layers must contain 1 to 32 rows")
-        previous = -0.5 * depth + cover
+        previous = -0.5 * depth + bottom_cover
         for index, row in enumerate(intermediate_steel_layers):
             if type(row) is not dict or set(row) != {"y_m", "bar_count"}:
                 raise ValueError("intermediate steel row requires y_m and bar_count")
@@ -628,7 +644,7 @@ def make_rectangular_stateful_rc_fiber_section(
             count = row["bar_count"]
             if type(count) is not int or not 1 <= count <= 64:
                 raise ValueError("intermediate steel bar_count must be 1 to 64")
-            if not previous < y < 0.5 * depth - cover:
+            if not previous < y < 0.5 * depth - top_cover:
                 raise ValueError(
                     "intermediate steel rows must increase strictly between outer layers"
                 )

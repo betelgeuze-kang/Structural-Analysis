@@ -390,3 +390,15 @@ def test_unequal_area_features_account_for_steel_and_reject_old_policy_context()
     assert swapped_values[3] == values[3]
     assert swapped_context != context
     assert policy.predict(base, config).ood is True
+
+
+def test_asymmetric_centroids_do_not_reuse_symmetric_policy_context():
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    model = _model()
+    before = learning.candidate_preanalysis_features(model, config)
+    model.sections[0].update(top_cover_m=0.05, bottom_cover_m=0.05)
+    assert learning.candidate_preanalysis_features(model, config) == before
+    model.sections[0].update(top_cover_m=0.04, bottom_cover_m=0.06)
+    assert learning.candidate_preanalysis_features(model, config)[1] != before[1]
+    policy = learning._fit(_rows(), 1e-6, 0.1)
+    assert policy.predict(model, config).ood is True

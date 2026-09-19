@@ -1427,7 +1427,7 @@ def _compile_portal(
         _keys(
             row,
             _SECTION_KEYS
-            | ({"top_bar_area_m2", "bottom_bar_area_m2"} & row.keys())
+            | ({"top_bar_area_m2", "bottom_bar_area_m2", "top_cover_m", "bottom_cover_m"} & row.keys())
             | (
                 {"intermediate_steel_layers"}
                 if "intermediate_steel_layers" in row
@@ -1473,6 +1473,14 @@ def _compile_portal(
                 width_m=_positive(row["width_m"], f"{path}/width_m"),
                 depth_m=_positive(row["depth_m"], f"{path}/depth_m"),
                 cover_m=_positive(row["cover_m"], f"{path}/cover_m"),
+                top_cover_m=(
+                    _positive(row["top_cover_m"], f"{path}/top_cover_m")
+                    if "top_cover_m" in row else None
+                ),
+                bottom_cover_m=(
+                    _positive(row["bottom_cover_m"], f"{path}/bottom_cover_m")
+                    if "bottom_cover_m" in row else None
+                ),
                 concrete_layer_count=_integer(
                     row["concrete_layer_count"], f"{path}/concrete_layer_count", 2, 32
                 ),

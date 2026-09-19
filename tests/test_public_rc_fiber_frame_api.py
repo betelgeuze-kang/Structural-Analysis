@@ -542,3 +542,30 @@ def test_unequal_outer_areas_complete_public_path_and_result_validation(tmp_path
     result = analyze_public_rc_fiber_frame(model, PublicRCFiberFrameConfig(load_steps=2))
     assert result.status == 'ready'
     assert validate_public_rc_fiber_frame_result(result).contract_pass is True
+
+
+def test_distinct_centroid_distances_complete_public_solve(tmp_path):
+    payload = _payload()
+    row = payload['sections'][0]
+    row.update(top_cover_m=0.04, bottom_cover_m=0.06)
+    model = _write_model(tmp_path / 'distinct-centroids.json', payload)
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(model)
+    assert compiled is not None, blockers
+    positions = {f.fiber_id: f.y_m for f in compiled.section_by_member[0].fibers}
+    assert positions['steel-top-layer'] == pytest.approx(row['depth_m'] / 2 - 0.04)
+    assert positions['steel-bottom-layer'] == pytest.approx(-row['depth_m'] / 2 + 0.06)
+    result = analyze_public_rc_fiber_frame(model, PublicRCFiberFrameConfig(load_steps=2))
+    assert result.status == 'ready'
+    assert validate_public_rc_fiber_frame_result(result).contract_pass is True
+
+
+@pytest.mark.parametrize('name', ['top_cover_m', 'bottom_cover_m'])
+@pytest.mark.parametrize('value', [None, True, 0, -1, '0.04', 0.3, 0.31])
+def test_public_compiler_rejects_invalid_centroid_distance(tmp_path, name, value):
+    payload = _payload()
+    payload['sections'][0][name] = value
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(
+        _write_model(tmp_path / 'invalid-centroid.json', payload)
+    )
+    assert compiled is None
+    assert blockers

@@ -454,7 +454,7 @@ function validatePhysicalChanges(baseline: Obj, candidate: Obj, value: unknown):
   const changed = new Set<string>()
   let actualChange = false
   for (const item of list(value, 1, 16)) {
-    const overrides = ['top_bar_area_m2', 'bottom_bar_area_m2'].filter(key => Object.prototype.hasOwnProperty.call(obj(item), key))
+    const overrides = ['top_bar_area_m2', 'bottom_bar_area_m2', 'top_cover_m', 'bottom_cover_m'].filter(key => Object.prototype.hasOwnProperty.call(obj(item), key))
     const change = exact(item, ['section_id', 'width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2', ...overrides])
     for (const key of overrides) positive(change[key])
     ensure(typeof change.section_id === 'string' && !changed.has(change.section_id), 'section change identity')

@@ -433,7 +433,7 @@ def _canonical_section(row: dict[str, Any]) -> dict[str, Any]:
         "bar_area_m2": float(parameters["bar_area_m2"]),
         **{
             name: float(parameters[name])
-            for name in ("top_bar_area_m2", "bottom_bar_area_m2")
+            for name in ("top_bar_area_m2", "bottom_bar_area_m2", "top_cover_m", "bottom_cover_m")
             if name in parameters
         },
         **(

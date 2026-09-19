@@ -60,6 +60,8 @@ _SECTION_FIELDS = (
     "bar_area_m2",
     "top_bar_area_m2",
     "bottom_bar_area_m2",
+    "top_cover_m",
+    "bottom_cover_m",
 )
 _EXCLUDED_COST_ITEMS = (
     "transverse_reinforcement",
@@ -129,6 +131,8 @@ class FiberFrameSectionChange:
     bar_area_m2: float | None = None
     top_bar_area_m2: float | None = None
     bottom_bar_area_m2: float | None = None
+    top_cover_m: float | None = None
+    bottom_cover_m: float | None = None
 
     def __post_init__(self) -> None:
         _identifier(self.section_id, "section_id")
@@ -149,7 +153,7 @@ class FiberFrameSectionChange:
     def to_dict(self) -> dict[str, Any]:
         """Preserve existing candidate hashes when new overrides are omitted."""
         result = asdict(self)
-        for name in ("top_bar_area_m2", "bottom_bar_area_m2"):
+        for name in ("top_bar_area_m2", "bottom_bar_area_m2", "top_cover_m", "bottom_cover_m"):
             if result[name] is None:
                 result.pop(name)
         return result

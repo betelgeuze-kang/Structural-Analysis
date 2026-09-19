@@ -241,3 +241,24 @@ def test_unused_common_area_cannot_create_independent_unequal_models():
     section['bar_area_m2'] = 0.0003
     section['top_bar_area_m2'] = 0.0002
     assert fiber_frame_physical_model_identity(_model(payload)) != middle
+
+
+def test_centroid_distance_aliases_and_swaps_preserve_physical_identity():
+    payload = _payload()
+    original = fiber_frame_physical_model_identity(_model(payload))
+    section = payload['sections'][0]
+    section.update(top_cover_m=section['cover_m'], bottom_cover_m=section['cover_m'])
+    assert fiber_frame_physical_model_identity(_model(payload)) == original
+    section.update(top_cover_m=0.04, bottom_cover_m=0.06)
+    changed = fiber_frame_physical_model_identity(_model(payload))
+    section['cover_m'] = 0.07
+    assert fiber_frame_physical_model_identity(_model(payload)) == changed
+    section['cover_m'] = 0.04
+    section.pop('top_cover_m')
+    assert fiber_frame_physical_model_identity(_model(payload)) == changed
+    section.update(top_cover_m=0.06, bottom_cover_m=0.04)
+    assert len({original, changed, fiber_frame_physical_model_identity(_model(payload))}) == 3
+    section['intermediate_steel_layers'] = [{'y_m': 0.0, 'bar_count': 2}]
+    with_middle = fiber_frame_physical_model_identity(_model(payload))
+    section['cover_m'] = 0.08
+    assert fiber_frame_physical_model_identity(_model(payload)) == with_middle

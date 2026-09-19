@@ -217,3 +217,12 @@ def test_explicit_schema_loader_rejects_unknown_and_ambiguous_documents(trained)
             loader(json.dumps({"schema_version": schema}).encode())
     with pytest.raises(ValueError, match="bytes"):
         loader(policy._json)
+
+
+def test_centroid_asymmetry_remains_fixed_context_for_area_policy():
+    model = base()
+    before = control_reinforcement_features(model, request())
+    model.sections[0].update(top_cover_m=0.05, bottom_cover_m=0.05)
+    assert control_reinforcement_features(model, request()) == before
+    model.sections[0].update(top_cover_m=0.04, bottom_cover_m=0.06)
+    assert control_reinforcement_features(model, request())[1] != before[1]

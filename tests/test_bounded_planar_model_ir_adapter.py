@@ -616,3 +616,26 @@ def test_model_ir_rejects_invalid_outer_bar_area(name, value):
     payload['sections'][0]['parameters'][name] = value
     with pytest.raises(ModelIRValidationError):
         parse_model_ir_v2(payload)
+
+
+def test_model_ir_distinct_centroids_reach_corotational_section():
+    from structural_analysis.api.nonlinear_frame import _compile_portal
+
+    payload = _payload()
+    parameters = payload['sections'][0]['parameters']
+    parameters.update(top_cover_m=0.04, bottom_cover_m=0.06)
+    adapter = adapt_bounded_planar_model_ir_v2(parse_model_ir_v2(payload))
+    compiled = _compile_portal(adapter.canonical_model, general_profile=True,
+                               source_model_ir_adapter=adapter)
+    positions = {f.fiber_id: f.y_m for f in compiled.problem.members[0].element.section.fibers}
+    assert positions['steel-top-layer'] == pytest.approx(parameters['depth_m'] / 2 - 0.04)
+    assert positions['steel-bottom-layer'] == pytest.approx(-parameters['depth_m'] / 2 + 0.06)
+
+
+@pytest.mark.parametrize('name', ['top_cover_m', 'bottom_cover_m'])
+@pytest.mark.parametrize('value', [None, True, 0, -1, '0.04'])
+def test_model_ir_rejects_invalid_centroid_distance(name, value):
+    payload = _payload()
+    payload['sections'][0]['parameters'][name] = value
+    with pytest.raises(ModelIRValidationError):
+        parse_model_ir_v2(payload)

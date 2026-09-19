@@ -388,3 +388,20 @@ def test_unequal_area_candidate_is_reanalyzed_and_priced_from_actual_bars(model,
     assert changed['material_estimate']['total'] == pytest.approx(0.4 * 0.6 * 3 * 100 + mass * 2)
     assert changed['material_estimate']['price_table_hash'] == baseline['material_estimate']['price_table_hash']
     assert report['claims']['confirmed_currency_savings'] is False
+
+
+def test_centroid_change_reanalyzed_with_unchanged_quantities_and_prices(model, prices):
+    before = model.canonical_payload()
+    candidate = design.FiberFrameDesignCandidate('centroids', (
+        design.FiberFrameSectionChange('RC1', top_cover_m=0.04, bottom_cover_m=0.06),
+    ))
+    report = design.compare_public_rc_fiber_frame_designs(
+        model, (candidate,), CONFIG, prices=prices, source_revision=REVISION,
+    ).to_dict()
+    baseline, changed = report['rows']
+    assert model.canonical_payload() == before
+    assert changed['full_reference_verification_pass'] is True
+    assert changed['result']['result_hash'] != baseline['result']['result_hash']
+    assert changed['quantities']['totals'] == baseline['quantities']['totals']
+    assert changed['material_estimate']['total'] == baseline['material_estimate']['total']
+    assert changed['material_estimate']['price_table_hash'] == baseline['material_estimate']['price_table_hash']
