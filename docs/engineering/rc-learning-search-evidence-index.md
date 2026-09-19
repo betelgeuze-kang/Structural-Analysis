@@ -516,3 +516,8 @@ These source-specific receipts do not qualify later commits automatically.
   separate larger targets, 16 paths, 128 steps; maximum tensile damage 0.9855,
   no steel plasticity, byte-exact pairs and repeats; two observed time ratios
   0.7975/0.7928. Deterministic retained reuse only, not learned or physical proof.
+- [Plastic reversal and increment sensitivity](rc-cantilever-plastic-reversal-reuse-20260920.md):
+  original large reversal fails in all baseline arms with exact rollback; a
+  separately declared 8 mm increment path completes 496 steps with steel
+  plasticity and concrete damage. Paired/repeated steps are byte exact and
+  observed reuse ratios are 0.8203/0.8226. No step-convergence or physical claim.
