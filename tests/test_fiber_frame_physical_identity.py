@@ -211,3 +211,16 @@ def test_unsupported_model_does_not_receive_a_supported_physical_identity(monkey
     monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", _forbidden)
     with pytest.raises(ValueError):
         fiber_frame_physical_model_identity(_model(payload))
+
+
+def test_outer_area_identity_preserves_defaults_and_distinguishes_swaps():
+    payload = _payload()
+    original = fiber_frame_physical_model_identity(_model(payload))
+    section = payload['sections'][0]
+    section.update(top_bar_area_m2=section['bar_area_m2'], bottom_bar_area_m2=section['bar_area_m2'])
+    assert fiber_frame_physical_model_identity(_model(payload)) == original
+    section.update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    unequal = fiber_frame_physical_model_identity(_model(payload))
+    section.update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
+    swapped = fiber_frame_physical_model_identity(_model(payload))
+    assert len({original, unequal, swapped}) == 3

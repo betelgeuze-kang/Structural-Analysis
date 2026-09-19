@@ -957,7 +957,7 @@ def benchmark_fiber_frame_candidate_search_suite(
                 ).canonical_model_checksum
             except Exception:
                 checksum = None
-            candidates.append({**asdict(candidate), "model_checksum": checksum})
+            candidates.append({**candidate.to_dict(), "model_checksum": checksum})
         bindings.append(
             {
                 "case_id": case.case_id,

@@ -28,6 +28,9 @@ from structural_analysis.ai.fiber_frame_warm_start_data import (
 )
 from structural_analysis.api import nonlinear_fiber_frame as public_api
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.rc_reinforcement_quantity import (
+    longitudinal_rebar_area_m2,
+)
 from structural_analysis.model.schema import CanonicalModel
 
 
@@ -174,15 +177,7 @@ def candidate_preanalysis_features(
                 for row, length in zip(assigned, lengths, strict=True)
             ),
             math.fsum(
-                (
-                    row["top_bar_count"]
-                    + row["bottom_bar_count"]
-                    + sum(
-                        layer["bar_count"]
-                        for layer in row.get("intermediate_steel_layers", [])
-                    )
-                )
-                * row["bar_area_m2"]
+                longitudinal_rebar_area_m2(row)
                 * length
                 for row, length in zip(assigned, lengths, strict=True)
             ),

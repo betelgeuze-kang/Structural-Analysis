@@ -77,6 +77,11 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
             **{name: _physical_float(section[name]) for name in _SECTION_FLOAT_FIELDS},
             **{name: section[name] for name in _SECTION_COUNT_FIELDS},
             **{
+                name: _physical_float(section[name])
+                for name in ("top_bar_area_m2", "bottom_bar_area_m2")
+                if name in section and section[name] != section["bar_area_m2"]
+            },
+            **{
                 kind: {
                     name: _physical_float(value)
                     for name, value in asdict(getattr(element.section, kind)).items()

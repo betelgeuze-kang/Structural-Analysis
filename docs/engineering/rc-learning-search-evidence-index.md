@@ -525,3 +525,16 @@ These source-specific receipts do not qualify later commits automatically.
   the fine baseline completes all targets but rejects secant on one near-zero
   moment mismatch. Reference-only common-target comparison observes reaction
   and material-state sensitivity; fixed-request reuse equality is not convergence.
+
+## 2026-09-20 external drawing and unequal reinforcement
+
+- [Zenodo beam candidate and drawing review](zenodo-18862214-candidate-20260920.md):
+  attributed downloadable source and drawing observations retained; missing
+  material, channel, cover and shear/bond details prevent training admission.
+- [Unequal outer reinforcement](rc-unequal-outer-reinforcement-20260920.md):
+  separate top/bottom areas now reach public fibers, section changes and steel
+  quantities. Physical identity and fixed learned contexts retain the distinction;
+  varying-area learned ranking and Workbench review remain pending.
+- [Hosted 1d8f4e7a5 result](hosted-1d8-development-terminal-20260920.md):
+  1,293 development checks passed; full-suite evidence preparation still failed.
+  This receipt predates the unequal-area implementation.

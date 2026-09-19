@@ -507,3 +507,38 @@ def test_compiler_keeps_each_member_bound_to_its_own_section(tmp_path):
         compiled.section_by_member[0].contract_hash
         != compiled.section_by_member[1].contract_hash
     )
+
+
+def test_public_compiler_retains_unequal_outer_bar_areas(tmp_path):
+    payload = _payload()
+    row = payload['sections'][0]
+    row.update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(
+        _write_model(tmp_path / 'unequal.json', payload)
+    )
+    assert compiled is not None, blockers
+    steel = {f.fiber_id: f.area_m2 for f in compiled.section_by_member[0].fibers
+             if f.material_kind == 'steel'}
+    assert steel['steel-top-layer'] == pytest.approx(row['top_bar_count'] * 0.00005)
+    assert steel['steel-bottom-layer'] == pytest.approx(row['bottom_bar_count'] * 0.0002)
+
+
+@pytest.mark.parametrize('name', ['top_bar_area_m2', 'bottom_bar_area_m2'])
+@pytest.mark.parametrize('value', [None, True, 0, -1, '0.0002'])
+def test_public_compiler_rejects_invalid_outer_area(tmp_path, name, value):
+    payload = _payload()
+    payload['sections'][0][name] = value
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(
+        _write_model(tmp_path / 'invalid.json', payload)
+    )
+    assert compiled is None
+    assert any(name in row['path'] for row in blockers)
+
+
+def test_unequal_outer_areas_complete_public_path_and_result_validation(tmp_path):
+    payload = _payload()
+    payload['sections'][0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.0004)
+    model = _write_model(tmp_path / 'unequal-solve.json', payload)
+    result = analyze_public_rc_fiber_frame(model, PublicRCFiberFrameConfig(load_steps=2))
+    assert result.status == 'ready'
+    assert validate_public_rc_fiber_frame_result(result).contract_pass is True

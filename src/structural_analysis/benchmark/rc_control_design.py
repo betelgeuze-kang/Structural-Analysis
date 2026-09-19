@@ -340,7 +340,7 @@ def compare_rc_control_designs(
     identity = {
         "schema_version": SCHEMA,
         "baseline_checksum": baseline.canonical_model_checksum,
-        "candidates": [asdict(candidate) for candidate in candidates],
+        "candidates": [candidate.to_dict() for candidate in candidates],
         "control_request": request.to_dict(),
         "history_limits": asdict(history_limits),
         "material_limits": asdict(material_limits),

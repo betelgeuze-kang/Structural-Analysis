@@ -589,3 +589,30 @@ def test_bounded_planar_model_ir_sample_runs_through_cli(tmp_path: Path) -> None
         == result["input_checksum"]
     )
     assert checkpoint_path.read_bytes()
+
+
+def test_model_ir_unequal_outer_areas_reach_corotational_section():
+    from structural_analysis.api.nonlinear_frame import _compile_portal
+
+    payload = _payload()
+    payload['sections'][0]['parameters'].update(
+        top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002,
+    )
+    adapter = adapt_bounded_planar_model_ir_v2(parse_model_ir_v2(payload))
+    model = adapter.canonical_model
+    assert model.sections[0]['top_bar_area_m2'] == 0.00005
+    assert model.sections[0]['bottom_bar_area_m2'] == 0.0002
+    compiled = _compile_portal(model, general_profile=True, source_model_ir_adapter=adapter)
+    section = compiled.problem.members[0].element.section
+    areas = {f.fiber_id: f.area_m2 for f in section.fibers if f.material_kind == 'steel'}
+    assert areas['steel-top-layer'] == pytest.approx(4 * 0.00005)
+    assert areas['steel-bottom-layer'] == pytest.approx(4 * 0.0002)
+
+
+@pytest.mark.parametrize('name', ['top_bar_area_m2', 'bottom_bar_area_m2'])
+@pytest.mark.parametrize('value', [None, True, 0, -1, '0.0002'])
+def test_model_ir_rejects_invalid_outer_bar_area(name, value):
+    payload = _payload()
+    payload['sections'][0]['parameters'][name] = value
+    with pytest.raises(ModelIRValidationError):
+        parse_model_ir_v2(payload)

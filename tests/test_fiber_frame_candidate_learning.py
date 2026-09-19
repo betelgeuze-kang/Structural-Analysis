@@ -371,3 +371,22 @@ def test_member_context_binds_non_feature_physics(change) -> None:
     )
     assert features == changed_features
     assert context != changed_context
+
+
+def test_unequal_area_features_account_for_steel_and_reject_old_policy_context():
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    base = _model()
+    before = learning.candidate_preanalysis_features(base, config)
+    base.sections[0].update(top_bar_area_m2=0.000387, bottom_bar_area_m2=0.000387)
+    assert learning.candidate_preanalysis_features(base, config) == before
+    base.sections[0].update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    values, context = learning.candidate_preanalysis_features(base, config)
+    assert values[learning.FEATURE_NAMES.index('longitudinal_rebar_volume_m3')] == pytest.approx(4 * (0.00005 + 0.0002) * 3)
+    assert context != before[1]
+    policy = learning._fit(_rows(), 1e-6, 0.1)
+    assert policy.predict(base, config).ood is True
+    base.sections[0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
+    swapped_values, swapped_context = learning.candidate_preanalysis_features(base, config)
+    assert swapped_values == values
+    assert swapped_context != context
+    assert policy.predict(base, config).ood is True
