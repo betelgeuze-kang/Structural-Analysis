@@ -117,6 +117,7 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
     if implementation not in ("native", "wrapper"):
         raise ValueError("unknown reuse implementation")
     model = load_neutral_json(model_path)
+    study_started = perf_counter_ns()
     # Refuse existing output; raw evidence is never overwritten.
     output.mkdir(parents=True, exist_ok=False)
     source_revision = subprocess.check_output(
@@ -152,11 +153,40 @@ def run(output: Path, repetitions: int, case: str = "small", arithmetic: str = "
                             **arithmetic_kwargs,
                         )
                     elapsed = perf_counter_ns() - started
+                    failure = None
                     if not (report["reference_repeat_exact"] and
                             report["all_execution_work_reported"]):
-                        raise ValueError("incomplete or nonrepeatable full path")
-                    if not all(v["full_history_pass"] for v in report["comparisons"].values()):
-                        raise ValueError("a strategy failed its full-history comparison")
+                        failure = "incomplete or nonrepeatable full path"
+                    elif not all(v["full_history_pass"] for v in report["comparisons"].values()):
+                        failure = "a strategy failed its full-history comparison"
+                    if failure is not None:
+                        comparison_bytes = (destination / "comparison.json").read_bytes()
+                        receipt = {
+                            "schema": "rc-immediate-line-search-reuse-failure.v1",
+                            "source_revision": source_revision,
+                            "reason": failure,
+                            "case": case, "retained": retained,
+                            "constant": bool(request.constant_nodal_loads),
+                            "implementation": implementation,
+                            "repetition": repetition, "order": list(order),
+                            "reuse_enabled": enabled,
+                            "benchmark_directory": name,
+                            "comparison_byte_length": len(comparison_bytes),
+                            "comparison_sha256": hashlib.sha256(comparison_bytes).hexdigest(),
+                            "benchmark_wall_ns": elapsed,
+                            "study_wall_ns_through_failure": perf_counter_ns() - study_started,
+                            "timing_scope": "output setup through failed benchmark validation; excludes model loading and failure receipt serialization",
+                            "reference_repeat_exact": report["reference_repeat_exact"],
+                            "all_execution_work_reported": report["all_execution_work_reported"],
+                            "full_history_pass": {k: v["full_history_pass"] for k, v in report["comparisons"].items()},
+                            "completed_pairs": rows,
+                            "completed_benchmarks_in_current_pair": [item[2] for item in pair.values()],
+                            "whole_benchmark_wall_ratio": None,
+                            "assembly_timing_recording": record_assembly_timing,
+                            "independent_physical_validation": False,
+                        }
+                        (output / "failure.json").write_text(json.dumps(receipt, indent=2) + "\n")
+                        raise ValueError(failure)
                     steps = {str(p.relative_to(destination)): p.read_bytes()
                              for p in destination.glob("*/*-step.json")}
                     calls = native_hits = 0

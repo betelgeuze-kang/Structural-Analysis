@@ -184,3 +184,34 @@ def test_invalid_timing_rejects_before_experiment_output(tmp_path, timing):
     with pytest.raises(ValueError, match="boolean assembly timing"):
         experiment.run(output, 2, record_assembly_timing=timing)
     assert not output.exists()
+
+
+@pytest.mark.parametrize("failed_gate", ["reference_repeat_exact", "all_execution_work_reported", "history"])
+def test_completed_benchmark_rejection_retains_cost_and_unknown_pair(tmp_path, monkeypatch, failed_gate):
+    calls = []
+
+    def benchmark(*args, **kwargs):
+        destination = kwargs["output_directory"]
+        destination.mkdir()
+        report = {"reference_repeat_exact": failed_gate != "reference_repeat_exact",
+                  "all_execution_work_reported": failed_gate != "all_execution_work_reported",
+                  "comparisons": {"secant": {"full_history_pass": failed_gate != "history"}}}
+        (destination / "comparison.json").write_text(json.dumps(report))
+        calls.append(destination)
+        return report
+
+    monkeypatch.setattr(experiment.runtime, "benchmark_rc_control_seed_paths", benchmark)
+    output = tmp_path / "failure-study"
+    with pytest.raises(ValueError, match="full path|full-history"):
+        experiment.run(output, 2, arithmetic="binary64", record_assembly_timing=True)
+    assert len(calls) == 1
+    assert not (output / "summary.json").exists()
+    receipt = json.loads((output / "failure.json").read_bytes())
+    assert receipt["whole_benchmark_wall_ratio"] is None
+    assert receipt["completed_pairs"] == receipt["completed_benchmarks_in_current_pair"] == []
+    assert receipt["reuse_enabled"] is False and receipt["repetition"] == 0
+    assert 0 <= receipt["benchmark_wall_ns"] <= receipt["study_wall_ns_through_failure"]
+    raw = (output / receipt["benchmark_directory"] / "comparison.json").read_bytes()
+    assert len(raw) == receipt["comparison_byte_length"]
+    assert experiment.hashlib.sha256(raw).hexdigest() == receipt["comparison_sha256"]
+    assert receipt["assembly_timing_recording"] is True
