@@ -124,6 +124,7 @@ jobs:
           tests/test_rc_search_http.py
           tests/test_rc_seed_original_audit.py
           tests/test_pinned_opensees_runtime.py
+          tests/test_external_product_replay_identity.py
           tests/test_local_source_reference_comparison.py
           tests/test_nonlinear_failure_diagnostic.py
           tests/test_durable_failure_diagnostics.py

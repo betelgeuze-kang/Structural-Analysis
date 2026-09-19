@@ -83,3 +83,16 @@ diagnosis (`opensees-corot2d-arithmetic-20260910.md`) already investigates the t
 remaining reference mismatches. No numerical rollback or reference substitution
 was made to force comparison success. The earlier main reproduction and the
 current-branch physical-comparison failures remain distinct.
+
+## Independent development coverage
+
+The 17 pure replay-identity regressions now live in
+`tests/test_external_product_replay_identity.py`, selected by the independent
+development-contract job. They do not read external receipt artifacts or run
+solver replays. The original receipt-validation integration test and full-suite
+requirements remain in place; tests were moved, not discarded. The workflow
+contract enforces the additional file (49 selected files). Pure replay plus
+workflow tests: 35 passed; the existing bounded-drift and validator mismatch-path
+integration selection separately passed two tests. Ruff and diff checks passed.
+This allows future CI to exercise the fix even when external preparation blocks
+full shards. The still-running hosted job at 467d2a056 predates these changes.
