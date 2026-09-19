@@ -1,0 +1,29 @@
+{
+  "schema_version": "bounded-rc-fiber-direct-control-request.v2",
+  "control_global_dof": 4,
+  "targets_m": [
+    -0.004,
+    -0.008,
+    -0.016,
+    0.008,
+    0.016,
+    -0.008,
+    -0.016
+  ],
+  "constant_nodal_loads": [
+    {
+      "node_id": "N2",
+      "FX_kN": -600.0,
+      "FY_kN": 0.0,
+      "MZ_kNm": 0.0
+    }
+  ],
+  "allow_reversals": true,
+  "maximum_reversals": 2,
+  "maximum_targets": 7,
+  "solver_config": {
+    "newton": {
+      "terminal_polishing": true
+    }
+  }
+}
