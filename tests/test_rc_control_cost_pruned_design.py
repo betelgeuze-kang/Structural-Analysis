@@ -44,6 +44,23 @@ def test_real_cost_pruning_preserves_full_reference_minimum_without_solving_skip
     pruned = study.compare_rc_control_designs(
         **args, output_directory=tmp_path / "pruned", prune_cost_dominated=True
     )
+    from copy import deepcopy
+    from scripts.run_rc_cost_pruning_campaign import pair_evidence
+
+    assert pair_evidence(full, pruned)["comparable"] is True
+    for mutation in ("unknown", "mismatch", "unselected", "input", "incomplete"):
+        changed = deepcopy(pruned)
+        if mutation == "unknown":
+            changed["rows"][0]["invocations"][0]["unknown_execution_work"] = True
+        elif mutation == "mismatch":
+            changed["rows"][0]["artifacts"]["result"]["sha256"] = "sha256:" + "0" * 64
+        elif mutation == "unselected":
+            changed["selected_candidate_id"] = None
+        elif mutation == "input":
+            changed["price_table_hash"] = "sha256:" + "0" * 64
+        else:
+            changed["status"] = "incomplete"
+        assert pair_evidence(full, changed)["comparable"] is False
     assert full["selected_candidate_id"] == pruned["selected_candidate_id"] == "cheap"
     assert (
         full["schema_version"] == study.SCHEMA
