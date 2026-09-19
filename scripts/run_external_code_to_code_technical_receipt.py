@@ -2520,6 +2520,32 @@ def _product_replay_numbers_close(stored: float, current: float) -> bool:
     )
 
 
+_REPLAY_METRIC_FIELDS = frozenset({
+    "quantity", "product_value", "reference_value", "absolute_error",
+    "relative_error", "absolute_tolerance", "relative_tolerance", "contract_pass",
+})
+
+
+def _replay_metric_errors_consistent(metric: dict[str, Any]) -> bool:
+    # Validate each derived diagnostic against its own primitive values before
+    # comparing primitive response drift. A near-zero denominator must not
+    # amplify an otherwise allowed response difference into stale provenance.
+    fields = ("product_value", "reference_value", "absolute_error", "relative_error")
+    if any(isinstance(metric[key], bool) or not isinstance(metric[key], (int, float))
+           for key in fields):
+        return False
+    values = {key: float(metric[key]) for key in fields}
+    if not all(math.isfinite(value) for value in values.values()):
+        return False
+    absolute = abs(values["product_value"] - values["reference_value"])
+    relative = absolute / max(abs(values["reference_value"]), np.finfo(np.float64).tiny)
+    return (
+        math.isfinite(relative)
+        and math.isclose(values["absolute_error"], absolute, rel_tol=1e-14, abs_tol=1e-30)
+        and math.isclose(values["relative_error"], relative, rel_tol=1e-14, abs_tol=1e-30)
+    )
+
+
 def _product_replay_values_match(stored: Any, current: Any) -> bool:
     """Compare replay payloads while allowing bounded numerical runtime drift."""
     if isinstance(stored, bool) or isinstance(current, bool):
@@ -2529,6 +2555,15 @@ def _product_replay_values_match(stored: Any, current: Any) -> bool:
     if isinstance(stored, (int, float)) and isinstance(current, (int, float)):
         return _product_replay_numbers_close(stored, current)
     if isinstance(stored, dict):
+        if stored.keys() == _REPLAY_METRIC_FIELDS and isinstance(current, dict):
+            if current.keys() != _REPLAY_METRIC_FIELDS or not all(
+                _replay_metric_errors_consistent(metric) for metric in (stored, current)
+            ):
+                return False
+            return all(
+                _product_replay_values_match(stored[key], current[key])
+                for key in stored if key != "relative_error"
+            )
         return (
             isinstance(current, dict)
             and stored.keys() == current.keys()
