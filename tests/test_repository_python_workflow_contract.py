@@ -942,7 +942,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     assert "--junitxml=development-contracts.xml" in tests
     assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
     selected = {x for x in tests if x.startswith("tests/")}
-    assert len(selected) == 47
+    assert len(selected) == 48
     assert all((ROOT / path).is_file() for path in selected)
     assert {
         "tests/test_bounded_rc_fiber_direct_control_api.py",
@@ -960,6 +960,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "tests/test_rc_quadratic_seed.py",
         "tests/test_rc_native_assembly_reuse.py",
         "tests/test_rc_line_search_reuse_experiment.py",
+        "tests/test_rc_reuse_campaign.py",
         "tests/test_rc_control_search_accounting.py",
         "tests/test_rc_control_strategy_costs.py",
         "tests/test_rc_control_process_costs.py",

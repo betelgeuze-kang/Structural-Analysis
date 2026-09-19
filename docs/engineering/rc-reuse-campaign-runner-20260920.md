@@ -33,3 +33,12 @@ Final packet:
 `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reuse-campaign-final-znepwsiu`.
 Its external inventory covers 985 files, re-read for hash verification; SHA-256:
 `a377e8baae8ce247ae5c857237817883fec14606c84146c9fda9098542619e00`.
+
+The independent development-contract CI selection now includes the eight campaign
+regressions; its workflow contract requires that inclusion. Combined campaign
+and repository-workflow tests: 26 passed; Ruff passed. Full-suite/external gates
+are unchanged. Prior published source e7b5e2e28 completed four hosted workflows:
+Frontend Web, Workflow Contract and P0 Canonical succeeded; CI run 35465265832,
+job 105956329223 failed with `external_code_to_code_product_replay_not_passed`
+and `external_code_to_code_technical_receipt_not_ready` in its original log.
+Those hosted statuses do not verify this later implementation.
