@@ -185,9 +185,13 @@ def compare_rc_control_strategy_costs(pairs):
             if pp.get(key) != lp.get(key):
                 raise ValueError("paired search conditions differ: " + key)
         historical = learned_report["historical_training_cost"]
-        _bound(
-            historical, "experimental-rc-control-candidate-training.v1", "report_hash"
-        )
+        training_schema = historical.get("schema_version") if type(historical) is dict else None
+        if training_schema not in (
+            "experimental-rc-control-candidate-training.v1",
+            "experimental-rc-control-reinforcement-training.v1",
+        ):
+            raise ValueError("supported historical training schema required")
+        _bound(historical, training_schema, "report_hash")
         if (
             historical["report_hash"] != lp["training_report_hash"]
             or historical["policy_hash"] != lp["policy_hash"]

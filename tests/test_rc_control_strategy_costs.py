@@ -267,3 +267,24 @@ def test_zero_cli_interval_cannot_be_hidden_inside_positive_cohort(strategy):
     rebind(execution)
     with pytest.raises(ValueError, match="positive.*wall"):
         compare([pair, paired(1)])
+
+
+@pytest.mark.parametrize(
+    "schema", ["experimental-rc-control-reinforcement-training.v1", "unknown"]
+)
+def test_reinforcement_training_cost_keeps_binding_and_rejects_unknown_schema(schema):
+    pair = paired()
+    learned = pair["learned_order"]
+    training = learned["report"]["historical_training_cost"]
+    training["schema_version"] = schema
+    training = bind(training, "report_hash")
+    learned["report"]["historical_training_cost"] = training
+    learned["plan"]["training_report_hash"] = training["report_hash"]
+    rebind(learned)
+    if schema == "unknown":
+        with pytest.raises(ValueError, match="training schema"):
+            compare([pair])
+    else:
+        result = compare([pair])
+        assert result["historical_training_wall_ns_counted_once"] == training["wall_ns"]
+        assert result["net_savings_proved"] is False
