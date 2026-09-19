@@ -606,3 +606,7 @@ These source-specific receipts do not qualify later commits automatically.
   artifacts retained and checked through the HTTP mount; desktop/mobile review
   refuses selection of the actual false-pass candidate while preserving its
   inspectable result. Exceeded limit values now wrap visibly above wide tables.
+- [Hosted integration outcome at 95ed](hosted-95ed-terminal-20260920.md): all
+  1,595 development contracts and frontend checks passed; full-suite shards still
+  stop at external replay/technical receipt preparation. Later boundary changes
+  require their own hosted run.
