@@ -36,3 +36,10 @@ check passed (49 workflows / 90 runner declarations).
 Actual source-bound producer execution, artifact/signature availability, current
 combined CI and an authorized main merge remain separate requirements. This
 integration closes missing local production transport plumbing, not those gates.
+
+The post-source-commit offline inventory rebuild updates six `current_blob_sha`
+values and the inventory digest only. All original PR/file identities, owner
+scope fields, statuses and disposition reasons are unchanged. Inventory and runner
+policy regressions then passed **24 tests in 20.73 s**, resolving the four stale
+inventory failures seen before rebuilding. This was an offline snapshot rebuild,
+not a fresh assertion that historical GitHub metadata has been re-fetched.
