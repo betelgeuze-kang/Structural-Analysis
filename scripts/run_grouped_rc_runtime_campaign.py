@@ -50,7 +50,7 @@ def prepare_cases():
         model = load_neutral_json_bytes(_bytes(payload), source_path=f'memory://{name}.json')
         request = BoundedRCFiberDirectControlRequest(
             7, tuple(v / 1000 for v in millimetres), allow_reversals=True,
-            maximum_reversals=3, constant_nodal_loads=(('N3', 0.0, -20.0, 0.0),),
+            maximum_reversals=4, constant_nodal_loads=(('N3', 0.0, -20.0, 0.0),),
         )
         request = replace(request, solver_config=replace(
             request.solver_config,
@@ -78,7 +78,9 @@ def main():
     if groups['groups'] != [['train-a'], ['train-b'], ['train-c']]:
         raise ValueError('predeclared three distinct synthetic training groups required')
     plan = {
-        'schema_version': 'synthetic-grouped-rc-runtime-campaign.v1',
+        'schema_version': 'synthetic-grouped-rc-runtime-campaign.v2',
+        'superseded_failed_plan_hash': 'sha256:45dcee06b7a9e5062590bd55933501b7ccd9cc12a330d5e9a2015cb57515b0fe',
+        'amendment': 'Allow the additional reversal from the actual preloaded origin; retain original failed execution and unchanged numerical tolerances.',
         'source_revision': args.source_revision,
         'cases': [{'case_id': c.case_id, 'split': c.split,
                    'model': c.model.canonical_payload(), 'request': c.request.to_dict()}

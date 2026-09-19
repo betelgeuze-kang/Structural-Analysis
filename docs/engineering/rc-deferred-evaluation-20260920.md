@@ -64,3 +64,24 @@ splits. The existing connected-group runtime regression now consumes deferred
 labels, excludes all samples of the withheld group and passes all full-path
 comparisons. Invalid deferral types and cross-split overlap fail before output.
 Ruff and diff checks pass. No external dataset or experimental holdout was used.
+
+## First campaign outcome and protocol amendment
+
+The frozen `5d254fe14baba8978a327e81651564ade4c8a7c1` campaign terminated with
+`training_failed`, preserving 45 known core calls and 277 Newton/linear solves.
+Train A completed all 12 targets for reference, secant and fresh reference with
+passing full-history comparisons. Train B/C completed preload but stopped at
+`post_preload_preflight`. No fit or runtime selection ran; both reserved cases
+retained zero evaluation calls. The process is terminal, not an unobserved live run.
+
+Stored preload responses explain the refusal: N3 UY is approximately -0.2145,
+-0.7173 and -1.6930 mm for A/B/C respectively. Moving to the first -0.5 mm target
+adds a reversal for B/C before the declared cyclic path. The original request
+allowed three reversals, whereas the actual preloaded-origin paths need four.
+This is a protocol budget error, not failed Newton convergence.
+
+The v2 campaign explicitly links the original failed plan and permits four
+reversals while retaining all coordinates, targets, materials, loads, regression
+choices, repeat counts and numerical acceptance tolerances. Original outcomes
+remain under `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-grouped-runtime-kqrx7nnx`.
+Any amended measurement is a new campaign and must not erase the initial cost.
