@@ -622,3 +622,7 @@ These source-specific receipts do not qualify later commits automatically.
   exact replay of both original 128-layer witness histories; derived 256-history
   values isolate a sampling-location contribution. Post-hoc, two-point diagnostic
   only; original projected-field failures and physical-validation gaps remain.
+- [Original Zenodo flexural-beam table](zenodo-8062007-original-20260920.md): official
+  804-row CSV/manual acquired with source identities and CC BY 4.0 metadata;
+  155 explicit controls across 51 reference prefixes. Scalar endpoints and mixed
+  measured/imputed inputs remain outside solver-history training and validation.
