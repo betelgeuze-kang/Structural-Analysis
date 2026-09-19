@@ -561,6 +561,8 @@ def make_rectangular_stateful_rc_fiber_section(
     top_bar_count: int = 4,
     bottom_bar_count: int = 4,
     bar_area_m2: float = 3.87e-4,
+    top_bar_area_m2: float | None = None,
+    bottom_bar_area_m2: float | None = None,
     intermediate_steel_layers: list[dict[str, Any]] | None = None,
     section_id: str = "rectangular_rc_stateful_fiber_section",
     steel: BilinearCombinedHardeningSteel | None = None,
@@ -580,6 +582,12 @@ def make_rectangular_stateful_rc_fiber_section(
         if type(count) is not int or count < 1:
             raise ValueError(f"{name} must be a positive integer")
     bar_area = _positive(bar_area_m2, name="bar_area_m2")
+    top_area = bar_area if top_bar_area_m2 is None else _positive(
+        top_bar_area_m2, name="top_bar_area_m2"
+    )
+    bottom_area = bar_area if bottom_bar_area_m2 is None else _positive(
+        bottom_bar_area_m2, name="bottom_bar_area_m2"
+    )
     layer_depth = depth / concrete_layer_count
     fibers = [
         StatefulSectionFiber(
@@ -595,13 +603,13 @@ def make_rectangular_stateful_rc_fiber_section(
             StatefulSectionFiber(
                 fiber_id="steel-bottom-layer",
                 y_m=-0.5 * depth + cover,
-                area_m2=bottom_bar_count * bar_area,
+                area_m2=bottom_bar_count * bottom_area,
                 material_kind="steel",
             ),
             StatefulSectionFiber(
                 fiber_id="steel-top-layer",
                 y_m=0.5 * depth - cover,
-                area_m2=top_bar_count * bar_area,
+                area_m2=top_bar_count * top_area,
                 material_kind="steel",
             ),
         )
