@@ -988,7 +988,12 @@ def test_connected_runtime_fits_exclude_every_related_case(original, tmp_path):
         feature_profile=learning.MATERIAL_FEATURE_PROFILE,
         arithmetic_profile="retained-twofold-refinement.v1",
         fit_solver=learning.SVD_RIDGE_FIT_PROFILE,
+        defer_evaluation=True,
     )
+    assert labels["evaluation_deferred"] is True
+    assert all(row["reason"] == "evaluation_explicitly_deferred"
+               for row in labels["evaluation"])
+    assert labels["evaluation_work"]["known_work"]["core_calls"] == 0
     policy = learning.RCControlSeedPolicy(json.dumps(labels["policy"]))
     samples = json.loads((tmp_path / "labels/training-samples.json").read_bytes())
     root = tmp_path / "grouped"

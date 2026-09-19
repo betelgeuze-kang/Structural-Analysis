@@ -750,10 +750,18 @@ def run_rc_control_learning_study(
     arithmetic_profile="binary64",
     feature_profile="legacy",
     fit_solver=NORMAL_RIDGE_FIT_PROFILE,
+    defer_evaluation=False,
 ):
-    """Preflight every split, collect only train labels, freeze once, then evaluate."""
+    """Preflight all splits, collect train labels, fit, then optionally evaluate.
+
+    Explicit deferral preserves validation/holdout solver outputs for subsequent
+    training-only runtime selection. It does not attest that an external caller
+    has never evaluated these cases elsewhere.
+    """
     wall, cpu = perf_counter_ns(), process_time_ns()
     cases = tuple(cases)
+    if type(defer_evaluation) is not bool:
+        raise ValueError("explicit boolean evaluation deferral required")
     if type(fit_solver) is not str or fit_solver not in (
         NORMAL_RIDGE_FIT_PROFILE,
         SVD_RIDGE_FIT_PROFILE,
@@ -839,6 +847,7 @@ def run_rc_control_learning_study(
         _bytes(
             {
                 "source_revision": source_revision,
+                **({"evaluation_deferred": True} if defer_evaluation else {}),
                 **(
                     {"fit_solver_profile": fit_solver}
                     if fit_solver != NORMAL_RIDGE_FIT_PROFILE
@@ -1058,7 +1067,14 @@ def run_rc_control_learning_study(
     for case in cases:
         if case.split == "train":
             continue
-        if policy is None:
+        if defer_evaluation:
+            row = {
+                "case_id": case.case_id,
+                "split": case.split,
+                "status": "not_attempted",
+                "reason": "evaluation_explicitly_deferred",
+            }
+        elif policy is None:
             row = {
                 "case_id": case.case_id,
                 "split": case.split,
@@ -1146,6 +1162,7 @@ def run_rc_control_learning_study(
         **({"feature_profile": feature_profile} if feature_profile != "legacy" else {}),
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
+        **({"evaluation_deferred": True} if defer_evaluation else {}),
         "generation": generation,
         "fit": fit,
         "generation_work": _execution_work(generation),
@@ -1157,7 +1174,11 @@ def run_rc_control_learning_study(
         "measured_source_split_screen": measurement_screen,
         "whole_study_wall_ns": perf_counter_ns() - wall,
         "whole_study_cpu_ns": process_time_ns() - cpu,
-        "timing_scope": "preflight_all_generation_reference_secant_fresh_verification_fit_all_evaluation_proposals_recovery_and_io_excluding_final_report_write",
+        "timing_scope": (
+            "preflight_all_generation_reference_secant_fresh_verification_fit_deferred_evaluation_receipts_and_io_excluding_final_report_write"
+            if defer_evaluation else
+            "preflight_all_generation_reference_secant_fresh_verification_fit_all_evaluation_proposals_recovery_and_io_excluding_final_report_write"
+        ),
         "claims": {
             "policy_training_performed": policy is not None,
             "independent_validation": False,

@@ -907,3 +907,72 @@ def test_retained_training_and_evaluation_bind_same_profile_and_preserve_origina
     )
     assert proc.returncode == 0, proc.stderr
     assert proc.stdout.strip() == policy.policy_hash
+
+
+def test_deferred_evaluation_generates_only_train_labels_and_no_evaluation_paths(
+    tmp_path, cases, monkeypatch
+):
+    actual = learning.benchmark_rc_control_seed_paths
+    seen = []
+    training_models = {c.model.canonical_model_checksum for c in cases if c.split == 'train'}
+
+    def training_only(model, request, **kwargs):
+        assert model.canonical_model_checksum in training_models
+        seen.append(model.canonical_model_checksum)
+        return actual(model, request, **kwargs)
+
+    monkeypatch.setattr(learning, 'benchmark_rc_control_seed_paths', training_only)
+    root = tmp_path / 'deferred'
+    report = learning.run_rc_control_learning_study(
+        cases, source_revision='a' * 40, output_directory=root,
+        fit_solver=learning.SVD_RIDGE_FIT_PROFILE, defer_evaluation=True,
+    )
+    assert set(seen) == training_models and len(seen) == 2
+    assert report['fit']['status'] == 'completed'
+    assert report['policy'] is not None
+    assert report['evaluation_deferred'] is True
+    assert json.loads((root / 'plan.json').read_bytes())['evaluation_deferred'] is True
+    assert report['evaluation_work'] == {
+        'known_work': {'core_calls': 0, 'newton_iterations': 0, 'linear_solves': 0},
+        'unknown_work': False,
+    }
+    assert len(report['evaluation']) == 2
+    for row in report['evaluation']:
+        assert row['status'] == 'not_attempted'
+        assert row['reason'] == 'evaluation_explicitly_deferred'
+        assert not (root / row['case_id']).exists()
+        assert not (root / f"{row['case_id']}-evaluation-started.json").exists()
+        assert json.loads((root / f"{row['case_id']}-evaluation-outcome.json").read_bytes()) == row
+    samples = json.loads((root / 'training-samples.json').read_bytes())
+    assert {s['case_id'] for s in samples} == {'train-a', 'train-b'}
+    assert report['claims']['independent_validation'] is False
+    assert report['claims']['performance_improvement'] is False
+
+
+@pytest.mark.parametrize('value', [None, 0, 1, 'true'])
+def test_evaluation_deferral_requires_boolean_before_output(tmp_path, cases, value):
+    root = tmp_path / 'invalid-deferral'
+    with pytest.raises(ValueError, match='boolean evaluation deferral'):
+        learning.run_rc_control_learning_study(
+            cases, source_revision='a' * 40, output_directory=root, defer_evaluation=value,
+        )
+    assert not root.exists()
+
+
+def test_deferral_does_not_bypass_cross_split_preflight(tmp_path, cases, monkeypatch):
+    original = cases[-1]
+    cases[-1] = learning.RCControlLearningCase(
+        original.case_id, cases[0].project_id, original.geometry_family_id,
+        original.load_history_id, original.split, original.model, original.request,
+    )
+    root = tmp_path / 'overlap-deferral'
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('overlapping split must be rejected before solver execution')
+
+    monkeypatch.setattr(learning, 'benchmark_rc_control_seed_paths', forbidden)
+    with pytest.raises(ValueError):
+        learning.run_rc_control_learning_study(
+            cases, source_revision='a' * 40, output_directory=root, defer_evaluation=True,
+        )
+    assert not root.exists()
