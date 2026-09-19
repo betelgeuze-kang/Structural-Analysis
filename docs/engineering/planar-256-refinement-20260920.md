@@ -7,6 +7,56 @@ load history, geometry and solver criteria unchanged. This is an actual fresh
 parameter fitting is planned. It remains a research-only layer count and does
 not extend the public bounded API or establish physical accuracy.
 
+## Completed execution and actual 128/256 comparison
+
+The single fresh 256-layer run completed all forty targets, with `status=ready`
+and its internal numerical contract passing. The comparison verified every
+accepted checkpoint transition and the original 128-layer prefix/suffix restart.
+The original packets were not rewritten. All **400 nodal/steel group comparisons**
+meet the unchanged exploratory 1% screen. The largest steel-history difference
+is 0.0288211% at 24 mm; the largest steel-stress difference is 0.0190027% at 72 mm.
+Maximum translation and rotation differences are 0.00137790% and 0.00319217%.
+
+Concrete field agreement remains incomplete: **34 of 240 groups exceed 1%**,
+comprising 33 tensile-damage targets and one compressive-damage target.
+
+| Concrete field | Maximum 64/128 difference (prior) | Maximum 128/256 difference | New target |
+| --- | ---: | ---: | ---: |
+| Tensile history strain | 0.269504% | 0.167610% | 10 mm |
+| Compressive history strain | 0.219462% | 0.125041% | 72 mm |
+| Tensile damage | 12.330094% | 6.683062% | 78 mm |
+| Compressive damage | 1.937147% | 1.017034% | 72 mm |
+| Dissipated energy density | 1.108178% | 0.710241% | 26 mm |
+| Stress | 1.698073% | 0.861804% | 72 mm |
+
+These are maxima over different grid-pair comparisons; their witnesses can move.
+They show reduced observed discrepancies, not a demonstrated asymptotic order or
+continuum-error bound. At the new tensile maximum, E3/Gauss 0/coarse cell 101 is
+the witness and six of 2,304 projected cells exceed the group screen. At the new
+compression maximum, E3/Gauss 2/cell 14 is the witness and one cell exceeds it.
+The local criterion is retained despite this localization. No mesh-independent
+material-field accuracy or independent physical validation is established.
+
+The solve took 605.696848 s; section reconstruction took 0.536133 s. The interval
+from source verification through result hashing was 647.850922 s and excludes
+summary/inventory output and the subsequent audit. This single refinement run
+is not a speedup experiment. It retains more detailed material history and is
+not proposed as a cheaper production model.
+
+All 466 retained source/protocol/input/result files were checked for byte length
+and SHA-256: 1,409,091,307 bytes, inventory SHA-256
+`d01c2ac989adfca3365c2346df32bb610c99c3fbb8a018f2bc117418d6dcfe71`.
+Full result SHA-256:
+`ae168bdad5cc4d23f0b246df39b84b1b800458033fe4ba0c9f4acaed7d98b695`.
+
+The separate comparison report and two auditor sources are retained at
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-128-256-audit-x4mlzq4i`:
+3 payload files, 1,062,346 bytes; inventory SHA-256
+`ec9d5862af14215a180fb89dca6c0eb8c64e327d6c66054d2b296da3f5ac7b8c`.
+The adjacent committed summary retains maxima, all failing target/field identities,
+source hashes and the run's timing boundaries. The full separate report contains
+all 640 comparisons and per-section damage localization.
+
 ## Frozen protocol
 
 - Original numerical source: `3e2cc1dba5c6dac1b12eb1badc9b6df09337b847`.
@@ -31,7 +81,7 @@ identity or Git mismatches before importing copied numerical code. Focused
 localization/source-integrity tests passed **16 tests in 1.63 s**; these are
 software checks, not independent solver evidence.
 
-## Execution state and comparison still required
+## Initial execution state before completion
 
 At this record's creation, the solver was confirmed live as process 111759
 (unified shell session 80440), after writing the protocol and entering the

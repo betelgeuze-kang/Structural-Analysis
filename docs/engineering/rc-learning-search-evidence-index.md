@@ -616,4 +616,5 @@ These source-specific receipts do not qualify later commits automatically.
   difference. Small mean differences do not replace the failed local screen.
 - [Frozen 256-layer experiment](planar-256-refinement-20260920.md): verified original
   Git source, unchanged forty-target path and solver criteria; fresh refinement
-  launched. The initial record is a live-run protocol, not a convergence result.
+  completed at forty targets. Actual 128/256 comparison passes 400 nodal/steel
+  groups but fails 34/240 concrete groups; tensile damage still differs by 6.68%.

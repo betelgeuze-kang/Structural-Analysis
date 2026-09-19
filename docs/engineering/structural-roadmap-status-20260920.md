@@ -98,3 +98,10 @@ where the retained 64/128-layer differences occur. The original maxima remain
 unchanged; localized damage-onset cells dominate the witness-section discrepancy.
 This informs subsequent mesh investigation without closing material convergence
 or substituting average error for the original local screen.
+
+The [fresh 256-layer full-history experiment](planar-256-refinement-20260920.md)
+completed forty targets and supports all 400 bounded 128/256 nodal/steel
+comparisons under the existing screen. Concrete failures reduce from 70/240
+(64/128) to 34/240 (128/256), but tensile damage still differs by 6.68%. This
+advances the numerical investigation without closing material-field convergence,
+independent verification, public scope expansion or performance qualification.
