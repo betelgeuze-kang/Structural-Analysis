@@ -54,3 +54,9 @@ Workflow Contract and P0 also passed at this source. The full Python shards stil
 stop at external replay/technical receipt preparation. Python development tests
 were still running when this frontend receipt was recorded. Later local concrete
 refinement commits are not covered by this hosted source.
+
+The subsequent terminal Python receipt for the same `60df039db` source passed
+**1,596 development tests in 1,368.34 s**, job 105977523578 of run 35473086713.
+All four full-suite shards failed at evidence materialization, so the aggregate
+remains failed. All five workflows at this source were terminal before publishing
+the later refinement/probe changes; no active validation was cancelled.
