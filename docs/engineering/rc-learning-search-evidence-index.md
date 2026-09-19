@@ -507,3 +507,12 @@ development/topology passes from full-suite preparation failure and one hosted
 browser failure. The [browser diagnostic preservation repair](runtime-browser-diagnostic-preservation-20260914.md)
 retains future failed traces before subsequent HTTP tests replace their output.
 These source-specific receipts do not qualify later commits automatically.
+
+## 2026-09-20 constant-axial cantilever reuse observations
+
+- [Elastic-material reversal path](rc-cantilever-reuse-timing-20260920.md):
+  16 paths, 128 steps, byte-exact paired results; no accepted damage or plasticity.
+- [Concrete-damaging reversal path](rc-cantilever-damage-reuse-timing-20260920.md):
+  separate larger targets, 16 paths, 128 steps; maximum tensile damage 0.9855,
+  no steel plasticity, byte-exact pairs and repeats; two observed time ratios
+  0.7975/0.7928. Deterministic retained reuse only, not learned or physical proof.
