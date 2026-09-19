@@ -41,3 +41,33 @@ Terminal listing and original logs are read-only at
 `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-945-terminal-20260920-t0zo5nu3`.
 External inventory SHA-256:
 `28b5ee32ffe69b6b6f3b92aefc1698061653a0e781d0778b0113f5873a7c969b`.
+
+## Follow-up: terminal checks at f0769225e
+
+All four returned workflow records for
+`f0769225e2b9cfeac6a892837fbee3415f7302f6` are now terminal: Workflow Contract CI
+35464560843, P0 Canonical Verification Contract 35464561013 and Frontend Web CI
+35464560877 succeeded. CI 35464560920 failed `Materialize exact current-source
+test evidence`, before the full repository tests, with the same two external
+replay/technical-receipt blockers above. These statuses do not cover later commits.
+
+Failure artifact 10590174928 is explicitly diagnostic-only, with
+`receipt_generation_attested=false` and a warning that receipts may be tracked
+or partially rewritten. Its external code-to-code receipt reports a current
+product replay against reused external execution values dated 2026-07-30,
+`external_runtime_executed_in_this_generation=false`, and
+`current_product_replay_pass=false`. It is not a fresh external execution.
+Two failed support_N1_UX_N metrics remain: bounded member-feature path absolute
+difference 4.96424095305589e-7 N and prescribed-settlement path difference
+3.631256504377234e-7 N. Existing absolute/relative tolerances remain unchanged.
+The downloaded diagnostic ZIP SHA-256 is
+`3f526fe38ca48f69fdaeebbd83e0c463a84c6af7b0651fb7db487ea15f769b05`.
+
+Commit 3720639f6 adds a separate failure receipt to the reuse experiment:
+a rejected returned full-path comparison retains elapsed costs and the original
+comparison file hash/length, leaves speed ratio null, and still raises the
+original failure. It does not repair or relabel the numerical mismatch.
+Validation: 31 tests passed before the report-binding addition; three focused
+failure tests passed after that addition. See
+`rc-reuse-failure-receipt-20260920.md` for scope. The change and this follow-up
+require hosted checks on their own published source.
