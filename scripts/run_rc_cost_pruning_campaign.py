@@ -8,6 +8,9 @@ import subprocess
 import sys
 from time import perf_counter_ns
 
+from structural_analysis.api.frame3d_direct_control_request import (
+    strict_json_object_bytes,
+)
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )
@@ -22,7 +25,9 @@ def save(path, value):
 
 
 def inspect_report(folder):
-    report = json.loads((folder / "comparison.json").read_bytes())
+    report = strict_json_object_bytes(
+        (folder / "comparison.json").read_bytes(), maximum_bytes=2 * 1024 * 1024
+    )
     body = {k: v for k, v in report.items() if k != "report_hash"}
     if report["report_hash"] != _sha(_bytes(body)):
         raise ValueError("comparison self hash mismatch")
@@ -59,6 +64,37 @@ def pair_evidence(full, pruned):
         and pruned["status"] in ("complete", "complete_with_cost_exclusions")
         and frows.keys() == prows.keys()
     )
+    expected_ids = ["baseline", *[c["candidate_id"] for c in full["candidates"]]]
+    complete = complete and all(
+        [r["candidate_id"] for r in report["rows"]] == expected_ids
+        and len(expected_ids)
+        == len(set(expected_ids))
+        == report["candidate_denominator"]
+        for report in (full, pruned)
+    )
+
+    def verified_row(row):
+        return (
+            row["status"] == "verified"
+            and row["full_reference_verification_pass"] is True
+            and [i["phase"] for i in row["invocations"]] == ["analysis", "verification"]
+        )
+
+    execution_records_complete = all(verified_row(r) for r in full["rows"]) and all(
+        verified_row(r)
+        or (
+            r["status"] == "skipped_cost_dominated"
+            and r["invocations"] == []
+            and r["full_reference_verification_pass"] is False
+            and r["selection_eligible"] is False
+            and r["performance"] is None
+            and set(r["artifacts"]) == {"model", "cost_skip"}
+        )
+        for r in pruned["rows"]
+    )
+    matching = matching and full.get("line_search_assembly_reuse") == pruned.get(
+        "line_search_assembly_reuse"
+    )
     known = all(
         i["status"] == "returned" and i["unknown_execution_work"] is False
         for report in (full, pruned)
@@ -88,12 +124,17 @@ def pair_evidence(full, pruned):
     return {
         "matching_inputs": matching,
         "complete": complete,
-        "known_work": known,
+        "known_work": known and execution_records_complete,
         "retained_result_hashes_match": hashes_match,
         "selected_candidate_id": selected,
         "same_verified_selection": bool(eligible),
         "comparable": bool(
-            matching and complete and known and hashes_match and eligible
+            matching
+            and complete
+            and known
+            and execution_records_complete
+            and hashes_match
+            and eligible
         ),
         "api_invocations": {
             name: sum(len(r["invocations"]) for r in report["rows"])
@@ -101,6 +142,52 @@ def pair_evidence(full, pruned):
         },
         "skipped_candidate_ids": pruned["cost_pruning"]["skipped_candidate_ids"],
     }
+
+
+def summarize_pair(reports, processes):
+    """Retain failed attempts and their measured cost without granting a ratio."""
+    evidence = {"comparable": False}
+    if set(reports) == {"full", "pruned"}:
+        try:
+            evidence = pair_evidence(reports["full"], reports["pruned"])
+        except (KeyError, TypeError, ValueError, IndexError) as exc:
+            evidence["audit_error"] = f"{type(exc).__name__}: {exc}"
+    else:
+        evidence["missing_report_modes"] = sorted({"full", "pruned"} - set(reports))
+    evidence["processes"] = processes
+    valid_processes = set(processes) == {"full", "pruned"} and all(
+        type(p.get("return_code")) is int
+        and p["return_code"] == 0
+        and type(p.get("wall_ns")) is int
+        and p["wall_ns"] > 0
+        and "audit_error" not in p
+        for p in processes.values()
+    )
+    evidence["processes_complete"] = valid_processes
+    evidence["comparable"] = bool(evidence["comparable"] and valid_processes)
+    evidence["pruned_over_full_process_ratio"] = (
+        processes["pruned"]["wall_ns"] / processes["full"]["wall_ns"]
+        if evidence["comparable"]
+        else None
+    )
+    return evidence
+
+
+def campaign_complete(summary):
+    cases = summary["cases"]
+    return (
+        len(cases) == summary["planned_case_count"]
+        and sum(len(c["pairs"]) for c in cases) == summary["planned_pair_count"]
+        and all(
+            pair.get("processes_complete")
+            and pair.get("matching_inputs")
+            and pair.get("complete")
+            and pair.get("known_work")
+            and pair.get("retained_result_hashes_match")
+            for c in cases
+            for pair in c["pairs"]
+        )
+    )
 
 
 def main():
@@ -253,20 +340,7 @@ def main():
                     reports[mode] = inspect_report(folder / label)
                 except Exception as exc:
                     process["audit_error"] = f"{type(exc).__name__}: {exc}"
-            evidence = (
-                pair_evidence(reports["full"], reports["pruned"])
-                if len(reports) == 2
-                else {"comparable": False}
-            )
-            evidence["processes"] = processes
-            evidence["comparable"] &= all(
-                p["return_code"] == 0 for p in processes.values()
-            )
-            evidence["pruned_over_full_process_ratio"] = (
-                processes["pruned"]["wall_ns"] / processes["full"]["wall_ns"]
-                if evidence["comparable"]
-                else None
-            )
+            evidence = summarize_pair(reports, processes)
             record["pairs"].append(evidence)
             summary["campaign_wall_ns"] = perf_counter_ns() - start
             save(root / "summary.json", summary)
@@ -280,18 +354,7 @@ def main():
         if p.is_file()
     }
     save(root / "inventory.json", inventory)
-    return (
-        0
-        if all(
-            all(p["return_code"] == 0 for p in pair["processes"].values())
-            and pair.get("complete")
-            and pair.get("known_work")
-            and pair.get("retained_result_hashes_match")
-            for c in summary["cases"]
-            for pair in c["pairs"]
-        )
-        else 1
-    )
+    return 0 if campaign_complete(summary) else 1
 
 
 if __name__ == "__main__":

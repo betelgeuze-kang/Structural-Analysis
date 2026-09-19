@@ -48,9 +48,21 @@ def test_real_cost_pruning_preserves_full_reference_minimum_without_solving_skip
     from scripts.run_rc_cost_pruning_campaign import pair_evidence
 
     assert pair_evidence(full, pruned)["comparable"] is True
-    for mutation in ("unknown", "mismatch", "unselected", "input", "incomplete"):
+    for mutation in (
+        "unknown",
+        "mismatch",
+        "unselected",
+        "input",
+        "incomplete",
+        "erased_work",
+        "duplicate_row",
+    ):
         changed = deepcopy(pruned)
-        if mutation == "unknown":
+        if mutation == "erased_work":
+            changed["rows"][0]["invocations"] = []
+        elif mutation == "duplicate_row":
+            changed["rows"].append(deepcopy(changed["rows"][0]))
+        elif mutation == "unknown":
             changed["rows"][0]["invocations"][0]["unknown_execution_work"] = True
         elif mutation == "mismatch":
             changed["rows"][0]["artifacts"]["result"]["sha256"] = "sha256:" + "0" * 64
@@ -200,3 +212,69 @@ def test_pruned_cli_exits_success_and_preserves_full_denominator(tmp_path, capsy
     summary = json.loads(capsys.readouterr().out)
     assert summary["status"] == "complete_with_cost_exclusions"
     assert summary["candidate_denominator"] == 3 and summary["verified_count"] == 2
+
+
+def test_campaign_retains_malformed_attempt_costs_and_missing_denominators():
+    from scripts.run_rc_cost_pruning_campaign import summarize_pair, campaign_complete
+
+    processes = {
+        "full": {"return_code": 0, "wall_ns": 100},
+        "pruned": {"return_code": 0, "wall_ns": 80},
+    }
+    malformed = summarize_pair({"full": {}, "pruned": {}}, processes)
+    assert not malformed["comparable"] and "audit_error" in malformed
+    assert malformed["pruned_over_full_process_ratio"] is None
+    assert malformed["processes"] == processes
+    missing = summarize_pair({"full": {}}, processes)
+    assert missing["missing_report_modes"] == ["pruned"]
+    assert missing["processes"]["pruned"]["wall_ns"] == 80
+    assert not campaign_complete(
+        {"planned_case_count": 1, "planned_pair_count": 2, "cases": []}
+    )
+    assert not campaign_complete(
+        {
+            "planned_case_count": 1,
+            "planned_pair_count": 2,
+            "cases": [{"pairs": [malformed]}],
+        }
+    )
+
+
+def test_campaign_reader_rejects_ambiguous_json(tmp_path):
+    from scripts.run_rc_cost_pruning_campaign import inspect_report
+
+    (tmp_path / "comparison.json").write_text(
+        '{"report_hash":"one","report_hash":"two"}'
+    )
+    with pytest.raises(ValueError):
+        inspect_report(tmp_path)
+
+
+def test_campaign_all_failed_processes_still_finalize_every_planned_pair(
+    tmp_path, monkeypatch
+):
+    from types import SimpleNamespace
+    from scripts import run_rc_cost_pruning_campaign as campaign
+
+    root = tmp_path / "failed-campaign"
+    monkeypatch.setattr(campaign.sys, "argv", ["campaign", "--output", str(root)])
+    monkeypatch.setattr(campaign.subprocess, "check_output", lambda *a, **k: "a" * 40)
+    monkeypatch.setattr(
+        campaign.subprocess, "run", lambda *a, **k: SimpleNamespace(returncode=2)
+    )
+    assert campaign.main() == 1
+    summary = json.loads((root / "summary.json").read_bytes())
+    protocol = json.loads((root / "protocol.json").read_bytes())
+    assert (
+        len(summary["cases"]) == summary["planned_case_count"] == len(protocol["cases"])
+    )
+    pairs = [p for c in summary["cases"] for p in c["pairs"]]
+    assert len(pairs) == summary["planned_pair_count"]
+    for pair in pairs:
+        assert pair["pruned_over_full_process_ratio"] is None
+        assert pair["missing_report_modes"] == ["full", "pruned"]
+        assert all(
+            p["return_code"] == 2 and p["wall_ns"] > 0 and "audit_error" in p
+            for p in pair["processes"].values()
+        )
+    assert (root / "inventory.json").is_file()

@@ -79,3 +79,20 @@ production behavior remains unchanged by this measurement script.
 This advances the repeated-runtime evidence and verified candidate-selection
 workstreams. It does not establish learned benefit, independent physical accuracy,
 external data admission, full CI completion, design approval or release readiness.
+
+## Subsequent failure-accounting hardening
+
+A later reader/driver review found that an original-byte audit could succeed on
+an incomplete JSON object, after which pair summarization raised and interrupted
+the remaining experiment. The driver now uses strict JSON, retains pair-level
+schema/audit errors and process clocks, and continues planned pairs with a null
+ratio. Missing reports, nonzero exits, malformed clocks, duplicate candidate rows,
+erased invocation records and differing execution inputs cannot receive speed
+credit. Terminal success also requires the declared case/pair denominator.
+
+The focused suite now has 10 passing tests (7.33 s), including an injected campaign
+where every subprocess fails: all planned pairs and attempted costs remain in the
+final summary/inventory and the driver exits nonzero. This injection is software
+failure-path evidence, not a numerical runtime observation. All 10 original pairs
+were re-read with the tightened checks; the eight eligible ratios are unchanged.
+The original packet, driver copy, clocks and inventory were not modified.
