@@ -127,6 +127,7 @@ jobs:
           tests/test_measured_response_split.py
           tests/test_aci_column_archive.py
           tests/test_rc_control_design.py
+          tests/test_rc_control_reinforcement_learning.py
           tests/test_rc_control_candidate_search.py
           tests/test_rc_control_candidate_cost.py
           tests/test_rc_control_cost_dominance.py

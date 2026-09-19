@@ -59,6 +59,16 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
     for member in problem.members:
         element = member.element
         section = authored_sections[authored_elements[member.member_id]["section"]]
+        # With no intermediate bars the common area has no independent physical
+        # role: use the effective top area as the canonical default. This keeps
+        # legacy equal-area payloads exact and removes redundant override aliases.
+        section = dict(section)
+        if not section.get("intermediate_steel_layers"):
+            top = section.get("top_bar_area_m2", section["bar_area_m2"])
+            bottom = section.get("bottom_bar_area_m2", section["bar_area_m2"])
+            section["bar_area_m2"] = top
+            section["top_bar_area_m2"] = top
+            section["bottom_bar_area_m2"] = bottom
         expanded_section = {
             "type": section["type"],
             **(

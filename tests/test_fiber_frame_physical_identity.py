@@ -224,3 +224,20 @@ def test_outer_area_identity_preserves_defaults_and_distinguishes_swaps():
     section.update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
     swapped = fiber_frame_physical_model_identity(_model(payload))
     assert len({original, unequal, swapped}) == 3
+
+
+def test_unused_common_area_cannot_create_independent_unequal_models():
+    payload = _payload()
+    section = payload['sections'][0]
+    section.update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.0004)
+    first = fiber_frame_physical_model_identity(_model(payload))
+    section['bar_area_m2'] = 0.0003
+    assert fiber_frame_physical_model_identity(_model(payload)) == first
+    section['bar_area_m2'] = 0.0002
+    section.pop('top_bar_area_m2')
+    assert fiber_frame_physical_model_identity(_model(payload)) == first
+    section['intermediate_steel_layers'] = [{'y_m': 0.0, 'bar_count': 2}]
+    middle = fiber_frame_physical_model_identity(_model(payload))
+    section['bar_area_m2'] = 0.0003
+    section['top_bar_area_m2'] = 0.0002
+    assert fiber_frame_physical_model_identity(_model(payload)) != middle

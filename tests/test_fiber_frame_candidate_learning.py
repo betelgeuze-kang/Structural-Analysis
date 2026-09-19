@@ -387,6 +387,6 @@ def test_unequal_area_features_account_for_steel_and_reject_old_policy_context()
     assert policy.predict(base, config).ood is True
     base.sections[0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
     swapped_values, swapped_context = learning.candidate_preanalysis_features(base, config)
-    assert swapped_values == values
+    assert swapped_values[3] == values[3]
     assert swapped_context != context
     assert policy.predict(base, config).ood is True

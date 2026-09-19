@@ -541,3 +541,7 @@ These source-specific receipts do not qualify later commits automatically.
 - [Workbench unequal-area review](rc-unequal-reinforcement-workbench-20260920.md):
   corrected UI quantity checks and per-layer labels; 131 frontend checks passed,
   including actual-report desktop/mobile rendering. No new physical evidence.
+- [Versioned outer-reinforcement learning](rc-control-reinforcement-learning-20260920.md):
+  separate 131-feature policy, freshly replayed labels and unseen-candidate
+  search/oracle connection; both strategies choose the same candidate in a small
+  internal test. No learning benefit or independent generalization established.

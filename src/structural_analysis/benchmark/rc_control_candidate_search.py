@@ -19,6 +19,9 @@ from structural_analysis.benchmark.rc_control_candidate_cost import (
 )
 from structural_analysis.benchmark.rc_control_candidate_learning import (
     RCControlCandidatePolicy,
+    RCControlReinforcementPolicy,
+    REINFORCEMENT_TRAINING_SCHEMA,
+    control_reinforcement_features,
     control_candidate_features,
 )
 from structural_analysis.benchmark.rc_control_candidate_ranking import (
@@ -214,7 +217,7 @@ def _run_candidate_search(
         raise ValueError("explicit boolean line-search assembly reuse required")
     if type(ranking_strategy) is not str or ranking_strategy not in RANKING_STRATEGIES:
         raise ValueError("supported candidate ranking strategy required")
-    if uses_policy and type(policy) is not RCControlCandidatePolicy:
+    if uses_policy and type(policy) not in (RCControlCandidatePolicy, RCControlReinforcementPolicy):
         raise ValueError("direct-control candidate policy required")
     if type(candidates) is not tuple or not 1 <= len(candidates) <= 16:
         raise ValueError("one to sixteen canonical alternatives required")
@@ -250,7 +253,7 @@ def _run_candidate_search(
         if (
             type(training_report) is not dict
             or training_report.get("schema_version")
-            != "experimental-rc-control-candidate-training.v1"
+            != (REINFORCEMENT_TRAINING_SCHEMA if type(policy) is RCControlReinforcementPolicy else "experimental-rc-control-candidate-training.v1")
         ):
             raise ValueError("original candidate training report required")
         # Detach caller-owned inputs before using their training cost declarations.
@@ -310,7 +313,7 @@ def _run_candidate_search(
     pool = []
     for key, model in models.items():
         if p is not None:
-            _, context = control_candidate_features(model, request)
+            _, context = (control_reinforcement_features if type(policy) is RCControlReinforcementPolicy else control_candidate_features)(model, request)
             if context != p["context_hash"]:
                 raise ValueError(
                     "training/search direct-control or fixed model context mismatch"
