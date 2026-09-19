@@ -602,3 +602,7 @@ These source-specific receipts do not qualify later commits automatically.
   pool contains a real narrow false-pass prediction blocked by full reanalysis;
   two pools have no feasible design. Same online work and higher training-inclusive
   costs still provide no learned benefit or independent validation.
+- [Actual boundary case in Workbench](rc-boundary-workbench-20260920.md): 91 original
+  artifacts retained and checked through the HTTP mount; desktop/mobile review
+  refuses selection of the actual false-pass candidate while preserving its
+  inspectable result. Exceeded limit values now wrap visibly above wide tables.

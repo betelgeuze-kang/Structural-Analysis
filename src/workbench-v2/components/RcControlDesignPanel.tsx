@@ -107,11 +107,15 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.quantities?.totals.longitudinal_rebar_mass_kg)}<br />Δ {shown(row.quantity_delta?.longitudinal_rebar_mass_kg)}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.material_estimate?.total)} {report.prices?.currency}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.scoped_estimate_reduction)}</td>
-          <td>{row.status === 'skipped_cost_dominated' ? 'Not analyzed: more expensive than a verified feasible design' : row.status}<br /><button type="button" className="wb2-btn" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
+          <td>{row.status === 'skipped_cost_dominated' ? 'Not analyzed: more expensive than a verified feasible design' : row.full_reference_verification_pass && !row.selection_eligible ? 'Analysis verified; requested limits failed' : row.status}<br /><button type="button" className="wb2-btn" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
         </tr>)}</tbody></table>
     </div>
     {report.rows.map((row: RcObject) => <details key={row.candidate_id} data-rc-design-details={row.candidate_id} open={selected === row.candidate_id}>
       <summary>{row.candidate_id} — screens, execution cost and original artifacts</summary>
+      {Object.entries(row.screens ?? {}).filter(([, screen]) => (screen as RcObject).status === 'fail').map(([key, value]) => {
+        const screen = value as RcObject
+        return <p key={key} data-rc-design-limit-failure={key}>Requested limit exceeded: <strong>{metrics.find(([name]) => name === key)?.[1] ?? key}</strong>. Value {shown(screen.value)}; limit {shown(screen.limit)}.</p>
+      })}
       <p>Result identity <code>{row.artifacts.result?.sha256 ?? 'UNAVAILABLE'}</code>. {row.failure ? `Failure phase: ${row.failure.phase}; kind: ${row.failure.kind}.` : ''}</p>
       {row.failure && row.artifacts.result ? <div data-rc-design-failure={row.candidate_id}>
         <button type="button" className="wb2-btn" disabled={inspecting !== null} onClick={() => { void inspectFailure(row.candidate_id) }}>Inspect {row.candidate_id} original failure</button>
