@@ -27,7 +27,12 @@ from structural_analysis.io.neutral.loader import load_neutral_json
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    root = parser.parse_args().output
+    parser.add_argument(
+        "--profile", choices=("original", "boundary"), default="original"
+    )
+    args = parser.parse_args()
+    root = args.output
+    boundary = args.profile == "boundary"
     root.mkdir(parents=True, exist_ok=False)
     start = perf_counter_ns()
     source = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
@@ -60,7 +65,9 @@ def main():
                 )
             ),
             terminal_limits=None,
-            history_limits=asdict(design.FiberFrameHistoryLimits(1, 0.0008)),
+            history_limits=asdict(
+                design.FiberFrameHistoryLimits(1, 0.0007 if boundary else 0.0008)
+            ),
             material_history_limits=asdict(
                 design.FiberFrameMaterialHistoryLimits(1, 1, 1)
             ),
@@ -86,11 +93,33 @@ def main():
         "independent_generalization": False,
         "preparation_transport_review_in_strategy_intervals": False,
     }
-    for width in (0.32, 0.48):
-        for label, targets in [
+    if boundary:
+        protocol.update(
+            schema_version="rc-reinforcement-boundary-cost-campaign.v1",
+            development_profile="synthetic_boundary_not_untouched_holdout",
+            prior_observations_informed_protocol=True,
+            post_measurement_exhaustive_audit=True,
+            exhaustive_audit_excluded_from_strategy_intervals=True,
+        )
+    histories = (
+        [
             ("small", (-0.001, -0.002, 0.001)),
             ("large", (-0.004, -0.008, 0.004)),
-        ]:
+        ]
+        if not boundary
+        else [
+            (
+                f"peak{int(peak * 1000)}",
+                tuple(
+                    peak * factor
+                    for factor in (-0.25, -0.5, -0.75, -1.0, -0.5, 0.0, 0.25, 0.5)
+                ),
+            )
+            for peak in (0.010, 0.014)
+        ]
+    )
+    for width in (0.36, 0.44) if boundary else (0.32, 0.48):
+        for label, targets in histories:
             name = f"w{int(width * 100)}-{label}"
             model = design.apply_fiber_frame_section_changes(
                 base,
@@ -264,6 +293,42 @@ def main():
                     for p in pairs
                 ],
             )
+            if boundary:
+                audit = execute(
+                    folder,
+                    "exhaustive-audit",
+                    "structural_analysis.benchmark.rc_control_candidate_cli",
+                    [
+                        "search",
+                        "--model",
+                        str(folder / "evaluation-model.json"),
+                        "--experiment",
+                        str(folder / "evaluation-experiment.json"),
+                        "--output",
+                        str(folder / "exhaustive-audit"),
+                        "--policy",
+                        str(folder / "training/policy.json"),
+                        "--training-report",
+                        str(folder / "training/training.json"),
+                        "--full-analysis-budget",
+                        "3",
+                        "--evaluate-exhaustive-oracle",
+                        *common,
+                    ],
+                )
+                audit_report = json.loads(
+                    (folder / "exhaustive-audit/result.json").read_bytes()
+                )
+                record["post_measurement_audit_process_wall_ns"] = audit["wall_ns"]
+                record["post_measurement_audit_report_hash"] = audit_report[
+                    "report_hash"
+                ]
+                record["candidate_cost_optimality_audit"] = audit_report[
+                    "candidate_cost_optimality_audit"
+                ]
+                record["candidate_coverage_audit"] = audit_report[
+                    "candidate_coverage_audit"
+                ]
         except Exception as exc:
             record.update(
                 status="failed",
