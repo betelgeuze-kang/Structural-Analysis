@@ -556,3 +556,8 @@ These source-specific receipts do not qualify later commits automatically.
 - [Hosted 6c9c17e69 terminal results](hosted-6c9-development-terminal-20260920.md):
   1,564 development tests passed; full shards remain blocked before test execution
   by external technical receipt readiness. Later local changes require new checks.
+- [Actual cost-pruned design execution](rc-control-cost-pruned-design-20260920.md):
+  opt-in strict cost exclusions based on prior fresh verified feasible results;
+  a real comparison preserves selection/results while reducing six API calls to
+  four. Skipped feasibility remains unknown; adaptive Workbench integration and
+  repeated timing remain open.

@@ -25,6 +25,7 @@ from structural_analysis.model.schema import CanonicalModel
 
 
 SCHEMA = "experimental-rc-control-design-comparison.v1"
+PRUNED_SCHEMA = "experimental-rc-control-cost-pruned-design.v1"
 
 
 def _bytes(value):
@@ -116,6 +117,8 @@ def _reference_design_row(
     history_limits,
     material_limits,
     terminal_limits,
+    *,
+    cost_incumbent=None,
 ):
     """Shared single-model execution, original artifacts and fresh verification."""
     candidate_id = "baseline" if candidate is None else candidate.candidate_id
@@ -149,6 +152,29 @@ def _reference_design_row(
         }
         return row
     row["artifacts"]["model"] = _save(root, f"{candidate_id}/model.json", model_bytes)
+    if (
+        cost_incumbent is not None
+        and row["material_estimate"] is not None
+        and row["material_estimate"]["total"] > cost_incumbent["estimate"]
+    ):
+        # Quantity/cost preparation is performed, but no solver or verification
+        # is invoked. This establishes cost exclusion, never candidate safety.
+        receipt = {
+            "schema_version": "rc-control-strict-cost-skip.v1",
+            "candidate_id": candidate_id,
+            "model_sha256": row["artifacts"]["model"]["sha256"],
+            "candidate_estimate": row["material_estimate"]["total"],
+            "price_table_hash": prices.price_table_hash,
+            "incumbent": dict(cost_incumbent),
+            "reason": "strictly_more_expensive_than_prior_full_verified_screen_pass",
+            "candidate_feasibility": "not_evaluated",
+            "solver_invocation_count": 0,
+        }
+        row["status"] = "skipped_cost_dominated"
+        row["artifacts"]["cost_skip"] = _save(
+            root, f"{candidate_id}/cost-skip.json", _bytes(receipt)
+        )
+        return row
     result, raw, checkpoint = None, None, None
     payload: dict[str, Any] | None = None
     validation: dict[str, Any] | None = None
@@ -278,13 +304,21 @@ def compare_rc_control_designs(
     output_directory: Path,
     terminal_limits: design.FiberFrameTerminalLimits | None = None,
     reuse_line_search_assembly: bool = False,
+    prune_cost_dominated: bool = False,
 ) -> dict:
-    """Analyze and freshly reverify baseline and every candidate from epoch zero.
+    """Analyze and freshly reverify requested models from epoch zero.
 
+    Default execution covers every candidate. Explicit cost pruning may exclude
+    strictly more expensive candidates after a verified feasible incumbent, using
+    a separate report schema with unknown skipped-candidate feasibility.
     Writes originals into a new, exclusive directory. Failed alternatives stay in
     the denominator; quantities survive numerical failure. An I/O failure aborts
     publication instead of silently losing an original numerical artifact.
     """
+    if type(prune_cost_dominated) is not bool:
+        raise ValueError("explicit boolean cost pruning required")
+    if prune_cost_dominated and prices is None:
+        raise ValueError("cost pruning requires a common price table")
     if type(reuse_line_search_assembly) is not bool:
         raise ValueError("explicit boolean line-search assembly reuse required")
     if type(baseline) is not CanonicalModel:
@@ -338,7 +372,7 @@ def compare_rc_control_designs(
     root.mkdir(parents=True, exist_ok=False)
     start_wall, start_cpu = perf_counter_ns(), process_time_ns()
     identity = {
-        "schema_version": SCHEMA,
+        "schema_version": PRUNED_SCHEMA if prune_cost_dominated else SCHEMA,
         "baseline_checksum": baseline.canonical_model_checksum,
         "candidates": [candidate.to_dict() for candidate in candidates],
         "control_request": request.to_dict(),
@@ -350,6 +384,8 @@ def compare_rc_control_designs(
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
     }
+    if prune_cost_dominated:
+        identity["execution_policy"] = "strict_verified_cost_dominance_in_authored_order.v1"
     if reuse_line_search_assembly:
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
@@ -358,20 +394,29 @@ def compare_rc_control_designs(
     kwargs = request.api_kwargs() | {"restart": None}
     if reuse_line_search_assembly:
         kwargs["reuse_line_search_assembly"] = True
-    rows = [
-        _reference_design_row(
-            baseline,
-            candidate,
-            request,
-            root,
-            kwargs,
-            prices,
-            history_limits,
-            material_limits,
-            terminal_limits,
+    rows = []
+    incumbent = None
+    for candidate in (None, *candidates):
+        row = _reference_design_row(
+            baseline, candidate, request, root, kwargs, prices,
+            history_limits, material_limits, terminal_limits,
+            **({"cost_incumbent": incumbent} if prune_cost_dominated else {}),
         )
-        for candidate in (None, *candidates)
-    ]
+        rows.append(row)
+        if (
+            prune_cost_dominated
+            and row["full_reference_verification_pass"]
+            and row["selection_eligible"]
+            and all(inv["status"] == "returned" and inv["unknown_execution_work"] is False for inv in row["invocations"])
+        ):
+            estimate = row["material_estimate"]["total"]
+            if incumbent is None or estimate < incumbent["estimate"]:
+                incumbent = {
+                    "candidate_id": row["candidate_id"], "estimate": estimate,
+                    "result_sha256": row["artifacts"]["result"]["sha256"],
+                    "verification_sha256": row["artifacts"]["verification"]["sha256"],
+                    "model_sha256": row["artifacts"]["model"]["sha256"],
+                }
     eligible = [row for row in rows if row["selection_eligible"]]
     selected = (
         min(
@@ -424,6 +469,23 @@ def compare_rc_control_designs(
             "release_approved": False,
         },
     }
+    if prune_cost_dominated:
+        skipped = [row for row in rows if row["status"] == "skipped_cost_dominated"]
+        resolved = all(
+            row["full_reference_verification_pass"]
+            or row["status"] == "skipped_cost_dominated"
+            for row in rows
+        )
+        report["status"] = ("complete_with_cost_exclusions" if skipped else "complete") if resolved else "incomplete"
+        report["cost_pruning"] = {
+            "skipped_candidate_ids": [row["candidate_id"] for row in skipped],
+            "skipped_count": len(skipped),
+            "api_invocation_count": sum(len(row["invocations"]) for row in rows),
+            "minimum_scoped_estimate_proved_within_declared_candidates": resolved and selected is not None,
+            "skipped_candidate_feasibility_known": False,
+            "all_requested_models_physically_verified": all(row["full_reference_verification_pass"] for row in rows),
+            "saved_wall_time_measured": False,
+        }
     design._finite_tree(report)
     report["report_hash"] = _sha(_bytes(report))
     _save(root, "comparison.json", _bytes(report))
