@@ -553,3 +553,6 @@ These source-specific receipts do not qualify later commits automatically.
   four separate fits, eight order-balanced comparison pairs, including concrete
   damage; same selections and exact repeated result hashes. Including training,
   learned execution costs 2.01–2.06× price order in these cases; no promotion.
+- [Hosted 6c9c17e69 terminal results](hosted-6c9-development-terminal-20260920.md):
+  1,564 development tests passed; full shards remain blocked before test execution
+  by external technical receipt readiness. Later local changes require new checks.
