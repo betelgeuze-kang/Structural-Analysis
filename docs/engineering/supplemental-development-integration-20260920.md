@@ -43,3 +43,32 @@ scope fields, statuses and disposition reasons are unchanged. Inventory and runn
 policy regressions then passed **24 tests in 20.73 s**, resolving the four stale
 inventory failures seen before rebuilding. This was an offline snapshot rebuild,
 not a fresh assertion that historical GitHub metadata has been re-fetched.
+
+## Current-main merge preview and historical records
+
+A read-only `git merge-tree` preview used base
+`4de4e3f55aae1d267cf704cec7d7533f3a627498`, development head
+`19f85db45ad18f2b29aa59fedf2dd2066d506ef6` and independently rechecked main
+`234c3122c78dea064411aa16b06b18ab16157576`. It found one textual conflict block,
+in `canonical/source-quarry-inventory.v1.json`. The workflow contract test merges
+without a conflict; the previously imported executable transport and workflow
+changes introduce no further textual conflict in this preview. This is a local
+merge preview, not an actual merge, GitHub mergeability guarantee or combined
+post-merge validation.
+
+The main/development inventory difference is precisely 14 `current_blob_sha`
+values and `inventory_digest`. All other metadata, dispositions and historical
+PR identities agree. The development inventory currently passes its offline
+480-file validation (71 present, 409 superseded), without claiming a fresh GitHub
+metadata verification. An eventual authorized merge must regenerate and validate
+current hashes against the resulting source tree; choosing main's stale hashes
+or dropping the conflict markers without rebuilding is not a valid resolution.
+No inventory field or acceptance rule was changed in this preflight.
+
+Three previously absent historical records were copied byte-for-byte from that
+exact main commit: `supplemental-current-main-20260909.md`, its JSON summary, and
+`supplemental-production-consumer-20260908.md`. Their original dates, revisions,
+limited test scopes and pending attestation statements remain intact. They are
+historical integration records, not new signed acceptance or current execution
+receipts. No branch ref was merged, no workflow dispatched and no release made
+as part of this preview/document import.
