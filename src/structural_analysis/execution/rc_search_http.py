@@ -30,6 +30,8 @@ _TOTAL_MAX = 1024**3
 _HASH = re.compile(r"sha256:[0-9a-f]{64}")
 _ID = re.compile(r"[A-Za-z][A-Za-z0-9_.:-]{0,127}")
 _MOUNT = re.compile(r"[A-Za-z][A-Za-z0-9_-]{0,63}")
+# Shared with layout readers as the exact complete-analysis artifact set.
+# Optional cost-exclusion receipts belong only to adaptive design reports.
 _ROLES = frozenset(
     {
         "model",
@@ -40,7 +42,6 @@ _ROLES = frozenset(
         "analysis_outcome",
         "verification_started",
         "verification_outcome",
-        "cost_skip",
     }
 )
 
@@ -345,7 +346,9 @@ class RcSearchArtifactBundle:
                 refs = row.get("artifacts")
                 if isinstance(refs, dict) and "cost_skip" in refs and not pruned:
                     raise ValueError("cost skip outside adaptive comparison")
-                if type(refs) is not dict or not set(refs) <= _ROLES:
+                if type(refs) is not dict or not set(refs) <= (
+                    _ROLES | {"cost_skip"} if pruned else _ROLES
+                ):
                     raise ValueError("comparison artifact role invalid")
                 for role, ref in refs.items():
                     relative = f"{row['candidate_id']}/{role.replace('_', '-')}.json"

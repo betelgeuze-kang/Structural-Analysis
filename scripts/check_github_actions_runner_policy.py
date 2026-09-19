@@ -29,6 +29,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
         ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+        ".github/workflows/bounded-planar-upload-identity.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/core-quality-ci.yml",
         ".github/workflows/current-support-bundle.yml",
@@ -59,6 +60,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/repository-hygiene-freshness.yml",
         ".github/workflows/runtime-input-viewer-ci.yml",
         ".github/workflows/science-quarantine-ci.yml",
+        ".github/workflows/supplemental-artifact-identity-ci.yml",
         ".github/workflows/viewer-browser-ci.yml",
         ".github/workflows/workflow-contract-ci.yml",
     }

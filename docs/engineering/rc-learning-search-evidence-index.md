@@ -585,3 +585,11 @@ These source-specific receipts do not qualify later commits automatically.
   each runtime fit, with exact excluded groups in the frozen plan and fit receipts.
   Real small-case execution verifies complementary sample membership; it remains
   internal tuning with no independent provenance or learned speedup claim.
+
+- [Supplemental development integration](supplemental-development-integration-20260920.md):
+  exact-ID verifier/consumer and production workflow wiring imported from current
+  main with controlled transport checks; no signature or scientific authority
+  inferred, and no main merge performed.
+- [Terminal 20a hosted outcome](hosted-20a-terminal-20260920.md): frontend 735 passed;
+  development layout readers rejected an erroneously expanded required-role set.
+  The optional adaptive receipt is now isolated and affected HTTP paths rerun.

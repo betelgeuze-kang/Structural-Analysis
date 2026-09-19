@@ -72,3 +72,12 @@ commits need their own hosted run after publication.
 Every numbered roadmap item remains open at its full requested scope. The actual
 implementation and bounded measurements are progress toward those requirements,
 not replacements for them.
+
+## Subsequent integration progress
+
+[Supplemental development integration](supplemental-development-integration-20260920.md)
+now imports exact current-main transport scripts and applies its production
+workflow changes to this branch. This supersedes the missing-local-plumbing
+portion of the snapshot above; branch ancestry, authorized merge and operational
+attestation remain unclosed. [Terminal 20a results](hosted-20a-terminal-20260920.md)
+record the completed CI, including the layout role-set regression and correction.
