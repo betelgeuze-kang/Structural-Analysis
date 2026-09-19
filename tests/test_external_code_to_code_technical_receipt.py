@@ -666,3 +666,33 @@ def test_replay_rejects_inconsistent_stored_relative_diagnostic():
     current = module._comparison('witness', -1e-12, 0.0)
     stored['relative_error'] = 0.0
     assert not module._product_replay_values_match(stored, current)
+
+
+def test_replay_mismatch_path_uses_same_metric_acceptance_rule():
+    left = module._comparison('witness', 4e-13, 0.0)
+    right = module._comparison('witness', -1e-12, 0.0)
+    assert module._product_replay_mismatch_path([{'metrics': [left]}], [{'metrics': [right]}]) is None
+    right['contract_pass'] = False
+    assert module._product_replay_mismatch_path([{'metrics': [left]}], [{'metrics': [right]}]) == (0, 'metrics', 0, 'contract_pass')
+
+
+@pytest.mark.parametrize('left,right,expected', [
+    ({'a': 1}, {}, ('a',)), ([1], [1, 2], (1,)),
+    ([{'value': 1.0}], [{'value': 2.0}], (0, 'value')),
+    (1, True, ()),
+])
+def test_replay_mismatch_path_retains_structural_and_scalar_failures(left, right, expected):
+    assert module._product_replay_mismatch_path(left, right) == expected
+
+
+def test_validator_reports_replay_mismatch_path_without_accepting_it(monkeypatch):
+    payload = _stored_receipt()
+    current = deepcopy(payload['comparisons'])
+    current[0]['contract_pass'] = not current[0]['contract_pass']
+    monkeypatch.setattr(module, '_source_checksums', lambda root: payload['internal_source']['input_checksums'])
+    monkeypatch.setattr(module, '_current_product_comparison_cases', lambda *a, **k: current)
+    with pytest.raises(module.ExternalCodeToCodeReceiptError) as caught:
+        module.validate_external_code_to_code_technical_receipt(
+            payload, repo_root=ROOT, require_current_sources=True,
+        )
+    assert str(caught.value) == 'receipt_product_comparisons_stale:path=[0, "contract_pass"]'
