@@ -16,7 +16,7 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
-The [bounded 2,048-layer witness diagnostic](planar-2048-witness-protocol-20260920.md) is implemented and locally checked, but its large retained-history replay remains pending until timing generation finishes. The original 1% failure remains open.
+The [bounded 2,048-layer witness diagnostic](planar-2048-witness-protocol-20260920.md) is implemented and locally checked, but its large retained-history replay is running after timing generation and gate evaluation completed; the first provenance-environment failure is preserved. The original 1% failure remains open.
 
 [Hosted fbc](hosted-fbc-terminal-20260920.md) passes 1,925 development tests and 814 frontend tests. Full Python shards remain stopped before test execution by external replay and technical-receipt preparation; later source changes require their own checks.
 
