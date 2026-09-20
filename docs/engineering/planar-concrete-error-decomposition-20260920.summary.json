@@ -1,0 +1,2069 @@
+{
+  "schema_version": "retained-concrete-error-decomposition.v1",
+  "source_point_inventory_sha256": "48a9f4d2fafada99a732599e24212e2ba734c6e9f23a0fa59db60f663903ac8d",
+  "source_point_report_sha256": "fdac9745848c0a4d82c2011e1a0534635f84fc4ba9775e43eeebe249dff138bc",
+  "source_fine_path_sha256": "ae168bdad5cc4d23f0b246df39b84b1b800458033fe4ba0c9f4acaed7d98b695",
+  "targets": [
+    {
+      "target_m": 0.002,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.004,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0031480129031226656,
+          "maximum_location": [
+            "E3",
+            0,
+            32
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0031480129031226656,
+            "history": 0.0,
+            "sampling": -0.0031480129031226656,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.010157410381231247,
+          "sum_absolute_history": 0.0014284880794862564,
+          "sum_absolute_sampling": 0.010369143856284568,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 85,
+          "sampling_magnitude_exceeds_history_cells": 145,
+          "mixed_onset_cells": 4
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.006,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.002604989996352891,
+          "maximum_location": [
+            "E3",
+            0,
+            47
+          ],
+          "components_at_total_maximum": {
+            "total": -0.002604989996352891,
+            "history": 0.0,
+            "sampling": -0.002604989996352891,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.016331956211512066,
+          "sum_absolute_history": 0.0019872853734534957,
+          "sum_absolute_sampling": 0.016705720036599092,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 197,
+          "sampling_magnitude_exceeds_history_cells": 316,
+          "mixed_onset_cells": 4
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.008,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.006363248770738572,
+          "maximum_location": [
+            "E2",
+            0,
+            101
+          ],
+          "components_at_total_maximum": {
+            "total": -0.006363248770738572,
+            "history": 5.214825689714431e-06,
+            "sampling": -0.0063684635964282865,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.027351872795492005,
+          "sum_absolute_history": 0.0022477235633447945,
+          "sum_absolute_sampling": 0.028209286161345992,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 358,
+          "sampling_magnitude_exceeds_history_cells": 418,
+          "mixed_onset_cells": 4
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.01,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.008284704588711111,
+          "maximum_location": [
+            "E2",
+            0,
+            95
+          ],
+          "components_at_total_maximum": {
+            "total": -0.008284704588711111,
+            "history": -1.2481774090966624e-06,
+            "sampling": -0.008283456411302015,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.04665033931746704,
+          "sum_absolute_history": 0.006846955788380904,
+          "sum_absolute_sampling": 0.046173599283276856,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 328,
+          "sampling_magnitude_exceeds_history_cells": 435,
+          "mixed_onset_cells": 4
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.012,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0053413262339920276,
+          "maximum_location": [
+            "E4",
+            0,
+            71
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0053413262339920276,
+            "history": 0.0,
+            "sampling": -0.0053413262339920276,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.036643527506242224,
+          "sum_absolute_history": 0.007432322054363061,
+          "sum_absolute_sampling": 0.037124380242048116,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 336,
+          "sampling_magnitude_exceeds_history_cells": 470,
+          "mixed_onset_cells": 7
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.014,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.008862917957759286,
+          "maximum_location": [
+            "E4",
+            2,
+            60
+          ],
+          "components_at_total_maximum": {
+            "total": -0.008862917957759286,
+            "history": -3.998209354116877e-05,
+            "sampling": -0.008822935864218118,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.05818717350488761,
+          "sum_absolute_history": 0.016461661768443103,
+          "sum_absolute_sampling": 0.052401397107858905,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 572,
+          "sampling_magnitude_exceeds_history_cells": 576,
+          "mixed_onset_cells": 4
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.016,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.016303350559955576,
+          "maximum_location": [
+            "E3",
+            2,
+            62
+          ],
+          "components_at_total_maximum": {
+            "total": -0.016303350559955576,
+            "history": -9.978857281101039e-05,
+            "sampling": -0.016203561987144566,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.05705384170341149,
+          "sum_absolute_history": 0.011212810729071987,
+          "sum_absolute_sampling": 0.05209745260037363,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 756,
+          "sampling_magnitude_exceeds_history_cells": 730,
+          "mixed_onset_cells": 3
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.018,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.01578713738687021,
+          "maximum_location": [
+            "E3",
+            2,
+            59
+          ],
+          "components_at_total_maximum": {
+            "total": -0.01578713738687021,
+            "history": -0.0002289983124013073,
+            "sampling": -0.015558139074468902,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.11732130107530964,
+          "sum_absolute_history": 0.0334184306837072,
+          "sum_absolute_sampling": 0.10729693599280216,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 814,
+          "sampling_magnitude_exceeds_history_cells": 474,
+          "mixed_onset_cells": 11
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.02,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.021078628568171165,
+          "maximum_location": [
+            "E6",
+            2,
+            44
+          ],
+          "components_at_total_maximum": {
+            "total": -0.021078628568171165,
+            "history": -0.0006226247481223579,
+            "sampling": -0.020456003820048807,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.10693084613442383,
+          "sum_absolute_history": 0.03643347367728056,
+          "sum_absolute_sampling": 0.09157568543294836,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 611,
+          "sampling_magnitude_exceeds_history_cells": 373,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0,
+          "maximum_location": [
+            "E1",
+            0,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0,
+            "history": 0.0,
+            "sampling": 0.0,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0,
+          "sum_absolute_history": 0.0,
+          "sum_absolute_sampling": 0.0,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 0,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.022,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.017956733937838254,
+          "maximum_location": [
+            "E6",
+            0,
+            87
+          ],
+          "components_at_total_maximum": {
+            "total": -0.017956733937838254,
+            "history": 0.0,
+            "sampling": -0.017956733937838254,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.16072453414263072,
+          "sum_absolute_history": 0.07992138205202615,
+          "sum_absolute_sampling": 0.10770268241910469,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 626,
+          "sampling_magnitude_exceeds_history_cells": 189,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 1.366481385312035e-05,
+          "maximum_location": [
+            "E2",
+            0,
+            1
+          ],
+          "components_at_total_maximum": {
+            "total": 1.366481385312035e-05,
+            "history": -4.332847440613463e-06,
+            "sampling": 1.7997661293733813e-05,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 2.67686845634163e-05,
+          "sum_absolute_history": 8.486881189373463e-06,
+          "sum_absolute_sampling": 3.5255565752789764e-05,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 2,
+          "sampling_magnitude_exceeds_history_cells": 2,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.024,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.020298214344792398,
+          "maximum_location": [
+            "E3",
+            0,
+            78
+          ],
+          "components_at_total_maximum": {
+            "total": -0.020298214344792398,
+            "history": -0.0002786202926440273,
+            "sampling": -0.02001959405214837,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.10173152170758859,
+          "sum_absolute_history": 0.016542429795446734,
+          "sum_absolute_sampling": 0.10060596638286023,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 927,
+          "sampling_magnitude_exceeds_history_cells": 817,
+          "mixed_onset_cells": 7
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 2.127246567201757e-05,
+          "maximum_location": [
+            "E2",
+            0,
+            5
+          ],
+          "components_at_total_maximum": {
+            "total": 2.127246567201757e-05,
+            "history": 6.899470242904826e-07,
+            "sampling": 2.0582518647727088e-05,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.00011560978990277082,
+          "sum_absolute_history": 4.713411261958456e-06,
+          "sum_absolute_sampling": 0.00011089637864081237,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 6,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.026,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.016096106560590295,
+          "maximum_location": [
+            "E4",
+            2,
+            81
+          ],
+          "components_at_total_maximum": {
+            "total": -0.016096106560590295,
+            "history": 0.0,
+            "sampling": -0.016096106560590295,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.12447688693497178,
+          "sum_absolute_history": 0.016759564107560743,
+          "sum_absolute_sampling": 0.12281470142436274,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 941,
+          "sampling_magnitude_exceeds_history_cells": 603,
+          "mixed_onset_cells": 8
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0015008484806363076,
+          "maximum_location": [
+            "E2",
+            0,
+            9
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0015008484806363076,
+            "history": -1.4082329524489623e-05,
+            "sampling": -0.001486766151111818,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.0015606290826251645,
+          "sum_absolute_history": 0.00012810317711087205,
+          "sum_absolute_sampling": 0.0016605676006870573,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 9,
+          "sampling_magnitude_exceeds_history_cells": 10,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.028,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.019513249385812226,
+          "maximum_location": [
+            "E4",
+            0,
+            48
+          ],
+          "components_at_total_maximum": {
+            "total": -0.019513249385812226,
+            "history": 0.0,
+            "sampling": -0.019513249385812226,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.12921597559497638,
+          "sum_absolute_history": 0.02756207856796633,
+          "sum_absolute_sampling": 0.12372611216023982,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 721,
+          "sampling_magnitude_exceeds_history_cells": 522,
+          "mixed_onset_cells": 9
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 2.163827154361142e-05,
+          "maximum_location": [
+            "E2",
+            0,
+            11
+          ],
+          "components_at_total_maximum": {
+            "total": 2.163827154361142e-05,
+            "history": -4.505229766804675e-06,
+            "sampling": 2.6143501310416095e-05,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.00020578191306780402,
+          "sum_absolute_history": 4.845045694290562e-05,
+          "sum_absolute_sampling": 0.00024483337851383125,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 12,
+          "sampling_magnitude_exceeds_history_cells": 12,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.03,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.03175429490751841,
+          "maximum_location": [
+            "E6",
+            2,
+            34
+          ],
+          "components_at_total_maximum": {
+            "total": -0.03175429490751841,
+            "history": 0.0,
+            "sampling": -0.03175429490751841,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.12845928262447948,
+          "sum_absolute_history": 0.019645709707002634,
+          "sum_absolute_sampling": 0.12623874149286207,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 935,
+          "sampling_magnitude_exceeds_history_cells": 621,
+          "mixed_onset_cells": 5
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0005064085322701306,
+          "maximum_location": [
+            "E2",
+            0,
+            15
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0005064085322701306,
+            "history": -5.826162749134056e-06,
+            "sampling": -0.0005005823695209966,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.0007625771990413255,
+          "sum_absolute_history": 7.043108437043699e-05,
+          "sum_absolute_sampling": 0.0008213559579134944,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 15,
+          "sampling_magnitude_exceeds_history_cells": 16,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.032,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.020865782983030712,
+          "maximum_location": [
+            "E6",
+            2,
+            33
+          ],
+          "components_at_total_maximum": {
+            "total": -0.020865782983030712,
+            "history": -0.0003288668667846828,
+            "sampling": -0.02053691611624603,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.14235366527867488,
+          "sum_absolute_history": 0.028025806295710165,
+          "sum_absolute_sampling": 0.13627772921216608,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 817,
+          "sampling_magnitude_exceeds_history_cells": 488,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0032311678327291427,
+          "maximum_location": [
+            "E2",
+            0,
+            18
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0032311678327291427,
+            "history": 0.0,
+            "sampling": -0.0032311678327291427,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.0032967111258213055,
+          "sum_absolute_history": 0.0004680061458957052,
+          "sum_absolute_sampling": 0.0036375959485367426,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 18,
+          "sampling_magnitude_exceeds_history_cells": 3,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.034,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.03677641021907002,
+          "maximum_location": [
+            "E6",
+            2,
+            32
+          ],
+          "components_at_total_maximum": {
+            "total": -0.03677641021907002,
+            "history": 0.0,
+            "sampling": -0.03677641021907002,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.17087354922778702,
+          "sum_absolute_history": 0.016958335016046933,
+          "sum_absolute_sampling": 0.1725581054016529,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 982,
+          "sampling_magnitude_exceeds_history_cells": 681,
+          "mixed_onset_cells": 8
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0017332261270274762,
+          "maximum_location": [
+            "E3",
+            2,
+            1
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0017332261270274762,
+            "history": 0.0,
+            "sampling": -0.0017332261270274762,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.0024317999176936556,
+          "sum_absolute_history": 0.00014167149517241295,
+          "sum_absolute_sampling": 0.0022997973602010835,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 1,
+          "sampling_magnitude_exceeds_history_cells": 23,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.036,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.035726565287123924,
+          "maximum_location": [
+            "E3",
+            0,
+            91
+          ],
+          "components_at_total_maximum": {
+            "total": -0.035726565287123924,
+            "history": -0.00035860369140516823,
+            "sampling": -0.035367961595718755,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.18484138667617772,
+          "sum_absolute_history": 0.0266100780127122,
+          "sum_absolute_sampling": 0.17810269373861637,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 913,
+          "sampling_magnitude_exceeds_history_cells": 490,
+          "mixed_onset_cells": 4
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.003543094192721752,
+          "maximum_location": [
+            "E2",
+            0,
+            23
+          ],
+          "components_at_total_maximum": {
+            "total": -0.003543094192721752,
+            "history": 0.0,
+            "sampling": -0.003543094192721752,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.004061877125077884,
+          "sum_absolute_history": 0.0009132582254265387,
+          "sum_absolute_sampling": 0.004279358232343711,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 23,
+          "sampling_magnitude_exceeds_history_cells": 4,
+          "mixed_onset_cells": 2
+        }
+      }
+    },
+    {
+      "target_m": 0.038,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.03683398398565263,
+          "maximum_location": [
+            "E3",
+            0,
+            92
+          ],
+          "components_at_total_maximum": {
+            "total": -0.03683398398565263,
+            "history": 0.0,
+            "sampling": -0.03683398398565263,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.18993099180959822,
+          "sum_absolute_history": 0.021576073594921974,
+          "sum_absolute_sampling": 0.19069788666398552,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 1063,
+          "sampling_magnitude_exceeds_history_cells": 620,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.002347948139798439,
+          "maximum_location": [
+            "E2",
+            0,
+            25
+          ],
+          "components_at_total_maximum": {
+            "total": -0.002347948139798439,
+            "history": -2.690456640253025e-05,
+            "sampling": -0.002321043573395909,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.0030712471715431122,
+          "sum_absolute_history": 0.0006932986955511256,
+          "sum_absolute_sampling": 0.003246541194396657,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 25,
+          "sampling_magnitude_exceeds_history_cells": 30,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.04,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.039610685092230646,
+          "maximum_location": [
+            "E3",
+            0,
+            93
+          ],
+          "components_at_total_maximum": {
+            "total": -0.039610685092230646,
+            "history": 0.0,
+            "sampling": -0.039610685092230646,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.21242093703819137,
+          "sum_absolute_history": 0.014055378789745943,
+          "sum_absolute_sampling": 0.21754110323501102,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 799,
+          "sampling_magnitude_exceeds_history_cells": 692,
+          "mixed_onset_cells": 7
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.00019796837049784743,
+          "maximum_location": [
+            "E3",
+            2,
+            4
+          ],
+          "components_at_total_maximum": {
+            "total": 0.00019796837049784743,
+            "history": 0.0001089581880189261,
+            "sampling": 8.901018247892134e-05,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.001599821087348574,
+          "sum_absolute_history": 0.0005607938025906645,
+          "sum_absolute_sampling": 0.0012040304213715158,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 27,
+          "sampling_magnitude_exceeds_history_cells": 28,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.042,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.016933250069364414,
+          "maximum_location": [
+            "E1",
+            0,
+            32
+          ],
+          "components_at_total_maximum": {
+            "total": -0.016933250069364414,
+            "history": -0.0007188688781091246,
+            "sampling": -0.01621438119125529,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.138304963884801,
+          "sum_absolute_history": 0.011396656215080792,
+          "sum_absolute_sampling": 0.1357541570225987,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 701,
+          "sampling_magnitude_exceeds_history_cells": 710,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.00011039699711173911,
+          "maximum_location": [
+            "E3",
+            2,
+            5
+          ],
+          "components_at_total_maximum": {
+            "total": 0.00011039699711173911,
+            "history": 1.3067611571382365e-05,
+            "sampling": 9.732938554035675e-05,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.0011899903632962006,
+          "sum_absolute_history": 0.0002417120356480451,
+          "sum_absolute_sampling": 0.001284640656738112,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 29,
+          "sampling_magnitude_exceeds_history_cells": 35,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.044,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.05091500041659919,
+          "maximum_location": [
+            "E3",
+            2,
+            38
+          ],
+          "components_at_total_maximum": {
+            "total": -0.05091500041659919,
+            "history": -0.0008309984678086524,
+            "sampling": -0.050084001948790535,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.24652644307105476,
+          "sum_absolute_history": 0.019654522801524243,
+          "sum_absolute_sampling": 0.24985453253355483,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 1085,
+          "sampling_magnitude_exceeds_history_cells": 571,
+          "mixed_onset_cells": 8
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.004436743480325356,
+          "maximum_location": [
+            "E2",
+            0,
+            30
+          ],
+          "components_at_total_maximum": {
+            "total": -0.004436743480325356,
+            "history": 0.0,
+            "sampling": -0.004436743480325356,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.005760281683152679,
+          "sum_absolute_history": 0.001311850280400595,
+          "sum_absolute_sampling": 0.005858444294506215,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 30,
+          "sampling_magnitude_exceeds_history_cells": 20,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.046,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.023562049482198644,
+          "maximum_location": [
+            "E3",
+            0,
+            95
+          ],
+          "components_at_total_maximum": {
+            "total": -0.023562049482198644,
+            "history": 0.0,
+            "sampling": -0.023562049482198644,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.13332569638732222,
+          "sum_absolute_history": 0.00821539964604412,
+          "sum_absolute_sampling": 0.13372184883343124,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 959,
+          "sampling_magnitude_exceeds_history_cells": 821,
+          "mixed_onset_cells": 5
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0001550505854633899,
+          "maximum_location": [
+            "E3",
+            2,
+            7
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0001550505854633899,
+            "history": 4.021684518829005e-05,
+            "sampling": 0.00011483374027509985,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.00153857669417512,
+          "sum_absolute_history": 0.0006246690353123308,
+          "sum_absolute_sampling": 0.001634343323683285,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 32,
+          "sampling_magnitude_exceeds_history_cells": 40,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.048,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.03916284350631566,
+          "maximum_location": [
+            "E2",
+            0,
+            69
+          ],
+          "components_at_total_maximum": {
+            "total": -0.03916284350631566,
+            "history": -0.00012754119878810588,
+            "sampling": -0.03903530230752755,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.226670256110392,
+          "sum_absolute_history": 0.026037193228103495,
+          "sum_absolute_sampling": 0.2174369795236621,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 785,
+          "sampling_magnitude_exceeds_history_cells": 588,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0030208541416759105,
+          "maximum_location": [
+            "E2",
+            0,
+            33
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0030208541416759105,
+            "history": 0.0,
+            "sampling": -0.0030208541416759105,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.004400902529644757,
+          "sum_absolute_history": 0.0004074070111632633,
+          "sum_absolute_sampling": 0.00480830954080802,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 42,
+          "sampling_magnitude_exceeds_history_cells": 43,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.05,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.022428299875791702,
+          "maximum_location": [
+            "E4",
+            0,
+            33
+          ],
+          "components_at_total_maximum": {
+            "total": -0.022428299875791702,
+            "history": 0.0,
+            "sampling": -0.022428299875791702,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.16454838294381996,
+          "sum_absolute_history": 0.015515124409092085,
+          "sum_absolute_sampling": 0.16504973374174553,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 740,
+          "sampling_magnitude_exceeds_history_cells": 604,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0020458273224311374,
+          "maximum_location": [
+            "E2",
+            0,
+            34
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0020458273224311374,
+            "history": -3.6773973519754755e-05,
+            "sampling": -0.0020090533489113827,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.003406560517304813,
+          "sum_absolute_history": 0.0007919289385441841,
+          "sum_absolute_sampling": 0.0039812223497791566,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 34,
+          "sampling_magnitude_exceeds_history_cells": 37,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.052,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.05613160017064939,
+          "maximum_location": [
+            "E3",
+            2,
+            37
+          ],
+          "components_at_total_maximum": {
+            "total": -0.05613160017064939,
+            "history": -0.0002102717742999971,
+            "sampling": -0.05592132839634939,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.2598361987132648,
+          "sum_absolute_history": 0.016042515297596927,
+          "sum_absolute_sampling": 0.2608524462627103,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 1145,
+          "sampling_magnitude_exceeds_history_cells": 824,
+          "mixed_onset_cells": 8
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0046179409635470625,
+          "maximum_location": [
+            "E3",
+            2,
+            10
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0046179409635470625,
+            "history": 0.0,
+            "sampling": -0.0046179409635470625,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.0071018989805704535,
+          "sum_absolute_history": 0.00035683626401239454,
+          "sum_absolute_sampling": 0.006745062716558059,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 0,
+          "sampling_magnitude_exceeds_history_cells": 47,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.054,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.01042386748100771,
+          "maximum_location": [
+            "E3",
+            2,
+            37
+          ],
+          "components_at_total_maximum": {
+            "total": 0.01042386748100771,
+            "history": 0.00030837087392987517,
+            "sampling": 0.010115496607077834,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.16085430346281682,
+          "sum_absolute_history": 0.02032316637892817,
+          "sum_absolute_sampling": 0.14719693784302623,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 668,
+          "sampling_magnitude_exceeds_history_cells": 783,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.004460974548831542,
+          "maximum_location": [
+            "E6",
+            2,
+            0
+          ],
+          "components_at_total_maximum": {
+            "total": -0.004460974548831542,
+            "history": 0.0,
+            "sampling": -0.004460974548831542,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.0088810305586004,
+          "sum_absolute_history": 0.0005647571902392956,
+          "sum_absolute_sampling": 0.009374940937097398,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 48,
+          "sampling_magnitude_exceeds_history_cells": 50,
+          "mixed_onset_cells": 2
+        }
+      }
+    },
+    {
+      "target_m": 0.056,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.04676180969829291,
+          "maximum_location": [
+            "E2",
+            0,
+            67
+          ],
+          "components_at_total_maximum": {
+            "total": -0.04676180969829291,
+            "history": 0.0,
+            "sampling": -0.04676180969829291,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.25316994751556926,
+          "sum_absolute_history": 0.020646590280460342,
+          "sum_absolute_sampling": 0.25410019030021064,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 845,
+          "sampling_magnitude_exceeds_history_cells": 667,
+          "mixed_onset_cells": 9
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.005694920712578266,
+          "maximum_location": [
+            "E3",
+            2,
+            11
+          ],
+          "components_at_total_maximum": {
+            "total": -0.005694920712578266,
+            "history": -9.951165315924548e-05,
+            "sampling": -0.005595409059419021,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.008387338741812966,
+          "sum_absolute_history": 0.0014315845046465325,
+          "sum_absolute_sampling": 0.008351267668633588,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 12,
+          "sampling_magnitude_exceeds_history_cells": 51,
+          "mixed_onset_cells": 2
+        }
+      }
+    },
+    {
+      "target_m": 0.058,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.06219683978659063,
+          "maximum_location": [
+            "E3",
+            2,
+            36
+          ],
+          "components_at_total_maximum": {
+            "total": -0.06219683978659063,
+            "history": 0.0,
+            "sampling": -0.06219683978659063,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.2375323932226257,
+          "sum_absolute_history": 0.014157078151795788,
+          "sum_absolute_sampling": 0.23498766671207622,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 635,
+          "sampling_magnitude_exceeds_history_cells": 941,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.005295323673365548,
+          "maximum_location": [
+            "E2",
+            0,
+            38
+          ],
+          "components_at_total_maximum": {
+            "total": -0.005295323673365548,
+            "history": -6.326900228803556e-05,
+            "sampling": -0.005232054671077513,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.011666636514461981,
+          "sum_absolute_history": 0.002270889774499296,
+          "sum_absolute_sampling": 0.011499362055454654,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 41,
+          "sampling_magnitude_exceeds_history_cells": 37,
+          "mixed_onset_cells": 3
+        }
+      }
+    },
+    {
+      "target_m": 0.06,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.038724183730179995,
+          "maximum_location": [
+            "E3",
+            0,
+            98
+          ],
+          "components_at_total_maximum": {
+            "total": -0.038724183730179995,
+            "history": 0.0,
+            "sampling": -0.038724183730179995,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.25260222495131546,
+          "sum_absolute_history": 0.015189374495252483,
+          "sum_absolute_sampling": 0.24510389431263768,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 883,
+          "sampling_magnitude_exceeds_history_cells": 867,
+          "mixed_onset_cells": 8
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.005492896973923578,
+          "maximum_location": [
+            "E3",
+            2,
+            12
+          ],
+          "components_at_total_maximum": {
+            "total": -0.005492896973923578,
+            "history": -7.38916145819335e-05,
+            "sampling": -0.005419005359341644,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.011857614424463259,
+          "sum_absolute_history": 0.0009641215103839418,
+          "sum_absolute_sampling": 0.01225365743412904,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 18,
+          "sampling_magnitude_exceeds_history_cells": 56,
+          "mixed_onset_cells": 4
+        }
+      }
+    },
+    {
+      "target_m": 0.062,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0429245680388019,
+          "maximum_location": [
+            "E2",
+            0,
+            66
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0429245680388019,
+            "history": -0.0002606627054489996,
+            "sampling": -0.0426639053333529,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.27466849403103244,
+          "sum_absolute_history": 0.022532330919835863,
+          "sum_absolute_sampling": 0.27669721522849555,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 888,
+          "sampling_magnitude_exceeds_history_cells": 649,
+          "mixed_onset_cells": 9
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.00024392952352675357,
+          "maximum_location": [
+            "E6",
+            2,
+            1
+          ],
+          "components_at_total_maximum": {
+            "total": 0.00024392952352675357,
+            "history": 7.495538243096345e-05,
+            "sampling": 0.00016897414109579012,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.003938055159423359,
+          "sum_absolute_history": 0.0005051419890621522,
+          "sum_absolute_sampling": 0.0035749042136477005,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 33,
+          "sampling_magnitude_exceeds_history_cells": 56,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.064,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.03149492922073094,
+          "maximum_location": [
+            "E4",
+            0,
+            32
+          ],
+          "components_at_total_maximum": {
+            "total": -0.03149492922073094,
+            "history": 0.0,
+            "sampling": -0.03149492922073094,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.23542130297413094,
+          "sum_absolute_history": 0.03348784397047588,
+          "sum_absolute_sampling": 0.20876423688579143,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 237,
+          "sampling_magnitude_exceeds_history_cells": 999,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.00797252474501342,
+          "maximum_location": [
+            "E3",
+            2,
+            13
+          ],
+          "components_at_total_maximum": {
+            "total": -0.00797252474501342,
+            "history": -0.000297207520290943,
+            "sampling": -0.007675317224722478,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.025884969638250266,
+          "sum_absolute_history": 0.003946256618852284,
+          "sum_absolute_sampling": 0.025758193152183306,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 37,
+          "sampling_magnitude_exceeds_history_cells": 47,
+          "mixed_onset_cells": 5
+        }
+      }
+    },
+    {
+      "target_m": 0.066,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.057702884421259926,
+          "maximum_location": [
+            "E3",
+            0,
+            99
+          ],
+          "components_at_total_maximum": {
+            "total": -0.057702884421259926,
+            "history": 0.0,
+            "sampling": -0.057702884421259926,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.25987581107751495,
+          "sum_absolute_history": 0.02121092031098648,
+          "sum_absolute_sampling": 0.2673581228451511,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 863,
+          "sampling_magnitude_exceeds_history_cells": 749,
+          "mixed_onset_cells": 7
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0007344272829257203,
+          "maximum_location": [
+            "E2",
+            1,
+            8
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0007344272829257203,
+            "history": 1.681174556988907e-05,
+            "sampling": -0.0007512390284956094,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.007145377740204961,
+          "sum_absolute_history": 0.002148905692400338,
+          "sum_absolute_sampling": 0.005390378673206797,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 42,
+          "sampling_magnitude_exceeds_history_cells": 61,
+          "mixed_onset_cells": 2
+        }
+      }
+    },
+    {
+      "target_m": 0.068,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0622820148159966,
+          "maximum_location": [
+            "E6",
+            2,
+            25
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0622820148159966,
+            "history": -0.002593285896862918,
+            "sampling": -0.05968872891913368,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.28589946365088165,
+          "sum_absolute_history": 0.023397556556865484,
+          "sum_absolute_sampling": 0.2826410140257664,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 618,
+          "sampling_magnitude_exceeds_history_cells": 744,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.005666056046717216,
+          "maximum_location": [
+            "E3",
+            0,
+            125
+          ],
+          "components_at_total_maximum": {
+            "total": -0.005666056046717216,
+            "history": 0.0,
+            "sampling": -0.005666056046717216,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.010326139571816606,
+          "sum_absolute_history": 0.002799383157403801,
+          "sum_absolute_sampling": 0.010257326570059622,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 16,
+          "sampling_magnitude_exceeds_history_cells": 67,
+          "mixed_onset_cells": 1
+        }
+      }
+    },
+    {
+      "target_m": 0.07,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.048419285027187176,
+          "maximum_location": [
+            "E3",
+            2,
+            34
+          ],
+          "components_at_total_maximum": {
+            "total": -0.048419285027187176,
+            "history": -0.002051165135290134,
+            "sampling": -0.04636811989189704,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.24062440101523896,
+          "sum_absolute_history": 0.0213633646214918,
+          "sum_absolute_sampling": 0.23829991401397044,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 840,
+          "sampling_magnitude_exceeds_history_cells": 758,
+          "mixed_onset_cells": 9
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.004791959132513235,
+          "maximum_location": [
+            "E6",
+            2,
+            3
+          ],
+          "components_at_total_maximum": {
+            "total": -0.004791959132513235,
+            "history": 0.0,
+            "sampling": -0.004791959132513235,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.014227010608949375,
+          "sum_absolute_history": 0.0028239007285362216,
+          "sum_absolute_sampling": 0.01271539654775411,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 45,
+          "sampling_magnitude_exceeds_history_cells": 67,
+          "mixed_onset_cells": 3
+        }
+      }
+    },
+    {
+      "target_m": 0.072,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.03957670215226916,
+          "maximum_location": [
+            "E4",
+            2,
+            100
+          ],
+          "components_at_total_maximum": {
+            "total": -0.03957670215226916,
+            "history": 0.0,
+            "sampling": -0.03957670215226916,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.26154728024771273,
+          "sum_absolute_history": 0.027387423009662126,
+          "sum_absolute_sampling": 0.24865711828099119,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 870,
+          "sampling_magnitude_exceeds_history_cells": 775,
+          "mixed_onset_cells": 7
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0087427555678799,
+          "maximum_location": [
+            "E3",
+            2,
+            14
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0087427555678799,
+            "history": 0.0,
+            "sampling": -0.0087427555678799,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.019772623725530125,
+          "sum_absolute_history": 0.004326579205945702,
+          "sum_absolute_sampling": 0.0203429589767411,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 30,
+          "sampling_magnitude_exceeds_history_cells": 49,
+          "mixed_onset_cells": 3
+        }
+      }
+    },
+    {
+      "target_m": 0.074,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.040110092550478815,
+          "maximum_location": [
+            "E1",
+            0,
+            24
+          ],
+          "components_at_total_maximum": {
+            "total": -0.040110092550478815,
+            "history": 0.0,
+            "sampling": -0.040110092550478815,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.25576366718364996,
+          "sum_absolute_history": 0.02000400185073703,
+          "sum_absolute_sampling": 0.2501020853884949,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 746,
+          "sampling_magnitude_exceeds_history_cells": 865,
+          "mixed_onset_cells": 8
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0021125911331295044,
+          "maximum_location": [
+            "E2",
+            0,
+            43
+          ],
+          "components_at_total_maximum": {
+            "total": -0.0021125911331295044,
+            "history": 0.0,
+            "sampling": -0.0021125911331295044,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.009627793687280228,
+          "sum_absolute_history": 0.001523000791476603,
+          "sum_absolute_sampling": 0.00964587277047263,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 66,
+          "sampling_magnitude_exceeds_history_cells": 67,
+          "mixed_onset_cells": 2
+        }
+      }
+    },
+    {
+      "target_m": 0.076,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.06092517621740906,
+          "maximum_location": [
+            "E1",
+            0,
+            24
+          ],
+          "components_at_total_maximum": {
+            "total": -0.06092517621740906,
+            "history": 0.0,
+            "sampling": -0.06092517621740906,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.2429220353167636,
+          "sum_absolute_history": 0.012597225888688501,
+          "sum_absolute_sampling": 0.2434740440397799,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 792,
+          "sampling_magnitude_exceeds_history_cells": 952,
+          "mixed_onset_cells": 4
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.0004893332805780415,
+          "maximum_location": [
+            "E3",
+            2,
+            14
+          ],
+          "components_at_total_maximum": {
+            "total": 0.0004893332805780415,
+            "history": 0.00018400514748784236,
+            "sampling": 0.00030532813309019913,
+            "residual": 0.0,
+            "mixed_onset": false
+          },
+          "sum_absolute_total": 0.007363709449001832,
+          "sum_absolute_history": 0.0027597326690962376,
+          "sum_absolute_sampling": 0.006079331667027843,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 58,
+          "sampling_magnitude_exceeds_history_cells": 79,
+          "mixed_onset_cells": 0
+        }
+      }
+    },
+    {
+      "target_m": 0.078,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.06683061523504347,
+          "maximum_location": [
+            "E3",
+            0,
+            101
+          ],
+          "components_at_total_maximum": {
+            "total": -0.06683061523504347,
+            "history": -0.001231297364983619,
+            "sampling": -0.06559931787005985,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.3611403835416634,
+          "sum_absolute_history": 0.03137906934615675,
+          "sum_absolute_sampling": 0.35699081111234304,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 1177,
+          "sampling_magnitude_exceeds_history_cells": 877,
+          "mixed_onset_cells": 6
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.008587395270608422,
+          "maximum_location": [
+            "E6",
+            2,
+            4
+          ],
+          "components_at_total_maximum": {
+            "total": -0.008587395270608422,
+            "history": 0.0,
+            "sampling": -0.008587395270608422,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.019730229617766104,
+          "sum_absolute_history": 0.004368153877668424,
+          "sum_absolute_sampling": 0.016806734178718863,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 5,
+          "sampling_magnitude_exceeds_history_cells": 69,
+          "mixed_onset_cells": 2
+        }
+      }
+    },
+    {
+      "target_m": 0.08,
+      "fields": {
+        "tensile_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.055453021337614206,
+          "maximum_location": [
+            "E2",
+            0,
+            64
+          ],
+          "components_at_total_maximum": {
+            "total": -0.055453021337614206,
+            "history": 0.00018827613319460923,
+            "sampling": -0.055641297470808815,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.30853710950968444,
+          "sum_absolute_history": 0.026712476593784396,
+          "sum_absolute_sampling": 0.2956129160642254,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 685,
+          "sampling_magnitude_exceeds_history_cells": 698,
+          "mixed_onset_cells": 7
+        },
+        "compressive_damage": {
+          "point_count": 2304,
+          "maximum_absolute_total": 0.007923651248616992,
+          "maximum_location": [
+            "E3",
+            2,
+            15
+          ],
+          "components_at_total_maximum": {
+            "total": -0.007923651248616992,
+            "history": 0.0,
+            "sampling": -0.007923651248616992,
+            "residual": 0.0,
+            "mixed_onset": true
+          },
+          "sum_absolute_total": 0.02041389546382505,
+          "sum_absolute_history": 0.004479127225011648,
+          "sum_absolute_sampling": 0.02262112302611491,
+          "maximum_absolute_closure_residual": 0.0,
+          "opposite_sign_component_cells": 38,
+          "sampling_magnitude_exceeds_history_cells": 74,
+          "mixed_onset_cells": 3
+        }
+      }
+    }
+  ],
+  "new_structural_solves": 0,
+  "new_material_integrations": 0,
+  "original_screen_replaced": false,
+  "physical_validation": false,
+  "scope": "Signed algebraic decomposition at original coarse coordinates; not causal attribution or a volume integral.",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-concrete-decomposition-se0j04nl",
+  "observer_revision": "5bbd295b2f312dbe801f8454f729ca2a61f91e42",
+  "inventory_sha256": "412f42d371d9fddb2c148478aa6ef3bc934a091838cf8fa973e8b1ee26d486df",
+  "payload_file_count": 9,
+  "payload_bytes": 108816,
+  "original_projection_crosscheck": {
+    "original_projection_sha256": "929ce8055c63588fcc2ec74fe81e68f68697d17212df429f49919862a4d2a3b2",
+    "matched_target_field_maxima_and_locations": 80,
+    "original_failed_group_counts": {
+      "nodal_steel": 0,
+      "concrete": 34
+    },
+    "new_solves": 0,
+    "new_material_integrations": 0
+  },
+  "parent_process_seconds": 21.987757428
+}

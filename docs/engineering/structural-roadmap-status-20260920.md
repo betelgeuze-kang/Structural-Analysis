@@ -267,3 +267,14 @@ No policy promotion, reserved evaluation or independent physics is supplied.
 [Hosted e2cb16ca8](hosted-e2cb-terminal-20260920.md) passes 1,713 development and
 814 frontend tests. Full Python shards still skip tests after evidence
 preparation fails. All five roadmap completion requirements remain open.
+
+## Concrete discrepancy decomposition
+
+The [retained error decomposition](planar-concrete-error-decomposition-20260920.md)
+reproduces all 80 original damage maxima and witness locations without new solves
+or material integration. At the controlling tensile witness, 98.16% of the signed
+error magnitude is the difference between fine-history center damage and the
+fine-child average; the controlling compression witness is entirely that term.
+These mixed-onset cells identify a spatial-resolution investigation, not physical
+causality or convergence. Cancellation elsewhere prevents interpreting global
+absolute sums as additive percentages. The 34/240 original failures remain open.
