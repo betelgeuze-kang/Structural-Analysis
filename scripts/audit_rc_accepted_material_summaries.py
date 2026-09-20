@@ -26,7 +26,9 @@ def main():
         raise ValueError('exact source revision required')
     started = perf_counter_ns()
     cases, samples, _, groups, costs = inputs(args.old_labels, args.new_labels)
-    prepared = learning._preflight([case for case in cases if case.split == 'train'], ARITHMETIC)
+    # Shared preflight validates the declared train/evaluation partition without
+    # solving any case. Only original training rows enter the loop below.
+    prepared = learning._preflight(cases, ARITHMETIC)
     readers = {False: reader(args.old_labels, PINS['labels']),
                True: reader(args.new_labels, NEW_INVENTORY)}
     old_cases = set(groups[0] + groups[1] + groups[2])
