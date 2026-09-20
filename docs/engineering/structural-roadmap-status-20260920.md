@@ -43,6 +43,13 @@ hardware, owner/operator actions and signed acceptance remain separate.
 
 ## Next decisions
 
+The [interior training expansion](rc-interior-training-coverage-20260920.md)
+adds 66 new source-verified labels while retaining the old 99 and leaving both
+reserved cases unexecuted. Whole-group reference-parent range eligibility now
+covers B/D/E (99 of 165 samples). No actual pooled-policy runtime benefit has
+been measured; complementary-group fitting and full-path cost comparison remain
+required before any policy promotion.
+
 The [material-boundary L-frame campaign](rc-l-frame-boundary-campaign-20260920.md)
 now verifies repeated rejection of a cheaper candidate after successful full
 analysis and fresh verification. Baseline remains selected; higher-cost excluded
