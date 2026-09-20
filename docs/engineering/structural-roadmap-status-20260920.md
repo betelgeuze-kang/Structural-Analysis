@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Adaptive failed-target recovery](rc-adaptive-full-path-results-20260921.md) now completes the short/40 mm original three-target history in both arithmetic profiles and both orders. All four proposal histories/checkpoints repeat exactly; twelve ordinary/secant/fresh paths still fail, so no qualified speed ratio follows. The study counts 116 native calls / 594 Newton iterations. The opt-in bounded scheduler preserves the material parent, unchanged tolerances and failed attempts; 111 focused tests pass. [Hosted predecessor 000](hosted-000-terminal-20260921.md) passes 2,008 development / 814 frontend tests but full CI remains failed and does not qualify adaptive code.
+
 [Retained failed-target recovery](rc-retained-failure-cost-results-20260921.md) runs 64 paths (34 complete), counting 314 native calls / 1,980 Newton iterations. On two ordinary-solvable cases it avoids all internal trials and costs 0.456/0.327 times upfront continuation; this is avoided work, not AI gain. Short/20 mm completes after recovery, while short/40 mm fails at the same trial/residual as binary64. Retained arithmetic alone does not close the hard convergence gap.
 
 [Retained full-path cost](rc-retained-continuation-cost-results-20260921.md) completes 32 repeated paths with 260 native calls / 1,540 Newton iterations. Retained histories pass and repeat exactly, but upfront continuation costs 3.82 and 2.10 times same-profile secant on the two cases. Binary64 comparison failures retain null ratios. Numerical agreement does not establish acceleration; failure-only retained recovery still needs its own comparison.
