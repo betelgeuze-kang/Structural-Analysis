@@ -112,14 +112,14 @@ def step_features(steps, layers):
 
 
 def compare_steps(coarse, fine, coarse_layers):
-    require(type(coarse_layers) is int and coarse_layers in (128, 256),
+    require(type(coarse_layers) is int and coarse_layers in (128, 256, 512),
             "fixed comparison layer count required")
     return compare_features(step_features(coarse, coarse_layers),
                             step_features(fine, 2 * coarse_layers), coarse_layers)
 
 
 def compare_features(coarse, fine, coarse_layers):
-    require(type(coarse_layers) is int and coarse_layers in (128, 256),
+    require(type(coarse_layers) is int and coarse_layers in (128, 256, 512),
             "fixed comparison layer count required")
     targets = [i / 500 for i in range(1, 41)]
     for features in (coarse, fine):

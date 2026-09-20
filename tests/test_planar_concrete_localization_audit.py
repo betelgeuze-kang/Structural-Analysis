@@ -350,14 +350,14 @@ def test_projection_error_decomposition_rejects_duplicate_points():
         summarize([row, row])
 
 
-@pytest.mark.parametrize('layers,expected', [(256, (256, 128)), (512, (512, 256))])
+@pytest.mark.parametrize('layers,expected', [(256, (256, 128)), (512, (512, 256)), (1024, (1024, 512))])
 def test_frozen_refinement_only_declares_original_or_next_resolution(layers, expected):
     from scripts.run_planar_256_refinement import refinement_layers
 
     assert refinement_layers(layers) == expected
 
 
-@pytest.mark.parametrize('bad', [True, 512.0, '512', 0, 128, 1024])
+@pytest.mark.parametrize('bad', [True, 512.0, '512', 0, 128, 2048])
 def test_frozen_refinement_rejects_unplanned_resolution_before_inputs(tmp_path, bad):
     from scripts.run_planar_256_refinement import run
 
@@ -366,7 +366,7 @@ def test_frozen_refinement_rejects_unplanned_resolution_before_inputs(tmp_path, 
     assert list(tmp_path.iterdir()) == []
 
 
-@pytest.mark.parametrize('layers', [128, 256])
+@pytest.mark.parametrize('layers', [128, 256, 512])
 def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatch, layers):
     import scripts.audit_planar_256_refinement as audit
 
@@ -393,7 +393,7 @@ def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatc
     assert maxima['nodal_steel']['translations']['within_exploratory_one_percent'] is True
 
 
-@pytest.mark.parametrize('layers', [True, 256., 64, 512])
+@pytest.mark.parametrize('layers', [True, 256., 64, 1024])
 def test_comparison_rejects_unplanned_resolution(layers):
     from scripts.audit_planar_256_refinement import compare_steps
     with pytest.raises(ValueError, match='layer count'):
@@ -406,9 +406,11 @@ def test_comparison_requires_complete_original_target_sequence():
         compare_steps([], [], 256)
 
 
-def test_large_refinement_audit_releases_original_before_next_read(monkeypatch, tmp_path):
+@pytest.mark.parametrize('module', ['scripts.audit_planar_512_refinement', 'scripts.audit_planar_1024_refinement'])
+def test_large_refinement_audit_releases_original_before_next_read(monkeypatch, tmp_path, module):
     import weakref
-    import scripts.audit_planar_512_refinement as audit
+    import importlib
+    audit = importlib.import_module(module)
 
     class PathObject(dict):
         pass
@@ -437,8 +439,10 @@ def test_large_refinement_audit_releases_original_before_next_read(monkeypatch, 
     assert result['structural_solves'] == 0
 
 
-def test_large_refinement_audit_does_not_extract_failed_path(monkeypatch, tmp_path):
-    import scripts.audit_planar_512_refinement as audit
+@pytest.mark.parametrize('module', ['scripts.audit_planar_512_refinement', 'scripts.audit_planar_1024_refinement'])
+def test_large_refinement_audit_does_not_extract_failed_path(monkeypatch, tmp_path, module):
+    import importlib
+    audit = importlib.import_module(module)
     protocol = dict.fromkeys(('source_revision', 'source_manifest_sha256', 'input_sha256',
                              'target_displacements_m', 'control_global_dof', 'configuration',
                              'same_proportional_force_vector', 'constant_axial_load'), 'same')

@@ -1,4 +1,4 @@
-"""Frozen-source, research-only full-history 256-layer refinement observation.
+"""Frozen-source, research-only full-history section refinement observation.
 
 Keeps the existing proportional load vector, forty targets and solver defaults.
 The source snapshot must match both its fixed manifest and its actual Git tree.
@@ -74,8 +74,8 @@ def checked_sources(bundle, repo):
 
 
 def refinement_layers(value):
-    require(type(value) is int and value in (256, 512),
-            "predeclared research layer count must be 256 or 512")
+    require(type(value) is int and value in (256, 512, 1024),
+            "predeclared research layer count must be 256, 512 or 1024")
     return value, value // 2
 
 
@@ -132,13 +132,17 @@ def run(bundle, output_parent, repo, *, layers=256):
             "selection": (
                 "Predeclared full 2 through 80 mm history, no retries or tolerance changes. Compare to original 128-layer prefix plus suffix using accepted chains, original nodal/steel groups and equal-area projected concrete histories. Preserve the exploratory 1% screen and local maxima alongside localization descriptors."
                 if layers == 256 else
-                "Predeclared full 2 through 80 mm history, no retries or tolerance changes. Compare to the original complete 256-layer path using accepted chains, original nodal/steel groups and equal-area projected concrete histories. Preserve the exploratory 1% screen and local maxima alongside localization descriptors."
+                f"Predeclared full 2 through 80 mm history, no retries or tolerance changes. Compare to the original complete {comparison_layers}-layer path using accepted chains, original nodal/steel groups and equal-area projected concrete histories. Preserve the exploratory 1% screen and local maxima alongside localization descriptors."
             ),
             "physical_validation": False,
             "public_result_authority": False,
             "timing_is_speedup_benchmark": False,
         },
     )
+    if layers == 1024:
+        require(hashlib.sha256((root / "protocol.json").read_bytes()).hexdigest()
+                == "e620f118fc72a7af34b8a527649dcddc3d1b78902922aab2860baa92ba73432b",
+                "predeclared 1024-layer protocol changed")
     started = perf_counter_ns()
     model = json.loads(raw)
     require(
@@ -215,6 +219,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle", type=Path)
     parser.add_argument("output_parent", type=Path)
-    parser.add_argument('--layers', type=int, choices=(256, 512), default=256)
+    parser.add_argument('--layers', type=int, choices=(256, 512, 1024), default=256)
     args = parser.parse_args()
     run(args.bundle, args.output_parent, Path(__file__).resolve().parents[1], layers=args.layers)
