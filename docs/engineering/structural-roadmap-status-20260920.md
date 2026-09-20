@@ -25,6 +25,15 @@ The subsequent [fixed material-input gate](rc-material-cost-gate-results-2026092
 fits five excluded-group complements but selects two training true positives
 and 25 false positives. It remains offline and is not promoted; this does not
 establish full-path benefit or independent generalization.
+Further [work-counter diagnosis](rc-nested-work-benefit-20260920.md) finds all
+32 original time-positive pairs reduce iterations, while 23 other work
+reductions fail the repeat-aware time rule. The
+[same-parent policy comparison](rc-policy-sensitive-labels-20260920.md) finds
+13 time-label and 48 work-category changes across four policies per parent.
+Ten [three-group-excluded 66-row seeds](rc-gate-inner-validation-preparation-20260920.md)
+are now prepared to avoid leakage in an additional inner validation split.
+The new [timing campaign](rc-inner-label-campaign-preparation-20260920.md) is
+frozen but not started while the 2,048-layer controller remains live.
 
 [Current-main integration review](current-main-integration-review-20260920.md)
 rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen
