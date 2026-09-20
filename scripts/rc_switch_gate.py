@@ -108,8 +108,11 @@ def fit_gate(training):
     require(x.ndim == 2 and x.shape[1] == len(training['feature_names']) and np.all(np.isfinite(x)),
             'finite aligned gate training matrix required')
     y = np.asarray([row['label'] for row in rows], dtype=float)
-    center = x.mean(axis=0)
-    scale = x.std(axis=0)
+    minimum, maximum = x.min(axis=0), x.max(axis=0)
+    constant = minimum == maximum
+    # Repeated decimal constants can acquire a tiny spurious mean/std offset.
+    center = np.where(constant, minimum, x.mean(axis=0))
+    scale = np.where(constant, 1.0, x.std(axis=0))
     scale = np.where(scale > 0, scale, 1.0)
     z = np.column_stack(((x - center) / scale, np.ones(len(x))))
     penalty = np.eye(z.shape[1]) * np.sqrt(RIDGE)
@@ -117,7 +120,7 @@ def fit_gate(training):
     weights = np.linalg.lstsq(np.vstack((z, penalty)), np.concatenate((y, np.zeros(z.shape[1]))), rcond=None)[0]
     payload = dict(schema_version=SCHEMA, feature_profile=PROFILE,
         feature_names=training['feature_names'], mean=center.tolist(), scale=scale.tolist(),
-        minimum=x.min(axis=0).tolist(), maximum=x.max(axis=0).tolist(), weights=weights.tolist(),
+        minimum=minimum.tolist(), maximum=maximum.tolist(), weights=weights.tolist(),
         ridge=RIDGE, threshold=THRESHOLD, outer_group_index=training['outer_group_index'],
         excluded_case_ids=training['excluded_case_ids'],
         training_sample_hashes=[row['source_sample_hash'] for row in rows],

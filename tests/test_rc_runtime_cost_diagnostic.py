@@ -471,3 +471,15 @@ def test_gate_augmented_ridge_fit_matches_known_two_row_solution(monkeypatch):
     assert gate.decision(features) is True
     features['values'] = [-1.0]
     assert gate.decision(features) is False
+
+
+def test_gate_repeated_decimal_constant_has_exact_center_and_unit_scale(monkeypatch):
+    module, _, _, _, training = fitted_gate_fixture(monkeypatch)
+    training['training_rows'] = [dict(training['training_rows'][0],
+        values=[.02], source_sample_hash='sha256:' + format(i, '064x')) for i in range(132)]
+    training['verified_positive_count'] = 132
+    training['verified_negative_count'] = 0
+    gate, _ = module.fit_gate(training)
+    assert gate._payload['mean'] == (.02,)
+    assert gate._payload['scale'] == (1.0,)
+    assert gate.decision(dict(profile=module.PROFILE, feature_names=['target_m'], values=[.02])) is True
