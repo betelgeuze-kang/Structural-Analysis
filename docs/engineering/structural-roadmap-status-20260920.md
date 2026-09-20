@@ -291,3 +291,10 @@ subdivision changes. The 256/512 comparison retains all original group threshold
 accepted-chain checks and local witnesses. Its focused regression suite passes
 52 tests. No new convergence result is available yet; the previous 34/240 concrete
 failures and independent physical-validation requirements remain open.
+
+## Hosted 11d9 checks complete
+
+[Exact-source 11d9 receipts](hosted-11d9-terminal-20260920.md) pass 1,719 Python
+development and 814 frontend tests. All full Python shards fail during evidence
+preparation and skip actual full tests; the external replay/technical receipt
+blockers remain explicit. Later comparison changes require new-head checks.
