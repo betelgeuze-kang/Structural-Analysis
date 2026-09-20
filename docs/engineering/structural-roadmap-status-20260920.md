@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[80 mm arithmetic isolation](rc-adaptive-80mm-results-20260921.md): binary64 and retained arithmetic, each repeated in reversed order, both fail the same -80 mm original target at the same internal recovery coordinate. All 16 paths remain incomplete, with 208 native calls / 1,380 Newton iterations retained. Precision alone does not resolve this witness; local residual/tangent and path-following diagnosis remains open.
+
 [Measured audit cost](rc-adaptive-audit-cost-20260921.md): three fresh processes at source 2588 reproduce identical 128-path audit results in 11.915–12.129 seconds. Original 3,492 JSON files remain unchanged. This isolates cached-read validation cost; source preparation, transport and browser review remain outside the measurement, and no full user-flow speedup is claimed.
 
 [Reusable campaign audit](rc-adaptive-campaign-audit-20260921.md) now validates original target histories, native work, parent/response bindings and comparison gates without rerunning solves. It reproduces all prior 128-path case outcomes and counts, including 70 complete paths / 802 calls / 4,702 Newton iterations and linear solves. Rehashed contradictory completion/work and missing/ambiguous metadata are rejected; original clocks and independent physics remain unauthenticated. Forty focused audit/runner/workflow tests pass. [Hosted predecessor 932](hosted-932-terminal-20260921.md) passes 2,017 development / 814 frontend tests, while full CI remains failed.
