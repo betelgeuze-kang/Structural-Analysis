@@ -1,77 +1,60 @@
-# Structural Analysis roadmap: evidence and remaining completion requirements
+# Structural Analysis roadmap: current evidence and completion requirements
 
-Snapshot after development commit `2a42fd7c67b33ab136b4dee5214bae2f3850b0a8`.
-This is a requirement-level status record, not a completion or release receipt.
-Historical numerical observations below retain their original source revisions;
-reading their records does not rerun or requalify them at this snapshot.
+Reviewed at development `02c6ed78ef12e3989cbdd3eed7c2fc37dcad08bd` on 2026-09-20.
+The evidence below retains each experiment's original source revision. A document
+refresh does not rerun those experiments or qualify the current head. All five
+original workstreams remain open at their full scope.
 
-| Original workstream | Evidence now available | Completion still unproved / next required evidence |
+| Original workstream | Strongest retained evidence | Remaining requirement |
 | --- | --- | --- |
-| Repeated multi-case nonlinear runtime | [Five-case process campaign](rc-cost-pruning-process-campaign-20260920.md): 20 processes, exact retained results, four successful-selection cases with 25.6–27.1% lower process time; one no-feasible case retained without a ratio. Earlier damaging/plastic path observations remain indexed separately. | Broader topologies and demanding material regimes with the same acceptance scope; robustness beyond two repetitions and one unpinned host; report preparation, transport and review costs when claiming user-time improvement. Deterministic pruning evidence is not learned acceleration. |
-| Canonical RC changes, full reanalysis, quantities and common-price comparison | [Unequal reinforcement](rc-unequal-outer-reinforcement-20260920.md), [Workbench delivery](rc-unequal-reinforcement-workbench-20260920.md), and [strict cost exclusion delivery](rc-cost-pruned-search-delivery-20260920.md) connect actual changed models to full accepted results, fresh verification, quantities, common declared prices and original downloads. | Physical verification for intended model classes, representative designs, and authoritative price/quantity scope for any commercial savings claim. Unanalyzed cost-excluded candidates retain unknown feasibility. |
-| Learned warm starts and leakage-resistant/full-cost evaluation | Existing full-path runtime selection retains secant when learning loses. [Connected exclusions](rc-runtime-connected-exclusions-20260920.md) now removes transitively related training cases from each fit and records actual excluded samples. | Predeclared sufficiently diverse source groups, untouched project/geometry/history evaluation, repeated costs including training, and useful net benefit. Caller IDs and synthetic shape differences are not independent project provenance. Small group-exclusion tests establish behavior only. |
-| Multifidelity selection and Workbench | Shortlist/ranking, full reanalysis, exhaustive-oracle comparisons, cost optimality, retained errors and adaptive cost exclusions reach authenticated original-artifact delivery and desktop/mobile review. | Useful decisions near meaningful feasibility boundaries under fixed budgets on new cases. The [four-case learned-ranking study](rc-reinforcement-cost-campaign-20260920.md) costs 2.01–2.06× price order including training and makes the same selections: learned gain is contradicted in that observed scope. |
-| Broader public planar/sparse, later materials/3D | Public bounded paths and internal backend/refinement studies are indexed. Selected 64/128 nodal/steel comparisons pass their limited screen. | [Concrete field projection](planar-concrete-projection-20260914.md) still exceeds the diagnostic screen in 70/240 groups, with 12.330094% maximum tensile-damage difference. Sparse benefit, complete nonlinear paths, material-field convergence and independent physical verification cannot be inferred from nodal agreement or software tests. New material/3D scope needs its own required verification. |
+| Repeated nonlinear runtime | [Five-case process study](rc-cost-pruning-process-campaign-20260920.md): deterministic cost exclusion lowers enclosing process time 25.6–27.1% in four cases; no-feasible case remains without a ratio. [54-fold study](rc-expanded-runtime-campaign-20260920.md) executes 216 full nonlinear paths with fixed history comparisons. | Broader topology/material regimes, repeat robustness and the complete preparation/transport/review cost before claiming user-time savings. Internal runs are not independent physical validation. |
+| Canonical RC changes, quantities and common prices | [Unequal reinforcement and canonical reanalysis](rc-unequal-outer-reinforcement-20260920.md), [outer centroid distances](rc-outer-centroid-distances-20260920.md), full accepted paths, fresh verification, member quantities and common declared prices reach original-artifact review. | Representative independently validated designs and authoritative quantity/price scope for commercial savings. Synthetic prices and verified internal calculations are not a construction quote or design approval. |
+| Learned warm starts with split and cost discipline | [Grouped 99-label runtime selection](rc-expanded-runtime-campaign-20260920.md): 198 proposals, all 54 comparisons pass, both candidates slower overall. [Same-parent probe](rc-same-parent-seed-probe-20260920.md): 198 single-step comparisons pass; one of 66 pairs is faster across all three repeats. [Cost attribution](rc-expanded-runtime-costs-20260920.md) separates overhead from invocation costs. | A useful learned policy on sufficiently diverse excluded groups and untouched project/geometry/history evaluation, including labels, fits, inference and failures. One favorable local parent cannot establish a selector or a full-path oracle. Secant remains selected. |
+| Multifidelity selection and Workbench | Shortlist/ranking, full reanalysis, exhaustive comparison, cost optimality, errors and [strict cost exclusion delivery](rc-cost-pruned-search-delivery-20260920.md) reach desktop/mobile original-artifact review. Actual boundary violations are rejected by full analysis. | Useful learned decisions near meaningful feasibility boundaries on new cases with fixed budgets. The [four-case learned ranking](rc-reinforcement-cost-campaign-20260920.md) costs 2.01–2.06 times price order including training and selects the same candidates. |
+| Broader planar/sparse and later material/3D capability | [256-layer full-history study](planar-256-refinement-20260920.md): 40 targets complete, 400 bounded nodal/steel comparisons pass; concrete diagnostic failures decrease from 70/240 to 34/240. | Concrete material-field convergence still fails its screen (maximum tensile-damage difference 6.68%). Sparse speed, broader complete paths, independent physical verification and each new material/3D scope remain unproved. |
 
-## Data and authority dependencies
+## Current integration and acceptance boundaries
 
-The [Zenodo beam candidate](zenodo-18862214-candidate-20260920.md) has preserved
-source/license metadata and drawing observations, but unresolved measured material
-properties, cover, channel mapping and shear-model suitability prevent admission.
-Unequal top/bottom reinforcement is now supported by the later implementation;
-that resolves the old software representation limitation, not the missing
-experimental information. No archive pickle was executed and no guessed labels
-were admitted. Other candidate sources retain their own admission restrictions.
+[Current-main integration review](current-main-integration-review-20260920.md)
+rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen
+changed components are byte-identical here; the workflow contract test merges
+cleanly to the existing development version. The textual conflict is the generated
+inventory digest. The current offline inventory passes (480 entries: 71 present,
+409 superseded), and 75 transport/workflow tests plus 137 subtests pass. This does
+not perform a merge, authenticate real supplemental signatures or waive exact
+combined-source checks. Rebuild the inventory against the eventual merged source;
+do not import historical hash values as current evidence.
 
-Independent verification, source rights and scientific endpoint definitions,
-owner/administrator actions, required hardware results and signed acceptance
-remain separate dependencies. None is supplied by a green fixture or local
-self-replay. No additional request to an external person was sent.
+[Hosted d67](hosted-d67-terminal-20260920.md) passed 1,674 Python development tests
+and 755 frontend tests. Published `1453ae48fd895164e67b609a995a5647f22422bc` has
+its own CI in progress at this review. Full Python shards remain blocked before
+actual tests by external replay/technical receipt preparation. Passing local or
+hosted development contracts is not full-suite or release completion.
 
-## Current GitHub and integration boundary
+Public experiment candidates retain unresolved geometry/material/channel or
+model-mechanism questions and their source-specific license boundaries. Software
+support for unequal reinforcement or centroid distances does not resolve those
+experimental uncertainties. Independent validation, source rights, required
+hardware, owner/operator actions and signed acceptance remain separate.
 
-At inspection, PR #439 is open, Draft, published at
-`20a940b072860aad80e07a578e88a0c4d331d1ca`, and GitHub reports `mergeable_state=dirty`.
-The branch endpoint for `main` resolves to
-`234c3122c78dea064411aa16b06b18ab16157576`. The PR response's base SHA still reports
-`4de4e3f55aae1d267cf704cec7d7533f3a627498`; this older PR metadata must not substitute
-for the independently queried current-main branch endpoint.
+## Next decisions
 
-Local graph comparison against exact current main reports four main-only commits
-and 529 development-only commits at the snapshot. The main-only commits are
-`7e1887613`, `8c64a1fcd`, `f788a3c55`, and merge `234c3122c`. Their changes cover
-supplemental identity production/consumption, workflow wiring, policy checks and
-regressions. This ancestry observation does not by itself prove that every
-semantic change is absent from the development branch. Main integration requires
-reviewing both implementations and conflicts, running the applicable combined
-checks and an authorized merge; no merge was performed here.
+1. Publish prepared local work after the current CI reaches terminal state; retain
+   exact-head receipts, failures and the original measurement packets.
+2. Expand defensible matched-parent evidence across geometry/history families
+   before fitting a causal gate; evaluate any gate on its own complete history.
+3. Extend candidate-selection evidence to meaningful feasibility boundaries and
+   broader nonlinear regimes while retaining competitive deterministic baselines.
+4. Continue concrete-field convergence and physically compatible source-data
+   reconstruction; qualify new planar/sparse/material/3D scopes separately.
+5. Preserve the prepared supplemental integration, rebuild generated metadata on
+   an authorized combined source, and require the remaining external acceptance.
 
-Published-head Frontend Web CI run 35470895335 passed, including 735 Workbench
-checks. Workflow Contract and P0 Canonical passed. Repository Python run
-35470914975 has passed collection; full shards failed before actual suite
-execution. Inspected shard 0 retains external-code-to-code product replay and
-technical receipt readiness blockers. The development job was still live at
-this snapshot. Aggregate CI is failed. Later local measurement and connected-group
-commits need their own hosted run after publication.
+## Historical progression
 
-## Next work in dependency order
-
-1. Preserve the terminal exact-head CI receipts and publish the prepared local
-   measurements/group-exclusion implementation without cancelling live validation.
-2. Prepare a predeclared grouped warm-start experiment with enough genuinely
-   separate geometry/history groups; keep training/tuning and untouched evaluation
-   roles distinct and retain all process/fit/label costs and failures.
-3. Measure candidate selection near meaningful feasibility/cost boundaries using
-   fixed data and budgets; keep deterministic price/pruning baselines competitive.
-4. Continue the unresolved planar/material numerical investigation and admit only
-   source data whose geometry, materials, channels and model mechanisms are known.
-5. Resolve current-main supplemental integration and exact combined checks, then
-   retain required independent, owner and hardware acceptance until authoritative
-   evidence exists.
-
-Every numbered roadmap item remains open at its full requested scope. The actual
-implementation and bounded measurements are progress toward those requirements,
-not replacements for them.
+The following dated observations explain how the current state was reached.
+Later sections supersede earlier experimental limitations only within the stated
+scope; none closes the five-workstream completion requirements above.
 
 ## Subsequent integration progress
 
