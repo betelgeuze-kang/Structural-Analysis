@@ -342,3 +342,132 @@ def test_switch_features_ignore_material_state_and_prefix_length():
         'previous_target_increment_m', 'last_coordinate_0', 'last_coordinate_1',
         'coordinate_increment_0', 'coordinate_increment_1']
     assert expected['values'] == [.4, .003, .001, .001, .002, 2., .001, 1.]
+
+
+def gate_row_fixture(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('rc_switch_gate_training_rows')
+    groups = [['a'], ['b'], ['c']]
+    tasks, rows = [], []
+    for outer in range(3):
+        for inner in range(3):
+            if outer == inner:
+                continue
+            sample = 'sha256:' + str(inner) * 64
+            task = dict(outer_group_index=outer, inner_group_index=inner,
+                label_source_sample_hashes=[sample], label_case_ids=groups[inner],
+                outer_evaluation_case_ids=groups[outer], seed_fit_index=len(tasks))
+            tasks.append(task)
+            repeats = nested_repeats()
+            rows.append(dict(outer_group_index=outer, inner_group_index=inner,
+                source_sample_hash=sample, case_id=groups[inner][0],
+                seed_fit_index=task['seed_fit_index'], repetitions=repeats,
+                label_result=module.label_from_repetitions(repeats),
+                guard_features=dict(profile=module.PROFILE, feature_names=['target_m'], values=[.001])))
+    return module, dict(pairs=rows), dict(groups=groups, label_tasks=tasks)
+
+
+def test_gate_training_rows_exclude_outer_and_retain_unknown_denominator(monkeypatch):
+    module, audit, plan = gate_row_fixture(monkeypatch)
+    row = audit['pairs'][0]
+    row['repetitions'][0]['comparison_pass'] = False
+    row['repetitions'][0]['path_time_ratio'] = None
+    row['label_result'] = module.label_from_repetitions(row['repetitions'])
+    result = module.gate_training_rows(audit, plan, 0)
+    assert result['excluded_case_ids'] == ['a']
+    assert [row['case_id'] for row in result['training_rows']] == ['c']
+    assert [row['case_id'] for row in result['unverified_rows']] == ['b']
+    assert result['verified_positive_count'] == 1
+    assert result['gate_fitted'] is False
+
+
+@pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'outer_case', 'seed', 'label', 'nonfinite'])
+def test_gate_training_rows_reject_transplanted_or_incomplete_inputs(monkeypatch, mutation):
+    module, audit, plan = gate_row_fixture(monkeypatch)
+    row = audit['pairs'][0]
+    if mutation == 'missing':
+        audit['pairs'].pop()
+    elif mutation == 'duplicate':
+        audit['pairs'][-1] = row
+    elif mutation == 'outer_case':
+        row['case_id'] = 'a'
+    elif mutation == 'seed':
+        row['seed_fit_index'] += 1
+    elif mutation == 'label':
+        row['label_result']['label'] = False
+    else:
+        row['guard_features']['values'][0] = float('nan')
+    with pytest.raises(ValueError):
+        module.gate_training_rows(audit, plan, 0)
+
+
+def test_gate_training_rows_are_invariant_to_report_serialization_order(monkeypatch):
+    module, audit, plan = gate_row_fixture(monkeypatch)
+    original = module.gate_training_rows(audit, plan, 1)
+    audit['pairs'].reverse()
+    assert module.gate_training_rows(audit, plan, 1) == original
+
+
+def fitted_gate_fixture(monkeypatch, positive=True):
+    module, audit, plan = gate_row_fixture(monkeypatch)
+    if not positive:
+        for row in audit['pairs']:
+            row['repetitions'][0]['path_time_ratio'] = 1.1
+            row['label_result'] = module.label_from_repetitions(row['repetitions'])
+    training = module.gate_training_rows(audit, plan, 0)
+    gate_module = importlib.import_module('rc_switch_gate')
+    gate, receipt = gate_module.fit_gate(training)
+    features = dict(profile=module.PROFILE, feature_names=['target_m'], values=[.001])
+    return gate_module, gate, receipt, features, training
+
+
+def test_fixed_gate_retains_decline_and_individual_bounds(monkeypatch):
+    _, gate, receipt, features, training = fitted_gate_fixture(monkeypatch)
+    assert gate.decision(features) is True
+    assert receipt['verified_rows'] == len(training['training_rows'])
+    assert receipt['fit_wall_ns'] > 0
+    features['values'] = [.002]
+    assert gate.decision(features) is False
+    _, negative, _, features, _ = fitted_gate_fixture(monkeypatch, False)
+    assert negative.decision(features) is False
+
+
+def test_gate_normalization_and_identity_come_from_excluded_training_only(monkeypatch):
+    import json
+    module, gate, _, _, training = fitted_gate_fixture(monkeypatch)
+    payload = json.loads(gate._json)
+    assert payload['mean'] == [.001] and payload['scale'] == [1.0]
+    assert payload['excluded_case_ids'] == ['a']
+    assert payload['training_sample_hashes'] == [r['source_sample_hash'] for r in training['training_rows']]
+    with pytest.raises(TypeError):
+        gate._payload['threshold'] = 0
+    payload['weights'][-1] += 1
+    with pytest.raises(ValueError, match='gate hash mismatch'):
+        module.RidgeGate(json.dumps(payload))
+    training['training_rows'][0]['case_id'] = 'a'
+    with pytest.raises(ValueError, match='outer group cannot enter gate fit'):
+        module.fit_gate(training)
+
+
+def test_gate_rejects_ambiguous_json_and_foreign_features(monkeypatch):
+    module, gate, _, features, _ = fitted_gate_fixture(monkeypatch)
+    with pytest.raises(ValueError):
+        module.RidgeGate('{"threshold":0,' + gate._json[1:])
+    features['feature_names'] = ['foreign']
+    with pytest.raises(ValueError, match='gate feature binding'):
+        gate.decision(features)
+
+
+def test_gate_augmented_ridge_fit_matches_known_two_row_solution(monkeypatch):
+    module, _, _, _, training = fitted_gate_fixture(monkeypatch)
+    training['training_rows'][0].update(values=[-1.0], label=False)
+    training['training_rows'][1].update(values=[1.0], label=True)
+    training['verified_positive_count'] = training['verified_negative_count'] = 1
+    gate, _ = module.fit_gate(training)
+    assert gate._payload['mean'] == (0.0,)
+    assert gate._payload['scale'] == (1.0,)
+    assert gate._payload['weights'] == pytest.approx((1.0 / 3.0, .5))
+    features = dict(profile=module.PROFILE, feature_names=['target_m'], values=[1.0])
+    assert gate.decision(features) is True
+    features['values'] = [-1.0]
+    assert gate.decision(features) is False
