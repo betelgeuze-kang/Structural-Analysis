@@ -162,3 +162,15 @@ evidence and proposal coverage, but does not close the learned-benefit goal.
 tests and 755 frontend tests. Full Python shards still stop at external evidence
 preparation. Newer revisions need their own receipts; all five roadmap goals
 remain active and independent verification requirements are unchanged.
+
+## Matched-parent local benefit remains insufficient for a selector
+
+The [matched-parent probe](rc-same-parent-seed-probe-20260920.md) completed
+198 comparisons from 33 retained middle-geometry states and two existing policies.
+All single-step response comparisons passed. One of 66 pairs was faster across
+all three repeats and reduced Newton iterations from five to four; two additional
+faster means were inconsistent across repeats. The run preserves two completed
+reports from a failed progress writer and resumes only the remaining work.
+This identifies a local seed benefit without establishing a trained gate,
+independent generalization, or whole-path speedup. Secant remains the selected
+complete-path strategy; all five roadmap goals remain open.
