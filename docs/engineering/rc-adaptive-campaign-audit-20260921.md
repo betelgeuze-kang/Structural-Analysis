@@ -49,3 +49,21 @@ and output inside original evidence. A partial history cannot be marked complete
 The two campaign modules are in the independent development-contract CI job.
 The full repository gate still requires all full-suite shards; adding these
 checks does not bypass external evidence preparation or other release conditions.
+
+## Actual original-campaign readback
+
+Committed auditor `1ccffdcf0985bf97275f5531c1b3b961fbfedcb2` was run against the
+retained 128-path campaign from source `84714992a`. Its case outcomes and all
+previously reported totals match the separate original audit exactly: 70 complete
+paths, 802 native calls and 4,702 Newton iterations. It additionally reconciles
+4,702 linear solves directly against native records. No numerical reexecution
+was performed and no original campaign file was written.
+
+The separate output packet is
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-public-adaptive-audit-q_o6bshv`.
+It retains the audit output, CLI output, auditor bytes and source metadata.
+All four inventory entries were reread and hash/length checked; inventory SHA-256:
+`f137f494e0f0428db0c1f1a4ebb25b38bf250ebe53ba153b852db9eb7521d836`.
+This confirms reproducible consistency checks, not the authenticity of original
+execution clocks or independent structural accuracy. Complete user-flow audit/UI
+costs remain a separate measurement requirement.
