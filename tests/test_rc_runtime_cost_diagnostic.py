@@ -562,6 +562,51 @@ def test_policy_sensitivity_rejects_transplanted_or_incomplete_observations(monk
         module.diagnose(audit, plan)
 
 
+def inner_validation_fixture(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('plan_rc_gate_inner_validation')
+    groups = [[f'{group}-{case}' for case in range(3)] for group in 'abcde']
+    samples = [dict(sample_hash=f'sha256:{index:064x}', case_id=case, split='train')
+               for index, case in enumerate(case for group in groups for case in group for _ in range(11))]
+    return module, groups, samples
+
+
+def test_inner_gate_validation_excludes_label_and_both_evaluation_groups(monkeypatch):
+    module, groups, samples = inner_validation_fixture(monkeypatch)
+    plan = module.inner_validation_plan(groups, samples)
+    assert plan['planned_new_seed_fits'] == 10
+    assert len(plan['unique_new_label_tasks']) == 30
+    assert plan['planned_new_unique_parent_pairs'] == 990
+    assert plan['planned_new_comparisons'] == 2970
+    assert plan['planned_new_single_target_paths'] == 11880
+    assert len(plan['gate_folds']) == 20
+    assert {len(fit['training_sample_hashes']) for fit in plan['seed_fits']} == {66}
+    identities = {row['sample_hash']: row['case_id'] for row in samples}
+    for fold in plan['gate_folds']:
+        module.require_fold_seed_exclusions(plan, fold, identities)
+        assert fold['gate_training_row_count'] == 99 and fold['validation_row_count'] == 33
+    assert module.inner_validation_plan(list(reversed(groups)), list(reversed(samples))) == plan
+    assert plan['new_fits_executed'] == plan['new_solves_executed'] == 0
+
+
+@pytest.mark.parametrize('mutation', ['declared_exclusion', 'actual_training', 'missing_training'])
+def test_inner_gate_validation_rejects_hidden_seed_training_leakage(monkeypatch, mutation):
+    module, groups, samples = inner_validation_fixture(monkeypatch)
+    plan = module.inner_validation_plan(groups, samples)
+    fold = plan['gate_folds'][0]
+    task = plan['unique_new_label_tasks'][fold['training_label_task_indices'][0]]
+    fit = plan['seed_fits'][task['seed_fit_index']]
+    if mutation == 'declared_exclusion':
+        fit['excluded_case_ids'] = task['label_case_ids']
+    elif mutation == 'actual_training':
+        fit['training_sample_hashes'][0] = next(row['sample_hash'] for row in samples
+                                               if row['case_id'] in fold['excluded_case_ids'])
+    else:
+        fit['training_sample_hashes'].pop()
+    with pytest.raises(ValueError):
+        module.require_fold_seed_exclusions(plan, fold, {row['sample_hash']: row['case_id'] for row in samples})
+
+
 @pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'outer_case', 'seed', 'label', 'nonfinite'])
 def test_gate_training_rows_reject_transplanted_or_incomplete_inputs(monkeypatch, mutation):
     module, audit, plan = gate_row_fixture(monkeypatch)
