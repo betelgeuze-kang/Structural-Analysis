@@ -21,6 +21,10 @@ reconstructs all 165 retained training parents and their exact native snapshots,
 yielding 27 unweighted state statistics per row. This is preparation for a
 separate representation experiment, with zero new fits or solves and no runtime
 policy change. It does not reverse the negative learned-gate results above.
+The subsequent [fixed material-input gate](rc-material-cost-gate-results-20260920.md)
+fits five excluded-group complements but selects two training true positives
+and 25 false positives. It remains offline and is not promoted; this does not
+establish full-path benefit or independent generalization.
 
 [Current-main integration review](current-main-integration-review-20260920.md)
 rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen
