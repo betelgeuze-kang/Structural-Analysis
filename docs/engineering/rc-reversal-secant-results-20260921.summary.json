@@ -1,0 +1,558 @@
+{
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reversal-secant-5dqfipgg",
+  "inventory_sha256": "b4d6ab74c7d45dc9149df548bcd5b4367ef85c6e28246fb49de0442fe0509787",
+  "verified_files": 516,
+  "source_revision": "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+  "summary": {
+    "rows": [
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "repeat": 0,
+        "status": "returned",
+        "unknown_work": false,
+        "report_hash": "sha256:ab272ae0138b275cde36ceaf7e94e5f9efcf587a7594a5c2dfedc05a18369d46",
+        "arms": {
+          "reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 186572634
+          },
+          "secant": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 229294082
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 181878014
+          }
+        },
+        "comparisons": {
+          "reference": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 0,
+              "by_response_field": {},
+              "examples": [],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "exact_terminal_checkpoint": true
+          },
+          "secant": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 1,
+              "by_response_field": {
+                "member_end_forces": 1
+              },
+              "examples": [
+                {
+                  "path": [
+                    2,
+                    "member_end_forces",
+                    0,
+                    "local_end_j",
+                    "MZ_Nm"
+                  ],
+                  "kind": "numeric_tolerance_exceeded",
+                  "reference": -4.263256414560601e-11,
+                  "arm": 3.268496584496461e-10,
+                  "absolute_difference": 3.694822225952521e-10,
+                  "allowed_difference": 1.0000000326849658e-10
+                }
+              ],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": false,
+            "maximum_absolute_difference_mixed_SI_fields": 1.4115357771515846e-09,
+            "maximum_relative_difference": 1.1304347826086956,
+            "exact_terminal_checkpoint": false
+          }
+        }
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "repeat": 1,
+        "status": "returned",
+        "unknown_work": false,
+        "report_hash": "sha256:5a61ffed4c8fb736130208220b65c8db1add913aed969a5c8ca9c49e6eaef731",
+        "arms": {
+          "secant": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 227900837
+          },
+          "reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 181023557
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 181294216
+          }
+        },
+        "comparisons": {
+          "secant": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 1,
+              "by_response_field": {
+                "member_end_forces": 1
+              },
+              "examples": [
+                {
+                  "path": [
+                    2,
+                    "member_end_forces",
+                    0,
+                    "local_end_j",
+                    "MZ_Nm"
+                  ],
+                  "kind": "numeric_tolerance_exceeded",
+                  "reference": -4.263256414560601e-11,
+                  "arm": 3.268496584496461e-10,
+                  "absolute_difference": 3.694822225952521e-10,
+                  "allowed_difference": 1.0000000326849658e-10
+                }
+              ],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": false,
+            "maximum_absolute_difference_mixed_SI_fields": 1.4115357771515846e-09,
+            "maximum_relative_difference": 1.1304347826086956,
+            "exact_terminal_checkpoint": false
+          },
+          "reference": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 0,
+              "by_response_field": {},
+              "examples": [],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "exact_terminal_checkpoint": true
+          }
+        }
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "repeat": 0,
+        "status": "returned",
+        "unknown_work": false,
+        "report_hash": "sha256:de1d9c873effbf40f011b2bafde6a003208bed9a1b0db18d71eb2a733d849bf2",
+        "arms": {
+          "reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 166091048
+          },
+          "secant": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 196275954
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 166296565
+          }
+        },
+        "comparisons": {
+          "reference": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 0,
+              "by_response_field": {},
+              "examples": [],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "exact_terminal_checkpoint": true
+          },
+          "secant": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 1,
+              "by_response_field": {
+                "member_end_forces": 1
+              },
+              "examples": [
+                {
+                  "path": [
+                    2,
+                    "member_end_forces",
+                    0,
+                    "local_end_j",
+                    "MZ_Nm"
+                  ],
+                  "kind": "numeric_tolerance_exceeded",
+                  "reference": 5.400124791776761e-10,
+                  "arm": -2.842170943040401e-10,
+                  "absolute_difference": 8.242295734817162e-10,
+                  "allowed_difference": 1.000000054001248e-10
+                }
+              ],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": false,
+            "maximum_absolute_difference_mixed_SI_fields": 3.434251993894577e-09,
+            "maximum_relative_difference": 1.5263157894736843,
+            "exact_terminal_checkpoint": false
+          }
+        }
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "repeat": 1,
+        "status": "returned",
+        "unknown_work": false,
+        "report_hash": "sha256:0b8bf43b41a6a304a27d73d7bbd175a6a5a7708ef8cb6c29f04fb14d958f4b32",
+        "arms": {
+          "secant": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 193864958
+          },
+          "reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 165081035
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 165799069
+          }
+        },
+        "comparisons": {
+          "secant": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 1,
+              "by_response_field": {
+                "member_end_forces": 1
+              },
+              "examples": [
+                {
+                  "path": [
+                    2,
+                    "member_end_forces",
+                    0,
+                    "local_end_j",
+                    "MZ_Nm"
+                  ],
+                  "kind": "numeric_tolerance_exceeded",
+                  "reference": 5.400124791776761e-10,
+                  "arm": -2.842170943040401e-10,
+                  "absolute_difference": 8.242295734817162e-10,
+                  "allowed_difference": 1.000000054001248e-10
+                }
+              ],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": false,
+            "maximum_absolute_difference_mixed_SI_fields": 3.434251993894577e-09,
+            "maximum_relative_difference": 1.5263157894736843,
+            "exact_terminal_checkpoint": false
+          },
+          "reference": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 0,
+              "by_response_field": {},
+              "examples": [],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "exact_terminal_checkpoint": true
+          }
+        }
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "repeat": 0,
+        "status": "returned",
+        "unknown_work": false,
+        "report_hash": "sha256:edf00dbaf3fff2e6dfb88dcdc65e51641004f759a39871bad4a0ad8db2c7cfeb",
+        "arms": {
+          "reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 165156198
+          },
+          "secant": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 217025479
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 164822577
+          }
+        },
+        "comparisons": {
+          "reference": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 0,
+              "by_response_field": {},
+              "examples": [],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "exact_terminal_checkpoint": true
+          },
+          "secant": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 1,
+              "by_response_field": {
+                "member_end_forces": 1
+              },
+              "examples": [
+                {
+                  "path": [
+                    2,
+                    "member_end_forces",
+                    0,
+                    "local_end_j",
+                    "MZ_Nm"
+                  ],
+                  "kind": "numeric_tolerance_exceeded",
+                  "reference": 3.836930773104541e-10,
+                  "arm": 5.115907697472721e-10,
+                  "absolute_difference": 1.2789769243681803e-10,
+                  "allowed_difference": 1.000000051159077e-10
+                }
+              ],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": false,
+            "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-09,
+            "maximum_relative_difference": 0.25,
+            "exact_terminal_checkpoint": false
+          }
+        }
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "repeat": 1,
+        "status": "returned",
+        "unknown_work": false,
+        "report_hash": "sha256:0e5cd8ff2429378f19a9126f03c7bae9cbb6fa41e40c10aa15f0c01c9372bd9b",
+        "arms": {
+          "secant": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 216898324
+          },
+          "reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 164424735
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "accepted_target_count": 2,
+            "failure": {
+              "phase": "numerical",
+              "kind": "all_attempts_blocked",
+              "target_index": 2
+            },
+            "wall_ns": 164758405
+          }
+        },
+        "comparisons": {
+          "secant": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 1,
+              "by_response_field": {
+                "member_end_forces": 1
+              },
+              "examples": [
+                {
+                  "path": [
+                    2,
+                    "member_end_forces",
+                    0,
+                    "local_end_j",
+                    "MZ_Nm"
+                  ],
+                  "kind": "numeric_tolerance_exceeded",
+                  "reference": 3.836930773104541e-10,
+                  "arm": 5.115907697472721e-10,
+                  "absolute_difference": 1.2789769243681803e-10,
+                  "allowed_difference": 1.000000051159077e-10
+                }
+              ],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": false,
+            "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-09,
+            "maximum_relative_difference": 0.25,
+            "exact_terminal_checkpoint": false
+          },
+          "reference": {
+            "full_history_pass": false,
+            "structure_match": true,
+            "mismatch_locations": {
+              "mismatch_count": 0,
+              "by_response_field": {},
+              "examples": [],
+              "example_limit": 20,
+              "examples_truncated": false
+            },
+            "physical_values_within_tolerance": true,
+            "maximum_absolute_difference_mixed_SI_fields": 0.0,
+            "maximum_relative_difference": 0.0,
+            "exact_terminal_checkpoint": true
+          }
+        }
+      }
+    ],
+    "wall_ns": 3386032110,
+    "speedup_claim": false,
+    "production_policy_changed": false
+  },
+  "known_work": {
+    "core_calls": 78,
+    "newton_iterations": 498,
+    "linear_solves": 498
+  },
+  "secant_fallback_attempts": 6,
+  "completed_comparisons": 6,
+  "attempted_full_paths": 18,
+  "completed_full_paths": 0,
+  "qualified_speed_ratio": null,
+  "independent_physical_validation": false
+}
