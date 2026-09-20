@@ -67,3 +67,23 @@ All four inventory entries were reread and hash/length checked; inventory SHA-25
 This confirms reproducible consistency checks, not the authenticity of original
 execution clocks or independent structural accuracy. Complete user-flow audit/UI
 costs remain a separate measurement requirement.
+
+## Optional per-invocation audit cost
+
+Add `--timing-output /separate/directory/cost.json` to record wall and process CPU
+nanoseconds from entry to the audit call through closing the serialized audit
+output. The timing receipt binds to `audit_hash`; nondeterministic clock values do
+not enter the original audit result or its hash. Both outputs must be distinct,
+outside original evidence and not already exist. Files are created exclusively.
+
+This optional receipt measures only a successfully returned audit and its output
+write. It excludes interpreter startup/imports, argument preflight, its own write,
+stdout, numerical solves, transport and browser review. It is not a replacement
+for enclosing-process measurements or complete user-flow costs. Failed audits do
+not emit a success timing receipt; their costs still require an enclosing runner.
+If writing the timing file fails, a previously written valid audit may remain and
+the CLI fails; no rollback deletes that evidence. Cache state is uncontrolled.
+
+Twenty-three audit/runner tests pass after this addition, including exact separate
+clock attribution, unchanged result payloads, and fail-fast rejection of colliding,
+existing or original-directory output destinations. Ruff and whitespace checks pass.

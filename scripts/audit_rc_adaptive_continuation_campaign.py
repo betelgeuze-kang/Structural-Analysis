@@ -8,6 +8,7 @@ import argparse
 from fnmatch import fnmatch
 import json
 from pathlib import Path
+from time import perf_counter_ns, process_time_ns
 
 from scripts.run_rc_adaptive_continuation_campaign import campaign_plan, prepare_cases
 from structural_analysis.api.frame3d_direct_control_request import (
@@ -614,12 +615,39 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("campaign_directory", type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--timing-output", type=Path)
     args = parser.parse_args()
     root, output = args.campaign_directory.resolve(), args.output.resolve()
     _require(not output.is_relative_to(root), "separate audit output required")
+    timing = args.timing_output.resolve() if args.timing_output else None
+    if timing is not None:
+        _require(not timing.is_relative_to(root), "separate timing output required")
+        _require(timing != output, "distinct audit and timing outputs required")
+        _require(not timing.exists(), "timing output already exists")
+    _require(not output.exists(), "audit output already exists")
+    started, cpu_started = perf_counter_ns(), process_time_ns()
     result = audit(root)
     with output.open("x") as stream:
         json.dump(result, stream, indent=2, allow_nan=False)
+    elapsed, cpu_elapsed = perf_counter_ns() - started, process_time_ns() - cpu_started
+    if timing is not None:
+        receipt = {
+            "schema_version": "adaptive-campaign-audit-cost.v1",
+            "audit_hash": result["audit_hash"],
+            "wall_ns": elapsed,
+            "process_cpu_ns": cpu_elapsed,
+            "scope": "audit_call_through_audit_output_close",
+            "excluded": [
+                "interpreter_startup_and_imports", "argument_preflight",
+                "timing_receipt_write", "stdout", "numerical_solves",
+                "transport", "browser_review",
+            ],
+            "cold_cache_controlled": False,
+            "original_execution_clocks_authenticated": False,
+            "full_user_flow_measured": False,
+        }
+        with timing.open("x") as stream:
+            json.dump(receipt, stream, indent=2, allow_nan=False)
     print(json.dumps({key: value for key, value in result.items() if key != "cases"}))
 
 

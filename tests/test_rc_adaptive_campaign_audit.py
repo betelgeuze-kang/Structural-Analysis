@@ -137,3 +137,47 @@ def test_partial_history_cannot_be_relabelled_complete():
             'response_history': [], 'status': 'complete', 'failure': None}
     with pytest.raises(ValueError, match='complete path status'):
         auditor._check_path_evidence({}, 'proposal', path, request)
+
+
+def test_cli_timing_is_separate_and_bound_to_unchanged_audit(tmp_path, monkeypatch):
+    original = tmp_path / 'original'
+    original.mkdir()
+    output, timing = tmp_path / 'audit.json', tmp_path / 'timing.json'
+    result = {'audit_hash': 'sha256:example', 'cases': [], 'numerical_reexecution_performed': False}
+    monkeypatch.setattr(auditor, 'audit', lambda root: result)
+    walls, cpus = iter((100, 180)), iter((200, 250))
+    monkeypatch.setattr(auditor, 'perf_counter_ns', lambda: next(walls))
+    monkeypatch.setattr(auditor, 'process_time_ns', lambda: next(cpus))
+    monkeypatch.setattr('sys.argv', ['audit', str(original), '--output', str(output),
+                                    '--timing-output', str(timing)])
+    auditor.main()
+    assert json.loads(output.read_text()) == result
+    cost = json.loads(timing.read_text())
+    assert cost['audit_hash'] == result['audit_hash']
+    assert (cost['wall_ns'], cost['process_cpu_ns']) == (80, 50)
+    assert not cost['full_user_flow_measured']
+    assert cost['scope'] == 'audit_call_through_audit_output_close'
+    assert 'interpreter_startup_and_imports' in cost['excluded']
+    assert list(original.iterdir()) == []
+
+
+@pytest.mark.parametrize('kind', ['inside', 'same', 'existing_timing', 'existing_audit'])
+def test_cli_rejects_unsafe_or_existing_outputs_before_audit(tmp_path, monkeypatch, kind):
+    original = tmp_path / 'original'
+    original.mkdir()
+    output, timing = tmp_path / 'audit.json', tmp_path / 'timing.json'
+    if kind == 'inside':
+        timing = original / 'timing.json'
+    elif kind == 'same':
+        timing = output
+    elif kind == 'existing_timing':
+        timing.write_text('preserve timing')
+    else:
+        output.write_text('preserve audit')
+    before = {p: p.read_bytes() for p in tmp_path.rglob('*.json')}
+    monkeypatch.setattr(auditor, 'audit', lambda root: pytest.fail('must preflight first'))
+    monkeypatch.setattr('sys.argv', ['audit', str(original), '--output', str(output),
+                                    '--timing-output', str(timing)])
+    with pytest.raises(ValueError, match='separate|distinct|already exists'):
+        auditor.main()
+    assert {p: p.read_bytes() for p in tmp_path.rglob('*.json')} == before
