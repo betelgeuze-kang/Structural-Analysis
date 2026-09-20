@@ -1,0 +1,203 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-frozen-path-n6soypwv",
+  "inventory_sha256": "9583a3fa9292ea5f9c5746cae2d126cdccb260a729c3c6385669657a7042b104",
+  "file_count": 1974,
+  "audit": {
+    "totals": {
+      "paths": 24,
+      "completed_paths": 6,
+      "core_calls": 102,
+      "newton_iterations": 588,
+      "linear_solves": 588,
+      "optimizer_assemblies": 0,
+      "optimizer_wall_ns": 0,
+      "proposal_wall_ns": 1663392253,
+      "newton_assembly_dispatches": 1638,
+      "additional_native_calls": 96,
+      "additional_newton_iterations": 310,
+      "additional_linear_solves": 310,
+      "additional_assembly_dispatches": 636,
+      "all_native_calls": 198,
+      "all_newton_iterations": 898
+    },
+    "proposal_repeat_checkpoints_equal": true,
+    "all_full_reference_comparisons_pass": false,
+    "rows": [
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "repeat": 0,
+        "report_hash": "sha256:64354d02f3164ac8f7129f6e9fcce7fe5689d31f6f8dbf02bde169befcdad524",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 365854091,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 186297040,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 230336581,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 184848911,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "repeat": 1,
+        "report_hash": "sha256:2e922e7982f4c6654c206e22ea284bc2e8e90399a2c0a12760e1e51f079c3b84",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 367185116,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 184494228,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 232787884,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 184342663,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "repeat": 0,
+        "report_hash": "sha256:1d5bd10297b722da21d758f7020e9508b253866f5250d0d2718233103159ddb3",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 362324203,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 168111087,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 197566718,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 167220647,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "repeat": 1,
+        "report_hash": "sha256:3dbd9799d0b2ff48c738ea8cea66e86c4af5913d8b0abfb7518b425d321d0c0d",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 374566063,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 168194849,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 197199466,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 167769755,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "repeat": 0,
+        "report_hash": "sha256:515a3cc72d2a60514f91c29d1d58f441772a88200b7fd59e5cb38ecd828a30c9",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 390079706,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 168191119,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 224645889,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 169286446,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "repeat": 1,
+        "report_hash": "sha256:c73b6bc5fd89a3b3f2de018b43026bd37965425296ae54eb1ca04fab1c0533ec",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 402157402,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 168609043,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 233251768,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 167270739,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      }
+    ],
+    "source_revision": "8d0dd66b65f17245bca08fb4fee5a284afc3631e"
+  }
+}

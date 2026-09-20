@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+The [frozen-parent continuation strategy](rc-frozen-continuation-path-results-20260921.md) completes all three original reversal models in both orders (six proposal paths within 24 attempted paths). Complete accepted histories and checkpoints repeat exactly. Its 96 additional native calls are explicitly counted: 198 total native calls / 898 Newton iterations across the study. Intermediate checkpoints are never adopted as material-history parents. Ordinary/secant/fresh references still fail, so no qualified speed ratio or independent/design approval follows. Product artifact replay and broader validation remain open.
+
 [Hosted 610e](hosted-610e-terminal-20260921.md) now passes 1,980 development and 814 frontend tests; full-suite shards remain blocked in evidence preparation. These receipts do not cover later trust-region code.
 
 The [opt-in full-path reversal strategy](rc-trust-region-path-results-20260921.md) now executes six comparisons / 24 paths from frozen b9e767cc9. The w48 cheap proposal completes both orderings with equal final checkpoints; all ordinary/fresh references and both w32 proposal cases remain incomplete. All 106 core calls, 672 Newton iterations and 362 additional optimizer assemblies are retained. Full-reference comparisons remain failed, so completion is not credited as speedup or independent validation. Unknown optimizer work now propagates to the whole-report work flag.
