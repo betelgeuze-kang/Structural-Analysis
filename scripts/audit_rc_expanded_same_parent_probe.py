@@ -48,6 +48,12 @@ def require_original_artifact(root, descriptor, name, expected):
     require((root / name).read_bytes() == expected, 'original artifact bytes')
 
 
+def require_work_counters(work):
+    require(set(work) == {'core_calls', 'newton_iterations', 'linear_solves'}
+            and all(type(value) is int and value >= 0 for value in work.values()),
+            'nonnegative integer work counters required')
+
+
 def audit(root):
     plan = read(root / 'plan.json')
     outcome = read(root / 'outcome.json')
@@ -95,6 +101,8 @@ def audit(root):
             require(report['arm_order'] == plan['arm_order_schedule'][repeat], 'counterbalanced order')
             require(report['absolute_tolerance'] == 1e-10 and report['relative_tolerance'] == 1e-8,
                     'original comparison tolerances')
+            require(set(report['arms']) == set(report['comparisons']) == {'reference', 'secant', 'proposal'}
+                    and report['all_execution_work_reported'] is True, 'all declared arms and comparisons required')
             arm_work = {}
             complete = True
             for name, arm in {**report['arms'], 'fresh-reference': report['fresh_reference']}.items():
@@ -104,11 +112,12 @@ def audit(root):
                 arm_work[name] = dict.fromkeys(metrics, 0)
                 complete = complete and arm['status'] == 'complete'
                 for invocation in arm['entries'][0]['invocations']:
-                    require(not invocation['unknown_work'], 'unknown solver work')
+                    require(invocation['unknown_work'] is False, 'unknown solver work')
+                    require_work_counters(invocation['work'])
                     for metric in metrics:
                         total[metric] += invocation['work'][metric]
                         arm_work[name][metric] += invocation['work'][metric]
-            passed = complete and all(c['step_response_pass'] for c in report['comparisons'].values())
+            passed = complete and all(c['step_response_pass'] is True for c in report['comparisons'].values())
             repeats.append({'repetition': repeat, 'comparison_pass': passed,
                 'decision': report['arms']['proposal']['entries'][0]['proposal_decision'],
                 'path_time_ratio': report['arms']['proposal']['wall_ns'] / report['arms']['secant']['wall_ns'] if passed else None,

@@ -129,3 +129,12 @@ def test_expanded_parent_audit_checks_original_artifact_bytes(monkeypatch, tmp_p
         module.require_original_artifact(tmp_path, descriptor, 'parent.json', expected)
     with pytest.raises(ValueError, match='artifact descriptor'):
         module.require_original_artifact(tmp_path, dict(descriptor, path='../parent.json'), 'parent.json', expected)
+
+
+@pytest.mark.parametrize('value', [True, -1, 1.0])
+def test_expanded_parent_audit_requires_known_integer_work(monkeypatch, value):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_expanded_same_parent_probe')
+    module.require_work_counters({'core_calls': 1, 'newton_iterations': 4, 'linear_solves': 4})
+    with pytest.raises(ValueError, match='integer work'):
+        module.require_work_counters({'core_calls': value, 'newton_iterations': 4, 'linear_solves': 4})

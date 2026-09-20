@@ -52,6 +52,7 @@ Do not treat partial receipts as a completed diagnostic or a learned-policy gain
 The follow-up auditor also compares the report's canonical model checksum,
 compiled problem hash, full source request and single-target request with the
 original prepared case. It checks both parent and accepted-context descriptors
-and actual bytes against the retained originals. The 18-test diagnostic suite
+and actual bytes against the retained originals. The 21-test diagnostic suite
 passes, including transplanted-model/history/request and artifact-byte rejection.
-This audit change does not alter the already running frozen numerical process.
+The audit also requires all three strategy comparisons and known nonnegative
+integer work counters, including the fresh-reference arm. This audit change does not alter the already running frozen numerical process.
