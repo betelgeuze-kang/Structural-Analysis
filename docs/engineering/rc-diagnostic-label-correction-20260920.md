@@ -74,3 +74,20 @@ Inventory: 7 files / 70,567 bytes, SHA-256
 [Corrected original abstention labels](rc-grouped-runtime-abstention-20260920.summary.json)
 and [recovered coverage summary](rc-training-history-coverage-extended-20260920.summary.json)
 retain the distinction between numerical source revision and later diagnostic code.
+
+## Next runtime comparison, declared before execution
+
+`run_expanded_rc_runtime_campaign.py` reads the pinned complete-label inventory,
+verifies each required input, regenerates and exactly compares all 11 cases, and
+uses the existing connected-family runtime selector. It runs nine training cases
+× two ridge values (10,000 and 1,000,000) × three counterbalanced repetitions:
+54 folds / 216 full paths, with a conservative budget of 4,104 core calls and
+19 fits including a possible selected full-training refit. Whole geometry/history
+families are excluded; no labels are regenerated and no reserved case is executed.
+
+The selector requires actual learned proposals, all existing full comparisons,
+and at least 1% improvement before selecting a learned policy. Existing label
+costs remain separate, and passing this internal tuning comparison would not by
+itself prove net savings or independent evaluation. The driver records input
+verification/preparation and selection time; imports and later audit time are
+outside that clock. No prediction is made here about the result.
