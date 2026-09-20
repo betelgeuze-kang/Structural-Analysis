@@ -1,0 +1,69 @@
+{
+  "schema": "posthoc-512-1024-witness-decomposition.v1",
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "material_sha256": "dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+  "source_sha256": {
+    "coarse": "2e5974645b6f6fbc81eb8f647a9d6af049007856a466e50bc41b6f685d3fbfd3",
+    "fine": "2f923d7537b4ddf10ce19e0959fd081767466442e9f438ef1265c7461154446b"
+  },
+  "structural_solves": 0,
+  "training_fits": 0,
+  "material_integrations": 160,
+  "selection": "Two maxima selected after the completed comparison; not independent evaluation.",
+  "causal_attribution": false,
+  "derived_midpoints_are_accepted_solver_fibers": false,
+  "original_projection_screen_replaced": false,
+  "physical_validation": false,
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-1024-witness-977sn6jf",
+  "inventory_sha256": "1b771d68ae412c77c177d74c93477f3b64653ecb9240ae55e67aac880928a4df",
+  "observer_revision": "e424051da",
+  "process": {
+    "exit_code": 0,
+    "wall_ns": 109633794291,
+    "new_solves": 0,
+    "new_fits": 0
+  },
+  "maximum_rss_kib": 17672176,
+  "verified_files": 768,
+  "verified_bytes": 16498068,
+  "witness_summaries": [
+    {
+      "member": "E2",
+      "gauss": 0,
+      "coarse_cell": 7,
+      "y_m": -0.2912109375,
+      "coarse_replay_exact": true,
+      "target_m": 0.022,
+      "field": "compressive_damage",
+      "decomposition": {
+        "coarse_accepted": 0.0,
+        "derived_fine_midpoint": 0.0,
+        "fine_left_accepted": 0.0007964243135917259,
+        "fine_right_accepted": 0.0,
+        "signed_total": -0.00039821215679586297,
+        "signed_history": 0.0,
+        "signed_sampling": -0.00039821215679586297
+      },
+      "exact_coarse_replay_targets": 40
+    },
+    {
+      "member": "E3",
+      "gauss": 2,
+      "coarse_cell": 132,
+      "y_m": -0.1447265625,
+      "coarse_replay_exact": true,
+      "target_m": 0.078,
+      "field": "tensile_damage",
+      "decomposition": {
+        "coarse_accepted": 0.004749499621792386,
+        "derived_fine_midpoint": 0.004903313638033979,
+        "fine_left_accepted": 0.0,
+        "fine_right_accepted": 0.05244331963022919,
+        "signed_total": -0.02147216019332221,
+        "signed_history": -0.00015381401624159352,
+        "signed_sampling": -0.021318346177080616
+      },
+      "exact_coarse_replay_targets": 40
+    }
+  ]
+}
