@@ -19,7 +19,7 @@ from structural_analysis.benchmark.rc_control_learning_split import control_trai
 AMPLITUDES = (("050", 0.5), ("100", 1.0), ("150", 1.5))
 
 
-def cases_with_history_coverage():
+def cases_with_history_coverage(*, extended_line_search=False):
     cases = []
     for original in prepare_cases():
         if original.split != 'train':
@@ -32,6 +32,13 @@ def cases_with_history_coverage():
                 original.model, replace(original.request,
                     targets_m=tuple(scale * x for x in original.request.targets_m)),
             ))
+    if extended_line_search:
+        cases = [learning.RCControlLearningCase(
+            c.case_id, c.project_id, c.geometry_family_id, c.load_history_id, c.split,
+            c.model, replace(c.request, solver_config=replace(c.request.solver_config,
+                newton=replace(c.request.solver_config.newton,
+                    line_search_alphas=tuple(2.0 ** -i for i in range(13))))),
+        ) for c in cases]
     learning._preflight(cases, ARITHMETIC)
     return cases
 
@@ -41,16 +48,24 @@ def main():
     parser.add_argument('--source-revision', required=True)
     parser.add_argument('--output-directory', required=True, type=Path)
     parser.add_argument('--preflight-only', action='store_true')
+    parser.add_argument('--extended-line-search', action='store_true')
     args = parser.parse_args()
     if re.fullmatch('[0-9a-f]{40}', args.source_revision) is None:
         raise ValueError('exact frozen source revision required')
     started = perf_counter_ns()
-    cases = cases_with_history_coverage()
+    cases = cases_with_history_coverage(extended_line_search=args.extended_line_search)
     groups = control_training_exclusion_groups(cases)['groups']
     if len(groups) != 3 or any(len(g) != 3 for g in groups):
         raise ValueError('three whole geometry/history families required')
     plan = {
-        'schema_version': 'rc-grouped-training-history-coverage.v1',
+        'schema_version': 'rc-grouped-training-history-coverage.v2' if args.extended_line_search else 'rc-grouped-training-history-coverage.v1',
+        **({'line_search_extension': {
+            'prior_failed_plan_hash': 'sha256:36ee7c9d5dcaefd807c43cedc44981cbecdf37fdc2899e4808bcf7795933afaa',
+            'alphas': [2.0 ** -i for i in range(13)],
+            'scope': 'all_declared_requests_including_unexecuted_reserved_cases',
+            'numerical_acceptance_tolerances_changed': False,
+            'maximum_iterations_changed': False,
+        }} if args.extended_line_search else {}),
         'source_revision': args.source_revision,
         'prior_campaign_plan_hash': 'sha256:eb3a0235184260625da8eadcef5f242d7e3f866e764e267c96a1c2289d56bd2b',
         'amplitude_multipliers': [scale for _, scale in AMPLITUDES],
