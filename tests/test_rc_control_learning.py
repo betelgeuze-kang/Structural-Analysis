@@ -976,3 +976,21 @@ def test_deferral_does_not_bypass_cross_split_preflight(tmp_path, cases, monkeyp
             cases, source_revision='a' * 40, output_directory=root, defer_evaluation=True,
         )
     assert not root.exists()
+
+
+def test_inference_payload_cache_is_content_keyed_bounded_and_recursively_immutable():
+    learning._inference_policy_payload.cache_clear()
+    original = '{"weights":[[1.0]],"nested":{"names":["a"]}}'
+    first = learning._inference_policy_payload(original)
+    assert learning._inference_policy_payload(original) is first
+    with pytest.raises(TypeError):
+        first['weights'][0][0] = 2.0
+    with pytest.raises(TypeError):
+        first['nested']['names'] = ('changed',)
+    changed = learning._inference_policy_payload(original.replace('1.0', '2.0'))
+    assert changed['weights'][0][0] == 2.0
+    assert first['weights'][0][0] == 1.0
+    for i in range(8):
+        learning._inference_policy_payload(json.dumps({'value': i}))
+    assert learning._inference_policy_payload.cache_info().currsize == 4
+    learning._inference_policy_payload.cache_clear()

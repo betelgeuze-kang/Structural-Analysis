@@ -1,0 +1,96 @@
+{
+  "parent_source_revision": "cef10ca639246d2b18f8dd1c59fac9b6f3e02123",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-inference-reuse-aa2jh26y",
+  "inventory_sha256": "eb2b045413fa6d6650cabdf3ef764f471360024c8edf06751d91ab469bfa2f40",
+  "verification": {
+    "contexts": 1080,
+    "legacy_exact_matches": 1080,
+    "recorded_proposal_matches": 594,
+    "raw_policy_abstentions": 486,
+    "caller_mutation_unchanged": 1080,
+    "new_solver_calls": 0,
+    "new_fits": 0
+  },
+  "measurements": {
+    "measurements": [
+      {
+        "repetition": 0,
+        "order": [
+          "legacy",
+          "reused"
+        ],
+        "proposals_per_arm": 100,
+        "legacy_ns": 200518385,
+        "reused_ns": 114226341,
+        "cache_misses": 1,
+        "cache_hits": 99
+      },
+      {
+        "repetition": 1,
+        "order": [
+          "reused",
+          "legacy"
+        ],
+        "proposals_per_arm": 100,
+        "reused_ns": 114311694,
+        "cache_misses": 1,
+        "cache_hits": 99,
+        "legacy_ns": 200123043
+      },
+      {
+        "repetition": 2,
+        "order": [
+          "legacy",
+          "reused"
+        ],
+        "proposals_per_arm": 100,
+        "legacy_ns": 199388118,
+        "reused_ns": 113919892,
+        "cache_misses": 1,
+        "cache_hits": 99
+      },
+      {
+        "repetition": 3,
+        "order": [
+          "reused",
+          "legacy"
+        ],
+        "proposals_per_arm": 100,
+        "reused_ns": 114057856,
+        "cache_misses": 1,
+        "cache_hits": 99,
+        "legacy_ns": 199444302
+      },
+      {
+        "repetition": 4,
+        "order": [
+          "legacy",
+          "reused"
+        ],
+        "proposals_per_arm": 100,
+        "legacy_ns": 200588647,
+        "reused_ns": 114821601,
+        "cache_misses": 1,
+        "cache_hits": 99
+      },
+      {
+        "repetition": 5,
+        "order": [
+          "reused",
+          "legacy"
+        ],
+        "proposals_per_arm": 100,
+        "reused_ns": 110341008,
+        "cache_misses": 1,
+        "cache_hits": 99,
+        "legacy_ns": 195630580
+      }
+    ],
+    "cold_parse_included_in_each_reused_arm": true,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "whole_path_speedup_proved": false
+  },
+  "regression_tests_passed": 69,
+  "full_path_benefit_proved": false
+}

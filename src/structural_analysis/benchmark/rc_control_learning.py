@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 import json
+from functools import lru_cache
+from types import MappingProxyType
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
@@ -374,6 +376,25 @@ def _features(context, model_features):
     )
 
 
+def _freeze_policy_payload(value):
+    if type(value) is dict:
+        return MappingProxyType({k: _freeze_policy_payload(v) for k, v in value.items()})
+    if type(value) is list:
+        return tuple(_freeze_policy_payload(v) for v in value)
+    return value
+
+
+@lru_cache(maxsize=4)
+def _inference_policy_payload(encoded):
+    """Bounded immutable parse reuse keyed by exact JSON content, not identity.
+
+    Policy construction still performs the full strict validation. This cache
+    only avoids reparsing that policy on each proposal; dynamic material input
+    validation is unchanged. Public to_dict continues to return detached data.
+    """
+    return _freeze_policy_payload(json.loads(encoded))
+
+
 @dataclass(frozen=True)
 class RCControlSeedPolicy:
     """Immutable detached JSON; weights and preprocessing contain train rows only."""
@@ -596,7 +617,7 @@ class RCControlSeedPolicy:
         arithmetic_profile="binary64",
         load_factor_coordinate_scale_m=None,
     ):
-        d = self.to_dict()
+        d = _inference_policy_payload(self._json)
         try:
             arithmetic = _arithmetic_manifest(arithmetic_profile)
         except ValueError:
@@ -605,8 +626,8 @@ class RCControlSeedPolicy:
             return None
         if (
             d["model_context_hash"] != model_features.context_hash
-            or d["model_feature_names"] != list(model_features.feature_names)
-            or d["free_global_dofs"] != list(free_global_dofs)
+            or d["model_feature_names"] != tuple(model_features.feature_names)
+            or d["free_global_dofs"] != tuple(free_global_dofs)
             or d["solver_config_hash"] != solver_config_hash
             or d["control_free_index"] != context.control_free_index
             or len(context.accepted_targets_m) < 2
@@ -618,7 +639,7 @@ class RCControlSeedPolicy:
                 x, names = material_control_features(context, model_features)
             except (ValueError, TypeError):
                 return None
-            if names != d["material_feature_names"]:
+            if tuple(names) != d["material_feature_names"]:
                 return None
             correction_scales = 1.0
         elif history_profile:
