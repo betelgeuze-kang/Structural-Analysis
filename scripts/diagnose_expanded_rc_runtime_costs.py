@@ -28,6 +28,11 @@ def decompose(arm, preload_recovery_ns):
     if any('proposal_guard' in entry for entry in entries):
         timing['proposal_guard'] = sum(entry.get('proposal_guard', {}).get('wall_ns', 0)
                                        for entry in entries)
+    if any('initial_residual_observation' in entry for entry in entries):
+        require(all(entry.get('initial_residual_observation', {'complete': True})['complete']
+                    for entry in entries), 'unknown initial residual observation cost')
+        timing['initial_residual_observation'] = sum(
+            entry.get('initial_residual_observation_wall_ns', 0) for entry in entries)
     timing['remaining_unattributed'] = arm['wall_ns'] - sum(timing.values())
     require(all(type(v) is int and v >= 0 for v in timing.values()), 'overlapping or invalid timing')
     return timing

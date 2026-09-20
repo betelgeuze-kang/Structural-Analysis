@@ -352,6 +352,7 @@ def _path(
     reuse_line_search_assembly=False,
     record_assembly_timing=False,
     proposal_guard=None,
+    observe_initial_residuals=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -521,6 +522,37 @@ def _path(
         finally:
             entry["proposal_wall_ns"] = perf_counter_ns() - pw
             entry["proposal_cpu_ns"] = process_time_ns() - pc
+        if observe_initial_residuals and entry.get("proposal_decision") == "proposed":
+            baseline = secant_seed(context)
+            if baseline is not None and seed is not None:
+                _save(root, f"{index:03d}-initial-residual-started.json", _bytes({
+                    "parent_hash": accepted.state_hash, "target_index": index,
+                    "unknown_observation_work_until_outcome": True,
+                }))
+                ow = perf_counter_ns()
+                from structural_analysis.benchmark.rc_control_initial_residual import (
+                    observe_rc_control_initial_residuals,
+                )
+                try:
+                    observation = observe_rc_control_initial_residuals(
+                        compiled.problem, accepted,
+                        control_global_dof=request.control_global_dof,
+                        target_m=target, config=request.solver_config,
+                        candidates={"secant": baseline, "proposal": seed},
+                    )
+                    entry["initial_residual_observation"] = observation
+                    if not observation["complete"]:
+                        failure = {"phase": "initial_residual_observation",
+                                   "kind": "incomplete_observation", "target_index": index}
+                except Exception as exc:
+                    entry["initial_residual_observation"] = {
+                        "complete": False, "unknown_work": True,
+                        "error_type": type(exc).__name__, "error": str(exc),
+                    }
+                    failure = {"phase": "initial_residual_observation",
+                               "kind": type(exc).__name__, "target_index": index}
+                finally:
+                    entry["initial_residual_observation_wall_ns"] = perf_counter_ns() - ow
         _save(root, f"{index:03d}-proposal.json", _bytes(entry))
         if failure:
             break
@@ -1032,6 +1064,7 @@ def benchmark_rc_control_seed_paths(
     record_assembly_work: bool = False,
     reuse_line_search_assembly: bool = False,
     record_assembly_timing: bool = False,
+    observe_initial_residuals: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -1040,6 +1073,10 @@ def benchmark_rc_control_seed_paths(
     original prefix, and cannot provide complete-path performance credit.
     """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(observe_initial_residuals) is not bool or (
+        observe_initial_residuals and proposal is None
+    ):
+        raise ValueError("initial residual observation requires a boolean and proposer")
     if (proposal_guard is None) != (proposal_guard_identity is None) or (
         proposal_guard is not None and (
             not callable(proposal_guard) or proposal is None
@@ -1332,6 +1369,14 @@ def benchmark_rc_control_seed_paths(
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
         )
+    if observe_initial_residuals:
+        identity["initial_residual_observation"] = {
+            "schema_version": "rc-control-initial-residual-observation.v1",
+            "scope": "secant and actual proposal on proposal-arm accepted parent",
+            "changes_seed": False,
+            "cost_included_in_path_wall": True,
+            "assembly_counts_separate_from_newton_dispatches": True,
+        }
     if proposal_guard is not None:
         identity["proposal_guard"] = {
             "identity": proposal_guard_identity,
@@ -1361,12 +1406,17 @@ def benchmark_rc_control_seed_paths(
             reuse_line_search_assembly,
             record_assembly_timing,
             proposal_guard if name == "proposal" else None,
+            observe_initial_residuals and name == "proposal",
         )
         if initial_prefix is not None:
             unknown = any(
                 inv["unknown_work"]
                 for entry in arm["entries"]
                 for inv in entry["invocations"]
+            )
+            unknown = unknown or any(
+                not entry.get("initial_residual_observation", {"complete": True})["complete"]
+                for entry in arm["entries"]
             )
             changed = initial_prefix[0].canonical_bytes() != origin_bytes
             if unknown or changed:

@@ -141,3 +141,118 @@ def test_coordinate_failure_does_not_claim_an_assembly(monkeypatch):
     assert report["rows"][0]["assembly_attempts"] == 0
     assert report["rows"][0]["unknown_work"]
     assert report["target_m"] == -1e-6 and report["control_global_dof"] == 7
+
+
+def runtime_observation(tmp_path, enabled=True):
+    from pathlib import Path
+    from structural_analysis.io.neutral.loader import load_neutral_json
+    from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+        BoundedRCFiberDirectControlRequest,
+    )
+    from structural_analysis.benchmark.rc_control_seed_runtime import (
+        benchmark_rc_control_seed_paths,
+        secant_seed,
+    )
+
+    model = load_neutral_json(
+        Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
+    )
+    request = BoundedRCFiberDirectControlRequest(
+        7, (-1e-6, -2e-6, 1e-6, 0.0), allow_reversals=True, maximum_reversals=3
+    )
+    return benchmark_rc_control_seed_paths(
+        model,
+        request,
+        source_revision="0" * 40,
+        output_directory=tmp_path,
+        proposal=secant_seed,
+        proposal_identity="sha256:" + "a" * 64,
+        proposal_abstention_strategy="secant",
+        observe_initial_residuals=enabled,
+    )
+
+
+def test_full_path_observation_keeps_actual_steps_and_charges_extra_work(tmp_path):
+    report = runtime_observation(tmp_path / "observed")
+    assert report["comparisons"]["proposal"]["full_history_pass"]
+    arm = report["arms"]["proposal"]
+    observed = [
+        entry["initial_residual_observation"]
+        for entry in arm["entries"]
+        if "initial_residual_observation" in entry
+    ]
+    assert len(observed) == 3
+    assert sum(row["assembly_attempts"] for obs in observed for row in obs["rows"]) == 6
+    assert arm["wall_ns"] > sum(obs["wall_ns"] for obs in observed)
+    for index, entry in enumerate(arm["entries"]):
+        assert (
+            tmp_path / f"observed/proposal/{index:03d}-1-step.json"
+        ).read_bytes() == (
+            tmp_path / f"observed/secant/{index:03d}-1-step.json"
+        ).read_bytes()
+        if "initial_residual_observation" in entry:
+            obs = entry["initial_residual_observation"]
+            assert obs["parent_hash"] == entry["parent_hash"]
+            assert (
+                obs["rows"][0]["relative_residual"]
+                == obs["rows"][1]["relative_residual"]
+            )
+    assert all(
+        "initial_residual_observation" not in entry
+        for name in ("reference", "secant")
+        for entry in report["arms"][name]["entries"]
+    )
+
+
+@pytest.mark.parametrize("mode", ["raised", "partial"])
+def test_failed_observation_stops_path_and_has_no_speed_credit(
+    tmp_path, monkeypatch, mode
+):
+    from structural_analysis.benchmark import rc_control_initial_residual as observer
+    from structural_analysis.benchmark.rc_control_runtime_selection import (
+        _runtime_score,
+    )
+
+    def fail(*args, **kwargs):
+        if mode == "partial":
+            return {"complete": False, "unknown_work": True}
+        raise RuntimeError("observation failed")
+
+    monkeypatch.setattr(observer, "observe_rc_control_initial_residuals", fail)
+    report = runtime_observation(tmp_path / "failed")
+    arm = report["arms"]["proposal"]
+    assert arm["status"] == "incomplete"
+    assert arm["failure"]["phase"] == "initial_residual_observation"
+    assert arm["entries"][-1]["invocations"] == []
+    assert arm["entries"][-1]["initial_residual_observation"]["unknown_work"]
+    assert not report["comparisons"]["proposal"]["full_history_pass"]
+    assert _runtime_score(report, [])["proposal_over_secant_path_wall_ratio"] is None
+
+
+@pytest.mark.parametrize("enabled", [None, 1, "true"])
+def test_observation_flag_is_strict_before_output(tmp_path, enabled):
+    with pytest.raises(ValueError, match="initial residual observation"):
+        runtime_observation(tmp_path / "invalid", enabled)
+    assert not (tmp_path / "invalid").exists()
+
+
+def test_observation_cost_is_separate_and_unknown_cost_is_rejected(monkeypatch):
+    import importlib
+    from pathlib import Path
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    module = importlib.import_module("diagnose_expanded_rc_runtime_costs")
+    entry = {
+        "invocations": [],
+        "recovery_wall_ns": 0,
+        "proposal_wall_ns": 3,
+        "initial_residual_observation": {"complete": True},
+        "initial_residual_observation_wall_ns": 7,
+    }
+    arm = {"wall_ns": 20, "preload_invocations": [], "entries": [entry]}
+    costs = module.decompose(arm, 0)
+    assert costs["initial_residual_observation"] == 7
+    assert costs["remaining_unattributed"] == 10
+    entry["initial_residual_observation"]["complete"] = False
+    with pytest.raises(ValueError, match="unknown initial residual"):
+        module.decompose(arm, 0)
