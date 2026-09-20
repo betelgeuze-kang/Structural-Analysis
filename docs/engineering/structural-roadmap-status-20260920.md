@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Hosted 8eee](hosted-8eee-terminal-20260920.md) passes 1,893 development tests and 814 frontend tests. Full Python shards remain stopped before test execution by external replay and technical-receipt preparation; later source changes require their own checks.
+
 The [accepted-material representation audit](rc-accepted-material-summary-results-20260920.md)
 reconstructs all 165 retained training parents and their exact native snapshots,
 yielding 27 unweighted state statistics per row. This is preparation for a
@@ -33,7 +35,7 @@ reductions fail the repeat-aware time rule. The
 Ten [three-group-excluded 66-row seeds](rc-gate-inner-validation-preparation-20260920.md)
 are now prepared to avoid leakage in an additional inner validation split.
 The new [timing campaign](rc-inner-label-campaign-preparation-20260920.md) is
-frozen and ready for admission after the now-completed 2,048-layer controller. No new label solves are included in this overview update.
+[admitted and running](rc-inner-label-campaign-start-20260920.md) after the completed 2,048-layer controller and audit. Fresh preflight passed; final labels and gate validation remain pending.
 
 [Current-main integration review](current-main-integration-review-20260920.md)
 rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen
