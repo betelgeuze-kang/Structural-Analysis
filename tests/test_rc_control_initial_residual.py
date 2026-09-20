@@ -271,3 +271,26 @@ def test_observation_cost_is_separate_and_unknown_cost_is_rejected(monkeypatch):
     entry["initial_residual_observation"]["complete"] = False
     with pytest.raises(ValueError, match="unknown initial residual"):
         module.decompose(arm, 0)
+
+
+
+def test_residual_summary_counts_repeats_without_inventing_independent_cases(monkeypatch):
+    import importlib
+    from pathlib import Path
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('summarize_rc_residual_observations')
+    rows = [dict(case_id='a', target_index=1, ridge=ridge, repetition_index=repeat,
+                 residual_order='higher', secant_gate_passed=True, proposal_gate_passed=False,
+                 observation_wall_ns=10, observation_assembly_attempts=2)
+            for ridge in (1e4, 1e6) for repeat in range(3)]
+    result = module.summarize_rows(rows)
+    assert result['observations'] == 6
+    assert result['unique_case_target_pairs'] == 1
+    assert result['unique_case_target_ridge_pairs'] == 2
+    assert result['higher'] == result['secant_pass_proposal_fail'] == 6
+    assert result['lower'] == result['proposal_pass_secant_fail'] == 0
+    assert result['observation_assembly_attempts'] == 12
+    assert result['observation_wall_ns'] == 60
+    with pytest.raises(ValueError, match='duplicate residual'):
+        module.summarize_rows(rows + rows[:1])
+    assert module.summarize_rows([])['observations'] == 0
