@@ -1,0 +1,37 @@
+{
+  "result": {
+    "case_id": "train-b-amp150",
+    "counts": {
+      "capture": 0,
+      "guard": 12,
+      "proposal": 0
+    },
+    "exact_numerical_context_files": 26,
+    "fits": 0,
+    "guard_callback_wall_ns": 36460,
+    "guarded_path_wall_ns": 3836345162,
+    "independent_validation": false,
+    "repetitions": 1,
+    "report_hash": "sha256:79a203ba91fc02e3d4c8a65857c8549e89e2a70848d2a3c3ba1647ce8f44dd19",
+    "secant_path_wall_ns": 3786428551,
+    "source_revision": "453d8baba549815b03809e9c74752c0bdfc8e0cc",
+    "speedup_claim": false,
+    "trained_guard": false,
+    "whole_study_wall_ns": 18003949664,
+    "work": {
+      "core_calls": 52,
+      "linear_solves": 296,
+      "newton_iterations": 296
+    }
+  },
+  "process": {
+    "exit_code": 0,
+    "parent_wall_ns": 19942310131
+  },
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-guard-decline-eybx2vyt",
+    "files": 1312,
+    "bytes": 35480971,
+    "inventory_sha256": "b1238d27dcbe991af5ba541f693e35bd9df009850c972b0ad19006551c68c055"
+  }
+}

@@ -41,3 +41,27 @@ The combined diagnostic, learning, runtime-selection and iteration-cost suite
 passes **166 tests in 266.91 s**; Ruff passes. No trained guard or reserved evaluation has been executed. The existing
 full-path selector continues to retain secant. The nested seed complements and
 all 1,980 planned label comparisons remain a separate unfinished study.
+
+## Frozen full nonlinear decline probe
+
+Source `453d8baba549815b03809e9c74752c0bdfc8e0cc` executes the complete original
+B-amplitude-1.5 history with the retained twofold arithmetic profile and declared
+constant loading. The untrained guard declines all twelve targets. Instrumented
+counts are **12 guard calls, zero material captures and zero proposer calls**.
+All original full-history comparisons pass and 26 numerical/context files match
+the secant arm byte for byte. Reference, secant, guarded and fresh-reference
+paths total **52 core calls and 296 Newton iterations/linear solves**.
+
+Measured secant arm: **3.786428551 s**; guarded arm: **3.836345162 s**; guard
+callback total: **0.000036460 s**. This single fixed-order observation is slower
+for the guarded arm and does not establish a causal overhead estimate or a
+speedup. Whole-study time is **18.003949664 s**, enclosing process time
+**19.942310131 s**. Context/receipt I/O and all remaining costs stay included;
+the callback timer alone is not the cost of adding a guard.
+
+No fits, trained guard or reserved evaluation are performed. The original packet
+is `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-guard-decline-eybx2vyt`.
+All **1,312 payload files / 35,480,971 bytes** are hash/length verified; inventory
+SHA-256 `b1238d27dcbe991af5ba541f693e35bd9df009850c972b0ad19006551c68c055`.
+[Machine-readable receipt](rc-pre-capture-guard-20260920.summary.json) preserves
+the exact report hash, source revision, counts and separate time scopes.

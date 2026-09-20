@@ -341,3 +341,13 @@ All twenty attempted reuses of the old 132-sample policies are rejected because
 they contain 33 outer-group samples. No switching labels, trained gate, structural
 solves or reserved evaluations are added. The next implementation must support
 and time a pre-capture decision before evaluating a gate on complete paths.
+
+## Pre-capture guard implemented and checked
+
+The [opt-in timed guard](rc-pre-capture-guard-20260920.md) can decline before
+material capture and inference while preserving secant execution. Its 166-test
+combined suite passes. A frozen full nonlinear B case makes twelve guard calls,
+zero captures/proposals and exactly matches 26 secant numerical/context files;
+all full-history comparisons pass. The single guarded arm is slightly slower
+than secant, so no speed benefit is claimed. No trained switch or nested label
+comparison has yet executed; all original roadmap requirements remain open.
