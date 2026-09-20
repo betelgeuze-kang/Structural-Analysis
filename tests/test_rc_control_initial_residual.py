@@ -172,7 +172,9 @@ def runtime_observation(tmp_path, enabled=True):
     )
 
 
-def test_full_path_observation_keeps_actual_steps_and_charges_extra_work(tmp_path):
+def test_full_path_observation_keeps_actual_steps_and_charges_extra_work(
+    tmp_path, monkeypatch
+):
     report = runtime_observation(tmp_path / "observed")
     assert report["comparisons"]["proposal"]["full_history_pass"]
     arm = report["arms"]["proposal"]
@@ -182,6 +184,19 @@ def test_full_path_observation_keeps_actual_steps_and_charges_extra_work(tmp_pat
         if "initial_residual_observation" in entry
     ]
     assert len(observed) == 3
+    import importlib
+    from copy import deepcopy
+    from pathlib import Path
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    audit = importlib.import_module("audit_rc_pooled_runtime_campaign")
+    assert audit.require_observations(report, True)[0] == 6
+    damaged = deepcopy(report)
+    damaged["arms"]["proposal"]["entries"][1]["initial_residual_observation"][
+        "parent_hash"
+    ] = "wrong"
+    with pytest.raises(ValueError, match="parent or authority"):
+        audit.require_observations(damaged, True)
     assert sum(row["assembly_attempts"] for obs in observed for row in obs["rows"]) == 6
     assert arm["wall_ns"] > sum(obs["wall_ns"] for obs in observed)
     for index, entry in enumerate(arm["entries"]):

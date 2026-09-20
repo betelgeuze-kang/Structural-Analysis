@@ -52,6 +52,7 @@ def main():
     parser.add_argument('--source-revision', required=True)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--preflight-only', action='store_true')
+    parser.add_argument('--observe-initial-residuals', action='store_true')
     parser.add_argument('--fit-solver', choices=(learning.SVD_RIDGE_FIT_PROFILE,
                         learning.CONSTANT_SAFE_SVD_FIT_PROFILE),
                         default=learning.SVD_RIDGE_FIT_PROFILE)
@@ -69,6 +70,8 @@ def main():
     _save(root, 'plan.json', _bytes({
         'source_revision': args.source_revision,
         'fit_solver_profile': args.fit_solver,
+        'observe_initial_residuals': args.observe_initial_residuals,
+        'maximum_observation_assemblies': 1980 if args.observe_initial_residuals else 0,
         'input_inventories': {'old': PINS['labels'], 'new': NEW_INVENTORY},
         'source_sample_hashes': [s['sample_hash'] for s in samples],
         'groups': groups, 'ridge_grid': [1e4, 1e6], 'repetitions': 3,
@@ -95,6 +98,7 @@ def main():
         maximum_fits=31, maximum_core_calls=6840, arithmetic_profile=ARITHMETIC,
         withholding_strategy='connected_training_groups',
         proposal_abstention_strategy='secant', static_model_abstention=True,
+        observe_initial_residuals=args.observe_initial_residuals,
     )
     _save(root, 'outcome.json', _bytes({
         'selection_result_hash': result['result_hash'],

@@ -29,6 +29,39 @@ def require_fit_method(source, plan, policy):
             'predeclared fit method differs')
 
 
+def require_observations(report, enabled):
+    attempts = 0
+    wall_ns = 0
+    for name, arm in {**report['arms'], 'fresh-reference': report['fresh_reference']}.items():
+        for entry in arm['entries']:
+            expected = enabled and name == 'proposal' and entry['target_index'] > 0 and entry.get('proposal_decision') == 'proposed'
+            require(('initial_residual_observation' in entry) == expected,
+                    'initial observation coverage differs')
+            if not expected:
+                continue
+            obs = entry['initial_residual_observation']
+            require(obs['complete'] and obs['parent_unchanged'] and not obs['committed']
+                    and not obs['candidate_selected'] and obs['newton_solves'] == 0
+                    and obs['parent_hash'] == entry['parent_hash']
+                    and obs['target_m'] == entry['target_m'], 'initial observation parent or authority differs')
+            require([r['name'] for r in obs['rows']] == ['secant', 'proposal'],
+                    'initial observation candidate roster differs')
+            for row in obs['rows']:
+                require(row['status'] == 'observed' and not row['unknown_work']
+                        and row['assembly_attempts'] == 1
+                        and math.isfinite(row['relative_residual']) and row['relative_residual'] >= 0,
+                        'initial observation work or residual differs')
+                attempts += 1
+            require(obs['rows'][1]['initial_augmented_coordinates_m'] == entry['proposal'],
+                    'observed proposal differs from solver seed')
+            measured = entry['initial_residual_observation_wall_ns']
+            require(type(measured) is int and measured >= obs['wall_ns'] > 0,
+                    'initial observation timing differs')
+            wall_ns += measured
+    require(wall_ns <= report['arms']['proposal']['wall_ns'], 'observation exceeds path cost')
+    return attempts, wall_ns
+
+
 def audit(study, old_labels, new_labels):
     cases, samples, profile, groups, costs = inputs(old_labels, new_labels)
     source = read(study / 'plan.json')
@@ -38,6 +71,8 @@ def audit(study, old_labels, new_labels):
     outcome = read(study / 'outcome.json')
     pooled = learning.RCControlSeedPolicy((study / 'pooled-policy.json').read_text())
     require_fit_method(source, plan, pooled.to_dict())
+    require(source.get('observe_initial_residuals', False) is plan.get('observe_initial_residuals', False),
+            'residual observation plan differs')
     _, _, pooled_profile = _validated_training_data(samples, pooled)
     require(pooled_profile == profile, 'pooled metadata differs')
     require(source['input_inventories'] == {'old': PINS['labels'], 'new': NEW_INVENTORY},
@@ -74,6 +109,7 @@ def audit(study, old_labels, new_labels):
             'complete unique fold roster')
     work = dict.fromkeys(('core_calls', 'newton_iterations', 'linear_solves'), 0)
     proposed = abstained = 0
+    observation_assemblies = observation_wall_ns = 0
     gate_counts = {}
     case_counts = {}
     per_fold_arm_work = []
@@ -95,7 +131,12 @@ def audit(study, old_labels, new_labels):
                 not score['execution_work']['unknown_work'], 'incomplete fold')
         report = checked(root / stem / 'comparison.json', 'report_hash')
         require_report_binding(plan, f['withheld_training_case'], report)
+        count, duration = require_observations(report, source.get('observe_initial_residuals', False))
+        observation_assemblies += count
+        observation_wall_ns += duration
         require(report['arm_order'] == f['arm_order'], 'reported arm order differs')
+        require(('initial_residual_observation' in report) is source.get('observe_initial_residuals', False),
+                'residual observation report differs')
         require(report['report_hash'] == f['report_hash'] and
                 report['proposal_identity'] == p['policy_hash'], 'comparison binding')
         require(report['absolute_tolerance'] == 1e-10 and report['relative_tolerance'] == 1e-8
@@ -138,6 +179,8 @@ def audit(study, old_labels, new_labels):
                 gate['problem_contract_hash'] == report['compiled_problem_contract_hash'],
                 'static gate source binding')
         gate_counts[gate['status']] = gate_counts.get(gate['status'], 0) + 1
+    require(observation_assemblies <= source.get('maximum_observation_assemblies', 0),
+            'initial observation assembly budget exceeded')
     for candidate in result['candidates']:
         folds = [f for f in result['folds'] if f['ridge'] == candidate['ridge']]
         equal_case_mean = mean(mean(f['score']['proposal_over_secant_path_wall_ratio']
@@ -175,6 +218,8 @@ def audit(study, old_labels, new_labels):
         require(result['selected_policy'] is None, 'unexpected selected policy')
     return {'source_revision': result['source_revision'], 'selection_result_hash': result['result_hash'],
             'completed_folds': len(actual_roster), 'groups': groups, 'sample_count': 165,
+            'observation_assembly_attempts': observation_assemblies,
+            'observation_wall_ns': observation_wall_ns,
             'fold_work': work, 'proposed_count': proposed, 'abstained_count': abstained,
             'case_counts': case_counts, 'static_gate_counts': gate_counts,
             'per_fold_arm_work': per_fold_arm_work, 'candidates': result['candidates'],

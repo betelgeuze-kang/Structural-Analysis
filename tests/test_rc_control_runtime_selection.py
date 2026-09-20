@@ -1048,3 +1048,26 @@ def test_constant_safe_runtime_selection_refits_preserve_opt_in_profile(
     assert result["selected_strategy"] == "learned_svd"
     assert observed and set(observed) == {method}
     assert json.loads((root / "plan.json").read_text())["fit_solver_profile"] == method
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_initial_observation_option_reaches_every_fold(tmp_path, original, monkeypatch, enabled):
+    seen = []
+    real = learning.benchmark_rc_control_seed_paths
+    def observe(*args, **kwargs):
+        seen.append(kwargs.get('observe_initial_residuals', False))
+        return real(*args, **kwargs)
+    monkeypatch.setattr(learning, 'benchmark_rc_control_seed_paths', observe)
+    result = run(tmp_path / 'observed', original, ridge_grid=(1e4,),
+                 observe_initial_residuals=enabled)
+    assert seen == [enabled, enabled]
+    assert result.get('observe_initial_residuals', False) is enabled
+
+
+@pytest.mark.parametrize("enabled", [None, 1, 'true'])
+def test_initial_observation_option_rejects_before_fit(tmp_path, enabled):
+    with pytest.raises(ValueError, match='boolean initial residual'):
+        selection.run_rc_control_runtime_selection(None, None, None,
+            source_revision='a'*40, output_directory=tmp_path/'invalid',
+            ridge_grid=(1e4,), observe_initial_residuals=enabled)
+    assert not (tmp_path/'invalid').exists()
