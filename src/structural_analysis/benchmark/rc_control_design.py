@@ -278,6 +278,25 @@ def _reference_design_row(
             "api_status": payload["status"],
             "errors": validation["errors"],
         }
+        # A valid artifact may faithfully reproduce an incomplete original path.
+        # Preserve that distinction instead of making every block look like a
+        # mismatch introduced by fresh verification.
+        path = payload.get("path") or {}
+        failed = [attempt for attempt in path.get("attempts", ())
+                  if attempt.get("committed") is False]
+        if failed:
+            attempt = failed[-1]
+            work = attempt.get("solver_work") or {}
+            row["failure"]["original_analysis_path"] = {
+                "status": path.get("status"),
+                "accepted_targets_m": path.get("accepted_target_prefix_m"),
+                "failed_target_m": attempt.get("target_control_displacement_m"),
+                "solver_reason": work.get("terminal_reason"),
+                "relative_residual": work.get("relative_residual"),
+                "rollback_exact": attempt.get("rollback_exact"),
+                "parent_unchanged": attempt.get("parent_checkpoint_immutable"),
+                "artifact_contract_pass": validation.get("artifact_contract_pass"),
+            }
         return row
     history = payload["response_history"]
     if request.constant_nodal_loads:

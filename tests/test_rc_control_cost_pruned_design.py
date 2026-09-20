@@ -311,3 +311,28 @@ def test_campaign_all_failed_processes_still_finalize_every_planned_pair(
     assert request["targets_m"] == ([-0.01, -0.02, 0.01] if profile == "large-drift"
                                     else [-0.001, -0.002, 0.001])
     assert len(pairs) == 10
+
+
+def test_nonconverged_original_path_is_not_presented_as_a_new_replay_mismatch(tmp_path):
+    args = inputs()
+    args['baseline'] = design.apply_fiber_frame_section_changes(args['baseline'],
+        design.FiberFrameDesignCandidate('base', (design.FiberFrameSectionChange(
+            'RC1', width_m=0.32, top_bar_area_m2=0.00032, bottom_bar_area_m2=0.00042),)))
+    args['candidates'] = (design.FiberFrameDesignCandidate('cheap', (
+        design.FiberFrameSectionChange('RC1', top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00025),)),)
+    args['request'] = BoundedRCFiberDirectControlRequest(
+        4, (-0.02, -0.04, 0.02), allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(('N2', -600., 0., 0.),))
+    report = study.compare_rc_control_designs(**args, output_directory=tmp_path / 'study')
+    row = next(row for row in report['rows'] if row['candidate_id'] == 'cheap')
+    assert row['status'] == 'verification_blocked'
+    assert not row['selection_eligible'] and row['performance'] is None
+    diagnostic = row['failure']['original_analysis_path']
+    assert diagnostic['accepted_targets_m'] == [-0.02, -0.04]
+    assert diagnostic['failed_target_m'] == 0.02
+    assert diagnostic['solver_reason'] == 'line_search_failed_to_reduce_residual'
+    assert diagnostic['relative_residual'] > 0.1
+    assert diagnostic['rollback_exact'] and diagnostic['parent_unchanged']
+    assert diagnostic['artifact_contract_pass'] and row['failure']['errors'] == []
+    assert [i['phase'] for i in row['invocations']] == ['analysis', 'verification']
+    assert all(not i['unknown_execution_work'] for i in row['invocations'])
