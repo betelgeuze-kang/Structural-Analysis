@@ -1,7 +1,7 @@
-# Full-path follow-up after native fiber serialization
+# Completed full-path follow-up after native fiber serialization
 
 The [capture-only result](rc-native-fiber-serialization-20260920.md) does not
-establish whole-path benefit. A new complete pooled selection is running from
+establish whole-path benefit. The completed pooled selection ran from
 frozen revision `85af596ed47c1b47e002ac7619cb5c6bb8a308b2` to test the actual
 learned/secant decision after that implementation change.
 
@@ -26,7 +26,7 @@ The process was started as PID **222330**, observed through shell session
 because an observation wait expires. `process-started.json` identifies the
 launch. `process.json` will record terminal status and elapsed parent time.
 
-No final score or strategy exists at this record. The previous audited pooled
+At the original live observation, no final score or strategy existed. The previous audited pooled
 study remains negative for learned acceleration. The new outcome must be audited
 with `scripts/audit_rc_pooled_runtime_campaign.py` before interpretation. Its
 checks bind all 90 cases, full reference comparisons, group-excluded samples,
@@ -66,3 +66,47 @@ Python development job (64 test files). The workflow contract requires that
 registration while preserving the independent full-evidence gate. Workflow and
 equivalence verification passes 37 local tests. Hosted execution at the new
 revision is still required; current CI belongs to the earlier published source.
+
+
+## Completed outcome: secant retained
+
+The original process exits successfully and both complete audits pass. All
+90 comparisons and 360 full paths satisfy the original checks, with 594
+proposals, 486 abstentions, 4,680 core calls and 24,054 Newton iterations/linear
+solves. Whole-group exclusion retains exactly 132 complementary samples per
+fit. Thirty selection fits run; no winning-policy refit or promotion occurs.
+
+| Ridge | Equal-case learned/secant time ratio | Decision |
+| --- | ---: | --- |
+| 10,000 | 1.0159009887699129 | Rejected |
+| 1,000,000 | 1.0260307234552783 | Rejected |
+
+Neither meets the unchanged 1% benefit requirement. No active-proposal case is
+faster in all three repetitions. The sole consistently faster case is C-amp150
+with ridge 1,000,000, which has zero actual proposals and uses secant fallback.
+It is not evidence of an AI gain.
+
+The cross-revision audit verifies **4,680 step files, 360 preload responses and
+4,320 input contexts** byte-for-byte against the original sealed packet. Paired
+models, full requests, numerical contracts and policy hashes also agree. This
+confirms preserved numerical results for these cases, not independent physical
+validation or unseen-project generalization.
+
+Selection wall time is 1,487.722865550 seconds, enclosing driver time
+1,488.512145509 seconds, and outer process time 1,489.895826656 seconds. These
+nested times are not added together. Selection fits total 0.730356816 seconds;
+the separate pooled metadata fit takes 0.025703053 seconds. The original two
+label-study costs remain unchanged and separate. Reserved cases stay unexecuted.
+
+The old study's selection time was 1,634.134640853 seconds, but these historical
+runs were not interleaved across code versions or isolated from environmental
+variation. Their elapsed-time difference is an observation, not a controlled
+speedup claim. The authoritative within-run result remains **secant selected**.
+
+The [machine summary](rc-scalar-runtime-followup-20260920.summary.json) preserves
+all case-repeat scores, work and timing, the complete equivalence result, and the
+final packet inventory hash/size. Historical live observations and audit
+preparation records remain intact; no completed solve or fit was repeated to
+repair a report. Next work must address remaining proposal/capture cost or a
+better cost-aligned strategy, with fresh full-path validation for any change.
+All five roadmap completion requirements remain open.

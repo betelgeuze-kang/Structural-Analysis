@@ -230,3 +230,14 @@ live process and audit the completed result before revising the secant decision.
 and 814 frontend tests passing. All full Python shards remain blocked before
 actual test execution. Later scalar-serialization and audit changes require
 new-head CI; the frozen numerical follow-up continues separately.
+
+
+## Scalar follow-up completed without AI promotion
+
+The [new complete study](rc-scalar-runtime-followup-20260920.md) passes both
+full-runtime and cross-revision audits: 90 comparisons, 360 paths and 9,360 exact
+numerical/context file matches. Work remains 4,680 core calls and 24,054 Newton
+iterations. Learned/secant ratios are 1.015901 and 1.026031, so secant remains
+selected. No active-proposal case wins all three repeats, and no reserved
+validation or policy promotion occurs. Historical elapsed-time differences do
+not prove a controlled implementation speedup. All roadmap goals remain open.
