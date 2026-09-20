@@ -97,6 +97,8 @@ jobs:
           tests/test_rc_control_svd_fit.py
           tests/test_rc_control_model_selection.py
           tests/test_rc_control_training_diagnostics.py
+          tests/test_rc_runtime_cost_diagnostic.py
+          tests/test_rc_same_parent_probe_records.py
           tests/test_planar_steel_refinement_witness_audit.py
           tests/test_planar_concrete_localization_audit.py
           tests/test_planar_material_activity.py
