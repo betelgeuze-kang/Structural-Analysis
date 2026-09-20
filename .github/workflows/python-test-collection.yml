@@ -95,6 +95,7 @@ jobs:
           tests/test_rc_control_learning_split.py
           tests/test_rc_control_history_features.py
           tests/test_rc_control_svd_fit.py
+          tests/test_rc_control_initial_residual.py
           tests/test_rc_control_model_selection.py
           tests/test_rc_control_training_diagnostics.py
           tests/test_rc_runtime_cost_diagnostic.py
