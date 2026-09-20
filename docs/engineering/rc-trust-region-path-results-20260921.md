@@ -1,6 +1,6 @@
 # Complete-path reversal strategy: one model completes, references remain incomplete
 
-Frozen source `b9e767cc9b1c596aff86f140c2e0a2404cd3a065` ran all six predeclared comparisons / 24 attempted full paths. The width 0.48 m cheap proposal arm completes both orderings from the original input model through preload and every original target. Its two final accepted checkpoints agree exactly. The width 0.32 m cheap/middle proposal arms remain incomplete, as do every ordinary reference, secant and fresh-reference arm.
+Frozen source `b9e767cc9b1c596aff86f140c2e0a2404cd3a065` ran all six predeclared comparisons / 24 attempted full paths. The width 0.48 m cheap proposal arm completes both orderings from the original input model through preload and every original target. Its two final accepted checkpoints agree exactly. A subsequent direct comparison also confirms exact accepted response-history agreement for each model across the two orders. The width 0.32 m cheap/middle proposal arms remain incomplete, as do every ordinary reference, secant and fresh-reference arm.
 
 The proposal is computed from the live arm's accepted parent only at the original +20 mm reversal. The earlier prefix uses the ordinary initial guess. There is no retained-failure lookahead, hidden intermediate target, tolerance change or optimizer commit. Original Newton retains state acceptance and failed proposals retain their reference fallback attempts.
 
@@ -11,3 +11,5 @@ Every full-history comparison against the fresh ordinary reference correctly fai
 All six report hashes, roster, known native/optimizer work, repeat checkpoints and outcome counts were audited. The packet inventory covers 1,889 non-cache files, including archived committed source, reports, steps, driver and audit; every inventoried file was reread. Inventory SHA-256: `6b9315bd681cd6169af39080adf2c95826b26bf93c6fe2f754f0e5cfd2c1d334`. See the [summary](rc-trust-region-path-results-20260921.summary.json) for individual enclosing path clocks and source identity.
 
 A subsequent report-integrity fix makes `all_execution_work_reported` false when numerical proposals or initial-residual observations have unknown work, including thrown proposal failures. It does not alter the numerical kernel or these completed known-work records. Eighteen focused tests pass after that fix. The original 75-test suite covered the new strategy, warm-start contracts and workflow registration. Neither suite is an external-validation receipt.
+
+The additional actual large-reversal regression preserves the distinction between proposal completion and failed fresh-reference comparison; all six trust-region tests pass.

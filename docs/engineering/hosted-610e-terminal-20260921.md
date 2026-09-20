@@ -1,0 +1,7 @@
+# Hosted checks for 610e0c56c
+
+Exact source `610e0c56cb97baf3be7653f5d1fe9c79fa00e60f` finished its hosted runs. Python development job [106100242925](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/35519205270/job/106100242925) passes 1,980 tests in 955.10 seconds. Frontend job [106100184766](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/35519184613/job/106100184766) passes 814 tests in 18.9 minutes; frontend aggregate 106102960669 succeeds. Workflow-contract run 35519184582 and P0 run 35519184617 succeed.
+
+Repository Python run 35519205270 still concludes failure: collection succeeds, but all four full-suite shards fail `Materialize exact current-source test evidence`, before actual full-suite execution. Shard-2 job 106100242746 logs a blocked bounded planar external V&V matrix (technical 2/25, fresh technical 0, external engine 0, eligible 0) and blocked internal license due diligence (legal approval false). Ordinary CI run 35519184597 / job 106100184522 fails the same named preparation step. These observations do not establish that every failure has an identical root cause or that the full suite would pass.
+
+These receipts cover 610e only. Subsequent trust-region diagnostic documents, opt-in strategy implementation and unknown-work propagation are not covered by these hosted executions. Focused local tests and retained source-specific numerical studies are recorded separately; no independent validation, licensing, release or merge approval is inferred.
