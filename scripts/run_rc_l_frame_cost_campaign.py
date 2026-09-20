@@ -18,6 +18,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source-revision', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--material-boundary-screen', action='store_true',
+                        help='Post-hoc synthetic 8e-5 steel plastic strain screen; not design approval.')
     args = parser.parse_args()
     if not re.fullmatch('[0-9a-f]{40}', args.source_revision):
         raise ValueError('exact frozen source revision required')
@@ -36,7 +38,8 @@ def main():
                                                       'synthetic L-frame study; not a quote')),
         'terminal_limits': None,
         'history_limits': asdict(design.FiberFrameHistoryLimits(0.1, 0.02)),
-        'material_history_limits': asdict(design.FiberFrameMaterialHistoryLimits(0.05, 1, 1))}
+        'material_history_limits': asdict(design.FiberFrameMaterialHistoryLimits(
+            8e-5 if args.material_boundary_screen else 0.05, 1, 1))}
     artifacts = {}
     for name, value in {'model': case.model.canonical_payload(), 'request': request.to_dict(),
                         'experiment': experiment}.items():
@@ -46,6 +49,8 @@ def main():
         'orders': orders, 'case_id': 'known-l-frame-a', 'planned_process_count': 8,
         'public_cli_arithmetic': 'unchanged', 'retained_learning_arithmetic_used': False,
         'independent_geometry_or_project': False, 'newton_tolerances_changed': False,
+        'screen_selection': ('post-hoc synthetic limit from prior same-model observations; not independent evaluation'
+                             if args.material_boundary_screen else 'original broad synthetic screen'),
         'synthetic_design_screens': True, 'material_regime_requires_observation': True,
         'scope': 'complete CLI process includes input, all analyses, fresh verification and output; preparation, audit and review excluded'}))
     records = []
