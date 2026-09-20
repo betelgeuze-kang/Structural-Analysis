@@ -1,0 +1,251 @@
+{
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-tree-recorded-time-opxv8bp3",
+  "inventory_sha256": "0b24121acd9151d9484764608626740d1acb2b2dc3c10596419e7efff88e66eb",
+  "audit": {
+    "tree_inventory": "eb06c7a18a4e2a6100d24f3cfc3004878d11ad77870fd6d55a0bc3d8fdc62483",
+    "labels_inventory": "35fd7ed0e4552eb1a093bf1394e8bdcf5fbe694464761085c194a8f8ee88b4fb",
+    "verified_original_comparison_reports": 1980,
+    "unique_source_samples": 165,
+    "totals": [
+      {
+        "secant_ns": 182733107272,
+        "selected_mixture_ns": 182698159330,
+        "selected_savings_ns": 34947942,
+        "decisions": 660,
+        "proposals": 2,
+        "recorded_savings_fraction": 0.0001912512873104032
+      },
+      {
+        "secant_ns": 183337324421,
+        "selected_mixture_ns": 183305184061,
+        "selected_savings_ns": 32140360,
+        "decisions": 660,
+        "proposals": 2,
+        "recorded_savings_fraction": 0.0001753072381824208
+      },
+      {
+        "secant_ns": 183091805691,
+        "selected_mixture_ns": 183055937607,
+        "selected_savings_ns": 35868084,
+        "decisions": 660,
+        "proposals": 2,
+        "recorded_savings_fraction": 0.00019590218068269956
+      }
+    ],
+    "folds": [
+      {
+        "name": "outer-0-validation-1-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-0-validation-2-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-0-validation-3-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-0-validation-4-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-1-validation-0-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-1-validation-2-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-1-validation-3-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-1-validation-4-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-2-validation-0-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-2-validation-1-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          34947942,
+          32140360,
+          35868084
+        ]
+      },
+      {
+        "name": "outer-2-validation-3-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-2-validation-4-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-3-validation-0-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-3-validation-1-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-3-validation-2-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-3-validation-4-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-4-validation-0-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-4-validation-1-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-4-validation-2-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "outer-4-validation-3-prefix-tree",
+        "recorded_savings_ns_by_repeat": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "measured_offline_inference_calls_ns_for_one_660_decision_pass": 9822754,
+    "original_20_fit_ns": 1155721395,
+    "new_fits": 0,
+    "new_solves": 0,
+    "actual_switched_path": false,
+    "scope": "Post-hoc arithmetic mixture of retained same-parent step timings; overlapping folds, no state propagation or online guard/feature cost",
+    "promoted": false,
+    "audit_wall_ns": 596044819
+  },
+  "selected_report_cross_check": [
+    {
+      "case_id": "train-b-amp100",
+      "category": "false_positive",
+      "times": [
+        {
+          "report_hash": "sha256:09325f3779d19b58dc85cb660616dc7ed06013ada4dc2613c24028c6213c8f39",
+          "secant_ns": 222566422,
+          "proposal_ns": 227580874
+        },
+        {
+          "report_hash": "sha256:e2c0a3c06419592b05ae0ca72e586c4b4e121d334d96732fea9b0a3bc10a8ff8",
+          "secant_ns": 222523601,
+          "proposal_ns": 229168829
+        },
+        {
+          "report_hash": "sha256:4ada11da4d5084e30547488554c3fc799a79cd38008e694b1b00b7b0d2aff2ac",
+          "secant_ns": 223954301,
+          "proposal_ns": 227719328
+        }
+      ]
+    },
+    {
+      "case_id": "train-b-amp150",
+      "category": "true_positive",
+      "times": [
+        {
+          "report_hash": "sha256:b147431df242aa3d5f6d180f6dc75befbb93972d978df66d1429282932e8ab88",
+          "secant_ns": 319116023,
+          "proposal_ns": 279153629
+        },
+        {
+          "report_hash": "sha256:329dc91512a6b1e97e466798cfe2e4b32219b666d840e22bf035817bd48d6ef4",
+          "secant_ns": 318225486,
+          "proposal_ns": 279439898
+        },
+        {
+          "report_hash": "sha256:3cdea6e55b384bb32914ab9c05fa2d306437c1645bab203aab08af12787f35f0",
+          "secant_ns": 318672191,
+          "proposal_ns": 279039080
+        }
+      ]
+    }
+  ],
+  "independent_selected_arithmetic_check": true
+}
