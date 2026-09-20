@@ -110,3 +110,7 @@ preparation records remain intact; no completed solve or fit was repeated to
 repair a report. Next work must address remaining proposal/capture cost or a
 better cost-aligned strategy, with fresh full-path validation for any change.
 All five roadmap completion requirements remain open.
+
+The [post-run cost diagnosis](rc-scalar-runtime-costs-20260920.md) now separates
+remaining capture/proposal work and profiles repeated policy JSON parsing on
+one original parent. It changes no solver, policy, acceptance or selection.
