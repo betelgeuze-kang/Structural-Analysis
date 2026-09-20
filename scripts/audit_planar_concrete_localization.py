@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 
 from structural_analysis.api.frame3d_direct_control_request import (
@@ -33,7 +34,14 @@ def require(condition, message):
 
 
 def read_checked(path, digest, maximum_bytes=1024**3):
-    raw = path.read_bytes()
+    require(type(maximum_bytes) is int and maximum_bytes > 0,
+            "maximum_bytes must be a positive integer")
+    with path.open('rb') as stream:
+        size = os.fstat(stream.fileno()).st_size
+        require(0 < size <= maximum_bytes,
+                "JSON input is empty or exceeds maximum_bytes")
+        raw = stream.read(size + 1)
+    require(len(raw) == size, "source size changed during read")
     require(hashlib.sha256(raw).hexdigest() == digest, "source SHA-256 mismatch")
     return strict_json_object_bytes(raw, maximum_bytes=maximum_bytes)
 

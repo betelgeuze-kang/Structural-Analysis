@@ -105,6 +105,42 @@ def test_pinned_bytes_and_strict_duplicate_keys(tmp_path):
         read_checked(p, hashlib.sha256(p.read_bytes()).hexdigest())
 
 
+@pytest.mark.parametrize('limit', [True, 0, -1, 1.5, '16'])
+def test_invalid_file_limit_rejected_before_open(tmp_path, limit):
+    with pytest.raises(ValueError, match='positive integer'):
+        read_checked(tmp_path / 'missing.json', '0' * 64, maximum_bytes=limit)
+
+
+def test_oversized_file_rejected_without_reading_payload(tmp_path, monkeypatch):
+    import io
+
+    p = tmp_path / 'oversized.json'
+    p.write_bytes(b'{"value":12345}')
+
+    class UnreadablePayload(io.BufferedReader):
+        def read(self, *args):
+            pytest.fail('oversized payload was read')
+
+    monkeypatch.setattr(type(p), 'open', lambda self, mode: UnreadablePayload(io.FileIO(self, mode)))
+    with pytest.raises(ValueError, match='exceeds maximum_bytes'):
+        read_checked(p, '0' * 64, maximum_bytes=4)
+
+
+def test_exact_file_limit_and_changed_size(tmp_path, monkeypatch):
+    import os
+    from types import SimpleNamespace
+
+    p = tmp_path / 'source.json'
+    raw = b'{"value":1}'
+    p.write_bytes(raw)
+    digest = hashlib.sha256(raw).hexdigest()
+    assert read_checked(p, digest, maximum_bytes=len(raw)) == {'value': 1}
+    for stale_size in (len(raw) - 1, len(raw) + 1):
+        monkeypatch.setattr(os, 'fstat', lambda fd: SimpleNamespace(st_size=stale_size))
+        with pytest.raises(ValueError, match='source size changed'):
+            read_checked(p, digest, maximum_bytes=100)
+
+
 def test_path_requires_full_accepted_parent_chain():
     step = {
         "committed": True,
