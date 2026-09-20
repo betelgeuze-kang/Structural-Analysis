@@ -36,3 +36,12 @@ foreign material-parent/case rejection, source-table separation and refusal of
 unfinished campaign inputs before fitting. Ruff and whitespace checks pass.
 These are contract tests; the actual new label campaign has not yet completed,
 and this driver has not produced real validation results.
+
+After the shared material-index refactor, a read-only replay at source
+`b932ea92ed013f7584e98db4f941949c1d105b8a` reconstructs all five original
+material-cost training tables exactly and validates all five original strict
+policy identities. No fit or solve is repeated. The receipt is preserved at
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-material-table-refactor-audit-deboyth9`,
+inventory `267fc7edbf3eef0b94ddd33af53a490ab52d309ec8dff8a8db82c39c3b462c5e`.
+Observed replay time before output is 0.264723 s. The original 2-positive /
+25-false-positive result remains unchanged and unpromoted.
