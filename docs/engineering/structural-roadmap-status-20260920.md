@@ -252,3 +252,18 @@ path benefit. A [new frozen full-path study](rc-policy-runtime-followup-20260920
 has started with all 165 labels and 90 planned comparisons. First preparation
 cost is included; bounded cache reuse across repeats is explicit. The existing
 secant selection remains authoritative pending the complete audited outcome.
+
+## Policy reuse full-path result
+
+The [policy-reuse study](rc-policy-runtime-followup-20260920.md) completes all
+90 comparisons/360 paths and passes runtime, numerical-equivalence and cache
+accounting audits. All 9,360 numerical/context files match. Six cold parses and
+642 hits account for all 648 policy calls; 432 calls are bypassed by static gates.
+Overall learned/secant ratios remain 1.011963 and 1.021737, so secant remains
+selected. D-amp150 with ridge 10,000 is faster in all three repeats but its mean
+improvement is only about 0.96%, below the 1% rule; it is not a validated selector.
+No policy promotion, reserved evaluation or independent physics is supplied.
+
+[Hosted e2cb16ca8](hosted-e2cb-terminal-20260920.md) passes 1,713 development and
+814 frontend tests. Full Python shards still skip tests after evidence
+preparation fails. All five roadmap completion requirements remain open.
