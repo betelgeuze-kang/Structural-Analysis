@@ -1,6 +1,6 @@
 # Expanded retained-parent diagnostic preparation
 
-Status: prepared; numerical execution has not started.
+Status: running on frozen source; no final diagnostic outcome yet.
 
 The previous matched-parent study covered only the original B geometry family
 and older complementary policies. The new diagnostic includes **all B/D/E cases**
@@ -35,3 +35,14 @@ local seed effects and identify whether there is enough variation to investigate
 a switching policy. They cannot establish independent generalization, train a
 validated selector by themselves, be summed into an oracle full-history speedup,
 or replace full-path cost selection. Historical label/fit costs stay separate.
+
+## Frozen execution
+
+Source: `60e820c7d47f356a25f7a82d94c66ab861d2e38b`.
+Packet: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-expanded-parent-_ute9ly2`.
+The source manifest is generated from this Git revision and verified before
+both preflight and execution. Frozen preflight exits 0 with 198 pairs, three
+repetitions and zero solves/fits/reserved evaluations. The execution launcher
+starts only after the 512-layer solve and read-only comparison have both exited
+0. Its original source, plan, per-repetition receipts and any failures are retained.
+Do not treat partial receipts as a completed diagnostic or a learned-policy gain.

@@ -12,7 +12,7 @@ original workstreams remain open at their full scope.
 | Canonical RC changes, quantities and common prices | [Unequal reinforcement and canonical reanalysis](rc-unequal-outer-reinforcement-20260920.md), [outer centroid distances](rc-outer-centroid-distances-20260920.md), full accepted paths, fresh verification, member quantities and common declared prices reach original-artifact review. | Representative independently validated designs and authoritative quantity/price scope for commercial savings. Synthetic prices and verified internal calculations are not a construction quote or design approval. |
 | Learned warm starts with split and cost discipline | [Policy reuse full-path selection](rc-policy-runtime-followup-20260920.md): 90 comparisons/360 paths, five whole excluded groups, 165 labels and 9,360 exact numerical/context matches. Learned/secant ratios 1.011963 and 1.021737 retain secant. Six cold parses/642 cache hits are fully accounted for; earlier scalar and proposal-only improvements do not establish overall AI benefit. | A useful learned policy on sufficiently diverse excluded groups and untouched project/geometry/history evaluation, including labels, fits, inference and failures. One favorable local parent cannot establish a selector or a full-path oracle. Secant remains selected. |
 | Multifidelity selection and Workbench | Shortlist/ranking, full reanalysis, exhaustive comparison, cost optimality, errors and [strict cost exclusion delivery](rc-cost-pruned-search-delivery-20260920.md) reach desktop/mobile original-artifact review. Actual boundary violations are rejected by full analysis. | Useful learned decisions near meaningful feasibility boundaries on new cases with fixed budgets. The [four-case learned ranking](rc-reinforcement-cost-campaign-20260920.md) costs 2.01–2.06 times price order including training and selects the same candidates. |
-| Broader planar/sparse and later material/3D capability | [256-layer full-history study](planar-256-refinement-20260920.md): 40 targets complete, 400 bounded nodal/steel comparisons pass; concrete diagnostic failures decrease from 70/240 to 34/240. | Concrete material-field convergence still fails its screen (maximum tensile-damage difference 6.68%). [Error decomposition](planar-concrete-error-decomposition-20260920.md) motivates the [running 512-layer follow-up](planar-512-refinement-20260920.md), which has no completed comparison yet. Sparse speed, broader complete paths, independent physical verification and each new material/3D scope remain unproved. |
+| Broader planar/sparse and later material/3D capability | [512-layer full-history study](planar-512-refinement-20260920.md): 40 targets complete, 400 nodal/steel comparisons pass; concrete diagnostic failures decrease 70/240 → 34/240 → 27/240 across successive layer pairs. | Concrete material-field convergence still fails its screen (maximum tensile-damage difference 3.645%). Compression damage now passes, but all 27 remaining failures are tensile damage. Some secondary maxima increase and witnesses move; uniform convergence is not proved. Sparse speed, broader complete paths, independent physical verification and each new material/3D scope remain unproved. |
 
 ## Current integration and acceptance boundaries
 
@@ -306,3 +306,12 @@ preflights all 198 policy/parent pairs using the retained 165 labels and exact
 132-sample whole-group complements. No fits, solver calls or reserved evaluations
 are performed in preparation. Its 594 comparisons are not yet executed; launch
 must follow the live 512-layer solve to avoid competing numerical measurements.
+
+## 512-layer observation completed
+
+The [completed 512-layer study](planar-512-refinement-20260920.md) commits all 40
+targets, verifies all 466 packet files and completes the original 640-group audit
+without more solves. All 400 nodal/steel groups pass; 27/240 concrete groups fail,
+all tensile damage (maximum 3.645%). This narrows the remaining field discrepancy
+but does not close material convergence or independent physics. The prepared
+B/D/E matched-parent diagnostic starts only after the solve and comparison exit.
