@@ -25,13 +25,15 @@ not perform a merge, authenticate real supplemental signatures or waive exact
 combined-source checks. Rebuild the inventory against the eventual merged source;
 do not import historical hash values as current evidence.
 
-[Hosted 5585](hosted-5585-terminal-20260920.md) passed 1,677 Python development tests
-and 755 frontend tests, including the cost-attribution and immutable-resume tests
-in the development job. The later [Workbench registration correction](workbench-suite-registration-20260920.md)
-restores five previously omitted files and prevents silent future omissions;
-all 64 restored tests pass locally. Full Python shards remain blocked before
-actual tests by external replay/technical receipt preparation. Passing local or
-hosted development contracts is not full-suite or release completion.
+[Hosted 90cc](hosted-90cc-terminal-20260920.md) passed 1,677 Python development tests.
+Its frontend run executes 812 tests: 810 pass, but two L-frame cases exhaust their
+30-second budget at the final screenshot and fail. The subsequent correction
+gives those artifact-heavy browser cases a scoped 60-second budget without
+removing assertions or screenshots. The [Workbench registration correction](workbench-suite-registration-20260920.md)
+restores five previously omitted files and prevents silent future omissions.
+Full Python shards remain blocked before actual tests by external replay/technical
+receipt preparation. Passing local or hosted development contracts is not
+full-suite or release completion.
 
 Public experiment candidates retain unresolved geometry/material/channel or
 model-mechanism questions and their source-specific license boundaries. Software
@@ -40,6 +42,12 @@ experimental uncertainties. Independent validation, source rights, required
 hardware, owner/operator actions and signed acceptance remain separate.
 
 ## Next decisions
+
+The [material-boundary L-frame campaign](rc-l-frame-boundary-campaign-20260920.md)
+now verifies repeated rejection of a cheaper candidate after successful full
+analysis and fresh verification. Baseline remains selected; higher-cost excluded
+candidates retain unknown feasibility in the pruned report. This uses a post-hoc
+synthetic limit on the same model and is not independent design validation.
 
 The [all-coordinate material replay](planar-all-common-material-points-20260920.md)
 now covers 2,304 points and forty targets, exactly reproducing all 92,160 coarse
