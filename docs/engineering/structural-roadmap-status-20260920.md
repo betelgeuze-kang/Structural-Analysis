@@ -1,6 +1,6 @@
 # Structural Analysis roadmap: current evidence and completion requirements
 
-Current overview refreshed after development `406af087b` on 2026-09-20.
+Current overview refreshed on 2026-09-20; each numerical source below remains pinned.
 The chronological observations below retain their original status at execution.
 The evidence below retains each experiment's original source revision. A document
 refresh does not rerun those experiments or qualify the current head. All five
@@ -315,3 +315,20 @@ without more solves. All 400 nodal/steel groups pass; 27/240 concrete groups fai
 all tensile damage (maximum 3.645%). This narrows the remaining field discrepancy
 but does not close material convergence or independent physics. The prepared
 B/D/E matched-parent diagnostic starts only after the solve and comparison exit.
+
+## Hosted 31ca checks complete
+
+[Exact-source 31ca receipts](hosted-31ca-terminal-20260920.md) pass 1,744 Python
+development and 814 frontend tests. Full shards still fail during evidence
+preparation and skip actual tests. Later matched-parent changes need new-head
+checks; no independent or release acceptance is added by these receipts.
+
+## Expanded matched-parent outcome
+
+The [completed B/D/E diagnosis](rc-expanded-same-parent-probe-20260920.md) passes
+all 594 comparisons and verifies 21,159 packet files. Fourteen of 198 pairs are
+faster in all three repeats (B five, D seven, E two), all at ridge 10,000 with
+fewer Newton iterations. These are local retained-parent benefits, not full-path
+acceleration. There are no new fits or reserved evaluations. Any future switching
+rule needs pre-solve features, leakage-resistant label construction and complete
+path costs; the existing overall runtime selection continues to retain secant.
