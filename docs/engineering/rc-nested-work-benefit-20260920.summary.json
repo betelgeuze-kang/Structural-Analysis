@@ -1,0 +1,50 @@
+{
+  "pair_count": 660,
+  "all_pairs_by_work_relation": {
+    "equal": 546,
+    "reduced": 55,
+    "increased": 59
+  },
+  "positive_time_labels_by_work_relation": {
+    "reduced": 32
+  },
+  "negative_time_labels_by_work_relation": {
+    "equal": 546,
+    "increased": 59,
+    "reduced": 23
+  },
+  "new_fits": 0,
+  "new_solves": 0,
+  "reserved_evaluation": false,
+  "identical_work_proves_identical_runtime": false,
+  "independent_evaluation": false,
+  "full_path_speedup_claim": false,
+  "source_revision": "36a143f7a1a6d65ba0b4180a91ca4cf800106f6a",
+  "input_inventory_sha256": "35fd7ed0e4552eb1a093bf1394e8bdcf5fbe694464761085c194a8f8ee88b4fb",
+  "wall_ns_before_output": 105161435,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-nested-work-diagnostic-45ff57w7",
+  "inventory_sha256": "a2f1ed58e38ab91ad79496d54fc5da252d69b5cc4ec06c07ad63cdb310d3b8d3",
+  "verified_files": 1373,
+  "verified_bytes": 126232061,
+  "diagnostic_sha256": "ab0960deb89f7aa57d604b4fd71e54c219832ff0f0076f4740a29acec5cfcdf2",
+  "reduced_work_delta_counts": [
+    {
+      "core_calls": 0,
+      "newton_iterations": -1,
+      "linear_solves": -1,
+      "pairs": 51
+    },
+    {
+      "core_calls": 0,
+      "newton_iterations": -2,
+      "linear_solves": -2,
+      "pairs": 4
+    }
+  ],
+  "reduced_but_time_negative": {
+    "pairs": 23,
+    "all_proposed": 23,
+    "any_repeat_slowdown": 23,
+    "mean_faster_pairs": 4
+  }
+}
