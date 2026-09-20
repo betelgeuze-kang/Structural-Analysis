@@ -46,3 +46,23 @@ selection arithmetic and separate label/fit costs before reporting any outcome.
 Neither a partial favorable fold nor a lower coordinate error establishes the
 required full-path benefit. Existing secant selection remains authoritative
 until the complete new experiment supports a different result.
+
+## Auditor prepared during execution
+
+`scripts/audit_rc_pooled_runtime_campaign.py` now checks the full 90-fold roster,
+the 132-sample complementary policy identities for every held group, all four
+complete paths, the original comparison tolerances, static-gate identities and
+timing, invocation work and the equal-case selection score. It also binds each
+comparison directly to the plan's exact model, complete request and source
+revision, preventing a result from another case from satisfying the audit.
+Selection fits, the additional pooled fit and the two historical label-study
+costs retain separate receipts. The auditor runs no solver or fitting code.
+
+At auditor revision `ba340f66224e97dba1c2559920fd72e810369581`, focused timing and
+transplanted-case rejection checks pass **5 tests in 1.66 seconds**. The source,
+model and request binding check also passes on the first original completed
+comparison. The full audit has not run because the campaign is still live;
+16 completed fold receipts were observed at this point. This observation is
+not a final selection result or an efficacy claim. Auditor source copies and
+their hashes are preserved separately in the active packet's `audit-source`
+and `audit-preparation.json`, leaving the frozen numerical source unchanged.
