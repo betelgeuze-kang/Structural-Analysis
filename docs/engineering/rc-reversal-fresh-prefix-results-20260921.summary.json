@@ -1,0 +1,463 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reversal-fresh-prefix-re2yv3ru",
+  "inventory_sha256": "368bca15680f194447ece1d835caa6d3aeea9980363dfbf489c42d9f78d24c9b",
+  "file_count": 44,
+  "audit": {
+    "prefix_analyses": 6,
+    "prefix_core_calls": 18,
+    "prefix_newton_iterations": 84,
+    "optimizations": 6,
+    "native_solves": 6,
+    "accepted_terminal_count": 2,
+    "optimizer_assembly_attempts": 362,
+    "native_newton_iterations": 38,
+    "native_newton_assembly_dispatches": 228,
+    "all_parents_unchanged": true,
+    "repeat_checkpoint_agreement": true,
+    "unknown_invocation_work": false,
+    "public_full_path_validation": false,
+    "prefix_wall_ns": 1008373595,
+    "optimizer_wall_ns": 675447382,
+    "native_wall_ns": 424789141
+  },
+  "rows": [
+    {
+      "case": "w32-drift40",
+      "candidate": "cheap",
+      "repeat": 0,
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 97280637,
+          "metrics": {
+            "control_error_m": -0.0007709015441209194,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": false,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.3877130012506092,
+            "newton_iteration_count": 8,
+            "linear_solve_count": 8,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6",
+          "assembly_work": {
+            "schema_version": "vector-newton-assembly-dispatch-work.v1",
+            "scope": "vector_newton_problem_assembly_dispatches_only",
+            "call_count": 52,
+            "returned_count": 52,
+            "exception_count": 0,
+            "in_flight_count": 0,
+            "element_material_evaluations": null,
+            "outside_newton_assembly_calls": null,
+            "wall_ns": 93020502,
+            "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+            "solver_completion_inferred": false,
+            "physical_validation": false
+          }
+        }
+      ],
+      "prefix_wall_ns": 169499693,
+      "prefix_work": {
+        "attempted_step_count": 3,
+        "known_linear_solve_count": 14,
+        "known_newton_iteration_count": 14,
+        "unknown_solver_work_attempt_count": 0
+      },
+      "parent_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6",
+      "fresh_parent_matches_retained": true,
+      "optimizer_wall_ns": 145255291,
+      "optimizer_status": 3,
+      "optimizer_success": true,
+      "optimizer_message": "`xtol` termination condition is satisfied.",
+      "nfev": 51,
+      "njev": 25,
+      "seed": [
+        0.00572055385603226,
+        0.018865723060962646,
+        -0.06701487777514585,
+        -0.029240806397176067
+      ],
+      "residual_inf": 0.43307371215833146,
+      "assembly_counts": {
+        "fun": 51,
+        "jac": 25
+      },
+      "assembly_attempts": 76,
+      "parent_unchanged": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w32-drift40",
+      "candidate": "cheap",
+      "repeat": 1,
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 96922083,
+          "metrics": {
+            "control_error_m": -0.0007709015441209194,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": false,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.3877130012506092,
+            "newton_iteration_count": 8,
+            "linear_solve_count": 8,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6",
+          "assembly_work": {
+            "schema_version": "vector-newton-assembly-dispatch-work.v1",
+            "scope": "vector_newton_problem_assembly_dispatches_only",
+            "call_count": 52,
+            "returned_count": 52,
+            "exception_count": 0,
+            "in_flight_count": 0,
+            "element_material_evaluations": null,
+            "outside_newton_assembly_calls": null,
+            "wall_ns": 92530682,
+            "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+            "solver_completion_inferred": false,
+            "physical_validation": false
+          }
+        }
+      ],
+      "prefix_wall_ns": 170792730,
+      "prefix_work": {
+        "attempted_step_count": 3,
+        "known_linear_solve_count": 14,
+        "known_newton_iteration_count": 14,
+        "unknown_solver_work_attempt_count": 0
+      },
+      "parent_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6",
+      "fresh_parent_matches_retained": true,
+      "optimizer_wall_ns": 144585904,
+      "optimizer_status": 3,
+      "optimizer_success": true,
+      "optimizer_message": "`xtol` termination condition is satisfied.",
+      "nfev": 51,
+      "njev": 25,
+      "seed": [
+        0.00572055385603226,
+        0.018865723060962646,
+        -0.06701487777514585,
+        -0.029240806397176067
+      ],
+      "residual_inf": 0.43307371215833146,
+      "assembly_counts": {
+        "fun": 51,
+        "jac": 25
+      },
+      "assembly_attempts": 76,
+      "parent_unchanged": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w32-drift40",
+      "candidate": "middle",
+      "repeat": 0,
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 108719491,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.3165410871066594,
+            "newton_iteration_count": 10,
+            "linear_solve_count": 10,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da",
+          "assembly_work": {
+            "schema_version": "vector-newton-assembly-dispatch-work.v1",
+            "scope": "vector_newton_problem_assembly_dispatches_only",
+            "call_count": 60,
+            "returned_count": 60,
+            "exception_count": 0,
+            "in_flight_count": 0,
+            "element_material_evaluations": null,
+            "outside_newton_assembly_calls": null,
+            "wall_ns": 104234221,
+            "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+            "solver_completion_inferred": false,
+            "physical_validation": false
+          }
+        }
+      ],
+      "prefix_wall_ns": 170046341,
+      "prefix_work": {
+        "attempted_step_count": 3,
+        "known_linear_solve_count": 14,
+        "known_newton_iteration_count": 14,
+        "unknown_solver_work_attempt_count": 0
+      },
+      "parent_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da",
+      "fresh_parent_matches_retained": true,
+      "optimizer_wall_ns": 150869082,
+      "optimizer_status": 3,
+      "optimizer_success": true,
+      "optimizer_message": "`xtol` termination condition is satisfied.",
+      "nfev": 54,
+      "njev": 28,
+      "seed": [
+        0.005379517370098608,
+        0.017810084230061408,
+        -0.06269292428942319,
+        -0.03808963839554181
+      ],
+      "residual_inf": 0.5069349196196754,
+      "assembly_counts": {
+        "fun": 54,
+        "jac": 28
+      },
+      "assembly_attempts": 82,
+      "parent_unchanged": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w32-drift40",
+      "candidate": "middle",
+      "repeat": 1,
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 108808284,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.3165410871066594,
+            "newton_iteration_count": 10,
+            "linear_solve_count": 10,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da",
+          "assembly_work": {
+            "schema_version": "vector-newton-assembly-dispatch-work.v1",
+            "scope": "vector_newton_problem_assembly_dispatches_only",
+            "call_count": 60,
+            "returned_count": 60,
+            "exception_count": 0,
+            "in_flight_count": 0,
+            "element_material_evaluations": null,
+            "outside_newton_assembly_calls": null,
+            "wall_ns": 104317456,
+            "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+            "solver_completion_inferred": false,
+            "physical_validation": false
+          }
+        }
+      ],
+      "prefix_wall_ns": 165151436,
+      "prefix_work": {
+        "attempted_step_count": 3,
+        "known_linear_solve_count": 14,
+        "known_newton_iteration_count": 14,
+        "unknown_solver_work_attempt_count": 0
+      },
+      "parent_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da",
+      "fresh_parent_matches_retained": true,
+      "optimizer_wall_ns": 150606751,
+      "optimizer_status": 3,
+      "optimizer_success": true,
+      "optimizer_message": "`xtol` termination condition is satisfied.",
+      "nfev": 54,
+      "njev": 28,
+      "seed": [
+        0.005379517370098608,
+        0.017810084230061408,
+        -0.06269292428942319,
+        -0.03808963839554181
+      ],
+      "residual_inf": 0.5069349196196754,
+      "assembly_counts": {
+        "fun": 54,
+        "jac": 28
+      },
+      "assembly_attempts": 82,
+      "parent_unchanged": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w48-drift40",
+      "candidate": "cheap",
+      "repeat": 0,
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "ready",
+          "committed": true,
+          "wall_ns": 6499217,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": true,
+            "control_gate_passed": true,
+            "solver_contract_pass": true,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": null,
+            "committed": true
+          },
+          "solver_metrics": {
+            "terminal_reason": "residual_and_increment_converged",
+            "relative_residual": 9.473903143468002e-16,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": true
+          },
+          "checkpoint_hash": "sha256:50d646cb33ae534458bcbde93aad236c16e3dc362d16709013f05392299bf38f",
+          "assembly_work": {
+            "schema_version": "vector-newton-assembly-dispatch-work.v1",
+            "scope": "vector_newton_problem_assembly_dispatches_only",
+            "call_count": 2,
+            "returned_count": 2,
+            "exception_count": 0,
+            "in_flight_count": 0,
+            "element_material_evaluations": null,
+            "outside_newton_assembly_calls": null,
+            "wall_ns": 3447032,
+            "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+            "solver_completion_inferred": false,
+            "physical_validation": false
+          }
+        }
+      ],
+      "prefix_wall_ns": 166511055,
+      "prefix_work": {
+        "attempted_step_count": 3,
+        "known_linear_solve_count": 14,
+        "known_newton_iteration_count": 14,
+        "unknown_solver_work_attempt_count": 0
+      },
+      "parent_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2",
+      "fresh_parent_matches_retained": true,
+      "optimizer_wall_ns": 42003495,
+      "optimizer_status": 3,
+      "optimizer_success": true,
+      "optimizer_message": "`xtol` termination condition is satisfied.",
+      "nfev": 12,
+      "njev": 11,
+      "seed": [
+        0.0016413152793326865,
+        0.02,
+        0.024814896168959624,
+        -0.013295140343823893
+      ],
+      "residual_inf": 9.473903143468002e-16,
+      "assembly_counts": {
+        "fun": 12,
+        "jac": 11
+      },
+      "assembly_attempts": 23,
+      "parent_unchanged": true,
+      "locally_accepted": true
+    },
+    {
+      "case": "w48-drift40",
+      "candidate": "cheap",
+      "repeat": 1,
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "ready",
+          "committed": true,
+          "wall_ns": 6559429,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": true,
+            "control_gate_passed": true,
+            "solver_contract_pass": true,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": null,
+            "committed": true
+          },
+          "solver_metrics": {
+            "terminal_reason": "residual_and_increment_converged",
+            "relative_residual": 9.473903143468002e-16,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": true
+          },
+          "checkpoint_hash": "sha256:50d646cb33ae534458bcbde93aad236c16e3dc362d16709013f05392299bf38f",
+          "assembly_work": {
+            "schema_version": "vector-newton-assembly-dispatch-work.v1",
+            "scope": "vector_newton_problem_assembly_dispatches_only",
+            "call_count": 2,
+            "returned_count": 2,
+            "exception_count": 0,
+            "in_flight_count": 0,
+            "element_material_evaluations": null,
+            "outside_newton_assembly_calls": null,
+            "wall_ns": 3496993,
+            "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+            "solver_completion_inferred": false,
+            "physical_validation": false
+          }
+        }
+      ],
+      "prefix_wall_ns": 166372340,
+      "prefix_work": {
+        "attempted_step_count": 3,
+        "known_linear_solve_count": 14,
+        "known_newton_iteration_count": 14,
+        "unknown_solver_work_attempt_count": 0
+      },
+      "parent_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2",
+      "fresh_parent_matches_retained": true,
+      "optimizer_wall_ns": 42126859,
+      "optimizer_status": 3,
+      "optimizer_success": true,
+      "optimizer_message": "`xtol` termination condition is satisfied.",
+      "nfev": 12,
+      "njev": 11,
+      "seed": [
+        0.0016413152793326865,
+        0.02,
+        0.024814896168959624,
+        -0.013295140343823893
+      ],
+      "residual_inf": 9.473903143468002e-16,
+      "assembly_counts": {
+        "fun": 12,
+        "jac": 11
+      },
+      "assembly_attempts": 23,
+      "parent_unchanged": true,
+      "locally_accepted": true
+    }
+  ]
+}
