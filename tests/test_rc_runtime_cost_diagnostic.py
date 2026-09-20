@@ -607,6 +607,42 @@ def test_inner_gate_validation_rejects_hidden_seed_training_leakage(monkeypatch,
         module.require_fold_seed_exclusions(plan, fold, {row['sample_hash']: row['case_id'] for row in samples})
 
 
+def test_nested_label_campaign_profiles_keep_original_scope_and_new_cost_budget(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('run_rc_nested_switch_labels')
+    old, new = module.campaign_definition(), module.campaign_definition(True)
+    assert (old['pairs'], old['comparisons'], old['single_target_paths'], old['maximum_core_calls']) == (660, 1980, 7920, 11880)
+    assert (new['pairs'], new['comparisons'], new['single_target_paths'], new['maximum_core_calls']) == (990, 2970, 11880, 17820)
+    assert old['seed_pin'] != new['seed_pin']
+    assert old['identity_fields'] == ('outer_group_index', 'inner_group_index')
+    assert new['identity_fields'] == ('label_group_index',)
+    with pytest.raises(ValueError, match='explicit campaign selection'):
+        module.campaign_definition(1)
+
+
+@pytest.mark.parametrize('mutation', ['profile', 'inventory', 'budget'])
+def test_nested_label_audit_rejects_cross_campaign_metadata_before_parent_reads(monkeypatch, tmp_path, mutation):
+    import json
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_nested_switch_labels')
+    spec = module.campaign_definition(True)
+    plan = dict(campaign_profile=module.INNER_CAMPAIGN, repetitions=3,
+                source_inventories=dict(old=module.PINS['labels'], new=module.NEW_INVENTORY, seeds=spec['seed_pin']),
+                maximum_core_calls=spec['maximum_core_calls'], new_fits=0,
+                reserved_evaluation=False, complete_path_claim=False)
+    if mutation == 'profile':
+        plan['campaign_profile'] = 'unknown'
+    elif mutation == 'inventory':
+        plan['source_inventories']['seeds'] = module.campaign_definition()['seed_pin']
+    else:
+        plan['maximum_core_calls'] = module.campaign_definition()['maximum_core_calls']
+    (tmp_path / 'plan.json').write_text(json.dumps(plan))
+    (tmp_path / 'outcome.json').write_text('{}')
+    monkeypatch.setattr(module, 'prepare', lambda *args, **kwargs: pytest.fail('invalid campaign read parents'))
+    with pytest.raises(ValueError):
+        module.audit(tmp_path)
+
+
 @pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'outer_case', 'seed', 'label', 'nonfinite'])
 def test_gate_training_rows_reject_transplanted_or_incomplete_inputs(monkeypatch, mutation):
     module, audit, plan = gate_row_fixture(monkeypatch)

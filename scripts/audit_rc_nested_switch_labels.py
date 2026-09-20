@@ -14,7 +14,10 @@ from audit_rc_expanded_same_parent_probe import (
     require_original_artifact,
     require_work_counters,
 )
-from run_rc_nested_switch_labels import prepare, LABEL_RULE, retained_seed_cost
+from run_rc_nested_switch_labels import (
+    prepare, LABEL_RULE, retained_seed_cost, campaign_definition, INNER_CAMPAIGN,
+    PINS, NEW_INVENTORY,
+)
 from structural_analysis.benchmark.rc_control_design import _bytes
 
 
@@ -57,28 +60,35 @@ def label_from_repetitions(repeats):
 def audit(root):
     plan = read(root / "plan.json")
     outcome = read(root / "outcome.json")
+    require(plan.get("campaign_profile") in (None, INNER_CAMPAIGN), "known label campaign required")
+    inner_validation = plan.get("campaign_profile") == INNER_CAMPAIGN
+    spec = campaign_definition(inner_validation)
+    require(plan["source_inventories"] == dict(old=PINS["labels"], new=NEW_INVENTORY,
+                                              seeds=spec["seed_pin"]),
+            "original campaign inventory binding required")
     require(
         plan["repetitions"] == 3
-        and plan["maximum_core_calls"] == 11880
+        and plan["maximum_core_calls"] == spec["maximum_core_calls"]
         and plan["new_fits"] == 0
         and plan["reserved_evaluation"] is False
         and plan["complete_path_claim"] is False,
         "fixed probe scope",
     )
     prepared, roster, objects, costs = prepare(
-        *(Path(plan["source_roots"][key]) for key in ("old", "new", "seeds"))
+        *(Path(plan["source_roots"][key]) for key in ("old", "new", "seeds")),
+        inner_validation=inner_validation,
     )
     require(
         plan["roster"] == roster and plan["historical_label_costs_separate"] == costs,
         "original complete complementary-group input binding",
     )
     require(
-        len(roster) == 660 and len(outcome["records"]) == 1980,
+        len(roster) == spec["pairs"] and len(outcome["records"]) == spec["comparisons"],
         "complete declared roster",
     )
     require(
         {(r["pair_index"], r["repetition"]) for r in outcome["records"]}
-        == {(p, r) for p in range(660) for r in range(3)},
+        == {(p, r) for p in range(spec["pairs"]) for r in range(3)},
         "unique complete reports",
     )
     require(
@@ -88,7 +98,7 @@ def audit(root):
     require(plan["label_rule"] == LABEL_RULE, "predeclared label rule required")
     require(
         plan["historical_seed_costs_separate"]
-        == retained_seed_cost(Path(plan["source_roots"]["seeds"])),
+        == retained_seed_cost(Path(plan["source_roots"]["seeds"]), inner_validation=inner_validation),
         "original seed fitting costs required",
     )
     cache_accounting(roster, outcome["cache_after"])
@@ -227,9 +237,9 @@ def audit(root):
     return {
         "source_revision": plan["source_revision"],
         "pairs": rows,
-        "report_count": 1980,
+        "report_count": spec["comparisons"],
         "retained_report_count": 0,
-        "new_report_count": 1980,
+        "new_report_count": spec["comparisons"],
         "label_counts": {
             name: sum(row["label_result"]["label"] is value for row in rows)
             for name, value in (
@@ -255,7 +265,8 @@ def audit(root):
         "complete_path_speedup_claim": False,
         "independent_evaluation": False,
         "new_fits": 0,
-        "scope": "nested development labels; whole outer and inner groups excluded from seed fitting; no fitted gate or independent generalization",
+        "scope": "three-group-excluded development labels for additional inner gate validation; no fitted gate or independent generalization"
+        if inner_validation else "nested development labels; whole outer and inner groups excluded from seed fitting; no fitted gate or independent generalization",
     }
 
 
