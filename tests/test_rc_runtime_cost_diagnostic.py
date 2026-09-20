@@ -138,3 +138,46 @@ def test_expanded_parent_audit_requires_known_integer_work(monkeypatch, value):
     module.require_work_counters({'core_calls': 1, 'newton_iterations': 4, 'linear_solves': 4})
     with pytest.raises(ValueError, match='integer work'):
         module.require_work_counters({'core_calls': value, 'newton_iterations': 4, 'linear_solves': 4})
+
+
+def nested_fixture():
+    import hashlib
+    groups = [[f'{group}-{amp}' for amp in range(3)] for group in 'abcde']
+    samples = [{'case_id': case, 'split': 'train',
+                'sample_hash': 'sha256:' + hashlib.sha256(f'{case}-{i}'.encode()).hexdigest()}
+               for group in groups for case in group for i in range(11)]
+    return groups, samples
+
+
+def test_nested_switch_labels_reject_single_exclusion_policy(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('prepare_rc_nested_switch_labels')
+    groups, samples = nested_fixture()
+    plan = module.nested_plan(groups, samples)
+    assert len(plan['seed_fits']) == 10 and len(plan['label_tasks']) == 20
+    assert all(len(fit['training_sample_hashes']) == 99 for fit in plan['seed_fits'])
+    fit = plan['seed_fits'][0]
+    policy = {'training_sample_hashes': fit['training_sample_hashes']}
+    module.validate_seed_training_hashes(policy, fit)
+    old_policy = {'training_sample_hashes': [s['sample_hash'] for s in samples if s['case_id'] not in groups[1]]}
+    assert len(old_policy['training_sample_hashes']) == 132
+    with pytest.raises(ValueError, match='both outer and inner'):
+        module.validate_seed_training_hashes(old_policy, fit)
+    assert module.nested_plan(list(reversed(groups)), list(reversed(samples))) == plan
+
+
+@pytest.mark.parametrize('damage', ['overlap', 'duplicate', 'reserved', 'missing_case'])
+def test_nested_switch_plan_rejects_ambiguous_training_provenance(monkeypatch, damage):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('prepare_rc_nested_switch_labels')
+    groups, samples = nested_fixture()
+    if damage == 'overlap':
+        groups[-1].append(groups[0][0])
+    elif damage == 'duplicate':
+        samples.append(samples[0])
+    elif damage == 'reserved':
+        samples[0]['split'] = 'evaluation'
+    else:
+        samples = [s for s in samples if s['case_id'] != groups[0][0]]
+    with pytest.raises(ValueError):
+        module.nested_plan(groups, samples)
