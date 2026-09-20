@@ -102,6 +102,9 @@ jobs:
           tests/test_rc_same_parent_probe_records.py
           tests/test_planar_steel_refinement_witness_audit.py
           tests/test_planar_concrete_localization_audit.py
+          tests/test_planar_1024_witness_probe.py
+          tests/test_planar_path_artifact_writer.py
+          tests/test_planar_path_artifact_reader.py
           tests/test_planar_material_activity.py
           tests/test_rc_control_runtime_selection.py
           tests/test_rc_control_step_work.py
