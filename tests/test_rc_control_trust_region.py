@@ -18,7 +18,7 @@ def run(tmp_path, **options):
             7, (-1e-6, -2e-6, -1.5e-6), allow_reversals=True, maximum_reversals=1,
         ),
         source_revision="a" * 40, output_directory=tmp_path / "study",
-        trust_region_reversal=True, **options,
+        trust_region_reversal=not options.get('frozen_parent_continuation', False), **options,
     )
 
 
@@ -70,14 +70,22 @@ def test_conflicting_strategy_rejected_before_output(tmp_path, options):
     assert not (tmp_path / 'study').exists()
 
 
-def test_large_reversal_completes_proposal_without_crediting_failed_reference(tmp_path):
+@pytest.mark.parametrize('width,top,bottom,strategy', [
+    (0.48, 0.0002, 0.00025, 'trust_region_reversal'),
+    (0.32, 0.0002, 0.00025, 'frozen_parent_continuation'),
+    (0.32, 0.0003, 0.0004, 'frozen_parent_continuation'),
+    (0.48, 0.0002, 0.00025, 'frozen_parent_continuation'),
+])
+def test_large_reversal_completes_proposal_without_crediting_failed_reference(
+    tmp_path, width, top, bottom, strategy,
+):
     from structural_analysis.benchmark import fiber_frame_design as design
 
     model = design.apply_fiber_frame_section_changes(
         load_neutral_json(Path('examples/public_rc_fiber_frame_cantilever.json')),
         design.FiberFrameDesignCandidate('cheap', (
             design.FiberFrameSectionChange(
-                'RC1', width_m=0.48, top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00025,
+                'RC1', width_m=width, top_bar_area_m2=top, bottom_bar_area_m2=bottom,
             ),
         )),
     )
@@ -87,7 +95,7 @@ def test_large_reversal_completes_proposal_without_crediting_failed_reference(tm
             constant_nodal_loads=(('N2', -600., 0., 0.),),
         ),
         source_revision='a' * 40, output_directory=tmp_path / 'large',
-        trust_region_reversal=True,
+        **{strategy: True},
     )
     assert report['arms']['proposal']['status'] == 'complete'
     assert report['arms']['proposal']['accepted_target_count'] == 3
@@ -101,3 +109,51 @@ def test_large_reversal_completes_proposal_without_crediting_failed_reference(tm
     assert last['numerical_proposal']['parent_unchanged']
     assert last['invocations'][0]['committed']
     assert last['invocations'][0]['work']['core_calls'] == 1
+
+    if strategy == 'frozen_parent_continuation':
+        import json
+        from structural_analysis.benchmark.rc_control_design import _sha
+
+        work = report['numerical_proposal_work']
+        assert work['native_core_calls_attempted'] == 16
+        assert work['known_newton_iterations'] > 16 and not work['unknown_work']
+        numerical = last['numerical_proposal']
+        assert not numerical['intermediate_material_checkpoints_adopted']
+        assert len(numerical['stages']) == 16
+        parents = []
+        for stage in numerical['stages']:
+            ref = stage['artifact']
+            raw = (tmp_path / 'large/proposal' / ref['path']).read_bytes()
+            assert _sha(raw) == ref['sha256'] and len(raw) == ref['byte_length']
+            record = json.loads(raw)
+            parents.append(record['parent_checkpoint'])
+            assert record['committed'] and stage['parent_hash'] == last['parent_hash']
+        assert all(parent == parents[0] for parent in parents)
+
+
+def test_continuation_interruption_retains_known_stages_and_unknown_attempt(tmp_path, monkeypatch):
+    from structural_analysis.benchmark import rc_control_frozen_continuation as module
+
+    original = module.solve_stateful_fiber_frame2d_displacement_control_step
+    calls = []
+
+    def interrupted(problem, parent, **options):
+        calls.append(parent.canonical_bytes())
+        if len(calls) == 2:
+            raise RuntimeError('injected second trial interruption')
+        return original(problem, parent, **options)
+
+    monkeypatch.setattr(module, 'solve_stateful_fiber_frame2d_displacement_control_step', interrupted)
+    report = run(tmp_path, frozen_parent_continuation=True)
+    assert calls[0] == calls[1]
+    assert not report['all_execution_work_reported']
+    work = report['numerical_proposal_work']
+    assert work['unknown_work'] and work['native_core_calls_attempted'] == 2
+    assert work['known_newton_iterations'] > 0
+    arm = report['arms']['proposal']
+    assert arm['status'] == 'incomplete' and arm['accepted_target_count'] == 2
+    last = arm['entries'][-1]
+    assert not last['invocations']
+    stages = last['numerical_proposal']['stages']
+    assert not stages[0]['unknown_work'] and stages[1]['unknown_work']
+    assert stages[0]['artifact']

@@ -52,6 +52,10 @@ from structural_analysis.benchmark.rc_control_trust_region import (
     TrustRegionReversalProposal,
     TRUST_REGION_REVERSAL_IDENTITY,
 )
+from structural_analysis.benchmark.rc_control_frozen_continuation import (
+    FrozenParentContinuationProposal,
+    FROZEN_CONTINUATION_IDENTITY,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.assembly_work import (
     VectorAssemblyWorkRecorder,
@@ -485,8 +489,16 @@ def _path(
         pw, pc = perf_counter_ns(), process_time_ns()
         try:
             numerical = None
-            if strategy == "proposal" and isinstance(proposal, TrustRegionReversalProposal):
-                numerical = proposal.propose(compiled.problem, accepted, request, context)
+            if strategy == "proposal" and isinstance(proposal, (TrustRegionReversalProposal, FrozenParentContinuationProposal)):
+                if isinstance(proposal, FrozenParentContinuationProposal):
+                    numerical = proposal.propose(
+                        compiled.problem, accepted, request, context,
+                        artifact_sink=lambda stage, payload: _save(
+                            root, f"{index:03d}-continuation-{stage:03d}.json", _bytes(payload)
+                        ),
+                    )
+                else:
+                    numerical = proposal.propose(compiled.problem, accepted, request, context)
                 entry["numerical_proposal"] = numerical
                 if numerical["unknown_work"]:
                     failure = {"phase": "numerical_proposal", "kind": "unknown_work",
@@ -523,7 +535,7 @@ def _path(
                 ).initial_augmented_coordinates_m
             entry["proposal"] = None if seed is None else list(seed)
         except Exception as exc:
-            if isinstance(proposal, TrustRegionReversalProposal):
+            if isinstance(proposal, (TrustRegionReversalProposal, FrozenParentContinuationProposal)):
                 failure = {"phase": "numerical_proposal", "kind": type(exc).__name__,
                            "target_index": index, "unknown_work": True}
             entry["proposal_error"] = {
@@ -1081,6 +1093,7 @@ def benchmark_rc_control_seed_paths(
     record_assembly_timing: bool = False,
     observe_initial_residuals: bool = False,
     trust_region_reversal: bool = False,
+    frozen_parent_continuation: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -1091,13 +1104,20 @@ def benchmark_rc_control_seed_paths(
     started, started_cpu = perf_counter_ns(), process_time_ns()
     if type(trust_region_reversal) is not bool:
         raise ValueError("explicit boolean trust-region reversal option required")
-    if trust_region_reversal:
+    if type(frozen_parent_continuation) is not bool:
+        raise ValueError("explicit boolean frozen-parent continuation option required")
+    if trust_region_reversal and frozen_parent_continuation:
+        raise ValueError("one numerical reversal strategy required")
+    if trust_region_reversal or frozen_parent_continuation:
         if (proposal is not None or proposal_identity is not None or
                 proposal_guard is not None or proposal_abstention_strategy != "reference" or
                 coordinate_precision != "binary64"):
             raise ValueError("isolated binary64 trust-region reversal strategy required")
-        proposal = TrustRegionReversalProposal()
-        proposal_identity = _sha(_bytes({"profile": TRUST_REGION_REVERSAL_IDENTITY}))
+        proposal = (TrustRegionReversalProposal() if trust_region_reversal
+                    else FrozenParentContinuationProposal())
+        numerical_identity = (TRUST_REGION_REVERSAL_IDENTITY if trust_region_reversal
+                              else FROZEN_CONTINUATION_IDENTITY)
+        proposal_identity = _sha(_bytes({"profile": numerical_identity}))
     if type(observe_initial_residuals) is not bool or (
         observe_initial_residuals and proposal is None
     ):
@@ -1371,9 +1391,9 @@ def benchmark_rc_control_seed_paths(
         "absolute_tolerance": absolute_tolerance,
         "relative_tolerance": relative_tolerance,
     }
-    if trust_region_reversal:
+    if trust_region_reversal or frozen_parent_continuation:
         identity["numerical_proposal"] = {
-            "identity": TRUST_REGION_REVERSAL_IDENTITY,
+            "identity": numerical_identity,
             "trigger": "accepted_direction_reversal",
             "cost_included_in_path_wall": True,
             "optimizer_assemblies_separate_from_newton_dispatches": True,
@@ -1565,6 +1585,19 @@ def benchmark_rc_control_seed_paths(
             "design_approval": False,
         },
     }
+    if trust_region_reversal or frozen_parent_continuation:
+        observations = [entry["numerical_proposal"]
+                        for arm in (*arms.values(), fresh) for entry in arm["entries"]
+                        if "numerical_proposal" in entry]
+        report["numerical_proposal_work"] = {
+            "scope": "additional proposal work, separate from path invocation work",
+            "native_core_calls_attempted": sum(o.get("native_core_calls_attempted", 0) for o in observations),
+            "known_newton_iterations": sum(o.get("known_newton_iterations", 0) for o in observations),
+            "known_linear_solves": sum(o.get("known_linear_solves", 0) for o in observations),
+            "optimizer_assembly_attempts": sum(o.get("assembly_attempts", 0) for o in observations),
+            "unknown_work": any(o["unknown_work"] for o in observations)
+            or any(bool((arm.get("failure") or {}).get("unknown_work")) for arm in (*arms.values(), fresh)),
+        }
     if initial_prefix is not None:
         for comparison in comparisons.values():
             comparison["step_response_pass"] = comparison.pop("full_history_pass")
