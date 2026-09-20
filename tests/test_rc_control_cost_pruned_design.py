@@ -276,14 +276,15 @@ def test_l_frame_audit_rejects_changed_protocol_before_reading_results(
         campaign.audit(tmp_path)
 
 
+@pytest.mark.parametrize("profile", ["original", "large-drift"])
 def test_campaign_all_failed_processes_still_finalize_every_planned_pair(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, profile
 ):
     from types import SimpleNamespace
     from scripts import run_rc_cost_pruning_campaign as campaign
 
     root = tmp_path / "failed-campaign"
-    monkeypatch.setattr(campaign.sys, "argv", ["campaign", "--output", str(root)])
+    monkeypatch.setattr(campaign.sys, "argv", ["campaign", "--output", str(root), "--history-profile", profile])
     monkeypatch.setattr(campaign.subprocess, "check_output", lambda *a, **k: "a" * 40)
     monkeypatch.setattr(
         campaign.subprocess, "run", lambda *a, **k: SimpleNamespace(returncode=2)
@@ -304,3 +305,9 @@ def test_campaign_all_failed_processes_still_finalize_every_planned_pair(
             for p in pair["processes"].values()
         )
     assert (root / "inventory.json").is_file()
+    assert protocol["history_profile"] == profile
+    first = root / protocol["cases"][0]["id"]
+    request = json.loads((first / "request.json").read_bytes())
+    assert request["targets_m"] == ([-0.01, -0.02, 0.01] if profile == "large-drift"
+                                    else [-0.001, -0.002, 0.001])
+    assert len(pairs) == 10

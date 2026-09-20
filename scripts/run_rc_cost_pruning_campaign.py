@@ -190,10 +190,30 @@ def campaign_complete(summary):
     )
 
 
+
+def campaign_specs(history_profile="original"):
+    """Fixed development rosters; large drift does not attest steel yielding."""
+    if history_profile == "original":
+        histories = (("small", (-0.001, -0.002, 0.001)),
+                     ("large", (-0.004, -0.008, 0.004)))
+        limit = 0.0008
+    elif history_profile == "large-drift":
+        histories = (("drift20", (-0.01, -0.02, 0.01)),
+                     ("drift40", (-0.02, -0.04, 0.02)))
+        limit = 0.01
+    else:
+        raise ValueError("unsupported predeclared history profile")
+    specs = [(f"w{int(width * 100)}-{label}", width, targets, limit)
+             for width in (0.32, 0.48) for label, targets in histories]
+    specs.append(("no-feasible-screen", 0.32, histories[0][1], 1e-12))
+    return specs
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    root = parser.parse_args().output
+    parser.add_argument("--history-profile", choices=("original", "large-drift"), default="original")
+    options = parser.parse_args()
+    root = options.output
     root.mkdir(parents=True, exist_ok=False)
     start = perf_counter_ns()
     source = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
@@ -216,6 +236,7 @@ def main():
     protocol = {
         "schema_version": "rc-cost-pruning-process-campaign.v1",
         "source_revision": source,
+        "history_profile": options.history_profile,
         "orders": [["full", "pruned"], ["pruned", "full"]],
         "cases": [],
         "scope": "interpreter_startup_inputs_analysis_fresh_verification_and_output_persistence",
@@ -228,15 +249,7 @@ def main():
         "learned_policy_used": False,
         "independent_generalization": False,
     }
-    specs = [
-        (f"w{int(width * 100)}-{label}", width, targets, 0.0008)
-        for width in (0.32, 0.48)
-        for label, targets in (
-            ("small", (-0.001, -0.002, 0.001)),
-            ("large", (-0.004, -0.008, 0.004)),
-        )
-    ]
-    specs.append(("no-feasible-screen", 0.32, (-0.001, -0.002, 0.001), 1e-12))
+    specs = campaign_specs(options.history_profile)
     for name, width, targets, limit in specs:
         folder = root / name
         model = design.apply_fiber_frame_section_changes(
