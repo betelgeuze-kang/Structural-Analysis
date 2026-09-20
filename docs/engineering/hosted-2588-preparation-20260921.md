@@ -7,3 +7,7 @@ This verifies the current failure boundary rather than inferring it from an olde
 ## Frontend terminal receipt
 
 The same-source [frontend job 106121830870](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/35527392717/job/106121830870) completed successfully: 814 Workbench E2E tests passed in 18.5 minutes. Build, type checks and browser smoke also succeeded, and the required aggregate job 106124637869 succeeded. The raw log is retained at `/tmp/structural-2588-frontend.log`. This receipt qualifies source 2588 only; it does not qualify later scoped audit-cost code or external physics. Development job 106121873780 was still running when this receipt was recorded.
+
+## Development terminal receipt
+
+[Development job 106121873780](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/35527406840/job/106121873780) completed successfully with **2,035 passed in 1,550.36 seconds**. The raw log is `/tmp/structural-2588-development.log`. The same-source frontend also passed 814 E2E and seven smoke tests. Full Python preparation and ordinary CI still failed; these independent diagnostic successes do not make the full suite green. These receipts predate the optional scoped audit-cost feature and do not qualify that later code. All branch runs were terminal before the next push.
