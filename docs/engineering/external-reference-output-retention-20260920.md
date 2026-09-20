@@ -33,3 +33,25 @@ clean-runner artifacts. Their inventory/schema/attestation integration requires 
 separate reviewed change; the option can be used now for local fresh-reference
 diagnostics. Full Python CI and the two original reaction comparisons remain
 open. No independent, legal, hardware or release qualification is asserted.
+
+## Actual frozen-source OpenSees observation
+
+At committed source `740122e0a262f81a00fc199cbb189870e077ad5f`, the full original driver ran
+once using the authenticated pinned OpenSeesPy/OpenSeesPyLinux 3.7.1.2 wheels.
+Decoded stdout/stderr and driver file hashes match the returned execution record.
+Removing attempt telemetry gives a numerical payload exactly equal to the earlier
+pinned original. All twelve recorded planar attempts return zero. This is not an
+independently counted total Newton workload.
+
+The enclosing `_run_opensees` call took 1.534014564 seconds, including runtime
+verification/staging/capture; the observer process took 3.263375660 seconds.
+These nested single observations are not acceleration measurements. All 793
+packet files were reread and hash/length verified. The inventory is
+`b5d8d2556823953d77047ac8f1b9191747f97a20227a799425bdbb0b143f1b20`.
+Exact source and packet location are in [the summary](external-reference-output-retention-20260920.summary.json).
+
+The 27 pinned-runtime regressions also passed, in addition to the eight new
+capture checks. No product reanalysis, CalculiX rerun, full technical receipt,
+protected artifact refresh or signed acceptance occurred. The same reference
+numbers preserve the two unresolved reaction comparisons; no acceptance credit
+is added by this observation.
