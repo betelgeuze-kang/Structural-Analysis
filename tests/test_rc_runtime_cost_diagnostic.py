@@ -483,3 +483,29 @@ def test_gate_repeated_decimal_constant_has_exact_center_and_unit_scale(monkeypa
     assert gate._payload['mean'] == (.02,)
     assert gate._payload['scale'] == (1.0,)
     assert gate.decision(dict(profile=module.PROFILE, feature_names=['target_m'], values=[.02])) is True
+
+
+def test_guarded_runtime_score_includes_policy_setup_and_full_path_validity(tmp_path, monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    from run_rc_guarded_runtime_campaign import score_path
+    report = guard_run(tmp_path, lambda context: False, lambda context: pytest.fail('declined proposer called'))
+    decisions = [dict(decision=e['proposal_decision']) for e in report['arms']['proposal']['entries']]
+    score = score_path(report, decisions, 12345)
+    assert score['full_comparison_pass'] is True
+    assert score['proposal_scored_wall_ns'] == report['arms']['proposal']['wall_ns'] + 12345
+    assert score['proposal_over_secant_path_wall_ratio'] == score['proposal_scored_wall_ns'] / report['arms']['secant']['wall_ns']
+    report['reference_repeat_exact'] = False
+    assert score_path(report, decisions, 12345)['proposal_over_secant_path_wall_ratio'] is None
+
+
+def test_guarded_audit_retains_fallback_timing_and_full_arm_binding(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    from audit_rc_guarded_runtime_campaign import require_arm_summary, require_declined_guard
+    summary = dict(path_hash='bound', status='complete')
+    require_arm_summary(dict(summary, response_history=[1], terminal_checkpoint={}, preload_response={}), summary)
+    with pytest.raises(ValueError):
+        require_arm_summary(dict(summary, status='failed'), summary)
+    entry = dict(proposal_decision='abstained_to_secant', proposal_wall_ns=100)
+    require_declined_guard(entry, {})
+    with pytest.raises(ValueError):
+        require_declined_guard(entry, dict(committed_material_state_json='captured'))

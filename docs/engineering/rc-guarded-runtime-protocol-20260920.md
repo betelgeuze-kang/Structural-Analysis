@@ -1,0 +1,13 @@
+# Fixed trained-guard full-path campaign
+
+Use the five already fitted gates, without new fitting or threshold search, on all fifteen declared synthetic training cases in five connected exclusion groups. Each case uses the gate excluding its entire group and the retained ridge-10,000 seed policy fitted on the other 132 original seed samples. The nested gate labels used 99-sample seed fits excluding both outer and inner groups; this difference remains a development distribution shift, not independent evidence.
+
+Execute three counterbalanced reference/secant/proposal orders per case: 45 comparisons, 180 full paths including a fresh reference, twelve requested displacement targets plus the original constant-load preload. Maximum core calls: 3,420. All original arithmetic, material history, loading requests and comparison tolerances remain fixed. No supplied parent snapshots or sampled-step timing sums substitute for each arm's own evolving accepted history.
+
+Charge gate/seed construction and callback setup once per comparison to the guarded arm. Guard callbacks include pre-capture feature construction and decision work. The guarded path retains capture, inference, deterministic fallback, numerical retries, recovery and step I/O as applicable. Prior labels, prior seed fits, five gate fits and the failed gate-fit attempt are retained separately; do not double-count nested timer scopes or assert that historical training cost is amortized.
+
+The read-only audit rebinds the complete roster and policies to pinned packets, checks all original path/report hashes and setup receipts, replays gate decisions from each saved pre-capture context, verifies material capture is absent on decline, and retains nonzero deterministic fallback timing. It accounts for every invocation including fresh-reference work and reconstructs bounded parsing-cache use from allowed callbacks. Failed or unaccounted paths remain ineligible for runtime benefit.
+
+A development runtime candidate requires all complete-path comparisons to pass, at least one actual proposal, and an equal-case mean guarded/secant time ratio below 0.99. This is a fixed screening rule, not a statistical confidence claim or proof of net savings after training. Reserved evaluation, external physics, licensing, operator/hardware/signature acceptance and broader roadmap closure remain separate.
+
+Verification before execution: all fifteen cases pass source/policy preflight with zero new fits or solves. The focused runtime-cost suite passes 63 tests in 6.93 s. Static checks pass. Numerical campaign results are not yet available at this declaration.
