@@ -53,6 +53,14 @@ hardware, owner/operator actions and signed acceptance remain separate.
 
 ## Historical progression
 
+The subsequent [public L-frame cost campaign](rc-l-frame-cost-campaign-20260920.md)
+executes eight CLI processes with steel plasticity and concrete damage, preserving
+full paths, fresh verification and identical selected-result hashes. Deterministic
+cost exclusion lowers process time by 48.39% in this single known family. Its
+original artifacts also pass desktop/mobile Workbench checks. This adds a broader
+observed material regime and two-member design delivery; it does not establish
+learned acceleration, independent physics or whole-user-flow savings.
+
 The following dated observations explain how the current state was reached.
 Later sections supersede earlier experimental limitations only within the stated
 scope; none closes the five-workstream completion requirements above.

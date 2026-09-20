@@ -1,0 +1,632 @@
+{
+  "completed_processes": 8,
+  "full_model_observations": [
+    {
+      "candidate_id": "baseline",
+      "material_estimate": {
+        "confirmed_currency_savings": false,
+        "currency": "USD",
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "concrete": 48.0,
+            "longitudinal_rebar": 97.2144,
+            "member_id": "M1"
+          },
+          {
+            "concrete": 36.0,
+            "longitudinal_rebar": 72.9108,
+            "member_id": "M2"
+          }
+        ],
+        "price_table_hash": "sha256:d4eca1c369fc7ab5d8d1fad3182ee7793727bb8b1e21e5d6cbbca4810c524be3",
+        "quantity_hash": "sha256:4dc3063d22c84519dc0cd06eefbfd9af5e227257990d3590951f654532f717d9",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "total": 254.1252,
+        "verified_quote": false
+      },
+      "performance": {
+        "accepted_epoch_count": 13,
+        "maximum_absolute_fiber_strain": 0.001424546731802224,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9986799411612628,
+        "maximum_load_factor": 1.1398188593081013,
+        "maximum_steel_accumulated_plastic_strain": 7.878049781739804e-05,
+        "maximum_translation_m": 0.01018600118531733,
+        "minimum_load_factor": -1.325957325300388,
+        "terminal_load_factor": -0.11964970016988367,
+        "terminal_maximum_absolute_fiber_strain": 1.8626977641413023e-05,
+        "terminal_maximum_translation_m": 4.934654228109429e-05
+      },
+      "quantities": {
+        "concrete_basis": "gross_section_volume_without_rebar_displacement_deduction",
+        "detailed_takeoff": false,
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "gross_concrete_volume_m3": 0.48,
+            "length_m": 2.0,
+            "longitudinal_rebar_mass_kg": 48.6072,
+            "longitudinal_rebar_volume_m3": 0.006192,
+            "member_id": "M1",
+            "section_id": "RC1"
+          },
+          {
+            "gross_concrete_volume_m3": 0.36,
+            "length_m": 1.5,
+            "longitudinal_rebar_mass_kg": 36.4554,
+            "longitudinal_rebar_volume_m3": 0.004644,
+            "member_id": "M2",
+            "section_id": "RC1"
+          }
+        ],
+        "model_checksum": "sha256:46f30d51fb008f689eff87aefb3796d053cac7ec2646f84ad561dd6cfb2da047",
+        "quantity_hash": "sha256:4dc3063d22c84519dc0cd06eefbfd9af5e227257990d3590951f654532f717d9",
+        "rebar_density_kg_per_m3": 7850.0,
+        "reinforcement_basis": "authored_longitudinal_bars_times_member_length",
+        "schema_version": "public-rc-fiber-member-quantities.v1",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "totals": {
+          "gross_concrete_volume_m3": 0.84,
+          "longitudinal_rebar_mass_kg": 85.0626,
+          "longitudinal_rebar_volume_m3": 0.010835999999999998
+        }
+      }
+    },
+    {
+      "candidate_id": "cheap",
+      "material_estimate": {
+        "confirmed_currency_savings": false,
+        "currency": "USD",
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "concrete": 48.0,
+            "longitudinal_rebar": 87.92,
+            "member_id": "M1"
+          },
+          {
+            "concrete": 36.0,
+            "longitudinal_rebar": 65.94,
+            "member_id": "M2"
+          }
+        ],
+        "price_table_hash": "sha256:d4eca1c369fc7ab5d8d1fad3182ee7793727bb8b1e21e5d6cbbca4810c524be3",
+        "quantity_hash": "sha256:3cf0140d188c756525186de2bae5382299d208017759bd6c27490a47a6792b27",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "total": 237.86,
+        "verified_quote": false
+      },
+      "performance": {
+        "accepted_epoch_count": 13,
+        "maximum_absolute_fiber_strain": 0.0014334164373945202,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9987225573344711,
+        "maximum_load_factor": 1.0551990110392004,
+        "maximum_steel_accumulated_plastic_strain": 8.77808609403411e-05,
+        "maximum_translation_m": 0.010246429631195333,
+        "minimum_load_factor": -1.2394511997680355,
+        "terminal_load_factor": -0.12045667593634016,
+        "terminal_maximum_absolute_fiber_strain": 2.0776060273809475e-05,
+        "terminal_maximum_translation_m": 5.4697186925088935e-05
+      },
+      "quantities": {
+        "concrete_basis": "gross_section_volume_without_rebar_displacement_deduction",
+        "detailed_takeoff": false,
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "gross_concrete_volume_m3": 0.48,
+            "length_m": 2.0,
+            "longitudinal_rebar_mass_kg": 43.96,
+            "longitudinal_rebar_volume_m3": 0.0056,
+            "member_id": "M1",
+            "section_id": "RC1"
+          },
+          {
+            "gross_concrete_volume_m3": 0.36,
+            "length_m": 1.5,
+            "longitudinal_rebar_mass_kg": 32.97,
+            "longitudinal_rebar_volume_m3": 0.0042,
+            "member_id": "M2",
+            "section_id": "RC1"
+          }
+        ],
+        "model_checksum": "sha256:9c6cb78948a25ebc55b5e13fdf5a1fece30a5aa54cfba3821f0c26fa2a78b5b9",
+        "quantity_hash": "sha256:3cf0140d188c756525186de2bae5382299d208017759bd6c27490a47a6792b27",
+        "rebar_density_kg_per_m3": 7850.0,
+        "reinforcement_basis": "authored_longitudinal_bars_times_member_length",
+        "schema_version": "public-rc-fiber-member-quantities.v1",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "totals": {
+          "gross_concrete_volume_m3": 0.84,
+          "longitudinal_rebar_mass_kg": 76.93,
+          "longitudinal_rebar_volume_m3": 0.0098
+        }
+      }
+    },
+    {
+      "candidate_id": "middle",
+      "material_estimate": {
+        "confirmed_currency_savings": false,
+        "currency": "USD",
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "concrete": 48.0,
+            "longitudinal_rebar": 100.48,
+            "member_id": "M1"
+          },
+          {
+            "concrete": 36.0,
+            "longitudinal_rebar": 75.36000000000001,
+            "member_id": "M2"
+          }
+        ],
+        "price_table_hash": "sha256:d4eca1c369fc7ab5d8d1fad3182ee7793727bb8b1e21e5d6cbbca4810c524be3",
+        "quantity_hash": "sha256:b3e229f91d1d2b1359aba64a3a46cd2fc40f37edb0673f91e90acf9d9fa59abb",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "total": 259.84000000000003,
+        "verified_quote": false
+      },
+      "performance": {
+        "accepted_epoch_count": 13,
+        "maximum_absolute_fiber_strain": 0.0014214458474381799,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9986646971932661,
+        "maximum_load_factor": 1.169214714275211,
+        "maximum_steel_accumulated_plastic_strain": 7.564745076645051e-05,
+        "maximum_translation_m": 0.010165902718244522,
+        "minimum_load_factor": -1.3559425618409806,
+        "terminal_load_factor": -0.1193922444397975,
+        "terminal_maximum_absolute_fiber_strain": 1.787424977190982e-05,
+        "terminal_maximum_translation_m": 4.748076036609258e-05
+      },
+      "quantities": {
+        "concrete_basis": "gross_section_volume_without_rebar_displacement_deduction",
+        "detailed_takeoff": false,
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "gross_concrete_volume_m3": 0.48,
+            "length_m": 2.0,
+            "longitudinal_rebar_mass_kg": 50.24,
+            "longitudinal_rebar_volume_m3": 0.0064,
+            "member_id": "M1",
+            "section_id": "RC1"
+          },
+          {
+            "gross_concrete_volume_m3": 0.36,
+            "length_m": 1.5,
+            "longitudinal_rebar_mass_kg": 37.68000000000001,
+            "longitudinal_rebar_volume_m3": 0.0048000000000000004,
+            "member_id": "M2",
+            "section_id": "RC1"
+          }
+        ],
+        "model_checksum": "sha256:57323fa88455e746ae4e7458d4e5c1587d94435b36046b1647009a6a3d5b39d9",
+        "quantity_hash": "sha256:b3e229f91d1d2b1359aba64a3a46cd2fc40f37edb0673f91e90acf9d9fa59abb",
+        "rebar_density_kg_per_m3": 7850.0,
+        "reinforcement_basis": "authored_longitudinal_bars_times_member_length",
+        "schema_version": "public-rc-fiber-member-quantities.v1",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "totals": {
+          "gross_concrete_volume_m3": 0.84,
+          "longitudinal_rebar_mass_kg": 87.92000000000002,
+          "longitudinal_rebar_volume_m3": 0.011200000000000002
+        }
+      }
+    },
+    {
+      "candidate_id": "costly",
+      "material_estimate": {
+        "confirmed_currency_savings": false,
+        "currency": "USD",
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "concrete": 48.0,
+            "longitudinal_rebar": 113.03999999999999,
+            "member_id": "M1"
+          },
+          {
+            "concrete": 36.0,
+            "longitudinal_rebar": 84.78,
+            "member_id": "M2"
+          }
+        ],
+        "price_table_hash": "sha256:d4eca1c369fc7ab5d8d1fad3182ee7793727bb8b1e21e5d6cbbca4810c524be3",
+        "quantity_hash": "sha256:66262068bbdc8bb03b31aa35c58318c4f27eb8effbf7cec90f5b40df17f9a86f",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "total": 281.82,
+        "verified_quote": false
+      },
+      "performance": {
+        "accepted_epoch_count": 13,
+        "maximum_absolute_fiber_strain": 0.001409664353110695,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9986050961362236,
+        "maximum_load_factor": 1.2801163669308733,
+        "maximum_steel_accumulated_plastic_strain": 6.380519357565963e-05,
+        "maximum_translation_m": 0.010093447286215555,
+        "minimum_load_factor": -1.469623960684859,
+        "terminal_load_factor": -0.11900844362378772,
+        "terminal_maximum_absolute_fiber_strain": 1.5053808432078472e-05,
+        "terminal_maximum_translation_m": 4.03422910342149e-05
+      },
+      "quantities": {
+        "concrete_basis": "gross_section_volume_without_rebar_displacement_deduction",
+        "detailed_takeoff": false,
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "gross_concrete_volume_m3": 0.48,
+            "length_m": 2.0,
+            "longitudinal_rebar_mass_kg": 56.519999999999996,
+            "longitudinal_rebar_volume_m3": 0.0072,
+            "member_id": "M1",
+            "section_id": "RC1"
+          },
+          {
+            "gross_concrete_volume_m3": 0.36,
+            "length_m": 1.5,
+            "longitudinal_rebar_mass_kg": 42.39,
+            "longitudinal_rebar_volume_m3": 0.0054,
+            "member_id": "M2",
+            "section_id": "RC1"
+          }
+        ],
+        "model_checksum": "sha256:219c906a5205c6f6761ca9f3295e4914f2e1350ef7663c4e0d85cbec202d82b8",
+        "quantity_hash": "sha256:66262068bbdc8bb03b31aa35c58318c4f27eb8effbf7cec90f5b40df17f9a86f",
+        "rebar_density_kg_per_m3": 7850.0,
+        "reinforcement_basis": "authored_longitudinal_bars_times_member_length",
+        "schema_version": "public-rc-fiber-member-quantities.v1",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "totals": {
+          "gross_concrete_volume_m3": 0.84,
+          "longitudinal_rebar_mass_kg": 98.91,
+          "longitudinal_rebar_volume_m3": 0.0126
+        }
+      }
+    }
+  ],
+  "independent_physical_validation": false,
+  "learned_speedup": false,
+  "pairs": [
+    {
+      "api_invocations": {
+        "full": 8,
+        "pruned": 4
+      },
+      "comparable": true,
+      "complete": true,
+      "known_work": true,
+      "matching_inputs": true,
+      "processes": {
+        "full": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r0-full",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json"
+          ],
+          "return_code": 0,
+          "wall_ns": 39507601383
+        },
+        "pruned": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r0-pruned",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json",
+            "--prune-cost-dominated"
+          ],
+          "return_code": 0,
+          "wall_ns": 20359567290
+        }
+      },
+      "processes_complete": true,
+      "pruned_over_full_process_ratio": 0.5153329125863019,
+      "retained_result_hashes_match": true,
+      "same_verified_selection": true,
+      "selected_candidate_id": "cheap",
+      "skipped_candidate_ids": [
+        "middle",
+        "costly"
+      ]
+    },
+    {
+      "api_invocations": {
+        "full": 8,
+        "pruned": 4
+      },
+      "comparable": true,
+      "complete": true,
+      "known_work": true,
+      "matching_inputs": true,
+      "processes": {
+        "full": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r1-full",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json"
+          ],
+          "return_code": 0,
+          "wall_ns": 39553003066
+        },
+        "pruned": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r1-pruned",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json",
+            "--prune-cost-dominated"
+          ],
+          "return_code": 0,
+          "wall_ns": 20520426004
+        }
+      },
+      "processes_complete": true,
+      "pruned_over_full_process_ratio": 0.5188082930077055,
+      "retained_result_hashes_match": true,
+      "same_verified_selection": true,
+      "selected_candidate_id": "cheap",
+      "skipped_candidate_ids": [
+        "middle",
+        "costly"
+      ]
+    },
+    {
+      "api_invocations": {
+        "full": 8,
+        "pruned": 4
+      },
+      "comparable": true,
+      "complete": true,
+      "known_work": true,
+      "matching_inputs": true,
+      "processes": {
+        "full": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r2-full",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json"
+          ],
+          "return_code": 0,
+          "wall_ns": 39899815399
+        },
+        "pruned": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r2-pruned",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json",
+            "--prune-cost-dominated"
+          ],
+          "return_code": 0,
+          "wall_ns": 20719185657
+        }
+      },
+      "processes_complete": true,
+      "pruned_over_full_process_ratio": 0.5192802385125641,
+      "retained_result_hashes_match": true,
+      "same_verified_selection": true,
+      "selected_candidate_id": "cheap",
+      "skipped_candidate_ids": [
+        "middle",
+        "costly"
+      ]
+    },
+    {
+      "api_invocations": {
+        "full": 8,
+        "pruned": 4
+      },
+      "comparable": true,
+      "complete": true,
+      "known_work": true,
+      "matching_inputs": true,
+      "processes": {
+        "full": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r3-full",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json"
+          ],
+          "return_code": 0,
+          "wall_ns": 39964682140
+        },
+        "pruned": {
+          "arguments": [
+            "/usr/bin/python3",
+            "-m",
+            "structural_analysis.benchmark.rc_control_design_cli",
+            "--source-revision",
+            "98ce68d128308554bbc98616f0919d19ed2f8daa",
+            "--output",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/r3-pruned",
+            "--model",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/model.json",
+            "--request",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/request.json",
+            "--experiment",
+            "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-cost-t3md3b1e/study/experiment.json",
+            "--prune-cost-dominated"
+          ],
+          "return_code": 0,
+          "wall_ns": 20415175738
+        }
+      },
+      "processes_complete": true,
+      "pruned_over_full_process_ratio": 0.5108304293897231,
+      "retained_result_hashes_match": true,
+      "same_verified_selection": true,
+      "selected_candidate_id": "cheap",
+      "skipped_candidate_ids": [
+        "middle",
+        "costly"
+      ]
+    }
+  ],
+  "process_wall_ns_sums": {
+    "full": 158925101988,
+    "pruned": 82014354689
+  },
+  "pruned_over_full_ratio_of_sums": 0.5160566434319022,
+  "repeated_and_retained_result_hashes_match": true,
+  "scope": "complete CLI process includes input, all analyses, fresh verification and output; preparation, audit and review excluded",
+  "source_revision": "98ce68d128308554bbc98616f0919d19ed2f8daa",
+  "synthetic_design_screens": true,
+  "work_sums": {
+    "full": {
+      "api_invocations": 32,
+      "attempted_steps": 416,
+      "linear_solves": 2536,
+      "newton": 2536
+    },
+    "pruned": {
+      "api_invocations": 16,
+      "attempted_steps": 208,
+      "linear_solves": 1264,
+      "newton": 1264
+    }
+  }
+}
