@@ -332,3 +332,12 @@ fewer Newton iterations. These are local retained-parent benefits, not full-path
 acceleration. There are no new fits or reserved evaluations. Any future switching
 rule needs pre-solve features, leakage-resistant label construction and complete
 path costs; the existing overall runtime selection continues to retain secant.
+
+## Nested switching-label provenance prepared
+
+The [nested preparation](rc-nested-switch-preparation-20260920.md) fits and audits
+ten 99-sample seed policies excluding both outer and inner connected groups.
+All twenty attempted reuses of the old 132-sample policies are rejected because
+they contain 33 outer-group samples. No switching labels, trained gate, structural
+solves or reserved evaluations are added. The next implementation must support
+and time a pre-capture decision before evaluating a gate on complete paths.

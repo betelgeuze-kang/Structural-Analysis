@@ -1,0 +1,447 @@
+{
+  "source_revision": "cdd78f326de82253877f2250d811a42aae22da17",
+  "result": {
+    "source_revision": "cdd78f326de82253877f2250d811a42aae22da17",
+    "seed_fits": 10,
+    "fit_wall_ns": 213587213,
+    "rejected_prior_policy_uses": 20,
+    "normalization_complement_verified": true,
+    "wall_ns_before_result_write": 1446685703,
+    "new_structural_solves": 0,
+    "switch_labels_generated": 0,
+    "gate_trained": false,
+    "reserved_evaluations": 0,
+    "full_path_speedup_claim": false
+  },
+  "fits": {
+    "fits": [
+      {
+        "artifact": {
+          "byte_length": 115572,
+          "path": "fit-000-policy.json",
+          "sha256": "sha256:5a28e87320cbe9ecad716b63fae34b752557be07792809c68307d705a6d44b99"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 0,
+        "policy_hash": "sha256:8594135fe334e0c6fd3f6f636e7e62cfc20e47543f7efda3be0f8128f49d58e5",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 24154554
+      },
+      {
+        "artifact": {
+          "byte_length": 115691,
+          "path": "fit-001-policy.json",
+          "sha256": "sha256:19e2e1e0c29b16da0d2681b46bf7443c5c1a355fe5f85e0d2710004a0181acdb"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 1,
+        "policy_hash": "sha256:b6dfe1ab697be93e778e24082510148e86baa5d2e5f19339798e7bf6334be9e5",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 21319124
+      },
+      {
+        "artifact": {
+          "byte_length": 115649,
+          "path": "fit-002-policy.json",
+          "sha256": "sha256:fb3fc354cea2c15dba52188b87058ec18393a5199ff7253a6b78f17bd11e9ddb"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 2,
+        "policy_hash": "sha256:8989301037764a445757914e71e9dc7a9c15b94c5ff2cff20c90d29a39d2655e",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 21139407
+      },
+      {
+        "artifact": {
+          "byte_length": 115556,
+          "path": "fit-003-policy.json",
+          "sha256": "sha256:2962db15f3cd5c0182dfeb10078041ae3d234f330a0616e3075cae7782d7979a"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 3,
+        "policy_hash": "sha256:15c4f37520949aafd06a18b003d09795990870ab12884be469b58ef6ba5c565a",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 20809303
+      },
+      {
+        "artifact": {
+          "byte_length": 119209,
+          "path": "fit-004-policy.json",
+          "sha256": "sha256:1273686ba534151bc4aa6063ba49f7247ad5345c3b55644f1e1af95f2a09aa50"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 4,
+        "policy_hash": "sha256:45324510230a63ced3450cbb3cf1d759af477b604c56b6835db8202bb473cf47",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 20963120
+      },
+      {
+        "artifact": {
+          "byte_length": 119177,
+          "path": "fit-005-policy.json",
+          "sha256": "sha256:797ae8762c651a8ba8e4363e5cbe364902ed1da380ccd116318f5fcd15c93507"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 5,
+        "policy_hash": "sha256:0480517db34f48a8e2f8b9bc1a20ae7ebc2b395120f2ffdcd0c980e833ee1cc3",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 20972021
+      },
+      {
+        "artifact": {
+          "byte_length": 119031,
+          "path": "fit-006-policy.json",
+          "sha256": "sha256:4d2c28dce8692d0a6749dd9c7495f84d648f010da91e25e8b997c2e02723280e"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 6,
+        "policy_hash": "sha256:ec2477f88e6b68aa1e60b666db028eaed9aff1706e7cf77e8e3a24c23bc4ca3b",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 21022312
+      },
+      {
+        "artifact": {
+          "byte_length": 119247,
+          "path": "fit-007-policy.json",
+          "sha256": "sha256:f0c4c2f1a6603323f0d4a23a4df57f2b58e437b145f07c602060635a3dbdb245"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 7,
+        "policy_hash": "sha256:fd2282ac818740595dcc1802885aed0e25b656ff13d98243777830e33c981d57",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 21142127
+      },
+      {
+        "artifact": {
+          "byte_length": 119117,
+          "path": "fit-008-policy.json",
+          "sha256": "sha256:d187cfe030667e26428be8aa4aa437c47492be75ab2d0c19767d84b998c555fe"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 8,
+        "policy_hash": "sha256:3e5ce90c4467133d4b640c0daf36f85160d381a2a40dabbee5d0cd8c8031423b",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 20986130
+      },
+      {
+        "artifact": {
+          "byte_length": 119165,
+          "path": "fit-009-policy.json",
+          "sha256": "sha256:132fe6ef159822fefae4be1ccbd9c2d7adf40281afa3e0af2b51c1fe764b323b"
+        },
+        "complement_feature_statistics_exact": true,
+        "fit_index": 9,
+        "policy_hash": "sha256:1a7253c9b10acf798311aa042aa1dc6823ad2578f8e9070e29e5cbfbd5455faa",
+        "promoted": false,
+        "sample_count": 99,
+        "wall_ns": 21079115
+      }
+    ],
+    "gate_trained": false,
+    "reserved_evaluation_executed": false,
+    "structural_solves": 0
+  },
+  "normalization_audit": {
+    "fits": [
+      {
+        "fit_index": 0,
+        "policy_hash": "sha256:8594135fe334e0c6fd3f6f636e7e62cfc20e47543f7efda3be0f8128f49d58e5",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "5a28e87320cbe9ecad716b63fae34b752557be07792809c68307d705a6d44b99"
+      },
+      {
+        "fit_index": 1,
+        "policy_hash": "sha256:b6dfe1ab697be93e778e24082510148e86baa5d2e5f19339798e7bf6334be9e5",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "19e2e1e0c29b16da0d2681b46bf7443c5c1a355fe5f85e0d2710004a0181acdb"
+      },
+      {
+        "fit_index": 2,
+        "policy_hash": "sha256:8989301037764a445757914e71e9dc7a9c15b94c5ff2cff20c90d29a39d2655e",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "fb3fc354cea2c15dba52188b87058ec18393a5199ff7253a6b78f17bd11e9ddb"
+      },
+      {
+        "fit_index": 3,
+        "policy_hash": "sha256:15c4f37520949aafd06a18b003d09795990870ab12884be469b58ef6ba5c565a",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "2962db15f3cd5c0182dfeb10078041ae3d234f330a0616e3075cae7782d7979a"
+      },
+      {
+        "fit_index": 4,
+        "policy_hash": "sha256:45324510230a63ced3450cbb3cf1d759af477b604c56b6835db8202bb473cf47",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "1273686ba534151bc4aa6063ba49f7247ad5345c3b55644f1e1af95f2a09aa50"
+      },
+      {
+        "fit_index": 5,
+        "policy_hash": "sha256:0480517db34f48a8e2f8b9bc1a20ae7ebc2b395120f2ffdcd0c980e833ee1cc3",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "797ae8762c651a8ba8e4363e5cbe364902ed1da380ccd116318f5fcd15c93507"
+      },
+      {
+        "fit_index": 6,
+        "policy_hash": "sha256:ec2477f88e6b68aa1e60b666db028eaed9aff1706e7cf77e8e3a24c23bc4ca3b",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "4d2c28dce8692d0a6749dd9c7495f84d648f010da91e25e8b997c2e02723280e"
+      },
+      {
+        "fit_index": 7,
+        "policy_hash": "sha256:fd2282ac818740595dcc1802885aed0e25b656ff13d98243777830e33c981d57",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "f0c4c2f1a6603323f0d4a23a4df57f2b58e437b145f07c602060635a3dbdb245"
+      },
+      {
+        "fit_index": 8,
+        "policy_hash": "sha256:3e5ce90c4467133d4b640c0daf36f85160d381a2a40dabbee5d0cd8c8031423b",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "d187cfe030667e26428be8aa4aa437c47492be75ab2d0c19767d84b998c555fe"
+      },
+      {
+        "fit_index": 9,
+        "policy_hash": "sha256:1a7253c9b10acf798311aa042aa1dc6823ad2578f8e9070e29e5cbfbd5455faa",
+        "sample_count": 99,
+        "statistics_exact": [
+          "feature_mean",
+          "feature_min",
+          "feature_max",
+          "feature_scale",
+          "target_scale"
+        ],
+        "policy_sha256": "132fe6ef159822fefae4be1ccbd9c2d7adf40281afa3e0af2b51c1fe764b323b"
+      }
+    ],
+    "new_fits": 0,
+    "new_solves": 0
+  },
+  "prior_policy_rejections": {
+    "runtime_inventory_sha256": "e47a96cf34c52b3a088f15eba08a890e745da6096a7a43b5127f78df8ca2b7c0",
+    "rejections": [
+      {
+        "outer_group_index": 0,
+        "inner_group_index": 1,
+        "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 0,
+        "inner_group_index": 2,
+        "policy_hash": "sha256:8cf44f552d5a805c6f169276c63ec95e2f311258de17318b927f7c20984ca716",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 0,
+        "inner_group_index": 3,
+        "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 0,
+        "inner_group_index": 4,
+        "policy_hash": "sha256:63ad574f1485ab6907f9a322ce466b63e0e663fe3bf383eac3ba13e83bfa20c9",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 1,
+        "inner_group_index": 0,
+        "policy_hash": "sha256:d45d60839cdc6ad9b386cc0a7675d40ad1782cb74348ad0b86e17ea74104da15",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 1,
+        "inner_group_index": 2,
+        "policy_hash": "sha256:8cf44f552d5a805c6f169276c63ec95e2f311258de17318b927f7c20984ca716",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 1,
+        "inner_group_index": 3,
+        "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 1,
+        "inner_group_index": 4,
+        "policy_hash": "sha256:63ad574f1485ab6907f9a322ce466b63e0e663fe3bf383eac3ba13e83bfa20c9",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 2,
+        "inner_group_index": 0,
+        "policy_hash": "sha256:d45d60839cdc6ad9b386cc0a7675d40ad1782cb74348ad0b86e17ea74104da15",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 2,
+        "inner_group_index": 1,
+        "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 2,
+        "inner_group_index": 3,
+        "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 2,
+        "inner_group_index": 4,
+        "policy_hash": "sha256:63ad574f1485ab6907f9a322ce466b63e0e663fe3bf383eac3ba13e83bfa20c9",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 3,
+        "inner_group_index": 0,
+        "policy_hash": "sha256:d45d60839cdc6ad9b386cc0a7675d40ad1782cb74348ad0b86e17ea74104da15",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 3,
+        "inner_group_index": 1,
+        "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 3,
+        "inner_group_index": 2,
+        "policy_hash": "sha256:8cf44f552d5a805c6f169276c63ec95e2f311258de17318b927f7c20984ca716",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 3,
+        "inner_group_index": 4,
+        "policy_hash": "sha256:63ad574f1485ab6907f9a322ce466b63e0e663fe3bf383eac3ba13e83bfa20c9",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 4,
+        "inner_group_index": 0,
+        "policy_hash": "sha256:d45d60839cdc6ad9b386cc0a7675d40ad1782cb74348ad0b86e17ea74104da15",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 4,
+        "inner_group_index": 1,
+        "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 4,
+        "inner_group_index": 2,
+        "policy_hash": "sha256:8cf44f552d5a805c6f169276c63ec95e2f311258de17318b927f7c20984ca716",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      },
+      {
+        "outer_group_index": 4,
+        "inner_group_index": 3,
+        "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+        "reason": "seed policy must exclude both outer and inner groups exactly",
+        "outer_sample_count_in_old_policy": 33
+      }
+    ]
+  },
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-nested-switch-9o6ul5ja",
+    "files": 966,
+    "bytes": 19300076,
+    "inventory_sha256": "547112b912e6ff77fc43e755daa8ce12467d7a72766ec2ada3875e4c40263c49",
+    "plan_sha256": "b35b1964d6bf771d00c230b943ff22d53bed5f9687b65e4078ccbafcabdac7ba"
+  },
+  "planned_label_tasks": 20,
+  "planned_label_parent_pairs": 660,
+  "planned_comparisons": 1980,
+  "planned_single_target_paths": 7920,
+  "current_switch_labels": 0,
+  "current_gate_models": 0
+}
