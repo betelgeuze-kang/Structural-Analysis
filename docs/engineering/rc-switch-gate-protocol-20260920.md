@@ -1,0 +1,15 @@
+# Fixed development gate specification
+
+This specification is prepared before inspecting the completed nested label outcomes. The campaign source remains frozen at `2b356511f178b68238a0cd0a5037f2d1f8535a04`; the local gate implementation does not alter that running experiment.
+
+For each of five outer groups, use the other four inner groups' audited labels. Seed fits supplying each label exclude both its inner group and the outer evaluation group. Include verified negative labels, exclude unverified labels from fitting, and retain their identities/counts. Canonically order input rows by inner group and original sample hash. Do not fit preprocessing on excluded or unverified rows.
+
+The first gate is a linear ridge classifier using binary targets, augmented least squares solved by SVD, ridge 1.0 on standardized feature coefficients and an unpenalized intercept. Standardize using only the verified fitting rows; replace a zero feature standard deviation with 1.0. No class reweighting or threshold search is planned. The fixed score threshold is 0.75; scores are regression outputs, not calibrated probabilities.
+
+Inference uses only the pre-solve feature schema. Decline outside individual observed feature bounds or when the fitting set has no positive labels. Invalid feature schemas, nonfinite inputs and numerical errors fail through the existing guarded-path contract. Individual bounds do not establish joint support or independent generalization. A constant declined gate is a legitimate negative development outcome, not a reason to change the threshold after evaluation.
+
+The policy binds the complete verified training-row assembly, ordered sample hashes, excluded cases, normalization, weights, threshold and label counts. It uses strict duplicate-rejecting JSON and a hash of the payload. Hash agreement is integrity evidence, not proof of source authenticity; callers must first run the complete original campaign auditor.
+
+Fit wall time includes preprocessing, solving, policy serialization and construction; artifact writing, original labels, original seed fitting and later audit remain separate costs. The benchmark callback accounts for pre-capture feature construction and decision time. No trained gate or full-path performance result exists at specification time.
+
+Next evaluate the gate on each outer group's own full nonlinear history, with a seed policy excluding that entire outer group. All reference comparisons and secant fallback remain required. Training labels use two-group-excluded seed policies whereas outer execution uses one-group-excluded seed policies; this change in training set and the difference between retained-parent labels and evolving full paths must remain visible. Previously used development cases and ridge selection do not become independent evidence. Reserved evaluations remain untouched until the development protocol is qualified.
