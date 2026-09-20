@@ -220,3 +220,8 @@ extended types keep recursive serialization. One retained parent has identical
 original snapshot bytes in all 1,231 comparisons, and six counterbalanced capture
 measurements are 12.6–13.3% shorter. This is a capture-only observation; complete
 path performance, independent generalization and all roadmap goals remain open.
+
+The [new full-path follow-up](rc-scalar-runtime-followup-20260920.md) has passed
+preflight and started on frozen 85af596ed source: the same 165 labels, five groups,
+90 comparisons and 360 paths. It has no final selection result yet. Preserve its
+live process and audit the completed result before revising the secant decision.
