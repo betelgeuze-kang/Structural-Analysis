@@ -151,8 +151,8 @@ def checked_sources(bundle, repo):
 
 
 def refinement_layers(value):
-    require(type(value) is int and value in (256, 512, 1024),
-            "predeclared research layer count must be 256, 512 or 1024")
+    require(type(value) is int and value in (256, 512, 1024, 2048),
+            "predeclared research layer count must be 256, 512, 1024 or 2048")
     return value, value // 2
 
 
@@ -219,6 +219,10 @@ def run(bundle, output_parent, repo, *, layers=256):
         require(hashlib.sha256((root / "protocol.json").read_bytes()).hexdigest()
                 == "e620f118fc72a7af34b8a527649dcddc3d1b78902922aab2860baa92ba73432b",
                 "predeclared 1024-layer protocol changed")
+    if layers == 2048:
+        require(file_sha256(root / 'protocol.json')
+                == '6508da674654590141a1b4084b9f59069a70db834da8c4070be153f0dccf9e43',
+                'predeclared 2048-layer protocol changed')
     started = perf_counter_ns()
     model = json.loads(raw)
     require(
@@ -295,6 +299,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle", type=Path)
     parser.add_argument("output_parent", type=Path)
-    parser.add_argument('--layers', type=int, choices=(256, 512, 1024), default=256)
+    parser.add_argument('--layers', type=int, choices=(256, 512, 1024, 2048), default=256)
     args = parser.parse_args()
     run(args.bundle, args.output_parent, Path(__file__).resolve().parents[1], layers=args.layers)

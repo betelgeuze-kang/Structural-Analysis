@@ -386,14 +386,15 @@ def test_projection_error_decomposition_rejects_duplicate_points():
         summarize([row, row])
 
 
-@pytest.mark.parametrize('layers,expected', [(256, (256, 128)), (512, (512, 256)), (1024, (1024, 512))])
+@pytest.mark.parametrize('layers,expected', [(256, (256, 128)), (512, (512, 256)),
+                                           (1024, (1024, 512)), (2048, (2048, 1024))])
 def test_frozen_refinement_only_declares_original_or_next_resolution(layers, expected):
     from scripts.run_planar_256_refinement import refinement_layers
 
     assert refinement_layers(layers) == expected
 
 
-@pytest.mark.parametrize('bad', [True, 512.0, '512', 0, 128, 2048])
+@pytest.mark.parametrize('bad', [True, 512.0, '512', 0, 128, 4096])
 def test_frozen_refinement_rejects_unplanned_resolution_before_inputs(tmp_path, bad):
     from scripts.run_planar_256_refinement import run
 
@@ -402,7 +403,45 @@ def test_frozen_refinement_rejects_unplanned_resolution_before_inputs(tmp_path, 
     assert list(tmp_path.iterdir()) == []
 
 
-@pytest.mark.parametrize('layers', [128, 256, 512])
+@pytest.mark.parametrize('corruption', [None, 'receipt', 'features'])
+def test_2048_coarse_features_require_original_bound_receipt(tmp_path, monkeypatch, corruption):
+    import json
+
+    from scripts import audit_planar_2048_refinement as audit
+
+    def save(name, value):
+        raw = json.dumps(value).encode()
+        (tmp_path / name).write_bytes(raw)
+        return hashlib.sha256(raw).hexdigest()
+
+    features = [{'target_m': i / 500} for i in range(1, 41)]
+    feature_sha = save('features.json', features)
+    monkeypatch.setattr(audit, 'FEATURES_SHA', feature_sha)
+    receipt_sha = save('result.json', {
+        'original_full_sha256': '0' * 64 if corruption == 'receipt' else audit.COARSE_SHA,
+        'features_sha256': feature_sha, 'verified_steps': 40})
+    inventory_sha = save('inventory.json', {'files': [{'path': 'result.json', 'sha256': receipt_sha}]})
+    monkeypatch.setattr(audit, 'COARSE_INVENTORY_SHA', inventory_sha)
+    if corruption == 'features':
+        save('features.json', features[:-1])
+    if corruption:
+        with pytest.raises(ValueError, match='provenance|digest'):
+            audit.coarse_features(tmp_path)
+    else:
+        assert audit.coarse_features(tmp_path) == features
+
+
+def test_2048_protocol_change_rejected_before_loading_features(tmp_path, monkeypatch):
+    from scripts import audit_planar_2048_refinement as audit
+
+    values = iter([{'source_revision': 'original'}, {'source_revision': 'changed'}])
+    monkeypatch.setattr(audit, 'read_checked', lambda *args: next(values))
+    monkeypatch.setattr(audit, 'coarse_features', lambda *args: pytest.fail('must reject first'))
+    with pytest.raises(ValueError, match='protocol mismatch'):
+        audit.audit(tmp_path, tmp_path, tmp_path, '0' * 64, '0' * 64)
+
+
+@pytest.mark.parametrize('layers', [128, 256, 512, 1024])
 def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatch, layers):
     import scripts.audit_planar_256_refinement as audit
 
@@ -429,7 +468,7 @@ def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatc
     assert maxima['nodal_steel']['translations']['within_exploratory_one_percent'] is True
 
 
-@pytest.mark.parametrize('layers', [True, 256., 64, 1024])
+@pytest.mark.parametrize('layers', [True, 256., 64, 2048])
 def test_comparison_rejects_unplanned_resolution(layers):
     from scripts.audit_planar_256_refinement import compare_steps
     with pytest.raises(ValueError, match='layer count'):
