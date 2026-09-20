@@ -18,7 +18,7 @@ original workstreams remain open at their full scope.
 
 The [bounded 2,048-layer witness diagnostic](planar-2048-witness-protocol-20260920.md) is implemented and locally checked, but its large retained-history replay remains pending until timing generation finishes. The original 1% failure remains open.
 
-[Hosted 19188](hosted-19188-terminal-20260920.md) passes 1,919 development tests and 814 frontend tests. Full Python shards remain stopped before test execution by external replay and technical-receipt preparation; later source changes require their own checks.
+[Hosted fbc](hosted-fbc-terminal-20260920.md) passes 1,925 development tests and 814 frontend tests. Full Python shards remain stopped before test execution by external replay and technical-receipt preparation; later source changes require their own checks.
 
 The [accepted-material representation audit](rc-accepted-material-summary-results-20260920.md)
 reconstructs all 165 retained training parents and their exact native snapshots,
@@ -37,7 +37,7 @@ reductions fail the repeat-aware time rule. The
 Ten [three-group-excluded 66-row seeds](rc-gate-inner-validation-preparation-20260920.md)
 are now prepared to avoid leakage in an additional inner validation split.
 The new [timing campaign](rc-inner-label-campaign-preparation-20260920.md) is
-[admitted and running](rc-inner-label-campaign-start-20260920.md) after the completed 2,048-layer controller and audit. Fresh preflight passed; final labels and gate validation remain pending.
+[admitted and running](rc-inner-label-campaign-start-20260920.md) after the completed 2,048-layer controller and audit. Fresh preflight passed; final labels and gate validation remain pending. The [fixed evaluation launcher](rc-inner-gate-evaluation-preparation-20260920.md) is prepared and refuses to overlap live label generation.
 
 [Current-main integration review](current-main-integration-review-20260920.md)
 rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen
