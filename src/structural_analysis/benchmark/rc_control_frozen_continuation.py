@@ -8,6 +8,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
 )
 from structural_analysis.solvers.nonlinear.assembly_work import VectorAssemblyWorkRecorder
 
+FROZEN_CONTINUATION_FAILURE_IDENTITY = "experimental-frozen-parent-failed-reversal-16.v1"
 FROZEN_CONTINUATION_IDENTITY = "experimental-frozen-parent-reversal-16.v1"
 
 

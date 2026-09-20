@@ -11,7 +11,9 @@ from time import perf_counter_ns
 from structural_analysis.api.frame3d_direct_control_request import strict_json_object_bytes
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
-from structural_analysis.benchmark.rc_control_frozen_continuation import FROZEN_CONTINUATION_IDENTITY
+from structural_analysis.benchmark.rc_control_frozen_continuation import (
+    FROZEN_CONTINUATION_IDENTITY, FROZEN_CONTINUATION_FAILURE_IDENTITY,
+)
 from structural_analysis.benchmark.rc_control_seed_runtime import benchmark_rc_control_seed_paths
 
 
@@ -61,7 +63,7 @@ def replay_rc_frozen_continuation_study(
         raise ValueError('separate original and replay directories required')
     originals = _read_study(study)
     report = originals['comparison.json']
-    if (report.get('numerical_proposal', {}).get('identity') != FROZEN_CONTINUATION_IDENTITY
+    if (report.get('numerical_proposal', {}).get('identity') not in (FROZEN_CONTINUATION_IDENTITY, FROZEN_CONTINUATION_FAILURE_IDENTITY)
             or report['request'] != request.to_dict()
             or report['model_checksum'] != model.canonical_model_checksum
             or report['schema_version'] != 'experimental-rc-control-seed-comparison.v2'):
@@ -84,6 +86,7 @@ def replay_rc_frozen_continuation_study(
     fresh = benchmark_rc_control_seed_paths(
         model, request, source_revision=replay_source_revision,
         output_directory=output / 'fresh', frozen_parent_continuation=True,
+        continuation_on_failure=report['numerical_proposal']['identity'] == FROZEN_CONTINUATION_FAILURE_IDENTITY,
         arm_order=tuple(report['arm_order']),
         absolute_tolerance=report['absolute_tolerance'], relative_tolerance=report['relative_tolerance'],
         record_assembly_work='assembly_work_recording' in report,

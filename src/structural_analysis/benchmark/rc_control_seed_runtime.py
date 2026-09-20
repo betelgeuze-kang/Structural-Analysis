@@ -55,6 +55,7 @@ from structural_analysis.benchmark.rc_control_trust_region import (
 from structural_analysis.benchmark.rc_control_frozen_continuation import (
     FrozenParentContinuationProposal,
     FROZEN_CONTINUATION_IDENTITY,
+    FROZEN_CONTINUATION_FAILURE_IDENTITY,
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.assembly_work import (
@@ -361,6 +362,7 @@ def _path(
     record_assembly_timing=False,
     proposal_guard=None,
     observe_initial_residuals=False,
+    continuation_on_failure=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -490,7 +492,11 @@ def _path(
         try:
             numerical = None
             if strategy == "proposal" and isinstance(proposal, (TrustRegionReversalProposal, FrozenParentContinuationProposal)):
-                if isinstance(proposal, FrozenParentContinuationProposal):
+                if continuation_on_failure:
+                    numerical = {"status": "deferred", "seed": None, "unknown_work": False,
+                                 "native_core_calls_attempted": 0,
+                                 "reason": "ordinary_invocation_must_fail_first"}
+                elif isinstance(proposal, FrozenParentContinuationProposal):
                     numerical = proposal.propose(
                         compiled.problem, accepted, request, context,
                         artifact_sink=lambda stage, payload: _save(
@@ -585,9 +591,8 @@ def _path(
             break
         # A rejected numerical proposal may fall back exactly once, with both
         # attempts retained. An exception leaves unknown work and stops the path.
-        for attempt, current in enumerate(
-            (seed, None) if seed is not None else (None,)
-        ):
+        attempt_seeds = [seed, None] if seed is not None else [None]
+        for attempt, current in enumerate(attempt_seeds):
             inv = {
                 "ordinal": attempt + 1,
                 "seed_used": current is not None,
@@ -698,6 +703,44 @@ def _path(
                     "target_index": index,
                 }
                 break
+            if (continuation_on_failure and strategy == "proposal" and attempt == 0
+                    and isinstance(proposal, FrozenParentContinuationProposal)):
+                pw, pc = perf_counter_ns(), process_time_ns()
+                _save(root, f"{index:03d}-continuation-started.json", _bytes({
+                    "failed_invocation": 1, "parent_hash": accepted.state_hash,
+                    "unknown_proposal_work_until_outcome": True,
+                }))
+                try:
+                    numerical = proposal.propose(
+                        compiled.problem, accepted, request, context,
+                        artifact_sink=lambda stage, payload: _save(
+                            root, f"{index:03d}-continuation-{stage:03d}.json", _bytes(payload)
+                        ),
+                    )
+                    entry["numerical_proposal"] = numerical
+                    entry["recovery_after_failed_invocation"] = 1
+                    if numerical["unknown_work"]:
+                        failure = {"phase": "numerical_proposal", "kind": "unknown_work",
+                                   "target_index": index}
+                    elif numerical["seed"] is not None:
+                        recovered = StatefulFiberFrame2DDisplacementControlStepAdapter(
+                            compiled.problem, accepted, request.control_global_dof,
+                            target, request.solver_config, tuple(numerical["seed"]),
+                        ).initial_augmented_coordinates_m
+                        attempt_seeds.append(recovered)
+                        entry["proposal"] = list(recovered)
+                        entry["proposal_decision"] = "proposed_after_reference_failure"
+                    else:
+                        entry["proposal_decision"] = "recovery_declined"
+                except Exception as exc:
+                    failure = {"phase": "numerical_proposal", "kind": type(exc).__name__,
+                               "target_index": index, "unknown_work": True}
+                finally:
+                    entry["proposal_wall_ns"] += perf_counter_ns() - pw
+                    entry["proposal_cpu_ns"] += process_time_ns() - pc
+                    _save(root, f"{index:03d}-continuation-proposal.json", _bytes(entry))
+                if failure:
+                    break
         if failure or step is None or not step.committed:
             failure = failure or {
                 "phase": "numerical",
@@ -1094,6 +1137,7 @@ def benchmark_rc_control_seed_paths(
     observe_initial_residuals: bool = False,
     trust_region_reversal: bool = False,
     frozen_parent_continuation: bool = False,
+    continuation_on_failure: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -1106,6 +1150,10 @@ def benchmark_rc_control_seed_paths(
         raise ValueError("explicit boolean trust-region reversal option required")
     if type(frozen_parent_continuation) is not bool:
         raise ValueError("explicit boolean frozen-parent continuation option required")
+    if type(continuation_on_failure) is not bool or (continuation_on_failure and not frozen_parent_continuation):
+        raise ValueError("failure-only continuation requires the explicit frozen-parent strategy")
+    if continuation_on_failure and observe_initial_residuals:
+        raise ValueError("failure-only continuation does not support pre-invocation residual observations")
     if trust_region_reversal and frozen_parent_continuation:
         raise ValueError("one numerical reversal strategy required")
     if trust_region_reversal or frozen_parent_continuation:
@@ -1117,6 +1165,8 @@ def benchmark_rc_control_seed_paths(
                     else FrozenParentContinuationProposal())
         numerical_identity = (TRUST_REGION_REVERSAL_IDENTITY if trust_region_reversal
                               else FROZEN_CONTINUATION_IDENTITY)
+        if continuation_on_failure:
+            numerical_identity = FROZEN_CONTINUATION_FAILURE_IDENTITY
         proposal_identity = _sha(_bytes({"profile": numerical_identity}))
     if type(observe_initial_residuals) is not bool or (
         observe_initial_residuals and proposal is None
@@ -1394,7 +1444,7 @@ def benchmark_rc_control_seed_paths(
     if trust_region_reversal or frozen_parent_continuation:
         identity["numerical_proposal"] = {
             "identity": numerical_identity,
-            "trigger": "accepted_direction_reversal",
+            "trigger": "failed_accepted_direction_reversal" if continuation_on_failure else "accepted_direction_reversal",
             "cost_included_in_path_wall": True,
             "optimizer_assemblies_separate_from_newton_dispatches": True,
             "optimizer_confers_acceptance": False,
@@ -1413,7 +1463,8 @@ def benchmark_rc_control_seed_paths(
             comparison_scope="one_target_from_one_supplied_native_parent_and_accepted_prefix",
             prefix_reachability_verified=False,
             original_complete_path_executed=False,
-            maximum_numerical_core_calls=2 + 2 * (len(order) - 1),
+            maximum_numerical_core_calls=2 + 2 * (len(order) - 1)
+            + (16 if frozen_parent_continuation else 0),
         )
     if record_assembly_work:
         identity["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
@@ -1461,6 +1512,7 @@ def benchmark_rc_control_seed_paths(
             record_assembly_timing,
             proposal_guard if name == "proposal" else None,
             observe_initial_residuals and name == "proposal",
+            continuation_on_failure and name == "proposal",
         )
         if initial_prefix is not None:
             unknown = any(
