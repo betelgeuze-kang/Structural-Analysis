@@ -3,6 +3,7 @@ import http from 'node:http'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { validateWorkbenchTestRegistration } from './workbench-test-registration.mjs'
 import {
   sanitizedFrontendEnvironment,
   trustedNode,
@@ -40,6 +41,8 @@ const specs = [
   'tests/frontend/workbench-v2-extended-sparse-job-contract.spec.ts',
   'tests/frontend/frame3d-job-browser.spec.ts',
   'tests/frontend/workbench-v2-design-comparison-contract.spec.ts',
+  'tests/frontend/workbench-v2-centroid-distance-contract.spec.ts',
+  'tests/frontend/workbench-v2-material-history-contract.spec.ts',
   'tests/frontend/workbench-v2-intermediate-steel-contract.spec.ts',
   'tests/frontend/workbench-v2-unequal-steel-contract.spec.ts',
   'tests/frontend/workbench-v2-candidate-process-contract.spec.ts',
@@ -55,7 +58,18 @@ const specs = [
 // The hermetic frontend lane has no Python solver installation. Opt into the
 // actual WSGI/browser integration only in a Python-enabled test environment.
 const withJobApi = process.argv.includes('--with-job-api')
-if (withJobApi) specs.push('tests/frontend/workbench-v2-job-api-browser.spec.ts', 'tests/frontend/workbench-v2-failure-diagnostic-browser.spec.ts', 'tests/frontend/workbench-v2-failure-history-browser.spec.ts', 'tests/frontend/workbench-v2-rc-search-http-browser.spec.ts', 'tests/frontend/workbench-v2-rc-cohort-http-browser.spec.ts')
+const pythonSpecs = [
+  'tests/frontend/workbench-v2-job-api-browser.spec.ts',
+  'tests/frontend/workbench-v2-failure-diagnostic-browser.spec.ts',
+  'tests/frontend/workbench-v2-failure-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-search-http-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-cohort-http-browser.spec.ts',
+  'tests/frontend/workbench-v2-checkpoint-retry-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-existing-checkpoint-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-successful-retry-history-browser.spec.ts',
+]
+validateWorkbenchTestRegistration(rootDir, specs, pythonSpecs)
+if (withJobApi) specs.push(...pythonSpecs)
 const passthrough = process.argv.slice(2).filter((arg) => arg !== '--with-job-api')
 
 const mime = {
@@ -112,6 +126,7 @@ async function main() {
   const playwright = trustedRepoTool(rootDir, 'node_modules/playwright/cli.js', 'playwright_cli')
   // Build with base '/' for local serving.
   for (const [args, extraEnvironment] of [
+    [['--test', trustedRepoTool(rootDir, 'tests/workbench-test-registration.test.mjs', 'workbench_registration_test')], {}],
     [[typescript, '--noEmit'], {}],
     [[vite, 'build'], { VITE_BASE_PATH: '/' }],
     [[delivery], {}],
