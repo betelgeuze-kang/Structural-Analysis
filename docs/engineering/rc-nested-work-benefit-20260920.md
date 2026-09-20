@@ -42,8 +42,8 @@ time before output is 0.105161 s, not a solver benchmark.
 Next learning work should distinguish whether a proposal reduces solver work
 and whether that reduction survives proposal overhead and repeat variability.
 The current material-input model's 2 true positives/25 false positives remains
-a failed selection result. No new target, threshold or runtime promotion is
-authorized by this descriptive diagnostic alone; each next experiment needs
+a failed selection result. This descriptive diagnostic does not validate a
+new target, threshold or runtime promotion; each next experiment needs
 its own excluded-group and full-cost validation.
 
 Verification: the previous 99-test focused module run passed; the subsequently
