@@ -1,0 +1,26 @@
+{
+  "checked_date": "2026-09-20",
+  "article_doi": "10.1617/s11527-026-02945-5",
+  "dataset_doi": "10.24355/dbbs.084-202506031524-0",
+  "metadata_url": "https://api.datacite.org/dois/10.24355/dbbs.084-202506031524-0",
+  "metadata_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-leopard-metadata-nh3omm5d",
+  "metadata_sha256": "6b5b7d617773ec330ca854771389810562e4849b1fa911f0c2a9eaeceb4da91b",
+  "landing_url": "https://leopard.tu-braunschweig.de/receive/dbbs_mods_00078770",
+  "rights": [
+    {
+      "lang": "en",
+      "rights": "Creative Commons Attribution Non Commercial Share Alike 4.0 International",
+      "rightsUri": "https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode",
+      "schemeUri": "https://spdx.org/licenses/",
+      "rightsIdentifier": "cc-by-nc-sa-4.0",
+      "rightsIdentifierScheme": "SPDX"
+    }
+  ],
+  "candidate_scope": "conventional cast beam four-point bending only; suitability unverified",
+  "dataset_files_retrieved": false,
+  "admitted_training_rows": 0,
+  "product_training_authorized": false,
+  "physical_validation": false,
+  "new_fits": 0,
+  "new_solves": 0
+}
