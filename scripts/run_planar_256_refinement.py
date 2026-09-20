@@ -25,6 +25,72 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def write_json(path, value):
+    with path.open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, indent=2, allow_nan=False)
+        stream.write('\n')
+
+
+def write_path_artifacts(root, metadata, steps):
+    """Preserve the original full JSON bytes while materializing one step at a time.
+
+    Metadata is the original ordered dictionary with an empty steps placeholder.
+    The index is published only after all full/step files finish successfully.
+    """
+    require(type(metadata.get('steps')) is list and not metadata['steps'],
+            'empty steps placeholder required')
+    step_root = root / 'steps'
+    step_root.mkdir()
+    encoder = json.JSONEncoder(indent=2, allow_nan=False)
+    entries = []
+    full = root / 'repeat-0.json'
+    with full.open('x', encoding='utf-8', newline='\n') as stream:
+        stream.write('{')
+        for index, (key, value) in enumerate(metadata.items()):
+            require(type(key) is str, 'string metadata key required')
+            stream.write(',' if index else '')
+            stream.write('\n  ' + encoder.encode(key) + ': ')
+            if key == 'steps':
+                stream.write('[')
+                for step in steps:
+                    ordinal = len(entries)
+                    step_file = step_root / f'{ordinal:04d}.json'
+                    write_json(step_file, step)
+                    entries.append({'path': str(step_file.relative_to(root)),
+                                    'bytes': step_file.stat().st_size,
+                                    'sha256': file_sha256(step_file)})
+                    stream.write(',' if ordinal else '')
+                    stream.write('\n    ')
+                    for chunk in encoder.iterencode(step):
+                        stream.write(chunk.replace('\n', '\n    '))
+                    del step
+                if entries:
+                    stream.write('\n  ')
+                stream.write(']')
+            else:
+                for chunk in encoder.iterencode(value):
+                    stream.write(chunk.replace('\n', '\n  '))
+        stream.write('\n}\n')
+    meta_file = root / 'path-metadata.json'
+    write_json(meta_file, metadata)
+    receipt = {'schema': 'fixed-planar-path-file-index.v1',
+               'full': {'path': full.name, 'bytes': full.stat().st_size,
+                        'sha256': file_sha256(full)},
+               'metadata': {'path': meta_file.name, 'bytes': meta_file.stat().st_size,
+                            'sha256': file_sha256(meta_file)},
+               'steps': entries, 'step_count': len(entries)}
+    write_json(root / 'path-index.json', receipt)
+    return receipt
+
+
 def checked_sources(bundle, repo):
     raw = (bundle / "inputs-manifest.json").read_bytes()
     require(hashlib.sha256(raw).hexdigest() == MANIFEST_SHA256, "manifest changed")
@@ -96,8 +162,7 @@ def run(bundle, output_parent, repo, *, layers=256):
     (root / "runner.py").write_bytes(Path(__file__).read_bytes())
 
     def write(name, value):
-        with (root / name).open("x") as stream:
-            stream.write(json.dumps(value, indent=2, allow_nan=False) + "\n")
+        write_json(root / name, value)
 
     require("structural_analysis" not in sys.modules, "run in a fresh process")
     sys.path.insert(0, str(source_root))
@@ -183,7 +248,9 @@ def run(bundle, output_parent, repo, *, layers=256):
         problem, targets, control_global_dof=15, config=config
     )
     solve_ns = perf_counter_ns() - started
-    write("repeat-0.json", path.to_dict())
+    metadata = replace(path, steps=()).to_dict()
+    metadata['contract_pass'] = path.contract_pass
+    receipt = write_path_artifacts(root, metadata, (step.to_dict() for step in path.steps))
     summary = {
         "source_revision": SOURCE_REVISION,
         "status": path.status,
@@ -192,9 +259,7 @@ def run(bundle, output_parent, repo, *, layers=256):
         "committed_steps": sum(s.committed for s in path.steps),
         "setup_wall_ns": setup_ns,
         "path_wall_ns": solve_ns,
-        "artifact_sha256": hashlib.sha256(
-            (root / "repeat-0.json").read_bytes()
-        ).hexdigest(),
+        "artifact_sha256": receipt['full']['sha256'],
         "through_artifact_hash_wall_ns": perf_counter_ns() - process_started,
         "timing_excludes": "summary and inventory output, subsequent comparison audit",
         "physical_validation": False,
@@ -205,7 +270,7 @@ def run(bundle, output_parent, repo, *, layers=256):
         {
             "path": str(p.relative_to(root)),
             "bytes": p.stat().st_size,
-            "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+            "sha256": file_sha256(p),
         }
         for p in sorted(root.rglob("*"))
         if p.is_file() and "__pycache__" not in p.parts
