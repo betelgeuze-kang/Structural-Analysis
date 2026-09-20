@@ -33,6 +33,46 @@ def test_signed_cancellation_does_not_hide_absolute_difference():
     assert result["mixed_onset_absolute_difference_share"] == 0
 
 
+def common_points():
+    from scripts.probe_planar_common_material_points import FIELDS
+
+    points = []
+    for cell, (a, b) in enumerate(((0., 1.), (1., 0.))):
+        points.append({'member': 'E1', 'gauss': 0, 'coarse_cell': cell,
+                       'y_m': float(cell), 'coarse_replay_exact': True,
+                       'rows': [{'target_m': 0.002,
+                                 'coarse_accepted_values': dict.fromkeys((*FIELDS, 'stress_mpa'), a),
+                                 'derived_fine_point_values': dict.fromkeys((*FIELDS, 'stress_mpa'), b)}]})
+    return points
+
+
+def test_all_common_points_keep_unsigned_error_and_maximum_location():
+    from scripts.probe_planar_common_material_points import summarize_all_points
+
+    result = summarize_all_points(common_points())
+    assert result['point_count'] == result['point_target_count'] == 2
+    for field in result['targets'][0]['fields'].values():
+        assert field['maximum_absolute_difference'] == field['mean_absolute_difference'] == 1
+        assert field['maximum_location']['coarse_cell'] == 0
+
+
+@pytest.mark.parametrize('mutation', ['duplicate', 'missing_target', 'unverified', 'nan'])
+def test_all_common_points_reject_incomplete_or_unknown_observations(mutation):
+    from scripts.probe_planar_common_material_points import summarize_all_points
+
+    points = common_points()
+    if mutation == 'duplicate':
+        points.append(points[0])
+    elif mutation == 'missing_target':
+        points[1]['rows'] = []
+    elif mutation == 'unverified':
+        points[1]['coarse_replay_exact'] = False
+    else:
+        points[1]['rows'][0]['derived_fine_point_values']['stress_mpa'] = float('nan')
+    with pytest.raises(ValueError):
+        summarize_all_points(points)
+
+
 def test_exact_match_has_no_mixed_error_share():
     result = cell_metrics([0.25], [0.5, 0])
     assert result["section_relative_infinity_difference"] == 0
