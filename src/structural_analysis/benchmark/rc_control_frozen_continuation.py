@@ -8,6 +8,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
 )
 from structural_analysis.solvers.nonlinear.assembly_work import VectorAssemblyWorkRecorder
 
+FROZEN_CONTINUATION_TARGET_FAILURE_IDENTITY = "experimental-frozen-parent-failed-target-16.v1"
 FROZEN_CONTINUATION_FAILURE_IDENTITY = "experimental-frozen-parent-failed-reversal-16.v1"
 FROZEN_CONTINUATION_IDENTITY = "experimental-frozen-parent-reversal-16.v1"
 
@@ -18,10 +19,14 @@ class FrozenParentContinuationProposal:
     def __call__(self, context):
         raise RuntimeError("native parent and scoped work recording required")
 
-    def propose(self, problem, parent, request, context, *, artifact_sink):
+    def propose(self, problem, parent, request, context, *, artifact_sink, allow_nonreversal=False):
         if problem.coordinate_precision != "binary64":
             raise ValueError("frozen-parent proposal requires binary64 coordinates")
+        if type(allow_nonreversal) is not bool:
+            raise ValueError("explicit boolean target continuation scope required")
         previous = context.accepted_targets_m
+        if not previous:
+            raise ValueError("accepted origin required for continuation")
         report = {
             "status": "abstained", "seed": None, "unknown_work": False,
             "native_core_calls_attempted": 0, "known_newton_iterations": 0,
@@ -29,9 +34,9 @@ class FrozenParentContinuationProposal:
             "intermediate_material_checkpoints_adopted": False,
             "parent_hash": parent.state_hash,
         }
-        if len(previous) < 2 or (
+        if not allow_nonreversal and (len(previous) < 2 or (
             (previous[-1] - previous[-2]) * (context.target_m - previous[-1]) >= 0
-        ):
+        )):
             report["reason"] = "no_accepted_direction_reversal"
             return report
         origin = parent.global_displacements[request.control_global_dof]

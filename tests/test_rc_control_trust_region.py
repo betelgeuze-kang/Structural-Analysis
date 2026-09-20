@@ -333,3 +333,55 @@ def test_parent_step_budget_includes_internal_continuation_calls(tmp_path, conti
     ordinary = sum(i['work']['core_calls'] for a in arms for e in a['entries'] for i in e['invocations'])
     assert ordinary + report['numerical_proposal_work']['native_core_calls_attempted'] <= report['maximum_numerical_core_calls']
     assert report['arms']['proposal']['status'] == 'complete'
+
+
+@pytest.mark.parametrize('amplitude', [.02, .04])
+def test_failed_first_l_frame_target_uses_original_parent_continuation(tmp_path, amplitude):
+    import json
+
+    model = load_neutral_json(Path('examples/public_rc_fiber_frame_l_frame_material_history.json'))
+    request = BoundedRCFiberDirectControlRequest(
+        7, (-amplitude / 2, -amplitude, amplitude / 2),
+        allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(('N3', 0., -25., 0.),),
+    )
+    report = benchmark_rc_control_seed_paths(
+        model, request, source_revision='a' * 40, output_directory=tmp_path / 'l-frame',
+        frozen_parent_continuation=True, continuation_on_failure=True,
+        continuation_all_failed_targets=True,
+    )
+    arm = report['arms']['proposal']
+    assert arm['status'] == ('complete' if amplitude == .02 else 'incomplete')
+    assert arm['accepted_target_count'] == (3 if amplitude == .02 else 0)
+    assert report['arms']['reference']['status'] == 'incomplete'
+    assert not report['comparisons']['proposal']['full_history_pass']
+    assert report['all_execution_work_reported']
+    assert report['numerical_proposal']['maximum_additional_native_calls'] == 48
+    assert report['numerical_proposal_work']['native_core_calls_attempted'] <= 48
+    first = arm['entries'][0]
+    assert not first['invocations'][0]['committed']
+    if amplitude == .02:
+        assert len(first['invocations']) == 2 and first['invocations'][1]['committed']
+        assert first['numerical_proposal']['native_core_calls_attempted'] == 16
+        from structural_analysis.benchmark.rc_control_continuation_replay import replay_rc_frozen_continuation_study
+        replay = replay_rc_frozen_continuation_study(
+            tmp_path / 'l-frame', model, request, output_directory=tmp_path / 'replay',
+            replay_source_revision='b' * 40,
+        )
+        assert replay['numerical_reproduction_pass'] and not replay['fresh_reference_comparisons_pass']
+    else:
+        assert len(first['invocations']) == 1
+        trial = first['numerical_proposal']
+        assert trial['status'] == 'blocked' and not trial['unknown_work']
+        assert trial['native_core_calls_attempted'] == len(trial['stages']) == 8
+        assert not trial['stages'][-1]['committed']
+    for entry in arm['entries']:
+        for stage in entry['numerical_proposal'].get('stages', []):
+            raw = json.loads((tmp_path / 'l-frame/proposal' / stage['artifact']['path']).read_bytes())
+            assert raw['parent_checkpoint']['state_hash'] == entry['parent_hash']
+
+
+def test_all_target_scope_requires_failure_only_mode_before_output(tmp_path):
+    with pytest.raises(ValueError, match='all-target continuation'):
+        run(tmp_path, frozen_parent_continuation=True, continuation_all_failed_targets=True)
+    assert not (tmp_path / 'study').exists()

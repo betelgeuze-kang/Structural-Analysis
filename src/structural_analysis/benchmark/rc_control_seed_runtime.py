@@ -56,6 +56,7 @@ from structural_analysis.benchmark.rc_control_frozen_continuation import (
     FrozenParentContinuationProposal,
     FROZEN_CONTINUATION_IDENTITY,
     FROZEN_CONTINUATION_FAILURE_IDENTITY,
+    FROZEN_CONTINUATION_TARGET_FAILURE_IDENTITY,
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.assembly_work import (
@@ -363,6 +364,7 @@ def _path(
     proposal_guard=None,
     observe_initial_residuals=False,
     continuation_on_failure=False,
+    continuation_all_failed_targets=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -713,6 +715,7 @@ def _path(
                 try:
                     numerical = proposal.propose(
                         compiled.problem, accepted, request, context,
+                        allow_nonreversal=continuation_all_failed_targets,
                         artifact_sink=lambda stage, payload: _save(
                             root, f"{index:03d}-continuation-{stage:03d}.json", _bytes(payload)
                         ),
@@ -1138,6 +1141,7 @@ def benchmark_rc_control_seed_paths(
     trust_region_reversal: bool = False,
     frozen_parent_continuation: bool = False,
     continuation_on_failure: bool = False,
+    continuation_all_failed_targets: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -1152,6 +1156,8 @@ def benchmark_rc_control_seed_paths(
         raise ValueError("explicit boolean frozen-parent continuation option required")
     if type(continuation_on_failure) is not bool or (continuation_on_failure and not frozen_parent_continuation):
         raise ValueError("failure-only continuation requires the explicit frozen-parent strategy")
+    if type(continuation_all_failed_targets) is not bool or (continuation_all_failed_targets and not continuation_on_failure):
+        raise ValueError("all-target continuation requires the explicit failure-only strategy")
     if continuation_on_failure and observe_initial_residuals:
         raise ValueError("failure-only continuation does not support pre-invocation residual observations")
     if trust_region_reversal and frozen_parent_continuation:
@@ -1167,6 +1173,8 @@ def benchmark_rc_control_seed_paths(
                               else FROZEN_CONTINUATION_IDENTITY)
         if continuation_on_failure:
             numerical_identity = FROZEN_CONTINUATION_FAILURE_IDENTITY
+        if continuation_all_failed_targets:
+            numerical_identity = FROZEN_CONTINUATION_TARGET_FAILURE_IDENTITY
         proposal_identity = _sha(_bytes({"profile": numerical_identity}))
     if type(observe_initial_residuals) is not bool or (
         observe_initial_residuals and proposal is None
@@ -1444,12 +1452,15 @@ def benchmark_rc_control_seed_paths(
     if trust_region_reversal or frozen_parent_continuation:
         identity["numerical_proposal"] = {
             "identity": numerical_identity,
-            "trigger": "failed_accepted_direction_reversal" if continuation_on_failure else "accepted_direction_reversal",
+            "trigger": "failed_target" if continuation_all_failed_targets else
+            "failed_accepted_direction_reversal" if continuation_on_failure else "accepted_direction_reversal",
             "cost_included_in_path_wall": True,
             "optimizer_assemblies_separate_from_newton_dispatches": True,
             "optimizer_confers_acceptance": False,
             "unknown_work_stops_path": True,
         }
+    if continuation_all_failed_targets:
+        identity["numerical_proposal"]["maximum_additional_native_calls"] = 16 * len(request.targets_m)
     if initial_prefix is not None:
         identity.update(
             schema_version="experimental-rc-control-parent-step-comparison.v1",
@@ -1513,6 +1524,7 @@ def benchmark_rc_control_seed_paths(
             proposal_guard if name == "proposal" else None,
             observe_initial_residuals and name == "proposal",
             continuation_on_failure and name == "proposal",
+            continuation_all_failed_targets and name == "proposal",
         )
         if initial_prefix is not None:
             unknown = any(
