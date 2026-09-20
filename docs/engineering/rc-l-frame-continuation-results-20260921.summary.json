@@ -1,0 +1,3802 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-continuation-51s9xsuj",
+  "inventory_sha256": "f31af49736e847b4c51b62bdbb00c77f0b6d59fb3d4e7e72899f49ee82064921",
+  "file_count": 3620,
+  "audit": {
+    "source_revision": "ce7a8615d0e8ea1a01a03f7f0affb722fa207f6e",
+    "totals": {
+      "paths": 96,
+      "completed_paths": 56,
+      "ordinary_native_calls": 326,
+      "additional_native_calls": 160,
+      "ordinary_newton_iterations": 1566,
+      "additional_newton_iterations": 494,
+      "all_native_calls": 486,
+      "all_newton_iterations": 2060
+    },
+    "pairs": [
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23118075,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6521695
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6537425
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13059120
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23123922,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 232516328,
+                  "newton_assembly_work": {
+                    "call_count": 34,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6498094
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6515845
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6471293
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6493024
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6518565
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6536895
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6529585
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6520874
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6555006
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6509385
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6517055
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6482924
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6508294
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6506284
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6496994
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6492994
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6531985
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6539605
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6488004
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6505544
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6497394
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6483304
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6497114
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6501834
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 25,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6490134
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 26,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6494584
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 27,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6477913
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 28,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6485164
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 29,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6504114
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 30,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6490284
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 31,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6504345
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 32,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6497254
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 33,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6521315
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 34,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6545555
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 34,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 221208557
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 232530099,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 11,
+                    "newton_iterations": 11
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 24447965,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6900158
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6900077
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13800235
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 24448276,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 233110268,
+                  "newton_assembly_work": {
+                    "call_count": 34,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6483174
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6491863
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6512914
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6477193
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6511474
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6509805
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6504344
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6481364
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6482814
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6493134
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6516795
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6488773
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6532916
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6541606
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6513274
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6527615
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6516864
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6536526
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6551986
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6571106
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6551345
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6619948
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6574616
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6551826
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 25,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6557626
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 26,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6538145
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 27,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6503034
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 28,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6549405
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 29,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6500195
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 30,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6561036
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 31,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6493643
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 32,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6529245
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 33,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6512225
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 34,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6549486
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 34,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 221837315
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 233117519,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 11,
+                    "newton_iterations": 11
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "short-2mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 2958462289,
+          "on-failure": 1419446985
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": true
+          },
+          {
+            "upfront": false,
+            "on-failure": true
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 164388763,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6440982
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6498304
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6475443
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6424261
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6478673
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6445112
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6476253
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6479414
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6449842
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6445783
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6447343
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6412131
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6492383
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6430372
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6495714
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6487864
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6492764
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6540046
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6471003
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6461443
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6438032
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6437042
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6446982
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6448493
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 155115679
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 164393595,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 165749983,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6464284
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6500404
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6501544
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6536995
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6576607
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6577817
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6557376
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6538095
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6518004
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6555776
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6543406
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6532365
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6580096
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6558526
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6531546
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6530266
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6500884
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6527465
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6497674
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6482333
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6475964
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6478023
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6455543
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6454753
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 156475746
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 165761541,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 163863454,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6436462
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6488734
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6454763
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6463103
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6418311
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6419183
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6470923
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6439723
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6459782
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6431602
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6406741
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6428892
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6442802
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6459082
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6459193
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6425452
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6434092
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6445602
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6439103
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6423532
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6445282
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6437832
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6434971
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6437162
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 154602324
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 163868419,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 166137032,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6598668
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6595327
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6560917
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6567226
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6584777
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6540465
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6589677
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6544927
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6512934
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6572467
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6538845
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6506904
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6586277
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6512684
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6495583
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6520254
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6459733
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6522584
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6506964
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6495644
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6495284
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6494585
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6505454
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6496364
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 156804544
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 166141963,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "short-20mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 556420089,
+          "on-failure": 500384894
+        },
+        "additional_native_calls": {
+          "upfront": 0,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 131268301,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6369391
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6465173
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6472354
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6397120
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6452203
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6384490
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6417272
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6462553
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6433612
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6397781
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6410581
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6429662
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6467133
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6430182
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6407832
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6451153
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6439572
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6453222
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6439432
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 122180718
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 131277545,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 131597650,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6457183
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6531395
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6501895
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6475193
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6451572
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6422631
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6432592
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6492613
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6439302
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6489734
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6434512
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6443693
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6494254
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6449662
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6441012
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6411671
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6397271
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6399090
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6388310
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 122553585
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 131607325,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 133529500,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6563196
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6645189
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6586197
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6565167
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6543765
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6510025
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6541026
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6563927
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6524815
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6517245
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6545935
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6535936
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6586007
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6597207
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6560816
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6531395
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6490543
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6482863
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6484074
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 124375328
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 133542850,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 132149370,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6421852
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6513725
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6500794
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6460474
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6450842
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6459033
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6445882
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6475443
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6519105
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6468433
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6490764
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6449382
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6495014
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6510624
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6449663
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6509694
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6488275
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6452933
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6459922
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 123021854
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 132169494,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "short-40mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 433160209,
+          "on-failure": 438488246
+        },
+        "additional_native_calls": {
+          "upfront": 0,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23247724,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6558896
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6584397
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13143293
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23248056,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 49787259,
+                  "newton_assembly_work": {
+                    "call_count": 6,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6553196
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6539626
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6563376
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6594367
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6585397
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6590457
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 6,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 39426419
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 49788470,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23008535,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6534826
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6468954
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13003780
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23018099,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 49167559,
+                  "newton_assembly_work": {
+                    "call_count": 6,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6511926
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6494634
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6495204
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6529205
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6476423
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6507395
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 6,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 39014787
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 49177370,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "long-2mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 2180039741,
+          "on-failure": 788906701
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": 0.36187721084301094,
+        "fresh_reference_gates": [
+          {
+            "upfront": true,
+            "on-failure": true
+          },
+          {
+            "upfront": true,
+            "on-failure": true
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23472705,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6631008
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6663259
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13294267
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23473023,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 214136152,
+                  "newton_assembly_work": {
+                    "call_count": 31,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6598227
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6596817
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6617118
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6577866
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6635198
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6580887
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6591977
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6566338
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6611348
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6596657
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6580907
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6609058
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6580437
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6580307
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6592737
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6604028
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6611968
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6597368
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6615157
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6585206
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6567157
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6582697
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6619348
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6620368
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 25,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6609368
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 26,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6574367
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 27,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6587858
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 28,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6594547
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 29,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6551826
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 30,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6565846
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 31,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6597168
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 31,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 204400156
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 214142596,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 6,
+                    "newton_iterations": 6
+                  }
+                },
+                {
+                  "committed": true,
+                  "cpu_ns": 23346554,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6619938
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6601047
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13220985
+                  },
+                  "ordinal": 2,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23346799,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23147515,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6512644
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6580846
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13093490
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23147973,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 212830062,
+                  "newton_assembly_work": {
+                    "call_count": 31,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6538096
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6596677
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6591728
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6548345
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6581507
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6572286
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6553766
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6499164
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6531536
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6546696
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6553805
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6530196
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6535485
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6551936
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6532215
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6559946
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6531335
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 18,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6578367
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 19,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6549246
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 20,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6541045
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 21,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6552086
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 22,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6544725
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 23,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6522994
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 24,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6549876
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 25,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6557536
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 26,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6578106
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 27,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6570097
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 28,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6547996
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 29,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6584957
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 30,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6594247
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 31,
+                        "phase": "blocked_observation",
+                        "status": "returned",
+                        "wall_ns": 6537955
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 31,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 203163952
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 212842212,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 6,
+                    "newton_iterations": 6
+                  }
+                },
+                {
+                  "committed": true,
+                  "cpu_ns": 23326065,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6625968
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6606528
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13232496
+                  },
+                  "ordinal": 2,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23336120,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "long-20mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 2970348028,
+          "on-failure": 3424250223
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 32
+        },
+        "on_failure_over_upfront_ratio": 1.1528111153040952,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23276645,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6573376
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6590777
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13164153
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23277036,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 120738493,
+                  "newton_assembly_work": {
+                    "call_count": 17,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6471463
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6512865
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6494484
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6458643
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6514944
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6529055
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6519265
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6471453
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6492823
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6471824
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6519775
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6486935
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6456613
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6457163
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6457113
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6486643
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6449622
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 17,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 110250683
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 120748169,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 8,
+                    "newton_iterations": 8
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23598025,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6700441
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6648359
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13348800
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23598409,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 122410552,
+                  "newton_assembly_work": {
+                    "call_count": 17,
+                    "calls": [
+                      {
+                        "compensated": false,
+                        "ordinal": 1,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6560586
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 2,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6616798
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 3,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6530535
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 4,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6558275
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 5,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6562296
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 6,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6560326
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 7,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6590717
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 8,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6570056
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 9,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6624979
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 10,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6594808
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 11,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6602728
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 12,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6571116
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 13,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6597527
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 14,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6547956
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 15,
+                        "phase": "line_search",
+                        "status": "returned",
+                        "wall_ns": 6551676
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 16,
+                        "phase": "primary_iteration",
+                        "status": "returned",
+                        "wall_ns": 6555517
+                      },
+                      {
+                        "compensated": false,
+                        "ordinal": 17,
+                        "phase": "final_observation",
+                        "status": "returned",
+                        "wall_ns": 6574777
+                      }
+                    ],
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 17,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 111770673
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 122414115,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 8,
+                    "newton_iterations": 8
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "long-40mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 3689541921,
+          "on-failure": 1300016859
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": true
+          },
+          {
+            "upfront": false,
+            "on-failure": true
+          }
+        ]
+      }
+    ],
+    "all_paired_histories_match": false,
+    "policy_promoted": false
+  }
+}
