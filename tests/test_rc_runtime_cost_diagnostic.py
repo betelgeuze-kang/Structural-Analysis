@@ -513,6 +513,55 @@ def test_gate_training_rows_exclude_outer_and_retain_unknown_denominator(monkeyp
     assert result['gate_fitted'] is False
 
 
+def policy_sensitivity_fixture(monkeypatch):
+    _, audit, plan = gate_row_fixture(monkeypatch)
+    module = importlib.import_module('diagnose_rc_policy_sensitive_labels')
+    for i, pair in enumerate(audit['pairs']):
+        pair['parent_hash'] = pair['source_sample_hash']
+        pair['policy_hash'] = f'sha256:{i:064x}'
+        for repeat in pair['repetitions']:
+            repeat['report_hash'] = f'sha256:{i:064x}'
+            repeat['work'] = dict(secant=dict(core_calls=1, newton_iterations=3, linear_solves=3),
+                                  proposal=dict(core_calls=1, newton_iterations=3, linear_solves=3))
+    return module, audit, plan
+
+
+def test_policy_sensitivity_distinguishes_same_parent_different_policies(monkeypatch):
+    module, audit, plan = policy_sensitivity_fixture(monkeypatch)
+    changed = audit['pairs'][0]
+    for repeat in changed['repetitions']:
+        repeat['path_time_ratio'] = 1.2
+        repeat['work']['proposal']['newton_iterations'] = 4
+        repeat['work']['proposal']['linear_solves'] = 4
+    changed['label_result'] = module.label_from_repetitions(changed['repetitions'])
+    result = module.diagnose(audit, plan)
+    assert result['parent_count'] == 3 and result['pair_count'] == 6
+    assert result['parents_with_time_label_changes'] == 1
+    assert result['parents_with_work_category_changes'] == 1
+    assert result['contradictory_labels_within_one_gate_claim'] is False
+    audit['pairs'].reverse()
+    assert module.diagnose(audit, plan) == result
+
+
+@pytest.mark.parametrize('mutation', ['parent', 'inputs', 'duplicate_policy', 'missing', 'seed'])
+def test_policy_sensitivity_rejects_transplanted_or_incomplete_observations(monkeypatch, mutation):
+    module, audit, plan = policy_sensitivity_fixture(monkeypatch)
+    pair = audit['pairs'][0]
+    if mutation == 'parent':
+        pair['parent_hash'] = 'foreign'
+    elif mutation == 'inputs':
+        pair['guard_features']['values'] = [.002]
+    elif mutation == 'duplicate_policy':
+        twin = next(row for row in audit['pairs'][1:] if row['source_sample_hash'] == pair['source_sample_hash'])
+        pair['policy_hash'] = twin['policy_hash']
+    elif mutation == 'missing':
+        audit['pairs'].pop()
+    else:
+        pair['seed_fit_index'] += 1
+    with pytest.raises(ValueError):
+        module.diagnose(audit, plan)
+
+
 @pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'outer_case', 'seed', 'label', 'nonfinite'])
 def test_gate_training_rows_reject_transplanted_or_incomplete_inputs(monkeypatch, mutation):
     module, audit, plan = gate_row_fixture(monkeypatch)
