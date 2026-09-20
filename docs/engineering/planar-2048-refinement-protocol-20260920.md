@@ -16,4 +16,4 @@ The 1,024-layer solve took 2,305.99 s; roughly twice that plus output/audit work
 
 Focused checks pass 91 tests in 2.48 s, including 1,024-cell projection witnesses, rejected unplanned resolutions, pinned coarse-feature receipt/digest checks, protocol mismatch rejection, and existing step-writer/reader controls. The actual coarse feature payload loads with all forty targets, eighteen sections and 1,024 cells per section. Ruff and diff checks pass. Public API scope is unchanged.
 
-Results are pending. A passing internal comparison, if observed, would not establish continuum convergence, independent physical validation, sparse performance, broader topology/material/3D scope or release readiness. Those original roadmap requirements remain open.
+The [completed observation](planar-2048-refinement-20260920.md) passes all 400 nodal/steel groups but retains one of 240 concrete failures: tensile damage at 74 mm differs by 1.0850199%, above the unchanged 1% screen. This does not establish continuum convergence, independent physical validation, sparse performance, broader topology/material/3D scope or release readiness. Those original roadmap requirements remain open.
