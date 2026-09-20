@@ -1,6 +1,7 @@
 # Structural Analysis roadmap: current evidence and completion requirements
 
-Reviewed at development `02c6ed78ef12e3989cbdd3eed7c2fc37dcad08bd` on 2026-09-20.
+Current overview refreshed after development `406af087b` on 2026-09-20.
+The chronological observations below retain their original status at execution.
 The evidence below retains each experiment's original source revision. A document
 refresh does not rerun those experiments or qualify the current head. All five
 original workstreams remain open at their full scope.
@@ -9,9 +10,9 @@ original workstreams remain open at their full scope.
 | --- | --- | --- |
 | Repeated nonlinear runtime | [Five-case process study](rc-cost-pruning-process-campaign-20260920.md): deterministic cost exclusion lowers enclosing process time 25.6–27.1% in four cases; no-feasible case remains without a ratio. [54-fold study](rc-expanded-runtime-campaign-20260920.md) executes 216 full nonlinear paths with fixed history comparisons. | Broader topology/material regimes, repeat robustness and the complete preparation/transport/review cost before claiming user-time savings. Internal runs are not independent physical validation. |
 | Canonical RC changes, quantities and common prices | [Unequal reinforcement and canonical reanalysis](rc-unequal-outer-reinforcement-20260920.md), [outer centroid distances](rc-outer-centroid-distances-20260920.md), full accepted paths, fresh verification, member quantities and common declared prices reach original-artifact review. | Representative independently validated designs and authoritative quantity/price scope for commercial savings. Synthetic prices and verified internal calculations are not a construction quote or design approval. |
-| Learned warm starts with split and cost discipline | [Grouped 99-label runtime selection](rc-expanded-runtime-campaign-20260920.md): 198 proposals, all 54 comparisons pass, both candidates slower overall. [Same-parent probe](rc-same-parent-seed-probe-20260920.md): 198 single-step comparisons pass; one of 66 pairs is faster across all three repeats. [Cost attribution](rc-expanded-runtime-costs-20260920.md) separates overhead from invocation costs. | A useful learned policy on sufficiently diverse excluded groups and untouched project/geometry/history evaluation, including labels, fits, inference and failures. One favorable local parent cannot establish a selector or a full-path oracle. Secant remains selected. |
+| Learned warm starts with split and cost discipline | [Policy reuse full-path selection](rc-policy-runtime-followup-20260920.md): 90 comparisons/360 paths, five whole excluded groups, 165 labels and 9,360 exact numerical/context matches. Learned/secant ratios 1.011963 and 1.021737 retain secant. Six cold parses/642 cache hits are fully accounted for; earlier scalar and proposal-only improvements do not establish overall AI benefit. | A useful learned policy on sufficiently diverse excluded groups and untouched project/geometry/history evaluation, including labels, fits, inference and failures. One favorable local parent cannot establish a selector or a full-path oracle. Secant remains selected. |
 | Multifidelity selection and Workbench | Shortlist/ranking, full reanalysis, exhaustive comparison, cost optimality, errors and [strict cost exclusion delivery](rc-cost-pruned-search-delivery-20260920.md) reach desktop/mobile original-artifact review. Actual boundary violations are rejected by full analysis. | Useful learned decisions near meaningful feasibility boundaries on new cases with fixed budgets. The [four-case learned ranking](rc-reinforcement-cost-campaign-20260920.md) costs 2.01–2.06 times price order including training and selects the same candidates. |
-| Broader planar/sparse and later material/3D capability | [256-layer full-history study](planar-256-refinement-20260920.md): 40 targets complete, 400 bounded nodal/steel comparisons pass; concrete diagnostic failures decrease from 70/240 to 34/240. | Concrete material-field convergence still fails its screen (maximum tensile-damage difference 6.68%). Sparse speed, broader complete paths, independent physical verification and each new material/3D scope remain unproved. |
+| Broader planar/sparse and later material/3D capability | [256-layer full-history study](planar-256-refinement-20260920.md): 40 targets complete, 400 bounded nodal/steel comparisons pass; concrete diagnostic failures decrease from 70/240 to 34/240. | Concrete material-field convergence still fails its screen (maximum tensile-damage difference 6.68%). [Error decomposition](planar-concrete-error-decomposition-20260920.md) motivates the [running 512-layer follow-up](planar-512-refinement-20260920.md), which has no completed comparison yet. Sparse speed, broader complete paths, independent physical verification and each new material/3D scope remain unproved. |
 
 ## Current integration and acceptance boundaries
 
@@ -41,7 +42,10 @@ support for unequal reinforcement or centroid distances does not resolve those
 experimental uncertainties. Independent validation, source rights, required
 hardware, owner/operator actions and signed acceptance remain separate.
 
-## Next decisions
+## Chronological decisions and observations
+
+The following entries are an execution history. Later completion entries supersede
+earlier running states; the overview table above gives the current outcome.
 
 The [interior training expansion](rc-interior-training-coverage-20260920.md)
 adds 66 new source-verified labels while retaining the old 99 and leaving both

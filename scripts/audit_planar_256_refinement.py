@@ -97,18 +97,37 @@ def nodal_steel(step, layers):
     return sorted(steel), groups
 
 
+def step_features(steps, layers):
+    """Keep only comparison values after callers validate the accepted path."""
+    targets = [i / 500 for i in range(1, 41)]
+    require(
+        [s["metrics"]["target_control_displacement_m"] for s in steps] == targets,
+        "full forty targets required",
+    )
+    return [
+        {"target_m": target, "sections": sections(step, layers, CONCRETE),
+         "nodal_steel": nodal_steel(step, layers)}
+        for target, step in zip(targets, steps, strict=True)
+    ]
+
+
 def compare_steps(coarse, fine, coarse_layers):
     require(type(coarse_layers) is int and coarse_layers in (128, 256),
             "fixed comparison layer count required")
+    return compare_features(step_features(coarse, coarse_layers),
+                            step_features(fine, 2 * coarse_layers), coarse_layers)
+
+
+def compare_features(coarse, fine, coarse_layers):
+    require(type(coarse_layers) is int and coarse_layers in (128, 256),
+            "fixed comparison layer count required")
     targets = [i / 500 for i in range(1, 41)]
-    for steps in (coarse, fine):
-        require(
-            [s["metrics"]["target_control_displacement_m"] for s in steps] == targets,
-            "full forty targets required",
-        )
+    for features in (coarse, fine):
+        require([row['target_m'] for row in features] == targets,
+                "full forty targets required")
     rows = []
     for target, a, b in zip(targets, coarse, fine, strict=True):
-        aa, bb = sections(a, coarse_layers, CONCRETE), sections(b, 2 * coarse_layers, CONCRETE)
+        aa, bb = a["sections"], b["sections"]
         require(set(aa) == set(bb), "section correspondence mismatch")
         for key in aa:
             require(
@@ -116,8 +135,8 @@ def compare_steps(coarse, fine, coarse_layers):
                 == (bb[key]["xi"], bb[key]["weight"]),
                 "integration mismatch",
             )
-        ak, ag = nodal_steel(a, coarse_layers)
-        bk, bg = nodal_steel(b, 2 * coarse_layers)
+        ak, ag = a["nodal_steel"]
+        bk, bg = b["nodal_steel"]
         require(ak == bk, "steel correspondence mismatch")
         metrics = {
             k: metric(

@@ -1,12 +1,14 @@
 """Read-only comparison of pinned full 256 and 512 layer histories."""
 
 import argparse
+import gc
 import json
 from pathlib import Path
 
 from scripts.audit_planar_256_refinement import (
     PROTOCOL_SHA256 as COARSE_PROTOCOL_SHA256,
-    compare_steps,
+    compare_features,
+    step_features,
 )
 from scripts.audit_planar_concrete_localization import read_checked, require, validate_path
 
@@ -21,14 +23,18 @@ def audit(coarse_root, fine_root, fine_sha256):
                   'target_displacements_m', 'control_global_dof', 'configuration',
                   'same_proportional_force_vector', 'constant_axial_load'):
         require(coarse_protocol[field] == fine_protocol[field], 'protocol mismatch: ' + field)
-    paths = [
-        read_checked(coarse_root / 'repeat-0.json', COARSE_SHA256, maximum_bytes=2 * 1024**3),
-        read_checked(fine_root / 'repeat-0.json', fine_sha256, maximum_bytes=4 * 1024**3),
-    ]
-    for path in paths:
+    features = []
+    for root, digest, layers, bound in (
+        (coarse_root, COARSE_SHA256, 256, 2 * 1024**3),
+        (fine_root, fine_sha256, 512, 4 * 1024**3),
+    ):
+        path = read_checked(root / 'repeat-0.json', digest, maximum_bytes=bound)
         validate_path(path)
         require(path['control_global_dof'] == 15, 'control DOF mismatch')
-    rows, maxima = compare_steps(paths[0]['steps'], paths[1]['steps'], 256)
+        features.append(step_features(path['steps'], layers))
+        del path
+        gc.collect()
+    rows, maxima = compare_features(features[0], features[1], 256)
     return {
         'schema': 'fixed-planar-256-512-comparison.v1',
         'source_revision': fine_protocol['source_revision'],

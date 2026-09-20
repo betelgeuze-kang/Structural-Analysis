@@ -404,3 +404,50 @@ def test_comparison_requires_complete_original_target_sequence():
     from scripts.audit_planar_256_refinement import compare_steps
     with pytest.raises(ValueError, match='forty targets'):
         compare_steps([], [], 256)
+
+
+def test_large_refinement_audit_releases_original_before_next_read(monkeypatch, tmp_path):
+    import weakref
+    import scripts.audit_planar_512_refinement as audit
+
+    class PathObject(dict):
+        pass
+
+    events, refs = [], []
+    protocol = dict.fromkeys(('source_revision', 'source_manifest_sha256', 'input_sha256',
+                             'target_displacements_m', 'control_global_dof', 'configuration',
+                             'same_proportional_force_vector', 'constant_axial_load'), 'same')
+
+    def read(path, digest, **kwargs):
+        if path.name == 'protocol.json':
+            return dict(protocol)
+        assert all(ref() is None for ref in refs), 'previous full path still retained'
+        value = PathObject(control_global_dof=15, steps=['steps'])
+        refs.append(weakref.ref(value))
+        events.append('read')
+        return value
+
+    monkeypatch.setattr(audit, 'read_checked', read)
+    monkeypatch.setattr(audit, 'validate_path', lambda path: events.append('validate'))
+    monkeypatch.setattr(audit, 'step_features', lambda steps, layers: events.append('extract') or [])
+    monkeypatch.setattr(audit, 'compare_features', lambda *args: ([], {}))
+    result = audit.audit(tmp_path / 'coarse', tmp_path / 'fine', 'digest')
+    assert events == ['read', 'validate', 'extract'] * 2
+    assert all(ref() is None for ref in refs)
+    assert result['structural_solves'] == 0
+
+
+def test_large_refinement_audit_does_not_extract_failed_path(monkeypatch, tmp_path):
+    import scripts.audit_planar_512_refinement as audit
+    protocol = dict.fromkeys(('source_revision', 'source_manifest_sha256', 'input_sha256',
+                             'target_displacements_m', 'control_global_dof', 'configuration',
+                             'same_proportional_force_vector', 'constant_axial_load'), 'same')
+    monkeypatch.setattr(audit, 'read_checked', lambda *args, **kwargs: dict(protocol))
+
+    def reject(path):
+        raise ValueError('path failed')
+
+    monkeypatch.setattr(audit, 'validate_path', reject)
+    monkeypatch.setattr(audit, 'step_features', lambda *args: pytest.fail('failed path extracted'))
+    with pytest.raises(ValueError, match='path failed'):
+        audit.audit(tmp_path, tmp_path, 'digest')

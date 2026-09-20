@@ -24,7 +24,7 @@ witness locations does not establish asymptotic convergence order.
 
 The shared comparison helper covers the original 128/256 and new 256/512 pair.
 Synthetic tests cover both resolutions, localized projection errors, rejected
-unplanned layer counts and incomplete paths. The focused file passes 52 tests;
+unplanned layer counts and incomplete paths. The focused file passes 54 tests;
 Ruff passes. Recomputing the original retained 128/256 report with the shared
 helper reproduces the entire report exactly (640 groups, zero structural solves).
 No material parameter fitting or AI training is performed.
@@ -32,3 +32,13 @@ No material parameter fitting or AI training is performed.
 The original 34/240 concrete failures remain authoritative until the new full
 path and its read-only comparison have completed. Preserve any new failed path;
 do not retry with relaxed tolerances or replace the original observations.
+
+## Comparison memory handling
+
+The 256/512 auditor reads and validates one complete path at a time. After
+accepted-chain and section/fiber bindings are verified, it retains only the
+comparison fields and releases the full path before reading the next result.
+The full original files and hashes remain unchanged. A lifecycle regression
+checks release before the second read; a failed path is rejected before feature
+extraction. This avoids simultaneous retention of both full decoded paths; no
+measured peak-memory reduction or streaming-parser claim is made.
