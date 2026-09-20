@@ -60,3 +60,9 @@ compiled problem, complete request, original tolerances and arithmetic fields.
 Source revision and timing may differ; physical/numerical contracts may not.
 Nineteen focused tests now pass, including each changed or missing contract
 field. The first real old/new comparison also passes this contract check.
+
+The 19 numerical-equivalence checks are now explicitly registered in the hosted
+Python development job (64 test files). The workflow contract requires that
+registration while preserving the independent full-evidence gate. Workflow and
+equivalence verification passes 37 local tests. Hosted execution at the new
+revision is still required; current CI belongs to the earlier published source.
