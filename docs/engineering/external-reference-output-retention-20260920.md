@@ -88,3 +88,18 @@ remain in their original module and the full gate is unchanged. The selection
 contract requires the new module (70 development modules). Capture, pinned-runtime
 and selection checks pass together: 36 tests in 5.20 seconds. This closes a test
 execution omission, not external numerical or independent acceptance.
+
+## Container transport follow-up
+
+The clean-runner now routes fresh code-to-code execution through a unique retained
+attempt directory and writes a diagnostic file inventory even when the child
+command raises. Three additional focused cases check success/failure propagation,
+UTF-8 byte length and hash binding, and preservation across repeated attempts.
+These use controlled commands; no fresh Docker or external numerical execution
+is claimed. Sidecars remain outside the v1 signed summary and do not close the
+schema/attestation dependency above.
+
+Validation: all eleven standalone output-capture cases plus the existing runner
+package/output-scope contract passed (12 passed, 13 unrelated cases deselected).
+Ruff and `git diff --check` passed. This does not requalify stored clean-runner
+receipts against the changed runner source.

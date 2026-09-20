@@ -96,3 +96,51 @@ def test_raw_capture_cli_forwards_fresh_output_directory(tmp_path, monkeypatch):
     assert module.main(args) == 0
     assert seen["raw_output_dir"] == output.resolve()
     assert json.loads((tmp_path / "receipt.json").read_text())["technical_contract_pass"] is False
+
+
+@pytest.mark.parametrize("failure", [None, "after_output", "before_output"])
+def test_clean_runner_retains_distinct_attempts_and_failure_inventory(tmp_path, monkeypatch, failure):
+    spec = importlib.util.spec_from_file_location(
+        "clean_runner_capture_contract",
+        ROOT / "benchmarks/clean-runners/opensees-calculix/run_clean_runner.py",
+    )
+    assert spec is not None and spec.loader is not None
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    attempts = []
+
+    def execute(command, *, cwd, env):
+        assert cwd == ROOT and env == {"PYTHONPATH": str(ROOT / "src")}
+        assert command[:2] == ["python", "receipt.py"]
+        capture = Path(command[command.index("--raw-output-dir") + 1])
+        assert not capture.exists()
+        attempts.append(capture.parent)
+        if failure == "before_output":
+            raise runner.CleanRunnerError("reference rejected")
+        capture.mkdir()
+        (capture / "stderr.txt").write_text("retained warning Ω\n", encoding="utf-8")
+        if failure:
+            raise runner.CleanRunnerError("reference rejected")
+
+    monkeypatch.setattr(runner, "_run", execute)
+    for _ in range(2):
+        kwargs = dict(output_dir=tmp_path, cwd=ROOT, env={"PYTHONPATH": str(ROOT / "src")})
+        if failure:
+            with pytest.raises(runner.CleanRunnerError, match="reference rejected"):
+                runner._run_code_with_capture(["python", "receipt.py"], **kwargs)
+        else:
+            runner._run_code_with_capture(["python", "receipt.py"], **kwargs)
+    assert len(set(attempts)) == 2
+    for attempt in attempts:
+        inventory = json.loads((attempt / "inventory.json").read_text())
+        assert inventory["receipt_command_completed"] is (failure is None)
+        assert inventory["signed_summary_member"] is False
+        assert inventory["qualification_claim"] is False
+        if failure == "before_output":
+            assert inventory["files"] == []
+            continue
+        assert inventory["files"] == [{
+            "path": "raw/stderr.txt",
+            "byte_length": len("retained warning Ω\n".encode()),
+            "sha256": runner._file_hash(attempt / "raw/stderr.txt"),
+        }]
