@@ -6,11 +6,12 @@ from audit_rc_nested_switch_labels import label_from_repetitions
 from prepare_rc_nested_switch_labels import require
 from rc_cost_margin_gate import cost_target
 from rc_switch_gate import RidgeGate
+from rc_offline_cost_tree import OfflineCostTree
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 
 
 def score_gate(gate, validation):
-    require(isinstance(gate, RidgeGate), 'validated fixed gate policy required')
+    require(isinstance(gate, (RidgeGate, OfflineCostTree)), 'validated fixed gate policy required')
     rows = validation['rows']
     require(type(rows) is list and rows and type(validation['declared_row_count']) is int
             and validation['declared_row_count'] == len(rows),
