@@ -361,6 +361,11 @@ def run_rc_control_runtime_selection(
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
     capture = source.get("feature_profile") == MATERIAL_FEATURE_PROFILE
+    fit_solver = (
+        learning.CONSTANT_SAFE_SVD_FIT_PROFILE
+        if source.get("fit_solver_profile") == learning.CONSTANT_SAFE_SVD_FIT_PROFILE
+        else learning.SVD_RIDGE_FIT_PROFILE
+    )
     plan = {
         "schema_version": "rc-control-runtime-selection-plan.v1",
         "source_revision": source_revision,
@@ -382,7 +387,7 @@ def run_rc_control_runtime_selection(
         ],
         "measured_source_screen": measured,
         "ridge_grid": list(ridge_grid),
-        "fit_solver_profile": learning.SVD_RIDGE_FIT_PROFILE,
+        "fit_solver_profile": fit_solver,
         "arithmetic_profile": arithmetic_profile,
         "ood_margin": source["ood_margin"],
         "minimum_relative_improvement": minimum_relative_improvement,
@@ -474,7 +479,7 @@ def run_rc_control_runtime_selection(
                 profile,
                 ridge,
                 source["ood_margin"],
-                fit_solver=learning.SVD_RIDGE_FIT_PROFILE,
+                fit_solver=fit_solver,
             )
         except Exception as exc:
             record.update(

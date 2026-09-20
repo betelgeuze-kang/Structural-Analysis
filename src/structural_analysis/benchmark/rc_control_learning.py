@@ -59,6 +59,7 @@ from structural_analysis.units.schema import CoordinateSystem, UnitSystem
 _ID = re.compile(r"[A-Za-z][A-Za-z0-9_.:-]{0,127}")
 _HASH = re.compile(r"sha256:[0-9a-f]{64}")
 SVD_RIDGE_FIT_PROFILE = "svd-ridge.v1"
+CONSTANT_SAFE_SVD_FIT_PROFILE = "svd-ridge-exact-constant-centering.v1"
 NORMAL_RIDGE_FIT_PROFILE = "normal-equations"
 
 
@@ -407,9 +408,12 @@ class RCControlSeedPolicy:
         d = strict_json_object_bytes(self._json.encode(), maximum_bytes=8 * 1024 * 1024)
         if (
             d.get("schema_version")
-            == "experimental-rc-control-secant-correction-policy.v5"
+            in ("experimental-rc-control-secant-correction-policy.v5",
+                "experimental-rc-control-secant-correction-policy.v6")
         ):
-            if d.get("fit_solver_profile") != SVD_RIDGE_FIT_PROFILE:
+            constant_safe = d["schema_version"].endswith(".v6")
+            expected_fit = CONSTANT_SAFE_SVD_FIT_PROFILE if constant_safe else SVD_RIDGE_FIT_PROFILE
+            if d.get("fit_solver_profile") != expected_fit:
                 raise ValueError("exact SVD ridge fit profile required")
             if d.get("policy_hash") != _sha(
                 _bytes({k: v for k, v in d.items() if k != "policy_hash"})
@@ -434,6 +438,12 @@ class RCControlSeedPolicy:
             )
             base["policy_hash"] = _sha(_bytes(base))
             RCControlSeedPolicy(_bytes(base).decode())
+            if constant_safe:
+                for low, high, mean, scale in zip(
+                    d["feature_min"], d["feature_max"], d["feature_mean"], d["feature_scale"], strict=True
+                ):
+                    if low == high and (mean != low or scale != 1.0):
+                        raise ValueError("exact constant centering and unit scale required")
             return
         expected = {
             "schema_version",
@@ -678,6 +688,7 @@ def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PRO
     if type(fit_solver) is not str or fit_solver not in (
         NORMAL_RIDGE_FIT_PROFILE,
         SVD_RIDGE_FIT_PROFILE,
+        CONSTANT_SAFE_SVD_FIT_PROFILE,
     ):
         raise ValueError("supported RC ridge fit solver required")
     if type(ridge) not in (int, float) or not np.isfinite(ridge) or ridge <= 0:
@@ -690,10 +701,16 @@ def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PRO
         mean = x.mean(axis=0)
         scale = x.std(axis=0)
         scale = np.where(scale > 0, scale, 1.0)
+        if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE:
+            constant = x.min(axis=0) == x.max(axis=0)
+            mean = np.where(constant, x[0], mean)
+            scale = np.where(constant, 1.0, scale)
         target = y.std(axis=0)
         target = np.where(target > 0, target, 1.0)
+        if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE:
+            target = np.where(y.min(axis=0) == y.max(axis=0), 1.0, target)
         z = np.column_stack([(x - mean) / scale, np.ones(len(x))])
-        if fit_solver == SVD_RIDGE_FIT_PROFILE:
+        if fit_solver in (SVD_RIDGE_FIT_PROFILE, CONSTANT_SAFE_SVD_FIT_PROFILE):
             # Same positive ridge and penalized intercept as the original fit.
             # Avoid forming Z.T @ Z; retain every singular direction with its
             # ridge filter, without truncation or a data-selected rank cutoff.
@@ -724,10 +741,12 @@ def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PRO
         "ridge": ridge,
         "ood_margin": ood_margin,
     }
-    if fit_solver == SVD_RIDGE_FIT_PROFILE:
+    if fit_solver in (SVD_RIDGE_FIT_PROFILE, CONSTANT_SAFE_SVD_FIT_PROFILE):
         d.update(
-            schema_version="experimental-rc-control-secant-correction-policy.v5",
-            fit_solver_profile=SVD_RIDGE_FIT_PROFILE,
+            schema_version=("experimental-rc-control-secant-correction-policy.v6"
+                            if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE else
+                            "experimental-rc-control-secant-correction-policy.v5"),
+            fit_solver_profile=fit_solver,
         )
     d["policy_hash"] = _sha(_bytes(d))
     return RCControlSeedPolicy(_bytes(d).decode())
@@ -786,6 +805,7 @@ def run_rc_control_learning_study(
     if type(fit_solver) is not str or fit_solver not in (
         NORMAL_RIDGE_FIT_PROFILE,
         SVD_RIDGE_FIT_PROFILE,
+        CONSTANT_SAFE_SVD_FIT_PROFILE,
     ):
         raise ValueError("supported RC ridge fit solver required")
     if type(feature_profile) is not str or feature_profile not in (

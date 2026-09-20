@@ -1024,3 +1024,27 @@ def test_connected_runtime_fits_exclude_every_related_case(original, tmp_path):
             s["sample_hash"] for s in samples if s["case_id"] not in excluded
         }
         assert fold["score"]["full_comparison_pass"]
+
+
+def test_constant_safe_runtime_selection_refits_preserve_opt_in_profile(
+    tmp_path, original, monkeypatch
+):
+    cases, samples, source, report = original
+    _, _, profile = _validated_training_data(samples, source)
+    method = learning.CONSTANT_SAFE_SVD_FIT_PROFILE
+    policy = learning._fit(samples, profile, 1e4, 0.1, fit_solver=method)
+    updated = (cases, samples, policy, report)
+    injected_benchmark(updated, monkeypatch, (0.8, 0.9))
+    observed = []
+    fitting = learning._fit
+
+    def fit(*args, **kwargs):
+        observed.append(kwargs["fit_solver"])
+        return fitting(*args, **kwargs)
+
+    monkeypatch.setattr(learning, "_fit", fit)
+    root = tmp_path / "constant-safe"
+    result = run(root, updated)
+    assert result["selected_strategy"] == "learned_svd"
+    assert observed and set(observed) == {method}
+    assert json.loads((root / "plan.json").read_text())["fit_solver_profile"] == method
