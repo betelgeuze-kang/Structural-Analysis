@@ -101,3 +101,31 @@ def test_expanded_parent_cache_accounts_repeats_and_rejects_boolean_counter(monk
         module.cache_accounting(roster, dict(counters, misses=5))
     with pytest.raises(ValueError, match='integer cache'):
         module.cache_accounting(roster, dict(counters, hits=True))
+
+
+@pytest.mark.parametrize('field', ['model_checksum', 'source_request', 'request', 'compiled_problem_contract_hash'])
+def test_expanded_parent_audit_rejects_other_case_report(monkeypatch, field):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_expanded_same_parent_probe')
+    report = dict(model_checksum='model', source_request={'targets': [1, 2]},
+                  request={'targets': [2]}, compiled_problem_contract_hash='problem')
+    module.require_source_binding(report, 'model', {'targets': [1, 2]}, {'targets': [2]}, 'problem')
+    report[field] = 'foreign'
+    with pytest.raises(ValueError, match='original model'):
+        module.require_source_binding(report, 'model', {'targets': [1, 2]}, {'targets': [2]}, 'problem')
+
+
+def test_expanded_parent_audit_checks_original_artifact_bytes(monkeypatch, tmp_path):
+    import hashlib
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_expanded_same_parent_probe')
+    expected = b'{"parent":1}'
+    descriptor = {'path': 'parent.json', 'byte_length': len(expected),
+                  'sha256': 'sha256:' + hashlib.sha256(expected).hexdigest()}
+    (tmp_path/'parent.json').write_bytes(expected)
+    module.require_original_artifact(tmp_path, descriptor, 'parent.json', expected)
+    (tmp_path/'parent.json').write_bytes(b'{"parent":2}')
+    with pytest.raises(ValueError, match='artifact bytes'):
+        module.require_original_artifact(tmp_path, descriptor, 'parent.json', expected)
+    with pytest.raises(ValueError, match='artifact descriptor'):
+        module.require_original_artifact(tmp_path, dict(descriptor, path='../parent.json'), 'parent.json', expected)

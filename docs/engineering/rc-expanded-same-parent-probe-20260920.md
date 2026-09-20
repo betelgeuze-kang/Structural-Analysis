@@ -46,3 +46,12 @@ repetitions and zero solves/fits/reserved evaluations. The execution launcher
 starts only after the 512-layer solve and read-only comparison have both exited
 0. Its original source, plan, per-repetition receipts and any failures are retained.
 Do not treat partial receipts as a completed diagnostic or a learned-policy gain.
+
+## Original-input audit binding
+
+The follow-up auditor also compares the report's canonical model checksum,
+compiled problem hash, full source request and single-target request with the
+original prepared case. It checks both parent and accepted-context descriptors
+and actual bytes against the retained originals. The 18-test diagnostic suite
+passes, including transplanted-model/history/request and artifact-byte rejection.
+This audit change does not alter the already running frozen numerical process.

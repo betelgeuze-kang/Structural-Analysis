@@ -1,11 +1,14 @@
 """Audit every retained B/D/E parent probe without solving or fitting."""
 import argparse
+import hashlib
+from dataclasses import replace
 import json
 from pathlib import Path
 from statistics import mean
 from collections import OrderedDict
 
 from run_rc_expanded_same_parent_probe import prepare
+from structural_analysis.benchmark.rc_control_design import _bytes
 
 from audit_grouped_rc_runtime_campaign import checked, read, require
 
@@ -31,13 +34,27 @@ def cache_accounting(roster, observed):
     return observed
 
 
+def require_source_binding(report, model_checksum, source_request, request, problem_hash):
+    require(report['model_checksum'] == model_checksum
+            and report['source_request'] == source_request and report['request'] == request
+            and report['compiled_problem_contract_hash'] == problem_hash,
+            'original model, source history and compiled request binding')
+
+
+def require_original_artifact(root, descriptor, name, expected):
+    require(descriptor == {'path': name, 'byte_length': len(expected),
+                          'sha256': 'sha256:' + hashlib.sha256(expected).hexdigest()},
+            'original artifact descriptor')
+    require((root / name).read_bytes() == expected, 'original artifact bytes')
+
+
 def audit(root):
     plan = read(root / 'plan.json')
     outcome = read(root / 'outcome.json')
     require(plan['repetitions'] == 3 and plan['maximum_core_calls'] == 3564
             and plan['new_fits'] == 0 and plan['reserved_evaluation'] is False
             and plan['complete_path_claim'] is False, 'fixed probe scope')
-    _, roster, _, costs = prepare(*(Path(plan['source_roots'][key]) for key in ('old', 'new', 'runtime')))
+    prepared, roster, objects, costs = prepare(*(Path(plan['source_roots'][key]) for key in ('old', 'new', 'runtime')))
     require(plan['roster'] == roster and plan['historical_label_costs_separate'] == costs,
             'original complete complementary-group input binding')
     require(len(roster) == 198 and len(outcome['records']) == 594, 'complete declared roster')
@@ -50,6 +67,9 @@ def audit(root):
     total = dict.fromkeys(metrics, 0)
     rows = []
     for pair, declaration in enumerate(plan['roster']):
+        case, _, parent, context = objects[pair]
+        _, compiled, _, _, _ = prepared[case.case_id]
+        request = replace(case.request, targets_m=(case.request.targets_m[declaration['target_index']],))
         repeats = []
         for record in (r for r in outcome['records'] if r['pair_index'] == pair):
             repeat = record['repetition']
@@ -57,6 +77,11 @@ def audit(root):
             name = f'pair-{pair:03d}-repeat-{repeat}/comparison.json'
             path = root / name
             report = checked(path, 'report_hash')
+            require_source_binding(report, case.model.canonical_model_checksum,
+                case.request.to_dict(), request.to_dict(), compiled.problem.contract_hash)
+            require_original_artifact(path.parent, report['initial_parent_artifact'], 'parent.json', parent)
+            require_original_artifact(path.parent, report['accepted_context_artifact'],
+                                      'accepted-context.json', _bytes(context.to_dict()))
             require(report['source_revision'] == plan['source_revision'], 'execution source revision')
             require(report['capture_material_state'] is True and report['material_capture_scope'] == 'proposal-only',
                     'proposal state-capture cost retained')
