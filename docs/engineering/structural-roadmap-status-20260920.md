@@ -210,3 +210,13 @@ from proposal and capture cost before defining another learning target.
 and 814 frontend tests. Full Python tests remain skipped after external-evidence
 preparation failures. The 34/240 projected concrete-field failures, independent
 physics and all five roadmap completion requirements remain open.
+
+## Capture-cost implementation follow-up
+
+[Native scalar fiber serialization](rc-native-fiber-serialization-20260920.md)
+removes recursive copying of native immutable scalar fields during repeated
+contract validation. Validation and fresh content hashing remain enabled;
+extended types keep recursive serialization. One retained parent has identical
+original snapshot bytes in all 1,231 comparisons, and six counterbalanced capture
+measurements are 12.6–13.3% shorter. This is a capture-only observation; complete
+path performance, independent generalization and all roadmap goals remain open.

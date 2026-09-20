@@ -125,6 +125,23 @@ class StatefulSectionFiber:
             raise ValueError("material_kind must be steel or concrete")
 
     def to_dict(self) -> dict[str, Any]:
+        # Native fibers contain immutable scalars. Avoid recursive dataclass
+        # copying on repeated contract validation, while reading fresh content
+        # every time (including forcibly replaced fields). Extended dataclasses
+        # and non-native values retain the original recursive serialization.
+        if (
+            type(self) is StatefulSectionFiber
+            and type(self.fiber_id) is str
+            and type(self.y_m) is float
+            and type(self.area_m2) is float
+            and type(self.material_kind) is str
+        ):
+            return {
+                "fiber_id": self.fiber_id,
+                "y_m": self.y_m,
+                "area_m2": self.area_m2,
+                "material_kind": self.material_kind,
+            }
         return asdict(self)
 
 

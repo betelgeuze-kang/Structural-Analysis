@@ -406,3 +406,34 @@ def test_intermediate_layers_use_overridden_outer_bounds():
         intermediate_steel_layers=[{'y_m': .17, 'bar_count':2}],
     )
     assert section.fibers[-1].y_m == .17
+
+
+def test_native_fiber_serialization_observes_replacement_and_detaches_mapping():
+    from dataclasses import asdict
+
+    from structural_analysis.materials.stateful_fiber_section import StatefulSectionFiber
+
+    fiber = StatefulSectionFiber('S1', 0.15, 0.001, 'steel')
+    before = fiber.to_dict()
+    assert before == asdict(fiber)
+    before['area_m2'] = 99
+    assert fiber.area_m2 == 0.001
+    object.__setattr__(fiber, 'area_m2', 0.002)
+    assert fiber.to_dict() == asdict(fiber)
+    assert fiber.to_dict()['area_m2'] == 0.002
+
+
+def test_extended_fiber_serialization_preserves_recursive_detachment():
+    from dataclasses import asdict, dataclass, field
+
+    from structural_analysis.materials.stateful_fiber_section import StatefulSectionFiber
+
+    @dataclass(frozen=True)
+    class ExtendedFiber(StatefulSectionFiber):
+        metadata: dict = field(default_factory=lambda: {'tags': ['original']})
+
+    fiber = ExtendedFiber('C1', -0.15, 0.01, 'concrete')
+    encoded = fiber.to_dict()
+    assert encoded == asdict(fiber)
+    encoded['metadata']['tags'].append('detached')
+    assert fiber.metadata == {'tags': ['original']}
