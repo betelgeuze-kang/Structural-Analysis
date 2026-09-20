@@ -1,0 +1,833 @@
+{
+  "abstained_count": 486,
+  "audit_fits": 0,
+  "audit_revision": "ba340f66224e97dba1c2559920fd72e810369581",
+  "audit_solver_calls": 0,
+  "candidates": [
+    {
+      "case_repeat_scores": [
+        {
+          "case_id": "train-a-amp050",
+          "fold_indices": [
+            0,
+            1,
+            2
+          ],
+          "maximum_ratio": 1.0079114105780411,
+          "mean_ratio": 0.9967577067689186,
+          "minimum_ratio": 0.9902872057835824,
+          "ratios": [
+            0.992074503945132,
+            0.9902872057835824,
+            1.0079114105780411
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.009700641224980794,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp100",
+          "fold_indices": [
+            3,
+            4,
+            5
+          ],
+          "maximum_ratio": 1.0105569376123258,
+          "mean_ratio": 1.0043704454655644,
+          "minimum_ratio": 0.9943799003050585,
+          "ratios": [
+            1.0105569376123258,
+            0.9943799003050585,
+            1.008174498479309
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.008733684703990285,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp150",
+          "fold_indices": [
+            6,
+            7,
+            8
+          ],
+          "maximum_ratio": 1.0074562911845553,
+          "mean_ratio": 0.9990923313106377,
+          "minimum_ratio": 0.990498503269326,
+          "ratios": [
+            0.990498503269326,
+            1.0074562911845553,
+            0.9993221994780316
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.008481230587318086,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp050",
+          "fold_indices": [
+            9,
+            10,
+            11
+          ],
+          "maximum_ratio": 1.0625866486665554,
+          "mean_ratio": 1.0557467604985682,
+          "minimum_ratio": 1.0517154210852282,
+          "ratios": [
+            1.0517154210852282,
+            1.0625866486665554,
+            1.0529382117439212
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.005954985882575575,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp100",
+          "fold_indices": [
+            12,
+            13,
+            14
+          ],
+          "maximum_ratio": 1.0175538380635687,
+          "mean_ratio": 1.0037624609286542,
+          "minimum_ratio": 0.9961572229672266,
+          "ratios": [
+            1.0175538380635687,
+            0.9975763217551673,
+            0.9961572229672266
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.011964740816271998,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp150",
+          "fold_indices": [
+            15,
+            16,
+            17
+          ],
+          "maximum_ratio": 1.029127175301034,
+          "mean_ratio": 1.02070565822564,
+          "minimum_ratio": 1.0089550307514614,
+          "ratios": [
+            1.0089550307514614,
+            1.0240347686244244,
+            1.029127175301034
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.010490046995494549,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp050",
+          "fold_indices": [
+            18,
+            19,
+            20
+          ],
+          "maximum_ratio": 1.0148868688871426,
+          "mean_ratio": 1.0128030376018058,
+          "minimum_ratio": 1.0102859845030872,
+          "ratios": [
+            1.013236259415188,
+            1.0148868688871426,
+            1.0102859845030872
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.002330835715693825,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp100",
+          "fold_indices": [
+            21,
+            22,
+            23
+          ],
+          "maximum_ratio": 0.9950976783568711,
+          "mean_ratio": 0.9896129579095065,
+          "minimum_ratio": 0.9855168117192679,
+          "ratios": [
+            0.9950976783568711,
+            0.9882243836523805,
+            0.9855168117192679
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.00493906420615784,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp150",
+          "fold_indices": [
+            24,
+            25,
+            26
+          ],
+          "maximum_ratio": 1.0020692436260794,
+          "mean_ratio": 0.9953272434900221,
+          "minimum_ratio": 0.9916663303685934,
+          "ratios": [
+            0.9916663303685934,
+            1.0020692436260794,
+            0.9922461564753939
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.005845936533565676,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-d-amp050",
+          "fold_indices": [
+            27,
+            28,
+            29
+          ],
+          "maximum_ratio": 1.0375391315804317,
+          "mean_ratio": 1.0326028485372678,
+          "minimum_ratio": 1.023649675611903,
+          "ratios": [
+            1.023649675611903,
+            1.036619738419469,
+            1.0375391315804317
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.0077672903911031,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-d-amp100",
+          "fold_indices": [
+            30,
+            31,
+            32
+          ],
+          "maximum_ratio": 1.007294903942674,
+          "mean_ratio": 0.9943877247328409,
+          "minimum_ratio": 0.9878520688524405,
+          "ratios": [
+            0.9878520688524405,
+            0.9880162014034082,
+            1.007294903942674
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.011178246340085388,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-d-amp150",
+          "fold_indices": [
+            33,
+            34,
+            35
+          ],
+          "maximum_ratio": 1.0063742452470725,
+          "mean_ratio": 0.9993290485155567,
+          "minimum_ratio": 0.9868435574848428,
+          "ratios": [
+            1.0063742452470725,
+            1.0047693428147548,
+            0.9868435574848428
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.010842487844717356,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-e-amp050",
+          "fold_indices": [
+            36,
+            37,
+            38
+          ],
+          "maximum_ratio": 1.0713113702076944,
+          "mean_ratio": 1.0709825550783447,
+          "minimum_ratio": 1.0703811444210953,
+          "ratios": [
+            1.0713113702076944,
+            1.0703811444210953,
+            1.0712551506062447
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.0005215949049662168,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-e-amp100",
+          "fold_indices": [
+            39,
+            40,
+            41
+          ],
+          "maximum_ratio": 1.0605933263327307,
+          "mean_ratio": 1.0563587558035439,
+          "minimum_ratio": 1.0537655295215633,
+          "ratios": [
+            1.0537655295215633,
+            1.054717411556338,
+            1.0605933263327307
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.0036980008825072148,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-e-amp150",
+          "fold_indices": [
+            42,
+            43,
+            44
+          ],
+          "maximum_ratio": 1.018993519365245,
+          "mean_ratio": 1.0146174645782555,
+          "minimum_ratio": 1.0103900396383452,
+          "ratios": [
+            1.0144688347311765,
+            1.0103900396383452,
+            1.018993519365245
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.004303665179399583,
+          "valid_repetitions": 3
+        }
+      ],
+      "fold_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44
+      ],
+      "proposed_count": 297,
+      "ridge": 10000.0,
+      "score": 1.0164304666296753
+    },
+    {
+      "case_repeat_scores": [
+        {
+          "case_id": "train-a-amp050",
+          "fold_indices": [
+            45,
+            46,
+            47
+          ],
+          "maximum_ratio": 1.0135008639316474,
+          "mean_ratio": 1.0011591090242156,
+          "minimum_ratio": 0.9828423251312631,
+          "ratios": [
+            1.007134138009736,
+            1.0135008639316474,
+            0.9828423251312631
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.01617906761457609,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp100",
+          "fold_indices": [
+            48,
+            49,
+            50
+          ],
+          "maximum_ratio": 1.017535637803676,
+          "mean_ratio": 1.0090102135630117,
+          "minimum_ratio": 1.0014998543154583,
+          "ratios": [
+            1.017535637803676,
+            1.0079951485699008,
+            1.0014998543154583
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.008065937994147235,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp150",
+          "fold_indices": [
+            51,
+            52,
+            53
+          ],
+          "maximum_ratio": 1.0159746734286392,
+          "mean_ratio": 1.0029425813718362,
+          "minimum_ratio": 0.982628406348356,
+          "ratios": [
+            1.0159746734286392,
+            0.982628406348356,
+            1.0102246643385138
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.017825962282512972,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp050",
+          "fold_indices": [
+            54,
+            55,
+            56
+          ],
+          "maximum_ratio": 1.0498002645547062,
+          "mean_ratio": 1.0355025914572427,
+          "minimum_ratio": 1.012640667935775,
+          "ratios": [
+            1.012640667935775,
+            1.044066841881247,
+            1.0498002645547062
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.02000546660826028,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp100",
+          "fold_indices": [
+            57,
+            58,
+            59
+          ],
+          "maximum_ratio": 1.0489640251179664,
+          "mean_ratio": 1.0424767428244157,
+          "minimum_ratio": 1.0352134867635954,
+          "ratios": [
+            1.0352134867635954,
+            1.0489640251179664,
+            1.0432527165916856
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.006908033564218928,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp150",
+          "fold_indices": [
+            60,
+            61,
+            62
+          ],
+          "maximum_ratio": 1.0286087468287473,
+          "mean_ratio": 1.0197967545268278,
+          "minimum_ratio": 1.0080318063974527,
+          "ratios": [
+            1.0080318063974527,
+            1.022749710354283,
+            1.0286087468287473
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.010601536703112343,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp050",
+          "fold_indices": [
+            63,
+            64,
+            65
+          ],
+          "maximum_ratio": 1.0148802665873433,
+          "mean_ratio": 1.0111483016460217,
+          "minimum_ratio": 1.0079168313897653,
+          "ratios": [
+            1.0148802665873433,
+            1.0106478069609564,
+            1.0079168313897653
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.003508593540872339,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp100",
+          "fold_indices": [
+            66,
+            67,
+            68
+          ],
+          "maximum_ratio": 1.0284513444814152,
+          "mean_ratio": 1.0183404707592434,
+          "minimum_ratio": 1.0103769057994907,
+          "ratios": [
+            1.0103769057994907,
+            1.016193161996824,
+            1.0284513444814152
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.009226566783345463,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp150",
+          "fold_indices": [
+            69,
+            70,
+            71
+          ],
+          "maximum_ratio": 1.0219998470042078,
+          "mean_ratio": 0.994188987504209,
+          "minimum_ratio": 0.9753857044382119,
+          "ratios": [
+            1.0219998470042078,
+            0.9753857044382119,
+            0.9851814110702073
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.02457787412901151,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-d-amp050",
+          "fold_indices": [
+            72,
+            73,
+            74
+          ],
+          "maximum_ratio": 1.0694648491507495,
+          "mean_ratio": 1.0538649992046762,
+          "minimum_ratio": 1.0414263447328056,
+          "ratios": [
+            1.0414263447328056,
+            1.0507038037304732,
+            1.0694648491507495
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.014284057550932611,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-d-amp100",
+          "fold_indices": [
+            75,
+            76,
+            77
+          ],
+          "maximum_ratio": 1.0457721204601438,
+          "mean_ratio": 1.0373730194679087,
+          "minimum_ratio": 1.0217722012634498,
+          "ratios": [
+            1.0457721204601438,
+            1.0445747366801326,
+            1.0217722012634498
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.013523963119795576,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-d-amp150",
+          "fold_indices": [
+            78,
+            79,
+            80
+          ],
+          "maximum_ratio": 1.038286067190254,
+          "mean_ratio": 1.032652392662395,
+          "minimum_ratio": 1.0276634344152733,
+          "ratios": [
+            1.0276634344152733,
+            1.0320076763816577,
+            1.038286067190254
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.005340582934475387,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-e-amp050",
+          "fold_indices": [
+            81,
+            82,
+            83
+          ],
+          "maximum_ratio": 1.060453608685385,
+          "mean_ratio": 1.0595612994277175,
+          "minimum_ratio": 1.0577840646885504,
+          "ratios": [
+            1.0577840646885504,
+            1.0604462249092172,
+            1.060453608685385
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.0015391348604377301,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-e-amp100",
+          "fold_indices": [
+            84,
+            85,
+            86
+          ],
+          "maximum_ratio": 1.0563476882742604,
+          "mean_ratio": 1.053788128702479,
+          "minimum_ratio": 1.052158951209661,
+          "ratios": [
+            1.0563476882742604,
+            1.0528577466235163,
+            1.052158951209661
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.0022440115103824266,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-e-amp150",
+          "fold_indices": [
+            87,
+            88,
+            89
+          ],
+          "maximum_ratio": 1.0426535915552966,
+          "mean_ratio": 1.033745310307773,
+          "minimum_ratio": 1.018556687748717,
+          "ratios": [
+            1.0426535915552966,
+            1.0400256516193056,
+            1.018556687748717
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.013219198482052249,
+          "valid_repetitions": 3
+        }
+      ],
+      "fold_indices": [
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89
+      ],
+      "proposed_count": 297,
+      "ridge": 1000000.0,
+      "score": 1.0270367268299982
+    }
+  ],
+  "case_counts": {
+    "train-a-amp050": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-a-amp100": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-a-amp150": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-b-amp050": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-b-amp100": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-b-amp150": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-c-amp050": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-c-amp100": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-c-amp150": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-d-amp050": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-d-amp100": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-d-amp150": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-e-amp050": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-e-amp100": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-e-amp150": {
+      "abstained": 6,
+      "proposed": 66
+    }
+  },
+  "completed_folds": 90,
+  "fold_work": {
+    "core_calls": 4680,
+    "linear_solves": 24054,
+    "newton_iterations": 24054
+  },
+  "groups": [
+    [
+      "train-a-amp050",
+      "train-a-amp100",
+      "train-a-amp150"
+    ],
+    [
+      "train-b-amp050",
+      "train-b-amp100",
+      "train-b-amp150"
+    ],
+    [
+      "train-c-amp050",
+      "train-c-amp100",
+      "train-c-amp150"
+    ],
+    [
+      "train-d-amp050",
+      "train-d-amp100",
+      "train-d-amp150"
+    ],
+    [
+      "train-e-amp050",
+      "train-e-amp100",
+      "train-e-amp150"
+    ]
+  ],
+  "historical_label_costs_separate": [
+    {
+      "generation_work": {
+        "known_work": {
+          "core_calls": 351,
+          "linear_solves": 1894,
+          "newton_iterations": 1894
+        },
+        "unknown_work": false
+      },
+      "learning_wall_ns": 134743465748,
+      "report_hash": "sha256:265b242638660529c2da85c4a741abecd4ad29d9ce8c08c27ff79d89a1f31dcf",
+      "sample_count": 99
+    },
+    {
+      "generation_work": {
+        "known_work": {
+          "core_calls": 234,
+          "linear_solves": 1212,
+          "newton_iterations": 1212
+        },
+        "unknown_work": false
+      },
+      "learning_wall_ns": 86013788545,
+      "report_hash": "sha256:903ecb836c3676f55bbea231c1ffe51ac86238be451cbaf661c5f914a5228b2c",
+      "sample_count": 66
+    }
+  ],
+  "independent_evaluation": false,
+  "inventory_sha256": "a2c9b9d141db3c4718d3d69e02590a82d91282ed1994bce2a11c8e39c20b8409",
+  "net_savings_proved": false,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-pooled-runtime-e5ho6__o",
+  "parent_process_seconds": 1636.396386288,
+  "parent_wall_ns": 1634991634764,
+  "payload_bytes": 1598062563,
+  "payload_file_count": 30005,
+  "policy_promoted": false,
+  "pooled_metadata_fit_wall_ns": 25927342,
+  "proposed_count": 594,
+  "reserved_evaluation_executed": false,
+  "sample_count": 165,
+  "selected_ridge": null,
+  "selected_strategy": "secant",
+  "selection_fit_count": 30,
+  "selection_fit_wall_ns_sum": 702777347,
+  "selection_result_hash": "sha256:6ea61d9a1bf59f99475d7c616983ac909eb2a4e0675b1ed38bfeacd0c2064938",
+  "selection_wall_ns": 1634134640853,
+  "source_revision": "80f9ff404dfa15f7048c21d673f348155f90d965",
+  "static_gate_counts": {
+    "not_rejected": 54,
+    "rejected": 36
+  }
+}

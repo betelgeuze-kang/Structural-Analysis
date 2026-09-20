@@ -1,4 +1,4 @@
-# Predeclared runtime selection from 165 retained training labels
+# Completed runtime selection from 165 retained training labels
 
 This campaign tests whether the [two new interior training groups](rc-interior-training-coverage-20260920.md)
 produce useful learned starts on whole nonlinear paths. It does not infer speed
@@ -22,7 +22,7 @@ and counted once in the protocol. They are not the entire development history's
 research cost. Pooled fit, selection and parent time are recorded separately;
 no total net savings or independent-project claim follows from a fold score.
 
-## Confirmed execution state at this record
+## Historical execution observation (superseded by completion below)
 
 The frozen source preflight passes: 17 cases, 165 samples, five groups, zero
 preflight fits and zero solver calls. All 469 archived source files match their
@@ -47,7 +47,7 @@ Neither a partial favorable fold nor a lower coordinate error establishes the
 required full-path benefit. Existing secant selection remains authoritative
 until the complete new experiment supports a different result.
 
-## Auditor prepared during execution
+## Historical auditor preparation
 
 `scripts/audit_rc_pooled_runtime_campaign.py` now checks the full 90-fold roster,
 the 132-sample complementary policy identities for every held group, all four
@@ -66,3 +66,51 @@ comparison. The full audit has not run because the campaign is still live;
 not a final selection result or an efficacy claim. Auditor source copies and
 their hashes are preserved separately in the active packet's `audit-source`
 and `audit-preparation.json`, leaving the frozen numerical source unchanged.
+
+## Completed and audited outcome
+
+The original process terminated successfully. The complete audit passes without
+new fits or solver calls. All **90 comparisons and 360 full paths** pass the
+original history checks. Every excluded group fits only its complementary 132
+samples. There are **594 proposals, 486 abstentions, 4,680 core calls and 24,054
+Newton iterations/linear solves**. Static gates reject 36 folds (groups A/C);
+54 folds in B/D/E allow proposals.
+
+| Ridge | Equal-case mean learned/secant time ratio | Selection |
+| --- | ---: | --- |
+| 10,000 | 1.0164304666296753 | Rejected |
+| 1,000,000 | 1.0270367268299982 | Rejected |
+
+**Secant remains selected.** Neither candidate meets the unchanged 1% improvement
+requirement. No active-proposal case is faster in all three repetitions. The one
+case consistently faster with ridge 10,000, C-amp100, contains zero proposals;
+its fallback timing variation is not an AI gain. D-amp100 and D-amp150 have
+slightly favorable means for that ridge but inconsistent repetition outcomes.
+More eligible training coverage has enabled more actual proposals, without
+establishing useful full-path acceleration. Earlier and current aggregate scores
+use different case mixes and must not be treated as a controlled improvement.
+
+Selection takes 1,634.134640853 seconds. Its 30 fits total 0.702777347 seconds;
+the additional pooled metadata fit takes 0.025927342 seconds. Driver parent time
+is 1,634.991634764 seconds; outer process time is 1,636.396386288 seconds. These
+nested intervals are not added together. The two prior label-study intervals
+remain separate at 134.743465748 and 86.013788545 seconds. No final full-pool
+refit or policy promotion occurs, and both reserved cases remain unexecuted.
+
+The packet retains the original live observation and auditor preparation, and
+adds `receipt-audit.json`, `audit-completion.json`, and an immutable payload
+inventory. The [machine summary](rc-pooled-runtime-campaign-20260920.summary.json)
+contains its inventory hash, byte/file counts, exact result hash, all case-repeat
+scores, work counts and separate costs. Audit revision is
+`ba340f66224e97dba1c2559920fd72e810369581`; numerical source remains unchanged.
+
+Next work should isolate proposal/capture overhead and iteration savings from
+these retained receipts before training a new strategy selector. Divergent
+full-path states cannot be spliced into same-parent causal training labels.
+Independent validation, concrete-field convergence and useful AI benefit remain
+open; this completed experiment closes none of those requirements.
+
+The [completed retained-cost diagnosis](rc-pooled-runtime-costs-20260920.md)
+now isolates roughly 22–24 ms proposal and 55–56 ms capture overhead per active
+path. New D cases sometimes save invocation work, but no consistent total-path
+gain is established. No additional solve or fit was used for this diagnosis.

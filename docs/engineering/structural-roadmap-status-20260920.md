@@ -194,3 +194,19 @@ reports from a failed progress writer and resumes only the remaining work.
 This identifies a local seed benefit without establishing a trained gate,
 independent generalization, or whole-path speedup. Secant remains the selected
 complete-path strategy; all five roadmap goals remain open.
+
+## Five-group runtime outcome and latest hosted checks
+
+The [165-label pooled campaign](rc-pooled-runtime-campaign-20260920.md) completes
+90 comparisons and 360 paths with all history checks passing. It makes 594
+proposals, but both candidate mean runtime ratios remain above secant (1.016430
+and 1.027037). No active-proposal case wins all three repetitions; secant remains
+selected, with no policy promotion or reserved evaluation. The complete audit
+checks exclusion identities, exact case binding and 4,680 core calls without
+rerunning numerical work. Next diagnosis must separate actual iteration savings
+from proposal and capture cost before defining another learning target.
+
+[Hosted 3d6fe9ec2](hosted-3d6-terminal-20260920.md) passes 1,691 Python development
+and 814 frontend tests. Full Python tests remain skipped after external-evidence
+preparation failures. The 34/240 projected concrete-field failures, independent
+physics and all five roadmap completion requirements remain open.
