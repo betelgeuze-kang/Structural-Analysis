@@ -351,3 +351,10 @@ zero captures/proposals and exactly matches 26 secant numerical/context files;
 all full-history comparisons pass. The single guarded arm is slightly slower
 than secant, so no speed benefit is claimed. No trained switch or nested label
 comparison has yet executed; all original roadmap requirements remain open.
+
+## Hosted 317e checks complete
+
+[Exact-source 317e receipts](hosted-317e-terminal-20260920.md) pass 1,754 Python
+development and 814 frontend tests. Full shards remain blocked before execution
+by external replay/technical preparation. The nested seed and pre-capture guard
+commits require new-head checks and do not close independent acceptance.
