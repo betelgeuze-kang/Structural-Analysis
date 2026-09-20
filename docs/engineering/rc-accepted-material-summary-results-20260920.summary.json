@@ -1,0 +1,59 @@
+{
+  "source_revision": "e2292c663429fd1674e62663ab2115d18fad9854",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-material-summary-fixed-7reguvn8",
+  "inventory_sha256": "5625656ac18854ab740ed7ae29edd1ee969dc5018accf1009dd7cf7b1ee88641",
+  "verified_files": 1419,
+  "verified_bytes": 126088366,
+  "summaries_sha256": "d4e9628334e575353ac9046356339fff70be49c7841108943efac467ca0b40a7",
+  "row_count": 165,
+  "feature_count": 27,
+  "original_native_snapshots_exact": 165,
+  "audit_wall_ns": 5698553615,
+  "outer_process": {
+    "exit_code": 0,
+    "outer_wall_ns": 7500045462,
+    "structural_solves": 0,
+    "new_fits": 0
+  },
+  "structural_solves": 0,
+  "new_fits": 0,
+  "reserved_evaluation_executed": false,
+  "policy_changed": false,
+  "online_extraction_cost_measured": false,
+  "concurrent_numerical_work": true,
+  "initial_failure": {
+    "source_revision": "d10ffda675c2172a7fdb27194c68d2de9b36e55d",
+    "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-material-summary-vdbykxkd",
+    "inventory_sha256": "2893c8bb552d6a9da6c62ec55ea4055af2085a046247d8e77d66ac762f52d7bd",
+    "outer_wall_ns": 2541940398,
+    "exit_code": 1,
+    "reason": "Shared preflight requires both training and evaluation declarations; no parents summarized."
+  },
+  "groups": [
+    {
+      "group_index": 0,
+      "row_count": 33,
+      "varying_features": 18
+    },
+    {
+      "group_index": 1,
+      "row_count": 33,
+      "varying_features": 10
+    },
+    {
+      "group_index": 2,
+      "row_count": 33,
+      "varying_features": 10
+    },
+    {
+      "group_index": 3,
+      "row_count": 33,
+      "varying_features": 10
+    },
+    {
+      "group_index": 4,
+      "row_count": 33,
+      "varying_features": 10
+    }
+  ]
+}

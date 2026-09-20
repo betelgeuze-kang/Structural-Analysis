@@ -69,6 +69,27 @@ def test_material_summary_rejects_rehashed_incomplete_or_invalid_native_states(c
         accepted_material_summary(_summary_snapshot(change), 'sha256:' + '1' * 64, 'sha256:' + '2' * 64)
 
 
+def test_material_summary_audit_preserves_split_declarations_before_reading_parents(monkeypatch, tmp_path):
+    import sys
+    from types import SimpleNamespace
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_accepted_material_summaries')
+    cases = [SimpleNamespace(split='train'), SimpleNamespace(split='validation')]
+    monkeypatch.setattr(module, 'inputs', lambda *args: (cases, [], None, [], []))
+    seen = []
+    monkeypatch.setattr(module.learning, '_preflight', lambda roster, arithmetic: seen.append(roster) or {})
+    def stop_before_parents(*args):
+        raise RuntimeError('stop before parent reads')
+    monkeypatch.setattr(module, 'reader', stop_before_parents)
+    monkeypatch.setattr(sys, 'argv', ['audit', '--old-labels', str(tmp_path / 'old'),
+        '--new-labels', str(tmp_path / 'new'), '--output', str(tmp_path / 'output'),
+        '--source-revision', 'a' * 40])
+    with pytest.raises(RuntimeError, match='stop before parent reads'):
+        module.main()
+    assert seen == [cases]
+    assert not (tmp_path / 'output').exists()
+
+
 def test_disjoint_timers_retain_unattributed_time_and_preload():
     arm = {'wall_ns': 100, 'preload_invocations': [{'wall_ns': 10, 'unknown_work': False}],
            'entries': [{'invocations': [{'wall_ns': 30, 'unknown_work': False}],
