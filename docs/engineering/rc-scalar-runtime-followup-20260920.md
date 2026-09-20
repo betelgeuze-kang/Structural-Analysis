@@ -37,3 +37,19 @@ time differences between old and new studies are not controlled causal evidence
 for the serialization change. The shared optimization can help deterministic
 paths too; a faster capture microbenchmark does not guarantee a better AI ratio.
 All five roadmap goals and independent verification requirements remain open.
+
+## Cross-revision numerical equivalence audit prepared
+
+`scripts/audit_rc_scalar_runtime_equivalence.py` supplements the full campaign
+cost audit. It requires all 90 fold identities and frozen policy hashes to match
+and compares every numerical step, preload response and input context byte with
+the previous sealed packet. Original result and numerical receipt hashes are
+checked against the pinned inventory. Extra or missing files, including matching
+omissions from both trees, fail. Timing/source-attestation records are outside
+this numerical byte comparison; this does not establish speedup.
+
+Six focused tests pass, including changed numerical bytes, modified original
+receipts and missing/extra rosters. The helper has also passed on the first
+completed real fold: 52 step files, four preload responses and 48 contexts match
+exactly. Nine completed fold receipts were observed while the original process
+remained live. This is a partial check, not the final 90-fold audit or selection.
