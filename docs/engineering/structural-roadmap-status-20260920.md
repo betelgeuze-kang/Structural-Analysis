@@ -382,3 +382,5 @@ comparison has yet executed; all original roadmap requirements remain open.
 development and 814 frontend tests. Full shards remain blocked before execution
 by external replay/technical preparation. The nested seed and pre-capture guard
 commits require new-head checks and do not close independent acceptance.
+
+The [fixed tree comparison](rc-inner-cost-tree-results-20260920.md) completed 20 fits and a separate output audit: TP 1, FP 1, TN 627, FN 31 across 660 overlapping decisions from 165 samples. No promotion or reserved evaluation follows. The [2,048-layer witness replay](planar-2048-witness-results-20260920.md) completed, exactly replaying all 40 coarse targets; the sole 74 mm witness difference decomposes entirely into the sampling term. The original 1% screen remains failed.

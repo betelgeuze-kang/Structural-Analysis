@@ -1,0 +1,31 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-2048-witness-fixed-lx2g8vau",
+  "inventory_sha256": "a970994fa138a688d9acf455765c226289d76aa766a0c8b18dfdcd99a69038be",
+  "execution": {
+    "exit_code": 0,
+    "outer_wall_ns": 731490598978,
+    "new_solves": 0,
+    "new_fits": 0
+  },
+  "witness": {
+    "member": "E3",
+    "gauss": 2,
+    "coarse_cell": 269,
+    "y_m": -0.14208984375,
+    "coarse_replay_exact": true
+  },
+  "at_74_mm": {
+    "coarse_accepted": 0.0,
+    "derived_fine_midpoint": 0.0,
+    "fine_left_accepted": 0.0,
+    "fine_right_accepted": 0.02170039778093924,
+    "signed_total": -0.01085019889046962,
+    "signed_history": 0.0,
+    "signed_sampling": -0.01085019889046962
+  },
+  "material_integrations": 80,
+  "new_solves": 0,
+  "new_fits": 0,
+  "physical_validation": false,
+  "original_screen_replaced": false
+}
