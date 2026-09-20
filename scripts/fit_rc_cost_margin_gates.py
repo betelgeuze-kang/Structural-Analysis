@@ -58,6 +58,7 @@ def main():
             positive_count=training['verified_positive_count'],
             negative_count=training['verified_negative_count']))
     result = dict(source_revision=args.source_revision, fits=receipts,
+        new_fits=len(receipts),
         wall_ns_before_result_write=perf_counter_ns()-started,
         all_training_decisions_decline=all(row['training_proposal_count'] == 0 for row in receipts),
         structural_solves=0, reserved_evaluation=False, full_path_speedup_claim=False,
