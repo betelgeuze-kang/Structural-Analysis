@@ -1,0 +1,17 @@
+# Bounded diagnostic for the remaining 1024/2048 tensile-damage difference
+
+The [completed comparison](planar-2048-refinement-20260920.md) leaves one failing group at 74 mm, E3:gauss-2, coarse cell 269. Its 1.0850199% relative tensile-damage difference exceeds the unchanged 1% screen.
+
+`scripts/probe_planar_2048_witness.py` prepares a post-hoc common-coordinate diagnostic. It pins both original full JSON digests and their indexed representations. The existing bounded reader checks all forty accepted steps, checkpoint continuity, each payload and reconstruction of the original complete JSON. A pure extractor retains only the selected section strains and one coarse/two fine fiber states per target. It does not retain the full path in memory.
+
+The diagnostic replays the original frozen concrete law at the 1,024-layer cell midpoint using each accepted section history. All forty coarse replays must exactly match accepted state and stress. Eighty local material integrations and zero structural solves/fits then decompose each field as:
+
+`coarse - projected fine = (coarse - fine-history midpoint) + (fine-history midpoint - projected fine)`.
+
+The derived fine-history midpoint is not an accepted solver fiber. The decomposition is algebraic and post-hoc; it is not causal attribution, independent physical validation, a replacement of the original projection screen, or authority to change tolerances or the public layer range.
+
+## Execution state
+
+Implementation only: the original large packets have **not** been scanned or replayed with this new driver. Wait for the running inner-label timing campaign to finish before the large diagnostic read. Freeze a committed source snapshot and record separate extraction/replay, enclosing-process and inventory costs, source pins and terminal status. Preserve failed attempts without rerunning numerical solves.
+
+Focused extraction/coordinate and previous witness regression checks: **15 passed in 1.70 seconds**; Ruff and diff checks passed. The added tests use small fabricated records and a mock material for the new coordinate check; the pre-existing tests retain their tiny material-law checks. These tests ran while label generation was live, so that campaign must not be described as a completely idle-host measurement. No additional structural benchmark, policy fit or large packet audit ran concurrently.

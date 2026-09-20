@@ -60,12 +60,14 @@ def decompose(coarse, midpoint, left, right):
             'signed_total': total, 'signed_history': history, 'signed_sampling': sampling}
 
 
-def replay(material, coarse, fine):
+def replay(material, coarse, fine, *, witnesses=WITNESSES, coarse_layers=512):
+    require(type(coarse_layers) is int and coarse_layers > 0, 'positive exact layer count required')
     out = []
-    for identity, aa, bb in zip(WITNESSES, coarse, fine, strict=True):
+    for identity, aa, bb in zip(witnesses, coarse, fine, strict=True):
         cp, fp = material.initial_state(), material.initial_state()
         mid, gauss, cell = identity
-        y = -0.3 + (cell + 0.5) * 0.6 / 512
+        require(type(cell) is int and 0 <= cell < coarse_layers, 'coarse cell outside layer range')
+        y = -0.3 + (cell + 0.5) * 0.6 / coarse_layers
         rows = []
         for a, b in zip(aa, bb, strict=True):
             require(a['target_m'] == b['target_m'], 'target mismatch')
