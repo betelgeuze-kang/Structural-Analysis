@@ -62,3 +62,25 @@ All 511 inventory entries were reread and hash/length checked. Inventory SHA-256
 The packet includes original/replayed files, changed implementation/test bytes,
 and the initial failed and corrected test logs. It does not archive the complete
 repository or authenticate synthetic source labels as commit identities.
+
+## Polishing-only diagnostic on frozen d1f8f5ca0
+
+A subsequent predeclared diagnostic archived committed source
+`d1f8f5ca0` and ran the same two cases with binary64 arithmetic and terminal
+polishing enabled. It performed two comparisons / eight complete paths, including
+fresh references, at the unchanged tolerances. Both proposal comparisons still
+failed: short/2 mm has four mismatches, maximum difference
+1.3931595923235598e-10; long/40 mm has ten mismatches, maximum difference
+6.344154668665403e-10. Secant comparisons also fail in this diagnostic.
+All work is known: 65 native calls / 351 Newton iterations, including all internal
+trials and reference paths.
+
+Polishing alone therefore does not explain the retained-profile tests passing
+these two cases. This does not identify which component of the complete retained
+profile is responsible, establish universal robustness, or qualify a speed ratio.
+This diagnostic is a single order per case and has no performance claim.
+
+Frozen source, plan, driver and complete results are retained in
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-polishing-isolation-296s7fmc`.
+All 1,168 inventory entries were reread and hash/length checked. Inventory SHA-256:
+`ee109cf545332a01bff72ff5f37885c9b4193edbfd37fbc76c58cc0e5140bfbc`.
