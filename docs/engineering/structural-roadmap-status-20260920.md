@@ -123,3 +123,16 @@ all 216 proposal decisions abstained. Secant remains selected. The audit binds
 complementary training samples to each excluded group and retains initial failed
 protocol costs. Reserved validation/holdout paths remain unexecuted. Material
 history coverage, useful learned benefit and independent validation remain open.
+
+## Training coverage and current hosted evidence
+
+The [history-coverage expansion](rc-training-history-coverage-plan-20260920.md)
+retains 77/99 expected labels: two reference paths fail line search while their
+secant counterparts complete. No fit, range conclusion or reserved evaluation
+was authorized from that incomplete study. Exact rollback and failed residuals
+are retained for the next numerical investigation.
+
+[Hosted 1804038c0](hosted-180-terminal-20260920.md) passed 1,667 development and
+755 frontend tests. Full Python shards remain blocked before test execution by
+external replay/technical receipt preparation. Later local commits require their
+own exact-head hosted checks; this is not full roadmap or release closure.

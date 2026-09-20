@@ -37,3 +37,37 @@ This stage deliberately precedes another full repeated runtime campaign. Its
 outcome can guide further **training-only** development while the existing
 reserved evaluation paths remain unexecuted. It does not restore an untouched
 status to any previously observed training fold or waive physical verification.
+
+## Terminal outcome: incomplete labels, no coverage conclusion
+
+The frozen `1cb62a5964ed0bac2cc0c97233ace5b3860f983b` execution is terminal.
+Seven cases qualified their original labels; two A-family variants did not.
+Only 77 of the expected 99 labels were retained. The run intentionally emitted
+`incomplete_labels`, performed no fit, and produced no range-eligibility result.
+Both reserved evaluation solver paths remain unexecuted. Their canonical models
+and full requests were compared exactly with the prior campaign and are unchanged.
+
+| Variant | Blocked reference target | Relative equilibrium residual | Control error | Secant path |
+| --- | ---: | ---: | ---: | --- |
+| A × 0.5 | +2 mm (index 6) | 0.09973544 | -0.861328125 mm | All 12 targets complete |
+| A × 1.5 | -4.5 mm (index 2) | 0.19662428 | +1.384277344 mm | All 12 targets complete |
+
+Both original reference paths stop with `line_search_failed_to_reduce_residual`;
+rollback remains exact. These are substantial unsatisfied equilibrium/control
+conditions, not tiny terminal-rounding differences. A completed secant path does
+not satisfy the existing requirement for a completed independent fresh-reference
+comparison. No failed sample was relabelled as valid, and acceptance tolerances
+were not relaxed. The next numerical investigation should preserve these exact
+parents/targets and examine globalization before expanding the learning study.
+
+Known work was 323 core calls and 1,670 Newton iterations/linear solves, with no
+unknown execution work. The label-study wall time was 117.067 s and enclosing
+campaign time 117.192 s before final outcome write. No runtime selection or
+reserved-case performance measurement followed.
+
+Packet: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-coverage-37l21wi_`.
+All 466 frozen source files match their SHA-256 manifest and exact Git blobs.
+Inventory: 2,513 files / 129,504,366 bytes, excluding regenerable `__pycache__`;
+SHA-256 `cffefc0082c58e75d07f6e7df712bea1e8eaab9b66ceb368990fd00b633e4f70`.
+[Retained outcome](rc-training-history-coverage-20260920.summary.json) includes
+all nine cases and the original blocked-step metrics.
