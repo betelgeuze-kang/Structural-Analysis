@@ -48,6 +48,10 @@ from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
 from structural_analysis.benchmark.rc_control_assembly_phases import (
     summarize_rc_control_assembly_phases,
 )
+from structural_analysis.benchmark.rc_control_trust_region import (
+    TrustRegionReversalProposal,
+    TRUST_REGION_REVERSAL_IDENTITY,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.assembly_work import (
     VectorAssemblyWorkRecorder,
@@ -480,7 +484,15 @@ def _path(
         )
         pw, pc = perf_counter_ns(), process_time_ns()
         try:
+            numerical = None
+            if strategy == "proposal" and isinstance(proposal, TrustRegionReversalProposal):
+                numerical = proposal.propose(compiled.problem, accepted, request, context)
+                entry["numerical_proposal"] = numerical
+                if numerical["unknown_work"]:
+                    failure = {"phase": "numerical_proposal", "kind": "unknown_work",
+                               "target_index": index}
             seed = (
+                numerical["seed"] if numerical is not None else
                 None
                 if strategy == "reference"
                 else secant_seed(context)
@@ -511,6 +523,9 @@ def _path(
                 ).initial_augmented_coordinates_m
             entry["proposal"] = None if seed is None else list(seed)
         except Exception as exc:
+            if isinstance(proposal, TrustRegionReversalProposal):
+                failure = {"phase": "numerical_proposal", "kind": type(exc).__name__,
+                           "target_index": index, "unknown_work": True}
             entry["proposal_error"] = {
                 "phase": "proposal",
                 "kind": type(exc).__name__,
@@ -1065,6 +1080,7 @@ def benchmark_rc_control_seed_paths(
     reuse_line_search_assembly: bool = False,
     record_assembly_timing: bool = False,
     observe_initial_residuals: bool = False,
+    trust_region_reversal: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -1073,6 +1089,15 @@ def benchmark_rc_control_seed_paths(
     original prefix, and cannot provide complete-path performance credit.
     """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(trust_region_reversal) is not bool:
+        raise ValueError("explicit boolean trust-region reversal option required")
+    if trust_region_reversal:
+        if (proposal is not None or proposal_identity is not None or
+                proposal_guard is not None or proposal_abstention_strategy != "reference" or
+                coordinate_precision != "binary64"):
+            raise ValueError("isolated binary64 trust-region reversal strategy required")
+        proposal = TrustRegionReversalProposal()
+        proposal_identity = _sha(_bytes({"profile": TRUST_REGION_REVERSAL_IDENTITY}))
     if type(observe_initial_residuals) is not bool or (
         observe_initial_residuals and proposal is None
     ):
@@ -1346,6 +1371,15 @@ def benchmark_rc_control_seed_paths(
         "absolute_tolerance": absolute_tolerance,
         "relative_tolerance": relative_tolerance,
     }
+    if trust_region_reversal:
+        identity["numerical_proposal"] = {
+            "identity": TRUST_REGION_REVERSAL_IDENTITY,
+            "trigger": "accepted_direction_reversal",
+            "cost_included_in_path_wall": True,
+            "optimizer_assemblies_separate_from_newton_dispatches": True,
+            "optimizer_confers_acceptance": False,
+            "unknown_work_stops_path": True,
+        }
     if initial_prefix is not None:
         identity.update(
             schema_version="experimental-rc-control-parent-step-comparison.v1",
@@ -1418,6 +1452,11 @@ def benchmark_rc_control_seed_paths(
                 not entry.get("initial_residual_observation", {"complete": True})["complete"]
                 for entry in arm["entries"]
             )
+            unknown = unknown or any(
+                entry.get("numerical_proposal", {}).get("unknown_work", False)
+                for entry in arm["entries"]
+            )
+            unknown = unknown or bool((arm.get("failure") or {}).get("unknown_work"))
             changed = initial_prefix[0].canonical_bytes() != origin_bytes
             if unknown or changed:
                 _save(
