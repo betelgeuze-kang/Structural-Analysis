@@ -1,0 +1,93 @@
+{
+  "cases": [
+    {
+      "case_id": "train-a-amp050",
+      "mean_ratio": 1.02627119968914
+    },
+    {
+      "case_id": "train-a-amp100",
+      "mean_ratio": 1.003824098890803
+    },
+    {
+      "case_id": "train-a-amp150",
+      "mean_ratio": 0.9904735691938334
+    },
+    {
+      "case_id": "train-b-amp050",
+      "mean_ratio": 0.9776149590116024
+    },
+    {
+      "case_id": "train-b-amp100",
+      "mean_ratio": 1.0141513211676574
+    },
+    {
+      "case_id": "train-b-amp150",
+      "mean_ratio": 1.0121661787376022
+    },
+    {
+      "case_id": "train-c-amp050",
+      "mean_ratio": 1.0016410148569868
+    },
+    {
+      "case_id": "train-c-amp100",
+      "mean_ratio": 1.0009924129233696
+    },
+    {
+      "case_id": "train-c-amp150",
+      "mean_ratio": 1.0024949152725229
+    },
+    {
+      "case_id": "train-d-amp050",
+      "mean_ratio": 1.001222676987297
+    },
+    {
+      "case_id": "train-d-amp100",
+      "mean_ratio": 1.0078429295110074
+    },
+    {
+      "case_id": "train-d-amp150",
+      "mean_ratio": 1.0027639396684815
+    },
+    {
+      "case_id": "train-e-amp050",
+      "mean_ratio": 1.0103544058474483
+    },
+    {
+      "case_id": "train-e-amp100",
+      "mean_ratio": 1.0208202037394087
+    },
+    {
+      "case_id": "train-e-amp150",
+      "mean_ratio": 1.0051502058152963
+    }
+  ],
+  "report_count": 45,
+  "full_comparison_pass": true,
+  "equal_case_mean_ratio": 1.0051856020874972,
+  "guard_allowed": 0,
+  "guard_declined": 540,
+  "proposed_count": 0,
+  "all_execution_work": {
+    "core_calls": 2340,
+    "newton_iterations": 12024,
+    "linear_solves": 12024
+  },
+  "cache_after": {
+    "currsize": 0,
+    "hits": 0,
+    "maxsize": 4,
+    "misses": 0
+  },
+  "development_runtime_eligible": false,
+  "historical_training_costs_amortized": false,
+  "net_savings_proved": false,
+  "independent_evaluation": false,
+  "reserved_evaluation": false,
+  "new_fits": 0,
+  "wall_ns_before_outcome_write": 746594859450,
+  "source_revision": "75a12b2a4f042eb49c637b21575f4cecd00557dc",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-guarded-runtime-24nhflp9",
+  "inventory_sha256": "4efe7fd210740f5cbf64f708c042a01593ed70930ee65dcd1a698facb701c4d0",
+  "files_verified": 17447,
+  "bytes_verified": 805543598
+}
