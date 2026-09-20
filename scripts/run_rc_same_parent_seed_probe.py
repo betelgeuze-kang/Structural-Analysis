@@ -77,7 +77,7 @@ def main():
                 if not step['committed'] or context.target_m != case.request.targets_m[index]:
                     raise ValueError('original accepted target required')
                 row = {'case_id': case.case_id, 'ridge': ridge, 'target_index': index,
-                       'policy_hash': policy.policy_hash, 'parent_hash': step['metrics']['parent_checkpoint_hash']}
+                       'policy_hash': policy.policy_hash, 'parent_hash': step['parent_checkpoint']['state_hash']}
                 roster.append(row)
                 objects.append((case, policy, index, _bytes(step['parent_checkpoint']), context))
     if len(objects) != 66:
