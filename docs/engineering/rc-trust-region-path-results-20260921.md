@@ -1,0 +1,13 @@
+# Complete-path reversal strategy: one model completes, references remain incomplete
+
+Frozen source `b9e767cc9b1c596aff86f140c2e0a2404cd3a065` ran all six predeclared comparisons / 24 attempted full paths. The width 0.48 m cheap proposal arm completes both orderings from the original input model through preload and every original target. Its two final accepted checkpoints agree exactly. The width 0.32 m cheap/middle proposal arms remain incomplete, as do every ordinary reference, secant and fresh-reference arm.
+
+The proposal is computed from the live arm's accepted parent only at the original +20 mm reversal. The earlier prefix uses the ordinary initial guess. There is no retained-failure lookahead, hidden intermediate target, tolerance change or optimizer commit. Original Newton retains state acceptance and failed proposals retain their reference fallback attempts.
+
+Across all 24 paths the record contains 106 core calls, 672 Newton iterations/linear solves and 2,044 Newton assembly dispatches. Six optimizations add 362 full residual/tangent callbacks, measured separately from Newton. Optimizer wall time totals 0.671724887 s, inside 0.678049712 s of enclosing proposal work and the respective full path clocks. Native recovery/outside-Newton observations are outside the assembly-sidecar count; these are not exhaustive material-evaluation counts.
+
+Every full-history comparison against the fresh ordinary reference correctly fails because no reference finishes the requested history. No qualified speed ratio is assigned. Completion of a proposed path is stronger evidence than a retained-parent solve but still does not provide an independent physical reference, unique branch selection, general convergence, design approval or production promotion.
+
+All six report hashes, roster, known native/optimizer work, repeat checkpoints and outcome counts were audited. The packet inventory covers 1,889 non-cache files, including archived committed source, reports, steps, driver and audit; every inventoried file was reread. Inventory SHA-256: `6b9315bd681cd6169af39080adf2c95826b26bf93c6fe2f754f0e5cfd2c1d334`. See the [summary](rc-trust-region-path-results-20260921.summary.json) for individual enclosing path clocks and source identity.
+
+A subsequent report-integrity fix makes `all_execution_work_reported` false when numerical proposals or initial-residual observations have unknown work, including thrown proposal failures. It does not alter the numerical kernel or these completed known-work records. Eighteen focused tests pass after that fix. The original 75-test suite covered the new strategy, warm-start contracts and workflow registration. Neither suite is an external-validation receipt.

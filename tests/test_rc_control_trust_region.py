@@ -48,6 +48,7 @@ def test_optimizer_exception_retains_assembly_and_stops_before_terminal_newton(t
     monkeypatch.setattr(optimize, 'least_squares', interrupted)
     report = run(tmp_path)
     arm = report['arms']['proposal']
+    assert not report['all_execution_work_reported']
     assert arm['status'] == 'incomplete' and arm['accepted_target_count'] == 2
     last = arm['entries'][-1]
     assert last['numerical_proposal']['assembly_attempts'] == 1

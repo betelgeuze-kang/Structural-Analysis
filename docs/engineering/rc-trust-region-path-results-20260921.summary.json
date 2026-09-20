@@ -1,0 +1,197 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-trust-path-gp3do2sw",
+  "inventory_sha256": "6b9315bd681cd6169af39080adf2c95826b26bf93c6fe2f754f0e5cfd2c1d334",
+  "file_count": 1889,
+  "audit": {
+    "totals": {
+      "paths": 24,
+      "completed_paths": 2,
+      "core_calls": 106,
+      "newton_iterations": 672,
+      "linear_solves": 672,
+      "optimizer_assemblies": 362,
+      "optimizer_wall_ns": 671724887,
+      "proposal_wall_ns": 678049712,
+      "newton_assembly_dispatches": 2044
+    },
+    "proposal_repeat_checkpoints_equal": true,
+    "all_full_reference_comparisons_pass": false,
+    "rows": [
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "repeat": 0,
+        "report_hash": "sha256:e2891d35178bee9bb01b0c2de2c0a197878ff424dc4f090bc20659d3ba07d6e9",
+        "arms": {
+          "proposal": {
+            "status": "incomplete",
+            "wall_ns": 428245842,
+            "accepted_target_count": 2
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 188458994,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 232954209,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 184670331,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "repeat": 1,
+        "report_hash": "sha256:7313968834996121c9f68a06d930cdd7b1e9a3ccbd022f12a8e369e396a913db",
+        "arms": {
+          "proposal": {
+            "status": "incomplete",
+            "wall_ns": 425823596,
+            "accepted_target_count": 2
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 184950841,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 232347607,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 184311377,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "repeat": 0,
+        "report_hash": "sha256:2718dfd08ee054b82e6fc9926324585ec437fa547a920079f0c4408e2316ee1a",
+        "arms": {
+          "proposal": {
+            "status": "incomplete",
+            "wall_ns": 520551343,
+            "accepted_target_count": 2
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 167211347,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 196513167,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 167279808,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "repeat": 1,
+        "report_hash": "sha256:a414fc2bfaae8784c866f0da427c30a6093bffd04d1ea08ec130feb0c9efd436",
+        "arms": {
+          "proposal": {
+            "status": "incomplete",
+            "wall_ns": 438922594,
+            "accepted_target_count": 2
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 167427053,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 196359640,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 167026588,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "repeat": 0,
+        "report_hash": "sha256:af92a98ffc499d9efb371128cd37a1583164b441918b89da33ea7a2cb50babdf",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 143218922,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 167248517,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 220707044,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 166876603,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "repeat": 1,
+        "report_hash": "sha256:f7040ae609b1c0f2c95ff046a469f1e658af4cf29d496d194c4040a74a1a85fc",
+        "arms": {
+          "proposal": {
+            "status": "complete",
+            "wall_ns": 142754056,
+            "accepted_target_count": 3
+          },
+          "reference": {
+            "status": "incomplete",
+            "wall_ns": 166820291,
+            "accepted_target_count": 2
+          },
+          "secant": {
+            "status": "incomplete",
+            "wall_ns": 220146634,
+            "accepted_target_count": 2
+          },
+          "fresh-reference": {
+            "status": "incomplete",
+            "wall_ns": 167077820,
+            "accepted_target_count": 2
+          }
+        },
+        "qualified_speed_ratio": null
+      }
+    ],
+    "source_revision": "b9e767cc9b1c596aff86f140c2e0a2404cd3a065"
+  }
+}

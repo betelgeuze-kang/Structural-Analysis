@@ -1548,6 +1548,14 @@ def benchmark_rc_control_seed_paths(
                 *arm["entries"],
             ]
             for inv in entry["invocations"]
+        ) and not any(
+            bool((arm.get("failure") or {}).get("unknown_work"))
+            or any(
+                entry.get("numerical_proposal", {}).get("unknown_work", False)
+                or not entry.get("initial_residual_observation", {"complete": True})["complete"]
+                for entry in arm["entries"]
+            )
+            for arm in (*arms.values(), fresh)
         ),
         "claims": {
             "experimental_control": True,
