@@ -307,3 +307,44 @@ def test_common_point_probe_rejects_modified_material_before_import(
     )
     with pytest.raises(ValueError, match="frozen material source"):
         probe.material_class(tmp_path)
+
+
+def test_projection_error_decomposition_preserves_signed_cancellation():
+    from scripts.decompose_planar_concrete_projection import decompose, summarize
+
+    row = decompose(0.4, 0.8, 0.4, 0.6)
+    assert row['total'] == pytest.approx(-0.1)
+    assert row['history'] == pytest.approx(-0.4)
+    assert row['sampling'] == pytest.approx(0.3)
+    assert abs(row['residual']) <= 1e-15
+    summary = summarize([{'point': ['E1', 0, 0], **row}])
+    assert summary['opposite_sign_component_cells'] == 1
+    assert summary['sum_absolute_history'] > summary['sum_absolute_total']
+
+
+def test_projection_error_decomposition_distinguishes_history_and_sampling():
+    from scripts.decompose_planar_concrete_projection import decompose
+
+    history = decompose(0.5, 0.4, 0.4, 0.4)
+    assert history['sampling'] == 0
+    assert history['history'] == history['total']
+    sampling = decompose(0.4, 0.4, 0, 0.6)
+    assert sampling['history'] == 0
+    assert sampling['sampling'] == sampling['total']
+    assert sampling['mixed_onset'] is True
+
+
+@pytest.mark.parametrize('bad', [True, float('nan'), float('inf'), -0.1, 1.1])
+def test_projection_error_decomposition_rejects_invalid_damage(bad):
+    from scripts.decompose_planar_concrete_projection import decompose
+
+    with pytest.raises(ValueError, match='finite damage'):
+        decompose(0.2, bad, 0.1, 0.3)
+
+
+def test_projection_error_decomposition_rejects_duplicate_points():
+    from scripts.decompose_planar_concrete_projection import decompose, summarize
+
+    row = {'point': ['E1', 0, 0], **decompose(0.4, 0.4, 0.4, 0.4)}
+    with pytest.raises(ValueError, match='duplicate point'):
+        summarize([row, row])
