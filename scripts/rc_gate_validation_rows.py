@@ -106,3 +106,29 @@ def assemble_fold(new_audit, retained_audit, plan, outer, validation, *, new_pol
         validation_group_index=validation, feature_profile=PROFILE, feature_names=list(names),
         rows=check, unverified_count=sum(row['label'] is None for row in check),
         declared_row_count=fold['validation_row_count'], independent_evaluation=False))
+
+
+def append_material_inputs(tables, summaries):
+    """Append only each row's own accepted-parent material statistics."""
+    from rc_material_cost_gate import PROFILE as MATERIAL_PROFILE, material_summary_index
+    indexed, names = material_summary_index(summaries)
+    result = deepcopy(tables)
+    for table, collections in ((result['training'], ('training_rows', 'unverified_rows')),
+                               (result['validation'], ('rows',))):
+        require(table['feature_profile'] == PROFILE, 'original prefix input table required')
+        for collection in collections:
+            for row in table[collection]:
+                require(row['source_sample_hash'] in indexed, 'original material source sample required')
+                original = indexed[row['source_sample_hash']]
+                summary = original['summary']
+                require(original['case_id'] == row['case_id']
+                        and summary['parent_state_hash'] == row['parent_hash'],
+                        'original material parent and case binding required')
+                row['material_summary'] = deepcopy(summary)
+                row['original_step_bytes_hash'] = original['original_step_bytes_hash']
+                row['values'].extend(summary['values'])
+        table['feature_profile'] = MATERIAL_PROFILE
+        table['feature_names'] = [*table['feature_names'], *('material.' + name for name in names)]
+    # Do not put the complete summary artifact hash (which includes validation
+    # and outer-group inputs) inside the object passed to the training fitter.
+    return result

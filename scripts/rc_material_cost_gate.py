@@ -20,10 +20,8 @@ class MaterialCostGate(CostMarginGate):
         raise ValueError('offline material gate has no cost-validated runtime adapter')
 
 
-def material_training_rows(audit, plan, summaries, outer):
-    """Call with authenticated artifacts; join by sample, case and parent."""
-    training = cost_training_rows(audit, plan, outer)
-    require(summaries['profile'] == SUMMARY_PROFILE and summaries['groups'] == plan['groups']
+def material_summary_index(summaries):
+    require(summaries['profile'] == SUMMARY_PROFILE
             and summaries['row_count'] == 165 and len(summaries['rows']) == 165
             and summaries['feature_count'] == 27, 'complete original material summary roster required')
     indexed = {}
@@ -39,6 +37,14 @@ def material_training_rows(audit, plan, summaries, outer):
             names = summary['feature_names']
         require(summary['feature_names'] == names, 'consistent material summary names required')
         indexed[key] = row
+    return indexed, names
+
+
+def material_training_rows(audit, plan, summaries, outer):
+    """Call with authenticated artifacts; join by sample, case and parent."""
+    training = cost_training_rows(audit, plan, outer)
+    require(summaries['groups'] == plan['groups'], 'original summary groups required')
+    indexed, names = material_summary_index(summaries)
     required = {row['source_sample_hash'] for row in audit['pairs']}
     require(set(indexed) == required, 'exact nested-label material sample coverage required')
     # Validate every join before selecting this outer complement.

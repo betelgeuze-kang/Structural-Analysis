@@ -804,6 +804,61 @@ def test_gate_validation_score_rejects_leakage_or_changed_measurements(monkeypat
         module.score_gate(gate, validation)
 
 
+def validation_material_fixture(monkeypatch):
+    from copy import deepcopy
+    from scripts.rc_accepted_material_summary import accepted_material_summary
+    module, audits, plan, hashes = validation_rows_fixture(monkeypatch)
+    tables = module.assemble_fold(*audits, plan, 0, 1, **hashes)
+    summary = accepted_material_summary(_summary_snapshot(), 'sha256:'+'1'*64, 'sha256:'+'2'*64)
+    rows = []
+    for i in range(165):
+        value = deepcopy(summary)
+        value['parent_state_hash'] = f'sha256:{i:064x}'
+        rows.append(dict(source_sample_hash=f'sha256:{i:064x}', case_id='abcde'[i] if i<5 else 'unused',
+                         summary=value, original_step_bytes_hash='sha256:'+'f'*64))
+    return module, tables, dict(profile=summary['profile'], row_count=165, feature_count=27, rows=rows)
+
+
+def test_material_fold_extension_keeps_validation_material_out_of_training_identity(monkeypatch):
+    module, tables, summaries = validation_material_fixture(monkeypatch)
+    result = module.append_material_inputs(tables, summaries)
+    fit = importlib.import_module('rc_material_cost_gate').fit_material_gate
+    gate, _ = fit(result['training'])
+    summaries['rows'][1]['summary']['values'][0] = -0.125
+    changed = module.append_material_inputs(tables, summaries)
+    other, _ = fit(changed['training'])
+    assert result['training'] == changed['training'] and gate.policy_hash == other.policy_hash
+    assert result['validation'] != changed['validation']
+    assert len(tables['training']['feature_names']) == 1
+    assert len(result['training']['feature_names']) == 28
+
+
+@pytest.mark.parametrize('mutation', ['parent', 'case', 'missing'])
+def test_material_fold_extension_rejects_foreign_summary_binding(monkeypatch, mutation):
+    module, tables, summaries = validation_material_fixture(monkeypatch)
+    if mutation == 'parent':
+        summaries['rows'][2]['summary']['parent_state_hash'] = 'foreign'
+    elif mutation == 'case':
+        summaries['rows'][2]['case_id'] = 'foreign'
+    else:
+        summaries['rows'][2]['source_sample_hash'] = 'foreign'
+    with pytest.raises(ValueError):
+        module.append_material_inputs(tables, summaries)
+
+
+def test_inner_variant_driver_rejects_unfinished_campaign_before_fitting(monkeypatch, tmp_path):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('evaluate_rc_inner_gate_variants')
+    def read(name):
+        assert name == 'stage-result.json'
+        return dict(status='prepared_not_started')
+    monkeypatch.setattr(module, 'reader', lambda *args: read)
+    with pytest.raises(ValueError, match='complete audited numerical campaign'):
+        module.inputs(tmp_path, 'a'*64, tmp_path, tmp_path, tmp_path, tmp_path)
+    with pytest.raises(ValueError, match='inventory pin'):
+        module.inputs(tmp_path, 'invalid', tmp_path, tmp_path, tmp_path, tmp_path)
+
+
 @pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'outer_case', 'seed', 'label', 'nonfinite'])
 def test_gate_training_rows_reject_transplanted_or_incomplete_inputs(monkeypatch, mutation):
     module, audit, plan = gate_row_fixture(monkeypatch)
