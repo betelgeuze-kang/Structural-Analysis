@@ -25,11 +25,11 @@ not perform a merge, authenticate real supplemental signatures or waive exact
 combined-source checks. Rebuild the inventory against the eventual merged source;
 do not import historical hash values as current evidence.
 
-[Hosted 90cc](hosted-90cc-terminal-20260920.md) passed 1,677 Python development tests.
-Its frontend run executes 812 tests: 810 pass, but two L-frame cases exhaust their
-30-second budget at the final screenshot and fail. The subsequent correction
-gives those artifact-heavy browser cases a scoped 60-second budget without
-removing assertions or screenshots. The [Workbench registration correction](workbench-suite-registration-20260920.md)
+[Hosted 695b](hosted-695b-terminal-20260920.md) passes 1,686 Python development tests
+and all 814 frontend tests, including the material-boundary review and scoped
+L-frame screenshot budget correction. The prior 90cc frontend failures remain
+recorded separately; the correction removes no assertions or screenshots.
+The [Workbench registration correction](workbench-suite-registration-20260920.md)
 restores five previously omitted files and prevents silent future omissions.
 Full Python shards remain blocked before actual tests by external replay/technical
 receipt preparation. Passing local or hosted development contracts is not
@@ -49,6 +49,12 @@ reserved cases unexecuted. Whole-group reference-parent range eligibility now
 covers B/D/E (99 of 165 samples). No actual pooled-policy runtime benefit has
 been measured; complementary-group fitting and full-path cost comparison remain
 required before any policy promotion.
+
+The [pooled runtime campaign](rc-pooled-runtime-campaign-20260920.md) has now
+started its predeclared 90 comparisons/360 full paths using the retained 165
+samples. It remains live with no final strategy or speed result. The prepared
+auditor will verify complete rosters, 132-sample complementary fits, exact case
+bindings and separate costs after termination; a partial fold is not a result.
 
 The [material-boundary L-frame campaign](rc-l-frame-boundary-campaign-20260920.md)
 now verifies repeated rejection of a cheaper candidate after successful full
