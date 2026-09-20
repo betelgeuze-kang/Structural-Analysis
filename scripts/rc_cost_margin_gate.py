@@ -52,6 +52,10 @@ def cost_training_rows(audit, plan, outer):
 
 
 def fit_cost_gate(training):
+    return _fit_cost_gate(training, CostMarginGate)
+
+
+def _fit_cost_gate(training, gate_class):
     started = perf_counter_ns()
     require(training['cost_target_profile'] == TARGET_PROFILE, 'fixed cost target profile required')
     targets = []
@@ -62,7 +66,7 @@ def fit_cost_gate(training):
         require(row['label'] is label_from_repetitions(row['cost_repetitions'])['label'],
                 'original benefit label required')
         targets.append(target)
-    gate, receipt = _fit_gate(training, targets, CostMarginGate)
+    gate, receipt = _fit_gate(training, targets, gate_class)
     receipt['target_profile'] = TARGET_PROFILE
     receipt['gate_cost_in_training_target'] = False
     receipt['fit_wall_ns'] = perf_counter_ns() - started

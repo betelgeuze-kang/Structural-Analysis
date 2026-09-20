@@ -23,6 +23,7 @@ THRESHOLD = 0.75
 @dataclass(frozen=True)
 class RidgeGate:
     _schema = SCHEMA
+    _feature_profile = PROFILE
     _ridge = RIDGE
     _threshold = THRESHOLD
     _json: str = field(repr=False)
@@ -36,7 +37,7 @@ class RidgeGate:
                 'outer_group_index', 'excluded_case_ids', 'training_sample_hashes',
                 'positive_count', 'negative_count', 'training_rows_hash', 'policy_hash'},
                 'exact gate fields required')
-        require(payload['schema_version'] == self._schema and payload['feature_profile'] == PROFILE
+        require(payload['schema_version'] == self._schema and payload['feature_profile'] == self._feature_profile
                 and type(payload['ridge']) is float and payload['ridge'] == self._ridge
                 and type(payload['threshold']) is float and payload['threshold'] == self._threshold,
                 'fixed gate profile required')
@@ -78,7 +79,7 @@ class RidgeGate:
 
     def decision(self, features):
         p = self._payload
-        require(features['profile'] == PROFILE
+        require(features['profile'] == self._feature_profile
                 and tuple(features['feature_names']) == p['feature_names'], 'gate feature binding required')
         values = features['values']
         require(len(values) == len(p['mean'])
@@ -114,7 +115,7 @@ def _fit_gate(training, targets, gate_class):
     require(rows and all(type(row['label']) is bool for row in rows), 'verified nonempty gate labels required')
     require(all(row['case_id'] not in training['excluded_case_ids'] for row in rows),
             'outer group cannot enter gate fit')
-    require(training['feature_profile'] == PROFILE, 'pre-solve feature profile required')
+    require(training['feature_profile'] == gate_class._feature_profile, 'pre-solve feature profile required')
     x = np.asarray([row['values'] for row in rows], dtype=float)
     require(x.ndim == 2 and x.shape[1] == len(training['feature_names']) and np.all(np.isfinite(x)),
             'finite aligned gate training matrix required')
@@ -131,7 +132,7 @@ def _fit_gate(training, targets, gate_class):
     penalty[-1, -1] = 0.0
     weights = np.linalg.lstsq(np.vstack((z, penalty)), np.concatenate((y, np.zeros(z.shape[1]))), rcond=None)[0]
     positives = sum(row['label'] for row in rows)
-    payload = dict(schema_version=gate_class._schema, feature_profile=PROFILE,
+    payload = dict(schema_version=gate_class._schema, feature_profile=gate_class._feature_profile,
         feature_names=training['feature_names'], mean=center.tolist(), scale=scale.tolist(),
         minimum=minimum.tolist(), maximum=maximum.tolist(), weights=weights.tolist(),
         ridge=gate_class._ridge, threshold=gate_class._threshold, outer_group_index=training['outer_group_index'],

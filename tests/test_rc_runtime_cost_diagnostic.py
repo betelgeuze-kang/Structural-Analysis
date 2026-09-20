@@ -641,6 +641,65 @@ def test_cost_margin_fit_matches_known_two_row_ridge_solution(monkeypatch):
     assert gate._payload['weights'] == pytest.approx((.25, .125))
 
 
+def material_gate_fixture(monkeypatch):
+    from copy import deepcopy
+    from scripts.rc_accepted_material_summary import accepted_material_summary
+    cost, audit, plan = cost_gate_fixture(monkeypatch)
+    training = cost.cost_training_rows(audit, plan, 0)
+    module = importlib.import_module('rc_material_cost_gate')
+    monkeypatch.setattr(module, 'cost_training_rows', lambda *args: deepcopy(training))
+    summary = accepted_material_summary(_summary_snapshot(), 'sha256:' + '1' * 64, 'sha256:' + '2' * 64)
+    rows = []
+    for i in range(165):
+        source = (training['training_rows'][i] if i < len(training['training_rows']) else
+                  dict(source_sample_hash=f'sha256:{i:064x}', case_id='other'))
+        rows.append(dict(source_sample_hash=source['source_sample_hash'], case_id=source['case_id'],
+                         original_step_bytes_hash='sha256:' + '3' * 64, summary=deepcopy(summary)))
+    audit = dict(pairs=[dict(source_sample_hash=row['source_sample_hash'], case_id=row['case_id'],
+                            parent_hash=summary['parent_state_hash']) for row in rows])
+    summaries = dict(profile=summary['profile'], groups=plan['groups'], row_count=165,
+                     feature_count=27, rows=rows)
+    return module, audit, plan, summaries
+
+
+def test_material_gate_preserves_cost_target_and_exclusion_but_has_no_runtime_adapter(monkeypatch):
+    module, audit, plan, summaries = material_gate_fixture(monkeypatch)
+    training = module.material_training_rows(audit, plan, summaries, 0)
+    gate, receipt = module.fit_material_gate(training)
+    assert len(training['feature_names']) == 28
+    assert gate._payload['excluded_case_ids'] == ('a',)
+    assert gate._payload['threshold'] == .01 and gate._payload['ridge'] == 1.0
+    assert receipt['online_extraction_cost_in_target'] is False
+    with pytest.raises(ValueError, match='no cost-validated runtime adapter'):
+        gate.guard(None)
+    with pytest.raises(ValueError, match='fixed gate profile'):
+        importlib.import_module('rc_cost_margin_gate').CostMarginGate(gate._json)
+    assert gate.decision(dict(profile=module.PROFILE, feature_names=training['feature_names'],
+                              values=training['training_rows'][0]['values']))
+
+
+@pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'foreign', 'case', 'parent', 'nan', 'names'])
+def test_material_gate_rejects_incomplete_or_transplanted_parent_joins(monkeypatch, mutation):
+    module, audit, plan, summaries = material_gate_fixture(monkeypatch)
+    row = summaries['rows'][0]
+    if mutation == 'missing':
+        summaries['rows'].pop()
+    elif mutation == 'duplicate':
+        summaries['rows'][-1] = row
+    elif mutation == 'foreign':
+        row['source_sample_hash'] = 'sha256:' + 'f' * 64
+    elif mutation == 'case':
+        row['case_id'] = 'foreign'
+    elif mutation == 'parent':
+        row['summary']['parent_state_hash'] = 'sha256:' + 'f' * 64
+    elif mutation == 'nan':
+        row['summary']['values'][0] = float('nan')
+    else:
+        row['summary']['feature_names'][0] = 'foreign'
+    with pytest.raises(ValueError):
+        module.material_training_rows(audit, plan, summaries, 0)
+
+
 def test_guarded_runtime_score_includes_policy_setup_and_full_path_validity(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
     from run_rc_guarded_runtime_campaign import score_path
