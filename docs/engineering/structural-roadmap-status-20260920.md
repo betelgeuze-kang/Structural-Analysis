@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Scoped audit timing](rc-adaptive-campaign-audit-20260921.md) now optionally writes wall/CPU cost receipts bound to an unchanged audit hash. Twenty-three audit/runner tests pass, and an actual frozen-source 128-path audit matches the earlier result exactly. Startup, transport and browser costs remain outside this scope.
+
 [Second-stop recovery check](rc-76mm-recovery-check-20260921.md): all eight TRF/native follow-ups at -76.20 mm and -80 mm fail original native acceptance despite optimizer success. This prevents treating the earlier isolated accepted seed as a generally effective recovery method; full-path robustness remains unresolved.
 
 [Alternate-seed witness](rc-80mm-alternate-seed-20260921.md): parent-start trust-region proposals pass original Newton at the previously failed internal target in both orders. Direct -80 mm proposals fail; continuing only recovered coordinates against the original material parent reaches approximately -76.20 mm before another bounded stop. The original path remains incomplete and all optimizer/native/interrupted-driver costs are retained.

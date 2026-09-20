@@ -87,3 +87,5 @@ the CLI fails; no rollback deletes that evidence. Cache state is uncontrolled.
 Twenty-three audit/runner tests pass after this addition, including exact separate
 clock attribution, unchanged result payloads, and fail-fast rejection of colliding,
 existing or original-directory output destinations. Ruff and whitespace checks pass.
+
+Actual frozen-source check at `9f36e540d799febbbb117c78e539a7075ed12afe` audits the original 128-path campaign with an exactly unchanged audit object/hash. The separate scoped receipt records 10.214824533 s wall and 10.213985152 s process CPU. This single observation excludes startup and the other receipt-listed stages; it is not directly comparable to the earlier enclosing-process timings as a speedup. Packet: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-scoped-audit-cost-lp65up0a`; inventory SHA-256 `94afc3efdbc140fad265f335d033a5c473cb0aea508bd364fe9c7d8b7c9e6beb`. All entries were reread and verified.
