@@ -16,6 +16,12 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+The [accepted-material representation audit](rc-accepted-material-summary-results-20260920.md)
+reconstructs all 165 retained training parents and their exact native snapshots,
+yielding 27 unweighted state statistics per row. This is preparation for a
+separate representation experiment, with zero new fits or solves and no runtime
+policy change. It does not reverse the negative learned-gate results above.
+
 [Current-main integration review](current-main-integration-review-20260920.md)
 rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen
 changed components are byte-identical here; the workflow contract test merges
