@@ -37,7 +37,7 @@ reductions fail the repeat-aware time rule. The
 Ten [three-group-excluded 66-row seeds](rc-gate-inner-validation-preparation-20260920.md)
 are now prepared to avoid leakage in an additional inner validation split.
 The new [timing campaign](rc-inner-label-campaign-preparation-20260920.md) is
-[admitted and running](rc-inner-label-campaign-start-20260920.md) after the completed 2,048-layer controller and audit. Fresh preflight passed; final labels and gate validation remain pending. The [fixed evaluation launcher](rc-inner-gate-evaluation-preparation-20260920.md) is prepared and refuses to overlap live label generation.
+[completed and audited](rc-inner-label-results-20260920.md): all 2,970 comparisons pass, producing 24 positive and 966 negative pair labels. The [forty fixed gate evaluations](rc-inner-gate-evaluation-results-20260920.md) are independently checked: prefix cost declines all validation decisions; material cost selects two false positives and no true positives. Neither is promoted; reserved cases remain untouched.
 
 [Current-main integration review](current-main-integration-review-20260920.md)
 rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen

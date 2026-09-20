@@ -1,0 +1,53 @@
+{
+  "all_report_work": {
+    "core_calls": 11880,
+    "linear_solves": 64581,
+    "newton_iterations": 64581
+  },
+  "cache_after": {
+    "currsize": 4,
+    "hits": 2947,
+    "maxsize": 4,
+    "misses": 23
+  },
+  "complete_path_speedup_claim": false,
+  "current_invocation_wall_ns": 4216024686431,
+  "faster_pair_means": 100,
+  "independent_evaluation": false,
+  "label_counts": {
+    "negative": 966,
+    "positive": 24,
+    "unverified": 0
+  },
+  "label_rule": {
+    "actual_proposal_required": true,
+    "all_repeats_must_pass": true,
+    "maximum_positive_time_ratio": 0.99,
+    "repetitions": 3,
+    "timing_scope": "proposal_arm_including_capture_inference_solves_recovery_io",
+    "unverified_label": null
+  },
+  "new_fits": 0,
+  "new_report_count": 2970,
+  "passed_comparisons": 2970,
+  "proposed_count": 834,
+  "report_count": 2970,
+  "retained_report_count": 0,
+  "scope": "three-group-excluded development labels for additional inner gate validation; no fitted gate or independent generalization",
+  "source_revision": "d89cffa9585ba945d4b7d7a630f0712876d7a919",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-inner-label-campaign-b003_gd4",
+  "inventory_sha256": "9293bd05ed831ae32090c827be36bdd6277c569ea24d4d12ca38ed1f3defe6ab",
+  "inventory_files": 101964,
+  "inventory_bytes": 4441434716,
+  "execution": {
+    "exit_code": 0,
+    "outer_execution_wall_ns": 4217896512381,
+    "new_fits": 0
+  },
+  "audit_execution": {
+    "exit_code": 0,
+    "audit_wall_ns": 11002110270,
+    "new_solves": 0,
+    "new_fits": 0
+  }
+}
