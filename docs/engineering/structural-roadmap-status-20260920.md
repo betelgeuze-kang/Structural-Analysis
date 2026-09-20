@@ -25,10 +25,11 @@ not perform a merge, authenticate real supplemental signatures or waive exact
 combined-source checks. Rebuild the inventory against the eventual merged source;
 do not import historical hash values as current evidence.
 
-[Hosted 1453](hosted-1453-terminal-20260920.md) passed 1,674 Python development tests
-and 755 frontend tests. The subsequent CI coverage correction adds the new
-cost-attribution and immutable-resume tests to the independent development job;
-its 21 local checks pass. Full Python shards remain blocked before
+[Hosted 5585](hosted-5585-terminal-20260920.md) passed 1,677 Python development tests
+and 755 frontend tests, including the cost-attribution and immutable-resume tests
+in the development job. The later [Workbench registration correction](workbench-suite-registration-20260920.md)
+restores five previously omitted files and prevents silent future omissions;
+all 64 restored tests pass locally. Full Python shards remain blocked before
 actual tests by external replay/technical receipt preparation. Passing local or
 hosted development contracts is not full-suite or release completion.
 
