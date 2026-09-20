@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Retained failed-target recovery](rc-retained-failure-cost-results-20260921.md) runs 64 paths (34 complete), counting 314 native calls / 1,980 Newton iterations. On two ordinary-solvable cases it avoids all internal trials and costs 0.456/0.327 times upfront continuation; this is avoided work, not AI gain. Short/20 mm completes after recovery, while short/40 mm fails at the same trial/residual as binary64. Retained arithmetic alone does not close the hard convergence gap.
+
 [Retained full-path cost](rc-retained-continuation-cost-results-20260921.md) completes 32 repeated paths with 260 native calls / 1,540 Newton iterations. Retained histories pass and repeat exactly, but upfront continuation costs 3.82 and 2.10 times same-profile secant on the two cases. Binary64 comparison failures retain null ratios. Numerical agreement does not establish acceleration; failure-only retained recovery still needs its own comparison.
 
 [Retained-coordinate continuation](rc-retained-continuation-20260921.md) now carries absolute seed coordinates correctly and replays the complete retained arithmetic profile. Short/2 mm and long/40 mm L-frame focused tests pass unchanged history comparisons; 249 JSON artifacts reproduce, with 65 additional replay native calls / 419 Newton iterations. Terminal polishing is explicitly enabled, so this does not isolate arithmetic alone or replace earlier binary64 failures. All 102 distinct focused cases pass across corrected runs; broader performance and physical qualification remain open.
