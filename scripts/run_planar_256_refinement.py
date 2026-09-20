@@ -73,11 +73,18 @@ def checked_sources(bundle, repo):
     return files, model
 
 
-def run(bundle, output_parent, repo):
+def refinement_layers(value):
+    require(type(value) is int and value in (256, 512),
+            "predeclared research layer count must be 256 or 512")
+    return value, value // 2
+
+
+def run(bundle, output_parent, repo, *, layers=256):
+    layers, comparison_layers = refinement_layers(layers)
     process_started = perf_counter_ns()
     files, raw = checked_sources(bundle, repo)
     root = Path(
-        tempfile.mkdtemp(prefix="structural-256-full-refinement-", dir=output_parent)
+        tempfile.mkdtemp(prefix=f"structural-{layers}-full-refinement-", dir=output_parent)
     )
     print(root, flush=True)
     source_root = root / "source"
@@ -109,20 +116,24 @@ def run(bundle, output_parent, repo):
     write(
         "protocol.json",
         {
-            "schema": "fixed-planar-256-refinement-protocol.v1",
+            "schema": f"fixed-planar-{layers}-refinement-protocol.v1",
             "source_revision": SOURCE_REVISION,
             "source_manifest_sha256": MANIFEST_SHA256,
             "source_files_git_verified": len(files),
             "input_sha256": INPUT_SHA256,
-            "concrete_layer_count": 256,
-            "comparison_layer_count": 128,
+            "concrete_layer_count": layers,
+            "comparison_layer_count": comparison_layers,
             "target_displacements_m": targets,
             "control_global_dof": 15,
             "configuration": asdict(config),
             "repetitions": 1,
             "same_proportional_force_vector": True,
             "constant_axial_load": False,
-            "selection": "Predeclared full 2 through 80 mm history, no retries or tolerance changes. Compare to original 128-layer prefix plus suffix using accepted chains, original nodal/steel groups and equal-area projected concrete histories. Preserve the exploratory 1% screen and local maxima alongside localization descriptors.",
+            "selection": (
+                "Predeclared full 2 through 80 mm history, no retries or tolerance changes. Compare to original 128-layer prefix plus suffix using accepted chains, original nodal/steel groups and equal-area projected concrete histories. Preserve the exploratory 1% screen and local maxima alongside localization descriptors."
+                if layers == 256 else
+                "Predeclared full 2 through 80 mm history, no retries or tolerance changes. Compare to the original complete 256-layer path using accepted chains, original nodal/steel groups and equal-area projected concrete histories. Preserve the exploratory 1% screen and local maxima alongside localization descriptors."
+            ),
             "physical_validation": False,
             "public_result_authority": False,
             "timing_is_speedup_benchmark": False,
@@ -149,7 +160,7 @@ def run(bundle, output_parent, repo):
         )
         require(base == old, "original section reconstruction mismatch")
         refined = make_rectangular_stateful_rc_fiber_section(
-            **dict(params, concrete_layer_count=256),
+            **dict(params, concrete_layer_count=layers),
             section_id=old.section_id,
             steel=old.steel,
             concrete=old.concrete,
@@ -204,5 +215,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle", type=Path)
     parser.add_argument("output_parent", type=Path)
+    parser.add_argument('--layers', type=int, choices=(256, 512), default=256)
     args = parser.parse_args()
-    run(args.bundle, args.output_parent, Path(__file__).resolve().parents[1])
+    run(args.bundle, args.output_parent, Path(__file__).resolve().parents[1], layers=args.layers)

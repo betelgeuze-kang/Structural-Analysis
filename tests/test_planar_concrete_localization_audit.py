@@ -348,3 +348,19 @@ def test_projection_error_decomposition_rejects_duplicate_points():
     row = {'point': ['E1', 0, 0], **decompose(0.4, 0.4, 0.4, 0.4)}
     with pytest.raises(ValueError, match='duplicate point'):
         summarize([row, row])
+
+
+@pytest.mark.parametrize('layers,expected', [(256, (256, 128)), (512, (512, 256))])
+def test_frozen_refinement_only_declares_original_or_next_resolution(layers, expected):
+    from scripts.run_planar_256_refinement import refinement_layers
+
+    assert refinement_layers(layers) == expected
+
+
+@pytest.mark.parametrize('bad', [True, 512.0, '512', 0, 128, 1024])
+def test_frozen_refinement_rejects_unplanned_resolution_before_inputs(tmp_path, bad):
+    from scripts.run_planar_256_refinement import run
+
+    with pytest.raises(ValueError, match='predeclared research layer count'):
+        run(tmp_path / 'missing-source', tmp_path, tmp_path, layers=bad)
+    assert list(tmp_path.iterdir()) == []
