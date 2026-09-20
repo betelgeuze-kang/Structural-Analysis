@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+The [L-frame breadth study](rc-l-frame-continuation-results-20260921.md) retains 96 paths, including prefix failures and unchanged near-zero force/moment comparison failures. The [all-failed-target extension](rc-failed-target-continuation-results-20260921.md) then completes short/20 mm in both orders but leaves short/40 mm incomplete; all 118 native calls / 448 Newton iterations are counted. No reference speed ratio is available. [Hosted 6f](hosted-6f-terminal-20260921.md) passes 1,994 development and 814 frontend tests, while full preparation remains failed; these receipts do not qualify later failure-only/all-target code.
+
 The [failure-only continuation comparison](rc-failure-only-continuation-results-20260921.md) runs twenty comparisons / eighty paths across five model/history combinations. All proposal histories match between modes. On two ordinary-solvable 20 mm cases it removes all 32 repeated internal proposal calls and costs 0.374–0.379 times upfront continuation; on three 40 mm cases it costs 1.215–1.329 times upfront due to the preserved failed first attempt. These are internal-strategy comparisons, not learned or independently qualified acceleration. All 602 native calls / 2,698 Newton iterations are retained.
 
 [Hosted e67](hosted-e67-terminal-20260921.md) passes 1,986 development and 814 frontend tests; full-suite preparation remains failed. It does not qualify later continuation/replay code.

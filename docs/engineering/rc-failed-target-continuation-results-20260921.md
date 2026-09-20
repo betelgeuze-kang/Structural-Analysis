@@ -1,0 +1,13 @@
+# Failed-target continuation recovers short L-frame 20 mm, not 40 mm
+
+Frozen source `0a77645ac` executes the eight predeclared comparisons / 32 attempted paths. With the new all-failed-target scope, short/20 mm completes the original preload and all three requested targets in both execution orders. Its complete accepted response history and final checkpoint repeat exactly. Reversal-only continuation still fails before accepting the first target.
+
+Short/40 mm remains incomplete in both modes and orders. The broader strategy attempts eight of its sixteen trial stages, then retains a known native line-search failure near target -0.01013404618 m (relative residual about 0.0582313). It returns no candidate and adopts none of the successful intermediate material states. The first requested -0.02 m target remains unaccepted. This is not repaired by silently inserting the successful short/20 mm history into the short/40 mm request.
+
+Only two of the 32 attempted paths complete; they are the new short/20 mm proposal paths. Every ordinary/secant/fresh-reference path remains incomplete. Mode-to-mode complete-history comparison and qualified speed ratios therefore remain unavailable. Exact repetition of the short/40 mm accepted prefix is only repetition of its unchanged preload, not a complete path result.
+
+All attempted work is retained: 70 ordinary path calls plus 48 internal proposal calls = 118 native calls, with 206 ordinary plus 242 additional Newton iterations = 448. There are sixteen internal calls per completed short/20 mm proposal and eight per failed short/40 mm proposal. Budgets declare at most sixteen additional native calls for each requested target, without treating unsuccessful trials as free.
+
+The audit verifies report/path identities, intermediate artifact hashes/lengths and parent bindings, known-work totals, roster and repeat accepted histories/checkpoints. All 1,788 inventoried non-cache files were reread; inventory SHA-256 `0fa50c44a1bb46abf20823f0005a4250c49b6656c4b4df9812d1977b1ef0ba53`. The [summary](rc-failed-target-continuation-results-20260921.summary.json) preserves failures and null ratios. The earlier six-case L-frame study and its near-zero comparison failures remain unchanged.
+
+Ninety-eight focused tests pass, including exact frozen-parent reuse, actual 20 mm completion/replay, known 40 mm failure retention, option preflight, budgets and prior warm-start/observation regressions. Ruff and diff checks pass. This extends an experimental numerical recovery strategy; no independent physical validation, production candidate eligibility, sparse/corotational/3D qualification or release approval follows.
