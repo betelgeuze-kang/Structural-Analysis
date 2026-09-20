@@ -15,8 +15,13 @@ def read(path):
 def audit(root):
     plan = read(root / 'plan.json')
     outcome = read(root / 'outcome.json')
-    if len(plan['orders']) != 4 or len(outcome['pairs']) != 4:
+    if (plan['orders'] != [['full', 'pruned'], ['pruned', 'full']] * 2
+            or type(plan.get('planned_process_count')) is not int
+            or plan['planned_process_count'] != 8
+            or len(outcome['pairs']) != 4):
         raise ValueError('complete four-pair denominator required')
+    if outcome.get('all_pairs_comparable') is not True:
+        raise ValueError('successful campaign outcome required')
     for artifact in plan['inputs'].values():
         raw = (root / artifact['path']).read_bytes()
         if len(raw) != artifact['byte_length'] or _sha(raw) != artifact['sha256']:

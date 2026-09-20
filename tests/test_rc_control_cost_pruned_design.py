@@ -250,6 +250,32 @@ def test_campaign_reader_rejects_ambiguous_json(tmp_path):
         inspect_report(tmp_path)
 
 
+@pytest.mark.parametrize('mutation', ['unbalanced', 'duplicate_mode', 'count', 'failed'])
+def test_l_frame_audit_rejects_changed_protocol_before_reading_results(
+    tmp_path, monkeypatch, mutation
+):
+    import importlib
+    from pathlib import Path
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    campaign = importlib.import_module('audit_rc_l_frame_cost_campaign')
+    plan = {'orders': [['full', 'pruned'], ['pruned', 'full']] * 2,
+            'planned_process_count': 8}
+    outcome = {'pairs': [{}, {}, {}, {}], 'all_pairs_comparable': True}
+    if mutation == 'unbalanced':
+        plan['orders'] = [['full', 'pruned']] * 4
+    elif mutation == 'duplicate_mode':
+        plan['orders'][0] = ['full', 'full']
+    elif mutation == 'count':
+        plan['planned_process_count'] = 6
+    else:
+        outcome['all_pairs_comparable'] = False
+    (tmp_path / 'plan.json').write_text(json.dumps(plan))
+    (tmp_path / 'outcome.json').write_text(json.dumps(outcome))
+    with pytest.raises(ValueError, match='denominator|successful campaign'):
+        campaign.audit(tmp_path)
+
+
 def test_campaign_all_failed_processes_still_finalize_every_planned_pair(
     tmp_path, monkeypatch
 ):
