@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Second-stop recovery check](rc-76mm-recovery-check-20260921.md): all eight TRF/native follow-ups at -76.20 mm and -80 mm fail original native acceptance despite optimizer success. This prevents treating the earlier isolated accepted seed as a generally effective recovery method; full-path robustness remains unresolved.
+
 [Alternate-seed witness](rc-80mm-alternate-seed-20260921.md): parent-start trust-region proposals pass original Newton at the previously failed internal target in both orders. Direct -80 mm proposals fail; continuing only recovered coordinates against the original material parent reaches approximately -76.20 mm before another bounded stop. The original path remains incomplete and all optimizer/native/interrupted-driver costs are retained.
 
 [Material-transition witness](rc-80mm-material-transition-20260921.md) locates a repeated concrete compression-peak tangent sign change in M1, first integration point, second fiber. Stresses remain near -30 MPa while tangents switch between approximately -12,000 and +30,000 MPa. This identifies a local constitutive transition, not an established solver defect or proof that equilibrium is absent.
