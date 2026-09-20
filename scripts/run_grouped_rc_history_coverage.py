@@ -16,6 +16,8 @@ from structural_analysis.benchmark import rc_control_learning as learning
 from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
 from structural_analysis.benchmark.rc_control_learning_split import control_training_exclusion_groups
 
+from structural_analysis.benchmark.rc_control_training_diagnostics import control_policy_feature_names
+
 AMPLITUDES = (("050", 0.5), ("100", 1.0), ("150", 1.5))
 
 
@@ -41,6 +43,26 @@ def cases_with_history_coverage(*, extended_line_search=False):
         ) for c in cases]
     learning._preflight(cases, ARITHMETIC)
     return cases
+
+
+def reference_parent_range_checks(samples, policy, groups, ood_margin):
+    rows = []
+    names = control_policy_feature_names(learning.RCControlSeedPolicy(_bytes(policy).decode()))
+    for group in groups:
+        fit_rows = [s for s in samples if s['case_id'] not in group]
+        held = [s for s in samples if s['case_id'] in group]
+        x = np.asarray([s['features'] for s in fit_rows], dtype=float)
+        low, high = x.min(axis=0), x.max(axis=0)
+        slack = np.maximum((high - low) * ood_margin, 1e-12)
+        for sample in held:
+            value = np.asarray(sample['features'], dtype=float)
+            violations = np.flatnonzero((value < low - slack) | (value > high + slack))
+            rows.append({'case_id': sample['case_id'], 'target_index': sample['target_index'],
+                         'sample_hash': sample['sample_hash'], 'excluded_group': group,
+                         'fitting_sample_count': len(fit_rows),
+                         'range_eligible': len(violations) == 0,
+                         'violating_features': [names[int(i)] for i in violations]})
+    return rows
 
 
 def main():
@@ -92,23 +114,7 @@ def main():
     )
     samples = json.loads((root / 'labels/training-samples.json').read_bytes())
     complete = labels['policy'] is not None and all(r['labels_eligible'] for r in labels['generation'])
-    rows = []
-    if complete:
-        names = labels['policy']['material_feature_names']
-        for group in groups:
-            fit_rows = [s for s in samples if s['case_id'] not in group]
-            held = [s for s in samples if s['case_id'] in group]
-            x = np.asarray([s['features'] for s in fit_rows], dtype=float)
-            low, high = x.min(axis=0), x.max(axis=0)
-            slack = np.maximum((high - low) * plan['ood_margin'], 1e-12)
-            for sample in held:
-                value = np.asarray(sample['features'], dtype=float)
-                violations = np.flatnonzero((value < low - slack) | (value > high + slack))
-                rows.append({'case_id': sample['case_id'], 'target_index': sample['target_index'],
-                             'sample_hash': sample['sample_hash'], 'excluded_group': group,
-                             'fitting_sample_count': len(fit_rows),
-                             'range_eligible': len(violations) == 0,
-                             'violating_features': [names[int(i)] for i in violations]})
+    rows = reference_parent_range_checks(samples, labels['policy'], groups, plan['ood_margin']) if complete else []
     outcome = {
         'schema_version': 'rc-grouped-training-history-coverage-outcome.v1',
         'plan_hash': plan['plan_hash'], 'learning_report_hash': labels['report_hash'],

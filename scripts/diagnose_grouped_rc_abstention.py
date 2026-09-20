@@ -1,7 +1,7 @@
 """Post-hoc range diagnostics of stored material-policy inputs; no solver or fit.
 
-Use the campaign's frozen package on PYTHONPATH. Does not alter OOD margins or
-promote a policy. Repeated folds are reduced to one original repetition per fit.
+Feature construction must match the campaign; the corrected name decoder
+includes the static and causal prefix. Does not alter OOD margins or promote a policy. Repeated folds are reduced to one original repetition per fit.
 """
 from collections import Counter
 import argparse
@@ -14,6 +14,8 @@ from structural_analysis.ai.fiber_frame_warm_start_features import (
 )
 from structural_analysis.benchmark.rc_control_material_features import material_control_features
 from structural_analysis.benchmark.rc_control_seed_runtime import RCControlSeedContext
+from structural_analysis.benchmark.rc_control_learning import RCControlSeedPolicy
+from structural_analysis.benchmark.rc_control_training_diagnostics import control_policy_feature_names
 
 
 def main():
@@ -39,6 +41,7 @@ def main():
             records.append(row)
             continue
         policy = json.loads((root / 'selection' / f"fit-{fold['fit_index']:04d}-policy.json").read_bytes())
+        complete_names = control_policy_feature_names(RCControlSeedPolicy(json.dumps(policy)))
         counts = Counter()
         per_target = []
         for path in sorted((root / 'selection' / f'fold-{index:04d}' / 'proposal').glob('*-context.json')):
@@ -51,15 +54,17 @@ def main():
             low, high = np.asarray(policy['feature_min']), np.asarray(policy['feature_max'])
             slack = np.maximum((high - low) * policy['ood_margin'], 1e-12)
             indices = np.flatnonzero((x < low - slack) | (x > high + slack))
-            counts.update(names[int(i)] for i in indices)
+            counts.update(complete_names[int(i)] for i in indices)
             per_target.append({'target_m': context.target_m, 'range_violation_count': len(indices),
-                               'first_violations': [{'feature': names[int(i)], 'value': float(x[i]),
+                               'first_violations': [{'feature': complete_names[int(i)], 'value': float(x[i]),
                                                      'low': float(low[i]), 'high': float(high[i]),
                                                      'slack': float(slack[i])} for i in indices[:4]]})
         row['noninitial_targets'] = per_target
         row['feature_violation_frequency'] = dict(counts.most_common())
         records.append(row)
-    report = {'schema_version': 'posthoc-grouped-material-range-diagnostics.v1',
+    report = {'schema_version': 'posthoc-grouped-material-range-diagnostics.v2',
+              'feature_names_include_model_and_causal_prefix': True,
+              'supersedes_v1_material_only_index_labels': True,
               'source_revision': result['source_revision'], 'selection_result_hash': result['result_hash'],
               'solver_calls': 0, 'fits': 0, 'policy_changed': False,
               'is_independent_evaluation': False, 'records': records}
