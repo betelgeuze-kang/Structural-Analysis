@@ -241,3 +241,14 @@ iterations. Learned/secant ratios are 1.015901 and 1.026031, so secant remains
 selected. No active-proposal case wins all three repeats, and no reserved
 validation or policy promotion occurs. Historical elapsed-time differences do
 not prove a controlled implementation speedup. All roadmap goals remain open.
+
+## Policy parse reuse implementation and complete-path evaluation
+
+[Immutable content-keyed policy parse reuse](rc-inference-policy-reuse-20260920.md)
+preserves all 1,080 original context decisions and 594 recorded proposals, with
+69 learning regression tests passing. Six cold-parse-inclusive proposal-stage
+measurements are roughly 43% shorter on one retained parent; this is not whole
+path benefit. A [new frozen full-path study](rc-policy-runtime-followup-20260920.md)
+has started with all 165 labels and 90 planned comparisons. First preparation
+cost is included; bounded cache reuse across repeats is explicit. The existing
+secant selection remains authoritative pending the complete audited outcome.
