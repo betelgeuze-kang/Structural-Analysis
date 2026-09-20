@@ -6,6 +6,69 @@ from pathlib import Path
 from scripts.diagnose_expanded_rc_runtime_costs import decompose
 
 
+def _summary_snapshot(change=None):
+    from dataclasses import asdict
+    from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+    from structural_analysis.benchmark.rc_control_material_features import MATERIAL_SNAPSHOT_SCHEMA
+    from structural_analysis.materials.concrete_damage import ConcreteDamageState
+    from structural_analysis.materials.uniaxial_plasticity import UniaxialPlasticityState
+    pairs = []
+    for index, (kind, state) in enumerate([
+        ('steel', UniaxialPlasticityState(plastic_strain=-0.02, accumulated_plastic_strain=0.03)),
+        ('steel', UniaxialPlasticityState(plastic_strain=0.01, accumulated_plastic_strain=0.04)),
+        ('concrete', ConcreteDamageState(tensile_damage=0.2)),
+        ('concrete', ConcreteDamageState(tensile_damage=0.6)),
+    ]):
+        pairs.extend((f'member_0_point_0_fiber_{index}_{kind}_{field}', value)
+                     for field, value in asdict(state).items())
+    if change is not None:
+        change(pairs)
+    body = dict(schema_version=MATERIAL_SNAPSHOT_SCHEMA,
+                problem_contract_hash='sha256:' + '1' * 64,
+                parent_state_hash='sha256:' + '2' * 64,
+                feature_names=[name for name, _ in pairs], values=[value for _, value in pairs])
+    body['snapshot_hash'] = _sha(_bytes(body))
+    return _bytes(body).decode()
+
+
+def test_material_summary_keeps_signed_states_and_order_independent_unweighted_statistics():
+    from scripts.rc_accepted_material_summary import accepted_material_summary
+    args = ('sha256:' + '1' * 64, 'sha256:' + '2' * 64)
+    result = accepted_material_summary(_summary_snapshot(), *args)
+    values = dict(zip(result['feature_names'], result['values'], strict=True))
+    assert len(values) == 27
+    assert result['fiber_counts'] == {'steel': 2, 'concrete': 2}
+    assert values['steel.plastic_strain.min'] == -0.02
+    assert values['steel.plastic_strain.mean'] == -0.005
+    assert values['steel.plastic_strain.max'] == 0.01
+    assert values['concrete.tensile_damage.mean'] == pytest.approx(0.4)
+    reordered = accepted_material_summary(_summary_snapshot(lambda pairs: pairs.reverse()), *args)
+    assert reordered['values'] == result['values']
+    assert reordered['snapshot_hash'] != result['snapshot_hash']
+
+
+@pytest.mark.parametrize('parent', [None, '', 'sha256:' + '3' * 64])
+def test_material_summary_requires_explicit_matching_parent(parent):
+    from scripts.rc_accepted_material_summary import accepted_material_summary
+    with pytest.raises(ValueError):
+        accepted_material_summary(_summary_snapshot(), 'sha256:' + '1' * 64, parent)
+
+
+@pytest.mark.parametrize('change', [
+    lambda pairs: pairs.pop(),
+    lambda pairs: pairs.__setitem__(0, (pairs[0][0].replace('plastic_strain', 'unknown'), 0.0)),
+    lambda pairs: pairs.__setitem__(0, (pairs[0][0].replace('member_0', 'member_00'), 0.0)),
+    lambda pairs: pairs.__setitem__(-1, (pairs[-1][0], -1.0)),
+    lambda pairs: pairs.__setitem__(10, (pairs[10][0], 1.0)),
+    lambda pairs: pairs.__setitem__(slice(None), [p for p in pairs if '_steel_' in p[0]]),
+    lambda pairs: pairs.__setitem__(8, (pairs[8][0].replace('fiber_2', 'fiber_0'), 0.0)),
+])
+def test_material_summary_rejects_rehashed_incomplete_or_invalid_native_states(change):
+    from scripts.rc_accepted_material_summary import accepted_material_summary
+    with pytest.raises(ValueError):
+        accepted_material_summary(_summary_snapshot(change), 'sha256:' + '1' * 64, 'sha256:' + '2' * 64)
+
+
 def test_disjoint_timers_retain_unattributed_time_and_preload():
     arm = {'wall_ns': 100, 'preload_invocations': [{'wall_ns': 10, 'unknown_work': False}],
            'entries': [{'invocations': [{'wall_ns': 30, 'unknown_work': False}],
