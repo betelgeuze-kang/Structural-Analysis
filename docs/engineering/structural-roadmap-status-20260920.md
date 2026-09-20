@@ -25,9 +25,10 @@ not perform a merge, authenticate real supplemental signatures or waive exact
 combined-source checks. Rebuild the inventory against the eventual merged source;
 do not import historical hash values as current evidence.
 
-[Hosted d67](hosted-d67-terminal-20260920.md) passed 1,674 Python development tests
-and 755 frontend tests. Published `1453ae48fd895164e67b609a995a5647f22422bc` has
-its own CI in progress at this review. Full Python shards remain blocked before
+[Hosted 1453](hosted-1453-terminal-20260920.md) passed 1,674 Python development tests
+and 755 frontend tests. The subsequent CI coverage correction adds the new
+cost-attribution and immutable-resume tests to the independent development job;
+its 21 local checks pass. Full Python shards remain blocked before
 actual tests by external replay/technical receipt preparation. Passing local or
 hosted development contracts is not full-suite or release completion.
 
