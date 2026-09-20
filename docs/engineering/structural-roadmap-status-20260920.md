@@ -41,6 +41,12 @@ hardware, owner/operator actions and signed acceptance remain separate.
 
 ## Next decisions
 
+The [all-coordinate material replay](planar-all-common-material-points-20260920.md)
+now covers 2,304 points and forty targets, exactly reproducing all 92,160 coarse
+states and stresses. Its derived fine-history damage maxima occur at neighboring
+cells rather than the original two witnesses. It improves spatial diagnosis but
+does not replace the failed projected-field screen or establish convergence.
+
 1. Publish prepared local work after the current CI reaches terminal state; retain
    exact-head receipts, failures and the original measurement packets.
 2. Expand defensible matched-parent evidence across geometry/history families
