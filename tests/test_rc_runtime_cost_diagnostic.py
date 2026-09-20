@@ -181,3 +181,106 @@ def test_nested_switch_plan_rejects_ambiguous_training_provenance(monkeypatch, d
         samples = [s for s in samples if s['case_id'] != groups[0][0]]
     with pytest.raises(ValueError):
         module.nested_plan(groups, samples)
+
+
+def guard_problem():
+    from structural_analysis.io.neutral.loader import load_neutral_json
+    from structural_analysis.api.rc_fiber_frame_direct_control_request import BoundedRCFiberDirectControlRequest
+    return load_neutral_json(Path('examples/public_rc_fiber_frame_l_frame_material_history.json')), BoundedRCFiberDirectControlRequest(
+        7, (-1e-6, -2e-6, 1e-6, 0.), allow_reversals=True, maximum_reversals=3)
+
+
+def guard_run(tmp_path, guard, proposal):
+    from structural_analysis.benchmark.rc_control_seed_runtime import benchmark_rc_control_seed_paths
+    model, request = guard_problem()
+    return benchmark_rc_control_seed_paths(model, request, source_revision='0'*40,
+        output_directory=tmp_path/'run', proposal=proposal, proposal_identity='sha256:'+'a'*64,
+        proposal_guard=guard, proposal_guard_identity='sha256:'+'b'*64,
+        capture_material_state=True, material_capture_scope='proposal-only',
+        proposal_abstention_strategy='secant')
+
+
+def test_declined_guard_skips_capture_and_proposal_with_exact_secant_steps(tmp_path, monkeypatch):
+    from structural_analysis.benchmark import rc_control_material_features as material
+    def unexpected(*args):
+        pytest.fail('declined guard reached capture or proposal')
+    monkeypatch.setattr(material, 'committed_material_snapshot', unexpected)
+    contexts = []
+    def guard(context):
+        contexts.append(context)
+        assert context.committed_material_state_json is None
+        return False
+    report = guard_run(tmp_path, guard, unexpected)
+    assert len(contexts) == 4 and report['comparisons']['proposal']['full_history_pass'] is True
+    for index, entry in enumerate(report['arms']['proposal']['entries']):
+        assert entry['proposal_guard']['allow_proposal'] is False
+        assert type(entry['proposal_guard']['wall_ns']) is int
+        assert 'committed_material_capture' not in entry
+        assert (tmp_path/f'run/proposal/{index:03d}-1-step.json').read_bytes() == (tmp_path/f'run/secant/{index:03d}-1-step.json').read_bytes()
+    assert all('proposal_guard' not in e for name in ('reference', 'secant') for e in report['arms'][name]['entries'])
+
+
+def test_accepted_guard_precedes_capture_and_preserves_seed_validation(tmp_path, monkeypatch):
+    from structural_analysis.benchmark import rc_control_material_features as material
+    from structural_analysis.benchmark.rc_control_seed_runtime import secant_seed
+    events=[]
+    original=material.committed_material_snapshot
+    def capture(*args):
+        events.append('capture')
+        return original(*args)
+    monkeypatch.setattr(material, 'committed_material_snapshot', capture)
+    def guard(context):
+        assert context.committed_material_state_json is None
+        events.append('guard')
+        return True
+    def propose(context):
+        assert context.committed_material_state_json is not None
+        events.append('proposal')
+        return secant_seed(context)
+    report=guard_run(tmp_path, guard, propose)
+    assert events == ['guard', 'capture', 'proposal'] * 4
+    assert report['comparisons']['proposal']['full_history_pass'] is True
+    assert all('committed_material_capture' in e for e in report['arms']['proposal']['entries'])
+
+
+@pytest.mark.parametrize('mode', ['nonboolean', 'exception'])
+def test_failed_guard_is_recorded_and_cannot_pass_full_path(tmp_path, monkeypatch, mode):
+    from structural_analysis.benchmark import rc_control_material_features as material
+    def unexpected(*args):
+        pytest.fail('failed guard reached capture or proposal')
+    monkeypatch.setattr(material, 'committed_material_snapshot', unexpected)
+    def guard(context):
+        if mode == 'exception':
+            raise RuntimeError('guard failed')
+        return 1
+    report=guard_run(tmp_path, guard, unexpected)
+    arm=report['arms']['proposal']
+    assert arm['status'] != 'complete'
+    assert report['comparisons']['proposal']['full_history_pass'] is False
+    assert arm['failure']['phase'] == 'proposal_guard'
+    assert arm['entries'][0]['proposal_guard']['status'] == 'raised'
+    assert arm['entries'][0]['invocations'] == []
+    from structural_analysis.benchmark.rc_control_runtime_selection import _runtime_score
+    assert _runtime_score(report, [])['proposal_over_secant_path_wall_ratio'] is None
+
+
+def test_guard_timing_is_separate_and_not_hidden_in_remainder():
+    arm={'wall_ns':100, 'preload_invocations':[], 'entries':[{
+        'invocations':[{'wall_ns':20,'unknown_work':False}], 'recovery_wall_ns':10,
+        'proposal_wall_ns':5, 'proposal_guard':{'wall_ns':7}}]}
+    result=decompose(arm,0)
+    assert result['proposal_guard']==7 and result['remaining_unattributed']==58
+    assert sum(result.values())==100
+
+
+@pytest.mark.parametrize('change', [ {'proposal_guard_identity':None}, {'proposal':None},
+    {'proposal_guard':42}, {'proposal_guard_identity':'unbound'}, {'proposal_abstention_strategy':'reference'}])
+def test_guard_configuration_rejected_before_output(tmp_path, change):
+    from structural_analysis.benchmark.rc_control_seed_runtime import benchmark_rc_control_seed_paths
+    options=dict(proposal=lambda context:None,proposal_identity='sha256:'+'a'*64,
+        proposal_guard=lambda context:False,proposal_guard_identity='sha256:'+'b'*64,
+        proposal_abstention_strategy='secant')
+    options.update(change)
+    with pytest.raises(ValueError, match='identified proposal guard'):
+        benchmark_rc_control_seed_paths(None,None,source_revision='guard-test',output_directory=tmp_path/'run',**options)
+    assert not (tmp_path/'run').exists()

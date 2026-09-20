@@ -318,6 +318,27 @@ def _preload(
     return step, response, coordinates, inv, failure
 
 
+def _guard_decision(context, guard, root, index):
+    """Time a decision on the accepted prefix before material capture."""
+    _save(root, f"{index:03d}-guard-context.json", _bytes(context.to_dict()))
+    _save(root, f"{index:03d}-guard-started.json", _bytes({
+        "status": "started", "unknown_guard_work_until_outcome": True,
+    }))
+    wall, cpu = perf_counter_ns(), process_time_ns()
+    result = {"status": "returned", "allow_proposal": None}
+    try:
+        allowed = guard(context)
+        if type(allowed) is not bool:
+            raise ValueError("proposal guard must return an exact boolean")
+        result["allow_proposal"] = allowed
+    except Exception as exc:
+        result.update(status="raised", exception_kind=type(exc).__name__)
+    finally:
+        result.update(wall_ns=perf_counter_ns() - wall, cpu_ns=process_time_ns() - cpu)
+    _save(root, f"{index:03d}-guard-outcome.json", _bytes(result))
+    return result
+
+
 def _path(
     compiled,
     request,
@@ -330,6 +351,7 @@ def _path(
     record_assembly_work=False,
     reuse_line_search_assembly=False,
     record_assembly_timing=False,
+    proposal_guard=None,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -392,7 +414,17 @@ def _path(
     for index, target in enumerate(() if failure else request.targets_m):
         material_state = None
         capture_cost = None
-        if capture_material_state:
+        guard_result = None
+        allow_proposal = True
+        if proposal_guard is not None:
+            guard_context = RCControlSeedContext(
+                source_hash, request.control_global_dof,
+                compiled.problem.free_global_dofs.index(request.control_global_dof),
+                target, tuple(targets), tuple(coordinates), None,
+            )
+            guard_result = _guard_decision(guard_context, proposal_guard, root, index)
+            allow_proposal = guard_result["allow_proposal"] is True
+        if capture_material_state and allow_proposal:
             from structural_analysis.benchmark.rc_control_material_features import (
                 committed_material_snapshot,
             )
@@ -424,8 +456,16 @@ def _path(
         }
         if capture_cost is not None:
             entry["committed_material_capture"] = capture_cost
+        if guard_result is not None:
+            entry["proposal_guard"] = guard_result
         entries.append(entry)
         _save(root, f"{index:03d}-context.json", _bytes(context.to_dict()))
+        if guard_result is not None and guard_result["status"] != "returned":
+            failure = {"phase": "proposal_guard", "kind": guard_result["exception_kind"]}
+            entry.update(proposal_wall_ns=0, proposal_cpu_ns=0,
+                         proposal_decision="guard_failed", proposal_error=failure)
+            _save(root, f"{index:03d}-proposal.json", _bytes(entry))
+            break
         _save(
             root,
             f"{index:03d}-proposal-started.json",
@@ -444,7 +484,7 @@ def _path(
                 if strategy == "reference"
                 else secant_seed(context)
                 if strategy == "secant"
-                else proposal(context)
+                else proposal(context) if allow_proposal else None
             )
             if strategy == "proposal":
                 entry["proposal_decision"] = "proposed"
@@ -972,6 +1012,8 @@ def benchmark_rc_control_seed_paths(
     output_directory: Path,
     proposal: Callable[[RCControlSeedContext], tuple[float, ...] | None] | None = None,
     proposal_identity: str | None = None,
+    proposal_guard: Callable[[RCControlSeedContext], bool] | None = None,
+    proposal_guard_identity: str | None = None,
     arm_order: tuple[str, ...] | None = None,
     absolute_tolerance: float = 1e-10,
     relative_tolerance: float = 1e-8,
@@ -998,6 +1040,16 @@ def benchmark_rc_control_seed_paths(
     original prefix, and cannot provide complete-path performance credit.
     """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if (proposal_guard is None) != (proposal_guard_identity is None) or (
+        proposal_guard is not None and (
+            not callable(proposal_guard) or proposal is None
+            or proposal_abstention_strategy != "secant"
+            or type(proposal_guard_identity) is not str
+            or not re.fullmatch(r"sha256:[0-9a-f]{64}", proposal_guard_identity)
+        )
+    ):
+        raise ValueError("identified proposal guard requires proposer and secant abstention")
+
     if type(record_assembly_timing) is not bool or (
         record_assembly_timing and not record_assembly_work
     ):
@@ -1280,6 +1332,14 @@ def benchmark_rc_control_seed_paths(
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
         )
+    if proposal_guard is not None:
+        identity["proposal_guard"] = {
+            "identity": proposal_guard_identity,
+            "identity_is_attestation": False,
+            "input_scope": "accepted_prefix_before_material_capture",
+            "decline_strategy": "secant",
+            "errors_fail_path": True,
+        }
     _save(root, "request.json", _bytes(identity))
     _save(root, "model.json", _bytes(model.canonical_payload()))
     origin_bytes = (
@@ -1300,6 +1360,7 @@ def benchmark_rc_control_seed_paths(
             record_assembly_work,
             reuse_line_search_assembly,
             record_assembly_timing,
+            proposal_guard if name == "proposal" else None,
         )
         if initial_prefix is not None:
             unknown = any(
