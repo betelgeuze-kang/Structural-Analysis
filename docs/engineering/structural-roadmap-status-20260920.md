@@ -278,3 +278,12 @@ fine-child average; the controlling compression witness is entirely that term.
 These mixed-onset cells identify a spatial-resolution investigation, not physical
 causality or convergence. Cancellation elsewhere prevents interpreting global
 absolute sums as additive percentages. The 34/240 original failures remain open.
+
+## Predeclared 512-layer follow-up running
+
+The [512-layer full-history observation](planar-512-refinement-20260920.md) has
+started on the same frozen numerical source and original 40 targets. Only concrete
+subdivision changes. The 256/512 comparison retains all original group thresholds,
+accepted-chain checks and local witnesses. Its focused regression suite passes
+52 tests. No new convergence result is available yet; the previous 34/240 concrete
+failures and independent physical-validation requirements remain open.

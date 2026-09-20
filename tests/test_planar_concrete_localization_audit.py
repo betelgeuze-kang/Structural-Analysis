@@ -364,3 +364,43 @@ def test_frozen_refinement_rejects_unplanned_resolution_before_inputs(tmp_path, 
     with pytest.raises(ValueError, match='predeclared research layer count'):
         run(tmp_path / 'missing-source', tmp_path, tmp_path, layers=bad)
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize('layers', [128, 256])
+def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatch, layers):
+    import scripts.audit_planar_256_refinement as audit
+
+    targets = [i / 500 for i in range(1, 41)]
+    coarse = [{'metrics': {'target_control_displacement_m': t}, 'fine': False} for t in targets]
+    fine = [{'metrics': {'target_control_displacement_m': t}, 'fine': True} for t in targets]
+
+    def fake_sections(step, count, fields):
+        assert count == layers * (2 if step['fine'] else 1)
+        values = [dict.fromkeys(fields, 0.) for _ in range(count)]
+        if step['fine']:
+            values[-1] = dict.fromkeys(fields, 0.5)
+        return {'E1:gauss-0': {'xi': 0., 'weight': 1., 'values': values}}
+
+    monkeypatch.setattr(audit, 'sections', fake_sections)
+    monkeypatch.setattr(audit, 'nodal_steel', lambda step, count: (['steel'], {'translations': [0.]}))
+    rows, maxima = audit.compare_steps(coarse, fine, layers)
+    assert len(rows) == 40
+    for result in maxima['concrete'].values():
+        assert result['absolute_difference'] == .25
+        assert result['witness_cell'] == layers - 1
+        assert result['cells'] == layers
+        assert result['within_exploratory_one_percent'] is False
+    assert maxima['nodal_steel']['translations']['within_exploratory_one_percent'] is True
+
+
+@pytest.mark.parametrize('layers', [True, 256., 64, 512])
+def test_comparison_rejects_unplanned_resolution(layers):
+    from scripts.audit_planar_256_refinement import compare_steps
+    with pytest.raises(ValueError, match='layer count'):
+        compare_steps([], [], layers)
+
+
+def test_comparison_requires_complete_original_target_sequence():
+    from scripts.audit_planar_256_refinement import compare_steps
+    with pytest.raises(ValueError, match='forty targets'):
+        compare_steps([], [], 256)

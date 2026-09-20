@@ -97,29 +97,9 @@ def nodal_steel(step, layers):
     return sorted(steel), groups
 
 
-def audit(original_parent, fine_root, fine_sha256):
-    protocol = read_checked(fine_root / "protocol.json", PROTOCOL_SHA256)
-    require(protocol["concrete_layer_count"] == 256, "fixed fine layer count required")
-    paths = {
-        key: read_checked(
-            original_parent / SOURCES[key][0] / "repeat-0.json", SOURCES[key][1]
-        )
-        for key in ("prefix", "suffix")
-    }
-    paths["fine"] = read_checked(
-        fine_root / "repeat-0.json", fine_sha256, maximum_bytes=2 * 1024**3
-    )
-    for path in paths.values():
-        validate_path(path)
-        require(path["control_global_dof"] == 15, "control DOF mismatch")
-    require(
-        paths["prefix"]["final_checkpoint"] == paths["suffix"]["initial_checkpoint"],
-        "restart mismatch",
-    )
-    coarse, fine = (
-        paths["prefix"]["steps"] + paths["suffix"]["steps"],
-        paths["fine"]["steps"],
-    )
+def compare_steps(coarse, fine, coarse_layers):
+    require(type(coarse_layers) is int and coarse_layers in (128, 256),
+            "fixed comparison layer count required")
     targets = [i / 500 for i in range(1, 41)]
     for steps in (coarse, fine):
         require(
@@ -128,7 +108,7 @@ def audit(original_parent, fine_root, fine_sha256):
         )
     rows = []
     for target, a, b in zip(targets, coarse, fine, strict=True):
-        aa, bb = sections(a, 128, CONCRETE), sections(b, 256, CONCRETE)
+        aa, bb = sections(a, coarse_layers, CONCRETE), sections(b, 2 * coarse_layers, CONCRETE)
         require(set(aa) == set(bb), "section correspondence mismatch")
         for key in aa:
             require(
@@ -136,8 +116,8 @@ def audit(original_parent, fine_root, fine_sha256):
                 == (bb[key]["xi"], bb[key]["weight"]),
                 "integration mismatch",
             )
-        ak, ag = nodal_steel(a, 128)
-        bk, bg = nodal_steel(b, 256)
+        ak, ag = nodal_steel(a, coarse_layers)
+        bk, bg = nodal_steel(b, 2 * coarse_layers)
         require(ak == bk, "steel correspondence mismatch")
         metrics = {
             k: metric(
@@ -163,8 +143,8 @@ def audit(original_parent, fine_root, fine_sha256):
                 ac = [v[field] for v in aa[key]["values"]]
                 bf = [v[field] for v in bb[key]["values"]]
                 av.extend(ac)
-                bv.extend((bf[2 * i] + bf[2 * i + 1]) / 2 for i in range(128))
-                keys.extend((key, i) for i in range(128))
+                bv.extend((bf[2 * i] + bf[2 * i + 1]) / 2 for i in range(coarse_layers))
+                keys.extend((key, i) for i in range(coarse_layers))
                 if field in ("tensile_damage", "compressive_damage"):
                     m = cell_metrics(ac, bf)
                     del m["cell_absolute_differences"], m["cell_mixed_onset_children"]
@@ -203,6 +183,33 @@ def audit(original_parent, fine_root, fine_sha256):
         }
         for kind in ("nodal_steel", "concrete")
     }
+    return rows, maxima
+
+
+def audit(original_parent, fine_root, fine_sha256):
+    protocol = read_checked(fine_root / "protocol.json", PROTOCOL_SHA256)
+    require(protocol["concrete_layer_count"] == 256, "fixed fine layer count required")
+    paths = {
+        key: read_checked(
+            original_parent / SOURCES[key][0] / "repeat-0.json", SOURCES[key][1]
+        )
+        for key in ("prefix", "suffix")
+    }
+    paths["fine"] = read_checked(
+        fine_root / "repeat-0.json", fine_sha256, maximum_bytes=2 * 1024**3
+    )
+    for path in paths.values():
+        validate_path(path)
+        require(path["control_global_dof"] == 15, "control DOF mismatch")
+    require(
+        paths["prefix"]["final_checkpoint"] == paths["suffix"]["initial_checkpoint"],
+        "restart mismatch",
+    )
+    coarse, fine = (
+        paths["prefix"]["steps"] + paths["suffix"]["steps"],
+        paths["fine"]["steps"],
+    )
+    rows, maxima = compare_steps(coarse, fine, 128)
     return {
         "schema": "fixed-planar-128-256-comparison.v1",
         "source_revision": protocol["source_revision"],
