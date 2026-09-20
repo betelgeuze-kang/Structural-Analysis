@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[80 mm local diagnosis](rc-80mm-local-diagnostic-20260921.md) exactly reproduces the failed residual/Newton direction in both orders. A smaller 1/64 fraction descends, but six native follow-ups show a grid down to 1/65536 and a 100-iteration limit still fail unchanged tolerances. All 84 diagnostic assemblies and 92 follow-up Newton iterations are retained; no numerical remedy is promoted.
+
 [80 mm arithmetic isolation](rc-adaptive-80mm-results-20260921.md): binary64 and retained arithmetic, each repeated in reversed order, both fail the same -80 mm original target at the same internal recovery coordinate. All 16 paths remain incomplete, with 208 native calls / 1,380 Newton iterations retained. Precision alone does not resolve this witness; local residual/tangent and path-following diagnosis remains open.
 
 [Measured audit cost](rc-adaptive-audit-cost-20260921.md): three fresh processes at source 2588 reproduce identical 128-path audit results in 11.915–12.129 seconds. Original 3,492 JSON files remain unchanged. This isolates cached-read validation cost; source preparation, transport and browser review remain outside the measurement, and no full user-flow speedup is claimed.
