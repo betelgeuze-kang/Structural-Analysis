@@ -181,3 +181,33 @@ def test_cli_rejects_unsafe_or_existing_outputs_before_audit(tmp_path, monkeypat
     with pytest.raises(ValueError, match='separate|distinct|already exists'):
         auditor.main()
     assert {p: p.read_bytes() for p in tmp_path.rglob('*.json')} == before
+
+
+def test_comparison_cost_preserves_absence_and_attributes_measured_scope():
+    assert auditor._comparison_cost({'rows': [{}]}) is None
+    result = auditor._comparison_cost({'rows': [{'comparison_cost': {
+        'scope': 'benchmark_call_and_return_or_exception_classification',
+        'wall_ns': 10, 'process_cpu_ns': 0,
+    }}], 'parent_wall_ns_before_final_write': 15})
+    assert result['summed_comparison_wall_ns'] == 10
+    assert result['parent_wall_ns_before_final_write'] == 15
+    assert not result['full_user_flow_measured']
+
+
+@pytest.mark.parametrize('corruption', ['partial', 'scope', 'boolean', 'negative_cpu', 'enclosing'])
+def test_comparison_cost_rejects_partial_or_invalid_measurements(corruption):
+    cost = {'scope': 'benchmark_call_and_return_or_exception_classification',
+            'wall_ns': 10, 'process_cpu_ns': 3}
+    outcome = {'rows': [{'comparison_cost': cost}], 'parent_wall_ns_before_final_write': 15}
+    if corruption == 'partial':
+        outcome['rows'].append({})
+    elif corruption == 'scope':
+        cost['scope'] = 'full_user_flow'
+    elif corruption == 'boolean':
+        cost['wall_ns'] = True
+    elif corruption == 'negative_cpu':
+        cost['process_cpu_ns'] = -1
+    else:
+        outcome['parent_wall_ns_before_final_write'] = 9
+    with pytest.raises(ValueError):
+        auditor._comparison_cost(outcome)

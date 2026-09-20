@@ -40,3 +40,27 @@ validation. Those tests and repository workflow/strict-YAML checks pass 27 tests
 The development-contract CI list includes this runner's test module; the required
 full-suite gate is unchanged. No policy promotion, independent project provenance,
 physical qualification or learned gain is claimed by this campaign.
+
+## Comparison-level measured cost
+
+New runner outcomes include `comparison_cost` on every returned or raised row.
+Wall and process CPU clocks span the benchmark call and classification of its
+return/exception. Benchmark-internal result writing is included; the outer started
+marker, row outcome write and final campaign write are outside each row's clock.
+The existing parent clock includes row writes but excludes case preparation,
+plan writing and the final campaign write. These clocks are nested, not additive.
+
+Caught exceptions retain elapsed cost and `unknown_work=true`; a known elapsed
+time does not reconstruct missing native work or qualify an incomplete path.
+Process termination before a row returns still leaves only its started marker,
+so complete cost is not inferred for killed processes. The independent auditor
+rejects partially present timing, invalid types/values, unknown scopes, or summed
+comparison wall time exceeding its enclosing sequential campaign time. Earlier
+packets without row timing remain readable and are not assigned invented costs.
+No original execution clock is independently authenticated, and startup, transport
+and browser review remain outside these measurements.
+
+Verification: 29 audit/runner tests passed, including a real short/40 mm campaign,
+injected exceptions with retained elapsed cost, partial timing rejection and
+separate audit timing. Ruff and whitespace checks passed. These checks establish
+the accounting contract, not a fresh eight-condition runtime performance result.

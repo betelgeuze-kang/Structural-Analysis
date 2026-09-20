@@ -9,7 +9,7 @@ from dataclasses import replace
 import json
 from pathlib import Path
 import re
-from time import perf_counter_ns
+from time import perf_counter_ns, process_time_ns
 
 from structural_analysis.api.rc_fiber_frame_direct_control_request import BoundedRCFiberDirectControlRequest
 from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
@@ -84,6 +84,7 @@ def run_campaign(source_revision, output_directory):
                 row = {'case_id': name, 'repeat': repeat, 'mode': mode,
                        'status': 'started', 'unknown_work': True}
                 _save(root, identity + '-started.json', _bytes(row))
+                comparison_started, cpu_started = perf_counter_ns(), process_time_ns()
                 try:
                     report = benchmark_rc_control_seed_paths(
                         model, request, source_revision=source_revision,
@@ -99,6 +100,12 @@ def run_campaign(source_revision, output_directory):
                                arm_statuses={key: arm['status'] for key, arm in arms.items()})
                 except Exception as exc:
                     row.update(status='raised', error_type=type(exc).__name__, error=str(exc))
+                finally:
+                    row['comparison_cost'] = {
+                        'wall_ns': perf_counter_ns() - comparison_started,
+                        'process_cpu_ns': process_time_ns() - cpu_started,
+                        'scope': 'benchmark_call_and_return_or_exception_classification',
+                    }
                 rows.append(row)
                 _save(root, identity + '-outcome.json', _bytes(row))
     outcome = {

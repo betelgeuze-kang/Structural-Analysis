@@ -95,6 +95,34 @@ def _check_invocation(invocation, native):
         )
 
 
+def _comparison_cost(outcome):
+    rows = outcome["rows"]
+    if not any("comparison_cost" in row for row in rows):
+        return None  # Earlier original packets did not measure this boundary.
+    _require(all("comparison_cost" in row for row in rows), "partial comparison timing")
+    wall = cpu = 0
+    for row in rows:
+        cost = row["comparison_cost"]
+        _require(
+            cost["scope"] == "benchmark_call_and_return_or_exception_classification",
+            "unknown comparison timing scope",
+        )
+        _positive_int(cost["wall_ns"], "comparison wall time")
+        _nonnegative_int(cost["process_cpu_ns"], "comparison CPU time")
+        wall += cost["wall_ns"]
+        cpu += cost["process_cpu_ns"]
+    parent_wall = outcome["parent_wall_ns_before_final_write"]
+    _positive_int(parent_wall, "campaign parent wall time")
+    _require(wall <= parent_wall, "comparison time exceeds enclosing campaign time")
+    return {
+        "summed_comparison_wall_ns": wall,
+        "summed_comparison_process_cpu_ns": cpu,
+        "parent_wall_ns_before_final_write": parent_wall,
+        "original_execution_clocks_authenticated": False,
+        "full_user_flow_measured": False,
+    }
+
+
 def _check_path_evidence(data, name, path, request):
     _require(
         path["requested_targets_m"] == list(request.targets_m),
@@ -607,6 +635,9 @@ def _audit(campaign_directory):
         "numerical_reexecution_performed": False,
         "original_execution_clocks_authenticated": False,
     }
+    comparison_cost = _comparison_cost(outcome)
+    if comparison_cost is not None:
+        result["comparison_cost"] = comparison_cost
     result["audit_hash"] = _sha(_bytes(result))
     return result
 

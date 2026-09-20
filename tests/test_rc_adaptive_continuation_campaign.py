@@ -1,5 +1,6 @@
 """Campaign orchestration checks; fake reports do not count as numerical evidence."""
 import json
+from itertools import count
 
 import pytest
 
@@ -30,6 +31,9 @@ def test_orders_incomplete_paths_and_unknown_work_remain_visible(tmp_path, monke
                          'proposal': {'status': 'complete'}}, 'fresh_reference': {'status': 'incomplete'}}
 
     monkeypatch.setattr(campaign, 'benchmark_rc_control_seed_paths', fake)
+    wall_clock, cpu_clock = count(0, 10), count(0, 3)
+    monkeypatch.setattr(campaign, 'perf_counter_ns', lambda: next(wall_clock))
+    monkeypatch.setattr(campaign, 'process_time_ns', lambda: next(cpu_clock))
     result = campaign.run_campaign('a' * 40, tmp_path / 'campaign')
     assert len(calls) == 32 and len(result['rows']) == 32
     assert [c['continuation_adaptive'] for c in calls[:4]] == [False, True, True, False]
@@ -37,6 +41,11 @@ def test_orders_incomplete_paths_and_unknown_work_remain_visible(tmp_path, monke
     assert all(c['continuation_on_failure'] and c['continuation_all_failed_targets'] for c in calls)
     assert result['observations_complete'] == (not inject_error)
     assert result['completed_paths'] == (31 if inject_error else 32)
+    assert all(row['comparison_cost'] == {
+        'wall_ns': 10, 'process_cpu_ns': 3,
+        'scope': 'benchmark_call_and_return_or_exception_classification',
+    } for row in result['rows'])
+    assert sum(row['comparison_cost']['wall_ns'] for row in result['rows']) <= result['parent_wall_ns_before_final_write']
     if inject_error:
         assert result['rows'][1]['unknown_work'] and result['rows'][1]['status'] == 'raised'
     assert not result['qualified_speedup'] and not result['policy_promoted']
