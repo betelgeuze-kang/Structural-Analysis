@@ -1118,3 +1118,21 @@ def test_guarded_audit_retains_fallback_timing_and_full_arm_binding(monkeypatch)
     require_declined_guard(entry, {})
     with pytest.raises(ValueError):
         require_declined_guard(entry, dict(committed_material_state_json='captured'))
+
+
+@pytest.mark.parametrize('constant_safe', [False, True])
+def test_pooled_audit_rejects_fit_method_drift(monkeypatch, constant_safe):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_pooled_runtime_campaign')
+    old = module.learning.SVD_RIDGE_FIT_PROFILE
+    new = module.learning.CONSTANT_SAFE_SVD_FIT_PROFILE
+    method = new if constant_safe else old
+    source = {'fit_solver_profile': method} if constant_safe else {}
+    plan = {'fit_solver_profile': method}
+    policy = {'fit_solver_profile': method}
+    module.require_fit_method(source, plan, policy)
+    for changed_plan, changed_policy in (({'fit_solver_profile': 'unknown'}, policy),
+                                         (plan, {'fit_solver_profile': old if constant_safe else new}),
+                                         (plan, {})):
+        with pytest.raises(ValueError, match='fit method'):
+            module.require_fit_method(source, changed_plan, changed_policy)

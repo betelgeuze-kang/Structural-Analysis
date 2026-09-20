@@ -21,6 +21,14 @@ def require_report_binding(plan, case_id, report):
             report['request'] == case['request'], 'comparison model/request/source binding')
 
 
+def require_fit_method(source, plan, policy):
+    expected = source.get('fit_solver_profile', learning.SVD_RIDGE_FIT_PROFILE)
+    require(expected in (learning.SVD_RIDGE_FIT_PROFILE, learning.CONSTANT_SAFE_SVD_FIT_PROFILE)
+            and plan.get('fit_solver_profile') == expected
+            and policy.get('fit_solver_profile') == expected,
+            'predeclared fit method differs')
+
+
 def audit(study, old_labels, new_labels):
     cases, samples, profile, groups, costs = inputs(old_labels, new_labels)
     source = read(study / 'plan.json')
@@ -29,6 +37,7 @@ def audit(study, old_labels, new_labels):
     result = checked(root / 'result.json', 'result_hash')
     outcome = read(study / 'outcome.json')
     pooled = learning.RCControlSeedPolicy((study / 'pooled-policy.json').read_text())
+    require_fit_method(source, plan, pooled.to_dict())
     _, _, pooled_profile = _validated_training_data(samples, pooled)
     require(pooled_profile == profile, 'pooled metadata differs')
     require(source['input_inventories'] == {'old': PINS['labels'], 'new': NEW_INVENTORY},
@@ -72,6 +81,8 @@ def audit(study, old_labels, new_labels):
         stem = f"fold-{f['index']:04d}"
         require(read(root / (stem + '-outcome.json')) == f, 'persisted fold mismatch')
         p = checked(root / f"fit-{f['fit_index']:04d}-policy.json", 'policy_hash')
+        learning.RCControlSeedPolicy(_bytes(p).decode())
+        require_fit_method(source, plan, p)
         require(p['policy_hash'] == f['policy_hash'], 'frozen policy binding')
         group = next(g for g in groups if f['withheld_training_case'] in g)
         expected = {s['sample_hash'] for s in samples if s['case_id'] not in group}
@@ -158,6 +169,7 @@ def audit(study, old_labels, new_labels):
             'predeclared work budget differs')
     if winner:
         selected = learning.RCControlSeedPolicy(_bytes(result['selected_policy']).decode())
+        require_fit_method(source, plan, selected.to_dict())
         _validated_training_data(samples, selected)
     else:
         require(result['selected_policy'] is None, 'unexpected selected policy')

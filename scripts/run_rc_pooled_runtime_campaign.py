@@ -52,6 +52,9 @@ def main():
     parser.add_argument('--source-revision', required=True)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--preflight-only', action='store_true')
+    parser.add_argument('--fit-solver', choices=(learning.SVD_RIDGE_FIT_PROFILE,
+                        learning.CONSTANT_SAFE_SVD_FIT_PROFILE),
+                        default=learning.SVD_RIDGE_FIT_PROFILE)
     args = parser.parse_args()
     if not re.fullmatch('[0-9a-f]{40}', args.source_revision):
         raise ValueError('exact source revision required')
@@ -65,6 +68,7 @@ def main():
     root.mkdir(parents=True, exist_ok=False)
     _save(root, 'plan.json', _bytes({
         'source_revision': args.source_revision,
+        'fit_solver_profile': args.fit_solver,
         'input_inventories': {'old': PINS['labels'], 'new': NEW_INVENTORY},
         'source_sample_hashes': [s['sample_hash'] for s in samples],
         'groups': groups, 'ridge_grid': [1e4, 1e6], 'repetitions': 3,
@@ -79,7 +83,7 @@ def main():
     # This fit binds the pooled policy schema; its weights/scales are not used
     # in withheld fits. Every selection fold refits only its complementary group.
     fitting = perf_counter_ns()
-    policy = learning._fit(samples, profile, 1e4, 0.1, fit_solver=learning.SVD_RIDGE_FIT_PROFILE)
+    policy = learning._fit(samples, profile, 1e4, 0.1, fit_solver=args.fit_solver)
     metadata_fit_wall_ns = perf_counter_ns() - fitting
     _save(root, 'pooled-policy.json', _bytes(policy.to_dict()))
     _save(root, 'pooled-fit.json', _bytes({'wall_ns': metadata_fit_wall_ns,
