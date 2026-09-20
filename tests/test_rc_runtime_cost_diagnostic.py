@@ -284,3 +284,61 @@ def test_guard_configuration_rejected_before_output(tmp_path, change):
     with pytest.raises(ValueError, match='identified proposal guard'):
         benchmark_rc_control_seed_paths(None,None,source_revision='guard-test',output_directory=tmp_path/'run',**options)
     assert not (tmp_path/'run').exists()
+
+
+def nested_label_reader(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    return importlib.import_module('audit_rc_nested_switch_labels').label_from_repetitions
+
+
+def nested_repeats():
+    return [dict(repetition=i, comparison_pass=True, decision='proposed', path_time_ratio=.98) for i in range(3)]
+
+
+def test_nested_label_requires_every_repeat_and_actual_proposals(monkeypatch):
+    label = nested_label_reader(monkeypatch)
+    rows = nested_repeats()
+    assert label(rows)['label'] is True
+    rows[1]['path_time_ratio'] = .995
+    assert label(rows)['label'] is False
+    rows[1]['path_time_ratio'] = .98
+    rows[2]['decision'] = 'abstained'
+    assert label(rows)['label'] is False
+    rows[2]['comparison_pass'] = False
+    rows[2]['path_time_ratio'] = None
+    assert label(rows)['label'] is None
+    assert label(rows)['status'] == 'unverified'
+
+
+@pytest.mark.parametrize('ratio', [True, 0, -1, float('nan'), float('inf'), None, '0.98'])
+def test_nested_label_rejects_invalid_measured_cost(monkeypatch, ratio):
+    rows = nested_repeats()
+    rows[1]['path_time_ratio'] = ratio
+    with pytest.raises(ValueError, match='positive finite measured ratios'):
+        nested_label_reader(monkeypatch)(rows)
+
+
+@pytest.mark.parametrize('repetitions', [[0, 0, 2], [0, 1], [False, 1, 2]])
+def test_nested_label_rejects_missing_or_ambiguous_repetition(monkeypatch, repetitions):
+    rows = [dict(repetition=i, comparison_pass=True, decision='proposed', path_time_ratio=.98) for i in repetitions]
+    with pytest.raises(ValueError, match='three unique original repetitions'):
+        nested_label_reader(monkeypatch)(rows)
+
+
+def test_switch_features_ignore_material_state_and_prefix_length():
+    from dataclasses import replace
+    from types import SimpleNamespace
+    from scripts.rc_switch_prefix_features import prefix_features, PROFILE
+    from structural_analysis.benchmark.rc_control_seed_runtime import RCControlSeedContext
+    context = RCControlSeedContext('compiled', 7, 0, .003, (.001, .002), ((.001, 1.), (.002, 2.)))
+    model = SimpleNamespace(problem_contract_hash='compiled', feature_names=('width',), values=(.4,))
+    expected = prefix_features(context, model)
+    changed = replace(context, committed_material_state_json='not parsed',
+        accepted_targets_m=(0., *context.accepted_targets_m),
+        accepted_augmented_coordinates_m=((0., 0.), *context.accepted_augmented_coordinates_m))
+    assert prefix_features(changed, model) == expected
+    assert expected['profile'] == PROFILE
+    assert expected['feature_names'] == ['model.width', 'target_m', 'target_increment_m',
+        'previous_target_increment_m', 'last_coordinate_0', 'last_coordinate_1',
+        'coordinate_increment_0', 'coordinate_increment_1']
+    assert expected['values'] == [.4, .003, .001, .001, .002, 2., .001, 1.]
