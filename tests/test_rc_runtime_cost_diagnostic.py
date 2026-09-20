@@ -737,6 +737,73 @@ def test_gate_validation_rows_reject_incomplete_or_foreign_labels(monkeypatch, m
         module.assemble_fold(*audits, plan, 0, 1, **hashes)
 
 
+def gate_score_fixture(monkeypatch):
+    from copy import deepcopy
+    module, audits, plan, hashes = validation_rows_fixture(monkeypatch)
+    tables = module.assemble_fold(*audits, plan, 0, 1, **hashes)
+    cost = importlib.import_module('rc_cost_margin_gate')
+    gate, _ = cost.fit_cost_gate(tables['training'])
+    validation = tables['validation']
+    template = validation['rows'][0]
+    rows = []
+    for i, (value, ratio) in enumerate([(3., .9), (3., 1.1), (9999., .9), (9999., 1.1), (3., None), (9999., None)]):
+        row = deepcopy(template)
+        row['source_sample_hash'] = f'sha256:{1000+i:064x}'
+        row['values'] = [value]
+        for repeat in row['cost_repetitions']:
+            repeat['comparison_pass'] = ratio is not None
+            repeat['path_time_ratio'] = ratio
+        row['label'] = module.label_from_repetitions(row['cost_repetitions'])['label']
+        row['cost_target'] = cost.cost_target(row['cost_repetitions'])
+        rows.append(row)
+    validation.update(rows=rows, declared_row_count=6, unverified_count=2)
+    return importlib.import_module('score_rc_gate_validation'), gate, validation
+
+
+def test_gate_validation_score_keeps_six_outcome_categories_and_unknown_denominator(monkeypatch):
+    module, gate, validation = gate_score_fixture(monkeypatch)
+    result = module.score_gate(gate, validation)
+    assert result['counts'] == dict(true_positive=1, false_positive=1, true_negative=1,
+                                    false_negative=1, proposed_unverified=1, declined_unverified=1)
+    assert result['declared_rows'] == 6 and result['verified_rows'] == 4
+    assert result['precision_on_verified_proposals'] == result['recall_on_verified_positives'] == .5
+    assert result['verification_fraction'] == pytest.approx(4/6)
+    assert result['all_required_rows_verified'] is result['promoted'] is False
+    assert result['inference_call_wall_ns'] > 0
+
+
+def test_gate_validation_score_zero_denominators_remain_unknown(monkeypatch):
+    module, gate, validation = gate_score_fixture(monkeypatch)
+    validation.update(rows=[validation['rows'][3]], declared_row_count=1, unverified_count=0)
+    result = module.score_gate(gate, validation)
+    assert result['precision_on_verified_proposals'] is None
+    assert result['recall_on_verified_positives'] is None
+    assert result['all_required_rows_verified'] is True
+    assert result['total_runtime_benefit_measured'] is False
+
+
+@pytest.mark.parametrize('mutation', ['sample_leak', 'case_leak', 'duplicate', 'label', 'target', 'unknown_count', 'denominator'])
+def test_gate_validation_score_rejects_leakage_or_changed_measurements(monkeypatch, mutation):
+    module, gate, validation = gate_score_fixture(monkeypatch)
+    row = validation['rows'][0]
+    if mutation == 'sample_leak':
+        row['source_sample_hash'] = gate._payload['training_sample_hashes'][0]
+    elif mutation == 'case_leak':
+        row['case_id'] = 'c'
+    elif mutation == 'duplicate':
+        validation['rows'][-1] = row
+    elif mutation == 'label':
+        row['label'] = False
+    elif mutation == 'target':
+        row['cost_target'] = 0.5
+    elif mutation == 'unknown_count':
+        validation['unverified_count'] = 0
+    else:
+        validation['declared_row_count'] = True
+    with pytest.raises(ValueError):
+        module.score_gate(gate, validation)
+
+
 @pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'outer_case', 'seed', 'label', 'nonfinite'])
 def test_gate_training_rows_reject_transplanted_or_incomplete_inputs(monkeypatch, mutation):
     module, audit, plan = gate_row_fixture(monkeypatch)
