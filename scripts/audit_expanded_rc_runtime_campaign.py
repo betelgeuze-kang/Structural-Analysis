@@ -1,7 +1,9 @@
 """Audit retained-label runtime receipts without fitting or executing a solver."""
 import argparse
 import hashlib
+import math
 from pathlib import Path
+from statistics import mean
 
 from audit_grouped_rc_runtime_campaign import checked, read, require
 
@@ -62,6 +64,7 @@ def audit(study, label_bundle):
     proposed = abstained = 0
     gate_counts = {}
     case_counts = {}
+    per_fold_arm_work = []
     for f in result['folds']:
         stem = f"fold-{f['index']:04d}"
         require(read(root / (stem + '-outcome.json')) == f, 'persisted fold mismatch')
@@ -83,20 +86,28 @@ def audit(study, label_bundle):
                 and all(c['full_history_pass'] for c in report['comparisons'].values()),
                 'full histories at original tolerance required')
         actual_work = dict.fromkeys(work, 0)
-        for arm in [*report['arms'].values(), report['fresh_reference']]:
+        arm_work = {}
+        for arm_name, arm in {**report['arms'], 'fresh-reference': report['fresh_reference']}.items():
             require(arm['status'] == 'complete' and arm['accepted_target_count'] == 12,
                     'all four full paths required')
+            arm_work[arm_name] = {**dict.fromkeys(work, 0), 'wall_ns': arm['wall_ns']}
             invocations = list(arm['preload_invocations'])
             invocations.extend(i for e in arm['entries'] for i in e['invocations'])
             for invocation in invocations:
                 require(not invocation['unknown_work'], 'unknown invocation work')
                 for key in actual_work:
                     actual_work[key] += invocation['work'][key]
+                    arm_work[arm_name][key] += invocation['work'][key]
+        per_fold_arm_work.append({'fold_index': f['index'], 'case_id': f['withheld_training_case'],
+                                  'ridge': f['ridge'], 'arms': arm_work})
         require(actual_work == score['execution_work']['known_work'], 'invocation cost sum')
         decisions = read(root / (stem + '-decisions.json'))
         require(sum(d['decision'] == 'proposed' for d in decisions) == score['proposed_count']
                 and sum(d['decision'].startswith('abstained') for d in decisions) ==
                 score['abstained_count'], 'proposal decision count')
+        ratio = (report['arms']['proposal']['wall_ns'] + f['static_model_gate_wall_ns']) / report['arms']['secant']['wall_ns']
+        require(math.isclose(ratio, score['proposal_over_secant_path_wall_ratio'],
+                             rel_tol=1e-14), 'path and gate timing ratio')
         proposed += score['proposed_count']
         abstained += score['abstained_count']
         by_case = case_counts.setdefault(f['withheld_training_case'],
@@ -107,6 +118,21 @@ def audit(study, label_bundle):
             work[k] += score['execution_work']['known_work'][k]
         gate = read(root / (stem + '-model-gate.json'))
         gate_counts[gate['status']] = gate_counts.get(gate['status'], 0) + 1
+    for candidate in result['candidates']:
+        folds = [f for f in result['folds'] if f['ridge'] == candidate['ridge']]
+        equal_case_mean = mean(mean(f['score']['proposal_over_secant_path_wall_ratio']
+                                    for f in folds if f['withheld_training_case'] == case)
+                               for case in train)
+        require(math.isclose(equal_case_mean, candidate['score'], rel_tol=1e-14),
+                'equal-case selection score')
+        require(candidate['proposed_count'] == sum(f['score']['proposed_count'] for f in folds),
+                'candidate proposal count')
+    eligible = [c for c in result['candidates'] if c['proposed_count'] > 0 and
+                c['score'] < 1 - plan['minimum_relative_improvement']]
+    winner = min(eligible, key=lambda c: (c['score'], -c['ridge'])) if eligible else None
+    require(result['selected_strategy'] == ('learned_svd' if winner else 'secant') and
+            result['selected_ridge'] == (winner['ridge'] if winner else None),
+            'predeclared selection decision')
     require(source['original_generation_work'] == labels['generation_work'] and
             source['original_label_study_wall_ns'] == labels['whole_study_wall_ns'] ==
             outcome['label_study_wall_ns_separate'], 'separate label cost binding')
@@ -118,6 +144,7 @@ def audit(study, label_bundle):
         'training_sample_count': len(samples), 'fit_completed_count': result['fit_completed_count'],
         'proposed_count': proposed, 'abstained_count': abstained, 'case_counts': case_counts,
         'static_gate_counts': gate_counts, 'fold_work': work,
+        'per_fold_arm_work': per_fold_arm_work,
         'label_generation_work': labels['generation_work'],
         'label_study_wall_ns_separate': labels['whole_study_wall_ns'],
         'selection_wall_ns': result['wall_ns'],
