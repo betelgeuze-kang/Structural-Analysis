@@ -485,6 +485,78 @@ def test_gate_repeated_decimal_constant_has_exact_center_and_unit_scale(monkeypa
     assert gate.decision(dict(profile=module.PROFILE, feature_names=['target_m'], values=[.02])) is True
 
 
+def cost_gate_fixture(monkeypatch):
+    _, audit, plan = gate_row_fixture(monkeypatch)
+    module = importlib.import_module('rc_cost_margin_gate')
+    for row in audit['pairs']:
+        for repetition in row['repetitions']:
+            repetition['report_hash'] = 'sha256:' + format(repetition['repetition'], '064x')
+    return module, audit, plan
+
+
+def test_cost_target_keeps_worst_repeat_loss_and_no_abstention_gain(monkeypatch):
+    module, _, _ = cost_gate_fixture(monkeypatch)
+    repeats = nested_repeats()
+    repeats[1]['path_time_ratio'] = 1.4
+    assert module.cost_target(repeats) == pytest.approx(-.4)
+    repeats[1]['path_time_ratio'] = .98
+    assert module.cost_target(repeats) == pytest.approx(.02)
+    repeats[1]['decision'] = 'abstained_to_secant'
+    assert module.cost_target(repeats) == 0.
+    repeats[1]['comparison_pass'] = False
+    repeats[1]['path_time_ratio'] = None
+    assert module.cost_target(repeats) is None
+
+
+def test_cost_training_rows_preserve_exclusion_and_measured_reports(monkeypatch):
+    module, audit, plan = cost_gate_fixture(monkeypatch)
+    training = module.cost_training_rows(audit, plan, 0)
+    assert training['excluded_case_ids'] == ['a']
+    assert all(row['case_id'] != 'a' and row['cost_target'] == pytest.approx(.02)
+               and len(row['cost_repetitions']) == 3 for row in training['training_rows'])
+    gate, receipt = module.fit_cost_gate(training)
+    assert gate._payload['threshold'] == .01
+    assert receipt['gate_cost_in_training_target'] is False
+    assert gate.decision(dict(profile=training['feature_profile'],
+                              feature_names=training['feature_names'], values=[.001])) is True
+    original = importlib.import_module('rc_switch_gate')
+    with pytest.raises(ValueError, match='fixed gate profile'):
+        original.RidgeGate(gate._json)
+
+
+@pytest.mark.parametrize('mutation', ['target', 'label', 'outer', 'profile', 'unverified'])
+def test_cost_fit_rejects_changed_targets_and_scope(monkeypatch, mutation):
+    module, audit, plan = cost_gate_fixture(monkeypatch)
+    training = module.cost_training_rows(audit, plan, 0)
+    row = training['training_rows'][0]
+    if mutation == 'target':
+        row['cost_target'] = .5
+    elif mutation == 'label':
+        row['label'] = False
+    elif mutation == 'outer':
+        row['case_id'] = 'a'
+    elif mutation == 'profile':
+        training['cost_target_profile'] = 'other'
+    else:
+        row['cost_repetitions'][0]['comparison_pass'] = False
+        row['cost_repetitions'][0]['path_time_ratio'] = None
+    with pytest.raises(ValueError):
+        module.fit_cost_gate(training)
+
+
+def test_cost_margin_fit_matches_known_two_row_ridge_solution(monkeypatch):
+    module, audit, plan = cost_gate_fixture(monkeypatch)
+    training = module.cost_training_rows(audit, plan, 0)
+    for row, x, ratio in zip(training['training_rows'], [-1., 1.], [1.25, .5]):
+        row['values'] = [x]
+        for repetition in row['cost_repetitions']:
+            repetition['path_time_ratio'] = ratio
+        row['cost_target'] = module.cost_target(row['cost_repetitions'])
+        row['label'] = ratio <= .99
+    gate, _ = module.fit_cost_gate(training)
+    assert gate._payload['weights'] == pytest.approx((.25, .125))
+
+
 def test_guarded_runtime_score_includes_policy_setup_and_full_path_validity(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
     from run_rc_guarded_runtime_campaign import score_path

@@ -1,0 +1,15 @@
+# Fixed measured-cost margin gate: development protocol
+
+The original binary-target ridge gates select no training positives at their fixed threshold. This new development candidate changes the regression target and decision units; it does not alter or retrospectively promote those old policies. It is informed by earlier development outcomes, not an independent confirmation.
+
+For each complete, numerically verified three-repeat nested pair, compute `g = min_r(1 - T_proposal,r / T_secant,r)`. Preserve negative margins without clipping losses. If any repeat did not actually propose a learned seed, use `min(0, g)` so measurement variation during abstention cannot create a positive learned-benefit target. Failed/unverified comparisons remain excluded with their identities retained; they are not converted into zero-cost or successful examples.
+
+Fit one linear ridge regression for each of the five original outer-group complements. Keep the original pre-solve feature profile, training-only mean/standard-deviation/bounds, constant-column handling, ridge 1.0, unpenalized intercept and augmented least-squares solve. Use the same complete nested label/seed inventories and 132-row complementary assemblies; no outer evaluation or reserved case enters fitting. Repetition report hashes and measured ratios are retained in the cost training table and its policy training hash.
+
+The new `rc-pre-capture-cost-margin-gate.v1` permits a proposal only when individual bounds pass, a verified positive exists in the training complement, and predicted relative margin is at least **0.01**. No hyperparameter or threshold search is planned. The score is a regression estimate of a minimum across three observed repeats, not a confidence bound, probability, guarantee, or absolute time saving. Individual-feature bounds still do not prove joint support.
+
+The target includes the retained proposal/material-capture path costs, but not this new gate's own inference/setup costs or historical label/fit generation. Those costs remain separately recorded and must be charged in any subsequent whole-path comparison. Local one-step margins do not imply equal full-path savings or preserve the same future accepted states.
+
+First fit the five policies and inspect training decisions. If every training decision declines, do not repeat the expensive full-path campaign solely to rediscover the known all-decline behavior. A nonzero count merely permits planning a subsequent full-path development evaluation; it is not evidence of usefulness, and every false positive remains counted. Do not time that campaign concurrently with the live 2,048-layer numerical run. The untouched reserved cases remain unexecuted.
+
+Focused checks pass 71 tests in 6.86 s, including known closed-form binary and continuous-target ridge solutions, worst-repeat loss, abstention gain exclusion, unknown comparisons, original outer-group exclusion, changed targets/profile/labels, and strict legacy-versus-cost policy separation. The existing development CI selection includes this test file. Full-source fitting results are pending. No solver authority, tolerance or public API changes.

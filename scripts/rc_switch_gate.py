@@ -22,6 +22,9 @@ THRESHOLD = 0.75
 
 @dataclass(frozen=True)
 class RidgeGate:
+    _schema = SCHEMA
+    _ridge = RIDGE
+    _threshold = THRESHOLD
     _json: str = field(repr=False)
     _payload: dict = field(init=False, repr=False, compare=False)
 
@@ -33,9 +36,9 @@ class RidgeGate:
                 'outer_group_index', 'excluded_case_ids', 'training_sample_hashes',
                 'positive_count', 'negative_count', 'training_rows_hash', 'policy_hash'},
                 'exact gate fields required')
-        require(payload['schema_version'] == SCHEMA and payload['feature_profile'] == PROFILE
-                and type(payload['ridge']) is float and payload['ridge'] == RIDGE
-                and type(payload['threshold']) is float and payload['threshold'] == THRESHOLD,
+        require(payload['schema_version'] == self._schema and payload['feature_profile'] == PROFILE
+                and type(payload['ridge']) is float and payload['ridge'] == self._ridge
+                and type(payload['threshold']) is float and payload['threshold'] == self._threshold,
                 'fixed gate profile required')
         require(payload['policy_hash'] == _sha(_bytes({k: v for k, v in payload.items() if k != 'policy_hash'})),
                 'gate hash mismatch')
@@ -99,6 +102,14 @@ class RidgeGate:
 def fit_gate(training):
     """Call only with original independently audited gate_training_rows output."""
     started = perf_counter_ns()
+    gate, receipt = _fit_gate(training, [row['label'] for row in training['training_rows']], RidgeGate)
+    receipt['fit_wall_ns'] = perf_counter_ns() - started
+    return gate, receipt
+
+
+def _fit_gate(training, targets, gate_class):
+    """Shared fixed-normalization solve; target semantics belong to the gate profile."""
+    started = perf_counter_ns()
     rows = training['training_rows']
     require(rows and all(type(row['label']) is bool for row in rows), 'verified nonempty gate labels required')
     require(all(row['case_id'] not in training['excluded_case_ids'] for row in rows),
@@ -107,7 +118,8 @@ def fit_gate(training):
     x = np.asarray([row['values'] for row in rows], dtype=float)
     require(x.ndim == 2 and x.shape[1] == len(training['feature_names']) and np.all(np.isfinite(x)),
             'finite aligned gate training matrix required')
-    y = np.asarray([row['label'] for row in rows], dtype=float)
+    y = np.asarray(targets, dtype=float)
+    require(y.shape == (len(rows),) and np.all(np.isfinite(y)), 'finite aligned gate targets required')
     minimum, maximum = x.min(axis=0), x.max(axis=0)
     constant = minimum == maximum
     # Repeated decimal constants can acquire a tiny spurious mean/std offset.
@@ -115,19 +127,20 @@ def fit_gate(training):
     scale = np.where(constant, 1.0, x.std(axis=0))
     scale = np.where(scale > 0, scale, 1.0)
     z = np.column_stack(((x - center) / scale, np.ones(len(x))))
-    penalty = np.eye(z.shape[1]) * np.sqrt(RIDGE)
+    penalty = np.eye(z.shape[1]) * np.sqrt(gate_class._ridge)
     penalty[-1, -1] = 0.0
     weights = np.linalg.lstsq(np.vstack((z, penalty)), np.concatenate((y, np.zeros(z.shape[1]))), rcond=None)[0]
-    payload = dict(schema_version=SCHEMA, feature_profile=PROFILE,
+    positives = sum(row['label'] for row in rows)
+    payload = dict(schema_version=gate_class._schema, feature_profile=PROFILE,
         feature_names=training['feature_names'], mean=center.tolist(), scale=scale.tolist(),
         minimum=minimum.tolist(), maximum=maximum.tolist(), weights=weights.tolist(),
-        ridge=RIDGE, threshold=THRESHOLD, outer_group_index=training['outer_group_index'],
+        ridge=gate_class._ridge, threshold=gate_class._threshold, outer_group_index=training['outer_group_index'],
         excluded_case_ids=training['excluded_case_ids'],
         training_sample_hashes=[row['source_sample_hash'] for row in rows],
-        positive_count=int(y.sum()), negative_count=int(len(y)-y.sum()),
+        positive_count=positives, negative_count=len(rows)-positives,
         training_rows_hash=_sha(_bytes(training)))
     payload['policy_hash'] = _sha(_bytes(payload))
-    gate = RidgeGate(_bytes(payload).decode())
+    gate = gate_class(_bytes(payload).decode())
     return gate, {'fit_wall_ns': perf_counter_ns()-started, 'verified_rows': len(rows),
                   'unverified_rows_excluded': len(training['unverified_rows']),
                   'independent_evaluation': False, 'policy_hash': gate.policy_hash}
