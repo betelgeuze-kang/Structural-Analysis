@@ -55,3 +55,25 @@ capture checks. No product reanalysis, CalculiX rerun, full technical receipt,
 protected artifact refresh or signed acceptance occurred. The same reference
 numbers preserve the two unresolved reaction comparisons; no acceptance credit
 is added by this observation.
+
+## Subsequent actual CalculiX capture observation
+
+A separate observation then ran the unchanged axial and spatial-truss jobs with
+CalculiX 2.17, using the same frozen implementation source as the OpenSees check.
+All three Debian asset hashes matched the repository pins before extraction;
+BLAS/LAPACK dependencies matched the retained source-reference profile. Runtime
+extraction was private and temporary. The two returned numerical payloads equal
+the prior local source-reference CalculiX result exactly.
+
+All twelve retained output/input hashes match: version stdout/stderr plus each
+job's stdout, stderr, INP, DAT and FRD. All 19 observation packet files were
+reread and verified. The wrapper took 21244115 ns; the enclosing
+extraction/execution/check interval took 169720115 ns. These nested
+single-run costs do not establish speedup. Inventory:
+`d08b39e754c15fc6babeb3406c31e258bf8320e95e0dac7a0e62d935dab8b5fc`.
+
+[The CalculiX summary](external-reference-output-retention-calculix-20260920.summary.json)
+binds the runtime binary, source and original packet. This follows the earlier
+OpenSees-only observation; its recorded zero CalculiX executions remains correct
+for that earlier packet. No current-product reanalysis or complete technical
+receipt was generated, and the existing OpenSees comparison failures remain.
