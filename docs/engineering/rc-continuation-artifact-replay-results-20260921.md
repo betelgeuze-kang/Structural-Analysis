@@ -1,0 +1,11 @@
+# All six continuation studies reproduce from model input
+
+Frozen replay source `cb8952c5a` regenerates all six original studies from canonical model/request inputs. Each compares 126 original JSON artifacts with a newly executed study, for 756 artifact comparisons. All numerical contents, native step identities, work records and filename sets match exactly after separating execution clocks and their derived report/path hashes. Every actual loaded structural-analysis submodule fingerprint in each receipt matches the archived replay source.
+
+The replay costs another 198 native calls and 898 Newton iterations, including all 96 internal continuation stages. Summed enclosing replay time is 7.161575431 s; it includes validation, repeated execution, file comparison and source fingerprinting. This is additional verification cost, not an inference time or an original-run speed ratio. Original execution clocks are expressly not authenticated by fresh numerical reproduction.
+
+All six proposal paths complete again, while ordinary/secant/fresh references remain incomplete. The replay gate passes, but the full-reference comparison gate remains failed. Same-engine numerical reproducibility does not establish an independent physical reference, unique branch, design approval, commercial savings or release qualification.
+
+The receipt audit checks all six audit hashes, fresh report hashes, original roster, actual cost totals and loaded submodule fingerprints against archived source bytes. Every one of 1,978 inventoried non-cache files was reread. Inventory SHA-256: `b189ae2bbd50c0acff046a2f5ee65f65054ddb73f1b71f636ecaba4db00d88ab`. The [summary](rc-continuation-artifact-replay-results-20260921.summary.json) retains original/fresh report identities, source attestations, runtime versions, artifact counts and all six replay outcomes.
+
+Fourteen focused strategy/replay tests pass. Tests include modified request rejection before solver execution and rehashed numerical/work tampering rejection after fresh execution. This adds artifact-level replay authority to the experimental benchmark only; public product result schemas, candidate eligibility and Workbench approval are not silently expanded.

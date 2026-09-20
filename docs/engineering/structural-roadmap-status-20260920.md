@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+The [fresh artifact replayer](rc-continuation-artifact-replay-results-20260921.md) now reproduces all six continuation studies / 756 original JSON artifacts with explicit additional cost (198 native calls / 898 Newton iterations). Native/work content and loaded source fingerprints are checked; clocks remain separately measured. Rehashed numerical/work tampering tests fail as intended. Experimental replay passes while ordinary-reference comparisons remain failed; this does not extend public product eligibility or independent physical authority.
+
 The [frozen-parent continuation strategy](rc-frozen-continuation-path-results-20260921.md) completes all three original reversal models in both orders (six proposal paths within 24 attempted paths). Complete accepted histories and checkpoints repeat exactly. Its 96 additional native calls are explicitly counted: 198 total native calls / 898 Newton iterations across the study. Intermediate checkpoints are never adopted as material-history parents. Ordinary/secant/fresh references still fail, so no qualified speed ratio or independent/design approval follows. Product artifact replay and broader validation remain open.
 
 [Hosted 610e](hosted-610e-terminal-20260921.md) now passes 1,980 development and 814 frontend tests; full-suite shards remain blocked in evidence preparation. These receipts do not cover later trust-region code.
