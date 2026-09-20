@@ -16,7 +16,9 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
-[Hosted 8eee](hosted-8eee-terminal-20260920.md) passes 1,893 development tests and 814 frontend tests. Full Python shards remain stopped before test execution by external replay and technical-receipt preparation; later source changes require their own checks.
+The [bounded 2,048-layer witness diagnostic](planar-2048-witness-protocol-20260920.md) is implemented and locally checked, but its large retained-history replay remains pending until timing generation finishes. The original 1% failure remains open.
+
+[Hosted 19188](hosted-19188-terminal-20260920.md) passes 1,919 development tests and 814 frontend tests. Full Python shards remain stopped before test execution by external replay and technical-receipt preparation; later source changes require their own checks.
 
 The [accepted-material representation audit](rc-accepted-material-summary-results-20260920.md)
 reconstructs all 165 retained training parents and their exact native snapshots,
