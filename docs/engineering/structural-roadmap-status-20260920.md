@@ -146,3 +146,19 @@ verified all nine training cases and yielded 99 labels. Its postprocessing namin
 error was corrected without rerunning numerical work; previous specific field
 names are explicitly superseded. Middle-geometry reference-parent range coverage
 improves, but actual learned proposals and net runtime benefit remain unproved.
+
+## Complete expanded runtime follow-up
+
+The [54-fold follow-up](rc-expanded-runtime-campaign-20260920.md) now demonstrates
+198 actual learned proposals, with all 216 full paths and 54 history comparisons
+passing. Both learned candidates remain slower overall (ratios 1.014294 and
+1.013226), so secant is retained. All middle-geometry case means are also slower;
+isolated one-iteration reductions do not recover the added path cost. No reserved
+evaluation was executed. The audit verifies complete group exclusion and all
+2,808 invocation costs without rerunning the experiment. This advances runtime
+evidence and proposal coverage, but does not close the learned-benefit goal.
+
+[Hosted 66da58e5](hosted-66-terminal-20260920.md) passed 1,673 Python development
+tests and 755 frontend tests. Full Python shards still stop at external evidence
+preparation. Newer revisions need their own receipts; all five roadmap goals
+remain active and independent verification requirements are unchanged.
