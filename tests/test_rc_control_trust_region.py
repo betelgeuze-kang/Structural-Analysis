@@ -68,3 +68,36 @@ def test_conflicting_strategy_rejected_before_output(tmp_path, options):
     with pytest.raises(ValueError, match='isolated binary64'):
         run(tmp_path, **options)
     assert not (tmp_path / 'study').exists()
+
+
+def test_large_reversal_completes_proposal_without_crediting_failed_reference(tmp_path):
+    from structural_analysis.benchmark import fiber_frame_design as design
+
+    model = design.apply_fiber_frame_section_changes(
+        load_neutral_json(Path('examples/public_rc_fiber_frame_cantilever.json')),
+        design.FiberFrameDesignCandidate('cheap', (
+            design.FiberFrameSectionChange(
+                'RC1', width_m=0.48, top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00025,
+            ),
+        )),
+    )
+    report = benchmark_rc_control_seed_paths(
+        model, BoundedRCFiberDirectControlRequest(
+            4, (-0.02, -0.04, 0.02), allow_reversals=True, maximum_reversals=2,
+            constant_nodal_loads=(('N2', -600., 0., 0.),),
+        ),
+        source_revision='a' * 40, output_directory=tmp_path / 'large',
+        trust_region_reversal=True,
+    )
+    assert report['arms']['proposal']['status'] == 'complete'
+    assert report['arms']['proposal']['accepted_target_count'] == 3
+    assert report['arms']['reference']['status'] == 'incomplete'
+    assert report['fresh_reference']['status'] == 'incomplete'
+    assert report['all_execution_work_reported']
+    assert not report['comparisons']['proposal']['full_history_pass']
+    assert not report['claims']['performance_improvement']
+    assert not report['claims']['independent_validation']
+    last = report['arms']['proposal']['entries'][-1]
+    assert last['numerical_proposal']['parent_unchanged']
+    assert last['invocations'][0]['committed']
+    assert last['invocations'][0]['work']['core_calls'] == 1

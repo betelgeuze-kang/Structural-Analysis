@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+The [opt-in full-path reversal strategy](rc-trust-region-path-results-20260921.md) now executes six comparisons / 24 paths from frozen b9e767cc9. The w48 cheap proposal completes both orderings with equal final checkpoints; all ordinary/fresh references and both w32 proposal cases remain incomplete. All 106 core calls, 672 Newton iterations and 362 additional optimizer assemblies are retained. Full-reference comparisons remain failed, so completion is not credited as speedup or independent validation. Unknown optimizer work now propagates to the whole-report work flag.
+
 The [bounded trust-region probe](rc-reversal-trust-results-20260921.md) accepts one of six starts under original Newton gates. The [fresh-prefix reproduction](rc-reversal-fresh-prefix-results-20260921.md) then reconstructs all three models twice from zero state: width 0.48 m / cheap completes the terminal +20 mm reversal twice with equal checkpoints; both width 0.32 m candidates still fail. This is a custom prefix-plus-terminal diagnostic, not public complete-path validation, production promotion, independent physics or speedup. All optimizer/native costs and unsuccessful attempts are retained.
 
 The [2,048-layer witness replay](planar-2048-witness-results-20260920.md) is complete: all 40 coarse targets replay exactly and the single 74 mm discrepancy is attributed to the sampling term in that witness. The original 1% screen remains failed; no uniform-convergence or physical-accuracy claim follows.
