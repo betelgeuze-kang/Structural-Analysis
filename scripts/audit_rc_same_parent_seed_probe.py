@@ -18,6 +18,7 @@ def audit(root):
     require(hashlib.sha256((prefix / 'inventory.json').read_bytes()).hexdigest() ==
             plan['retained_prefix_inventory_sha256'], 'prefix inventory')
     prefix_index = {r['path']: r for r in read(prefix / 'inventory.json')['files']}
+    prefix_revision = read(prefix / 'study/plan.json')['source_revision']
     metrics = ('core_calls', 'newton_iterations', 'linear_solves')
     total = dict.fromkeys(metrics, 0)
     rows = []
@@ -37,6 +38,10 @@ def audit(root):
             else:
                 path = root / name
             report = checked(path, 'report_hash')
+            require(report['source_revision'] == (prefix_revision if record['retained_from_prefix'] else plan['source_revision']),
+                    'execution source revision')
+            require(report['capture_material_state'] is True and report['material_capture_scope'] == 'proposal-only',
+                    'proposal state-capture cost retained')
             require(report['report_hash'] == record['report_hash'] and
                     report['proposal_identity'] == declaration['policy_hash'], 'report and policy binding')
             require(report['initial_parent_hash'] == declaration['parent_hash'] and
@@ -60,7 +65,7 @@ def audit(root):
                     for metric in metrics:
                         total[metric] += invocation['work'][metric]
                         arm_work[name][metric] += invocation['work'][metric]
-            passed = complete and all(c['full_history_pass'] for c in report['comparisons'].values())
+            passed = complete and all(c['step_response_pass'] for c in report['comparisons'].values())
             repeats.append({'repetition': repeat, 'comparison_pass': passed,
                 'decision': report['arms']['proposal']['entries'][0]['proposal_decision'],
                 'path_time_ratio': report['arms']['proposal']['wall_ns'] / report['arms']['secant']['wall_ns'] if passed else None,
@@ -68,6 +73,7 @@ def audit(root):
         valid = all(r['comparison_pass'] for r in repeats)
         rows.append({**declaration, 'repetitions': repeats, 'all_comparisons_pass': valid,
                      'mean_path_time_ratio': mean(r['path_time_ratio'] for r in repeats) if valid else None})
+    require(total['core_calls'] <= plan['maximum_core_calls'], 'declared core-call budget')
     return {'source_revision': plan['source_revision'], 'pairs': rows, 'report_count': 198,
         'retained_report_count': 2, 'new_report_count': 196, 'all_report_work': total,
         'passed_comparisons': sum(r['comparison_pass'] for row in rows for r in row['repetitions']),
