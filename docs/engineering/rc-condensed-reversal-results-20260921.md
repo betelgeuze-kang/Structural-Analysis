@@ -1,0 +1,7 @@
+# Exact-control reduction does not resolve the reversal
+
+All six predeclared condensed starts fail the original native Newton acceptance, including the w48 cheap parent-start case that succeeded under the earlier augmented TRF method. This is a negative diagnostic, not a production replacement. It contradicts the proposed explanation that the tested failures are resolved merely by exactly enforcing the control equation and eliminating its proportional load factor.
+
+The six optimizations perform 370 full residual/tangent observations, including reconstruction/direct checks. The projected residual equals the direct augmented residual on remaining equations exactly in all final checks; the weighted control residual is zero. This verifies the observed algebraic reduction at those candidates, not all tangents or global equivalence of optimization trajectories. Twelve subsequent native confirmations use twelve Newton iterations and all fail. Every accepted parent remains byte-identical. No intermediate material state was adopted.
+
+Optimizer wall time sums to 0.724011129 s and native confirmation time to 0.203540639 s. These single-run observations have no qualified speed ratio. The 38-file packet was inventoried and reread: SHA-256 `1d8da7a05f88ccc493825824a9bed3f9baed0cf9496aca7ad3ad0c131806fc3f`. The [summary](rc-condensed-reversal-results-20260921.summary.json) retains all six outcomes, native gates and scoped costs. The existing augmented proposal and all its original failures remain unchanged.
