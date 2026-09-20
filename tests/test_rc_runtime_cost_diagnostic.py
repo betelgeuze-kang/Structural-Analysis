@@ -6,6 +6,54 @@ from pathlib import Path
 from scripts.diagnose_expanded_rc_runtime_costs import decompose
 
 
+@pytest.mark.parametrize('proposal, relation', [
+    ((1, 3, 3), 'equal'), ((1, 2, 2), 'reduced'),
+    ((2, 4, 4), 'increased'), ((2, 2, 2), 'mixed'),
+])
+def test_nested_work_diagnostic_keeps_cost_vector_distinct_from_time(monkeypatch, proposal, relation):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('diagnose_rc_nested_work_benefit')
+    repeat = dict(comparison_pass=True, path_time_ratio=.5, work=dict(
+        secant=dict(zip(module.COUNTERS, (1, 3, 3))),
+        proposal=dict(zip(module.COUNTERS, proposal))))
+    assert module.work_relation(repeat)['relation'] == relation
+    repeat['path_time_ratio'] = 2.0
+    assert module.work_relation(repeat)['relation'] == relation
+    repeat['comparison_pass'] = False
+    assert module.work_relation(repeat) == dict(relation='unverified', delta=None)
+
+
+@pytest.mark.parametrize('bad', [True, -1, 1.0, None])
+def test_nested_work_diagnostic_rejects_unverified_counters(monkeypatch, bad):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('diagnose_rc_nested_work_benefit')
+    with pytest.raises(ValueError, match='exact solver-work counters'):
+        module.work_relation(dict(comparison_pass=True, work=dict(
+            secant=dict(core_calls=1, newton_iterations=3, linear_solves=3),
+            proposal=dict(core_calls=1, newton_iterations=bad, linear_solves=3))))
+
+
+def test_nested_work_diagnostic_keeps_repeat_variation_and_checks_original_labels(monkeypatch):
+    from copy import deepcopy
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('diagnose_rc_nested_work_benefit')
+    repeats = [dict(repetition=i, comparison_pass=True, decision='proposed',
+        path_time_ratio=.9, report_hash='original', work=dict(
+            secant=dict(core_calls=1, newton_iterations=3, linear_solves=3),
+            proposal=dict(core_calls=1, newton_iterations=3-i, linear_solves=3-i))) for i in range(3)]
+    pair = dict(outer_group_index=0, inner_group_index=1, source_sample_hash='sample',
+                case_id='case', parent_hash='parent', repetitions=repeats,
+                label_result=module.label_from_repetitions(repeats))
+    result = module.diagnose(dict(pairs=[pair]))
+    assert result['positive_time_labels_by_work_relation'] == {'varies_across_repeats': 1}
+    assert [r['relation'] for r in result['rows'][0]['repetitions']] == ['equal', 'reduced', 'reduced']
+    with pytest.raises(ValueError, match='unique original nested pair'):
+        module.diagnose(dict(pairs=[pair, deepcopy(pair)]))
+    pair['label_result']['label'] = False
+    with pytest.raises(ValueError, match='original elapsed-time label'):
+        module.diagnose(dict(pairs=[pair]))
+
+
 def _summary_snapshot(change=None):
     from dataclasses import asdict
     from structural_analysis.benchmark.rc_control_design import _bytes, _sha
