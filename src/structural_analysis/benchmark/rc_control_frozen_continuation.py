@@ -8,22 +8,25 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
 )
 from structural_analysis.solvers.nonlinear.assembly_work import VectorAssemblyWorkRecorder
 
+ADAPTIVE_FROZEN_CONTINUATION_IDENTITY = "experimental-frozen-parent-adaptive-failed-target-64.v1"
 FROZEN_CONTINUATION_TARGET_FAILURE_IDENTITY = "experimental-frozen-parent-failed-target-16.v1"
 FROZEN_CONTINUATION_FAILURE_IDENTITY = "experimental-frozen-parent-failed-reversal-16.v1"
 FROZEN_CONTINUATION_IDENTITY = "experimental-frozen-parent-reversal-16.v1"
 
 
 class FrozenParentContinuationProposal:
-    """Sixteen trial targets with one immutable original material parent."""
+    """Bounded coordinate trials with one immutable original material parent."""
 
     def __call__(self, context):
         raise RuntimeError("native parent and scoped work recording required")
 
-    def propose(self, problem, parent, request, context, *, artifact_sink, allow_nonreversal=False):
+    def propose(self, problem, parent, request, context, *, artifact_sink, allow_nonreversal=False, adaptive=False):
         if problem.coordinate_precision not in ("binary64", "twofold-increment"):
             raise ValueError("supported native continuation coordinates required")
         if type(allow_nonreversal) is not bool:
             raise ValueError("explicit boolean target continuation scope required")
+        if type(adaptive) is not bool:
+            raise ValueError("explicit boolean adaptive continuation required")
         previous = context.accepted_targets_m
         if not previous:
             raise ValueError("accepted origin required for continuation")
@@ -56,15 +59,29 @@ class FrozenParentContinuationProposal:
         before = parent.canonical_bytes()
         targets = [origin + (context.target_m - origin) * i / 16 for i in range(1, 17)]
         targets[-1] = context.target_m
+        maximum_calls = 64 if adaptive else 16
+        fraction, increment = 0., 1 / 16
         started = perf_counter_ns()
-        report.update(status="failed", maximum_native_calls=16, trial_targets_m=targets)
+        report.update(status="failed", maximum_native_calls=maximum_calls,
+                      trial_targets_m=[] if adaptive else targets)
+        if adaptive:
+            report.update(adaptive=True, minimum_fraction_increment=2**-20,
+                          maximum_fraction_increment=1 / 16)
         try:
-            for index, target in enumerate(targets):
+            for index in range(maximum_calls):
+                proposed = min(1., fraction + increment) if adaptive else (index + 1) / 16
+                target = (context.target_m if proposed == 1. else
+                          origin + (context.target_m - origin) * proposed) if adaptive else targets[index]
+                if adaptive:
+                    report["trial_targets_m"].append(target)
                 recorder = VectorAssemblyWorkRecorder(record_wall_time=True)
                 stage = {
                     "index": index, "target_m": target,
                     "parent_hash": parent.state_hash, "unknown_work": True,
                 }
+                if adaptive:
+                    stage.update(last_accepted_fraction=fraction, fraction=proposed,
+                                 fraction_increment=increment)
                 report["stages"].append(stage)
                 report["native_core_calls_attempted"] += 1
                 tick = perf_counter_ns()
@@ -86,7 +103,13 @@ class FrozenParentContinuationProposal:
                     report["known_linear_solves"] += stage["linear_solves"]
                     stage["artifact"] = artifact_sink(index, result.to_dict())
                     if not result.committed:
-                        report.update(status="blocked", reason="trial_stage_not_accepted")
+                        if adaptive:
+                            increment /= 2
+                            if increment >= 2**-20:
+                                continue
+                        report.update(status="blocked", reason=(
+                            "minimum_fraction_increment" if adaptive else "trial_stage_not_accepted"
+                        ))
                         break
                     # Only coordinates travel to the next trial. Always retain parent.
                     seed = tuple(
@@ -94,13 +117,22 @@ class FrozenParentContinuationProposal:
                         if problem.coordinate_precision == "twofold-increment"
                         else result.trial_solution.free_displacements_m
                     )
+                    if adaptive:
+                        fraction = proposed
+                        increment = min(1 / 16, 2 * increment)
+                        if fraction == 1.:
+                            report.update(status="returned", seed=list(seed))
+                            break
                 finally:
                     stage.update(wall_ns=perf_counter_ns() - tick,
                                  assembly_work=recorder.to_dict())
                     if parent.canonical_bytes() != before:
                         raise RuntimeError("continuation mutated original parent")
             else:
-                report.update(status="returned", seed=list(seed))
+                if adaptive:
+                    report.update(status="blocked", reason="native_trial_budget_exhausted")
+                else:
+                    report.update(status="returned", seed=list(seed))
         except Exception as exc:
             report.update(unknown_work=True, error_type=type(exc).__name__, error=str(exc))
         finally:

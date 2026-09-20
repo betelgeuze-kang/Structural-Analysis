@@ -249,13 +249,15 @@ def test_replay_rejects_changed_request_before_running(tmp_path, continuation_or
     assert not (tmp_path / 'replay').exists()
 
 
-def test_failure_only_strategy_does_no_trial_work_on_successful_native_paths(tmp_path, monkeypatch):
+@pytest.mark.parametrize("adaptive", [False, True])
+def test_failure_only_strategy_does_no_trial_work_on_successful_native_paths(tmp_path, monkeypatch, adaptive):
     import json
     from structural_analysis.benchmark.rc_control_frozen_continuation import FrozenParentContinuationProposal
 
     monkeypatch.setattr(FrozenParentContinuationProposal, 'propose',
                         lambda *a, **k: pytest.fail('successful ordinary solve must not trigger trials'))
-    report = run(tmp_path, frozen_parent_continuation=True, continuation_on_failure=True)
+    report = run(tmp_path, frozen_parent_continuation=True, continuation_on_failure=True,
+                 continuation_all_failed_targets=adaptive, continuation_adaptive=adaptive)
     assert all(c['full_history_pass'] for c in report['comparisons'].values())
     assert report['numerical_proposal_work']['native_core_calls_attempted'] == 0
     assert report['numerical_proposal_work']['known_newton_iterations'] == 0
@@ -312,7 +314,8 @@ def test_failed_reversal_recovery_stops_on_unknown_trial_without_retrying(tmp_pa
     assert report['arms']['proposal']['status'] == 'incomplete'
 
 
-def test_parent_step_budget_includes_internal_continuation_calls(tmp_path, continuation_original):
+@pytest.mark.parametrize("adaptive", [False, True])
+def test_parent_step_budget_includes_internal_continuation_calls(tmp_path, continuation_original, adaptive):
     import json
     from structural_analysis.benchmark.rc_control_seed_runtime import RCControlSeedContext
     from structural_analysis.benchmark.rc_control_design import _bytes
@@ -326,9 +329,10 @@ def test_parent_step_budget_includes_internal_continuation_calls(tmp_path, conti
     report = benchmark_rc_control_seed_paths(
         model, request, source_revision='a' * 40, output_directory=tmp_path / 'parent',
         frozen_parent_continuation=True, continuation_on_failure=True,
+        continuation_all_failed_targets=adaptive, continuation_adaptive=adaptive,
         parent_checkpoint_bytes=_bytes(stage['parent_checkpoint']), accepted_context=context,
     )
-    assert report['maximum_numerical_core_calls'] == 22
+    assert report['maximum_numerical_core_calls'] == (70 if adaptive else 22)
     arms = [*report['arms'].values(), report['fresh_reference']]
     ordinary = sum(i['work']['core_calls'] for a in arms for e in a['entries'] for i in e['invocations'])
     assert ordinary + report['numerical_proposal_work']['native_core_calls_attempted'] <= report['maximum_numerical_core_calls']
@@ -476,3 +480,88 @@ def test_continuation_replay_rejects_incomplete_retained_profile_before_output(t
             replay_source_revision='b' * 40,
         )
     assert not output.exists()
+
+
+@pytest.mark.parametrize('retained', [False, True])
+def test_adaptive_failed_target_completes_short_40mm_path_and_replays(tmp_path, retained):
+    from dataclasses import replace
+    from structural_analysis.benchmark.rc_control_learning import _arithmetic_kwargs, RETAINED_LEARNING_ARITHMETIC_PROFILE
+    from structural_analysis.benchmark.rc_control_continuation_replay import replay_rc_frozen_continuation_study
+
+    model = load_neutral_json(Path('examples/public_rc_fiber_frame_l_frame_material_history.json'))
+    request = BoundedRCFiberDirectControlRequest(
+        7, (-.02, -.04, .02), allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(('N3', 0., -25., 0.),),
+    )
+    request = replace(request, solver_config=replace(
+        request.solver_config, newton=replace(request.solver_config.newton, terminal_polishing=True),
+    ))
+    options = _arithmetic_kwargs(RETAINED_LEARNING_ARITHMETIC_PROFILE) if retained else {}
+    report = benchmark_rc_control_seed_paths(
+        model, request, source_revision='a' * 40, output_directory=tmp_path / 'adaptive',
+        frozen_parent_continuation=True, continuation_on_failure=True,
+        continuation_all_failed_targets=True, continuation_adaptive=True, **options,
+    )
+    proposal = report['arms']['proposal']
+    assert proposal['status'] == 'complete' and proposal['accepted_target_count'] == 3
+    assert report['all_execution_work_reported']
+    assert not report['comparisons']['proposal']['full_history_pass']
+    assert report['numerical_proposal']['maximum_additional_native_calls'] == 192
+    first = proposal['entries'][0]
+    assert not first['invocations'][0]['committed'] and first['invocations'][1]['committed']
+    stages = first['numerical_proposal']['stages']
+    assert len(stages) == 18 and not stages[7]['committed'] and stages[8]['committed']
+    assert stages[8]['fraction_increment'] == stages[7]['fraction_increment'] / 2
+    assert stages[8]['last_accepted_fraction'] == stages[7]['last_accepted_fraction']
+    replay = replay_rc_frozen_continuation_study(
+        tmp_path / 'adaptive', model, request, output_directory=tmp_path / 'replay',
+        replay_source_revision='b' * 40,
+    )
+    assert replay['numerical_reproduction_pass'] and not replay['fresh_reference_comparisons_pass']
+
+
+@pytest.mark.parametrize('adaptive,all_targets', [(True, False), (1, True)])
+def test_adaptive_scope_rejected_before_output(tmp_path, adaptive, all_targets):
+    with pytest.raises(ValueError, match='adaptive continuation'):
+        run(tmp_path, frozen_parent_continuation=True, continuation_on_failure=True,
+            continuation_all_failed_targets=all_targets, continuation_adaptive=adaptive)
+    assert not (tmp_path / 'study').exists()
+
+
+@pytest.mark.parametrize('outcome', ['minimum', 'budget', 'unknown'])
+def test_adaptive_scheduler_stops_with_no_seed_at_limits_or_unknown_work(monkeypatch, outcome):
+    """Synthetic control-flow test; these fake solves are not physical evidence."""
+    from types import SimpleNamespace as NS
+    from structural_analysis.benchmark import rc_control_frozen_continuation as module
+
+    parent = NS(state_hash='fixed', global_displacements=[0.], canonical_bytes=lambda: b'fixed')
+    adapter = NS(initial_free_displacements_m=lambda: (0., 0.), absolute_coordinates=lambda v: (v, (0., 0.)))
+    monkeypatch.setattr(module, 'StatefulFiberFrame2DDisplacementControlStepAdapter', lambda *a: adapter)
+    calls = []
+
+    def fake_solve(problem, actual_parent, **options):
+        assert actual_parent is parent
+        calls.append(options['target_control_displacement_m'])
+        if outcome == 'unknown' and len(calls) == 2:
+            raise RuntimeError('injected unreported trial')
+        committed = outcome == 'budget' and len(calls) > 10 and len(calls) % 2 == 1
+        metrics = {'terminal_reason': 'synthetic', 'relative_residual': 0. if committed else 1.,
+                   'newton_iteration_count': 0, 'linear_solve_count': 0}
+        return NS(committed=committed, trial_solution=NS(metrics=metrics, free_displacements_m=(0., 0.)),
+                  to_dict=lambda: {'synthetic': True})
+
+    monkeypatch.setattr(module, 'solve_stateful_fiber_frame2d_displacement_control_step', fake_solve)
+    result = module.FrozenParentContinuationProposal().propose(
+        NS(coordinate_precision='binary64'), parent,
+        NS(control_global_dof=0, solver_config=NS(control_tolerance_m=1e-10)),
+        NS(accepted_targets_m=(0.,), target_m=1.),
+        artifact_sink=lambda i, payload: {'index': i}, allow_nonreversal=True, adaptive=True,
+    )
+    assert result['seed'] is None and result['parent_unchanged']
+    assert result['native_core_calls_attempted'] == len(calls) <= 64
+    if outcome == 'unknown':
+        assert result['unknown_work'] and len(calls) == 2
+    else:
+        assert not result['unknown_work'] and result['status'] == 'blocked'
+        assert result['reason'] == ('minimum_fraction_increment' if outcome == 'minimum' else 'native_trial_budget_exhausted')
+        assert len(calls) == (17 if outcome == 'minimum' else 64)
