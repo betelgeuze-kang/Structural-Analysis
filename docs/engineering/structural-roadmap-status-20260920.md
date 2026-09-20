@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Measured audit cost](rc-adaptive-audit-cost-20260921.md): three fresh processes at source 2588 reproduce identical 128-path audit results in 11.915–12.129 seconds. Original 3,492 JSON files remain unchanged. This isolates cached-read validation cost; source preparation, transport and browser review remain outside the measurement, and no full user-flow speedup is claimed.
+
 [Reusable campaign audit](rc-adaptive-campaign-audit-20260921.md) now validates original target histories, native work, parent/response bindings and comparison gates without rerunning solves. It reproduces all prior 128-path case outcomes and counts, including 70 complete paths / 802 calls / 4,702 Newton iterations and linear solves. Rehashed contradictory completion/work and missing/ambiguous metadata are rejected; original clocks and independent physics remain unauthenticated. Forty focused audit/runner/workflow tests pass. [Hosted predecessor 932](hosted-932-terminal-20260921.md) passes 2,017 development / 814 frontend tests, while full CI remains failed.
 
 [Reusable adaptive breadth campaign](rc-adaptive-breadth-results-20260921.md) runs eight conditions / 128 paths on two L-frame geometries, with 70 complete and all 802 native calls / 4,702 Newton iterations known. Adaptive recovery adds short/40 mm completion and preserves the other completed cases, but short/80 mm still fails at the minimum increment after accepting only its first target. Near-one qualified ratios occur only when recovery is never invoked; no learned/adaptive speed gain is claimed. The repository runner and CI orchestration tests make the campaign repeatable.

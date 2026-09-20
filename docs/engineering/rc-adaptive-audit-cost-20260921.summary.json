@@ -1,0 +1,40 @@
+{
+  "source_revision": "2588eeefa5b85c0e2b72dcacb5585d7da27d4106",
+  "original_campaign": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-adaptive-breadth-r0_ukbrk/study",
+  "python_version": "3.10.12",
+  "runs": [
+    {
+      "repeat": 0,
+      "returncode": 0,
+      "parent_wall_ns": 11914744106,
+      "child_user_seconds": 11.653735000000001,
+      "child_system_seconds": 0.25983999999999996
+    },
+    {
+      "repeat": 1,
+      "returncode": 0,
+      "parent_wall_ns": 12015187670,
+      "child_user_seconds": 11.775102,
+      "child_system_seconds": 0.23587099999999994
+    },
+    {
+      "repeat": 2,
+      "returncode": 0,
+      "parent_wall_ns": 12129163167,
+      "child_user_seconds": 11.831927999999998,
+      "child_system_seconds": 0.29578400000000005
+    }
+  ],
+  "original_json_files": 3492,
+  "original_json_bytes": 233927075,
+  "original_json_unchanged": true,
+  "audit_outputs_exact": true,
+  "cold_cache_controlled": false,
+  "numerical_reexecution_performed": false,
+  "includes_interpreter_import_parse_validation_output": true,
+  "includes_source_snapshot_or_inventory": false,
+  "includes_browser_or_solver": false,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-audit-cost-hcshmvnm",
+  "inventory_sha256": "cc406aeb8be40b38e97ebbd1bcba455183f6ecf758a19f848c51baa0a2471634",
+  "inventory_files": 724
+}
