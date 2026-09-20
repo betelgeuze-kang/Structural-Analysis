@@ -979,7 +979,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     assert "--junitxml=development-contracts.xml" in tests
     assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
     selected = {x for x in tests if x.startswith("tests/")}
-    assert len(selected) == 67
+    assert len(selected) == 68
     assert all((ROOT / path).is_file() for path in selected)
     assert {
         "tests/test_stateful_fiber_section.py",
@@ -1002,6 +1002,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "tests/test_planar_steel_refinement_witness_audit.py",
         "tests/test_planar_concrete_localization_audit.py",
         "tests/test_planar_1024_witness_probe.py",
+        "tests/test_planar_2048_witness_probe.py",
         "tests/test_planar_path_artifact_writer.py",
         "tests/test_planar_path_artifact_reader.py",
         "tests/test_planar_material_activity.py",
