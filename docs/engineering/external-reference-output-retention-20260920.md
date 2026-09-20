@@ -77,3 +77,14 @@ binds the runtime binary, source and original packet. This follows the earlier
 OpenSees-only observation; its recorded zero CalculiX executions remains correct
 for that earlier packet. No current-product reanalysis or complete technical
 receipt was generated, and the existing OpenSees comparison failures remain.
+
+## Development CI registration
+
+The eight capture tests initially lived in the full external-receipt test module,
+which the development lane did not select. They now live in
+`tests/test_external_reference_output_capture.py`, with no stored-receipt reads,
+and are explicitly registered in that lane. All original full receipt tests
+remain in their original module and the full gate is unchanged. The selection
+contract requires the new module (70 development modules). Capture, pinned-runtime
+and selection checks pass together: 36 tests in 5.20 seconds. This closes a test
+execution omission, not external numerical or independent acceptance.
