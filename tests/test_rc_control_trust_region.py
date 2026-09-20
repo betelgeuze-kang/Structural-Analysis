@@ -157,3 +157,86 @@ def test_continuation_interruption_retains_known_stages_and_unknown_attempt(tmp_
     stages = last['numerical_proposal']['stages']
     assert not stages[0]['unknown_work'] and stages[1]['unknown_work']
     assert stages[0]['artifact']
+
+
+@pytest.fixture(scope='module')
+def continuation_original(tmp_path_factory):
+    from structural_analysis.benchmark import fiber_frame_design as design
+
+    root = tmp_path_factory.mktemp('continuation-original')
+    model = design.apply_fiber_frame_section_changes(
+        load_neutral_json(Path('examples/public_rc_fiber_frame_cantilever.json')),
+        design.FiberFrameDesignCandidate('cheap', (design.FiberFrameSectionChange(
+            'RC1', width_m=0.32, top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00025,
+        ),)),
+    )
+    request = BoundedRCFiberDirectControlRequest(
+        4, (-.02, -.04, .02), allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(('N2', -600., 0., 0.),),
+    )
+    benchmark_rc_control_seed_paths(
+        model, request, source_revision='a' * 40, output_directory=root / 'study',
+        frozen_parent_continuation=True, record_assembly_work=True, record_assembly_timing=True,
+    )
+    return root / 'study', model, request
+
+
+def test_fresh_original_replay_counts_all_trials_without_promoting_reference(tmp_path, continuation_original):
+    from structural_analysis.benchmark.rc_control_continuation_replay import replay_rc_frozen_continuation_study
+
+    study, model, request = continuation_original
+    result = replay_rc_frozen_continuation_study(
+        study, model, request, output_directory=tmp_path / 'replay', replay_source_revision='b' * 40,
+    )
+    assert result['numerical_reproduction_pass'] and not result['mismatched_artifacts']
+    assert result['fresh_native_calls'] == 33 and result['fresh_known_newton_iterations'] > 33
+    assert not result['fresh_reference_comparisons_pass']
+    assert not result['independent_physical_validation']
+    assert not result['original_execution_clocks_authenticated']
+    assert result['loaded_source_sha256']
+
+
+@pytest.mark.parametrize('mutation', ['stage', 'work'])
+def test_replay_rejects_rehashed_numerical_or_work_falsification(
+    tmp_path, continuation_original, mutation,
+):
+    import json
+    import shutil
+    from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+    from structural_analysis.benchmark.rc_control_continuation_replay import replay_rc_frozen_continuation_study
+
+    original, model, request = continuation_original
+    study = tmp_path / 'modified'
+    shutil.copytree(original, study)
+    path = study / ('proposal/002-continuation-000.json' if mutation == 'stage' else 'comparison.json')
+    value = json.loads(path.read_bytes())
+    if mutation == 'stage':
+        value['trial_solution']['metrics']['relative_residual'] = 0.5
+        key = 'step_hash'
+    else:
+        value['numerical_proposal_work']['native_core_calls_attempted'] = 0
+        key = 'report_hash'
+    value.pop(key)
+    from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+    value[key] = canonical_hash(value) if key == 'step_hash' else _sha(_bytes(value))
+    path.write_bytes(_bytes(value))
+    result = replay_rc_frozen_continuation_study(
+        study, model, request, output_directory=tmp_path / 'replay', replay_source_revision='b' * 40,
+    )
+    assert not result['numerical_reproduction_pass']
+    assert path.relative_to(study).as_posix() in result['mismatched_artifacts']
+    assert result['fresh_native_calls'] == 33
+
+
+def test_replay_rejects_changed_request_before_running(tmp_path, continuation_original, monkeypatch):
+    from dataclasses import replace
+    from structural_analysis.benchmark import rc_control_continuation_replay as replay
+
+    original, model, request = continuation_original
+    monkeypatch.setattr(replay, 'benchmark_rc_control_seed_paths', lambda *a, **k: pytest.fail('must preflight'))
+    with pytest.raises(ValueError, match='matching constant-load'):
+        replay.replay_rc_frozen_continuation_study(
+            original, model, replace(request, targets_m=(-.02, -.04, .01)),
+            output_directory=tmp_path / 'replay', replay_source_revision='b' * 40,
+        )
+    assert not (tmp_path / 'replay').exists()

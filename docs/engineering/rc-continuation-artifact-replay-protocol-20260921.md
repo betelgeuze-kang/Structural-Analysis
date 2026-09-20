@@ -1,0 +1,11 @@
+# Fresh original-artifact replay for experimental continuation
+
+`replay_rc_frozen_continuation_study` validates the supplied canonical model/request against an original constant-load binary64 continuation study. It verifies report/path/native-step self hashes, rejects unexpected arithmetic profiles, binds assembly summaries to path hashes and requires a separate output directory. JSON inputs have bounded size/count and use the existing strict duplicate-key parser; nonlocal symlink targets are rejected.
+
+The replay executes every original arm, preload, failed fallback, numerical continuation stage and fresh reference again from model input. It compares the complete JSON filename set and all numerical/artifact/work content. Native step hashes remain compared; report/path hashes and execution clocks are separately handled because fresh timings differ. Original clocks are explicitly not authenticated by numerical replay. Recorded source revisions remain attestations; the receipt fingerprints actual loaded structural-analysis Python modules and records runtime versions.
+
+The source hash distinction matters: native steps use canonical_hash, whereas benchmark reports and paths use their byte serialization hash. An initial four-test failure exposed that mismatch; the verifier now applies the correct existing hash method per artifact.
+
+Fourteen focused strategy/replay tests pass, including exact fresh reproduction of the actual w32 cheap failure case, changed canonical request rejected before execution, and rehashed intermediate numerical/work falsifications rejected after replay. Passing reproduction does not convert failed ordinary-reference comparison into a pass or establish independent physics.
+
+Freeze the committed implementation before replaying all six studies in packet 9583a3fa9292ea5f9c5746cae2d126cdccb260a729c3c6385669657a7042b104. Authenticate its original files before execution. Preserve six separate replay directories, all new solver costs and every mismatch; do not overwrite original studies. Expected counts/outcomes must be checked from actual records, not assigned from prior totals. No new model selection, learned fit or production qualification is performed.
