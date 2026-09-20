@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Portal recovery admission](rc-portal-recovery-admission-20260921.md) confirms that the current serial-chain RC direct-control compiler rejects two fixed supports before numerical arms. Existing public planar load-control results do not supply the requested constant-axial cyclic path; the proposed 48-path portal study did not execute. Broader topology integration remains open.
+
 [Measured full-campaign rerun](rc-measured-adaptive-campaign-20260921.md) at source 0f713 reproduces all 128 original histories/checkpoints and 70 complete paths. It separately measures 116.338 s enclosing runner and 12.116 s enclosing audit, with nested comparison costs retained. These are observed component costs, not a full user-flow or qualified speedup claim.
 
 [Scoped audit timing](rc-adaptive-campaign-audit-20260921.md) now optionally writes wall/CPU cost receipts bound to an unchanged audit hash. Twenty-three audit/runner tests pass, and an actual frozen-source 128-path audit matches the earlier result exactly. Startup, transport and browser costs remain outside this scope.
