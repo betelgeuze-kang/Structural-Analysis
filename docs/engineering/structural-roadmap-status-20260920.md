@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+The [failure-only continuation comparison](rc-failure-only-continuation-results-20260921.md) runs twenty comparisons / eighty paths across five model/history combinations. All proposal histories match between modes. On two ordinary-solvable 20 mm cases it removes all 32 repeated internal proposal calls and costs 0.374–0.379 times upfront continuation; on three 40 mm cases it costs 1.215–1.329 times upfront due to the preserved failed first attempt. These are internal-strategy comparisons, not learned or independently qualified acceleration. All 602 native calls / 2,698 Newton iterations are retained.
+
 [Hosted e67](hosted-e67-terminal-20260921.md) passes 1,986 development and 814 frontend tests; full-suite preparation remains failed. It does not qualify later continuation/replay code.
 
 The [fresh artifact replayer](rc-continuation-artifact-replay-results-20260921.md) now reproduces all six continuation studies / 756 original JSON artifacts with explicit additional cost (198 native calls / 898 Newton iterations). Native/work content and loaded source fingerprints are checked; clocks remain separately measured. Rehashed numerical/work tampering tests fail as intended. Experimental replay passes while ordinary-reference comparisons remain failed; this does not extend public product eligibility or independent physical authority.
