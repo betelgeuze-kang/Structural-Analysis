@@ -39,46 +39,57 @@ def write_json(path, value):
         stream.write('\n')
 
 
-def write_path_artifacts(root, metadata, steps):
-    """Preserve the original full JSON bytes while materializing one step at a time.
+def iter_path_json(metadata, steps):
+    """Yield the original pretty-printed path bytes without retaining all steps."""
+    require(type(metadata.get('steps')) is list and not metadata['steps'],
+            'empty steps placeholder required')
+    encoder = json.JSONEncoder(indent=2, allow_nan=False)
+    yield '{'
+    for index, (key, value) in enumerate(metadata.items()):
+        require(type(key) is str, 'string metadata key required')
+        yield ',' if index else ''
+        yield '\n  ' + encoder.encode(key) + ': '
+        if key == 'steps':
+            yield '['
+            count = 0
+            for step in steps:
+                yield ',' if count else ''
+                yield '\n    '
+                for chunk in encoder.iterencode(step):
+                    yield chunk.replace('\n', '\n    ')
+                count += 1
+                del step
+            if count:
+                yield '\n  '
+            yield ']'
+        else:
+            for chunk in encoder.iterencode(value):
+                yield chunk.replace('\n', '\n  ')
+    yield '\n}\n'
 
-    Metadata is the original ordered dictionary with an empty steps placeholder.
-    The index is published only after all full/step files finish successfully.
-    """
+
+def write_path_artifacts(root, metadata, steps):
+    """Preserve full JSON bytes and publish the index only after all files finish."""
     require(type(metadata.get('steps')) is list and not metadata['steps'],
             'empty steps placeholder required')
     step_root = root / 'steps'
     step_root.mkdir()
-    encoder = json.JSONEncoder(indent=2, allow_nan=False)
     entries = []
+
+    def recorded_steps():
+        for step in steps:
+            step_file = step_root / f'{len(entries):04d}.json'
+            write_json(step_file, step)
+            entries.append({'path': str(step_file.relative_to(root)),
+                            'bytes': step_file.stat().st_size,
+                            'sha256': file_sha256(step_file)})
+            yield step
+            del step
+
     full = root / 'repeat-0.json'
     with full.open('x', encoding='utf-8', newline='\n') as stream:
-        stream.write('{')
-        for index, (key, value) in enumerate(metadata.items()):
-            require(type(key) is str, 'string metadata key required')
-            stream.write(',' if index else '')
-            stream.write('\n  ' + encoder.encode(key) + ': ')
-            if key == 'steps':
-                stream.write('[')
-                for step in steps:
-                    ordinal = len(entries)
-                    step_file = step_root / f'{ordinal:04d}.json'
-                    write_json(step_file, step)
-                    entries.append({'path': str(step_file.relative_to(root)),
-                                    'bytes': step_file.stat().st_size,
-                                    'sha256': file_sha256(step_file)})
-                    stream.write(',' if ordinal else '')
-                    stream.write('\n    ')
-                    for chunk in encoder.iterencode(step):
-                        stream.write(chunk.replace('\n', '\n    '))
-                    del step
-                if entries:
-                    stream.write('\n  ')
-                stream.write(']')
-            else:
-                for chunk in encoder.iterencode(value):
-                    stream.write(chunk.replace('\n', '\n  '))
-        stream.write('\n}\n')
+        for chunk in iter_path_json(metadata, recorded_steps()):
+            stream.write(chunk)
     meta_file = root / 'path-metadata.json'
     write_json(meta_file, metadata)
     receipt = {'schema': 'fixed-planar-path-file-index.v1',
