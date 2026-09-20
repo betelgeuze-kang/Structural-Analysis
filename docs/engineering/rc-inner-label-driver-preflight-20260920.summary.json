@@ -1,0 +1,37 @@
+{
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-inner-label-preflight-uvedjrqf",
+  "inventory_sha256": "9794a13dcc3a7030229449add3c75b6e6d7d22a6147cbb91cce501cbfa681146",
+  "source_revision": "c38a9cdf74d9874056cc9a18add36c906a3ed47d",
+  "verified_files": 1199,
+  "verified_bytes": 128294853,
+  "execution": {
+    "results": [
+      {
+        "name": "new-preflight",
+        "exit_code": 0,
+        "wall_ns": 7821964493
+      },
+      {
+        "name": "original-audit",
+        "exit_code": 0,
+        "wall_ns": 10021605081
+      }
+    ],
+    "new_fits": 0,
+    "new_solves": 0,
+    "original_audit_exact": true
+  },
+  "preflight": {
+    "pairs": 990,
+    "comparisons": 2970,
+    "single_target_paths": 11880,
+    "new_fits": 0,
+    "new_solves": 0,
+    "reserved_evaluations": 0
+  },
+  "original_audit_inventory_sha256": "35fd7ed0e4552eb1a093bf1394e8bdcf5fbe694464761085c194a8f8ee88b4fb",
+  "original_audit_reproduced_exactly": true,
+  "existing_report_count": 1980,
+  "new_fits": 0,
+  "new_solves": 0
+}
