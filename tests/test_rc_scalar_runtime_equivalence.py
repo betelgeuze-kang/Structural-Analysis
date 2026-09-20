@@ -35,3 +35,31 @@ def test_fold_equivalence_rejects_receipt_mutation_or_roster_change(tmp_path, mo
     else:
         with pytest.raises(ValueError, match='changed'):
             module.compare_fold(old, new, index)
+
+
+@pytest.mark.parametrize('field', [
+    'model_checksum', 'compiled_problem_contract_hash', 'request',
+    'absolute_tolerance', 'relative_tolerance', 'coordinate_precision',
+    'fiber_strain_evaluation', 'force_accumulation', 'material_arithmetic',
+    'native_checkpoint_coordinate_representation', 'strain_evaluation',
+    'terminal_coordinate_precision', 'terminal_refinement_limit',
+])
+def test_equivalence_rejects_changed_physics_or_acceptance(tmp_path, monkeypatch, field):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_scalar_runtime_equivalence')
+    fields = (
+        'model_checksum', 'compiled_problem_contract_hash', 'request',
+        'absolute_tolerance', 'relative_tolerance', 'coordinate_precision',
+        'fiber_strain_evaluation', 'force_accumulation', 'material_arithmetic',
+        'native_checkpoint_coordinate_representation', 'strain_evaluation',
+        'terminal_coordinate_precision', 'terminal_refinement_limit',
+    )
+    original = dict.fromkeys(fields, 'original')
+    changed = dict(original, source_revision='new', whole_study_wall_ns=99)
+    module.require_same_problem_and_numerics(original, changed)
+    changed[field] = 'different'
+    with pytest.raises(ValueError, match='problem or numerical contract changed'):
+        module.require_same_problem_and_numerics(original, changed)
+    del changed[field]
+    with pytest.raises(ValueError, match='problem or numerical contract changed'):
+        module.require_same_problem_and_numerics(original, changed)

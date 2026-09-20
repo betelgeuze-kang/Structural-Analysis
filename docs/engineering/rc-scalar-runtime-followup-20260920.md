@@ -53,3 +53,10 @@ receipts and missing/extra rosters. The helper has also passed on the first
 completed real fold: 52 step files, four preload responses and 48 contexts match
 exactly. Nine completed fold receipts were observed while the original process
 remained live. This is a partial check, not the final 90-fold audit or selection.
+
+The equivalence audit additionally pins each original comparison receipt,
+requires both result-to-report hash bindings, and checks the same model,
+compiled problem, complete request, original tolerances and arithmetic fields.
+Source revision and timing may differ; physical/numerical contracts may not.
+Nineteen focused tests now pass, including each changed or missing contract
+field. The first real old/new comparison also passes this contract check.

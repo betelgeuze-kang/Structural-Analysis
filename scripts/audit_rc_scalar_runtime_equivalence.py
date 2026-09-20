@@ -39,6 +39,21 @@ def compare_fold(old, new, index):
     return counts
 
 
+def require_same_problem_and_numerics(old_report, new_report):
+    # Source revision and timings intentionally differ. The physical request,
+    # compiled contract, tolerances and arithmetic profile must not differ.
+    for field in (
+        'model_checksum', 'compiled_problem_contract_hash', 'request',
+        'absolute_tolerance', 'relative_tolerance', 'coordinate_precision',
+        'fiber_strain_evaluation', 'force_accumulation', 'material_arithmetic',
+        'native_checkpoint_coordinate_representation', 'strain_evaluation',
+        'terminal_coordinate_precision', 'terminal_refinement_limit',
+    ):
+        require(field in old_report and field in new_report and
+                old_report[field] == new_report[field],
+                'paired problem or numerical contract changed: ' + field)
+
+
 def audit(old, new):
     raw = (old / 'inventory.json').read_bytes()
     require(hashlib.sha256(raw).hexdigest() == OLD_INVENTORY, 'original inventory changed')
@@ -60,6 +75,16 @@ def audit(old, new):
         a, b = (r[number] for r in outcomes)
         for field in ('withheld_training_case', 'ridge', 'repetition_index', 'policy_hash'):
             require(a[field] == b[field], 'paired fold identity changed')
+        relative = f'study/selection/fold-{number:04d}/comparison.json'
+        original = (old / relative).read_bytes()
+        receipt = index[relative]
+        require(len(original) == receipt['byte_length'] and
+                hashlib.sha256(original).hexdigest() == receipt['sha256'],
+                'original comparison receipt changed')
+        reports = [checked(root / relative, 'report_hash') for root in (old, new)]
+        require(reports[0]['report_hash'] == a['report_hash'] and
+                reports[1]['report_hash'] == b['report_hash'], 'fold report binding changed')
+        require_same_problem_and_numerics(*reports)
         counts = compare_fold(old / f'study/selection/fold-{number:04d}',
                               new / f'study/selection/fold-{number:04d}', index)
         for key, value in counts.items():
