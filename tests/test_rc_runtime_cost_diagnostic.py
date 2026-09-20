@@ -643,6 +643,100 @@ def test_nested_label_audit_rejects_cross_campaign_metadata_before_parent_reads(
         module.audit(tmp_path)
 
 
+def validation_rows_fixture(monkeypatch):
+    planner, _, _ = inner_validation_fixture(monkeypatch)
+    groups = [[letter] for letter in 'abcde']
+    samples = [dict(sample_hash=f'sha256:{i:064x}', case_id=group[0], split='train')
+               for i, group in enumerate(groups)]
+    plan = planner.inner_validation_plan(groups, samples)
+    original = planner.nested_plan(groups, samples)
+    module = importlib.import_module('rc_gate_validation_rows')
+    policies = [{i: f'sha256:{offset+i:064x}' for i in range(10)} for offset in (100, 200)]
+    audits = []
+    for tasks, hashes, retained in [(plan['unique_new_label_tasks'], policies[0], False),
+                                     (original['label_tasks'], policies[1], True)]:
+        rows = []
+        for task in tasks:
+            sample = task['label_source_sample_hashes'][0]
+            repeats = nested_repeats()
+            for repeat in repeats:
+                repeat['report_hash'] = 'sha256:' + 'a' * 64
+            identity = ({axis: task[axis] for axis in ('outer_group_index', 'inner_group_index')}
+                        if retained else {axis: task[axis] for axis in ('task_index', 'label_group_index')})
+            rows.append(dict(**identity, source_sample_hash=sample, case_id=task['label_case_ids'][0],
+                parent_hash=sample, seed_fit_index=task['seed_fit_index'], policy_hash=hashes[task['seed_fit_index']],
+                repetitions=repeats, label_result=module.label_from_repetitions(repeats),
+                guard_features=dict(profile=module.PROFILE, feature_names=['x'], values=[float(int(sample[-4:], 16))])))
+        audits.append(dict(pairs=rows))
+    return module, audits, plan, dict(new_policy_hashes=policies[0], old_policy_hashes=policies[1])
+
+
+def test_gate_validation_rows_keep_validation_out_of_fit_inputs(monkeypatch):
+    module, audits, plan, hashes = validation_rows_fixture(monkeypatch)
+    result = module.assemble_fold(*audits, plan, 0, 1, **hashes)
+    training = result['training']
+    assert {row['case_id'] for row in training['training_rows']} == {'c', 'd', 'e'}
+    assert [row['case_id'] for row in result['validation']['rows']] == ['b']
+    assert training['excluded_case_ids'] == ['a', 'b']
+    cost = importlib.import_module('rc_cost_margin_gate')
+    gate, _ = cost.fit_cost_gate(training)
+    for audit in audits:
+        for row in audit['pairs']:
+            if row['case_id'] == 'b':
+                row['guard_features']['values'] = [9999.]
+    for row in audits[1]['pairs']:
+        if row['case_id'] != 'b':
+            continue
+        for repeat in row['repetitions']:
+            repeat['path_time_ratio'] = 1.2
+        row['label_result'] = module.label_from_repetitions(row['repetitions'])
+    changed = module.assemble_fold(*audits, plan, 0, 1, **hashes)
+    assert changed['training'] == training
+    other, _ = cost.fit_cost_gate(changed['training'])
+    assert gate.policy_hash == other.policy_hash
+
+
+def test_gate_validation_unknown_rows_remain_in_validation_denominator(monkeypatch):
+    module, audits, plan, hashes = validation_rows_fixture(monkeypatch)
+    for audit in audits:
+        for row in audit['pairs']:
+            row['repetitions'][0]['comparison_pass'] = False
+            row['repetitions'][0]['path_time_ratio'] = None
+            row['label_result'] = module.label_from_repetitions(row['repetitions'])
+    result = module.assemble_fold(*audits, plan, 0, 1, **hashes)
+    assert not result['training']['training_rows'] and len(result['training']['unverified_rows']) == 3
+    assert result['validation']['unverified_count'] == result['validation']['declared_row_count'] == 1
+    assert result['validation']['rows'][0]['cost_target'] is None
+
+
+@pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'policy', 'seed', 'group', 'nonfinite', 'label', 'boolean', 'parent', 'features'])
+def test_gate_validation_rows_reject_incomplete_or_foreign_labels(monkeypatch, mutation):
+    module, audits, plan, hashes = validation_rows_fixture(monkeypatch)
+    row = audits[0]['pairs'][0]
+    if mutation == 'missing':
+        audits[0]['pairs'].pop()
+    elif mutation == 'duplicate':
+        audits[0]['pairs'][-1] = row
+    elif mutation == 'policy':
+        row['policy_hash'] = 'sha256:' + 'f' * 64
+    elif mutation == 'seed':
+        row['seed_fit_index'] += 1
+    elif mutation == 'group':
+        row['label_group_index'] += 1
+    elif mutation == 'nonfinite':
+        row['guard_features']['values'][0] = float('nan')
+    elif mutation == 'label':
+        row['label_result']['label'] = False
+    elif mutation == 'parent':
+        row['parent_hash'] = 'sha256:' + 'f' * 64
+    elif mutation == 'features':
+        row['guard_features']['values'] = [9999.]
+    else:
+        row['task_index'] = False
+    with pytest.raises(ValueError):
+        module.assemble_fold(*audits, plan, 0, 1, **hashes)
+
+
 @pytest.mark.parametrize('mutation', ['missing', 'duplicate', 'outer_case', 'seed', 'label', 'nonfinite'])
 def test_gate_training_rows_reject_transplanted_or_incomplete_inputs(monkeypatch, mutation):
     module, audit, plan = gate_row_fixture(monkeypatch)
