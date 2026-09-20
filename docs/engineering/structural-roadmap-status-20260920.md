@@ -298,3 +298,11 @@ failures and independent physical-validation requirements remain open.
 development and 814 frontend tests. All full Python shards fail during evidence
 preparation and skip actual full tests; the external replay/technical receipt
 blockers remain explicit. Later comparison changes require new-head checks.
+
+## Broader matched-parent preparation
+
+The [B/D/E matched-parent diagnostic](rc-expanded-same-parent-probe-20260920.md)
+preflights all 198 policy/parent pairs using the retained 165 labels and exact
+132-sample whole-group complements. No fits, solver calls or reserved evaluations
+are performed in preparation. Its 594 comparisons are not yet executed; launch
+must follow the live 512-layer solve to avoid competing numerical measurements.

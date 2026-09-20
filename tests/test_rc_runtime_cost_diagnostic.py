@@ -73,3 +73,31 @@ def test_policy_cache_receipt_requires_cold_complete_accounting(monkeypatch, cha
     else:
         with pytest.raises(ValueError):
             module.validate_receipt(before, outcome, expected)
+
+
+def test_expanded_parent_probe_excludes_whole_group_not_only_case(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('run_rc_expanded_same_parent_probe')
+    groups = [[f'{group}-{amplitude}' for amplitude in range(3)] for group in 'abcde']
+    samples = [{'case_id': case, 'sample_hash': f'{case}-{index}'}
+               for group in groups for case in group for index in range(11)]
+    result = module.complementary_samples(samples, groups, 'b-1')
+    assert len(result) == 132
+    assert all(not value.startswith('b-') for value in result)
+    assert set(module.CASE_IDS) == {f'train-{g}-amp{a}' for g in 'bde' for a in ('050', '100', '150')}
+    with pytest.raises(ValueError, match='one complete'):
+        module.complementary_samples(samples, groups + [groups[1]], 'b-1')
+    with pytest.raises(ValueError, match='132 complementary'):
+        module.complementary_samples(samples[:-1], groups, 'b-1')
+
+
+def test_expanded_parent_cache_accounts_repeats_and_rejects_boolean_counter(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_expanded_same_parent_probe')
+    roster = [{'policy_hash': str(i)} for i in range(6)]
+    counters = {'hits': 12, 'misses': 6, 'maxsize': 4, 'currsize': 4}
+    assert module.cache_accounting(roster, counters) == counters
+    with pytest.raises(ValueError, match='ordered policy-cache'):
+        module.cache_accounting(roster, dict(counters, misses=5))
+    with pytest.raises(ValueError, match='integer cache'):
+        module.cache_accounting(roster, dict(counters, hits=True))
