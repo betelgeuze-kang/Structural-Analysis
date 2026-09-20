@@ -1,0 +1,19 @@
+{
+  "source_inventory": "19d600900d8972263446acb7a899c14687eb61e8307d7b4d8f62f1ef3c7f9bcf",
+  "same_parent_actual_proposal_rows": 60,
+  "unique_case_target_pairs": 11,
+  "secant_pass_proposal_fail": 18,
+  "proposal_lower_residual": 0,
+  "proposal_higher_residual": 60,
+  "newton_added": 39,
+  "new_solves": 0,
+  "new_fits": 0,
+  "scope": "Post-hoc same-parent actual-proposal initial residual observations; overlapping ridge/repeat rows, not a deployable gate",
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-v6-residual-y327c3za",
+    "inventory_sha256": "43334c6f052862d1d4be727b61a5a969f7867f8a16a6bb0d2cf30ec5c2c97a4f"
+  },
+  "coordinate_binding": "Exact Fraction(seed) minus retained parent high+low and load-factor origin",
+  "first_attempt_failed": "Absolute proposal compared directly to relative solver coordinates; corrected auditor preserves exact origin conversion",
+  "first_attempt_script_sha256": "5f4059060f804f73beb743fcd1f1c0098362f8218e4020486f5c87ee7209ad3e"
+}
