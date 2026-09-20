@@ -136,3 +136,13 @@ are retained for the next numerical investigation.
 755 frontend tests. Full Python shards remain blocked before test execution by
 external replay/technical receipt preparation. Later local commits require their
 own exact-head hosted checks; this is not full roadmap or release closure.
+
+## Globalization diagnosis and corrected coverage
+
+The [same-parent probe](rc-line-search-probe-20260920.md) reproduced both blocked
+step hashes and resolved them with smaller permitted line-search steps, without
+changing acceptance tolerances. The [full-history follow-up](rc-diagnostic-label-correction-20260920.md)
+verified all nine training cases and yielded 99 labels. Its postprocessing naming
+error was corrected without rerunning numerical work; previous specific field
+names are explicitly superseded. Middle-geometry reference-parent range coverage
+improves, but actual learned proposals and net runtime benefit remain unproved.

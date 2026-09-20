@@ -3,8 +3,8 @@
 The [completed grouped runtime experiment](rc-grouped-runtime-campaign-20260920.md)
 produced no learned corrections. For the interior geometry, 21 distinct input
 features violated the training envelopes across the original contexts. Those
-features are concrete dissipated energy, concrete compressive history and one
-steel plastic-strain coordinate. Four concrete energy coordinates violated the
+features are concrete compressive-history strains (corrected full-vector labels;
+the earlier energy/plastic names were erroneous). Four such coordinates violated the
 range on all 11 noninitial targets, with identical exclusions at both ridge values.
 
 The next bounded question is whether additional **training histories within each
@@ -71,3 +71,5 @@ Inventory: 2,513 files / 129,504,366 bytes, excluding regenerable `__pycache__`;
 SHA-256 `cffefc0082c58e75d07f6e7df712bea1e8eaab9b66ceb368990fd00b633e4f70`.
 [Retained outcome](rc-training-history-coverage-20260920.summary.json) includes
 all nine cases and the original blocked-step metrics.
+
+The subsequent [extended-search result and diagnostic correction](rc-diagnostic-label-correction-20260920.md) is separate evidence; it does not overwrite this original incomplete run.

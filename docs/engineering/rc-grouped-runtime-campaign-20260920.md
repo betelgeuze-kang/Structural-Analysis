@@ -49,9 +49,9 @@ target has insufficient accepted history; all 11 later targets violate 4–14
 material/history feature ranges. A post-hoc audit of the actual stored proposal
 contexts confirms this for the first repetition of each fitted policy.
 
-For example, at B's -3 mm target, a concrete energy-density feature is
-`1.0670515064e-5 MJ/m³`, compared with training high `9.7600214713e-6` and allowed
-slack `1.7480547382e-7`. Other energy-history features lie above or below their
+For example, at B's -3 mm target, a concrete compressive-history strain is
+`1.0670515064e-5` (dimensionless), compared with training high `9.7600214713e-6` and allowed
+slack `1.7480547382e-7`. Other compressive-history strain features lie above or below their
 training ranges. This is not evidence that widening a threshold is safe. The
 existing thresholds were retained. Geometry interpolation alone did not provide
 coverage of the accepted material histories.
@@ -96,3 +96,14 @@ regenerable `__pycache__` directories; its SHA-256 is
 case repeats, counts, costs and feature violations. The standalone auditors
 perform no fits or solver calls. Their receipt/identity checks do not replace
 independent replay, provenance or physical validation.
+
+## Diagnostic label correction
+
+The first v1 range report incorrectly used material-only names for full-vector
+indices. Its specific energy/plastic-field names and associated units were wrong.
+The corrected v2 report includes the 101-input static/causal prefix: all 21
+violating fields in case B are concrete compressive-history strains. The four
+fields recurring at every noninitial target belong to member 0, point 2, fibers
+1, 2, 3 and 5. Numeric values, bounds, decisions, fold costs and solver outcomes
+are unchanged. Original v1 artifacts remain preserved in the original packet
+and Git history; see [correction and new coverage](rc-diagnostic-label-correction-20260920.md).
