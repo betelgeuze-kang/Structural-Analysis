@@ -1272,7 +1272,10 @@ def _run_opensees(
     python_executable: Path,
     python_path: Path,
     wheel_paths: list[Path],
+    raw_output_dir: Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    if raw_output_dir is not None:
+        raw_output_dir.mkdir(parents=True, exist_ok=False)
     try:
         completed, binding = execute_pinned_opensees(
             python_executable=python_executable,
@@ -1282,6 +1285,15 @@ def _run_opensees(
         )
     except PinnedOpenSeesRuntimeError as exc:
         raise ExternalCodeToCodeReceiptError(str(exc)) from exc
+    if raw_output_dir is not None:
+        for name, text in (("driver.py", OPENSEES_DRIVER),
+                           ("stdout.txt", completed.stdout),
+                           ("stderr.txt", completed.stderr)):
+            with (raw_output_dir / name).open("x", encoding="utf-8", newline="") as stream:
+                stream.write(text)
+        with (raw_output_dir / "execution.json").open("x", encoding="utf-8") as stream:
+            json.dump({"return_code": completed.returncode,
+                       "runtime_binding": binding}, stream, indent=2)
     prefix = "CODE_TO_CODE_JSON="
     rows = [row[len(prefix) :] for row in completed.stdout.splitlines() if row.startswith(prefix)]
     if completed.returncode != 0 or len(rows) != 1:
@@ -3673,6 +3685,7 @@ def build_external_code_to_code_technical_receipt(
     calculix_library_dir: Path,
     calculix_license_path: Path,
     external_assets: list[Path],
+    raw_output_dir: Path | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     assets = _external_asset_rows(external_assets)
@@ -3683,14 +3696,21 @@ def build_external_code_to_code_technical_receipt(
     if "License: GPL-2" not in calculix_license:
         raise ExternalCodeToCodeReceiptError("calculix_license_posture_invalid")
 
+    if raw_output_dir is not None:
+        # Reserve before any external execution; never mix attempts or overwrite evidence.
+        raw_output_dir.mkdir(parents=True, exist_ok=False)
+    capture = {} if raw_output_dir is None else {"raw_output_dir": raw_output_dir / "opensees"}
     opensees, opensees_outputs = _run_opensees(
         python_executable=python_executable,
         python_path=opensees_python_path,
         wheel_paths=[path for path in external_assets if path.suffix == ".whl"],
+        **capture,
     )
+    capture = {} if raw_output_dir is None else {"raw_output_dir": raw_output_dir / "calculix"}
     calculix, calculix_outputs = _run_calculix(
         binary=calculix_binary,
         library_dir=calculix_library_dir,
+        **capture,
     )
     cases = calculate_external_reference_comparisons(
         repo_root=repo_root,
@@ -4367,6 +4387,7 @@ def _resolve(path: Path) -> Path:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--raw-output-dir", type=Path, help="New directory for decoded external output and original calculation files")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--refresh-product-replay", action="store_true")
     parser.add_argument("--reuse-reason")
@@ -4380,6 +4401,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--external-asset", type=Path, action="append", default=[])
     args = parser.parse_args(argv)
     out = _resolve(args.out)
+    if args.raw_output_dir is not None and (args.check or args.refresh_product_replay):
+        parser.error("--raw-output-dir requires fresh external execution")
     if args.check and args.refresh_product_replay:
         parser.error("--check and --refresh-product-replay are mutually exclusive")
     if args.reuse_reference_receipt is not None and not args.refresh_product_replay:
@@ -4440,6 +4463,7 @@ def main(argv: list[str] | None = None) -> int:
         calculix_library_dir=args.calculix_library_dir,
         calculix_license_path=args.calculix_license,
         external_assets=args.external_asset,
+        **({} if args.raw_output_dir is None else {"raw_output_dir": _resolve(args.raw_output_dir)}),
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
