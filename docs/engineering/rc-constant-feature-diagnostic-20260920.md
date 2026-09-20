@@ -1,0 +1,13 @@
+# Exact-constant feature normalization diagnostic
+
+All ten retained 99-row complementary seed fits contain 48 exactly constant input columns that normalize to nonzero constants. Their combined squared normalized value is exactly 48.0 in each fit. The input rows and fitted policy bytes were authenticated against their original inventory hashes; no refit, solver call, threshold change or reserved-case access was performed.
+
+The implementation computes `mean = x.mean(axis=0)` and `scale = x.std(axis=0)`, replacing a scale only when it is exactly zero. For repeated floating-point values, the computed mean may differ slightly from the identical input value. The subsequent standard deviation is then nonzero even though `min == max`. Dividing the centering residual by this tiny scale creates a constant +1 or -1 column. This is present in the real retained policies, not only in a constructed example.
+
+With the existing ridge-penalized intercept, redundant constant columns alter regularization. For a fixed effective intercept, the minimum sum of squared coefficients across the explicit intercept and these 48 unit constant columns is one forty-ninth of the penalty for a sole intercept. This algebra describes the redundant constant directions only; it does not establish that this effect explains all poor predictions or that correcting it will improve runtime.
+
+Four fits have 269 exactly constant features and six have 249. All have the same 48 nonzero normalized constants. Per-policy identities and column indices are retained in [the summary](rc-constant-feature-diagnostic-20260920.summary.json). The full 165-row exploratory check also found 48 affected columns; the authenticated complementary-fit result is the relevant evidence.
+
+Next implementation requirement: introduce an explicitly versioned opt-in preprocessing contract that detects exact constants from training rows, uses the identical observed value as their mean, and uses a unit scale. Their centered values must be exactly zero. Preserve the legacy fitting profile and artifacts for reproducibility. Apply no epsilon-based near-constant threshold or validation-derived normalization. The new candidate needs meaningful constant-column and regularization-equivalence regressions followed by complementary-fold evaluation and full-cost runtime testing before any promotion. This diagnostic alone closes no acceleration or independent-validation requirement.
+
+Input inventory identities: original 99 samples `f850f7e65670bf4d6254039da2aca35269cbd1840b645d82308c2402017849f0`; additional 66 samples `23d28a47d891e1b45d7306007529a78d203a436677af0fd5fe9e7dbe4061af92`; ten complementary seed policies `547112b912e6ff77fc43e755daa8ce12467d7a72766ec2ada3875e4c40263c49`.
