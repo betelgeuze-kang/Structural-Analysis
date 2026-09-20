@@ -69,12 +69,22 @@ def replay_rc_frozen_continuation_study(
             or report['model_checksum'] != model.canonical_model_checksum
             or report['schema_version'] != 'experimental-rc-control-seed-comparison.v2'):
         raise ValueError('matching constant-load continuation model/request required')
-    unsupported = ('coordinate_precision', 'strain_evaluation', 'material_arithmetic',
-                   'fiber_strain_evaluation', 'force_accumulation', 'terminal_coordinate_precision',
-                   'capture_material_state', 'proposal_guard', 'initial_residual_observation',
+    arithmetic_keys = (
+        'coordinate_precision', 'strain_evaluation', 'material_arithmetic',
+        'fiber_strain_evaluation', 'force_accumulation', 'terminal_coordinate_precision',
+        'terminal_refinement_limit',
+    )
+    arithmetic = {k: report[k] for k in arithmetic_keys if k in report}
+    if arithmetic:
+        from structural_analysis.benchmark.rc_control_learning import (
+            _arithmetic_kwargs, RETAINED_LEARNING_ARITHMETIC_PROFILE,
+        )
+        if arithmetic != _arithmetic_kwargs(RETAINED_LEARNING_ARITHMETIC_PROFILE):
+            raise ValueError('original binary64 or complete retained arithmetic profile required')
+    unsupported = ('capture_material_state', 'proposal_guard', 'initial_residual_observation',
                    'initial_parent_artifact', 'line_search_assembly_reuse')
     if any(key in report for key in unsupported):
-        raise ValueError('original binary64 complete-path continuation profile required')
+        raise ValueError('original complete-path continuation profile required')
     for name in [*report['arm_order'], 'fresh-reference']:
         path = originals[name + '/path.json']
         phase = report.get('assembly_phase_work', {}).get(name)
@@ -93,6 +103,7 @@ def replay_rc_frozen_continuation_study(
         absolute_tolerance=report['absolute_tolerance'], relative_tolerance=report['relative_tolerance'],
         record_assembly_work='assembly_work_recording' in report,
         record_assembly_timing=report.get('assembly_timing_recording', False),
+        **arithmetic,
     )
     regenerated = _read_study(output / 'fresh')
     differences = sorted(set(originals) ^ set(regenerated))

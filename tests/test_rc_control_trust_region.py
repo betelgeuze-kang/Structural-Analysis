@@ -65,7 +65,7 @@ def test_optimizer_exception_retains_assembly_and_stops_before_terminal_newton(t
     {'proposal_abstention_strategy': 'secant'},
 ])
 def test_conflicting_strategy_rejected_before_output(tmp_path, options):
-    with pytest.raises(ValueError, match='isolated binary64'):
+    with pytest.raises(ValueError, match='isolated numerical proposal'):
         run(tmp_path, **options)
     assert not (tmp_path / 'study').exists()
 
@@ -385,3 +385,94 @@ def test_all_target_scope_requires_failure_only_mode_before_output(tmp_path):
     with pytest.raises(ValueError, match='all-target continuation'):
         run(tmp_path, frozen_parent_continuation=True, continuation_all_failed_targets=True)
     assert not (tmp_path / 'study').exists()
+
+
+@pytest.mark.parametrize("length,height,amplitude", [(2., 1.5, .002), (3., 2.5, .04)])
+def test_retained_continuation_uses_absolute_seed_coordinates_and_replays(tmp_path, length, height, amplitude):
+    from dataclasses import replace
+    import json
+    from structural_analysis.benchmark.rc_control_learning import (
+        _arithmetic_kwargs, RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    from structural_analysis.benchmark.rc_control_continuation_replay import replay_rc_frozen_continuation_study
+
+    payload = json.loads(Path('examples/public_rc_fiber_frame_l_frame_material_history.json').read_text())
+    for node in payload['nodes']:
+        if node['id'] == 'N2':
+            node['coordinates'] = [length, 0., 0.]
+        elif node['id'] == 'N3':
+            node['coordinates'] = [length, height, 0.]
+    model_path = tmp_path / 'model.json'
+    model_path.write_text(json.dumps(payload))
+    model = load_neutral_json(model_path)
+    request = BoundedRCFiberDirectControlRequest(
+        7, (-amplitude / 2, -amplitude, amplitude / 2), allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(('N3', 0., -25., 0.),),
+    )
+    request = replace(request, solver_config=replace(
+        request.solver_config, newton=replace(request.solver_config.newton, terminal_polishing=True),
+    ))
+    report = benchmark_rc_control_seed_paths(
+        model, request, source_revision='a' * 40, output_directory=tmp_path / 'retained',
+        frozen_parent_continuation=True,
+        **_arithmetic_kwargs(RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    assert report['arms']['proposal']['status'] == 'complete'
+    assert report['all_execution_work_reported']
+    entry = report['arms']['proposal']['entries'][-1]
+    proposal = entry['numerical_proposal']
+    assert proposal['seed_coordinate_representation'] == 'binary64_absolute_high'
+    assert proposal['native_core_calls_attempted'] == 16 and proposal['parent_unchanged']
+    prior_coordinates = None
+    for stage in proposal['stages']:
+        data = json.loads((tmp_path / 'retained/proposal' / stage['artifact']['path']).read_bytes())
+        parent = data['parent_checkpoint']
+        initial = data['metrics']['initial_augmented_coordinates_m']
+        if prior_coordinates is None:
+            assert initial[:-1] == parent['free_coordinates_m']
+            assert any(value != 0 for value in initial)
+        else:
+            assert initial == prior_coordinates
+        assert parent['state_hash'] == entry['parent_hash']
+        prior_coordinates = data['metrics']['absolute_augmented_coordinates_m']
+        assert data['metrics']['coordinate_precision'] == 'twofold-increment'
+        assert data['accepted_checkpoint']['free_coordinate_compensation_m'] is not None
+    replay = replay_rc_frozen_continuation_study(
+        tmp_path / 'retained', model, request, output_directory=tmp_path / 'replay',
+        replay_source_revision='b' * 40,
+    )
+    assert replay['numerical_reproduction_pass']
+    assert replay['fresh_native_calls'] >= 16
+    assert all(c['full_history_pass'] for c in report['comparisons'].values())
+    assert replay['fresh_reference_comparisons_pass']
+
+
+@pytest.mark.parametrize('alteration', ['missing', 'mixed'])
+def test_continuation_replay_rejects_incomplete_retained_profile_before_output(tmp_path, monkeypatch, alteration):
+    from structural_analysis.benchmark import rc_control_continuation_replay as replay
+    from structural_analysis.benchmark.rc_control_frozen_continuation import FROZEN_CONTINUATION_IDENTITY
+    from structural_analysis.benchmark.rc_control_learning import (
+        _arithmetic_kwargs, RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+
+    model = load_neutral_json(Path('examples/public_rc_fiber_frame_l_frame_material_history.json'))
+    request = BoundedRCFiberDirectControlRequest(7, (-.001, -.002))
+    report = {
+        'schema_version': 'experimental-rc-control-seed-comparison.v2',
+        'model_checksum': model.canonical_model_checksum,
+        'request': request.to_dict(),
+        'numerical_proposal': {'identity': FROZEN_CONTINUATION_IDENTITY},
+        **_arithmetic_kwargs(RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    }
+    if alteration == 'missing':
+        del report['force_accumulation']
+    else:
+        report['coordinate_precision'] = 'binary64'
+    monkeypatch.setattr(replay, '_read_study', lambda root: {'comparison.json': report})
+    output = tmp_path / 'replay'
+    with pytest.raises(ValueError, match='complete retained arithmetic profile'):
+        replay.replay_rc_frozen_continuation_study(
+            tmp_path / 'original', model, request, output_directory=output,
+            replay_source_revision='b' * 40,
+        )
+    assert not output.exists()

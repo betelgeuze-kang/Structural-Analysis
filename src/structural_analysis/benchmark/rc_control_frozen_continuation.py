@@ -20,8 +20,8 @@ class FrozenParentContinuationProposal:
         raise RuntimeError("native parent and scoped work recording required")
 
     def propose(self, problem, parent, request, context, *, artifact_sink, allow_nonreversal=False):
-        if problem.coordinate_precision != "binary64":
-            raise ValueError("frozen-parent proposal requires binary64 coordinates")
+        if problem.coordinate_precision not in ("binary64", "twofold-increment"):
+            raise ValueError("supported native continuation coordinates required")
         if type(allow_nonreversal) is not bool:
             raise ValueError("explicit boolean target continuation scope required")
         previous = context.accepted_targets_m
@@ -34,6 +34,9 @@ class FrozenParentContinuationProposal:
             "intermediate_material_checkpoints_adopted": False,
             "parent_hash": parent.state_hash,
         }
+        if problem.coordinate_precision == "twofold-increment":
+            report.update(coordinate_precision="twofold-increment",
+                          seed_coordinate_representation="binary64_absolute_high")
         if not allow_nonreversal and (len(previous) < 2 or (
             (previous[-1] - previous[-2]) * (context.target_m - previous[-1]) >= 0
         )):
@@ -46,7 +49,10 @@ class FrozenParentContinuationProposal:
             problem, parent, request.control_global_dof, context.target_m,
             request.solver_config,
         )
-        seed = tuple(adapter.initial_free_displacements_m())
+        # Native seed inputs are absolute coordinates; retained solver coordinates
+        # are increments from the unchanged parent, initially zero.
+        absolute, _ = adapter.absolute_coordinates(adapter.initial_free_displacements_m())
+        seed = tuple(absolute)
         before = parent.canonical_bytes()
         targets = [origin + (context.target_m - origin) * i / 16 for i in range(1, 17)]
         targets[-1] = context.target_m
@@ -83,7 +89,11 @@ class FrozenParentContinuationProposal:
                         report.update(status="blocked", reason="trial_stage_not_accepted")
                         break
                     # Only coordinates travel to the next trial. Always retain parent.
-                    seed = tuple(result.trial_solution.free_displacements_m)
+                    seed = tuple(
+                        result.metrics["absolute_augmented_coordinates_m"]
+                        if problem.coordinate_precision == "twofold-increment"
+                        else result.trial_solution.free_displacements_m
+                    )
                 finally:
                     stage.update(wall_ns=perf_counter_ns() - tick,
                                  assembly_work=recorder.to_dict())

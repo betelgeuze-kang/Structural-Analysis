@@ -1165,8 +1165,8 @@ def benchmark_rc_control_seed_paths(
     if trust_region_reversal or frozen_parent_continuation:
         if (proposal is not None or proposal_identity is not None or
                 proposal_guard is not None or proposal_abstention_strategy != "reference" or
-                coordinate_precision != "binary64"):
-            raise ValueError("isolated binary64 trust-region reversal strategy required")
+                (trust_region_reversal and coordinate_precision != "binary64")):
+            raise ValueError("isolated numerical proposal strategy and supported coordinate precision required")
         proposal = (TrustRegionReversalProposal() if trust_region_reversal
                     else FrozenParentContinuationProposal())
         numerical_identity = (TRUST_REGION_REVERSAL_IDENTITY if trust_region_reversal
