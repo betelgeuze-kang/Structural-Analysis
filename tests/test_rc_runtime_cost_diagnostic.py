@@ -39,3 +39,37 @@ def test_overlapping_timers_and_unknown_work_are_not_presented_as_complete_costs
     arm['preload_invocations'][0]['unknown_work'] = True
     with pytest.raises(ValueError, match='unknown invocation cost'):
         decompose(arm, 0)
+
+
+def test_policy_cache_accounting_replays_eviction_and_exact_content(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_policy_cache_receipt')
+    assert module.reference_counts(['a', 'b', 'c', 'd', 'a', 'e', 'b']) == {
+        'hits': 1, 'misses': 6, 'maxsize': 4, 'currsize': 4,
+    }
+    assert module.reference_counts(['{"a":1}', '{"a": 1}', '{"a":1}']) == {
+        'hits': 1, 'misses': 2, 'maxsize': 4, 'currsize': 2,
+    }
+
+
+@pytest.mark.parametrize('change', ['none', 'hot_start', 'wrong_hits', 'boolean', 'cleared'])
+def test_policy_cache_receipt_requires_cold_complete_accounting(monkeypatch, change):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    module = importlib.import_module('audit_rc_policy_cache_receipt')
+    before = dict(hits=0, misses=0, maxsize=4, currsize=0)
+    expected = dict(hits=9, misses=1, maxsize=4, currsize=1)
+    outcome = dict(before=dict(before), after=dict(expected), cold_process=True,
+                   cache_cleared_between_folds=False)
+    if change == 'hot_start':
+        before['currsize'] = outcome['before']['currsize'] = 1
+    elif change == 'wrong_hits':
+        outcome['after']['hits'] = 8
+    elif change == 'boolean':
+        outcome['after']['misses'] = True
+    elif change == 'cleared':
+        outcome['cache_cleared_between_folds'] = True
+    if change == 'none':
+        module.validate_receipt(before, outcome, expected)
+    else:
+        with pytest.raises(ValueError):
+            module.validate_receipt(before, outcome, expected)

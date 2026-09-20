@@ -35,3 +35,18 @@ bindings using `audit_rc_pooled_runtime_campaign.py`; then require the separate
 full numerical-equivalence audit. Archived sources and numerical inputs remain
 unchanged during measurement. This experiment does not supply independent
 physical validation, reserved evaluation, policy promotion or roadmap closure.
+
+## Cache lifecycle auditor prepared during execution
+
+`scripts/audit_rc_policy_cache_receipt.py` reconstructs the exact-content
+four-entry LRU access sequence from all 90 completed fold policies and model
+gates. It requires a zero-hit/zero-miss/empty initial cache, exact nonnegative
+integer counters, no between-fold clearing, complete proposal paths and bound
+policy/report/gate hashes. Observed terminal counters must equal the reconstructed
+hits, misses and final size. Static-gate bypasses are counted separately.
+
+Eleven focused cost/accounting tests pass, including hot-start, boolean counter,
+wrong-hit and lifecycle rejection plus exact-content and eviction checks. This
+adds no fitting or numerical execution. The full cache audit cannot run until
+the original process writes its terminal cache receipt; it supplements the
+existing full runtime and numerical-equivalence audits.
