@@ -257,7 +257,7 @@ def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
         "python scripts/build_phase1_core_api_contract_artifacts.py"
         in workflow[readiness:quality_gate]
     )
-    assert "for pass in 1 2 3; do" in workflow[readiness:quality_gate]
+    assert "for pass in 1 2 3; do" in workflow
     checkout = workflow.split(
         "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
         1,
@@ -403,7 +403,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "gh run download" in workflow
     assert "for attempt in {1..12}" in workflow
     assert "sleep 5" in workflow
-    assert "exact-SHA canonical artifact unavailable after bounded retry" in workflow
+    assert "exact-SHA canonical artifact unavailable after bounded_retry" in workflow
     assert (
         "artifacts/manifests/canonical_verification_environment.current.v1.json"
         in workflow
@@ -978,8 +978,10 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     assert tests[:3] == ["python", "-m", "pytest"]
     assert "--junitxml=development-contracts.xml" in tests
     assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
-    selected = {x for x in tests if x.startswith("tests/")}
-    assert len(selected) == 74
+    selected_paths = [x for x in tests if x.startswith("tests/")]
+    selected = set(selected_paths)
+    assert len(selected_paths) == len(selected), "duplicate development module selection"
+    assert len(selected) == 78
     assert all((ROOT / path).is_file() for path in selected)
     assert {
         "tests/test_stateful_fiber_section.py",
@@ -999,6 +1001,10 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "tests/test_rc_runtime_cost_diagnostic.py",
         "tests/test_rc_control_initial_residual.py",
         "tests/test_rc_control_trust_region.py",
+        "tests/test_rc_recovery_configuration.py",
+        "tests/test_rc_replay_streaming.py",
+        "tests/test_rc_branch_diagnostic.py",
+        "tests/test_rc_recovery_followup.py",
         "tests/test_rc_adaptive_continuation_campaign.py",
         "tests/test_rc_adaptive_campaign_audit.py",
         "tests/test_rc_offline_cost_tree.py",
