@@ -257,7 +257,7 @@ def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
         "python scripts/build_phase1_core_api_contract_artifacts.py"
         in workflow[readiness:quality_gate]
     )
-    assert "for pass in 1 2 3; do" in workflow
+    assert "for pass in 1 2 3; do" in workflow[readiness:quality_gate]
     checkout = workflow.split(
         "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
         1,
@@ -403,7 +403,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "gh run download" in workflow
     assert "for attempt in {1..12}" in workflow
     assert "sleep 5" in workflow
-    assert "exact-SHA canonical artifact unavailable after bounded_retry" in workflow
+    assert "exact-SHA canonical artifact unavailable after bounded retry" in workflow
     assert (
         "artifacts/manifests/canonical_verification_environment.current.v1.json"
         in workflow
