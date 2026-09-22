@@ -26,15 +26,75 @@ from structural_analysis.benchmark.rc_control_recovery_execution import benchmar
 from structural_analysis.io.neutral.loader import load_neutral_json
 
 _MODES = ('frozen-reversal', 'frozen-failed-reversal', 'frozen-failed-target', 'adaptive-failed-target')
+_ARM_NAMES = frozenset(('reference', 'secant', 'proposal'))
+
+
+def _checked_review_report(files):
+    """Check declared report/path consistency, not solver physics or clocks.
+
+    Empty/missing comparison sets must never become a vacuous all-pass result.
+    Self-rehashed but contradictory metadata is rejected. Matching hashes do
+    not authenticate the author or independently validate numerical results.
+    """
+    report = files['comparison.json']
+    if report.get('schema_version') not in (
+        'experimental-rc-control-seed-comparison.v1',
+        'experimental-rc-control-seed-comparison.v2',
+    ):
+        raise ValueError('supported seed-comparison report required')
+    for field in ('arms', 'comparisons'):
+        if type(report.get(field)) is not dict or set(report[field]) != _ARM_NAMES:
+            raise ValueError('complete exact reference/secant/proposal roster required')
+    order = report.get('arm_order')
+    if (type(order) is not list or len(order) != 3
+            or any(type(name) is not str for name in order)
+            or set(order) != _ARM_NAMES):
+        raise ValueError('unique complete arm order required')
+    if type(report.get('all_execution_work_reported')) is not bool:
+        raise ValueError('explicit Boolean work declaration required')
+    request = decode_bounded_rc_fiber_direct_control_request(report['request'])
+    original_request = files['request.json']
+    required = ('request', 'model_checksum', 'compiled_problem_contract_hash', 'source_revision')
+    if (_bytes(report['request']) != _bytes(request.to_dict())
+            or any(key not in original_request for key in required)
+            or any(key not in report or _bytes(value) != _bytes(report[key])
+                   for key, value in original_request.items())):
+        raise ValueError('original request/report binding mismatch')
+    targets = list(request.targets_m)
+    for name in (*order, 'fresh-reference'):
+        arm = report['fresh_reference'] if name == 'fresh-reference' else report['arms'][name]
+        path = files[name + '/path.json']
+        projected = {key: value for key, value in path.items()
+                     if key not in ('response_history', 'terminal_checkpoint', 'preload_response')}
+        if type(arm) is not dict or _bytes(projected) != _bytes(arm):
+            raise ValueError('original path/report binding mismatch')
+        if (arm.get('requested_targets_m') != targets
+                or arm.get('source_problem_hash') != report['compiled_problem_contract_hash']):
+            raise ValueError('original path/request/problem binding mismatch')
+        count = arm.get('accepted_target_count')
+        if type(count) is not int or not 0 <= count <= len(targets):
+            raise ValueError('bounded integer accepted target count required')
+        if arm.get('status') not in ('complete', 'incomplete'):
+            raise ValueError('known path completion status required')
+        if arm['status'] == 'complete' and (count != len(targets) or arm.get('failure') is not None):
+            raise ValueError('inconsistent completion declaration')
+    fresh = report['fresh_reference']
+    for name, comparison in report['comparisons'].items():
+        if type(comparison) is not dict or type(comparison.get('full_history_pass')) is not bool:
+            raise ValueError('explicit Boolean full-history result required')
+        if comparison['full_history_pass'] and (
+            report['arms'][name]['status'] != 'complete' or fresh['status'] != 'complete'
+            or comparison.get('structure_match') is not True
+            or comparison.get('physical_values_within_tolerance') is not True
+        ):
+            raise ValueError('passing comparison contradicts completion or component gates')
+    return report
 
 
 def summarize_rc_recovery_study(study):
     """Read all bounded artifacts; do not equate self-consistency with acceptance."""
     files = ReplayStudyFiles(Path(study))
-    report = files['comparison.json']
-    if report.get('schema_version') not in ('experimental-rc-control-seed-comparison.v1',
-                                            'experimental-rc-control-seed-comparison.v2'):
-        raise ValueError('supported seed-comparison report required')
+    report = _checked_review_report(files)
     arms = {}
     for name, arm in [*report['arms'].items(), ('fresh-reference', report['fresh_reference'])]:
         count = arm['accepted_target_count']
@@ -140,7 +200,10 @@ def main(argv=None):
         passed = (summary['declared_full_history_comparisons_pass']
                   and summary['all_execution_work_reported'])
         if args.replay:
-            passed = passed and summary['fresh_replay']['numerical_reproduction_pass']
+            passed = (passed
+                      and summary['fresh_replay']['numerical_reproduction_pass'] is True
+                      and summary['fresh_replay']['fresh_reference_comparisons_pass'] is True
+                      and summary['fresh_replay']['unknown_replay_work'] is False)
         summary.update(status='completed' if passed else 'incomplete_or_unverified',
                        command_wall_ns=perf_counter_ns() - started)
         _write_summary(output, summary)

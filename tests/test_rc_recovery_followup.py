@@ -260,3 +260,182 @@ def test_unsupported_replay_scope_rejected_before_computation(tmp_path, monkeypa
     monkeypatch.setattr(cli, 'benchmark_rc_control_seed_paths', lambda *a, **k: pytest.fail('unsupported replay computed'))
     assert cli.main(args+['--replay']) == 2
     assert not (tmp_path/'out').exists()
+
+
+@pytest.fixture(scope='module')
+def review_study(tmp_path_factory):
+    from structural_analysis.benchmark.rc_control_recovery_execution import benchmark_rc_control_seed_paths
+    from structural_analysis.benchmark.rc_control_recovery_strategy import RCControlRecoveryStrategy
+
+    root = tmp_path_factory.mktemp('review-integrity')/'study'
+    request = BoundedRCFiberDirectControlRequest(
+        4, (-1e-6, -2e-6, 1e-6), allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(('N2', -10., 0., 0.),),
+    )
+    benchmark_rc_control_seed_paths(
+        model(), request, source_revision='a'*40, output_directory=root,
+        recovery_strategy=RCControlRecoveryStrategy('adaptive-failed-target'),
+    )
+    return root
+
+
+def _rewrite_report(root, report):
+    from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+
+    body = {key: value for key, value in report.items() if key != 'report_hash'}
+    report['report_hash'] = _sha(_bytes(body))
+    (root/'comparison.json').write_bytes(_bytes(report))
+
+
+@pytest.mark.parametrize('mutation', [
+    'empty-comparisons', 'missing-comparison', 'empty-arms', 'missing-arm',
+    'missing-path', 'changed-embedded-path', 'nonboolean-work', 'nonboolean-pass',
+    'duplicate-arm-order', 'comparison-contradiction', 'request-mismatch',
+])
+def test_summary_rejects_inconsistent_metadata_even_after_rehash(
+    tmp_path, review_study, mutation, capsys,
+):
+    import shutil
+
+    root = tmp_path/'altered'
+    shutil.copytree(review_study, root)
+    report = json.loads((root/'comparison.json').read_bytes())
+    if mutation == 'empty-comparisons':
+        report['comparisons'] = {}
+    elif mutation == 'missing-comparison':
+        report['comparisons'].pop('proposal')
+    elif mutation == 'empty-arms':
+        report['arms'] = {}
+    elif mutation == 'missing-arm':
+        report['arms'].pop('proposal')
+    elif mutation == 'missing-path':
+        (root/'proposal/path.json').unlink()
+    elif mutation == 'changed-embedded-path':
+        report['arms']['proposal']['failure'] = {'kind': 'contradiction'}
+    elif mutation == 'nonboolean-work':
+        report['all_execution_work_reported'] = 'true'
+    elif mutation == 'nonboolean-pass':
+        report['comparisons']['proposal']['full_history_pass'] = 1
+    elif mutation == 'duplicate-arm-order':
+        report['arm_order'] = ['reference', 'reference', 'proposal']
+    elif mutation == 'comparison-contradiction':
+        report['comparisons']['proposal']['structure_match'] = False
+    else:
+        (root/'request.json').write_text('{}')
+    _rewrite_report(root, report)
+    with pytest.raises((ValueError, KeyError)):
+        cli.summarize_rc_recovery_study(root)
+    assert cli.main(['summary', '--study', str(root)]) == 2
+
+
+def test_valid_review_keeps_declared_acceptance_separate_from_physics(review_study):
+    result = cli.summarize_rc_recovery_study(review_study)
+    assert result['declared_full_history_comparisons_pass']
+    assert result['artifact_hashes_checked']
+    assert not result['fresh_replay_executed_by_summary']
+    assert not result['declared_counts_are_independently_audited']
+    assert not result['independent_physical_validation'] and not result['design_approval']
+
+
+def test_valid_failed_comparison_remains_readable(tmp_path, review_study):
+    import shutil
+
+    root = tmp_path/'failed-comparison'
+    shutil.copytree(review_study, root)
+    report = json.loads((root/'comparison.json').read_bytes())
+    report['comparisons']['proposal']['full_history_pass'] = False
+    report['comparisons']['proposal']['physical_values_within_tolerance'] = False
+    _rewrite_report(root, report)
+    assert not cli.summarize_rc_recovery_study(root)['declared_full_history_comparisons_pass']
+
+
+@pytest.mark.parametrize('changed', [
+    {'fresh_reference_comparisons_pass': False},
+    {'unknown_replay_work': True},
+    {'numerical_reproduction_pass': 1},
+])
+def test_run_cannot_promote_incomplete_fresh_audit(tmp_path, monkeypatch, changed, capsys):
+    # Controlled audit result tests CLI admission, not fresh numerical accuracy.
+    audit = dict(numerical_reproduction_pass=True, fresh_reference_comparisons_pass=True,
+                 fresh_native_calls=1, fresh_known_newton_iterations=1,
+                 unknown_replay_work=False, audit_hash='sha256:'+'a'*64)
+    audit.update(changed)
+    monkeypatch.setattr(cli, 'replay_rc_frozen_continuation_study', lambda *a, **k: audit)
+    assert cli.main(arguments(tmp_path)+['--replay']) == 1
+    summary = json.loads((tmp_path/'out/summary.json').read_bytes())
+    assert summary['status'] == 'incomplete_or_unverified'
+    assert not summary['design_approval']
+
+
+@pytest.fixture(scope='module')
+def damaged_native(tmp_path_factory):
+    from structural_analysis.api import rc_fiber_frame_direct_control as api
+    from structural_analysis.benchmark import fiber_frame_design as design
+    from structural_analysis.benchmark.rc_control_recovery_execution import benchmark_rc_control_seed_paths
+    from structural_analysis.benchmark.rc_control_recovery_strategy import RCControlRecoveryStrategy
+    from structural_analysis.benchmark.rc_control_design import _bytes
+    from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import (
+        load_stateful_fiber_frame2d_checkpoint_bytes,
+    )
+
+    authored = design.apply_fiber_frame_section_changes(
+        model(), design.FiberFrameDesignCandidate('history-witness', (
+            design.FiberFrameSectionChange('RC1', width_m=.32,
+                                          top_bar_area_m2=.0002, bottom_bar_area_m2=.00025),
+        )),
+    )
+    request = BoundedRCFiberDirectControlRequest(
+        4, (-.02, -.04, .02), allow_reversals=True, maximum_reversals=2,
+        constant_nodal_loads=(('N2', -600., 0., 0.),),
+    )
+    root = tmp_path_factory.mktemp('accepted-damaged-history')/'study'
+    report = benchmark_rc_control_seed_paths(
+        authored, request, source_revision='a'*40, output_directory=root,
+        recovery_strategy=RCControlRecoveryStrategy('adaptive-failed-target'),
+    )
+    assert report['arms']['reference']['accepted_target_count'] == 2
+    assert report['arms']['reference']['status'] == 'incomplete'
+    assert report['arms']['proposal']['status'] == 'complete'
+    assert not report['comparisons']['proposal']['full_history_pass']
+    compiled, blockers, _ = public._compile(authored)
+    assert compiled is not None and not blockers
+    compiled = api._with_constant_loading(compiled, request.constant_nodal_loads)
+    step = json.loads((root/'reference/001-1-step.json').read_bytes())
+    assert step['committed']
+    parent = load_stateful_fiber_frame2d_checkpoint_bytes(_bytes(step['accepted_checkpoint']), compiled.problem)
+    states = [state for element in parent.to_dict()['element_states']
+              for point in element['integration_point_states'] for state in point['fiber_states']]
+    assert max(state.get('tensile_damage', 0) for state in states) > .5
+    assert max(state.get('accumulated_plastic_strain', 0) for state in states) > 0
+    return compiled.problem, parent, request.solver_config, root
+
+
+@pytest.mark.parametrize('target', [-.038, -.039999, .02])
+def test_sampled_seed_on_actual_damage_and_plasticity_keeps_original_parent(damaged_native, target):
+    problem, parent, config, root = damaged_native
+    adapter = Adapter(problem, parent, 4, target, config)
+    coordinates = adapter.initial_free_displacements_m()
+    observation = adapter.observe(coordinates)
+    direction = np.linalg.solve(observation.augmented_jacobian_kn_per_m,
+                                -observation.augmented_residual_kn)
+    before = parent.canonical_bytes()
+    options = dict(control_global_dof=4, target_m=target, coordinates=coordinates,
+                   direction=direction, config=config)
+    first = candidate.run_rc_branch_sampled_seed(problem, parent, **options)
+    second = candidate.run_rc_branch_sampled_seed(problem, parent, **options)
+    assert _without_execution_clocks(first) == _without_execution_clocks(second)
+    assert parent.canonical_bytes() == before
+    assert first['native_accepted'] and first['native_core_calls_attempted'] == 1
+    assert first['diagnostic_assembly_attempts'] == 18 and not first['unknown_work']
+    assert first['native_step']['parent_checkpoint'] == parent.to_dict()
+    assert first['native_step']['trial_solution']['metrics']['relative_residual'] <= config.newton.residual_tolerance
+    assert not first['intermediate_material_checkpoints_adopted']
+    assert not first['direction_construction_work_included']
+    assert not first['full_history_verified'] and not first['original_80mm_witness_qualified']
+    assert not first['independent_physical_validation'] and not first['design_approval']
+    # Persist explicit direction construction separately from the candidate's budget.
+    (root.parent/f'branch-witness-{target}.json').write_text(json.dumps({
+        'direction_construction_assemblies': 1, 'direction_linear_solves': 1,
+        'parent_hash': parent.state_hash, 'candidate': first,
+        'scope': 'known small cantilever; not original 80mm witness or full-path speedup',
+    }, allow_nan=False))
