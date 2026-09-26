@@ -16,6 +16,8 @@ original workstreams remain open at their full scope.
 
 ## Current integration and acceptance boundaries
 
+[Internal portal preload and reversal boundary](rc-internal-portal-preload-20260927.md): the dense corotational fiber-frame path now accepts bounded opt-in reversals and an independently hashed constant nodal-load channel. A synthetic two-base portal test commits one-step `lambda = 0` preload equilibrium before cyclic displacement control and verifies restart and rollback. Public two-base RC direct control, a staged axial-load history, native sparse handling of that load, the proposed 25 kN/48-path study, and independent physical validation remain open.
+
 [Portal recovery admission](rc-portal-recovery-admission-20260921.md) confirms that the current serial-chain RC direct-control compiler rejects two fixed supports before numerical arms. Existing public planar load-control results do not supply the requested constant-axial cyclic path; the proposed 48-path portal study did not execute. Broader topology integration remains open.
 
 [Measured full-campaign rerun](rc-measured-adaptive-campaign-20260921.md) at source 0f713 reproduces all 128 original histories/checkpoints and 70 complete paths. It separately measures 116.338 s enclosing runner and 12.116 s enclosing audit, with nested comparison costs retained. These are observed component costs, not a full user-flow or qualified speedup claim.
