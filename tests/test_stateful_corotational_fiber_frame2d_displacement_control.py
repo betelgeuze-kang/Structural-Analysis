@@ -282,16 +282,19 @@ def test_direct_control_solves_coupled_multi_equation_frame() -> None:
 def test_two_base_portal_cyclic_path_repeats_and_restarts_exact_checkpoint() -> None:
     problem = _two_base_portal_problem("direct-control-cyclic-portal")
     targets = (-1.0e-5, -2.0e-5, -1.0e-5, 1.0e-5)
-    kwargs = {
-        "control_global_dof": 9,
-        "allow_reversals": True,
-        "maximum_reversals": 1,
-    }
     first = run_stateful_corotational_fiber_frame2d_displacement_control_path(
-        problem, targets, **kwargs
+        problem,
+        targets,
+        control_global_dof=9,
+        allow_reversals=True,
+        maximum_reversals=1,
     )
     repeated = run_stateful_corotational_fiber_frame2d_displacement_control_path(
-        problem, targets, **kwargs
+        problem,
+        targets,
+        control_global_dof=9,
+        allow_reversals=True,
+        maximum_reversals=1,
     )
     prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
         problem, targets[:1], control_global_dof=9
@@ -304,7 +307,12 @@ def test_two_base_portal_cyclic_path_repeats_and_restarts_exact_checkpoint() -> 
         problem,
     )
     suffix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
-        problem, targets[1:], initial_checkpoint=restored, **kwargs
+        problem,
+        targets[1:],
+        control_global_dof=9,
+        initial_checkpoint=restored,
+        allow_reversals=True,
+        maximum_reversals=1,
     )
 
     assert first.contract_pass is True
