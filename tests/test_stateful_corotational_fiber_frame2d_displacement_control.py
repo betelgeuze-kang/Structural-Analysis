@@ -108,6 +108,22 @@ def _arch_problem(case_id: str) -> StatefulCorotationalFiberFrame2DProblem:
     )
 
 
+def _two_base_portal_problem(case_id: str) -> StatefulCorotationalFiberFrame2DProblem:
+    coordinates = ((0.0, 0.0), (2.0, 0.0), (0.0, 2.0), (2.0, 2.0))
+    return StatefulCorotationalFiberFrame2DProblem(
+        case_id=case_id,
+        node_coordinates_m=coordinates,
+        members=(
+            _member(coordinates, "left-column", 0, 2),
+            _member(coordinates, "roof-beam", 2, 3),
+            _member(coordinates, "right-column", 1, 3),
+        ),
+        fixed_global_dofs=(0, 1, 2, 3, 4, 5),
+        reference_external_loads=((9, 1.0),),
+        rotation_coordinate_scale_m=2.0,
+    )
+
+
 @pytest.fixture(scope="module")
 def direct_arch_path():
     problem = _arch_problem("direct-control-shallow-arch")
@@ -261,6 +277,182 @@ def test_direct_control_solves_coupled_multi_equation_frame() -> None:
         and len(step.trial_assembly.residual_kn) == 6
         for step in result.steps
     )
+
+
+def test_two_base_portal_cyclic_path_repeats_and_restarts_exact_checkpoint() -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-portal")
+    targets = (-1.0e-5, -2.0e-5, -1.0e-5, 1.0e-5)
+    kwargs = {
+        "control_global_dof": 9,
+        "allow_reversals": True,
+        "maximum_reversals": 1,
+    }
+    first = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, targets, **kwargs
+    )
+    repeated = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, targets, **kwargs
+    )
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, targets[:1], control_global_dof=9
+    )
+    assert prefix.contract_pass is True
+    restored = load_stateful_corotational_fiber_frame2d_checkpoint_bytes(
+        dump_stateful_corotational_fiber_frame2d_checkpoint_bytes(
+            problem, prefix.final_checkpoint
+        ),
+        problem,
+    )
+    suffix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, targets[1:], initial_checkpoint=restored, **kwargs
+    )
+
+    assert first.contract_pass is True
+    assert repeated.contract_pass is True
+    assert suffix.contract_pass is True
+    assert len(problem.free_global_dofs) == 6
+    assert first.final_checkpoint.global_displacements[9] == targets[-1]
+    assert (
+        first.final_checkpoint.canonical_bytes()
+        == repeated.final_checkpoint.canonical_bytes()
+    )
+    assert (
+        first.final_checkpoint.canonical_bytes()
+        == suffix.final_checkpoint.canonical_bytes()
+    )
+    assert tuple(
+        step.accepted_checkpoint.canonical_bytes() for step in first.steps
+    ) == (tuple(step.accepted_checkpoint.canonical_bytes() for step in repeated.steps))
+    assert tuple(
+        step.accepted_checkpoint.canonical_bytes() for step in first.steps[1:]
+    ) == (tuple(step.accepted_checkpoint.canonical_bytes() for step in suffix.steps))
+    assert all(
+        step.metrics["parent_checkpoint_immutable"] is True
+        and step.metrics["solver_contract_pass"] is True
+        for step in first.steps
+    )
+
+
+def test_cyclic_portal_failure_rolls_back_after_a_restarted_commit(monkeypatch) -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-rollback")
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, (-1.0e-5,), control_global_dof=9
+    )
+    assert prefix.contract_pass is True
+    parent_bytes = prefix.final_checkpoint.canonical_bytes()
+    original_step = solve_stateful_corotational_fiber_frame2d_displacement_control_step
+
+    def fail_second_target(*args, **kwargs):
+        if kwargs["target_control_displacement_m"] == -1.0e-5:
+            kwargs["config"] = (
+                StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+                    maximum_iterations=0,
+                )
+            )
+        return original_step(*args, **kwargs)
+
+    monkeypatch.setattr(
+        "structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control.solve_stateful_corotational_fiber_frame2d_displacement_control_step",
+        fail_second_target,
+    )
+
+    def run_restarted_path():
+        return run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (-2.0e-5, -1.0e-5),
+            control_global_dof=9,
+            initial_checkpoint=prefix.final_checkpoint,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
+
+    blocked = run_restarted_path()
+    repeated = run_restarted_path()
+
+    assert blocked.status == "blocked"
+    assert blocked.contract_pass is False
+    assert len(blocked.steps) == 2
+    assert blocked.steps[0].committed is True
+    assert blocked.steps[0].parent_checkpoint.canonical_bytes() == parent_bytes
+    assert blocked.steps[1].committed is False
+    assert blocked.steps[1].metrics["rollback_exact"] is True
+    assert blocked.final_checkpoint is blocked.steps[0].accepted_checkpoint
+    assert blocked.final_checkpoint.global_displacements[9] == -2.0e-5
+    assert blocked.final_checkpoint.canonical_bytes() == (
+        repeated.final_checkpoint.canonical_bytes()
+    )
+    assert tuple(step.committed for step in blocked.steps) == (
+        tuple(step.committed for step in repeated.steps)
+    )
+
+
+@pytest.mark.parametrize(
+    ("allow_reversals", "maximum_reversals", "targets", "message"),
+    (
+        (False, 1, (-1e-5,), "explicit opt-in"),
+        (1, 1, (-1e-5,), "explicit boolean"),
+        (True, True, (-1e-5,), "integer in"),
+        (True, -1, (-1e-5,), "integer in"),
+        (True, 1.0, (-1e-5,), "integer in"),
+        (True, 255, (-1e-5,), "integer in"),
+        (True, 0, (-1e-5, -2e-5, -1e-5), "reversal budget"),
+        (True, 1, (-1e-5, -2e-5, -1e-5, -2e-5), "reversal budget"),
+        (True, 1, (-1e-5, -1e-5), "successive control targets"),
+    ),
+)
+def test_cyclic_path_rejects_invalid_contract_before_solve(
+    monkeypatch, allow_reversals, maximum_reversals, targets, message
+) -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-invalid")
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("invalid path must not enter the Newton step")
+
+    monkeypatch.setattr(
+        "structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control.solve_stateful_corotational_fiber_frame2d_displacement_control_step",
+        forbidden,
+    )
+    with pytest.raises(ValueError, match=message):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            targets,
+            control_global_dof=9,
+            allow_reversals=allow_reversals,
+            maximum_reversals=maximum_reversals,
+        )
+
+
+def test_cyclic_path_rejects_initial_or_restart_target_and_target_budget() -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-target-budget")
+    with pytest.raises(ValueError, match="successive control targets"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (0.0, 1.0e-5),
+            control_global_dof=9,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, (-1.0e-5,), control_global_dof=9
+    )
+    assert prefix.contract_pass is True
+    with pytest.raises(ValueError, match="successive control targets"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (-1.0e-5, -2.0e-5),
+            control_global_dof=9,
+            initial_checkpoint=prefix.final_checkpoint,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
+    with pytest.raises(ValueError, match="bounded path length"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (1.0e-6 * index for index in range(1, 257)),
+            control_global_dof=9,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
 
 
 def test_invalid_full_step_trial_is_rejected_and_backtracking_continues(

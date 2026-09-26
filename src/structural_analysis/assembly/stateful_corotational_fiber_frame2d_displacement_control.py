@@ -912,36 +912,66 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
     control_global_dof: int,
     initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint | None = None,
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig | None = None,
+    allow_reversals: bool = False,
+    maximum_reversals: int = 0,
 ) -> StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
-    """Run a strictly monotone displacement target path until one step fails."""
+    """Run bounded targets from one accepted checkpoint until one step fails.
+
+    Reversal admission applies to this supplied path from ``initial_checkpoint``;
+    a checkpoint alone does not attest to directions in an earlier prefix.
+    """
 
     _require_connected_member_graph(problem)
     _controlled_free_index(problem, control_global_dof)
-    targets = tuple(
-        _finite(value, name="control displacement") for value in control_displacements_m
-    )
+    if type(allow_reversals) is not bool:
+        raise ValueError("allow_reversals must be an explicit boolean")
+    if (
+        type(maximum_reversals) is not int
+        or maximum_reversals < 0
+        or maximum_reversals > 254
+    ):
+        raise ValueError("maximum_reversals must be an integer in [0, 254]")
+    if not allow_reversals and maximum_reversals != 0:
+        raise ValueError("reversals require explicit opt-in and budget")
+    try:
+        source_targets = iter(control_displacements_m)
+    except TypeError as exc:
+        raise ValueError("control_displacements_m must be iterable") from exc
+    parsed_targets: list[float] = []
+    for value in source_targets:
+        if len(parsed_targets) >= 255:
+            raise ValueError("control_displacements_m exceeds the bounded path length")
+        parsed_targets.append(_finite(value, name="control displacement"))
+    targets = tuple(parsed_targets)
     if not targets:
         raise ValueError("control_displacements_m must be non-empty")
-    if len(targets) > 255:
-        raise ValueError("control_displacements_m exceeds the bounded path length")
     first = initial_checkpoint or (
         initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
     )
     validate_stateful_corotational_fiber_frame2d_checkpoint(problem, first)
     control_index = _controlled_free_index(problem, control_global_dof)
     accepted_control = _free_generalized_coordinates(problem, first)[control_index]
-    direction = math.copysign(1.0, targets[0] - accepted_control)
-    if targets[0] == accepted_control or any(
-        direction * (right - left) <= 0.0
-        for left, right in zip(
-            (accepted_control, *targets[:-1]),
-            targets,
-            strict=True,
-        )
-    ):
-        raise ValueError(
-            "control_displacements_m must advance strictly in one direction"
-        )
+    previous = accepted_control
+    prior_direction: int | None = None
+    reversals = 0
+    for target in targets:
+        if target == previous:
+            if allow_reversals:
+                raise ValueError("successive control targets must differ")
+            raise ValueError(
+                "control_displacements_m must advance strictly in one direction"
+            )
+        direction = 1 if target > previous else -1
+        if prior_direction is not None and direction != prior_direction:
+            reversals += 1
+            if not allow_reversals:
+                raise ValueError(
+                    "control_displacements_m must advance strictly in one direction"
+                )
+            if reversals > maximum_reversals:
+                raise ValueError("cumulative reversal budget exceeded")
+        prior_direction = direction
+        previous = target
     solver_config = config or (
         StatefulCorotationalFiberFrame2DDisplacementControlConfig()
     )
