@@ -97,10 +97,24 @@ def _json_bytes(payload: Any) -> bytes:
     return json.dumps(
         payload,
         allow_nan=False,
+        default=_json_scalar,
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
+
+
+def _json_scalar(value: Any) -> bool | int | float:
+    if isinstance(value, np.bool_):
+        return bool(value)
+    if isinstance(value, np.integer):
+        return int(value)
+    if isinstance(value, np.floating):
+        finite = float(value)
+        if math.isfinite(finite):
+            return finite
+        raise ValueError("non-finite NumPy scalar in campaign artifact")
+    raise TypeError(f"unsupported campaign artifact value: {type(value).__name__}")
 
 
 def _sha(raw: bytes) -> str:

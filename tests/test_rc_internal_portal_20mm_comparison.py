@@ -53,6 +53,20 @@ def test_changed_original_bytes_fail_before_internal_compilation(tmp_path) -> No
         runner.prepare_case(model_path=model, request_path=request)
 
 
+def test_artifact_json_accepts_only_finite_numpy_scalars() -> None:
+    assert runner._json_bytes(
+        {"boolean": np.bool_(True), "integer": np.int64(2), "float": np.float32(0.5)}
+    ) == (b'{"boolean":true,"float":0.5,"integer":2}')
+    with pytest.raises(ValueError, match="non-finite"):
+        runner._json_bytes({"value": np.float32(np.inf)})
+    with pytest.raises(ValueError):
+        runner._json_bytes({"value": np.float64(np.nan)})
+    with pytest.raises(TypeError, match="ndarray"):
+        runner._json_bytes({"value": np.array([1.0])})
+    with pytest.raises(TypeError, match="object"):
+        runner._json_bytes({"value": object()})
+
+
 def test_plan_is_20mm_only_and_reverses_all_four_arms() -> None:
     plan = runner.campaign_plan("a" * 40, runner.prepare_case())
     assert plan["planned_comparisons"] == 4
@@ -68,7 +82,7 @@ def test_plan_is_20mm_only_and_reverses_all_four_arms() -> None:
     assert plan["plan_hash"].startswith("sha256:")
 
 
-def test_real_fresh_preload_and_first_target_preserve_full_artifacts(tmp_path) -> None:
+def test_real_fresh_preload_and_full_path_preserve_full_artifacts(tmp_path) -> None:
     case = runner.prepare_case()
     arm_root = tmp_path / "reference"
     report = runner._run_arm(
@@ -77,7 +91,6 @@ def test_real_fresh_preload_and_first_target_preserve_full_artifacts(tmp_path) -
         arm="reference",
         mode="fixed",
         deadline_ns=perf_counter_ns() + 60_000_000_000,
-        targets_m=(-0.01,),
     )
     assert report["status"] == "complete"
     assert report["unknown_work"] is False
@@ -86,16 +99,18 @@ def test_real_fresh_preload_and_first_target_preserve_full_artifacts(tmp_path) -
     assert report["preload"]["work"]["linear_solve_count"] == 2
     assert report["preload"]["work"]["assembly_call_count"] == 6
     assert report["accepted_checkpoint_hashes"] == [
-        "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b"
+        "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+        "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+        "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9",
     ]
-    assert report["known_work_lower_bound"]["core_calls"] == 2
-    assert report["known_work_lower_bound"]["linear_solve_count"] == 16
-    assert report["known_work_lower_bound"]["assembly_call_count"] == 59
+    assert report["known_work_lower_bound"]["core_calls"] == 4
+    assert report["known_work_lower_bound"]["linear_solve_count"] == 44
+    assert report["known_work_lower_bound"]["assembly_call_count"] == 163
     step_artifact = json.loads(
-        (arm_root / "target-000-attempt-0-step.json").read_bytes()
+        (arm_root / "target-002-attempt-0-step.json").read_bytes()
     )
     assert step_artifact["committed"] is True
-    assert len(step_artifact["trial_solution"]["convergence_history"]) == 14
+    assert len(step_artifact["trial_solution"]["convergence_history"]) == 16
     assert step_artifact["metrics"]["parent_checkpoint_immutable"] is True
     assert (arm_root / "preload-step.json").is_file()
     assert (arm_root / "path.json").is_file()
