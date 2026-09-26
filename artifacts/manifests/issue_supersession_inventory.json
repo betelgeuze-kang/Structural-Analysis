@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-09-07T22:45:28Z",
+  "observed_at": "2026-09-26T20:00:55Z",
   "observation_source": "gh_cli_read_only_current_github_state",
-  "observed_open_issue_count": 9,
+  "observed_open_issue_count": 15,
   "open_issue_numbers": [
     247,
     258,
@@ -12,10 +12,16 @@
     291,
     293,
     297,
-    433,
-    435
+    438,
+    441,
+    443,
+    445,
+    447,
+    449,
+    451,
+    454
   ],
-  "open_issue_projection_sha256": "sha256:1fd456cc45c9af8993dc6ec6d0307e36d5207834d1e22286cd26852bd4ac30b0",
+  "open_issue_projection_sha256": "sha256:996b259e2a3faffd053f78e4ee0258d90589e0baa3497d643da82524be34fd72",
   "open_issues": [
     {
       "number": 247,
@@ -159,39 +165,162 @@
       "current_product_authority": false
     },
     {
-      "number": 433,
-      "title": "Detect ambiguous supplemental uploads and preserve bounded transport diagnostics",
+      "number": 438,
+      "title": "Integrate bounded physical RC design exploration and guarded learned selection",
       "state": "open",
-      "updated_at": "2026-09-07T01:05:50Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/433",
-      "body_sha256": "sha256:edfa696e0292b3ad5c274a5cd5da63bd52f20467935acee196944bc6595db867",
+      "updated_at": "2026-09-26T20:00:19Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/438",
+      "body_sha256": "sha256:63f1f20bb63ae40381e04294e79af8d1a78b6a29efa99b079c872a9505847093",
+      "labels": [],
+      "classification": "comprehensive_external_validation",
+      "linked_pull_requests": [439, 440],
+      "merged_implementation_pull_requests": [440],
+      "disposition": "partial_supplemental_transport_merged_await_rc_roadmap_and_external_acceptance",
+      "required_external_inputs": [
+        "independent_physical_validation",
+        "owner_acceptance",
+        "qualified_hardware_observation",
+        "source_rights_decision"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 441,
+      "title": "Add bounded local RC result reuse and finite-pool price search",
+      "state": "open",
+      "updated_at": "2026-09-11T16:35:15Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/441",
+      "body_sha256": "sha256:47cf106f92555416526ede879ee2aef72f44e16f169911e2359d934e6db30a3b",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [432],
+      "linked_pull_requests": [442],
       "merged_implementation_pull_requests": [],
-      "disposition": "await_producer_transport_verification_tests_and_reviewed_pr_integration",
+      "disposition": "await_bounded_result_reuse_and_price_search_review",
       "required_external_inputs": [],
       "closable_by_repository_code_alone": true,
       "current_product_authority": false
     },
     {
-      "number": 435,
-      "title": "Prepare a tested exact-ID supplemental consumer boundary before Product State wiring",
+      "number": 443,
+      "title": "Persist verified local RC research using existing durable jobs and bounded execution",
       "state": "open",
-      "updated_at": "2026-09-07T01:14:57Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/435",
-      "body_sha256": "sha256:d32b82a702327561f4fcd8c6b87d0d97634a604e29fcd9c7d6cf58524f9fd9be",
+      "updated_at": "2026-09-11T23:52:10Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/443",
+      "body_sha256": "sha256:98731c0edef9f74259fe77182540a390c3bbd70aa7e13df77b6b111af4e6d4d5",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [434],
+      "linked_pull_requests": [444],
       "merged_implementation_pull_requests": [],
-      "disposition": "await_exact_id_consumer_boundary_and_offline_transport_archive_regressions",
+      "disposition": "await_durable_local_research_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 445,
+      "title": "Persist verified local RC results and retain bounded execution accounting",
+      "state": "open",
+      "updated_at": "2026-09-12T06:23:28Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/445",
+      "body_sha256": "sha256:2e8c72230e66444647bcd4fc03ac7daacd1dd6c3142469822a8bd9aae0a38873",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [446],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_persistent_originals_and_budget_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 447,
+      "title": "Persist verified local RC results and preserve cooperative research controls",
+      "state": "open",
+      "updated_at": "2026-09-12T07:52:04Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/447",
+      "body_sha256": "sha256:642a48d0ed9e834b7c70add62e281aab8452e0cf4281e282255e397b6e8b54c4",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [448],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_safe_persistent_originals_and_controls_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 449,
+      "title": "Integrate response-scoped RC refinement checks with verified result reuse",
+      "state": "open",
+      "updated_at": "2026-09-14T01:51:30Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/449",
+      "body_sha256": "sha256:9d5588aaedcf9e8153214b2ddbe7a0cb7692b0ea9e2cd746f5a6b2f782e5bfc1",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [450, 452],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_response_scoped_refinement_and_reuse_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 451,
+      "title": "Integrate the independent strict neutral-input guard into main",
+      "state": "open",
+      "updated_at": "2026-09-14T23:19:06Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/451",
+      "body_sha256": "sha256:0376ebb5f27ef3a0495059428a4d07afd400c81ed292398eb99423b949d7f540",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [452],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_strict_neutral_input_guard_main_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 454,
+      "title": "Harden linear model ID admission and remove dense symmetry-diagnostic allocation",
+      "state": "open",
+      "updated_at": "2026-09-16T00:15:54Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/454",
+      "body_sha256": "sha256:8dc96ba4e8058b5407061477f2114529082325f6b33d19be6098884c029c3628",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [453],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_linear_id_and_sparse_diagnostic_review",
       "required_external_inputs": [],
       "closable_by_repository_code_alone": true,
       "current_product_authority": false
     }
   ],
-  "implemented_but_open_issues": [],
+  "implemented_but_open_issues": [
+    {
+      "number": 438,
+      "title": "Integrate bounded physical RC design exploration and guarded learned selection",
+      "state": "open",
+      "updated_at": "2026-09-26T20:00:19Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/438",
+      "body_sha256": "sha256:63f1f20bb63ae40381e04294e79af8d1a78b6a29efa99b079c872a9505847093",
+      "labels": [],
+      "classification": "comprehensive_external_validation",
+      "linked_pull_requests": [439, 440],
+      "merged_implementation_pull_requests": [440],
+      "disposition": "partial_supplemental_transport_merged_await_rc_roadmap_and_external_acceptance",
+      "required_external_inputs": [
+        "independent_physical_validation",
+        "owner_acceptance",
+        "qualified_hardware_observation",
+        "source_rights_decision"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    }
+  ],
   "orphan_issues": [],
   "resolved_issues": [
     {
@@ -238,6 +367,24 @@
       "resolved_by_pull_request": 239,
       "merge_commit_sha": "da87ef0221705b9483a0b239e151495b66244011",
       "normalization_comment_id": 5098996554
+    },
+    {
+      "number": 433,
+      "state": "closed",
+      "state_reason": "completed",
+      "resolution": "resolved_by",
+      "resolved_by_pull_request": 440,
+      "merge_commit_sha": "234c3122c78dea064411aa16b06b18ab16157576",
+      "closure_event_id": 31078133852
+    },
+    {
+      "number": 435,
+      "state": "closed",
+      "state_reason": "completed",
+      "resolution": "resolved_by",
+      "resolved_by_pull_request": 440,
+      "merge_commit_sha": "234c3122c78dea064411aa16b06b18ab16157576",
+      "closure_event_id": 31078134023
     }
   ],
   "superseded_pull_requests": [
@@ -280,6 +427,22 @@
       "disposition": "superseded",
       "superseded_by_pull_request": 239,
       "normalization_comment_id": 5098997560
+    },
+    {
+      "number": 432,
+      "state": "closed",
+      "merged": false,
+      "disposition": "superseded",
+      "superseded_by_pull_request": 440,
+      "normalization_comment_id": 5659440952
+    },
+    {
+      "number": 434,
+      "state": "closed",
+      "merged": false,
+      "disposition": "superseded",
+      "superseded_by_pull_request": 440,
+      "normalization_comment_id": 5659444717
     }
   ],
   "claims": {
