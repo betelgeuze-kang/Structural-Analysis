@@ -178,6 +178,24 @@ def verify(study, model_path, request_path):
                 and entry["target_m"] == request.targets_m[index],
                 "target order differs",
             )
+            context = read(root / f"{index:03d}-context.json")
+            require(
+                context["problem_contract_hash"] == problem.contract_hash
+                and context["control_global_dof"] == request.control_global_dof
+                and context["target_m"] == request.targets_m[index],
+                "original proposal source differs",
+            )
+            proposal = read(root / f"{index:03d}-proposal.json")
+            require(
+                proposal["invocations"] == []
+                and all(
+                    key in entry and entry[key] == value
+                    for key, value in proposal.items()
+                    if key != "invocations"
+                )
+                and proposal["proposal"] == entry["proposal"],
+                "original proposal artifact differs",
+            )
             attempts = entry["invocations"]
             require(
                 type(attempts) is list and 1 <= len(attempts) <= 2,
@@ -241,6 +259,27 @@ def verify(study, model_path, request_path):
                 )
             solution = step["trial_solution"]
             metrics = solution["metrics"]
+            if transition_index is not None:
+                entry = path["entries"][transition_index]
+                require(
+                    type(invocation.get("seed_used")) is bool
+                    and (not invocation["seed_used"] or entry["proposal"] is not None),
+                    "original seed use differs",
+                )
+                seed = entry["proposal"] if invocation["seed_used"] is True else None
+                recorded_seed = step["metrics"].get("initial_augmented_coordinates_m")
+                recorded_seed_hash = step["metrics"].get(
+                    "initial_augmented_coordinates_hash"
+                )
+                require(
+                    (seed is None and recorded_seed is None and recorded_seed_hash is None)
+                    or (
+                        seed is not None
+                        and recorded_seed == seed
+                        and recorded_seed_hash == canonical_hash(seed)
+                    ),
+                    "original seeded attempt proposal differs from recorded initial coordinates",
+                )
             expected_work = dict(
                 core_calls=1,
                 newton_iterations=metrics["iteration_count"],

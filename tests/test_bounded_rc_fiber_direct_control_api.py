@@ -1376,6 +1376,31 @@ def test_two_fixed_endpoint_invalid_supports_do_not_solve(
     assert result.to_dict()["unsupported_features"][0]["kind"] == expected_kind
 
 
+@pytest.mark.parametrize("experimental_two_fixed_endpoints", (False, True))
+def test_unhashable_support_dof_is_structured_unsupported(
+    monkeypatch, experimental_two_fixed_endpoints
+):
+    payload = json.loads(MODEL.read_bytes())
+    payload["supports"][0]["dofs"] = ["UX", {}, "RZ"]
+    if experimental_two_fixed_endpoints:
+        payload["loads"][0]["node"] = "N2"
+        payload["supports"].append({"node": "N3", "dofs": ["UX", "UY", "RZ"]})
+    model = load_neutral_json_bytes(_bytes(payload))
+    monkeypatch.setattr(api, "run_stateful_fiber_frame2d_control_path", _forbid)
+
+    result = api.analyze_bounded_rc_fiber_direct_control(
+        model,
+        (-1e-6,),
+        control_global_dof=4 if experimental_two_fixed_endpoints else 7,
+        experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+    )
+
+    assert result.status == "unsupported"
+    assert result.to_dict()["unsupported_features"][0]["kind"] == (
+        "rc_fiber_frame_support_dofs_invalid"
+    )
+
+
 def test_two_fixed_endpoint_loads_on_either_fixed_end_are_rejected(monkeypatch):
     monkeypatch.setattr(api, "run_stateful_fiber_frame2d_control_path", _forbid)
     for node in ("N1", "N3"):

@@ -1116,6 +1116,7 @@ def _compile_exact(
         if (
             type(support_dofs) is not list
             or len(support_dofs) != 3
+            or any(type(dof) is not str for dof in support_dofs)
             or set(support_dofs) != set(_ACTIVE_COMPONENTS)
         ):
             _fail_compile(

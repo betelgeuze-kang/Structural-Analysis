@@ -240,6 +240,62 @@ def test_failed_attempt_rollback_record_cannot_be_forged(two_fixed_retry_path, t
         verify(root)
 
 
+@pytest.mark.parametrize(
+    ("forgery", "message"),
+    [
+        ("artifact", "proposal artifact differs"),
+        ("proposal", "seeded attempt proposal differs"),
+        ("step", "seeded attempt proposal differs"),
+        ("source", "proposal source differs"),
+    ],
+)
+def test_failed_seeded_attempt_binds_original_proposal_to_step_and_source(
+    two_fixed_retry_path, tmp_path, forgery, message
+):
+    root = tmp_path / forgery
+    shutil.copytree(two_fixed_retry_path, root)
+    secant = root / "study/secant"
+    if forgery == "artifact":
+        proposal_file = secant / "002-proposal.json"
+        proposal = json.loads(proposal_file.read_bytes())
+        proposal["proposal"][0] += 1e-5
+        proposal_file.write_bytes(_bytes(proposal))
+    elif forgery == "proposal":
+        path_file = secant / "path.json"
+        path = json.loads(path_file.read_bytes())
+        proposal_file = secant / "002-proposal.json"
+        proposal = json.loads(proposal_file.read_bytes())
+        for vector in (path["entries"][2]["proposal"], proposal["proposal"]):
+            vector[0] += 1e-5
+        proposal_file.write_bytes(_bytes(proposal))
+        path_file.write_bytes(rehash(path, "path_hash"))
+        report_file = root / "study/comparison.json"
+        report = json.loads(report_file.read_bytes())
+        report["arms"]["secant"] = {
+            key: value
+            for key, value in path.items()
+            if key not in ("response_history", "terminal_checkpoint", "preload_response")
+        }
+        report_file.write_bytes(rehash(report, "report_hash"))
+    elif forgery == "step":
+        step_file = secant / "002-1-step.json"
+        step = json.loads(step_file.read_bytes())
+        initial = step["metrics"]["initial_augmented_coordinates_m"]
+        initial[0] += 1e-5
+        step["metrics"]["initial_augmented_coordinates_hash"] = canonical_hash(initial)
+        step["step_hash"] = canonical_hash(
+            {key: value for key, value in step.items() if key != "step_hash"}
+        )
+        step_file.write_bytes(_bytes(step))
+    else:
+        context_file = secant / "002-context.json"
+        context = json.loads(context_file.read_bytes())
+        context["problem_contract_hash"] = "sha256:" + "b" * 64
+        context_file.write_bytes(_bytes(context))
+    with pytest.raises(ValueError, match=message):
+        verify(root)
+
+
 def test_actual_preload_and_lateral_replay_counts_no_newton(original, monkeypatch):
     from structural_analysis.assembly import stateful_fiber_frame2d_solver as force
     from structural_analysis.assembly import (
