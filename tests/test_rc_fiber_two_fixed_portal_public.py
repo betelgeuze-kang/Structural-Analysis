@@ -43,6 +43,11 @@ def test_original_two_base_portal_requested_targets_replay_with_both_reaction_se
     assert experimental.to_dict()["schema_version"] == (
         TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION
     )
+    derived_bytes = (ROOT / "experimental-two-fixed-endpoints-request.json").read_bytes()
+    assert hashlib.sha256(derived_bytes).hexdigest() == (
+        "92e94d3580bdf76edabef458ac0f769e054087ab04f897178f3692b2098c0e45"
+    )
+    assert decode_bounded_rc_fiber_direct_control_request(derived_bytes) == experimental
     assert experimental.resume_contract_hash != original.resume_contract_hash
 
     result = analyze_bounded_rc_fiber_direct_control(
@@ -88,15 +93,9 @@ def test_original_two_base_portal_v3_cli_runs_and_replay_verifies(tmp_path):
     report = tmp_path / "report.json"
     checkpoint = tmp_path / "checkpoint.json"
     model.write_bytes((ROOT / "original-model.json").read_bytes())
-    original = decode_bounded_rc_fiber_direct_control_request(
-        (ROOT / "original-request.json").read_bytes()
+    request.write_bytes(
+        (ROOT / "experimental-two-fixed-endpoints-request.json").read_bytes()
     )
-    small = replace(
-        original,
-        targets_m=(-1e-5,),
-        experimental_two_fixed_endpoints=True,
-    )
-    request.write_text(json.dumps(small.to_dict()))
     assert cli.main(
         [
             "run",
@@ -116,6 +115,7 @@ def test_original_two_base_portal_v3_cli_runs_and_replay_verifies(tmp_path):
     receipt = json.loads(report.read_bytes())
     assert checkpoint.is_file()
     assert observed["request"]["experimental_two_fixed_endpoints"] is True
+    assert len(observed["response_history"]) == 3
     assert len(observed["terminal_response"]["support_reactions"]) == 6
     assert receipt["request"]["schema_version"] == (
         TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION

@@ -130,6 +130,7 @@ def verify(study, model_path, request_path):
     spec.loader.exec_module(rational)
     work: Counter[str] = Counter()
     audit_work: Counter[str] = Counter()
+    uncommitted_attempts_by_arm: dict[str, int] = {}
     rows: dict[str, Any] = {}
     paths: dict[str, Any] = {}
     for name in [*report["arm_order"], "fresh-reference"]:
@@ -163,6 +164,7 @@ def verify(study, model_path, request_path):
         )
         parent = initial_stateful_fiber_frame2d_checkpoint(problem)
         arm_work: Counter[str] = Counter()
+        uncommitted_attempts_by_arm[name] = 0
         invocations = path["preload_invocations"]
         require(
             len(invocations) == 1, "each arm must have exactly one original preload"
@@ -176,18 +178,33 @@ def verify(study, model_path, request_path):
                 and entry["target_m"] == request.targets_m[index],
                 "target order differs",
             )
+            attempts = entry["invocations"]
             require(
-                len(entry["invocations"]) == 1,
-                "multiple original attempts require separate failure audit",
+                type(attempts) is list and 1 <= len(attempts) <= 2,
+                "one committed attempt or one failed seeded retry required",
             )
-            transitions.append(
-                (
-                    index,
-                    entry["invocations"][0],
-                    f"{index:03d}-1",
-                    path["response_history"][index],
+            if len(attempts) == 2:
+                require(
+                    entry["proposal"] is not None
+                    and attempts[0].get("seed_used") is True
+                    and attempts[1].get("seed_used") is False,
+                    "failed seeded attempt must precede one unseeded fallback",
                 )
-            )
+            for ordinal, invocation in enumerate(attempts, start=1):
+                require(
+                    invocation.get("ordinal") == ordinal,
+                    "original attempt ordinal differs",
+                )
+                transitions.append(
+                    (
+                        index,
+                        invocation,
+                        f"{index:03d}-{ordinal}",
+                        path["response_history"][index]
+                        if ordinal == len(attempts)
+                        else None,
+                    )
+                )
         for transition_index, invocation, stem, response in transitions:
             require(
                 invocation == read(root / (stem + "-outcome.json")),
@@ -201,7 +218,6 @@ def verify(study, model_path, request_path):
             )
             require(
                 invocation["status"] == "returned"
-                and invocation["committed"] is True
                 and invocation["unknown_work"] is False,
                 "original numerical work unavailable",
             )
@@ -210,7 +226,19 @@ def verify(study, model_path, request_path):
                 step["parent_checkpoint"] == parent.to_dict(),
                 "original parent chain differs",
             )
-            require(step["committed"] is True, "uncommitted original transition")
+            if transition_index is not None:
+                require(
+                    path["entries"][transition_index]["parent_hash"]
+                    == parent.state_hash,
+                    "original entry parent hash differs",
+                )
+                require(
+                    step["step_hash"]
+                    == canonical_hash(
+                        {k: v for k, v in step.items() if k != "step_hash"}
+                    ),
+                    "original step identity differs",
+                )
             solution = step["trial_solution"]
             metrics = solution["metrics"]
             expected_work = dict(
@@ -223,6 +251,26 @@ def verify(study, model_path, request_path):
                 and invocation["work"] == expected_work,
                 "original work counters differ",
             )
+            arm_work.update(expected_work)
+            if response is None:
+                require(
+                    transition_index is not None
+                    and invocation["committed"] is False
+                    and invocation["rollback_exact"] is True
+                    and step["committed"] is False
+                    and step["status"] == "blocked"
+                    and step["metrics"]["rollback_exact"] is True
+                    and step["accepted_checkpoint"] == parent.to_dict(),
+                    "uncommitted original attempt did not preserve its parent",
+                )
+                # The failed trial is charged and its rollback record is bound,
+                # but its constitutive assembly is not independently replayed.
+                uncommitted_attempts_by_arm[name] += 1
+                continue
+            require(
+                invocation["committed"] is True and step["committed"] is True,
+                "uncommitted original transition",
+            )
             require(
                 all(
                     metrics[k] is True
@@ -234,7 +282,6 @@ def verify(study, model_path, request_path):
                 ),
                 "original Newton gates failed",
             )
-            arm_work.update(expected_work)
             adapter: Any
             if transition_index is None:
                 identity = _sha(_bytes(step))
@@ -255,7 +302,6 @@ def verify(study, model_path, request_path):
                 identity = canonical_hash(
                     {k: v for k, v in step.items() if k != "step_hash"}
                 )
-                require(step["step_hash"] == identity, "original step identity differs")
                 adapter = StatefulFiberFrame2DDisplacementControlStepAdapter(
                     problem,
                     parent,
@@ -397,10 +443,15 @@ def verify(study, model_path, request_path):
     require(
         report["reference_repeat_exact"] == exact, "stored reference repeat differs"
     )
-    return dict(
-        schema_version="rc-constant-seed-original-audit.v1",
-        original_records_reproduced=True,
-        repeat_admissible=exact and all(comparisons.values()),
+    uncommitted_count = sum(uncommitted_attempts_by_arm.values())
+    result = dict(
+        schema_version=(
+            "rc-constant-seed-original-audit.v2"
+            if uncommitted_count
+            else "rc-constant-seed-original-audit.v1"
+        ),
+        original_records_reproduced=uncommitted_count == 0,
+        repeat_admissible=uncommitted_count == 0 and exact and all(comparisons.values()),
         comparisons=comparisons,
         original_work=dict(work),
         audit_work={**audit_work, "newton_solves": 0, "state_commits": 0},
@@ -408,6 +459,15 @@ def verify(study, model_path, request_path):
         elapsed_ns=perf_counter_ns() - started,
         independent_physical_validation=False,
     )
+    if uncommitted_count:
+        result.update(
+            accepted_transitions_reassembled=audit_work["assembly_replays"],
+            uncommitted_attempts_record_bound=uncommitted_count,
+            uncommitted_attempts_by_arm=uncommitted_attempts_by_arm,
+            uncommitted_attempts_reassembled=0,
+            original_replay_scope="accepted_transitions_only",
+        )
+    return result
 
 
 if __name__ == "__main__":

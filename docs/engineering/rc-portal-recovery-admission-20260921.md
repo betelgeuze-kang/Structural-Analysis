@@ -1,5 +1,7 @@
 # Portal recovery study stops at public-profile admission
 
+**2026-09-27 update:** A separate, explicit experimental two-fixed-endpoint direct-control profile now admits the original portal model. Its scope and full 20 mm software observation are recorded in the [follow-up note](rc-public-two-base-portal-control-20260927.md). The rejected packets and findings below remain the original study record; they are not rewritten as completed comparisons.
+
 A planned development study constructs a 4 m by 3 m, three-member portal from the existing RC material/section definitions, with twelve concrete layers, two fixed bases, N4 horizontal reference loading and constant -25 kN vertical forces at both roof nodes. Three intended amplitude conditions are 20/40/80 mm, with reversal targets -A/2, -A, +A/2. Two repeats and two recovery modes would give twelve comparisons / 48 paths. These are authored conditions on one geometry, not independent buildings or experimental data.
 
 No comparison returned and no complete path was produced. The first generated input was rejected because its descriptive metadata field was unsupported. After using the accepted `case_id` metadata field, the compiler rejected the two-base support arrangement: `rc_fiber_frame_support_count_unsupported`. Both twelve-row rejection packets are preserved, including the driver's `unknown_work=true` flags; no failed attempt is silently replaced with a successful result.

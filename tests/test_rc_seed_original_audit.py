@@ -10,6 +10,7 @@ import pytest
 
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
+    decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.api.nonlinear_fiber_frame import (
     EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE,
@@ -22,6 +23,7 @@ from structural_analysis.benchmark.rc_control_learning import (
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     benchmark_rc_control_seed_paths,
 )
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.io.neutral.loader import load_neutral_json
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -162,6 +164,79 @@ def test_two_fixed_original_audit_rejects_forged_compiler_profile(
     report["compiler_profile"] = "single-fixed-endpoint-profile"
     report_path.write_bytes(rehash(report, "report_hash"))
     with pytest.raises(ValueError, match="compiler profile differs"):
+        verify(root)
+
+
+@pytest.fixture(scope="module")
+def two_fixed_retry_path(tmp_path_factory):
+    root = tmp_path_factory.mktemp("two-fixed-retry-path")
+    source = ROOT / "examples/research/rc_internal_portal_20mm"
+    shutil.copyfile(source / "original-model.json", root / "model.json")
+    request = replace(
+        decode_bounded_rc_fiber_direct_control_request(
+            (source / "original-request.json").read_bytes()
+        ),
+        experimental_two_fixed_endpoints=True,
+    )
+    (root / "request.json").write_bytes(_bytes(request.to_dict()))
+    report = benchmark_rc_control_seed_paths(
+        load_neutral_json(root / "model.json"),
+        request,
+        source_revision="a" * 40,
+        output_directory=root / "study",
+        **_arithmetic_kwargs(RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    assert report["reference_repeat_exact"]
+    path = json.loads((root / "study/secant/path.json").read_bytes())
+    assert [len(entry["invocations"]) for entry in path["entries"]] == [1, 1, 2]
+    assert path["entries"][2]["invocations"][0]["committed"] is False
+    assert path["entries"][2]["invocations"][1]["committed"] is True
+    return root
+
+
+def test_failed_seeded_attempt_is_charged_but_not_claimed_as_reassembled(
+    two_fixed_retry_path, monkeypatch
+):
+    from structural_analysis.assembly import stateful_fiber_frame2d_solver as force
+    from structural_analysis.assembly import (
+        stateful_fiber_frame2d_displacement_control as control,
+    )
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("original retry audit must not run Newton")
+
+    monkeypatch.setattr(force, "newton_raphson_vector", forbidden)
+    monkeypatch.setattr(control, "newton_raphson_vector", forbidden)
+    result = verify(two_fixed_retry_path)
+    assert result["schema_version"] == "rc-constant-seed-original-audit.v2"
+    assert result["comparisons"] == {"reference": True, "secant": True}
+    assert result["original_records_reproduced"] is False
+    assert result["repeat_admissible"] is False
+    assert result["original_replay_scope"] == "accepted_transitions_only"
+    assert result["accepted_transitions_reassembled"] == 12
+    assert result["uncommitted_attempts_record_bound"] == 1
+    assert result["uncommitted_attempts_by_arm"] == {
+        "reference": 0,
+        "secant": 1,
+        "fresh-reference": 0,
+    }
+    assert result["uncommitted_attempts_reassembled"] == 0
+    assert result["original_work"]["core_calls"] == 13
+    assert result["audit_work"]["assembly_replays"] == 12
+    assert result["audit_work"]["newton_solves"] == 0
+
+
+def test_failed_attempt_rollback_record_cannot_be_forged(two_fixed_retry_path, tmp_path):
+    root = tmp_path / "forged-rollback"
+    shutil.copytree(two_fixed_retry_path, root)
+    step_path = root / "study/secant/002-1-step.json"
+    step = json.loads(step_path.read_bytes())
+    step["metrics"]["rollback_exact"] = False
+    step["step_hash"] = canonical_hash(
+        {key: value for key, value in step.items() if key != "step_hash"}
+    )
+    step_path.write_bytes(_bytes(step))
+    with pytest.raises(ValueError, match="did not preserve its parent"):
         verify(root)
 
 
