@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -145,6 +147,48 @@ def test_canonical_packet_byte_hash_rejects_tamper_and_duplicate_keys(tmp_path) 
     path.write_bytes(duplicate)
     with pytest.raises(audit.PortalResponseAuditError, match="duplicate JSON key"):
         audit._read_verified(path, audit._sha(duplicate))
+
+
+def test_archived_packet_runner_identity_is_distinct_from_local_runner(
+    monkeypatch,
+) -> None:
+    archived_source = b"archived runner source"
+    archived_hash = audit._sha(archived_source)
+
+    def fake_run(command, *, cwd, check, capture_output):
+        assert command == [
+            "git",
+            "show",
+            f"{audit.PACKET_SOURCE_REVISION}:{audit.PACKET_RUNNER_PATH}",
+        ]
+        assert cwd.is_dir()
+        assert check is True
+        assert capture_output is True
+        return SimpleNamespace(stdout=archived_source)
+
+    monkeypatch.setattr(audit.subprocess, "run", fake_run)
+    identity = audit._runner_source_identity({"runner_source_hash": archived_hash})
+    assert identity["packet_runner_source_hash"] == archived_hash
+    assert identity["local_runner_matches_packet_source"] is False
+    assert identity["local_runner_source_hash"] == audit._sha(
+        Path(audit.portal_runner.__file__).read_bytes()
+    )
+    with pytest.raises(
+        audit.PortalResponseAuditError, match="archived runner source differs"
+    ):
+        audit._runner_source_identity({"runner_source_hash": "sha256:" + "0" * 64})
+
+
+def test_unavailable_archived_runner_fails_closed(monkeypatch) -> None:
+    def missing_git(*args, **kwargs):
+        raise FileNotFoundError("git")
+
+    monkeypatch.setattr(audit.subprocess, "run", missing_git)
+    with pytest.raises(
+        audit.PortalResponseAuditError,
+        match="archived packet runner source unavailable",
+    ):
+        audit._runner_source_identity({"runner_source_hash": "sha256:" + "0" * 64})
 
 
 def test_real_preload_projection_binds_member_section_and_fiber_states() -> None:

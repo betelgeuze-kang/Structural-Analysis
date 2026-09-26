@@ -11,6 +11,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import subprocess
 from typing import Any
 
 from structural_analysis.benchmark import (
@@ -37,6 +38,9 @@ from structural_analysis.benchmark.rc_internal_portal_20mm_comparison import (
 
 SCHEMA_VERSION = "internal-rc-portal-20mm-response-diagnostic.v1"
 PACKET_SOURCE_REVISION = "1500212a51992a43ccf1dbbe1b6af5c50e8b8cf5"
+PACKET_RUNNER_PATH = (
+    "src/structural_analysis/benchmark/rc_internal_portal_20mm_comparison.py"
+)
 PLAN_FILE_HASH = (
     "sha256:9d9287503cc99bdff63e46691949b1ec12f669e8eddf84a9d15468f2d4b315ff"
 )
@@ -120,6 +124,33 @@ def _self_hash(payload: dict[str, Any], key: str) -> str:
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise PortalResponseAuditError(message)
+
+
+def _runner_source_identity(plan: dict[str, Any]) -> dict[str, Any]:
+    """Bind the packet to its archived runner, independent of the local runner."""
+
+    try:
+        archived_source = subprocess.run(
+            ["git", "show", f"{PACKET_SOURCE_REVISION}:{PACKET_RUNNER_PATH}"],
+            cwd=Path(__file__).resolve().parents[1],
+            check=True,
+            capture_output=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise PortalResponseAuditError(
+            "archived packet runner source unavailable"
+        ) from exc
+    archived_hash = _sha(archived_source)
+    _require(
+        archived_hash == plan["runner_source_hash"],
+        "archived runner source differs from packet",
+    )
+    local_hash = _sha(Path(portal_runner.__file__).read_bytes())
+    return {
+        "packet_runner_source_hash": archived_hash,
+        "local_runner_source_hash": local_hash,
+        "local_runner_matches_packet_source": local_hash == archived_hash,
+    }
 
 
 def _validated_projection(step: dict[str, Any], case: Any) -> dict[str, Any]:
@@ -547,10 +578,7 @@ def audit_packet(root: Path) -> dict[str, Any]:
         and plan["internal_problem_contract_hash"] == INTERNAL_PROBLEM_HASH,
         "packet input identity changed",
     )
-    _require(
-        _sha(Path(portal_runner.__file__).read_bytes()) == plan["runner_source_hash"],
-        "local runner source differs from packet",
-    )
+    runner_source_identity = _runner_source_identity(plan)
     _require(
         outcome["source_unchanged"] is True
         and outcome["exact_source_comparison_eligible"] is True
@@ -635,6 +663,7 @@ def audit_packet(root: Path) -> dict[str, Any]:
         "status": "read_only_diagnostic_projection",
         "auditor_source_hash": _sha(Path(__file__).read_bytes()),
         "packet_source_revision": PACKET_SOURCE_REVISION,
+        **runner_source_identity,
         "plan_hash": plan["plan_hash"],
         "outcome_hash": outcome["outcome_hash"],
         "comparison_rule_source": "rc_control_seed_runtime.py defaults; fiber_frame_runtime.py numeric payload rule",

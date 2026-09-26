@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 from time import perf_counter_ns
+from types import SimpleNamespace
 from typing import Any
 
 import numpy as np
@@ -154,6 +155,7 @@ def test_fixed_frozen_parent_stages_never_adopt_intermediate_checkpoint(
         case,
         tmp_path,
         parent,
+        0,
         -0.01,
         "fixed",
         runner._empty_work(),
@@ -166,6 +168,70 @@ def test_fixed_frozen_parent_stages_never_adopt_intermediate_checkpoint(
     assert all(supplied is parent for _target, supplied in observed)
     assert observed[-1][0] == -0.01
     assert parent.canonical_bytes() == parent_bytes
+
+
+def test_two_target_recoveries_write_distinct_exclusive_stage_artifacts(
+    monkeypatch, tmp_path
+) -> None:
+    case = runner.prepare_case()
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(case.problem)
+    solved_targets: list[float] = []
+
+    def fake_solver(
+        _problem,
+        _parent,
+        *,
+        control_global_dof,
+        target_control_displacement_m,
+        config,
+        augmented_coordinate_seed_m,
+    ):
+        assert control_global_dof == runner.CONTROL_DOF
+        solved_targets.append(target_control_displacement_m)
+        return SimpleNamespace(
+            committed=True,
+            accepted_checkpoint=SimpleNamespace(state_hash=parent.state_hash),
+            metrics={
+                **{name: 0 for name in runner._WORK_KEYS},
+                "rollback_exact": True,
+                "parent_checkpoint_immutable": True,
+            },
+            trial_solution=SimpleNamespace(
+                augmented_coordinates_m=np.zeros(7),
+                metrics={"terminal_reason": "synthetic_committed"},
+            ),
+            to_dict=lambda: {"target_m": target_control_displacement_m},
+        )
+
+    monkeypatch.setattr(
+        runner,
+        "solve_stateful_corotational_fiber_frame2d_displacement_control_step",
+        fake_solver,
+    )
+    for target_index, target_m in enumerate((-0.01, -0.02)):
+        seed, stages, unknown, reason = runner._frozen_parent_seed(
+            case,
+            tmp_path,
+            parent,
+            target_index,
+            target_m,
+            "fixed",
+            runner._empty_work(),
+            perf_counter_ns() + 60_000_000_000,
+        )
+        assert seed == (0.0,) * 7
+        assert len(stages) == 16
+        assert unknown is False
+        assert reason == "target_coordinate_reached"
+    assert len(solved_targets) == 32
+    assert solved_targets[15] == -0.01
+    assert solved_targets[31] == -0.02
+    for target_index in range(2):
+        for stage_index in range(16):
+            prefix = f"target-{target_index:03d}-continuation-{stage_index:03d}"
+            for suffix in ("started", "step", "outcome"):
+                assert (tmp_path / f"{prefix}-{suffix}.json").is_file()
+    assert len(list(tmp_path.iterdir())) == 2 * 16 * 3
 
 
 def test_deadline_before_arm_keeps_zero_known_work(tmp_path) -> None:
