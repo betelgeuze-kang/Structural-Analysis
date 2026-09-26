@@ -188,7 +188,8 @@ def test_initial_reader_binds_one_read_then_performs_full_recheck(tmp_path, monk
 
 
 def test_mutation_during_initial_decode_is_still_rejected(tmp_path, monkeypatch):
-    path = tmp_path/'a.json'; path.write_text('{"value":1}')
+    path = tmp_path/'a.json'
+    path.write_text('{"value":1}')
     original = files._validate_value
     def changed(raw, name):
         value = original(raw, name)
@@ -202,7 +203,8 @@ def test_mutation_during_initial_decode_is_still_rejected(tmp_path, monkeypatch)
 def write_request(tmp_path):
     request = BoundedRCFiberDirectControlRequest(4, (-1e-6, -2e-6, 1e-6), allow_reversals=True, maximum_reversals=2,
         constant_nodal_loads=(('N2', -10., 0., 0.),))
-    path = tmp_path/'request.json'; path.write_text(json.dumps(request.to_dict()))
+    path = tmp_path/'request.json'
+    path.write_text(json.dumps(request.to_dict()))
     return path
 
 
@@ -225,7 +227,9 @@ def test_cli_actual_run_and_fresh_replay_agree(tmp_path, capsys):
 
 
 def test_cli_cannot_overwrite_output(tmp_path, capsys):
-    args = arguments(tmp_path); (tmp_path/'out').mkdir(); (tmp_path/'out/keep').write_text('unchanged')
+    args = arguments(tmp_path)
+    (tmp_path/'out').mkdir()
+    (tmp_path/'out/keep').write_text('unchanged')
     assert cli.main(args) == 2
     assert (tmp_path/'out/keep').read_text() == 'unchanged'
     assert not (tmp_path/'out/started.json').exists()
@@ -233,12 +237,14 @@ def test_cli_cannot_overwrite_output(tmp_path, capsys):
 
 @pytest.mark.parametrize('bad', ['', 'main', 'a'*39, 'A'*40])
 def test_cli_source_label_rejected_before_output(tmp_path, capsys, bad):
-    args = arguments(tmp_path); args[-1] = bad
+    args = arguments(tmp_path)
+    args[-1] = bad
     assert cli.main(args) == 2 and not (tmp_path/'out').exists()
 
 
 def test_cli_bad_request_rejected_before_output(tmp_path, capsys):
-    args = arguments(tmp_path); (tmp_path/'request.json').write_text('{"x":1,"x":2}')
+    args = arguments(tmp_path)
+    (tmp_path/'request.json').write_text('{"x":1,"x":2}')
     assert cli.main(args) == 2 and not (tmp_path/'out').exists()
 
 
