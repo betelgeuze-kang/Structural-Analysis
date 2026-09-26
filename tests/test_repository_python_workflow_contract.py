@@ -981,7 +981,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     selected_paths = [x for x in tests if x.startswith("tests/")]
     selected = set(selected_paths)
     assert len(selected_paths) == len(selected), "duplicate development module selection"
-    assert len(selected) == 79
+    assert len(selected) == 80
     assert all((ROOT / path).is_file() for path in selected)
     assert {
         "tests/test_stateful_fiber_section.py",
@@ -1008,6 +1008,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "tests/test_rc_adaptive_continuation_campaign.py",
         "tests/test_rc_adaptive_campaign_audit.py",
         "tests/test_rc_internal_portal_20mm_comparison.py",
+        "tests/test_audit_rc_internal_portal_20mm_comparison.py",
         "tests/test_rc_offline_cost_tree.py",
         "tests/test_rc_scalar_runtime_equivalence.py",
         "tests/test_rc_same_parent_probe_records.py",
