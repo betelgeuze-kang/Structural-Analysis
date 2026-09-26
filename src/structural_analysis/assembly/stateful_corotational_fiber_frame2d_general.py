@@ -585,6 +585,12 @@ def validate_corotational_fiber_frame_general_manifest(
 def _validate_general_profile(
     problem: StatefulCorotationalFiberFrame2DProblem,
 ) -> dict[str, Any]:
+    if problem.constant_external_loads:
+        _fail(
+            "corotational_general_constant_external_load_unsupported",
+            "/constant_external_loads",
+            "The v1 connected-frame profile supports proportional nodal loads only.",
+        )
     node_count = len(problem.node_coordinates_m)
     if not 2 <= node_count <= 128 or not 1 <= len(problem.members) <= 256:
         _fail(

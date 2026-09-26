@@ -486,6 +486,12 @@ def _validate_portal_profile(
     problem: StatefulCorotationalFiberFrame2DProblem,
 ) -> tuple[tuple[int, int], tuple[int, int]]:
     coordinates = problem.node_coordinates_m
+    if problem.constant_external_loads:
+        _fail(
+            "corotational_portal_constant_external_load_unsupported",
+            "/constant_external_loads",
+            "The v1 portal profile supports proportional nodal loads only.",
+        )
     if problem.prescribed_displacements:
         _fail(
             "corotational_portal_prescribed_displacement_unsupported",

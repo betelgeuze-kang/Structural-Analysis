@@ -145,6 +145,7 @@ class StatefulCorotationalFiberFrame2DProblem:
     reference_external_loads: tuple[tuple[int, float], ...]
     rotation_coordinate_scale_m: float
     prescribed_displacements: tuple[tuple[int, float], ...] = ()
+    constant_external_loads: tuple[tuple[int, float], ...] = ()
 
     def __post_init__(self) -> None:
         normalized_case_id = str(self.case_id).strip()
@@ -218,6 +219,23 @@ class StatefulCorotationalFiberFrame2DProblem:
             load_dofs.add(dof)
             loads.append((dof, _finite(row[1], name="reference external load")))
         object.__setattr__(self, "reference_external_loads", tuple(sorted(loads)))
+        if not isinstance(self.constant_external_loads, tuple):
+            raise ValueError("constant_external_loads must be a tuple")
+        constant_loads: list[tuple[int, float]] = []
+        constant_load_dofs: set[int] = set()
+        for row in self.constant_external_loads:
+            if not isinstance(row, tuple) or len(row) != 2 or type(row[0]) is not int:
+                raise ValueError("each constant external load must be (dof, value)")
+            dof = row[0]
+            if dof < 0 or dof >= global_dof_count:
+                raise ValueError("constant external load DOF is out of range")
+            if dof in constant_load_dofs:
+                raise ValueError("constant external load DOFs must be unique")
+            constant_load_dofs.add(dof)
+            constant_loads.append((dof, _finite(row[1], name="constant external load")))
+        object.__setattr__(
+            self, "constant_external_loads", tuple(sorted(constant_loads))
+        )
         if not isinstance(self.prescribed_displacements, tuple):
             raise ValueError("prescribed_displacements must be a tuple")
         prescribed: list[tuple[int, float]] = []
@@ -239,6 +257,7 @@ class StatefulCorotationalFiberFrame2DProblem:
         object.__setattr__(self, "prescribed_displacements", normalized_prescribed)
         if (
             not any(value != 0.0 for _, value in loads)
+            and not any(value != 0.0 for _, value in constant_loads)
             and not any(value != 0.0 for _, value in normalized_prescribed)
             and not any(member.features.has_distributed_load for member in self.members)
         ):
@@ -272,36 +291,40 @@ class StatefulCorotationalFiberFrame2DProblem:
 
     @property
     def contract_hash(self) -> str:
-        return canonical_hash(
-            {
-                "schema_version": (STATEFUL_COROTATIONAL_FIBER_FRAME2D_SCHEMA_VERSION),
-                "case_id": self.case_id,
-                "node_coordinates_m": [list(row) for row in self.node_coordinates_m],
-                "members": [
-                    {
-                        "member_id": member.member_id,
-                        "node_i": member.node_i,
-                        "node_j": member.node_j,
-                        "element_contract_hash": member.element.contract_hash,
-                        "feature_contract_hash": member.features.contract_hash,
-                    }
-                    for member in self.members
-                ],
-                "fixed_global_dofs": list(self.fixed_global_dofs),
-                "reference_external_loads": [
-                    [dof, value] for dof, value in self.reference_external_loads
-                ],
-                "prescribed_displacements": [
-                    [dof, value] for dof, value in self.prescribed_displacements
-                ],
-                "rotation_coordinate_scale_m": self.rotation_coordinate_scale_m,
-                "assembly": STATEFUL_COROTATIONAL_FIBER_FRAME2D_ASSEMBLY,
-                "coordinate_scaling": (
-                    STATEFUL_COROTATIONAL_FIBER_FRAME2D_COORDINATE_SCALING
-                ),
-                "residual_formula": RESIDUAL_FORMULA,
-            }
-        )
+        contract = {
+            "schema_version": (STATEFUL_COROTATIONAL_FIBER_FRAME2D_SCHEMA_VERSION),
+            "case_id": self.case_id,
+            "node_coordinates_m": [list(row) for row in self.node_coordinates_m],
+            "members": [
+                {
+                    "member_id": member.member_id,
+                    "node_i": member.node_i,
+                    "node_j": member.node_j,
+                    "element_contract_hash": member.element.contract_hash,
+                    "feature_contract_hash": member.features.contract_hash,
+                }
+                for member in self.members
+            ],
+            "fixed_global_dofs": list(self.fixed_global_dofs),
+            "reference_external_loads": [
+                [dof, value] for dof, value in self.reference_external_loads
+            ],
+            "prescribed_displacements": [
+                [dof, value] for dof, value in self.prescribed_displacements
+            ],
+            "rotation_coordinate_scale_m": self.rotation_coordinate_scale_m,
+            "assembly": STATEFUL_COROTATIONAL_FIBER_FRAME2D_ASSEMBLY,
+            "coordinate_scaling": (
+                STATEFUL_COROTATIONAL_FIBER_FRAME2D_COORDINATE_SCALING
+            ),
+            "residual_formula": RESIDUAL_FORMULA,
+        }
+        # Preserve v1 identity for problems without the optional constant channel.
+        if self.constant_external_loads:
+            contract["constant_external_loads"] = [
+                [dof, value] for dof, value in self.constant_external_loads
+            ]
+        return canonical_hash(contract)
 
     def member_global_dofs(
         self,
@@ -319,6 +342,13 @@ class StatefulCorotationalFiberFrame2DProblem:
     def reference_external_load_vector(self) -> np.ndarray:
         external = np.zeros(self.global_dof_count, dtype=np.float64)
         for dof, value in self.reference_external_loads:
+            external[dof] = value
+        external.setflags(write=False)
+        return external
+
+    def constant_external_load_vector(self) -> np.ndarray:
+        external = np.zeros(self.global_dof_count, dtype=np.float64)
+        for dof, value in self.constant_external_loads:
             external[dof] = value
         external.setflags(write=False)
         return external
@@ -355,6 +385,13 @@ class StatefulCorotationalFiberFrame2DProblem:
         )
         return max(
             float(np.linalg.norm(generalized, ord=np.inf)),
+            float(
+                np.linalg.norm(
+                    self.physical_coordinate_scale
+                    * self.constant_external_load_vector(),
+                    ord=np.inf,
+                )
+            ),
             distributed_scale,
             1.0,
         )
@@ -709,7 +746,10 @@ def assemble_stateful_corotational_fiber_frame2d(
     if prescribed is not None:
         global_displacements[prescribed_dofs] = prescribed[prescribed_dofs]
     internal = np.zeros(problem.global_dof_count, dtype=np.float64)
-    external = load_factor * problem.reference_external_load_vector()
+    external = (
+        problem.constant_external_load_vector()
+        + load_factor * problem.reference_external_load_vector()
+    )
     partial_load_factor_derivative = -problem.reference_external_load_vector().copy()
     material_tangent = np.zeros(
         (problem.global_dof_count, problem.global_dof_count),
