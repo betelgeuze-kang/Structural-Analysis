@@ -103,6 +103,7 @@ jobs:
           tests/test_rc_recovery_followup.py
           tests/test_rc_adaptive_continuation_campaign.py
           tests/test_rc_adaptive_campaign_audit.py
+          tests/test_rc_internal_portal_20mm_comparison.py
           tests/test_rc_control_model_selection.py
           tests/test_rc_control_training_diagnostics.py
           tests/test_rc_runtime_cost_diagnostic.py
