@@ -509,6 +509,15 @@ def test_invalid_full_step_trial_is_rejected_and_backtracking_continues(
     assert first_attempts[0]["failure"] == "invalid_trial_assembly"
     assert len(first_attempts) >= 2
     assert any(row["accepted"] is True for row in first_attempts[1:])
+    assert solution.metrics["assembly_exception_count"] == 1
+    assert solution.metrics["line_search_trial_count"] == sum(
+        row["attempt_count"] for row in solution.line_search_history
+    )
+    assert solution.metrics["assembly_call_count"] == (
+        solution.metrics["iteration_count"]
+        + solution.metrics["line_search_trial_count"]
+        + 1  # Final parent-bound assembly.
+    )
 
 
 def test_direct_control_rejects_disconnected_member_graph() -> None:
@@ -555,6 +564,222 @@ def test_failed_direct_control_step_rolls_back_exact_parent() -> None:
     assert result.trial_solution.metrics["contract_pass"] is False
     assert result.trial_solution.metrics["fallback_used"] is False
     assert result.trial_solution.metrics["regularization_used"] is False
+    assert result.trial_solution.metrics["iteration_count"] == 1
+    assert result.trial_solution.metrics["linear_solve_count"] == 1
+    assert result.trial_solution.metrics["line_search_trial_count"] >= 1
+    assert result.trial_solution.metrics["assembly_call_count"] == (
+        1 + result.trial_solution.metrics["line_search_trial_count"]
+    )
+    assert result.metrics["assembly_call_count"] == (
+        result.trial_solution.metrics["assembly_call_count"] + 1
+    )
+
+
+@pytest.mark.parametrize(
+    "seed",
+    (
+        (),
+        (0.0,),
+        ((0.0, 0.0),),
+        (0.0, np.nan),
+        (np.inf, 0.0),
+        (True, 0.0),
+        ("0.0", 0.0),
+        (0.0, 1.0e308),
+    ),
+)
+def test_direct_control_rejects_invalid_augmented_seed_before_solve(
+    monkeypatch, seed
+) -> None:
+    problem = _arch_problem("direct-control-invalid-seed")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("invalid seed must not enter the Newton solve")
+
+    monkeypatch.setattr(
+        "structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control.solve_stateful_corotational_fiber_frame2d_displacement_control",
+        forbidden,
+    )
+    with pytest.raises(ValueError, match="augmented_coordinate_seed_m"):
+        solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+            problem,
+            parent,
+            control_global_dof=4,
+            target_control_displacement_m=-0.01,
+            augmented_coordinate_seed_m=seed,
+        )
+    assert parent.canonical_bytes() == parent_bytes
+
+
+def test_single_step_augmented_seed_preserves_parent_and_no_seed_checkpoint() -> None:
+    problem = _arch_problem("direct-control-seed-regression")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    plain = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+    )
+    explicit_none = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        augmented_coordinate_seed_m=None,
+    )
+    seed = plain.trial_solution.augmented_coordinates_m.copy()
+    seed_bytes = seed.tobytes()
+    step_problem = StatefulCorotationalFiberFrame2DDisplacementControlStepProblem(
+        problem=problem,
+        accepted_checkpoint=parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        config=StatefulCorotationalFiberFrame2DDisplacementControlConfig(),
+        augmented_coordinate_seed_m=seed,
+    )
+    seed[0] = 123.0
+    normalized_seed = step_problem.initial_augmented_coordinates_m()
+    assert normalized_seed.tobytes() == seed_bytes
+    normalized_seed[0] = 456.0
+    assert step_problem.initial_augmented_coordinates_m().tobytes() == seed_bytes
+    seeded = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        augmented_coordinate_seed_m=step_problem.initial_augmented_coordinates_m(),
+    )
+
+    assert plain.committed and explicit_none.committed and seeded.committed
+    assert plain.accepted_checkpoint.state_hash == (
+        "sha256:7fb7afb78809bc510540ee2f45682fe250da7b13bed4a5af545d95814497ded3"
+    )
+    assert (
+        plain.accepted_checkpoint.canonical_bytes()
+        == explicit_none.accepted_checkpoint.canonical_bytes()
+        == seeded.accepted_checkpoint.canonical_bytes()
+    )
+    assert seeded.trial_solution.metrics["iteration_count"] == 1
+    assert seeded.trial_solution.metrics["linear_solve_count"] == 1
+    assert seeded.trial_solution.metrics["assembly_call_count"] == 2
+    assert parent.canonical_bytes() == parent_bytes
+    assert seeded.accepted_checkpoint.parent_state_hash == parent.state_hash
+
+
+def test_augmented_seed_solves_multi_equation_two_base_portal() -> None:
+    problem = _two_base_portal_problem("direct-control-multi-dof-seed")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    plain = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=9,
+        target_control_displacement_m=-2.0e-5,
+    )
+    seed = plain.trial_solution.augmented_coordinates_m.copy()
+    seeded = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=9,
+        target_control_displacement_m=-2.0e-5,
+        augmented_coordinate_seed_m=seed,
+    )
+
+    assert len(problem.free_global_dofs) == 6
+    assert seed.shape == (7,)
+    assert plain.committed and seeded.committed
+    assert seeded.accepted_checkpoint.canonical_bytes() == (
+        plain.accepted_checkpoint.canonical_bytes()
+    )
+    assert seeded.accepted_checkpoint.parent_state_hash == parent.state_hash
+    assert parent.canonical_bytes() == parent_bytes
+
+
+def test_invalid_seed_assembly_counts_work_and_rolls_back(monkeypatch) -> None:
+    problem = _arch_problem("direct-control-seed-assembly-failure")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    seed = np.asarray((-0.01, 0.0), dtype=np.float64)
+    original_assemble = (
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem.assemble
+    )
+
+    def reject_seed(self, coordinates_m):
+        if np.array_equal(coordinates_m, seed):
+            raise ValueError("synthetic invalid seed geometry")
+        return original_assemble(self, coordinates_m)
+
+    monkeypatch.setattr(
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem,
+        "assemble",
+        reject_seed,
+    )
+    result = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        augmented_coordinate_seed_m=seed,
+    )
+
+    assert result.status == "blocked"
+    assert result.accepted_checkpoint is parent
+    assert result.metrics["rollback_exact"] is True
+    assert parent.canonical_bytes() == parent_bytes
+    assert result.trial_solution.metrics["terminal_reason"] == "invalid_seed_assembly"
+    assert result.trial_solution.metrics["solver_executed"] is True
+    assert result.trial_solution.metrics["iteration_count"] == 1
+    assert result.trial_solution.metrics["linear_solve_count"] == 0
+    assert result.trial_solution.metrics["assembly_call_count"] == 1
+    assert result.trial_solution.metrics["assembly_exception_count"] == 1
+    assert result.metrics["assembly_call_count"] == 2
+
+
+def test_failed_augmented_linear_solve_is_counted_before_rollback(monkeypatch) -> None:
+    problem = _arch_problem("direct-control-singular-work")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    original_assemble = (
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem.assemble
+    )
+
+    def singular_augmented_jacobian(self, coordinates_m):
+        assembly = original_assemble(self, coordinates_m)
+        return replace(
+            assembly,
+            augmented_jacobian_kn_per_m=np.zeros_like(
+                assembly.augmented_jacobian_kn_per_m
+            ),
+        )
+
+    monkeypatch.setattr(
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem,
+        "assemble",
+        singular_augmented_jacobian,
+    )
+    result = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+    )
+
+    assert result.status == "blocked"
+    assert result.accepted_checkpoint is parent
+    assert result.metrics["rollback_exact"] is True
+    assert parent.canonical_bytes() == parent_bytes
+    assert result.trial_solution.metrics["terminal_reason"] == (
+        "singular_augmented_jacobian"
+    )
+    assert result.trial_solution.convergence_history == []
+    assert result.trial_solution.metrics["solver_executed"] is True
+    assert result.trial_solution.metrics["iteration_count"] == 1
+    assert result.trial_solution.metrics["linear_solve_count"] == 1
+    assert result.trial_solution.metrics["assembly_call_count"] == 1
+    assert result.metrics["assembly_call_count"] == 2
 
 
 def test_direct_control_rejects_ambiguous_or_unsupported_configuration() -> None:
