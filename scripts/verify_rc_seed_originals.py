@@ -93,7 +93,20 @@ def verify(study, model_path, request_path):
         model.canonical_model_checksum == report["model_checksum"],
         "original model differs",
     )
-    compiled, blockers, _ = public._compile(model)
+    if request.experimental_two_fixed_endpoints:
+        require(
+            report.get("compiler_profile")
+            == public.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE,
+            "experimental two-fixed-endpoint compiler profile differs",
+        )
+    compiled, blockers, _ = public._compile(
+        model,
+        **(
+            {"experimental_two_fixed_endpoints": True}
+            if request.experimental_two_fixed_endpoints
+            else {}
+        ),
+    )
     require(compiled is not None and not blockers, "unsupported original model")
     compiled = _learning_compiled_arithmetic(
         api._with_constant_loading(compiled, request.constant_nodal_loads), profile

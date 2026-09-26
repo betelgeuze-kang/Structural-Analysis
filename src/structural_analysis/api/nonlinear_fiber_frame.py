@@ -1,9 +1,9 @@
 """Public bounded stateful RC fiber-frame API.
 
-The compiler accepts one deliberately narrow planar serial-cantilever profile.
-Every accepted final result is produced through the existing J1--J5 source
-chain and the exact source-specific engineering recovery operator.  General
-frame topology and unsupported model semantics fail closed before solve.
+The public load-control compiler accepts one narrow planar serial cantilever.
+Its accepted final results use the J1--J5 source chain and exact engineering
+recovery. An explicit two-fixed-endpoint compiler branch exists only for the
+experimental direct-control API; general frame topology still fails closed.
 """
 
 from __future__ import annotations
@@ -86,6 +86,9 @@ PUBLIC_RC_FIBER_FRAME_REPORT_SCHEMA_VERSION = (
 PUBLIC_RC_FIBER_FRAME_SOLVER_ID = "public_cpu_stateful_rc_fiber_frame_newton_v1"
 PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE = (
     "planar_serial_cantilever_explicit_rectangular_rc.v1"
+)
+EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE = (
+    "planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1"
 )
 PUBLIC_RC_FIBER_FRAME_CLAIM_BOUNDARY = (
     "This public Developer Preview path accepts only one XY-plane serial "
@@ -431,7 +434,7 @@ class _CompiledPublicRCFiberFrame:
     problem: StatefulFiberFrame2DProblem
     node_ids: tuple[str, ...]
     section_by_member: tuple[StatefulRCFiberSection, ...]
-    support_node_id: str
+    support_node_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -621,11 +624,15 @@ def validate_public_rc_fiber_frame_result(
 
 def _compile(
     model: CanonicalModel,
+    *,
+    experimental_two_fixed_endpoints: bool = False,
 ) -> tuple[
     _CompiledPublicRCFiberFrame | None,
     list[Mapping[str, Any]],
     list[str],
 ]:
+    if type(experimental_two_fixed_endpoints) is not bool:
+        raise ValueError("explicit boolean two-fixed-endpoint compiler opt-in required")
     unsupported: list[Mapping[str, Any]] = [
         dict(row) for row in model.unsupported_features
     ]
@@ -633,14 +640,21 @@ def _compile(
     if unsupported:
         return None, unsupported, warnings
     try:
-        compiled = _compile_exact(model)
+        compiled = _compile_exact(
+            model,
+            experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+        )
     except _PublicRCFiberFrameCompileError as exc:
         unsupported.append(exc.to_blocker())
         return None, unsupported, warnings
     return compiled, unsupported, warnings
 
 
-def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
+def _compile_exact(
+    model: CanonicalModel,
+    *,
+    experimental_two_fixed_endpoints: bool = False,
+) -> _CompiledPublicRCFiberFrame:
     if model.schema_version != CANONICAL_MODEL_SCHEMA_VERSION:
         _fail_compile(
             "rc_fiber_frame_schema_invalid",
@@ -1071,34 +1085,51 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
             "Only one connected, unbranched, acyclic member chain is supported.",
         )
 
-    if len(model.supports) != 1:
+    required_support_count = 2 if experimental_two_fixed_endpoints else 1
+    if len(model.supports) != required_support_count:
         _fail_compile(
             "rc_fiber_frame_support_count_unsupported",
             "/supports",
-            "Exactly one zero-displacement endpoint support is required.",
+            (
+                "Exactly two zero-displacement endpoint supports are required "
+                "for experimental direct control."
+                if experimental_two_fixed_endpoints
+                else "Exactly one zero-displacement endpoint support is required."
+            ),
         )
-    support = model.supports[0]
-    _exact_keys(support, {"node", "dofs"}, "/supports/0")
-    support_node_id = support["node"]
-    if type(support_node_id) is not str or support_node_id not in endpoints:
-        _fail_compile(
-            "rc_fiber_frame_support_node_invalid",
-            "/supports/0/node",
-            "The single support must be located at a chain endpoint.",
-        )
-    support_dofs = support["dofs"]
-    if (
-        type(support_dofs) is not list
-        or len(support_dofs) != 3
-        or set(support_dofs) != set(_ACTIVE_COMPONENTS)
-    ):
-        _fail_compile(
-            "rc_fiber_frame_support_dofs_invalid",
-            "/supports/0/dofs",
-            "The endpoint must restrain exactly UX, UY, and RZ at zero.",
-        )
-    support_index = node_index[support_node_id]
-    fixed_global_dofs = tuple(3 * support_index + offset for offset in range(3))
+    support_node_set: set[str] = set()
+    for index, support in enumerate(model.supports):
+        path = f"/supports/{index}"
+        _exact_keys(support, {"node", "dofs"}, path)
+        support_node_id = support["node"]
+        if (
+            type(support_node_id) is not str
+            or support_node_id not in endpoints
+            or support_node_id in support_node_set
+        ):
+            _fail_compile(
+                "rc_fiber_frame_support_node_invalid",
+                f"{path}/node",
+                "Each fully fixed support must occupy a distinct chain endpoint.",
+            )
+        support_dofs = support["dofs"]
+        if (
+            type(support_dofs) is not list
+            or len(support_dofs) != 3
+            or set(support_dofs) != set(_ACTIVE_COMPONENTS)
+        ):
+            _fail_compile(
+                "rc_fiber_frame_support_dofs_invalid",
+                f"{path}/dofs",
+                "The endpoint must restrain exactly UX, UY, and RZ at zero.",
+            )
+        support_node_set.add(support_node_id)
+    support_node_ids = tuple(node for node in node_ids if node in support_node_set)
+    fixed_global_dofs = tuple(
+        3 * node_index[node] + offset
+        for node in support_node_ids
+        for offset in range(3)
+    )
 
     if len(model.loads) < 1 or len(model.loads) > _MAX_LOAD_ROWS:
         _fail_compile(
@@ -1118,7 +1149,7 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
                 f"{path}/node",
                 "Nodal load must reference a declared node.",
             )
-        if load_node_id == support_node_id:
+        if load_node_id in support_node_set:
             _fail_compile(
                 "rc_fiber_frame_support_load_unsupported",
                 f"{path}/node",
@@ -1201,7 +1232,7 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
         problem=problem,
         node_ids=tuple(node_ids),
         section_by_member=tuple(section_by_member),
-        support_node_id=support_node_id,
+        support_node_ids=support_node_ids,
     )
 
 
@@ -1594,14 +1625,18 @@ def _reaction_rows(
     reaction_global_si: Any,
 ) -> tuple[Mapping[str, Any], ...]:
     values = np.asarray(reaction_global_si, dtype=np.float64).reshape((-1, 6))
-    node_index = compiled.node_ids.index(compiled.support_node_id)
     return tuple(
         {
-            "node_id": compiled.support_node_id,
+            "node_id": node_id,
             "dof": component,
-            "value_si": float(values[node_index, _ACTIVE_TO_CANONICAL[component]]),
+            "value_si": float(
+                values[
+                    compiled.node_ids.index(node_id), _ACTIVE_TO_CANONICAL[component]
+                ]
+            ),
             "unit": "N" if component in {"UX", "UY"} else "N*m",
         }
+        for node_id in compiled.support_node_ids
         for component in _ACTIVE_COMPONENTS
     )
 
@@ -1841,6 +1876,7 @@ def _fail_compile(kind: str, path: str, detail: str) -> NoReturn:
 
 
 __all__ = [
+    "EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE",
     "PUBLIC_RC_FIBER_FRAME_CLAIM_BOUNDARY",
     "PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE",
     "PUBLIC_RC_FIBER_FRAME_REPORT_SCHEMA_VERSION",

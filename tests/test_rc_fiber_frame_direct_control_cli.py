@@ -11,6 +11,7 @@ import pytest
 from structural_analysis.api import rc_fiber_frame_direct_control_cli as cli
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     REQUEST_SCHEMA_VERSION,
+    TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -176,6 +177,42 @@ def test_run_mandatory_source_validation_and_failed_status_accounting(
         assert not paths["checkpoint-output"].exists()
     else:
         assert paths["checkpoint-output"].read_bytes() == checkpoint
+
+
+def test_two_fixed_endpoint_v3_cli_forwards_exact_opt_in_to_analysis_and_replay(
+    tmp_path, monkeypatch
+):
+    paths = _inputs(tmp_path)
+    paths["model"].write_bytes(
+        (ROOT / "examples/research/rc_internal_portal_20mm/original-model.json").read_bytes()
+    )
+    paths["request"].write_text(
+        json.dumps(
+            {
+                "schema_version": TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION,
+                "experimental_two_fixed_endpoints": True,
+                "control_global_dof": 9,
+                "targets_m": [-1e-5],
+                "constant_nodal_loads": [
+                    {"node_id": "N3", "FX_kN": 0.0, "FY_kN": -25.0, "MZ_kNm": 0.0},
+                    {"node_id": "N4", "FX_kN": 0.0, "FY_kN": -25.0, "MZ_kNm": 0.0},
+                ],
+            }
+        )
+    )
+    _, _, calls = _stubs(monkeypatch)
+    assert cli.main(_argv(paths)) == 0
+    assert [call[0] for call in calls] == ["analyze", "validate"]
+    for _, _model, _targets, kwargs in calls:
+        assert kwargs["experimental_two_fixed_endpoints"] is True
+        assert kwargs["constant_nodal_loads"] == (
+            ("N3", 0.0, -25.0, 0.0),
+            ("N4", 0.0, -25.0, 0.0),
+        )
+    report = json.loads(paths["report"].read_bytes())
+    assert report["request"]["schema_version"] == (
+        TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION
+    )
 
 
 def test_verifier_rejection_writes_failed_receipt_without_checkpoint_authority(

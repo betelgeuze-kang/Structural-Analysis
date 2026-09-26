@@ -1259,8 +1259,160 @@ def test_native_reuse_binds_api_verification_and_restart_profile():
         )
 
 
-@pytest.mark.parametrize('value', [1, None, 'true'])
+@pytest.mark.parametrize("value", [1, None, "true"])
 def test_invalid_reuse_switch_rejects_before_model_compilation(value):
-    with pytest.raises(ValueError, match='boolean line-search assembly reuse'):
-        api.analyze_bounded_rc_fiber_direct_control(None, (1e-6,),
-            control_global_dof=7, reuse_line_search_assembly=value)
+    with pytest.raises(ValueError, match="boolean line-search assembly reuse"):
+        api.analyze_bounded_rc_fiber_direct_control(
+            None, (1e-6,), control_global_dof=7, reuse_line_search_assembly=value
+        )
+
+
+def _two_fixed_endpoint_model():
+    payload = json.loads(MODEL.read_bytes())
+    payload["loads"][0]["node"] = "N2"
+    payload["loads"][0]["components"]["FY"] = -10.0
+    payload["supports"].append({"node": "N3", "dofs": ["UX", "UY", "RZ"]})
+    return load_neutral_json_bytes(_bytes(payload))
+
+
+def test_two_fixed_endpoints_require_direct_control_opt_in_and_replay():
+    two_fixed = _two_fixed_endpoint_model()
+    assert monotonic_api._compile(two_fixed)[1][0]["kind"] == (
+        "rc_fiber_frame_support_count_unsupported"
+    )
+    compiled, unsupported, _ = monotonic_api._compile(
+        two_fixed, experimental_two_fixed_endpoints=True
+    )
+    assert not unsupported and compiled is not None
+    assert compiled.problem.fixed_global_dofs == (0, 1, 2, 6, 7, 8)
+    assert compiled.support_node_ids == ("N1", "N3")
+
+    target = (-1e-6,)
+    options = dict(control_global_dof=4, experimental_two_fixed_endpoints=True)
+    solved = api.analyze_bounded_rc_fiber_direct_control(two_fixed, target, **options)
+    payload = solved.to_dict()
+    assert solved.status == "ready" and solved.contract_pass is True
+    assert payload["request"]["experimental_two_fixed_endpoints"] is True
+    assert payload["model"]["compiler_profile"] == (
+        monotonic_api.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+    )
+    reactions = payload["terminal_response"]["support_reactions"]
+    assert [(row["node_id"], row["dof"]) for row in reactions] == [
+        (node, dof) for node in ("N1", "N3") for dof in ("UX", "UY", "RZ")
+    ]
+    validated = api.validate_bounded_rc_fiber_direct_control_artifacts(
+        two_fixed,
+        target,
+        result=solved.result_artifact_bytes(),
+        checkpoint=solved.checkpoint_artifact_bytes(),
+        **options,
+    )
+    assert validated.status == "valid_artifact" and validated.contract_pass is True
+    wrong_profile = api.validate_bounded_rc_fiber_direct_control_artifacts(
+        two_fixed,
+        target,
+        result=solved.result_artifact_bytes(),
+        checkpoint=solved.checkpoint_artifact_bytes(),
+        control_global_dof=4,
+    ).to_dict()
+    assert wrong_profile["status"] == "invalid_artifact"
+    assert wrong_profile["fresh_source_execution_invoked"] is False
+
+    restarted = api.analyze_bounded_rc_fiber_direct_control(
+        two_fixed,
+        (),
+        restart=solved.checkpoint_artifact_bytes(),
+        **options,
+    )
+    assert restarted.contract_pass is True
+    assert restarted.to_dict()["response_history"] == payload["response_history"]
+
+
+@pytest.mark.parametrize(
+    ("supports", "expected_kind"),
+    [
+        (
+            [{"node": "N1", "dofs": ["UX", "UY", "RZ"]}],
+            "rc_fiber_frame_support_count_unsupported",
+        ),
+        (
+            [
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+            ],
+            "rc_fiber_frame_support_node_invalid",
+        ),
+        (
+            [
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+                {"node": "N2", "dofs": ["UX", "UY", "RZ"]},
+            ],
+            "rc_fiber_frame_support_node_invalid",
+        ),
+        (
+            [
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+                {"node": "N3", "dofs": ["UX", "UY"]},
+            ],
+            "rc_fiber_frame_support_dofs_invalid",
+        ),
+    ],
+)
+def test_two_fixed_endpoint_invalid_supports_do_not_solve(
+    monkeypatch, supports, expected_kind
+):
+    payload = json.loads(MODEL.read_bytes())
+    payload["loads"][0]["node"] = "N2"
+    payload["supports"] = supports
+    model = load_neutral_json_bytes(_bytes(payload))
+    monkeypatch.setattr(api, "run_stateful_fiber_frame2d_control_path", _forbid)
+    result = api.analyze_bounded_rc_fiber_direct_control(
+        model,
+        (-1e-6,),
+        control_global_dof=4,
+        experimental_two_fixed_endpoints=True,
+    )
+    assert result.status == "unsupported"
+    assert result.to_dict()["unsupported_features"][0]["kind"] == expected_kind
+
+
+def test_two_fixed_endpoint_loads_on_either_fixed_end_are_rejected(monkeypatch):
+    monkeypatch.setattr(api, "run_stateful_fiber_frame2d_control_path", _forbid)
+    for node in ("N1", "N3"):
+        payload = json.loads(MODEL.read_bytes())
+        payload["loads"][0]["node"] = node
+        payload["supports"].append({"node": "N3", "dofs": ["UX", "UY", "RZ"]})
+        model = load_neutral_json_bytes(_bytes(payload))
+        result = api.analyze_bounded_rc_fiber_direct_control(
+            model,
+            (-1e-6,),
+            control_global_dof=4,
+            experimental_two_fixed_endpoints=True,
+        )
+        assert result.status == "unsupported"
+        assert result.to_dict()["unsupported_features"][0]["kind"] == (
+            "rc_fiber_frame_support_load_unsupported"
+        )
+        with pytest.raises(ValueError, match="fully fixed endpoint"):
+            api.analyze_bounded_rc_fiber_direct_control(
+                _two_fixed_endpoint_model(),
+                (-1e-6,),
+                control_global_dof=4,
+                experimental_two_fixed_endpoints=True,
+                constant_nodal_loads=((node, 1.0, 0.0, 0.0),),
+            )
+
+
+@pytest.mark.parametrize("value", (None, 1, "true"))
+def test_two_fixed_endpoint_opt_in_requires_boolean_before_compilation(value):
+    with pytest.raises(ValueError, match="boolean two-fixed-endpoint compiler opt-in"):
+        monotonic_api._compile(
+            _two_fixed_endpoint_model(), experimental_two_fixed_endpoints=value
+        )
+    with pytest.raises(ValueError, match="boolean two-fixed-endpoint opt-in"):
+        api.analyze_bounded_rc_fiber_direct_control(
+            None,
+            (-1e-6,),
+            control_global_dof=4,
+            experimental_two_fixed_endpoints=value,
+        )

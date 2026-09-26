@@ -92,6 +92,60 @@ def test_all_constructor_settings_preserved_including_polishing_and_line_search(
         assert changed.resume_contract_hash != typed.resume_contract_hash
 
 
+def test_two_fixed_endpoint_v3_roundtrip_and_resume_binding():
+    old = request.BoundedRCFiberDirectControlRequest(
+        9,
+        (-1e-5, -2e-5, 1e-5),
+        allow_reversals=True,
+        maximum_reversals=1,
+        constant_nodal_loads=(("N3", 0.0, -25.0, 0.0),),
+    )
+    experimental = replace(old, experimental_two_fixed_endpoints=True)
+    payload = request.bounded_rc_fiber_direct_control_request_payload(experimental)
+    assert payload["schema_version"] == request.TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION
+    assert payload["experimental_two_fixed_endpoints"] is True
+    assert request.decode_bounded_rc_fiber_direct_control_request(
+        json.dumps(payload).encode()
+    ) == experimental
+    assert experimental.api_kwargs()["experimental_two_fixed_endpoints"] is True
+    assert "experimental_two_fixed_endpoints" not in old.api_kwargs()
+    assert experimental.resume_contract_hash != old.resume_contract_hash
+    assert experimental.request_hash != old.request_hash
+    assert replace(experimental, targets_m=(-2e-5,)).resume_contract_hash == (
+        experimental.resume_contract_hash
+    )
+
+
+@pytest.mark.parametrize("value", [False, 0, 1, None, "true"])
+def test_two_fixed_endpoint_v3_requires_exact_true(value):
+    with pytest.raises(ValueError):
+        request.decode_bounded_rc_fiber_direct_control_request(
+            minimal(
+                schema_version=request.TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION,
+                experimental_two_fixed_endpoints=value,
+            )
+        )
+    if value is not False:
+        with pytest.raises(ValueError):
+            request.BoundedRCFiberDirectControlRequest(
+                4, (-1e-5,), experimental_two_fixed_endpoints=value
+            )
+
+
+@pytest.mark.parametrize(
+    "schema_version",
+    [request.REQUEST_SCHEMA_VERSION, request.CONSTANT_REQUEST_SCHEMA_VERSION],
+)
+def test_legacy_request_schemas_reject_two_fixed_opt_in(schema_version):
+    payload = minimal(schema_version=schema_version, experimental_two_fixed_endpoints=True)
+    if schema_version == request.CONSTANT_REQUEST_SCHEMA_VERSION:
+        payload["constant_nodal_loads"] = [
+            {"node_id": "N3", "FX_kN": 0.0, "FY_kN": -25.0, "MZ_kNm": 0.0}
+        ]
+    with pytest.raises(ValueError, match="unknown fields"):
+        request.decode_bounded_rc_fiber_direct_control_request(payload)
+
+
 @pytest.mark.parametrize(
     "update",
     [

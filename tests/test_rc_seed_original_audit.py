@@ -11,6 +11,9 @@ import pytest
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )
+from structural_analysis.api.nonlinear_fiber_frame import (
+    EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE,
+)
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 from structural_analysis.benchmark.rc_control_learning import (
     _arithmetic_kwargs,
@@ -63,6 +66,103 @@ def original(tmp_path_factory):
 
 def verify(root):
     return audit.verify(root / "study", root / "model.json", root / "request.json")
+
+
+@pytest.fixture(scope="module")
+def two_fixed_small_step(tmp_path_factory):
+    root = tmp_path_factory.mktemp("two-fixed-small-step")
+    shutil.copyfile(
+        ROOT / "examples/research/rc_internal_portal_20mm/original-model.json",
+        root / "model.json",
+    )
+    request = BoundedRCFiberDirectControlRequest(
+        9,
+        (-1e-6,),
+        constant_nodal_loads=(
+            ("N3", 0.0, -25.0, 0.0),
+            ("N4", 0.0, -25.0, 0.0),
+        ),
+        experimental_two_fixed_endpoints=True,
+    )
+    request = replace(
+        request,
+        solver_config=replace(
+            request.solver_config,
+            newton=replace(request.solver_config.newton, terminal_polishing=True),
+        ),
+    )
+    model = load_neutral_json(root / "model.json")
+    rejected = root / "without-opt-in"
+    with pytest.raises(ValueError, match="supported RC model required"):
+        benchmark_rc_control_seed_paths(
+            model,
+            replace(request, experimental_two_fixed_endpoints=False),
+            source_revision="a" * 40,
+            output_directory=rejected,
+            **_arithmetic_kwargs(RETAINED_LEARNING_ARITHMETIC_PROFILE),
+        )
+    assert not rejected.exists()
+    (root / "request.json").write_bytes(_bytes(request.to_dict()))
+    report = benchmark_rc_control_seed_paths(
+        model,
+        request,
+        source_revision="a" * 40,
+        output_directory=root / "study",
+        **_arithmetic_kwargs(RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    assert report["reference_repeat_exact"] and report["all_execution_work_reported"]
+    return root
+
+
+def test_two_fixed_small_step_replays_original_preload_and_six_reactions(
+    two_fixed_small_step, monkeypatch
+):
+    from structural_analysis.assembly import stateful_fiber_frame2d_solver as force
+    from structural_analysis.assembly import (
+        stateful_fiber_frame2d_displacement_control as control,
+    )
+
+    report = json.loads(
+        (two_fixed_small_step / "study/comparison.json").read_bytes()
+    )
+    assert report["compiler_profile"] == (
+        EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+    )
+    assert report["request"]["experimental_two_fixed_endpoints"] is True
+    for name in ("reference", "secant", "fresh-reference"):
+        path = json.loads(
+            (two_fixed_small_step / "study" / name / "path.json").read_bytes()
+        )
+        assert path["status"] == "complete"
+        for response in (path["preload_response"], *path["response_history"]):
+            assert [(row["node_id"], row["dof"]) for row in response["support_reactions"]] == [
+                (node, dof)
+                for node in ("N1", "N2")
+                for dof in ("UX", "UY", "RZ")
+            ]
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("two-fixed original audit must not run Newton")
+
+    monkeypatch.setattr(force, "newton_raphson_vector", forbidden)
+    monkeypatch.setattr(control, "newton_raphson_vector", forbidden)
+    result = verify(two_fixed_small_step)
+    assert result["original_records_reproduced"] and result["repeat_admissible"]
+    assert result["original_work"]["core_calls"] == 6
+    assert result["audit_work"]["assembly_replays"] == 6
+
+
+def test_two_fixed_original_audit_rejects_forged_compiler_profile(
+    two_fixed_small_step, tmp_path
+):
+    root = tmp_path / "forged-profile"
+    shutil.copytree(two_fixed_small_step, root)
+    report_path = root / "study/comparison.json"
+    report = json.loads(report_path.read_bytes())
+    report["compiler_profile"] = "single-fixed-endpoint-profile"
+    report_path.write_bytes(rehash(report, "report_hash"))
+    with pytest.raises(ValueError, match="compiler profile differs"):
+        verify(root)
 
 
 def test_actual_preload_and_lateral_replay_counts_no_newton(original, monkeypatch):

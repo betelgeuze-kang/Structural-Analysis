@@ -1331,7 +1331,14 @@ def benchmark_rc_control_seed_paths(
     ):
         raise ValueError("declared path budget exceeded")
     model = model.detached_analysis_snapshot()
-    compiled, blockers, _ = public._compile(model)
+    compiled, blockers, _ = public._compile(
+        model,
+        **(
+            {"experimental_two_fixed_endpoints": True}
+            if request.experimental_two_fixed_endpoints
+            else {}
+        ),
+    )
     if compiled is None or blockers:
         raise ValueError("supported RC model required")
     compiled = api._with_constant_loading(compiled, request.constant_nodal_loads)
@@ -1378,6 +1385,14 @@ def benchmark_rc_control_seed_paths(
         **(
             {"compiled_problem_contract_hash": compiled.problem.contract_hash}
             if request.constant_nodal_loads
+            else {}
+        ),
+        **(
+            {
+                "compiler_profile": public.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE,
+                "compiled_problem_contract_hash": compiled.problem.contract_hash,
+            }
+            if request.experimental_two_fixed_endpoints
             else {}
         ),
         "source_revision": source_revision,
