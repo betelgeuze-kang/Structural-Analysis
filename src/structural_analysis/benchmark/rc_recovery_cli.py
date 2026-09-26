@@ -74,9 +74,12 @@ def _checked_review_report(files):
         count = arm.get('accepted_target_count')
         if type(count) is not int or not 0 <= count <= len(targets):
             raise ValueError('bounded integer accepted target count required')
+        history = path.get('response_history')
+        if type(history) is not list or len(history) != count:
+            raise ValueError('accepted history length mismatch')
         if arm.get('status') not in ('complete', 'incomplete'):
             raise ValueError('known path completion status required')
-        if arm['status'] == 'complete' and (count != len(targets) or arm.get('failure') is not None):
+        if (arm['status'] == 'complete') != (count == len(targets) and arm.get('failure') is None):
             raise ValueError('inconsistent completion declaration')
     fresh = report['fresh_reference']
     for name, comparison in report['comparisons'].items():

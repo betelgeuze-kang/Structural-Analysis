@@ -349,6 +349,26 @@ def test_valid_failed_comparison_remains_readable(tmp_path, review_study):
     assert not cli.summarize_rc_recovery_study(root)['declared_full_history_comparisons_pass']
 
 
+def test_summary_rejects_rehashed_complete_path_with_missing_accepted_history(tmp_path, review_study):
+    import shutil
+    from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+
+    root = tmp_path/'truncated-history'
+    shutil.copytree(review_study, root)
+    path_file = root/'proposal/path.json'
+    path = json.loads(path_file.read_bytes())
+    assert path['status'] == 'complete' and path['accepted_target_count'] == 3
+    path['response_history'].pop()
+    path['path_hash'] = _sha(_bytes({key: value for key, value in path.items() if key != 'path_hash'}))
+    path_file.write_bytes(_bytes(path))
+    report = json.loads((root/'comparison.json').read_bytes())
+    report['arms']['proposal']['path_hash'] = path['path_hash']
+    _rewrite_report(root, report)
+
+    with pytest.raises(ValueError, match='accepted history length'):
+        cli.summarize_rc_recovery_study(root)
+
+
 @pytest.mark.parametrize('changed', [
     {'fresh_reference_comparisons_pass': False},
     {'unknown_replay_work': True},
