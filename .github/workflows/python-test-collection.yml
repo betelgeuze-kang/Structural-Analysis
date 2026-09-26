@@ -97,6 +97,10 @@ jobs:
           tests/test_rc_control_svd_fit.py
           tests/test_rc_control_initial_residual.py
           tests/test_rc_control_trust_region.py
+          tests/test_rc_recovery_configuration.py
+          tests/test_rc_replay_streaming.py
+          tests/test_rc_branch_diagnostic.py
+          tests/test_rc_recovery_followup.py
           tests/test_rc_adaptive_continuation_campaign.py
           tests/test_rc_adaptive_campaign_audit.py
           tests/test_rc_control_model_selection.py
