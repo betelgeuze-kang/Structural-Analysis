@@ -1,0 +1,90 @@
+{
+  "candidate_canonical_model_checksum": "sha256:431b960cf5d73d684bf8bac896669991b4e26bc64d4475c2b8650ee1bdc7cdfa",
+  "claim_boundary": "single internal dense preflight only; original fixed/adaptive 48-path comparison, 40/80 mm conditions, native sparse speed, independent physics and public direct-control admission not evaluated",
+  "execution_source_revision": "77507e5c0040a78eccc53137010b5e8ed900c363",
+  "fixed_global_dofs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "internal_problem_contract_hash": "sha256:5d53352c5d85cc8e47ad49df1d2c37bd671c81e4b6d45f1bcc1b5807254cbb51",
+  "original_geometry_m": [
+    [
+      0,
+      0
+    ],
+    [
+      4,
+      0
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      4,
+      3
+    ]
+  ],
+  "original_model_sha256": "6f8eec155f5fcf2f9ae942c021a8692e79ae1efd0d1b98342f8aea0b642d0ed6",
+  "original_public_compiler_result": "rc_fiber_frame_support_count_unsupported",
+  "original_request_sha256": "e0cbc4995e2c98f4a30a0902ac321b4a0e66a9baa61ed20a88e5e73809df627e",
+  "path_20mm": {
+    "accepted_checkpoint_hashes": [
+      "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+      "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+      "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+    ],
+    "accepted_target_count": 3,
+    "all_parent_hashes_bound": true,
+    "dense_assembly_calls": 157,
+    "final_checkpoint_roundtrip_exact": true,
+    "linear_solve_count": 42,
+    "max_abs_force_balance_kn": 1.6983392470137915e-10,
+    "max_abs_free_residual_kn": 1.0051053322968073e-09,
+    "per_target_dense_assemblies": [
+      53,
+      47,
+      57
+    ],
+    "per_target_linear_solves": [
+      14,
+      12,
+      16
+    ],
+    "status": "ready",
+    "targets_m": [
+      -0.01,
+      -0.02,
+      0.01
+    ],
+    "wall_seconds_two_runs": [
+      7.143883274000473,
+      7.083627633001015
+    ]
+  },
+  "preload": {
+    "checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+    "dense_assembly_calls": 6,
+    "linear_solve_count": 2,
+    "load_factor": 0.0,
+    "max_abs_free_residual_kn": 1.4210854715202004e-14,
+    "roof_uy_m": [
+      -9.591774094536525e-06,
+      -9.591774094536526e-06
+    ],
+    "status": "ready",
+    "wall_seconds_two_runs": [
+      0.265618966999682,
+      0.2640606429995387
+    ]
+  },
+  "reference_n4_fx_kn": 150,
+  "repeat_numerical_and_work_fields_exact_except_clocks": true,
+  "schema_version": "internal-rc-portal-25kn-preflight.v1",
+  "section": "RC1 0.4 m x 0.6 m; 12 concrete layers; 4 top and 4 bottom bars",
+  "transformation": "original three elements changed only from stateful_rc_fiber_frame2d to stateful_corotational_rc_fiber_frame2d; internal _compile_portal; N3/N4 UY each -25 kN constant"
+}
