@@ -1,7 +1,8 @@
-"""Replay stored RC seed-study transitions, including independent arm preloads.
+"""Replay accepted RC transitions and failed seeds' final trial assemblies.
 
 This audit invokes constitutive assembly at original coordinates, never Newton
-or a new accepted solve. It is reproducibility evidence, not an external oracle.
+or a new accepted solve. It cannot reproduce a failed Newton/search trajectory.
+It is bounded reproducibility evidence, not an external oracle.
 """
 
 import argparse
