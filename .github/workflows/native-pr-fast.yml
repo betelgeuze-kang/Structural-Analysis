@@ -68,11 +68,14 @@ jobs:
           python3 scripts/check_native_capabilities.py --fail-invalid
 
       - name: Verify exact tested ref identity
+        id: identity
         env:
           EVENT_NAME: ${{ github.event_name }}
           EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
+          EXPECTED_BASE_REF: ${{ github.event.pull_request.base.ref || '' }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -87,14 +90,19 @@ jobs:
               echo "pull-request gate requires an exact two-parent merge ref" >&2
               exit 1
             fi
-            if [[ "${parents[0]}" != "$EXPECTED_BASE_SHA" ]]; then
-              echo "merge-ref base parent mismatch" >&2
-              exit 1
-            fi
             if [[ "${parents[1]}" != "$EXPECTED_HEAD_SHA" ]]; then
               echo "merge-ref head parent mismatch" >&2
               exit 1
             fi
+            if ! python3 scripts/verify_native_pr_base_ref.py \
+              --repository "$GITHUB_REPOSITORY" \
+              --base-ref "$EXPECTED_BASE_REF" \
+              --event-base-sha "$EXPECTED_BASE_SHA" \
+              --tested-base-sha "${parents[0]}"; then
+              echo "merge-ref base parent mismatch" >&2
+              exit 1
+            fi
+            printf 'tested_base_sha=%s\n' "${parents[0]}" >> "$GITHUB_OUTPUT"
           elif [[ "$EVENT_NAME" == "merge_group" ]]; then
             if [[ "$actual_sha" != "${{ github.event.merge_group.head_sha }}" ]]; then
               echo "merge-group head mismatch" >&2
@@ -112,11 +120,15 @@ jobs:
         id: scope
         env:
           EVENT_NAME: ${{ github.event_name }}
-          NATIVE_CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
+          NATIVE_CI_BASE_SHA: ${{ steps.identity.outputs.tested_base_sha || github.event.merge_group.base_sha || github.event.before || '' }}
           NATIVE_CI_HEAD_SHA: ${{ github.sha }}
         shell: bash
         run: |
           set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" && "$NATIVE_CI_BASE_SHA" != "$(git rev-parse HEAD^1)" ]]; then
+            echo "validated merge-ref base parent missing from classifier" >&2
+            exit 1
+          fi
           protection_args=()
           if [[ "$EVENT_NAME" == "pull_request" || "$EVENT_NAME" == "merge_group" ]]; then
             protection_args+=(--fail-protected-evidence)
