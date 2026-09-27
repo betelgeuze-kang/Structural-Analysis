@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { rcDesignBlockedStep, validateRcDesignStudy } from '../../src/workbench-v2/model/rcControlDesignSchema'
+import { rcDesignBlockedStep, validateRcDesignStudy, validateRcStudyControl, validateRcTwoFixedStudyProfile } from '../../src/workbench-v2/model/rcControlDesignSchema'
+import { portalDesignBytes, portalDesignRead } from './rcPortalDesignFixture'
 const root = 'tests/frontend/fixtures/rc-control-design/'
 const original = readFileSync(`${root}comparison.json`)
 const hash = (s: string | Uint8Array) => `sha256:${createHash('sha256').update(s).digest('hex')}`
@@ -9,6 +10,9 @@ const read = async (path: string) => new Uint8Array(readFileSync(`${root}${path}
 const constantRoot = 'tests/frontend/fixtures/rc-control-design-constant/'
 const constantOriginal = readFileSync(`${constantRoot}comparison.json`)
 const constantRead = async (path: string) => new Uint8Array(readFileSync(`${constantRoot}${path}`))
+const portalRoot = 'examples/research/rc_internal_portal_20mm/'
+const portalModel = JSON.parse(readFileSync(`${portalRoot}original-model.json`, 'utf8'))
+const portalRequest = JSON.parse(readFileSync(`${portalRoot}experimental-two-fixed-endpoints-request.json`, 'utf8'))
 // Synthetic diagnostic parsing cases; numerical evidence is recorded separately.
 const failedStep = () => ({ schema_version: 'bounded-rc-fiber-direct-control-result.v1', status: 'blocked',
   path: { accepted_target_prefix_m: [-.001], attempts: [{ committed: false, target_control_displacement_m: -.002,
@@ -50,6 +54,92 @@ test('RC study validates original constant preload and complete per-design work'
     expect(row.performance.accepted_epoch_count).toBe(4)
     expect(row.invocations.map((i: any) => i.work.attempted_step_count)).toEqual([4, 4])
   }
+})
+test('experimental two-fixed study admits only an explicitly marked v3 request', () => {
+  expect(() => validateRcStudyControl(portalRequest)).not.toThrow()
+  expect(() => validateRcStudyControl({ ...portalRequest, experimental_two_fixed_endpoints: false })).toThrow('study_two_fixed_opt_in_invalid')
+  expect(() => validateRcStudyControl({ ...portalRequest, experimental_two_fixed_endpoints: undefined })).toThrow('study_two_fixed_opt_in_invalid')
+  expect(() => validateRcStudyControl({ ...portalRequest, schema_version: 'bounded-rc-fiber-direct-control-request.v2' })).toThrow('study_two_fixed_opt_in_invalid')
+  expect(() => validateRcStudyControl({ ...portalRequest, constant_nodal_loads: [] })).toThrow('study_constant_loads_invalid')
+  const withoutPreload = { ...portalRequest }
+  delete withoutPreload.constant_nodal_loads
+  expect(() => validateRcStudyControl(withoutPreload)).not.toThrow()
+})
+test('two-fixed study binds original endpoint supports and every support reaction', () => {
+  const reactions = portalModel.supports.flatMap((support: any) => ['UX', 'UY', 'RZ'].map((dof) => ({ node_id: support.node, dof })))
+  const histories = [{ support_reactions: reactions }, { support_reactions: [...reactions].reverse() }]
+  expect(() => validateRcTwoFixedStudyProfile(portalModel, histories, portalRequest.constant_nodal_loads)).not.toThrow()
+  expect(() => validateRcTwoFixedStudyProfile(portalModel, [histories[0], { support_reactions: reactions.slice(1) }])).toThrow('study_two_fixed_reactions_invalid')
+  expect(() => validateRcTwoFixedStudyProfile(portalModel, histories, [{ node_id: portalModel.supports[0].node }])).toThrow('study_two_fixed_preload_support_invalid')
+  const interiorSupport = structuredClone(portalModel)
+  interiorSupport.supports[1].node = 'N3'
+  expect(() => validateRcTwoFixedStudyProfile(interiorSupport, histories)).toThrow('study_two_fixed_support_invalid')
+})
+test('producer-derived two-fixed portal study retains three fresh-verified designs, quantities and common prices', async () => {
+  const review = await validateRcDesignStudy(portalDesignBytes('comparison.json'), portalDesignRead)
+  expect(review.report.control_request.schema_version).toBe('bounded-rc-fiber-direct-control-request.v3')
+  expect(review.report.control_request.experimental_two_fixed_endpoints).toBe(true)
+  expect(review.report.verified_count).toBe(3)
+  expect(review.report.selected_candidate_id).toBe('narrower-036')
+  expect(review.report.rows.map((row: any) => row.status)).toEqual(['verified', 'verified', 'verified'])
+  for (const row of review.report.rows) {
+    expect(row.performance.accepted_epoch_count).toBe(4)
+    expect(row.quantities.members).toHaveLength(3)
+    expect(row.invocations.map((invocation: any) => invocation.work.attempted_step_count)).toEqual([4, 4])
+  }
+})
+function rehashNamed(raw: string, key: string): string {
+  const pattern = new RegExp(`,"${key}":"sha256:[a-f0-9]{64}"`)
+  const without = raw.replace(pattern, '')
+  expect(without).not.toBe(raw)
+  return raw.replace(pattern, `,"${key}":"${hash(without)}"`)
+}
+async function validateAlteredPortalResult(changedResult: string) {
+  const originalResult = new TextDecoder().decode(portalDesignBytes('baseline/result.json'))
+  const resultHashes = [hash(portalDesignBytes('baseline/result.json')), hash(changedResult)]
+  const verifiedHash = JSON.parse(changedResult).result_hash
+  const originalVerification = new TextDecoder().decode(portalDesignBytes('baseline/verification.json'))
+  const changedVerification = originalVerification.replace(JSON.parse(originalResult).result_hash, verifiedHash)
+  expect(changedVerification).not.toBe(originalVerification)
+  let report = new TextDecoder().decode(portalDesignBytes('comparison.json'))
+  report = report.replace(resultHashes[0], resultHashes[1])
+    .replace(hash(portalDesignBytes('baseline/verification.json')), hash(changedVerification))
+  const changedReport = new TextEncoder().encode(rehashNamed(report, 'report_hash'))
+  return validateRcDesignStudy(changedReport, async path => path === 'baseline/result.json'
+    ? new TextEncoder().encode(changedResult)
+    : path === 'baseline/verification.json' ? new TextEncoder().encode(changedVerification) : portalDesignRead(path))
+}
+test('two-fixed study rejects a self-hashed but wrong compiler profile', async () => {
+  const originalResult = new TextDecoder().decode(portalDesignBytes('baseline/result.json'))
+  const profile = 'planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1'
+  expect(originalResult).toContain(profile)
+  const changed = rehashNamed(originalResult.replace(profile, profile.replace('.v1', '.v0')), 'result_hash')
+  await expect(validateAlteredPortalResult(changed)).rejects.toThrow('study_request_binding_invalid')
+})
+test('two-fixed study rejects a self-hashed result that drops the explicit opt-in', async () => {
+  const originalResult = new TextDecoder().decode(portalDesignBytes('baseline/result.json'))
+  const originalFlag = '"experimental_two_fixed_endpoints":true'
+  expect(originalResult).toContain(originalFlag)
+  const changed = rehashNamed(originalResult.replace(originalFlag, '"experimental_two_fixed_endpoints":null'), 'result_hash')
+  await expect(validateAlteredPortalResult(changed)).rejects.toThrow('study_two_fixed_request_invalid')
+})
+test('two-fixed study rejects a self-hashed result that changes one constant preload', async () => {
+  const originalResult = new TextDecoder().decode(portalDesignBytes('baseline/result.json'))
+  const originalLoad = '"constant_nodal_loads":[{"FX_kN":0.0,"FY_kN":-25.0,"MZ_kNm":0.0,"node_id":"N3"}'
+  expect(originalResult).toContain(originalLoad)
+  const changed = rehashNamed(originalResult.replace(originalLoad, originalLoad.replace('-25.0', '-26.0')), 'result_hash')
+  await expect(validateAlteredPortalResult(changed)).rejects.toThrow('study_request_binding_invalid')
+})
+test('two-fixed study rejects a self-hashed accepted row with a missing base reaction', async () => {
+  const originalResult = new TextDecoder().decode(portalDesignBytes('baseline/result.json'))
+  const historyAt = originalResult.indexOf('"response_history":')
+  const reactionAt = originalResult.indexOf('"support_reactions":[', historyAt)
+  const nodeAt = originalResult.indexOf('"node_id":"N2"', reactionAt)
+  expect(historyAt).toBeGreaterThanOrEqual(0)
+  expect(reactionAt).toBeGreaterThan(historyAt)
+  expect(nodeAt).toBeGreaterThan(reactionAt)
+  const changed = rehashNamed(originalResult.slice(0, nodeAt) + '"node_id":"N3"' + originalResult.slice(nodeAt + '"node_id":"N2"'.length), 'result_hash')
+  await expect(validateAlteredPortalResult(changed)).rejects.toThrow('study_two_fixed_reactions_invalid')
 })
 test('RC study rejects rehashed omission of preload from performance count', async () => {
   const changed = constantOriginal.toString().replace('"accepted_epoch_count":4', '"accepted_epoch_count":3')

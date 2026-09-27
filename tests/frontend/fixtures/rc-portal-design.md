@@ -1,0 +1,5 @@
+# Two-fixed-endpoint RC portal design study fixture
+
+`rc-portal-design-artifacts.json.gz` is a gzip-compressed JSON map of base64-encoded, byte-exact originals from the separate three-design producer run at source revision `ff110da47ea3014e7bc244cbb032920d95d46bf2`. It contains all 26 JSON files, including `comparison.json`, the producer request and each baseline/alternative model, result, checkpoint, verification and invocation record. The unpacked original bytes total 5,856,843; the gzip file is 1,409,893 bytes and has SHA-256 `ff2b904449b1e4304946c1daff8d367456eb547b2bfeaa59550d6c53243a2579`.
+
+The producer report hash is `sha256:3bb38a0f7f30eddd2440ec99e7960863cdc54d603a5f741fb0d4fafb15b317a5`. All three rows completed the authored 20 mm history and fresh full-path verification. Under the declared synthetic common prices and limits, `narrower-036` was selected. These fixtures exercise byte-bound Workbench review; they are neither independent physical validation nor a real cost quote.

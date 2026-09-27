@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { setTimeout as delay } from 'node:timers/promises'
+import { portalDesignBytes } from './rcPortalDesignFixture'
 const directory = 'tests/frontend/fixtures/rc-control-design/'
 const report = JSON.parse(readFileSync(`${directory}comparison.json`, 'utf8'))
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
@@ -16,6 +17,17 @@ async function setup(page: Page, changed = false, reportName = 'comparison', art
     if (relative === 'baseline/result.json' && artifactDelayMs) await delay(artifactDelayMs)
     const bytes = readFileSync(sourceDirectory + (relative === 'comparison.json' ? reportName + '.json' : relative))
     await route.fulfill({ contentType: 'application/json', body: changed && relative === 'wider/result.json' ? Buffer.concat([bytes, Buffer.from(' ')]) : bytes })
+  })
+}
+async function setupPortal(page: Page) {
+  await page.addInitScript(() => {
+    window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlDesignUrl: '/rc-study/comparison.json', jobAuthorization: () => ({ tenantId: 'synthetic-study', bearerToken: 'synthetic-only' }) }
+  })
+  await page.route('**/rc-study/**', async route => {
+    expect(await route.request().headerValue('authorization')).toBe('Bearer synthetic-only')
+    expect(await route.request().headerValue('x-structural-tenant')).toBe('synthetic-study')
+    const relative = new URL(route.request().url()).pathname.replace('/rc-study/', '')
+    await route.fulfill({ contentType: 'application/json', body: Buffer.from(portalDesignBytes(relative)) })
   })
 }
 // Wait only at the asynchronous original-artifact validation boundary. A wrong
@@ -33,6 +45,30 @@ async function waitForRcDesign(page: Page, expected: 'verified' | 'invalid' = 'v
 for (const width of [1440, 390]) {
   test.describe(`RC study browser ${width}`, () => {
     test.use({ viewport: { width, height: 1000 } })
+    test('reviews two-fixed portal originals and three-member quantities', async ({ page }) => {
+      await setupPortal(page)
+      await page.goto(`${baseUrl}/#/workbench-v2`)
+      const panel = await waitForRcDesign(page)
+      await expect(panel.locator('[data-rc-design-constants]')).toContainText('N3, 0, -25, 0')
+      await expect(panel.locator('[data-rc-design-constants]')).toContainText('N4, 0, -25, 0')
+      await expect(panel.locator('[data-rc-design-candidate]')).toHaveCount(3)
+      await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'narrower-036')
+      const details = panel.locator('[data-rc-design-details="narrower-036"]')
+      await expect(panel.locator('[data-rc-design-members="narrower-036"] tbody tr')).toHaveCount(3)
+      const costs = details.getByRole('region', { name: 'narrower-036 RC execution costs' })
+      await expect(costs.locator('tbody tr')).toHaveCount(2)
+      for (const row of await costs.locator('tbody tr').all()) await expect(row.locator('td').nth(2)).toHaveText('4')
+      for (const role of ['model', 'result', 'checkpoint', 'verification']) {
+        const pending = page.waitForEvent('download')
+        await details.getByRole('button', { name: `Download narrower-036 ${role}`, exact: true }).click()
+        expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(portalDesignBytes(`narrower-036/${role}.json`)))
+      }
+      const pending = page.waitForEvent('download')
+      await panel.getByRole('button', { name: 'Download original RC comparison' }).click()
+      expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(portalDesignBytes('comparison.json')))
+      const bounds = await panel.boundingBox()
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
+    })
     test('shows original constant loads and preload-inclusive design costs', async ({ page }) => {
       const sourceDirectory = 'tests/frontend/fixtures/rc-control-design-constant/'
       await setup(page, false, 'comparison', 0, sourceDirectory)
