@@ -37,3 +37,7 @@ feature packet is a verified coarse input, not a 2,048/4,096 numerical
 comparison. No accepted 4,096-layer path or new 1% screen result exists yet.
 The earlier 1,024/2,048 concrete tensile-damage screen still fails at
 1.08501989%; neither that screen nor its denominator was changed.
+
+Update, 2026-09-28: the later complete 4,096-layer path and fixed-pair
+comparison are recorded in [the 4,096-layer result](planar-4096-refinement-20260928.md).
+The statement above describes the status when this feature packet was made.

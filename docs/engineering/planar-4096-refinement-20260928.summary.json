@@ -1,0 +1,262 @@
+{
+  "schema": "fixed-planar-2048-4096-refinement-summary.v1",
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "fine_protocol_sha256": "7f30057cd8b26b0706c96bf84d5fc81842c4dbfc319f8abfc5c618793d459881",
+  "fine_path_sha256": "030122250b5b9b9013accdf86329d1cd6b98bfcf4bb74626bb71ef2bd1912e87",
+  "fine_path_bytes": 21942467552,
+  "fine_index_sha256": "f1c82345e9d4389a43d237a06e8c6eaecca9adc71cafc425eac74810858a5838",
+  "fine_inventory_sha256": "23bbd149afd4ed0c322239b4b313da5f99314f75af3135a52fc621e5b8c9c038",
+  "fine_inventory_verified_files": 508,
+  "fine_inventory_verified_bytes": 42522738508,
+  "coarse_path_sha256": "434faa33ae5360b332897d3e0c7171844a95182630082d9f9689a885d7ff71f6",
+  "coarse_features_sha256": "8faae14f83d9cb837139570c54071984a9b5795568cca3044b0f8b5090890c3d",
+  "coarse_feature_inventory_sha256": "2a4b667df986d9e50460be6f6ef786318983cc95db691a28dd665e1280a1a03a",
+  "comparison_sha256": "d8a81482c4b4bd5493b6879ff0b8245883f2dc7356613cc71381265443606678",
+  "fine_run_summary": {
+    "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+    "status": "ready",
+    "contract_pass": true,
+    "attempted_steps": 40,
+    "committed_steps": 40,
+    "setup_wall_ns": 732774865,
+    "path_wall_ns": 9061451221550,
+    "artifact_sha256": "030122250b5b9b9013accdf86329d1cd6b98bfcf4bb74626bb71ef2bd1912e87",
+    "through_artifact_hash_wall_ns": 10757484713324,
+    "timing_excludes": "summary and inventory output, subsequent comparison audit",
+    "physical_validation": false,
+    "public_result_authority": false
+  },
+  "matched_targets": 40,
+  "original_group_screen": 0.01,
+  "failed_group_counts": {
+    "nodal_steel": 0,
+    "concrete": 0
+  },
+  "evaluated_group_counts": {
+    "nodal_steel": 400,
+    "concrete": 240
+  },
+  "maxima": {
+    "nodal_steel": {
+      "translations": {
+        "target_m": 0.056,
+        "absolute_difference": 2.8435007334848272e-09,
+        "finer_infinity_norm": 0.056,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 5.077679881222906e-08,
+        "within_exploratory_one_percent": true,
+        "witness_index": 9
+      },
+      "rotations": {
+        "target_m": 0.022,
+        "absolute_difference": 7.219097182022127e-10,
+        "finer_infinity_norm": 0.0038036015862966902,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 1.8979635532886804e-07,
+        "within_exploratory_one_percent": true,
+        "witness_index": 4
+      },
+      "support_forces": {
+        "target_m": 0.04,
+        "absolute_difference": 0.00022119811228549224,
+        "finer_infinity_norm": 1522.5190247991904,
+        "denominator_floor": 1e-09,
+        "relative_group_difference": 1.452843010054779e-07,
+        "within_exploratory_one_percent": true,
+        "witness_index": 3
+      },
+      "support_moments": {
+        "target_m": 0.01,
+        "absolute_difference": 5.529721022412559e-05,
+        "finer_infinity_norm": 372.09759471371433,
+        "denominator_floor": 1e-09,
+        "relative_group_difference": 1.486094266926674e-07,
+        "within_exploratory_one_percent": true,
+        "witness_index": 1
+      },
+      "load_factor": {
+        "target_m": 0.04,
+        "absolute_difference": 1.0543414330488332e-07,
+        "finer_infinity_norm": 0.742269634229294,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 1.4204291600094437e-07,
+        "within_exploratory_one_percent": true,
+        "witness_index": 0
+      },
+      "plastic_strain": {
+        "target_m": 0.024,
+        "absolute_difference": 4.0578578227489425e-10,
+        "finer_infinity_norm": 8.52226584557679e-05,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 4.761477635498832e-06,
+        "within_exploratory_one_percent": true,
+        "witness_index": 1
+      },
+      "accumulated_plastic_strain": {
+        "target_m": 0.024,
+        "absolute_difference": 4.0578578227489425e-10,
+        "finer_infinity_norm": 8.52226584557679e-05,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 4.761477635498832e-06,
+        "within_exploratory_one_percent": true,
+        "witness_index": 1
+      },
+      "backstress_mpa": {
+        "target_m": 0.024,
+        "absolute_difference": 2.028928911372574e-06,
+        "finer_infinity_norm": 0.4261132922788395,
+        "denominator_floor": 1e-09,
+        "relative_group_difference": 4.761477635494379e-06,
+        "within_exploratory_one_percent": true,
+        "witness_index": 1
+      },
+      "dissipated_energy_density_mj_per_m3": {
+        "target_m": 0.024,
+        "absolute_difference": 1.0144644556884554e-07,
+        "finer_infinity_norm": 0.021305664613941976,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 4.761477635504557e-06,
+        "within_exploratory_one_percent": true,
+        "witness_index": 1
+      },
+      "steel_stress_mpa": {
+        "target_m": 0.022,
+        "absolute_difference": 0.0001461335091903493,
+        "finer_infinity_norm": 241.48842635372225,
+        "denominator_floor": 1e-09,
+        "relative_group_difference": 6.051366990826259e-07,
+        "within_exploratory_one_percent": true,
+        "witness_index": 22
+      }
+    },
+    "concrete": {
+      "tensile_history_strain": {
+        "target_m": 0.008,
+        "absolute_difference": 4.6929605343524436e-08,
+        "finer_infinity_norm": 0.0004470171146340557,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 0.00010498391181720794,
+        "within_exploratory_one_percent": true,
+        "witness_index": 17300,
+        "witness_section": "E3:gauss-2",
+        "witness_cell": 916,
+        "cells_above_original_one_percent_norm": 0,
+        "cells": 36864
+      },
+      "compressive_history_strain": {
+        "target_m": 0.076,
+        "absolute_difference": 2.7652754601984386e-07,
+        "finer_infinity_norm": 0.003289937901597792,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 8.40525123241826e-05,
+        "within_exploratory_one_percent": true,
+        "witness_index": 14070,
+        "witness_section": "E3:gauss-0",
+        "witness_cell": 1782,
+        "cells_above_original_one_percent_norm": 0,
+        "cells": 36864
+      },
+      "tensile_damage": {
+        "target_m": 0.08,
+        "absolute_difference": 0.005068440130828689,
+        "finer_infinity_norm": 0.9999999998495619,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 0.005068440131591175,
+        "within_exploratory_one_percent": true,
+        "witness_index": 13915,
+        "witness_section": "E3:gauss-0",
+        "witness_cell": 1627,
+        "cells_above_original_one_percent_norm": 0,
+        "cells": 36864
+      },
+      "compressive_damage": {
+        "target_m": 0.022,
+        "absolute_difference": 6.252588274041626e-05,
+        "finer_infinity_norm": 0.034896873556880204,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 0.0017917330799993333,
+        "within_exploratory_one_percent": true,
+        "witness_index": 6173,
+        "witness_section": "E2:gauss-0",
+        "witness_cell": 29,
+        "cells_above_original_one_percent_norm": 0,
+        "cells": 36864
+      },
+      "dissipated_energy_density_mj_per_m3": {
+        "target_m": 0.024,
+        "absolute_difference": 2.425471701394346e-06,
+        "finer_infinity_norm": 0.0020678476927466173,
+        "denominator_floor": 1e-12,
+        "relative_group_difference": 0.0011729450432457697,
+        "within_exploratory_one_percent": true,
+        "witness_index": 6243,
+        "witness_section": "E2:gauss-0",
+        "witness_cell": 99,
+        "cells_above_original_one_percent_norm": 0,
+        "cells": 36864
+      },
+      "stress_mpa": {
+        "target_m": 0.078,
+        "absolute_difference": 0.015921073271158548,
+        "finer_infinity_norm": 29.993583158652953,
+        "denominator_floor": 1e-09,
+        "relative_group_difference": 0.0005308159811031254,
+        "within_exploratory_one_percent": true,
+        "witness_index": 34887,
+        "witness_section": "E6:gauss-2",
+        "witness_cell": 71,
+        "cells_above_original_one_percent_norm": 0,
+        "cells": 36864
+      }
+    }
+  },
+  "prior_onset_target_0_074m": {
+    "absolute_difference": 0.004064308797651572,
+    "finer_infinity_norm": 0.9999999991056119,
+    "denominator_floor": 1e-12,
+    "relative_group_difference": 0.004064308801286642,
+    "within_exploratory_one_percent": true,
+    "witness_index": 393,
+    "witness_section": "E1:gauss-0",
+    "witness_cell": 393,
+    "cells_above_original_one_percent_norm": 0,
+    "cells": 36864
+  },
+  "prior_onset_section_0_074m": {
+    "cells": 2048,
+    "section_relative_infinity_difference": 0.00010732820714354857,
+    "section_mean_absolute_damage_difference": 7.48766342810079e-07,
+    "coarse_section_mean_damage": 0.7203085581752847,
+    "fine_section_mean_damage": 0.7203078094089419,
+    "cells_above_one_percent_section_norm": 0,
+    "mixed_onset_child_cells": 0,
+    "mixed_onset_absolute_difference_share": 0.0,
+    "finer_projected_infinity_norm": 0.9999999986133022
+  },
+  "prior_onset_cells_2048_to_4096": [
+    {
+      "coarse_cell": 538,
+      "coarse_damage": 0.0,
+      "fine_child_damage": [
+        0.0,
+        0.0
+      ],
+      "fine_pair_mean_damage": 0.0,
+      "absolute_difference": 0.0
+    },
+    {
+      "coarse_cell": 539,
+      "coarse_damage": 0.02170039778093924,
+      "fine_child_damage": [
+        0.01023284166317684,
+        0.03295329748471221
+      ],
+      "fine_pair_mean_damage": 0.021593069573944523,
+      "absolute_difference": 0.00010732820699471679
+    }
+  ],
+  "structural_solves_in_comparison_audit": 0,
+  "training_fits_in_comparison_audit": 0,
+  "independent_physical_validation": false,
+  "public_api_extended": false
+}

@@ -57,3 +57,7 @@ records the exact input SHA-256 pins, 40-target check, threshold margins,
 original relative error and unchanged failure. Focused onset and existing
 witness tests pass (10 tests); those tests verify diagnostic integrity, not
 physical accuracy.
+
+Update, 2026-09-28: [the complete 2,048/4,096 comparison](planar-4096-refinement-20260928.md)
+now tests the next fixed layer pair and reports this neighborhood. The
+1,024/2,048 failure described here remains a separate retained result.
