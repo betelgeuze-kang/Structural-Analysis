@@ -106,6 +106,8 @@ def test_extract_2048_features_binds_full_path_and_inventory(tmp_path, monkeypat
     monkeypatch.setattr(
         comparison, "COARSE_PROTOCOL_SHA", extractor.COARSE_PROTOCOL_SHA
     )
+    monkeypatch.setattr(comparison, "COARSE_FEATURE_SHA", receipt["features_sha256"])
+    monkeypatch.setattr(comparison, "COARSE_FEATURE_INVENTORY_SHA", inventory_sha)
     assert (
         comparison.coarse_features(
             output, receipt["features_sha256"], inventory_sha, "synthetic-source"

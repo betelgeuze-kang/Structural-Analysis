@@ -52,9 +52,11 @@ def feature_packet(root, *, source_revision="synthetic-source", mutation=None):
 
 
 @pytest.mark.parametrize("mutation", [None, "source", "index", "targets", "bytes"])
-def test_4096_audit_requires_pinned_2048_features(tmp_path, mutation):
+def test_4096_audit_requires_pinned_2048_features(tmp_path, monkeypatch, mutation):
     root = tmp_path / "features"
     feature_sha, inventory_sha, features = feature_packet(root, mutation=mutation)
+    monkeypatch.setattr(audit, "COARSE_FEATURE_SHA", feature_sha)
+    monkeypatch.setattr(audit, "COARSE_FEATURE_INVENTORY_SHA", inventory_sha)
     if mutation == "bytes":
         with (root / "features.json").open("ab") as stream:
             stream.write(b" ")
@@ -68,14 +70,45 @@ def test_4096_audit_requires_pinned_2048_features(tmp_path, mutation):
             audit.coarse_features(root, feature_sha, inventory_sha, "synthetic-source")
 
 
-def test_4096_audit_rejects_wrong_inventory_or_unpinned_digest(tmp_path):
+def test_4096_audit_rejects_wrong_inventory_or_unpinned_digest(tmp_path, monkeypatch):
     root = tmp_path / "features"
     feature_sha, inventory_sha, _ = feature_packet(root)
-    with pytest.raises(ValueError, match="SHA-256"):
+    monkeypatch.setattr(audit, "COARSE_FEATURE_SHA", feature_sha)
+    monkeypatch.setattr(audit, "COARSE_FEATURE_INVENTORY_SHA", inventory_sha)
+    with pytest.raises(ValueError, match="pinned 2048 feature inventory"):
         audit.coarse_features(root, feature_sha, "0" * 64, "synthetic-source")
     with pytest.raises(ValueError, match="explicit SHA-256"):
         audit.coarse_features(root, feature_sha, "not-a-digest", "synthetic-source")
     assert inventory_sha != "0" * 64
+
+
+def test_4096_audit_rejects_self_consistent_unpinned_feature_packet(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "features"
+    feature_sha, inventory_sha, _ = feature_packet(root)
+    assert feature_sha != audit.COARSE_FEATURE_SHA
+    assert inventory_sha != audit.COARSE_FEATURE_INVENTORY_SHA
+    with pytest.raises(ValueError, match="pinned 2048 feature digest"):
+        audit.coarse_features(root, feature_sha, inventory_sha, "synthetic-source")
+
+    values = iter(protocols())
+    monkeypatch.setattr(audit, "read_checked", lambda *args, **kwargs: next(values))
+    monkeypatch.setattr(
+        audit, "coarse_features", lambda *args: pytest.fail("must reject unpinned input")
+    )
+    with pytest.raises(ValueError, match="pinned 2048 feature digest"):
+        audit.audit(
+            tmp_path, root, tmp_path, "1" * 64, "2" * 64,
+            feature_sha, inventory_sha,
+        )
+    monkeypatch.setattr(audit, "COARSE_FEATURE_SHA", feature_sha)
+    values = iter(protocols())
+    with pytest.raises(ValueError, match="pinned 2048 feature inventory"):
+        audit.audit(
+            tmp_path, root, tmp_path, "1" * 64, "2" * 64,
+            feature_sha, inventory_sha,
+        )
 
 
 def protocols():
@@ -125,8 +158,8 @@ def test_4096_audit_binds_confirmed_protocol_and_comparison_inputs(
 
     def read_coarse(root, feature_sha, inventory_sha, revision):
         assert (feature_sha, inventory_sha, revision) == (
-            "3" * 64,
-            "4" * 64,
+            audit.COARSE_FEATURE_SHA,
+            audit.COARSE_FEATURE_INVENTORY_SHA,
             "synthetic-source",
         )
         return coarse_features
@@ -155,7 +188,8 @@ def test_4096_audit_binds_confirmed_protocol_and_comparison_inputs(
     monkeypatch.setattr(audit, "read_path_artifacts", read_fine)
     monkeypatch.setattr(audit, "compare_features", compare)
     result = audit.audit(
-        tmp_path, tmp_path, tmp_path, "1" * 64, "2" * 64, "3" * 64, "4" * 64
+        tmp_path, tmp_path, tmp_path, "1" * 64, "2" * 64,
+        audit.COARSE_FEATURE_SHA, audit.COARSE_FEATURE_INVENTORY_SHA,
     )
     assert result["schema"] == "fixed-planar-2048-4096-comparison.v1"
     assert result["source_sha256"] == {"coarse": audit.COARSE_SHA, "fine": "1" * 64}

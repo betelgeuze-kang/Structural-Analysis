@@ -21,6 +21,8 @@ from structural_analysis.api.frame3d_direct_control_request import (
 )
 
 FINE_PROTOCOL_SHA = "7f30057cd8b26b0706c96bf84d5fc81842c4dbfc319f8abfc5c618793d459881"
+COARSE_FEATURE_SHA = "8faae14f83d9cb837139570c54071984a9b5795568cca3044b0f8b5090890c3d"
+COARSE_FEATURE_INVENTORY_SHA = "2a4b667df986d9e50460be6f6ef786318983cc95db691a28dd665e1280a1a03a"
 PROTOCOL_FIELDS = (
     "source_revision",
     "source_manifest_sha256",
@@ -41,10 +43,17 @@ def _digest(value):
     return value
 
 
+def _pinned_coarse_digests(feature_sha256, inventory_sha256):
+    feature_sha256, inventory_sha256 = _digest(feature_sha256), _digest(inventory_sha256)
+    require(feature_sha256 == COARSE_FEATURE_SHA, "pinned 2048 feature digest required")
+    require(inventory_sha256 == COARSE_FEATURE_INVENTORY_SHA,
+            "pinned 2048 feature inventory digest required")
+    return feature_sha256, inventory_sha256
+
+
 def coarse_features(root, feature_sha256, inventory_sha256, source_revision):
-    feature_sha256, inventory_sha256 = (
-        _digest(feature_sha256),
-        _digest(inventory_sha256),
+    feature_sha256, inventory_sha256 = _pinned_coarse_digests(
+        feature_sha256, inventory_sha256
     )
     inventory = read_checked(
         root / "inventory.json", inventory_sha256, maximum_bytes=128 * 1024
@@ -146,6 +155,9 @@ def audit(
             coarse_protocol[field] == fine_protocol[field],
             "protocol mismatch: " + field,
         )
+    feature_sha256, feature_inventory_sha256 = _pinned_coarse_digests(
+        feature_sha256, feature_inventory_sha256
+    )
     coarse = coarse_features(
         feature_root,
         feature_sha256,
