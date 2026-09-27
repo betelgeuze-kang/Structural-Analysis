@@ -141,7 +141,10 @@ def _reference_design_row(
             if candidate is None
             else design.apply_fiber_frame_section_changes(baseline, candidate)
         )
-        row["quantities"] = design.calculate_fiber_frame_member_quantities(model)
+        row["quantities"] = design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        )
         row["material_estimate"] = design._estimate(row["quantities"], prices)
         model_bytes = _bytes(model.canonical_payload())
     except (ValueError, TypeError, KeyError) as error:

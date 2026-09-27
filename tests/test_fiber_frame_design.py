@@ -102,6 +102,28 @@ def test_member_quantities_sum_shared_section_once_per_physical_member(model):
     )
 
 
+def test_two_fixed_endpoint_portal_quantities_require_explicit_profile():
+    portal = load_neutral_json(
+        Path("examples/research/rc_internal_portal_20mm/original-model.json")
+    )
+    with pytest.raises(design.FiberFrameDesignError, match="support_count_unsupported"):
+        design.calculate_fiber_frame_member_quantities(portal)
+    with pytest.raises(design.FiberFrameDesignError, match="explicit boolean"):
+        design.calculate_fiber_frame_member_quantities(
+            portal, experimental_two_fixed_endpoints=1
+        )
+    quantities = design.calculate_fiber_frame_member_quantities(
+        portal, experimental_two_fixed_endpoints=True
+    )
+    assert {member["member_id"] for member in quantities["members"]} == {
+        "left", "right", "beam"
+    }
+    assert quantities["totals"]["gross_concrete_volume_m3"] == pytest.approx(2.4)
+    assert quantities["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+        8 * 0.000387 * 10 * 7850
+    )
+
+
 def test_real_candidate_reanalysis_and_invalid_case_remain_in_denominator(comparison):
     report = comparison.to_dict()
     assert report["status"] == "partial"
