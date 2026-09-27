@@ -15,6 +15,9 @@ from structural_analysis.ai.fiber_frame_warm_start_data import (
     FiberFrameWarmStartDataCase,
 )
 from structural_analysis.api import nonlinear_fiber_frame as public_api
+from structural_analysis.benchmark.fiber_frame_candidate_cost import (
+    audit_fiber_frame_candidate_pool_cost,
+)
 from structural_analysis.benchmark import fiber_frame_candidate_search as search
 from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
@@ -504,6 +507,22 @@ def test_actual_labels_and_online_final_candidates_are_full_solver_verified(
     assert report["claims"]["screen_limits_cover_full_history_extrema"] is False
     assert report["claims"]["confirmed_construction_savings"] is False
     assert report["claims"]["generalized_speedup_claimed"] is False
+
+
+def test_pure_pool_cost_audit_keeps_producer_invalid_candidate_unknown(
+    actual_study,
+) -> None:
+    report = actual_study[4].to_dict()
+    before = deepcopy(report)
+    audit = audit_fiber_frame_candidate_pool_cost(report)
+    assert report == before
+    assert audit["source_report_hash"] == report["report_hash"]
+    assert audit["status"] == "oracle_incomplete"
+    assert "invalid" in audit["oracle_unverifiable_candidate_ids"]
+    assert audit["pool_minimum_feasible_estimate"] is None
+    for arm in audit["arms"].values():
+        assert arm["selected_minus_pool_minimum_estimate"] is None
+        assert arm["missed_cheaper_feasible_count"] is None
 
 
 def test_saved_comparison_accessor_preserves_producer_hashes_and_is_detached(

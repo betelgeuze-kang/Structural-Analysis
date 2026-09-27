@@ -88,6 +88,7 @@ jobs:
           tests/test_bounded_planar_model_ir_adapter.py
           tests/test_model_ir_v2_contract.py
           tests/test_fiber_frame_candidate_search.py
+          tests/test_fiber_frame_candidate_cost.py
           tests/test_fiber_frame_candidate_search_suite.py
           tests/test_bounded_rc_fiber_direct_control_api.py
           tests/test_rc_control_warm_start.py
