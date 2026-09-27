@@ -72,7 +72,9 @@ def control_candidate_features(model, request):
         study._bytes(request.to_dict())
     )
     values, geometry_context = candidate_preanalysis_features(
-        model, PublicRCFiberFrameConfig()
+        model,
+        PublicRCFiberFrameConfig(),
+        experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints,
     )
     return values, study._sha(
         study._bytes(
@@ -365,7 +367,12 @@ def train_rc_control_candidate_policy(
         design.apply_fiber_frame_section_changes(baseline, c) for c in candidates
     ]
     descriptors = [descriptor_function(m, request) for m in models]
-    model_ids = [candidate_model_identity(m) for m in models]
+    model_ids = [
+        candidate_model_identity(
+            m, experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints
+        )
+        for m in models
+    ]
     if len(set(model_ids)) != len(models) or len({d[1] for d in descriptors}) != 1:
         raise ValueError(
             "unique physical training models in one fixed context required"
@@ -418,7 +425,10 @@ def train_rc_control_candidate_policy(
                 "complete finite training response/material targets required"
             )
         sample = {
-            "model_identity": candidate_model_identity(model),
+            "model_identity": candidate_model_identity(
+                model,
+                experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            ),
             "features": list(descriptor[0]),
             "targets": targets,
             "result_sha256": row["artifacts"]["result"]["sha256"],

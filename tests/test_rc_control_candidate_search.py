@@ -10,6 +10,7 @@ import pytest
 
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
+    decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.benchmark import rc_control_candidate_learning as learning
@@ -76,6 +77,159 @@ def search_inputs(trained):
         ),
     )
     return args
+
+
+def test_existing_single_fixed_identity_and_control_context_hashes_stay_exact():
+    original = load_neutral_json(Path("examples/public_rc_fiber_frame_cantilever.json"))
+    assert learning.candidate_model_identity(original) == (
+        "sha256:0be40a21cd24a62319dfff406e4722b71ca12f15ef555fe5d0ac5bc6a1efdc0d"
+    )
+    assert learning.candidate_preanalysis_features(
+        original, learning.PublicRCFiberFrameConfig()
+    )[1] == (
+        "sha256:6866a01f18022c17e6a6019cc937bf26c95537d0e51984be248e397f8003d4a9"
+    )
+    request_v1 = BoundedRCFiberDirectControlRequest(4, (-1e-5,))
+    request_v2 = replace(
+        request_v1, constant_nodal_loads=(("N2", -600.0, 0.0, 0.0),)
+    )
+    assert learning.control_candidate_features(original, request_v1)[1] == (
+        "sha256:cf0b54af726f9078355818f47b4c00c6763cc3f4bd83838845267d62315a208f"
+    )
+    assert learning.control_candidate_features(original, request_v2)[1] == (
+        "sha256:17882e5c02d54f1ab731535dc60d0131ea1214870d98276c9e0c914742db5e0d"
+    )
+
+
+def _portal_inputs():
+    root = Path("examples/research/rc_internal_portal_20mm")
+    return dict(
+        baseline=load_neutral_json(root / "original-model.json"),
+        candidates=(candidate("narrower-036", 0.36), candidate("wider-050", 0.50)),
+        request=decode_bounded_rc_fiber_direct_control_request(
+            (root / "experimental-two-fixed-endpoints-request.json").read_bytes()
+        ),
+        prices=design.FiberFrameMaterialPrices(
+            100,
+            1,
+            "KRW",
+            "2026-09-28",
+            "Synthetic development arithmetic only; not a market quotation",
+        ),
+        history_limits=design.FiberFrameHistoryLimits(1, 1),
+        material_limits=design.FiberFrameMaterialHistoryLimits(1, 1, 1),
+        source_revision="a" * 40,
+    )
+
+
+def test_two_fixed_portal_features_bind_v3_request_and_vary_only_section_values():
+    args = _portal_inputs()
+    original, request = args["baseline"], args["request"]
+    changed = design.apply_fiber_frame_section_changes(original, args["candidates"][0])
+    assert request.to_dict()["schema_version"] == (
+        "bounded-rc-fiber-direct-control-request.v3"
+    )
+    for descriptor in (
+        learning.control_candidate_features,
+        learning.control_reinforcement_features,
+    ):
+        before, context = descriptor(original, request)
+        after, changed_context = descriptor(changed, request)
+        assert before != after and context == changed_context
+        with pytest.raises(ValueError, match="supported public RC profile"):
+            descriptor(
+                original,
+                replace(request, experimental_two_fixed_endpoints=False),
+            )
+
+
+def test_two_fixed_portal_search_preflight_requires_typed_v3_opt_in(
+    tmp_path, monkeypatch
+):
+    args = _portal_inputs()
+    no_opt_in = replace(args["request"], experimental_two_fixed_endpoints=False)
+    unsupported = tmp_path / "unsupported"
+    with pytest.raises(ValueError, match="supported public RC profile"):
+        search.run_rc_control_candidate_strategy(
+            **(args | {"request": no_opt_in}),
+            strategy="price_order",
+            output_directory=unsupported,
+            full_analysis_budget=2,
+        )
+    assert not unsupported.exists()
+    spoofed = tmp_path / "spoofed"
+    with pytest.raises(ValueError, match="exact direct-control request"):
+        search.run_rc_control_candidate_strategy(
+            **(args | {"request": object()}),
+            strategy="price_order",
+            output_directory=spoofed,
+            full_analysis_budget=2,
+        )
+    assert not spoofed.exists()
+
+    output = tmp_path / "admitted"
+
+    def stop_before_solver(*positional, **_keyword):
+        assert positional[2] == args["request"]
+        raise RuntimeError("portal search preflight complete")
+
+    monkeypatch.setattr(study, "compare_rc_control_designs", stop_before_solver)
+    with pytest.raises(RuntimeError, match="portal search preflight complete"):
+        search.run_rc_control_candidate_strategy(
+            **args,
+            strategy="price_order",
+            output_directory=output,
+            full_analysis_budget=2,
+        )
+    plan = json.loads((output / "plan.json").read_bytes())
+    assert plan["control_request"] == args["request"].to_dict()
+    assert [
+        row["quantities"]["totals"]["gross_concrete_volume_m3"]
+        for row in plan["pool"]
+    ] == pytest.approx([2.4, 2.16, 3.0])
+    assert all(row["model_identity"].startswith("sha256:") for row in plan["pool"])
+    assert json.loads((output / "price_order-outcome.json").read_bytes())[
+        "unknown_work_until_outcome"
+    ] is True
+
+
+def test_two_fixed_portal_training_preflight_uses_disjoint_model_identities(
+    tmp_path, monkeypatch
+):
+    args = _portal_inputs()
+    baseline = design.apply_fiber_frame_section_changes(
+        args["baseline"], candidate("training-base", 0.38)
+    )
+    output = tmp_path / "training"
+
+    def stop_before_labels(*_positional, **_keyword):
+        raise RuntimeError("portal training preflight complete")
+
+    monkeypatch.setattr(study, "compare_rc_control_designs", stop_before_labels)
+    with pytest.raises(RuntimeError, match="portal training preflight complete"):
+        learning.train_rc_control_candidate_policy(
+            baseline,
+            (candidate("training-042", 0.42),),
+            args["request"],
+            history_limits=args["history_limits"],
+            material_limits=args["material_limits"],
+            source_revision=args["source_revision"],
+            output_directory=output,
+        )
+    plan = json.loads((output / "plan.json").read_bytes())
+    assert plan["control_request"] == args["request"].to_dict()
+    assert len(set(plan["training_model_identities"])) == 2
+    pool_models = (args["baseline"],) + tuple(
+        design.apply_fiber_frame_section_changes(args["baseline"], item)
+        for item in args["candidates"]
+    )
+    assert not set(plan["training_model_identities"]) & {
+        learning.candidate_model_identity(
+            model,
+            experimental_two_fixed_endpoints=True,
+        )
+        for model in pool_models
+    }
 
 
 @pytest.mark.parametrize("strategy", ["price_order", "learned_order"])

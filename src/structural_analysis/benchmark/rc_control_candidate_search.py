@@ -11,6 +11,10 @@ from time import perf_counter_ns, process_time_ns
 from structural_analysis.ai.fiber_frame_candidate_learning import (
     candidate_model_identity,
 )
+from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+    BoundedRCFiberDirectControlRequest,
+    decode_bounded_rc_fiber_direct_control_request,
+)
 from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.benchmark import rc_control_design as study
 from structural_analysis.benchmark.rc_control_candidate_cost import (
@@ -211,6 +215,11 @@ def _run_candidate_search(
         raise ValueError("supported standalone strategy required")
     if only_strategy is not None and evaluate_exhaustive_oracle:
         raise ValueError("standalone online execution cannot receive an oracle")
+    if type(request) is not BoundedRCFiberDirectControlRequest:
+        raise ValueError("exact direct-control request required")
+    request = decode_bounded_rc_fiber_direct_control_request(
+        study._bytes(request.to_dict())
+    )
     uses_policy = only_strategy != "price_order"
     if not uses_policy and (policy is not None or training_report is not None):
         raise ValueError("price-only execution must not receive learned artifacts")
@@ -311,7 +320,13 @@ def _run_candidate_search(
     models = {"baseline": original}
     for c in candidates:
         models[c.candidate_id] = design.apply_fiber_frame_section_changes(original, c)
-    identities = {key: candidate_model_identity(model) for key, model in models.items()}
+    identities = {
+        key: candidate_model_identity(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        )
+        for key, model in models.items()
+    }
     if len(set(identities.values())) != len(identities):
         raise ValueError(
             "duplicate physical alternatives are not new search candidates"
@@ -330,7 +345,10 @@ def _run_candidate_search(
                 raise ValueError(
                     "training/search direct-control or fixed model context mismatch"
                 )
-        quantities = design.calculate_fiber_frame_member_quantities(model)
+        quantities = design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        )
         estimate = design._estimate(quantities, prices)
         assert estimate is not None
         model_bytes = study._bytes(model.canonical_payload())

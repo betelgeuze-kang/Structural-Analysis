@@ -3,6 +3,7 @@
 from copy import deepcopy
 from dataclasses import replace
 import json
+from pathlib import Path
 
 import pytest
 
@@ -12,6 +13,77 @@ from tests.test_rc_control_learning import case
 from structural_analysis.benchmark import rc_control_layout_search as search
 from structural_analysis.benchmark import rc_control_design as study
 from structural_analysis.benchmark import fiber_frame_design as design
+from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+    decode_bounded_rc_fiber_direct_control_request,
+)
+from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.execution.rc_layout_search_graph import read_layout_search_graph
+
+
+def test_two_fixed_portal_staged_price_order_retains_prefix_and_full_paths(tmp_path):
+    root = Path("examples/research/rc_internal_portal_20mm")
+    baseline = load_neutral_json(root / "original-model.json")
+    request = decode_bounded_rc_fiber_direct_control_request(
+        (root / "experimental-two-fixed-endpoints-request.json").read_bytes()
+    )
+
+    def changed(name, width):
+        return search.RCControlLayoutCandidate(
+            name,
+            design.apply_fiber_frame_section_changes(
+                baseline,
+                design.FiberFrameDesignCandidate(
+                    name,
+                    (design.FiberFrameSectionChange("RC1", width_m=width),),
+                ),
+            ),
+        )
+
+    output = tmp_path / "portal-staged"
+    report = search.run_control_layout_staged_strategy(
+        baseline,
+        (changed("narrower", 0.36), changed("wider", 0.50)),
+        request,
+        strategy="price_order",
+        prefix_target_count=1,
+        prices=design.FiberFrameMaterialPrices(
+            100, 1, "KRW", "2026-09-28", "synthetic test only"
+        ),
+        history_limits=design.FiberFrameHistoryLimits(1, 1),
+        material_limits=design.FiberFrameMaterialHistoryLimits(1, 1, 1),
+        source_revision="a" * 40,
+        output_directory=output,
+        full_analysis_budget=3,
+    )
+    assert report["arms"]["price_order"]["selected_candidate_id"] == "narrower"
+    comparison = json.loads((output / "price_order/comparison.json").read_bytes())
+    assert [row["candidate_id"] for row in comparison["rows"]] == [
+        "baseline",
+        "narrower",
+    ]
+    assert all(row["full_reference_verification_pass"] for row in comparison["rows"])
+    decisions = comparison["prefix_screening"]["decisions"]
+    assert [(row["candidate_id"], row["action"]) for row in decisions] == [
+        ("narrower", "execute_full_reference")
+    ]
+    prefix = json.loads(
+        (output / "price_order/prefix/narrower/request.json").read_bytes()
+    )
+    assert prefix["experimental_two_fixed_endpoints"] is True
+    assert prefix["targets_m"] == [-0.01]
+    result = json.loads(
+        (output / "price_order/narrower/baseline/result.json").read_bytes()
+    )
+    assert result["request"]["experimental_two_fixed_endpoints"] is True
+    for response in [result["preload_response"], *result["response_history"]]:
+        assert {(r["node_id"], r["dof"]) for r in response["support_reactions"]} == {
+            (node, dof) for node in ("N1", "N2") for dof in ("UX", "UY", "RZ")
+        }
+
+    def read(path, _maximum, _reference=None):
+        return (output / path).read_bytes()
+
+    read_layout_search_graph(read, report)
 
 
 def _price_pruning_inputs(inputs, budget=3):

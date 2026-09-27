@@ -36,8 +36,14 @@ def control_reinforcement_features(model, request):
         study._bytes(request.to_dict())
     )
     config = PublicRCFiberFrameConfig()
-    old_values, _ = candidate_preanalysis_features(model, config)
-    context = fiber_frame_physical_model_payload(model)
+    old_values, _ = candidate_preanalysis_features(
+        model,
+        config,
+        experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints,
+    )
+    context = fiber_frame_physical_model_payload(
+        model, experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints
+    )
     sections = [member["section"] for member in context["members"]]
     areas = tuple(
         float(s.get(key, s["bar_area_m2"])) for s in sections for key in OUTER_FIELDS

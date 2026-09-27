@@ -42,14 +42,22 @@ def control_history_turning_points(targets):
     return normalized
 
 
-def geometry_shape_signature(model):
+def geometry_shape_signature(model, *, experimental_two_fixed_endpoints=False):
     """Sorted normalized pair distances plus coarse connectivity; no solver calls.
 
     Congruent, mirrored and uniformly scaled coordinate sets group together even
     when entity order, orientation or origin changes. Different homometric graphs
     can also group together: false-positive split rejection is conservative.
     """
-    payload = fiber_frame_physical_model_payload(model)
+    if type(experimental_two_fixed_endpoints) is not bool:
+        raise ValueError("explicit boolean two-fixed-endpoint shape profile required")
+    payload = (
+        fiber_frame_physical_model_payload(
+            model, experimental_two_fixed_endpoints=True
+        )
+        if experimental_two_fixed_endpoints
+        else fiber_frame_physical_model_payload(model)
+    )
     coordinates = np.asarray(payload["node_coordinates_m"], dtype=float)
     edges = [tuple(member["nodes"]) for member in payload["members"]]
     signature = _distance_signature(

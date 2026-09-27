@@ -11,6 +11,10 @@ from structural_analysis.ai.fiber_frame_physical_identity import (
     fiber_frame_physical_model_identity,
     fiber_frame_physical_model_payload,
 )
+from structural_analysis.ai.fiber_frame_candidate_learning import (
+    candidate_model_identity,
+    candidate_preanalysis_features,
+)
 from structural_analysis.ai.fiber_frame_warm_start_data import (
     FiberFrameWarmStartDataCase,
     FiberFrameWarmStartDataError,
@@ -122,6 +126,36 @@ def test_entity_aliases_and_declaration_order_keep_physical_identity(kind, monke
         fiber_frame_physical_model_payload(original)["identity_profile"]
         == PHYSICAL_MODEL_IDENTITY_PROFILE
     )
+
+
+def test_two_fixed_portal_identity_and_features_require_explicit_profile():
+    source = Path(__file__).resolve().parents[1] / (
+        "examples/research/rc_internal_portal_20mm/original-model.json"
+    )
+    payload = json.loads(source.read_bytes())
+    original = _model(payload)
+    renamed = _model(_aliased(payload, "all"))
+    with pytest.raises(ValueError, match="supported public RC profile"):
+        candidate_model_identity(original)
+    with pytest.raises(ValueError, match="boolean two-fixed-endpoint"):
+        fiber_frame_physical_model_identity(
+            original, experimental_two_fixed_endpoints=1
+        )
+    profile = dict(experimental_two_fixed_endpoints=True)
+    physical = fiber_frame_physical_model_payload(original, **profile)
+    assert physical == fiber_frame_physical_model_payload(renamed, **profile)
+    assert physical["compiler_profile"] == (
+        public_api.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+    )
+    assert candidate_model_identity(original, **profile) == candidate_model_identity(
+        renamed, **profile
+    )
+    config = public_api.PublicRCFiberFrameConfig()
+    assert candidate_preanalysis_features(
+        original, config, **profile
+    ) == candidate_preanalysis_features(renamed, config, **profile)
+    with pytest.raises(ValueError, match="supported public RC profile"):
+        candidate_preanalysis_features(original, config)
 
 
 @pytest.mark.parametrize(

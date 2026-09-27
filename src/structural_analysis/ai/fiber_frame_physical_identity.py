@@ -29,7 +29,9 @@ def _physical_float(value: float) -> float:
     return float(value) if value else 0.0
 
 
-def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
+def fiber_frame_physical_model_payload(
+    model: CanonicalModel, *, experimental_two_fixed_endpoints: bool = False
+) -> dict[str, Any]:
     """Compile without solving, then expand material/section references by value.
 
     Unique coordinates are required by the public compiler. They give a stable
@@ -39,8 +41,13 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
 
     if type(model) is not CanonicalModel:
         raise ValueError("physical identity requires an exact CanonicalModel")
+    if type(experimental_two_fixed_endpoints) is not bool:
+        raise ValueError("explicit boolean two-fixed-endpoint identity profile required")
     snapshot = model.detached_analysis_snapshot()
-    compiled, blockers, _ = public_api._compile(snapshot)
+    compiled, blockers, _ = public_api._compile(
+        snapshot,
+        experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+    )
     if compiled is None or blockers:
         raise ValueError("physical identity requires the supported public RC profile")
     problem = compiled.problem
@@ -122,7 +129,11 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
     members.sort(key=lambda row: tuple(row["nodes"]))
     return {
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
-        "compiler_profile": public_api.PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
+        "compiler_profile": (
+            public_api.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+            if experimental_two_fixed_endpoints
+            else public_api.PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
+        ),
         "node_coordinates_m": [
             [_physical_float(value) for value in problem.node_coordinates_m[index]]
             for index in node_order
@@ -137,7 +148,14 @@ def fiber_frame_physical_model_payload(model: CanonicalModel) -> dict[str, Any]:
     }
 
 
-def fiber_frame_physical_model_identity(model: CanonicalModel) -> str:
+def fiber_frame_physical_model_identity(
+    model: CanonicalModel, *, experimental_two_fixed_endpoints: bool = False
+) -> str:
     """Return the versioned, entity-name invariant duplicate-detection hash."""
 
-    return canonical_hash(fiber_frame_physical_model_payload(model))
+    return canonical_hash(
+        fiber_frame_physical_model_payload(
+            model,
+            experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+        )
+    )

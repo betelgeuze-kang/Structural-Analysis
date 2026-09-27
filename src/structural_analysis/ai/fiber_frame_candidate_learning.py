@@ -143,14 +143,20 @@ def _number(value: Any, name: str) -> float:
     return result
 
 
-def candidate_model_identity(model: CanonicalModel) -> str:
+def candidate_model_identity(
+    model: CanonicalModel, *, experimental_two_fixed_endpoints: bool = False
+) -> str:
     """Bind supported physics independently of authored entity labels or order."""
-    return fiber_frame_physical_model_identity(model)
+    return fiber_frame_physical_model_identity(
+        model, experimental_two_fixed_endpoints=experimental_two_fixed_endpoints
+    )
 
 
 def candidate_preanalysis_features(
     model: CanonicalModel,
     config: public_api.PublicRCFiberFrameConfig,
+    *,
+    experimental_two_fixed_endpoints: bool = False,
 ) -> tuple[tuple[float, ...], str]:
     """Only section geometry and authored bars vary inside a fixed solve context."""
     if (
@@ -158,7 +164,9 @@ def candidate_preanalysis_features(
         or type(config) is not public_api.PublicRCFiberFrameConfig
     ):
         raise FiberFrameCandidateLearningError("exact model and config types required")
-    context = fiber_frame_physical_model_payload(model)
+    context = fiber_frame_physical_model_payload(
+        model, experimental_two_fixed_endpoints=experimental_two_fixed_endpoints
+    )
     assigned = [member["section"] for member in context["members"]]
     n = len(assigned)
     if not 1 <= n <= _MAX_FEATURE_MEMBERS:

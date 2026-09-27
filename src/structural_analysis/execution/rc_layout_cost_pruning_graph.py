@@ -67,6 +67,8 @@ def _original_row(read, name, row, model, request, *, allow_unverified=False):
         expected_request["constant_nodal_loads"] = request.to_dict()[
             "constant_nodal_loads"
         ]
+    if request.experimental_two_fixed_endpoints:
+        expected_request["experimental_two_fixed_endpoints"] = True
     _same(result.get("request"), expected_request, "pruning original request differs")
     if (
         result.get("model", {}).get("canonical_model_checksum")
