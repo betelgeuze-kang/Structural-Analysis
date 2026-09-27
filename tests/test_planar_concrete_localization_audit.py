@@ -387,14 +387,15 @@ def test_projection_error_decomposition_rejects_duplicate_points():
 
 
 @pytest.mark.parametrize('layers,expected', [(256, (256, 128)), (512, (512, 256)),
-                                           (1024, (1024, 512)), (2048, (2048, 1024))])
+                                           (1024, (1024, 512)), (2048, (2048, 1024)),
+                                           (4096, (4096, 2048))])
 def test_frozen_refinement_only_declares_original_or_next_resolution(layers, expected):
     from scripts.run_planar_256_refinement import refinement_layers
 
     assert refinement_layers(layers) == expected
 
 
-@pytest.mark.parametrize('bad', [True, 512.0, '512', 0, 128, 4096])
+@pytest.mark.parametrize('bad', [True, 512.0, '512', 0, 128, 8192])
 def test_frozen_refinement_rejects_unplanned_resolution_before_inputs(tmp_path, bad):
     from scripts.run_planar_256_refinement import run
 
@@ -441,7 +442,7 @@ def test_2048_protocol_change_rejected_before_loading_features(tmp_path, monkeyp
         audit.audit(tmp_path, tmp_path, tmp_path, '0' * 64, '0' * 64)
 
 
-@pytest.mark.parametrize('layers', [128, 256, 512, 1024])
+@pytest.mark.parametrize('layers', [128, 256, 512, 1024, 2048])
 def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatch, layers):
     import scripts.audit_planar_256_refinement as audit
 
@@ -451,7 +452,7 @@ def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatc
 
     def fake_sections(step, count, fields):
         assert count == layers * (2 if step['fine'] else 1)
-        values = [dict.fromkeys(fields, 0.) for _ in range(count)]
+        values = [dict.fromkeys(fields, 0.)] * count
         if step['fine']:
             values[-1] = dict.fromkeys(fields, 0.5)
         return {'E1:gauss-0': {'xi': 0., 'weight': 1., 'values': values}}
@@ -468,7 +469,7 @@ def test_refinement_comparison_preserves_projection_and_local_witness(monkeypatc
     assert maxima['nodal_steel']['translations']['within_exploratory_one_percent'] is True
 
 
-@pytest.mark.parametrize('layers', [True, 256., 64, 2048])
+@pytest.mark.parametrize('layers', [True, 256., 64, 4096])
 def test_comparison_rejects_unplanned_resolution(layers):
     from scripts.audit_planar_256_refinement import compare_steps
     with pytest.raises(ValueError, match='layer count'):
