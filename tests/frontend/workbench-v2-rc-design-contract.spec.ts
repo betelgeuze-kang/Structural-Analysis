@@ -64,6 +64,12 @@ test('RC study validates original full references, physical changes, quantity an
   expect(review.models.wider.sections[0].width_m).toBe(.5)
   expect(review.report.rows[2].status).toBe('invalid_candidate')
 })
+test('RC study rejects a rehashed member estimate that disagrees with the common price table', async () => {
+  const originalRow = '"concrete":60.0,"longitudinal_rebar":48.6072,"member_id":"M1"'
+  expect(original.toString()).toContain(originalRow)
+  const changed = original.toString().replace(originalRow, '"concrete":61.0,"longitudinal_rebar":48.6072,"member_id":"M1"')
+  await expect(validateRcDesignStudy(rehash(changed), read)).rejects.toThrow('study_member_estimate_invalid')
+})
 for (const role of ['model', 'result', 'checkpoint', 'verification', 'analysis_started', 'analysis_outcome', 'verification_started', 'verification_outcome']) {
   test(`RC study rejects changed original ${role}`, async () => {
     const report = JSON.parse(original.toString())

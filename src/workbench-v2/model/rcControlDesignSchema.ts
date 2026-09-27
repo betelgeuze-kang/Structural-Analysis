@@ -112,6 +112,14 @@ export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: s
   check(estimate && estimate.scope === SCOPE && estimate.verified_quote === false && estimate.confirmed_currency_savings === false
     && same(estimate.excluded_items, EXCLUDED) && estimate.quantity_hash === q.quantity_hash && estimate.price_table_hash === report.price_table_hash
     && estimate.currency === price.currency && close(estimate.total, totals.gross_concrete_volume_m3 * price.concrete_per_m3 + totals.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_estimate_invalid')
+  check(Array.isArray(estimate.members) && estimate.members.length === q.members.length
+    && new Set(estimate.members.map((m: RcObject) => m.member_id)).size === q.members.length, 'study_member_estimate_count_invalid')
+  for (const member of q.members) {
+    const cost = estimate.members.find((m: RcObject) => m.member_id === member.member_id)
+    check(cost && same(Object.keys(cost).sort(), ['concrete', 'longitudinal_rebar', 'member_id'])
+      && close(cost.concrete, member.gross_concrete_volume_m3 * price.concrete_per_m3)
+      && close(cost.longitudinal_rebar, member.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_member_estimate_invalid')
+  }
 }
 
 export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, report: RcObject, read: StudyRead, profile: 'section' | 'layout' = 'section'): Promise<RcObject | null> {

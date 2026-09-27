@@ -131,6 +131,22 @@ def test_actual_full_reference_reanalysis_and_common_quantities(actual):
         result = json.loads((root / row["artifacts"]["result"]["path"]).read_bytes())
         assert result["request"]["restart_input_sha256"] is None
         assert result["path"]["initial_checkpoint"]["epoch"] == 0
+        width = 0.4 if row is baseline else 0.5
+        quantities = {m["member_id"]: m for m in row["quantities"]["members"]}
+        estimates = {m["member_id"]: m for m in row["material_estimate"]["members"]}
+        assert quantities.keys() == estimates.keys() == {"M1", "M2"}
+        for member_id, length in (("M1", 2.0), ("M2", 1.5)):
+            member = quantities[member_id]
+            cost = estimates[member_id]
+            assert member["length_m"] == pytest.approx(length)
+            assert member["gross_concrete_volume_m3"] == pytest.approx(width * 0.6 * length)
+            assert member["longitudinal_rebar_mass_kg"] == pytest.approx(
+                8 * 0.000387 * length * 7850
+            )
+            assert cost["concrete"] == pytest.approx(width * 0.6 * length * 100)
+            assert cost["longitudinal_rebar"] == pytest.approx(
+                8 * 0.000387 * length * 7850
+            )
     assert (
         baseline["artifacts"]["model"]["sha256"]
         != wider["artifacts"]["model"]["sha256"]

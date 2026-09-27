@@ -59,6 +59,7 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
   const config = report.control_request.solver_config
   const newton = config.newton
   const current = report.rows.find((r: RcObject) => r.candidate_id === selected)
+  const baseline = report.rows[0]
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
     <p data-rc-design-authority>Original artifacts and stored full-path verification bindings checked. The browser does not rerun the solver. Caller limits, quantities and prices do not establish independent physical validation, code compliance, a verified quote or design approval.</p>
@@ -141,6 +142,21 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
       <h3>Selected candidate: {selected}</h3>
       <p>Model <code>{current.quantities.model_checksum}</code> · result <code>{current.artifacts.result.sha256}</code> · price table <code>{report.price_table_hash}</code></p>
       <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${longitudinalSteelDescription(s)}`).join('; ')}</p>
+      <div className="wb2-table-scroll" role="region" aria-label={`${current.candidate_id} RC member quantities and declared prices`} data-rc-design-members={current.candidate_id} tabIndex={0}>
+        <table className="wb2-table"><thead><tr><th>Member</th><th>Length (m)</th><th>Gross concrete (m³) / Δ</th><th>Longitudinal rebar (kg) / Δ</th><th>Concrete estimate</th><th>Rebar estimate</th><th>Estimate reduction</th></tr></thead>
+          <tbody>{current.quantities.members.map((member: RcObject) => {
+            const before = baseline.quantities?.members.find((m: RcObject) => m.member_id === member.member_id)
+            const cost = current.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
+            const priorCost = baseline.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
+            return <tr key={member.member_id} data-rc-design-member={member.member_id}>
+              <td>{member.member_id} ({member.section_id})</td><td>{shown(member.length_m)}</td>
+              <td>{shown(member.gross_concrete_volume_m3)} / Δ {shown(before ? member.gross_concrete_volume_m3 - before.gross_concrete_volume_m3 : null)}</td>
+              <td>{shown(member.longitudinal_rebar_mass_kg)} / Δ {shown(before ? member.longitudinal_rebar_mass_kg - before.longitudinal_rebar_mass_kg : null)}</td>
+              <td>{shown(cost?.concrete)} {report.prices?.currency}</td><td>{shown(cost?.longitudinal_rebar)} {report.prices?.currency}</td>
+              <td>{shown(cost && priorCost ? priorCost.concrete + priorCost.longitudinal_rebar - cost.concrete - cost.longitudinal_rebar : null)} {report.prices?.currency}</td>
+            </tr>
+          })}</tbody></table>
+      </div>
       <div data-rc-design-discretization={current.candidate_id}>
         <h4>Selected model discretization</h4>
         <dl>
