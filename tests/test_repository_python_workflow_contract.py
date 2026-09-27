@@ -968,6 +968,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     jobs = workflow["jobs"]
     diagnostic = jobs["development_contracts"]
     assert diagnostic["name"] == "pytest-development-contracts"
+    assert diagnostic["timeout-minutes"] == "45"
     assert "needs" not in diagnostic and "if" not in diagnostic
     assert "continue-on-error" not in diagnostic
     assert workflow["permissions"] == {"contents": "read"}
