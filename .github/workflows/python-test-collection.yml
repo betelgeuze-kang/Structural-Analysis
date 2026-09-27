@@ -115,6 +115,9 @@ jobs:
           tests/test_planar_concrete_localization_audit.py
           tests/test_planar_1024_witness_probe.py
           tests/test_planar_2048_witness_probe.py
+          tests/test_planar_4096_refinement_driver.py
+          tests/test_extract_planar_2048_features.py
+          tests/test_audit_planar_4096_refinement.py
           tests/test_planar_path_artifact_writer.py
           tests/test_planar_path_artifact_reader.py
           tests/test_planar_material_activity.py
