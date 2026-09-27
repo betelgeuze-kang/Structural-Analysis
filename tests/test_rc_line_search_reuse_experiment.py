@@ -8,6 +8,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from scripts import run_rc_reuse_campaign as campaign
+
 _spec = importlib.util.spec_from_file_location(
     "reuse_experiment",
     Path(__file__).resolve().parents[1] / "scripts/diagnose_rc_control_line_search_reuse.py",
@@ -153,7 +155,8 @@ def test_supplied_case_preserves_preload_and_targets_through_native_comparison(t
     request_path = tmp_path / "request.json"
     request_path.write_text(json.dumps(request.to_dict()))
     model_path = Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
-    output = tmp_path / "study"
+    case_directory = tmp_path / "case"
+    output = case_directory / "results"
     experiment.run(output, 2, case="supplied", arithmetic="retained",
                    model_path=model_path, request_path=request_path,
                    record_assembly_timing=timing)
@@ -163,6 +166,12 @@ def test_supplied_case_preserves_preload_and_targets_through_native_comparison(t
     assert summary["supplied_constant_load_count"] == 1
     assert summary["supplied_request_sha256"] == experiment.hashlib.sha256(
         request_path.read_bytes()).hexdigest()
+    campaign._validate_case_receipt(
+        case_directory,
+        {"model": model_path.read_bytes(), "request": request_path.read_bytes()},
+        source=summary["base_revision"], repetitions=2, arithmetic="retained",
+        record_assembly_timing=timing,
+    )
     assert [row["order"] for row in summary["rows"]] == [[False, True], [True, False]]
     for row in summary["rows"]:
         assert row["constant"] is True
