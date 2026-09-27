@@ -7,6 +7,11 @@ arithmetic and timing scope, and the exact number and alternating order of
 repetitions. Each off/on benchmark must have a unique expected directory,
 finite positive wall time, closed dispatch accounting, a matching time ratio,
 and original native step files whose bytes match across the pair.
+For each enumerated native step, the gate also reads its paired saved outcome,
+checks the complete ordered assembly-dispatch record, and recomputes actual
+dispatches and line-search reuse hits. The summary counts must match those
+saved records; balanced but inflated summary counts, missing outcomes, and
+malformed dispatch records fail the case.
 
 The referenced comparison reports must retain valid canonical hashes, the
 same supplied request and source revision, complete reference and strategy

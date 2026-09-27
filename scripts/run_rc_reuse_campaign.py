@@ -57,6 +57,58 @@ def _step_hashes(directory):
     return result
 
 
+def _assembly_counts(directory, steps):
+    """Recount dispatches from the saved outcome paired with each native step."""
+    dispatches = reuse_hits = 0
+    for relative in steps:
+        outcome = directory / (relative.removesuffix("-step.json") + "-outcome.json")
+        _require(
+            outcome.resolve().is_relative_to(directory.resolve()),
+            "experiment assembly outcome escapes its benchmark",
+        )
+        payload = _receipt(outcome)
+        work = payload.get("newton_assembly_work")
+        _require(
+            payload.get("status") == "returned"
+            and type(work) is dict
+            and work.get("schema_version") == "vector-newton-assembly-dispatch-work.v1"
+            and work.get("scope") == "vector_newton_problem_assembly_dispatches_only"
+            and type(work.get("calls")) is list,
+            "experiment assembly outcome is incomplete",
+        )
+        calls = work["calls"]
+        _require(
+            all(
+                type(call) is dict
+                and type(call.get("ordinal")) is int
+                and call["ordinal"] == ordinal
+                and type(call.get("phase")) is str
+                and bool(call["phase"])
+                and call.get("status") == "returned"
+                and type(call.get("compensated")) is bool
+                for ordinal, call in enumerate(calls, 1)
+            )
+            and all(
+                type(work.get(key)) is int and work[key] == count
+                for key, count in (
+                    ("call_count", len(calls)),
+                    ("returned_count", len(calls)),
+                    ("exception_count", 0),
+                    ("in_flight_count", 0),
+                )
+            ),
+            "experiment assembly dispatch record is malformed",
+        )
+        hits = work.get("line_search_reuse_hit_count", 0)
+        _require(
+            type(hits) is int and hits >= 0,
+            "experiment assembly reuse count is malformed",
+        )
+        dispatches += len(calls)
+        reuse_hits += hits
+    return dispatches, reuse_hits
+
+
 def _comparison(directory, *, source, request, constant):
     report = _receipt(directory / "comparison.json")
     identity = report.get("report_hash")
@@ -203,6 +255,12 @@ def _validate_case_receipt(directory, values, *, source, repetitions, arithmetic
             )
             steps = _step_hashes(benchmark)
             _require(len(steps) == item["step_count"], "experiment step count mismatch")
+            dispatches, reuse_hits = _assembly_counts(benchmark, steps)
+            _require(
+                item["actual_newton_dispatches"] == dispatches
+                and item["reused_dispatches"] == reuse_hits,
+                "experiment summary dispatches differ from saved outcomes",
+            )
             pair[strategy] = (item, steps, _comparison(
                 benchmark, source=source, request=request, constant=constant,
             ))

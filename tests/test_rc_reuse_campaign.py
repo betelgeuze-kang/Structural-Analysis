@@ -52,6 +52,22 @@ def write_success(output, *, source, model_raw, request_raw):
             benchmark = output / name
             (benchmark / 'reference').mkdir(parents=True)
             (benchmark / 'reference' / 'target-0-step.json').write_text('{"state":1}')
+            count = 8 if enabled else 10
+            work = {
+                'schema_version': 'vector-newton-assembly-dispatch-work.v1',
+                'scope': 'vector_newton_problem_assembly_dispatches_only',
+                'call_count': count, 'returned_count': count,
+                'exception_count': 0, 'in_flight_count': 0,
+                'calls': [
+                    {'ordinal': ordinal, 'phase': 'primary_iteration',
+                     'status': 'returned', 'compensated': False}
+                    for ordinal in range(1, count + 1)
+                ],
+                **({'line_search_reuse_hit_count': 2} if enabled else {}),
+            }
+            (benchmark / 'reference' / 'target-0-outcome.json').write_text(
+                json.dumps({'status': 'returned', 'newton_assembly_work': work})
+            )
             (benchmark / 'comparison.json').write_text(json.dumps(report))
             pair[strategy] = {
                 'directory': name, 'wall_ns': 1000 if not enabled else 900,
@@ -150,6 +166,8 @@ def test_failed_case_retained_later_case_runs_on_frozen_inputs(tmp_path, monkeyp
 @pytest.mark.parametrize('mutation', [
     'duplicate_pair', 'wrong_order', 'nonboolean_order', 'model_hash', 'request_hash',
     'missing_comparison', 'resealed_failed_history', 'changed_native_step', 'wrong_ratio',
+    'inflated_dispatches', 'missing_outcome', 'malformed_outcome',
+    'duplicate_outcome_key',
 ])
 def test_invalid_saved_receipt_fails_case_but_preserves_original_and_runs_later(
     tmp_path, monkeypatch, mutation
@@ -188,6 +206,24 @@ def test_invalid_saved_receipt_fails_case_but_preserves_original_and_runs_later(
         elif mutation == 'changed_native_step':
             (output / summary['rows'][0]['reuse']['directory'] /
              'reference/target-0-step.json').write_text('{"state":2}')
+        elif mutation == 'inflated_dispatches':
+            for strategy in ('baseline', 'reuse'):
+                summary['rows'][0][strategy]['actual_newton_dispatches'] += 1
+        elif mutation in ('missing_outcome', 'malformed_outcome',
+                          'duplicate_outcome_key'):
+            outcome_path = (output / summary['rows'][0]['baseline']['directory'] /
+                            'reference/target-0-outcome.json')
+            if mutation == 'missing_outcome':
+                outcome_path.unlink()
+            else:
+                outcome = json.loads(outcome_path.read_text())
+                if mutation == 'malformed_outcome':
+                    outcome['newton_assembly_work']['call_count'] = True
+                    outcome_path.write_text(json.dumps(outcome))
+                else:
+                    outcome_path.write_text(
+                        '{"status":"returned",' + json.dumps(outcome)[1:]
+                    )
         else:
             summary['rows'][0]['whole_benchmark_wall_ratio'] = 0.5
         (output / 'summary.json').write_text(json.dumps(summary))
