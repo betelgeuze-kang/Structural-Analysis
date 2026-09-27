@@ -156,6 +156,7 @@ export function ExportPanel({
         ...(candidateProcessReview ? { candidate_process_review: {
           manifest: candidateProcessReview.manifest,
           suite: candidateProcessReview.suite,
+          ...(candidateProcessReview.costAudit ? { cost_audit: candidateProcessReview.costAudit } : {}),
           manifest_url: candidateProcessReview.manifestUrl,
           suite_url: candidateProcessReview.suiteUrl,
           selection: selectedCandidateSlot ? {
@@ -237,7 +238,7 @@ export function ExportPanel({
         <li>displayed blockers ({blockers.length})</li>
         <li>selected comparison rows ({comparisonRows.length})</li>
         <li>physical design comparison: {designComparison ? `${designComparison.report.rows.length} source-bound alternatives` : 'unavailable'}</li>
-        {candidateProcessReview ? <li>candidate process review: whole search and the currently selected attempt; original bytes can also be downloaded in the search panel</li> : null}
+        {candidateProcessReview ? <li>candidate process review: whole search, {candidateProcessReview.costAudit ? 'verified finite-pool cost audit, ' : ''}and the currently selected attempt; original bytes can also be downloaded in the search panel</li> : null}
         <li>viewer deep link + reviewer draft + persistence receipt</li>
         <li>evidence manifest reference (checksum + commit, if published)</li>
       </ul>

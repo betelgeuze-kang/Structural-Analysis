@@ -3,6 +3,8 @@ import { loadCandidateProcessReview, parseCandidateProcessJson } from '../../src
 import { validateCandidateProcessManifest } from '../../src/workbench-v2/model/candidateProcessSchema'
 import { candidateBytes, candidateProcessObservedFixture, candidateProcessIncompleteFixture, replaceCandidateArtifact, sealCandidateFixture, type CandidateObservedFixture } from './candidateProcessObservedFixture'
 import { candidateProcessMaterialHistoryFixture } from './candidateProcessMaterialHistoryFixture'
+import { candidateProcessCostFixture, resealCandidateCostFixture } from './candidateProcessCostFixture'
+import type { CandidateProcessCostSidecar } from '../../src/workbench-v2/model/candidateProcessSchema'
 
 const origin = 'https://example.test'
 const url = `${origin}/candidate-review/manifest.json`
@@ -34,6 +36,48 @@ test('exact historical bytes retain all 12 slots, eight original comparisons and
     if (slot.comparison) { expect(slot.comparison.report).toEqual(slot.run.report!.arm!.design_comparison); expect(Buffer.from(slot.comparisonReportBytes!).equals(Buffer.from(fixture.files.get(new URL(slot.comparison.reportUrl).pathname.slice('/candidate-review/'.length))!))).toBe(true) }
     else expect(slot.strategy).toBe('oracle')
   }
+})
+
+test('v4 binds frozen producer cost bytes to the verified suite and independently recomputed pool costs', async () => {
+  const fixture = candidateProcessCostFixture(); const result = await load(fixture)
+  expect(result.errors).toEqual([]); expect(result.status).toBe('verified')
+  const bundle = result.bundle!
+  expect(bundle.manifest.source_suite_schema_version).toBe('rc-fiber-candidate-process-suite.v1')
+  expect(bundle.costAudit?.groups).toHaveLength(4)
+  expect(bundle.costAudit?.groups[0].audit?.pool_minimum_feasible_estimate).toBe(144.0108)
+  expect(bundle.costAudit?.groups[0].audit?.arms.deterministic.missed_cheaper_feasible_candidate_ids).toEqual(['near-limit'])
+  expect(bundle.costAudit?.groups[0].audit?.arms.learned.selected_minus_pool_minimum_estimate).toBe(0)
+  expect(Buffer.from(bundle.costAuditBytes!).equals(Buffer.from(fixture.files.get('cost/candidate-pool-audit.json')!))).toBe(true)
+})
+
+test('v4 rejects a missing or changed cost sidecar before exposing the suite', async () => {
+  const missing = candidateProcessCostFixture(); missing.files.delete('cost/candidate-pool-audit.json')
+  expect((await load(missing)).bundle).toBeNull()
+  const changed = candidateProcessCostFixture()
+  const result = await load(changed, (path, bytes) => new Response(path === 'cost/candidate-pool-audit.json' ? new Uint8Array(bytes.length) : bytes, { headers: { 'content-type': 'application/json' } }))
+  expect(result.status).toBe('invalid'); expect(result.bundle).toBeNull()
+})
+
+for (const [name, mutate] of [
+  ['lowered pool minimum', (sidecar: CandidateProcessCostSidecar) => { sidecar.groups[0].audit!.pool_minimum_feasible_estimate = 100 }],
+  ['erased missed cheaper candidate', (sidecar: CandidateProcessCostSidecar) => { sidecar.groups[0].audit!.arms.deterministic.missed_cheaper_feasible_candidate_ids = []; sidecar.groups[0].audit!.arms.deterministic.missed_cheaper_feasible_count = 0 }],
+  ['replaced source price hash', (sidecar: CandidateProcessCostSidecar) => { sidecar.groups[0].audit!.price_table_hash = 'sha256:' + '0'.repeat(64) }],
+  ['promoted an unavailable oracle', (sidecar: CandidateProcessCostSidecar) => { sidecar.groups[0].status = 'oracle_not_run'; sidecar.groups[0].audit!.status = 'oracle_not_run' }],
+  ['changed worker hash', (sidecar: CandidateProcessCostSidecar) => { sidecar.groups[0].worker_report_hashes.learned = 'sha256:' + '0'.repeat(64) }],
+] as const) test(`v4 rejects coherently resealed ${name}`, async () => {
+  const fixture = candidateProcessCostFixture()
+  const sidecar = JSON.parse(new TextDecoder().decode(fixture.files.get('cost/candidate-pool-audit.json')!)) as CandidateProcessCostSidecar
+  mutate(sidecar); resealCandidateCostFixture(fixture, sidecar)
+  const result = await load(fixture)
+  expect(result.status).toBe('invalid'); expect(result.bundle).toBeNull()
+})
+
+test('v4 requires its exact source suite version and cost manifest fields', async () => {
+  const fixture = candidateProcessCostFixture(); fixture.manifest.source_suite_schema_version = 'rc-fiber-candidate-process-suite.v2'
+  fixture.files.set('manifest.json', candidateBytes(fixture.manifest))
+  expect((await load(fixture)).status).toBe('invalid')
+  const extra = candidateProcessCostFixture(); (extra.manifest as any).unreviewed_cost_claim = 1
+  expect(() => validateCandidateProcessManifest(extra.manifest)).toThrow()
 })
 
 test('mixed material suite keeps new case scope and exact legacy worker report bytes', async () => {

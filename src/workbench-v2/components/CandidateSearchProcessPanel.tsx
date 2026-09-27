@@ -79,6 +79,9 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
   const winner = fields(arm.final_selection)
   const selectedFailure = fields(run.failure)
   const failureDetails = Object.values(selectedFailure).filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+  const costGroup = bundle.costAudit?.groups.find(entry => entry.case_id === slot?.caseId && entry.phase === slot.phase && entry.repetition === slot.repetition)
+  const poolCost = fields(costGroup?.audit)
+  const poolArms = fields(poolCost.arms)
 
   function select(part: 'caseId' | 'phase' | 'repetition' | 'strategy', chosen: string): void {
     if (!slot) return
@@ -163,6 +166,30 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
       <p className="wb2-note">Audit counts exclude the baseline and retain unavailable verification. Terminal prediction audits concern terminal limits. Full-scope prediction audits also include history and material limits when declared and predicted; unavailable counts are not zero failures. Deterministic search makes no prediction claim. The audit does not establish independent generalization.</p>
     </details>
 
+    {bundle.costAudit ? <section data-candidate-pool-cost>
+      <h3>Finite-pool material cost audit</h3>
+      <p className="wb2-note">This audit uses the declared material price basis and the stored, verified online and oracle rows. It applies only to this frozen candidate pool. It does not establish a global design optimum, an independently validated design or confirmed construction savings.</p>
+      <p className="wb2-note">Selected group: {slot ? `${slot.caseId} · ${label(slot.phase)} · repetition ${slot.repetition + 1}` : 'UNAVAILABLE'} · <strong data-candidate-pool-cost-status>{costGroup?.status ?? 'UNAVAILABLE'}</strong></p>
+      {costGroup?.audit ? <>
+        <dl className="wb2-kv">
+          <Metric name="Pool denominator including baseline" metric={poolCost.candidate_denominator} id="pool-denominator" integer />
+          <Metric name={`Oracle-verified feasible pool minimum (${String(poolCost.currency)})`} metric={poolCost.pool_minimum_feasible_estimate} id="pool-minimum" />
+          <dt>Minimum candidate IDs</dt><dd data-candidate-pool-minimum-ids>{Array.isArray(poolCost.pool_minimum_feasible_candidate_ids) ? poolCost.pool_minimum_feasible_candidate_ids.join(', ') || 'None' : 'UNAVAILABLE'}</dd>
+          <dt>Oracle-unverifiable candidate IDs</dt><dd data-candidate-pool-unknown-ids>{Array.isArray(poolCost.oracle_unverifiable_candidate_ids) ? poolCost.oracle_unverifiable_candidate_ids.join(', ') || 'None' : 'UNAVAILABLE'}</dd>
+        </dl>
+        <div className="wb2-table-scroll" role="region" aria-label="Finite-pool cost comparison" tabIndex={0}>
+          <table className="wb2-table"><thead><tr><th scope="col">Online arm</th><th scope="col">Status</th><th scope="col">Selected estimate</th><th scope="col">Selected minus pool minimum</th><th scope="col">Missed cheaper feasible</th><th scope="col">Unrequested cheaper feasible</th></tr></thead>
+            <tbody>{(['deterministic', 'learned'] as const).map(strategy => { const result = fields(poolArms[strategy]); return <tr key={strategy} data-candidate-pool-arm={strategy}>
+              <th scope="row">{label(strategy)}</th><td>{String(result.status)}</td><td>{value(result.selected_estimate)}</td>
+              <td data-candidate-pool-gap={strategy}>{value(result.selected_minus_pool_minimum_estimate)}</td>
+              <td data-candidate-pool-missed={strategy}>{value(result.missed_cheaper_feasible_count, true)}{Array.isArray(result.missed_cheaper_feasible_candidate_ids) && result.missed_cheaper_feasible_candidate_ids.length ? ` · ${result.missed_cheaper_feasible_candidate_ids.join(', ')}` : ''}</td>
+              <td data-candidate-pool-unrequested={strategy}>{value(result.unrequested_cheaper_feasible_count, true)}{Array.isArray(result.unrequested_cheaper_feasible_candidate_ids) && result.unrequested_cheaper_feasible_candidate_ids.length ? ` · ${result.unrequested_cheaper_feasible_candidate_ids.join(', ')}` : ''}</td>
+            </tr> })}</tbody></table>
+        </div>
+        <p className="wb2-note">Missed means outside the planned shortlist; unrequested means outside the attempted prefix. An unavailable oracle outcome leaves the minimum and related gaps unavailable. Zero means the comparison was complete and found no cheaper candidate under that definition.</p>
+      </> : <p className="wb2-unavailable">Online worker reports are unavailable for this group; no pool-cost comparison can be shown.</p>}
+    </section> : null}
+
     {slot ? <>
       <h3>Inspect an attempt</h3>
       <div className="wb2-candidate-selectors">
@@ -216,6 +243,7 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
     <div className="wb2-actions" aria-label="Candidate search artifact downloads">
       <button type="button" className="wb2-btn" onClick={() => download(bundle.manifestBytes, 'candidate-process-manifest.json')}>Download review manifest</button>
       <button type="button" className="wb2-btn" onClick={() => download(bundle.suiteBytes, 'candidate-process-suite.json')}>Download whole search JSON</button>
+      {bundle.costAuditBytes ? <button type="button" className="wb2-btn" onClick={() => download(bundle.costAuditBytes!, 'candidate-process-cost-audit.json')}>Download cost audit JSON</button> : null}
       {slot?.comparison && slot.comparisonManifestBytes && slot.comparisonReportBytes ? <>
         <button type="button" className="wb2-btn" onClick={() => download(slot.comparisonManifestBytes!, 'selected-comparison-manifest.json')}>Download selected comparison manifest</button>
         <button type="button" className="wb2-btn" onClick={() => download(slot.comparisonReportBytes!, 'selected-comparison.json')}>Download selected comparison JSON</button>

@@ -26,6 +26,27 @@ FIXTURES = Path(__file__).parent / "fixtures/fiber_frame_candidate_process"
 SOURCE = "a" * 40
 
 
+def test_legacy_section_change_shape_accepts_omitted_later_overrides_only():
+    legacy = {
+        "section_id": "section",
+        "width_m": None,
+        "depth_m": 0.4,
+        "cover_m": None,
+        "top_bar_count": None,
+        "bottom_bar_count": None,
+        "bar_area_m2": None,
+    }
+    process._validate_section_change_fields(legacy)
+    for optional in process._SECTION_CHANGE_OPTIONAL_FIELDS:
+        process._validate_section_change_fields({**legacy, optional: None})
+    with pytest.raises(ValueError, match="fields"):
+        process._validate_section_change_fields(
+            {k: v for k, v in legacy.items() if k != "section_id"}
+        )
+    with pytest.raises(ValueError, match="fields"):
+        process._validate_section_change_fields({**legacy, "unrecognized": 1})
+
+
 @pytest.fixture(autouse=True)
 def forbid_solver_and_workers(monkeypatch):
     calls = []

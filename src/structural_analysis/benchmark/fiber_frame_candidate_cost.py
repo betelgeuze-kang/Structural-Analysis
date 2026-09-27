@@ -8,6 +8,7 @@ an independent physical validation, or construction savings.
 from __future__ import annotations
 
 import math
+import re
 from typing import Any, Mapping
 
 from structural_analysis.benchmark.fiber_frame_design import (
@@ -105,6 +106,27 @@ def audit_fiber_frame_candidate_pool_cost(report: Mapping[str, Any]) -> dict[str
         or (stopping and report["stop_mode"] != "first_verified_feasible")
     ):
         raise ValueError("fiber-frame comparison scope does not match its schema")
+    return _audit_validated_components(
+        report,
+        history=history,
+        material=material,
+        stopping=stopping,
+        source_binding={"source_report_hash": source_hash},
+        schema_version="fiber-frame-candidate-pool-cost-audit.v1",
+    )
+
+
+def _audit_validated_components(
+    report: Mapping[str, Any],
+    *,
+    history: bool,
+    material: bool,
+    stopping: bool,
+    source_binding: Mapping[str, Any],
+    schema_version: str,
+    oracle_unavailable: bool = False,
+) -> dict[str, Any]:
+    """Shared arithmetic for source reports already validated by their owner."""
     basis = _object(report.get("price_basis"), "price basis")
     currency, price_hash = basis.get("currency"), basis.get("price_table_hash")
     price_keys = {
@@ -234,7 +256,15 @@ def audit_fiber_frame_candidate_pool_cost(report: Mapping[str, Any]) -> dict[str
         or (executed is False and rows is not None)
     ):
         raise ValueError("cost audit oracle execution declaration mismatch")
-    if executed:
+    if oracle_unavailable:
+        if executed is not True or rows is not None:
+            raise ValueError("unavailable oracle must remain an unresolved request")
+        oracle_by_id = {}
+        outcomes = {}
+        unknown = None
+        feasible = []
+        status = "oracle_unavailable"
+    elif executed:
         if _ids(rows, "oracle rows") != ["baseline", *pool_ids]:
             raise ValueError("cost audit oracle must cover the full declared pool")
         for row in rows:
@@ -324,8 +354,8 @@ def audit_fiber_frame_candidate_pool_cost(report: Mapping[str, Any]) -> dict[str
             else len(unrequested),
         }
     return {
-        "schema_version": "fiber-frame-candidate-pool-cost-audit.v1",
-        "source_report_hash": source_hash,
+        "schema_version": schema_version,
+        **source_binding,
         "status": status,
         "candidate_denominator": len(pool_ids) + 1,
         "baseline_included": True,
@@ -342,3 +372,146 @@ def audit_fiber_frame_candidate_pool_cost(report: Mapping[str, Any]) -> dict[str
         "confirmed_currency_savings": False,
         "independent_physical_validation": False,
     }
+
+
+def audit_fiber_frame_candidate_process_suite_cost(
+    suite: Mapping[str, Any], *, source_suite_sha256: str
+) -> dict[str, Any]:
+    """Derive a sidecar from a separately validated saved process suite.
+
+    The caller must first validate the suite and its original worker artifacts.
+    Invalid online reports remain unavailable; a configured but missing oracle
+    is distinct from a deliberately disabled oracle. No worker is rerun.
+    """
+    suite = _object(suite, "candidate process suite")
+    if suite.get("report_hash") != canonical_hash(
+        {key: value for key, value in suite.items() if key != "report_hash"}
+    ):
+        raise ValueError("cost sidecar source suite hash mismatch")
+    if not isinstance(source_suite_sha256, str) or not re.fullmatch(
+        r"sha256:[0-9a-f]{64}", source_suite_sha256
+    ):
+        raise ValueError("cost sidecar source suite byte hash invalid")
+    declaration = _object(suite.get("declaration"), "suite declaration")
+    configuration = _object(declaration.get("configuration"), "suite configuration")
+    cases = declaration.get("cases")
+    runs = suite.get("runs")
+    if not isinstance(cases, list) or not isinstance(runs, list):
+        raise ValueError("cost sidecar requires declared cases and runs")
+    by_slot = {
+        (run["case_id"], run["phase"], run["repetition"], run["strategy"]): run
+        for run in runs
+    }
+    if len(by_slot) != len(runs):
+        raise ValueError("cost sidecar duplicate source slot")
+    groups = []
+    oracle_configured = configuration.get("oracle_audit")
+    if type(oracle_configured) is not bool:
+        raise ValueError("cost sidecar oracle configuration invalid")
+    for phase, count in (
+        ("warmup", configuration["warmups"]),
+        ("measured", configuration["repetitions"]),
+    ):
+        for repetition in range(count):
+            for case in cases:
+                case = _object(case, "declared case")
+                case_id = case["case_id"]
+                binding = _object(case["input_binding"], "case input binding")
+                plans = _object(case["plans"], "case plans")
+                pool = _object(plans["learned"], "learned plan")["candidate_pool"]
+                source = {}
+                reports = {}
+                for strategy in ("deterministic", "learned", "oracle"):
+                    run = by_slot.get((case_id, phase, repetition, strategy))
+                    if run is None and (strategy != "oracle" or oracle_configured):
+                        raise ValueError("cost sidecar missing declared source slot")
+                    report = (
+                        _object(run["report"], "validated worker report")
+                        if run is not None and run["report_contract_pass"] is True
+                        else None
+                    )
+                    if report is not None:
+                        if report.get("report_hash") != canonical_hash(
+                            {
+                                key: value
+                                for key, value in report.items()
+                                if key != "report_hash"
+                            }
+                        ):
+                            raise ValueError("cost sidecar worker report hash mismatch")
+                        expected_pool = _object(plans[strategy], "strategy plan")[
+                            "candidate_pool"
+                        ]
+                        if (
+                            report.get("candidate_pool") != expected_pool
+                            or report.get("input_binding") != binding
+                        ):
+                            raise ValueError("cost sidecar worker binding mismatch")
+                        if [
+                            (
+                                row["candidate_id"],
+                                row["screening_status"],
+                                row["preanalysis_material_estimate"],
+                            )
+                            for row in expected_pool
+                        ] != [
+                            (
+                                row["candidate_id"],
+                                row["screening_status"],
+                                row["preanalysis_material_estimate"],
+                            )
+                            for row in pool
+                        ]:
+                            raise ValueError(
+                                "cost sidecar candidate cost basis mismatch"
+                            )
+                    reports[strategy] = report
+                    source[strategy] = (
+                        report["report_hash"] if report is not None else None
+                    )
+                audit = None
+                status = "online_report_unavailable"
+                if reports["deterministic"] and reports["learned"]:
+                    oracle = reports["oracle"]
+                    unavailable = oracle_configured and oracle is None
+                    audit = _audit_validated_components(
+                        {
+                            "price_basis": binding["price_basis"],
+                            "candidate_pool": pool,
+                            "arms": [
+                                reports[name]["arm"]
+                                for name in ("deterministic", "learned")
+                            ],
+                            "oracle": {
+                                "executed": oracle_configured,
+                                "labels_available_to_online_selection": False,
+                                "rows": oracle["rows"] if oracle is not None else None,
+                            },
+                        },
+                        history="history_limits" in binding,
+                        material="material_history_limits" in binding,
+                        stopping="stop_mode" in binding,
+                        source_binding={},
+                        schema_version="fiber-frame-candidate-process-pool-cost-audit.v1",
+                        oracle_unavailable=unavailable,
+                    )
+                    status = audit["status"]
+                groups.append(
+                    {
+                        "case_id": case_id,
+                        "phase": phase,
+                        "repetition": repetition,
+                        "worker_report_hashes": source,
+                        "status": status,
+                        "audit": audit,
+                    }
+                )
+    result = {
+        "schema_version": "fiber-frame-candidate-process-cost-sidecar.v1",
+        "source_suite_report_hash": suite["report_hash"],
+        "source_suite_identity_hash": suite["suite_identity_hash"],
+        "source_suite_sha256": source_suite_sha256,
+        "groups": groups,
+    }
+    result["report_hash"] = canonical_hash(result)
+    return result

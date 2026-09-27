@@ -4,8 +4,9 @@
 `src/structural_analysis/benchmark/fiber_frame_candidate_cost.py` reads an
 already validated fiber-frame candidate comparison report (v2–v5). It returns
 a separate audit value without editing the report or running the solver. The
-existing comparison, suite, process, fixture, and Workbench schemas are
-unchanged; no producer currently exports this value.
+existing comparison and process suite schemas and sealed fixture bytes are
+unchanged. The saved-process review exporter derives the same arithmetic from
+separately validated deterministic, learned, and oracle worker reports.
 
 The helper verifies the comparison report's canonical `report_hash` before
 reading its cost claims. Its output records that hash as `source_report_hash`
@@ -39,3 +40,18 @@ stopping. Both lists require a confirmed online selection and complete oracle.
 This audit is a finite-pool comparison under declared material prices, not a
 global design optimum, independent physical validation, construction quote,
 or confirmed currency savings.
+
+The process review writer emits a `rc-fiber-candidate-process-review-bundle.v4`
+manifest with a separate `cost/candidate-pool-audit.json` artifact. Its byte
+length, SHA-256, and canonical report hash are recorded in the manifest. The
+sidecar binds the unchanged source suite hash and raw-byte SHA-256, and records
+each source worker report hash by case, phase, and repetition. The review
+validator recomputes the sidecar from the already validated saved artifacts;
+resealing a changed audit cannot make it valid. Review manifests v1–v3 remain
+readable without a cost sidecar.
+
+An online report failure leaves that pair's audit unavailable. An oracle that
+the suite deliberately did not request is `oracle_not_run`; a configured oracle
+whose report did not validate is `oracle_unavailable`. Both keep the finite-pool
+minimum, gap, and cheaper-feasible counts null. These review calculations make
+no new solver request and are not added to the saved process timing.

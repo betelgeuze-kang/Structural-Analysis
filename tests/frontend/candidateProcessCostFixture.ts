@@ -1,0 +1,38 @@
+import { readFileSync } from 'node:fs'
+import { canonicalJson } from '../../src/workbench-v2/model/checksum'
+import type { CandidateProcessCostSidecar } from '../../src/workbench-v2/model/candidateProcessSchema'
+import { candidateBytes, candidateDigest, candidateProcessObservedFixture, type CandidateObservedFixture } from './candidateProcessObservedFixture'
+
+/** Frozen Python producer output on the historical observed suite; no worker is rerun. */
+export function candidateProcessCostFixture(): CandidateObservedFixture {
+  const fixture = candidateProcessObservedFixture()
+  const bytes = new Uint8Array(readFileSync(new URL('../fixtures/fiber_frame_candidate_review/observed-cost-sidecar.json', import.meta.url)))
+  const sidecar = JSON.parse(new TextDecoder().decode(bytes)) as CandidateProcessCostSidecar
+  fixture.manifest.schema_version = 'rc-fiber-candidate-process-review-bundle.v4'
+  fixture.manifest.source_suite_schema_version = fixture.suite.schema_version as CandidateProcessManifestSuiteVersion
+  fixture.manifest.cost_audit_file = 'cost/candidate-pool-audit.json'
+  fixture.manifest.cost_audit_byte_length = bytes.length
+  fixture.manifest.cost_audit_sha256 = candidateDigest(bytes)
+  fixture.manifest.cost_audit_hash = sidecar.report_hash
+  fixture.files.set(fixture.manifest.cost_audit_file, bytes)
+  fixture.files.set('manifest.json', candidateBytes(fixture.manifest))
+  return fixture
+}
+
+type CandidateProcessManifestSuiteVersion = NonNullable<CandidateObservedFixture['manifest']['source_suite_schema_version']>
+
+/** Test-only coherent transport reseal; it does not assert producer provenance. */
+export function resealCandidateCostFixture(fixture: CandidateObservedFixture, sidecar: CandidateProcessCostSidecar): void {
+  sidecar.source_suite_report_hash = fixture.suite.report_hash
+  sidecar.source_suite_identity_hash = fixture.suite.suite_identity_hash
+  sidecar.source_suite_sha256 = fixture.manifest.suite_sha256
+  const unsealed = { ...sidecar } as Record<string, unknown>
+  delete unsealed.report_hash
+  sidecar.report_hash = candidateDigest(new TextEncoder().encode(canonicalJson(unsealed)))
+  const bytes = new TextEncoder().encode(canonicalJson(sidecar))
+  fixture.manifest.cost_audit_hash = sidecar.report_hash
+  fixture.manifest.cost_audit_byte_length = bytes.length
+  fixture.manifest.cost_audit_sha256 = candidateDigest(bytes)
+  fixture.files.set(fixture.manifest.cost_audit_file!, bytes)
+  fixture.files.set('manifest.json', candidateBytes(fixture.manifest))
+}

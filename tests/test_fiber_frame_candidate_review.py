@@ -158,6 +158,30 @@ def test_relocated_review_uses_only_copied_bytes_and_preserves_eight_m2_pairs(
     )
     manifest, suite = checked["manifest"], checked["suite"]
     assert suite["status"] == "ready" and len(suite["runs"]) == 12
+    assert manifest["schema_version"] == review.COST_SCHEMA_VERSION
+    assert manifest["source_suite_schema_version"] == suite["schema_version"]
+    cost_raw = (complete_bundle / manifest["cost_audit_file"]).read_bytes()
+    cost = codec._json(cost_raw)
+    assert review._raw_identity(cost_raw) == {
+        "byte_length": manifest["cost_audit_byte_length"],
+        "sha256": manifest["cost_audit_sha256"],
+    }
+    assert cost["report_hash"] == manifest["cost_audit_hash"]
+    assert cost["source_suite_report_hash"] == suite["report_hash"]
+    assert cost["source_suite_sha256"] == manifest["suite_sha256"]
+    assert len(cost["groups"]) == 4
+    for group in cost["groups"]:
+        assert group["status"] == group["audit"]["status"]
+        assert group["audit"]["candidate_denominator"] == 3
+        assert group["audit"]["confirmed_currency_savings"] is False
+        for name, worker_hash in group["worker_report_hashes"].items():
+            run = next(
+                row
+                for row in suite["runs"]
+                if (row["case_id"], row["phase"], row["repetition"], row["strategy"])
+                == (group["case_id"], group["phase"], group["repetition"], name)
+            )
+            assert worker_hash == run["report"]["report_hash"]
     assert len(manifest["artifacts"]) == 54
     assert len(manifest["comparisons"]) == 8
     assert suite["cost_accounting"]["current_analysis_request_count"] == 28
@@ -352,6 +376,53 @@ def test_nested_comparison_raw_corruption_is_rejected(bundle):
     ).parent / "comparison.json"
     path.write_bytes(path.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="comparison bytes"):
+        review.validate_fiber_frame_candidate_process_review_bundle(bundle)
+
+
+def test_legacy_v1_review_manifest_remains_accepted(bundle):
+    manifest_path = bundle / "manifest.json"
+    manifest = _load(manifest_path)
+    for key in review._COST_MANIFEST_FIELDS:
+        manifest.pop(key)
+    manifest["schema_version"] = review.SCHEMA_VERSION
+    _write(manifest_path, manifest)
+    checked = review.validate_fiber_frame_candidate_process_review_bundle(bundle)
+    assert checked["suite"]["schema_version"] == process.SCHEMA_VERSION
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["raw_bytes", "cost_gap", "worker_hash", "source_bytes", "missing", "alias"],
+)
+def test_versioned_cost_sidecar_rejects_resealed_or_missing_data(bundle, mutation):
+    manifest_path = bundle / "manifest.json"
+    manifest = _load(manifest_path)
+    cost_path = bundle / manifest["cost_audit_file"]
+    cost = _load(cost_path)
+    if mutation == "raw_bytes":
+        cost_path.write_bytes(cost_path.read_bytes() + b"\n")
+    elif mutation == "missing":
+        cost_path.unlink()
+    elif mutation == "alias":
+        manifest["cost_audit_file"] = manifest["comparisons"][0]["manifest_file"]
+        _write(manifest_path, manifest)
+    else:
+        if mutation == "cost_gap":
+            cost["groups"][0]["audit"]["pool_minimum_feasible_estimate"] = 0
+        elif mutation == "worker_hash":
+            cost["groups"][0]["worker_report_hashes"]["learned"] = "sha256:" + "0" * 64
+        else:
+            cost["source_suite_sha256"] = "sha256:" + "0" * 64
+        _rehash(cost)
+        _write(cost_path, cost)
+        raw = cost_path.read_bytes()
+        manifest.update(
+            cost_audit_byte_length=len(raw),
+            cost_audit_sha256=codec._digest(raw),
+            cost_audit_hash=cost["report_hash"],
+        )
+        _write(manifest_path, manifest)
+    with pytest.raises(ValueError):
         review.validate_fiber_frame_candidate_process_review_bundle(bundle)
 
 
