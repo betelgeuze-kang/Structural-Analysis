@@ -86,6 +86,51 @@ def test_original_two_base_portal_requested_targets_replay_with_both_reaction_se
     assert verified.contract_pass is True
 
 
+def test_plan_derived_40mm_two_base_portal_completes_fresh_source_validation():
+    model = load_neutral_json_bytes((ROOT / "original-model.json").read_bytes())
+    base = decode_bounded_rc_fiber_direct_control_request(
+        (ROOT / "experimental-two-fixed-endpoints-request.json").read_bytes()
+    )
+    derived_bytes = (
+        ROOT / "experimental-two-fixed-endpoints-derived-40mm-request.json"
+    ).read_bytes()
+    assert hashlib.sha256(derived_bytes).hexdigest() == (
+        "c8e4954ee7560ccd73b5e69ae364bd157f87b5a23cf230d168a62900d4ae395d"
+    )
+    derived = decode_bounded_rc_fiber_direct_control_request(derived_bytes)
+    assert derived == replace(base, targets_m=(-0.02, -0.04, 0.02))
+    eighty_bytes = (
+        ROOT / "experimental-two-fixed-endpoints-derived-80mm-request.json"
+    ).read_bytes()
+    assert hashlib.sha256(eighty_bytes).hexdigest() == (
+        "abf8d1d84a6b05af107730494ae5440deb305ceae123b91ceb5c92eb5feea782"
+    )
+    assert decode_bounded_rc_fiber_direct_control_request(eighty_bytes) == replace(
+        base, targets_m=(-0.04, -0.08, 0.04)
+    )
+
+    result = analyze_bounded_rc_fiber_direct_control(
+        model, derived.targets_m, **derived.api_kwargs()
+    )
+    payload = result.to_dict()
+    assert result.status == "ready" and result.contract_pass is True
+    assert payload["metrics"]["control_work"]["unknown_solver_work_attempt_count"] == 0
+    assert [
+        next(d["UX_m"] for d in row["node_displacements"] if d["node_id"] == "N4")
+        for row in payload["response_history"]
+    ] == list(derived.targets_m)
+    assert all(len(row["support_reactions"]) == 6 for row in payload["response_history"])
+
+    verified = validate_bounded_rc_fiber_direct_control_artifacts(
+        model,
+        derived.targets_m,
+        result=result.result_artifact_bytes(),
+        checkpoint=result.checkpoint_artifact_bytes(),
+        **derived.api_kwargs(),
+    )
+    assert verified.status == "valid_artifact" and verified.contract_pass is True
+
+
 def test_original_two_base_portal_v3_cli_runs_and_replay_verifies(tmp_path):
     model = tmp_path / "model.json"
     request = tmp_path / "request.json"
