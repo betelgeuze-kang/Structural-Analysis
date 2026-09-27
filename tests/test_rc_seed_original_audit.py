@@ -194,7 +194,7 @@ def two_fixed_retry_path(tmp_path_factory):
     return root
 
 
-def test_failed_seeded_attempt_is_charged_but_not_claimed_as_reassembled(
+def test_failed_seeded_terminal_trial_replay_does_not_qualify_attempt_history(
     two_fixed_retry_path, monkeypatch
 ):
     from structural_analysis.assembly import stateful_fiber_frame2d_solver as force
@@ -208,11 +208,15 @@ def test_failed_seeded_attempt_is_charged_but_not_claimed_as_reassembled(
     monkeypatch.setattr(force, "newton_raphson_vector", forbidden)
     monkeypatch.setattr(control, "newton_raphson_vector", forbidden)
     result = verify(two_fixed_retry_path)
-    assert result["schema_version"] == "rc-constant-seed-original-audit.v2"
+    assert result["schema_version"] == "rc-constant-seed-original-audit.v3"
     assert result["comparisons"] == {"reference": True, "secant": True}
     assert result["original_records_reproduced"] is False
     assert result["repeat_admissible"] is False
-    assert result["original_replay_scope"] == "accepted_transitions_only"
+    assert result["independent_physical_validation"] is False
+    assert result["original_replay_scope"] == (
+        "accepted_transitions_and_failed_terminal_trials_only"
+    )
+    assert result["uncommitted_replay_scope"] == "terminal_trial_only"
     assert result["accepted_transitions_reassembled"] == 12
     assert result["uncommitted_attempts_record_bound"] == 1
     assert result["uncommitted_attempts_by_arm"] == {
@@ -221,9 +225,81 @@ def test_failed_seeded_attempt_is_charged_but_not_claimed_as_reassembled(
         "fresh-reference": 0,
     }
     assert result["uncommitted_attempts_reassembled"] == 0
+    assert result["uncommitted_terminal_trials_reassembled"] == 1
     assert result["original_work"]["core_calls"] == 13
-    assert result["audit_work"]["assembly_replays"] == 12
+    assert result["audit_work"]["assembly_replays"] == 13
+    assert result["audit_work"]["rational_record_rebuilds"] == 13
     assert result["audit_work"]["newton_solves"] == 0
+    assert result["audit_work"]["state_commits"] == 0
+
+
+@pytest.mark.parametrize(
+    ("forgery", "message"),
+    [
+        ("assembly", "failed original assembly replay differs"),
+        ("coordinate", "failed original trial coordinates differ"),
+        ("coordinate_metadata", "failed original trial coordinate metadata differs"),
+        ("residual", "failed original trial residual binding differs"),
+    ],
+)
+def test_failed_seeded_terminal_trial_tampering_fails_closed(
+    two_fixed_retry_path, tmp_path, forgery, message
+):
+    root = tmp_path / forgery
+    shutil.copytree(two_fixed_retry_path, root)
+    step_file = root / "study/secant/002-1-step.json"
+    step = json.loads(step_file.read_bytes())
+    if forgery == "assembly":
+        step["trial_assembly"]["member_assemblies"][0]["element_response"][
+            "section_responses"
+        ][0]["fiber_responses"][0]["stress_mpa"] += 1.0
+    elif forgery == "coordinate":
+        step["trial_solution"]["augmented_coordinates_m"][0] += 1e-5
+    elif forgery == "coordinate_metadata":
+        step["metrics"]["absolute_augmented_coordinates_m"][0] += 1e-5
+    else:
+        step["trial_solution"]["metrics"]["residual_kn"][0] += 1.0
+    step["step_hash"] = canonical_hash(
+        {key: value for key, value in step.items() if key != "step_hash"}
+    )
+    step_file.write_bytes(_bytes(step))
+    with pytest.raises(ValueError, match=message):
+        verify(root)
+
+
+@pytest.mark.parametrize(
+    "forgery",
+    [
+        "step_committed",
+        "solver_contract",
+        "solution_status",
+        "terminal_reason",
+        "accepted_control",
+    ],
+)
+def test_failed_seeded_failure_metadata_tampering_fails_closed(
+    two_fixed_retry_path, tmp_path, forgery
+):
+    root = tmp_path / forgery
+    shutil.copytree(two_fixed_retry_path, root)
+    step_file = root / "study/secant/002-1-step.json"
+    step = json.loads(step_file.read_bytes())
+    if forgery == "step_committed":
+        step["metrics"]["committed"] = True
+    elif forgery == "solver_contract":
+        step["metrics"]["solver_contract_pass"] = True
+    elif forgery == "solution_status":
+        step["trial_solution"]["status"] = "ready"
+    elif forgery == "terminal_reason":
+        step["metrics"]["terminal_reason"] = "forged_terminal_reason"
+    else:
+        step["metrics"]["accepted_control_displacement_m"] += 1e-4
+    step["step_hash"] = canonical_hash(
+        {key: value for key, value in step.items() if key != "step_hash"}
+    )
+    step_file.write_bytes(_bytes(step))
+    with pytest.raises(ValueError, match="failed original failure metadata differs"):
+        verify(root)
 
 
 def test_failed_attempt_rollback_record_cannot_be_forged(two_fixed_retry_path, tmp_path):

@@ -6,6 +6,7 @@ or a new accepted solve. It is reproducibility evidence, not an external oracle.
 
 import argparse
 from collections import Counter
+from fractions import Fraction
 import importlib.util
 import json
 from pathlib import Path
@@ -131,6 +132,7 @@ def verify(study, model_path, request_path):
     work: Counter[str] = Counter()
     audit_work: Counter[str] = Counter()
     uncommitted_attempts_by_arm: dict[str, int] = {}
+    uncommitted_replays = 0
     rows: dict[str, Any] = {}
     paths: dict[str, Any] = {}
     for name in [*report["arm_order"], "fresh-reference"]:
@@ -302,9 +304,192 @@ def verify(study, model_path, request_path):
                     and step["accepted_checkpoint"] == parent.to_dict(),
                     "uncommitted original attempt did not preserve its parent",
                 )
-                # The failed trial is charged and its rollback record is bound,
-                # but its constitutive assembly is not independently replayed.
+                solver_ready = solution["metrics"]["contract_pass"] is True
+                require(
+                    type(solution["metrics"]["contract_pass"]) is bool
+                    and solution["status"]
+                    == ("ready" if solver_ready else "blocked")
+                    and step["metrics"]["committed"] is False
+                    and step["metrics"]["solver_contract_pass"] is False
+                    and step["metrics"]["parent_checkpoint_immutable"] is True
+                    and step["metrics"]["accepted_control_displacement_m"]
+                    == parent.global_displacements[request.control_global_dof]
+                    and step["metrics"]["terminal_reason"]
+                    == (
+                        "direct_control_terminal_binding_or_gate_failed"
+                        if solver_ready
+                        else solution["metrics"].get("terminal_reason")
+                    ),
+                    "failed original failure metadata differs",
+                )
+                adapter = StatefulFiberFrame2DDisplacementControlStepAdapter(
+                    problem,
+                    parent,
+                    request.control_global_dof,
+                    request.targets_m[transition_index],
+                    request.solver_config,
+                )
+                increment = np.asarray(
+                    solution.get(
+                        "solver_increment_coordinates_m",
+                        solution["augmented_coordinates_m"],
+                    )
+                )
+                increment_low = solution.get(
+                    "solver_increment_coordinate_compensation_m"
+                )
+                coordinates, compensation = adapter.absolute_coordinates(
+                    increment,
+                    None if increment_low is None else np.asarray(increment_low),
+                )
+                require(
+                    np.array_equal(
+                        increment, solution["metrics"]["free_displacements_m"]
+                    )
+                    and np.array_equal(
+                        coordinates, solution["augmented_coordinates_m"]
+                    )
+                    and (
+                        (
+                            compensation is None
+                            and "augmented_coordinate_compensation_m" not in solution
+                        )
+                        or (
+                            compensation is not None
+                            and np.array_equal(
+                                compensation,
+                                solution["augmented_coordinate_compensation_m"],
+                            )
+                        )
+                    )
+                    and (
+                        (
+                            increment_low is None
+                            and "free_displacement_compensation_m"
+                            not in solution["metrics"]
+                        )
+                        or (
+                            increment_low is not None
+                            and np.array_equal(
+                                increment_low,
+                                solution["metrics"]["free_displacement_compensation_m"],
+                            )
+                        )
+                    ),
+                    "failed original trial coordinates differ",
+                )
+                origin = adapter.coordinate_origin()
+                require(
+                    step["metrics"]["control_global_dof"]
+                    == request.control_global_dof
+                    and step["metrics"]["target_control_displacement_m"]
+                    == request.targets_m[transition_index]
+                    and step["metrics"]["config_hash"]
+                    == request.solver_config.contract_hash
+                    and step["metrics"]["config"]
+                    == request.solver_config.to_manifest()
+                    and (
+                        (
+                            origin is None
+                            and "absolute_augmented_coordinates_m"
+                            not in step["metrics"]
+                        )
+                        or (
+                            origin is not None
+                            and step["metrics"]["coordinate_precision"]
+                            == problem.coordinate_precision
+                            and step["metrics"]["solver_coordinate_role"]
+                            == "increment_from_native_parent"
+                            and np.array_equal(
+                                step["metrics"]["coordinate_origin_m"], origin[0]
+                            )
+                            and np.array_equal(
+                                step["metrics"]["coordinate_origin_compensation_m"],
+                                origin[1],
+                            )
+                            and np.array_equal(
+                                step["metrics"]["absolute_augmented_coordinates_m"],
+                                coordinates,
+                            )
+                            and np.array_equal(
+                                step["metrics"][
+                                    "absolute_augmented_coordinate_compensation_m"
+                                ],
+                                compensation,
+                            )
+                        )
+                    ),
+                    "failed original trial coordinate metadata differs",
+                )
+                factor = adapter.load_factor_at(coordinates, compensation)
+                recorder = MaterialTrialRuntimeRecorder()
+                fresh = assemble_stateful_fiber_frame2d(
+                    problem,
+                    parent,
+                    target_load_factor=factor,
+                    trial_free_coordinates_m=coordinates[:-1],
+                    trial_free_coordinate_compensation_m=(
+                        None if compensation is None else compensation[:-1]
+                    ),
+                    material_runtime=recorder,
+                )
+                audit_work["assembly_replays"] += 1
+                audit_work["material_integrations"] += recorder.call_count
+                require(
+                    recorder.coverage_complete,
+                    "failed assembly replay material costs unavailable",
+                )
+                require(
+                    _bytes(fresh.to_dict()) == _bytes(step["trial_assembly"]),
+                    "failed original assembly replay differs",
+                )
+                rational.verify_assembly(problem, step["trial_assembly"])
+                audit_work["rational_record_rebuilds"] += 1
+                control_error = (
+                    float(
+                        Fraction(float(coordinates[adapter.control_free_index]))
+                        + Fraction(
+                            float(compensation[adapter.control_free_index])
+                        )
+                        - Fraction(adapter.target_control_displacement_m)
+                    )
+                    if compensation is not None
+                    else float(
+                        fresh.global_displacements[request.control_global_dof]
+                        - adapter.target_control_displacement_m
+                    )
+                )
+                relative_equilibrium = float(
+                    np.linalg.norm(fresh.residual_kn, ord=np.inf)
+                ) / problem.reference_force_scale()
+                require(
+                    step["metrics"]["solved_load_factor"] == factor
+                    and step["metrics"]["control_error_m"] == control_error
+                    and step["metrics"]["relative_equilibrium"]
+                    == relative_equilibrium
+                    and step["metrics"]["control_gate_passed"]
+                    is (
+                        abs(control_error)
+                        <= request.solver_config.control_tolerance_m
+                    )
+                    and step["metrics"]["equilibrium_gate_passed"]
+                    is (
+                        relative_equilibrium
+                        <= request.solver_config.newton.residual_tolerance
+                    )
+                    and np.array_equal(
+                        solution["metrics"]["residual_kn"],
+                        np.concatenate(
+                            (
+                                fresh.residual_kn,
+                                [adapter.control_row_weight * control_error],
+                            )
+                        ),
+                    ),
+                    "failed original trial residual binding differs",
+                )
                 uncommitted_attempts_by_arm[name] += 1
+                uncommitted_replays += 1
                 continue
             require(
                 invocation["committed"] is True and step["committed"] is True,
@@ -485,7 +670,7 @@ def verify(study, model_path, request_path):
     uncommitted_count = sum(uncommitted_attempts_by_arm.values())
     result = dict(
         schema_version=(
-            "rc-constant-seed-original-audit.v2"
+            "rc-constant-seed-original-audit.v3"
             if uncommitted_count
             else "rc-constant-seed-original-audit.v1"
         ),
@@ -500,11 +685,15 @@ def verify(study, model_path, request_path):
     )
     if uncommitted_count:
         result.update(
-            accepted_transitions_reassembled=audit_work["assembly_replays"],
+            accepted_transitions_reassembled=(
+                audit_work["assembly_replays"] - uncommitted_replays
+            ),
             uncommitted_attempts_record_bound=uncommitted_count,
             uncommitted_attempts_by_arm=uncommitted_attempts_by_arm,
             uncommitted_attempts_reassembled=0,
-            original_replay_scope="accepted_transitions_only",
+            uncommitted_terminal_trials_reassembled=uncommitted_replays,
+            uncommitted_replay_scope="terminal_trial_only",
+            original_replay_scope="accepted_transitions_and_failed_terminal_trials_only",
         )
     return result
 
