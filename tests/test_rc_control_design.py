@@ -9,6 +9,7 @@ import pytest
 
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
+    decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.benchmark import rc_control_design as study
@@ -65,6 +66,67 @@ def test_constant_design_reanalysis_includes_preload_response_and_cost(tmp_path)
             assert response["support_reactions"][0]["value_si"] == pytest.approx(
                 600000.0, abs=1e-6
             )
+
+
+def test_explicit_two_fixed_portal_design_reanalysis_and_quantities(tmp_path):
+    base = Path("examples/research/rc_internal_portal_20mm")
+    model = load_neutral_json(base / "original-model.json")
+    request = decode_bounded_rc_fiber_direct_control_request(
+        (base / "experimental-two-fixed-endpoints-request.json").read_bytes()
+    )
+    original = model.canonical_payload()
+    report = study.compare_rc_control_designs(
+        model,
+        (
+            design.FiberFrameDesignCandidate(
+                "narrower", (design.FiberFrameSectionChange("RC1", width_m=0.36),)
+            ),
+        ),
+        request,
+        history_limits=design.FiberFrameHistoryLimits(1, 1),
+        material_limits=design.FiberFrameMaterialHistoryLimits(1, 1, 1),
+        prices=design.FiberFrameMaterialPrices(
+            100, 1, "KRW", "2026-09-28", "synthetic test only"
+        ),
+        source_revision="a" * 40,
+        output_directory=tmp_path / "portal",
+    )
+    assert model.canonical_payload() == original
+    assert report["status"] == "complete" and report["verified_count"] == 2
+    assert report["selected_candidate_id"] == "narrower"
+    baseline, narrower = report["rows"]
+    assert narrower["quantity_delta"]["gross_concrete_volume_m3"] == pytest.approx(
+        -0.24
+    )
+    assert narrower["scoped_estimate_reduction"] == pytest.approx(24)
+    for row in (baseline, narrower):
+        assert row["full_reference_verification_pass"] is True
+        assert row["performance"]["accepted_epoch_count"] == 4
+        assert [inv["phase"] for inv in row["invocations"]] == [
+            "analysis",
+            "verification",
+        ]
+        assert [inv["work"]["attempted_step_count"] for inv in row["invocations"]] == [
+            4,
+            4,
+        ]
+        assert all(not inv["unknown_execution_work"] for inv in row["invocations"])
+        result = json.loads(
+            (tmp_path / "portal" / row["artifacts"]["result"]["path"]).read_bytes()
+        )
+        assert result["model"]["compiler_profile"] == (
+            "planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1"
+        )
+        assert result["request"]["experimental_two_fixed_endpoints"] is True
+        assert (
+            result["request"]["constant_nodal_loads"]
+            == request.to_dict()["constant_nodal_loads"]
+        )
+        assert result["path"]["accepted_target_prefix_m"] == list(request.targets_m)
+        for response in [result["preload_response"], *result["response_history"]]:
+            assert {
+                (r["node_id"], r["dof"]) for r in response["support_reactions"]
+            } == {(node, dof) for node in ("N1", "N2") for dof in ("UX", "UY", "RZ")}
 
 
 def test_preload_peak_cannot_escape_design_screen_when_terminal_is_smaller(tmp_path):
