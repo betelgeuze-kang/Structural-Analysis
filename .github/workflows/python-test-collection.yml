@@ -55,7 +55,8 @@ jobs:
   development_contracts:
     name: pytest-development-contracts
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # A hosted 2,482-test pass took 28m43s; setup and artifact upload exhausted 30m.
+    timeout-minutes: 45
     # Independent diagnostic coverage: external receipt preparation must not
     # suppress learning, candidate, input and runtime-identity regressions.
     # This is additional coverage; pytest-full still requires all full shards.
