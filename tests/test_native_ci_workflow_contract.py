@@ -63,6 +63,22 @@ def test_scope_classifier_uses_bounded_immutable_merge_ref_checkout() -> None:
     assert "fetch-depth: 0" not in scope
 
 
+def test_scope_classifier_uses_verified_current_pr_base_parent() -> None:
+    pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+    scope = pr_fast.split("  scope-contract:\n", 1)[1].split("\n  rust-quality:", 1)[0]
+
+    assert "id: identity" in scope
+    assert "scripts/verify_native_pr_base_ref.py" in scope
+    assert (
+        'printf \'tested_base_sha=%s\\n\' "${parents[0]}" >> "$GITHUB_OUTPUT"' in scope
+    )
+    assert "steps.identity.outputs.tested_base_sha" in scope
+    assert '"$NATIVE_CI_BASE_SHA" != "$(git rev-parse HEAD^1)"' in scope
+    assert "fetch-depth: 2" in scope
+
+
 def test_protected_evidence_rejection_is_pre_merge_only() -> None:
     pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"
