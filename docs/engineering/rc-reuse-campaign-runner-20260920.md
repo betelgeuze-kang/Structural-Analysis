@@ -42,3 +42,5 @@ Frontend Web, Workflow Contract and P0 Canonical succeeded; CI run 35465265832,
 job 105956329223 failed with `external_code_to_code_product_replay_not_passed`
 and `external_code_to_code_technical_receipt_not_ready` in its original log.
 Those hosted statuses do not verify this later implementation.
+
+A later [two-geometry completed campaign](rc-two-geometry-reuse-benchmark-20260927.md) uses the current authored cantilever and experimental two-fixed-endpoint portal as separate cases, with two order-balanced repetitions and 32 completed full paths. It does not change the failed-case accounting or source epoch reported above.
