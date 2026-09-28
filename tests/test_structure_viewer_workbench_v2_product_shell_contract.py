@@ -38,12 +38,17 @@ def test_workbench_v2_is_the_default_product_surface() -> None:
     main = _read("src/main.tsx")
 
     assert "export function resolveProductSurface" in main
+    assert "export type ProductSurface = 'workbench-v2' | 'legacy-app' | 'rc-pin-roller-original'" in main
     assert "path.endsWith('/legacy') || hash === '#/legacy'" in main
-    assert "return legacyRoute ? 'legacy-app' : 'workbench-v2'" in main
+    assert "if (legacyRoute) return 'legacy-app'" in main
+    assert "if (path.endsWith('/rc-pin-roller-original') || hash === '#/rc-pin-roller-original') return 'rc-pin-roller-original'" in main
+    assert "return 'workbench-v2'" in main
     assert "export function resolveSameOriginJobUrl" in main
     assert "resolved.origin === origin ? resolved.toString() : undefined" in main
     assert "import.meta.env.VITE_JOB_STATUS_URL" in main
-    assert "return surface === 'legacy-app' ? (" in main
+    assert "return surface === 'rc-pin-roller-original' ? (" in main
+    assert "<RcPinRollerOriginalPanel />" in main
+    assert ") : surface === 'legacy-app' ? (" in main
     assert "<LegacyAppSurface />" in main
     assert "<WorkbenchPage" in main
     assert "jobStatusUrl={jobStatusUrl}" in main

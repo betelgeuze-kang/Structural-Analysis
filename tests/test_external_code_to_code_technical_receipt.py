@@ -402,6 +402,121 @@ def test_validation_rejects_rehashed_comparison_tampering() -> None:
         )
 
 
+def test_planar_axial_reaction_roundoff_floor_is_scoped_and_fails_closed() -> None:
+    cases = (
+        "bounded_planar_member_feature_load_path",
+        "bounded_planar_prescribed_settlement_load_path",
+    )
+    for case_id in cases:
+        floor = module._comparison_absolute_tolerance(case_id, "support_N1_UX_N")
+        assert floor == 1.0e-6
+        assert module._comparison(
+            "support_N1_UX_N", 0.0, 4.96422719988357e-7,
+            absolute_tolerance=floor,
+        )["contract_pass"] is True
+        assert module._comparison(
+            "support_N1_UX_N", 0.0, 2.0e-6,
+            absolute_tolerance=floor,
+        )["contract_pass"] is False
+        assert module._comparison_absolute_tolerance(case_id, "support_N1_UY_N") == (
+            module.COMPARISON_ABSOLUTE_TOLERANCE
+        )
+    assert module._comparison_absolute_tolerance(
+        "bounded_planar_vertical_load_path", "support_N1_UX_N"
+    ) == module.COMPARISON_ABSOLUTE_TOLERANCE
+
+
+@pytest.mark.parametrize(
+    ("builder", "displacements", "reactions", "end_forces"),
+    [
+        (
+            module._bounded_planar_member_feature_metrics,
+            module.BOUNDED_PLANAR_MEMBER_FEATURE_DISPLACEMENT_SPECS,
+            module.BOUNDED_PLANAR_MEMBER_FEATURE_REACTION_SPECS,
+            module.BOUNDED_PLANAR_MEMBER_FEATURE_END_FORCE_SPECS,
+        ),
+        (
+            module._bounded_planar_settlement_metrics,
+            module.BOUNDED_PLANAR_SETTLEMENT_DISPLACEMENT_SPECS,
+            module.BOUNDED_PLANAR_SETTLEMENT_REACTION_SPECS,
+            module.BOUNDED_PLANAR_SETTLEMENT_END_FORCE_SPECS,
+        ),
+    ],
+)
+def test_planar_external_generation_uses_same_scoped_reaction_floor(
+    builder, displacements, reactions, end_forces,
+) -> None:
+    product = {
+        "node_displacements": {}, "support_reactions": {},
+        "member_end_forces": {"E1": {}},
+    }
+    reference = {
+        "node_displacements": {}, "support_reactions": {},
+        "member_end_forces": {"E1": {}},
+    }
+    for _quantity, node_id, component in displacements:
+        product["node_displacements"].setdefault(node_id, {})[component] = 0.0
+        reference["node_displacements"].setdefault(node_id, {})[component] = 0.0
+    for quantity, node_id, dof in reactions:
+        product["support_reactions"][(node_id, dof)] = 0.0
+        reference["support_reactions"].setdefault(node_id, {})[dof] = (
+            4.96422719988357e-7 if quantity == "support_N1_UX_N" else 0.0
+        )
+    for _quantity, end_name, component in end_forces:
+        product["member_end_forces"]["E1"].setdefault(end_name, {})[component] = 0.0
+        reference["member_end_forces"]["E1"].setdefault(end_name, {})[component] = 0.0
+    metrics = builder(product, reference)
+    axial = next(row for row in metrics if row["quantity"] == "support_N1_UX_N")
+    assert axial["absolute_tolerance"] == 1.0e-6
+    assert axial["contract_pass"] is True
+    assert all(
+        row["absolute_tolerance"] == 1.0e-10
+        for row in metrics if row is not axial
+    )
+
+
+def test_planar_axial_reaction_receipt_limit_accepts_stricter_legacy_only() -> None:
+    retained = _stored_receipt()
+    case = next(
+        row for row in retained["comparisons"]
+        if row["case_id"] == "bounded_planar_member_feature_load_path"
+    )
+    metric = next(row for row in case["metrics"] if row["quantity"] == "support_N1_UX_N")
+    assert metric["absolute_tolerance"] == module.COMPARISON_ABSOLUTE_TOLERANCE
+    module.validate_external_code_to_code_technical_receipt(
+        retained, repo_root=ROOT, require_current_sources=False,
+    )
+    current_limit = deepcopy(retained)
+    current_case = next(
+        row for row in current_limit["comparisons"]
+        if row["case_id"] == "bounded_planar_member_feature_load_path"
+    )
+    current_metric = next(
+        row for row in current_case["metrics"]
+        if row["quantity"] == "support_N1_UX_N"
+    )
+    current_metric["absolute_tolerance"] = 1.0e-6
+    current_limit["artifact_hash"] = module._artifact_hash(current_limit)
+    module.validate_external_code_to_code_technical_receipt(
+        current_limit, repo_root=ROOT, require_current_sources=False,
+    )
+    tampered = deepcopy(retained)
+    case = next(
+        row for row in tampered["comparisons"]
+        if row["case_id"] == "bounded_planar_member_feature_load_path"
+    )
+    metric = next(row for row in case["metrics"] if row["quantity"] == "support_N1_UY_N")
+    metric["absolute_tolerance"] = 1.0e-6
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_tolerance_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered, repo_root=ROOT, require_current_sources=False,
+        )
+
+
 def test_validation_rejects_frame3d_tolerance_tampering() -> None:
     tampered = deepcopy(_stored_receipt())
     frame3d = next(
