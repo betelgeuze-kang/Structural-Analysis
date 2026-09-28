@@ -209,6 +209,20 @@ def test_fresh_receipt_without_execution_source_fails_closed() -> None:
     tampered["runtimes"]["opensees"]["execution_outputs"][
         "runtime_binding"
     ] = expected_binding()
+    tampered["blockers_remaining"] = [
+        blocker
+        for blocker in tampered["blockers_remaining"]
+        if blocker != module.REUSED_EXECUTION_BLOCKER
+    ]
+    replay["external_execution_source_commit_sha"] = tampered["source_commit_sha"]
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+    module.validate_external_modal_buckling_technical_receipt(
+        tampered,
+        repo_root=ROOT,
+        require_current_sources=False,
+    )
+
+    replay.pop("external_execution_source_commit_sha")
     tampered["artifact_hash"] = module._artifact_hash(tampered)
     with pytest.raises(
         module.ExternalModalBucklingReceiptError,
