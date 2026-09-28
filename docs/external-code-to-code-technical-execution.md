@@ -1,14 +1,15 @@
 # 외부 code-to-code 기술 실행 영수증
 
 이 문서는 OpenSees와 CalculiX를 실제 로컬 실행해 저장한 좁은 기술 비교와
-현재 제품 replay를 설명한다. 현재 source에서는 고정된 다섯 외부 asset으로
-OpenSees와 CalculiX를 같은 generation에서 다시 실행했고 두 child receipt 모두
-fresh다. 이는 동일 운영자의 좁은 기술 증거이므로 Level 2 증거로 등록하거나
-제품의 법무·재배포·상용 동등성·출시 준비를 승인하지 않는다.
+제품 replay를 설명한다. 현재 code-to-code 영수증은 고정된 다섯 외부 asset으로
+두 solver를 같은 host에서 다시 실행했다. 별도 modal·buckling 영수증은 외부
+실행값을 재사용한 제품 replay이며, 보존된 container 실행은 현재 source의
+교차환경 수치 parity를 통과하지 못한다. 이들은 동일 운영자의 좁은 기술 증거이므로
+Level 2 증거로 등록하거나 제품의 법무·재배포·상용 동등성·출시 준비를 승인하지 않는다.
 
 ## 실행 범위
 
-`external_code_to_code_technical_execution_receipt.json`은 정확히 열한 case를
+`external_code_to_code_technical_execution_receipt.json`은 정확히 열두 case를
 기록한다.
 
 | Case | 외부 기준 | 제품 경로 | 비교 항목 | 결과 |
@@ -20,15 +21,18 @@ fresh다. 이는 동일 운영자의 좁은 기술 증거이므로 Level 2 증�
 | bounded planar prescribed-settlement load path | OpenSees 3.7.1 `Corotational elasticBeamColumn`, `Transformation`, `sp` | source-bound `bounded_planar_frame_alpha` ModelIR v2 경로, 1 kN 축 기준하중 + N2 UY `-0.1 mm`, 4개 load step | N2 변위 2개, N1/N2 지점반력 5개, E1 양단 모멘트 2개 | PASS |
 | spatial Frame3D cantilever combined load | OpenSees 3.7.1 `ElasticTimoshenkoBeam` | stateful sparse corotational Frame3D load-control 경로, 2 m one-element cantilever | tip UY/UZ/RX/RY/RZ, base FY/FZ/MX/MY/MZ | PASS |
 | Frame3D axial-yield direct control | OpenSees 3.7.1 `forceBeamColumn` + `Steel01` | source-bound bounded Frame3D ModelIR v2 direct-displacement-control API, N2 UX four-target path through first yield | control UX, load factor, base UX reaction, axial stress, plastic strain, backstress, accumulated plastic strain, dissipated energy density | PASS |
+| Frame3D cyclic axial-reversal direct control | OpenSees 3.7.1 `forceBeamColumn` + `Hardening` | source-bound Frame3D direct-control API, N2 UX `+0.003/+0.006/+0.001/-0.004/+0.002 m` 경로 | 다섯 target의 coordinate/load factor/base reaction과 최종 재료상태 4개, 총 19개 | PASS |
 | Frame3D rotational direct control | OpenSees 3.7.1 3D `forceBeamColumn` + elastic `GJ` | source-bound bounded Frame3D ModelIR v2 direct-displacement-control API, N2 RX four-target torsional path | control RX, moment-load factor, base RX reaction | PASS |
 | Frame3D bending-rotational direct control | OpenSees 3.7.1 3D `forceBeamColumn` + elastic `EIy/EIz` | separate source-bound N2 RY and RZ four-target pure-axis bending paths | each control angle, moment-load factor, same-axis base moment | PASS |
 | axial member tip load | CalculiX CrunchiX 2.17 | authoritative linear-static frame 경로 | tip 변위, base 축반력 | PASS |
 | tetrahedral spatial truss combined load | CalculiX CrunchiX 2.17 `T3D2` | authoritative linear-static 3D truss 경로, 6개 부재 | apex 3축 변위, base 3개 절점의 3축 반력 9개 | PASS |
 
-총 75개 수치 비교가 통과했다. Modal 고유값과 axial 결과의 절대오차는 `0`이고,
-spatial-truss case의 최대 절대오차는 `4.694679409237196e-13`이다. 새 Frame3D
+총 94개 수치 비교가 통과했다. 세 planar load path는 각각 네 성공 시도에서
+목표 하중계수 `0.25/0.5/0.75/1.0`에 도달했다. Modal 고유값과 axial 결과의
+절대오차는 `0`이고, spatial-truss case의 최대 절대오차는
+`4.694679409237196e-13`이다. Spatial Frame3D
 case의 최대 절대·상대오차는 base torsional reaction에서 각각
-`7.531298538004938e-07`과 `3.765649269002469e-05`다. 기존 일곱 case는
+`7.531298538004938e-07`과 `3.765649269002469e-05`다. Modal·linear·planar case는
 `1e-10 + 1e-10 * max(abs(product), abs(reference), 1)`을 유지하고, 작은
 corotational-대-linear formulation 차이를 숨기지 않는 Frame3D case만
 `1e-10 + 1e-4 * max(abs(product), abs(reference), tiny)`를 사용한다. 축항복
@@ -78,6 +82,13 @@ checkpoint가 생성됐으며 cutback, fallback, regularization은 없었다. �
 운영자의 단일 UX·단조 축항복 기술 비교만 닫는다. 다축/다중제어, 반복·역전하중,
 일반 fiber/shear/torsion coupling, 독립 운영자 또는 formal Level 2는 닫지 않는다.
 
+Frame3D cyclic axial-reversal case는 같은 2 m 축부재를 다섯 UX target으로
+왕복 제어한다. OpenSees `Hardening`과 제품의 상태 갱신 경로에서 각 target의
+coordinate·load factor·base reaction 및 최종 plastic strain·backstress·
+accumulated plastic strain·dissipated energy density 19개를 비교한다. 이 단일
+재료·하중 이력의 동일 운영자 기술 비교는 다른 cyclic 재료, 다축 제어 또는
+독립 V&V를 닫지 않는다.
+
 Frame3D rotational direct-control case는 별도 source-bound ModelIR에서 N2 RX를
 `0.0005/0.001/0.0015/0.002 rad`로 제어하고, `1 kN·m` 기준모멘트에 대한 최종
 하중계수와 base RX 반력을 비교한다. 제품과 OpenSees 모두 최종
@@ -110,19 +121,19 @@ frame/shell 또는 재료·기하 비선형 비교와 독립 운영자 검토를
   출력은 SHA-256으로 결속
 - 외부 package와 runtime은 저장소에 번들하지 않음
 
-현재 receipt의 live hash authority는
-`artifacts/vv/opensees_calculix_clean_runner/external_code_to_code_receipt.json`의
-`artifact_hash`와 `internal_source.source_set_hash` 필드다. 재생성 시각을 포함하는
-volatile replay hash를 문서에 복제하지 않는다.
-Receipt의 `source_commit_sha`는 후보 생성 시 base인
-`f8929fa0cab55778131321eed348e7ec28d2eca0`이며, 후보의 실제 source byte는 별도
-input checksum과 source-set hash로 결속한다.
+현재 host 영수증의 hash authority는
+`implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json`의
+`artifact_hash`와 `internal_source.source_set_hash` 필드다. 이 파일에 기록된
+208개 input checksum과 `source_commit_sha`를 함께 확인해야 하며, 다른 generation의
+container child 영수증 hash로 대체하지 않는다. 재생성 때 바뀌는 hash 값은 문서에
+복제하지 않는다.
 
 ## 전체 모델 modal·buckling 추가 영수증
 
 `external_modal_buckling_technical_execution_receipt.json`은 같은 고정 runtime
-bytes에서 보존된 외부 값을 제품의 공개 전체 모델 경로 두 개와 비교한다. 현재
-source generation에서는 제품 replay만 다시 실행됐고 외부 runtime은 재사용됐다.
+bytes에서 보존된 외부 값을 제품의 공개 전체 모델 경로 두 개와 비교한다. 저장된
+영수증의 마지막 생성에서는 제품 replay만 실행했고 외부 runtime은 재사용됐다.
+이 기록은 현재 code-to-code 영수증과 같은 source의 새 외부 실행을 주장하지 않는다.
 
 | Case | 외부 기준 | 비교 정책 | 결과 |
 |---|---|---|---|
@@ -152,10 +163,10 @@ Euler-Bernoulli initial-stress formulation 차이를 숨기지 않은 채 좌굴
 
 준비 manifest의 `external_solver_execution`, `external_reference_attached`,
 `verification_matrix_credit`, `verification_level_2`는 계속 `false`다. 별도
-`bounded_planar_same_operator_supplemental_execution/receipt.json`이 실제 실행을
-결속해 V&V matrix의 세 행은 `fresh_external_technical`이지만, 이 로컬 실행은
-컨테이너 attestation·독립 operator·법적 승인·formal promotion receipt를
-제공하지 않으므로 승격되지 않는다.
+`bounded_planar_same_operator_supplemental_execution/receipt.json`은 과거의 실제
+실행을 결속한다. 현재 source에서 재실행하지 않은 matrix 행은 replay-only 기술
+참조로 남으며, 컨테이너 attestation·독립 operator·법적 승인·formal promotion
+receipt를 제공하지 않으므로 승격되지 않는다.
 
 ```bash
 PYTHONPATH=src python3 scripts/build_bounded_planar_external_modal_buckling_case_package.py --check
@@ -176,10 +187,10 @@ Euler-Bernoulli frame과 CalculiX expanded B32 formulation을 동일하다고
 
 네 mode matrix는 JSON에 넣지 않는다. `<f8`, C-order, little-endian raw binary
 artifact로 저장하고 shape, byte length, data hash, content hash, repository path를
-receipt에 기록한다. 현재 live hash authority는
-`artifacts/vv/opensees_calculix_clean_runner/external_modal_buckling_receipt.json`의
-`artifact_hash`와 `internal_source.source_set_hash` 필드이며, volatile replay hash를
-문서에 복제하지 않는다.
+receipt에 기록한다. 보존된 modal·buckling 영수증의 hash authority는
+`implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json`의
+`artifact_hash`와 `internal_source.source_set_hash` 필드다. 재생성 때 바뀌는 hash
+값은 문서에 복제하지 않는다.
 이 추가 영수증도 제품 법무/재배포 승인, 독립 clean runner, broad corpus,
 published benchmark decision 또는 hierarchy operator manifest를 만들지 않으며
 `verification_level_2=false`, `commercial_equivalence=false`,
@@ -196,15 +207,16 @@ SHA-256을 추출 전에 검사한다. 생성 bundle은
 복제하지 않는다.
 
 보존된 container generation은 네트워크 차단·read-only source·고정 자산 계약을
-유지하지만, 현재 host receipt에 추가된 cyclic direct-control metric과 source 변경을
-포함하지 않는다. 갱신된 summary는 host/container scalar 수 `199/161`, metric/source
-set match `false`, `cross_environment_numerical_parity=false`를 기록한다. 따라서 현재
-matrix의 `same_operator_execution_binding`은
-`current_source_clean_runner_cross_environment_parity_missing` 사유로 unavailable이며,
-container parity나 isolation credit을 부여하지 않는다. 별도의 current-source host
-OpenSees/CalculiX receipt가 실제 외부 실행과 9개 core row의 fresh 기술 증거를
-제공한다. 독립 운영자 attestation, 제품 법무·재배포 승인, Verification Level 2 또는
-release readiness는 여전히 승격되지 않는다.
+유지한다. 현재 clean-runner summary의 host/container scalar 수는 `199/199`,
+metric-set match는 `true`지만 source-set match와 수치 계약은 `false`다. 최대
+절대차는 `2.6121327323380683e-12`이며, 선언된 절대·상대 허용오차로 평가한
+`numerical_contract_pass`는 `false`다.
+`same_operator_container_isolated_reproduction=false`와
+`current_source_container_cross_environment_parity_missing`을 유지하므로 현재
+source의 container parity나 isolation credit을 부여하지 않는다. 별도의 host
+code-to-code 영수증만 OpenSees/CalculiX를 새로 실행한 12-case 기술 증거다.
+독립 운영자 attestation, 제품 법무·재배포 승인, Verification Level 2 또는 release
+readiness는 여전히 승격되지 않는다.
 
 이 실행은 동일 운영자가 만든 기술 후보다. 독립 운영자 재현·서명, 법무·재배포
 승인, hierarchy operator manifest가 아니므로 Verification Level 2에 편입하지
@@ -213,14 +225,13 @@ release readiness는 여전히 승격되지 않는다.
 
 ## 크레딧 경계
 
-이 기술 영수증은 다음을 참으로 기록한다.
+현재 host code-to-code 영수증은 다음을 참으로 기록한다.
 
-- 두 독립 외부 솔버의 실제 로컬 실행
+- OpenSees와 CalculiX의 동일 운영자·동일 host 실제 실행
 - 고정된 외부 runtime 버전 확인
-- 열한 좁은 code-to-code case의 75개 수치 계약 통과
-- 저장된 host/container 값에 대한 current-product 수치 계약 통과
-- current-source external runtime rerun
-- same-operator current-source container-isolated reproduction
+- 열두 좁은 code-to-code case의 94개 수치 계약 통과
+- 해당 host 영수증의 current-product replay 통과
+- 해당 source의 external runtime 재실행
 
 다음은 명시적으로 `false`다.
 
@@ -230,6 +241,7 @@ release readiness는 여전히 승격되지 않는다.
 - Verification Level 2 크레딧
 - 상용 솔버 동등성
 - release readiness
+- 현재 source의 same-operator container 수치 parity 및 격리 재현 크레딧
 
 OpenSeesPy license 문구는 내부 사용과 commercial redistribution을 구분하며,
 CalculiX package는 GPL-2 posture를 기록한다. 이 저장소에는 어느 runtime에
@@ -247,6 +259,9 @@ PYTHONPATH=src python3 -m pytest -q \
   tests/test_external_modal_buckling_technical_receipt.py \
   tests/test_external_vv_clean_runner_contract.py
 ```
+
+보존된 modal·buckling 영수증의 source checksum은 현재 checkout과 다르므로 그
+`--check`는 새 source에서 갱신되기 전까지 freshness 오류를 내는 검증 gate다.
 
 외부 asset directory가 준비된 재현 명령은 다음과 같다.
 
