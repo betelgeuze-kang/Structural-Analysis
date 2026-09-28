@@ -20,8 +20,13 @@ experiment. The campaign records enclosing wall time even for input/solver
 exceptions and retains available success/failure receipt hashes. `campaign_complete`
 means every declared case was attempted; `all_cases_completed` additionally
 requires successful case execution and a success receipt. A missing/partial
-campaign receipt is not completion. Interrupts are not swallowed. Earlier case
-receipts survive, but an interrupted case has no claimed final elapsed cost.
+campaign receipt is not completion. Before each numerical case, the v2
+campaign receipt atomically records a `running` row with unknown native work
+and unknown case elapsed time. A caught keyboard interrupt records its elapsed
+wall time and any available original receipt hashes as `interrupted`, then
+propagates the interrupt. A process exit that cannot run Python cleanup leaves
+the `running` row and a null case time. Earlier case receipts survive in both
+cases; neither state is a completed benchmark.
 
 No aggregate speed ratio is calculated. Consult each case's bound original
 report for fixed-request comparisons; failed cases remain in the denominator

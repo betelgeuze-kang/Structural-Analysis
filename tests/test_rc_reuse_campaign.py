@@ -137,9 +137,11 @@ def test_complete_source_bound_two_repetition_receipt_is_accepted(tmp_path, monk
     output = tmp_path / 'output'
     assert campaign.run(path, output) is True
     receipt = json.loads((output / 'campaign.json').read_text())
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
     assert receipt['campaign_complete'] and receipt['all_cases_completed']
     assert receipt['aggregate_speed_ratio'] is None
     assert receipt['cases'][0]['status'] == 'completed'
+    assert receipt['cases'][0]['unknown_native_work'] is False
 
 
 @pytest.mark.parametrize('profile', ('two-fixed', 'pin-roller'))
@@ -215,6 +217,7 @@ def test_failed_case_retained_later_case_runs_on_frozen_inputs(tmp_path, monkeyp
     assert receipt['campaign_complete'] and not receipt['all_cases_completed']
     assert receipt['aggregate_speed_ratio'] is None
     assert receipt['cases'][0]['error']['message'] == 'original full-history failure'
+    assert all(row['unknown_native_work'] for row in receipt['cases'])
     assert receipt['cases'][1]['status'] == 'failed'
     assert 'repetition count mismatch' in receipt['cases'][1]['error']['message']
     assert all(r['case_wall_ns'] >= 0 for r in receipt['cases'])
@@ -332,13 +335,77 @@ def test_duplicate_json_key_and_interrupt_are_not_silently_accepted(tmp_path, mo
         campaign.run(path, tmp_path / 'output')
     path.write_text(json.dumps(payload))
 
-    def interrupted(*a, **k):
+    def interrupted(output, *a, **k):
+        output.mkdir()
+        (output / 'failure.json').write_text('{"attempted":true}\n')
         raise KeyboardInterrupt
 
     monkeypatch.setattr(campaign.experiment, 'run', interrupted)
     with pytest.raises(KeyboardInterrupt):
         campaign.run(path, tmp_path / 'output')
-    assert not (tmp_path / 'output/campaign.json').exists()
+    receipt = campaign.load_json_object_strict(tmp_path / 'output/campaign.json')
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
+    assert receipt['recorded_case_count'] == 1
+    assert receipt['planned_case_count'] == 2
+    assert receipt['campaign_complete'] is False
+    assert receipt['all_cases_completed'] is False
+    assert receipt['aggregate_speed_ratio'] is None
+    row = receipt['cases'][0]
+    assert row['status'] == 'interrupted'
+    assert row['error']['type'] == 'KeyboardInterrupt'
+    assert row['unknown_native_work'] is True
+    assert type(row['case_wall_ns']) is int and row['case_wall_ns'] >= 0
+    raw = (tmp_path / 'output/failed/results/failure.json').read_bytes()
+    assert row['receipts']['failure.json']['bytes'] == len(raw)
+    assert row['receipts']['failure.json']['sha256'] == hashlib.sha256(raw).hexdigest()
+    assert not (tmp_path / 'output/campaign.json.tmp').exists()
+
+
+@pytest.mark.parametrize('crash_case', ('first', 'last'))
+def test_unhandled_exit_leaves_an_atomic_running_row_and_unknown_cost(
+    tmp_path, monkeypatch, crash_case
+):
+    path, _ = plan(tmp_path, names=('first', 'last'))
+    source = campaign.subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+
+    def execute(output, repetitions, **kwargs):
+        active = campaign.load_json_object_strict(output.parents[1] / 'campaign.json')
+        assert active['cases'][-1]['id'] == output.parent.name
+        assert active['cases'][-1]['status'] == 'running'
+        assert active['cases'][-1]['case_wall_ns'] is None
+        assert active['cases'][-1]['unknown_native_work'] is True
+        if output.parent.name == crash_case:
+            raise SystemExit(77)
+        write_success(
+            output, source=source, model_raw=kwargs['model_path'].read_bytes(),
+            request_raw=kwargs['request_path'].read_bytes(),
+        )
+
+    monkeypatch.setattr(campaign.experiment, 'run', execute)
+    output = tmp_path / 'output'
+    with pytest.raises(SystemExit) as exit_result:
+        campaign.run(path, output)
+    assert exit_result.value.code == 77
+    # Read the persisted receipt after the runner has stopped. No restart is
+    # needed or allowed to infer the missing numerical work.
+    receipt = campaign.load_json_object_strict(output / 'campaign.json')
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
+    assert receipt['planned_case_count'] == 2
+    assert receipt['recorded_case_count'] == (1 if crash_case == 'first' else 2)
+    assert receipt['campaign_complete'] is False
+    assert receipt['all_cases_completed'] is False
+    assert receipt['aggregate_speed_ratio'] is None
+    assert receipt['cases'][-1]['id'] == crash_case
+    assert receipt['cases'][-1]['status'] == 'running'
+    assert receipt['cases'][-1]['case_wall_ns'] is None
+    assert receipt['cases'][-1]['unknown_native_work'] is True
+    assert receipt['cases'][-1]['receipts'] == {}
+    if crash_case == 'last':
+        assert receipt['cases'][0]['status'] == 'completed'
+        assert receipt['cases'][0]['unknown_native_work'] is False
+    assert not (output / 'campaign.json.tmp').exists()
+    with pytest.raises(FileExistsError):
+        campaign.run(path, output)
 
 
 def test_return_without_success_receipt_is_not_completion(tmp_path, monkeypatch):

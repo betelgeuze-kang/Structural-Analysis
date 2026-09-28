@@ -24,7 +24,9 @@ from structural_analysis.model_ir.validation import load_json_object_strict
 
 
 def _write(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary.replace(path)
 
 
 def _require(condition, message):
@@ -379,10 +381,50 @@ def run(manifest: Path, output: Path):
         "experiment_script_sha256": hashlib.sha256(Path(experiment.__file__).read_bytes()).hexdigest(),
     })
     rows = []
+
+    def persist():
+        all_terminal = len(rows) == len(frozen) and all(
+            row["status"] in ("completed", "failed") for row in rows
+        )
+        _write(output / "campaign.json", {
+            "schema": "rc-reuse-campaign.v2", "source_revision": source,
+            "planned_case_count": len(frozen), "recorded_case_count": len(rows),
+            "campaign_complete": all_terminal,
+            "all_cases_completed": all_terminal and all(
+                row["status"] == "completed" for row in rows
+            ),
+            "cases": rows, "campaign_wall_ns_through_receipt": perf_counter_ns() - started,
+            "timing_scope": "manifest/input reads, setup, all recorded activity and post-run receipt verification through this receipt; excludes this receipt write",
+            "aggregate_speed_ratio": None, "independent_physical_validation": False,
+        })
+
     for name, values in frozen:
         directory = output / name
+        row = {
+            "id": name, "status": "running", "error": None,
+            "case_wall_ns": None, "unknown_native_work": True, "receipts": {},
+        }
+        rows.append(row)
+        # This atomic pre-solve receipt keeps the case in the denominator even
+        # if the process terminates without running Python exception handlers.
+        persist()
         case_started = perf_counter_ns()
-        error = None
+
+        def finish(status, error):
+            row["status"] = status
+            row["error"] = error
+            row["case_wall_ns"] = perf_counter_ns() - case_started
+            row["unknown_native_work"] = status != "completed"
+            for filename in ("summary.json", "failure.json"):
+                path = directory / "results" / filename
+                if path.is_file():
+                    raw = path.read_bytes()
+                    row["receipts"][filename] = {
+                        "path": str(path.relative_to(output)), "bytes": len(raw),
+                        "sha256": hashlib.sha256(raw).hexdigest(),
+                    }
+            persist()
+
         try:
             experiment.run(
                 directory / "results", repetitions, case="supplied",
@@ -395,32 +437,15 @@ def run(manifest: Path, output: Path):
                 arithmetic=plan["arithmetic"],
                 record_assembly_timing=plan["record_assembly_timing"],
             )
+        except KeyboardInterrupt as exc:
+            finish("interrupted", {"type": type(exc).__name__, "message": str(exc)})
+            raise
         except Exception as exc:
-            # Continue independent declared cases, but retain failure and return
-            # nonzero from the CLI. Interrupts and process termination propagate.
-            error = {"type": type(exc).__name__, "message": str(exc)}
-        row = {"id": name, "status": "failed" if error else "completed",
-               "error": error, "case_wall_ns": perf_counter_ns() - case_started,
-               "receipts": {}}
-        for filename in ("summary.json", "failure.json"):
-            path = directory / "results" / filename
-            if path.is_file():
-                raw = path.read_bytes()
-                row["receipts"][filename] = {
-                    "path": str(path.relative_to(output)), "bytes": len(raw),
-                    "sha256": hashlib.sha256(raw).hexdigest(),
-                }
-        rows.append(row)
-        # Persist after every case; a partial campaign is explicitly incomplete.
-        _write(output / "campaign.json", {
-            "schema": "rc-reuse-campaign.v1", "source_revision": source,
-            "planned_case_count": len(frozen), "recorded_case_count": len(rows),
-            "campaign_complete": len(rows) == len(frozen),
-            "all_cases_completed": len(rows) == len(frozen) and all(r["status"] == "completed" for r in rows),
-            "cases": rows, "campaign_wall_ns_through_receipt": perf_counter_ns() - started,
-            "timing_scope": "manifest/input reads, setup, all attempted cases, post-run saved receipt verification, and preceding receipt writes; excludes this final receipt write",
-            "aggregate_speed_ratio": None, "independent_physical_validation": False,
-        })
+            # Continue independent declared cases; unknown native work remains
+            # unknown even if a partial original receipt reports some attempts.
+            finish("failed", {"type": type(exc).__name__, "message": str(exc)})
+        else:
+            finish("completed", None)
     return all(row["status"] == "completed" for row in rows)
 
 
