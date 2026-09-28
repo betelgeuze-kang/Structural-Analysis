@@ -92,7 +92,11 @@ class OriginalPacket:
         if path.is_absolute() or ".." in path.parts or relative not in self.files:
             raise TraceError(f"undeclared packet path: {relative}")
         full = self.root / path
-        if not full.is_file() or full.is_symlink():
+        if (
+            not full.resolve().is_relative_to(self.root)
+            or not full.is_file()
+            or full.is_symlink()
+        ):
             raise TraceError(f"missing or linked original file: {relative}")
         raw = full.read_bytes()
         expected = self.files[relative]

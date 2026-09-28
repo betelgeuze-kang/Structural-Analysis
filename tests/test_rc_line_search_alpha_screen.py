@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 
 import pytest
 
+from scripts import screen_rc_line_search_alpha as screen
 from scripts.screen_rc_line_search_alpha import (
     FEATURE_NAMES,
     TraceError,
@@ -140,3 +143,29 @@ def test_group_split_excludes_every_held_case_and_counts_false_skip():
         )
     assert folds[4]["false_skips_unobserved_outcome"] == 3
     assert decision["supports_online_experiment_design"] is False
+
+
+def test_packet_reader_rejects_linked_parent_before_read(tmp_path, monkeypatch):
+    root = tmp_path / "packet"
+    root.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    raw = b'{"value":1}'
+    (outside / "data.json").write_bytes(raw)
+    (root / "link").symlink_to(outside, target_is_directory=True)
+    inventory = {
+        "files": [
+            {
+                "path": "link/data.json",
+                "byte_length": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+            }
+        ]
+    }
+    inventory_raw = json.dumps(inventory).encode()
+    (root / "inventory.json").write_bytes(inventory_raw)
+    monkeypatch.setattr(
+        screen, "INVENTORY_SHA256", hashlib.sha256(inventory_raw).hexdigest()
+    )
+    with pytest.raises(TraceError, match="missing or linked"):
+        screen.OriginalPacket(root).read("link/data.json")
