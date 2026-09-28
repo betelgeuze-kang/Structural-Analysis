@@ -1,0 +1,77 @@
+name: RC Pin Roller Candidate Budget Evidence
+
+# One fixed synthetic software study. The uploaded original packet is not
+# independent physical validation, a design approval, or a cost quote.
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  PYTHONPATH: .:src
+  RC_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  budget-packet:
+    name: rc-pin-roller-budget-originals
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact source commit without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.RC_SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: Verify exact clean checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$RC_SOURCE_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install pinned runtime dependencies
+        run: >-
+          python -m pip install numpy==1.26.4 scipy==1.12.0
+          matplotlib==3.8.4 jsonschema==4.26.0
+
+      - name: Run predeclared candidate budget and full-pool oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/rc-pin-roller-budget"
+          python scripts/run_rc_pin_roller_budget_study.py \
+            --output "$RUNNER_TEMP/rc-pin-roller-budget/packet"
+
+      - name: Audit saved originals after the numerical run
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/rc-pin-roller-budget/packet/plan.json"
+          python scripts/audit_rc_pin_roller_budget_study.py \
+            --packet "$RUNNER_TEMP/rc-pin-roller-budget/packet" \
+            --output "$RUNNER_TEMP/rc-pin-roller-budget/audit.json"
+
+      - name: Upload original packet and independent byte audit
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: rc-pin-roller-budget-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/rc-pin-roller-budget/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 30
