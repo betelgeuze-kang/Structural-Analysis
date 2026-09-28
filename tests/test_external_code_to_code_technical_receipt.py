@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -40,6 +41,33 @@ def _stored_receipt() -> dict[str, object]:
     payload = json.loads(RECEIPT.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+@pytest.mark.parametrize("receipt_path", [RECEIPT, FRESH_HOST_RECEIPT])
+def test_committed_candidate_receipt_sources_match_declared_commit(
+    receipt_path: Path,
+) -> None:
+    # CI regenerates the working copy before tests, so inspect committed bytes.
+    relative_path = receipt_path.relative_to(ROOT).as_posix()
+    committed_receipt = subprocess.run(
+        ["git", "show", f"HEAD:{relative_path}"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    payload = json.loads(committed_receipt.stdout)
+    source_commit = payload["source_commit_sha"]
+    for path, expected_hash in payload["internal_source"]["input_checksums"].items():
+        source = subprocess.run(
+            ["git", "show", f"{source_commit}:{path}"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        )
+        actual_hash = "sha256:" + hashlib.sha256(source.stdout).hexdigest()
+        assert actual_hash == expected_hash, (
+            f"{relative_path} declares {source_commit}, but {path} has different bytes"
+        )
 
 
 def test_stored_candidate_replay_validates_without_new_external_execution() -> None:
