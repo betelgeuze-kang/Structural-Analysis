@@ -11,3 +11,7 @@ Issue [#480](https://github.com/betelgeuze-kang/Structural-Analysis/issues/480) 
 The ledger records wall and CPU for policy loading, preflight, gate where used, benchmark, receipt inventory and the enclosing slot. The audit reports its own separate read/hash/recheck interval. Process startup, historical label generation, training and selection fits, internal capture, inference, solver, recovery and remaining report I/O remain explicitly unknown or separately nested. The enclosing slot interval includes inventory creation and excludes its final outcome write; the audit interval excludes any later summary write. Nested timers must not be added. Because original rights and full lifecycle costs are not independently audited here, total evaluation cost, training-cost reuse and break-even remain unknown, and the result retains secant. A later issue #480 slice must fill and audit those fields before a net-benefit decision.
 
 Focused contract tests use generated temporary synthetic cases. They do not execute the grouped campaign's reserved validation or holdout cases and are not independent physical validation.
+
+The separate [lifecycle cost receipt audit](rc-heldout-lifecycle-cost-audit-20260929.md)
+can bind original launcher, label and selection intervals without adding
+nested scopes. It still leaves total cost and net benefit unknown.
