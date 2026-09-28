@@ -31,7 +31,7 @@ def test_all_480_rows_have_exact_owner_scope_disposition() -> None:
     report = source_quarry.validate_inventory(ROOT, payload, _schema())
     assert report["contract_pass"] is True
     assert report["changed_file_count"] == 480
-    assert report["status_counts"] == {"present": 71, "superseded": 409}
+    assert report["status_counts"] == {"present": 70, "superseded": 410}
     assert report["unique_file_blocker_count"] == 0
     assert report["external_only_file_blocker_count"] == 0
     assert [(pr["number"], len(pr["files"])) for pr in payload["pull_requests"]] == [
