@@ -51,8 +51,12 @@ volumetric tie ratio **0.77%**. It reports concrete cylinder strength
 transverse SD295 D6 bar yield strength **376 MPa**, and applied axial force
 **160 kN**. The reported effective height is retained as named; it has not been
 silently equated with a solver element length, actuator height, or gauge datum.
-The drawing and cross-section are on pp. 3 and 5, and the repeated-displacement
-protocol for TP-11 is shown on p. 7.
+Figure 1(b) on p. 3 marks the lateral-load point 1,450 mm above the footing
+top and the specimen top 1,850 mm above it. Figure 2(b) on p. 5 depicts 12
+perimeter D13 longitudinal bars at three 105 mm intervals along each side of
+the 315 mm inner dimension. This drawing narrows the geometry crosswalk but
+does not by itself establish bar-centroid cover or the solver's boundary
+conditions. The repeated-displacement protocol for TP-11 is shown on p. 7.
 
 The PDF's p. 2, Table 3 maps `CH001` to lateral load, `CH002` to lateral
 displacement, `CH003` to vertical load, `CH006` to footing sliding, and
@@ -84,9 +88,12 @@ one specimen's history, not 3,553 independent structures or Newton-state labels.
 This is a **candidate** for the current planar axial–curvature RC fiber model:
 the original program studied plastic hinge length in cyclic cantilever piers
 and reports an axial force. It is **not yet classified as flexure-dominated**.
-The archive's p. 9 includes TP-11 failure-mode imagery and a hysteresis plot,
-but a visual damage classification and the original paper's failure account
-have not been completed. Shear deformation, reinforcement bond/anchorage slip,
+The archive's p. 9, Fig. 7(a) sketches cracks and shaded damage zones near the
+footing at 11 yield displacements; Fig. 7(b) shows the cyclic force-displacement
+loops. The visible damage is concentrated toward the footing, but this sketch
+alone cannot establish a unique governing flexural mechanism or exclude shear
+and anchorage effects. The original paper's failure account has not been
+cross-checked. Shear deformation, reinforcement bond/anchorage slip,
 confinement, bar instability, and footing sliding/rotation may matter; the
 present Euler–Bernoulli axial–curvature element does not establish those
 mechanisms. Bar-centroid coordinates and cover, concrete/steel constitutive
@@ -100,8 +107,8 @@ not identify TP-11 in that table, but that is **not proof** that TP-11 is absent
 from external PEER, ACI, or other mirrors. Crosswalk original author, year,
 specimen and data-file identity before counting a new independent campaign.
 
-**Decision: HOLD for learning and physical validation.** Next review the TP-11
-failure image and original report, source-computed channel equations and
+**Decision: HOLD for learning and physical validation.** Next review the
+original report's failure account, source-computed channel equations and
 footing-motion channels, exact reinforcement placement and materials, and
 archive/mirror lineage. Freeze campaign-level training and evaluation roles
 before fitting; measured load–displacement pairs do not provide accepted
