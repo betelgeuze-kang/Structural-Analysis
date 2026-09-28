@@ -14,6 +14,69 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PHASE2_REFRESH_COMMANDS = (
+    "python scripts/build_phase2_state_updated_steel_material_artifacts.py",
+    "python scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
+    "python scripts/build_phase2_state_updated_composite_section_artifacts.py",
+    "python scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+    "python scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
+)
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name", "consumer_steps"),
+    [
+        (
+            "ci.yml",
+            "verify",
+            ("Build current-HEAD readiness snapshot", "PR quality gate"),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "python_full_shards",
+            ("Run materialized repository test suite shard",),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "deterministic_quality",
+            ("Deterministic repository quality gate",),
+        ),
+        (
+            "nightly-heavy-solver.yml",
+            "heavy-full-quality",
+            (
+                "Run materialized repository Python suite",
+                "Full workstation/release quality gate",
+            ),
+        ),
+    ],
+)
+def test_phase2_source_receipts_materialize_before_consumers(
+    workflow_name: str, job_name: str, consumer_steps: tuple[str, ...]
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows" / workflow_name).read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"][job_name]["steps"]
+    names = [step["name"] for step in steps]
+    materialize_index = names.index("Materialize exact current-source test evidence")
+    run_lines = [line.strip() for line in steps[materialize_index]["run"].splitlines()]
+    refresh_indices = [run_lines.index(command) for command in PHASE2_REFRESH_COMMANDS]
+
+    assert refresh_indices == sorted(refresh_indices)
+    assert all(run_lines.count(command) == 1 for command in PHASE2_REFRESH_COMMANDS)
+    assert refresh_indices[-1] < next(
+        index
+        for index, line in enumerate(run_lines)
+        if line.startswith(
+            "python scripts/run_external_code_to_code_technical_receipt.py"
+        )
+    )
+    assert all(materialize_index < names.index(name) for name in consumer_steps)
+    if "Validate pristine commercial gap ledger" in names:
+        assert (
+            names.index("Validate pristine commercial gap ledger") < materialize_index
+        )
 
 
 @pytest.mark.parametrize(
@@ -205,11 +268,7 @@ def test_all_supported_events_run_the_complete_pytest_suite() -> None:
     assert hosted_hip_source < pristine_ledger < materialize < full_suite
     assert "--deselect" in workflow[full_suite:]
     for command in (
-        "python scripts/build_phase2_state_updated_steel_material_artifacts.py",
-        "python scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
-        "python scripts/build_phase2_state_updated_composite_section_artifacts.py",
-        "python scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
-        "python scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
+        *PHASE2_REFRESH_COMMANDS,
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
         "python scripts/build_fracture_energy_concrete_benchmark.py",
         "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",

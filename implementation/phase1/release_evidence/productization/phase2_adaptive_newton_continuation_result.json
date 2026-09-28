@@ -275,7 +275,7 @@
         }
       ],
       "line_search_step_count": 5,
-      "linear_solve_count": 5,
+      "linear_solve_count": 0,
       "no_solve_contract_pass": false,
       "outcome": "rolled_back",
       "reaction_observation_only": false,
