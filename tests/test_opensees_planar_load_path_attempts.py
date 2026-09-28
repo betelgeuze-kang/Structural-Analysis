@@ -20,8 +20,8 @@ SCRIPT = Path(__file__).resolve().parents[1] / (
 ROOT = SCRIPT.parents[1]
 RECEIPT = (
     ROOT
-    / "implementation/phase1/release_evidence/productization/"
-    "external_code_to_code_technical_execution_receipt.json"
+    / "artifacts/vv/opensees_calculix_planar_attempts/"
+    "current_product_replay_receipt.json"
 )
 CASES = (
     "public_corotational_portal",

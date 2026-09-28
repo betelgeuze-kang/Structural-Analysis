@@ -1,15 +1,19 @@
 # 외부 code-to-code 기술 실행 영수증
 
 이 문서는 OpenSees와 CalculiX를 실제 로컬 실행해 저장한 좁은 기술 비교와
-제품 replay를 설명한다. 현재 code-to-code 영수증은 고정된 다섯 외부 asset으로
-두 solver를 같은 host에서 다시 실행했다. 별도 modal·buckling 영수증은 외부
-실행값을 재사용한 제품 replay이며, 보존된 container 실행은 현재 source의
-교차환경 수치 parity를 통과하지 못한다. 이들은 동일 운영자의 좁은 기술 증거이므로
-Level 2 증거로 등록하거나 제품의 법무·재배포·상용 동등성·출시 준비를 승인하지 않는다.
+제품 replay를 설명한다. `artifacts/vv/opensees_calculix_planar_attempts/`의
+`host_fresh_receipt_84602ccf9.json`은 고정된 다섯 외부 asset으로 두 solver를
+같은 host에서 실행한 당시 source-bound 후보 원본이다.
+`current_product_replay_receipt.json`은 그 외부 실행값을 현재 후보 source에서
+재생한 별도 영수증이며 외부 실행 재사용과 current-source rerun blocker를 기록한다.
+보호된 productization 영수증과 상용 gap ledger는 이전 상태를 그대로 보존한다.
+별도 modal·buckling 영수증도 외부 실행값을 재사용한 제품 replay다. 이들은
+동일 운영자의 좁은 기술 증거이므로 Level 2 증거로 등록하거나 제품의
+법무·재배포·상용 동등성·출시 준비를 승인하지 않는다.
 
 ## 실행 범위
 
-`external_code_to_code_technical_execution_receipt.json`은 정확히 열두 case를
+위 두 후보 영수증은 정확히 열두 case를
 기록한다.
 
 | Case | 외부 기준 | 제품 경로 | 비교 항목 | 결과 |
@@ -121,12 +125,13 @@ frame/shell 또는 재료·기하 비선형 비교와 독립 운영자 검토를
   출력은 SHA-256으로 결속
 - 외부 package와 runtime은 저장소에 번들하지 않음
 
-현재 host 영수증의 hash authority는
-`implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json`의
-`artifact_hash`와 `internal_source.source_set_hash` 필드다. 이 파일에 기록된
-208개 input checksum과 `source_commit_sha`를 함께 확인해야 하며, 다른 generation의
-container child 영수증 hash로 대체하지 않는다. 재생성 때 바뀌는 hash 값은 문서에
-복제하지 않는다.
+당시 host 실제 실행의 hash authority는
+`artifacts/vv/opensees_calculix_planar_attempts/host_fresh_receipt_84602ccf9.json`의
+`artifact_hash`와 `internal_source.source_set_hash` 필드다. 208개 input checksum과
+`source_commit_sha`는 해당 실행 source에 결속되며 새 HEAD의 외부 실행 freshness로
+옮겨지지 않는다. 현재 후보 제품 replay는 같은 디렉터리의
+`current_product_replay_receipt.json`을 별도로 검사한다. 다른 generation의 container
+child 영수증 hash로 대체하거나 재생성 때 바뀌는 hash를 문서에 복제하지 않는다.
 
 ## 전체 모델 modal·buckling 추가 영수증
 
@@ -202,16 +207,18 @@ published benchmark decision 또는 hierarchy operator manifest를 만들지 않
 Python 3.11 base image에서 다시 생성한다. 실행 시 repository mount는 read-only,
 runtime network는 `none`, 지정 output mount만 writable이며 다섯 외부 package의
 SHA-256을 추출 전에 검사한다. 생성 bundle은
-`artifacts/vv/opensees_calculix_clean_runner/`에 있고 summary의 live hash authority는
+`artifacts/vv/opensees_calculix_clean_runner/`에 있고 해당 번들의 hash authority는
 `clean_runner_receipt.json`의 `artifact_hash` 필드다. volatile replay hash를 문서에 복제하지 않는다.
 
-새 container generation은 네트워크 차단·read-only source·고정 자산 계약을
-유지하며 code-to-code와 modal/buckling 외부 엔진을 모두 새로 실행했다. 같은
-source commit에서 만든 두 host parity 입력은 제품 replay만 수행했고 외부 실행
+보존된 container generation은 source commit `170b703d2`에서 네트워크 차단·
+read-only source·고정 자산 계약을 유지하며 code-to-code와 modal/buckling 외부
+엔진을 모두 실행했다. 같은 source commit에서 만든 두 host parity 입력은 제품
+replay만 수행했고 외부 실행
 freshness를 받지 않는다. Host/container scalar `199/199`, metric-set과 source-set
 match, 선언된 결합 절대·상대 허용오차 계약은 모두 `true`다. 최대 절대차는
 `1.6209256159527285e-12`이며 `same_operator_container_isolated_reproduction`과
-`cross_environment_numerical_parity`는 이 좁은 기술 범위에서 `true`다. 다만
+`cross_environment_numerical_parity`는 그 source의 좁은 기술 범위에서 `true`다.
+이 결과를 새 후보 HEAD의 교차환경 parity로 옮겨 주장하지 않는다. 다만
 buckling semantic result hash는 수치 허용오차 안에서 정확히 일치하지 않는다.
 독립 운영자 attestation, 제품 법무·재배포 승인, Verification Level 2 또는 release
 readiness는 여전히 승격되지 않는다.
@@ -223,13 +230,17 @@ readiness는 여전히 승격되지 않는다.
 
 ## 크레딧 경계
 
-현재 host code-to-code 영수증은 다음을 참으로 기록한다.
+보존된 host code-to-code 원본은 당시 source에 대해 다음을 참으로 기록한다.
 
 - OpenSees와 CalculiX의 동일 운영자·동일 host 실제 실행
 - 고정된 외부 runtime 버전 확인
 - 열두 좁은 code-to-code case의 94개 수치 계약 통과
-- 해당 host 영수증의 current-product replay 통과
-- 해당 source의 external runtime 재실행
+- 당시 host 영수증의 제품 replay 통과
+- 당시 source의 external runtime 재실행
+
+현재 후보 제품 replay는 같은 열두 case와 94개 metric을 재계산하지만
+`external_runtime_executed_in_this_generation=false`,
+`external_execution_reused=true`와 current-source rerun blocker를 유지한다.
 
 다음은 이 host 영수증만으로는 승인·증명되지 않는다. 동일 운영자의 좁은 격리
 재현과 수치 parity는 위 별도 clean-runner 영수증에서만 확인된다.
@@ -250,7 +261,8 @@ frame/shell/modal/buckling/material-nonlinear 구조형식 폭이 없다. 따라
 ## 오프라인 검사
 
 ```bash
-PYTHONPATH=src python3 scripts/run_external_code_to_code_technical_receipt.py --check
+PYTHONPATH=src python3 scripts/run_external_code_to_code_technical_receipt.py \
+  --out artifacts/vv/opensees_calculix_planar_attempts/current_product_replay_receipt.json --check
 PYTHONPATH=src python3 scripts/run_external_modal_buckling_technical_receipt.py --check
 PYTHONPATH=src python3 -m pytest -q \
   tests/test_external_code_to_code_technical_receipt.py \
@@ -258,8 +270,10 @@ PYTHONPATH=src python3 -m pytest -q \
   tests/test_external_vv_clean_runner_contract.py
 ```
 
-보존된 modal·buckling 영수증의 source checksum은 현재 checkout과 다르므로 그
-`--check`는 새 source에서 갱신되기 전까지 freshness 오류를 내는 검증 gate다.
+보호된 productization code-to-code 영수증과 modal·buckling 영수증의 source
+checksum은 이 후보 checkout과 다르다. 기본 경로의 `--check`는 새 source에서
+갱신되기 전까지 freshness 오류를 내는 검증 gate다. 위 `--out`은 보호된 경로를
+후보 제품 replay로 바꿔 읽는 검사에만 적용된다.
 
 외부 asset directory가 준비된 재현 명령은 다음과 같다.
 

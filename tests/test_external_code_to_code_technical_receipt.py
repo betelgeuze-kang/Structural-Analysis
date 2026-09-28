@@ -18,8 +18,13 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/run_external_code_to_code_technical_receipt.py"
 RECEIPT = (
     ROOT
-    / "implementation/phase1/release_evidence/productization/"
-    "external_code_to_code_technical_execution_receipt.json"
+    / "artifacts/vv/opensees_calculix_planar_attempts/"
+    "current_product_replay_receipt.json"
+)
+FRESH_HOST_RECEIPT = (
+    ROOT
+    / "artifacts/vv/opensees_calculix_planar_attempts/"
+    "host_fresh_receipt_84602ccf9.json"
 )
 SPEC = importlib.util.spec_from_file_location(
     "run_external_code_to_code_technical_receipt",
@@ -37,7 +42,7 @@ def _stored_receipt() -> dict[str, object]:
     return payload
 
 
-def test_stored_receipt_validates_and_records_actual_technical_execution() -> None:
+def test_stored_candidate_replay_validates_without_new_external_execution() -> None:
     payload = _stored_receipt()
     schema = json.loads((ROOT / module.SCHEMA_PATH).read_text(encoding="utf-8"))
 
@@ -110,17 +115,25 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     )
     replay = payload["replay_provenance"]
     assert replay["current_product_replay_pass"] is True
-    fresh_execution = (
-        replay["external_runtime_executed_in_this_generation"] is True
-        and replay["external_execution_reused"] is False
-    )
     reused_execution = (
         replay["external_runtime_executed_in_this_generation"] is False
         and replay["external_execution_reused"] is True
         and isinstance(replay["reuse_reason"], str)
         and bool(replay["reuse_reason"].strip())
     )
-    assert fresh_execution or reused_execution
+    assert reused_execution
+    fresh_host = json.loads(FRESH_HOST_RECEIPT.read_text(encoding="utf-8"))
+    module.validate_external_code_to_code_technical_receipt(
+        fresh_host,
+        repo_root=ROOT,
+        require_current_sources=False,
+    )
+    assert fresh_host["replay_provenance"]["external_runtime_executed_in_this_generation"] is True
+    assert fresh_host["replay_provenance"]["external_execution_reused"] is False
+    assert replay["external_execution_source_commit_sha"] == fresh_host["source_commit_sha"]
+    assert replay["external_execution_generated_at"] == fresh_host[
+        "replay_provenance"
+    ]["external_execution_generated_at"]
     assert (
         module.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
     ) is reused_execution
@@ -572,7 +585,6 @@ def test_product_replay_refresh_does_not_invent_legacy_execution_source() -> Non
     replay["external_execution_reused"] = True
     replay["reuse_reason"] = "legacy_reference_execution_origin_unknown"
     replay["external_execution_source_commit_sha"] = None
-    stored["blockers_remaining"].append(module.REUSED_EXECUTION_BLOCKER)
     stored["artifact_hash"] = module._artifact_hash(stored)
     refreshed = module.refresh_external_code_to_code_product_replay(
         stored,
@@ -620,7 +632,7 @@ def test_fresh_receipt_without_execution_source_fails_closed() -> None:
 
 def test_cli_offline_check_validates_stored_receipt() -> None:
     completed = subprocess.run(
-        [sys.executable, str(SCRIPT), "--check"],
+        [sys.executable, str(SCRIPT), "--out", str(RECEIPT), "--check"],
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -635,11 +647,7 @@ def test_cli_refresh_can_use_a_validated_current_reference_receipt(
     tmp_path: Path,
 ) -> None:
     out = tmp_path / "embedded-code-receipt.json"
-    reference = (
-        ROOT
-        / "implementation/phase1/release_evidence/productization/"
-        "external_code_to_code_technical_execution_receipt.json"
-    )
+    reference = RECEIPT
     completed = subprocess.run(
         [
             sys.executable,
@@ -662,7 +670,9 @@ def test_cli_refresh_can_use_a_validated_current_reference_receipt(
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["replay_provenance"]["external_execution_reused"] is True
     assert payload["replay_provenance"]["external_execution_source_commit_sha"] == (
-        _stored_receipt()["source_commit_sha"]
+        _stored_receipt()["replay_provenance"][
+            "external_execution_source_commit_sha"
+        ]
     )
     assert [row["case_id"] for row in payload["comparisons"]] == [
         row["case_id"] for row in _stored_receipt()["comparisons"]

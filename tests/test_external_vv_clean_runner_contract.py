@@ -398,10 +398,17 @@ def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sourc
         else:
             with pytest.raises(error_type, match="receipt_sources_stale"):
                 validator(receipt, repo_root=ROOT, require_current_sources=True)
-            assert (
-                "external_runtime_current_source_rerun_missing"
-                in receipt["blockers_remaining"]
-            )
+            replay = receipt["replay_provenance"]
+            if replay["external_execution_reused"]:
+                assert (
+                    "external_runtime_current_source_rerun_missing"
+                    in receipt["blockers_remaining"]
+                )
+            else:
+                assert replay["external_runtime_executed_in_this_generation"] is True
+                assert replay["external_execution_source_commit_sha"] == receipt[
+                    "source_commit_sha"
+                ]
 
     for name, receipt, path in (
         ("code_to_code", code, CODE_RECEIPT),
