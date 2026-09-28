@@ -32,6 +32,8 @@ publisher-signed digest. The original ZIP remains outside Git at
 | Original ZIP member, under `Kawashima-RC-Tests/` | Bytes | ZIP CRC-32 | Local SHA-256 |
 | --- | ---: | --- | --- |
 | `TP-010 to 013/Documentation/titech03.pdf` | 805,438 | `f9a2c39c` | `65e5840f47eea6178ae6c9672dfbfebbcedfb3854069653d527ee36cb3420617` |
+| `TP-010 to 013/Documentation/disp.pdf` | 38,646 | `3d4c6821` | `0ab3083a536f2c0e859f0851c53b27bd37b03c46abdcf86c6fcaea582cf46fc6` |
+| `TP-010 to 013/Documentation/force.pdf` | 35,659 | `31f4bb45` | `7c5aca7f8178b8e164a74e1eb255bd6b756901a9991bed55c25d7451541b00c4` |
 | `TP-010 to 013/Experimental data/tp011.txt` | 859,735 | `7d4e9f77` | `4a0be0187313afd6cd063426c0db030199492cf7313a0a5ec31b88a7ac08db22` |
 
 The ZIP also lists `TP-010 to 013/Experimental data/tp011.xls`; this screen
@@ -72,6 +74,18 @@ respectively. These source-computed columns must not be relabeled as untouched
 instrument channels or commanded displacement targets without a sensor and
 correction crosswalk.
 
+The separate one-page Appendix B (`disp.pdf`) explicitly defines the specimen
+displacement at the load point as `u_P = u - (u_Fs + u_Fr)`: measured lateral
+displacement minus footing sliding and the displacement induced by footing
+rotation. Its Eq. (B-3) computes the rotation term from two vertical footing
+gauges and their spacing. Appendix A (`force.pdf`) defines the reported lateral
+force at the load-point height as the horizontal actuator force plus corrections
+for horizontal and vertical components of the vertical actuator force, including
+its rotation and lever arm (Eq. A-2 through A-6). The appendices establish the
+meaning of the corrected columns, but the exact gauge distances, raw-channel
+signs, and implementation used to produce all 3,553 rows have not been
+reconstructed. The original PDFs remain outside Git.
+
 The original `tp011.txt` contains **3,553 ordered numeric records**, with
 contiguous `STEP` values 1–3,553 and 32 columns per record. It additionally
 contains **21 trailing empty CSV records** (14 of width 32 and seven of width
@@ -103,8 +117,8 @@ cross-checked. Shear deformation, reinforcement bond/anchorage slip,
 confinement, bar instability, and footing sliding/rotation may matter; the
 present Euler–Bernoulli axial–curvature element does not establish those
 mechanisms. Bar-centroid coordinates and cover, concrete/steel constitutive
-curves, source correction equations, sensor datums, load application geometry,
-and a defensible comparison interval remain unverified.
+curves, numerical channel-to-equation reconstruction, sensor datums, load
+application geometry, and a defensible comparison interval remain unverified.
 
 The existing [local PEER rectangular property table](../../implementation/phase1/open_data/pbd_hinge/peer_spd/rectangular_properties.txt)
 already has Takemura–Kawashima 1997 tests 1–6 at source rows 248–253,
@@ -114,7 +128,7 @@ from external PEER, ACI, or other mirrors. Crosswalk original author, year,
 specimen and data-file identity before counting a new independent campaign.
 
 **Decision: HOLD for learning and physical validation.** Next review the
-original report's failure account, source-computed channel equations and
+original report's failure account, numeric channel/equation reconstruction and
 footing-motion channels, exact reinforcement placement and materials, and
 archive/mirror lineage. Freeze campaign-level training and evaluation roles
 before fitting; measured load–displacement pairs do not provide accepted
