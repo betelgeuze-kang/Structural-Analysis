@@ -144,6 +144,7 @@ def _reference_design_row(
         row["quantities"] = design.calculate_fiber_frame_member_quantities(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         )
         row["material_estimate"] = design._estimate(row["quantities"], prices)
         model_bytes = _bytes(model.canonical_payload())
@@ -285,8 +286,11 @@ def _reference_design_row(
         # Preserve that distinction instead of making every block look like a
         # mismatch introduced by fresh verification.
         path = payload.get("path") or {}
-        failed = [attempt for attempt in path.get("attempts", ())
-                  if attempt.get("committed") is False]
+        failed = [
+            attempt
+            for attempt in path.get("attempts", ())
+            if attempt.get("committed") is False
+        ]
         if failed:
             attempt = failed[-1]
             work = attempt.get("solver_work") or {}
@@ -350,6 +354,10 @@ def compare_rc_control_designs(
     request = decode_bounded_rc_fiber_direct_control_request(_bytes(request.to_dict()))
     if not request.targets_m:
         raise ValueError("at least one authored target required")
+    if request.experimental_pin_roller_beam and request.constant_nodal_loads:
+        raise ValueError(
+            "pin-roller design comparison does not support constant preloads"
+        )
     if type(candidates) is not tuple or not 1 <= len(candidates) <= 16:
         raise ValueError("one to sixteen candidates required")
     if any(type(c) is not design.FiberFrameDesignCandidate for c in candidates):
@@ -407,7 +415,9 @@ def compare_rc_control_designs(
         "source_revision_is_attestation": False,
     }
     if prune_cost_dominated:
-        identity["execution_policy"] = "strict_verified_cost_dominance_in_authored_order.v1"
+        identity["execution_policy"] = (
+            "strict_verified_cost_dominance_in_authored_order.v1"
+        )
     if reuse_line_search_assembly:
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
@@ -420,8 +430,15 @@ def compare_rc_control_designs(
     incumbent = None
     for candidate in (None, *candidates):
         row = _reference_design_row(
-            baseline, candidate, request, root, kwargs, prices,
-            history_limits, material_limits, terminal_limits,
+            baseline,
+            candidate,
+            request,
+            root,
+            kwargs,
+            prices,
+            history_limits,
+            material_limits,
+            terminal_limits,
             **({"cost_incumbent": incumbent} if prune_cost_dominated else {}),
         )
         rows.append(row)
@@ -429,12 +446,16 @@ def compare_rc_control_designs(
             prune_cost_dominated
             and row["full_reference_verification_pass"]
             and row["selection_eligible"]
-            and all(inv["status"] == "returned" and inv["unknown_execution_work"] is False for inv in row["invocations"])
+            and all(
+                inv["status"] == "returned" and inv["unknown_execution_work"] is False
+                for inv in row["invocations"]
+            )
         ):
             estimate = row["material_estimate"]["total"]
             if incumbent is None or estimate < incumbent["estimate"]:
                 incumbent = {
-                    "candidate_id": row["candidate_id"], "estimate": estimate,
+                    "candidate_id": row["candidate_id"],
+                    "estimate": estimate,
                     "result_sha256": row["artifacts"]["result"]["sha256"],
                     "verification_sha256": row["artifacts"]["verification"]["sha256"],
                     "model_sha256": row["artifacts"]["model"]["sha256"],
@@ -498,14 +519,21 @@ def compare_rc_control_designs(
             or row["status"] == "skipped_cost_dominated"
             for row in rows
         )
-        report["status"] = ("complete_with_cost_exclusions" if skipped else "complete") if resolved else "incomplete"
+        report["status"] = (
+            ("complete_with_cost_exclusions" if skipped else "complete")
+            if resolved
+            else "incomplete"
+        )
         report["cost_pruning"] = {
             "skipped_candidate_ids": [row["candidate_id"] for row in skipped],
             "skipped_count": len(skipped),
             "api_invocation_count": sum(len(row["invocations"]) for row in rows),
-            "minimum_scoped_estimate_proved_within_declared_candidates": resolved and selected is not None,
+            "minimum_scoped_estimate_proved_within_declared_candidates": resolved
+            and selected is not None,
             "skipped_candidate_feasibility_known": False,
-            "all_requested_models_physically_verified": all(row["full_reference_verification_pass"] for row in rows),
+            "all_requested_models_physically_verified": all(
+                row["full_reference_verification_pass"] for row in rows
+            ),
             "saved_wall_time_measured": False,
         }
     design._finite_tree(report)
