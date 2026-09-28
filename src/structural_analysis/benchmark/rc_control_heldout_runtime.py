@@ -11,17 +11,24 @@ import json
 import os
 import re
 import subprocess
+from threading import Lock
 from time import perf_counter_ns, process_time_ns, time_ns
+
+import numpy as np
 
 from structural_analysis.benchmark import rc_control_learning as learning
 from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
+from structural_analysis.benchmark.fiber_frame_runtime import _numeric_payload_difference
 from structural_analysis.benchmark.rc_control_runtime_selection import (
     _runtime_score,
     _static_material_model_gate,
 )
+from structural_analysis.benchmark.rc_control_seed_runtime import _physical_mismatch_locations
 
 
 _PROCESS_STARTED_NS = time_ns()
+_PROCESS_SLOT_LOCK = Lock()
+_CLAIMED_PROCESS_ID = None
 _HASH = re.compile(r"sha256:[0-9a-f]{64}")
 
 
@@ -29,8 +36,86 @@ def _actual_proposal_count(report):
     return sum(
         entry.get("proposal_decision") == "proposed"
         and entry.get("proposal") is not None
+        and bool(entry.get("invocations"))
+        and entry["invocations"][0].get("seed_used") is True
+        and entry["invocations"][0].get("status") in ("returned", "raised")
         for entry in report["arms"]["proposal"]["entries"]
     )
+
+
+def _receipt_inventory(root, plan_hash, slot_index):
+    """Hash every original slot file except the inventory and its outcome."""
+    files = []
+    for path in sorted(root.rglob("*")):
+        if path.is_symlink():
+            raise ValueError("slot receipt symlink is not an original file")
+        if path.is_dir():
+            continue
+        relative = path.relative_to(root).as_posix()
+        if relative in ("receipt-inventory.json", "outcome.json"):
+            continue
+        payload = path.read_bytes()
+        files.append({"path": relative, "sha256": _sha(payload), "bytes": len(payload)})
+    result = {
+        "schema_version": "rc-heldout-receipt-inventory.v1",
+        "plan_hash": plan_hash,
+        "slot_index": slot_index,
+        "file_count": len(files),
+        "total_bytes": sum(row["bytes"] for row in files),
+        "files": files,
+    }
+    result["inventory_hash"] = _sha(_bytes(result))
+    return result
+
+
+def _complete_history(path):
+    return ([path["preload_response"]] if path.get("preload_response") is not None
+            else []) + path["response_history"]
+
+
+def _audit_original_histories(report, paths):
+    """Recompute the producer's full-history verdict from original path files."""
+    fresh = paths["fresh-reference"]
+    reference = paths["reference"]
+    fresh_history = _complete_history(fresh)
+    for name, arm in paths.items():
+        if name == "fresh-reference":
+            continue
+        arm_history = _complete_history(arm)
+        structure, maximum_absolute, maximum_relative, within = (
+            _numeric_payload_difference(
+                fresh_history, arm_history,
+                absolute_tolerance=report["absolute_tolerance"],
+                relative_tolerance=report["relative_tolerance"],
+            )
+        )
+        recomputed = {
+            "full_history_pass": fresh["status"] == arm["status"] == "complete"
+            and structure and within,
+            "structure_match": structure,
+            "mismatch_locations": _physical_mismatch_locations(
+                fresh_history, arm_history,
+                absolute_tolerance=report["absolute_tolerance"],
+                relative_tolerance=report["relative_tolerance"],
+            ),
+            "physical_values_within_tolerance": within,
+            "maximum_absolute_difference_mixed_SI_fields": maximum_absolute
+            if np.isfinite(maximum_absolute) else None,
+            "maximum_relative_difference": maximum_relative
+            if np.isfinite(maximum_relative) else None,
+            "exact_terminal_checkpoint": _bytes(fresh["terminal_checkpoint"])
+            == _bytes(arm["terminal_checkpoint"]),
+        }
+        if report["comparisons"].get(name) != recomputed:
+            raise ValueError("stored comparison differs from original full histories")
+    if set(report["comparisons"]) != set(paths) - {"fresh-reference"} or (
+        report["reference_repeat_exact"] is not (
+            report["comparisons"]["reference"]["full_history_pass"]
+            and report["comparisons"]["reference"]["exact_terminal_checkpoint"]
+            and _bytes(_complete_history(reference)) == _bytes(fresh_history)
+        )
+    ):
+        raise ValueError("fresh-reference repeat differs from original full histories")
 
 
 def _selected_policy(selection, source_revision):
@@ -154,7 +239,7 @@ def declare_heldout_runtime(
         "break_even_eligible": False,
         "cost_scopes": {
             "enclosing": ["slot_total"],
-            "nested_in_slot": ["policy_loading", "preflight", "model_gate", "benchmark", "slot_io"],
+            "nested_in_slot": ["policy_loading", "preflight", "model_gate", "benchmark", "receipt_inventory", "slot_io"],
             "nested_in_benchmark": ["material_capture", "inference", "solver_attempts", "recovery", "step_report_io", "full_path_verification"],
             "outside_slot": ["process_startup", "label_generation", "training_fits", "development_selection", "separate_audit"],
         },
@@ -220,6 +305,11 @@ def run_heldout_slot(plan, cases, selection, *, slot_index, output_directory):
     root = Path(output_directory)
     if root.name != f"slot-{slot_index:04d}":
         raise ValueError("slot output directory must bind its declared index")
+    global _CLAIMED_PROCESS_ID
+    with _PROCESS_SLOT_LOCK:
+        if _CLAIMED_PROCESS_ID == os.getpid():
+            raise ValueError("each held-out slot requires a fresh process")
+        _CLAIMED_PROCESS_ID = os.getpid()
     root.mkdir(parents=True, exist_ok=False)
     process_identity = [os.getpid(), _PROCESS_STARTED_NS]
     started = {
@@ -303,12 +393,20 @@ def run_heldout_slot(plan, cases, selection, *, slot_index, output_directory):
                        unknown_work_until_outcome=True)
     finally:
         outcome["decisions"] = decisions
+        iw, ic = perf_counter_ns(), process_time_ns()
+        inventory = _receipt_inventory(root, plan["plan_hash"], slot_index)
+        _save(root, "receipt-inventory.json", _bytes(inventory))
+        outcome["cost_ledger"]["receipt_inventory"] = {
+            "wall_ns": perf_counter_ns() - iw, "cpu_ns": process_time_ns() - ic,
+        }
         outcome["wall_ns"] = perf_counter_ns() - wall
         outcome["cpu_ns"] = process_time_ns() - cpu
         outcome["cost_ledger"]["enclosing_slot"] = {
             "wall_ns": outcome["wall_ns"], "cpu_ns": outcome["cpu_ns"],
             "nested_scopes_are_not_additive": True,
+            "excludes_final_outcome_write": True,
         }
+        outcome["receipt_inventory_hash"] = inventory["inventory_hash"]
         _save(root, "outcome.json", _bytes(outcome))
     return outcome
 
@@ -400,6 +498,7 @@ def audit_heldout_receipts(plan, root):
     Missing and raised slots remain in the denominator. This audit does not
     authenticate external source rights, independent physics or lifecycle cost.
     """
+    audit_wall, audit_cpu = perf_counter_ns(), process_time_ns()
     root = Path(root)
     outcomes = {}
     rows = {row["case_id"]: row for row in plan["cases"]}
@@ -430,6 +529,11 @@ def audit_heldout_receipts(plan, root):
                    for key in ("plan_hash", "slot", "process_identity"))
         ):
             raise ValueError("slot start and outcome binding mismatch")
+        inventory = _read_receipt(folder / "receipt-inventory.json")
+        if inventory != _receipt_inventory(folder, plan["plan_hash"], index) or (
+            outcome.get("receipt_inventory_hash") != inventory["inventory_hash"]
+        ):
+            raise ValueError("original slot receipt inventory mismatch")
         ledger = outcome.get("cost_ledger", {})
         enclosure = ledger.get("enclosing_slot", {})
         if any(
@@ -438,6 +542,13 @@ def audit_heldout_receipts(plan, root):
             for key in ("wall_ns", "cpu_ns")
         ):
             raise ValueError("measured enclosing slot costs required")
+        receipt_cost = ledger.get("receipt_inventory", {})
+        if any(
+            type(receipt_cost.get(key)) is not int
+            or not 0 <= receipt_cost[key] <= outcome[key]
+            for key in ("wall_ns", "cpu_ns")
+        ):
+            raise ValueError("receipt inventory cost exceeds enclosing slot")
         if outcome.get("status") == "completed":
             report = _read_receipt(folder / "benchmark" / "comparison.json")
             if (
@@ -462,11 +573,20 @@ def audit_heldout_receipts(plan, root):
                 for key in ("wall_ns", "cpu_ns")
             ):
                 raise ValueError("whole benchmark cost exceeds enclosing slot")
+            if set(report["arms"]) != set(slot["arm_order"]):
+                raise ValueError("full-path arm roster differs from declared slot")
+            paths = {}
             for arm_name in (*slot["arm_order"], "fresh-reference"):
                 path = _read_receipt(folder / "benchmark" / arm_name / "path.json")
+                paths[arm_name] = path
                 summary = (report["fresh_reference"] if arm_name == "fresh-reference"
                            else report["arms"][arm_name])
                 if (
+                    path.get("schema_version") not in (
+                        "experimental-rc-control-seed-path.v1",
+                        "experimental-rc-control-seed-path.v2",
+                    )
+                    or
                     path.get("path_hash") != _sha(_bytes({
                         key: value for key, value in path.items() if key != "path_hash"
                     }))
@@ -475,6 +595,7 @@ def audit_heldout_receipts(plan, root):
                                                   "preload_response")}
                 ):
                     raise ValueError("original path file differs from comparison report")
+            _audit_original_histories(report, paths)
             gate = outcome.get("cost_ledger", {}).get("model_gate")
             score = _runtime_score(
                 report, outcome.get("decisions", []),
@@ -489,4 +610,10 @@ def audit_heldout_receipts(plan, root):
         elif outcome.get("status") != "raised" or outcome.get("unknown_work_until_outcome") is not True:
             raise ValueError("terminal completed or raised slot outcome required")
         outcomes[index] = outcome
-    return summarize_heldout_runtime(plan, outcomes)
+    summary = summarize_heldout_runtime(plan, outcomes)
+    summary["separate_audit"] = {
+        "wall_ns": perf_counter_ns() - audit_wall,
+        "cpu_ns": process_time_ns() - audit_cpu,
+        "scope": "read, hash and recheck original slot receipts; excludes summary write",
+    }
+    return summary
