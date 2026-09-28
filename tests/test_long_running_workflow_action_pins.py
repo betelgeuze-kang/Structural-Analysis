@@ -40,8 +40,9 @@ def test_exact_reviewed_action_pins_are_retained() -> None:
 
     assert sources["repository_python"].count(checkout) == 3
     assert sources["repository_python"].count(setup_python) == 3
-    # Development results and failed-materialization diagnostics are retained.
-    assert sources["repository_python"].count(upload) == 2
+    # Development results, failed-materialization diagnostics, and full-shard
+    # pytest results each retain the same reviewed action pin.
+    assert sources["repository_python"].count(upload) == 3
 
     assert sources["legacy_evidence"].count(checkout) == 2
     assert sources["legacy_evidence"].count(setup_python) == 2
