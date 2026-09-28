@@ -3,7 +3,7 @@ import { loadCandidateProcessReview, parseCandidateProcessJson } from '../../src
 import { validateCandidateProcessManifest } from '../../src/workbench-v2/model/candidateProcessSchema'
 import { candidateBytes, candidateProcessObservedFixture, candidateProcessIncompleteFixture, replaceCandidateArtifact, sealCandidateFixture, type CandidateObservedFixture } from './candidateProcessObservedFixture'
 import { candidateProcessMaterialHistoryFixture } from './candidateProcessMaterialHistoryFixture'
-import { candidateProcessCostFixture, resealCandidateCostFixture } from './candidateProcessCostFixture'
+import { candidateProcessCostFixture, candidateProcessStopCostFixture, resealCandidateCostFixture } from './candidateProcessCostFixture'
 import type { CandidateProcessCostSidecar } from '../../src/workbench-v2/model/candidateProcessSchema'
 
 const origin = 'https://example.test'
@@ -48,6 +48,36 @@ test('v4 binds frozen producer cost bytes to the verified suite and independentl
   expect(bundle.costAudit?.groups[0].audit?.arms.deterministic.missed_cheaper_feasible_candidate_ids).toEqual(['near-limit'])
   expect(bundle.costAudit?.groups[0].audit?.arms.learned.selected_minus_pool_minimum_estimate).toBe(0)
   expect(Buffer.from(bundle.costAuditBytes!).equals(Buffer.from(fixture.files.get('cost/candidate-pool-audit.json')!))).toBe(true)
+})
+
+test('v4 stop review distinguishes planned omissions from unattempted cheaper candidates and rejects a resealed false count', async () => {
+  const fixture = candidateProcessStopCostFixture()
+  const result = await load(fixture)
+  expect(result.errors).toEqual([]); expect(result.status).toBe('verified')
+  const stopped = fixture.suite.declaration.cases[0]
+  const group = result.bundle!.costAudit!.groups.find(row => row.case_id === stopped.case_id && row.repetition === 0)!
+  const learned = group.audit!.arms.learned
+  const learnedRun = fixture.suite.runs.find(row => row.case_id === stopped.case_id && row.repetition === 0 && row.strategy === 'learned')!
+  const oracleRun = fixture.suite.runs.find(row => row.case_id === stopped.case_id && row.repetition === 0 && row.strategy === 'oracle')!
+  const cheaper = oracleRun.report!.rows!.find(row => row.candidate_id === 'near-limit')!
+  expect(learnedRun.report!.arm!.shortlist).toContain('near-limit')
+  expect(learnedRun.report!.arm!.execution!.attempted_candidate_ids).toEqual([])
+  expect(cheaper).toMatchObject({ full_reference_verification_pass: true, full_history_verification_pass: true, full_material_history_verification_pass: true, terminal_limit_status: 'pass', history_limit_status: 'pass', material_history_limit_status: 'pass' })
+  expect(cheaper.material_estimate.total).toBeLessThan(learned.selected_estimate)
+  expect(learned.selected_candidate_id).toBe('baseline')
+  expect(learned.selected_minus_pool_minimum_estimate).toBeGreaterThan(0)
+  expect(learned.missed_cheaper_feasible_candidate_ids).toEqual([])
+  expect(learned.missed_cheaper_feasible_count).toBe(0)
+  expect(learned.unrequested_cheaper_feasible_candidate_ids).toEqual(['near-limit'])
+  expect(learned.unrequested_cheaper_feasible_count).toBe(1)
+
+  const sidecar = JSON.parse(new TextDecoder().decode(fixture.files.get('cost/candidate-pool-audit.json')!)) as CandidateProcessCostSidecar
+  const falseGroup = sidecar.groups.find(row => row.case_id === stopped.case_id && row.repetition === 0)!
+  falseGroup.audit!.arms.learned.unrequested_cheaper_feasible_candidate_ids = []
+  falseGroup.audit!.arms.learned.unrequested_cheaper_feasible_count = 0
+  resealCandidateCostFixture(fixture, sidecar)
+  const forged = await load(fixture)
+  expect(forged.status).toBe('invalid'); expect(forged.bundle).toBeNull()
 })
 
 test('v4 rejects a missing or changed cost sidecar before exposing the suite', async () => {

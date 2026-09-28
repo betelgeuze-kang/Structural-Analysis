@@ -3,15 +3,15 @@ import { expect, test, type Page } from '@playwright/test'
 import { candidateProcessIncompleteFixture, candidateProcessObservedFixture } from './candidateProcessObservedFixture'
 import { designComparisonFixture } from './designComparisonFixture'
 import { waitForCandidateProcess } from './candidateProcessBrowserWait'
-import { candidateProcessCostFixture } from './candidateProcessCostFixture'
+import { candidateProcessCostFixture, candidateProcessStopCostFixture } from './candidateProcessCostFixture'
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 const identity = (bytes: Uint8Array): string => `sha256:${createHash('sha256').update(bytes).digest('hex')}`
 const encode = (value: unknown): Uint8Array => Buffer.from(JSON.stringify(value))
 test.setTimeout(120000)
 
-async function serveReview(page: Page, options: { corruptSuite?: boolean; corruptCost?: boolean; standalone?: boolean; incomplete?: boolean; costAudit?: boolean } = {}) {
-  const fixture = options.costAudit ? candidateProcessCostFixture() : options.incomplete ? candidateProcessIncompleteFixture() : candidateProcessObservedFixture()
+async function serveReview(page: Page, options: { corruptSuite?: boolean; corruptCost?: boolean; standalone?: boolean; incomplete?: boolean; costAudit?: boolean; stopCostAudit?: boolean } = {}) {
+  const fixture = options.stopCostAudit ? candidateProcessStopCostFixture() : options.costAudit ? candidateProcessCostFixture() : options.incomplete ? candidateProcessIncompleteFixture() : candidateProcessObservedFixture()
   await page.addInitScript((standalone) => {
     window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
       candidateSearchProcessUrl: '/candidate-review/manifest.json',
@@ -36,6 +36,14 @@ for (const [name, viewport] of [
   ['mobile', { width: 390, height: 844 }],
 ] as const) test.describe(`v4 finite-pool cost audit on ${name}`, () => {
   test.use({ viewport })
+  test('keeps a planned but unattempted cheaper stop candidate distinct', async ({ page }) => {
+    await serveReview(page, { stopCostAudit: true })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = await waitForCandidateProcess(page)
+    await expect(panel.locator('[data-candidate-pool-cost-status]')).toHaveText('complete')
+    await expect(panel.locator('[data-candidate-pool-missed="learned"]')).toHaveText('0')
+    await expect(panel.locator('[data-candidate-pool-unrequested="learned"]')).toHaveText('1 · near-limit')
+  })
   test('shows only independently verified group costs and exports exact sidecar bytes', async ({ page }) => {
     const fixture = await serveReview(page, { costAudit: true })
     await page.goto(`${baseUrl}/#/workbench-v2`)

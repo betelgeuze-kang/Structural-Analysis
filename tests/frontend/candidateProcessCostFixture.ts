@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { canonicalJson } from '../../src/workbench-v2/model/checksum'
 import type { CandidateProcessCostSidecar } from '../../src/workbench-v2/model/candidateProcessSchema'
 import { candidateBytes, candidateDigest, candidateProcessObservedFixture, type CandidateObservedFixture } from './candidateProcessObservedFixture'
+import { candidateProcessStopFixture } from './candidateProcessStopFixture'
 
 /** Frozen Python producer output on the historical observed suite; no worker is rerun. */
 export function candidateProcessCostFixture(): CandidateObservedFixture {
@@ -35,4 +36,30 @@ export function resealCandidateCostFixture(fixture: CandidateObservedFixture, si
   fixture.manifest.cost_audit_sha256 = candidateDigest(bytes)
   fixture.files.set(fixture.manifest.cost_audit_file!, bytes)
   fixture.files.set('manifest.json', candidateBytes(fixture.manifest))
+}
+
+/** Synthetic stop transport: the selected baseline precedes an unattempted, cheaper oracle-feasible shortlist member. */
+export function candidateProcessStopCostFixture(): CandidateObservedFixture {
+  const fixture = candidateProcessStopFixture()
+  const observed = candidateProcessCostFixture()
+  const sidecar = JSON.parse(new TextDecoder().decode(observed.files.get('cost/candidate-pool-audit.json')!)) as CandidateProcessCostSidecar
+  fixture.manifest.schema_version = 'rc-fiber-candidate-process-review-bundle.v4'
+  fixture.manifest.source_suite_schema_version = fixture.suite.schema_version as CandidateProcessManifestSuiteVersion
+  fixture.manifest.cost_audit_file = 'cost/candidate-pool-audit.json'
+  const stoppedCase = fixture.suite.declaration.cases[0].case_id
+  for (const group of sidecar.groups) {
+    for (const strategy of ['deterministic', 'learned', 'oracle'] as const) {
+      const run = fixture.suite.runs.find(row => row.case_id === group.case_id && row.phase === group.phase && row.repetition === group.repetition && row.strategy === strategy)!
+      group.worker_report_hashes[strategy] = run.report!.report_hash
+    }
+    if (group.case_id !== stoppedCase) continue
+    const audit = group.audit!
+    audit.arms.learned = structuredClone(audit.arms.deterministic)
+    audit.arms.learned.missed_cheaper_feasible_candidate_ids = []
+    audit.arms.learned.missed_cheaper_feasible_count = 0
+    // The frozen planned shortlist still contains near-limit; execution stopped at the baseline.
+    // Its oracle-feasible lower estimate therefore counts only outside the attempted prefix.
+  }
+  resealCandidateCostFixture(fixture, sidecar)
+  return fixture
 }
