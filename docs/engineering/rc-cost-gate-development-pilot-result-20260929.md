@@ -1,0 +1,29 @@
+# RC cost-gated warm-start: synthetic development pilot result (2026-09-29)
+
+This is a development diagnostic, not a policy promotion or independent validation. The predeclared guard used secant for target indices 0, 1, and 11, and allowed the frozen learned proposal at indices 2–10 of each 12-target path. The six whole-path runs were completed after the plan was written and before inspecting their results. No reserved held-out case was read or executed.
+
+## Frozen inputs and decision
+
+- Executed source: `33acc9b1369fd4b4c1db782adb71b409bae62ec2` on `codex/rc-cost-gate-pilot-20260929` (parent: PR #481 source `48d4d5f8e4d20bce52a5ac4e90347d540638861a`).
+- Original non-reserved development packet: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-policy-runtime-q8fxqvd8`; packet inventory SHA-256 `e47a96cf34c52b3a088f15eba08a890e745da6096a7a43b5127f78df8ca2b7c0`, policy file SHA-256 `c9f29095d391d6aeafb81415464268a092104fd14311421d7dc70b52ed3b09e9`, policy identity `sha256:748ca448dc4aacea36bea9d6672057aa3d76c15ff1d8ac6db6f9ff53e40e8e48`, selection result `sha256:ce95bc6c4cd81d815156b733764811366b48153348f8ae108d5ba9bb67df7eac` (which had selected secant, not this policy).
+- Frozen plan `sha256:feb4daed5e87b3d69fba12b913a6b02699e806a019305e48e0c8f18ceebbdcc2`; plan file SHA-256 `08ea04effd743dadd85ccbbcdf6041da474aa6dc3169cfbf0be36f3b2b7f4103`.
+- Planned screen: all six slots complete with original full-history comparison and known work, at least one actual learned proposal in every slot, and the *equal-case mean* of the three within-case proposal/secant whole-path wall-time ratios strictly below `0.99`. Failures remain in the six-slot denominator. The screen is diagnostic only; it cannot change the promotion gate.
+
+| Slot | Case | Arm order | Secant s | Guarded proposal s | Ratio | Secant → proposal Newton/solves |
+| ---: | :--- | :--- | ---: | ---: | ---: | :--- |
+| 0 | F | reference, secant, proposal | 4.029152 | 3.929990 | 0.975389 | 67 → 65 |
+| 1 | G | reference, secant, proposal | 3.713133 | 3.766708 | 1.014429 | 67 → 63 |
+| 2 | F | secant, proposal, reference | 4.014790 | 3.953295 | 0.984683 | 67 → 65 |
+| 3 | G | secant, proposal, reference | 3.749195 | 3.770446 | 1.005668 | 67 → 63 |
+| 4 | F | proposal, reference, secant | 4.000336 | 3.884267 | 0.970985 | 67 → 65 |
+| 5 | G | proposal, reference, secant | 3.786892 | 3.750131 | 0.990292 | 67 → 63 |
+
+F's mean ratio was `0.9770189562`; G's was `1.0034629682`. Their equal-case mean was **`0.9902409622`**, so the predeclared `<0.99` screen **failed**. Pooling all six path times instead gives approximately `0.989754`; that was not the planned decision statistic and is not substituted after seeing the result. All six slots completed, all whole-history comparisons passed, all original work was reported, and each gated path made nine actual learned proposals. The guard abstained at the three excluded indices. Each slot performed a reference, secant, guarded-proposal, and fresh-reference path: 24 full paths in total. Neither policy promotion nor a reserved-case run followed.
+
+## Cost and evidence limits
+
+Across the six repeated paths, secant used 402 Newton iterations/linear solves and the gated proposal used 384; both used 78 core calls. The gated paths spent `0.226468 s` on committed-material capture, `0.282698 s` in proposal callbacks, and `0.000286 s` in guard callbacks. These are nested inside the proposal-path time. The four arm wall-time totals were reference `30.679042 s`, secant `23.293499 s`, guarded proposal `23.054836 s`, and fresh reference `30.540084 s`. The enclosing six benchmark scopes totaled `109.384519 s`; six slot scopes totaled `110.096704 s`; separate fresh-process launchers totaled `121.17 s`. These timing scopes contain one another and **must not be added**. Historical label generation, fit, and development selection costs belong to the source packet and are not reconstructed by this pilot; total AI lifecycle cost and net benefit remain unknown. The audit itself took `1.723891 s` wall time, separately. Result storage was about 110 MiB and 2,180 files, including six original benchmark trees.
+
+The 15 train cases A–E and new F/G have distinct declared project/geometry/history identifiers and F/G have distinct model and request hashes. F/G also have different dimensions and reversal histories from A–E. However, all 17 case instances descend from the same authored public RC example template. The identifiers and three timing repeats do **not** make F/G independent source projects or a genuinely lineage-disjoint validation set. The two case means are at best a same-template development signal. The observed 18-iteration reduction across repeated proposal paths is real recorded solver work, but no eligible, frozen learned policy or general net speedup is established.
+
+Original machine-local receipts: `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-cost-gate-pilot-20260929/plan.json` and `audit.json` (audit file SHA-256 `bc63d5dc812ed42a76ef2418fd20162dfd70be6b1bf1a7a385a41ec2303798e0`), plus each `slot-0000` through `slot-0005` benchmark tree, outcome, inventory, and launcher timing. The audit independently reloaded all six original path files, checked their hashes and path summaries, reran full-history and runtime-score checks, and left `heldout_executed=false`, `policy_promoted=false`, and `net_benefit_proved=false`.
