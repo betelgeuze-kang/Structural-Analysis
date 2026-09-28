@@ -24,6 +24,38 @@ This is a post-run integrity and completion check. It does not repeat the
 nonlinear solve, independently validate physical response, or prove a speedup.
 Earlier campaign records are not retroactively reclassified by this change.
 
+## Clean-source hosted packet
+
+The optional `.github/workflows/rc-reuse-campaign-evidence.yml` runs the
+committed three-topology synthetic plan from the event's exact head commit in a
+clean checkout. It accepts only tracked files under `examples/` as plan and
+model/request inputs and uses four pinned direct
+Python dependencies. The campaign's `--require-clean-source` mode rejects a
+dirty checkout, output inside the checkout, or imported repository modules from
+another location. It records pre-run and post-run repository and imported
+dependency module byte hashes, Python and installed dependency versions,
+distribution `RECORD` hashes, and thread settings in
+`execution-source.json`. The workflow retains the complete original packet as
+a downloadable Actions artifact, including all comparison and native step
+files. No protected or private source data belong in this workflow.
+
+After the run, `scripts/audit_rc_reuse_campaign_packet.py` checks the packet in
+a separate Python process against the committed plan and its original input
+bytes. It rechecks case completion, saved receipt hashes, ordered dispatch
+counts, baseline/reuse native step equality, reported full-history gates,
+per-case ratios and a byte inventory of every packet file. The auditor does
+not rerun a nonlinear solve or independently derive the physical response.
+Failed or interrupted cases remain in the original packet; the audit exits
+nonzero instead of turning a partial campaign into a success. Different cases
+retain separate ratios and the cross-case ratio remains `null`.
+
+This contract adds no hosted measurement until the workflow completes on an
+exact source commit. A hosted packet gives inspectably bound software
+execution evidence for these synthetic cases. Transitive dependencies are
+recorded but not locked, so a later installation may differ. The packet does
+not establish independent physical validation, hardware-general speedup,
+learned-policy benefit, or complete preparation/transport/review cost.
+
 ## Interruption accounting in campaign receipt v2
 
 The campaign now atomically writes a `running` row before calling each

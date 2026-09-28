@@ -57,6 +57,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/profile-scoped-product-state.yml",
         ".github/workflows/public-planar-cli-wheel-ci.yml",
         ".github/workflows/python-test-collection.yml",
+        ".github/workflows/rc-reuse-campaign-evidence.yml",
         ".github/workflows/repository-hygiene-freshness.yml",
         ".github/workflows/runtime-input-viewer-ci.yml",
         ".github/workflows/science-quarantine-ci.yml",
@@ -335,8 +336,10 @@ def check_runner_policy(
             "may use explicitly allowlisted GitHub-hosted runners. "
             "Hardware, GPU, non-public private-corpus, release-publication, and other "
             "non-allowlisted lanes must remain self-hosted. An explicitly allowlisted lane "
-            "may use hosted runners for immutable public inputs only when raw inputs are not "
-            "uploaded. Science-quarantine execution does not promote "
+            "may use hosted runners for immutable public inputs. Committed public synthetic "
+            "fixture bytes may be uploaded in a bounded research receipt; protected, private, "
+            "or externally restricted raw inputs must not be uploaded. "
+            "Science-quarantine execution does not promote "
             "that code into the structural product surface."
         ),
     }

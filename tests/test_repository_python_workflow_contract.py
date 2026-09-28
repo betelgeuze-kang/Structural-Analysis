@@ -1052,6 +1052,73 @@ def test_workflow_contract_self_validates_strict_yaml_and_full_history() -> None
     assert workflow.count("tests/test_workflow_yaml_strict.py") == 1
 
 
+def test_rc_reuse_campaign_uploads_exact_source_originals_and_independent_audit() -> None:
+    workflow = yaml.load(
+        (ROOT / ".github/workflows/rc-reuse-campaign-evidence.yml").read_text(
+            encoding="utf-8"
+        ),
+        Loader=yaml.BaseLoader,
+    )
+    assert workflow["permissions"] == {"contents": "read"}
+    assert {"pull_request", "push", "workflow_dispatch"} <= set(workflow["on"])
+    assert "pull_request_target" not in workflow["on"]
+    assert workflow["env"]["RC_REUSE_SOURCE_SHA"] == (
+        "${{ github.event.pull_request.head.sha || github.sha }}"
+    )
+    assert workflow["env"]["PYTHONPATH"] == ".:src"
+
+    job = workflow["jobs"]["three-topology"]
+    assert job["runs-on"] == "ubuntu-24.04"
+    steps = {step["name"]: step for step in job["steps"]}
+    assert len(steps) == len(job["steps"])
+
+    checkout = steps["Checkout exact source commit without credentials"]
+    assert checkout["uses"] == (
+        "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
+    )
+    assert checkout["with"] == {
+        "ref": "${{ env.RC_REUSE_SOURCE_SHA }}",
+        "persist-credentials": "false",
+    }
+    clean_check = steps["Verify exact clean checkout"]["run"]
+    assert 'test "$(git rev-parse HEAD)" = "$RC_REUSE_SOURCE_SHA"' in clean_check
+    assert 'git status --porcelain --untracked-files=all' in clean_check
+
+    setup = steps["Set up Python"]
+    assert setup["uses"] == (
+        "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1"
+    )
+    assert setup["with"]["python-version"] == "3.10"
+    install = steps["Install pinned runtime dependencies"]["run"]
+    assert "numpy==1.26.4 scipy==1.12.0" in install
+    assert "matplotlib==3.8.4 jsonschema==4.26.0" in install
+    assert "-e ." not in install
+    assert "pytest" not in install
+    run = steps["Run frozen three-topology campaign"]["run"]
+    assert "--require-clean-source" in run
+    assert "examples/research/rc_reuse_campaign/three-topology-plan.json" in run
+    assert '"$RUNNER_TEMP/rc-reuse-campaign/packet"' in run
+
+    audit = steps["Independently audit saved packet"]
+    assert audit["if"] == "${{ always() }}"
+    assert "python scripts/audit_rc_reuse_campaign_packet.py" in audit["run"]
+    assert '"$RUNNER_TEMP/rc-reuse-campaign/packet"' in audit["run"]
+    assert (
+        "--expected-plan examples/research/rc_reuse_campaign/three-topology-plan.json"
+        in audit["run"]
+    )
+    assert '"$RUNNER_TEMP/rc-reuse-campaign/audit.json"' in audit["run"]
+
+    upload = steps["Upload full original packet and audit"]
+    assert upload["if"] == "${{ always() }}"
+    assert upload["uses"] == (
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+    )
+    assert upload["with"]["path"] == "${{ runner.temp }}/rc-reuse-campaign/"
+    assert upload["with"]["if-no-files-found"] == "error"
+    assert upload["with"]["include-hidden-files"] == "true"
+
+
 def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:
     workflow = (
         ROOT / ".github" / "workflows" / "python-test-collection.yml"

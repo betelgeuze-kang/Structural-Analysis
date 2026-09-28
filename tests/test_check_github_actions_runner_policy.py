@@ -110,12 +110,19 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/product-state-current.yml",
         ".github/workflows/python-test-collection.yml",
+        ".github/workflows/rc-reuse-campaign-evidence.yml",
         ".github/workflows/repository-hygiene-freshness.yml",
     }
 
     assert expected <= (
         check_github_actions_runner_policy.DEFAULT_GITHUB_HOSTED_WORKFLOWS
     )
+
+
+def test_hosted_policy_allows_only_public_fixture_uploads() -> None:
+    boundary = check_github_actions_runner_policy.check_runner_policy()["claim_boundary"]
+    assert "Committed public synthetic fixture bytes may be uploaded" in boundary
+    assert "protected, private, or externally restricted raw inputs must not be uploaded" in boundary
 
 
 def test_runner_policy_blocks_unapproved_github_hosted_runner(tmp_path: Path) -> None:

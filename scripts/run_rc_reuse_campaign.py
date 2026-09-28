@@ -14,6 +14,7 @@ import subprocess
 from time import perf_counter_ns
 
 from scripts import diagnose_rc_control_line_search_reuse as experiment
+from scripts import rc_reuse_campaign_source as source_identity
 from structural_analysis.api import nonlinear_fiber_frame as public
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     decode_bounded_rc_fiber_direct_control_request,
@@ -329,8 +330,14 @@ def _validate_case_receipt(directory, values, *, source, repetitions, arithmetic
         )
 
 
-def run(manifest: Path, output: Path):
+def run(manifest: Path, output: Path, *, require_clean_source=False):
     started = perf_counter_ns()
+    source_before = None
+    if require_clean_source:
+        if output.resolve().is_relative_to(source_identity.ROOT):
+            raise ValueError("clean-source campaign output must be outside checkout")
+        source_identity.require_public_fixture(manifest)
+        source_before = source_identity.snapshot_clean_source()
     plan = load_json_object_strict(manifest)
     if set(plan) != {"schema", "repetitions", "arithmetic", "record_assembly_timing", "cases"}:
         raise ValueError("unexpected or missing campaign fields")
@@ -360,12 +367,16 @@ def run(manifest: Path, output: Path):
             if not isinstance(case[role], str) or not case[role]:
                 raise ValueError("input path must be a nonempty string")
             source = (manifest.parent / case[role]).resolve()
+            if require_clean_source:
+                source_identity.require_public_fixture(source)
             # Read every input before executing any case, so later external edits
             # cannot silently change a case after the campaign has started.
             values[role] = source.read_bytes()
         frozen.append((name, values))
     output.mkdir(parents=True, exist_ok=False)
     source = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    if source_before is not None and source_before["source_revision"] != source:
+        raise ValueError("campaign source changed before execution")
     bindings = []
     for name, values in frozen:
         directory = output / name
@@ -446,6 +457,15 @@ def run(manifest: Path, output: Path):
             finish("failed", {"type": type(exc).__name__, "message": str(exc)})
         else:
             finish("completed", None)
+    if source_before is not None:
+        source_after = source_identity.snapshot_clean_source()
+        provenance = {
+            "schema": "rc-reuse-execution-source.v1",
+            "before": source_before,
+            "after": source_after,
+        }
+        source_identity.verify_saved_source(provenance)
+        _write(output / "execution-source.json", provenance)
     return all(row["status"] == "completed" for row in rows)
 
 
@@ -453,5 +473,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--require-clean-source", action="store_true")
     args = parser.parse_args()
-    raise SystemExit(0 if run(args.manifest, args.output) else 1)
+    raise SystemExit(0 if run(
+        args.manifest, args.output,
+        require_clean_source=args.require_clean_source,
+    ) else 1)
