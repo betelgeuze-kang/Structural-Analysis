@@ -19,8 +19,9 @@ Each `launchers` entry identifies one declared slot and an original
 plan and source, slot index, original `started.json` and `outcome.json` byte
 hashes, process identity, return code, and measured `wall_ns`. Its `scope` is
 `subprocess_launch_through_exit_including_startup_and_stdout`, the same
-enclosing-process scope used by `rc_control_process_costs.py`. A future
-producer must take a **single parent** `perf_counter_ns()` interval around
+enclosing-process scope used by `rc_control_process_costs.py`. The
+[slot launcher](rc-heldout-slot-launcher-20260929.md) takes a **single parent**
+`perf_counter_ns()` interval around
 subprocess launch, output capture and exit, including Python startup and the
 slot's final outcome write. The auditor checks that this interval is at least
 the original slot interval and that all observed process identities are
