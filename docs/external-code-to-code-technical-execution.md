@@ -205,16 +205,14 @@ SHA-256을 추출 전에 검사한다. 생성 bundle은
 `artifacts/vv/opensees_calculix_clean_runner/`에 있고 summary의 live hash authority는
 `clean_runner_receipt.json`의 `artifact_hash` 필드다. volatile replay hash를 문서에 복제하지 않는다.
 
-보존된 container generation은 네트워크 차단·read-only source·고정 자산 계약을
-유지한다. 현재 clean-runner summary의 host/container scalar 수는 `199/199`,
-metric-set match는 `true`지만 source-set match와 수치 계약은 `false`다. 최대
-절대차는 `2.6121327323380683e-12`이며, 선언된 절대·상대 허용오차로 평가한
-세 개의 0이 아닌 scalar 차이는 모두 결합 허용오차 안에 있다. 그러나 source-set
-match가 `false`이므로 집계 `numerical_contract_pass`는 `false`다.
-`same_operator_container_isolated_reproduction=false`와
-`current_source_container_cross_environment_parity_missing`을 유지하므로 현재
-source의 container parity나 isolation credit을 부여하지 않는다. 별도의 host
-code-to-code 영수증만 OpenSees/CalculiX를 새로 실행한 12-case 기술 증거다.
+새 container generation은 네트워크 차단·read-only source·고정 자산 계약을
+유지하며 code-to-code와 modal/buckling 외부 엔진을 모두 새로 실행했다. 같은
+source commit에서 만든 두 host parity 입력은 제품 replay만 수행했고 외부 실행
+freshness를 받지 않는다. Host/container scalar `199/199`, metric-set과 source-set
+match, 선언된 결합 절대·상대 허용오차 계약은 모두 `true`다. 최대 절대차는
+`1.6209256159527285e-12`이며 `same_operator_container_isolated_reproduction`과
+`cross_environment_numerical_parity`는 이 좁은 기술 범위에서 `true`다. 다만
+buckling semantic result hash는 수치 허용오차 안에서 정확히 일치하지 않는다.
 독립 운영자 attestation, 제품 법무·재배포 승인, Verification Level 2 또는 release
 readiness는 여전히 승격되지 않는다.
 
@@ -233,7 +231,8 @@ readiness는 여전히 승격되지 않는다.
 - 해당 host 영수증의 current-product replay 통과
 - 해당 source의 external runtime 재실행
 
-다음은 명시적으로 `false`다.
+다음은 이 host 영수증만으로는 승인·증명되지 않는다. 동일 운영자의 좁은 격리
+재현과 수치 parity는 위 별도 clean-runner 영수증에서만 확인된다.
 
 - 제품 법무·라이선스 승인
 - 외부 runtime 상용 재배포 승인
@@ -241,7 +240,6 @@ readiness는 여전히 승격되지 않는다.
 - Verification Level 2 크레딧
 - 상용 솔버 동등성
 - release readiness
-- 현재 source의 same-operator container 수치 parity 및 격리 재현 크레딧
 
 OpenSeesPy license 문구는 내부 사용과 commercial redistribution을 구분하며,
 CalculiX package는 GPL-2 posture를 기록한다. 이 저장소에는 어느 runtime에

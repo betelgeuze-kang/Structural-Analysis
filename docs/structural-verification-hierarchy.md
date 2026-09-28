@@ -57,9 +57,11 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   frame modal과 반복 2모드 frame 선형좌굴의 두 case를 통과하지만, 외부 실행값은
   재사용했고 저장된 generation에서는 제품 replay만 수행했다. Modal 고유값·MAC
   4개, 좌굴계수·부분공간 3개가 통과하며 네 mode matrix는 little-endian binary
-  artifact로 분리돼 있다. 보존된 동일 운영자 clean runner의 host/container
-  scalar key는 `199/199`로 일치하지만 source-set match와 수치 계약은 `false`다.
-  따라서 현재 source의 container parity 또는 독립 운영자 재현을 주장하지 않는다.
+  artifact로 분리돼 있다. 동일 운영자의 새 격리 clean runner에서는 두 외부
+  자식 영수증을 새로 실행했고, 같은 source에서 만든 host 제품 replay와
+  scalar `199/199`, source-set 및 결합 수치 허용오차 계약을 통과했다. 따라서
+  이 범위의 container parity는 `true`지만 독립 운영자 재현은 아직 없다.
+  Buckling semantic result hash의 정확한 일치는 수치 허용오차 안에서 실패했다.
   그러나 제품 법무 승인, redistribution 승인, 독립 운영자 재현·서명,
   material-nonlinear 구조형식 breadth, published benchmark decision과 operator manifest가 없으므로
   `verification_hierarchy_credit=false`이고 Level 2로 승격하지 않는다. 중형
@@ -72,7 +74,7 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   `phase2_whole_model_buckling_result.json`은 각각 bounded frame/truss 공개
   모달 및 compression-only frame 선형좌굴 경로에서 analytic/invariant gate
   `4/4`를 통과한다. 위 별도 기술 receipt가 각각 한 frame/column의 보존된 외부
-  reference 비교를 추가했지만 현재 source의 격리 재현은 통과하지 못했다. 법무/use approval,
+  reference 비교를 추가했고 같은 운영자의 좁은 격리 재현은 통과했다. 법무/use approval,
   독립 운영자 attestation, breadth,
   published decision과 hierarchy operator manifest가 없으므로 Level 2 슬롯을
   채우지 않는다. 따라서 receipts를 추가해도 최고 검증 단계는 `1`이다.

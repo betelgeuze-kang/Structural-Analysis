@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:091553f161cbf0fbdb61548da33bbb11f091da3a9314e64c19427095f32684f7",
+  "artifact_hash": "sha256:43bfd4cb463676efec70504bb9e0a8bbc7a9fcef6185ac45ba741fff5421e6a3",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -9,7 +9,8 @@
     "code_to_code_structural_family_breadth_insufficient",
     "published_modal_buckling_benchmark_missing",
     "verification_level_2_not_achieved",
-    "release_readiness_not_established"
+    "release_readiness_not_established",
+    "external_runtime_current_source_rerun_missing"
   ],
   "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. OpenSees is compared with the public whole-model frame consistent-mass modal path for one two-degree-of-freedom cantilever, including eigenvalues and per-mode MAC. CalculiX B32 is compared with the public compression-only frame linear-buckling path for one sixteen-element pin-ended square column, including two repeated load factors and a basis-invariant two-mode subspace correlation. The CalculiX comparison uses a declared 1 percent load-factor tolerance and does not assert identical element formulations. Mode vectors are checksum-bound little-endian binary artifacts and are not inlined in JSON. This is narrow technical code-to-code evidence only. No product/legal approval or external-runtime redistribution approval is attached, the packages are not bundled, and no independent clean runner, broad structural-family corpus, published benchmark decision, or operator hierarchy manifest is present. Therefore this receipt does not achieve Verification Level 2, commercial equivalence, design authority, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
   "claims": {
@@ -84,32 +85,32 @@
       "external_return_code": 0,
       "metrics": [
         {
-          "absolute_error": 0.05299886801157161,
+          "absolute_error": 0.052998868012544165,
           "absolute_tolerance": 1e-08,
           "contract_pass": true,
           "metric_kind": "value_error",
-          "product_value": 7.486293131988428,
+          "product_value": 7.4862931319874555,
           "quantity": "buckling_load_factor_mode_1",
           "reference_value": 7.539292,
-          "relative_error": 0.007029687669819873,
+          "relative_error": 0.007029687669948871,
           "relative_tolerance": 0.01
         },
         {
-          "absolute_error": 0.0529988680127369,
+          "absolute_error": 0.05299886801218623,
           "absolute_tolerance": 1e-08,
           "contract_pass": true,
           "metric_kind": "value_error",
-          "product_value": 7.486293131987263,
+          "product_value": 7.486293131987813,
           "quantity": "buckling_load_factor_mode_2",
           "reference_value": 7.539292,
-          "relative_error": 0.007029687669974436,
+          "relative_error": 0.007029687669901395,
           "relative_tolerance": 0.01
         },
         {
           "contract_pass": true,
           "metric_kind": "minimum_threshold",
           "minimum_accepted": 0.999999,
-          "observed_value": 0.9999999970316462,
+          "observed_value": 0.9999999970332671,
           "quantity": "repeated_mode_subspace_minimum_principal_correlation_squared"
         }
       ],
@@ -126,8 +127,8 @@
   "engine_version": "0.3.0",
   "execution_environment": {
     "machine": "x86_64",
-    "python_executable_sha256": "sha256:22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
-    "python_version": "3.11.15",
+    "python_executable_sha256": "sha256:7d51cd6b48b521277f5caa4610a82126e315fa2be4df069823a8b1eeb5bd4a86",
+    "python_version": "3.10.12",
     "system": "Linux"
   },
   "external_assets": [
@@ -180,7 +181,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-09-28T12:24:43.625624+00:00",
+  "generated_at": "2026-09-28T12:20:46.479749+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/__init__.py": "sha256:31c100a82c060d1c2e23896fced89480977670723c8fb667e3e2c9c1d3f568fc",
@@ -378,10 +379,10 @@
   },
   "mode_vector_artifacts": [
     {
-      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/product_modal_modes.f64le",
+      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/product_modal_modes.f64le",
       "byte_length": 32,
       "byte_order": "little",
-      "content_hash": "sha256:ee3cfe517583566452cc322163a372df0964ee8deecfb73bdf581226decf9237",
+      "content_hash": "sha256:2909ff87686c54fb5d4ee07a47992bd66e3651e13e1f474811bdc9132bbacd79",
       "data_hash": "sha256:39ecaabc6e8d89987489ede409eb005536ab42c38b5e450dbe4322218bddd893",
       "dtype": "<f8",
       "layout": "C",
@@ -392,10 +393,10 @@
       ]
     },
     {
-      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/opensees_modal_modes.f64le",
+      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/opensees_modal_modes.f64le",
       "byte_length": 32,
       "byte_order": "little",
-      "content_hash": "sha256:8a1a0cdfb5886d0dcdf2dcfc38887b12997f5423ec9248467d39c39e330288e6",
+      "content_hash": "sha256:f7a1ea968b2ae66b40bbb6a76a8d182a281718bc0b1f04ff3e695ec2e3008e99",
       "data_hash": "sha256:777c724fc2f464fc11e57b9a21d5e69e204dbaba02f8fbc0bc86f9b10f23a187",
       "dtype": "<f8",
       "layout": "C",
@@ -406,11 +407,11 @@
       ]
     },
     {
-      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/product_buckling_modes.f64le",
+      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/product_buckling_modes.f64le",
       "byte_length": 544,
       "byte_order": "little",
-      "content_hash": "sha256:2d94a802188dd64e9448c2920c10f7bd8be0b82a469b5055304829bfa746507b",
-      "data_hash": "sha256:2318ebf3e7ce8079cc949a42f995d1586c3280493f6dd2f8c3694c323ff65d20",
+      "content_hash": "sha256:4f9698699d99d839a8a93e1097a5b813206d3682f5e84f6c14eb98a70532ddf1",
+      "data_hash": "sha256:440ac4c6905ab362a0b41197936ee140f5bb3c31d19b54b965ad6992be59334f",
       "dtype": "<f8",
       "layout": "C",
       "name": "product_buckling_modes",
@@ -420,11 +421,11 @@
       ]
     },
     {
-      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/calculix_buckling_modes.f64le",
+      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/calculix_buckling_modes.f64le",
       "byte_length": 544,
       "byte_order": "little",
-      "content_hash": "sha256:90b2586ae12904b4af6750a4cfce7b3ed1b7ed7ad5b9f020d342eea555fc0128",
-      "data_hash": "sha256:32acd17fc747e805c9bc5c07b8ee4ce39f20ca280951e3848e69702d3e62fac6",
+      "content_hash": "sha256:c499b3875bc0823aefd14d54be0b74acbcdc0fada913c49ff1c87bc4cb300415",
+      "data_hash": "sha256:058abb5a45a958b759c366ee1cef2677488f0fef90a5a007cf874b4431b969a1",
       "dtype": "<f8",
       "layout": "C",
       "name": "calculix_buckling_modes",
@@ -437,18 +438,18 @@
   "mode_vector_storage_profile": "canonical_little_endian_fp64_binary.v1",
   "product_evidence": {
     "buckling_model_hash": "sha256:0e222cde2c47ba863d680edff85a9f31a42c829ad876e4324f8fb763dd745800",
-    "buckling_semantic_result_hash": "sha256:4584a2b8206a97aa6bb0ba45f0b7dd6b6184599210d20c15b3a5e277f8c47fc6",
+    "buckling_semantic_result_hash": "sha256:9c47b3f1dff59cdef4ebd27bf61b0a7533a4eb889e344db76700971837a47bc2",
     "modal_model_hash": "sha256:5eb02ed60f6d95cf97d13bfde70ac2ffe94e7cb96ca0159c7d0a9a039a40d17c",
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-09-28T12:24:43.633452+00:00",
+    "current_product_replay_generated_at": "2026-09-28T12:20:46.479749+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-09-28T12:24:43.633441+00:00",
-    "external_execution_reused": false,
-    "external_execution_source_commit_sha": "10c05ec5439755d610befda005049c3b3a1dc450",
-    "external_runtime_executed_in_this_generation": true,
-    "reuse_reason": null
+    "external_execution_generated_at": "2026-07-30T13:37:59.789469+00:00",
+    "external_execution_reused": true,
+    "external_execution_source_commit_sha": null,
+    "external_runtime_executed_in_this_generation": false,
+    "reuse_reason": "Exact-current host replay for clean-runner parity; retained external values receive no freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -457,11 +458,11 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:b8ec3933f48d1de716ab86e75f4f638f687163ed74e565a97405e66c26edd8a1",
-        "frd_sha256": "sha256:a3e1f0d25d717c37b20f28dca7740d78fa7cda609688e55187f44abef6836ef9",
+        "frd_sha256": "sha256:20792744d6ecb6a6d77a638ddbf36baecf5fcba8b2cf3e11309dfc97023f3bf3",
         "input_deck_sha256": "sha256:2a929ab93c0191b2b45c99ef1b46b956f0fe27f22d7cba99905cee934481825d",
         "return_code": 0,
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:af6affeec4bc2f9d5710135a5e275a5f59e78dced576bceac3eee01c166d21bd",
+        "stdout_sha256": "sha256:2c7a3ebaea888f1a5b897034be748a836648ffab7bf6dad006b751180aa6155c",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -490,7 +491,7 @@
       "license": {
         "commercial_redistribution_approved": false,
         "declared_license_posture": "internal_use_allowed_commercial_redistribution_requires_license",
-        "license_file_sha256": "sha256:289503a95d55c43668bdadcd1815c9a93b46cb6ec890b3e9aea6c559d3806382",
+        "license_file_sha256": "sha256:aeb25d4e6647320e0581d01b5bbc7f15606b7aaffa8f09c23a424cb95fa49761",
         "product_legal_approval": false
       },
       "name": "OpenSees",
