@@ -641,6 +641,32 @@ def test_replay_near_zero_derived_error_does_not_amplify_allowed_response_drift(
     assert module._product_replay_values_match(stored, current)
 
 
+def test_saved_zero_reference_metric_allows_bounded_product_replay_drift():
+    stored = _stored_receipt()["comparisons"]
+    current = deepcopy(stored)
+    case = next(
+        row for row in current
+        if row["case_id"] == "bounded_planar_member_feature_load_path"
+    )
+    metric = next(
+        row for row in case["metrics"]
+        if row["quantity"] == "member_E1_end_j_MZ_N_m"
+    )
+    assert metric["reference_value"] == 0.0
+    replay_metric = module._comparison(
+        metric["quantity"], 4.440892098500626e-13, metric["reference_value"],
+    )
+    assert module._product_replay_numbers_close(
+        metric["product_value"], replay_metric["product_value"],
+    )
+    assert not module._product_replay_numbers_close(
+        metric["relative_error"], replay_metric["relative_error"],
+    )
+    assert metric["contract_pass"] is replay_metric["contract_pass"] is True
+    metric.update(replay_metric)
+    assert module._product_replay_values_match(stored, current)
+
+
 @pytest.mark.parametrize('field,value', [
     ('relative_error', 0.0), ('relative_error', float('nan')),
     ('absolute_error', 0.0), ('contract_pass', False),
