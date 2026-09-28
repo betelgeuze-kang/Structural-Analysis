@@ -1,6 +1,8 @@
 """Real subprocess development checks; no reserved evaluation packet is loaded."""
 
 from copy import deepcopy
+from pathlib import Path
+import subprocess
 import sys
 import time
 
@@ -280,3 +282,79 @@ def test_attempt_and_v1_timing_cannot_diverge_after_resealing(development, monke
     with pytest.raises(ValueError, match="attempt and v1 launcher differ"):
         _launch(development, 1)
     assert not (root / "launch-attempts/slot-0001").exists()
+
+
+def test_child_executes_only_the_single_hash_checked_input(tmp_path, monkeypatch):
+    original = {"plan": {"identity": "original"}, "cases": [],
+                "selection": {}, "slot_index": 0}
+    replacement = {**original, "plan": {"identity": "replacement"}}
+    path = tmp_path / "input.json"
+    raw = _bytes(original)
+    path.write_bytes(raw)
+    read_bytes = Path.read_bytes
+    reads = []
+    executed = []
+
+    def swap_after_read(self):
+        observed = read_bytes(self)
+        if self == path:
+            reads.append(observed)
+            self.write_bytes(_bytes(replacement))
+        return observed
+
+    def run(plan, *args, **kwargs):
+        executed.append(plan)
+        return {"status": "completed"}
+
+    monkeypatch.setattr(Path, "read_bytes", swap_after_read)
+    monkeypatch.setattr(runtime, "run_heldout_slot", run)
+    assert launcher._child(path, tmp_path / "slot-0000", _sha(raw)) == 0
+    assert reads == [raw]
+    assert executed == [original["plan"]]
+    assert read_bytes(path) == _bytes(replacement)
+
+
+@pytest.mark.parametrize("raw", [b'{"plan": {}, "plan": {}}', b'{"plan": NaN}'])
+def test_child_hash_match_does_not_admit_duplicate_or_nonfinite_json(tmp_path, monkeypatch, raw):
+    path = tmp_path / "input.json"
+    path.write_bytes(raw)
+    monkeypatch.setattr(runtime, "run_heldout_slot", lambda *args, **kwargs: pytest.fail("must not execute"))
+    with pytest.raises(ValueError, match="invalid JSON object"):
+        launcher._child(path, tmp_path / "slot-0000", _sha(raw))
+
+
+def test_child_hash_mismatch_never_executes(tmp_path, monkeypatch):
+    path = tmp_path / "input.json"
+    path.write_bytes(b'{"changed": true}')
+    monkeypatch.setattr(runtime, "run_heldout_slot", lambda *args, **kwargs: pytest.fail("must not execute"))
+    with pytest.raises(ValueError, match="input bytes changed"):
+        launcher._child(path, tmp_path / "slot-0000", _sha(b"original"))
+
+
+def test_child_exiting_during_timeout_kill_is_reaped_without_launch_error(tmp_path, monkeypatch):
+    class ExitingChild:
+        pid = 123
+        returncode = None
+        calls = 0
+
+        def wait(self, timeout=None):
+            self.calls += 1
+            if self.calls == 1:
+                raise subprocess.TimeoutExpired("synthetic-child", timeout)
+            self.returncode = 0
+            return self.returncode
+
+        def poll(self):
+            return self.returncode
+
+    child = ExitingChild()
+    monkeypatch.setattr(launcher.subprocess, "Popen", lambda *args, **kwargs: child)
+    def already_exited(*args):
+        raise ProcessLookupError("child exited after timeout")
+    monkeypatch.setattr(launcher.os, "killpg", already_exited)
+    observed = launcher._observe(["synthetic-child"], tmp_path / "stdout", tmp_path / "stderr", .1)
+    assert child.calls == 2
+    assert observed["return_code"] == 0
+    assert observed["timed_out"] is True
+    assert observed["launch_error"] is None
+    assert observed["wall_ns"] > 0

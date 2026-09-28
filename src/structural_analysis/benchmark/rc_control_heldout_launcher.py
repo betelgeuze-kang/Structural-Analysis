@@ -15,6 +15,7 @@ import subprocess
 import sys
 from time import perf_counter_ns
 
+from structural_analysis.api.frame3d_direct_control_request import strict_json_object_bytes
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     decode_bounded_rc_fiber_direct_control_request,
 )
@@ -100,6 +101,16 @@ def _child_command(input_path, output_path, input_hash):
             "--output", str(output_path), "--input-sha256", input_hash]
 
 
+def _kill_and_wait(process):
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        # The child may have exited after wait timed out. Still reap it and
+        # retain the observed timeout without inventing a process-launch error.
+        pass
+    process.wait()
+
+
 def _observe(command, stdout_path, stderr_path, timeout_seconds):
     """A single parent interval includes Popen, output capture, wait and close."""
     process = None
@@ -119,15 +130,13 @@ def _observe(command, stdout_path, stderr_path, timeout_seconds):
                 except (subprocess.TimeoutExpired, KeyboardInterrupt) as exc:
                     timed_out = isinstance(exc, subprocess.TimeoutExpired)
                     failure = None if timed_out else "KeyboardInterrupt"
-                    os.killpg(process.pid, signal.SIGKILL)
-                    process.wait()
+                    _kill_and_wait(process)
             except OSError as exc:
                 failure = type(exc).__name__
     finally:
         # A parent interruption must not leave a slot running unnoticed.
         if process is not None and process.poll() is None:
-            os.killpg(process.pid, signal.SIGKILL)
-            process.wait()
+            _kill_and_wait(process)
         wall_ns = perf_counter_ns() - start
     return {
         "wall_ns": wall_ns, "cpu_ns": None, "scope": PROCESS_SCOPE,
@@ -342,9 +351,11 @@ def audit_heldout_launch_attempts(plan, packet_root):
 
 
 def _child(input_path, output_path, input_hash):
-    if _sha(input_path.read_bytes()) != input_hash:
+    raw = input_path.read_bytes()
+    if _sha(raw) != input_hash:
         raise ValueError("launcher input bytes changed")
-    value = runtime._read_receipt(input_path)
+    # Parse the bytes whose digest was checked, never reopen the mutable path.
+    value = strict_json_object_bytes(raw, maximum_bytes=64 * 1024 * 1024)
     outcome = runtime.run_heldout_slot(
         value["plan"], [_decode_case(case) for case in value["cases"]],
         value["selection"], slot_index=value["slot_index"], output_directory=output_path,

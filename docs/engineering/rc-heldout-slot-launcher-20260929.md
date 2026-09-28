@@ -10,7 +10,10 @@ current development results that retain secant remain ineligible.
 
 Both parent and child require the exact clean committed source. Inputs are
 serialized as JSON, byte-bound in the attempt receipt, and checked again by the
-child before case reconstruction. Model checksums, typed requests, the case
+child before case reconstruction. The child reads the input once, checks its
+hash, and parses that exact byte string with duplicate-key and nonfinite-number
+rejection (64 MiB maximum). Replacing the input path after the read cannot
+change the executed document. Model checksums, typed requests, the case
 roster and selected policy are checked by the existing slot runtime. Measured
 workbook sources are rejected by this initial transport rather than silently
 omitted. Frozen source and rights references still need independent review.
@@ -27,7 +30,8 @@ The parent takes exactly one `perf_counter_ns()` interval around `Popen`, stdout
 and stderr capture to files, exit/wait, timeout termination and stream close.
 The fixed child calls `run_heldout_slot`; a raised terminal slot exits with code
 1, a completed slot with code 0. A timeout kills the child process group and
-waits for exit. A keyboard interruption during the wait also kills/waits and
+waits for exit. If the child exits between timeout and the kill signal, it is
+still reaped; the timeout remains recorded without a false launch error. A keyboard interruption during the wait also kills/waits and
 records the interruption. An abrupt parent termination can leave its measured
 cost unknown. Child CPU is unavailable and stays null.
 
