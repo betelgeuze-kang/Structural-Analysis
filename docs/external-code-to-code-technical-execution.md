@@ -203,14 +203,14 @@ Python 3.11 base image에서 다시 생성한다. 실행 시 repository mount는
 runtime network는 `none`, 지정 output mount만 writable이며 다섯 외부 package의
 SHA-256을 추출 전에 검사한다. 생성 bundle은
 `artifacts/vv/opensees_calculix_clean_runner/`에 있고 summary의 live hash authority는
-`clean_runner_receipt.json`의 `artifact_hash` 필드다. volatile replay hash를 문서에
-복제하지 않는다.
+`clean_runner_receipt.json`의 `artifact_hash` 필드다. volatile replay hash를 문서에 복제하지 않는다.
 
 보존된 container generation은 네트워크 차단·read-only source·고정 자산 계약을
 유지한다. 현재 clean-runner summary의 host/container scalar 수는 `199/199`,
 metric-set match는 `true`지만 source-set match와 수치 계약은 `false`다. 최대
 절대차는 `2.6121327323380683e-12`이며, 선언된 절대·상대 허용오차로 평가한
-`numerical_contract_pass`는 `false`다.
+세 개의 0이 아닌 scalar 차이는 모두 결합 허용오차 안에 있다. 그러나 source-set
+match가 `false`이므로 집계 `numerical_contract_pass`는 `false`다.
 `same_operator_container_isolated_reproduction=false`와
 `current_source_container_cross_environment_parity_missing`을 유지하므로 현재
 source의 container parity나 isolation credit을 부여하지 않는다. 별도의 host

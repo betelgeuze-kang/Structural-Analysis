@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:eb0bd32d658a31a3e80752604b39f679d7b27ddc89a643df316ce84d36f1d1ae",
+  "artifact_hash": "sha256:55265cb18f8171b9af55f1ab812ebafdc25997e663c9e7bbd17831573eeaabd0",
   "blockers_remaining": [
     "independent_operator_attestation_missing",
     "product_legal_license_approval_missing",
@@ -33,8 +33,8 @@
     "host_only_metric_keys": [],
     "host_reference_receipts": {
       "code_to_code": {
-        "artifact_hash": "sha256:0e4c6852f2c1f400ab2a3923f637c8d6089a618b59876c6de15622d3cd2c3020",
-        "file_sha256": "sha256:f106cf556e5956ef62e582db6eaad2bef5edeccda2190b3be85853d0e032318b",
+        "artifact_hash": "sha256:4025b3d2eadf7689d7e7d053497edfddc8ed939aec2e563dc0ae43f7a53b0c0f",
+        "file_sha256": "sha256:17ae0f2d90bb4969e5d6e6da61cee591233799e2b7dc6ca83d28b95a65351bfa",
         "path": "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json"
       },
       "modal_buckling": {
@@ -86,7 +86,7 @@
       "sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"
     }
   ],
-  "generated_at": "2026-08-29T16:25:00.722014+00:00",
+  "generated_at": "2026-09-28T12:19:25.535030+00:00",
   "isolation": {
     "designated_output_mount_writable": true,
     "isolation_contract_pass": true,
