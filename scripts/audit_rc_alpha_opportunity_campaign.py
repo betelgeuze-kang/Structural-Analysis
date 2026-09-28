@@ -5,9 +5,23 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 
-from run_rc_alpha_opportunity_campaign import prepare_cases, summarize_completed_secant
+if __package__:
+    from .run_rc_alpha_opportunity_campaign import (
+        ALPHAS,
+        _account_trial_dispatches,
+        prepare_cases,
+        summarize_completed_secant,
+    )
+else:
+    from run_rc_alpha_opportunity_campaign import (
+        ALPHAS,
+        _account_trial_dispatches,
+        prepare_cases,
+        summarize_completed_secant,
+    )
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     _numeric_payload_difference,
@@ -36,6 +50,147 @@ def _history(path):
     return (
         [path["preload_response"]] if path["preload_response"] is not None else []
     ) + path["response_history"]
+
+
+def _finite_norm(values):
+    _require(type(values) is list and values, "nonempty residual vector required")
+    _require(
+        all(type(value) in (int, float) and math.isfinite(value) for value in values),
+        "finite residual vector required",
+    )
+    return max(abs(value) for value in values)
+
+
+def _preload_trial_scope(step, outcome):
+    """Count the constant-preload search and its timed assembly separately."""
+    _require(
+        step.get("status") == "ready" and step.get("committed") is True,
+        "committed preload step required",
+    )
+    _require(
+        outcome.get("status") == "returned"
+        and outcome.get("unknown_work") is False
+        and outcome.get("committed") is True,
+        "known committed preload outcome required",
+    )
+    solution = step["trial_solution"]
+    history, convergence = (
+        solution["line_search_history"],
+        solution["convergence_history"],
+    )
+    _require(
+        type(history) is list and type(convergence) is list,
+        "preload trial history required",
+    )
+    by_iteration = {
+        row["iteration"]: row
+        for row in convergence
+        if type(row) is dict and type(row.get("iteration")) is int
+    }
+    _require(
+        len(by_iteration) == len(convergence),
+        "unique preload convergence rows required",
+    )
+    rows = []
+    previous = -1
+    for line in history:
+        _require(
+            type(line) is dict
+            and type(line.get("iteration")) is int
+            and line["iteration"] > previous
+            and line["iteration"] in by_iteration,
+            "ordered preload line search required",
+        )
+        previous = line["iteration"]
+        before = by_iteration[previous]
+        attempts = line.get("attempts")
+        _require(
+            type(attempts) is list
+            and 1 <= len(attempts) <= len(ALPHAS)
+            and line.get("attempt_count") == len(attempts),
+            "complete preload attempts required",
+        )
+        _require(
+            line.get("starting_free_displacements_m")
+            == before.get("free_displacements_m")
+            and line.get("newton_increment_m") == before.get("newton_increment_m")
+            and line.get("attempt_count") == before.get("line_search_attempt_count")
+            and line.get("selected_alpha") == before.get("line_search_alpha"),
+            "preload convergence and search state differ",
+        )
+        before_norm = _finite_norm(before.get("residual_kn"))
+        _require(before_norm > 0, "positive pretrial preload residual required")
+        accepted_index = None
+        for index, attempt in enumerate(attempts):
+            _require(
+                type(attempt) is dict
+                and attempt.get("alpha") == ALPHAS[index]
+                and type(attempt.get("accepted")) is bool,
+                "original preload alpha grid required",
+            )
+            accepted = _finite_norm(attempt.get("trial_residual_kn")) < before_norm
+            _require(
+                accepted == attempt["accepted"],
+                "preload alpha acceptance differs from raw residual",
+            )
+            if accepted:
+                _require(
+                    accepted_index is None and index == len(attempts) - 1,
+                    "accepted preload trial must terminate search",
+                )
+                accepted_index = index
+        _require(
+            line["selected_alpha"]
+            == (0.0 if accepted_index is None else ALPHAS[accepted_index]),
+            "selected preload alpha differs",
+        )
+        rows.append(
+            {
+                "trial_count": len(attempts),
+                "observed_failed_trial_count": len(attempts)
+                if accepted_index is None
+                else accepted_index,
+            }
+        )
+    calls = outcome["newton_assembly_work"]["calls"]
+    joined = _account_trial_dispatches(rows, calls)
+    trial_calls = [call for call in calls if call.get("phase") == "line_search"]
+    return {
+        "line_searches": len(rows),
+        "trials": joined["trial_dispatches"],
+        "failed_trials": sum(row["observed_failed_trial_count"] for row in rows),
+        "line_search_assembly_wall_ns": sum(call["wall_ns"] for call in trial_calls),
+        "failed_trial_dispatch_wall_ns": joined["failed_trial_dispatch_wall_ns"],
+    }
+
+
+def _target_trial_scope(folder, counted, target_count):
+    """Use only target outcomes; the path phase total also includes preload."""
+    wall_ns = 0
+    trial_count = 0
+    for index in range(target_count):
+        outcome = _read_json(folder / "secant" / f"{index:03d}-1-outcome.json")
+        calls = outcome["newton_assembly_work"]["calls"]
+        trials = [call for call in calls if call.get("phase") == "line_search"]
+        _require(
+            all(
+                call.get("status") == "returned"
+                and type(call.get("wall_ns")) is int
+                and call["wall_ns"] >= 0
+                for call in trials
+            ),
+            "complete timed target trial dispatches required",
+        )
+        trial_count += len(trials)
+        wall_ns += sum(call["wall_ns"] for call in trials)
+    _require(trial_count == counted["trials"], "target trace and dispatch count differ")
+    return {
+        "line_searches": counted["line_searches"],
+        "trials": trial_count,
+        "failed_trials": counted["failed_trials"],
+        "line_search_assembly_wall_ns": wall_ns,
+        "failed_trial_dispatch_wall_ns": counted["failed_trial_dispatch_wall_ns"],
+    }
 
 
 def audit(packet: Path):
@@ -139,15 +294,41 @@ def audit(packet: Path):
         _require(
             counted == result["opportunity"], "source trace and outcome counts differ"
         )
+        preload_invocations = paths["secant"].get("preload_invocations")
+        _require(
+            type(preload_invocations) is list
+            and len(preload_invocations) == 1
+            and preload_invocations[0].get("status") == "returned"
+            and preload_invocations[0].get("unknown_work") is False,
+            "one known constant preload required",
+        )
+        preload = _preload_trial_scope(
+            _read_json(folder / "secant" / "preload-step.json"),
+            _read_json(folder / "secant" / "preload-outcome.json"),
+        )
+        target = _target_trial_scope(folder, counted, len(case.request.targets_m))
+        whole = {
+            key: preload[key] + target[key]
+            for key in (
+                "line_searches",
+                "trials",
+                "failed_trials",
+                "line_search_assembly_wall_ns",
+                "failed_trial_dispatch_wall_ns",
+            )
+        }
+        _require(
+            whole["line_search_assembly_wall_ns"]
+            == counted["secant_line_search_assembly_wall_ns"]
+            == report["assembly_phase_work"]["secant"]["phase_wall_ns"]["line_search"],
+            "preload plus target timing must equal whole-path assembly timing",
+        )
         trials.append(
             {
                 "case_id": case.case_id,
-                "line_searches": counted["line_searches"],
-                "trials": counted["trials"],
-                "failed_trials": counted["failed_trials"],
-                "failed_trial_dispatch_wall_ns": counted[
-                    "failed_trial_dispatch_wall_ns"
-                ],
+                "target_control": target,
+                "constant_preload": preload,
+                "whole_secant_path": whole,
                 "secant_path_wall_ns": counted["secant_path_wall_ns"],
                 "report_hash": counted["report_hash"],
             }
@@ -174,7 +355,7 @@ def audit(packet: Path):
         "original packet inventory differs",
     )
     return {
-        "schema_version": "rc-alpha-training-opportunity-readonly-audit.v1",
+        "schema_version": "rc-alpha-training-opportunity-readonly-audit.v2",
         "producer_revision": PRODUCER_REVISION,
         "plan_sha256": PLAN_SHA256,
         "outcome_sha256": OUTCOME_SHA256,
@@ -183,8 +364,18 @@ def audit(packet: Path):
         "total_bytes": sum(row["bytes"] for row in files),
         "all_cases_complete_and_original_histories_pass": True,
         "trial_rows": trials,
-        "line_searches": sum(row["line_searches"] for row in trials),
-        "failed_trials": sum(row["failed_trials"] for row in trials),
+        "target_control": {
+            key: sum(row["target_control"][key] for row in trials)
+            for key in trials[0]["target_control"]
+        },
+        "constant_preload": {
+            key: sum(row["constant_preload"][key] for row in trials)
+            for key in trials[0]["constant_preload"]
+        },
+        "whole_secant_path": {
+            key: sum(row["whole_secant_path"][key] for row in trials)
+            for key in trials[0]["whole_secant_path"]
+        },
         "solver_calls_in_readonly_audit": 0,
         "policy_fits_in_readonly_audit": 0,
         "independent_physical_validation": False,

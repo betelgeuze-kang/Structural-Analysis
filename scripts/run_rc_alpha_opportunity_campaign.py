@@ -16,7 +16,10 @@ import re
 import subprocess
 from time import perf_counter_ns
 
-from screen_rc_line_search_alpha import _line_rows
+if __package__:
+    from .screen_rc_line_search_alpha import _line_rows
+else:
+    from screen_rc_line_search_alpha import _line_rows
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )

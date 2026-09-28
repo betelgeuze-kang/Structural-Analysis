@@ -1,45 +1,115 @@
 {
   "all_cases_complete_and_original_histories_pass": true,
-  "failed_trials": 0,
+  "constant_preload": {
+    "failed_trial_dispatch_wall_ns": 0,
+    "failed_trials": 0,
+    "line_search_assembly_wall_ns": 67297177,
+    "line_searches": 3,
+    "trials": 3
+  },
   "file_count": 737,
   "independent_physical_validation": false,
   "inventory_sha256": "5d6bdbec7776370a07bd88b850a012ba6356feccbd8df0124aa489b1bfd72bad",
   "learned_net_savings_proved": false,
-  "line_searches": 108,
   "outcome_sha256": "11a2cf1f18b34a877d675bc42ae1fc986c4daa20acecb202bc1531b2f1611202",
   "plan_sha256": "a3a0fbf6b92b8add583eeebdf8d108b8f6b81eb8081f2e98ad889fb4e76233da",
   "policy_fits_in_readonly_audit": 0,
   "producer_revision": "e5011c08f1088acf351133936dcbd1220f9f5761",
-  "schema_version": "rc-alpha-training-opportunity-readonly-audit.v1",
+  "schema_version": "rc-alpha-training-opportunity-readonly-audit.v2",
   "solver_calls_in_readonly_audit": 0,
+  "target_control": {
+    "failed_trial_dispatch_wall_ns": 0,
+    "failed_trials": 0,
+    "line_search_assembly_wall_ns": 2596661045,
+    "line_searches": 108,
+    "trials": 108
+  },
   "total_bytes": 40181128,
   "trial_rows": [
     {
       "case_id": "train-alpha-h",
-      "failed_trial_dispatch_wall_ns": 0,
-      "failed_trials": 0,
-      "line_searches": 39,
+      "constant_preload": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 22681571,
+        "line_searches": 1,
+        "trials": 1
+      },
       "report_hash": "sha256:ffb925a7f06f726bc2d637f192dfb50275cbbcac264682f3f4a468f3c26408c4",
       "secant_path_wall_ns": 3364664883,
-      "trials": 39
+      "target_control": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 912068204,
+        "line_searches": 39,
+        "trials": 39
+      },
+      "whole_secant_path": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 934749775,
+        "line_searches": 40,
+        "trials": 40
+      }
     },
     {
       "case_id": "train-alpha-i",
-      "failed_trial_dispatch_wall_ns": 0,
-      "failed_trials": 0,
-      "line_searches": 35,
+      "constant_preload": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 21585742,
+        "line_searches": 1,
+        "trials": 1
+      },
       "report_hash": "sha256:d1bef490a12b3222ffde18256e76128d2d00352890c4b557741ab752e98a1aeb",
       "secant_path_wall_ns": 3335761536,
-      "trials": 35
+      "target_control": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 875667834,
+        "line_searches": 35,
+        "trials": 35
+      },
+      "whole_secant_path": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 897253576,
+        "line_searches": 36,
+        "trials": 36
+      }
     },
     {
       "case_id": "train-alpha-j",
-      "failed_trial_dispatch_wall_ns": 0,
-      "failed_trials": 0,
-      "line_searches": 34,
+      "constant_preload": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 23029864,
+        "line_searches": 1,
+        "trials": 1
+      },
       "report_hash": "sha256:b3107fd707765aea9aaad47c64d15c9cc762896f16601a423936b4a936c0d45b",
       "secant_path_wall_ns": 3336590506,
-      "trials": 34
+      "target_control": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 808925007,
+        "line_searches": 34,
+        "trials": 34
+      },
+      "whole_secant_path": {
+        "failed_trial_dispatch_wall_ns": 0,
+        "failed_trials": 0,
+        "line_search_assembly_wall_ns": 831954871,
+        "line_searches": 35,
+        "trials": 35
+      }
     }
-  ]
+  ],
+  "whole_secant_path": {
+    "failed_trial_dispatch_wall_ns": 0,
+    "failed_trials": 0,
+    "line_search_assembly_wall_ns": 2663958222,
+    "line_searches": 111,
+    "trials": 111
+  }
 }

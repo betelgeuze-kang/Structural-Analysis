@@ -28,16 +28,21 @@ history against fresh reference, and a trial-to-assembly count match before
 giving an eligible count. Incomplete or retried paths remain in the declared
 three-case denominator without a favorable count.
 
-| Case | Complete paths | Secant line searches | Failed alpha trials | Secant path wall | Line-search assembly wall |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| H | 3/3 | 39 | 0 | 3.364665 s | 0.934750 s |
-| I | 3/3 | 35 | 0 | 3.335762 s | 0.897254 s |
-| J | 3/3 | 34 | 0 | 3.336591 s | 0.831955 s |
+| Case | Complete paths | Target searches / trials | Target assembly wall | Preload searches / trials | Preload assembly wall | Whole secant searches / trials | Whole line-search assembly wall | Secant path wall |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| H | 3/3 | 39 / 39 | 0.912068 s | 1 / 1 | 0.022682 s | 40 / 40 | 0.934750 s | 3.364665 s |
+| I | 3/3 | 35 / 35 | 0.875668 s | 1 / 1 | 0.021586 s | 36 / 36 | 0.897254 s | 3.335762 s |
+| J | 3/3 | 34 / 34 | 0.808925 s | 1 / 1 | 0.023030 s | 35 / 35 | 0.831955 s | 3.336591 s |
+| Total | 9/9 | **108 / 108** | **2.596661 s** | **3 / 3** | **0.067297 s** | **111 / 111** | **2.663958 s** | 10.037017 s |
 
-All **108** recorded first-alpha trials succeeded. There were zero rejected
-trials and therefore zero measured rejected-trial dispatch time to omit on
-these particular paths. The roughly 2.664 s of line-search assembly time
-above is for the **accepted** trials; it is not available as a skip saving.
+The target-control rows and constant-preload rows are disjoint. Every one of
+the **108 target** and **3 preload** first-alpha trials succeeded; neither
+scope has a failed trial. The original whole-path phase timer includes both
+scopes: 2,596,661,045 ns target assembly plus 67,297,177 ns preload assembly
+equals 2,663,958,222 ns whole-path line-search assembly. There is therefore
+zero measured rejected-trial dispatch time to omit on these particular paths.
+The whole-path assembly time is for the **accepted** trials; it is not
+available as a skip saving.
 No counterfactual skipped-alpha trajectory was run. The result is a negative
 opportunity screen for this proposed learning target on these cases, not a
 speedup comparison or a general bound on other models.
@@ -53,9 +58,10 @@ Its plan and outcome file SHA-256 values are
 `a3a0fbf6b92b8add583eeebdf8d108b8f6b81eb8081f2e98ad889fb4e76233da`
 and `11a2cf1f18b34a877d675bc42ae1fc986c4daa20acecb202bc1531b2f1611202`.
 The [small machine summary](rc-alpha-opportunity-20260929.summary.json) keeps
-each case's counts and exact report hash; the 40 MB original is not in Git.
+target, preload, and whole-path scopes separately for each case, plus exact
+report hashes; the 40 MB original is not in Git.
 
-Focused alpha extraction/accounting tests: **23 passed**. Ruff check and
+Focused alpha extraction/accounting tests: **27 passed**. Ruff check and
 format checks pass. To reproduce from the producer commit, run the producer
 with `PYTHONPATH=scripts:src`, an empty output directory path on `/mnt`, and
 single-threaded BLAS settings. Run
@@ -69,6 +75,18 @@ has no accepted alpha. All three original paths have zero such rows, so the
 read-only audit still reproduces the exact frozen plan, outcome and packet
 inventory. The producer revision above remains the numerical source; this
 later parser correction did not rerun or alter a structural path.
+
+A subsequent post-run scope correction separates target-control and preload
+trial counts and timed assembly in the read-only audit and derived machine
+summary. Previously the target-only 108-search count appeared next to the
+whole-path 2.663958 s assembly time, which also contained three preload
+searches. This correction verified the disjoint sums against the unchanged
+whole-path phase timers and original packet inventory. It did **not** execute
+another structural solve, change the `e5011c08` numerical producer, modify
+the original packet, or measure a new policy outcome.
+The current runner's package/CLI import compatibility adjustment only lets
+the same audit helpers load under standard test collection; it does not
+change the frozen producer's numerical algorithm or this packet.
 
 The prior A–E and new H–J observations have different exact source revisions
 and are reported separately. Neither supplied cross-group evidence for an
