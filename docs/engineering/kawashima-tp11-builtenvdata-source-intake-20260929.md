@@ -82,9 +82,10 @@ gauges and their spacing. Appendix A (`force.pdf`) defines the reported lateral
 force at the load-point height as the horizontal actuator force plus corrections
 for horizontal and vertical components of the vertical actuator force, including
 its rotation and lever arm (Eq. A-2 through A-6). The appendices establish the
-meaning of the corrected columns, but the exact gauge distances, raw-channel
-signs, and implementation used to produce all 3,553 rows have not been
-reconstructed. The original PDFs remain outside Git.
+meaning of the corrected columns. The illustrated gauge distances and a numeric
+channel crosswalk can be checked below; raw-sensor polarity and the vertical
+actuator's dimensions still lack independent source confirmation. The original
+PDFs remain outside Git.
 
 The original `tp011.txt` contains **3,553 ordered numeric records**, with
 contiguous `STEP` values 1–3,553 and 32 columns per record. It additionally
@@ -99,9 +100,81 @@ nonblank finite `CH003`, `Displacement (mm)`, and `Force (kN)` value:
 | `Force (kN)` | −98.431 to 91.257 kN | Source-computed lateral force |
 
 The nearly constant observed axial-load channel supports screening a fixed
-axial-load path, but does not prove the exact force and displacement correction,
+axial-load path, but does not prove the physical correction geometry,
 boundary condition, or a valid solver input sequence. The 3,553 records are
 one specimen's history, not 3,553 independent structures or Newton-state labels.
+
+## Numerical channel crosswalk: research only
+
+The original TXT header names `CH001`–`CH008`, `Displacement (mm)`,
+`Force (kN)`, and four intermediate columns: `ua Eq.(A-6)`, `theta  Eq.(A-5)`,
+`VF-h Eq.(A-3)`, and `VF-v Eq.(A-4)`. The TXT header does not state units for
+these intermediates; Appendix A implies mm for `ua`, radians for `theta`, and
+kN for `VF-h`/`VF-v`. `titech03.pdf` p. 2, Table 3 gives kN for `CH001`
+(lateral load) and `CH003` (vertical load), and mm for `CH002` (lateral
+displacement), `CH005` (lateral LVDT), and `CH006`–`CH008` (footing checks).
+
+Appendix B Eq. (B-2)–(B-3) and `titech03.pdf` p. 6, Fig. 3 give the load-point
+height `h = 1450 mm` and a footing-gauge span of `250 + 400 + 250 = 900 mm`
+(the 400 mm width is also in p. 1, Table 1). The following *empirical raw-TXT
+arithmetic* reproduces the printed corrected displacement. Keep `U` unrounded
+in all subsequent calculations:
+
+```text
+U = CH002 - CH006 - (1450 / 900) * (CH007 - CH008)    [mm]
+```
+
+All 3,553 printed `Displacement (mm)` values agree with `U` to at most
+`0.000500000003 mm` (mean absolute difference `0.000249617 mm`); decimal
+round-half-up to the printed `0.001 mm` matches all 3,553. For example, STEP
+42 has `CH002 = 2.940`, `CH006 = 0.040`, `CH007 = 0.000`, and `CH008 =
+-0.181 mm`, giving `U = 2.608388889 mm` and printed `2.608 mm`. `CH005`
+does not enter this matching arithmetic; this does not establish which physical
+sensor supplied the archived worksheet's `u`.
+
+The source-derived columns themselves support the following *numeric* values
+for Appendix A's otherwise undimensioned actuator distances. On 3,327 rows
+with `|U| > 1 mm`, the median printed `ua / U` is `1.689656318`, consistent
+with `1 + h_t / h = 2450 / 1450` and thus `h_t = 1000 mm`. The median printed
+`ua / tan(theta)` is `1749.997 mm`, consistent with `h_a = 1750 mm`.
+Using those inferred values, Appendix A Eq. (A-2)–(A-6) gives this numerical
+reconstruction from raw TXT channels:
+
+```text
+c     = 1 + 1000 / 1450
+ua    = c * U                               [mm]
+theta = atan(ua / 1750)                    [radians]
+VF-h  = CH003 * sin(theta)                 [kN]
+VF-v  = CH003 * cos(theta)                 [kN]
+P     = CH001 + c * VF-h + VF-v * ua / 1450 [kN]
+```
+
+`ua` from the unrounded `U` agrees with all 3,553 printed `ua` entries after
+decimal round-half-up to `0.001 mm` (maximum absolute difference
+`0.000500000003 mm`). Replacing `U` with the already rounded printed
+`Displacement (mm)` matches only 2,066 entries, so retaining source-channel
+precision matters. Recomputed `VF-h` and `VF-v` each round to all 3,553 printed
+entries at `0.001 kN`. Recomputed `P` likewise
+rounds to all 3,553 printed `Force (kN)` entries: maximum absolute difference
+`0.000499961 kN`, mean absolute difference `0.000249689 kN`. At STEP 42 it
+gives `ua = 4.407278 mm`, `theta = 0.002518439 rad`, and `P = 53.513882 kN`,
+against printed `4.407 mm`, `0.002518`, and `53.514 kN`.
+
+This is an arithmetic consistency check, not independent calibration of the
+experiment. The `1000` and `1750 mm` distances are **inferred from the TXT's
+already derived `ua`/`theta` columns**; the inspected PDFs do not dimension
+`h_t` or `h_a`. The `400 mm` from lateral load point to specimen top in
+`titech03.pdf` p. 3, Fig. 1-1(b) does not identify the lower actuator swivel
+and must not be substituted for `h_t`. Appendix B defines footing rotation
+with jack-side minus opposite-side vertical displacement; Fig. 3 places
+`CH008` on the jack side and `CH007` opposite, whereas the matching raw-column
+arithmetic above uses `CH007 - CH008`. The original sensor polarity and
+worksheet mapping are not documented here. Appendix B also distinguishes
+measured `u` (which includes footing motion) from corrected `u_P`, while
+Appendix A writes `u` in Eq. (A-6). Numerically, the TXT's `ua` follows the
+**unrounded corrected** `U`; the notation and physical implementation of that
+choice remain unresolved. No source-computed column is reclassified as a raw
+instrument observation, solver state, or independent force/displacement target.
 
 ## Model correspondence and duplicate check: HOLD
 
@@ -117,7 +190,7 @@ cross-checked. Shear deformation, reinforcement bond/anchorage slip,
 confinement, bar instability, and footing sliding/rotation may matter; the
 present Euler–Bernoulli axial–curvature element does not establish those
 mechanisms. Bar-centroid coordinates and cover, concrete/steel constitutive
-curves, numerical channel-to-equation reconstruction, sensor datums, load
+curves, independently confirmed correction geometry and sensor datums, load
 application geometry, and a defensible comparison interval remain unverified.
 
 The existing [local PEER rectangular property table](../../implementation/phase1/open_data/pbd_hinge/peer_spd/rectangular_properties.txt)
@@ -128,8 +201,8 @@ from external PEER, ACI, or other mirrors. Crosswalk original author, year,
 specimen and data-file identity before counting a new independent campaign.
 
 **Decision: HOLD for learning and physical validation.** Next review the
-original report's failure account, numeric channel/equation reconstruction and
-footing-motion channels, exact reinforcement placement and materials, and
-archive/mirror lineage. Freeze campaign-level training and evaluation roles
-before fitting; measured load–displacement pairs do not provide accepted
-equilibrium states or a learned warm-start speedup claim.
+original report's failure account, independent channel-sign and actuator
+geometry confirmation, footing-motion channels, exact reinforcement placement
+and materials, and archive/mirror lineage. Freeze campaign-level training and
+evaluation roles before fitting; measured load–displacement pairs do not provide
+accepted equilibrium states or a learned warm-start speedup claim.
