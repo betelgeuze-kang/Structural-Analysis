@@ -32,3 +32,36 @@ The source/diagnostic basis is
 `main-product-replay-relative-error-diagnosis-20260920.md`. A hosted run must
 still establish whether this resolves its failure, and the development branch's
 independent external response mismatch is not repaired by this change.
+
+## 2026-09-29 exact-main port
+
+The comparison and first-mismatch-path code and tests above were ported onto
+main `234c3122c78dea064411aa16b06b18ab16157576` with their original
+development-branch code and test patches unchanged. Their patch IDs match
+development commits `bf78fcd15` and `007297f9f`; the latter's historical report
+sections were not copied into this main-based branch.
+
+The preserved Nightly overlay from run `35536882664` contains 12 comparison
+cases. Its comparison rows equal the tracked main receipt. Local replays against
+that overlay matched on Python 3.10.12 and on isolated Python 3.12.11 with the
+27 packages from the repository's locked CI requirements, including NumPy 2.2.6
+and SciPy 1.15.3. These runs do not reproduce the Product State Current failure
+from run `35542528427`; that old hosted log reports only
+`receipt_product_comparisons_stale`, without a rejected field path.
+
+On the ported source, 18 focused near-zero, integrity and mismatch-path cases
+passed, three existing bounded-drift and tampering cases passed, and four other
+low-cost metadata, legal-boundary and fail-closed cases passed. A combined
+low-cost selection returned 25 passed and five deselected, not a full-file pass.
+The existing CLI
+check against the tracked pre-port receipt was also attempted and failed with
+`receipt_sources_stale`. Direct current-source validation of the preserved
+Nightly receipt gave the same expected result: changing the validator changes
+its source inventory, while the original receipt remains immutable. The two
+long-running refresh tests, stored-receipt current-source test and CLI refresh
+test were not rerun on this port.
+
+No stored receipt was rewritten, rehashed or promoted. A new exact-source
+hosted execution is still required to see whether the comparison change resolves
+the consumer failure; independent verification, legal approval and release
+authority remain separate blockers.
