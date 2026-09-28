@@ -6,6 +6,8 @@ import argparse
 import hashlib
 import json
 import math
+import os
+import stat
 from pathlib import Path
 from typing import Any
 
@@ -68,10 +70,44 @@ def _self_hash(value: dict[str, Any], key: str) -> None:
         raise TraceError(f"{key} does not bind original content")
 
 
+def _read_unlinked_regular_file(root: Path, relative: Path, description: str) -> bytes:
+    """Read through no-follow directory handles, including the packet root."""
+    if ".." in root.parts or relative.is_absolute() or ".." in relative.parts:
+        raise TraceError(f"missing or linked {description}: {relative}")
+    components = (*root.parts[1:], *relative.parts)
+    directory_fd = None
+    try:
+        directory_fd = os.open(root.anchor, os.O_RDONLY | os.O_DIRECTORY)
+        for part in components[:-1]:
+            next_fd = os.open(
+                part,
+                os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                dir_fd=directory_fd,
+            )
+            os.close(directory_fd)
+            directory_fd = next_fd
+        file_fd = os.open(
+            components[-1],
+            os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK,
+            dir_fd=directory_fd,
+        )
+        with os.fdopen(file_fd, "rb") as stream:
+            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                raise TraceError(f"missing or linked {description}: {relative}")
+            return stream.read()
+    except OSError as exc:
+        raise TraceError(f"missing or linked {description}: {relative}") from exc
+    finally:
+        if directory_fd is not None:
+            os.close(directory_fd)
+
+
 class OriginalPacket:
     def __init__(self, root: Path) -> None:
-        self.root = root.resolve()
-        raw = (self.root / "inventory.json").read_bytes()
+        self.root = root.absolute()
+        raw = _read_unlinked_regular_file(
+            self.root, Path("inventory.json"), "inventory file"
+        )
         if _hash(raw) != INVENTORY_SHA256:
             raise TraceError("pooled packet inventory identity differs")
         inventory = _strict_json(raw)
@@ -91,14 +127,7 @@ class OriginalPacket:
         path = Path(relative)
         if path.is_absolute() or ".." in path.parts or relative not in self.files:
             raise TraceError(f"undeclared packet path: {relative}")
-        full = self.root / path
-        if (
-            not full.resolve().is_relative_to(self.root)
-            or not full.is_file()
-            or full.is_symlink()
-        ):
-            raise TraceError(f"missing or linked original file: {relative}")
-        raw = full.read_bytes()
+        raw = _read_unlinked_regular_file(self.root, path, "original file")
         expected = self.files[relative]
         digest = _hash(raw)
         if len(raw) != expected.get("byte_length") or digest != expected.get("sha256"):
@@ -146,12 +175,16 @@ def _line_rows(
         raise TraceError("finite target increment required")
     rows: list[dict[str, Any]] = []
     previous_alpha_index = -1
+    previous_iteration = -1
     for line in history:
         if type(line) is not dict:
             raise TraceError("line-search record required")
         iteration = line.get("iteration")
         if type(iteration) is not int or iteration < 0 or iteration not in by_iteration:
             raise TraceError("line-search iteration lacks causal convergence row")
+        if iteration <= previous_iteration:
+            raise TraceError("line-search iterations must be strictly increasing")
+        previous_iteration = iteration
         before = by_iteration[iteration]
         if (
             line.get("starting_free_displacements_m")
@@ -181,7 +214,13 @@ def _line_rows(
                 or type(attempt.get("accepted")) is not bool
             ):
                 raise TraceError("original alpha prefix or acceptance flag differs")
-            _finite_number(attempt.get("trial_relative_residual"), "trial residual")
+            trial_residual = _finite_number(
+                attempt.get("trial_relative_residual"), "trial residual"
+            )
+            if trial_residual < 0 or attempt["accepted"] != (trial_residual < residual):
+                raise TraceError(
+                    "trial acceptance differs from strict residual decrease"
+                )
             if attempt["accepted"]:
                 if accepted_index is not None or index != len(attempts) - 1:
                     raise TraceError("accepted trial must terminate original search")
@@ -374,9 +413,8 @@ def screen_packet(root: Path) -> dict[str, Any]:
         if len(entries) < len(targets):
             issues.append(f"{len(targets) - len(entries)} unattempted targets")
         signature = []
-        for target_index, (target, entry) in enumerate(
-            zip(targets, entries, strict=True)
-        ):
+        for target_index, entry in enumerate(entries):
+            target = targets[target_index]
             if (
                 type(entry) is not dict
                 or entry.get("target_index") != target_index

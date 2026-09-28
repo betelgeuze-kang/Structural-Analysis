@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import itertools
 import json
 
 import pytest
@@ -22,7 +23,9 @@ def _step(*, accepted_index: int, trial_residual: float = 0.4):
         {
             "alpha": alpha,
             "accepted": index == accepted_index,
-            "trial_relative_residual": trial_residual,
+            "trial_relative_residual": (
+                trial_residual if index == accepted_index else 0.6
+            ),
         }
         for index, alpha in enumerate(alphas)
     ]
@@ -96,11 +99,40 @@ def test_no_accepted_alpha_remains_unverified():
     blocked = _step(accepted_index=1)
     trial = blocked["trial_solution"]
     trial["line_search_history"][0]["attempts"][-1]["accepted"] = False
+    trial["line_search_history"][0]["attempts"][-1]["trial_relative_residual"] = 0.6
     trial["line_search_history"][0]["selected_alpha"] = 0.0
     trial["convergence_history"][0]["line_search_alpha"] = 0.0
     row = _rows(blocked)[0]
     assert row["first_accepted_index"] is None
     assert row["observed_failed_trial_count"] == 2
+
+
+@pytest.mark.parametrize("iterations", [(1, 0), (0, 0)])
+def test_line_search_history_must_be_strictly_ordered(iterations):
+    step = _step(accepted_index=0)
+    trial = step["trial_solution"]
+    second_line = copy.deepcopy(trial["line_search_history"][0])
+    second_before = copy.deepcopy(trial["convergence_history"][0])
+    second_line["iteration"] = 1
+    second_before["iteration"] = 1
+    trial["convergence_history"].append(second_before)
+    trial["line_search_history"].append(second_line)
+    for line, iteration in zip(trial["line_search_history"], iterations, strict=True):
+        line["iteration"] = iteration
+    with pytest.raises(TraceError, match="strictly increasing"):
+        _rows(step)
+
+
+@pytest.mark.parametrize(
+    "accepted,trial_residual", [(False, 0.4), (True, 0.5), (True, 0.6)]
+)
+def test_trial_acceptance_must_match_strict_residual_decrease(accepted, trial_residual):
+    step = _step(accepted_index=0)
+    attempt = step["trial_solution"]["line_search_history"][0]["attempts"][0]
+    attempt["accepted"] = accepted
+    attempt["trial_relative_residual"] = trial_residual
+    with pytest.raises(TraceError, match="strict residual decrease"):
+        _rows(step)
 
 
 def test_held_features_cannot_change_training_normalization():
@@ -169,3 +201,157 @@ def test_packet_reader_rejects_linked_parent_before_read(tmp_path, monkeypatch):
     )
     with pytest.raises(TraceError, match="missing or linked"):
         screen.OriginalPacket(root).read("link/data.json")
+
+
+def test_packet_reader_rejects_in_root_parent_link(tmp_path, monkeypatch):
+    root = tmp_path / "packet"
+    real = root / "real"
+    real.mkdir(parents=True)
+    raw = b'{"value":1}'
+    (real / "data.json").write_bytes(raw)
+    (root / "link").symlink_to(real, target_is_directory=True)
+    inventory = {
+        "files": [
+            {
+                "path": "link/data.json",
+                "byte_length": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+            }
+        ]
+    }
+    inventory_raw = json.dumps(inventory).encode()
+    (root / "inventory.json").write_bytes(inventory_raw)
+    monkeypatch.setattr(
+        screen, "INVENTORY_SHA256", hashlib.sha256(inventory_raw).hexdigest()
+    )
+    with pytest.raises(TraceError, match="missing or linked original file"):
+        screen.OriginalPacket(root).read("link/data.json")
+
+
+def test_packet_reader_rejects_linked_inventory_before_read(tmp_path, monkeypatch):
+    root = tmp_path / "packet"
+    root.mkdir()
+    outside = tmp_path / "outside.json"
+    outside.write_bytes(b'{"files":[]}')
+    (root / "inventory.json").symlink_to(outside)
+    monkeypatch.setattr(
+        screen, "INVENTORY_SHA256", hashlib.sha256(outside.read_bytes()).hexdigest()
+    )
+    with pytest.raises(TraceError, match="missing or linked inventory file"):
+        screen.OriginalPacket(root)
+
+
+def test_packet_reader_rejects_linked_root_before_inventory_read(tmp_path, monkeypatch):
+    real_root = tmp_path / "real"
+    real_root.mkdir()
+    inventory_raw = b'{"files":[]}'
+    (real_root / "inventory.json").write_bytes(inventory_raw)
+    linked_root = tmp_path / "linked"
+    linked_root.symlink_to(real_root, target_is_directory=True)
+    monkeypatch.setattr(
+        screen, "INVENTORY_SHA256", hashlib.sha256(inventory_raw).hexdigest()
+    )
+    with pytest.raises(TraceError, match="missing or linked inventory file"):
+        screen.OriginalPacket(linked_root)
+
+
+def test_packet_reader_keeps_byte_hash_check(tmp_path, monkeypatch):
+    root = tmp_path / "packet"
+    root.mkdir()
+    (root / "data.json").write_bytes(b'{"value":2}')
+    expected = b'{"value":1}'
+    inventory = {
+        "files": [
+            {
+                "path": "data.json",
+                "byte_length": len(expected),
+                "sha256": hashlib.sha256(expected).hexdigest(),
+            }
+        ]
+    }
+    inventory_raw = json.dumps(inventory).encode()
+    (root / "inventory.json").write_bytes(inventory_raw)
+    monkeypatch.setattr(
+        screen, "INVENTORY_SHA256", hashlib.sha256(inventory_raw).hexdigest()
+    )
+    with pytest.raises(TraceError, match="original bytes differ from inventory"):
+        screen.OriginalPacket(root).read("data.json")
+
+
+def test_unattempted_target_survives_in_blocked_report(monkeypatch, tmp_path):
+    records = {
+        "study/plan.json": {
+            "source_revision": screen.SOURCE_REVISION,
+            "groups": [list(group) for group in screen.GROUPS],
+            "ridge_grid": list(screen.RIDGES),
+            "repetitions": 3,
+            "reserved_evaluation_executed": False,
+        }
+    }
+    cases = [case for group in screen.GROUPS for case in group]
+    for index, (case, ridge, repeat) in enumerate(
+        itertools.product(cases, screen.RIDGES, screen.REPETITIONS)
+    ):
+        prefix = f"study/selection/fold-{index:04d}"
+        request_body = {
+            "targets_m": [0.1],
+            "solver_config": {"newton": {"line_search_alphas": list(screen.ALPHAS)}},
+        }
+        request = {
+            "source_revision": screen.SOURCE_REVISION,
+            "request": request_body,
+            "compiled_problem_contract_hash": "model",
+        }
+        entries = (
+            []
+            if index == 0
+            else [{"target_index": 0, "target_m": 0.1, "invocations": []}]
+        )
+        path = {
+            "entries": entries,
+            "status": "complete",
+            "failure": None,
+            "accepted_target_count": 1,
+        }
+        path["path_hash"] = "sha256:" + screen._hash(screen._json_bytes(path))
+        comparison = {
+            "source_revision": screen.SOURCE_REVISION,
+            "request": request_body,
+            "arms": {"secant": {"path_hash": path["path_hash"]}},
+            "all_execution_work_reported": True,
+            "reference_repeat_exact": True,
+            "comparisons": {"secant": {"full_history_pass": True}},
+        }
+        comparison["report_hash"] = "sha256:" + screen._hash(
+            screen._json_bytes(comparison)
+        )
+        records[prefix + "-outcome.json"] = {
+            "withheld_training_case": case,
+            "ridge": ridge,
+            "repetition_index": repeat,
+            "status": "completed",
+            "report_hash": comparison["report_hash"],
+        }
+        records[prefix + "/request.json"] = request
+        records[prefix + "/comparison.json"] = comparison
+        records[prefix + "/secant/path.json"] = path
+        if entries:
+            records[prefix + "/secant/000-context.json"] = {
+                "target_m": 0.1,
+                "problem_contract_hash": "model",
+            }
+
+    class FakePacket:
+        def __init__(self, root):
+            self.consumed = set()
+
+        def read(self, relative):
+            self.consumed.add(relative)
+            value = copy.deepcopy(records[relative])
+            return value, screen._hash(screen._json_bytes(value))
+
+    monkeypatch.setattr(screen, "OriginalPacket", FakePacket)
+    report = screen.screen_packet(tmp_path)
+    assert report["status"] == "blocked_original_work_or_repeat_identity"
+    assert "1 unattempted targets" in report["fold_issues"][0]["issues"]
+    assert report["screen_decision"]["supports_online_experiment_design"] is False
