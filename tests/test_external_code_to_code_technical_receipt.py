@@ -535,7 +535,14 @@ def test_product_replay_comparison_allows_only_bounded_runtime_drift() -> None:
 
 
 def test_product_replay_refresh_does_not_invent_legacy_execution_source() -> None:
-    stored = _stored_receipt()
+    stored = deepcopy(_stored_receipt())
+    replay = stored["replay_provenance"]
+    replay["external_runtime_executed_in_this_generation"] = False
+    replay["external_execution_reused"] = True
+    replay["reuse_reason"] = "legacy_reference_execution_origin_unknown"
+    replay["external_execution_source_commit_sha"] = None
+    stored["blockers_remaining"].append(module.REUSED_EXECUTION_BLOCKER)
+    stored["artifact_hash"] = module._artifact_hash(stored)
     refreshed = module.refresh_external_code_to_code_product_replay(
         stored,
         repo_root=ROOT,
@@ -623,6 +630,9 @@ def test_cli_refresh_can_use_a_validated_current_reference_receipt(
     assert completed.returncode == 0, completed.stderr + completed.stdout
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["replay_provenance"]["external_execution_reused"] is True
+    assert payload["replay_provenance"]["external_execution_source_commit_sha"] == (
+        _stored_receipt()["source_commit_sha"]
+    )
     assert [row["case_id"] for row in payload["comparisons"]] == [
         row["case_id"] for row in _stored_receipt()["comparisons"]
     ]
