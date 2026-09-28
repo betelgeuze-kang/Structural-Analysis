@@ -183,6 +183,9 @@ def test_inventory_tracks_external_and_repository_work_without_authority() -> No
         449,
         451,
         454,
+        457,
+        458,
+        460,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -218,6 +221,9 @@ def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> 
         (449, [450, 452]),
         (451, [452]),
         (454, [453]),
+        (457, [455]),
+        (458, [456]),
+        (460, [459]),
     ):
         row = rows[number]
         assert row["classification"] == "repository_implementation"
