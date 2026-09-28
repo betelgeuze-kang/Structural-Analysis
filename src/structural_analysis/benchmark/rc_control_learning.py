@@ -247,7 +247,9 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
         ):
             raise ValueError("declared control path budget exceeded")
         model = case.model
-        physical = fiber_frame_physical_model_payload(model)
+        two_fixed = case.request.experimental_two_fixed_endpoints
+        compiler_option = {"experimental_two_fixed_endpoints": True} if two_fixed else {}
+        physical = fiber_frame_physical_model_payload(model, **compiler_option)
         # Separate geometry from section/material/load changes and entity names.
         geometry = {k: physical[k] for k in ("node_coordinates_m", "fixed_global_dofs")}
         geometry["members"] = [m["nodes"] for m in physical["members"]]
@@ -270,7 +272,7 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
             if key in owners and owners[key] != case.split:
                 raise ValueError(f"split_leakage: {key[0]}")
             owners[key] = case.split
-        compiled, blockers, _ = public._compile(model)
+        compiled, blockers, _ = public._compile(model, **compiler_option)
         if compiled is None or blockers:
             raise ValueError("supported RC learning model required")
         compiled = _with_constant_loading(compiled, case.request.constant_nodal_loads)

@@ -145,6 +145,16 @@ def geometry_shapes_overlap(left, right):
     )
 
 
+def _case_compiler_profile(cases):
+    """Require one explicitly selected RC compiler profile per learning roster."""
+    if any(case.request.experimental_pin_roller_beam for case in cases):
+        raise ValueError("pin-roller RC learning compiler profile is not supported")
+    profiles = tuple(case.request.experimental_two_fixed_endpoints for case in cases)
+    if any(type(profile) is not bool for profile in profiles) or len(set(profiles)) > 1:
+        raise ValueError("mixed or invalid RC learning compiler profiles")
+    return profiles[0] if profiles else False
+
+
 def _history_prefix(shorter, longer):
     if len(shorter) > len(longer):
         return False
@@ -163,9 +173,14 @@ def _history_prefix(shorter, longer):
 
 def validate_control_learning_split_shapes(cases):
     """Reject transformed geometry or resampled history aliases across splits."""
+    cases = tuple(cases)
+    two_fixed = _case_compiler_profile(cases)
     records = []
     for case in cases:
-        geometry = geometry_shape_signature(case.model)
+        geometry = geometry_shape_signature(
+            case.model,
+            **({"experimental_two_fixed_endpoints": True} if two_fixed else {}),
+        )
         turning = control_history_turning_points(case.request.targets_m)
         for previous in records:
             if previous["split"] == case.split:
@@ -185,6 +200,7 @@ def validate_control_learning_split_shapes(cases):
         )
     return {
         "schema_version": "rc-control-learning-conservative-shape-screen.v2",
+        **({"experimental_two_fixed_endpoints": True} if two_fixed else {}),
         "cases": records,
         "comparison_relative_tolerance": 1e-10,
         "comparison_absolute_tolerance": 1e-12,
@@ -204,11 +220,19 @@ def control_training_exclusion_groups(cases):
     pair. Transitive closure is intentional: indirectly related cases stay out of
     the same fitting set. This does not authenticate project provenance.
     """
+    cases = tuple(cases)
+    two_fixed = _case_compiler_profile(cases)
     training = sorted((c for c in cases if c.split == "train"), key=lambda c: c.case_id)
     names = [c.case_id for c in training]
     if len(names) != len(set(names)) or len(names) < 2:
         raise ValueError("unique multiple training cases required")
-    shapes = [geometry_shape_signature(c.model) for c in training]
+    shapes = [
+        geometry_shape_signature(
+            c.model,
+            **({"experimental_two_fixed_endpoints": True} if two_fixed else {}),
+        )
+        for c in training
+    ]
     histories = [control_history_turning_points(c.request.targets_m) for c in training]
     parent = list(range(len(training)))
 
@@ -244,6 +268,7 @@ def control_training_exclusion_groups(cases):
     ordered = sorted(groups.values(), key=lambda group: group[0])
     return {
         "schema_version": "rc-control-training-exclusion-groups.v1",
+        **({"experimental_two_fixed_endpoints": True} if two_fixed else {}),
         "groups": ordered,
         "connections": connections,
         "transitive_closure": True,
