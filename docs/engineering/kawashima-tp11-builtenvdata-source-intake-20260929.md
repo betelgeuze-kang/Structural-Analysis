@@ -126,11 +126,9 @@ U = CH002 - CH006 - (1450 / 900) * (CH007 - CH008)    [mm]
 
 All 3,553 printed `Displacement (mm)` values agree with `U` to at most
 `0.000500000003 mm` (mean absolute difference `0.000249617 mm`); decimal
-round-half-up to the printed `0.001 mm` matches all 3,553. For example, STEP
-42 has `CH002 = 2.940`, `CH006 = 0.040`, `CH007 = 0.000`, and `CH008 =
--0.181 mm`, giving `U = 2.608388889 mm` and printed `2.608 mm`. `CH005`
-does not enter this matching arithmetic; this does not establish which physical
-sensor supplied the archived worksheet's `u`.
+round-half-up to the printed `0.001 mm` matches all 3,553. `CH005` does not
+enter this matching arithmetic; this does not establish which physical sensor
+supplied the archived worksheet's `u`.
 
 The source-derived columns themselves support the following *numeric* values
 for Appendix A's otherwise undimensioned actuator distances. On 3,327 rows
@@ -154,11 +152,9 @@ decimal round-half-up to `0.001 mm` (maximum absolute difference
 `0.000500000003 mm`). Replacing `U` with the already rounded printed
 `Displacement (mm)` matches only 2,066 entries, so retaining source-channel
 precision matters. Recomputed `VF-h` and `VF-v` each round to all 3,553 printed
-entries at `0.001 kN`. Recomputed `P` likewise
-rounds to all 3,553 printed `Force (kN)` entries: maximum absolute difference
-`0.000499961 kN`, mean absolute difference `0.000249689 kN`. At STEP 42 it
-gives `ua = 4.407278 mm`, `theta = 0.002518439 rad`, and `P = 53.513882 kN`,
-against printed `4.407 mm`, `0.002518`, and `53.514 kN`.
+entries at `0.001 kN`. Recomputed `P` rounds to all 3,553 printed `Force (kN)`
+entries: maximum absolute difference
+`0.000499961 kN`, mean absolute difference `0.000249689 kN`.
 
 This is an arithmetic consistency check, not independent calibration of the
 experiment. The `1000` and `1750 mm` distances are **inferred from the TXT's
