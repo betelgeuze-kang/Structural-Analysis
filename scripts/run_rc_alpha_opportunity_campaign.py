@@ -127,8 +127,15 @@ def _account_trial_dispatches(rows, calls):
     failed_wall = 0
     for row in rows:
         count = row["trial_count"]
+        failed_count = row["observed_failed_trial_count"]
+        if (
+            type(count) is not int
+            or type(failed_count) is not int
+            or not 0 <= failed_count <= count
+        ):
+            raise ValueError("bounded original failed-trial count required")
         failed_wall += sum(
-            call["wall_ns"] for call in trials[offset : offset + count - 1]
+            call["wall_ns"] for call in trials[offset : offset + failed_count]
         )
         offset += count
     return {

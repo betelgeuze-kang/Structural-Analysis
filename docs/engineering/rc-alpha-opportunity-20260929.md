@@ -55,7 +55,7 @@ and `11a2cf1f18b34a877d675bc42ae1fc986c4daa20acecb202bc1531b2f1611202`.
 The [small machine summary](rc-alpha-opportunity-20260929.summary.json) keeps
 each case's counts and exact report hash; the 40 MB original is not in Git.
 
-Focused alpha extraction/accounting tests: **22 passed**. Ruff check and
+Focused alpha extraction/accounting tests: **23 passed**. Ruff check and
 format checks pass. To reproduce from the producer commit, run the producer
 with `PYTHONPATH=scripts:src`, an empty output directory path on `/mnt`, and
 single-threaded BLAS settings. Run
@@ -63,6 +63,12 @@ single-threaded BLAS settings. Run
 resulting original packet. The committed audit pins this particular run's
 plan, outcome and inventory digests, so a fresh run needs its own receipt
 and auditor pinning rather than inheriting this result.
+
+A post-run parser correction counts every rejected trial when a line search
+has no accepted alpha. All three original paths have zero such rows, so the
+read-only audit still reproduces the exact frozen plan, outcome and packet
+inventory. The producer revision above remains the numerical source; this
+later parser correction did not rerun or alter a structural path.
 
 The prior A–E and new H–J observations have different exact source revisions
 and are reported separately. Neither supplied cross-group evidence for an

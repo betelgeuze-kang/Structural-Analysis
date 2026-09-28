@@ -27,7 +27,10 @@ def test_prospective_cases_are_training_only_and_whole_group_distinct():
 
 
 def test_failed_trial_dispatch_cost_is_joined_by_solver_order():
-    rows = [{"trial_count": 2}, {"trial_count": 1}]
+    rows = [
+        {"trial_count": 2, "observed_failed_trial_count": 1},
+        {"trial_count": 1, "observed_failed_trial_count": 0},
+    ]
     calls = [
         {"phase": "primary_iteration", "status": "returned", "wall_ns": 7},
         {"phase": "line_search", "status": "returned", "wall_ns": 11},
@@ -38,6 +41,15 @@ def test_failed_trial_dispatch_cost_is_joined_by_solver_order():
         "trial_dispatches": 3,
         "failed_trial_dispatch_wall_ns": 11,
     }
+
+
+def test_no_accepted_alpha_charges_every_failed_dispatch():
+    rows = [{"trial_count": 2, "observed_failed_trial_count": 2}]
+    calls = [
+        {"phase": "line_search", "status": "returned", "wall_ns": 11},
+        {"phase": "line_search", "status": "returned", "wall_ns": 13},
+    ]
+    assert _account_trial_dispatches(rows, calls)["failed_trial_dispatch_wall_ns"] == 24
 
 
 @pytest.mark.parametrize(
@@ -56,4 +68,6 @@ def test_failed_trial_dispatch_cost_is_joined_by_solver_order():
 )
 def test_missing_failed_or_unmeasured_trial_dispatch_is_ineligible(calls):
     with pytest.raises(ValueError):
-        _account_trial_dispatches([{"trial_count": 2}], calls)
+        _account_trial_dispatches(
+            [{"trial_count": 2, "observed_failed_trial_count": 1}], calls
+        )
