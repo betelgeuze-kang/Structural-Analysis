@@ -323,14 +323,15 @@ def test_v4_restart_rejects_a_different_pin_roller_partition():
         )
 
 
-def test_v4_preload_cannot_be_applied_directly_at_a_restrained_support():
+@pytest.mark.parametrize("node", ("N2", "N6"))
+def test_v4_preload_cannot_be_applied_directly_at_a_restrained_support(node):
     with pytest.raises(ValueError, match="support node"):
         analyze_bounded_rc_fiber_direct_control(
             _model(),
             (-1e-6,),
             control_global_dof=10,
             experimental_pin_roller_beam=True,
-            constant_nodal_loads=(("N2", 0.0, -1.0, 0.0),),
+            constant_nodal_loads=((node, 0.0, -1.0, 0.0),),
         )
 
 

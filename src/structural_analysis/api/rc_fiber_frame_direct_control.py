@@ -600,7 +600,9 @@ def _with_constant_loading(compiled, constants):
             row[0] in compiled.support_node_ids for row in constants
         ):
             raise ValueError(
-                "constant nodal load at a support node is unsupported"
+                "constant nodal load at a fully fixed endpoint is unsupported"
+                if len(compiled.problem.fixed_global_dofs) == 6
+                else "constant nodal load at a pin or roller support node is unsupported"
             )
         pattern = tuple(
             (3 * node_index[node] + offset, value)
