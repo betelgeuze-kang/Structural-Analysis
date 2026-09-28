@@ -84,6 +84,11 @@ export function JobServicePanel({
         <dd data-job-error-code>{job.error_code ?? 'none reported'}</dd>
         <dt>Request</dt><dd className="wb2-mono">{shortHash(job.request.content_hash)}</dd>
         <dt>Checkpoint</dt><dd className="wb2-mono">{job.checkpoint ? shortHash(job.checkpoint.content_hash) : 'none'}</dd>
+        <dt>Saved continuation</dt><dd data-job-resume>{job.can_resume
+          ? job.status === 'checkpointed'
+            ? 'Checkpoint saved; worker continuation available'
+            : 'Checkpoint saved; exact retry available through the job service'
+          : 'Unavailable in this state'}</dd>
         <dt>Result</dt><dd className="wb2-mono">{job.result ? shortHash(job.result.content_hash) : 'not published'}</dd>
         <dt>Evidence</dt><dd className="wb2-mono">{job.evidence ? shortHash(job.evidence.content_hash) : 'not published'}</dd>
         <dt>Published pair integrity</dt><dd>{artifactStatus ?? 'not evaluated'}</dd>
