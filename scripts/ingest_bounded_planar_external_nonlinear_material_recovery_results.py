@@ -147,6 +147,7 @@ def _load_result_schema(package_root: Path, manifest: dict[str, Any]) -> dict[st
 def _validate_result(
     *,
     case: dict[str, Any],
+    repo_root: Path,
     package_root: Path,
     results_root: Path,
     result_schema: dict[str, Any],
@@ -252,7 +253,7 @@ def _validate_result(
         "case_id": case_id,
         "requirement_id": case["requirement_id"],
         "external_result": {
-            "path": _relative(package_root.parent.parent.parent, result_path),
+            "path": _relative(repo_root, result_path),
             "file_sha256": _file_hash(result_path),
             "artifact_hash": result["artifact_hash"],
             "executed_at": result["executed_at"],
@@ -334,6 +335,7 @@ def build_execution_receipt(
     for case in manifest["cases"]:
         receipt_case, _result = _validate_result(
             case=case,
+            repo_root=repo_root,
             package_root=package_root,
             results_root=results_root,
             result_schema=result_schema,
