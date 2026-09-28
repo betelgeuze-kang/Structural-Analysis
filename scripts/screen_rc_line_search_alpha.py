@@ -195,9 +195,21 @@ def _line_rows(
         ):
             raise TraceError("pretrial state and convergence record differ")
         residual = _finite_number(before.get("relative_residual"), "pretrial residual")
+        raw_before = before.get("residual_kn")
         vector = line.get("newton_increment_m")
-        if residual <= 0 or type(vector) is not list or not vector:
+        if (
+            residual <= 0
+            or type(raw_before) is not list
+            or not raw_before
+            or type(vector) is not list
+            or not vector
+        ):
             raise TraceError("positive pretrial residual and increment required")
+        before_norm = max(
+            abs(_finite_number(value, "pretrial raw residual")) for value in raw_before
+        )
+        if before_norm <= 0:
+            raise TraceError("positive pretrial raw residual required")
         direction = max(abs(_finite_number(v, "Newton increment")) for v in vector)
         if direction <= 0:
             raise TraceError("positive Newton increment required")
@@ -214,12 +226,22 @@ def _line_rows(
                 or type(attempt.get("accepted")) is not bool
             ):
                 raise TraceError("original alpha prefix or acceptance flag differs")
-            trial_residual = _finite_number(
+            trial_relative = _finite_number(
                 attempt.get("trial_relative_residual"), "trial residual"
             )
-            if trial_residual < 0 or attempt["accepted"] != (trial_residual < residual):
+            raw_trial = attempt.get("trial_residual_kn")
+            if (
+                trial_relative < 0
+                or type(raw_trial) is not list
+                or len(raw_trial) != len(raw_before)
+            ):
+                raise TraceError("complete finite trial residual vector required")
+            trial_norm = max(
+                abs(_finite_number(value, "trial raw residual")) for value in raw_trial
+            )
+            if attempt["accepted"] != (trial_norm < before_norm):
                 raise TraceError(
-                    "trial acceptance differs from strict residual decrease"
+                    "trial acceptance differs from strict raw residual decrease"
                 )
             if attempt["accepted"]:
                 if accepted_index is not None or index != len(attempts) - 1:

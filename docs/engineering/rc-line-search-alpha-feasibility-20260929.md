@@ -31,7 +31,9 @@ trial reduced the residual, from the unchanged thirteen-factor binary grid
 `1, 1/2, ..., 1/4096`. A complete trial history with no accepted alpha has a
 null label and is not silently converted to a negative example.
 The extractor rejects out-of-order line-search iterations and verifies that
-each trial's acceptance flag matches the solver's strict residual decrease.
+each trial's acceptance flag matches the solver's strict decrease in the raw
+residual infinity norm. The normalized pretrial residual remains a feature;
+rounding in its scale does not decide acceptance.
 
 The fixed offline baseline uses each other whole group's rows, standardizes
 features on those training rows only, and predicts skipping alpha `1` only when
@@ -93,7 +95,7 @@ No reserved case was read.
 
 The complete row-level [machine report](rc-line-search-alpha-feasibility-20260929.summary.json)
 has raw SHA-256 \`e6f49427eeca91e32f527095f82fc127c716194f9478ff63f0a54f16849a1bb8\`
-and a validated internal report hash. Sixteen focused extractor,
+and a validated internal report hash. Seventeen focused extractor,
 packet-integrity, and leakage tests, Ruff checks, formatting, and whitespace
 checks pass. Further development would need more distinct, source-bound
 **training** geometries and histories

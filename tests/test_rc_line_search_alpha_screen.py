@@ -4,6 +4,7 @@ import copy
 import hashlib
 import itertools
 import json
+import math
 
 import pytest
 
@@ -17,15 +18,20 @@ from scripts.screen_rc_line_search_alpha import (
 )
 
 
-def _step(*, accepted_index: int, trial_residual: float = 0.4):
+def _step(*, accepted_index: int, trial_residual_kn: float = 0.8):
     alphas = [1.0, 0.5, 0.25][: accepted_index + 1]
     attempts = [
         {
             "alpha": alpha,
             "accepted": index == accepted_index,
+            "trial_residual_kn": [
+                trial_residual_kn if index == accepted_index else 1.2,
+                0.1,
+            ],
             "trial_relative_residual": (
-                trial_residual if index == accepted_index else 0.6
-            ),
+                trial_residual_kn if index == accepted_index else 1.2
+            )
+            / 2.0,
         }
         for index, alpha in enumerate(alphas)
     ]
@@ -36,6 +42,7 @@ def _step(*, accepted_index: int, trial_residual: float = 0.4):
                     "iteration": 0,
                     "free_displacements_m": [0.1, 0.2],
                     "newton_increment_m": [0.01, -0.02],
+                    "residual_kn": [1.0, -0.2],
                     "relative_residual": 0.5,
                     "line_search_attempt_count": len(attempts),
                     "line_search_alpha": alphas[-1],
@@ -74,7 +81,10 @@ def test_extracts_only_pretrial_features_and_first_accepted_alpha():
     changed_trial_result = copy.deepcopy(original)
     changed_trial_result["trial_solution"]["line_search_history"][0]["attempts"][1][
         "trial_relative_residual"
-    ] = 0.0001
+    ] = 0.05
+    changed_trial_result["trial_solution"]["line_search_history"][0]["attempts"][1][
+        "trial_residual_kn"
+    ] = [0.1, 0.02]
     second = _rows(changed_trial_result)
     assert len(first) == 1
     assert first[0]["features"] == second[0]["features"]
@@ -99,6 +109,7 @@ def test_no_accepted_alpha_remains_unverified():
     blocked = _step(accepted_index=1)
     trial = blocked["trial_solution"]
     trial["line_search_history"][0]["attempts"][-1]["accepted"] = False
+    trial["line_search_history"][0]["attempts"][-1]["trial_residual_kn"] = [1.2, 0.1]
     trial["line_search_history"][0]["attempts"][-1]["trial_relative_residual"] = 0.6
     trial["line_search_history"][0]["selected_alpha"] = 0.0
     trial["convergence_history"][0]["line_search_alpha"] = 0.0
@@ -124,15 +135,30 @@ def test_line_search_history_must_be_strictly_ordered(iterations):
 
 
 @pytest.mark.parametrize(
-    "accepted,trial_residual", [(False, 0.4), (True, 0.5), (True, 0.6)]
+    "accepted,trial_residual_kn", [(False, 0.8), (True, 1.0), (True, 1.2)]
 )
-def test_trial_acceptance_must_match_strict_residual_decrease(accepted, trial_residual):
+def test_trial_acceptance_must_match_strict_raw_residual_decrease(
+    accepted, trial_residual_kn
+):
     step = _step(accepted_index=0)
     attempt = step["trial_solution"]["line_search_history"][0]["attempts"][0]
     attempt["accepted"] = accepted
-    attempt["trial_relative_residual"] = trial_residual
-    with pytest.raises(TraceError, match="strict residual decrease"):
+    attempt["trial_residual_kn"] = [trial_residual_kn, 0.1]
+    attempt["trial_relative_residual"] = trial_residual_kn / 2.0
+    with pytest.raises(TraceError, match="strict raw residual decrease"):
         _rows(step)
+
+
+def test_raw_residual_decrease_survives_normalization_rounding():
+    step = _step(accepted_index=0)
+    before = step["trial_solution"]["convergence_history"][0]
+    attempt = step["trial_solution"]["line_search_history"][0]["attempts"][0]
+    raw_trial = math.nextafter(1.0, 0.0)
+    before["relative_residual"] = 1.0 / 3.0
+    attempt["trial_residual_kn"] = [raw_trial, 0.1]
+    attempt["trial_relative_residual"] = raw_trial / 3.0
+    assert attempt["trial_relative_residual"] == before["relative_residual"]
+    assert _rows(step)[0]["first_accepted_index"] == 0
 
 
 def test_held_features_cannot_change_training_normalization():
