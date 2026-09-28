@@ -306,17 +306,27 @@ def calculate_fiber_frame_member_quantities(
     *,
     rebar_density_kg_per_m3: float = 7850.0,
     experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
 ) -> dict[str, Any]:
     """Calculate explicit geometry quantities once per member, never per Gauss point."""
     if type(model) is not CanonicalModel:
         raise FiberFrameDesignError("model must be a CanonicalModel")
     if type(experimental_two_fixed_endpoints) is not bool:
-        raise FiberFrameDesignError("explicit boolean two-fixed-endpoint profile required")
+        raise FiberFrameDesignError(
+            "explicit boolean two-fixed-endpoint profile required"
+        )
+    if type(experimental_pin_roller_beam) is not bool:
+        raise FiberFrameDesignError("explicit boolean pin-roller-beam profile required")
+    if experimental_two_fixed_endpoints and experimental_pin_roller_beam:
+        raise FiberFrameDesignError(
+            "experimental compiler profiles are mutually exclusive"
+        )
     density = _number(rebar_density_kg_per_m3, "rebar_density_kg_per_m3")
     snapshot = model.detached_analysis_snapshot()
     compiled, unsupported, _ = public_api._compile(
         snapshot,
         experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=experimental_pin_roller_beam,
     )
     if compiled is None:
         raise FiberFrameDesignError(

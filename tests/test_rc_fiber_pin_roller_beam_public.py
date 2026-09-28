@@ -21,6 +21,7 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION,
 )
 from structural_analysis.assembly import stateful_fiber_frame2d_control_path as control_path
+from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
 
@@ -153,6 +154,65 @@ def test_explicit_v4_compiler_accepts_interior_pin_and_roller_only():
     assert compiled.problem.free_global_dofs.count(5) == 1  # pin rotation
     assert compiled.problem.free_global_dofs.count(15) == 1  # roller UX
     assert compiled.problem.free_global_dofs.count(17) == 1  # roller rotation
+
+
+def test_v4_member_quantities_require_opt_in_and_count_authored_lengths_once():
+    model = _model()
+    with pytest.raises(design.FiberFrameDesignError, match="support_count_unsupported"):
+        design.calculate_fiber_frame_member_quantities(model)
+
+    quantities = design.calculate_fiber_frame_member_quantities(
+        model, experimental_pin_roller_beam=True
+    )
+    assert [row["member_id"] for row in quantities["members"]] == [
+        f"M{index}" for index in range(1, len(STATIONS_M))
+    ]
+    assert [row["length_m"] for row in quantities["members"]] == pytest.approx(
+        [right - left for left, right in zip(STATIONS_M, STATIONS_M[1:])]
+    )
+    assert quantities["totals"]["gross_concrete_volume_m3"] == pytest.approx(
+        0.4 * 0.6 * 1.9
+    )
+    assert quantities["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+        8 * 0.000387 * 1.9 * 7850
+    )
+    assert quantities["detailed_takeoff"] is False
+
+    swapped = _payload()
+    swapped["supports"] = [
+        {"node": "N2", "dofs": ["UY"]},
+        {"node": "N6", "dofs": ["UX", "UY"]},
+    ]
+    changed = design.calculate_fiber_frame_member_quantities(
+        _model(swapped), experimental_pin_roller_beam=True
+    )
+    assert changed["totals"] == quantities["totals"]
+    assert changed["quantity_hash"] != quantities["quantity_hash"]
+
+
+def test_v4_member_quantities_reject_invalid_opt_in_and_geometry():
+    model = _model()
+    with pytest.raises(
+        design.FiberFrameDesignError, match="explicit boolean pin-roller"
+    ):
+        design.calculate_fiber_frame_member_quantities(
+            model, experimental_pin_roller_beam=1
+        )
+    with pytest.raises(design.FiberFrameDesignError, match="mutually exclusive"):
+        design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=True,
+            experimental_pin_roller_beam=True,
+        )
+    nonhorizontal = _payload()
+    nonhorizontal["nodes"][3]["coordinates"][1] = 0.01
+    with pytest.raises(
+        design.FiberFrameDesignError,
+        match="rc_fiber_frame_pin_roller_beam_geometry_invalid",
+    ):
+        design.calculate_fiber_frame_member_quantities(
+            _model(nonhorizontal), experimental_pin_roller_beam=True
+        )
 
 
 @pytest.mark.parametrize(
