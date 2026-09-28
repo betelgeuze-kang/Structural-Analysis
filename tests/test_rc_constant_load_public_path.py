@@ -145,10 +145,15 @@ def test_failed_preload_stops_before_control_and_retains_work(model, monkeypatch
         ),
     ).to_dict()
     assert not result["contract_pass"] and result["checkpoint"] is None
-    assert result["metrics"]["control_work"]["attempted_step_count"] == 1
-    # The blocked Newton return omits iteration/linear counters; do not invent them.
-    assert result["metrics"]["control_work"]["unknown_solver_work_attempt_count"] == 1
-    step = result["failure"]["attempts"][0]["step"]
+    counts = result["metrics"]["control_work"]
+    assert counts["attempted_step_count"] == 1
+    attempt = result["failure"]["attempts"][0]
+    work = attempt["solver_work"]
+    assert work["iteration_count"] > 0 and work["linear_solve_count"] > 0
+    assert counts["known_newton_iteration_count"] == work["iteration_count"]
+    assert counts["known_linear_solve_count"] == work["linear_solve_count"]
+    assert counts["unknown_solver_work_attempt_count"] == 0
+    step = attempt["step"]
     assert not step["committed"]
     assert step["accepted_checkpoint"] == step["parent_checkpoint"]
 
