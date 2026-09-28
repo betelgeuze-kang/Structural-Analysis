@@ -210,6 +210,17 @@ This slice does not validate or authorize:
   commercial use, or G1 closure;
 - formal Level 2/3 independent-solver or published-benchmark verification.
 
+## Public experimental source lead
+
+The [Zenodo 18735817 flexural specimen source record](../benchmarks/rc_fiber/zenodo_18735817_flexural_source.v1.json)
+identifies an author-published, CC BY 4.0 load–displacement file and its U.S.
+DOT specimen drawing. It records the original file hash, ordered channel units,
+geometry and material crosswalk, and an optional prospective comparison window.
+This is source qualification only: zero measured rows have been ingested, the
+current public compiler cannot represent the simply supported four-point
+specimen or its separate titanium/grout interface, and no experimental
+comparison or training permission follows from the record.
+
 ## Focused verification
 
 ```bash
