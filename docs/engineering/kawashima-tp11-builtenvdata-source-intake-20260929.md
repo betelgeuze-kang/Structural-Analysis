@@ -40,6 +40,12 @@ documentation cites Kawashima, Shoji, and Sakakibara (2000), *A Cyclic Loading
 Test for Clarifying the Plastic Hinge Length of Reinforced Concrete Piers*, as
 the TP-10–13 experimental publication. That citation identifies the original
 campaign; it is not a second independent dataset.
+The [J-GLOBAL bibliographic record](https://jglobal.jst.go.jp/en/detail?JGLOBAL_ID=200902171365489905)
+lists the Japanese-language article in *Journal of Structural Engineering A*,
+46A(2), pp. 767–776 (2000). Its author record spells the first name
+`Kazuhiko`, whereas BED's API spells it `Kasuhiko`; this metadata discrepancy
+is preserved rather than silently normalized. The catalog record does not
+provide the paper's failure-mode account or replace reading its full text.
 
 ## TP-11 source fields and response boundary
 
