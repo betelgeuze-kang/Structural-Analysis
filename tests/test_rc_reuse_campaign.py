@@ -2,7 +2,11 @@
 from copy import deepcopy
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
+import time
 
 import pytest
 
@@ -406,6 +410,55 @@ def test_unhandled_exit_leaves_an_atomic_running_row_and_unknown_cost(
     assert not (output / 'campaign.json.tmp').exists()
     with pytest.raises(FileExistsError):
         campaign.run(path, output)
+
+
+def test_killed_process_preserves_running_case_and_unknown_cost(tmp_path):
+    path, _ = plan(tmp_path, names=('killed', 'later'))
+    output = tmp_path / 'output'
+    entered = tmp_path / 'entered'
+    code = '''
+from pathlib import Path
+import sys
+import time
+from scripts import run_rc_reuse_campaign as campaign
+
+def block(output, repetitions, **kwargs):
+    Path(sys.argv[3]).write_text('entered')
+    time.sleep(60)
+
+campaign.experiment.run = block
+campaign.run(Path(sys.argv[1]), Path(sys.argv[2]))
+'''
+    environment = dict(os.environ)
+    environment['PYTHONPATH'] = os.pathsep.join((str(ROOT), str(ROOT / 'src')))
+    child = subprocess.Popen(
+        [sys.executable, '-c', code, str(path), str(output), str(entered)],
+        cwd=ROOT, env=environment,
+    )
+    try:
+        deadline = time.monotonic() + 10
+        while not entered.is_file() and child.poll() is None and time.monotonic() < deadline:
+            time.sleep(0.02)
+        assert entered.is_file() and child.poll() is None
+        child.kill()
+        assert child.wait(timeout=5) != 0
+    finally:
+        if child.poll() is None:
+            child.kill()
+            child.wait(timeout=5)
+
+    receipt = campaign.load_json_object_strict(output / 'campaign.json')
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
+    assert receipt['planned_case_count'] == 2
+    assert receipt['recorded_case_count'] == 1
+    assert receipt['campaign_complete'] is False
+    assert receipt['all_cases_completed'] is False
+    assert receipt['aggregate_speed_ratio'] is None
+    assert receipt['cases'][0]['id'] == 'killed'
+    assert receipt['cases'][0]['status'] == 'running'
+    assert receipt['cases'][0]['case_wall_ns'] is None
+    assert receipt['cases'][0]['unknown_native_work'] is True
+    assert not (output / 'campaign.json.tmp').exists()
 
 
 def test_return_without_success_receipt_is_not_completion(tmp_path, monkeypatch):
