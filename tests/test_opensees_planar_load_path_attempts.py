@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import ast
+from copy import deepcopy
+import importlib.util
+import json
 from pathlib import Path
+import sys
 from typing import Any
 
 import pytest
@@ -11,6 +15,12 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / (
     "scripts/run_external_code_to_code_technical_receipt.py"
+)
+ROOT = SCRIPT.parents[1]
+RECEIPT = (
+    ROOT
+    / "implementation/phase1/release_evidence/productization/"
+    "external_code_to_code_technical_execution_receipt.json"
 )
 CASES = (
     "public_corotational_portal",
@@ -145,5 +155,96 @@ def test_original_planar_blocks_stop_without_retries_and_retain_attempts(
         external_return_code=max(abs(int(code)) for code in codes),
         product_regularization_applied=False,
         product_fallback_used=False,
+        load_path_attempts=attempts,
     )
     assert receipt_case["contract_pass"] is (failed_step is None)
+    assert receipt_case["load_path_attempts"] == attempts
+
+
+@pytest.mark.parametrize("failed_step", [None, 1])
+def test_written_receipt_retains_and_validates_planar_attempts(
+    tmp_path: Path,
+    failed_step: int | None,
+) -> None:
+    spec = importlib.util.spec_from_file_location(
+        "run_external_code_to_code_technical_receipt_attempt_test", SCRIPT
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    ops = RevertingSolver(failed_step)
+    driver_payload: dict[str, Any] = {"load_path_attempts": {}}
+    namespace = {
+        "ops": ops,
+        "payload": driver_payload,
+        "perf_counter_ns": lambda: 7 * ops.calls,
+    }
+    exec(
+        compile(_driver_case("public_corotational_portal"), str(SCRIPT), "exec"),
+        namespace,
+    )
+    attempts = driver_payload["load_path_attempts"]["public_corotational_portal"]
+    receipt = json.loads(RECEIPT.read_text(encoding="utf-8"))
+    case = receipt["comparisons"][2]
+    receipt["comparisons"][2] = module._case(
+        case_id=case["case_id"],
+        analysis_type=case["analysis_type"],
+        reference_solver=case["reference_solver"],
+        product_solver_id=case["product_solver_id"],
+        metrics=case["metrics"],
+        external_return_code=max(abs(row["analyze_return_code"]) for row in attempts),
+        product_regularization_applied=False,
+        product_fallback_used=False,
+        load_path_attempts=attempts,
+    )
+    receipt["technical_contract_pass"] = failed_step is None
+    receipt["status"] = "partial" if failed_step is None else "blocked"
+    receipt["claims"] = module._expected_claims(
+        receipt["comparisons"],
+        technical_pass=receipt["technical_contract_pass"],
+    )
+    receipt["artifact_hash"] = module._artifact_hash(receipt)
+    out = tmp_path / "planar-attempt-receipt.json"
+    out.write_text(json.dumps(receipt, allow_nan=False), encoding="utf-8")
+
+    persisted = json.loads(out.read_text(encoding="utf-8"))
+    module.validate_external_code_to_code_technical_receipt(
+        persisted,
+        repo_root=ROOT,
+        require_current_sources=False,
+    )
+    persisted_case = persisted["comparisons"][2]
+    assert persisted_case["load_path_attempts"] == attempts
+    assert persisted_case["contract_pass"] is (failed_step is None)
+    assert persisted_case["external_return_code"] == (0 if failed_step is None else 3)
+
+    if failed_step is not None:
+        missing = deepcopy(persisted)
+        missing["comparisons"][2].pop("load_path_attempts")
+        missing["artifact_hash"] = module._artifact_hash(missing)
+        with pytest.raises(
+            module.ExternalCodeToCodeReceiptError,
+            match="receipt_schema_invalid",
+        ):
+            module.validate_external_code_to_code_technical_receipt(
+                missing,
+                repo_root=ROOT,
+                require_current_sources=False,
+            )
+
+    tampered = deepcopy(persisted)
+    tampered["comparisons"][2]["load_path_attempts"][0][
+        "target_load_factor"
+    ] = 0.75
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_planar_load_path_attempt_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )

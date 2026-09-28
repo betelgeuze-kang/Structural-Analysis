@@ -98,6 +98,13 @@ SPATIAL_FRAME3D_ABSOLUTE_TOLERANCE = 1.0e-10
 SPATIAL_FRAME3D_RELATIVE_TOLERANCE = 1.0e-4
 FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE = 1.0e-10
 FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE = 1.0e-8
+PLANAR_LOAD_PATH_CASE_IDS = frozenset(
+    (
+        "public_corotational_portal_load_path",
+        "bounded_planar_member_feature_load_path",
+        "bounded_planar_prescribed_settlement_load_path",
+    )
+)
 PRODUCT_REPLAY_ABSOLUTE_TOLERANCE = COMPARISON_ABSOLUTE_TOLERANCE
 PRODUCT_REPLAY_RELATIVE_TOLERANCE = COMPARISON_RELATIVE_TOLERANCE
 PUBLIC_COROTATIONAL_PORTAL_MODEL = Path(
@@ -381,6 +388,7 @@ SOURCE_PATHS = (
     Path("scripts/run_external_code_to_code_technical_receipt.py"),
     SCHEMA_PATH,
     Path("tests/test_external_code_to_code_technical_receipt.py"),
+    Path("tests/test_opensees_planar_load_path_attempts.py"),
     Path("src/structural_analysis/api/core.py"),
     Path("src/structural_analysis/api/frame3d_direct_control.py"),
     Path("src/structural_analysis/api/nonlinear_frame.py"),
@@ -2534,6 +2542,7 @@ def _case(
     external_return_code: int,
     product_regularization_applied: bool,
     product_fallback_used: bool,
+    load_path_attempts: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     contract_pass = bool(
         metrics
@@ -2542,7 +2551,7 @@ def _case(
         and not product_regularization_applied
         and not product_fallback_used
     )
-    return {
+    case = {
         "case_id": case_id,
         "analysis_type": analysis_type,
         "reference_solver": reference_solver,
@@ -2553,6 +2562,9 @@ def _case(
         "product_fallback_used": product_fallback_used,
         "contract_pass": contract_pass,
     }
+    if load_path_attempts is not None:
+        case["load_path_attempts"] = load_path_attempts
+    return case
 
 
 def _current_product_comparison_cases(
@@ -2845,6 +2857,9 @@ def _current_product_comparison_cases(
                 portal["regularization_used"]
             ),
             product_fallback_used=bool(portal["fallback_used"]),
+            load_path_attempts=stored[
+                "public_corotational_portal_load_path"
+            ].get("load_path_attempts"),
         ),
         _case(
             case_id="bounded_planar_member_feature_load_path",
@@ -2909,6 +2924,9 @@ def _current_product_comparison_cases(
                 member_feature["regularization_used"]
             ),
             product_fallback_used=bool(member_feature["fallback_used"]),
+            load_path_attempts=stored[
+                "bounded_planar_member_feature_load_path"
+            ].get("load_path_attempts"),
         ),
         *(
             [
@@ -2973,6 +2991,9 @@ def _current_product_comparison_cases(
                         settlement["regularization_used"]
                     ),
                     product_fallback_used=bool(settlement["fallback_used"]),
+                    load_path_attempts=stored[
+                        "bounded_planar_prescribed_settlement_load_path"
+                    ].get("load_path_attempts"),
                 )
             ]
             if settlement is not None
@@ -3391,6 +3412,9 @@ def build_external_code_to_code_technical_receipt(
                     "public_corotational_portal_analyze_codes"
                 ]
             ),
+            load_path_attempts=opensees["load_path_attempts"][
+                "public_corotational_portal"
+            ],
             product_regularization_applied=bool(
                 portal["regularization_used"]
             ),
@@ -3411,6 +3435,9 @@ def build_external_code_to_code_technical_receipt(
                     "bounded_planar_member_feature_analyze_codes"
                 ]
             ),
+            load_path_attempts=opensees["load_path_attempts"][
+                "bounded_planar_member_feature"
+            ],
             product_regularization_applied=bool(
                 member_feature["regularization_used"]
             ),
@@ -3433,6 +3460,9 @@ def build_external_code_to_code_technical_receipt(
                     "bounded_planar_settlement_analyze_codes"
                 ]
             ),
+            load_path_attempts=opensees["load_path_attempts"][
+                "bounded_planar_settlement"
+            ],
             product_regularization_applied=bool(
                 settlement["regularization_used"]
             ),
@@ -3767,6 +3797,51 @@ def validate_external_code_to_code_technical_receipt(
     if stored_assets != expected_assets:
         raise ExternalCodeToCodeReceiptError("receipt_external_assets_invalid")
     for case in payload["comparisons"]:
+        attempts = case.get("load_path_attempts")
+        if case["case_id"] in PLANAR_LOAD_PATH_CASE_IDS:
+            if attempts is None:
+                if require_current_sources and not replay["external_execution_reused"]:
+                    raise ExternalCodeToCodeReceiptError(
+                        "receipt_planar_load_path_attempts_missing"
+                    )
+            else:
+                for index, attempt in enumerate(attempts):
+                    expected_target = (0.25, 0.5, 0.75, 1.0)[index]
+                    expected_previous = (
+                        0.0
+                        if index == 0
+                        else attempts[index - 1]["achieved_load_factor"]
+                    )
+                    if (
+                        attempt["target_load_factor"] != expected_target
+                        or not math.isfinite(attempt["previous_load_factor"])
+                        or not math.isfinite(attempt["achieved_load_factor"])
+                        or not math.isclose(
+                            attempt["previous_load_factor"],
+                            expected_previous,
+                            rel_tol=0.0,
+                            abs_tol=1.0e-12,
+                        )
+                        or any(
+                            not math.isfinite(norm)
+                            for norm in attempt["test_norms_reported"]
+                        )
+                    ):
+                        raise ExternalCodeToCodeReceiptError(
+                            "receipt_planar_load_path_attempt_invalid"
+                        )
+                    if attempt["analyze_return_code"] != 0 and index != len(attempts) - 1:
+                        raise ExternalCodeToCodeReceiptError(
+                            "receipt_planar_load_path_continued_after_failure"
+                        )
+                if (
+                    (attempts[-1]["analyze_return_code"] == 0 and len(attempts) != 4)
+                    or case["external_return_code"]
+                    != max(abs(row["analyze_return_code"]) for row in attempts)
+                ):
+                    raise ExternalCodeToCodeReceiptError(
+                        "receipt_planar_load_path_return_code_invalid"
+                    )
         frame3d_case = (
             case["case_id"] == "spatial_frame3d_cantilever_combined_load"
         )
