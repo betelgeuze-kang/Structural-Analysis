@@ -63,6 +63,9 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
     <p data-rc-design-authority>Original artifacts and stored full-path verification bindings checked. The browser does not rerun the solver. Caller limits, quantities and prices do not establish independent physical validation, code compliance, a verified quote or design approval.</p>
+    {report.control_request.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
+      ? <p data-rc-design-pin-roller>Experimental horizontal pin/roller beam: the pin restrains UX and UY, the roller restrains UY, and both rotations remain free. This comparison has no constant preload.</p>
+      : null}
     {report.cost_pruning ? <p data-rc-design-cost-pruning>{report.cost_pruning.skipped_count} candidates excluded by verified cost dominance. Their feasibility is not evaluated; no elapsed-time saving is asserted.</p> : null}
     <p>{report.control_request.targets_m.length} authored targets per design · {report.verified_count}/{report.candidate_denominator} designs have complete stored verification · execution {report.status}</p>
     {report.control_request.constant_nodal_loads ? <p data-rc-design-constants>Constant nodal loads (node, FX kN, FY kN, MZ kN·m): {report.control_request.constant_nodal_loads.map((r: RcObject) => `${r.node_id}, ${r.FX_kN}, ${r.FY_kN}, ${r.MZ_kNm}`).join('; ')}. Every analysis and fresh verification includes its own preload. Path screens include that accepted preload.</p> : null}
