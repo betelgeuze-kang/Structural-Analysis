@@ -57,3 +57,12 @@ has no source-bound original packet and receives no benchmark speed ratio.
 Any future repetition must use a new durable output directory, preserve every
 attempted case and original receipt, and report per-case ratios only after all
 declared pairs pass. Do not combine different cases into one speed ratio.
+
+For the current-source v2 run, [`three-topology-v2-executed-plan.json`](three-topology-v2-executed-plan.json)
+and [`three-topology-v2-campaign.json`](three-topology-v2-campaign.json) are
+byte-preserved copies of the packet's bound input/runner plan and final campaign
+receipt. Their SHA-256 digests are `931d8639fdabedfa2bc2b2c579c2d5e08151a2e2cb79ef1c14d7acbfb8970f0c`
+and `521acceea00eb7ba8ed6a5397d265e555d8bcb3cf52d713890ef9d4834ea32f0`,
+respectively. They make the scheduled inputs and recorded case outcomes reviewable
+without the local packet; they do not contain the twelve original comparison
+reports or replace their independent review.

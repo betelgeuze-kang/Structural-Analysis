@@ -1,0 +1,69 @@
+{
+  "source_revision": "df20a8ac6717126ca1cbf765d25774e01f681de5",
+  "plan": {
+    "schema": "rc-reuse-campaign-plan.v1",
+    "repetitions": 4,
+    "arithmetic": "retained",
+    "record_assembly_timing": true,
+    "cases": [
+      {
+        "id": "cantilever-concrete-damage",
+        "model": "../../public_rc_fiber_frame_cantilever.json",
+        "request": "concrete-damage.request.json"
+      },
+      {
+        "id": "two-fixed-endpoint-portal-20mm",
+        "model": "../rc_internal_portal_20mm/original-model.json",
+        "request": "../rc_internal_portal_20mm/experimental-two-fixed-endpoints-request.json"
+      },
+      {
+        "id": "pin-roller-steel-plastic-reversal",
+        "model": "pin-roller-steel-plastic.model.json",
+        "request": "pin-roller-steel-plastic.request.json"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "id": "cantilever-concrete-damage",
+      "inputs": {
+        "model": {
+          "sha256": "b642e14a56ca88b74dfbbb6749f7b4b87199ef1aafb94c5265ec35b89eab7968",
+          "bytes": 1897
+        },
+        "request": {
+          "sha256": "7b1892d1f14ae884e2afee366cc2304ed718acefa8260e2272f8677404ae703b",
+          "bytes": 488
+        }
+      }
+    },
+    {
+      "id": "two-fixed-endpoint-portal-20mm",
+      "inputs": {
+        "model": {
+          "sha256": "6f8eec155f5fcf2f9ae942c021a8692e79ae1efd0d1b98342f8aea0b642d0ed6",
+          "bytes": 1819
+        },
+        "request": {
+          "sha256": "92e94d3580bdf76edabef458ac0f769e054087ab04f897178f3692b2098c0e45",
+          "bytes": 659
+        }
+      }
+    },
+    {
+      "id": "pin-roller-steel-plastic-reversal",
+      "inputs": {
+        "model": {
+          "sha256": "22b5eb4a70cb6a5ef226e70c6d883ce788e8fbb3614e16e8b6bcccfe5f76b201",
+          "bytes": 3696
+        },
+        "request": {
+          "sha256": "5dc17d29a2b4e9228532e9acb1040ad4d87913d62e359ff50e18d2288b2cf883",
+          "bytes": 869
+        }
+      }
+    }
+  ],
+  "campaign_script_sha256": "d7cecbf6f2c662fd0de74e36af16f227d48cc18ad56f79a65b6ea18eeaaf2727",
+  "experiment_script_sha256": "beae29c1f5f561110a3052d8145d049f980a23429f55d2f43e3df1c74018ca18"
+}

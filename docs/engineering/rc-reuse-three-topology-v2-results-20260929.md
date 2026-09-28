@@ -35,6 +35,9 @@ disk). `campaign.json` has SHA-256
 `521acceea00eb7ba8ed6a5397d265e555d8bcb3cf52d713890ef9d4834ea32f0`;
 `plan.json` has SHA-256
 `931d8639fdabedfa2bc2b2c579c2d5e08151a2e2cb79ef1c14d7acbfb8970f0c`.
+[Byte-preserved copies of these two small receipts](../../examples/research/rc_reuse_campaign/README.md)
+are in Git for review; the twelve original comparison reports remain only in
+the local packet.
 For an inventory digest, sort all regular files by root-relative POSIX path,
 make an array of `{"path": ..., "bytes": ..., "sha256": ...}` records (SHA-256
 of each original file), encode it as UTF-8 JSON with sorted object keys, no
