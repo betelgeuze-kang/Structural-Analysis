@@ -687,6 +687,26 @@ def test_replay_small_drift_cannot_flip_comparison_pass():
     assert not module._product_replay_values_match(stored, current)
 
 
+@pytest.mark.parametrize("bounded", [False, True])
+def test_replay_rejects_current_false_pass_label_even_with_bounded_drift(bounded):
+    if bounded:
+        kwargs = {
+            "absolute_tolerance": module.FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE,
+            "relative_tolerance": module.FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE,
+        }
+        stored = module._bounded_comparison("witness", 0.0, 0.0, **kwargs)
+        current = module._bounded_comparison("witness", 1.5e-10, 0.0, **kwargs)
+    else:
+        stored = module._comparison("witness", 1.9e-10, 0.0)
+        current = module._comparison("witness", 2.1e-10, 0.0)
+    assert stored["contract_pass"] and not current["contract_pass"]
+    assert module._product_replay_numbers_close(
+        stored["product_value"], current["product_value"],
+    )
+    current["contract_pass"] = True
+    assert not module._product_replay_values_match(stored, current)
+
+
 def test_replay_rejects_inconsistent_stored_relative_diagnostic():
     stored = module._comparison('witness', 4e-13, 0.0)
     current = module._comparison('witness', -1e-12, 0.0)

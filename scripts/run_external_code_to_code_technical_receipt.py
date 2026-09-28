@@ -2476,19 +2476,50 @@ def _replay_metric_errors_consistent(metric: dict[str, Any]) -> bool:
     # Validate each derived diagnostic against its own primitive values before
     # comparing primitive response drift. A near-zero denominator must not
     # amplify an otherwise allowed response difference into stale provenance.
-    fields = ("product_value", "reference_value", "absolute_error", "relative_error")
+    fields = (
+        "product_value", "reference_value", "absolute_error", "relative_error",
+        "absolute_tolerance", "relative_tolerance",
+    )
     if any(isinstance(metric[key], bool) or not isinstance(metric[key], (int, float))
            for key in fields):
         return False
-    values = {key: float(metric[key]) for key in fields}
+    try:
+        values = {key: float(metric[key]) for key in fields}
+    except (OverflowError, ValueError):
+        return False
     if not all(math.isfinite(value) for value in values.values()):
+        return False
+    if values["absolute_tolerance"] < 0 or values["relative_tolerance"] < 0:
+        return False
+    tolerances = (values["absolute_tolerance"], values["relative_tolerance"])
+    # The stored receipt validator uses a unity scale for the base cases and
+    # a tiny floor for bounded 3-D cases; require one of those known contracts.
+    if tolerances == (
+        COMPARISON_ABSOLUTE_TOLERANCE, COMPARISON_RELATIVE_TOLERANCE,
+    ):
+        scale = max(abs(values["product_value"]), abs(values["reference_value"]), 1.0)
+    elif tolerances in {
+        (SPATIAL_FRAME3D_ABSOLUTE_TOLERANCE, SPATIAL_FRAME3D_RELATIVE_TOLERANCE),
+        (FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE,
+         FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE),
+    }:
+        scale = max(
+            abs(values["product_value"]), abs(values["reference_value"]),
+            np.finfo(np.float64).tiny,
+        )
+    else:
         return False
     absolute = abs(values["product_value"] - values["reference_value"])
     relative = absolute / max(abs(values["reference_value"]), np.finfo(np.float64).tiny)
+    expected_pass = absolute <= (
+        values["absolute_tolerance"] + values["relative_tolerance"] * scale
+    )
     return (
         math.isfinite(relative)
         and math.isclose(values["absolute_error"], absolute, rel_tol=1e-14, abs_tol=1e-30)
         and math.isclose(values["relative_error"], relative, rel_tol=1e-14, abs_tol=1e-30)
+        and type(metric["contract_pass"]) is bool
+        and metric["contract_pass"] is expected_pass
     )
 
 
