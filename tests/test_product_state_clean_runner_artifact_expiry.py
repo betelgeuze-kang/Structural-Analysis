@@ -31,6 +31,18 @@ def _download_step() -> str:
     )
 
 
+def _lookup_script() -> str:
+    workflow = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    steps = workflow["jobs"]["build-current-state"]["steps"]
+    shell = next(
+        step["run"]
+        for step in steps
+        if step.get("name")
+        == "Materialize attested exact-SHA clean-runner evidence when available"
+    )
+    return shell.split("python - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+
+
 def _inventory_script() -> str:
     shell = _download_step()
     return shell.split("artifact_id=\"$(python - <<'PY'\n", 1)[1].split('\nPY\n)"', 1)[
@@ -56,14 +68,20 @@ def _artifact(artifact_id: int, name: str) -> dict:
     }
 
 
-def _fixture(tmp_path: Path, artifacts: list[dict]) -> tuple[Path, dict[str, str]]:
+def _fixture(
+    tmp_path: Path,
+    artifacts: list[dict],
+    *,
+    event: str = "push",
+    source_sha: str = SOURCE_SHA,
+) -> tuple[Path, dict[str, str]]:
     input_dir = tmp_path / "clean-runner-input"
     input_dir.mkdir()
     run = {
         "id": RUN_ID,
         "run_attempt": RUN_ATTEMPT,
-        "event": "push",
-        "head_sha": SOURCE_SHA,
+        "event": event,
+        "head_sha": source_sha,
         "head_branch": "main",
         "path": ".github/workflows/opensees-calculix-current-source.yml",
         "repository": {"full_name": REPOSITORY},
@@ -93,9 +111,13 @@ def _fixture(tmp_path: Path, artifacts: list[dict]) -> tuple[Path, dict[str, str
 
 
 def _run_inventory(
-    tmp_path: Path, artifacts: list[dict]
+    tmp_path: Path,
+    artifacts: list[dict],
+    *,
+    event: str = "push",
+    source_sha: str = SOURCE_SHA,
 ) -> tuple[subprocess.CompletedProcess[str], Path]:
-    input_dir, env = _fixture(tmp_path, artifacts)
+    input_dir, env = _fixture(tmp_path, artifacts, event=event, source_sha=source_sha)
     result = subprocess.run(
         [sys.executable, "-c", _inventory_script()],
         cwd=tmp_path,
@@ -105,6 +127,79 @@ def _run_inventory(
         check=False,
     )
     return result, input_dir
+
+
+@pytest.mark.parametrize(
+    ("event", "source_sha", "accepted"),
+    [
+        ("schedule", SOURCE_SHA, True),
+        ("pull_request", SOURCE_SHA, False),
+        ("schedule", "b" * 40, False),
+    ],
+)
+def test_inventory_accepts_only_scheduled_exact_source_main_runs(
+    tmp_path: Path, event: str, source_sha: str, accepted: bool
+) -> None:
+    final_name = f"opensees-calculix-current-source-{RUN_ID}-{RUN_ATTEMPT}"
+    producer_name = f"opensees-calculix-current-source-candidate-{RUN_ID}-{RUN_ATTEMPT}"
+    result, input_dir = _run_inventory(
+        tmp_path,
+        [_artifact(201, final_name), _artifact(202, producer_name)],
+        event=event,
+        source_sha=source_sha,
+    )
+
+    assert (result.returncode == 0) is accepted
+    if accepted:
+        assert result.stdout.strip() == "201"
+        assert (input_dir / "artifact.json").exists()
+        assert (input_dir / "producer-artifact.json").exists()
+    else:
+        assert "clean_runner_workflow_run_invalid" in result.stderr
+        assert not (input_dir / "artifact.json").exists()
+        assert not (input_dir / "producer-artifact.json").exists()
+
+
+def test_lookup_selects_only_scheduled_run_for_exact_main_source(
+    tmp_path: Path,
+) -> None:
+    input_dir = tmp_path / "clean-runner-input"
+    input_dir.mkdir()
+    valid = {
+        "id": RUN_ID,
+        "run_attempt": RUN_ATTEMPT,
+        "conclusion": "success",
+        "head_sha": SOURCE_SHA,
+        "head_branch": "main",
+        "event": "schedule",
+        "repository": {"full_name": REPOSITORY},
+        "head_repository": {"full_name": REPOSITORY},
+        "path": ".github/workflows/opensees-calculix-current-source.yml",
+    }
+    foreign_event = {**valid, "id": RUN_ID + 1, "event": "pull_request"}
+    foreign_sha = {**valid, "id": RUN_ID + 2, "head_sha": "b" * 40}
+    (input_dir / "workflow-runs.json").write_text(
+        json.dumps({"workflow_runs": [valid, foreign_event, foreign_sha]}) + "\n",
+        encoding="utf-8",
+    )
+    env = {
+        **os.environ,
+        "CLEAN_RUNNER_INPUT_DIR": str(input_dir),
+        "PRODUCT_STATE_SHA": SOURCE_SHA,
+        "GITHUB_REPOSITORY": REPOSITORY,
+    }
+
+    result = subprocess.run(
+        [sys.executable, "-c", _lookup_script()],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == f"{RUN_ID} {RUN_ATTEMPT} success"
 
 
 def test_missing_producer_candidate_records_zero_credit_and_no_summary(

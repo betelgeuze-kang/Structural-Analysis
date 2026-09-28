@@ -983,7 +983,7 @@ jobs:
               for row in payload.get("workflow_runs", [])
               if row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]
               and row.get("head_branch") == "main"
-              and row.get("event") in {"push", "workflow_dispatch"}
+              and row.get("event") in {"push", "workflow_dispatch", "schedule"}
               and row.get("repository", {}).get("full_name")
               == os.environ["GITHUB_REPOSITORY"]
               and row.get("head_repository", {}).get("full_name")
@@ -1068,7 +1068,7 @@ jobs:
           if not (
               run.get("id") == int(os.environ["CLEAN_RUNNER_RUN_ID"])
               and run.get("run_attempt") == int(os.environ["CLEAN_RUNNER_RUN_ATTEMPT"])
-              and run.get("event") in {"push", "workflow_dispatch"}
+              and run.get("event") in {"push", "workflow_dispatch", "schedule"}
               and run.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]
               and run.get("head_branch") == "main"
               and run.get("path") == ".github/workflows/opensees-calculix-current-source.yml"

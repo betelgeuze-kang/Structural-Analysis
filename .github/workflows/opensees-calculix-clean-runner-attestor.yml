@@ -68,7 +68,7 @@ jobs:
           source = os.environ["SOURCE_SHA"]; repository = os.environ["GITHUB_REPOSITORY"]
           run_id = int(os.environ["GITHUB_RUN_ID"]); attempt = int(os.environ["GITHUB_RUN_ATTEMPT"])
           if (run.get("id") != run_id or run.get("run_attempt") != attempt or run.get("head_sha") != source or
-              run.get("head_branch") != "main" or run.get("event") not in {"push", "workflow_dispatch"} or
+              run.get("head_branch") != "main" or run.get("event") not in {"push", "workflow_dispatch", "schedule"} or
               run.get("path") != ".github/workflows/opensees-calculix-current-source.yml" or
               run.get("repository", {}).get("full_name") != repository or
               run.get("head_repository", {}).get("full_name") != repository): fail("workflow_run_identity_invalid")

@@ -23,7 +23,7 @@ def _inline_attestor_verifier() -> str:
 
 
 def _run_inline_attestor(
-    tmp_path: Path, archive: bytes
+    tmp_path: Path, archive: bytes, *, event: str = "push"
 ) -> subprocess.CompletedProcess[str]:
     source_sha = "a" * 40
     digest = hashlib.sha256(archive).hexdigest()
@@ -34,7 +34,7 @@ def _run_inline_attestor(
         "run_attempt": 1,
         "head_sha": source_sha,
         "head_branch": "main",
-        "event": "push",
+        "event": event,
         "path": ".github/workflows/opensees-calculix-current-source.yml",
         "repository": {"full_name": "owner/repository"},
         "head_repository": {"full_name": "owner/repository"},
@@ -56,7 +56,11 @@ def _run_inline_attestor(
         ),
         "workflow_run": {"id": 456, "head_sha": source_sha, "head_branch": "main"},
     }
-    for name, payload in (("run.json", run), ("jobs.json", jobs), ("artifact.json", artifact)):
+    for name, payload in (
+        ("run.json", run),
+        ("jobs.json", jobs),
+        ("artifact.json", artifact),
+    ):
         (inputs / name).write_text(json.dumps(payload), encoding="utf-8")
     (inputs / "candidate.zip").write_bytes(archive)
     env = {
@@ -84,6 +88,7 @@ def test_workflow_runs_exact_current_main_in_isolated_clean_runner() -> None:
 
     assert 'branches: ["main"]' in source
     assert "workflow_dispatch:" in source
+    assert 'cron: "23 5 1,15 * *"' in source
     assert "pull_request:" not in source
     assert "if: github.ref == 'refs/heads/main'" in source
     assert "runs-on: ubuntu-22.04" in source
@@ -125,7 +130,7 @@ def test_workflow_pins_assets_and_never_uploads_solver_packages() -> None:
     )[1]
     assert "EXTERNAL_ASSET_DIR" not in upload_section
     assert "-candidate-${{ github.run_id }}-${{ github.run_attempt }}" in source
-    assert "retention-days: 7" in upload_section
+    assert "retention-days: 90" in upload_section
 
 
 def test_clean_runner_retains_summary_bound_host_replays_for_candidate_upload() -> None:
@@ -168,6 +173,9 @@ def test_workflow_attests_without_promoting_level2() -> None:
     )
     assert 'get("verification_level_2") is not False' in attestor_source
     assert "clean_runner_handoff.sigstore.json" in attestor_source
+    assert 'run.get("event") not in {"push", "workflow_dispatch", "schedule"}' in (
+        attestor_source
+    )
     assert "--deny-self-hosted-runners" in attestor_source
     assert 'certificate.get("runInvocationURI") == invocation' in attestor_source
     assert 'get("invocationId") == invocation' in attestor_source
@@ -181,7 +189,12 @@ def test_workflow_attests_without_promoting_level2() -> None:
 
 @pytest.mark.parametrize(
     "malicious_name",
-    ["control\nname.json", "control\u0007name.json", "control\u200dname.json", "e\u0301.json"],
+    [
+        "control\nname.json",
+        "control\u0007name.json",
+        "control\u200dname.json",
+        "e\u0301.json",
+    ],
 )
 def test_clean_runner_attestor_rejects_control_format_and_non_nfc_names(
     tmp_path: Path, malicious_name: str
@@ -214,7 +227,9 @@ def test_clean_runner_attestor_rejects_self_hosted_producer_job(tmp_path: Path) 
         env={
             "SOURCE_SHA": "a" * 40,
             "PRODUCER_ARTIFACT_ID": "123",
-            "PRODUCER_ARTIFACT_DIGEST": hashlib.sha256(archive_path.read_bytes()).hexdigest(),
+            "PRODUCER_ARTIFACT_DIGEST": hashlib.sha256(
+                archive_path.read_bytes()
+            ).hexdigest(),
             "CANDIDATE_ARTIFACT_NAME": "opensees-calculix-current-source-candidate-456-1",
             "FINAL_ARTIFACT_NAME": "opensees-calculix-current-source-456-1",
             "GITHUB_RUN_ID": "456",
@@ -228,8 +243,10 @@ def test_clean_runner_attestor_rejects_self_hosted_producer_job(tmp_path: Path) 
     assert "workflow_job_runner_invalid" in completed.stderr
 
 
+@pytest.mark.parametrize("event", ["push", "schedule"])
 def test_clean_runner_attestor_does_not_trust_candidate_technical_pass(
     tmp_path: Path,
+    event: str,
 ) -> None:
     archive_path = tmp_path / "self-certified.zip"
     files = {
@@ -255,7 +272,20 @@ def test_clean_runner_attestor_does_not_trust_candidate_technical_pass(
         for name, raw in files.items():
             archive.writestr(name, raw)
 
-    completed = _run_inline_attestor(tmp_path, archive_path.read_bytes())
+    completed = _run_inline_attestor(tmp_path, archive_path.read_bytes(), event=event)
 
     assert completed.returncode != 0
     assert "child_receipt_contract_invalid" in completed.stderr
+
+
+def test_clean_runner_attestor_rejects_non_main_trigger(tmp_path: Path) -> None:
+    archive_path = tmp_path / "not-a-main-trigger.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr("README.md", "candidate")
+
+    completed = _run_inline_attestor(
+        tmp_path, archive_path.read_bytes(), event="pull_request"
+    )
+
+    assert completed.returncode != 0
+    assert "workflow_run_identity_invalid" in completed.stderr
