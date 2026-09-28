@@ -220,6 +220,10 @@ def _run_candidate_search(
     request = decode_bounded_rc_fiber_direct_control_request(
         study._bytes(request.to_dict())
     )
+    if request.experimental_pin_roller_beam and request.constant_nodal_loads:
+        raise ValueError(
+            "pin-roller design comparison does not support constant preloads"
+        )
     uses_policy = only_strategy != "price_order"
     if not uses_policy and (policy is not None or training_report is not None):
         raise ValueError("price-only execution must not receive learned artifacts")

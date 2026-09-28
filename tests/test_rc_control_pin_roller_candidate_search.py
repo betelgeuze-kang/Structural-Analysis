@@ -56,6 +56,46 @@ def test_v4_descriptors_preserve_request_and_reject_missing_opt_in():
             )
 
 
+@pytest.mark.parametrize(
+    "entry", ["training", "reinforcement_training", "price_order", "search"]
+)
+def test_v4_preloads_rejected_before_output_publication(tmp_path, monkeypatch, entry):
+    args = inputs()
+    args["request"] = replace(
+        args["request"], constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),)
+    )
+    output = tmp_path / entry
+
+    def unexpected_comparison(*_args, **_kwargs):
+        pytest.fail("invalid preload reached design execution")
+
+    monkeypatch.setattr(
+        learning.study, "compare_rc_control_designs", unexpected_comparison
+    )
+    with pytest.raises(ValueError, match="pin-roller.*constant preloads"):
+        if entry in ("training", "reinforcement_training"):
+            learning.train_rc_control_candidate_policy(
+                **args,
+                reinforcement_features=entry == "reinforcement_training",
+                output_directory=output,
+            )
+        else:
+            options = dict(
+                prices=design.FiberFrameMaterialPrices(
+                    100, 1, "KRW", "2026-09-29", "Synthetic development arithmetic only"
+                ),
+                full_analysis_budget=2,
+                output_directory=output,
+            )
+            if entry == "price_order":
+                search.run_rc_control_candidate_strategy(
+                    **args, **options, strategy=entry
+                )
+            else:
+                search.compare_rc_control_candidate_search(**args, **options)
+    assert not output.exists()
+
+
 def test_v4_full_search_keeps_complete_pair_and_separate_oracle(tmp_path):
     args = inputs()
     policy, training = learning.train_rc_control_candidate_policy(
