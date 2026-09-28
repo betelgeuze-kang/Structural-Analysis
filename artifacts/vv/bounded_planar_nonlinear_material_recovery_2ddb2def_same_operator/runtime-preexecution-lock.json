@@ -1,0 +1,78 @@
+{
+  "artifact_hash": "sha256:c52ce1e89b3e9539b7713dcf1f0a593964c10b15a509999dc90095b7f6daaa3d",
+  "claim_boundary": "The local OCI image and named external assets were content-addressed before a no-network execution. This supports same-operator technical freshness only; it is not redistribution or legal-use approval, independent reproduction, Verification Level 2, or release authority.",
+  "container_image": {
+    "architecture": "amd64",
+    "base_image": "docker.io/library/python:3.11-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba",
+    "content_addressed_before_execution": true,
+    "derived_image_id": "sha256:626da371dca6e8195a5aad4c32b7749a68ad5dc7fe252467f4864e68d2c5eb1a",
+    "os": "linux",
+    "published": false,
+    "rootfs_layer_diff_ids": [
+      "sha256:81f823b9617547261c907396f63f770deaa554748ff739bedfa650e3bb74595a",
+      "sha256:4afd601a0b71a78a672236c1cbc5be357ab2e6d89f1281fab21c404c29a20e9f",
+      "sha256:67cf2840064f2c10fa903ff81ccc39ba1bd74cd4fbcf5d03f903d50e6970ee74",
+      "sha256:6ed84982cd237e878bed0365d119ffa2b1b053d3db32716796379392b42496d1",
+      "sha256:51ca004cec9f1784b0ee93821909dcfc898b92556ea84a02de29b8c64e59626b"
+    ]
+  },
+  "control_files": [
+    {
+      "file_sha256": "sha256:d4996e90852bb8ce12c1e891c959fcd9ea36868b7f1143447761385eef4432c9",
+      "path": "benchmarks/clean-runners/bounded-planar-supplemental/Dockerfile",
+      "size": 713
+    },
+    {
+      "file_sha256": "sha256:e95227c981842b518a3f840ca9aecdc52c8f52b9c709b4a8e7cc1d4a1d5ff3bc",
+      "path": "benchmarks/clean-runners/bounded-planar-supplemental/run_family.py",
+      "size": 8460
+    },
+    {
+      "file_sha256": "sha256:d9a6346cb668b0abec6658467fb7b68d00afc61c534e608a6a05ceeb259f0736",
+      "path": "scripts/bounded_planar_runtime_lock.py",
+      "size": 18616
+    }
+  ],
+  "execution_policy": {
+    "asset_mount_read_only": true,
+    "capabilities_dropped": true,
+    "docker_socket_mounted": false,
+    "image_selected_by_content_address": true,
+    "network_disabled": true,
+    "no_new_privileges": true,
+    "only_persistent_result_mount_writable": true,
+    "repository_mount_read_only": true,
+    "root_filesystem_read_only": true
+  },
+  "external_assets": [
+    {
+      "asset_id": "openseespy",
+      "file_sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+      "filename": "openseespy-3.7.1.2-py3-none-any.whl",
+      "kind": "python_wheel",
+      "size": 5337,
+      "source": "https://pypi.org/project/openseespy/3.7.1.2/",
+      "version": "3.7.1.2"
+    },
+    {
+      "asset_id": "openseespylinux",
+      "file_sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a",
+      "filename": "openseespylinux-3.7.1.2-py3-none-any.whl",
+      "kind": "python_wheel",
+      "size": 58094841,
+      "source": "https://pypi.org/project/openseespylinux/3.7.1.2/",
+      "version": "3.7.1.2"
+    }
+  ],
+  "family_id": "nonlinear_material_recovery",
+  "lock_mode": "local_content_addressed_oci_image_plus_hash_locked_assets",
+  "networked_acquisition_completed_before_lock": true,
+  "prepared_at": "2026-09-28T15:05:13.688947+00:00",
+  "prepared_before_external_execution": true,
+  "runtime_asset_bytes_attached": false,
+  "runtime_asset_metadata_sealed": true,
+  "same_operator_technical_credit_only": true,
+  "schema_version": "bounded-planar-runtime-preexecution-lock.v1",
+  "source_commit_sha": "2ddb2deff53ec4e5b7bb6c047709f914a5dd554e",
+  "source_tree_sha": "5c01d707a8a2bfbb8f2335a5af419d3c81291415"
+}

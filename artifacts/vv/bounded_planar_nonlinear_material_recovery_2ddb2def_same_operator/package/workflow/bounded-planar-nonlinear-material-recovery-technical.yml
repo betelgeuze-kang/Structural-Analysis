@@ -1,0 +1,164 @@
+name: Bounded Planar Nonlinear Material Recovery Technical Execution
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  WORKFLOW_SHA: "${{ github.workflow_sha }}"
+  FAMILY_ID: nonlinear_material_recovery
+  PACKAGE_DIR: artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package
+  RESULT_DIR: .ci/bounded-planar-nonlinear-material-recovery/results
+  RECEIPT_PATH: .ci/bounded-planar-nonlinear-material-recovery/technical-receipt.json
+  SEAL_PATH: .ci/bounded-planar-nonlinear-material-recovery/producer-seal.json
+  RUNTIME_ASSET_DIR: /tmp/structural-analysis-nonlinear-${{ github.run_id }}-${{ github.run_attempt }}/runtime-assets
+  RUNTIME_IMAGE_INSPECT: /tmp/structural-analysis-nonlinear-${{ github.run_id }}-${{ github.run_attempt }}/image-inspect.json
+  RUNTIME_IMAGE_TAG: structural-analysis-bounded-planar-nonlinear:${{ github.run_id }}-${{ github.run_attempt }}
+  RUNTIME_LOCK_PATH: .ci/bounded-planar-nonlinear-material-recovery/runtime-preexecution-lock.json
+  CANDIDATE_ARTIFACT_NAME: bounded-planar-nonlinear-material-recovery-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+
+concurrency:
+  group: bounded-planar-nonlinear-material-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  produce:
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      artifact-id: ${{ steps.upload_candidate.outputs.artifact-id }}
+      artifact-digest: ${{ steps.upload_candidate.outputs.artifact-digest }}
+    steps:
+      - name: Checkout exact current-main source without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 1
+          lfs: false
+          persist-credentials: false
+
+      - name: Verify exact clean source identity
+        run: |
+          set -euo pipefail
+          test "$WORKFLOW_SHA" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12.11"
+
+      - name: Install hash-locked contract runtime
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes --no-deps \
+            --force-reinstall --no-cache-dir \
+            -r canonical/requirements-cp312-manylinux2014-x86_64.lock
+
+      - name: Materialize and check exact execution package
+        run: |
+          set -euo pipefail
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py --check
+
+      - name: Acquire hash-locked OpenSees assets
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNTIME_ASSET_DIR"
+          python -m pip download --only-binary=:all: --require-hashes \
+            --dest "$RUNTIME_ASSET_DIR" -r "$PACKAGE_DIR/requirements.txt"
+
+      - name: Build and seal content-addressed runtime before execution
+        run: |
+          set -euo pipefail
+          docker build --pull --provenance=false --platform linux/amd64 \
+            --tag "$RUNTIME_IMAGE_TAG" \
+            benchmarks/clean-runners/bounded-planar-supplemental
+          mkdir -p "$(dirname "$RUNTIME_IMAGE_INSPECT")"
+          docker image inspect "$RUNTIME_IMAGE_TAG" > "$RUNTIME_IMAGE_INSPECT"
+          python scripts/bounded_planar_runtime_lock.py prepare \
+            --family-id "$FAMILY_ID" --source-sha "$SOURCE_SHA" \
+            --source-tree-sha "$(git rev-parse HEAD^{tree})" \
+            --asset-dir "$RUNTIME_ASSET_DIR" \
+            --image-inspect "$RUNTIME_IMAGE_INSPECT" --out "$RUNTIME_LOCK_PATH"
+
+      - name: Execute nonlinear cases in exact no-network runtime
+        run: |
+          set -euo pipefail
+          mkdir -p "$RESULT_DIR"
+          runtime_image_id="$(python scripts/bounded_planar_runtime_lock.py image-id --manifest "$RUNTIME_LOCK_PATH")"
+          test "$(docker image inspect "$runtime_image_id" --format '{{.Id}}')" = "$runtime_image_id"
+          docker run --rm --platform linux/amd64 --network none --read-only \
+            --cap-drop ALL --security-opt no-new-privileges=true --pids-limit 256 \
+            --user "$(id -u):$(id -g)" \
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=1073741824 \
+            --mount "type=bind,src=$PWD,dst=/workspace,readonly" \
+            --mount "type=bind,src=$RUNTIME_ASSET_DIR,dst=/assets,readonly" \
+            --mount "type=bind,src=$PWD/$RESULT_DIR,dst=/results" \
+            "$runtime_image_id" \
+            /workspace/benchmarks/clean-runners/bounded-planar-supplemental/run_family.py \
+            --family-id "$FAMILY_ID" --package-dir "/workspace/$PACKAGE_DIR" \
+            --result-dir /results --asset-dir /assets \
+            --runtime-manifest "/workspace/$RUNTIME_LOCK_PATH" \
+            --derived-image-id "$runtime_image_id"
+
+      - name: Build fail-closed technical receipt
+        run: >-
+          python scripts/ingest_bounded_planar_external_nonlinear_material_recovery_results.py
+          --package-dir "$PACKAGE_DIR" --results-dir "$RESULT_DIR"
+          --out "$RECEIPT_PATH" --fail-technical-blocked
+
+      - name: Seal exact clean source, runtime, package, results, and receipt
+        run: >-
+          python scripts/build_bounded_planar_technical_producer_seal.py
+          --family-id "$FAMILY_ID" --receipt-path "$RECEIPT_PATH"
+          --package-dir "$PACKAGE_DIR" --runtime-asset-dir "$RUNTIME_ASSET_DIR"
+          --runtime-lock-manifest "$RUNTIME_LOCK_PATH" --out "$SEAL_PATH"
+          --source-sha "$SOURCE_SHA" --source-tree-sha "$(git rev-parse HEAD^{tree})"
+          --workflow-sha "$WORKFLOW_SHA" --repository "$GITHUB_REPOSITORY"
+          --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT"
+          --candidate-artifact-name "$CANDIDATE_ARTIFACT_NAME"
+
+      - name: Upload immutable unprivileged candidate
+        id: upload_candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.CANDIDATE_ARTIFACT_NAME }}
+          path: |
+            .ci/bounded-planar-nonlinear-material-recovery
+            ${{ env.PACKAGE_DIR }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  attest:
+    needs: produce
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: ./.github/workflows/bounded-planar-sealed-technical-attestor.yml
+    with:
+      producer-artifact-id: ${{ needs.produce.outputs.artifact-id }}
+      producer-artifact-digest: ${{ needs.produce.outputs.artifact-digest }}
+      source-sha: ${{ github.sha }}
+      family-id: nonlinear_material_recovery
+      caller-workflow-path: .github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml
+      receipt-path: .ci/bounded-planar-nonlinear-material-recovery/technical-receipt.json
+      seal-path: .ci/bounded-planar-nonlinear-material-recovery/producer-seal.json
+      handoff-path: .ci/bounded-planar-nonlinear-material-recovery/artifact-handoff.json
+      attestation-bundle-path: .ci/bounded-planar-nonlinear-material-recovery/artifact-handoff.sigstore.json
+      attestation-verification-path: .ci/bounded-planar-nonlinear-material-recovery/attestation-verification.json
+      candidate-artifact-name: bounded-planar-nonlinear-material-recovery-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+      final-artifact-name: bounded-planar-nonlinear-material-recovery-${{ github.run_id }}-${{ github.run_attempt }}

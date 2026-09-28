@@ -1,0 +1,262 @@
+{
+  "artifact_hash": "sha256:f73d93dd3ff3546050eed487f1e2d01c4f872b3e3247f02ea72075b2a349c658",
+  "blockers": [
+    "external_runtime_execution_missing"
+  ],
+  "cases": [
+    {
+      "blockers": [
+        "external_runtime_execution_missing"
+      ],
+      "case_id": "bounded_planar_p_delta",
+      "case_kind": "p_delta_portal",
+      "current_product_contract_pass": true,
+      "external_execution_status": "unavailable",
+      "external_reference_attached": false,
+      "external_runner": {
+        "file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "path": "runner/run_case.py"
+      },
+      "metric_ids": [
+        "pdelta.amplification.ratio_0p25",
+        "pdelta.amplification.ratio_0p5",
+        "pdelta.amplification.ratio_0p75",
+        "pdelta.amplification.ratio_0p9",
+        "pdelta.amplification.ratio_0p95",
+        "pdelta.base_effective_stiffness_kn_per_m",
+        "pdelta.response.monotonic"
+      ],
+      "model": {
+        "artifact_hash": "sha256:e5f8b7897cb530564e6464adb0ca0e7ed1d927f9ff199117a1f4c2281b3db9a8",
+        "file_sha256": "sha256:cd709c803422bbd08b5834de8497249616f05218df8a6e6f8ffaa9da2fe5db8f",
+        "path": "models/bounded_planar_p_delta.case.json"
+      },
+      "product_result": {
+        "artifact_hash": "sha256:e93064550884e3954ab585d7c1d527592f294d0389faf24704cd9c70ec8631b4",
+        "file_sha256": "sha256:7a010b8c42d29112b219696d295b24e2b7812d445f57c9734866912d0b0f8da2",
+        "path": "product/bounded_planar_p_delta.product-result.json"
+      },
+      "requirement_id": "geometric_nonlinear.p_delta"
+    },
+    {
+      "blockers": [
+        "external_runtime_execution_missing"
+      ],
+      "case_id": "bounded_planar_snap_through",
+      "case_kind": "lee_frame_snap_through",
+      "current_product_contract_pass": true,
+      "external_execution_status": "unavailable",
+      "external_reference_attached": false,
+      "external_runner": {
+        "file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "path": "runner/run_case.py"
+      },
+      "metric_ids": [
+        "snap.descending_branch_observed",
+        "snap.first_limit.downward_displacement_m",
+        "snap.first_limit.horizontal_displacement_m",
+        "snap.first_limit.load_factor",
+        "snap.negative_load_observed"
+      ],
+      "model": {
+        "artifact_hash": "sha256:ddd7eed2806ca47fc7835f3664382af944fe55e3cdbe30c4141c1b16bb03c06e",
+        "file_sha256": "sha256:3beed4f697b444b2087bec2ef4f1c2cf1ee969908a16adffe5636cafbfafd7a2",
+        "path": "models/bounded_planar_snap_through.case.json"
+      },
+      "product_result": {
+        "artifact_hash": "sha256:6e9461b47a2848ef1b2803ed2eda36da000e4a9665072b8a4371c088050db5e1",
+        "file_sha256": "sha256:c2cbb6cc6aa28aafbf9d49b0aae159e7eca8c3f691098232dc0572cc319a4e2f",
+        "path": "product/bounded_planar_snap_through.product-result.json"
+      },
+      "requirement_id": "geometric_nonlinear.snap_through"
+    },
+    {
+      "blockers": [
+        "external_runtime_execution_missing"
+      ],
+      "case_id": "bounded_planar_steel_yield",
+      "case_kind": "steel_uniaxial_yield",
+      "current_product_contract_pass": true,
+      "external_execution_status": "unavailable",
+      "external_reference_attached": false,
+      "external_runner": {
+        "file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "path": "runner/run_case.py"
+      },
+      "metric_ids": [
+        "steel.post_yield_tangent_mpa",
+        "steel.stress.strain_0p000500_mpa",
+        "steel.stress.strain_0p001250_mpa",
+        "steel.stress.strain_0p002000_mpa",
+        "steel.stress.strain_0p004000_mpa",
+        "steel.yielded_point_count"
+      ],
+      "model": {
+        "artifact_hash": "sha256:133be166ec25de70833617e749a8135d3607cef32c25e275ff5510016efa7348",
+        "file_sha256": "sha256:de351e40f36b3be1f15e91ad4f820dae57debde792b500032a1020f508da046c",
+        "path": "models/bounded_planar_steel_yield.case.json"
+      },
+      "product_result": {
+        "artifact_hash": "sha256:65cd36a7e12dadcc08782bd501ccb4c201edb16281fb283ea09f05fa18fb1f5a",
+        "file_sha256": "sha256:d0bcf557f93c5807ba17b9be8ed6a435b4edbc20b25690a563006c0af58903a6",
+        "path": "product/bounded_planar_steel_yield.product-result.json"
+      },
+      "requirement_id": "material.steel_yield"
+    },
+    {
+      "blockers": [
+        "external_runtime_execution_missing"
+      ],
+      "case_id": "bounded_planar_rc_fiber",
+      "case_kind": "rc_fiber_nonlinear_section",
+      "current_product_contract_pass": true,
+      "external_execution_status": "unavailable",
+      "external_reference_attached": false,
+      "external_runner": {
+        "file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "path": "runner/run_case.py"
+      },
+      "metric_ids": [
+        "fiber.0.strain",
+        "fiber.0.stress_mpa",
+        "fiber.1.strain",
+        "fiber.1.stress_mpa",
+        "fiber.2.strain",
+        "fiber.2.stress_mpa",
+        "fiber.3.strain",
+        "fiber.3.stress_mpa",
+        "fiber.count",
+        "rc.nonlinear_concrete_fiber_count",
+        "rc.yielded_steel_fiber_count",
+        "section.axial_force_kn",
+        "section.moment_z_kn_m"
+      ],
+      "model": {
+        "artifact_hash": "sha256:3c39863f6e3fa92d86824fd631883aa651f1f1d4ed25cb17bae9fb8eee746db0",
+        "file_sha256": "sha256:d78e15d5e8320f8f62753b171bad0ca8a10afe3f8e75caed468314f466ff5fd6",
+        "path": "models/bounded_planar_rc_fiber.case.json"
+      },
+      "product_result": {
+        "artifact_hash": "sha256:24b4157ae7a9c1b1eff310ea6a515542a56a03aca22fe8a1fad3ecc4707a600f",
+        "file_sha256": "sha256:3b0827370d0f20d770e628271747ce9b6074562cfc5c0e4289f7ede18939677c",
+        "path": "product/bounded_planar_rc_fiber.product-result.json"
+      },
+      "requirement_id": "material.rc_fiber"
+    },
+    {
+      "blockers": [
+        "external_runtime_execution_missing"
+      ],
+      "case_id": "bounded_planar_section_recovery",
+      "case_kind": "rc_fiber_elastic_section_recovery",
+      "current_product_contract_pass": true,
+      "external_execution_status": "unavailable",
+      "external_reference_attached": false,
+      "external_runner": {
+        "file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "path": "runner/run_case.py"
+      },
+      "metric_ids": [
+        "section.axial_force_kn",
+        "section.moment_z_kn_m"
+      ],
+      "model": {
+        "artifact_hash": "sha256:27d7ab4a85282c00cd13b9d9c2080e60f46b1ef85ab9ebdc76ec6c0244d914db",
+        "file_sha256": "sha256:7fb386a6e5439987655c2a813ff4c57e75bd1455e2fefc480a3e1c236b017f1c",
+        "path": "models/bounded_planar_section_recovery.case.json"
+      },
+      "product_result": {
+        "artifact_hash": "sha256:d8da6b86e31a183350710f3ad64b304545a5e362be748bec6777432395825bda",
+        "file_sha256": "sha256:a2035b9e87b074377d400ba9bb5b7a7d896f530034389cea1b9e0d8ab35f17dc",
+        "path": "product/bounded_planar_section_recovery.product-result.json"
+      },
+      "requirement_id": "recovery.section"
+    },
+    {
+      "blockers": [
+        "external_runtime_execution_missing"
+      ],
+      "case_id": "bounded_planar_fiber_recovery",
+      "case_kind": "rc_fiber_elastic_fiber_recovery",
+      "current_product_contract_pass": true,
+      "external_execution_status": "unavailable",
+      "external_reference_attached": false,
+      "external_runner": {
+        "file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "path": "runner/run_case.py"
+      },
+      "metric_ids": [
+        "fiber.0.strain",
+        "fiber.0.stress_mpa",
+        "fiber.1.strain",
+        "fiber.1.stress_mpa",
+        "fiber.2.strain",
+        "fiber.2.stress_mpa",
+        "fiber.3.strain",
+        "fiber.3.stress_mpa",
+        "fiber.count"
+      ],
+      "model": {
+        "artifact_hash": "sha256:a3e8ebce55d99052eb310b79279157b3ff76c3554413b4d6bd7205c320a16e15",
+        "file_sha256": "sha256:c8064f35f14afbd5b0a4fbafbf4aba97ab100e87302b373b10238dd0ac70ea62",
+        "path": "models/bounded_planar_fiber_recovery.case.json"
+      },
+      "product_result": {
+        "artifact_hash": "sha256:dd1a17a2e71bd71ef2215f5eccc889973a0ebb49bc1ee7c6d3edf15a66378bb4",
+        "file_sha256": "sha256:99de18e63978891dbee278d2234318e3d20188ce36b36d6f519d4d505596043e",
+        "path": "product/bounded_planar_fiber_recovery.product-result.json"
+      },
+      "requirement_id": "recovery.fiber"
+    }
+  ],
+  "claim_boundary": "This source-bound package records six exact bounded inputs, current-product reference values and tolerances, source hashes, one standalone OpenSees runner, pinned runtime versions, and output authenticity fields. OpenSees was not executed while building the package and no operator evidence is attached, so it grants no matrix credit, Verification Level 2, design authority, commercial equivalence, or release readiness.",
+  "claims": {
+    "current_product_replay": true,
+    "exact_case_inputs": true,
+    "external_reference_attached": false,
+    "external_runner_syntax_checked": true,
+    "external_solver_execution": false,
+    "output_authenticity_contract": true,
+    "runtime_dependency_pinned": true,
+    "verification_level_2": false,
+    "verification_matrix_credit": false
+  },
+  "contract_pass": true,
+  "execution_workflow": {
+    "file_sha256": "sha256:4ac5db1e4ea8bf9301ac31ca15447a4b40e2490780bcbcfbe0ff0bf1f67a31d1",
+    "path": "workflow/bounded-planar-nonlinear-material-recovery-technical.yml"
+  },
+  "external_result_schema": {
+    "file_sha256": "sha256:338187dc15e3edc3e598f22c9afc9477d20fa824db5937cc979bd5dfd593902a",
+    "path": "schemas/bounded_planar_opensees_nonlinear_material_recovery_result_v1.schema.json"
+  },
+  "operator_readme": {
+    "file_sha256": "sha256:60a622886ea2dfe6a967be36b4a94bcf01cc22f3f3938be0d73ab36a3f9219ce",
+    "path": "README.md"
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "python_requirements": {
+    "file_sha256": "sha256:99377ffe3614d842b8680c78f186ec2523c53b1a6feac692d1beab93e816993c",
+    "path": "requirements.txt"
+  },
+  "schema_version": "bounded-planar-external-nonlinear-material-recovery-case-package.v1",
+  "source_commit_sha": "2ddb2deff53ec4e5b7bb6c047709f914a5dd554e",
+  "source_files": {
+    "scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py": "sha256:7e810dff2bf11775411e462a7bf5bb47891ad778287e8b698f9a7c0e7a3be113",
+    "scripts/ingest_bounded_planar_external_nonlinear_material_recovery_results.py": "sha256:b7a4223db62e3571c837faf95483b78768634423697165f1e006334ab81aa7d3",
+    "scripts/run_bounded_planar_external_nonlinear_material_recovery_case.py": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+    "src/structural_analysis/benchmark/lee_frame.py": "sha256:082ab121a2dfb359341998cfcc22629d516a32c5fcf9bb5d77d88ceaee909741",
+    "src/structural_analysis/benchmark/portal_frame_pdelta.py": "sha256:a8eabda9c7b9049e292e41e8f1797afa9e019093d49548c481a0060b79b5febe",
+    "src/structural_analysis/materials/concrete_damage.py": "sha256:dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+    "src/structural_analysis/materials/stateful_fiber_section.py": "sha256:ae20466b008c68863ae7ddd8d7000fef9bb1ee0fde5d515726c2c15de38c8c32",
+    "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
+    "src/structural_analysis/schemas/bounded_planar_external_nonlinear_material_recovery_case_package_v1.schema.json": "sha256:78bfc1d493efb8becc0852c83e730eb36b855e11a5e972f1620d0efea109935b",
+    "src/structural_analysis/schemas/bounded_planar_external_nonlinear_material_recovery_execution_receipt_v1.schema.json": "sha256:0cbd6874b78bf5cc45c0429b471e40d501e95e206fbfec3381d8adab351d9559",
+    "src/structural_analysis/schemas/bounded_planar_opensees_nonlinear_material_recovery_result_v1.schema.json": "sha256:338187dc15e3edc3e598f22c9afc9477d20fa824db5937cc979bd5dfd593902a"
+  },
+  "summary": {
+    "case_count": 6,
+    "external_ready_count": 0,
+    "product_ready_count": 6
+  }
+}

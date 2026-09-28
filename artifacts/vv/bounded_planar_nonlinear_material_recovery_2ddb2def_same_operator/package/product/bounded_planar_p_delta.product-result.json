@@ -1,0 +1,55 @@
+{
+  "artifact_hash": "sha256:e93064550884e3954ab585d7c1d527592f294d0389faf24704cd9c70ec8631b4",
+  "case_id": "bounded_planar_p_delta",
+  "case_kind": "p_delta_portal",
+  "claims": {
+    "bounded_product_reference": true,
+    "external_reference_attached": false,
+    "verification_level_2": false,
+    "verification_matrix_credit": false
+  },
+  "contract_pass": true,
+  "metrics": {
+    "pdelta.amplification.ratio_0p25": 1.3332031887270555,
+    "pdelta.amplification.ratio_0p5": 1.99960956618027,
+    "pdelta.amplification.ratio_0p75": 3.998828698540355,
+    "pdelta.amplification.ratio_0p9": 9.9964860956357,
+    "pdelta.amplification.ratio_0p95": 19.992581757367628,
+    "pdelta.base_effective_stiffness_kn_per_m": 10411.570108589116,
+    "pdelta.response.monotonic": 1.0
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "requirement_id": "geometric_nonlinear.p_delta",
+  "schema_version": "bounded-planar-nonlinear-material-recovery-product-result.v1",
+  "source_model_file_sha256": "sha256:cd709c803422bbd08b5834de8497249616f05218df8a6e6f8ffaa9da2fe5db8f",
+  "tolerances": {
+    "pdelta.amplification.ratio_0p25": {
+      "absolute_tolerance": 0.03,
+      "relative_tolerance": 0.01
+    },
+    "pdelta.amplification.ratio_0p5": {
+      "absolute_tolerance": 0.03,
+      "relative_tolerance": 0.01
+    },
+    "pdelta.amplification.ratio_0p75": {
+      "absolute_tolerance": 0.03,
+      "relative_tolerance": 0.01
+    },
+    "pdelta.amplification.ratio_0p9": {
+      "absolute_tolerance": 0.03,
+      "relative_tolerance": 0.01
+    },
+    "pdelta.amplification.ratio_0p95": {
+      "absolute_tolerance": 0.03,
+      "relative_tolerance": 0.01
+    },
+    "pdelta.base_effective_stiffness_kn_per_m": {
+      "absolute_tolerance": 1e-05,
+      "relative_tolerance": 1e-08
+    },
+    "pdelta.response.monotonic": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    }
+  }
+}

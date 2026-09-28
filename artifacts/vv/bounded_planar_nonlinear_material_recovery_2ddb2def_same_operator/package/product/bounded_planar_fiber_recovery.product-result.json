@@ -1,0 +1,65 @@
+{
+  "artifact_hash": "sha256:dd1a17a2e71bd71ef2215f5eccc889973a0ebb49bc1ee7c6d3edf15a66378bb4",
+  "case_id": "bounded_planar_fiber_recovery",
+  "case_kind": "rc_fiber_elastic_fiber_recovery",
+  "claims": {
+    "bounded_product_reference": true,
+    "external_reference_attached": false,
+    "verification_level_2": false,
+    "verification_matrix_credit": false
+  },
+  "contract_pass": true,
+  "metrics": {
+    "fiber.0.strain": 1.5e-05,
+    "fiber.0.stress_mpa": 0.45,
+    "fiber.1.strain": -1.4999999999999997e-05,
+    "fiber.1.stress_mpa": -0.4499999999999999,
+    "fiber.2.strain": 2.5e-05,
+    "fiber.2.stress_mpa": 5.0,
+    "fiber.3.strain": -2.5e-05,
+    "fiber.3.stress_mpa": -5.0,
+    "fiber.count": 4.0
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "requirement_id": "recovery.fiber",
+  "schema_version": "bounded-planar-nonlinear-material-recovery-product-result.v1",
+  "source_model_file_sha256": "sha256:c8064f35f14afbd5b0a4fbafbf4aba97ab100e87302b373b10238dd0ac70ea62",
+  "tolerances": {
+    "fiber.0.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.0.stress_mpa": {
+      "absolute_tolerance": 1e-07,
+      "relative_tolerance": 1e-08
+    },
+    "fiber.1.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.1.stress_mpa": {
+      "absolute_tolerance": 1e-07,
+      "relative_tolerance": 1e-08
+    },
+    "fiber.2.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.2.stress_mpa": {
+      "absolute_tolerance": 1e-07,
+      "relative_tolerance": 1e-08
+    },
+    "fiber.3.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.3.stress_mpa": {
+      "absolute_tolerance": 1e-07,
+      "relative_tolerance": 1e-08
+    },
+    "fiber.count": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    }
+  }
+}

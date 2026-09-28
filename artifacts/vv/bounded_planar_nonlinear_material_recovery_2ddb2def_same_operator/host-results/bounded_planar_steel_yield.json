@@ -1,0 +1,31 @@
+{
+  "artifact_hash": "sha256:b5cb545228e4efa06608cc0efa4f5b61c994d5025ac4058ae4f2835eb8b07776",
+  "blockers": [],
+  "case_id": "bounded_planar_steel_yield",
+  "contract_pass": true,
+  "executed_at": "2026-09-28T15:06:49.690075+00:00",
+  "metrics": {
+    "steel.post_yield_tangent_mpa": 7692.307692307692,
+    "steel.stress.strain_0p000500_mpa": 100.0,
+    "steel.stress.strain_0p001250_mpa": 250.0,
+    "steel.stress.strain_0p002000_mpa": 255.76923076923077,
+    "steel.stress.strain_0p004000_mpa": 271.15384615384613,
+    "steel.yielded_point_count": 2.0
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "return_codes": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+  "runtime": {
+    "opensees_core_version": "3.7.1",
+    "openseespy_version": "3.7.1.2",
+    "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.35",
+    "python_version": "3.10.12"
+  },
+  "schema_version": "bounded-planar-opensees-nonlinear-material-recovery-result.v1",
+  "source_model_file_sha256": "sha256:de351e40f36b3be1f15e91ad4f820dae57debde792b500032a1020f508da046c"
+}

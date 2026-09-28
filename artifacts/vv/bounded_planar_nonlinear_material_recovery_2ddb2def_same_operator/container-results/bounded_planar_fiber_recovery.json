@@ -1,0 +1,35 @@
+{
+  "artifact_hash": "sha256:29672752f2bfd3ecb871da9f81763059f5c705f6e91ea60aeff5efa9b3cecf96",
+  "blockers": [],
+  "case_id": "bounded_planar_fiber_recovery",
+  "contract_pass": true,
+  "executed_at": "2026-09-28T15:06:03.474356+00:00",
+  "metrics": {
+    "fiber.0.strain": 1.4999999999999997e-05,
+    "fiber.0.stress_mpa": 0.4499999999999999,
+    "fiber.1.strain": -1.5e-05,
+    "fiber.1.stress_mpa": -0.45,
+    "fiber.2.strain": 2.4999999999999998e-05,
+    "fiber.2.stress_mpa": 5.0,
+    "fiber.3.strain": -2.5e-05,
+    "fiber.3.stress_mpa": -5.0,
+    "fiber.count": 4.0,
+    "rc.nonlinear_concrete_fiber_count": 0.0,
+    "rc.yielded_steel_fiber_count": 0.0,
+    "section.axial_force_kn": -1.3877787807814457e-14,
+    "section.moment_z_kn_m": 20.069999999999993
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "return_codes": [
+    0
+  ],
+  "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+  "runtime": {
+    "opensees_core_version": "3.7.1",
+    "openseespy_version": "3.7.1.2",
+    "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.36",
+    "python_version": "3.11.15"
+  },
+  "schema_version": "bounded-planar-opensees-nonlinear-material-recovery-result.v1",
+  "source_model_file_sha256": "sha256:c8064f35f14afbd5b0a4fbafbf4aba97ab100e87302b373b10238dd0ac70ea62"
+}

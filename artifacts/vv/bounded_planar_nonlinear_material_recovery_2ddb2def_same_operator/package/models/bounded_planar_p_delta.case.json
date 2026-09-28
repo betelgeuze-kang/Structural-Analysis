@@ -1,0 +1,26 @@
+{
+  "artifact_hash": "sha256:e5f8b7897cb530564e6464adb0ca0e7ed1d927f9ff199117a1f4c2281b3db9a8",
+  "case_id": "bounded_planar_p_delta",
+  "case_kind": "p_delta_portal",
+  "load_ratios": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.95
+  ],
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "product_critical_gravity_load_kn": 31246.91494693496,
+  "properties": {
+    "bay_width_m": 5.0,
+    "beam_area_m2": 0.2,
+    "beam_second_moment_m4": 0.00016,
+    "column_area_m2": 0.2,
+    "column_second_moment_m4": 8e-05,
+    "story_height_m": 3.0,
+    "youngs_modulus_kn_per_m2": 200000000.0
+  },
+  "requirement_id": "geometric_nonlinear.p_delta",
+  "schema_version": "bounded-planar-external-nonlinear-material-recovery-case.v1"
+}

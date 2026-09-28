@@ -1,0 +1,4 @@
+openseespy==3.7.1.2 \
+    --hash=sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65
+openseespylinux==3.7.1.2 \
+    --hash=sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a

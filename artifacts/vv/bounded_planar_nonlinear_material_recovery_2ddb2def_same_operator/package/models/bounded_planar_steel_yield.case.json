@@ -1,0 +1,20 @@
+{
+  "artifact_hash": "sha256:133be166ec25de70833617e749a8135d3607cef32c25e275ff5510016efa7348",
+  "case_id": "bounded_planar_steel_yield",
+  "case_kind": "steel_uniaxial_yield",
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "requirement_id": "material.steel_yield",
+  "schema_version": "bounded-planar-external-nonlinear-material-recovery-case.v1",
+  "steel": {
+    "elastic_modulus_mpa": 200000.0,
+    "isotropic_hardening_modulus_mpa": 3000.0,
+    "kinematic_hardening_modulus_mpa": 5000.0,
+    "yield_stress_mpa": 250.0
+  },
+  "strain_path": [
+    0.0005,
+    0.00125,
+    0.002,
+    0.004
+  ]
+}

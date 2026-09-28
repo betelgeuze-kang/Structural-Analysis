@@ -1,0 +1,85 @@
+{
+  "artifact_hash": "sha256:24b4157ae7a9c1b1eff310ea6a515542a56a03aca22fe8a1fad3ecc4707a600f",
+  "case_id": "bounded_planar_rc_fiber",
+  "case_kind": "rc_fiber_nonlinear_section",
+  "claims": {
+    "bounded_product_reference": true,
+    "external_reference_attached": false,
+    "verification_level_2": false,
+    "verification_matrix_credit": false
+  },
+  "contract_pass": true,
+  "metrics": {
+    "fiber.0.strain": 0.0006000000000000001,
+    "fiber.0.stress_mpa": 0.6693904804452885,
+    "fiber.1.strain": -0.0012,
+    "fiber.1.stress_mpa": -27.693490391599074,
+    "fiber.2.strain": 0.0012000000000000001,
+    "fiber.2.stress_mpa": 240.00000000000003,
+    "fiber.3.strain": -0.0018,
+    "fiber.3.stress_mpa": -254.23076923076923,
+    "fiber.count": 4.0,
+    "rc.nonlinear_concrete_fiber_count": 2.0,
+    "rc.yielded_steel_fiber_count": 1.0,
+    "section.axial_force_kn": -3264.921220107685,
+    "section.moment_z_kn_m": 701.7991633891061
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "requirement_id": "material.rc_fiber",
+  "schema_version": "bounded-planar-nonlinear-material-recovery-product-result.v1",
+  "source_model_file_sha256": "sha256:d78e15d5e8320f8f62753b171bad0ca8a10afe3f8e75caed468314f466ff5fd6",
+  "tolerances": {
+    "fiber.0.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.0.stress_mpa": {
+      "absolute_tolerance": 0.5,
+      "relative_tolerance": 0.12
+    },
+    "fiber.1.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.1.stress_mpa": {
+      "absolute_tolerance": 0.5,
+      "relative_tolerance": 0.12
+    },
+    "fiber.2.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.2.stress_mpa": {
+      "absolute_tolerance": 0.5,
+      "relative_tolerance": 0.12
+    },
+    "fiber.3.strain": {
+      "absolute_tolerance": 1e-12,
+      "relative_tolerance": 1e-09
+    },
+    "fiber.3.stress_mpa": {
+      "absolute_tolerance": 0.5,
+      "relative_tolerance": 0.12
+    },
+    "fiber.count": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    },
+    "rc.nonlinear_concrete_fiber_count": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    },
+    "rc.yielded_steel_fiber_count": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    },
+    "section.axial_force_kn": {
+      "absolute_tolerance": 2.0,
+      "relative_tolerance": 0.12
+    },
+    "section.moment_z_kn_m": {
+      "absolute_tolerance": 2.0,
+      "relative_tolerance": 0.12
+    }
+  }
+}
