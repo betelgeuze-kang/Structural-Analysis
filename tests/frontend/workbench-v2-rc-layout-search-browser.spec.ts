@@ -214,3 +214,58 @@ for (const tamper of ['initial', 'download'] as const) test(`RC staged layout br
   await expect(panel.locator('[data-rc-design-selected]')).toHaveCount(0)
   await expect(panel.locator('[data-rc-prefix-candidate]')).toHaveCount(0)
 })
+
+import { portalSpanBytes, type PortalSpanRun } from './rcPortalLayoutSpanFixture'
+
+for (const run of ['staged', 'full'] as const satisfies readonly PortalSpanRun[]) {
+  for (const width of [1440, 390]) {
+    test(`two-fixed portal span ${run} original review at ${width}px`, async ({ page }) => {
+      test.setTimeout(60000)
+      await page.setViewportSize({ width, height: 1000 })
+      await page.addInitScript((mode) => {
+        window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+          rcControlSearchUrl: `/portal-span-${mode}/result.json`,
+          jobAuthorization: () => ({ tenantId: 'synthetic-portal-span', bearerToken: 'synthetic-portal-span-token' }),
+        }
+      }, run)
+      await page.route(`**/portal-span-${run}/**`, async route => {
+        expect(await route.request().headerValue('authorization')).toBe('Bearer synthetic-portal-span-token')
+        const path = new URL(route.request().url()).pathname.replace(`/portal-span-${run}/`, '')
+        await route.fulfill({ contentType: 'application/json', body: Buffer.from(portalSpanBytes(run, path)) })
+      })
+      await page.goto(`${base}/#/workbench-v2`)
+      const panel = page.locator('[data-rc-search]')
+      await expect(panel).toHaveAttribute('data-rc-search', 'verified', { timeout: 60000 })
+      await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'shorter_span_360')
+      await expect(panel.locator('[data-rc-search-layout]')).toContainText('equivalent building function')
+      const planDownload = page.waitForEvent('download')
+      await panel.getByRole('button', { name: 'Download search plan', exact: true }).click()
+      expect(await readFile((await (await planDownload).path())!)).toEqual(Buffer.from(portalSpanBytes(run, 'plan.json')))
+      if (run === 'staged') {
+        await expect(panel.locator('[data-rc-search-staging]')).toContainText('Prefix steps: 4; full steps: 16')
+        await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('unavailable')
+        await expect(panel.locator('[data-rc-pruning-candidate="longer_span_440"]')).toContainText('Unknown')
+        await expect(panel.locator('[data-rc-pruning-candidate="longer_span_440"]')).toContainText('Skipped: higher cost')
+        for (const [label, path] of [
+          ['Download pool longer_span_440 model', 'pool/longer_span_440.json'],
+          ['Download longer_span_440 decision', 'price_order/decisions/02.json'],
+          ['Download prefix shorter_span_360 result', 'price_order/prefix/shorter_span_360/baseline/result.json'],
+        ]) {
+          const pending = page.waitForEvent('download')
+          await panel.getByRole('button', { name: label, exact: true }).click()
+          expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(portalSpanBytes(run, path)))
+        }
+      } else {
+        await expect(panel.locator('[data-rc-pruning-candidate]')).toHaveCount(0)
+        await panel.getByRole('button', { name: 'Select longer_span_440', exact: true }).click()
+        const details = panel.locator('[data-rc-design-details="longer_span_440"]')
+        await expect(panel.locator('[data-rc-design-candidate="longer_span_440"]')).toContainText('502.35744')
+        const pending = page.waitForEvent('download')
+        await details.getByRole('button', { name: 'Download longer_span_440 result', exact: true }).click()
+        expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(portalSpanBytes(run, 'price_order/longer_span_440/baseline/result.json')))
+      }
+      const bounds = await panel.boundingBox()
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
+    })
+  }
+}

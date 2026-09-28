@@ -1,0 +1,354 @@
+{
+  "execution_order": [
+    "staged",
+    "full"
+  ],
+  "full_json_file_count": 37,
+  "gzip_bytes": 2596579,
+  "gzip_sha256": "fc9c3ac52bf3cc233e8f07333b27b1f34f6fab414892097b5be6a2a395e16174",
+  "new_input_files": {
+    "layout-span-comparison.json": {
+      "byte_length": 776,
+      "sha256": "f83684c69adfb452067d3179ac95ec3e00159d60bad6ecaf6e366d3b4cc98a11"
+    },
+    "layout-span-comparison.md": {
+      "byte_length": 1611,
+      "sha256": "9cb4278195915275dd03a95ba9e42e42d505d9240814eb305f4da45f98706ce8"
+    },
+    "portal-span-360.json": {
+      "byte_length": 2710,
+      "sha256": "11c10f4decda5f78d69f5c638a4a5dc53f79c26a1fe98d5fe32aa3a62c97b710"
+    },
+    "portal-span-440.json": {
+      "byte_length": 2710,
+      "sha256": "45081f5f9598f8b5ce6f6f7b79618b61dd0912df749cd70ee81120410ae4c9b0"
+    }
+  },
+  "original_json_file_count": 79,
+  "originals": {
+    "full/plan.json": {
+      "byte_length": 8548,
+      "sha256": "91ae1bda7e903881c9a0e6abefc56336486d6ef7d2460a84472e0b858c5f44eb"
+    },
+    "full/pool/baseline.json": {
+      "byte_length": 1657,
+      "sha256": "73d2b76305f3a104061931cf028ab33c40b813889d5e198e7bae33895bfa19e1"
+    },
+    "full/pool/longer_span_440.json": {
+      "byte_length": 1661,
+      "sha256": "e0357fb370d8ee75f9a3da26606b33576e95ffe707c1dbfb05d3e1aa0cc0bd38"
+    },
+    "full/pool/shorter_span_360.json": {
+      "byte_length": 1661,
+      "sha256": "e77524a9237bc48115e0d92a50989835744ea667a79f214aa56cea71beb29665"
+    },
+    "full/price-table.json": {
+      "byte_length": 155,
+      "sha256": "49fbe311929215c8cdce4df01eea9eb120d3dfb064afc4f546f8197d4326c2e9"
+    },
+    "full/price_order/baseline/baseline/analysis-outcome.json": {
+      "byte_length": 256,
+      "sha256": "4a27abe064e12026041ce4889a6d846e612994780cff4a9e046c77cdf1d9a32b"
+    },
+    "full/price_order/baseline/baseline/analysis-started.json": {
+      "byte_length": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    "full/price_order/baseline/baseline/checkpoint.json": {
+      "byte_length": 97897,
+      "sha256": "2cfcf68af91ea1391990b13ce5e82413f1897770c13b53630fde2b54594e62f9"
+    },
+    "full/price_order/baseline/baseline/model.json": {
+      "byte_length": 1657,
+      "sha256": "73d2b76305f3a104061931cf028ab33c40b813889d5e198e7bae33895bfa19e1"
+    },
+    "full/price_order/baseline/baseline/result.json": {
+      "byte_length": 1836445,
+      "sha256": "90f73d61e2f53972e9838967dda1b1c7c4dcc54c25aa808705fba882d30c469b"
+    },
+    "full/price_order/baseline/baseline/verification-outcome.json": {
+      "byte_length": 260,
+      "sha256": "846880d6044f9eb4a9f4bb36f81279ce53985d92da02fa4071511c4018a55984"
+    },
+    "full/price_order/baseline/baseline/verification-started.json": {
+      "byte_length": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    "full/price_order/baseline/baseline/verification.json": {
+      "byte_length": 1047,
+      "sha256": "7f03141c52394d97443302e39eb10420421ed3a3e3594df1d9ea702c4eceb91f"
+    },
+    "full/price_order/baseline/row.json": {
+      "byte_length": 5220,
+      "sha256": "74fa0a56fcf8f7567f358cc42c532d23d9656b0c0d761657f5effc5ec3a45dae"
+    },
+    "full/price_order/comparison.json": {
+      "byte_length": 16132,
+      "sha256": "5a7bc578f779d6aa5ae4aba5ca053c645b9883c8a59d192b0169b79b54be218d"
+    },
+    "full/price_order/longer_span_440/baseline/analysis-outcome.json": {
+      "byte_length": 256,
+      "sha256": "c797c2314a39b04a96188ea05e1080cb34372d2ba712f24f50ee019a4c3ef34d"
+    },
+    "full/price_order/longer_span_440/baseline/analysis-started.json": {
+      "byte_length": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    "full/price_order/longer_span_440/baseline/checkpoint.json": {
+      "byte_length": 98007,
+      "sha256": "a21895a35dd269f16210130f4084502b2dde78a2cb17483a1c00f6a39d212095"
+    },
+    "full/price_order/longer_span_440/baseline/model.json": {
+      "byte_length": 1661,
+      "sha256": "e0357fb370d8ee75f9a3da26606b33576e95ffe707c1dbfb05d3e1aa0cc0bd38"
+    },
+    "full/price_order/longer_span_440/baseline/result.json": {
+      "byte_length": 1834228,
+      "sha256": "fc426ee8645fd10779804a52478e0ab27cb2153e5f538901cd09e9ad99f72d15"
+    },
+    "full/price_order/longer_span_440/baseline/verification-outcome.json": {
+      "byte_length": 260,
+      "sha256": "a5286fcc98b36a5cf9046bacf6f4bf0e53e57cf492cf9ebdfa61325dccbb2d57"
+    },
+    "full/price_order/longer_span_440/baseline/verification-started.json": {
+      "byte_length": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    "full/price_order/longer_span_440/baseline/verification.json": {
+      "byte_length": 1047,
+      "sha256": "8fc388b8eda422aa2773167d54be4e887d58c0952f7035a03dd18a0c59fa97f4"
+    },
+    "full/price_order/longer_span_440/row.json": {
+      "byte_length": 5309,
+      "sha256": "39ee71db8c5ddad64c3b95bc5777bbe4ac077bfd78d490a254ee76716a6d2fe2"
+    },
+    "full/price_order/outcome.json": {
+      "byte_length": 515,
+      "sha256": "0d1425d1f273d923d4904223911b3fac629adee0257db639c7512138fe4e235e"
+    },
+    "full/price_order/shorter_span_360/baseline/analysis-outcome.json": {
+      "byte_length": 256,
+      "sha256": "1f26880c4924186f11dc533a1dd6dad2c73506a2750652759d01249ff919e344"
+    },
+    "full/price_order/shorter_span_360/baseline/analysis-started.json": {
+      "byte_length": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    "full/price_order/shorter_span_360/baseline/checkpoint.json": {
+      "byte_length": 98105,
+      "sha256": "4f970c9abab54dc31a55282a6a15ef2bf2c1558460b4fb81fbb91f5deb20481f"
+    },
+    "full/price_order/shorter_span_360/baseline/model.json": {
+      "byte_length": 1661,
+      "sha256": "e77524a9237bc48115e0d92a50989835744ea667a79f214aa56cea71beb29665"
+    },
+    "full/price_order/shorter_span_360/baseline/result.json": {
+      "byte_length": 1835844,
+      "sha256": "3b5dfbe207c320fdaad7f9f72b2a1874a71dae4d71551dcf21debcab6af200c3"
+    },
+    "full/price_order/shorter_span_360/baseline/verification-outcome.json": {
+      "byte_length": 260,
+      "sha256": "9946b76391cabf182002e953ba92c3ee84d33c9cce22fdede5bfcbec9000bc2f"
+    },
+    "full/price_order/shorter_span_360/baseline/verification-started.json": {
+      "byte_length": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    "full/price_order/shorter_span_360/baseline/verification.json": {
+      "byte_length": 1047,
+      "sha256": "8cb859873f428a01065afd747bf5bb9e82fb6caeddb87f91219b3e23d3913a2b"
+    },
+    "full/price_order/shorter_span_360/row.json": {
+      "byte_length": 5302,
+      "sha256": "bd88af8b820c5b4d8b36612d032eb2b09e8f2ad9801abc1a215df0ec90fbf41e"
+    },
+    "full/price_order/started.json": {
+      "byte_length": 120,
+      "sha256": "8f9a16ca725ea8626b1dc83ba60724990622541d540568f0790eff5d83d19038"
+    },
+    "full/result.json": {
+      "byte_length": 2389,
+      "sha256": "1471ad2f9926786b234c1bdd0a594c317c392be9c2f9b2aeb5e4e8dd5dcf9f06"
+    },
+    "full/strategy-runtime.json": {
+      "byte_length": 624,
+      "sha256": "9e3c1d0ac70c86cebf8bb991e773787fd56274571a52fa233c9ea8cda0e92ea9"
+    },
+    "staged/plan.json": {
+      "byte_length": 8991,
+      "sha256": "d4880339dcf9cbebc7fde75c57d2953c5a8798aa36a4a5626f3a4636a2a96e70"
+    },
+    "staged/pool/baseline.json": {
+      "byte_length": 1657,
+      "sha256": "73d2b76305f3a104061931cf028ab33c40b813889d5e198e7bae33895bfa19e1"
+    },
+    "staged/pool/longer_span_440.json": {
+      "byte_length": 1661,
+      "sha256": "e0357fb370d8ee75f9a3da26606b33576e95ffe707c1dbfb05d3e1aa0cc0bd38"
+    },
+    "staged/pool/shorter_span_360.json": {
+      "byte_length": 1661,
+      "sha256": "e77524a9237bc48115e0d92a50989835744ea667a79f214aa56cea71beb29665"
+    },
+    "staged/price-table.json": {
+      "byte_length": 155,
+      "sha256": "49fbe311929215c8cdce4df01eea9eb120d3dfb064afc4f546f8197d4326c2e9"
+    },
+    "staged/price_order/baseline/baseline/analysis-outcome.json": {
+      "byte_length": 256,
+      "sha256": "c9f5653b08f77a084b811090b27962f007eaabda7697c9168fe36d31dd8238d2"
+    },
+    "staged/price_order/baseline/baseline/analysis-started.json": {
+      "byte_length": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    "staged/price_order/baseline/baseline/checkpoint.json": {
+      "byte_length": 97897,
+      "sha256": "2cfcf68af91ea1391990b13ce5e82413f1897770c13b53630fde2b54594e62f9"
+    },
+    "staged/price_order/baseline/baseline/model.json": {
+      "byte_length": 1657,
+      "sha256": "73d2b76305f3a104061931cf028ab33c40b813889d5e198e7bae33895bfa19e1"
+    },
+    "staged/price_order/baseline/baseline/result.json": {
+      "byte_length": 1836445,
+      "sha256": "90f73d61e2f53972e9838967dda1b1c7c4dcc54c25aa808705fba882d30c469b"
+    },
+    "staged/price_order/baseline/baseline/verification-outcome.json": {
+      "byte_length": 260,
+      "sha256": "987a42248395367e19861e72ed764f16ae321ebe2495d561f6ce830a00e27279"
+    },
+    "staged/price_order/baseline/baseline/verification-started.json": {
+      "byte_length": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    "staged/price_order/baseline/baseline/verification.json": {
+      "byte_length": 1047,
+      "sha256": "7f03141c52394d97443302e39eb10420421ed3a3e3594df1d9ea702c4eceb91f"
+    },
+    "staged/price_order/baseline/row.json": {
+      "byte_length": 5220,
+      "sha256": "21fb227a67a9a647d5c3d1ad02e46cdce055e81b2f0f53669225d99e5fe45d10"
+    },
+    "staged/price_order/comparison.json": {
+      "byte_length": 12789,
+      "sha256": "df32f78155f352b265ce1e6b79204d24b128a1c0dd59dd0837eb7963f654ceb9"
+    },
+    "staged/price_order/decisions/00.json": {
+      "byte_length": 1116,
+      "sha256": "fb0192cffa83e2ab8aad39c024145eb470a1e1c28e9c577ee945b8d2d730ebcf"
+    },
+    "staged/price_order/decisions/01.json": {
+      "byte_length": 1130,
+      "sha256": "198c96ccdd999b91ea105ffe20ff45bd771ab765bf07472dced2762929b0e1b3"
+    },
+    "staged/price_order/decisions/02.json": {
+      "byte_length": 1138,
+      "sha256": "e391fad7b5bf3a229a5082694d7f2965d1db2bddb15afb7e616dfb85f7464838"
+    },
+    "staged/price_order/outcome.json": {
+      "byte_length": 2475,
+      "sha256": "e863f2672acb2deb1d22811beb3b09a04c4e9e579557a015fcf994051bc60298"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/analysis-outcome.json": {
+      "byte_length": 256,
+      "sha256": "15fd09d50f0c1c2ebcbd2561932dceb49d72d89fcc63be92bd9fee53b43a4a5b"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/analysis-started.json": {
+      "byte_length": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/checkpoint.json": {
+      "byte_length": 94959,
+      "sha256": "2efca378c3481ef4be589933f994515275a097e231944b086a47f15c2f60b5b1"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/model.json": {
+      "byte_length": 1661,
+      "sha256": "e77524a9237bc48115e0d92a50989835744ea667a79f214aa56cea71beb29665"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/result.json": {
+      "byte_length": 983948,
+      "sha256": "e22012c31399ffcda45349b35da421280bdaced9746406a01957239b86562722"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/verification-outcome.json": {
+      "byte_length": 260,
+      "sha256": "bf613a7f946139bea0f421b0340c200ff0cef3a016937dd82eb336f3fd1dd78b"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/verification-started.json": {
+      "byte_length": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    "staged/price_order/prefix/shorter_span_360/baseline/verification.json": {
+      "byte_length": 1047,
+      "sha256": "8960cbad4407cb5cadc04e02d7a87ef51757242cef94c671f67db63f21a75f5a"
+    },
+    "staged/price_order/prefix/shorter_span_360/decision.json": {
+      "byte_length": 997,
+      "sha256": "93f671881f9c760d28ab712b4331c9b329ba8c97742c8daacd7069ece207c32a"
+    },
+    "staged/price_order/prefix/shorter_span_360/request.json": {
+      "byte_length": 648,
+      "sha256": "dd63ddc18ce9035645ff0a41162a42be2f37bda134c38403aa731d75f1cb0397"
+    },
+    "staged/price_order/prefix/shorter_span_360/row.json": {
+      "byte_length": 4916,
+      "sha256": "42444da85eedd4d25fcf1682c86400629fb407df573e72f0b973a1d1e73225ac"
+    },
+    "staged/price_order/shorter_span_360/baseline/analysis-outcome.json": {
+      "byte_length": 256,
+      "sha256": "efb1293538a0165cf0958b9329ebefb97bd56a217204803a7a2a2e1290b934a9"
+    },
+    "staged/price_order/shorter_span_360/baseline/analysis-started.json": {
+      "byte_length": 81,
+      "sha256": "7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+    },
+    "staged/price_order/shorter_span_360/baseline/checkpoint.json": {
+      "byte_length": 98105,
+      "sha256": "4f970c9abab54dc31a55282a6a15ef2bf2c1558460b4fb81fbb91f5deb20481f"
+    },
+    "staged/price_order/shorter_span_360/baseline/model.json": {
+      "byte_length": 1661,
+      "sha256": "e77524a9237bc48115e0d92a50989835744ea667a79f214aa56cea71beb29665"
+    },
+    "staged/price_order/shorter_span_360/baseline/result.json": {
+      "byte_length": 1835844,
+      "sha256": "3b5dfbe207c320fdaad7f9f72b2a1874a71dae4d71551dcf21debcab6af200c3"
+    },
+    "staged/price_order/shorter_span_360/baseline/verification-outcome.json": {
+      "byte_length": 260,
+      "sha256": "42ef1c2ed9f62662dd7b668a54bed8d6d1ea4ac0592920495d745067b71be410"
+    },
+    "staged/price_order/shorter_span_360/baseline/verification-started.json": {
+      "byte_length": 85,
+      "sha256": "1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+    },
+    "staged/price_order/shorter_span_360/baseline/verification.json": {
+      "byte_length": 1047,
+      "sha256": "8cb859873f428a01065afd747bf5bb9e82fb6caeddb87f91219b3e23d3913a2b"
+    },
+    "staged/price_order/shorter_span_360/row.json": {
+      "byte_length": 5302,
+      "sha256": "6d5275cb29bc260fe8e909c86821eb680e416089ce5cb1f79bd64c9a7968c856"
+    },
+    "staged/price_order/started.json": {
+      "byte_length": 120,
+      "sha256": "8f9a16ca725ea8626b1dc83ba60724990622541d540568f0790eff5d83d19038"
+    },
+    "staged/result.json": {
+      "byte_length": 3952,
+      "sha256": "774940913d2554d72d3ae70f1d07f15b2a01d6eec6602ffad9836fc6a96a8886"
+    },
+    "staged/strategy-runtime.json": {
+      "byte_length": 626,
+      "sha256": "c290942cb27fe27a16fdf8f96b410a16ee4c71b3eea1a42cca2c6ccde28fa83d"
+    }
+  },
+  "producer_source_revision": "e0146cd9b33fa7c02d2fd8a81ec31c177fb64dba",
+  "producer_source_scope": "exact Git code plus four separately predeclared inputs not in that revision",
+  "raw_original_total_bytes": 10871903,
+  "raw_original_tree_sha256": "9f4cd695244378eb7da37571a8de9be93f7727b0ba3165430b1f0ea9f3f855e4",
+  "schema_version": "rc-portal-layout-span-original-fixture-manifest.v1",
+  "staged_json_file_count": 42,
+  "uncompressed_base64_map_bytes": 14500346,
+  "uncompressed_base64_map_sha256": "f4d366c7fbb24b155eae0de14439c4bc38bcc8e94f7d25a97cb47a7222c9800e"
+}
