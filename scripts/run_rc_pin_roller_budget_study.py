@@ -25,6 +25,10 @@ TRAIN_WIDTHS = (0.30, 0.36, 0.48, 0.58)
 ONLINE_WIDTHS = (0.42, 0.34, 0.38, 0.46, 0.50, 0.54)
 BUDGET = 3
 STRAIN_LIMIT = 0.0001585
+RANKING_STRATEGIES = (
+    "feasibility_then_price.v1",
+    "feasibility_then_cheaper_boundary.v1",
+)
 
 
 def _sha(raw: bytes) -> str:
@@ -81,8 +85,15 @@ def _experiment(widths: tuple[float, ...], prices: dict | None) -> dict:
     }
 
 
-def prepare_packet(repo: Path, output: Path, revision: str) -> dict:
+def prepare_packet(
+    repo: Path,
+    output: Path,
+    revision: str,
+    ranking_strategy: str = RANKING_STRATEGIES[0],
+) -> dict:
     """Freeze generated inputs and the protocol before training/search starts."""
+    if ranking_strategy not in RANKING_STRATEGIES:
+        raise ValueError("unsupported ranking strategy")
     if not (len(ONLINE_WIDTHS) > BUDGET and not set(TRAIN_WIDTHS) & set(ONLINE_WIDTHS)):
         raise ValueError("training/pool separation or bounded budget changed")
     output.mkdir(parents=True, exist_ok=False)
@@ -117,7 +128,7 @@ def prepare_packet(repo: Path, output: Path, revision: str) -> dict:
         "online_widths_m": list(ONLINE_WIDTHS),
         "full_analysis_budget_per_online_arm_including_baseline": BUDGET,
         "full_pool_size_including_baseline": len(ONLINE_WIDTHS),
-        "ranking_strategy": "feasibility_then_price.v1",
+        "ranking_strategy": ranking_strategy,
         "evaluate_exhaustive_oracle_after_online_arms": True,
         "line_search_assembly_reuse": False,
         "cost_dominance_pruning": False,
@@ -181,6 +192,9 @@ def _execute(repo: Path, output: Path, phase: str, arguments: list[str]) -> None
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--ranking-strategy", choices=RANKING_STRATEGIES, default=RANKING_STRATEGIES[0]
+    )
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[1]
     output = args.output.resolve()
@@ -189,7 +203,7 @@ def main() -> int:
     revision = _git(repo, "rev-parse", "HEAD")
     if _git(repo, "status", "--porcelain", "--untracked-files=all"):
         raise ValueError("run requires a clean exact-source checkout")
-    plan = prepare_packet(repo, output, revision)
+    plan = prepare_packet(repo, output, revision, args.ranking_strategy)
     inputs = output / "inputs"
     common = [
         "--request", str(inputs / "request.json"),

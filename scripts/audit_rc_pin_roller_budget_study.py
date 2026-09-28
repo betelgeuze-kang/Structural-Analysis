@@ -15,6 +15,8 @@ from copy import deepcopy
 MODEL = Path('examples/research/rc_reuse_campaign/pin-roller-steel-plastic.model.json')
 REQUEST = Path('examples/research/rc_reuse_campaign/pin-roller-steel-plastic.request.json')
 PRIOR_PAIR = Path('docs/engineering/rc-pin-roller-design-pair-20260929.audit.json')
+LEGACY_RANKING = 'feasibility_then_price.v1'
+BOUNDARY_RANKING = 'feasibility_then_cheaper_boundary.v1'
 
 def sha(data):
     return 'sha256:' + hashlib.sha256(data).hexdigest()
@@ -36,6 +38,71 @@ def canonical(value):
 
 def check_hash_object(value, key):
     return value[key] == sha(canonical({k: v for k, v in value.items() if k != key}))
+
+def check_frozen_ranking(pre, search_plan, check):
+    """Audit this declared six-model schedule against preserved predictions.
+
+    These are case-specific expected orders, not a second ranking implementation.
+    The experiment runner calls the production candidate-ranking function.
+    """
+    strategy = pre.get('ranking_strategy')
+    check(strategy in (LEGACY_RANKING, BOUNDARY_RANKING), 'unsupported frozen ranking strategy')
+    price = search_plan['plans']['price_order']
+    learned = search_plan['plans']['learned_order']
+    check(price['ordering'] == ['w34','w38','w46','w50','w54'], 'price ordering unexpected')
+    check(price['shortlist'] == ['w34','w38'], 'price shortlist unexpected')
+    predictions = search_plan['predictions']
+    check([r['candidate_id'] for r in predictions] == ['w34','w38','w46','w50','w54'], 'prediction roster unexpected')
+    if strategy == LEGACY_RANKING:
+        check(search_plan['schema_version'] == 'experimental-rc-control-candidate-search-plan.v2', 'legacy search plan schema changed')
+        check('ranking' not in search_plan, 'legacy plan unexpectedly contains boundary ranking')
+        check(learned['ordering'] == ['w50','w54','w34','w38','w46'], 'legacy learned ordering unexpected')
+        check(learned['shortlist'] == ['w50','w54'], 'legacy learned shortlist unexpected')
+        return
+    if strategy != BOUNDARY_RANKING:
+        return
+    check(search_plan['schema_version'] == 'experimental-rc-control-candidate-search-plan.v3', 'boundary search plan schema changed')
+    check(learned['ordering'] == ['w50','w46','w38','w34','w54'], 'boundary learned ordering unexpected')
+    check(learned['shortlist'] == ['w50','w46'], 'boundary learned shortlist unexpected')
+    ranking = search_plan.get('ranking')
+    check(isinstance(ranking, dict), 'boundary ranking explanation missing')
+    if not isinstance(ranking, dict):
+        return
+    check(ranking.get('strategy') == BOUNDARY_RANKING, 'boundary ranking strategy mismatch')
+    check(ranking.get('predicted_feasible_seed_id') == 'w50', 'boundary seed mismatch')
+    check(ranking.get('fallback_reason') is None, 'unexpected boundary fallback')
+    check(ranking.get('uncertainty_calibrated') is False, 'boundary score falsely claims calibration')
+    check(ranking.get('physical_result_authority') is False, 'boundary score falsely claims physical authority')
+    expected_roles = {
+        'w34': 'cheaper_predicted_boundary',
+        'w38': 'cheaper_predicted_boundary',
+        'w46': 'cheaper_predicted_boundary',
+        'w50': 'predicted_feasible_seed',
+        'w54': 'remaining_legacy_order',
+    }
+    explanations = ranking.get('rows')
+    check(isinstance(explanations, list), 'boundary ranking rows missing')
+    if not isinstance(explanations, list):
+        return
+    check([r.get('candidate_id') for r in explanations] == list(expected_roles), 'boundary ranking row order changed')
+    if len(explanations) != len(predictions):
+        return
+    for predicted, explained in zip(predictions, explanations):
+        cid = predicted['candidate_id']
+        check(explained.get('role') == expected_roles[cid], f'{cid} boundary role mismatch')
+        screens = predicted['predicted_screens']
+        expected_score = None if screens is None else max(
+            (screen['value'] - screen['limit']) / screen['value']
+            if screen['value'] > screen['limit'] else 0.0
+            for screen in screens.values()
+        )
+        score = explained.get('relative_exceedance')
+        check(
+            (expected_score is None and score is None)
+            or (type(score) in (int, float) and math.isfinite(score)
+                and math.isclose(score, expected_score, rel_tol=0, abs_tol=1e-15)),
+            f'{cid} boundary score differs from frozen prediction',
+        )
 
 def audit_packet(SOURCE, ROOT):
     SOURCE, ROOT = Path(SOURCE).resolve(), Path(ROOT).resolve()
@@ -100,8 +167,7 @@ def audit_packet(SOURCE, ROOT):
     check(search_plan.get('line_search_assembly_reuse') is None and search_plan.get('design_execution_policy') is None, 'optimization switch enabled')
     check(len(search_plan['pool']) == len(online_widths), 'online pool incomplete')
     check(search['candidate_denominator'] == len(online_widths), 'result denominator mismatch')
-    check(search_plan['plans']['price_order']['shortlist'] == ['w34','w38'], 'price shortlist unexpected')
-    check(search_plan['plans']['learned_order']['shortlist'] == ['w50','w54'], 'learned shortlist unexpected')
+    check_frozen_ranking(pre, search_plan, check)
     price_input = load(ROOT/'inputs/online-experiment.json')['prices']
     normalized_price = {
         **price_input,
