@@ -6,6 +6,7 @@ import ast
 from copy import deepcopy
 import importlib.util
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -137,16 +138,29 @@ def test_original_planar_blocks_stop_without_retries_and_retain_attempts(
         )
         assert attempt["test_norms_reported"] == [2.0e-8, 3.3e-10, 0.0]
     # Exercise the original receipt gate even if every numeric metric matches.
+    script_nodes = ast.parse(SCRIPT.read_text(encoding="utf-8")).body
+    completion_gate = next(
+        node
+        for node in script_nodes
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "_planar_load_path_attempts_complete"
+    )
     gate = next(
         node
-        for node in ast.parse(SCRIPT.read_text(encoding="utf-8")).body
+        for node in script_nodes
         if isinstance(node, ast.FunctionDef) and node.name == "_case"
     )
+    namespace["math"] = math
+    namespace["PLANAR_LOAD_PATH_TARGETS"] = (0.25, 0.5, 0.75, 1.0)
     exec(
-        compile(ast.Module(body=[gate], type_ignores=[]), str(SCRIPT), "exec"),
+        compile(
+            ast.Module(body=[completion_gate, gate], type_ignores=[]),
+            str(SCRIPT),
+            "exec",
+        ),
         namespace,
     )
-    receipt_case = namespace["_case"](
+    case_args = dict(
         case_id=case,
         analysis_type="test",
         reference_solver="injected reverting solver",
@@ -155,10 +169,21 @@ def test_original_planar_blocks_stop_without_retries_and_retain_attempts(
         external_return_code=max(abs(int(code)) for code in codes),
         product_regularization_applied=False,
         product_fallback_used=False,
-        load_path_attempts=attempts,
     )
+    receipt_case = namespace["_case"](**case_args, load_path_attempts=attempts)
     assert receipt_case["contract_pass"] is (failed_step is None)
     assert receipt_case["load_path_attempts"] == attempts
+    if failed_step is None:
+        assert namespace["_case"](**case_args)["contract_pass"] is True
+        for index in range(4):
+            under_target = deepcopy(attempts)
+            under_target[index]["achieved_load_factor"] = index / 4
+            assert (
+                namespace["_case"](**case_args, load_path_attempts=under_target)[
+                    "contract_pass"
+                ]
+                is False
+            )
 
 
 @pytest.mark.parametrize("failed_step", [None, 1])
@@ -219,6 +244,26 @@ def test_written_receipt_retains_and_validates_planar_attempts(
     assert persisted_case["load_path_attempts"] == attempts
     assert persisted_case["contract_pass"] is (failed_step is None)
     assert persisted_case["external_return_code"] == (0 if failed_step is None else 3)
+
+    if failed_step is None:
+        for index in range(4):
+            under_target = deepcopy(persisted)
+            under_target_attempts = under_target["comparisons"][2][
+                "load_path_attempts"
+            ]
+            under_target_attempts[index]["achieved_load_factor"] = index / 4
+            if index + 1 < len(under_target_attempts):
+                under_target_attempts[index + 1]["previous_load_factor"] = index / 4
+            under_target["artifact_hash"] = module._artifact_hash(under_target)
+            with pytest.raises(
+                module.ExternalCodeToCodeReceiptError,
+                match="receipt_planar_load_path_attempt_invalid",
+            ):
+                module.validate_external_code_to_code_technical_receipt(
+                    under_target,
+                    repo_root=ROOT,
+                    require_current_sources=False,
+                )
 
     if failed_step is not None:
         missing = deepcopy(persisted)

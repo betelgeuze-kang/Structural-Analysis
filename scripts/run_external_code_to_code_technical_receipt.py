@@ -105,6 +105,7 @@ PLANAR_LOAD_PATH_CASE_IDS = frozenset(
         "bounded_planar_prescribed_settlement_load_path",
     )
 )
+PLANAR_LOAD_PATH_TARGETS = (0.25, 0.5, 0.75, 1.0)
 PRODUCT_REPLAY_ABSOLUTE_TOLERANCE = COMPARISON_ABSOLUTE_TOLERANCE
 PRODUCT_REPLAY_RELATIVE_TOLERANCE = COMPARISON_RELATIVE_TOLERANCE
 PUBLIC_COROTATIONAL_PORTAL_MODEL = Path(
@@ -2532,6 +2533,25 @@ def _product_replay_values_match(stored: Any, current: Any) -> bool:
     return type(stored) is type(current) and stored == current
 
 
+def _planar_load_path_attempts_complete(
+    attempts: list[dict[str, Any]] | None,
+) -> bool:
+    # Earlier replay receipts have no per-step records.
+    if attempts is None:
+        return True
+    return len(attempts) == len(PLANAR_LOAD_PATH_TARGETS) and all(
+        attempt["target_load_factor"] == target
+        and attempt["analyze_return_code"] == 0
+        and math.isclose(
+            attempt["achieved_load_factor"],
+            target,
+            rel_tol=0.0,
+            abs_tol=1.0e-12,
+        )
+        for attempt, target in zip(attempts, PLANAR_LOAD_PATH_TARGETS, strict=True)
+    )
+
+
 def _case(
     *,
     case_id: str,
@@ -2550,6 +2570,7 @@ def _case(
         and external_return_code == 0
         and not product_regularization_applied
         and not product_fallback_used
+        and _planar_load_path_attempts_complete(load_path_attempts)
     )
     case = {
         "case_id": case_id,
@@ -3806,7 +3827,7 @@ def validate_external_code_to_code_technical_receipt(
                     )
             else:
                 for index, attempt in enumerate(attempts):
-                    expected_target = (0.25, 0.5, 0.75, 1.0)[index]
+                    expected_target = PLANAR_LOAD_PATH_TARGETS[index]
                     expected_previous = (
                         0.0
                         if index == 0
@@ -3821,6 +3842,15 @@ def validate_external_code_to_code_technical_receipt(
                             expected_previous,
                             rel_tol=0.0,
                             abs_tol=1.0e-12,
+                        )
+                        or (
+                            attempt["analyze_return_code"] == 0
+                            and not math.isclose(
+                                attempt["achieved_load_factor"],
+                                expected_target,
+                                rel_tol=0.0,
+                                abs_tol=1.0e-12,
+                            )
                         )
                         or any(
                             not math.isfinite(norm)
@@ -3982,6 +4012,7 @@ def validate_external_code_to_code_technical_receipt(
             and case["external_return_code"] == 0
             and case["product_regularization_applied"] is False
             and case["product_fallback_used"] is False
+            and _planar_load_path_attempts_complete(attempts)
         )
         if case["contract_pass"] is not expected_case_pass:
             raise ExternalCodeToCodeReceiptError("receipt_case_pass_invalid")
