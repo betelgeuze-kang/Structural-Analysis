@@ -29,6 +29,8 @@ module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
+from pinned_opensees_runtime import expected_binding  # noqa: E402
+
 
 def _payload() -> dict:
     return json.loads(RECEIPT.read_text(encoding="utf-8"))
@@ -183,8 +185,31 @@ def test_fresh_receipt_without_execution_source_fails_closed() -> None:
     replay["external_execution_reused"] = False
     replay["reuse_reason"] = None
     replay.pop("external_execution_source_commit_sha", None)
+    checksums = tampered["internal_source"]["input_checksums"]
+    pinned_runtime = Path("scripts/pinned_opensees_runtime.py")
+    checksums[str(pinned_runtime)] = module.input_checksums(
+        [pinned_runtime], repo_root=ROOT
+    )[str(pinned_runtime)]
+    tampered["internal_source"]["source_set_hash"] = module._hash_value(checksums)
+    tampered["runtimes"]["opensees"]["execution_outputs"].pop(
+        "runtime_binding", None
+    )
     tampered["artifact_hash"] = module._artifact_hash(tampered)
 
+    with pytest.raises(
+        module.ExternalModalBucklingReceiptError,
+        match="opensees_current_execution_binding_missing",
+    ):
+        module.validate_external_modal_buckling_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+    tampered["runtimes"]["opensees"]["execution_outputs"][
+        "runtime_binding"
+    ] = expected_binding()
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
     with pytest.raises(
         module.ExternalModalBucklingReceiptError,
         match="receipt_replay_execution_source_invalid",
