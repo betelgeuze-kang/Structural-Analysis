@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-09-28T03:36:01Z",
+  "observed_at": "2026-09-28T17:21:56Z",
   "observation_source": "gh_cli_read_only_current_github_state",
-  "observed_open_issue_count": 18,
+  "observed_open_issue_count": 36,
   "open_issue_numbers": [
     247,
     258,
@@ -22,9 +22,27 @@
     454,
     457,
     458,
-    460
+    460,
+    462,
+    463,
+    465,
+    467,
+    468,
+    470,
+    475,
+    476,
+    477,
+    478,
+    480,
+    483,
+    484,
+    486,
+    488,
+    490,
+    492,
+    493
   ],
-  "open_issue_projection_sha256": "sha256:69e81645e2bb6c0cf01ff2d58ff9e6f7da124d1a54a3a6f743326215229ab8cd",
+  "open_issue_projection_sha256": "sha256:970a782b1691924a8640f9b8c7e6e3b40376a6a85f21bf291573c9d681ab4309",
   "open_issues": [
     {
       "number": 247,
@@ -35,7 +53,9 @@
       "body_sha256": "sha256:5dc4704b309b732306825dc68e48e9f3ee2fa6b92aa66648c0322d4fce3d04fa",
       "labels": [],
       "classification": "independent_human_review",
-      "linked_pull_requests": [246],
+      "linked_pull_requests": [
+        246
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_independent_numerical_product_evidence_and_release_review",
       "required_external_inputs": [
@@ -152,7 +172,9 @@
       "updated_at": "2026-08-17T10:15:28Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/297",
       "body_sha256": "sha256:dd5849011196025e17b053b45276f3b4c471ffa314aa8575f84f249f4a4de93e",
-      "labels": ["validation"],
+      "labels": [
+        "validation"
+      ],
       "classification": "comprehensive_external_validation",
       "linked_pull_requests": [],
       "merged_implementation_pull_requests": [],
@@ -176,8 +198,13 @@
       "body_sha256": "sha256:77bb8e630de876e9747b3bece0f1050fc25ea93746e0dcd9d971db28ae2af64c",
       "labels": [],
       "classification": "comprehensive_external_validation",
-      "linked_pull_requests": [439, 440],
-      "merged_implementation_pull_requests": [440],
+      "linked_pull_requests": [
+        439,
+        440
+      ],
+      "merged_implementation_pull_requests": [
+        440
+      ],
       "disposition": "partial_supplemental_transport_merged_await_rc_roadmap_and_external_acceptance",
       "required_external_inputs": [
         "independent_physical_validation",
@@ -197,7 +224,9 @@
       "body_sha256": "sha256:47cf106f92555416526ede879ee2aef72f44e16f169911e2359d934e6db30a3b",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [442],
+      "linked_pull_requests": [
+        442
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_bounded_result_reuse_and_price_search_review",
       "required_external_inputs": [],
@@ -213,7 +242,9 @@
       "body_sha256": "sha256:98731c0edef9f74259fe77182540a390c3bbd70aa7e13df77b6b111af4e6d4d5",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [444],
+      "linked_pull_requests": [
+        444
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_durable_local_research_review",
       "required_external_inputs": [],
@@ -229,7 +260,9 @@
       "body_sha256": "sha256:2e8c72230e66444647bcd4fc03ac7daacd1dd6c3142469822a8bd9aae0a38873",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [446],
+      "linked_pull_requests": [
+        446
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_persistent_originals_and_budget_review",
       "required_external_inputs": [],
@@ -245,7 +278,9 @@
       "body_sha256": "sha256:642a48d0ed9e834b7c70add62e281aab8452e0cf4281e282255e397b6e8b54c4",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [448],
+      "linked_pull_requests": [
+        448
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_safe_persistent_originals_and_controls_review",
       "required_external_inputs": [],
@@ -261,7 +296,10 @@
       "body_sha256": "sha256:9d5588aaedcf9e8153214b2ddbe7a0cb7692b0ea9e2cd746f5a6b2f782e5bfc1",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [450, 452],
+      "linked_pull_requests": [
+        450,
+        452
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_response_scoped_refinement_and_reuse_review",
       "required_external_inputs": [],
@@ -277,7 +315,9 @@
       "body_sha256": "sha256:0376ebb5f27ef3a0495059428a4d07afd400c81ed292398eb99423b949d7f540",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [452],
+      "linked_pull_requests": [
+        452
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_strict_neutral_input_guard_main_review",
       "required_external_inputs": [],
@@ -293,7 +333,9 @@
       "body_sha256": "sha256:8dc96ba4e8058b5407061477f2114529082325f6b33d19be6098884c029c3628",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [453],
+      "linked_pull_requests": [
+        453
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_linear_id_and_sparse_diagnostic_review",
       "required_external_inputs": [],
@@ -309,7 +351,9 @@
       "body_sha256": "sha256:0811b791fa9f673ebcf17672243676ca4a292d2067c6210fdb4f928e5079b586",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [455],
+      "linked_pull_requests": [
+        455
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_exact_accepted_coordinate_replay_review",
       "required_external_inputs": [],
@@ -325,7 +369,9 @@
       "body_sha256": "sha256:4b2c451e5793b5285beb551efd682af821a96ecba723eaec9368f26e13da3cc9",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [456],
+      "linked_pull_requests": [
+        456
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_failed_step_attempt_receipt_persistence_and_review",
       "required_external_inputs": [],
@@ -341,9 +387,346 @@
       "body_sha256": "sha256:7ec7cbac99cb303eb05269825f29128ef6e251577fb3d8813c5328d1e01fd761",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [459],
+      "linked_pull_requests": [
+        459
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_finite_pool_cost_audit_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 462,
+      "title": "Handle expired clean-runner producer candidate at zero evidence credit",
+      "state": "open",
+      "updated_at": "2026-09-28T05:41:04Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/462",
+      "body_sha256": "sha256:05e05b82110fcf9c17e7f34a108396f1613406e61c4ea2ef1dc17d6ebf62450f",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        461
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_expired_producer_candidate_zero_credit_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 463,
+      "title": "Allow explicit pin-roller RC beam member quantities",
+      "state": "open",
+      "updated_at": "2026-09-28T07:17:20Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/463",
+      "body_sha256": "sha256:61a3b3dc4de09000f43ac5930aa9cf3886fa604843cd8f97e6ee1d38ec7df6c2",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        464
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_explicit_pin_roller_member_quantity_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 465,
+      "title": "Admit explicit pin-roller RC durable jobs",
+      "state": "open",
+      "updated_at": "2026-09-28T07:44:19Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/465",
+      "body_sha256": "sha256:a98c2692c2f226d06ff0110c0b5bd93690fa489bcba1f3c7a6ab5b72273e5b24",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        466
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_pin_roller_durable_job_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 467,
+      "title": "Stabilize stored RC browser test at 390 px under CI load",
+      "state": "open",
+      "updated_at": "2026-09-28T09:19:36Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/467",
+      "body_sha256": "sha256:dced9b34bdee8dafe3dfa4b89723b8ce4a84c2d5dafe3e95f511bfc224ffb1a1",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        472
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_stored_rc_browser_timeout_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 468,
+      "title": "Review saved pin-roller RC jobs in Workbench",
+      "state": "open",
+      "updated_at": "2026-09-28T08:23:56Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/468",
+      "body_sha256": "sha256:fd0e31fe132f90776984eb0fc94f0146c41d01c1ddcd46c89b6aac65579af4dc",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        469
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_saved_pin_roller_workbench_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 470,
+      "title": "Cover synthetic pin-roller tensile-onset rollback and strict control",
+      "state": "open",
+      "updated_at": "2026-09-28T08:26:20Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/470",
+      "body_sha256": "sha256:4a263b6292aa93cdd456f53e1443edbe9fa4c1658e3d21b237ed97af6765f790",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        471
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_synthetic_tensile_onset_regression_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 475,
+      "title": "Qualify a public flexural RC beam before data admission",
+      "state": "open",
+      "updated_at": "2026-09-28T17:01:43Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/475",
+      "body_sha256": "sha256:71d50528413100c670f10cad56cd7b076940cc03873ecbce66eb24aea272d7e7",
+      "labels": [],
+      "classification": "licensed_corpus_validation",
+      "linked_pull_requests": [
+        482,
+        489
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_original_response_rights_model_crosswalk_and_independent_holdout",
+      "required_external_inputs": [
+        "documented_measurement_rights",
+        "independent_heldout_physical_comparison",
+        "model_response_correspondence"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 476,
+      "title": "Complete pin–roller v4 design pair reanalysis and quantities",
+      "state": "open",
+      "updated_at": "2026-09-28T09:56:58Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/476",
+      "body_sha256": "sha256:69b9708f15268b5714726f29930acec6d5fd629080958461a0f0413d89fb807e",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        473
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_pin_roller_design_pair_reanalysis_and_quantity_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 477,
+      "title": "Review v4 pin–roller design comparisons in Workbench",
+      "state": "open",
+      "updated_at": "2026-09-28T09:57:05Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/477",
+      "body_sha256": "sha256:85ba400c1e8f034d04fe58f636b7ddf057d46479f1bf9b7a480f0cc145b67cba",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        474
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_pin_roller_design_workbench_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 478,
+      "title": "Persist failed planar external attempts in the technical receipt",
+      "state": "open",
+      "updated_at": "2026-09-28T10:30:38Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/478",
+      "body_sha256": "sha256:0c60ec593470d32426cfb12adbd7dbf384b6380870deec22f4b70fce801da68f",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        479
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_failed_external_attempt_receipt_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 480,
+      "title": "Benchmark held-out RC learned versus secant full-path runtime with complete costs",
+      "state": "open",
+      "updated_at": "2026-09-28T12:19:23Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/480",
+      "body_sha256": "sha256:be63d3b53313849a590a6ce9c8f9baa88ef3f7a2d1985fe2db2a7dc5bd222eaa",
+      "labels": [],
+      "classification": "licensed_corpus_validation",
+      "linked_pull_requests": [
+        481,
+        491
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_admissible_heldout_learned_runtime_and_full_cost_evidence",
+      "required_external_inputs": [
+        "eligible_licensed_heldout_cohort",
+        "source_rights_and_lineage_review",
+        "verified_repeated_full_cost_campaign"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 483,
+      "title": "Add guarded held-out RC runtime and cost-ledger software contract",
+      "state": "open",
+      "updated_at": "2026-09-28T13:41:28Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/483",
+      "body_sha256": "sha256:235a65ac5abe46347d14299bed8173c55a95975e17e352cb4cb5cb2107041ac2",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        481
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_heldout_runtime_and_cost_ledger_contract_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 484,
+      "title": "Record licensed flexural RC measurement source without row admission",
+      "state": "open",
+      "updated_at": "2026-09-28T14:29:02Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/484",
+      "body_sha256": "sha256:75ed69ded79398a252a0726924e70c5a12e54f39d792b3c61c3c531d3b83401d",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        482
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_source_only_flexural_measurement_record_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 486,
+      "title": "Bind nonlinear receipt paths and retain exact-source same-operator replay",
+      "state": "open",
+      "updated_at": "2026-09-28T15:09:48Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/486",
+      "body_sha256": "sha256:a544a5187365a523f05c1c3a9119bc4355cd181476e548b946bfc7cdedfda351",
+      "labels": [],
+      "classification": "external_platform_operator_user",
+      "linked_pull_requests": [
+        487
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_pinned_same_operator_external_replay_and_path_review",
+      "required_external_inputs": [
+        "actual_same_operator_external_solver_execution",
+        "pinned_external_solver_runtime"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 488,
+      "title": "Record interrupted RC reuse cases in the benchmark denominator",
+      "state": "open",
+      "updated_at": "2026-09-28T15:27:27Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/488",
+      "body_sha256": "sha256:9c4ad63e687208964be7463b58d5af70ed1190a9030be9262301afc0eb65ebdb",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        491
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_interrupted_campaign_accounting_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 490,
+      "title": "Record source-only flexural RC reference and SND byte-access gate",
+      "state": "open",
+      "updated_at": "2026-09-28T15:32:17Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/490",
+      "body_sha256": "sha256:1de250a405c139983c007a1aa673a0cae52a3921445d0360aa138604310da564",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        489
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_source_only_flexural_reference_and_access_audit_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 492,
+      "title": "Inspect rejected RC design alternatives in Workbench",
+      "state": "open",
+      "updated_at": "2026-09-28T16:08:20Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/492",
+      "body_sha256": "sha256:6784501b5125e68d06c65e783b275607e1b84cd0f76baf7431e12ce7c4ef3a6a",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        485
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_all_candidate_workbench_details_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 493,
+      "title": "Refresh complete current-main issue-state inventory",
+      "state": "open",
+      "updated_at": "2026-09-28T17:21:19Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/493",
+      "body_sha256": "sha256:33ad143a7bded30963d365b8c6e3599c11771383a36f0954450fba31563c9ce2",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_complete_current_issue_inventory_review",
       "required_external_inputs": [],
       "closable_by_repository_code_alone": true,
       "current_product_authority": false
@@ -359,8 +742,13 @@
       "body_sha256": "sha256:77bb8e630de876e9747b3bece0f1050fc25ea93746e0dcd9d971db28ae2af64c",
       "labels": [],
       "classification": "comprehensive_external_validation",
-      "linked_pull_requests": [439, 440],
-      "merged_implementation_pull_requests": [440],
+      "linked_pull_requests": [
+        439,
+        440
+      ],
+      "merged_implementation_pull_requests": [
+        440
+      ],
       "disposition": "partial_supplemental_transport_merged_await_rc_roadmap_and_external_acceptance",
       "required_external_inputs": [
         "independent_physical_validation",

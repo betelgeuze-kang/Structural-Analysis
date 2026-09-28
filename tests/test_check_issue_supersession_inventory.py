@@ -186,6 +186,24 @@ def test_inventory_tracks_external_and_repository_work_without_authority() -> No
         457,
         458,
         460,
+        462,
+        463,
+        465,
+        467,
+        468,
+        470,
+        475,
+        476,
+        477,
+        478,
+        480,
+        483,
+        484,
+        486,
+        488,
+        490,
+        492,
+        493,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -204,7 +222,7 @@ def test_inventory_tracks_external_and_repository_work_without_authority() -> No
 def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> None:
     payload = _payload()
     rows = {row["number"]: row for row in payload["open_issues"]}
-    for number in (247, 258, 260, 290, 291, 293, 297, 438):
+    for number in (247, 258, 260, 290, 291, 293, 297, 438, 475, 480, 486):
         row = rows[number]
         assert row["classification"] in inventory.EXTERNAL_CLASSIFICATIONS
         assert row["closable_by_repository_code_alone"] is False
@@ -212,6 +230,13 @@ def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> 
         assert row["current_product_authority"] is False
     assert rows[438]["linked_pull_requests"] == [439, 440]
     assert rows[438]["merged_implementation_pull_requests"] == [440]
+    assert rows[475]["linked_pull_requests"] == [482, 489]
+    assert rows[480]["linked_pull_requests"] == [481, 491]
+    assert rows[486]["linked_pull_requests"] == [487]
+    assert all(
+        rows[number]["merged_implementation_pull_requests"] == []
+        for number in (475, 480, 486)
+    )
     assert payload["implemented_but_open_issues"] == [rows[438]]
     for number, pull_requests in (
         (441, [442]),
@@ -224,6 +249,20 @@ def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> 
         (457, [455]),
         (458, [456]),
         (460, [459]),
+        (462, [461]),
+        (463, [464]),
+        (465, [466]),
+        (467, [472]),
+        (468, [469]),
+        (470, [471]),
+        (476, [473]),
+        (477, [474]),
+        (478, [479]),
+        (483, [481]),
+        (484, [482]),
+        (488, [491]),
+        (490, [489]),
+        (492, [485]),
     ):
         row = rows[number]
         assert row["classification"] == "repository_implementation"
