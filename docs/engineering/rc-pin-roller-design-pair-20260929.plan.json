@@ -1,0 +1,37 @@
+{
+  "decision_rule": "minimum common scoped estimate among full-reference-verified and all-screen-passing candidates",
+  "declared_candidate_ids": [
+    "baseline",
+    "wider"
+  ],
+  "declared_repetition_count": 1,
+  "declared_target_count": 4,
+  "failure_rule": "retain invalid, failed, incomplete, and unknown-work candidates in the denominator; no eligible speed or saving claim",
+  "frozen_at_utc": "2026-09-28T19:24:08.182891+00:00",
+  "independent_physical_validation": false,
+  "input_bindings": {
+    "experiment": {
+      "bytes": 706,
+      "packet_path": "inputs/experiment.json",
+      "sha256": "72f76c226bcd007ca4deb6e26858bf44da0364febc679f15e7a474d8564d0417",
+      "source_path": "examples/experimental_rc_control_design_comparison.v3.json"
+    },
+    "model": {
+      "bytes": 3696,
+      "packet_path": "inputs/model.json",
+      "sha256": "22b5eb4a70cb6a5ef226e70c6d883ce788e8fbb3614e16e8b6bcccfe5f76b201",
+      "source_path": "examples/research/rc_reuse_campaign/pin-roller-steel-plastic.model.json"
+    },
+    "request": {
+      "bytes": 869,
+      "packet_path": "inputs/request.json",
+      "sha256": "5dc17d29a2b4e9228532e9acb1040ad4d87913d62e359ff50e18d2288b2cf883",
+      "source_path": "examples/research/rc_reuse_campaign/pin-roller-steel-plastic.request.json"
+    }
+  },
+  "price_scope": "synthetic development arithmetic only, not a construction quotation",
+  "schema": "rc-pin-roller-design-pair-synthetic-plan.v1",
+  "solver_authority": "original full path plus fresh same-engine verification per candidate",
+  "source_revision": "7b472c1b7246bef8821ce6351fa1d8432ff728ab",
+  "source_revision_is_attestation": false
+}
