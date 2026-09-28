@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 import os
 import subprocess
+import sys
 from time import perf_counter_ns, process_time_ns
 
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
@@ -73,10 +74,28 @@ def _clean_head() -> str:
     return head
 
 
+def _verified_packet_bytes(packet: Path, entries: dict, relative: str) -> bytes:
+    row = entries.get(relative)
+    if row is None:
+        raise ValueError(f"original packet inventory omits {relative}")
+    payload = (packet / relative).read_bytes()
+    if (row.get("byte_length") != len(payload)
+            or row.get("sha256") != hashlib.sha256(payload).hexdigest()):
+        raise ValueError(f"original packet file differs from inventory: {relative}")
+    return payload
+
+
 def _inputs(packet: Path):
-    if _file_hash(packet / "inventory.json") != ORIGINAL_INVENTORY:
+    inventory_bytes = (packet / "inventory.json").read_bytes()
+    if hashlib.sha256(inventory_bytes).hexdigest() != ORIGINAL_INVENTORY:
         raise ValueError("original development packet inventory changed")
-    selection = _json(packet / "study/selection/result.json")
+    inventory = json.loads(inventory_bytes)
+    entries = {row["path"]: row for row in inventory["files"]}
+    if len(entries) != len(inventory["files"]):
+        raise ValueError("duplicate original packet inventory paths")
+    selection = json.loads(_verified_packet_bytes(
+        packet, entries, "study/selection/result.json"
+    ))
     if (
         selection.get("source_revision") != ORIGINAL_SOURCE
         or selection.get("result_hash") != ORIGINAL_RESULT
@@ -88,7 +107,7 @@ def _inputs(packet: Path):
         }))
     ):
         raise ValueError("original rejected development selection changed")
-    policy_bytes = (packet / "study/pooled-policy.json").read_bytes()
+    policy_bytes = _verified_packet_bytes(packet, entries, "study/pooled-policy.json")
     policy = learning.RCControlSeedPolicy(policy_bytes.decode())
     if policy.policy_hash != ORIGINAL_POLICY:
         raise ValueError("unpromoted source policy changed")
@@ -105,12 +124,15 @@ def _inputs(packet: Path):
     train = []
     for fold in folds:
         case_id = fold["withheld_training_case"]
-        folder = packet / "study/selection" / f"fold-{fold['index']:04d}"
+        prefix = f"study/selection/fold-{fold['index']:04d}"
         model = load_neutral_json_bytes(
-            (folder / "model.json").read_bytes(), source_path=f"memory://{case_id}.json"
+            _verified_packet_bytes(packet, entries, f"{prefix}/model.json"),
+            source_path=f"memory://{case_id}.json"
         )
         request = decode_bounded_rc_fiber_direct_control_request(
-            _json(folder / "request.json")["request"]
+            json.loads(_verified_packet_bytes(
+                packet, entries, f"{prefix}/request.json"
+            ))["request"]
         )
         group = case_id.split("-amp")[0]
         train.append(learning.RCControlLearningCase(
@@ -118,10 +140,14 @@ def _inputs(packet: Path):
             f"synthetic-{group}", "train", model, request,
         ))
     base = next(row for row in folds if row["withheld_training_case"] == "train-d-amp150")
-    base_folder = packet / "study/selection" / f"fold-{base['index']:04d}"
-    model_template = _json(base_folder / "model.json")
+    base_prefix = f"study/selection/fold-{base['index']:04d}"
+    model_template = json.loads(_verified_packet_bytes(
+        packet, entries, f"{base_prefix}/model.json"
+    ))
     request_template = decode_bounded_rc_fiber_direct_control_request(
-        _json(base_folder / "request.json")["request"]
+        json.loads(_verified_packet_bytes(
+            packet, entries, f"{base_prefix}/request.json"
+        ))["request"]
     )
     pilot = []
     for case_id, width, height, millimetres in CASE_SPECS:
@@ -337,7 +363,51 @@ def run_slot(root: Path, index: int):
     return outcome
 
 
-def audit(root: Path):
+def _audit_slot_contract(plan: dict, slot: dict, report: dict) -> None:
+    if plan.get("guard") != GATE or plan.get("guard_hash") != _sha(_bytes(GATE)):
+        raise ValueError("original pilot guard differs from frozen rule")
+    cases = [row for row in plan["cases"] if row["case_id"] == slot["case_id"]]
+    if (len(cases) != 1 or slot["case_id"] not in plan["development_case_ids"]
+            or cases[0]["split"] != "validation"
+            or cases[0]["static_model_gate"] != "not_rejected"):
+        raise ValueError("pilot slot does not bind one declared development case")
+    request = report.get("request")
+    if (report.get("model_checksum") != cases[0]["model_hash"]
+            or not isinstance(request, dict)
+            or _sha(_bytes(request)) != cases[0]["request_hash"]):
+        raise ValueError("pilot report model or request differs from scheduled case")
+    if (type(report.get("absolute_tolerance")) is not float
+            or type(report.get("relative_tolerance")) is not float
+            or report["absolute_tolerance"] != plan["absolute_tolerance"]
+            or report["relative_tolerance"] != plan["relative_tolerance"]
+            or plan["arithmetic_profile"] != ARITHMETIC
+            or any(report.get(key) != value for key, value in
+                   learning._arithmetic_kwargs(ARITHMETIC).items())
+            or report.get("capture_material_state") is not True
+            or report.get("material_capture_scope") != "proposal-only"
+            or report.get("proposal_requested") is not True
+            or report.get("proposal_abstention_strategy") != "secant"):
+        raise ValueError("pilot report comparison or execution config changed")
+    targets = request.get("targets_m")
+    entries = report.get("arms", {}).get("proposal", {}).get("entries")
+    if (not isinstance(targets, list) or len(targets) != 12
+            or not isinstance(entries, list) or len(entries) != len(targets)):
+        raise ValueError("pilot report target or guard roster changed")
+    for index, entry in enumerate(entries):
+        expected_allow = 2 <= index <= 10
+        guard = entry.get("proposal_guard", {})
+        if (type(entry.get("target_index")) is not int
+                or entry["target_index"] != index
+                or entry.get("target_m") != targets[index]
+                or guard.get("status") != "returned"
+                or guard.get("allow_proposal") is not expected_allow):
+            raise ValueError("pilot report per-target guard differs from frozen rule")
+        if not expected_allow and entry.get("proposal_decision") != (
+                "abstained_to_reference" if index == 0 else "abstained_to_secant"):
+            raise ValueError("pilot report declined-target strategy changed")
+
+
+def audit(root: Path, *, write: bool = True):
     started_wall, started_cpu = perf_counter_ns(), process_time_ns()
     plan = _read_plan(root)
     rows = []
@@ -369,6 +439,7 @@ def audit(root: Path):
                 or report["arm_order"] != slot["arm_order"]
             ):
                 raise ValueError("pilot report binding changed")
+            _audit_slot_contract(plan, slot, report)
             paths = {}
             for name in (*slot["arm_order"], "fresh-reference"):
                 path = _json(folder / "benchmark" / name / "path.json")
@@ -430,7 +501,8 @@ def audit(root: Path):
               "net_benefit_proved": False,
               "separate_audit_wall_ns": perf_counter_ns() - started_wall,
               "separate_audit_cpu_ns": process_time_ns() - started_cpu}
-    _save(root, "audit.json", _bytes(result))
+    if write:
+        _save(root, "audit.json", _bytes(result))
     return result
 
 
@@ -445,15 +517,22 @@ def main():
     running.add_argument("--index", required=True, type=int)
     reviewing = sub.add_parser("audit")
     reviewing.add_argument("--output", required=True, type=Path)
+    reviewing.add_argument("--verify-only", action="store_true",
+                           help="recompute without rewriting the frozen audit receipt")
     args = parser.parse_args()
     if args.command == "prepare":
         result = prepare(args.packet, args.output)
     elif args.command == "slot":
         result = run_slot(args.output, args.index)
     else:
-        result = audit(args.output)
+        result = audit(args.output, write=not args.verify_only)
     print(json.dumps(result, sort_keys=True))
+    if args.command == "slot" and result["status"] != "completed":
+        return 1
+    if args.command == "audit" and result["predeclared_path_screen_pass"] is not True:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

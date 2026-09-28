@@ -70,3 +70,16 @@ solver work, child enclosing time, and read-only audit time remain separate;
 nested timers must not be summed. Historical label/fit/selection costs remain
 separate from current evaluation costs. No value from this pilot is used to
 modify its gate or to open the reserved evaluation cases.
+
+## Post-run erratum (2026-09-29)
+
+The frozen rule and plan still declare indices 0, 1 and 11 as guard declines,
+with `secant` as the configured fallback. The pre-run sentence saying all three
+indices were *sent to secant* described the configured fallback, not the
+realized first-target strategy. In each original path, index 0 had no prior
+accepted state from which to form a secant seed and was recorded as
+`abstained_to_reference` with `seed_used=false`; indices 1 and 11 were recorded
+as `abstained_to_secant`. This correction does not change the guard bits, the
+plan hash, any numerical execution, or the `<0.99` decision rule. A later
+read-only audit revision binds the original case hashes, comparison settings
+and per-target guard receipts more tightly to the frozen plan.
