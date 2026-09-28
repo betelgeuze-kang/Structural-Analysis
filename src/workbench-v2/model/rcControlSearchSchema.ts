@@ -3,7 +3,7 @@ import { validateRcLayoutSearch } from './rcLayoutSearchSchema'
 import { sha256Bytes } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
 import { validateRcDesignStudy, verifyQuantities, type RcDesignReview, type StudyRead } from './rcControlDesignSchema'
-import { costOptimality } from './rcControlSearchCost'
+import { costOptimality, RC_COST_AUDIT_V1, RC_COST_AUDIT_V2 } from './rcControlSearchCost'
 import { candidateRanking, CHEAPER_BOUNDARY_RANKING, LEGACY_RANKING } from './rcControlCandidateRanking'
 
 export const RC_SEARCH_ARMS = ['price_order', 'learned_order'] as const
@@ -200,7 +200,8 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     await verifyQuantities({ ...row, artifacts: { model: ref } }, model, poolSlices[index], common)
   }
   check(same(report.candidate_coverage_audit, priceOnly ? null : coverage(plan, designs.exhaustive_oracle?.report ?? null)), 'search_coverage_invalid')
-  const cost = costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, review]) => [name, review.report])))
+  const costSchema = report.candidate_cost_optimality_audit?.schema_version === RC_COST_AUDIT_V2 ? RC_COST_AUDIT_V2 : RC_COST_AUDIT_V1
+  const cost = costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, review]) => [name, review.report])), costSchema)
   check(standalone || report.schema_version === 'experimental-rc-control-candidate-search.v3'
     ? same(report.candidate_cost_optimality_audit, cost) : !('candidate_cost_optimality_audit' in report), 'search_cost_optimality_invalid')
   check([report.ranking_wall_ns, report.online_and_optional_oracle_wall_ns, report.online_and_optional_oracle_cpu_ns].every(nat)

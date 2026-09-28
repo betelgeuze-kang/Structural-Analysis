@@ -5,8 +5,11 @@ from copy import deepcopy
 import pytest
 
 from structural_analysis.benchmark.rc_control_candidate_cost import (
+    COST_AUDIT_V1,
+    COST_AUDIT_V2,
     candidate_cost_optimality_audit,
 )
+from structural_analysis.benchmark.rc_control_candidate_search import _coverage_audit
 
 
 def case():
@@ -39,6 +42,16 @@ def case():
             "price_order": {"shortlist": ["cheap"]},
             "learned_order": {"shortlist": ["middle"]},
         },
+        "predictions": [
+            {
+                "candidate_id": name,
+                "prediction": {"abstained": False},
+                "predicted_screens": {
+                    "limit": {"status": "fail" if name != "middle" else "pass"}
+                },
+            }
+            for name in ("cheap", "middle", "costly")
+        ],
     }
     reports = {
         name: {
@@ -59,6 +72,7 @@ def case():
 def test_more_expensive_missed_feasible_does_not_count_as_lost_cost_optimality():
     plan, reports = case()
     result = candidate_cost_optimality_audit(plan, reports)
+    assert result["schema_version"] == COST_AUDIT_V2
     assert result["pool_minimum_feasible_candidate_ids"] == ["cheap"]
     assert result["pool_minimum_feasible_estimate"] == 100
     price, learned = result["arms"]["price_order"], result["arms"]["learned_order"]
@@ -67,8 +81,35 @@ def test_more_expensive_missed_feasible_does_not_count_as_lost_cost_optimality()
     assert price["matches_pool_minimum"] is True
     assert learned["selected_minus_pool_minimum_estimate"] == 100
     assert learned["missed_cheaper_feasible_candidate_ids"] == ["cheap"]
+    assert learned["missed_cheaper_false_negative_candidate_ids"] == ["cheap"]
+    assert price["missed_cheaper_false_negative_candidate_ids"] is None
     assert learned["matches_pool_minimum"] is False
     assert not result["global_design_optimality_proved"]
+
+
+def test_cheaper_false_negative_excludes_abstention_and_expensive_false_negative():
+    plan, reports = case()
+    abstained = deepcopy(plan["pool"][1])
+    abstained["candidate_id"] = "abstained"
+    abstained["material_estimate"]["total"] = 150
+    plan["pool"].append(abstained)
+    reports["exhaustive_oracle"]["rows"].append(deepcopy(abstained))
+    plan["predictions"].append(
+        {
+            "candidate_id": "abstained",
+            "prediction": {"abstained": True},
+            "predicted_screens": None,
+        }
+    )
+    coverage = _coverage_audit(plan, reports["exhaustive_oracle"])
+    assert coverage["arms"]["learned_order"]["false_negative_candidate_ids"] == [
+        "cheap",
+        "costly",
+    ]
+    learned = candidate_cost_optimality_audit(plan, reports)["arms"]["learned_order"]
+    assert learned["missed_cheaper_feasible_candidate_ids"] == ["cheap", "abstained"]
+    assert learned["missed_cheaper_false_negative_candidate_ids"] == ["cheap"]
+    assert learned["missed_cheaper_false_negative_count"] == 1
 
 
 @pytest.mark.parametrize("unknown", ["cheap", "costly", "baseline"])
@@ -90,6 +131,8 @@ def test_any_incomplete_oracle_row_keeps_minimum_and_gap_unknown(unknown, mutati
         assert arm["selected_minus_pool_minimum_estimate"] is None
         assert arm["matches_pool_minimum"] is None
         assert arm["missed_cheaper_feasible_count"] is None
+        assert arm["missed_cheaper_false_negative_count"] is None
+        assert arm["missed_cheaper_false_negative_candidate_ids"] is None
 
 
 def test_no_oracle_is_distinct_from_no_feasible_candidate():
@@ -98,6 +141,7 @@ def test_no_oracle_is_distinct_from_no_feasible_candidate():
     first = candidate_cost_optimality_audit(plan, no_oracle)
     assert first["status"] == "oracle_not_run"
     assert first["oracle_unverifiable_candidate_ids"] is None
+    assert first["arms"]["learned_order"]["missed_cheaper_false_negative_count"] is None
     for row in reports["exhaustive_oracle"]["rows"]:
         row["screens"]["limit"]["status"] = "fail"
     second = candidate_cost_optimality_audit(plan, reports)
@@ -113,6 +157,7 @@ def test_missing_selection_is_not_zero_gap_or_an_invented_oracle_selection():
     assert result["status"] == "no_verified_selection"
     assert result["selected_estimate"] is None
     assert result["selected_minus_pool_minimum_estimate"] is None
+    assert result["missed_cheaper_false_negative_count"] is None
 
 
 def test_contradictory_later_outcome_cannot_certify_online_selection():
@@ -122,6 +167,16 @@ def test_contradictory_later_outcome_cannot_certify_online_selection():
     assert arm["status"] == "selection_not_confirmed_by_oracle"
     assert arm["selected_candidate_id"] == "middle"
     assert arm["selected_minus_pool_minimum_estimate"] is None
+    assert arm["missed_cheaper_false_negative_count"] is None
+
+
+def test_legacy_cost_audit_replay_keeps_v1_shape():
+    plan, reports = case()
+    result = candidate_cost_optimality_audit(
+        plan, reports, schema_version=COST_AUDIT_V1
+    )
+    assert result["schema_version"] == COST_AUDIT_V1
+    assert "missed_cheaper_false_negative_count" not in result["arms"]["learned_order"]
 
 
 @pytest.mark.parametrize("zero", [False, True])

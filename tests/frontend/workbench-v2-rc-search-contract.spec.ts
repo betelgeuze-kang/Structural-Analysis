@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { costOptimality } from '../../src/workbench-v2/model/rcControlSearchCost'
+import { costOptimality, RC_COST_AUDIT_V2 } from '../../src/workbench-v2/model/rcControlSearchCost'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { validateRcControlSearch } from '../../src/workbench-v2/model/rcControlSearchSchema'
@@ -82,6 +82,21 @@ for (const suffix of ['', '-no-oracle']) {
     expect(review.costOptimality.arms.price_order.selected_minus_pool_minimum_estimate).toBe(suffix ? null : 0)
   })
 }
+test('RC search validates a v2 cost audit and rejects a forged false-negative count', async () => {
+  const dir = 'tests/frontend/fixtures/rc-control-search-cost/'
+  const source = readFileSync(dir + 'result.json', 'utf8')
+  const plan = JSON.parse(readFileSync(dir + 'plan.json', 'utf8'))
+  const reports = Object.fromEntries(['price_order', 'learned_order', 'exhaustive_oracle'].map(name =>
+    [name, JSON.parse(readFileSync(dir + name + '/comparison.json', 'utf8'))]))
+  const audit = costOptimality(plan, reports, RC_COST_AUDIT_V2)
+  const report = changed(source, { candidate_cost_optimality_audit: JSON.stringify(audit) }, 'report_hash')
+  const readV2 = async (p: string) => new Uint8Array(readFileSync(dir + p))
+  const review = await validateRcControlSearch(report, readV2)
+  expect(review.costOptimality).toEqual(audit)
+  audit.arms.learned_order.missed_cheaper_false_negative_count = 1
+  const forged = changed(source, { candidate_cost_optimality_audit: JSON.stringify(audit) }, 'report_hash')
+  await expect(validateRcControlSearch(forged, readV2)).rejects.toThrow('search_cost_optimality_invalid')
+})
 for (const [name, mutate] of [
   ['gap', (a: any) => { a.arms.learned_order.selected_minus_pool_minimum_estimate = 1 }],
   ['cheaper missed count', (a: any) => { a.arms.learned_order.missed_cheaper_feasible_count = 2 }],
@@ -167,6 +182,26 @@ test('RC search cost arithmetic distinguishes loss, ties and unknown outcomes in
   const ties = costOptimality(plan, reports)
   expect(ties.pool_minimum_feasible_candidate_ids).toEqual(['baseline', 'cheap', 'middle'])
   expect(ties.arms.learned_order.matches_pool_minimum).toBe(true)
+})
+test('RC search v2 cost intersection separates false negatives from abstentions and expensive misses', () => {
+  const pool = [['baseline', 300], ['cheap', 100], ['middle', 200], ['costly', 400], ['abstained', 150]].map(([candidate_id, total]) =>
+    ({ candidate_id, material_estimate: { total, currency: 'KRW', scope: 'test' } }))
+  const rows = pool.map(p => ({ ...p, full_reference_verification_pass: true, screens: { limit: { status: 'pass' } } }))
+  const plan = { pool, price_table_hash: 'common', history_limits: { limit: 1 }, material_limits: {}, terminal_limits: null,
+    plans: { price_order: { shortlist: ['cheap'] }, learned_order: { shortlist: ['middle'] } },
+    predictions: ['cheap', 'middle', 'costly', 'abstained'].map(candidate_id => ({ candidate_id,
+      prediction: { abstained: candidate_id === 'abstained' }, predicted_screens: candidate_id === 'abstained' ? null
+        : { limit: { status: candidate_id === 'middle' ? 'pass' : 'fail' } } })) }
+  const reports = { price_order: { selected_candidate_id: 'cheap' }, learned_order: { selected_candidate_id: 'middle' },
+    exhaustive_oracle: { report_hash: 'oracle', rows } }
+  const audit = costOptimality(plan, reports, RC_COST_AUDIT_V2)
+  expect(audit.arms.learned_order.missed_cheaper_feasible_candidate_ids).toEqual(['cheap', 'abstained'])
+  expect(audit.arms.learned_order.missed_cheaper_false_negative_candidate_ids).toEqual(['cheap'])
+  expect(audit.arms.price_order.missed_cheaper_false_negative_candidate_ids).toBeNull()
+  const withoutOracle = costOptimality(plan, { price_order: reports.price_order, learned_order: reports.learned_order }, RC_COST_AUDIT_V2)
+  expect(withoutOracle.arms.learned_order.missed_cheaper_false_negative_count).toBeNull()
+  rows[0].full_reference_verification_pass = false
+  expect(costOptimality(plan, reports, RC_COST_AUDIT_V2).arms.learned_order.missed_cheaper_false_negative_count).toBeNull()
 })
 
 // Controlled ranking metadata exercises schedule reconstruction, not prediction quality.

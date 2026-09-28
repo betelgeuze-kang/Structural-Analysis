@@ -7,6 +7,10 @@ not a quote, global design optimum, or a measure of learned speedup.
 import math
 
 
+COST_AUDIT_V1 = "rc-control-candidate-cost-optimality.v1"
+COST_AUDIT_V2 = "rc-control-candidate-cost-optimality.v2"
+
+
 def verified_limit_outcome(plan, row):
     requested = set(plan["history_limits"]) | set(plan["material_limits"])
     requested.update("terminal_" + k for k in (plan["terminal_limits"] or {}))
@@ -25,16 +29,52 @@ def verified_limit_outcome(plan, row):
     return all(s["status"] == "pass" for s in screens.values())
 
 
-def candidate_cost_optimality_audit(plan, comparisons):
+def candidate_cost_optimality_audit(
+    plan, comparisons, *, schema_version=COST_AUDIT_V2
+):
     """Require every oracle result before identifying a finite-pool minimum.
 
     Unknown outcomes remain unknown even when their declared prices exceed the
     best known feasible price. Both online comparisons retain their own selected
     result; a contradictory later oracle does not silently replace it.
+    V2 also intersects missed cheaper feasible alternatives with predicted
+    limit failures for the learned arm; abstentions never count as failures.
     """
+    if schema_version not in (COST_AUDIT_V1, COST_AUDIT_V2):
+        raise ValueError("unsupported cost audit schema version")
     pool = {row["candidate_id"]: row for row in plan["pool"]}
     if len(pool) != len(plan["pool"]) or "baseline" not in pool:
         raise ValueError("cost audit requires a unique pool including baseline")
+    predicted_failures = set()
+    if schema_version == COST_AUDIT_V2 and "learned_order" in plan["plans"]:
+        predictions = plan["predictions"]
+        ids = [row["candidate_id"] for row in predictions]
+        if len(ids) != len(pool) - 1 or set(ids) != set(pool) - {"baseline"}:
+            raise ValueError("cost audit needs one prediction per alternative")
+        requested_screens = set(plan["history_limits"]) | set(plan["material_limits"])
+        requested_screens.update(
+            "terminal_" + key for key in (plan["terminal_limits"] or {})
+        )
+        for row in predictions:
+            prediction = row["prediction"]
+            screens = row["predicted_screens"]
+            if type(prediction.get("abstained")) is not bool:
+                raise ValueError("cost audit needs explicit prediction abstention")
+            if prediction["abstained"]:
+                if screens is not None:
+                    raise ValueError("abstained prediction cannot have screens")
+            elif (
+                type(screens) is not dict
+                or set(screens) != requested_screens
+                or any(
+                    type(screen) is not dict
+                    or screen.get("status") not in ("pass", "fail")
+                    for screen in screens.values()
+                )
+            ):
+                raise ValueError("cost audit needs complete prediction screens")
+            elif any(screen["status"] == "fail" for screen in screens.values()):
+                predicted_failures.add(row["candidate_id"])
     estimates = {}
     common = None
     for candidate_id, row in pool.items():
@@ -138,7 +178,7 @@ def candidate_cost_optimality_audit(plan, comparisons):
             if arm_status == "compared"
             else None
         )
-        arms[name] = {
+        arm = {
             "status": arm_status,
             "selected_candidate_id": selected_id,
             "selected_estimate": selected_estimate,
@@ -147,8 +187,19 @@ def candidate_cost_optimality_audit(plan, comparisons):
             "missed_cheaper_feasible_count": None if missed is None else len(missed),
             "missed_cheaper_feasible_candidate_ids": missed,
         }
+        if schema_version == COST_AUDIT_V2:
+            false_negative_missed = (
+                [candidate_id for candidate_id in missed if candidate_id in predicted_failures]
+                if missed is not None and name == "learned_order"
+                else None
+            )
+            arm["missed_cheaper_false_negative_count"] = (
+                None if false_negative_missed is None else len(false_negative_missed)
+            )
+            arm["missed_cheaper_false_negative_candidate_ids"] = false_negative_missed
+        arms[name] = arm
     return {
-        "schema_version": "rc-control-candidate-cost-optimality.v1",
+        "schema_version": schema_version,
         "status": status,
         "candidate_denominator": len(pool),
         "baseline_included": True,

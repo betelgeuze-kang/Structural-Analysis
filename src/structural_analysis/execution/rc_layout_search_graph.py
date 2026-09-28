@@ -22,6 +22,8 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
 )
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.benchmark.rc_control_candidate_cost import (
+    COST_AUDIT_V1,
+    COST_AUDIT_V2,
     candidate_cost_optimality_audit,
 )
 from structural_analysis.benchmark.rc_control_candidate_ranking import (
@@ -492,9 +494,17 @@ def _read_layout_search_graph(read, result):
         o["wall_ns"] for o in outcomes.values()
     ):
         raise ValueError("layout total is smaller than disjoint components")
+    cost_audit = result.get("candidate_cost_optimality_audit")
+    cost_schema = cost_audit.get("schema_version") if type(cost_audit) is dict else None
+    if not pruned and cost_schema not in (COST_AUDIT_V1, COST_AUDIT_V2):
+        raise ValueError("unsupported layout cost audit schema")
     _same(
         result.get("candidate_cost_optimality_audit"),
-        None if pruned else candidate_cost_optimality_audit(plan, comparisons),
+        None
+        if pruned
+        else candidate_cost_optimality_audit(
+            plan, comparisons, schema_version=cost_schema
+        ),
         "layout cost optimality differs",
     )
     _same(

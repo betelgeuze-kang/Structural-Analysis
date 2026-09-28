@@ -1,10 +1,16 @@
 import type { RcObject } from './rcJobSchema'
 
+export const RC_COST_AUDIT_V1 = 'rc-control-candidate-cost-optimality.v1'
+export const RC_COST_AUDIT_V2 = 'rc-control-candidate-cost-optimality.v2'
+
 /** Derive only after original models, quantities, prices and all design reports
  * have passed validateRcControlSearch's full artifact checks. */
-export function costOptimality(plan: RcObject, comparisons: Record<string, RcObject>): RcObject {
+export function costOptimality(plan: RcObject, comparisons: Record<string, RcObject>, schemaVersion: typeof RC_COST_AUDIT_V1 | typeof RC_COST_AUDIT_V2 = RC_COST_AUDIT_V1): RcObject {
   const pool: RcObject[] = plan.pool, oracle = comparisons.exhaustive_oracle ?? null
   const estimates = new Map<string, number>(pool.map(r => [r.candidate_id, r.material_estimate.total]))
+  const predictedFailures = new Set<string>(schemaVersion === RC_COST_AUDIT_V2 && plan.plans.learned_order
+    ? plan.predictions.filter((r: RcObject) => !r.prediction.abstained && Object.values(r.predicted_screens).some((s: any) => s.status === 'fail')).map((r: RcObject) => r.candidate_id)
+    : [])
   const requested = [...Object.keys(plan.history_limits), ...Object.keys(plan.material_limits), ...Object.keys(plan.terminal_limits ?? {}).map(k => `terminal_${k}`)].sort()
   const outcome = (r: RcObject): boolean | null => {
     if (!r.full_reference_verification_pass || !r.screens || !Object.keys(r.screens).length
@@ -29,11 +35,18 @@ export function costOptimality(plan: RcObject, comparisons: Record<string, RcObj
     const requestedIds = new Set(['baseline', ...plan.plans[name].shortlist])
     const missed = armStatus === 'compared' ? pool.filter(r => !requestedIds.has(r.candidate_id)
       && outcomes.get(r.candidate_id) === true && estimates.get(r.candidate_id)! < selectedEstimate!).map(r => r.candidate_id) : null
-    arms[name] = { status: armStatus, selected_candidate_id: selectedId, selected_estimate: selectedEstimate,
+    const arm: RcObject = { status: armStatus, selected_candidate_id: selectedId, selected_estimate: selectedEstimate,
       selected_minus_pool_minimum_estimate: gap, matches_pool_minimum: gap === null ? null : gap === 0,
       missed_cheaper_feasible_count: missed === null ? null : missed.length, missed_cheaper_feasible_candidate_ids: missed }
+    if (schemaVersion === RC_COST_AUDIT_V2) {
+      const falseNegativeMissed = name === 'learned_order' && missed !== null
+        ? missed.filter((candidateId: string) => predictedFailures.has(candidateId)) : null
+      arm.missed_cheaper_false_negative_count = falseNegativeMissed === null ? null : falseNegativeMissed.length
+      arm.missed_cheaper_false_negative_candidate_ids = falseNegativeMissed
+    }
+    arms[name] = arm
   }
-  return { schema_version: 'rc-control-candidate-cost-optimality.v1', status,
+  return { schema_version: schemaVersion, status,
     candidate_denominator: pool.length, baseline_included: true, price_table_hash: plan.price_table_hash,
     currency: pool[0].material_estimate.currency, quantity_scope: pool[0].material_estimate.scope,
     oracle_comparison_hash: oracle?.report_hash ?? null, oracle_unverifiable_candidate_ids: oracle ? unknown : null,
