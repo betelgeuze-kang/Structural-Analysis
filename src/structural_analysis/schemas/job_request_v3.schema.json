@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://structural-analysis.local/schemas/job_request_v3.schema.json",
   "title": "Structural Analysis Experimental RC Fiber Durable Job Request v3",
-  "description": "Immutable full RC request with proportional v1 or constant-load v2 configuration. Pure validation resolves nodes and model topology without solving. Actual preloaded origin, cumulative reversals and equilibrium are verified by the worker with separately charged preload and prefix replay.",
+  "description": "Immutable full RC request with proportional v1, constant-load v2, or explicitly opted-in pin/roller v4 configuration. Pure validation resolves nodes and model topology without solving. Actual preloaded origin, cumulative reversals and equilibrium are verified by the worker with separately charged preload and prefix replay.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -79,7 +79,8 @@
         "schema_version": {
           "enum": [
             "bounded-rc-fiber-direct-control-request.v1",
-            "bounded-rc-fiber-direct-control-request.v2"
+            "bounded-rc-fiber-direct-control-request.v2",
+            "bounded-rc-fiber-direct-control-request.v4"
           ]
         },
         "control_global_dof": {
@@ -127,6 +128,9 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 255
+        },
+        "experimental_pin_roller_beam": {
+          "const": true
         },
         "solver_config": {
           "type": "object",
@@ -255,6 +259,27 @@
             "not": {
               "required": [
                 "constant_nodal_loads"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "schema_version": {
+                "const": "bounded-rc-fiber-direct-control-request.v4"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "experimental_pin_roller_beam"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "experimental_pin_roller_beam"
               ]
             }
           }

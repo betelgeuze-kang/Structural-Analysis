@@ -19,6 +19,7 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )
 from structural_analysis.execution import rc_fiber_job_contract as contract
+from tests.test_rc_fiber_pin_roller_beam_public import _payload as pin_roller_payload
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -161,6 +162,62 @@ def test_request_schema_requires_full_configuration_and_rejects_initial_restart(
     for changed in (request | {"restart": None}, request | {"config": {}}):
         with pytest.raises(jsonschema.ValidationError):
             validator.validate(changed)
+
+
+def test_v4_request_binds_explicit_pin_roller_profile_without_solving():
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        control_global_dof=10,
+        targets_m=(-1e-6, -2e-6),
+        experimental_pin_roller_beam=True,
+    ).to_dict()
+    validator = jsonschema.Draft202012Validator(
+        json.loads(
+            (
+                ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+            ).read_bytes()
+        )
+    )
+    validator.validate(request)
+    model, config = contract.validate_rc_fiber_job_request(request)
+    assert config.experimental_pin_roller_beam is True
+    assert model.source_path == "<durable-rc-model>"
+    chunk, compiled, scope, binding, control = contract._context(request)
+    assert chunk == config and compiled.problem.fixed_global_dofs == (3, 4, 16)
+    assert binding["compiler_profile"] == (
+        contract.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+    )
+    assert control == {
+        "global_dof": 10,
+        "node_id": "N4",
+        "component": "UY",
+        "unit": "m",
+    }
+    assert scope["problem_contract_hash"] == compiled.problem.contract_hash
+    assert contract._api_request(config, None)["experimental_pin_roller_beam"] is True
+
+    for invalid in (
+        lambda value: value["config"].pop("experimental_pin_roller_beam"),
+        lambda value: value["config"].update(experimental_pin_roller_beam=False),
+        lambda value: value["config"].update(
+            constant_nodal_loads=[
+                {"node_id": "N3", "FX_kN": 0.0, "FY_kN": -1.0, "MZ_kNm": 0.0}
+            ],
+        ),
+    ):
+        changed = deepcopy(request)
+        invalid(changed)
+        with pytest.raises(jsonschema.ValidationError):
+            validator.validate(changed)
+        with pytest.raises(ValueError):
+            contract.validate_rc_fiber_job_request(changed)
+
+    changed = deepcopy(request)
+    changed["model"]["supports"][1]["dofs"] = ["UX", "UY"]
+    validator.validate(changed)
+    with pytest.raises(ValueError, match="unsupported canonical model"):
+        contract.validate_rc_fiber_job_request(changed)
 
 
 @pytest.mark.parametrize(
