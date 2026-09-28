@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:3e95f7e184e8d61de76b226ce30403142a01d1038839613a2e1076ea45dc556c",
+  "inventory_digest": "sha256:3668190fca472d084eab4e67e245b10dd5caa473c344a2aeb8060e4214a6fb5f",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -607,7 +607,7 @@
           "blob_sha": "e27946545163fd11641c68b0ff12f1dc4debad2f",
           "change_status": "modified",
           "changes": 65,
-          "current_blob_sha": "994f5ec11759a7ba74f286f275fa715d8cfcf4de",
+          "current_blob_sha": "fbe50a1743a270de23ece5ead000521d4b3974ea",
           "current_relation": "different",
           "deletions": 7,
           "path": ".github/workflows/workflow-contract-ci.yml",
