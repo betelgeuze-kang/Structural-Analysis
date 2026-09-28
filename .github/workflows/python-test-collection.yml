@@ -239,7 +239,9 @@ jobs:
           python scripts/build_bounded_planar_external_modal_buckling_case_package.py
           python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
           python scripts/build_bounded_planar_external_vv_matrix.py
-          python scripts/build_internal_license_due_diligence.py --fail-blocked
+          # Write the exact-current manifest before pytest. A blocked license
+          # contract is enforced after the test result has been retained.
+          python scripts/build_internal_license_due_diligence.py
           # These tracked receipts bind the exact Git commit. Rebuild them only in
           # the ephemeral runner so full pytest validates current-source bytes.
           python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py
@@ -290,10 +292,27 @@ jobs:
           --shard-count 4
           --
           -q
+          --junitxml=pytest-full-shard-${{ matrix.shard }}.xml
           --deselect
           tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
           --deselect
           tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::test_committed_receipt_is_reproducible
+
+      - name: Retain diagnostic shard test result independently of license status
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pytest-full-shard-diagnostic-${{ matrix.shard }}-${{ github.sha }}
+          path: pytest-full-shard-${{ matrix.shard }}.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Require exact current-source external license contract
+        if: ${{ always() && steps.materialize.outcome == 'success' }}
+        run: >-
+          python scripts/build_internal_license_due_diligence.py
+          --out "$RUNNER_TEMP/internal-license-gate.json"
+          --fail-blocked
 
   full:
     name: pytest-full

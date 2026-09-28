@@ -30,7 +30,11 @@ def test_failed_materialization_upload_preserves_failure_and_limits_files(
     steps = {step["name"]: step for step in job["steps"]}
     materialize = steps["Materialize exact current-source test evidence"]
     assert materialize["id"] == "materialize"
-    assert "--fail-blocked" in materialize["run"]
+    if job_name == "full_shards":
+        assert "--fail-blocked" not in materialize["run"]
+        assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    else:
+        assert "--fail-blocked" in materialize["run"]
     assert not job.get("continue-on-error", False)
     assert all(not step.get("continue-on-error", False) for step in job["steps"])
     gate = "Run materialized repository test suite shard" if job_name == "full_shards" else "Build current-HEAD readiness snapshot"
@@ -52,6 +56,50 @@ def test_failed_materialization_upload_preserves_failure_and_limits_files(
         "artifacts/manifests/internal_license_due_diligence.current.v1.json",
     ]
     assert upload["with"]["retention-days"] == 7
+
+
+def test_full_shard_reports_pytest_before_enforcing_external_license_gate() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/python-test-collection.yml").read_text()
+    )
+    jobs = workflow["jobs"]
+    shard_steps = jobs["full_shards"]["steps"]
+    names = [step["name"] for step in shard_steps]
+    materialize = shard_steps[names.index("Materialize exact current-source test evidence")]
+    test_step = shard_steps[names.index("Run materialized repository test suite shard")]
+    upload = shard_steps[
+        names.index("Retain diagnostic shard test result independently of license status")
+    ]
+    license_gate = shard_steps[
+        names.index("Require exact current-source external license contract")
+    ]
+
+    assert names.index("Materialize exact current-source test evidence") < names.index(
+        "Run materialized repository test suite shard"
+    ) < names.index(
+        "Retain diagnostic shard test result independently of license status"
+    ) < names.index("Require exact current-source external license contract")
+    assert "if" not in test_step
+    assert "--junitxml=pytest-full-shard-${{ matrix.shard }}.xml" in test_step["run"]
+    assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    assert "--fail-blocked" not in materialize["run"]
+    assert upload["if"] == "${{ always() }}"
+    assert upload["with"] == {
+        "name": "pytest-full-shard-diagnostic-${{ matrix.shard }}-${{ github.sha }}",
+        "path": "pytest-full-shard-${{ matrix.shard }}.xml",
+        "if-no-files-found": "warn",
+        "retention-days": 14,
+    }
+    assert license_gate["if"] == (
+        "${{ always() && steps.materialize.outcome == 'success' }}"
+    )
+    assert license_gate["run"] == (
+        "python scripts/build_internal_license_due_diligence.py "
+        '--out "$RUNNER_TEMP/internal-license-gate.json" --fail-blocked'
+    )
+    assert all(not step.get("continue-on-error", False) for step in shard_steps)
+    assert jobs["full"]["needs"] == "full_shards"
+    assert jobs["full"]["if"] == "${{ always() }}"
 
 
 @pytest.mark.parametrize(
