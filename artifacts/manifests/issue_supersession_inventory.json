@@ -1,7 +1,7 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-09-28T18:19:23Z",
+  "observed_at": "2026-09-28T18:57:15Z",
   "observation_source": "gh_cli_read_only_current_github_state",
   "observed_open_issue_count": 37,
   "open_issue_numbers": [
@@ -43,7 +43,7 @@
     493,
     495
   ],
-  "open_issue_projection_sha256": "sha256:5ceea0713be14b07366ddfee7f3a983c458c6c64c750dc2c73ad9ee9123b9353",
+  "open_issue_projection_sha256": "sha256:69220fc1d48dffdcf6bb69cda6672dbab6119b3632c7f237cdba51687b52160c",
   "open_issues": [
     {
       "number": 247,
@@ -586,9 +586,9 @@
       "number": 480,
       "title": "Benchmark held-out RC learned versus secant full-path runtime with complete costs",
       "state": "open",
-      "updated_at": "2026-09-28T12:19:23Z",
+      "updated_at": "2026-09-28T18:55:14Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/480",
-      "body_sha256": "sha256:be63d3b53313849a590a6ce9c8f9baa88ef3f7a2d1985fe2db2a7dc5bd222eaa",
+      "body_sha256": "sha256:49ad3d330f1f865b0baa021b9a9d8f9274641d35e5c5244446122272b897522c",
       "labels": [],
       "classification": "licensed_corpus_validation",
       "linked_pull_requests": [
