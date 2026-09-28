@@ -35,7 +35,10 @@ dirty checkout, output inside the checkout, or imported repository modules from
 another location. It records pre-run and post-run repository and imported
 dependency module byte hashes, Python and installed dependency versions,
 distribution `RECORD` hashes, and thread settings in
-`execution-source.json`. The workflow retains the complete original packet as
+`execution-source.json`. The imported-module byte checks cover repository
+modules and the four direct dependencies; transitive dependency versions and
+distribution `RECORD` hashes are recorded, but their loaded file bytes are not
+individually verified. The workflow retains the complete original packet as
 a downloadable Actions artifact, including all comparison and native step
 files. No protected or private source data belong in this workflow.
 
@@ -52,9 +55,9 @@ retain separate ratios and the cross-case ratio remains `null`.
 This contract adds no hosted measurement until the workflow completes on an
 exact source commit. A hosted packet gives inspectably bound software
 execution evidence for these synthetic cases. Transitive dependencies are
-recorded but not locked, so a later installation may differ. The packet does
-not establish independent physical validation, hardware-general speedup,
-learned-policy benefit, or complete preparation/transport/review cost.
+neither locked nor byte-verified, so a later installation may differ. The
+packet does not establish independent physical validation, hardware-general
+speedup, learned-policy benefit, or complete preparation/transport/review cost.
 
 ## Interruption accounting in campaign receipt v2
 
