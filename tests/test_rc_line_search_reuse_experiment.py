@@ -9,6 +9,12 @@ import numpy as np
 import pytest
 
 from scripts import run_rc_reuse_campaign as campaign
+from structural_analysis.api import nonlinear_fiber_frame as public
+from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+    decode_bounded_rc_fiber_direct_control_request,
+)
+from structural_analysis.benchmark import rc_control_learning as learning
+from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
 _spec = importlib.util.spec_from_file_location(
     "reuse_experiment",
@@ -185,6 +191,51 @@ def test_supplied_case_preserves_preload_and_targets_through_native_comparison(t
                     assert 0 <= sum(phase["phase_wall_ns"].values()) <= report["whole_study_wall_ns"]
                 else:
                     assert phase["phase_wall_ns"] is None
+
+
+def test_pin_roller_reversal_with_accepted_steel_plasticity_has_full_benchmark_history(
+    tmp_path,
+):
+    directory = Path("examples/research/rc_reuse_campaign")
+    model = load_neutral_json_bytes(
+        (directory / "pin-roller-steel-plastic.model.json").read_bytes()
+    )
+    request = decode_bounded_rc_fiber_direct_control_request(
+        (directory / "pin-roller-steel-plastic.request.json").read_bytes()
+    )
+    assert request.experimental_pin_roller_beam is True
+    assert request.targets_m == (-0.00005, -0.0001, -0.00015, 0.00005)
+    report = experiment.runtime.benchmark_rc_control_seed_paths(
+        model, request, source_revision="a" * 40,
+        output_directory=tmp_path / "comparison",
+        proposal=experiment.runtime.secant_seed,
+        proposal_identity="sha256:" + "b" * 64,
+        record_assembly_work=True,
+        record_assembly_timing=True,
+        **learning._arithmetic_kwargs(learning.RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    assert report["compiler_profile"] == (
+        public.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+    )
+    assert report["compiled_problem_contract_hash"].startswith("sha256:")
+    assert report["reference_repeat_exact"] is True
+    assert report["all_execution_work_reported"] is True
+    assert {name: value["full_history_pass"] for name, value in
+            report["comparisons"].items()} == {
+        "reference": True, "secant": True, "proposal": True,
+    }
+    assert all(arm["status"] == "complete" for arm in report["arms"].values())
+    assert report["fresh_reference"]["status"] == "complete"
+    step = json.loads(
+        (tmp_path / "comparison/reference/002-1-step.json").read_bytes()
+    )
+    assert step["committed"] is True
+    assert max(
+        fiber.get("accumulated_plastic_strain", 0.0)
+        for member in step["accepted_checkpoint"]["element_states"]
+        for point in member["integration_point_states"]
+        for fiber in point["fiber_states"]
+    ) > 0.0
 
 
 @pytest.mark.parametrize("timing", [None, 1, "true"])

@@ -1336,6 +1336,8 @@ def benchmark_rc_control_seed_paths(
         **(
             {"experimental_two_fixed_endpoints": True}
             if request.experimental_two_fixed_endpoints
+            else {"experimental_pin_roller_beam": True}
+            if request.experimental_pin_roller_beam
             else {}
         ),
     )
@@ -1393,6 +1395,11 @@ def benchmark_rc_control_seed_paths(
                 "compiled_problem_contract_hash": compiled.problem.contract_hash,
             }
             if request.experimental_two_fixed_endpoints
+            else {
+                "compiler_profile": public.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
+                "compiled_problem_contract_hash": compiled.problem.contract_hash,
+            }
+            if request.experimental_pin_roller_beam
             else {}
         ),
         "source_revision": source_revision,

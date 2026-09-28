@@ -14,10 +14,12 @@ import subprocess
 from time import perf_counter_ns
 
 from scripts import diagnose_rc_control_line_search_reuse as experiment
+from structural_analysis.api import nonlinear_fiber_frame as public
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.benchmark.rc_control_design import _bytes as canonical_bytes
+from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.model_ir.validation import load_json_object_strict
 
 
@@ -109,7 +111,8 @@ def _assembly_counts(directory, steps):
     return dispatches, reuse_hits
 
 
-def _comparison(directory, *, source, request, constant):
+def _comparison(directory, *, source, request, constant, compiler_profile,
+                compiled_problem_contract_hash):
     report = _receipt(directory / "comparison.json")
     identity = report.get("report_hash")
     unsigned = {key: value for key, value in report.items() if key != "report_hash"}
@@ -129,6 +132,13 @@ def _comparison(directory, *, source, request, constant):
         and report.get("all_execution_work_reported") is True,
         "experiment comparison source or completion mismatch",
     )
+    if compiler_profile is not None:
+        _require(
+            report.get("compiler_profile") == compiler_profile
+            and report.get("compiled_problem_contract_hash")
+            == compiled_problem_contract_hash,
+            "experiment comparison compiler profile or problem mismatch",
+        )
     arms = report.get("arms")
     comparisons = report.get("comparisons")
     _require(
@@ -168,6 +178,35 @@ def _validate_case_receipt(directory, values, *, source, repetitions, arithmetic
         expected.add("assembly_timing_recording")
     _require(set(summary) == expected, "experiment summary fields mismatch")
     request = decode_bounded_rc_fiber_direct_control_request(values["request"])
+    compiler_profile = None
+    compiled_problem_contract_hashes = {}
+    if request.experimental_two_fixed_endpoints or request.experimental_pin_roller_beam:
+        profile_flag = (
+            "experimental_two_fixed_endpoints"
+            if request.experimental_two_fixed_endpoints
+            else "experimental_pin_roller_beam"
+        )
+        compiler_profile = (
+            public.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+            if request.experimental_two_fixed_endpoints
+            else public.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+        )
+        model = load_neutral_json_bytes(values["model"])
+        compiled, blockers, _ = public._compile(model, **{profile_flag: True})
+        _require(compiled is not None and not blockers, "experiment model compiler mismatch")
+        compiled = experiment.runtime.api._with_constant_loading(
+            compiled, request.constant_nodal_loads
+        )
+        for retained in (False, True):
+            profile = (
+                experiment.learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+                if retained else "binary64"
+            )
+            compiled_problem_contract_hashes[retained] = (
+                experiment.learning._learning_compiled_arithmetic(
+                    compiled, profile
+                ).problem.contract_hash
+            )
     _require(
         summary["schema"] == "rc-immediate-line-search-reuse-experiment.v1"
         and summary["base_revision"] == source
@@ -263,6 +302,8 @@ def _validate_case_receipt(directory, values, *, source, repetitions, arithmetic
             )
             pair[strategy] = (item, steps, _comparison(
                 benchmark, source=source, request=request, constant=constant,
+                compiler_profile=compiler_profile,
+                compiled_problem_contract_hash=compiled_problem_contract_hashes.get(retained),
             ))
         baseline, reuse = pair["baseline"], pair["reuse"]
         _require(

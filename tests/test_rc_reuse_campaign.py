@@ -33,7 +33,8 @@ def write_success(output, *, source, model_raw, request_raw):
         name: {'full_history_pass': True} for name in ('reference', 'secant', 'proposal')
     }
     report = {
-        'schema_version': 'experimental-rc-control-seed-comparison.v2',
+        'schema_version': 'experimental-rc-control-seed-comparison.v2'
+        if request.constant_nodal_loads else 'experimental-rc-control-seed-comparison.v1',
         'source_revision': source, 'source_revision_is_attestation': False,
         'request': request.to_dict(), 'arm_order': ['reference', 'secant', 'proposal'],
         'proposal_requested': True, 'reference_repeat_exact': True,
@@ -41,6 +42,27 @@ def write_success(output, *, source, model_raw, request_raw):
         'arms': {name: {'status': 'complete'} for name in comparisons},
         'fresh_reference': {'status': 'complete'}, 'comparisons': comparisons,
     }
+    if request.experimental_two_fixed_endpoints or request.experimental_pin_roller_beam:
+        profile_flag = (
+            'experimental_two_fixed_endpoints'
+            if request.experimental_two_fixed_endpoints else 'experimental_pin_roller_beam'
+        )
+        profile = (
+            campaign.public.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+            if request.experimental_two_fixed_endpoints
+            else campaign.public.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+        )
+        model = campaign.load_neutral_json_bytes(model_raw)
+        compiled, blockers, _ = campaign.public._compile(model, **{profile_flag: True})
+        assert compiled is not None and not blockers
+        compiled = campaign.experiment.runtime.api._with_constant_loading(
+            compiled, request.constant_nodal_loads
+        )
+        compiled = campaign.experiment.learning._learning_compiled_arithmetic(
+            compiled, campaign.experiment.learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        )
+        report['compiler_profile'] = profile
+        report['compiled_problem_contract_hash'] = compiled.problem.contract_hash
     report['report_hash'] = 'sha256:' + hashlib.sha256(
         campaign.canonical_bytes(report)
     ).hexdigest()
@@ -75,7 +97,8 @@ def write_success(output, *, source, model_raw, request_raw):
                 'reused_dispatches': 0 if not enabled else 2,
             }
         rows.append({
-            'retained': True, 'constant': True, 'repetition': repetition,
+            'retained': True, 'constant': bool(request.constant_nodal_loads),
+            'repetition': repetition,
             'order': [False, True] if repetition % 2 == 0 else [True, False],
             **pair, 'native_step_bytes_exact': True, 'whole_benchmark_wall_ratio': 0.9,
         })
@@ -117,6 +140,49 @@ def test_complete_source_bound_two_repetition_receipt_is_accepted(tmp_path, monk
     assert receipt['campaign_complete'] and receipt['all_cases_completed']
     assert receipt['aggregate_speed_ratio'] is None
     assert receipt['cases'][0]['status'] == 'completed'
+
+
+@pytest.mark.parametrize('profile', ('two-fixed', 'pin-roller'))
+@pytest.mark.parametrize('tamper', (None, 'compiler_profile', 'compiled_problem_contract_hash'))
+def test_profiled_saved_comparison_binds_exact_compiler_and_problem(
+    tmp_path, profile, tamper
+):
+    if profile == 'two-fixed':
+        directory = ROOT / 'examples/research/rc_internal_portal_20mm'
+        model_raw = (directory / 'original-model.json').read_bytes()
+        request_raw = (
+            directory / 'experimental-two-fixed-endpoints-request.json'
+        ).read_bytes()
+    else:
+        directory = ROOT / 'examples/research/rc_reuse_campaign'
+        model_raw = (directory / 'pin-roller-steel-plastic.model.json').read_bytes()
+        request_raw = (directory / 'pin-roller-steel-plastic.request.json').read_bytes()
+    source = 'a' * 40
+    case = tmp_path / 'case'
+    case.mkdir()
+    summary = write_success(
+        case / 'results', source=source, model_raw=model_raw, request_raw=request_raw,
+    )
+    if tamper is not None:
+        path = case / 'results' / summary['rows'][0]['baseline']['directory'] / 'comparison.json'
+        report = json.loads(path.read_bytes())
+        report[tamper] = 'sha256:' + '0' * 64 if tamper.endswith('hash') else 'wrong-profile'
+        report.pop('report_hash')
+        report['report_hash'] = 'sha256:' + hashlib.sha256(
+            campaign.canonical_bytes(report)
+        ).hexdigest()
+        path.write_text(json.dumps(report))
+    def action():
+        campaign._validate_case_receipt(
+            case, {'model': model_raw, 'request': request_raw},
+            source=source, repetitions=2, arithmetic='retained',
+            record_assembly_timing=True,
+        )
+    if tamper is None:
+        action()
+    else:
+        with pytest.raises(ValueError, match='compiler profile or problem mismatch'):
+            action()
 
 
 def test_failed_case_retained_later_case_runs_on_frozen_inputs(tmp_path, monkeypatch):
