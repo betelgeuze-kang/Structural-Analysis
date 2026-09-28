@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:091553f161cbf0fbdb61548da33bbb11f091da3a9314e64c19427095f32684f7",
+  "artifact_hash": "sha256:320ced72f51224953fd09a3da50ba9fa981f137dd64b3d65c92327f168ec1ebf",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -180,12 +180,12 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-09-28T12:24:43.625624+00:00",
+  "generated_at": "2026-09-28T14:03:02.936873+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/__init__.py": "sha256:31c100a82c060d1c2e23896fced89480977670723c8fb667e3e2c9c1d3f568fc",
       "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:fa4626804c5c340aedb20641c756b361359453d5d152419728b1ca08b4f3ed0d",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:a083ce2ed58dc35a4bf82ae7884cae8038307536b5758b0833f8de1b7977e93f",
       "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:74ba8db797bc414a30b6d56c226b8411818eefcbb90cc8f4874112c56ff4d22e",
       "scripts/source_bound_python_inventory.py": "sha256:b60b5feecdaacaa924221be3ed13c46e2aa5bf4228c6e50fb70833f2d971919c",
       "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
@@ -374,7 +374,7 @@
       "tests/test_external_modal_buckling_technical_receipt.py": "sha256:d7ce86138e53108bfc37f8eeb119ee6a65a4e1cbe3e283ce2f7d54cd5ea936bf",
       "tests/test_source_bound_python_inventory.py": "sha256:cb4abba49d8d62f5990630d4092a5505fd0f287cc0ae2ccfbc82a2355f7236f9"
     },
-    "source_set_hash": "sha256:30590b5e92c64271daa5803e59b56d31f41a7fb389cbcf8dc36b72dc4423b205"
+    "source_set_hash": "sha256:3db0a74963e7da61f5319260e387cf2abb74ddd9bf91e837023861973b78c29f"
   },
   "mode_vector_artifacts": [
     {
@@ -442,11 +442,11 @@
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-09-28T12:24:43.633452+00:00",
+    "current_product_replay_generated_at": "2026-09-28T14:03:02.944651+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-09-28T12:24:43.633441+00:00",
+    "external_execution_generated_at": "2026-09-28T14:03:02.944645+00:00",
     "external_execution_reused": false,
-    "external_execution_source_commit_sha": "10c05ec5439755d610befda005049c3b3a1dc450",
+    "external_execution_source_commit_sha": "170b703d25e64ec97266386408c9893ebaf08aa5",
     "external_runtime_executed_in_this_generation": true,
     "reuse_reason": null
   },
@@ -457,11 +457,11 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:b8ec3933f48d1de716ab86e75f4f638f687163ed74e565a97405e66c26edd8a1",
-        "frd_sha256": "sha256:a3e1f0d25d717c37b20f28dca7740d78fa7cda609688e55187f44abef6836ef9",
+        "frd_sha256": "sha256:bb006a8c0659331ebbc7ec8419d1b29d80f38e470b1568a8310f896c77b7a9e7",
         "input_deck_sha256": "sha256:2a929ab93c0191b2b45c99ef1b46b956f0fe27f22d7cba99905cee934481825d",
         "return_code": 0,
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:af6affeec4bc2f9d5710135a5e275a5f59e78dced576bceac3eee01c166d21bd",
+        "stdout_sha256": "sha256:9e847e692900324c0f1c92d30d19079088ab90656463644a18c129138b1f4889",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -499,7 +499,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "10c05ec5439755d610befda005049c3b3a1dc450",
+  "source_commit_sha": "170b703d25e64ec97266386408c9893ebaf08aa5",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:ace6ac06f3b9629fc9a59f74b1942773fe24b6a82df1d0a50f451cdf80f03875",
+  "artifact_hash": "sha256:5a524e357cb7370a48563ca49c20fab5997ac9e885e8f2197d439c7834fd3811",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -116,7 +116,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 26921,
+          "analyze_wall_ns": 30721,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 2,
@@ -206,7 +206,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 13240,
+          "analyze_wall_ns": 13370,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 3,
@@ -296,7 +296,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 8831,
+          "analyze_wall_ns": 8751,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 2,
@@ -386,7 +386,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 12450,
+          "analyze_wall_ns": 18260,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 3,
@@ -610,7 +610,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 10550,
+          "analyze_wall_ns": 11600,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 2,
@@ -700,7 +700,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 4140,
+          "analyze_wall_ns": 4020,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 2,
@@ -790,7 +790,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 6820,
+          "analyze_wall_ns": 7000,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 4,
@@ -880,7 +880,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 3710,
+          "analyze_wall_ns": 3720,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 2,
@@ -1064,7 +1064,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 12430,
+          "analyze_wall_ns": 14401,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 1,
@@ -1154,7 +1154,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 3350,
+          "analyze_wall_ns": 3550,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 1,
@@ -1244,7 +1244,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 2990,
+          "analyze_wall_ns": 2630,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 1,
@@ -1334,7 +1334,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 2510,
+          "analyze_wall_ns": 2500,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 1,
@@ -2261,7 +2261,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-09-28T12:18:09.352827+00:00",
+  "generated_at": "2026-09-28T13:56:30.990365+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -2273,7 +2273,7 @@
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
       "scripts/__init__.py": "sha256:31c100a82c060d1c2e23896fced89480977670723c8fb667e3e2c9c1d3f568fc",
       "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:fa4626804c5c340aedb20641c756b361359453d5d152419728b1ca08b4f3ed0d",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:a083ce2ed58dc35a4bf82ae7884cae8038307536b5758b0833f8de1b7977e93f",
       "scripts/source_bound_python_inventory.py": "sha256:b60b5feecdaacaa924221be3ed13c46e2aa5bf4228c6e50fb70833f2d971919c",
       "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
       "src/structural_analysis/adapters/__init__.py": "sha256:2701dd402c3567252dd13a793af2bfd13449442fe69811e6dcc05868eb706d08",
@@ -2467,20 +2467,20 @@
       "src/structural_analysis/units/schema.py": "sha256:705c1ca9070271d9c524eb440a831ccb0d7a438d11b5c1f4dbefc77b63639741",
       "tests/test_bounded_planar_model_ir_adapter.py": "sha256:b3075d7831c35a47ce61e6d159c13465fb1f73c1a03317ee6517fd5b1417296a",
       "tests/test_equation_scaling_6dof.py": "sha256:af1df403c6dd318f82c9db29c61e297e75116081061d90709a035238bdc38867",
-      "tests/test_external_code_to_code_technical_receipt.py": "sha256:5cb5de2c2f173e126de12773740dfd0a3542c114d6d06f2c43301044c3f1d359",
+      "tests/test_external_code_to_code_technical_receipt.py": "sha256:a0d24f23c021149294360f190714951d2028603280adbce8ed58034c84d4f0c6",
       "tests/test_opensees_planar_load_path_attempts.py": "sha256:53c383fb0452f32e48b10a64776e0047c93ca7fbe67042c6f917b918ce58b7ee",
       "tests/test_source_bound_python_inventory.py": "sha256:cb4abba49d8d62f5990630d4092a5505fd0f287cc0ae2ccfbc82a2355f7236f9",
       "tests/test_stateful_corotational_frame3d_sparse.py": "sha256:54e41b4546a203d9aaadccbb25b0001d298289ec1986af410e62acc0a2b650fa",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:c12854152a6be8b0f5cc8e4dd783c94e01d10eb6ebb11578dde268e6fd1fe01a"
     },
-    "source_set_hash": "sha256:089619fe1533746b32b5b6eb062af4896cd431e025f94f7bcfee1a6d18eba3ca"
+    "source_set_hash": "sha256:ea0de04e69a558ba9a3529fd9650851a4bb58b48cd4f2f911ec1a27b9bdaf61c"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-09-28T12:18:09.352827+00:00",
+    "current_product_replay_generated_at": "2026-09-28T13:56:30.990365+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-09-28T11:42:18.592645+00:00",
+    "external_execution_generated_at": "2026-09-28T13:52:02.364362+00:00",
     "external_execution_reused": true,
-    "external_execution_source_commit_sha": "a4f480409fef4a34ecdc80a8006fd9e32afb58af",
+    "external_execution_source_commit_sha": "84602ccf9065c8aa407f91adbb24b2b947676b29",
     "external_runtime_executed_in_this_generation": false,
     "reuse_reason": "Exact-current host replay for clean-runner parity; retained external values receive no freshness credit."
   },
@@ -2491,17 +2491,17 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
-        "frd_sha256": "sha256:ee79d4c6ae33658f1c04cdf525d1c6498a70ab14bfad075c1d5a1b2480a6418b",
+        "frd_sha256": "sha256:bd3d5950498c9af1259ae5a9d328845527148b74308fb8e971ea41cda79ece9b",
         "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
         "return_code": 0,
         "spatial_truss_dat_sha256": "sha256:d754b6dc5fd1e316b516629ed970a5bf1f6e274849c436222b8ea5eb63545cd6",
-        "spatial_truss_frd_sha256": "sha256:908c3d870095e886feaae79315fb1bac90aa4e14f47f22a4da7114509903b7ca",
+        "spatial_truss_frd_sha256": "sha256:72d9a3a587791f4331886c10841be44873bfcbbfc5d3e4ac49aee5cf1535321d",
         "spatial_truss_input_deck_sha256": "sha256:6675595b476187c36132d260a624bb85d0a9d155c31ff6aba38006f6ab3645b1",
         "spatial_truss_return_code": 0,
         "spatial_truss_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "spatial_truss_stdout_sha256": "sha256:aad5d3c371acd28c033580f727f564b9e8d04a2ed9884d16b12d145077893d38",
+        "spatial_truss_stdout_sha256": "sha256:a1c77b71c99d527e755ad8cf4f0dd501334f6fb94d0465aec6a3c308a9c2bdcf",
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:39d2aacc7ac669dffb1815dcb420946cc7fe3bb8d006e08fe11413f79dc4ec6f",
+        "stdout_sha256": "sha256:2b0f9b1e343fe457f62aa999e2375e369f87a5676c29158a8cb36711782670cd",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -2524,13 +2524,13 @@
         "driver_sha256": "sha256:f46dbe613df6525c32968bf81ac0b02ea0b4c1123174add02745f7861b0444e1",
         "return_code": 0,
         "stderr_sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea",
-        "stdout_sha256": "sha256:79f7349c2e216cb3766c8a39d5ac848cc1b00b99169e08c9cce2cd3994e19b5d"
+        "stdout_sha256": "sha256:38c06456af30be7f58f76c2da91567de95b73b4019a623a662e1c8b6eb14151e"
       },
       "independent_from_product": true,
       "license": {
         "commercial_redistribution_approved": false,
         "declared_license_posture": "internal_use_allowed_commercial_redistribution_requires_license",
-        "license_file_sha256": "sha256:289503a95d55c43668bdadcd1815c9a93b46cb6ec890b3e9aea6c559d3806382",
+        "license_file_sha256": "sha256:aeb25d4e6647320e0581d01b5bbc7f15606b7aaffa8f09c23a424cb95fa49761",
         "product_legal_approval": false
       },
       "name": "OpenSees",
@@ -2539,7 +2539,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "10c05ec5439755d610befda005049c3b3a1dc450",
+  "source_commit_sha": "170b703d25e64ec97266386408c9893ebaf08aa5",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
