@@ -21,6 +21,7 @@ CONSTANT_REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v2"
 TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION = (
     "bounded-rc-fiber-direct-control-request.v3"
 )
+PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v4"
 REQUEST_MAX_BYTES = 128 * 1024
 _NEWTON_FIELDS = {
     "residual_tolerance",
@@ -164,6 +165,7 @@ class BoundedRCFiberDirectControlRequest:
     maximum_targets: int = 255
     constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = ()
     experimental_two_fixed_endpoints: bool = False
+    experimental_pin_roller_beam: bool = False
 
     def __post_init__(self):
         object.__setattr__(
@@ -171,6 +173,10 @@ class BoundedRCFiberDirectControlRequest:
         )
         if type(self.experimental_two_fixed_endpoints) is not bool:
             raise ValueError("experimental_two_fixed_endpoints must be a boolean")
+        if type(self.experimental_pin_roller_beam) is not bool:
+            raise ValueError("experimental_pin_roller_beam must be a boolean")
+        if self.experimental_two_fixed_endpoints and self.experimental_pin_roller_beam:
+            raise ValueError("experimental RC support profiles are mutually exclusive")
         _integer(self.control_global_dof, "control_global_dof", 0, 47)
         if self.control_global_dof % 3 not in (0, 1):
             raise ValueError("control_global_dof must name a translational UX/UY DOF")
@@ -231,6 +237,11 @@ class BoundedRCFiberDirectControlRequest:
                 if self.experimental_two_fixed_endpoints
                 else {}
             ),
+            **(
+                {"experimental_pin_roller_beam": True}
+                if self.experimental_pin_roller_beam
+                else {}
+            ),
             "allow_reversals": self.allow_reversals,
             "maximum_reversals": self.maximum_reversals,
             "maximum_targets": self.maximum_targets,
@@ -243,12 +254,16 @@ class BoundedRCFiberDirectControlRequest:
         )
         return {
             "schema_version": (
-                TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION
-                if self.experimental_two_fixed_endpoints
+                PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
+                if self.experimental_pin_roller_beam
                 else (
-                    CONSTANT_REQUEST_SCHEMA_VERSION
-                    if self.constant_nodal_loads
-                    else REQUEST_SCHEMA_VERSION
+                    TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION
+                    if self.experimental_two_fixed_endpoints
+                    else (
+                        CONSTANT_REQUEST_SCHEMA_VERSION
+                        if self.constant_nodal_loads
+                        else REQUEST_SCHEMA_VERSION
+                    )
                 )
             ),
             **(
@@ -263,6 +278,11 @@ class BoundedRCFiberDirectControlRequest:
             **(
                 {"experimental_two_fixed_endpoints": True}
                 if self.experimental_two_fixed_endpoints
+                else {}
+            ),
+            **(
+                {"experimental_pin_roller_beam": True}
+                if self.experimental_pin_roller_beam
                 else {}
             ),
             "control_global_dof": self.control_global_dof,
@@ -319,11 +339,13 @@ def decode_bounded_rc_fiber_direct_control_request(
     version = payload.get("schema_version")
     constant = version == CONSTANT_REQUEST_SCHEMA_VERSION
     two_fixed = version == TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION
+    pin_roller = version == PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
     _object(
         payload,
         _REQUEST_FIELDS
-        | ({"constant_nodal_loads"} if constant or two_fixed else set())
-        | ({"experimental_two_fixed_endpoints"} if two_fixed else set()),
+        | ({"constant_nodal_loads"} if constant or two_fixed or pin_roller else set())
+        | ({"experimental_two_fixed_endpoints"} if two_fixed else set())
+        | ({"experimental_pin_roller_beam"} if pin_roller else set()),
         "request",
     )
     if not {"schema_version", "control_global_dof", "targets_m"} <= payload.keys():
@@ -332,12 +354,13 @@ def decode_bounded_rc_fiber_direct_control_request(
         REQUEST_SCHEMA_VERSION,
         CONSTANT_REQUEST_SCHEMA_VERSION,
         TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION,
+        PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION,
     ):
         raise ValueError("request schema_version is unsupported")
     if type(payload["targets_m"]) is not list:
         raise ValueError("targets_m must be a JSON array")
     values = {key: value for key, value in payload.items() if key != "schema_version"}
-    if constant or (two_fixed and "constant_nodal_loads" in values):
+    if constant or ((two_fixed or pin_roller) and "constant_nodal_loads" in values):
         values["constant_nodal_loads"] = _decode_constant_loads(
             values.get("constant_nodal_loads")
         )
@@ -345,6 +368,8 @@ def decode_bounded_rc_fiber_direct_control_request(
             raise ValueError("v2 requires a nonempty constant load pattern")
     if two_fixed and values.get("experimental_two_fixed_endpoints") is not True:
         raise ValueError("v3 requires experimental_two_fixed_endpoints=true")
+    if pin_roller and values.get("experimental_pin_roller_beam") is not True:
+        raise ValueError("v4 requires experimental_pin_roller_beam=true")
     values["targets_m"] = tuple(values["targets_m"])
     if "solver_config" in values:
         values["solver_config"] = _solver(values["solver_config"])

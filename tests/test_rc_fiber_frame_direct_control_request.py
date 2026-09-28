@@ -116,6 +116,69 @@ def test_two_fixed_endpoint_v3_roundtrip_and_resume_binding():
     )
 
 
+def test_pin_roller_beam_v4_roundtrip_and_legacy_request_identity():
+    original = request.BoundedRCFiberDirectControlRequest(10, (-1e-6,))
+    two_fixed = replace(original, experimental_two_fixed_endpoints=True)
+    pin_roller = replace(original, experimental_pin_roller_beam=True)
+    for old in (original, two_fixed):
+        assert "experimental_pin_roller_beam" not in old.to_dict()
+        assert "experimental_pin_roller_beam" not in old.api_kwargs()
+    payload = pin_roller.to_dict()
+    assert payload["schema_version"] == request.PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
+    assert payload["experimental_pin_roller_beam"] is True
+    assert request.decode_bounded_rc_fiber_direct_control_request(
+        json.dumps(payload).encode()
+    ) == pin_roller
+    assert pin_roller.api_kwargs()["experimental_pin_roller_beam"] is True
+    assert pin_roller.request_hash != original.request_hash
+    assert pin_roller.resume_contract_hash != original.resume_contract_hash
+    assert replace(pin_roller, targets_m=(-2e-6,)).resume_contract_hash == (
+        pin_roller.resume_contract_hash
+    )
+
+
+@pytest.mark.parametrize("value", [False, 0, 1, None, "true"])
+def test_pin_roller_beam_v4_requires_exact_true(value):
+    with pytest.raises(ValueError):
+        request.decode_bounded_rc_fiber_direct_control_request(
+            minimal(
+                schema_version=request.PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION,
+                experimental_pin_roller_beam=value,
+            )
+        )
+    if value is not False:
+        with pytest.raises(ValueError):
+            request.BoundedRCFiberDirectControlRequest(
+                4, (-1e-5,), experimental_pin_roller_beam=value
+            )
+
+
+def test_pin_roller_beam_v4_cannot_alias_legacy_or_two_fixed_transport():
+    for version in (
+        request.REQUEST_SCHEMA_VERSION,
+        request.CONSTANT_REQUEST_SCHEMA_VERSION,
+        request.TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION,
+    ):
+        payload = minimal(
+            schema_version=version, experimental_pin_roller_beam=True
+        )
+        if version != request.REQUEST_SCHEMA_VERSION:
+            payload["constant_nodal_loads"] = [
+                {"node_id": "N3", "FX_kN": 0.0, "FY_kN": -25.0, "MZ_kNm": 0.0}
+            ]
+        if version == request.TWO_FIXED_ENDPOINT_REQUEST_SCHEMA_VERSION:
+            payload["experimental_two_fixed_endpoints"] = True
+        with pytest.raises(ValueError, match="unknown fields"):
+            request.decode_bounded_rc_fiber_direct_control_request(payload)
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        request.BoundedRCFiberDirectControlRequest(
+            4,
+            (-1e-5,),
+            experimental_two_fixed_endpoints=True,
+            experimental_pin_roller_beam=True,
+        )
+
+
 @pytest.mark.parametrize("value", [False, 0, 1, None, "true"])
 def test_two_fixed_endpoint_v3_requires_exact_true(value):
     with pytest.raises(ValueError):

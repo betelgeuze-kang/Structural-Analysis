@@ -19,6 +19,7 @@ from structural_analysis.api.frame3d_direct_control_request import (
     strict_json_object_bytes,
 )
 from structural_analysis.api.nonlinear_fiber_frame import (
+    EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
     EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE,
     PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
     _compile,
@@ -514,11 +515,16 @@ def _prepare(
     constant_nodal_loads,
     reuse_line_search_assembly=False,
     experimental_two_fixed_endpoints=False,
+    experimental_pin_roller_beam=False,
 ):
     if type(reuse_line_search_assembly) is not bool:
         raise ValueError("explicit boolean line-search assembly reuse required")
     if type(experimental_two_fixed_endpoints) is not bool:
         raise ValueError("explicit boolean two-fixed-endpoint opt-in required")
+    if type(experimental_pin_roller_beam) is not bool:
+        raise ValueError("explicit boolean pin-roller-beam opt-in required")
+    if experimental_two_fixed_endpoints and experimental_pin_roller_beam:
+        raise ValueError("experimental RC support profiles are mutually exclusive")
     if type(model) is not CanonicalModel:
         raise ValueError("model must be an exact CanonicalModel")
     constants = _constant_loads(constant_nodal_loads)
@@ -565,14 +571,20 @@ def _prepare(
         request["constant_nodal_loads"] = _constant_load_payload(constants)
     if experimental_two_fixed_endpoints:
         request["experimental_two_fixed_endpoints"] = True
+    if experimental_pin_roller_beam:
+        request["experimental_pin_roller_beam"] = True
     model_binding = {
         "canonical_model_checksum": snapshot.canonical_model_checksum,
         "input_checksum": snapshot.input_checksum,
         "source_format": snapshot.source_format,
         "compiler_profile": (
-            EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
-            if experimental_two_fixed_endpoints
-            else PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
+            EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+            if experimental_pin_roller_beam
+            else (
+                EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+                if experimental_two_fixed_endpoints
+                else PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
+            )
         ),
     }
     return snapshot, targets, cfg, resume, request, model_binding, constants
@@ -588,7 +600,7 @@ def _with_constant_loading(compiled, constants):
             row[0] in compiled.support_node_ids for row in constants
         ):
             raise ValueError(
-                "constant nodal load at a fully fixed endpoint is unsupported"
+                "constant nodal load at a support node is unsupported"
             )
         pattern = tuple(
             (3 * node_index[node] + offset, value)
@@ -615,6 +627,7 @@ def analyze_bounded_rc_fiber_direct_control(
     constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = (),
     reuse_line_search_assembly: bool = False,
     experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
 ) -> BoundedRCFiberDirectControlResult:
     snapshot, targets, cfg, resume, request, binding, constants = _prepare(
         model,
@@ -628,10 +641,12 @@ def analyze_bounded_rc_fiber_direct_control(
         constant_nodal_loads,
         reuse_line_search_assembly,
         experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam,
     )
     compiled, unsupported, warnings = _compile(
         snapshot,
         experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=experimental_pin_roller_beam,
     )
     compiled = _with_constant_loading(compiled, constants)
     payload = {
@@ -726,6 +741,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
     constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = (),
     reuse_line_search_assembly: bool = False,
     experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
 ) -> BoundedRCFiberDirectControlValidationReport:
     """Verify against a fresh complete source execution, never a supplied success flag."""
     report: dict[str, Any] = {
@@ -775,6 +791,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             constant_nodal_loads,
             reuse_line_search_assembly,
             experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam,
         )
         if supplied.get("schema_version") != (
             CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
@@ -812,6 +829,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             constant_nodal_loads=constants,
             reuse_line_search_assembly=reuse_line_search_assembly,
             experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=experimental_pin_roller_beam,
         )
         regenerated = expected.to_dict()
         report["replay_control_work"] = regenerated["metrics"]["control_work"]
