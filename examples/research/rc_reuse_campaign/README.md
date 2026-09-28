@@ -37,9 +37,12 @@ input decoding/model loading within the experiment and its output writes.
 These observations do not prove physical validity, learned gain, material/step
 convergence, independent geometry provenance or release readiness.
 
-The separate `three-topology-plan.json` is a **prepared, unexecuted** follow-up:
-four order-balanced repetitions each for the existing cantilever and two-fixed
-portal, plus the opt-in pin/roller beam. The beam model and request are
+The separate `three-topology-plan.json` has now been executed twice: four
+order-balanced repetitions each for the existing cantilever and two-fixed
+portal, plus the opt-in pin/roller beam. The original v1 packet at source
+`fb41d86b5` and the current-source v2 packet at `df20a8ac6` retain all twelve
+baseline/reuse pairs. The [v2 result and original-byte inventory digest](../../../docs/engineering/rc-reuse-three-topology-v2-results-20260929.md)
+distinguish the two runs and their local-only packet locations. The beam model and request are
 deliberately synthetic. Its 25 MPa steel yield stress is a numerical
 material-plasticity witness, not a tested structural steel grade or a 4TU
 specimen fit. Its four original targets include a reversal, and a focused
@@ -51,7 +54,6 @@ targets -0.1/-0.2/+0.1 mm accepted only the first target; the second returned
 paths with a line-search grid through 1/4096 also blocked before the reversal.
 That in-memory pilot
 has no source-bound original packet and receives no benchmark speed ratio.
-Run the prepared plan only into a new durable
-output directory, preserve every attempted case and original receipt, and
-report per-case ratios only after all declared pairs pass. Do not combine
-different cases into one speed ratio.
+Any future repetition must use a new durable output directory, preserve every
+attempted case and original receipt, and report per-case ratios only after all
+declared pairs pass. Do not combine different cases into one speed ratio.
