@@ -93,6 +93,12 @@ test('pin/roller study binds the horizontal chain, support roles, and every acce
   changed.nodes[3].coordinates[1] = .01
   expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_geometry_invalid')
   changed.nodes[3].coordinates[1] = 0
+  changed.nodes[3].coordinates[2] = .01
+  expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_geometry_invalid')
+  changed.nodes[3].coordinates[2] = 0
+  changed.supports[1].extra = true
+  expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_support_invalid')
+  delete changed.supports[1].extra
   changed.supports[1].dofs = ['UX', 'UY']
   expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_support_invalid')
   const missing = structuredClone(result.response_history)

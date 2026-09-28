@@ -143,7 +143,7 @@ export function validateRcPinRollerStudyProfile(model: RcObject, history?: RcObj
   const ids = nodes.map(node => node.id)
   const coordinates = nodes.map(node => node.coordinates)
   check(ids.every(id => typeof id === 'string') && new Set(ids).size === ids.length
-    && coordinates.every(point => Array.isArray(point) && point.length === 3 && point.every(num))
+    && coordinates.every(point => Array.isArray(point) && point.length === 3 && point.every(num) && point[2] === 0)
     && new Set(coordinates.map(point => point[0])).size === nodes.length
     && new Set(coordinates.map(point => point[1])).size === 1, 'study_pin_roller_geometry_invalid')
   const ordered = [...nodes].sort((a, b) => a.coordinates[0] - b.coordinates[0]).map(node => node.id)
@@ -156,6 +156,8 @@ export function validateRcPinRollerStudyProfile(model: RcObject, history?: RcObj
   check(links.size === nodes.length - 1
     && ordered.slice(1).every((id, index) => links.has(JSON.stringify([ordered[index], id].sort()))), 'study_pin_roller_chain_invalid')
   const supports = model.supports as RcObject[]
+  check(supports.every(support => support && same(Object.keys(support).sort(), ['dofs', 'node'])
+    && typeof support.node === 'string' && Array.isArray(support.dofs)), 'study_pin_roller_support_invalid')
   const pin = supports.find(support => Array.isArray(support.dofs) && same([...support.dofs].sort(), ['UX', 'UY']))
   const roller = supports.find(support => Array.isArray(support.dofs) && same(support.dofs, ['UY']))
   check(pin && roller && typeof pin.node === 'string' && typeof roller.node === 'string'
