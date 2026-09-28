@@ -146,13 +146,13 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
       <summary>{row.candidate_id} — screens, execution cost and original artifacts</summary>
       <div data-rc-design-physical-changes={row.candidate_id}>
         <h4>Declared physical section changes</h4>
-        {row.candidate_id === 'baseline' ? <p>Baseline model; no section changes.</p> : report.candidates.find((candidate: RcObject) => candidate.candidate_id === row.candidate_id)?.changes.map((change: RcObject) => {
+        {row.candidate_id === 'baseline' ? <p>Baseline model; no section changes.</p> : Array.isArray(report.candidates) ? report.candidates.find((candidate: RcObject) => candidate.candidate_id === row.candidate_id)?.changes.map((change: RcObject) => {
           const before = models.baseline?.sections.find((section: RcObject) => section.id === change.section_id)
           return <p key={change.section_id} data-rc-design-section-change={change.section_id}>{change.section_id}: {Object.entries(change)
             .filter(([field, value]) => field !== 'section_id' && value !== null)
             .map(([field, value]) => `${sectionFieldLabels[field] ?? field} ${priorSectionValue(before?.[field])} → ${shown(value)}`)
             .join('; ')}</p>
-        })}
+        }) : <p>Section-change declaration unavailable for this layout-search arm; inspect the original model.</p>}
         <p>Model <code>{row.quantities?.model_checksum ?? 'UNAVAILABLE'}</code> · price table <code>{report.price_table_hash ?? 'UNAVAILABLE'}</code> · analysis {row.full_reference_verification_pass ? 'verified' : 'unverified'}.</p>
         {row.quantities ? <RcDesignMemberQuantities row={row} baseline={baseline} currency={report.prices?.currency} />
           : <p>Member quantities and scoped estimate are unavailable for this candidate.</p>}

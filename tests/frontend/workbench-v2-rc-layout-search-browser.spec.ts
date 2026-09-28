@@ -46,6 +46,10 @@ for (const width of [1440,390]) {
       await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('middle')
       await panel.getByRole('button',{name:'Review Learned order',exact:true}).click()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected','large')
+      const details = panel.locator('[data-rc-design-details="large"]')
+      await expect(details.locator('[data-rc-design-physical-changes="large"]')).toContainText('Section-change declaration unavailable')
+      await expect(details.locator('[data-rc-design-section-change]')).toHaveCount(0)
+      await expect(details.locator('[data-rc-design-members="large"] tbody tr')).toHaveCount(2)
       for (const role of ['model','result','checkpoint','verification']) {
         const pending=page.waitForEvent('download')
         await panel.getByRole('button',{name:`Download large ${role}`,exact:true}).click()
