@@ -534,6 +534,37 @@ def test_product_replay_comparison_allows_only_bounded_runtime_drift() -> None:
     assert not module._product_replay_values_match(stored, current)
 
 
+def test_product_replay_ignores_only_revalidated_derived_metric_errors() -> None:
+    stored = [{"metrics": [module._comparison("near_zero", 1.0e-12, 0.0)]}]
+    current = [{"metrics": [module._comparison("near_zero", 1.1e-12, 0.0)]}]
+    stored_error = stored[0]["metrics"][0]["relative_error"]
+    current_error = current[0]["metrics"][0]["relative_error"]
+    assert not module._product_replay_numbers_close(stored_error, current_error)
+    assert module._product_replay_values_match(stored, current)
+
+    metric = current[0]["metrics"][0]
+    metric["contract_pass"] = not metric["contract_pass"]
+    assert not module._product_replay_values_match(stored, current)
+
+
+@pytest.mark.parametrize("derived_field", ["absolute_error", "relative_error"])
+def test_validation_rejects_rehashed_derived_metric_error_tampering(
+    derived_field: str,
+) -> None:
+    tampered = deepcopy(_stored_receipt())
+    tampered["comparisons"][0]["metrics"][0][derived_field] += 1.0
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_error_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+
 def test_product_replay_refresh_does_not_invent_legacy_execution_source() -> None:
     stored = deepcopy(_stored_receipt())
     replay = stored["replay_provenance"]

@@ -2513,12 +2513,30 @@ def _product_replay_values_match(stored: Any, current: Any) -> bool:
     if isinstance(stored, (int, float)) and isinstance(current, (int, float)):
         return _product_replay_numbers_close(stored, current)
     if isinstance(stored, dict):
+        # These two metric fields are recomputed and checked against the stored
+        # product/reference pair before current-source replay comparison.
+        metric_keys = {
+            "quantity",
+            "product_value",
+            "reference_value",
+            "absolute_error",
+            "relative_error",
+            "absolute_tolerance",
+            "relative_tolerance",
+            "contract_pass",
+        }
+        derived_keys = (
+            {"absolute_error", "relative_error"}
+            if stored.keys() == metric_keys
+            else set()
+        )
         return (
             isinstance(current, dict)
             and stored.keys() == current.keys()
             and all(
                 _product_replay_values_match(stored[key], current[key])
                 for key in stored
+                if key not in derived_keys
             )
         )
     if isinstance(stored, list):
