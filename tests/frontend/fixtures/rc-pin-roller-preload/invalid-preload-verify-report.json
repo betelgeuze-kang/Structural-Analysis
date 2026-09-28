@@ -1,0 +1,124 @@
+{
+  "analysis_api_timing": null,
+  "analysis_performed_by_cli": false,
+  "artifact_contract_pass": true,
+  "claims": {
+    "design_authority": false,
+    "independent_physical_validation": false,
+    "performance_improvement_claimed": false,
+    "production_promotion_eligible": false,
+    "public_j1_j5_authority": false
+  },
+  "contract_pass": true,
+  "inputs": [
+    {
+      "byte_length": 637,
+      "path": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tests/frontend/fixtures/rc-pin-roller-preload/request.json",
+      "role": "request",
+      "sha256": "sha256:00ace694ea471555ad681de41eb0408ac633299e0934f89eeb37a1743eef235f"
+    },
+    {
+      "byte_length": 2379,
+      "path": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tests/frontend/fixtures/rc-pin-roller-preload/model.json",
+      "role": "model",
+      "sha256": "sha256:c92c42550878d44014a37acb91cbd0a459349bc28263060d218309f7971c10e2"
+    },
+    {
+      "byte_length": 833300,
+      "path": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tests/frontend/fixtures/rc-pin-roller-preload/result.json",
+      "role": "result",
+      "sha256": "sha256:b3c2dfda01f36b7f3687f3327c8fd42055dc891573f2b21f6ac3cac65081df44"
+    },
+    {
+      "byte_length": 46133,
+      "path": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tests/frontend/fixtures/rc-pin-roller-preload/checkpoint.json",
+      "role": "checkpoint",
+      "sha256": "sha256:c73359b84263d09a233e831149c9abe0a7a08630d1b88a054bf376c7946a099d"
+    }
+  ],
+  "operation": "verify",
+  "report_hash": "sha256:4535a90500c9f4c45e2c46b9bc4e9f76843b5255b53ac40b0620e630859435bf",
+  "request": {
+    "allow_reversals": false,
+    "constant_nodal_loads": [
+      {
+        "FX_kN": 0.0,
+        "FY_kN": -0.01,
+        "MZ_kNm": 0.0,
+        "node_id": "N4"
+      }
+    ],
+    "control_global_dof": 10,
+    "experimental_pin_roller_beam": true,
+    "maximum_reversals": 0,
+    "maximum_targets": 255,
+    "schema_version": "bounded-rc-fiber-direct-control-request.v4",
+    "solver_config": {
+      "control_tolerance_m": 1e-12,
+      "load_factor_coordinate_scale_m": 0.001,
+      "newton": {
+        "increment_tolerance": 1e-12,
+        "line_search_alphas": [
+          1.0,
+          0.5,
+          0.25,
+          0.125,
+          0.0625,
+          0.03125
+        ],
+        "matrix_backend": "numpy_linalg_solve_dense",
+        "max_iterations": 25,
+        "residual_tolerance": 1e-10,
+        "terminal_polishing": false
+      }
+    },
+    "targets_m": [
+      -1e-06
+    ]
+  },
+  "request_hash": "sha256:9f93e4ef675ddc0fdb3309ad158e350e2e65ddc62f86b9ccf7d90a11a2e4f1fb",
+  "result_max_bytes": 536870912,
+  "resume_contract_hash": "sha256:fd5761a468148caffd36940f90abb316368cf2cf54fab1fad8374af191bb95d9",
+  "schema_version": "bounded-rc-fiber-direct-control-cli-report.v1",
+  "scope": "original API work and mandatory fresh-source verification are separate; unsigned local consistency, not independent physics",
+  "status": "valid_artifact",
+  "timing_scope": "reported function wall/process CPU only; input parsing, report formatting and output writes excluded",
+  "verification": {
+    "artifact_contract_pass": true,
+    "claims": {
+      "design_authority": false,
+      "experimental_small_displacement_rc_control": true,
+      "general_cyclic_validation": false,
+      "global_capacity_verified": false,
+      "hashes_authenticate_source": false,
+      "independent_physical_validation": false,
+      "performance_improvement": false,
+      "production_promotion_eligible": false,
+      "public_j1_j5_authority": false,
+      "release_approved": false
+    },
+    "contract_pass": true,
+    "errors": [],
+    "fresh_source_execution_invoked": true,
+    "physical_path_complete": true,
+    "replay_control_work": {
+      "attempted_step_count": 2,
+      "known_linear_solve_count": 4,
+      "known_newton_iteration_count": 4,
+      "unknown_solver_work_attempt_count": 0
+    },
+    "response_reassembly_attempts": 2,
+    "response_reassembly_verified_count": 2,
+    "schema_version": "bounded-rc-fiber-direct-control-validation.v1",
+    "solver_replay_performed": true,
+    "status": "valid_artifact",
+    "unavailable_execution_work": false,
+    "verification_scope": "fresh_complete_request_solver_and_original_transition_replay",
+    "verified_result_hash": "sha256:109709d3ff02c70eb3e67a0421131b61926e14321d44ec61a99d3a12d4668353"
+  },
+  "verification_api_timing": {
+    "process_cpu_ns": 492114619,
+    "wall_ns": 492131057
+  },
+  "verification_performed": true
+}

@@ -4,14 +4,18 @@ import { WorkbenchPage } from './workbench-v2/WorkbenchPage'
 import './index.css'
 
 const LegacyApp = lazy(() => import('./App'))
+const RcPinRollerOriginalPanel = lazy(() => import('./workbench-v2/components/RcPinRollerOriginalPanel')
+  .then(module => ({ default: module.RcPinRollerOriginalPanel })))
 
-export type ProductSurface = 'workbench-v2' | 'legacy-app'
+export type ProductSurface = 'workbench-v2' | 'legacy-app' | 'rc-pin-roller-original'
 
 export function resolveProductSurface(location: Pick<Location, 'pathname' | 'hash'>): ProductSurface {
   const path = location.pathname.replace(/\/+$/, '')
   const hash = location.hash.replace(/\/+$/, '')
   const legacyRoute = path.endsWith('/legacy') || hash === '#/legacy'
-  return legacyRoute ? 'legacy-app' : 'workbench-v2'
+  if (legacyRoute) return 'legacy-app'
+  if (path.endsWith('/rc-pin-roller-original') || hash === '#/rc-pin-roller-original') return 'rc-pin-roller-original'
+  return 'workbench-v2'
 }
 
 export function resolveSameOriginJobUrl(value: string | undefined, origin: string): string | undefined {
@@ -103,7 +107,11 @@ function RootRouter(): ReactElement {
     window.location.origin,
   )
 
-  return surface === 'legacy-app' ? (
+  return surface === 'rc-pin-roller-original' ? (
+    <Suspense fallback={<p role="status">Loading original bundle reviewer…</p>}>
+      <RcPinRollerOriginalPanel />
+    </Suspense>
+  ) : surface === 'legacy-app' ? (
     <LegacyAppSurface />
   ) : (
     <WorkbenchPage

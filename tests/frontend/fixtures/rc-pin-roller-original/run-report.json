@@ -1,0 +1,164 @@
+{
+  "analysis_api_timing": {
+    "process_cpu_ns": 324590652,
+    "wall_ns": 324616816
+  },
+  "analysis_contract_pass": true,
+  "analysis_control_accounting": {
+    "accepted_target_count": 1,
+    "attempted_target_count": 1,
+    "cumulative_accepted_target_count": 1,
+    "failed_target_count": 0,
+    "hidden_retries_or_cutbacks": 0,
+    "prefix_replay_work": {
+      "attempted_step_count": 0,
+      "known_linear_solve_count": 0,
+      "known_newton_iteration_count": 0,
+      "unknown_solver_work_attempt_count": 0
+    },
+    "prefix_replayed_step_count": 0,
+    "requested_target_count": 1,
+    "restart_verification_scope": "not_requested",
+    "suffix_work": {
+      "attempted_step_count": 1,
+      "known_linear_solve_count": 2,
+      "known_newton_iteration_count": 2,
+      "unknown_solver_work_attempt_count": 0
+    },
+    "total_work": {
+      "attempted_step_count": 1,
+      "known_linear_solve_count": 2,
+      "known_newton_iteration_count": 2,
+      "unknown_solver_work_attempt_count": 0
+    },
+    "unattempted_target_count": 0
+  },
+  "analysis_control_work": {
+    "attempted_step_count": 1,
+    "known_linear_solve_count": 2,
+    "known_newton_iteration_count": 2,
+    "unknown_solver_work_attempt_count": 0
+  },
+  "analysis_metrics": {
+    "control_work": {
+      "attempted_step_count": 1,
+      "known_linear_solve_count": 2,
+      "known_newton_iteration_count": 2,
+      "unknown_solver_work_attempt_count": 0
+    },
+    "current_epoch": null,
+    "explicit_validation_solver_replay_performed": false,
+    "response_history_scope": "cumulative_accepted_prefix",
+    "response_reassembly_attempts": 1,
+    "response_reassembly_verified_count": 1,
+    "whole_accepted_history_recovered": true
+  },
+  "analysis_result_hash": "sha256:c59168552af7de20c42dbca030bcada11d70e853223fb4b9debd137c0ac9b489",
+  "analysis_status": "ready",
+  "artifact_contract_pass": true,
+  "checkpoint_output_published": true,
+  "claims": {
+    "design_authority": false,
+    "independent_physical_validation": false,
+    "performance_improvement_claimed": false,
+    "production_promotion_eligible": false,
+    "public_j1_j5_authority": false
+  },
+  "contract_pass": true,
+  "inputs": [
+    {
+      "byte_length": 547,
+      "path": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tests/frontend/fixtures/rc-pin-roller-original/request.json",
+      "role": "request",
+      "sha256": "sha256:eb7450850e509695a388b4b5d92bf3108700b8d50d02c9499be41223b92a02e5"
+    },
+    {
+      "byte_length": 2379,
+      "path": "/home/betelgeuze/.codex/worktrees/23ee/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tests/frontend/fixtures/rc-pin-roller-original/model.json",
+      "role": "model",
+      "sha256": "sha256:c92c42550878d44014a37acb91cbd0a459349bc28263060d218309f7971c10e2"
+    }
+  ],
+  "operation": "run",
+  "report_hash": "sha256:971f43fae45f1d4c53b3bd95d0d5758a9add6e6d3f5cec255ca9ada7a59d0e44",
+  "request": {
+    "allow_reversals": false,
+    "control_global_dof": 10,
+    "experimental_pin_roller_beam": true,
+    "maximum_reversals": 0,
+    "maximum_targets": 255,
+    "schema_version": "bounded-rc-fiber-direct-control-request.v4",
+    "solver_config": {
+      "control_tolerance_m": 1e-12,
+      "load_factor_coordinate_scale_m": 0.001,
+      "newton": {
+        "increment_tolerance": 1e-12,
+        "line_search_alphas": [
+          1.0,
+          0.5,
+          0.25,
+          0.125,
+          0.0625,
+          0.03125
+        ],
+        "matrix_backend": "numpy_linalg_solve_dense",
+        "max_iterations": 25,
+        "residual_tolerance": 1e-10,
+        "terminal_polishing": false
+      }
+    },
+    "targets_m": [
+      -1e-06
+    ]
+  },
+  "request_hash": "sha256:6e64a05f0b4d1831af9ca457935c43d5d450b9b25cc130a461c56c00c70eaeb0",
+  "result_max_bytes": 536870912,
+  "result_output_published": true,
+  "result_serialization_timing": {
+    "process_cpu_ns": 27859916,
+    "wall_ns": 27861091
+  },
+  "resume_contract_hash": "sha256:4225cba5529bfc3d413d158f17238502618edc98c6b794dccb3648e7f69bc369",
+  "schema_version": "bounded-rc-fiber-direct-control-cli-report.v1",
+  "scope": "original API work and mandatory fresh-source verification are separate; unsigned local consistency, not independent physics",
+  "status": "valid_artifact",
+  "timing_scope": "reported function wall/process CPU only; input parsing, report formatting and output writes excluded",
+  "verification": {
+    "artifact_contract_pass": true,
+    "claims": {
+      "design_authority": false,
+      "experimental_small_displacement_rc_control": true,
+      "general_cyclic_validation": false,
+      "global_capacity_verified": false,
+      "hashes_authenticate_source": false,
+      "independent_physical_validation": false,
+      "performance_improvement": false,
+      "production_promotion_eligible": false,
+      "public_j1_j5_authority": false,
+      "release_approved": false
+    },
+    "contract_pass": true,
+    "errors": [],
+    "fresh_source_execution_invoked": true,
+    "physical_path_complete": true,
+    "replay_control_work": {
+      "attempted_step_count": 1,
+      "known_linear_solve_count": 2,
+      "known_newton_iteration_count": 2,
+      "unknown_solver_work_attempt_count": 0
+    },
+    "response_reassembly_attempts": 1,
+    "response_reassembly_verified_count": 1,
+    "schema_version": "bounded-rc-fiber-direct-control-validation.v1",
+    "solver_replay_performed": true,
+    "status": "valid_artifact",
+    "unavailable_execution_work": false,
+    "verification_scope": "fresh_complete_request_solver_and_original_transition_replay",
+    "verified_result_hash": "sha256:c59168552af7de20c42dbca030bcada11d70e853223fb4b9debd137c0ac9b489"
+  },
+  "verification_api_timing": {
+    "process_cpu_ns": 333318524,
+    "wall_ns": 333335274
+  },
+  "verification_performed": true
+}
