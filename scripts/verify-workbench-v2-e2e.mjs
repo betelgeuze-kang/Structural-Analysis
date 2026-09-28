@@ -41,6 +41,8 @@ const specs = [
   'tests/frontend/workbench-v2-rc-history-file-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-pin-roller-original-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-pin-roller-original-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-pin-roller-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-pin-roller-job-browser.spec.ts',
   'tests/frontend/workbench-v2-frame3d-job-contract.spec.ts',
   'tests/frontend/workbench-v2-extended-sparse-job-contract.spec.ts',
   'tests/frontend/frame3d-job-browser.spec.ts',
