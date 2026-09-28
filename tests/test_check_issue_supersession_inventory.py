@@ -263,6 +263,7 @@ def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> 
         (488, [491]),
         (490, [489]),
         (492, [485]),
+        (493, [494]),
     ):
         row = rows[number]
         assert row["classification"] == "repository_implementation"

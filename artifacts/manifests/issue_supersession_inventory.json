@@ -1,7 +1,7 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-09-28T17:21:56Z",
+  "observed_at": "2026-09-28T17:27:23Z",
   "observation_source": "gh_cli_read_only_current_github_state",
   "observed_open_issue_count": 36,
   "open_issue_numbers": [
@@ -724,7 +724,9 @@
       "body_sha256": "sha256:33ad143a7bded30963d365b8c6e3599c11771383a36f0954450fba31563c9ce2",
       "labels": [],
       "classification": "repository_implementation",
-      "linked_pull_requests": [],
+      "linked_pull_requests": [
+        494
+      ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_complete_current_issue_inventory_review",
       "required_external_inputs": [],
