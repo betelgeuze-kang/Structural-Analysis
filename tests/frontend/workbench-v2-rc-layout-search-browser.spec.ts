@@ -44,6 +44,16 @@ for (const width of [1440,390]) {
       await expect(panel).toHaveAttribute('data-rc-search','verified',{timeout:60000})
       await expect(panel.locator('[data-rc-search-layout]')).toContainText('equivalent building function')
       await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('middle')
+      const learned = JSON.parse(layoutFiles['learned_order/comparison.json'].toString())
+      const winner = learned.rows.find((row: any) => row.candidate_id === learned.selected_candidate_id)
+      await expect(panel.locator('[data-rc-search-selected-performance="learned_order"]')).toHaveText(String(winner.performance.maximum_translation_m))
+      await expect(panel.locator('[data-rc-search-selected-concrete="learned_order"]')).toHaveText(String(winner.quantities.totals.gross_concrete_volume_m3))
+      await expect(panel.locator('[data-rc-search-selected-rebar="learned_order"]')).toHaveText(String(winner.quantities.totals.longitudinal_rebar_mass_kg))
+      await expect(panel.locator('[data-rc-search-selected-estimate="learned_order"]')).toHaveText(`${winner.material_estimate.total} ${winner.material_estimate.currency}`)
+      for (const metric of ['performance', 'concrete', 'rebar']) {
+        await expect(panel.locator(`[data-rc-search-selected-${metric}="price_order"]`)).toHaveText('Unavailable')
+      }
+      await expect(panel.locator('[data-rc-search-selected-estimate="price_order"]')).toContainText('Unavailable')
       await panel.getByRole('button',{name:'Review Learned order',exact:true}).click()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected','large')
       const details = panel.locator('[data-rc-design-details="large"]')
