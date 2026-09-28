@@ -4,7 +4,7 @@ This is a separate fixed-family software study of the opt-in
 `feasibility_then_cheaper_boundary.v1` scheduling rule. It uses the same authored
 pin–roller model and four-target reversal request as the prior
 [price-tier budget observation](rc-pin-roller-v4-budget-study-20260929.md),
-without changing the solver, fitted policy, price table or physical limits. The
+without changing the solver, training recipe, price table or physical limits. The
 runner saves a hashed plan and generated input bytes before the first training
 or search solve. It requires a clean exact source commit and an empty packet
 directory outside the checkout.
