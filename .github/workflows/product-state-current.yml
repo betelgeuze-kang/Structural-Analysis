@@ -1092,14 +1092,10 @@ jobs:
           producer_matches = [
               row for row in artifacts if row.get("name") == expected_producer_name
           ]
-          if len(matches) != 1 or len(producer_matches) != 1:
+          if len(matches) != 1 or len(producer_matches) > 1:
               raise SystemExit("clean_runner_artifact_inventory_invalid")
           artifact = matches[0]
-          producer_artifact = producer_matches[0]
-          for candidate, candidate_name in (
-              (artifact, expected_name),
-              (producer_artifact, expected_producer_name),
-          ):
+          def validate_artifact(candidate, candidate_name):
               expected_url = (
                   f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/"
                   f"actions/artifacts/{candidate.get('id')}/zip"
@@ -1119,6 +1115,23 @@ jobs:
                   and workflow_run.get("head_branch") == "main"
               ):
                   raise SystemExit("clean_runner_artifact_metadata_invalid")
+          validate_artifact(artifact, expected_name)
+          if not producer_matches:
+              lookup = root / "lookup.json"
+              payload = json.loads(lookup.read_text())
+              payload.update(
+                  {
+                      "artifact_status": "unavailable",
+                      "artifact_unavailable_reason": "exact_sha_producer_candidate_artifact_missing",
+                      "producer_candidate_match_count": 0,
+                      "same_operator_execution_credit": 0,
+                  }
+              )
+              lookup.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+              print("unavailable")
+              raise SystemExit(0)
+          producer_artifact = producer_matches[0]
+          validate_artifact(producer_artifact, expected_producer_name)
           if artifact["id"] == producer_artifact["id"]:
               raise SystemExit("clean_runner_artifact_identity_collision")
           (root / "artifact.json").write_text(json.dumps(artifact, sort_keys=True) + "\n")
@@ -1128,6 +1141,10 @@ jobs:
           print(artifact["id"])
           PY
           )"
+          if test "$artifact_id" = "unavailable"; then
+            echo "exact-SHA clean-runner producer candidate unavailable; retaining zero credit" >&2
+            exit 0
+          fi
           if ! gh api -H 'Accept: application/vnd.github+json' \
             "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" \
             > "$CLEAN_RUNNER_INPUT_DIR/artifact.zip"; then
