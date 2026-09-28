@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-09-28T17:27:23Z",
+  "observed_at": "2026-09-28T18:19:23Z",
   "observation_source": "gh_cli_read_only_current_github_state",
-  "observed_open_issue_count": 36,
+  "observed_open_issue_count": 37,
   "open_issue_numbers": [
     247,
     258,
@@ -40,9 +40,10 @@
     488,
     490,
     492,
-    493
+    493,
+    495
   ],
-  "open_issue_projection_sha256": "sha256:970a782b1691924a8640f9b8c7e6e3b40376a6a85f21bf291573c9d681ab4309",
+  "open_issue_projection_sha256": "sha256:5ceea0713be14b07366ddfee7f3a983c458c6c64c750dc2c73ad9ee9123b9353",
   "open_issues": [
     {
       "number": 247,
@@ -729,6 +730,24 @@
       ],
       "merged_implementation_pull_requests": [],
       "disposition": "await_complete_current_issue_inventory_review",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false
+    },
+    {
+      "number": 495,
+      "title": "Record a predeclared RC warm-start cost-gate development pilot",
+      "state": "open",
+      "updated_at": "2026-09-28T18:18:04Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/495",
+      "body_sha256": "sha256:3a616897924f88a490d382fc25d8473099bb1dc621921c25843e74570f651173",
+      "labels": [],
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        496
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_development_only_rc_cost_gate_pilot_review",
       "required_external_inputs": [],
       "closable_by_repository_code_alone": true,
       "current_product_authority": false
