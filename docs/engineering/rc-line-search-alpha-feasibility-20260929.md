@@ -65,8 +65,8 @@ estimate.
 
 ## Source-bound result
 
-The protocol and core extractor were committed at
-\`cb2bc0c7a134dc59bf87fc6ef542d1d4d9f83dab\` before the final receipt run.
+The protocol and core extractor were committed in this branch before the final
+receipt run.
 A preceding dry run of the same development packet
 had already returned the same counts; this result is not blind. The final run
 checked **3,601 original files** against the sealed packet inventory. All **90**
@@ -76,8 +76,8 @@ were no missing, failed, retried, unknown-work, or mismatched selected steps.
 The script executed zero structural solver calls and made zero seed-policy fits.
 
 The 15 canonical secant paths contain **373** primary Newton line searches.
-The first alpha (\`1\`) succeeded in **370**. Only **three** required one failed
-trial before \`1/2\` succeeded, and all three belong to group A. There are no
+The first alpha (`1`) succeeded in **370**. Only **three** required one failed
+trial before `1/2` succeeded, and all three belong to group A. There are no
 null labels. The recorded histories thus contain **376** alpha-trial evaluations,
 of which a perfect trace-aware skip could omit at most three while preserving
 the originally selected alpha at those exact states. This is a count of logged
@@ -88,13 +88,13 @@ In five whole-group exclusions, the fixed three-neighbor screen predicted
 excluded, its training rows contain no backtrack-positive example. The other
 four held groups contain no positives to recover. Only one of five groups has
 positive labels, below the predeclared three-group support condition. The
-report therefore sets \`supports_online_experiment_design=false\`. The available
+report therefore sets `supports_online_experiment_design=false`. The available
 original data supports an authenticated *negative screen*, not an online
 learned-alpha experiment or a claim that the target reduces whole-path cost.
 No reserved case was read.
 
 The complete row-level [machine report](rc-line-search-alpha-feasibility-20260929.summary.json)
-has raw SHA-256 \`e6f49427eeca91e32f527095f82fc127c716194f9478ff63f0a54f16849a1bb8\`
+has raw SHA-256 `e6f49427eeca91e32f527095f82fc127c716194f9478ff63f0a54f16849a1bb8`
 and a validated internal report hash. Seventeen focused extractor,
 packet-integrity, and leakage tests, Ruff checks, formatting, and whitespace
 checks pass. Further development would need more distinct, source-bound
