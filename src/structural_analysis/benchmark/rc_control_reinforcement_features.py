@@ -40,9 +40,12 @@ def control_reinforcement_features(model, request):
         model,
         config,
         experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=restored.experimental_pin_roller_beam,
     )
     context = fiber_frame_physical_model_payload(
-        model, experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints
+        model,
+        experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=restored.experimental_pin_roller_beam,
     )
     sections = [member["section"] for member in context["members"]]
     areas = tuple(

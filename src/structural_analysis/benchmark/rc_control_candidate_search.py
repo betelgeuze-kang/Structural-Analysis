@@ -324,6 +324,7 @@ def _run_candidate_search(
         key: candidate_model_identity(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         )
         for key, model in models.items()
     }
@@ -348,6 +349,7 @@ def _run_candidate_search(
         quantities = design.calculate_fiber_frame_member_quantities(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         )
         estimate = design._estimate(quantities, prices)
         assert estimate is not None

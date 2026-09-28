@@ -75,6 +75,7 @@ def control_candidate_features(model, request):
         model,
         PublicRCFiberFrameConfig(),
         experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=restored.experimental_pin_roller_beam,
     )
     return values, study._sha(
         study._bytes(
@@ -369,7 +370,9 @@ def train_rc_control_candidate_policy(
     descriptors = [descriptor_function(m, request) for m in models]
     model_ids = [
         candidate_model_identity(
-            m, experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints
+            m,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         )
         for m in models
     ]
@@ -428,6 +431,7 @@ def train_rc_control_candidate_policy(
             "model_identity": candidate_model_identity(
                 model,
                 experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+                experimental_pin_roller_beam=request.experimental_pin_roller_beam,
             ),
             "features": list(descriptor[0]),
             "targets": targets,
