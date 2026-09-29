@@ -11,14 +11,16 @@ The conventional `Ref` beam in He et al., *Ultra-thin Strain Hardening Cementiti
 - [Version record and original workbook](https://zenodo.org/records/10082010); [record API](https://zenodo.org/api/records/10082010). The API names Shan He (ORCID `0000-0003-4175-2877`) as creator, declares `cc-by-4.0`, and links the paper DOI as `isPublishedIn`. The record is an open dataset, not a numerical-model output record.
 - [Published paper DOI](https://doi.org/10.1016/j.engstruct.2023.116584); [TU Delft publication record](https://research.tudelft.nl/en/publications/ultra-thin-strain-hardening-cementitious-composite-shcc-layer-in-/); [university-hosted final PDF](https://pure.tudelft.nl/ws/portalfiles/portal/155973438/1_s2.0_S0141029623009999_main.pdf). The PDF includes one repository cover page; printed page numbers below exclude that cover. The final paper's first page declares CC BY 4.0.
 
-The original bytes were downloaded into a separate temporary source-audit directory. No workbook values, original workbook/PDF, or training rows were added to this repository.
+The source-audit downloads were kept outside this repository. No workbook values, original workbook/PDF, or training rows were added to it.
 
 | Original file | Bytes | MD5 | SHA-256 |
 | --- | ---: | --- | --- |
 | `Data summary.xlsx` | 276,386 | `738cf9caa83da2f6f41f1a6c714f4c14` | `96503244fcb5bdebd461a572e8252ce3f39d8b6f9888829fe877e2efcf09c89a` |
-| TU Delft final PDF, including repository cover | 25,742,495 | `fb2b7e63d6f6313ca1e3c79664f144e3` | `f6cda821796fd755b5518d92ad996fc72736f946dd3b8242ffa256d8944912e2` |
+| One retrieval of the TU Delft final PDF, including repository cover | 25,742,495 | `fb2b7e63d6f6313ca1e3c79664f144e3` | `f6cda821796fd755b5518d92ad996fc72736f946dd3b8242ffa256d8944912e2` |
 
-The workbook size and MD5 match the live Zenodo API's `files` entry. The PDF hashes are locally observed identifiers, not a publisher-supplied checksum. The [CC BY 4.0 terms](https://creativecommons.org/licenses/by/4.0/) support reuse and adaptation with attribution, license linkage and indication of changes. Any later derived asset must preserve creator, versioned DOI, file hash, sheet/cell coordinates, measurement role and transformation provenance. This rights screen does not resolve physical-input gaps or constitute dataset admission.
+The workbook size and MD5 match the live Zenodo API's `files` entry; a fresh read of that official file also matched the SHA-256 above. The PDF hashes identify **one retrieval**, not a publisher-supplied checksum or a stable byte-level version pin. On 2026-09-29, repeat GETs from the same official TU Delft PDF URL returned the same 25,742,495-byte length but different MD5 and SHA-256 values. Two responses had SHA-256 `09705169e452299c3cc5c90bc042cc60b024ff7273c0d10c9d559c8acf284f7e` and `288141ffa82c1c2c8545463596941b475f283af41ee26f1f8678d209b2f44548`. Comparing those responses found 80 differing bytes in the final 25,249 bytes, including generated `ArialUnicodeMS` font subset names and PDF trailer identifiers. A future hash mismatch at this URL alone therefore does not establish a different article or experiment. Use the paper DOI and TU Delft publication/PDF links above as locators, and retain each observed PDF hash only with its own retrieval. This byte check does not resolve any experimental input convention.
+
+The [CC BY 4.0 terms](https://creativecommons.org/licenses/by/4.0/) support reuse and adaptation with attribution, license linkage and indication of changes. Any later derived measurement asset must preserve creator, versioned DOI, original workbook hash, sheet/cell coordinates, measurement role and transformation provenance. This rights screen does not resolve physical-input gaps or constitute dataset admission.
 
 ## Numerical channel and specimen correspondence
 
