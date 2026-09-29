@@ -21,6 +21,10 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION,
 )
 from structural_analysis.assembly import stateful_fiber_frame2d_control_path as control_path
+from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
+    StatefulFiberFrame2DDisplacementControlConfig,
+)
+from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
 
@@ -153,6 +157,65 @@ def test_explicit_v4_compiler_accepts_interior_pin_and_roller_only():
     assert compiled.problem.free_global_dofs.count(5) == 1  # pin rotation
     assert compiled.problem.free_global_dofs.count(15) == 1  # roller UX
     assert compiled.problem.free_global_dofs.count(17) == 1  # roller rotation
+
+
+def test_v4_member_quantities_require_opt_in_and_count_authored_lengths_once():
+    model = _model()
+    with pytest.raises(design.FiberFrameDesignError, match="support_count_unsupported"):
+        design.calculate_fiber_frame_member_quantities(model)
+
+    quantities = design.calculate_fiber_frame_member_quantities(
+        model, experimental_pin_roller_beam=True
+    )
+    assert [row["member_id"] for row in quantities["members"]] == [
+        f"M{index}" for index in range(1, len(STATIONS_M))
+    ]
+    assert [row["length_m"] for row in quantities["members"]] == pytest.approx(
+        [right - left for left, right in zip(STATIONS_M, STATIONS_M[1:])]
+    )
+    assert quantities["totals"]["gross_concrete_volume_m3"] == pytest.approx(
+        0.4 * 0.6 * 1.9
+    )
+    assert quantities["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+        8 * 0.000387 * 1.9 * 7850
+    )
+    assert quantities["detailed_takeoff"] is False
+
+    swapped = _payload()
+    swapped["supports"] = [
+        {"node": "N2", "dofs": ["UY"]},
+        {"node": "N6", "dofs": ["UX", "UY"]},
+    ]
+    changed = design.calculate_fiber_frame_member_quantities(
+        _model(swapped), experimental_pin_roller_beam=True
+    )
+    assert changed["totals"] == quantities["totals"]
+    assert changed["quantity_hash"] != quantities["quantity_hash"]
+
+
+def test_v4_member_quantities_reject_invalid_opt_in_and_geometry():
+    model = _model()
+    with pytest.raises(
+        design.FiberFrameDesignError, match="explicit boolean pin-roller"
+    ):
+        design.calculate_fiber_frame_member_quantities(
+            model, experimental_pin_roller_beam=1
+        )
+    with pytest.raises(design.FiberFrameDesignError, match="mutually exclusive"):
+        design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=True,
+            experimental_pin_roller_beam=True,
+        )
+    nonhorizontal = _payload()
+    nonhorizontal["nodes"][3]["coordinates"][1] = 0.01
+    with pytest.raises(
+        design.FiberFrameDesignError,
+        match="rc_fiber_frame_pin_roller_beam_geometry_invalid",
+    ):
+        design.calculate_fiber_frame_member_quantities(
+            _model(nonhorizontal), experimental_pin_roller_beam=True
+        )
 
 
 @pytest.mark.parametrize(
@@ -301,6 +364,71 @@ def test_v4_four_point_path_reactions_rotation_and_fresh_restart_replay():
     assert continuation.status == "ready" and continuation.contract_pass is True
     assert len(continuation.to_dict()["response_history"]) == 2
     assert continuation.to_dict()["response_history"][0] == response
+
+
+def test_v4_synthetic_tensile_damage_onset_blocks_default_but_strict_control_replays():
+    """The short beam path crosses a constitutive kink under explicit control weighting."""
+    model = _model()
+    targets = (-1.5e-4, -1.6e-4)
+    default = analyze_bounded_rc_fiber_direct_control(
+        model, targets, control_global_dof=10, experimental_pin_roller_beam=True
+    )
+    blocked = default.to_dict()
+    assert default.status == "blocked" and default.contract_pass is False
+    assert len(blocked["response_history"]) == 1
+    first, failed = blocked["path"]["attempts"]
+    assert first["committed"] is True
+    assert failed["target_control_displacement_m"] == targets[1]
+    assert failed["committed"] is False and failed["rollback_exact"] is True
+    assert failed["accepted_checkpoint_hash"] == failed["parent_checkpoint_hash"]
+    assert failed["step"]["metrics"]["terminal_reason"] == (
+        "line_search_failed_to_reduce_residual"
+    )
+
+    config = StatefulFiberFrame2DDisplacementControlConfig(
+        control_tolerance_m=1e-15
+    )
+    strict = analyze_bounded_rc_fiber_direct_control(
+        model,
+        targets,
+        control_global_dof=10,
+        experimental_pin_roller_beam=True,
+        config=config,
+    )
+    accepted = strict.to_dict()
+    assert strict.status == "ready" and strict.contract_pass is True
+    assert len(accepted["response_history"]) == len(targets)
+    assert all(row["committed"] for row in accepted["path"]["attempts"])
+    assert all(
+        row["step"]["metrics"]["relative_equilibrium"]
+        <= config.newton.residual_tolerance
+        for row in accepted["path"]["attempts"]
+    )
+    assert all(
+        abs(row["step"]["metrics"]["control_error_m"])
+        <= config.control_tolerance_m
+        for row in accepted["path"]["attempts"]
+    )
+    damage_counts = [
+        sum(
+            section["damaged_concrete_fiber_count"]
+            for member in row["step"]["trial_assembly"]["member_assemblies"]
+            for section in member["element_response"]["section_responses"]
+        )
+        for row in accepted["path"]["attempts"]
+    ]
+    assert damage_counts[0] == 0 and damage_counts[1] > 0
+    verification = validate_bounded_rc_fiber_direct_control_artifacts(
+        model,
+        targets,
+        control_global_dof=10,
+        experimental_pin_roller_beam=True,
+        config=config,
+        result=strict.result_artifact_bytes(),
+        checkpoint=strict.checkpoint_artifact_bytes(),
+    )
+    assert verification.status == "valid_artifact"
+    assert verification.contract_pass is True
 
 
 def test_v4_restart_rejects_a_different_pin_roller_partition():

@@ -274,9 +274,19 @@ def run_rc_refinement(
         model, request, history_limits, material_limits, terminal_limits, prices
     )
     models = {n: refine_sections(model, n) for n in levels}
-    quantities = design.calculate_fiber_frame_member_quantities(model)
+    quantities = design.calculate_fiber_frame_member_quantities(
+        model,
+        experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=request.experimental_pin_roller_beam,
+    )
     if any(
-        physical_quantity_basis(design.calculate_fiber_frame_member_quantities(m))
+        physical_quantity_basis(
+            design.calculate_fiber_frame_member_quantities(
+                m,
+                experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+                experimental_pin_roller_beam=request.experimental_pin_roller_beam,
+            )
+        )
         != physical_quantity_basis(quantities)
         for m in models.values()
     ):
@@ -496,7 +506,12 @@ def run_refined_candidate_search(
         {
             "candidate_id": name,
             "material_estimate": design._estimate(
-                design.calculate_fiber_frame_member_quantities(model), prices
+                design.calculate_fiber_frame_member_quantities(
+                    model,
+                    experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+                    experimental_pin_roller_beam=request.experimental_pin_roller_beam,
+                ),
+                prices,
             ),
         }
         for name, model in models.items()

@@ -245,7 +245,11 @@ class DurableRCControlResultSession(RCControlResultSession):
             )
         )
         job_request = self._request(model, request, key)
-        quantities = design.calculate_fiber_frame_member_quantities(model)
+        quantities = design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
+        )
         estimate = design._estimate(quantities, prices)
         phase_times["input_and_runtime_checks_ns"] = perf_counter_ns() - mark
         path = _safe_directory(self._root / key.split(":")[1])

@@ -200,7 +200,11 @@ def run_rc_control_cost_search(
         }
     )
     quantities = {
-        name: design.calculate_fiber_frame_member_quantities(model)
+        name: design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
+        )
         for name, model in models.items()
     }
     pool = [

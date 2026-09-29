@@ -64,6 +64,14 @@ fields remain owned by the core API and cannot become Workbench solver truth.
 If the endpoint is absent or invalid, the panel is explicitly **UNAVAILABLE**.
 See [Durable job service and exact resume](durable-job-service.md).
 
+For an experimental RC pin/roller v4 job, Workbench uses the existing durable
+request v3 and no-preload result v1 transport. A saved checkpoint is shown as
+worker-continuable; a published result is displayed only after the original
+request, receipt, restart, compiler profile, and three pin/roller reaction rows
+per accepted step pass stored-artifact review. The browser does not initiate a
+retry or rerun the solver. Stored worker attestations and local fixture checks
+do not establish independent physical validation or design approval.
+
 ### Demo cases
 
 The demo provider offers three samples so the execution and evidence boundaries are visible:

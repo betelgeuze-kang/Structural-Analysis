@@ -10,6 +10,7 @@ export interface RcJobSummary {
   sourceRevision: string
   targets: number[]
   hasPreload?: boolean
+  pinRoller?: { pin: string; roller: string }
   assemblyReuse?: boolean
   constantLoads?: RcObject[]
   control: { node_id: string; component: string; unit: string }
@@ -43,6 +44,8 @@ export const PATH_CLAIMS = {
   performance_improvement_claimed: false, production_promotion_eligible: false,
   public_j1_j5_authority: false,
 }
+const PIN_ROLLER_COMPILER_PROFILE = 'planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1'
+const CANTILEVER_COMPILER_PROFILE = 'planar_serial_cantilever_explicit_rectangular_rc.v1'
 export function check(value: unknown, code: string): asserts value {
   if (!value) throw new Error(`rc_review_${code}`)
 }
@@ -107,6 +110,26 @@ export async function selfHash(raw: string, value: RcObject, key: string): Promi
 function nat(value: unknown): value is number { return Number.isSafeInteger(value) && (value as number) >= 0 }
 function hash(value: unknown): boolean { return typeof value === 'string' && /^sha256:[a-f0-9]{64}$/.test(value) }
 
+function pinRollerSupports(model: RcObject): { pin: string; roller: string; reactions: Array<[string, 'UX' | 'UY']> } {
+  check(Array.isArray(model.nodes) && Array.isArray(model.supports) && model.supports.length === 2, 'pin_roller_support_invalid')
+  const nodes = model.nodes.map((item: unknown) => object(item).id)
+  check(nodes.every((id: unknown) => typeof id === 'string' && id.length > 0)
+    && new Set(nodes).size === nodes.length, 'pin_roller_support_invalid')
+  const supported = new Map<string, string[]>()
+  for (const item of model.supports) {
+    const row = object(item)
+    check(typeof row.node === 'string' && nodes.includes(row.node) && !supported.has(row.node)
+      && Array.isArray(row.dofs), 'pin_roller_support_invalid')
+    supported.set(row.node, row.dofs)
+  }
+  const pin = [...supported].find(([, dofs]) => same([...dofs].sort(), ['UX', 'UY']))?.[0]
+  const roller = [...supported].find(([, dofs]) => same(dofs, ['UY']))?.[0]
+  check(pin && roller && pin !== roller, 'pin_roller_support_invalid')
+  const reactions = nodes.flatMap((node: string): Array<[string, 'UX' | 'UY']> =>
+    node === pin ? [[node, 'UX'], [node, 'UY']] : node === roller ? [[node, 'UY']] : [])
+  return { pin, roller, reactions }
+}
+
 export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: RcArtifacts): Promise<{
   summary: RcJobSummary; history: RcObject[]; terminalBytes: Uint8Array
 }> {
@@ -137,9 +160,14 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       },
     },
   } as RcObject
+  const pinRoller = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
   const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
   const version = hasPreload ? 'v2' : 'v1', offset = hasPreload ? 1 : 0
   check(request.result_contract === `bounded-rc-fiber-job-result.${version}`, 'loading_profile_invalid')
+  check(pinRoller ? config.experimental_pin_roller_beam === true
+    : config.experimental_pin_roller_beam === undefined, 'pin_roller_opt_in_invalid')
+  check(config.experimental_two_fixed_endpoints === undefined, 'request_config_invalid')
+  const supportRoles = pinRoller ? pinRollerSupports(object(request.model)) : undefined
   if (hasPreload) {
     const loads = config.constant_nodal_loads
     check(Array.isArray(loads) && loads.length > 0 && loads.length <= 16, 'constant_loads_invalid')
@@ -157,7 +185,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   const execution = object(request.execution_config)
   check(execution.reuse_line_search_assembly === undefined || typeof execution.reuse_line_search_assembly === 'boolean', 'execution_reuse_invalid')
   const reuseProfile = execution.reuse_line_search_assembly === true ? 'rc-control-immediate-line-search-reuse.v1' : undefined
-  check(config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`
+  check((pinRoller || config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`)
     && request.model.schema_version === 'structural-analysis-canonical-model.v1'
     && typeof config.solver_config.control_tolerance_m === 'number'
     && config.solver_config.control_tolerance_m > 0, 'request_config_invalid')
@@ -172,7 +200,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && result.profile === `bounded_rc_fiber_durable_chunk_execution.${version}`
     && result.status === 'ready' && result.contract_pass === true
     && result.request_hash === job.request.content_hash && result.case_id === request.case_id
-    && result.source_revision === request.source_revision && /^[a-f0-9]{40}$/.test(result.source_revision)
+    && result.source_revision === request.source_revision && /^(?:[a-f0-9]{40}|sha256:[a-f0-9]{64})$/.test(result.source_revision)
     && result.source_revision_is_attestation === false && same(result.authority, AUTHORITY)
     && same(result.control_targets, targets) && result.completed_target_count === targets.length
     && result.total_target_count === targets.length && job.progress.completed_steps === targets.length
@@ -200,9 +228,12 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && api.status === 'ready' && api.contract_pass === true && api.failure === null
     && same(api.unsupported_features, []) && same(api.claims, CLAIMS), 'api_invalid')
   check(await sha256Hex(fields(requestDoc.raw).get('model')!.value) === api.model.input_checksum
-    && api.model.canonical_model_checksum === api.model.input_checksum, 'model_binding_invalid')
+    && api.model.canonical_model_checksum === api.model.input_checksum
+    && api.model.compiler_profile === (pinRoller ? PIN_ROLLER_COMPILER_PROFILE : CANTILEVER_COMPILER_PROFILE), 'model_binding_invalid')
   check(api.control.global_dof === config.control_global_dof && api.control.unit === 'm'
     && ['UX', 'UY'].includes(api.control.component), 'control_invalid')
+  check(pinRoller ? api.request.experimental_pin_roller_beam === true
+    : api.request.experimental_pin_roller_beam === undefined, 'pin_roller_api_invalid')
   const binary = atob(result.terminal_checkpoint_artifact_base64)
   check(binary.length <= 128 * 1024 * 1024, 'native_too_large')
   const terminalBytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
@@ -253,6 +284,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       && receipt.api_request.allow_reversals === config.allow_reversals
       && receipt.api_request.maximum_reversals === config.maximum_reversals
       && receipt.api_request.maximum_targets === config.maximum_targets
+      && (pinRoller ? receipt.api_request.experimental_pin_roller_beam === true
+        : receipt.api_request.experimental_pin_roller_beam === undefined)
       && same(receipt.api_request.configuration.newton, config.solver_config.newton)
       && receipt.api_request.configuration.control_tolerance_m === config.solver_config.control_tolerance_m
       && receipt.api_request.configuration.load_factor_coordinate_scale_m === config.solver_config.load_factor_coordinate_scale_m
@@ -314,7 +347,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   return { history: acceptedHistory, terminalBytes, summary: {
     resultHash: result.result_hash, sourceRevision: result.source_revision,
     ...(reuseProfile ? { assemblyReuse: true } : {}),
-    targets, hasPreload, constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
+    targets, hasPreload, pinRoller: supportRoles && { pin: supportRoles.pin, roller: supportRoles.roller },
+    constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
     control: api.control, reservedInvocations: budget.reserved_attempts,
     confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
     unknownWork: unknown || budget.reserved_attempts !== receipts.length * 2,
@@ -322,9 +356,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   } }
 }
 
-// The experimental two-fixed-endpoint request uses v3 transport, while its
-// result and restart schema still follow whether a constant preload exists.
-// Durable-job admission above remains limited to its existing v1/v2 profiles.
+// Transport v4 pin/roller jobs have no preload and retain the v1 result and
+// restart schemas. The two-fixed v3 request is not admitted to durable jobs.
 export function rcControlHasPreload(config: RcObject): boolean {
   return (config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
     || config.schema_version === 'bounded-rc-fiber-direct-control-request.v3')
@@ -334,6 +367,8 @@ export function rcControlHasPreload(config: RcObject): boolean {
 /** Shared stored-history binding checks; no numerical execution. */
 export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model: RcObject, config: RcObject): RcObject[] {
   const hasPreload = rcControlHasPreload(config)
+  const supportRoles = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
+    ? pinRollerSupports(model) : undefined
   const offset = hasPreload ? 1 : 0
   const history = hasPreload ? [api.preload_response, ...api.response_history] : api.response_history
   const targets = config.targets_m
@@ -370,6 +405,18 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
     if (!preload) check(controlled && Math.abs(controlled[`${api.control.component}_m`] - targets[targetIndex]) <= config.solver_config.control_tolerance_m, 'controlled_target_invalid')
     for (const r of row.support_reactions) check(nodeIds.includes(r.node_id) && ['UX', 'UY', 'RZ'].includes(r.dof)
       && r.unit === (r.dof === 'RZ' ? 'N*m' : 'N') && typeof r.value_si === 'number', 'reaction_invalid')
+    if (supportRoles) {
+      check(row.support_reactions.length === 3, 'pin_roller_reaction_invalid')
+      row.support_reactions.forEach((reaction: RcObject, i: number) => {
+        check(reaction.node_id === supportRoles.reactions[i][0]
+          && reaction.dof === supportRoles.reactions[i][1]
+          && reaction.unit === 'N', 'pin_roller_reaction_invalid')
+      })
+      for (const [nodeId, dof] of supportRoles.reactions) {
+        const node = row.node_displacements.find((item: RcObject) => item.node_id === nodeId)
+        check(node && node[`${dof}_m`] === 0, 'pin_roller_restrained_displacement_invalid')
+      }
+    }
     for (const m of row.member_end_forces) check(nodeIds.includes(m.node_i) && nodeIds.includes(m.node_j)
       && ['local_end_i', 'local_end_j'].every((end) => ['FX_N', 'FY_N', 'MZ_Nm'].every((key) => typeof object(m[end])[key] === 'number')), 'member_invalid')
     for (const s of row.section_results) check(memberIds.includes(s.member_id) && nat(s.integration_point_index)

@@ -30,6 +30,7 @@ from structural_analysis.execution import job_worker as dispatcher
 from structural_analysis.execution import rc_fiber_direct_control_worker as worker
 from structural_analysis.execution.job_http_api import DurableJobHttpApi
 from structural_analysis.execution.job_service import DurableJobService, JobServiceError
+from tests.test_rc_fiber_pin_roller_beam_public import _payload as pin_roller_payload
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -366,6 +367,54 @@ def test_real_reopened_chunks_preserve_exact_cumulative_response_and_checkpoint(
     assert full_api["request"] != split_api["request"]
     assert summary["original_api_calls"] == summary["fresh_verification_calls"] == 4
     assert summary["core_target_calls"] == 18
+
+
+def test_v4_pin_roller_job_reopens_saved_checkpoint_and_publishes_two_targets(tmp_path):
+    store = tmp_path / "pin-roller-jobs"
+    request = _request(chunk_size=1)
+    request["case_id"] = "pin-roller-two-targets"
+    request["model"] = pin_roller_payload()
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        control_global_dof=10,
+        targets_m=(-1e-6, -2e-6),
+        experimental_pin_roller_beam=True,
+    ).to_dict()
+    service = _service(store)
+    submitted = _submit(service, request)
+    first = _run(service, _claim(service))
+    assert first.status == "checkpointed" and first.progress_completed == 1
+    assert first.checkpoint is not None and first.result is None
+
+    reopened = _service(store)
+    claim = _claim(reopened)
+    assert claim.job.job_id == submitted.job_id
+    assert claim.checkpoint_bytes is not None
+    assert _sha(claim.checkpoint_bytes) == first.checkpoint.content_hash
+    saved = json.loads(claim.checkpoint_bytes)
+    assert saved["control_targets"] == [-1e-6, -2e-6]
+    assert saved["completed_target_count"] == 1
+    assert saved["receipts"][0]["api_request"]["experimental_pin_roller_beam"] is True
+
+    final = _run(reopened, claim)
+    assert final.status == "succeeded" and final.progress_completed == 2
+    assert (
+        reopened.validate_integrity(final.job_id, **TENANT_AUTH)["contract_pass"]
+        is True
+    )
+    result = json.loads(reopened.read_result(final.job_id, **TENANT_AUTH))
+    assert result["api_result"]["model"]["compiler_profile"] == (
+        "planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1"
+    )
+    assert len(result["api_result"]["response_history"]) == 2
+    assert result["receipts"][0] == saved["receipts"][0]
+    assert [
+        (row["node_id"], row["dof"])
+        for row in result["api_result"]["terminal_response"]["support_reactions"]
+    ] == [("N2", "UX"), ("N2", "UY"), ("N6", "UY")]
+    assert (
+        result["receipts"][-1]["api_request"]["restart_input_sha256"]
+        == (saved["receipts"][0]["checkpoint_sha256"])
+    )
 
 
 def test_actual_reserved_invocations_retain_analysis_and_fresh_verification(

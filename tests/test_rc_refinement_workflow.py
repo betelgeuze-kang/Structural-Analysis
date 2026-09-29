@@ -22,6 +22,7 @@ TESTS = {
     "tests/test_rc_control_durable_research.py",
     "tests/test_local_amd_diagnostic.py",
     "tests/test_rc_merge_reconciliation.py",
+    "tests/test_rc_control_support_profile_integration.py",
 }
 
 

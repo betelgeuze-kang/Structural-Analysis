@@ -81,6 +81,9 @@ export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJ
       : 'Original bytes and stored request, receipt and checkpoint bindings verified. Fresh replay is a retained worker attestation. This browser does not rerun the solver or establish independent validation, design approval or release readiness.'}</p>
     {summary.historyFile ? <p data-rc-history-status>Stored history: {summary.historyFile.status} · {summary.targets.length}/{summary.historyFile.declaredTargets} lateral targets · {summary.historyFile.bytes} bytes.</p> : null}
     <dl className="wb2-kv">
+      {summary.pinRoller ? <>
+        <dt>Experimental support profile</dt><dd data-rc-pin-roller-profile>Pin/roller beam · pin {summary.pinRoller.pin} (UX/UY), roller {summary.pinRoller.roller} (UY)</dd>
+      </> : null}
       {summary.assemblyReuse ? <><dt>Intermediate calculation reuse</dt><dd data-rc-reuse>Enabled · same result verification required</dd></> : null}
       <dt>Control</dt><dd>{summary.control.node_id} · {summary.control.component} ({summary.control.unit})</dd>
       <dt>{summary.historyFile ? 'Declared canonical model identity' : 'Source revision'}</dt><dd className="wb2-mono" style={{ overflowWrap: 'anywhere' }} data-rc-source>{summary.sourceRevision}</dd>

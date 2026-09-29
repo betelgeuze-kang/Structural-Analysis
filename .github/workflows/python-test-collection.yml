@@ -356,6 +356,7 @@ jobs:
           tests/test_rc_control_durable_research.py
           tests/test_local_amd_diagnostic.py
           tests/test_rc_merge_reconciliation.py
+          tests/test_rc_control_support_profile_integration.py
       - name: Check formatting without changing committed bytes
         if: ${{ !cancelled() }}
         run: >-
@@ -381,6 +382,7 @@ jobs:
           tests/test_rc_control_persistence.py
           tests/test_rc_local_resources.py
           tests/test_rc_merge_reconciliation.py
+          tests/test_rc_control_support_profile_integration.py
           > rc-refinement-format.diff
       - name: Check changed Python lint
         if: ${{ !cancelled() }}
@@ -407,6 +409,7 @@ jobs:
           tests/test_rc_control_persistence.py
           tests/test_rc_local_resources.py
           tests/test_rc_merge_reconciliation.py
+          tests/test_rc_control_support_profile_integration.py
           > rc-refinement-lint.json
       - name: Retain original diagnostics
         if: ${{ always() }}
