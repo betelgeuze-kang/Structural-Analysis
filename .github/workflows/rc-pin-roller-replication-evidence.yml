@@ -26,6 +26,7 @@ jobs:
         with:
           ref: ${{ env.RC_SOURCE_SHA }}
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Verify exact clean checkout
         shell: bash

@@ -158,6 +158,18 @@ def test_new_replication_protocol_is_frozen_before_any_numerical_work(tmp_path):
         runner.prepare_packet(SOURCE, output, revision)
 
 
+def test_replication_workflow_fetches_preregistered_history():
+    workflow = (
+        SOURCE / ".github/workflows/rc-pin-roller-replication-evidence.yml"
+    ).read_text()
+    checkout = workflow.split(
+        "- name: Checkout exact source commit without credentials", 1
+    )[1].split("- name: Verify exact clean checkout", 1)[0]
+    assert "ref: ${{ env.RC_SOURCE_SHA }}" in checkout
+    assert "persist-credentials: false" in checkout
+    assert "fetch-depth: 0" in checkout
+
+
 def test_ranking_audit_uses_new_pool_and_rejects_posthoc_shortlist():
     audit = _script("audit_rc_pin_roller_budget_study")
     prices = {"w34": 1.0, "w38": 2.0, "w42": 3.0, "w46": 4.0, "w52": 5.0}
