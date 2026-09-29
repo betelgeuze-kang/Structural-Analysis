@@ -26,6 +26,8 @@ test('force-floor packet renders signed minimum, solver-selected design, quantit
   await expect(panel.locator('[data-rc-search-arm="price_order"]')).toContainText('baseline')
   await expect(panel.locator('[data-rc-search-arm="learned_order"]')).toContainText('w43')
   await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Yes')
+  await expect(panel.locator('[data-rc-search-cheaper-false-negative="learned_order"]')).toHaveText('0')
+  await expect(panel.locator('[data-rc-search-cheaper-false-negative="price_order"]')).toHaveText('Not applicable')
   await expect(panel.locator('[data-rc-search-authority]')).toContainText('nonauthoritative')
   await panel.getByRole('button', { name: 'Review Learned order', exact: true }).click()
   await expect(panel.locator('[data-rc-design-force-floor]')).toContainText('at least 180')
