@@ -46,16 +46,28 @@ invocations, 224 attempted steps, and 646 known Newton iterations/linear
 solves. The whole runner took 63.383 s; its training and search timings are
 nested scopes and must not be added to that total.
 
-This is a positive **candidate-ordering observation** within one authored RC
-pin/roller geometry and loading history: at equal online analysis budget,
-the learned order found the declared-pool minimum while price order did not.
-It is not a calculation-speed gain. The learned online arm was slightly slower
-in this single ordered run, and its 15.437 s label-generation cost was outside
-both online arms. The force threshold was selected after an earlier packet;
-the held-out widths share the same geometry, material model, request, and
-synthetic price formula as training. A simple boundary-aware deterministic
-strategy is not yet a measured comparator. The 8.778-unit estimate gap is
+This is a **candidate-ordering observation** within one authored RC pin/roller
+geometry and loading history: at equal online analysis budget, the learned
+order found the declared-pool minimum while price order did not. It is not a
+calculation-speed gain. The learned online arm was slightly slower in this
+single ordered run, and its 15.437 s label-generation cost was outside both
+online arms. The force threshold was selected after an earlier packet; the
+held-out widths share the same geometry, material model, request, and
+synthetic price formula as training. The 8.778-unit estimate gap is
 invented-price arithmetic, not a market quote or realized currency saving.
+
+A read-only **posthoc** deterministic comparison further limits attribution to
+AI. Piecewise-linear interpolation of the seven training signed factors across
+RC1 width puts the factor-180 crossing at 0.41061177249 m. It predicts `w41`
+below the floor and ranks `w43`, `w45`, `w47` first by synthetic price, exactly
+the learned shortlist. Against the saved twelve-candidate oracle, its largest
+absolute factor error is about `1.68e-12`, versus `0.61121` for the learned
+policy. The other seven interpolated training targets pass their upper screens
+throughout this width interval. This comparator was not predeclared or run as
+a separately timed online arm; the calculation used the completed packet.
+It shows that this same-family result does not isolate a benefit unique to AI.
+The next prospective comparison must include a deterministic boundary rule
+under the same analysis budget and test distinct geometry and loading histories.
 No independent project/geometry/history generalization, experimental physical
 accuracy, net AI time saving, or engineering approval follows from this result.
 
