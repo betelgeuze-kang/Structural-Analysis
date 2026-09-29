@@ -10,7 +10,7 @@
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "b333879eedd5354dc469a209982d0329c0eadb804b5a0b011abb8fc06a09da39"
+      "sha256": "1b2bb95273c9a7570da10cf928bed8492b75cfad087daade1a67dd6c6bfc212d"
     }
   },
   "authority": {
