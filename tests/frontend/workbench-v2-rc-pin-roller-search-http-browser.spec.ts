@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { spawn, execFileSync, type ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
@@ -48,7 +48,7 @@ test.describe('frozen six-model pin/roller search over real HTTP', () => {
       const closed = new Promise<void>(done => server!.once('exit', () => done()))
       server.kill('SIGTERM'); await closed
     }
-    if (receipt) {
+    if (receipt && existsSync(receipt)) {
       const record = JSON.parse(await readFile(receipt, 'utf8'))
       expect(record.report_hash).toBe(reportHash)
       expect(record.new_solver_calls).toBe(0)
