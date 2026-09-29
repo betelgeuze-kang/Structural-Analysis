@@ -322,17 +322,21 @@ def guard_problem():
         7, (-1e-6, -2e-6, 1e-6, 0.), allow_reversals=True, maximum_reversals=3)
 
 
-def guard_run(tmp_path, guard, proposal):
+def guard_run(tmp_path, guard, proposal, *, material_snapshot_layout_reuse=False):
     from structural_analysis.benchmark.rc_control_seed_runtime import benchmark_rc_control_seed_paths
     model, request = guard_problem()
     return benchmark_rc_control_seed_paths(model, request, source_revision='0'*40,
         output_directory=tmp_path/'run', proposal=proposal, proposal_identity='sha256:'+'a'*64,
         proposal_guard=guard, proposal_guard_identity='sha256:'+'b'*64,
         capture_material_state=True, material_capture_scope='proposal-only',
+        material_snapshot_layout_reuse=material_snapshot_layout_reuse,
         proposal_abstention_strategy='secant')
 
 
-def test_declined_guard_skips_capture_and_proposal_with_exact_secant_steps(tmp_path, monkeypatch):
+@pytest.mark.parametrize('material_snapshot_layout_reuse', [False, True])
+def test_declined_guard_skips_capture_and_proposal_with_exact_secant_steps(
+    tmp_path, monkeypatch, material_snapshot_layout_reuse
+):
     from structural_analysis.benchmark import rc_control_material_features as material
     def unexpected(*args):
         pytest.fail('declined guard reached capture or proposal')
@@ -342,7 +346,10 @@ def test_declined_guard_skips_capture_and_proposal_with_exact_secant_steps(tmp_p
         contexts.append(context)
         assert context.committed_material_state_json is None
         return False
-    report = guard_run(tmp_path, guard, unexpected)
+    report = guard_run(
+        tmp_path, guard, unexpected,
+        material_snapshot_layout_reuse=material_snapshot_layout_reuse,
+    )
     assert len(contexts) == 4 and report['comparisons']['proposal']['full_history_pass'] is True
     for index, entry in enumerate(report['arms']['proposal']['entries']):
         assert entry['proposal_guard']['allow_proposal'] is False

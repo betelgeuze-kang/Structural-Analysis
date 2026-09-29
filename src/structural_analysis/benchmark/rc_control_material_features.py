@@ -4,7 +4,7 @@ These are solver-computed native state variables, never measured experiment
 channels. No trial integration, recovery or future response is used here.
 """
 
-from dataclasses import fields
+from dataclasses import dataclass, fields
 import re
 
 import numpy as np
@@ -34,30 +34,84 @@ _NAME = re.compile(
 )
 
 
-def committed_material_snapshot(problem, checkpoint):
+@dataclass(frozen=True)
+class _MaterialSnapshotLayout:
+    problem_contract_hash: str
+    names: tuple[str, ...]
+    members: tuple
+
+
+@dataclass
+class MaterialSnapshotLayoutCache:
+    """Path-local immutable field layout; never stores accepted field values."""
+
+    layout: _MaterialSnapshotLayout | None = None
+
+
+def committed_material_snapshot(problem, checkpoint, *, layout_cache=None):
     """Detach exact native scalar fields in member/point/fiber/field order."""
+    if (
+        layout_cache is not None
+        and type(layout_cache) is not MaterialSnapshotLayoutCache
+    ):
+        raise ValueError("path-local material layout cache required")
     if type(checkpoint) is not StatefulFiberFrame2DCheckpoint:
         raise ValueError("original committed checkpoint required")
     validate_stateful_fiber_frame2d_checkpoint(problem, checkpoint)
-    names: list[str] = []
+    layout = None if layout_cache is None else layout_cache.layout
+    if layout is not None and layout.problem_contract_hash != problem.contract_hash:
+        raise ValueError("material layout cache differs from the problem")
+    names: list[str] = [] if layout is None else list(layout.names)
     values: list[float] = []
-    for member_index, element in enumerate(checkpoint.element_states):
-        for point_index, section in enumerate(element.integration_point_states):
-            if type(section) is not StatefulFiberSectionState:
-                raise ValueError("native RC fiber section state required")
-            for fiber_index, state in enumerate(section.fiber_states):
-                if type(state) is UniaxialPlasticityState:
-                    kind = "steel"
-                elif type(state) is ConcreteDamageState:
-                    kind = "concrete"
-                else:
-                    raise ValueError("supported native RC material state required")
-                for field in fields(state):
-                    names.append(
-                        f"member_{member_index}_point_{point_index}_fiber_{fiber_index}"
-                        f"_{kind}_{field.name}"
+    if layout is None:
+        member_layouts = []
+        for member_index, element in enumerate(checkpoint.element_states):
+            point_layouts = []
+            for point_index, section in enumerate(element.integration_point_states):
+                if type(section) is not StatefulFiberSectionState:
+                    raise ValueError("native RC fiber section state required")
+                fiber_layouts = []
+                for fiber_index, state in enumerate(section.fiber_states):
+                    if type(state) is UniaxialPlasticityState:
+                        kind = "steel"
+                    elif type(state) is ConcreteDamageState:
+                        kind = "concrete"
+                    else:
+                        raise ValueError("supported native RC material state required")
+                    field_names = tuple(field.name for field in fields(state))
+                    for field_name in field_names:
+                        names.append(
+                            f"member_{member_index}_point_{point_index}_fiber_{fiber_index}"
+                            f"_{kind}_{field_name}"
+                        )
+                        values.append(getattr(state, field_name))
+                    fiber_layouts.append((type(state), field_names))
+                point_layouts.append(tuple(fiber_layouts))
+            member_layouts.append(tuple(point_layouts))
+        pending_layout = (
+            _MaterialSnapshotLayout(
+                problem.contract_hash, tuple(names), tuple(member_layouts)
+            )
+            if layout_cache is not None
+            else None
+        )
+    else:
+        for element, point_layouts in zip(
+            checkpoint.element_states, layout.members, strict=True
+        ):
+            for section, fiber_layouts in zip(
+                element.integration_point_states, point_layouts, strict=True
+            ):
+                if type(section) is not StatefulFiberSectionState:
+                    raise ValueError("native RC fiber section state required")
+                for state, (state_type, field_names) in zip(
+                    section.fiber_states, fiber_layouts, strict=True
+                ):
+                    if type(state) is not state_type:
+                        raise ValueError("native RC material layout changed")
+                    values.extend(
+                        getattr(state, field_name) for field_name in field_names
                     )
-                    values.append(getattr(state, field.name))
     body = {
         "schema_version": MATERIAL_SNAPSHOT_SCHEMA,
         "problem_contract_hash": checkpoint.problem_contract_hash,
@@ -68,6 +122,8 @@ def committed_material_snapshot(problem, checkpoint):
     body["snapshot_hash"] = _sha(_bytes(body))
     encoded = _bytes(body).decode()
     decode_material_snapshot(encoded, problem.contract_hash)
+    if layout_cache is not None and layout is None:
+        layout_cache.layout = pending_layout
     return encoded
 
 

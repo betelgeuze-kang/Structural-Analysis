@@ -367,6 +367,7 @@ def _path(
     continuation_on_failure=False,
     continuation_all_failed_targets=False,
     continuation_adaptive=False,
+    material_snapshot_layout_reuse=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -378,6 +379,13 @@ def _path(
     source_hash = compiled.problem.contract_hash
     preload_step = preload_response = preload_coordinates = None
     preload_invocations = []
+    material_layout_cache = None
+    if capture_material_state and material_snapshot_layout_reuse:
+        from structural_analysis.benchmark.rc_control_material_features import (
+            MaterialSnapshotLayoutCache,
+        )
+
+        material_layout_cache = MaterialSnapshotLayoutCache()
     failure = None
     if request.constant_nodal_loads and initial_prefix is None:
         preload_step, preload_response, preload_coordinates, invocation, failure = (
@@ -445,7 +453,13 @@ def _path(
             )
 
             mw, mc = perf_counter_ns(), process_time_ns()
-            material_state = committed_material_snapshot(compiled.problem, accepted)
+            material_state = (
+                committed_material_snapshot(compiled.problem, accepted)
+                if material_layout_cache is None
+                else committed_material_snapshot(
+                    compiled.problem, accepted, layout_cache=material_layout_cache
+                )
+            )
             capture_cost = {
                 "wall_ns": perf_counter_ns() - mw,
                 "cpu_ns": process_time_ns() - mc,
@@ -1134,6 +1148,7 @@ def benchmark_rc_control_seed_paths(
     terminal_refinement_limit: int = 1,
     capture_material_state: bool = False,
     material_capture_scope: str = "all-arms",
+    material_snapshot_layout_reuse: bool = False,
     proposal_abstention_strategy: str = "reference",
     parent_checkpoint_bytes: bytes | None = None,
     accepted_context: RCControlSeedContext | None = None,
@@ -1228,6 +1243,10 @@ def benchmark_rc_control_seed_paths(
         not capture_material_state or proposal is None
     ):
         raise ValueError("proposal-only capture requires an opted-in proposer")
+    if type(material_snapshot_layout_reuse) is not bool or (
+        material_snapshot_layout_reuse and not capture_material_state
+    ):
+        raise ValueError("material layout reuse requires explicit capture")
     if type(force_accumulation) is not str or force_accumulation not in (
         "binary64",
         "rational",
@@ -1469,6 +1488,11 @@ def benchmark_rc_control_seed_paths(
         ),
         **({"capture_material_state": True} if capture_material_state else {}),
         **(
+            {"material_snapshot_layout_reuse": True}
+            if material_snapshot_layout_reuse
+            else {}
+        ),
+        **(
             {"material_capture_scope": material_capture_scope}
             if material_capture_scope != "all-arms"
             else {}
@@ -1556,6 +1580,7 @@ def benchmark_rc_control_seed_paths(
             continuation_on_failure and name == "proposal",
             continuation_all_failed_targets and name == "proposal",
             continuation_adaptive and name == "proposal",
+            material_snapshot_layout_reuse,
         )
         if initial_prefix is not None:
             unknown = any(

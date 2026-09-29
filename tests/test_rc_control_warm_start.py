@@ -1,6 +1,6 @@
 """Optional RC control seeds cannot acquire equilibrium or commit authority."""
 
-from dataclasses import replace
+from dataclasses import fields, replace
 import json
 
 import numpy as np
@@ -21,6 +21,100 @@ def case():
     problem = make_two_element_stateful_fiber_cantilever()
     parent = initial_stateful_fiber_frame2d_checkpoint(problem)
     return problem, parent
+
+
+def test_path_local_material_layout_reuse_keeps_exact_bytes_and_rejects_tampering(
+    case, monkeypatch
+):
+    from structural_analysis.benchmark import rc_control_material_features as material
+    from structural_analysis.benchmark.rc_control_material_features import (
+        MaterialSnapshotLayoutCache,
+        committed_material_snapshot,
+    )
+
+    problem, parent = case
+    cache = MaterialSnapshotLayoutCache()
+    original = committed_material_snapshot(problem, parent)
+    assert committed_material_snapshot(problem, parent, layout_cache=cache) == original
+    assert cache.layout is not None
+
+    accepted = run(case).accepted_checkpoint
+    assert accepted is not parent
+    next_original = committed_material_snapshot(problem, accepted)
+    assert committed_material_snapshot(problem, accepted, layout_cache=cache) == next_original
+    assert next_original != original
+
+    different_problem = make_two_element_stateful_fiber_cantilever(angle_rad=0.1)
+    different_parent = initial_stateful_fiber_frame2d_checkpoint(different_problem)
+    with pytest.raises(ValueError, match="cache differs"):
+        committed_material_snapshot(
+            different_problem, different_parent, layout_cache=cache
+        )
+
+    empty_cache = MaterialSnapshotLayoutCache()
+
+    def rejected_decode(*args, **kwargs):
+        raise ValueError("injected strict decode failure")
+
+    with monkeypatch.context() as patcher:
+        patcher.setattr(material, "decode_material_snapshot", rejected_decode)
+        with pytest.raises(ValueError, match="strict decode failure"):
+            committed_material_snapshot(problem, parent, layout_cache=empty_cache)
+    assert empty_cache.layout is None
+
+    fiber = accepted.element_states[0].integration_point_states[0].fiber_states[0]
+    object.__setattr__(fiber, fields(fiber)[0].name, float("nan"))
+    for selected_cache in (None, cache):
+        with pytest.raises(ValueError):
+            committed_material_snapshot(problem, accepted, layout_cache=selected_cache)
+
+
+def test_layout_reuse_full_paths_keep_context_and_solver_bytes(tmp_path):
+    from pathlib import Path
+    from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+        BoundedRCFiberDirectControlRequest,
+    )
+    from structural_analysis.benchmark import rc_control_seed_runtime as runtime
+    from structural_analysis.io.neutral.loader import load_neutral_json
+
+    model = load_neutral_json(
+        Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
+    )
+    request = BoundedRCFiberDirectControlRequest(
+        7, (-1e-6, -2e-6, -1.5e-6), allow_reversals=True, maximum_reversals=1
+    )
+    reports = {}
+    for reuse in (False, True):
+        folder = tmp_path / ("cached" if reuse else "original")
+        reports[reuse] = runtime.benchmark_rc_control_seed_paths(
+            model,
+            request,
+            source_revision="a" * 40,
+            output_directory=folder,
+            proposal=runtime.secant_seed,
+            proposal_identity="sha256:" + "b" * 64,
+            capture_material_state=True,
+            material_capture_scope="proposal-only",
+            material_snapshot_layout_reuse=reuse,
+        )
+        report = reports[reuse]
+        assert report["reference_repeat_exact"]
+        assert report["all_execution_work_reported"]
+        assert all(row["full_history_pass"] for row in report["comparisons"].values())
+        assert all(
+            "committed_material_capture" in entry
+            for entry in report["arms"]["proposal"]["entries"]
+        )
+    assert reports[True]["material_snapshot_layout_reuse"] is True
+    assert "material_snapshot_layout_reuse" not in reports[False]
+    for arm in ("reference", "secant", "proposal", "fresh-reference"):
+        for index in range(3):
+            name = f"{index:03d}"
+            for suffix in ("context.json", "1-step.json"):
+                relative = f"{arm}/{name}-{suffix}"
+                assert (tmp_path / "cached" / relative).read_bytes() == (
+                    tmp_path / "original" / relative
+                ).read_bytes()
 
 
 @pytest.mark.parametrize(
@@ -325,10 +419,14 @@ def test_actual_numerically_rejected_seed_records_fallback_cost(tmp_path, absten
         * len(context.accepted_augmented_coordinates_m[-1]),
         proposal_identity="sha256:" + "b" * 64,
         arm_order=("proposal", "secant", "reference"),
+        capture_material_state=True,
+        material_capture_scope="proposal-only",
+        material_snapshot_layout_reuse=True,
     )
     entries = report["arms"]["proposal"]["entries"][0]["invocations"]
     assert len(entries) == 2
     assert entries[0]["committed"] is False and entries[0]["rollback_exact"] is True
+    assert "committed_material_capture" in report["arms"]["proposal"]["entries"][0]
     assert entries[1]["seed_used"] is False
     assert all(i["work"]["core_calls"] == 1 for i in entries)
     assert entries[0]["unknown_work"] is False
