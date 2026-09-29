@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from functools import lru_cache
 import hashlib
 import importlib.util
 import json
@@ -37,17 +38,41 @@ sys.modules[SPEC.name] = module
 SPEC.loader.exec_module(module)
 
 
-def _stored_receipt() -> dict[str, object]:
+@lru_cache(maxsize=1)
+def _current_product_replay_receipt() -> dict[str, object]:
+    # Historical external execution remains immutable; only replay the product.
     payload = json.loads(RECEIPT.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
-    return payload
+    return module.refresh_external_code_to_code_product_replay(
+        payload,
+        repo_root=ROOT,
+        reuse_reason=(
+            "Test current-product-only replay; historical external execution "
+            "is reused without freshness or promotion credit."
+        ),
+    )
+
+
+def _stored_receipt() -> dict[str, object]:
+    return deepcopy(_current_product_replay_receipt())
+
+
+@pytest.fixture(scope="module")
+def current_replay_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    path = tmp_path_factory.mktemp("code-to-code-replay") / "receipt.json"
+    path.write_text(
+        json.dumps(_stored_receipt(), ensure_ascii=False, indent=2, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
+    return path
 
 
 @pytest.mark.parametrize("receipt_path", [RECEIPT, FRESH_HOST_RECEIPT])
 def test_committed_candidate_receipt_sources_match_declared_commit(
     receipt_path: Path,
 ) -> None:
-    # CI regenerates the working copy before tests, so inspect committed bytes.
+    # Check historical provenance independently of the temporary product replay.
     relative_path = receipt_path.relative_to(ROOT).as_posix()
     committed_receipt = subprocess.run(
         ["git", "show", f"HEAD:{relative_path}"],
@@ -68,6 +93,51 @@ def test_committed_candidate_receipt_sources_match_declared_commit(
         assert actual_hash == expected_hash, (
             f"{relative_path} declares {source_commit}, but {path} has different bytes"
         )
+
+
+def test_current_product_replay_preserves_historical_external_evidence() -> None:
+    original_bytes = {
+        path: path.read_bytes() for path in (RECEIPT, FRESH_HOST_RECEIPT)
+    }
+    original = json.loads(original_bytes[RECEIPT])
+    payload = _stored_receipt()
+
+    assert all(
+        path.read_bytes() == contents for path, contents in original_bytes.items()
+    )
+    for field in ("runtimes", "external_assets", "execution_environment"):
+        assert payload[field] == original[field]
+    original_replay = original["replay_provenance"]
+    replay = payload["replay_provenance"]
+    assert replay["external_runtime_executed_in_this_generation"] is False
+    assert replay["external_execution_reused"] is True
+    for field in (
+        "external_execution_source_commit_sha",
+        "external_execution_generated_at",
+    ):
+        assert replay[field] == original_replay[field]
+    assert module.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
+
+    original_cases = {row["case_id"]: row for row in original["comparisons"]}
+    assert {row["case_id"] for row in payload["comparisons"]} == set(original_cases)
+    for row in payload["comparisons"]:
+        historical = original_cases[row["case_id"]]
+        for field in (
+            "reference_solver", "external_return_code", "load_path_attempts"
+        ):
+            assert row.get(field) == historical.get(field)
+        assert {
+            metric["quantity"]: metric["reference_value"] for metric in row["metrics"]
+        } == {
+            metric["quantity"]: metric["reference_value"]
+            for metric in historical["metrics"]
+        }
+
+    # Mutation tests must not alter the process-local replay used by other tests.
+    expected = deepcopy(payload)
+    payload["comparisons"][0]["metrics"][0]["reference_value"] += 1.0
+    payload["replay_provenance"]["external_execution_source_commit_sha"] = None
+    assert _stored_receipt() == expected
 
 
 def test_stored_candidate_replay_validates_without_new_external_execution() -> None:
@@ -377,7 +447,7 @@ def test_receipt_does_not_promote_legal_hierarchy_or_release_claims() -> None:
 
 
 def test_product_replay_migrates_only_the_known_prior_claim_boundary() -> None:
-    stored = _stored_receipt()
+    stored = json.loads(RECEIPT.read_text(encoding="utf-8"))
     refreshed = module.refresh_external_code_to_code_product_replay(
         stored,
         repo_root=ROOT,
@@ -658,9 +728,9 @@ def test_fresh_receipt_without_execution_source_fails_closed() -> None:
         )
 
 
-def test_cli_offline_check_validates_stored_receipt() -> None:
+def test_cli_offline_check_validates_stored_receipt(current_replay_path: Path) -> None:
     completed = subprocess.run(
-        [sys.executable, str(SCRIPT), "--out", str(RECEIPT), "--check"],
+        [sys.executable, str(SCRIPT), "--out", str(current_replay_path), "--check"],
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -673,9 +743,10 @@ def test_cli_offline_check_validates_stored_receipt() -> None:
 
 def test_cli_refresh_can_use_a_validated_current_reference_receipt(
     tmp_path: Path,
+    current_replay_path: Path,
 ) -> None:
     out = tmp_path / "embedded-code-receipt.json"
-    reference = RECEIPT
+    reference = current_replay_path
     completed = subprocess.run(
         [
             sys.executable,
