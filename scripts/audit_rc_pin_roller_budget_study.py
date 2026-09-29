@@ -131,6 +131,54 @@ def check_frozen_ranking(pre, search_plan, check):
             f'{cid} boundary score differs from frozen prediction',
         )
 
+def derived_performance(result, request):
+    """Recompute design metrics from this row's original accepted solver history."""
+    history = result['response_history']
+    if request.get('constant_nodal_loads'):
+        history = [result['preload_response'], *history]
+    if not history:
+        raise ValueError('accepted solver history is empty')
+    points = [point for response in history for point in response['fiber_results']]
+    steel = [p['material_state'] for p in points if p['material_kind'] == 'steel']
+    concrete = [p['material_state'] for p in points if p['material_kind'] == 'concrete']
+    return {
+        'maximum_translation_m': max(math.hypot(node['UX_m'], node['UY_m'], node['UZ_m']) for response in history for node in response['node_displacements']),
+        'maximum_absolute_fiber_strain': max(abs(p['strain']) for p in points),
+        'terminal_maximum_translation_m': max(math.hypot(node['UX_m'], node['UY_m'], node['UZ_m']) for node in history[-1]['node_displacements']),
+        'terminal_maximum_absolute_fiber_strain': max(abs(p['strain']) for p in history[-1]['fiber_results']),
+        'maximum_steel_accumulated_plastic_strain': max((p['accumulated_plastic_strain'] for p in steel), default=None),
+        'maximum_concrete_tensile_damage': max((p['tensile_damage'] for p in concrete), default=None),
+        'maximum_concrete_compressive_damage': max((p['compressive_damage'] for p in concrete), default=None),
+        'terminal_load_factor': history[-1]['load_factor'],
+        'minimum_load_factor': min(response['load_factor'] for response in history),
+        'maximum_load_factor': max(response['load_factor'] for response in history),
+        'accepted_epoch_count': len(history),
+    }
+
+def verified_row_claim_violations(row, result, comparison, request):
+    """Check saved row claims against its own result, not another solver arm."""
+    performance = derived_performance(result, request)
+    limits = {**comparison['history_limits'], **comparison['material_limits']}
+    if comparison['terminal_limits'] is not None:
+        limits.update({f'terminal_{key}': value for key, value in comparison['terminal_limits'].items()})
+    screens = {
+        key: {
+            'value': performance[key],
+            'limit': limit,
+            'status': 'unavailable' if performance[key] is None else 'pass' if performance[key] <= limit else 'fail',
+        }
+        for key, limit in limits.items()
+    }
+    violations = []
+    if canonical(row['performance']) != canonical(performance):
+        violations.append('performance differs from original result history')
+    if canonical(row['screens']) != canonical(screens):
+        violations.append('screens differ from original result and frozen limits')
+    eligible = all(screen['status'] == 'pass' for screen in screens.values())
+    if type(row['selection_eligible']) is not bool or row['selection_eligible'] is not eligible:
+        violations.append('selection eligibility differs from original result screens')
+    return violations
+
 def audit_packet(SOURCE, ROOT, protocol_path=None):
     SOURCE, ROOT = Path(SOURCE).resolve(), Path(ROOT).resolve()
     violations = []
@@ -222,11 +270,14 @@ def audit_packet(SOURCE, ROOT, protocol_path=None):
     check(len(search_plan['pool']) == len(online_widths), 'online pool incomplete')
     check(search['candidate_denominator'] == len(online_widths), 'result denominator mismatch')
     check_frozen_ranking(pre, search_plan, check)
-    price_input = load(ROOT/'inputs/online-experiment.json')['prices']
+    training_experiment = load(ROOT/'inputs/training-experiment.json')
+    online_experiment = load(ROOT/'inputs/online-experiment.json')
+    for field, expected in (('history_limits', online_experiment['history_limits']), ('material_limits', online_experiment['material_history_limits']), ('terminal_limits', online_experiment['terminal_limits'])):
+        check(canonical(search_plan[field]) == canonical(expected), f'search {field} differs from frozen input')
+    price_input = online_experiment['prices']
     if protocol is not None:
         check(price_input == protocol['synthetic_prices'], 'replication price input differs from preregistration')
-        for name in ('training-experiment.json', 'online-experiment.json'):
-            experiment_input = load(ROOT/'inputs'/name)
+        for name, experiment_input in (('training-experiment.json', training_experiment), ('online-experiment.json', online_experiment)):
             check(experiment_input['terminal_limits'] == protocol['terminal_limits'], f'{name} terminal limits differ from preregistration')
             check(experiment_input['history_limits'] == {
                 'maximum_translation_m':protocol['history_maximum_translation_limit_m'],
@@ -276,6 +327,14 @@ def audit_packet(SOURCE, ROOT, protocol_path=None):
     required_roles = {'analysis_outcome', 'analysis_started', 'checkpoint', 'model', 'result', 'verification', 'verification_outcome', 'verification_started'}
     for name, directory in categories.items():
         comparison = load(directory/'comparison.json')
+        expected_experiment = training_experiment if name == 'training_labels' else online_experiment
+        expected_limits = {
+            'history_limits': expected_experiment['history_limits'],
+            'material_limits': expected_experiment['material_history_limits'],
+            'terminal_limits': None if name == 'training_labels' else expected_experiment['terminal_limits'],
+        }
+        for field, expected in expected_limits.items():
+            check(canonical(comparison[field]) == canonical(expected), f'{name} {field} differs from frozen input')
         check(check_hash_object(comparison,'report_hash'), f'{name} comparison internal hash mismatch')
         comparison_hashes[name] = comparison['report_hash']
         check(comparison['status'] == 'complete', f'{name} comparison incomplete')
@@ -378,6 +437,8 @@ def audit_packet(SOURCE, ROOT, protocol_path=None):
                     and verification['unavailable_execution_work'] is False,
                     f'{name}/{cid} fresh replay unavailable or bound to another result',
                 )
+                for violation in verified_row_claim_violations(row, result, comparison, request):
+                    check(False, f'{name}/{cid} {violation}')
         rows[name] = category_rows
         if name != 'training_labels':
             eligible = [row for row in comparison['rows'] if row['selection_eligible']]
@@ -435,7 +496,7 @@ def audit_packet(SOURCE, ROOT, protocol_path=None):
             check(child_wall <= outcome['wall_ns'], f'{phase} child report wall exceeds launcher wall')
             check((ROOT/f'{phase}-stdout.txt').is_file() and (ROOT/f'{phase}-stderr.txt').is_file(), f'{phase} launcher streams unavailable')
     check(fit_outcome['wall_ns'] <= train['wall_ns'], 'training fit wall exceeds training report wall')
-    experiment = load(ROOT/'inputs/online-experiment.json')
+    experiment = online_experiment
     price = experiment['prices']
     limits = {**experiment['history_limits'], **experiment['material_history_limits']}
     limits.update({f'terminal_{key}': value for key, value in experiment['terminal_limits'].items()})
