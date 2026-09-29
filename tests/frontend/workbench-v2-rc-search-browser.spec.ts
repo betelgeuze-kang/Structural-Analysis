@@ -1,17 +1,31 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { costOptimality, RC_COST_AUDIT_V2 } from '../../src/workbench-v2/model/rcControlSearchCost'
 const root = 'tests/frontend/fixtures/rc-control-search/'
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
-async function setup(page: Page, directory = root, tamper = false) {
+async function setup(page: Page, directory = root, tamper = false, resultOverride?: Buffer) {
   await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/rc-search/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-search', bearerToken: 'synthetic-test-only' }) } })
   await page.route('**/rc-search/**', async route => {
     expect(await route.request().headerValue('authorization')).toBe('Bearer synthetic-test-only')
     expect(await route.request().headerValue('x-structural-tenant')).toBe('synthetic-search')
     const path = new URL(route.request().url()).pathname.replace('/rc-search/', '')
-    const bytes = readFileSync(directory + path)
+    const bytes = path === 'result.json' && resultOverride ? resultOverride : readFileSync(directory + path)
     await route.fulfill({ contentType: 'application/json', body: tamper && path === 'pool/middle.json' ? Buffer.concat([bytes, Buffer.from(' ')]) : bytes })
   })
+}
+function controlledV2NoOracleResult(directory: string): Buffer {
+  // This changes only the cost-audit envelope of an existing no-oracle fixture.
+  // It is a display control, not a newly executed solver observation.
+  const report = JSON.parse(readFileSync(directory + 'result.json', 'utf8'))
+  const plan = JSON.parse(readFileSync(directory + 'plan.json', 'utf8'))
+  const comparisons = Object.fromEntries(['price_order', 'learned_order'].map(name =>
+    [name, JSON.parse(readFileSync(`${directory}${name}/comparison.json`, 'utf8'))]))
+  report.candidate_cost_optimality_audit = costOptimality(plan, comparisons, RC_COST_AUDIT_V2)
+  delete report.report_hash
+  report.report_hash = `sha256:${createHash('sha256').update(JSON.stringify(report)).digest('hex')}`
+  return Buffer.from(JSON.stringify(report))
 }
 async function ready(page: Page, status = 'verified') {
   const panel = page.locator('[data-rc-search]')
@@ -66,6 +80,15 @@ for (const width of [1440, 390]) {
       await expect(panel.locator('[data-rc-search-candidate="costly"]')).toContainText('Not run')
       await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('exhaustive check was not run')
       await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Unavailable')
+    })
+    test('keeps a v2 cheaper false-negative count unknown without the exhaustive check', async ({ page }) => {
+      const directory = 'tests/frontend/fixtures/rc-control-search-cost-no-oracle/'
+      await setup(page, directory, false, controlledV2NoOracleResult(directory))
+      await page.goto(`${baseUrl}/#/workbench-v2`)
+      const panel = await ready(page)
+      await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('exhaustive check was not run')
+      await expect(panel.locator('[data-rc-search-cheaper-false-negative="learned_order"]')).toHaveText('Unavailable')
+      await expect(panel.locator('[data-rc-search-cheaper-false-negative="price_order"]')).toHaveText('Not applicable')
     })
   })
 }

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { loadRcControlSearch, type RcSearchSession, type PrefixRole } from '../model/rcControlSearchProvider'
 import { RC_SEARCH_ARMS, searchWork } from '../model/rcControlSearchSchema'
+import { RC_COST_AUDIT_V2 } from '../model/rcControlSearchCost'
 import type { JobAuthorizationProvider } from '../model/jobTransport'
 import type { RcObject } from '../model/rcJobSchema'
 import { RcControlDesignReviewPanel } from './RcControlDesignPanel'
 
 const label = (name: string) => ({ price_order: 'Price order', learned_order: 'Learned order', exhaustive_oracle: 'Later exhaustive check' })[name] ?? name
 const shown = (value: unknown) => typeof value === 'number' ? String(value) : 'Unavailable'
+const shownCandidates = (count: number | null, ids: string[] | null) => ids === null ? 'Unavailable' : `${count}${count ? `: ${ids.join(', ')}` : ''}`
 export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInvalid }: { url: string; authorize?: JobAuthorizationProvider; expectedReportHash?: string; onInvalid?: () => void }): ReactElement {
   const [loaded, setLoaded] = useState<{ url: string; session: RcSearchSession } | null>(null)
   const [status, setStatus] = useState('loading')
@@ -110,10 +112,10 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       : cost.status === 'oracle_not_run' ? 'Pool minimum unavailable: the exhaustive check was not run.'
       : cost.status === 'oracle_incomplete' ? `Pool minimum unavailable: ${cost.oracle_unverifiable_candidate_ids.join(', ')} could not be verified.`
       : 'Pool minimum unavailable: no candidate passed every requested limit.'}</p>
-    <div className="wb2-table-scroll" role="region" aria-label="RC candidate pool cost" tabIndex={0}><table className="wb2-table" style={{ minWidth: 700, overflowWrap: 'normal' }}><thead><tr><th>Strategy</th><th>Estimate above pool minimum ({cost.currency})</th><th>Matches pool minimum</th><th>Cheaper feasible alternatives not requested</th></tr></thead><tbody>
-      {arms.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{a.missed_cheaper_feasible_candidate_ids === null ? 'Unavailable' : `${a.missed_cheaper_feasible_count}${a.missed_cheaper_feasible_count ? `: ${a.missed_cheaper_feasible_candidate_ids.join(', ')}` : ''}`}</td></tr> })}
+    <div className="wb2-table-scroll" role="region" aria-label="RC candidate pool cost" tabIndex={0}><table className="wb2-table" style={{ minWidth: 900, overflowWrap: 'normal' }}><thead><tr><th>Strategy</th><th>Estimate above pool minimum ({cost.currency})</th><th>Matches pool minimum</th><th>Cheaper feasible alternatives not requested</th><th>Cheaper missed and predicted failure</th></tr></thead><tbody>
+      {arms.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{shownCandidates(a.missed_cheaper_feasible_count, a.missed_cheaper_feasible_candidate_ids)}</td><td data-rc-search-cheaper-false-negative={name}>{cost.schema_version !== RC_COST_AUDIT_V2 ? 'Not reported' : name === 'price_order' ? 'Not applicable' : shownCandidates(a.missed_cheaper_false_negative_count, a.missed_cheaper_false_negative_candidate_ids)}</td></tr> })}
     </tbody></table></div>
-    <p>Recomputed from verified design records using one price table and material scope. The baseline is included. A minimum requires every candidate to be verified; unknown values do not mean zero. This finite-pool comparison does not establish a global design optimum or quoted monetary savings.</p>
+    <p>Recomputed from verified design records using one price table and material scope. The baseline is included. The final column intersects missed cheaper feasible candidates with recorded predicted failures; it is unavailable without a complete exhaustive check. A minimum requires every candidate to be verified; unknown values do not mean zero. This finite-pool comparison does not establish a global design optimum or quoted monetary savings.</p>
     </>}
     <div>{(['result', 'plan', 'policy', 'historical-training', 'price-table'] as const).filter(role => role === 'price-table' ? layout : training || role === 'result' || role === 'plan').map(role => <button className="wb2-btn" type="button" key={role} onClick={() => { void download(role) }}>Download search {role}</button>)}</div>
     <h3>{label(arm)}: verified design records</h3>
