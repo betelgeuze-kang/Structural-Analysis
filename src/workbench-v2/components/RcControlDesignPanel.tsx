@@ -12,6 +12,34 @@ const metrics = [
   ['maximum_concrete_compressive_damage', 'Concrete compressive damage'], ['terminal_maximum_translation_m', 'Terminal translation (m)'],
   ['terminal_maximum_absolute_fiber_strain', 'Terminal fiber strain'],
 ]
+const sectionFieldLabels: Record<string, string> = {
+  width_m: 'Width (m)', depth_m: 'Depth (m)', cover_m: 'Cover (m)',
+  top_bar_count: 'Top bar count', bottom_bar_count: 'Bottom bar count',
+  bar_area_m2: 'Shared bar area (m²)', top_bar_area_m2: 'Top bar area (m²)',
+  bottom_bar_area_m2: 'Bottom bar area (m²)', top_cover_m: 'Top cover (m)',
+  bottom_cover_m: 'Bottom cover (m)',
+}
+const priorSectionValue = (value: unknown) => value === null || value === undefined ? 'not separately declared' : shown(value)
+
+function RcDesignMemberQuantities({ row, baseline, currency }: { row: RcObject; baseline: RcObject; currency?: string }): ReactElement | null {
+  if (!row.quantities) return null
+  return <div className="wb2-table-scroll" role="region" aria-label={`${row.candidate_id} RC member quantities and declared prices`} data-rc-design-members={row.candidate_id} tabIndex={0}>
+    <table className="wb2-table"><thead><tr><th>Member</th><th>Length (m)</th><th>Gross concrete (m³) / Δ</th><th>Longitudinal rebar (kg) / Δ</th><th>Concrete estimate</th><th>Rebar estimate</th><th>Estimate reduction</th></tr></thead>
+      <tbody>{row.quantities.members.map((member: RcObject) => {
+        const before = baseline.quantities?.members.find((m: RcObject) => m.member_id === member.member_id)
+        const cost = row.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
+        const priorCost = baseline.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
+        return <tr key={member.member_id} data-rc-design-member={member.member_id}>
+          <td>{member.member_id} ({member.section_id})</td><td>{shown(member.length_m)}</td>
+          <td>{shown(member.gross_concrete_volume_m3)} / Δ {shown(before ? member.gross_concrete_volume_m3 - before.gross_concrete_volume_m3 : null)}</td>
+          <td>{shown(member.longitudinal_rebar_mass_kg)} / Δ {shown(before ? member.longitudinal_rebar_mass_kg - before.longitudinal_rebar_mass_kg : null)}</td>
+          <td>{shown(cost?.concrete)} {currency}</td><td>{shown(cost?.longitudinal_rebar)} {currency}</td>
+          <td>{shown(cost && priorCost ? priorCost.concrete + priorCost.longitudinal_rebar - cost.concrete - cost.longitudinal_rebar : null)} {currency}</td>
+        </tr>
+      })}</tbody></table>
+  </div>
+}
+
 export function RcControlDesignPanel({ url, authorize }: { url: string; authorize?: JobAuthorizationProvider }): ReactElement {
   const [session, setSession] = useState<RcDesignSession | null>(null)
   const [state, setState] = useState('loading')
@@ -119,6 +147,20 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
     </div>
     {report.rows.map((row: RcObject) => <details key={row.candidate_id} data-rc-design-details={row.candidate_id} open={selected === row.candidate_id}>
       <summary>{row.candidate_id} — screens, execution cost and original artifacts</summary>
+      <div data-rc-design-physical-changes={row.candidate_id}>
+        <h4>Declared physical section changes</h4>
+        {row.candidate_id === 'baseline' ? <p>Baseline model; no section changes.</p> : Array.isArray(report.candidates) ? report.candidates.find((candidate: RcObject) => candidate.candidate_id === row.candidate_id)?.changes.map((change: RcObject) => {
+          const before = models.baseline?.sections.find((section: RcObject) => section.id === change.section_id)
+          return <p key={change.section_id} data-rc-design-section-change={change.section_id}>{change.section_id}: {Object.entries(change)
+            .filter(([field, value]) => field !== 'section_id' && value !== null)
+            .map(([field, value]) => `${sectionFieldLabels[field] ?? field} ${priorSectionValue(before?.[field])} → ${shown(value)}`)
+            .join('; ')}</p>
+        }) : <p>Section-change declaration unavailable for this layout-search arm; inspect the original model.</p>}
+        <p>Model <code>{row.quantities?.model_checksum ?? 'UNAVAILABLE'}</code> · price table <code>{report.price_table_hash ?? 'UNAVAILABLE'}</code> · analysis {row.full_reference_verification_pass ? 'verified' : 'unverified'}.</p>
+        {row.quantities ? <RcDesignMemberQuantities row={row} baseline={baseline} currency={report.prices?.currency} />
+          : <p>Member quantities and scoped estimate are unavailable for this candidate.</p>}
+        {row.status === 'skipped_cost_dominated' ? <p>Geometry quantities and declared estimates were prepared before the cost skip. Full analysis and physical feasibility were not evaluated.</p> : null}
+      </div>
       {Object.entries(row.screens ?? {}).filter(([, screen]) => (screen as RcObject).status === 'fail').map(([key, value]) => {
         const screen = value as RcObject
         return <p key={key} data-rc-design-limit-failure={key}>{key === 'load_factor_at_target' ? 'Required minimum not reached' : 'Requested limit exceeded'}: <strong>{shownMetrics.find(([name]) => name === key)?.[1] ?? key}</strong>. Value {shown(screen.value)}; limit {shown(screen.limit)}.</p>
@@ -148,21 +190,6 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
       <h3>Selected candidate: {selected}</h3>
       <p>Model <code>{current.quantities.model_checksum}</code> · result <code>{current.artifacts.result.sha256}</code> · price table <code>{report.price_table_hash}</code></p>
       <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${longitudinalSteelDescription(s)}`).join('; ')}</p>
-      <div className="wb2-table-scroll" role="region" aria-label={`${current.candidate_id} RC member quantities and declared prices`} data-rc-design-members={current.candidate_id} tabIndex={0}>
-        <table className="wb2-table"><thead><tr><th>Member</th><th>Length (m)</th><th>Gross concrete (m³) / Δ</th><th>Longitudinal rebar (kg) / Δ</th><th>Concrete estimate</th><th>Rebar estimate</th><th>Estimate reduction</th></tr></thead>
-          <tbody>{current.quantities.members.map((member: RcObject) => {
-            const before = baseline.quantities?.members.find((m: RcObject) => m.member_id === member.member_id)
-            const cost = current.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
-            const priorCost = baseline.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
-            return <tr key={member.member_id} data-rc-design-member={member.member_id}>
-              <td>{member.member_id} ({member.section_id})</td><td>{shown(member.length_m)}</td>
-              <td>{shown(member.gross_concrete_volume_m3)} / Δ {shown(before ? member.gross_concrete_volume_m3 - before.gross_concrete_volume_m3 : null)}</td>
-              <td>{shown(member.longitudinal_rebar_mass_kg)} / Δ {shown(before ? member.longitudinal_rebar_mass_kg - before.longitudinal_rebar_mass_kg : null)}</td>
-              <td>{shown(cost?.concrete)} {report.prices?.currency}</td><td>{shown(cost?.longitudinal_rebar)} {report.prices?.currency}</td>
-              <td>{shown(cost && priorCost ? priorCost.concrete + priorCost.longitudinal_rebar - cost.concrete - cost.longitudinal_rebar : null)} {report.prices?.currency}</td>
-            </tr>
-          })}</tbody></table>
-      </div>
       <div data-rc-design-discretization={current.candidate_id}>
         <h4>Selected model discretization</h4>
         <dl>
