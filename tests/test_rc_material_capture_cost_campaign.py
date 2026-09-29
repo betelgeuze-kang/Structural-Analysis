@@ -155,7 +155,16 @@ def test_raised_slot_keeps_unknown_proposal_count(tmp_path, campaign, monkeypatc
         folder,
         "outcome.json",
         campaign._bytes(
-            {**receipt, "status": "raised", "unknown_work_until_outcome": True}
+            {
+                **receipt,
+                "status": "raised",
+                "unknown_work_until_outcome": True,
+                "wall_ns": 100,
+                "cpu_ns": 100,
+                "cost_ledger": {
+                    "input_loading_and_preflight": {"wall_ns": 50, "cpu_ns": 50}
+                },
+            }
         ),
     )
     campaign._save(folder, "inventory.json", campaign._bytes(campaign.pilot._inventory(folder)))
@@ -164,6 +173,42 @@ def test_raised_slot_keeps_unknown_proposal_count(tmp_path, campaign, monkeypatc
     assert result["slots"][0]["actual_proposals"] is None
     assert result["modes"][0]["cases"][0]["actual_proposals"] is None
     assert result["modes"][0]["equal_case_mean_ratio"] is None
+
+
+def test_audit_rejects_loading_larger_than_slot(tmp_path, campaign, monkeypatch):
+    plan = fixture_plan(campaign)
+    campaign._save(tmp_path, "plan.json", campaign._bytes(plan))
+    monkeypatch.setattr(campaign.pilot, "_clean_head", lambda: plan["source_revision"])
+    monkeypatch.setattr(campaign, "_inputs", lambda _: None)
+    folder = tmp_path / "slot-0000"
+    folder.mkdir()
+    receipt = {"plan_hash": plan["plan_hash"], "slot": plan["schedule"][0], "pid": 10}
+    campaign._save(
+        folder,
+        "started.json",
+        campaign._bytes(
+            {**receipt, "previous_outcome_sha256": None, "previous_inventory_sha256": None}
+        ),
+    )
+    campaign._save(
+        folder,
+        "outcome.json",
+        campaign._bytes(
+            {
+                **receipt,
+                "status": "raised",
+                "unknown_work_until_outcome": True,
+                "wall_ns": 100,
+                "cpu_ns": 100,
+                "cost_ledger": {
+                    "input_loading_and_preflight": {"wall_ns": 101, "cpu_ns": 50}
+                },
+            }
+        ),
+    )
+    campaign._save(folder, "inventory.json", campaign._bytes(campaign.pilot._inventory(folder)))
+    with pytest.raises(ValueError, match="input loading timing"):
+        campaign.audit(tmp_path, write=False)
 
 
 def test_capture_cost_scopes_are_kept_separate(campaign):
@@ -249,6 +294,10 @@ def test_capture_cost_rejects_shifted_roster_and_nested_scope(campaign):
     )
     entries[2]["committed_material_capture"]["wall_ns"] = 1001
     with pytest.raises(ValueError, match="nested proposal timing"):
+        campaign._costs(report)
+    for index in range(2, 11):
+        entries[index]["committed_material_capture"]["wall_ns"] = 200
+    with pytest.raises(ValueError, match="aggregate capture timing"):
         campaign._costs(report)
 
 

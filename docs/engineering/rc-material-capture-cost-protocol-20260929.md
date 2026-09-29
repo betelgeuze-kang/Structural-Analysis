@@ -48,9 +48,10 @@ available, input loading/preflight, each full benchmark, each path, committed
 material capture, proposal callback, guard callback, numerical attempts,
 recovery and read-only audit. Report actual proposal and fallback counts and
 known/unknown solver work. These scopes overlap and must not be summed.
-Validate that capture occurs exactly at allowed indices 2 through 10 and that
-each individual nested timing fits within its enclosing proposal path, each
-path within the benchmark, and the benchmark within its slot. Prior
+Validate that capture occurs exactly at allowed indices 2 through 10. Each
+individual timing and each sequential per-scope aggregate must fit within its
+enclosing proposal path. Each path must fit within the benchmark; the benchmark
+and input loading must fit within the slot. Prior
 label generation, fits and selection are historical costs, not zero costs; this
 campaign does not establish full AI lifecycle break-even.
 

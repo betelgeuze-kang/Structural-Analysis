@@ -340,39 +340,27 @@ def _costs(report):
             raise ValueError("nonnegative observed timing required")
         return sum(values)
 
-    return {
-        "capture_wall_ns": timed_sum(
-            [
-                row["committed_material_capture"]
-                for row in entries
-                if "committed_material_capture" in row
-            ],
-            "wall_ns",
-        ),
-        "capture_cpu_ns": timed_sum(
-            [
-                row["committed_material_capture"]
-                for row in entries
-                if "committed_material_capture" in row
-            ],
-            "cpu_ns",
-        ),
-        "proposal_callback_wall_ns": timed_sum(entries, "proposal_wall_ns"),
-        "guard_callback_wall_ns": timed_sum(
-            [row["proposal_guard"] for row in entries], "wall_ns"
-        ),
-        "solver_attempt_wall_ns": timed_sum(
-            [attempt for row in entries for attempt in row["invocations"]], "wall_ns"
-        ),
-        "preload_solver_attempt_wall_ns": timed_sum(
-            report["arms"]["proposal"]["preload_invocations"], "wall_ns"
-        ),
-        "recovery_wall_ns": timed_sum(
-            [row for row in entries if "recovery_wall_ns" in row], "recovery_wall_ns"
-        ),
-        "proposal_path_wall_ns": report["arms"]["proposal"]["wall_ns"],
-        "secant_path_wall_ns": report["arms"]["secant"]["wall_ns"],
+    groups = {
+        "capture": [row["committed_material_capture"] for row in entries if "committed_material_capture" in row],
+        "proposal_callback": entries,
+        "guard_callback": [row["proposal_guard"] for row in entries],
+        "solver_attempt": [attempt for row in entries for attempt in row["invocations"]],
+        "preload_solver_attempt": report["arms"]["proposal"]["preload_invocations"],
+        "recovery": [row for row in entries if "recovery_wall_ns" in row],
     }
+    costs = {}
+    for unit in ("wall_ns", "cpu_ns"):
+        proposal_path = report["arms"]["proposal"][unit]
+        costs[f"proposal_path_{unit}"] = proposal_path
+        costs[f"secant_path_{unit}"] = report["arms"]["secant"][unit]
+        for group, records in groups.items():
+            key = f"proposal_{unit}" if group == "proposal_callback" else unit
+            if group == "recovery":
+                key = f"recovery_{unit}"
+            total = timed_sum(records, key)
+            contained(total, proposal_path, f"aggregate {group}")
+            costs[f"{group}_{unit}"] = total
+    return costs
 
 
 def _proposal_bytes_match(left: Path, right: Path) -> bool:
@@ -449,6 +437,16 @@ def audit(root: Path, *, write=True):
         ):
             raise ValueError("original capture-cost slot receipt changed")
         pids.add(outcome["pid"])
+        for unit in ("wall_ns", "cpu_ns"):
+            loading = outcome.get("cost_ledger", {}).get(
+                "input_loading_and_preflight", {}
+            ).get(unit)
+            if (
+                type(loading) is not int
+                or type(outcome.get(unit)) is not int
+                or not 0 <= loading <= outcome[unit]
+            ):
+                raise ValueError("input loading timing exceeds enclosing slot")
         ratio = None
         actual = None
         costs = None
