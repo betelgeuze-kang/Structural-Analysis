@@ -1,0 +1,7 @@
+{
+  "schema_version": "experimental-rc-control-force-factor-learning-plan.v1",
+  "fit_method": "svd-ridge-unpenalized-intercept.v2",
+  "ridge": 1.0,
+  "ood_margin": 0.0,
+  "ranking_strategy": "feasibility_then_price.v1"
+}

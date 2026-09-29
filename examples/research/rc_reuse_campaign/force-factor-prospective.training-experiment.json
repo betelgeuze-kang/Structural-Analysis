@@ -1,0 +1,79 @@
+{
+  "schema_version": "rc-fiber-design-experiment.v3",
+  "candidates": [
+    {
+      "candidate_id": "w32",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.32
+        }
+      ]
+    },
+    {
+      "candidate_id": "w36",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.36
+        }
+      ]
+    },
+    {
+      "candidate_id": "w40",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.4
+        }
+      ]
+    },
+    {
+      "candidate_id": "w48",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.48
+        }
+      ]
+    },
+    {
+      "candidate_id": "w52",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.52
+        }
+      ]
+    },
+    {
+      "candidate_id": "w56",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.56
+        }
+      ]
+    }
+  ],
+  "history_limits": {
+    "maximum_absolute_fiber_strain": 0.0001585,
+    "maximum_translation_m": 1.0
+  },
+  "material_history_limits": {
+    "maximum_concrete_compressive_damage": 1.0,
+    "maximum_concrete_tensile_damage": 1.0,
+    "maximum_steel_accumulated_plastic_strain": 1.0
+  },
+  "terminal_limits": {
+    "maximum_absolute_fiber_strain": 1.0,
+    "maximum_translation_m": 1.0
+  },
+  "prices": {
+    "as_of": "2026-09-29",
+    "concrete_per_m3": 100,
+    "currency": "KRW",
+    "rebar_per_kg": 1,
+    "source": "Invented arithmetic for synthetic study; not a quote"
+  }
+}
