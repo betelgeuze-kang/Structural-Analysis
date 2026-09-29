@@ -16,12 +16,17 @@ from typing import Any
 
 from structural_analysis.benchmark import fiber_frame_candidate_process as candidate
 from structural_analysis.benchmark import fiber_frame_runtime_process as codec
+from structural_analysis.benchmark.fiber_frame_candidate_cost import (
+    audit_fiber_frame_candidate_process_suite_cost,
+)
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
 
 SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v1"
 MATERIAL_SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v2"
 STOP_SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v3"
+COST_SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v4"
+COST_FILE = "cost/candidate-pool-audit.json"
 _FILE_LIMIT = 64 * 1024 * 1024
 _TOTAL_LIMIT = 256 * 1024 * 1024
 _FILE_COUNT_LIMIT = 32768
@@ -35,6 +40,13 @@ _MANIFEST_FIELDS = {
     "suite_identity_hash",
     "artifacts",
     "comparisons",
+}
+_COST_MANIFEST_FIELDS = {
+    "source_suite_schema_version",
+    "cost_audit_file",
+    "cost_audit_byte_length",
+    "cost_audit_sha256",
+    "cost_audit_hash",
 }
 _ARTIFACT_FIELDS = {"source_path", "file", "byte_length", "sha256"}
 _COMPARISON_FIELDS = {
@@ -721,6 +733,17 @@ def _comparisons(
     return rows, files
 
 
+def _cost_sidecar(
+    suite: dict[str, Any], suite_raw: bytes
+) -> tuple[dict[str, Any], bytes]:
+    payload = audit_fiber_frame_candidate_process_suite_cost(
+        suite, source_suite_sha256=codec._digest(suite_raw)
+    )
+    raw = codec._bytes(payload)
+    _require(len(raw) <= _FILE_LIMIT, "cost audit size limit exceeded")
+    return payload, raw
+
+
 def _write_review_bundle(suite_path: Path, output_directory: Path) -> Path:
     """Validate before publishing; write unchanged artifacts then manifest last.
 
@@ -743,12 +766,11 @@ def _write_review_bundle(suite_path: Path, output_directory: Path) -> Path:
         inventory.append({"source_path": source, "file": target, **_raw_identity(data)})
         files[target] = data
     suite_raw = artifacts.read(Path(artifacts.path("suite.json")))
+    cost, cost_raw = _cost_sidecar(suite, suite_raw)
+    files[COST_FILE] = cost_raw
     manifest = {
-        "schema_version": STOP_SCHEMA_VERSION
-        if suite["schema_version"] == candidate.STOP_SCHEMA_VERSION
-        else MATERIAL_SCHEMA_VERSION
-        if suite["schema_version"] == candidate.MATERIAL_SCHEMA_VERSION
-        else SCHEMA_VERSION,
+        "schema_version": COST_SCHEMA_VERSION,
+        "source_suite_schema_version": suite["schema_version"],
         "source_revision": suite["declaration"]["source_revision"],
         "suite_file": "suite.json",
         "suite_byte_length": len(suite_raw),
@@ -757,6 +779,10 @@ def _write_review_bundle(suite_path: Path, output_directory: Path) -> Path:
         "suite_identity_hash": suite["suite_identity_hash"],
         "artifacts": inventory,
         "comparisons": comparisons,
+        "cost_audit_file": COST_FILE,
+        "cost_audit_byte_length": len(cost_raw),
+        "cost_audit_sha256": codec._digest(cost_raw),
+        "cost_audit_hash": cost["report_hash"],
     }
     manifest_raw = codec._bytes(manifest)
     _require(len(manifest_raw) <= 4 * 1024 * 1024, "manifest size limit exceeded")
@@ -781,7 +807,12 @@ def _validate_review_bundle(
     root = _local_path(bundle_directory)
     manifest_raw = _read(root / "manifest.json", 4 * 1024 * 1024)
     manifest = _json(manifest_raw)
-    _fields(manifest, _MANIFEST_FIELDS, "review manifest")
+    cost_bundle = manifest.get("schema_version") == COST_SCHEMA_VERSION
+    _fields(
+        manifest,
+        _MANIFEST_FIELDS | (_COST_MANIFEST_FIELDS if cost_bundle else set()),
+        "review manifest",
+    )
     _equal(manifest["suite_file"], "suite.json", "suite filename")
     suite_raw = _read(root / "suite.json")
     _equal(
@@ -793,15 +824,22 @@ def _validate_review_bundle(
         "suite bytes",
     )
     suite = _json(suite_raw)
-    _equal(
-        manifest["schema_version"],
-        STOP_SCHEMA_VERSION
-        if suite["schema_version"] == candidate.STOP_SCHEMA_VERSION
-        else MATERIAL_SCHEMA_VERSION
-        if suite["schema_version"] == candidate.MATERIAL_SCHEMA_VERSION
-        else SCHEMA_VERSION,
-        "review schema",
-    )
+    if cost_bundle:
+        _equal(
+            manifest["source_suite_schema_version"],
+            suite["schema_version"],
+            "source suite schema",
+        )
+    else:
+        _equal(
+            manifest["schema_version"],
+            STOP_SCHEMA_VERSION
+            if suite["schema_version"] == candidate.STOP_SCHEMA_VERSION
+            else MATERIAL_SCHEMA_VERSION
+            if suite["schema_version"] == candidate.MATERIAL_SCHEMA_VERSION
+            else SCHEMA_VERSION,
+            "review schema",
+        )
     logical = _logical_root(suite)
     values = {str(logical / "suite.json"): suite_raw}
     seen_files = {"suite.json", "manifest.json"}
@@ -862,6 +900,31 @@ def _validate_review_bundle(
         total += len(data)
         _require(total <= _TOTAL_LIMIT, "bundle size limit exceeded")
         _equal(data, expected, "comparison bytes")
+    if cost_bundle:
+        _equal(manifest["cost_audit_file"], COST_FILE, "cost audit filename")
+        _require(
+            COST_FILE not in seen_files and COST_FILE not in files,
+            "cost audit path alias",
+        )
+        expected_cost, expected_raw = _cost_sidecar(suite, suite_raw)
+        raw = _read(root / COST_FILE)
+        total += len(raw)
+        _require(total <= _TOTAL_LIMIT, "bundle size limit exceeded")
+        _equal(
+            {
+                "byte_length": manifest["cost_audit_byte_length"],
+                "sha256": manifest["cost_audit_sha256"],
+            },
+            _raw_identity(raw),
+            "cost audit bytes",
+        )
+        actual_cost = _json(raw)
+        _fields(actual_cost, set(expected_cost), "cost audit sidecar")
+        _hashed(actual_cost, "report_hash")
+        _equal(
+            manifest["cost_audit_hash"], actual_cost["report_hash"], "cost audit hash"
+        )
+        _equal(raw, expected_raw, "cost audit derivation")
     # Bytes are returned only after every mapped source and every comparison is checked.
     return {"manifest": manifest, "suite": suite}
 

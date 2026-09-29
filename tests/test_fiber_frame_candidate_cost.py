@@ -7,6 +7,7 @@ import pytest
 
 from structural_analysis.benchmark.fiber_frame_candidate_cost import (
     audit_fiber_frame_candidate_pool_cost,
+    audit_fiber_frame_candidate_process_suite_cost,
 )
 from structural_analysis.benchmark.fiber_frame_design import (
     QUANTITY_SCOPE,
@@ -94,6 +95,97 @@ def _case():
             },
         }
     )
+
+
+def _process_suite(*, oracle_configured=True, oracle_valid=True, online_valid=True):
+    comparison = _case()
+    binding = {"price_basis": comparison["price_basis"]}
+    pool = comparison["candidate_pool"]
+    runs = []
+    for strategy, payload, valid in (
+        ("deterministic", {"arm": comparison["arms"][0]}, True),
+        ("learned", {"arm": comparison["arms"][1]}, online_valid),
+        ("oracle", {"rows": comparison["oracle"]["rows"]}, oracle_valid),
+    ):
+        if strategy == "oracle" and not oracle_configured:
+            continue
+        report = _seal({"candidate_pool": pool, "input_binding": binding, **payload})
+        runs.append(
+            {
+                "case_id": "pool",
+                "phase": "measured",
+                "repetition": 0,
+                "strategy": strategy,
+                "report_contract_pass": valid,
+                "report": report if valid else None,
+            }
+        )
+    declaration = {
+        "configuration": {
+            "warmups": 0,
+            "repetitions": 1,
+            "oracle_audit": oracle_configured,
+        },
+        "cases": [
+            {
+                "case_id": "pool",
+                "input_binding": binding,
+                "plans": {
+                    name: {"candidate_pool": pool}
+                    for name in ("deterministic", "learned", "oracle")
+                },
+            }
+        ],
+    }
+    return _seal(
+        {
+            "declaration": declaration,
+            "suite_identity_hash": canonical_hash(declaration),
+            "runs": runs,
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    ("oracle_configured", "oracle_valid", "online_valid", "expected"),
+    [
+        (False, False, True, "oracle_not_run"),
+        (True, False, True, "oracle_unavailable"),
+        (True, True, False, "online_report_unavailable"),
+        (True, True, True, "complete"),
+    ],
+)
+def test_process_sidecar_preserves_missing_oracle_and_online_availability(
+    oracle_configured, oracle_valid, online_valid, expected
+):
+    suite = _process_suite(
+        oracle_configured=oracle_configured,
+        oracle_valid=oracle_valid,
+        online_valid=online_valid,
+    )
+    original = deepcopy(suite)
+    sidecar = audit_fiber_frame_candidate_process_suite_cost(
+        suite, source_suite_sha256="sha256:" + "a" * 64
+    )
+    assert suite == original
+    assert sidecar["source_suite_report_hash"] == suite["report_hash"]
+    assert sidecar["report_hash"] == canonical_hash(
+        {key: value for key, value in sidecar.items() if key != "report_hash"}
+    )
+    group = sidecar["groups"][0]
+    assert group["status"] == expected
+    assert (group["worker_report_hashes"]["oracle"] is not None) is (
+        oracle_valid and oracle_configured
+    )
+    if group["audit"] is None:
+        assert expected == "online_report_unavailable"
+    elif expected != "complete":
+        assert group["audit"]["pool_minimum_feasible_estimate"] is None
+        assert all(
+            arm["selected_minus_pool_minimum_estimate"] is None
+            and arm["missed_cheaper_feasible_count"] is None
+            for arm in group["audit"]["arms"].values()
+        )
 
 
 def test_cost_audit_separates_missed_feasibility_from_lost_cost_optimality():

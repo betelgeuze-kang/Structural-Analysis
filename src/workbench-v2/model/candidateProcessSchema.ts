@@ -7,9 +7,11 @@ export type CandidateProcessPhase = 'warmup' | 'measured'
 export interface CandidateArtifact { source_path: string; file: string; byte_length: number; sha256: string }
 export interface CandidateComparisonEntry { case_id: string; phase: CandidateProcessPhase; repetition: number; strategy: 'deterministic' | 'learned'; worker_report_hash: string; manifest_file: string; manifest_byte_length: number; manifest_sha256: string }
 export interface CandidateProcessManifest {
-  schema_version: 'rc-fiber-candidate-process-review-bundle.v1' | 'rc-fiber-candidate-process-review-bundle.v2' | 'rc-fiber-candidate-process-review-bundle.v3'; source_revision: string
+  schema_version: 'rc-fiber-candidate-process-review-bundle.v1' | 'rc-fiber-candidate-process-review-bundle.v2' | 'rc-fiber-candidate-process-review-bundle.v3' | 'rc-fiber-candidate-process-review-bundle.v4'; source_revision: string
   suite_file: 'suite.json'; suite_byte_length: number; suite_sha256: string; suite_report_hash: string; suite_identity_hash: string
   artifacts: CandidateArtifact[]; comparisons: CandidateComparisonEntry[]
+  source_suite_schema_version?: 'rc-fiber-candidate-process-suite.v1' | 'rc-fiber-candidate-process-suite.v2' | 'rc-fiber-candidate-process-suite.v3'
+  cost_audit_file?: 'cost/candidate-pool-audit.json'; cost_audit_byte_length?: number; cost_audit_sha256?: string; cost_audit_hash?: string
 }
 export interface CandidateDistribution { count: number; minimum: number | null; maximum: number | null; median: number | null; population_standard_deviation: number | null }
 export interface CandidatePhaseCounts { declared_worker_slots: number; attempted_worker_slots: number; validated_report_count: number; unknown_request_slots: number; not_launched_slots: number; validated_online_request_subtotal: number; validated_oracle_request_subtotal: number; total_analysis_request_count: number | null; known_solver_execution_subtotal: number; unknown_solver_execution_subtotal: number }
@@ -53,7 +55,10 @@ export interface CandidateProcessSuite extends CandidateObject {
   runs: CandidateProcessRun[]; case_summaries: CandidateCaseSummary[]; cost_accounting: CandidateProcessCostAccounting; resource_accounting: CandidateProcessResourceAccounting; claims: CandidateObject
 }
 export interface CandidateProcessSlot { key: string; caseId: string; phase: CandidateProcessPhase; repetition: number; strategy: CandidateProcessStrategy; run: CandidateProcessRun; comparison: VerifiedDesignComparison | null; comparisonManifestBytes: Uint8Array | null; comparisonReportBytes: Uint8Array | null }
-export interface VerifiedCandidateProcessReview { manifest: CandidateProcessManifest; suite: CandidateProcessSuite; manifestUrl: string; suiteUrl: string; manifestBytes: Uint8Array; suiteBytes: Uint8Array; slots: CandidateProcessSlot[] }
+export interface CandidateProcessCostAudit { schema_version: 'fiber-frame-candidate-process-pool-cost-audit.v1'; status: string; candidate_denominator: number; baseline_included: true; price_table_hash: string; currency: string; quantity_scope: string; oracle_unverifiable_candidate_ids: string[] | null; pool_minimum_feasible_estimate: number | null; pool_minimum_feasible_candidate_ids: string[] | null; arms: Record<'deterministic' | 'learned', CandidateObject>; missed_cheaper_definition: string; unrequested_cheaper_definition: string; global_design_optimality_proved: false; confirmed_currency_savings: false; independent_physical_validation: false }
+export interface CandidateProcessCostGroup { case_id: string; phase: CandidateProcessPhase; repetition: number; worker_report_hashes: Record<CandidateProcessStrategy, string | null>; status: string; audit: CandidateProcessCostAudit | null }
+export interface CandidateProcessCostSidecar { schema_version: 'fiber-frame-candidate-process-cost-sidecar.v1'; source_suite_report_hash: string; source_suite_identity_hash: string; source_suite_sha256: string; groups: CandidateProcessCostGroup[]; report_hash: string }
+export interface VerifiedCandidateProcessReview { manifest: CandidateProcessManifest; suite: CandidateProcessSuite; manifestUrl: string; suiteUrl: string; manifestBytes: Uint8Array; suiteBytes: Uint8Array; slots: CandidateProcessSlot[]; costAudit: CandidateProcessCostSidecar | null; costAuditBytes: Uint8Array | null }
 export interface CandidateLoadedArtifact { bytes: Uint8Array; value: unknown }
 export interface CandidateLoadedComparison { bundle: VerifiedDesignComparison; manifestBytes: Uint8Array; reportBytes: Uint8Array }
 
@@ -98,12 +103,20 @@ export function candidateProcessSafeFile(value: unknown): string {
 function byteIdentity(value: unknown): void { const row = object(value); hash(row.sha256); natural(row.byte_length) }
 
 export function validateCandidateProcessManifest(value: unknown): CandidateProcessManifest {
-  const m = exact(value, ['schema_version', 'source_revision', 'suite_file', 'suite_byte_length', 'suite_sha256', 'suite_report_hash', 'suite_identity_hash', 'artifacts', 'comparisons'])
-  ensure(['rc-fiber-candidate-process-review-bundle.v1', 'rc-fiber-candidate-process-review-bundle.v2', 'rc-fiber-candidate-process-review-bundle.v3'].includes(string(m.schema_version)), 'review_schema'); equal(m.suite_file, 'suite.json')
+  const version = object(value).schema_version
+  const v4 = version === 'rc-fiber-candidate-process-review-bundle.v4'
+  const m = exact(value, ['schema_version', 'source_revision', 'suite_file', 'suite_byte_length', 'suite_sha256', 'suite_report_hash', 'suite_identity_hash', 'artifacts', 'comparisons', ...(v4 ? ['source_suite_schema_version', 'cost_audit_file', 'cost_audit_byte_length', 'cost_audit_sha256', 'cost_audit_hash'] : [])])
+  ensure(['rc-fiber-candidate-process-review-bundle.v1', 'rc-fiber-candidate-process-review-bundle.v2', 'rc-fiber-candidate-process-review-bundle.v3', 'rc-fiber-candidate-process-review-bundle.v4'].includes(string(m.schema_version)), 'review_schema'); equal(m.suite_file, 'suite.json')
   ensure(/^(?:[0-9a-f]{40}|sha256:[0-9a-f]{64})$/.test(string(m.source_revision)), 'source_revision')
   ensure(natural(m.suite_byte_length) > 0 && natural(m.suite_byte_length) <= 64 * 1024 * 1024, 'suite_size')
   for (const key of ['suite_sha256', 'suite_report_hash', 'suite_identity_hash']) hash(m[key])
   const sources = new Set<string>(); const files = new Set(['suite.json', 'manifest.json']); const keys = new Set<string>()
+  if (v4) {
+    ensure(['rc-fiber-candidate-process-suite.v1', 'rc-fiber-candidate-process-suite.v2', 'rc-fiber-candidate-process-suite.v3'].includes(string(m.source_suite_schema_version)), 'source_suite_schema')
+    equal(m.cost_audit_file, 'cost/candidate-pool-audit.json'); files.add(candidateProcessSafeFile(m.cost_audit_file))
+    ensure(natural(m.cost_audit_byte_length) > 0 && natural(m.cost_audit_byte_length) <= 64 * 1024 * 1024, 'cost_audit_size')
+    hash(m.cost_audit_sha256); hash(m.cost_audit_hash)
+  }
   for (const item of array(m.artifacts)) {
     const row = exact(item, ['source_path', 'file', 'byte_length', 'sha256']); const source = string(row.source_path); const file = candidateProcessSafeFile(row.file)
     ensure(!sources.has(source) && !files.has(file), 'duplicate_artifact'); sources.add(source); files.add(file); byteIdentity(row); ensure(natural(row.byte_length) <= 64 * 1024 * 1024, 'artifact_size')
@@ -423,7 +436,7 @@ function validateWorker(run: CandidateObject, declared: CandidateObject, frozenR
         equal(row.solver_executed, executionFailed ? null : actualSolver)
         if (row.full_reference_verification_pass) { equal(actual.status, 'ready'); equal(actualSolver, true) }
       } else equal(row.full_reference_verification_pass, false)
-      if (stopping && row.analysis_requested) {
+      if ((stopping || strategy === 'oracle') && row.analysis_requested) {
         const identity = { ...input, rebar_density_kg_per_m3: 7850 }
         const baseline = rows[0]; const candidate = row.candidate_id === 'baseline' ? undefined : array(input.candidates).map(object).find(c => c.candidate_id === row.candidate_id)
         equal(row.model_checksum, candidate?.model_checksum ?? input.baseline_model_checksum)
@@ -622,7 +635,9 @@ export function validateCandidateProcessReview(value: unknown, manifest: Candida
   const material = cases.some(row => object(row.input_binding).material_history_limits !== undefined)
   const stopping = cases.some(row => stopMode(object(row.input_binding)))
   equal(suite.schema_version, stopping ? 'rc-fiber-candidate-process-suite.v3' : material ? 'rc-fiber-candidate-process-suite.v2' : 'rc-fiber-candidate-process-suite.v1')
-  equal(manifest.schema_version, stopping ? 'rc-fiber-candidate-process-review-bundle.v3' : material ? 'rc-fiber-candidate-process-review-bundle.v2' : 'rc-fiber-candidate-process-review-bundle.v1')
+  const sourceSuiteVersion = stopping ? 'rc-fiber-candidate-process-suite.v3' : material ? 'rc-fiber-candidate-process-suite.v2' : 'rc-fiber-candidate-process-suite.v1'
+  if (manifest.schema_version === 'rc-fiber-candidate-process-review-bundle.v4') equal(manifest.source_suite_schema_version, sourceSuiteVersion)
+  else equal(manifest.schema_version, stopping ? 'rc-fiber-candidate-process-review-bundle.v3' : material ? 'rc-fiber-candidate-process-review-bundle.v2' : 'rc-fiber-candidate-process-review-bundle.v1')
   const inputs = array(declaration.inputs).map(object); inputs.forEach(row => sourceIdentity(row, manifest)); equal(inputs.length, cases.length * 2 + 2)
   const originalRequest = exact(sourceArtifact(inputs[0].path, artifacts).value, ['schema_version', 'cases', 'repetitions', 'warmups', 'oracle_audit'])
   equal(originalRequest.schema_version, stopping ? 'rc-fiber-candidate-process-suite-request.v3' : material ? 'rc-fiber-candidate-process-suite-request.v2' : 'rc-fiber-candidate-process-suite-request.v1')

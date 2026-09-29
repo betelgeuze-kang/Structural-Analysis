@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
 import type { CandidateProcessManifest, CandidateProcessSuite } from '../../src/workbench-v2/model/candidateProcessSchema'
 
-export const candidateBytes = (value: unknown): Uint8Array => new TextEncoder().encode(JSON.stringify(value))
+// Synthetic transport reseals retain the producer's float spelling for price
+// fields; their declared Python price identity is never regenerated in JS.
+export const candidateBytes = (value: unknown): Uint8Array => new TextEncoder().encode(JSON.stringify(value)
+  .replace(/("(?:concrete_per_m3|rebar_per_kg)":)(-?(?:0|[1-9]\d*))(?=[,}])/g, '$1$2.0'))
 export const candidateDigest = (value: Uint8Array): string => `sha256:${createHash('sha256').update(value).digest('hex')}`
 export interface CandidateObservedFixture { files: Map<string, Uint8Array>; manifest: CandidateProcessManifest; suite: CandidateProcessSuite }
 let archive: { files: { path: string; utf8: string; sha256: string; byte_length: number }[]; suite_file: string; expected_comparisons: { case_id: string; phase: 'measured'; repetition: number; strategy: 'deterministic' | 'learned'; directory: string }[] } | undefined

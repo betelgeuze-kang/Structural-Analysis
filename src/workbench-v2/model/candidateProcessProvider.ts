@@ -1,13 +1,62 @@
-import { sha256Bytes } from './checksum'
+import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
 import { parseNativeJsonStrict } from './nativeFrameProvider'
+import { fields, rawValues } from './rcJobSchema'
 import { validateDesignComparisonManifest, validateDesignComparisonReport } from './designComparisonSchema'
 import { candidateProcessSlotKey, validateCandidateProcessManifest, validateCandidateProcessReview, type CandidateLoadedArtifact, type CandidateLoadedComparison, type VerifiedCandidateProcessReview } from './candidateProcessSchema'
+import { validateCandidateProcessCostSidecar } from './candidateProcessCostSchema'
 
 export type CandidateProcessStatus = 'unconfigured' | 'loading' | 'verified' | 'integrity_unavailable' | 'missing' | 'invalid' | 'error'
 export interface CandidateProcessLoadResult { status: CandidateProcessStatus; bundle: VerifiedCandidateProcessReview | null; errors: string[] }
 const empty = (status: CandidateProcessStatus, message?: string): CandidateProcessLoadResult => ({ status, bundle: null, errors: message ? [message] : [] })
 const FILE_LIMIT = 64 * 1024 * 1024
 const TOTAL_LIMIT = 256 * 1024 * 1024
+
+// The producer writes sorted, indented Python JSON. Preserve its numeric tokens
+// (notably 0.0) when checking the canonical logical hash; JSON.stringify would
+// silently change them to 0 and reject a valid producer sidecar.
+function compactPythonJson(bytes: Uint8Array): string {
+  const source = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  let compact = ''; let token = ''; let quoted = false; let escaped = false
+  for (const character of source) {
+    if (quoted) {
+      token += character
+      if (escaped) escaped = false
+      else if (character === '\\') escaped = true
+      else if (character === '"') { quoted = false; compact += JSON.stringify(JSON.parse(token)); token = '' }
+    } else if (character === '"') { quoted = true; token = character }
+    else if (!/[ \t\r\n]/.test(character)) compact += character
+  }
+  return compact
+}
+
+function canonicalCostText(bytes: Uint8Array, value: unknown): string {
+  const compact = compactPythonJson(bytes)
+  const marker = /,"report_hash":"sha256:[0-9a-f]{64}"/g
+  const matches = compact.match(marker)
+  if (!matches || matches.length !== 1) throw new Error('candidate process cost audit hash field is invalid')
+  const unsealed = compact.replace(marker, '')
+  const parsed = { ...value as Record<string, unknown> }; delete parsed.report_hash
+  if (canonicalJson(JSON.parse(unsealed)) !== canonicalJson(parsed)) throw new Error('candidate process cost audit canonical source mismatch')
+  return unsealed
+}
+
+// Price values are normalized Python floats. Preserve their original tokens
+// (100.0, -0.0, exponent spellings) instead of hashing a JS JSON round trip.
+async function validatePriceHashes(bytes: Uint8Array): Promise<void> {
+  const declaration = fields(fields(compactPythonJson(bytes)).get('declaration')!.value)
+  for (const declared of rawValues(declaration.get('cases')!.value)) {
+    const input = fields(fields(declared).get('input_binding')!.value)
+    const prices = fields(input.get('price_basis')!.value)
+    if (canonicalJson([...prices.keys()].sort()) !== canonicalJson(['as_of', 'concrete_per_m3', 'currency', 'price_table_hash', 'rebar_per_kg', 'source'])) throw new Error('candidate process price basis fields mismatch')
+    const expected = JSON.parse(prices.get('price_table_hash')!.value)
+    prices.delete('price_table_hash')
+    prices.set('schema_version', { member: '"schema_version":"declared-rc-material-prices.v1"', value: '' })
+    const canonical = `{${[...prices.entries()].sort(([a], [b]) => a < b ? -1 : 1).map(([, entry]) => entry.member).join(',')}}`
+    const digest = await sha256Hex(canonical)
+    if (digest === null) throw new Error('candidate process integrity unavailable')
+    if (digest !== expected) throw new Error('candidate process price table hash mismatch')
+  }
+}
 
 // Bound nesting before entering the existing duplicate-key/finite-number parser.
 // Strings and escaped quotes cannot contribute to structural depth.
@@ -70,6 +119,14 @@ export async function loadCandidateProcessReview(url: string | undefined, signal
     const suiteUrl = new URL(manifest.suite_file, manifestUrl)
     const suiteBytes = await read(suiteUrl, FILE_LIMIT, { byte_length: manifest.suite_byte_length, sha256: manifest.suite_sha256 })
     const suite = parseCandidateProcessJson(suiteBytes)
+    const costAuditBytes = manifest.schema_version === 'rc-fiber-candidate-process-review-bundle.v4'
+      ? await read(new URL(manifest.cost_audit_file!, manifestUrl), FILE_LIMIT, { byte_length: manifest.cost_audit_byte_length!, sha256: manifest.cost_audit_sha256! }) : null
+    const costAuditValue = costAuditBytes === null ? null : parseCandidateProcessJson(costAuditBytes)
+    if (costAuditValue !== null) {
+      const logicalHash = await sha256Hex(canonicalCostText(costAuditBytes!, costAuditValue))
+      if (logicalHash === null) throw new Error('candidate process integrity unavailable')
+      if (logicalHash !== manifest.cost_audit_hash) throw new Error('candidate process cost audit hash mismatch')
+    }
     const artifacts = new Map<string, CandidateLoadedArtifact>()
     // source_path is only a lookup label from the producer. Only validated bundle-relative file is fetched.
     for (const entry of manifest.artifacts) {
@@ -91,8 +148,10 @@ export async function loadCandidateProcessReview(url: string | undefined, signal
       comparisons.set(candidateProcessSlotKey(entry.case_id, entry.phase, entry.repetition, entry.strategy), { bundle: { manifest: nested, report, manifestUrl: nestedUrl.href, reportUrl: reportUrl.href }, manifestBytes: nestedBytes, reportBytes })
     }
     const validated = validateCandidateProcessReview(suite, manifest, artifacts, comparisons)
+    await validatePriceHashes(suiteBytes)
+    const costAudit = costAuditValue === null ? null : validateCandidateProcessCostSidecar(costAuditValue, manifest, validated.suite, validated.slots)
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
-    return { status: 'verified', bundle: { manifest, ...validated, manifestUrl: manifestUrl.href, suiteUrl: suiteUrl.href, manifestBytes, suiteBytes }, errors: [] }
+    return { status: 'verified', bundle: { manifest, ...validated, manifestUrl: manifestUrl.href, suiteUrl: suiteUrl.href, manifestBytes, suiteBytes, costAudit, costAuditBytes }, errors: [] }
   } catch (error) {
     if ((error as Error)?.name === 'AbortError' && signal?.aborted) return empty('unconfigured')
     const message = (error as Error)?.message ?? 'candidate process request failed'
