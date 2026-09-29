@@ -43,3 +43,15 @@ behavior only. They do not demonstrate physical accuracy, learned acceleration,
 independent validation, actual hardware latency, commercial price savings or
 release approval. The original broader roadmap and constant-preload support work
 remain open.
+
+The first complete integration run passed 505 of 506 tests but exposed a real
+SQLite WAL-initialization collision in the unchanged simultaneous-same-physics
+regression. Connection setup now retries only SQLite BUSY within one monotonic
+30-second deadline, closing each failed connection before waiting. It verifies
+that WAL was actually enabled and restores the existing 30-second busy timeout
+for subsequent transactions. Non-BUSY errors still fail immediately; foreign-key,
+FULL synchronous, authorization and transaction semantics remain unchanged.
+Deterministic deadline/error/close checks accompany actual reader-lock and
+concurrent constructor/submission/single-claim regressions. This correction is
+validated with the full affected durable-service and RC suites, not by discarding
+the failed observation or loosening the existing concurrency assertion.

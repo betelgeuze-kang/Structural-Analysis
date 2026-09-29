@@ -106,7 +106,9 @@ def test_request_compiles_supported_model_without_solving_and_detaches():
         ("experimental_pin_roller_beam", "unsupported canonical model"),
     ],
 )
-def test_unavailable_durable_profile_or_incompatible_geometry_is_rejected(profile, reason):
+def test_unavailable_durable_profile_or_incompatible_geometry_is_rejected(
+    profile, reason
+):
     request = _request()
     request["config"] = BoundedRCFiberDirectControlRequest(
         7, (-1e-6,), **{profile: True}

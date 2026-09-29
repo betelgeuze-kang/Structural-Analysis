@@ -28,6 +28,7 @@ import re
 import secrets
 import sqlite3
 import tempfile
+from time import monotonic, sleep
 from types import MappingProxyType
 from typing import Any, Final, Iterator, Literal, NoReturn
 
@@ -2011,23 +2012,58 @@ class DurableJobService:
             connection.close()
 
     def _connect(self) -> sqlite3.Connection:
-        try:
-            connection = sqlite3.connect(
-                self._db_path,
-                timeout=30.0,
-                isolation_level=None,
-            )
-            connection.row_factory = sqlite3.Row
-            connection.execute("PRAGMA foreign_keys = ON")
-            connection.execute("PRAGMA journal_mode = WAL")
-            connection.execute("PRAGMA synchronous = FULL")
-            return connection
-        except sqlite3.DatabaseError:
-            _fail(
-                "job_database_open_failed",
-                "/database",
-                "The durable database could not be opened.",
-            )
+        # WAL setup can return BUSY without invoking SQLite's busy handler.
+        # Retry fresh connections under one deadline, releasing every failed
+        # connection before waiting. Transactions retain their 30-second wait.
+        deadline = monotonic() + 30.0
+        retry_delay = 0.005
+        while monotonic() < deadline:
+            connection = None
+            configured = False
+            try:
+                connection = sqlite3.connect(
+                    self._db_path,
+                    timeout=0.0,
+                    isolation_level=None,
+                )
+                connection.row_factory = sqlite3.Row
+                connection.execute("PRAGMA foreign_keys = ON")
+                mode = connection.execute("PRAGMA journal_mode = WAL").fetchone()
+                if mode is None or mode[0] != "wal":
+                    raise sqlite3.OperationalError("WAL mode is required")
+                connection.execute("PRAGMA synchronous = FULL")
+                if monotonic() >= deadline:
+                    break
+                connection.execute("PRAGMA busy_timeout = 30000")
+                configured = True
+                return connection
+            except sqlite3.DatabaseError as exc:
+                code = getattr(exc, "sqlite_errorcode", None)
+                # Python 3.10 lacks sqlite_errorcode. Its exact BUSY message
+                # excludes SQLITE_LOCKED ("database table is locked").
+                busy = isinstance(exc, sqlite3.OperationalError) and (
+                    code & 0xFF == 5  # SQLITE_BUSY, including extended codes
+                    if type(code) is int
+                    else str(exc) == "database is locked"
+                )
+                if not busy:
+                    _fail(
+                        "job_database_open_failed",
+                        "/database",
+                        "The durable database could not be opened.",
+                    )
+            finally:
+                if connection is not None and not configured:
+                    connection.close()
+            remaining = deadline - monotonic()
+            if remaining > 0:
+                sleep(min(retry_delay, remaining))
+                retry_delay = min(retry_delay * 2, 0.05)
+        _fail(
+            "job_database_open_failed",
+            "/database",
+            "The durable database could not be opened.",
+        )
 
     @contextmanager
     def _transaction(self) -> Iterator[sqlite3.Connection]:

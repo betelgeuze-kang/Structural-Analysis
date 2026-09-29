@@ -84,23 +84,29 @@ def test_phase2_source_receipts_materialize_before_consumers(
     [("python-test-collection.yml", "full_shards"), ("ci.yml", "verify")],
 )
 def test_failed_materialization_upload_preserves_failure_and_limits_files(
-    workflow_name: str, job_name: str,
+    workflow_name: str,
+    job_name: str,
 ) -> None:
-    workflow = yaml.safe_load(
-        (ROOT / ".github/workflows" / workflow_name).read_text()
-    )
+    workflow = yaml.safe_load((ROOT / ".github/workflows" / workflow_name).read_text())
     job = workflow["jobs"][job_name]
     steps = {step["name"]: step for step in job["steps"]}
     materialize = steps["Materialize exact current-source test evidence"]
     assert materialize["id"] == "materialize"
     if job_name == "full_shards":
         assert "--fail-blocked" not in materialize["run"]
-        assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+        assert (
+            "python scripts/build_internal_license_due_diligence.py"
+            in materialize["run"]
+        )
     else:
         assert "--fail-blocked" in materialize["run"]
     assert not job.get("continue-on-error", False)
     assert all(not step.get("continue-on-error", False) for step in job["steps"])
-    gate = "Run materialized repository test suite shard" if job_name == "full_shards" else "Build current-HEAD readiness snapshot"
+    gate = (
+        "Run materialized repository test suite shard"
+        if job_name == "full_shards"
+        else "Build current-HEAD readiness snapshot"
+    )
     assert "if" not in steps[gate]
     condition = "${{ failure() && steps.materialize.outcome == 'failure' }}"
     assert steps["Describe failed materialization diagnostics"]["if"] == condition
@@ -108,7 +114,8 @@ def test_failed_materialization_upload_preserves_failure_and_limits_files(
     assert upload["if"] == condition
     assert upload["with"]["name"] == (
         "materialization-failure-shard-${{ matrix.shard }}-${{ github.sha }}"
-        if job_name == "full_shards" else "materialization-failure-verify-${{ github.sha }}"
+        if job_name == "full_shards"
+        else "materialization-failure-verify-${{ github.sha }}"
     )
     assert upload["with"]["path"].splitlines() == [
         "materialization-failure-context.json",
@@ -128,23 +135,32 @@ def test_full_shard_reports_pytest_before_enforcing_external_license_gate() -> N
     jobs = workflow["jobs"]
     shard_steps = jobs["full_shards"]["steps"]
     names = [step["name"] for step in shard_steps]
-    materialize = shard_steps[names.index("Materialize exact current-source test evidence")]
+    materialize = shard_steps[
+        names.index("Materialize exact current-source test evidence")
+    ]
     test_step = shard_steps[names.index("Run materialized repository test suite shard")]
     upload = shard_steps[
-        names.index("Retain diagnostic shard test result independently of license status")
+        names.index(
+            "Retain diagnostic shard test result independently of license status"
+        )
     ]
     license_gate = shard_steps[
         names.index("Require exact current-source external license contract")
     ]
 
-    assert names.index("Materialize exact current-source test evidence") < names.index(
-        "Run materialized repository test suite shard"
-    ) < names.index(
-        "Retain diagnostic shard test result independently of license status"
-    ) < names.index("Require exact current-source external license contract")
+    assert (
+        names.index("Materialize exact current-source test evidence")
+        < names.index("Run materialized repository test suite shard")
+        < names.index(
+            "Retain diagnostic shard test result independently of license status"
+        )
+        < names.index("Require exact current-source external license contract")
+    )
     assert "if" not in test_step
     assert "--junitxml=pytest-full-shard-${{ matrix.shard }}.xml" in test_step["run"]
-    assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    assert (
+        "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    )
     assert "--fail-blocked" not in materialize["run"]
     assert upload["if"] == "${{ always() }}"
     assert upload["with"] == {
@@ -170,25 +186,34 @@ def test_full_shard_reports_pytest_before_enforcing_external_license_gate() -> N
     [("python-test-collection.yml", "full_shards"), ("ci.yml", "verify")],
 )
 def test_failure_context_is_valid_json_without_generation_or_qualification_credit(
-    tmp_path: Path, workflow_name: str, job_name: str,
+    tmp_path: Path,
+    workflow_name: str,
+    job_name: str,
 ) -> None:
-    workflow = yaml.safe_load(
-        (ROOT / ".github/workflows" / workflow_name).read_text()
+    workflow = yaml.safe_load((ROOT / ".github/workflows" / workflow_name).read_text())
+    step = next(
+        step
+        for step in workflow["jobs"][job_name]["steps"]
+        if step["name"] == "Describe failed materialization diagnostics"
     )
-    step = next(step for step in workflow["jobs"][job_name]["steps"]
-                if step["name"] == "Describe failed materialization diagnostics")
     lines = step["run"].splitlines()
     assert lines[0] == "python - <<'PYTHON'" and lines[-1] == "PYTHON"
     subprocess.run(
         [sys.executable, "-c", "\n".join(lines[1:-1])],
         cwd=tmp_path,
-        env={"GITHUB_SHA": "a" * 40, "GITHUB_RUN_ID": "123",
-             "GITHUB_RUN_ATTEMPT": "2", "GITHUB_JOB": job_name},
+        env={
+            "GITHUB_SHA": "a" * 40,
+            "GITHUB_RUN_ID": "123",
+            "GITHUB_RUN_ATTEMPT": "2",
+            "GITHUB_JOB": job_name,
+        },
         check=True,
         capture_output=True,
         text=True,
     )
-    payload = json.loads((tmp_path / "materialization-failure-context.json").read_bytes())
+    payload = json.loads(
+        (tmp_path / "materialization-failure-context.json").read_bytes()
+    )
     assert payload["job"] == job_name
     assert payload["workflow_sha"] == "a" * 40
     assert payload["run_id"] == "123" and payload["run_attempt"] == "2"
@@ -1089,7 +1114,9 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
     selected_paths = [x for x in tests if x.startswith("tests/")]
     selected = set(selected_paths)
-    assert len(selected_paths) == len(selected), "duplicate development module selection"
+    assert len(selected_paths) == len(selected), (
+        "duplicate development module selection"
+    )
     assert len(selected) == 84
     assert all((ROOT / path).is_file() for path in selected)
     assert {
