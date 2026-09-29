@@ -183,9 +183,37 @@ def test_inventory_tracks_external_and_repository_work_without_authority() -> No
         449,
         451,
         454,
-        457,
         458,
         460,
+        462,
+        463,
+        465,
+        467,
+        468,
+        470,
+        475,
+        476,
+        477,
+        478,
+        480,
+        483,
+        484,
+        486,
+        488,
+        490,
+        492,
+        493,
+        495,
+        512,
+        513,
+        514,
+        516,
+        518,
+        520,
+        522,
+        524,
+        538,
+        539,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -204,39 +232,85 @@ def test_inventory_tracks_external_and_repository_work_without_authority() -> No
 def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> None:
     payload = _payload()
     rows = {row["number"]: row for row in payload["open_issues"]}
-    for number in (247, 258, 260, 290, 291, 293, 297, 438):
+    for number in (247, 258, 260, 290, 291, 293, 297, 438, 475, 480, 486):
         row = rows[number]
         assert row["classification"] in inventory.EXTERNAL_CLASSIFICATIONS
         assert row["closable_by_repository_code_alone"] is False
         assert row["required_external_inputs"]
         assert row["current_product_authority"] is False
     assert rows[438]["linked_pull_requests"] == [439, 440]
+    assert rows[475]["linked_pull_requests"] == [482, 489]
+    assert rows[480]["linked_pull_requests"] == [481, 491]
+    assert rows[486]["linked_pull_requests"] == [487]
     assert rows[438]["merged_implementation_pull_requests"] == [440]
-    assert payload["implemented_but_open_issues"] == [rows[438]]
+    assert all(
+        rows[number]["merged_implementation_pull_requests"] == []
+        for number in (475, 480, 486)
+    )
+    # A merge into a non-default review branch does not close its open issue.
+    assert payload["implemented_but_open_issues"] == [rows[438], rows[467], rows[514]]
     for number, pull_requests in (
         (441, [442]),
-        (443, [444]),
-        (445, [446]),
+        (443, [444, 450]),
+        (445, [446, 450]),
         (447, [448]),
         (449, [450, 452]),
-        (451, [452]),
+        (451, [452, 453]),
         (454, [453]),
-        (457, [455]),
-        (458, [456]),
-        (460, [459]),
+        (458, [456, 479]),
+        (460, [459, 534]),
+        (462, [461]),
+        (463, [464, 469, 534]),
+        (465, [466, 469]),
+        (467, [472]),
+        (468, [469]),
+        (470, [469, 471]),
+        (476, [473, 499, 534]),
+        (477, [474, 534]),
+        (478, [479]),
+        (483, [481]),
+        (484, [482, 537]),
+        (488, [491]),
+        (490, [489, 537]),
+        (492, [485, 534]),
+        (493, [494]),
+        (495, [496]),
+        (512, [510]),
+        (513, [511]),
+        (514, [461, 515]),
+        (516, [517]),
+        (518, [519]),
+        (520, [521, 534]),
+        (522, [523, 534]),
+        (524, [525, 534]),
+        (538, [537]),
+        (539, [528]),
     ):
         row = rows[number]
         assert row["classification"] == "repository_implementation"
         assert row["closable_by_repository_code_alone"] is True
         assert row["required_external_inputs"] == []
         assert row["linked_pull_requests"] == pull_requests
-        assert row["merged_implementation_pull_requests"] == []
+        assert row["merged_implementation_pull_requests"] == {
+            467: [472],
+            514: [515],
+        }.get(number, [])
         assert row["current_product_authority"] is False
     resolved = {row["number"]: row for row in payload["resolved_issues"]}
     assert resolved[433]["resolved_by_pull_request"] == 440
     assert resolved[433]["closure_event_id"] == 31078133852
     assert resolved[435]["resolved_by_pull_request"] == 440
     assert resolved[435]["closure_event_id"] == 31078134023
+    assert resolved[457] == {
+        "number": 457,
+        "state": "closed",
+        "state_reason": "completed",
+        "resolution": "resolved_by",
+        "resolved_by_pull_request": 455,
+        "merge_commit_sha": "215358123e6d8ac1d25b1435e6b43469367242b2",
+        "closure_event_id": 32060610808,
+    }
+    assert set(resolved) == {207, 210, 212, 216, 218, 433, 435, 457}
     superseded = {row["number"]: row for row in payload["superseded_pull_requests"]}
     assert superseded[432]["superseded_by_pull_request"] == 440
     assert superseded[434]["superseded_by_pull_request"] == 440
