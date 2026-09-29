@@ -17,6 +17,8 @@ REQUEST = Path('examples/research/rc_reuse_campaign/pin-roller-steel-plastic.req
 PRIOR_PAIR = Path('docs/engineering/rc-pin-roller-design-pair-20260929.audit.json')
 LEGACY_RANKING = 'feasibility_then_price.v1'
 BOUNDARY_RANKING = 'feasibility_then_cheaper_boundary.v1'
+REPLICATION_PROTOCOL_SHA = 'sha256:bb2fa3e4446d343d5d7c42b0990482f8868105b945c1a905ee370d87ddd61b42'
+REPLICATION_PROTOCOL_COMMIT = '71501cf5ad4e95b0af268386c9ed6cd19ea62fc2'
 
 def sha(data):
     return 'sha256:' + hashlib.sha256(data).hexdigest()
@@ -40,62 +42,87 @@ def check_hash_object(value, key):
     return value[key] == sha(canonical({k: v for k, v in value.items() if k != key}))
 
 def check_frozen_ranking(pre, search_plan, check):
-    """Audit this declared six-model schedule against preserved predictions.
-
-    These are case-specific expected orders, not a second ranking implementation.
-    The experiment runner calls the production candidate-ranking function.
-    """
+    """Independently reconstruct the frozen orders from saved pool and predictions."""
     strategy = pre.get('ranking_strategy')
     check(strategy in (LEGACY_RANKING, BOUNDARY_RANKING), 'unsupported frozen ranking strategy')
     price = search_plan['plans']['price_order']
     learned = search_plan['plans']['learned_order']
-    check(price['ordering'] == ['w34','w38','w46','w50','w54'], 'price ordering unexpected')
-    check(price['shortlist'] == ['w34','w38'], 'price shortlist unexpected')
+    pool = search_plan['pool'][1:]
+    estimates = {r['candidate_id']:r['material_estimate']['total'] for r in pool}
+    expected_ids = [f'w{round(w*100):02d}' for w in pre['online_widths_m'][1:]]
+    check([r['candidate_id'] for r in pool] == expected_ids, 'pool order differs from frozen widths')
+    def price_key(cid):
+        return estimates[cid], cid
+    expected_price = sorted(expected_ids, key=price_key)
+    budget = pre['full_analysis_budget_per_online_arm_including_baseline'] - 1
+    check(price['ordering'] == expected_price, 'price ordering unexpected')
+    check(price['shortlist'] == expected_price[:budget], 'price shortlist unexpected')
     predictions = search_plan['predictions']
-    check([r['candidate_id'] for r in predictions] == ['w34','w38','w46','w50','w54'], 'prediction roster unexpected')
+    check([r['candidate_id'] for r in predictions] == expected_ids, 'prediction roster unexpected')
+    by_id = {r['candidate_id']:r for r in predictions}
+    scores = {}
+    for row in predictions:
+        cid = row['candidate_id']
+        check(row['estimate'] == estimates[cid], f'{cid} predicted estimate differs from frozen pool')
+        screens = row['predicted_screens']
+        if screens is None:
+            check(row['prediction']['abstained'] is True, f'{cid} missing screens without abstention')
+            expected_tier = 1
+            scores[cid] = None
+        else:
+            check(row['prediction']['abstained'] is False, f'{cid} abstained with screens')
+            expected_tier = 0 if all(s['status'] == 'pass' for s in screens.values()) else 2
+            scores[cid] = max(
+                (s['value'] - s['limit']) / s['value']
+                if s['value'] > s['limit'] else 0.0
+                for s in screens.values()
+            )
+        check(row['ranking_tier'] == expected_tier, f'{cid} prediction tier mismatch')
+    legacy = sorted(expected_ids, key=lambda cid: (by_id[cid]['ranking_tier'], *price_key(cid)))
     if strategy == LEGACY_RANKING:
         check(search_plan['schema_version'] == 'experimental-rc-control-candidate-search-plan.v2', 'legacy search plan schema changed')
         check('ranking' not in search_plan, 'legacy plan unexpectedly contains boundary ranking')
-        check(learned['ordering'] == ['w50','w54','w34','w38','w46'], 'legacy learned ordering unexpected')
-        check(learned['shortlist'] == ['w50','w54'], 'legacy learned shortlist unexpected')
+        check(learned['ordering'] == legacy, 'legacy learned ordering unexpected')
+        check(learned['shortlist'] == legacy[:budget], 'legacy learned shortlist unexpected')
         return
     if strategy != BOUNDARY_RANKING:
         return
     check(search_plan['schema_version'] == 'experimental-rc-control-candidate-search-plan.v3', 'boundary search plan schema changed')
-    check(learned['ordering'] == ['w50','w46','w38','w34','w54'], 'boundary learned ordering unexpected')
-    check(learned['shortlist'] == ['w50','w46'], 'boundary learned shortlist unexpected')
+    seed = next((cid for cid in legacy if by_id[cid]['ranking_tier'] == 0), None)
+    challengers = [] if seed is None else sorted(
+        (cid for cid in legacy if estimates[cid] < estimates[seed]),
+        key=lambda cid: (0 if scores[cid] is None else 1, scores[cid] or 0.0, *price_key(cid)),
+    )
+    front = ([] if seed is None else [seed]) + challengers
+    expected_learned = front + [cid for cid in legacy if cid not in set(front)]
+    check(learned['ordering'] == expected_learned, 'boundary learned ordering unexpected')
+    check(learned['shortlist'] == expected_learned[:budget], 'boundary learned shortlist unexpected')
     ranking = search_plan.get('ranking')
     check(isinstance(ranking, dict), 'boundary ranking explanation missing')
     if not isinstance(ranking, dict):
         return
     check(ranking.get('strategy') == BOUNDARY_RANKING, 'boundary ranking strategy mismatch')
-    check(ranking.get('predicted_feasible_seed_id') == 'w50', 'boundary seed mismatch')
-    check(ranking.get('fallback_reason') is None, 'unexpected boundary fallback')
+    check(ranking.get('predicted_feasible_seed_id') == seed, 'boundary seed mismatch')
+    check(ranking.get('fallback_reason') == ('no_predicted_feasible_seed' if seed is None else None), 'boundary fallback mismatch')
     check(ranking.get('uncertainty_calibrated') is False, 'boundary score falsely claims calibration')
     check(ranking.get('physical_result_authority') is False, 'boundary score falsely claims physical authority')
-    expected_roles = {
-        'w34': 'cheaper_predicted_boundary',
-        'w38': 'cheaper_predicted_boundary',
-        'w46': 'cheaper_predicted_boundary',
-        'w50': 'predicted_feasible_seed',
-        'w54': 'remaining_legacy_order',
-    }
     explanations = ranking.get('rows')
     check(isinstance(explanations, list), 'boundary ranking rows missing')
     if not isinstance(explanations, list):
         return
-    check([r.get('candidate_id') for r in explanations] == list(expected_roles), 'boundary ranking row order changed')
+    check([r.get('candidate_id') for r in explanations] == expected_ids, 'boundary ranking row order changed')
     if len(explanations) != len(predictions):
         return
     for predicted, explained in zip(predictions, explanations):
         cid = predicted['candidate_id']
-        check(explained.get('role') == expected_roles[cid], f'{cid} boundary role mismatch')
-        screens = predicted['predicted_screens']
-        expected_score = None if screens is None else max(
-            (screen['value'] - screen['limit']) / screen['value']
-            if screen['value'] > screen['limit'] else 0.0
-            for screen in screens.values()
+        expected_role = (
+            'predicted_feasible_seed' if cid == seed else
+            'cheaper_unpredicted' if cid in challengers and scores[cid] is None else
+            'cheaper_predicted_boundary' if cid in challengers else
+            'remaining_legacy_order'
         )
+        check(explained.get('role') == expected_role, f'{cid} boundary role mismatch')
+        expected_score = scores[cid]
         score = explained.get('relative_exceedance')
         check(
             (expected_score is None and score is None)
@@ -104,26 +131,53 @@ def check_frozen_ranking(pre, search_plan, check):
             f'{cid} boundary score differs from frozen prediction',
         )
 
-def audit_packet(SOURCE, ROOT):
+def audit_packet(SOURCE, ROOT, protocol_path=None):
     SOURCE, ROOT = Path(SOURCE).resolve(), Path(ROOT).resolve()
     violations = []
     def check(condition, reason):
         if not condition:
             violations.append(reason)
     pre = load(ROOT/'plan.json')
+    protocol = None
+    if protocol_path is not None:
+        protocol_file = SOURCE/Path(protocol_path)
+        check(sha(protocol_file.read_bytes()) == REPLICATION_PROTOCOL_SHA, 'preregistered protocol bytes changed')
+        protocol = load(protocol_file)
+        check(protocol['schema_version'] == 'synthetic-rc-pin-roller-heldout-replication-protocol.v1', 'replication protocol schema changed')
+        check(pre['schema'] == 'synthetic-rc-pin-roller-heldout-replication-predeclaration.v1', 'replication packet schema changed')
+        check(pre['protocol_commit'] == REPLICATION_PROTOCOL_COMMIT and pre['protocol_sha256'] == REPLICATION_PROTOCOL_SHA, 'replication protocol identity mismatch')
+        check(protocol['source_model_sha256'] == pre['source_model_sha256'] and protocol['source_request_sha256'] == pre['source_request_sha256'], 'replication source hash binding mismatch')
+        check(protocol['training_widths_m'] == pre['training_widths_m'] and protocol['online_widths_m'] == pre['online_widths_m'], 'replication widths differ from preregistration')
+        check(protocol['ranking_strategy'] == pre['ranking_strategy'] and protocol['full_analysis_budget_per_online_arm_including_baseline'] == pre['full_analysis_budget_per_online_arm_including_baseline'], 'replication ordering or budget differs from preregistration')
+        check(protocol['history_maximum_absolute_fiber_strain_limit'] == pre['history_maximum_absolute_fiber_strain_limit'], 'replication strain screen differs from preregistration')
+        check(protocol['evaluate_exhaustive_oracle_after_online_arms'] is True and protocol['line_search_assembly_reuse'] is False and protocol['cost_dominance_pruning'] is False, 'replication numerical execution switches changed')
     check((ROOT/'plan.sha256').read_text().split()[0] == sha((ROOT/'plan.json').read_bytes()), 'frozen plan hash mismatch')
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=SOURCE, text=True).strip()
     check(pre['source_revision'] == revision, 'source revision mismatch')
     check(not subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=all'], cwd=SOURCE, text=True).strip(), 'source checkout is not clean')
-    source_model = SOURCE/MODEL
-    source_request = SOURCE/REQUEST
+    if protocol is not None:
+        check(subprocess.run(['git','merge-base','--is-ancestor',REPLICATION_PROTOCOL_COMMIT,revision], cwd=SOURCE, check=False).returncode == 0, 'preregistration commit is not an ancestor')
+    source_model = SOURCE/(protocol['source_model'] if protocol else MODEL)
+    source_request = SOURCE/(protocol['source_request'] if protocol else REQUEST)
     check(sha(source_model.read_bytes()) == pre['source_model_sha256'], 'source model bytes changed')
     check(sha(source_request.read_bytes()) == pre['source_request_sha256'], 'source request bytes changed')
-    check(sha((SOURCE/PRIOR_PAIR).read_bytes()) == pre['prior_pair_audit_sha256'], 'prior pair byte binding changed')
+    if protocol is not None:
+        expected_model = deepcopy(load(SOURCE/MODEL))
+        for node in expected_model['nodes']:
+            node['coordinates'][0] = round(node['coordinates'][0] * 1.1, 12)
+        expected_model['metadata']['case_id'] = 'synthetic-pin-roller-209cm-reversal-replication'
+        check(load(source_model) == expected_model, 'preregistered geometry differs from declared scaling rule')
+        expected_request = load(SOURCE/REQUEST)
+        expected_request['targets_m'] = [-0.00004, -0.00009, -0.00014, 0.00004]
+        check(load(source_request) == expected_request, 'preregistered history differs from declared target rule')
+    if protocol is None:
+        check(sha((SOURCE/PRIOR_PAIR).read_bytes()) == pre['prior_pair_audit_sha256'], 'prior pair byte binding changed')
     if pre['schema'] == 'synthetic-pin-roller-v4-candidate-budget-predeclaration.v1':
         check(sha((ROOT/'prepare.py').read_bytes()) == pre['preparation_script_sha256'], 'preparation script changed')
     elif pre['schema'] == 'synthetic-pin-roller-v4-candidate-budget-predeclaration.v2':
         check(sha((SOURCE/'scripts/run_rc_pin_roller_budget_study.py').read_bytes()) == pre['runner_sha256'], 'runner source changed')
+    elif pre['schema'] == 'synthetic-rc-pin-roller-heldout-replication-predeclaration.v1':
+        check(sha((SOURCE/'scripts/run_rc_pin_roller_replication.py').read_bytes()) == pre['runner_sha256'], 'replication runner source changed')
     else:
         check(False, 'unsupported frozen plan schema')
     for name, expected in pre['input_sha256'].items():
@@ -134,7 +188,7 @@ def audit_packet(SOURCE, ROOT):
     check(len(online_widths) >= 4 and pre['full_analysis_budget_per_online_arm_including_baseline'] < len(online_widths), 'pool/budget mismatch')
     request = load(ROOT/'inputs/request.json')
     expected_targets = request['targets_m']
-    expected_supports = {('N2','UX'),('N2','UY'),('N6','UY')}
+    expected_supports = {(row['node'], dof) for row in load(source_model)['supports'] for dof in row['dofs']}
     train = load(ROOT/'training/training.json')
     policy = load(ROOT/'training/policy.json')
     train_plan = load(ROOT/'training/plan.json')
@@ -169,6 +223,16 @@ def audit_packet(SOURCE, ROOT):
     check(search['candidate_denominator'] == len(online_widths), 'result denominator mismatch')
     check_frozen_ranking(pre, search_plan, check)
     price_input = load(ROOT/'inputs/online-experiment.json')['prices']
+    if protocol is not None:
+        check(price_input == protocol['synthetic_prices'], 'replication price input differs from preregistration')
+        for name in ('training-experiment.json', 'online-experiment.json'):
+            experiment_input = load(ROOT/'inputs'/name)
+            check(experiment_input['terminal_limits'] == protocol['terminal_limits'], f'{name} terminal limits differ from preregistration')
+            check(experiment_input['history_limits'] == {
+                'maximum_translation_m':protocol['history_maximum_translation_limit_m'],
+                'maximum_absolute_fiber_strain':protocol['history_maximum_absolute_fiber_strain_limit'],
+            }, f'{name} history limits differ from preregistration')
+            check(experiment_input['material_history_limits'] == protocol['material_history_limits'], f'{name} material limits differ from preregistration')
     normalized_price = {
         **price_input,
         'concrete_per_m3': float(price_input['concrete_per_m3']),
@@ -182,7 +246,8 @@ def audit_packet(SOURCE, ROOT):
     for baseline, width in ((online_base, online_widths[0]), (training_base, train_widths[0])):
         expected = deepcopy(source_base)
         expected['sections'][0]['width_m'] = width
-        expected['metadata']['case_id'] = f'synthetic-pin-roller-v4-budget-width-{width:.2f}'
+        prefix = 'synthetic-pin-roller-replication' if protocol is not None else 'synthetic-pin-roller-v4-budget'
+        expected['metadata']['case_id'] = f'{prefix}-width-{width:.2f}'
         check(baseline == expected, 'generated baseline differs from the committed source model')
     for index, width in enumerate(online_widths):
         cid = 'baseline' if index == 0 else f'w{round(width*100):02d}'
@@ -359,7 +424,7 @@ def audit_packet(SOURCE, ROOT):
     check(fit_outcome['status'] == 'completed' and fit_outcome['unknown_fit_work_until_outcome'] is False and fit_outcome['method'] == train_plan['fit_method'], 'training fit incomplete or method changed')
     check(all(type(fit_outcome[key]) is int and fit_outcome[key] >= 0 for key in ('wall_ns', 'cpu_ns')), 'training fit timing unavailable')
     launcher_outcomes = {}
-    if pre['schema'] == 'synthetic-pin-roller-v4-candidate-budget-predeclaration.v2':
+    if pre['schema'] in ('synthetic-pin-roller-v4-candidate-budget-predeclaration.v2', 'synthetic-rc-pin-roller-heldout-replication-predeclaration.v1'):
         for phase, child_wall in (('training', train['wall_ns']), ('search', search['online_and_optional_oracle_wall_ns'])):
             check(load(ROOT/f'{phase}-started.json') == {'phase':phase,'status':'started','unknown_work_until_outcome':True}, f'{phase} launcher start record mismatch')
             outcome = load(ROOT/f'{phase}-outcome.json')
@@ -421,19 +486,23 @@ def audit_packet(SOURCE, ROOT):
         oracle_table.append({'candidate_id':cid,'width_m':width,'history_maximum_absolute_fiber_strain':screen['value'],'history_strain_screen':screen['status'],'full_reference_verified':row['full_reference_verification_pass'],'scoped_synthetic_estimate':row['material_estimate']['total']})
     feasible = [r for r in oracle_table if oracle_rows[r['candidate_id']]['selection_eligible']]
     cheapest = min(feasible,key=lambda r:r['scoped_synthetic_estimate']) if feasible else None
-    check(cheapest is not None and cheapest['candidate_id'] == summary['exhaustive_oracle']['selected_candidate_id'], 'oracle cheapest feasible mismatch')
+    check((None if cheapest is None else cheapest['candidate_id']) == summary['exhaustive_oracle']['selected_candidate_id'], 'oracle cheapest feasible mismatch')
     cost_audit = search['candidate_cost_optimality_audit']
     check(cost_audit['pool_minimum_feasible_candidate_ids'] == ([cheapest['candidate_id']] if cheapest else None), 'reported finite pool optimum mismatch')
     learned_id = summary['learned_order']['selected_candidate_id']
     expected_gap = None if cheapest is None or learned_id is None else rows['learned_order'][learned_id]['material_estimate']['total'] - cheapest['scoped_synthetic_estimate']
     observed_gap = cost_audit['arms']['learned_order']['selected_minus_pool_minimum_estimate']
     check((expected_gap is None and observed_gap is None) or (expected_gap is not None and type(observed_gap) in (int, float) and math.isclose(observed_gap, expected_gap, rel_tol=0, abs_tol=1e-9)), 'reported learned pool cost gap mismatch')
-    missed = [r['candidate_id'] for r in oracle_table if r['candidate_id'] not in {'baseline', *search_plan['plans']['learned_order']['shortlist']} and oracle_rows[r['candidate_id']]['selection_eligible'] and learned_id is not None and r['scoped_synthetic_estimate'] < rows['learned_order'][learned_id]['material_estimate']['total']]
+    missed = None if learned_id is None or cheapest is None else [r['candidate_id'] for r in oracle_table if r['candidate_id'] not in {'baseline', *search_plan['plans']['learned_order']['shortlist']} and oracle_rows[r['candidate_id']]['selection_eligible'] and r['scoped_synthetic_estimate'] < rows['learned_order'][learned_id]['material_estimate']['total']]
     check(cost_audit['arms']['learned_order']['missed_cheaper_feasible_candidate_ids'] == missed, 'reported missed cheaper candidates mismatch')
     predicted_failure_ids = {r['candidate_id'] for r in search_plan['predictions'] if not r['prediction']['abstained'] and any(screen['status'] == 'fail' for screen in r['predicted_screens'].values())}
     if cost_audit['schema_version'] == 'rc-control-candidate-cost-optimality.v2':
-        check(cost_audit['arms']['learned_order']['missed_cheaper_false_negative_candidate_ids'] == [cid for cid in missed if cid in predicted_failure_ids], 'reported cheaper false negatives mismatch')
-    check(search['candidate_coverage_audit']['arms']['learned_order']['false_negative_candidate_ids'] == ['w46'], 'false negative audit mismatch')
+        check(cost_audit['arms']['learned_order']['missed_cheaper_false_negative_candidate_ids'] == (None if missed is None else [cid for cid in missed if cid in predicted_failure_ids]), 'reported cheaper false negatives mismatch')
+    false_negative_ids = [
+        cid for cid in search_plan['plans']['price_order']['ordering']
+        if cid in predicted_failure_ids and oracle_rows[cid]['selection_eligible']
+    ]
+    check(search['candidate_coverage_audit']['arms']['learned_order']['false_negative_candidate_ids'] == false_negative_ids, 'false negative audit mismatch')
     files = []
     for path in ROOT.rglob('*'):
         if path.is_symlink():
@@ -443,7 +512,7 @@ def audit_packet(SOURCE, ROOT):
     files.sort()
     inventory = [[str(path.relative_to(ROOT)), len(path.read_bytes()), sha(path.read_bytes())] for path in files]
     report = {
-        'schema':'synthetic-pin-roller-v4-budget-byte-and-arithmetic-audit.v2',
+        'schema':'synthetic-rc-pin-roller-heldout-replication-audit.v1' if protocol is not None else 'synthetic-pin-roller-v4-budget-byte-and-arithmetic-audit.v2',
         'pass':not violations,
         'violations':violations,
         'source_revision':pre['source_revision'],
@@ -462,7 +531,7 @@ def audit_packet(SOURCE, ROOT):
         'oracle_separate_after_online_arms':search_plan['oracle_after_online_arms'],
         'learned_selected_minus_pool_minimum_synthetic_estimate':observed_gap,
         'learned_missed_cheaper_feasible_candidate_ids':missed,
-        'interpretation':'One synthetic fixed-family same-engine study. Byte and scoped price arithmetic audit; no independent physical validation, code compliance, quote, or general speedup.',
+        'interpretation':'Separate authored synthetic geometry/history replication with a newly fitted fixed-context policy. Same-engine byte and scoped price arithmetic audit; no old-policy transfer, independent physical validation, code compliance, quote, or general speedup.' if protocol is not None else 'One synthetic fixed-family same-engine study. Byte and scoped price arithmetic audit; no independent physical validation, code compliance, quote, or general speedup.',
     }
     return report
 
@@ -471,9 +540,40 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--packet', type=Path, required=True)
+    parser.add_argument('--protocol', type=Path)
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
-    report = audit_packet(args.source, args.packet)
+    try:
+        report = audit_packet(args.source, args.packet, args.protocol)
+    except (OSError, ValueError, KeyError, TypeError, IndexError, ZeroDivisionError) as exc:
+        # Interrupted numerical runs retain their originals. Missing reports and
+        # work are unknown, never inferred from the requested denominator.
+        root = args.packet.resolve()
+        files = sorted(p for p in root.rglob('*') if p.is_file() and p.name != 'audit.json')
+        inventory = [[str(p.relative_to(root)), len(p.read_bytes()), sha(p.read_bytes())] for p in files]
+        outcomes = {}
+        for phase in ('training', 'search'):
+            path = root/f'{phase}-outcome.json'
+            try:
+                outcomes[phase] = load(path)
+            except (OSError, ValueError):
+                outcomes[phase] = None
+        report = {
+            'schema':'synthetic-rc-pin-roller-heldout-replication-incomplete-audit.v1' if args.protocol else 'synthetic-pin-roller-v4-budget-incomplete-audit.v1',
+            'pass':False,
+            'status':'incomplete_or_unverifiable',
+            'violations':[f'{type(exc).__name__}: {exc}'],
+            'launcher_phase_outcomes':outcomes,
+            'total_evaluation_cost_ns':None,
+            'selected_candidate_id':None,
+            'packet_file_count_excluding_audit':len(files),
+            'packet_file_inventory_sha256':sha(canonical(inventory)),
+            'referenced_artifacts_hashed':0,
+            'comparisons':None,
+            'oracle_table':None,
+        }
+    if args.protocol:
+        report['total_evaluation_cost_ns'] = None
     target = args.output or args.packet/'audit.json'
     with target.open('xb') as stream:
         stream.write((json.dumps(report,sort_keys=True,indent=2,allow_nan=False)+'\n').encode())

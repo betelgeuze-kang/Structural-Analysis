@@ -3,6 +3,8 @@
 import hashlib
 import importlib.util
 import json
+import subprocess
+import sys
 from copy import deepcopy
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -81,10 +83,12 @@ def test_boundary_audit_checks_declared_order_and_independent_scores():
             "candidate_id": cid,
             "estimate": price,
             "ranking_tier": 0 if cid in ("w50", "w54") else 2,
+            "prediction": {"abstained": False},
             "predicted_screens": {
                 "maximum_absolute_fiber_strain": {
                     "value": values[cid],
                     "limit": .1585,
+                    "status": "pass" if cid in ("w50", "w54") else "fail",
                 }
             },
         }
@@ -96,6 +100,10 @@ def test_boundary_audit_checks_declared_order_and_independent_scores():
     assert order == ["w50", "w46", "w38", "w34", "w54"]
     plan = {
         "schema_version": "experimental-rc-control-candidate-search-plan.v3",
+        "pool": [{"candidate_id": "baseline"}] + [
+            {"candidate_id": cid, "material_estimate": {"total": price}}
+            for cid, price in prices.items()
+        ],
         "plans": {
             "price_order": {
                 "ordering": ["w34", "w38", "w46", "w50", "w54"],
@@ -106,7 +114,11 @@ def test_boundary_audit_checks_declared_order_and_independent_scores():
         "predictions": predictions,
         "ranking": ranking,
     }
-    pre = {"ranking_strategy": "feasibility_then_cheaper_boundary.v1"}
+    pre = {
+        "ranking_strategy": "feasibility_then_cheaper_boundary.v1",
+        "online_widths_m": [0.42, 0.34, 0.38, 0.46, 0.50, 0.54],
+        "full_analysis_budget_per_online_arm_including_baseline": 3,
+    }
     violations = []
     audit.check_frozen_ranking(pre, plan, lambda ok, reason: violations.append(reason) if not ok else None)
     assert violations == []
@@ -116,6 +128,114 @@ def test_boundary_audit_checks_declared_order_and_independent_scores():
     audit.check_frozen_ranking(pre, damaged, lambda ok, reason: violations.append(reason) if not ok else None)
     assert "w46 boundary score differs from frozen prediction" in violations
     assert "boundary learned shortlist unexpected" in violations
+
+
+def test_new_replication_protocol_is_frozen_before_any_numerical_work(tmp_path):
+    from scripts import run_rc_pin_roller_replication as runner
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=SOURCE, text=True
+    ).strip()
+    output = tmp_path / "packet"
+    plan = runner.prepare_packet(SOURCE, output, revision)
+    protocol = json.loads((SOURCE / runner.PROTOCOL).read_bytes())
+    assert plan["protocol_commit"] == runner.PROTOCOL_COMMIT
+    assert plan["protocol_sha256"] == runner.PROTOCOL_SHA
+    assert plan["training_widths_m"] == protocol["training_widths_m"]
+    assert plan["online_widths_m"] == protocol["online_widths_m"]
+    assert plan["ranking_strategy"] == protocol["ranking_strategy"]
+    assert not set(plan["training_widths_m"]) & set(plan["online_widths_m"])
+    assert not (output / "training").exists()
+    assert not (output / "search").exists()
+    source_model = json.loads((SOURCE / protocol["source_model"]).read_bytes())
+    online = json.loads((output / "inputs" / "online-model.json").read_bytes())
+    assert online["sections"][0]["width_m"] == protocol["online_widths_m"][0]
+    assert online["supports"] == source_model["supports"]
+    assert online["loads"] == source_model["loads"]
+    assert (output / "inputs" / "request.json").read_bytes() == (
+        SOURCE / protocol["source_request"]
+    ).read_bytes()
+    with pytest.raises(FileExistsError):
+        runner.prepare_packet(SOURCE, output, revision)
+
+
+def test_ranking_audit_uses_new_pool_and_rejects_posthoc_shortlist():
+    audit = _script("audit_rc_pin_roller_budget_study")
+    prices = {"w34": 1.0, "w38": 2.0, "w42": 3.0, "w46": 4.0, "w52": 5.0}
+    predictions = [
+        {
+            "candidate_id": cid,
+            "estimate": price,
+            "prediction": {"abstained": False},
+            "ranking_tier": 0 if cid == "w46" else 2,
+            "predicted_screens": {
+                "maximum_absolute_fiber_strain": {
+                    "value": 0.1 if cid == "w46" else 0.21 + i * 0.01,
+                    "limit": 0.2,
+                    "status": "pass" if cid == "w46" else "fail",
+                }
+            },
+        }
+        for i, (cid, price) in enumerate(prices.items())
+    ]
+    order, ranking = candidate_ranking(
+        predictions, "feasibility_then_cheaper_boundary.v1"
+    )
+    pre = {
+        "ranking_strategy": "feasibility_then_cheaper_boundary.v1",
+        "online_widths_m": [0.44, 0.34, 0.38, 0.42, 0.46, 0.52],
+        "full_analysis_budget_per_online_arm_including_baseline": 3,
+    }
+    plan = {
+        "schema_version": "experimental-rc-control-candidate-search-plan.v3",
+        "pool": [{"candidate_id": "baseline"}] + [
+            {"candidate_id": cid, "material_estimate": {"total": price}}
+            for cid, price in prices.items()
+        ],
+        "plans": {
+            "price_order": {"ordering": list(prices), "shortlist": list(prices)[:2]},
+            "learned_order": {"ordering": order, "shortlist": order[:2]},
+        },
+        "predictions": predictions,
+        "ranking": ranking,
+    }
+    violations = []
+    audit.check_frozen_ranking(pre, plan, lambda ok, reason: violations.append(reason) if not ok else None)
+    assert violations == []
+    changed = deepcopy(plan)
+    changed["plans"]["learned_order"]["shortlist"] = ["w52", "w34"]
+    audit.check_frozen_ranking(pre, changed, lambda ok, reason: violations.append(reason) if not ok else None)
+    assert "boundary learned shortlist unexpected" in violations
+
+
+def test_incomplete_replication_audit_keeps_unknown_total_cost(tmp_path):
+    packet = tmp_path / "packet"
+    packet.mkdir()
+    (packet / "plan.json").write_text('{"schema":"interrupted"}\n')
+    (packet / "training-outcome.json").write_text(
+        '{"phase":"training","status":"failed","wall_ns":123,"unknown_work_until_outcome":true}\n'
+    )
+    output = tmp_path / "audit.json"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(SOURCE / "scripts" / "audit_rc_pin_roller_budget_study.py"),
+            "--protocol",
+            "examples/research/rc_reuse_campaign/pin-roller-replication.protocol.json",
+            "--packet", str(packet),
+            "--output", str(output),
+        ],
+        cwd=SOURCE,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 1
+    result = json.loads(output.read_bytes())
+    assert result["status"] == "incomplete_or_unverifiable"
+    assert result["total_evaluation_cost_ns"] is None
+    assert result["selected_candidate_id"] is None
+    assert result["launcher_phase_outcomes"]["training"]["wall_ns"] == 123
+    assert result["launcher_phase_outcomes"]["search"] is None
 
 
 def test_failed_phase_retains_unknown_work_and_original_stderr(tmp_path, monkeypatch):
