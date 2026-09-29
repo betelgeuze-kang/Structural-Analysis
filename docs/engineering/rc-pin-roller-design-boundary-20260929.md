@@ -22,14 +22,15 @@ and a separate fresh full-path verification. Its synthetic common rates produce
 an estimate difference of 4.56; this checks arithmetic and scope only, not a
 construction quote, realized currency saving or independently validated response.
 
-The durable job transport still supports only the one-fixed-endpoint RC profile.
-Previously it decoded a v3 or v4 request, then compiled its model using the
+At parent source `3021a69b54d073b6f5dee7e329545bbe4f1237a7`, the durable job
+transport supported only the one-fixed-endpoint RC profile. Before that correction
+it decoded a v3 or v4 request, then compiled its model using the
 default profile. A cantilever paired with either incompatible flag could pass
 submission validation even though the worker would use different support
-semantics. It now rejects both flags explicitly before the default compiler or
-worker dispatch. The direct-control API/CLI remain the available experimental
-route for the two-fixed-endpoint and pin/roller profiles. This change does not
-enable a pin/roller durable worker or browser submission service.
+semantics. That parent correction rejected both flags explicitly before the
+default compiler or worker dispatch; it did not enable a pin/roller durable
+worker or browser submission service. The subsequent integration below extends
+that transport boundary only where explicit support is implemented.
 
 Validation: all 11 new cases failed against the previous implementation. After
 the correction, the five-file regression selection passed 180 tests, including
@@ -37,3 +38,30 @@ the existing cantilever/portal design comparisons and durable contract/service
 tests. Ruff and whitespace checks passed. These are local software observations;
 the browser review of saved originals, measured-specimen validation, operational
 budgets, official support and release qualification remain separate work.
+
+## Integrated proportional-load durable path
+
+PR #469 now incorporates the parent correction and the #471 tensile-onset
+regression. An explicit pin/roller request without constant preload passes its
+profile through the durable compiler, worker, saved result and Workbench review.
+A cantilever mislabeled as a pin/roller beam still fails its model check; the
+two-fixed-endpoint profile and a canonical pin/roller request with constant
+preload still fail before model compilation. Constant-preload support in the
+direct-control API and review of its original files does not imply support in
+this durable job path.
+
+On integrated source `cd9e063b7f97d8279a25c8fb9645902d2296c4b6`, 119 Python
+tests passed for the public beam, durable request/worker and quantity/design
+boundary. The synthetic tensile-onset regression retains the default blocked
+path with exact rollback and the explicitly weighted control configuration's
+accepted, freshly verified result. Solver defaults and equilibrium criteria are
+unchanged; this is not evidence from a measured specimen.
+
+The pinned Node 24.20.0/npm 11.19.0 environment installed the unchanged lockfile
+with fast-uri 3.1.8; vulnerability and package-signature audits passed. The build
+and 84 existing contract/browser cases passed in desktop and mobile Chromium
+configurations (1280x720 and 390x844). They cover saved conventional and constant
+jobs, pin/roller original files and saved pin/roller jobs, including byte-exact
+downloads and altered-profile/reaction rejection. These saved-artifact tests do
+not exercise a live HTTP job submission service or establish a mobile response
+time guarantee. That broader service integration remains separate work.
