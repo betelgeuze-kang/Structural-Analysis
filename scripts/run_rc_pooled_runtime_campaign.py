@@ -15,6 +15,7 @@ from structural_analysis.benchmark.rc_control_runtime_selection import (
 from structural_analysis.benchmark.rc_control_training_diagnostics import _validated_training_data
 
 NEW_INVENTORY = '23d28a47d891e1b45d7306007529a78d203a436677af0fd5fe9e7dbe4061af92'
+ASSEMBLY_REUSE_PROFILE = 'rc-control-immediate-line-search-reuse.v1'
 
 
 def inputs(old_root, new_root):
@@ -52,6 +53,7 @@ def main():
     parser.add_argument('--source-revision', required=True)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--preflight-only', action='store_true')
+    parser.add_argument('--reuse-line-search-assembly', action='store_true')
     parser.add_argument('--observe-initial-residuals', action='store_true')
     parser.add_argument('--fit-solver', choices=(learning.SVD_RIDGE_FIT_PROFILE,
                         learning.CONSTANT_SAFE_SVD_FIT_PROFILE),
@@ -79,7 +81,11 @@ def main():
         'maximum_selection_fits': 31, 'maximum_selection_core_calls': 6840,
         'pooled_metadata_fit_count': 1, 'minimum_relative_improvement': 0.01,
         'historical_label_costs_separate': costs,
-        'arithmetic_profile': ARITHMETIC, 'labels_regenerated': False,
+        'arithmetic_profile': ARITHMETIC,
+        'selected_assembly_reuse_profile': (
+            ASSEMBLY_REUSE_PROFILE if args.reuse_line_search_assembly else None
+        ),
+        'labels_regenerated': False,
         'reserved_evaluation_executed': False, 'independent_project_provenance': False,
         'parallel_timing_runs': False,
     }))
@@ -99,6 +105,7 @@ def main():
         withholding_strategy='connected_training_groups',
         proposal_abstention_strategy='secant', static_model_abstention=True,
         observe_initial_residuals=args.observe_initial_residuals,
+        reuse_line_search_assembly=args.reuse_line_search_assembly,
     )
     _save(root, 'outcome.json', _bytes({
         'selection_result_hash': result['result_hash'],

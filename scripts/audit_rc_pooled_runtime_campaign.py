@@ -6,7 +6,9 @@ from pathlib import Path
 from statistics import mean
 
 from audit_grouped_rc_runtime_campaign import checked, read, require
-from run_rc_pooled_runtime_campaign import NEW_INVENTORY, PINS, inputs
+from run_rc_pooled_runtime_campaign import (
+    ASSEMBLY_REUSE_PROFILE, NEW_INVENTORY, PINS, inputs,
+)
 from structural_analysis.benchmark import rc_control_learning as learning
 from structural_analysis.benchmark.rc_control_design import _bytes
 from structural_analysis.benchmark.rc_control_training_diagnostics import _validated_training_data
@@ -19,6 +21,9 @@ def require_report_binding(plan, case_id, report):
     require(report['source_revision'] == plan['source_revision'] and
             report['model_checksum'] == case['model_hash'] and
             report['request'] == case['request'], 'comparison model/request/source binding')
+    key = 'line_search_assembly_reuse'
+    require((key in report) == (key in plan) and report.get(key) == plan.get(key),
+            'comparison assembly reuse profile binding')
 
 
 def require_fit_method(source, plan, policy):
@@ -27,6 +32,16 @@ def require_fit_method(source, plan, policy):
             and plan.get('fit_solver_profile') == expected
             and policy.get('fit_solver_profile') == expected,
             'predeclared fit method differs')
+
+
+def require_assembly_reuse_profile(source, plan, result):
+    selected = source.get('selected_assembly_reuse_profile')
+    require(selected is None or selected == ASSEMBLY_REUSE_PROFILE,
+            'unsupported selected assembly reuse profile')
+    key = 'line_search_assembly_reuse'
+    require(all((key in receipt) == (selected is not None) and
+                receipt.get(key) == selected for receipt in (plan, result)),
+            'selected assembly reuse profile differs from child selection')
 
 
 def require_observations(report, enabled):
@@ -79,6 +94,7 @@ def audit(study, old_labels, new_labels):
             'original inventories differ')
     require(source['source_revision'] == plan['source_revision'] == result['source_revision'],
             'runtime source revisions')
+    require_assembly_reuse_profile(source, plan, result)
     require(outcome['selection_result_hash'] == result['result_hash'] and
             result['plan_hash'] == plan['plan_hash'], 'runtime bindings')
     require(plan['source_policy_hash'] == pooled.policy_hash and
