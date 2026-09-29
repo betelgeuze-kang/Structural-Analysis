@@ -1,0 +1,50 @@
+{
+  "artifact_hash": "sha256:65cd36a7e12dadcc08782bd501ccb4c201edb16281fb283ea09f05fa18fb1f5a",
+  "case_id": "bounded_planar_steel_yield",
+  "case_kind": "steel_uniaxial_yield",
+  "claims": {
+    "bounded_product_reference": true,
+    "external_reference_attached": false,
+    "verification_level_2": false,
+    "verification_matrix_credit": false
+  },
+  "contract_pass": true,
+  "metrics": {
+    "steel.post_yield_tangent_mpa": 7692.307692307692,
+    "steel.stress.strain_0p000500_mpa": 100.0,
+    "steel.stress.strain_0p001250_mpa": 250.0,
+    "steel.stress.strain_0p002000_mpa": 255.76923076923077,
+    "steel.stress.strain_0p004000_mpa": 271.1538461538461,
+    "steel.yielded_point_count": 2.0
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "requirement_id": "material.steel_yield",
+  "schema_version": "bounded-planar-nonlinear-material-recovery-product-result.v1",
+  "source_model_file_sha256": "sha256:de351e40f36b3be1f15e91ad4f820dae57debde792b500032a1020f508da046c",
+  "tolerances": {
+    "steel.post_yield_tangent_mpa": {
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-10
+    },
+    "steel.stress.strain_0p000500_mpa": {
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-10
+    },
+    "steel.stress.strain_0p001250_mpa": {
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-10
+    },
+    "steel.stress.strain_0p002000_mpa": {
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-10
+    },
+    "steel.stress.strain_0p004000_mpa": {
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-10
+    },
+    "steel.yielded_point_count": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    }
+  }
+}

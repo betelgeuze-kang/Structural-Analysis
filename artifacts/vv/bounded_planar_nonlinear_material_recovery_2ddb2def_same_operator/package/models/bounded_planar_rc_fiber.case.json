@@ -1,0 +1,58 @@
+{
+  "artifact_hash": "sha256:3c39863f6e3fa92d86824fd631883aa651f1f1d4ed25cb17bae9fb8eee746db0",
+  "case_id": "bounded_planar_rc_fiber",
+  "case_kind": "rc_fiber_nonlinear_section",
+  "concrete": {
+    "compressive_peak_strain": 0.002,
+    "compressive_softening_rate": 400.0,
+    "compressive_strength_mpa": 30.0,
+    "elastic_modulus_mpa": 30000.0,
+    "history_tolerance": 1e-14,
+    "material_id": "concrete_asymmetric_exponential_damage_1d",
+    "residual_compressive_strength_mpa": 6.0,
+    "tensile_softening_rate": 3000.0,
+    "tensile_strength_mpa": 3.0,
+    "tension_softening_slope_mpa": 4660.0,
+    "ultimate_compressive_strain": 0.006,
+    "unloading_ratio": 0.1
+  },
+  "fibers": [
+    {
+      "area_m2": 0.12,
+      "fiber_id": "concrete-00",
+      "material_kind": "concrete",
+      "y_m": -0.15
+    },
+    {
+      "area_m2": 0.12,
+      "fiber_id": "concrete-01",
+      "material_kind": "concrete",
+      "y_m": 0.14999999999999997
+    },
+    {
+      "area_m2": 0.001548,
+      "fiber_id": "steel-bottom-layer",
+      "material_kind": "steel",
+      "y_m": -0.25
+    },
+    {
+      "area_m2": 0.001548,
+      "fiber_id": "steel-top-layer",
+      "material_kind": "steel",
+      "y_m": 0.25
+    }
+  ],
+  "generalized_strain": {
+    "axial_strain": -0.0003,
+    "curvature_z_per_m": 0.006
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "requirement_id": "material.rc_fiber",
+  "schema_version": "bounded-planar-external-nonlinear-material-recovery-case.v1",
+  "steel": {
+    "elastic_modulus_mpa": 200000.0,
+    "isotropic_hardening_modulus_mpa": 3000.0,
+    "kinematic_hardening_modulus_mpa": 5000.0,
+    "yield_stress_mpa": 250.0
+  }
+}

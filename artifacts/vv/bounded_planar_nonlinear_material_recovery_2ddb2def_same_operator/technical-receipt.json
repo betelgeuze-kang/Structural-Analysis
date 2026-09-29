@@ -1,0 +1,605 @@
+{
+  "artifact_hash": "sha256:09b289e2d1015a9cfe5117fca5a962c4a7512c53af691544264fc29e37346c71",
+  "blockers": [
+    "formal_level2_promotion_receipt_missing",
+    "fresh_current_source_execution_not_attested",
+    "independent_operator_attestation_missing",
+    "product_legal_license_approval_missing"
+  ],
+  "cases": [
+    {
+      "blockers": [],
+      "case_id": "bounded_planar_p_delta",
+      "external_result": {
+        "artifact_hash": "sha256:b92ea211815e56323d7cffce5ae980114d46130f644c916b220c86e3d4160e97",
+        "executed_at": "2026-09-28T15:06:02.326422+00:00",
+        "file_sha256": "sha256:457066dad051799d8e3af8441ca6132907de8838593c60d042fd98fb8544a68b",
+        "path": "artifacts/vv/bounded_planar_nonlinear_material_recovery_2ddb2def_same_operator/container-results/bounded_planar_p_delta.json",
+        "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "runtime": {
+          "opensees_core_version": "3.7.1",
+          "openseespy_version": "3.7.1.2",
+          "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.36",
+          "python_version": "3.11.15"
+        },
+        "source_model_file_sha256": "sha256:cd709c803422bbd08b5834de8497249616f05218df8a6e6f8ffaa9da2fe5db8f"
+      },
+      "maximum_absolute_error": 0.15700967138460697,
+      "maximum_relative_error": 0.007792201243374284,
+      "metric_comparisons": [
+        {
+          "absolute_error": 0.0003038290300290125,
+          "absolute_tolerance": 0.03,
+          "contract_pass": true,
+          "external_value": 1.3335070177570845,
+          "metric_id": "pdelta.amplification.ratio_0p25",
+          "product_value": 1.3332031887270555,
+          "relative_error": 0.00022784209305478053,
+          "relative_tolerance": 0.01
+        },
+        {
+          "absolute_error": 0.0011722174025947663,
+          "absolute_tolerance": 0.03,
+          "contract_pass": true,
+          "external_value": 2.0007817835828647,
+          "metric_id": "pdelta.amplification.ratio_0p5",
+          "product_value": 1.99960956618027,
+          "relative_error": 0.0005858796857374614,
+          "relative_tolerance": 0.01
+        },
+        {
+          "absolute_error": 0.005865672955024159,
+          "absolute_tolerance": 0.03,
+          "contract_pass": true,
+          "external_value": 4.004694371495379,
+          "metric_id": "pdelta.amplification.ratio_0p75",
+          "product_value": 3.998828698540355,
+          "relative_error": 0.0014646992781209116,
+          "relative_tolerance": 0.01
+        },
+        {
+          "absolute_error": 0.03880452498078313,
+          "absolute_tolerance": 0.03,
+          "contract_pass": true,
+          "external_value": 10.035290620616482,
+          "metric_id": "pdelta.amplification.ratio_0p9",
+          "product_value": 9.9964860956357,
+          "relative_error": 0.0038668062986699342,
+          "relative_tolerance": 0.01
+        },
+        {
+          "absolute_error": 0.15700967138460697,
+          "absolute_tolerance": 0.03,
+          "contract_pass": true,
+          "external_value": 20.149591428752235,
+          "metric_id": "pdelta.amplification.ratio_0p95",
+          "product_value": 19.992581757367628,
+          "relative_error": 0.007792201243374284,
+          "relative_tolerance": 0.01
+        },
+        {
+          "absolute_error": 9.677023626863956e-10,
+          "absolute_tolerance": 1e-05,
+          "contract_pass": true,
+          "external_value": 10411.570108588148,
+          "metric_id": "pdelta.base_effective_stiffness_kn_per_m",
+          "product_value": 10411.570108589116,
+          "relative_error": 9.294490193060134e-14,
+          "relative_tolerance": 1e-08
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 1.0,
+          "metric_id": "pdelta.response.monotonic",
+          "product_value": 1.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        }
+      ],
+      "requirement_id": "geometric_nonlinear.p_delta",
+      "technical_comparison_pass": true
+    },
+    {
+      "blockers": [],
+      "case_id": "bounded_planar_snap_through",
+      "external_result": {
+        "artifact_hash": "sha256:05f9a5f966debc217e8459e38b81c233d7b1184f6def90351aca48413dd98ac1",
+        "executed_at": "2026-09-28T15:06:02.627904+00:00",
+        "file_sha256": "sha256:8165a021979bd05c359bf751989f641bd677c8aa29f7e6c408d90b1e18892558",
+        "path": "artifacts/vv/bounded_planar_nonlinear_material_recovery_2ddb2def_same_operator/container-results/bounded_planar_snap_through.json",
+        "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "runtime": {
+          "opensees_core_version": "3.7.1",
+          "openseespy_version": "3.7.1.2",
+          "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.36",
+          "python_version": "3.11.15"
+        },
+        "source_model_file_sha256": "sha256:3beed4f697b444b2087bec2ef4f1c2cf1ee969908a16adffe5636cafbfafd7a2"
+      },
+      "maximum_absolute_error": 0.0021127478361660512,
+      "maximum_relative_error": 0.00785063574853477,
+      "metric_comparisons": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 1.0,
+          "metric_id": "snap.descending_branch_observed",
+          "product_value": 1.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        },
+        {
+          "absolute_error": 0.001599623428433783,
+          "absolute_tolerance": 0.003,
+          "contract_pass": true,
+          "external_value": 0.48738476653050233,
+          "metric_id": "snap.first_limit.downward_displacement_m",
+          "product_value": 0.4889843899589361,
+          "relative_error": 0.003271317983316637,
+          "relative_tolerance": 0.02
+        },
+        {
+          "absolute_error": 0.0021127478361660512,
+          "absolute_tolerance": 0.003,
+          "contract_pass": true,
+          "external_value": 0.2670053088206303,
+          "metric_id": "snap.first_limit.horizontal_displacement_m",
+          "product_value": 0.26911805665679633,
+          "relative_error": 0.00785063574853477,
+          "relative_tolerance": 0.02
+        },
+        {
+          "absolute_error": 9.72619004784292e-05,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 18.65872707861115,
+          "metric_id": "snap.first_limit.load_factor",
+          "product_value": 18.658629816710672,
+          "relative_error": 5.2126760881733645e-06,
+          "relative_tolerance": 0.02
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 1.0,
+          "metric_id": "snap.negative_load_observed",
+          "product_value": 1.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        }
+      ],
+      "requirement_id": "geometric_nonlinear.snap_through",
+      "technical_comparison_pass": true
+    },
+    {
+      "blockers": [],
+      "case_id": "bounded_planar_steel_yield",
+      "external_result": {
+        "artifact_hash": "sha256:14571a8fed86b3fd6bfb43a4b92631a76eab653989f62e6b005877e78797d8df",
+        "executed_at": "2026-09-28T15:06:02.837507+00:00",
+        "file_sha256": "sha256:5a2bffa0f5a671665f814e74364f083a957314743621930344deaedb22f02c28",
+        "path": "artifacts/vv/bounded_planar_nonlinear_material_recovery_2ddb2def_same_operator/container-results/bounded_planar_steel_yield.json",
+        "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "runtime": {
+          "opensees_core_version": "3.7.1",
+          "openseespy_version": "3.7.1.2",
+          "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.36",
+          "python_version": "3.11.15"
+        },
+        "source_model_file_sha256": "sha256:de351e40f36b3be1f15e91ad4f820dae57debde792b500032a1020f508da046c"
+      },
+      "maximum_absolute_error": 5.684341886080802e-14,
+      "maximum_relative_error": 2.0963530360014305e-16,
+      "metric_comparisons": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-08,
+          "contract_pass": true,
+          "external_value": 7692.307692307692,
+          "metric_id": "steel.post_yield_tangent_mpa",
+          "product_value": 7692.307692307692,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-08,
+          "contract_pass": true,
+          "external_value": 100.0,
+          "metric_id": "steel.stress.strain_0p000500_mpa",
+          "product_value": 100.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-08,
+          "contract_pass": true,
+          "external_value": 250.0,
+          "metric_id": "steel.stress.strain_0p001250_mpa",
+          "product_value": 250.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-08,
+          "contract_pass": true,
+          "external_value": 255.76923076923077,
+          "metric_id": "steel.stress.strain_0p002000_mpa",
+          "product_value": 255.76923076923077,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 5.684341886080802e-14,
+          "absolute_tolerance": 1e-08,
+          "contract_pass": true,
+          "external_value": 271.15384615384613,
+          "metric_id": "steel.stress.strain_0p004000_mpa",
+          "product_value": 271.1538461538461,
+          "relative_error": 2.0963530360014305e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 2.0,
+          "metric_id": "steel.yielded_point_count",
+          "product_value": 2.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        }
+      ],
+      "requirement_id": "material.steel_yield",
+      "technical_comparison_pass": true
+    },
+    {
+      "blockers": [],
+      "case_id": "bounded_planar_rc_fiber",
+      "external_result": {
+        "artifact_hash": "sha256:5dc4e2e7d192bc2364fbea23a505502993f0e13c8fde34cccf447580caaa2ef5",
+        "executed_at": "2026-09-28T15:06:03.048659+00:00",
+        "file_sha256": "sha256:8af3740e92bcfb49dc17e8a17142e6ffc7966c66cd359e9d84c59251a65cf7c9",
+        "path": "artifacts/vv/bounded_planar_nonlinear_material_recovery_2ddb2def_same_operator/container-results/bounded_planar_rc_fiber.json",
+        "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "runtime": {
+          "opensees_core_version": "3.7.1",
+          "openseespy_version": "3.7.1.2",
+          "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.36",
+          "python_version": "3.11.15"
+        },
+        "source_model_file_sha256": "sha256:d78e15d5e8320f8f62753b171bad0ca8a10afe3f8e75caed468314f466ff5fd6"
+      },
+      "maximum_absolute_error": 299.29198933845373,
+      "maximum_relative_error": 0.09166897733862699,
+      "metric_comparisons": [
+        {
+          "absolute_error": 2.168404344971009e-19,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": 0.0005999999999999998,
+          "metric_id": "fiber.0.strain",
+          "product_value": 0.0006000000000000001,
+          "relative_error": 3.614007241618348e-16,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 0.0006095195547123344,
+          "absolute_tolerance": 0.5,
+          "contract_pass": true,
+          "external_value": 0.6700000000000008,
+          "metric_id": "fiber.0.stress_mpa",
+          "product_value": 0.6693904804452885,
+          "relative_error": 0.0009097306786751249,
+          "relative_tolerance": 0.12
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": -0.0012,
+          "metric_id": "fiber.1.strain",
+          "product_value": -0.0012,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 2.4934903915990745,
+          "absolute_tolerance": 0.5,
+          "contract_pass": true,
+          "external_value": -25.2,
+          "metric_id": "fiber.1.stress_mpa",
+          "product_value": -27.693490391599074,
+          "relative_error": 0.09003886315303485,
+          "relative_tolerance": 0.12
+        },
+        {
+          "absolute_error": 2.168404344971009e-19,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": 0.0012,
+          "metric_id": "fiber.2.strain",
+          "product_value": 0.0012000000000000001,
+          "relative_error": 1.807003620809174e-16,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 5.684341886080802e-14,
+          "absolute_tolerance": 0.5,
+          "contract_pass": true,
+          "external_value": 239.99999999999997,
+          "metric_id": "fiber.2.stress_mpa",
+          "product_value": 240.00000000000003,
+          "relative_error": 2.368475785867e-16,
+          "relative_tolerance": 0.12
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": -0.0018,
+          "metric_id": "fiber.3.strain",
+          "product_value": -0.0018,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.5,
+          "contract_pass": true,
+          "external_value": -254.23076923076923,
+          "metric_id": "fiber.3.stress_mpa",
+          "product_value": -254.23076923076923,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.12
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 4.0,
+          "metric_id": "fiber.count",
+          "product_value": 4.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 2.0,
+          "metric_id": "rc.nonlinear_concrete_fiber_count",
+          "product_value": 2.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 1.0,
+          "metric_id": "rc.yielded_steel_fiber_count",
+          "product_value": 1.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        },
+        {
+          "absolute_error": 299.29198933845373,
+          "absolute_tolerance": 2.0,
+          "contract_pass": true,
+          "external_value": -2965.629230769231,
+          "metric_id": "section.axial_force_kn",
+          "product_value": -3264.921220107685,
+          "relative_error": 0.09166897733862699,
+          "relative_tolerance": 0.12
+        },
+        {
+          "absolute_error": 44.871855696798434,
+          "absolute_tolerance": 2.0,
+          "contract_pass": true,
+          "external_value": 656.9273076923076,
+          "metric_id": "section.moment_z_kn_m",
+          "product_value": 701.7991633891061,
+          "relative_error": 0.0639383146028626,
+          "relative_tolerance": 0.12
+        }
+      ],
+      "requirement_id": "material.rc_fiber",
+      "technical_comparison_pass": true
+    },
+    {
+      "blockers": [],
+      "case_id": "bounded_planar_section_recovery",
+      "external_result": {
+        "artifact_hash": "sha256:b7a3ae16f746ccb1c45c22f168e82b2fc754d013920b44050bf24b9d1dd83618",
+        "executed_at": "2026-09-28T15:06:03.260995+00:00",
+        "file_sha256": "sha256:c916a45fe545740b0532df49ba64657be01bc215a56855a5fa56f5f2179a464c",
+        "path": "artifacts/vv/bounded_planar_nonlinear_material_recovery_2ddb2def_same_operator/container-results/bounded_planar_section_recovery.json",
+        "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "runtime": {
+          "opensees_core_version": "3.7.1",
+          "openseespy_version": "3.7.1.2",
+          "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.36",
+          "python_version": "3.11.15"
+        },
+        "source_model_file_sha256": "sha256:7fb386a6e5439987655c2a813ff4c57e75bd1455e2fefc480a3e1c236b017f1c"
+      },
+      "maximum_absolute_error": 2.808864252301646e-14,
+      "maximum_relative_error": 1.9765625,
+      "metric_comparisons": [
+        {
+          "absolute_error": 2.808864252301646e-14,
+          "absolute_tolerance": 1e-07,
+          "contract_pass": true,
+          "external_value": -1.3877787807814457e-14,
+          "metric_id": "section.axial_force_kn",
+          "product_value": 1.4210854715202004e-14,
+          "relative_error": 1.9765625,
+          "relative_tolerance": 1e-08
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "contract_pass": true,
+          "external_value": 20.069999999999993,
+          "metric_id": "section.moment_z_kn_m",
+          "product_value": 20.069999999999993,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-08
+        }
+      ],
+      "requirement_id": "recovery.section",
+      "technical_comparison_pass": true
+    },
+    {
+      "blockers": [],
+      "case_id": "bounded_planar_fiber_recovery",
+      "external_result": {
+        "artifact_hash": "sha256:29672752f2bfd3ecb871da9f81763059f5c705f6e91ea60aeff5efa9b3cecf96",
+        "executed_at": "2026-09-28T15:06:03.474356+00:00",
+        "file_sha256": "sha256:5a2238a4f0d7a75a4bce354989eaf5d072341504e6c6c31649fa2f536db0e86a",
+        "path": "artifacts/vv/bounded_planar_nonlinear_material_recovery_2ddb2def_same_operator/container-results/bounded_planar_fiber_recovery.json",
+        "runner_file_sha256": "sha256:50cf8c45f613c07588e8c134fcc98905d48d8802f4d8e2d0cfff45c5a9d475a6",
+        "runtime": {
+          "opensees_core_version": "3.7.1",
+          "openseespy_version": "3.7.1.2",
+          "platform": "Linux-6.5.0-26-generic-x86_64-with-glibc2.36",
+          "python_version": "3.11.15"
+        },
+        "source_model_file_sha256": "sha256:c8064f35f14afbd5b0a4fbafbf4aba97ab100e87302b373b10238dd0ac70ea62"
+      },
+      "maximum_absolute_error": 1.1102230246251565e-16,
+      "maximum_relative_error": 2.4671622769447924e-16,
+      "metric_comparisons": [
+        {
+          "absolute_error": 3.3881317890172014e-21,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": 1.4999999999999997e-05,
+          "metric_id": "fiber.0.strain",
+          "product_value": 1.5e-05,
+          "relative_error": 2.2587545260114677e-16,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 1e-07,
+          "contract_pass": true,
+          "external_value": 0.4499999999999999,
+          "metric_id": "fiber.0.stress_mpa",
+          "product_value": 0.45,
+          "relative_error": 2.4671622769447924e-16,
+          "relative_tolerance": 1e-08
+        },
+        {
+          "absolute_error": 3.3881317890172014e-21,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": -1.5e-05,
+          "metric_id": "fiber.1.strain",
+          "product_value": -1.4999999999999997e-05,
+          "relative_error": 2.2587545260114677e-16,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 1e-07,
+          "contract_pass": true,
+          "external_value": -0.45,
+          "metric_id": "fiber.1.stress_mpa",
+          "product_value": -0.4499999999999999,
+          "relative_error": 2.4671622769447924e-16,
+          "relative_tolerance": 1e-08
+        },
+        {
+          "absolute_error": 3.3881317890172014e-21,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": 2.4999999999999998e-05,
+          "metric_id": "fiber.2.strain",
+          "product_value": 2.5e-05,
+          "relative_error": 1.3552527156068805e-16,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "contract_pass": true,
+          "external_value": 5.0,
+          "metric_id": "fiber.2.stress_mpa",
+          "product_value": 5.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-08
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-12,
+          "contract_pass": true,
+          "external_value": -2.5e-05,
+          "metric_id": "fiber.3.strain",
+          "product_value": -2.5e-05,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-09
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "contract_pass": true,
+          "external_value": -5.0,
+          "metric_id": "fiber.3.stress_mpa",
+          "product_value": -5.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-08
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 0.1,
+          "contract_pass": true,
+          "external_value": 4.0,
+          "metric_id": "fiber.count",
+          "product_value": 4.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 0.1
+        }
+      ],
+      "requirement_id": "recovery.fiber",
+      "technical_comparison_pass": true
+    }
+  ],
+  "claim_boundary": "This receipt authenticates six packaged inputs, product references, runner bytes, self-hashed OpenSees outputs and pinned runtime versions, then evaluates only the declared bounded technical metrics. It does not authenticate the operator identity or source environment, approve licenses, grant matrix credit or Verification Level 2, establish design authority, prove commercial equivalence, or create release readiness.",
+  "claims": {
+    "external_results_self_consistent": true,
+    "fresh_current_source_external_execution": false,
+    "independent_operator_attested": false,
+    "legal_use_approved": false,
+    "package_bytes_authenticated": true,
+    "verification_level_2": false,
+    "verification_matrix_credit": false
+  },
+  "package_binding": {
+    "artifact_hash": "sha256:f73d93dd3ff3546050eed487f1e2d01c4f872b3e3247f02ea72075b2a349c658",
+    "file_sha256": "sha256:466e73fc35349757750c72142911435c53a903785888fadef1f5eea13724a71e",
+    "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+    "path": "artifacts/vv/bounded_planar_nonlinear_material_recovery_2ddb2def_same_operator/package/manifest.json",
+    "source_commit_sha": "2ddb2deff53ec4e5b7bb6c047709f914a5dd554e"
+  },
+  "runtime_policy": {
+    "opensees_core_version": "3.7.1",
+    "openseespy_version": "3.7.1.2"
+  },
+  "schema_version": "bounded-planar-external-nonlinear-material-recovery-execution-receipt.v1",
+  "source_commit_sha": "2ddb2deff53ec4e5b7bb6c047709f914a5dd554e",
+  "status": "technical_pass",
+  "summary": {
+    "case_count": 6,
+    "self_consistent_result_count": 6,
+    "technical_comparison_pass_count": 6
+  },
+  "technical_contract_pass": true
+}

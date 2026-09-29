@@ -55,6 +55,58 @@ def test_execution_receipt_schema_is_valid() -> None:
     Draft202012Validator.check_schema(schema)
 
 
+def test_result_path_uses_explicit_repository_root(tmp_path: Path) -> None:
+    package_root = tmp_path / "arbitrary" / "deep" / "depth" / "package"
+    manifest = ingest.package_builder.write_package(
+        repo_root=ROOT, out_dir=package_root
+    )
+    case = manifest["cases"][0]
+    product = json.loads(
+        (package_root / case["product_result"]["path"]).read_text(encoding="utf-8")
+    )
+    result = {
+        "schema_version": "bounded-planar-opensees-nonlinear-material-recovery-result.v1",
+        "package_id": ingest.package_builder.PACKAGE_ID,
+        "case_id": case["case_id"],
+        "executed_at": "2026-01-01T00:00:00+00:00",
+        "runner_file_sha256": case["external_runner"]["file_sha256"],
+        "source_model_file_sha256": case["model"]["file_sha256"],
+        "runtime": {
+            "python_version": "3.11",
+            "platform": "test-fixture",
+            "openseespy_version": ingest.package_builder.PINNED_OPENSEESPY_VERSION,
+            "opensees_core_version": ingest.package_builder.PINNED_OPENSEES_CORE_VERSION,
+        },
+        "return_codes": [0],
+        "metrics": product["metrics"],
+        "contract_pass": True,
+        "blockers": [],
+    }
+    result["artifact_hash"] = ingest._artifact_hash(result)
+    results_root = tmp_path / "results"
+    results_root.mkdir()
+    (results_root / f"{case['case_id']}.json").write_text(
+        json.dumps(result), encoding="utf-8"
+    )
+    result_schema = json.loads(
+        (
+            package_root / manifest["external_result_schema"]["path"]
+        ).read_text(encoding="utf-8")
+    )
+
+    receipt_case, _ = ingest._validate_result(
+        case=case,
+        repo_root=tmp_path,
+        package_root=package_root,
+        results_root=results_root,
+        result_schema=result_schema,
+    )
+
+    assert receipt_case["external_result"]["path"] == (
+        f"results/{case['case_id']}.json"
+    )
+
+
 @requires_local_supplemental
 def test_committed_results_replay_six_technical_passes() -> None:
     receipt = _build()

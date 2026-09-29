@@ -1093,6 +1093,7 @@ def _validate_bounded_planar_nonlinear_material_recovery_bundle(
             validated_receipt_case, _validated_result = (
                 nonlinear_material_recovery_ingest._validate_result(
                     case=manifest_case,
+                    repo_root=repo_root,
                     package_root=manifest_path.parent,
                     results_root=path.parent,
                     result_schema=result_schema,

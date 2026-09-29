@@ -1,0 +1,18 @@
+{
+  "arc_length_m": 0.02,
+  "artifact_hash": "sha256:ddd7eed2806ca47fc7835f3664382af944fe55e3cdbe30c4141c1b16bb03c06e",
+  "case_id": "bounded_planar_snap_through",
+  "case_kind": "lee_frame_snap_through",
+  "load_factor_metric_scale_m": 0.0001,
+  "maximum_steps": 500,
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "properties": {
+    "area_m2": 0.0006,
+    "elements_per_member": 10,
+    "member_length_m": 1.2,
+    "second_moment_m4": 2e-08,
+    "youngs_modulus_kn_per_m2": 72000000.0
+  },
+  "requirement_id": "geometric_nonlinear.snap_through",
+  "schema_version": "bounded-planar-external-nonlinear-material-recovery-case.v1"
+}

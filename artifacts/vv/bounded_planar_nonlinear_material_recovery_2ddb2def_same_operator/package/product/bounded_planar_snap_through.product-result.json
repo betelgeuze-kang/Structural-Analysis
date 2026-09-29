@@ -1,0 +1,45 @@
+{
+  "artifact_hash": "sha256:6e9461b47a2848ef1b2803ed2eda36da000e4a9665072b8a4371c088050db5e1",
+  "case_id": "bounded_planar_snap_through",
+  "case_kind": "lee_frame_snap_through",
+  "claims": {
+    "bounded_product_reference": true,
+    "external_reference_attached": false,
+    "verification_level_2": false,
+    "verification_matrix_credit": false
+  },
+  "contract_pass": true,
+  "metrics": {
+    "snap.descending_branch_observed": 1.0,
+    "snap.first_limit.downward_displacement_m": 0.4889843899589361,
+    "snap.first_limit.horizontal_displacement_m": 0.26911805665679633,
+    "snap.first_limit.load_factor": 18.658629816710672,
+    "snap.negative_load_observed": 1.0
+  },
+  "package_id": "bounded-planar-nonlinear-material-recovery-v1",
+  "requirement_id": "geometric_nonlinear.snap_through",
+  "schema_version": "bounded-planar-nonlinear-material-recovery-product-result.v1",
+  "source_model_file_sha256": "sha256:3beed4f697b444b2087bec2ef4f1c2cf1ee969908a16adffe5636cafbfafd7a2",
+  "tolerances": {
+    "snap.descending_branch_observed": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    },
+    "snap.first_limit.downward_displacement_m": {
+      "absolute_tolerance": 0.003,
+      "relative_tolerance": 0.02
+    },
+    "snap.first_limit.horizontal_displacement_m": {
+      "absolute_tolerance": 0.003,
+      "relative_tolerance": 0.02
+    },
+    "snap.first_limit.load_factor": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.02
+    },
+    "snap.negative_load_observed": {
+      "absolute_tolerance": 0.1,
+      "relative_tolerance": 0.1
+    }
+  }
+}
