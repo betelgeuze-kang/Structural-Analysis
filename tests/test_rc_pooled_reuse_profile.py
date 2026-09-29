@@ -19,10 +19,14 @@ def test_pooled_runner_freezes_profile_and_passes_it_to_child(
 ):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     runner = importlib.import_module("run_rc_pooled_runtime_campaign")
-    cases = [SimpleNamespace(case_id="train", split="train"),
-             SimpleNamespace(case_id="reserved", split="holdout")]
+    cases = [
+        SimpleNamespace(case_id="train", split="train"),
+        SimpleNamespace(case_id="reserved", split="holdout"),
+    ]
     monkeypatch.setattr(runner, "inputs", lambda *_: (cases, [], None, [], []))
-    policy = SimpleNamespace(policy_hash="policy", to_dict=lambda: {"policy_hash": "policy"})
+    policy = SimpleNamespace(
+        policy_hash="policy", to_dict=lambda: {"policy_hash": "policy"}
+    )
     monkeypatch.setattr(runner.learning, "_fit", lambda *args, **kwargs: policy)
     calls = []
 
@@ -36,10 +40,14 @@ def test_pooled_runner_freezes_profile_and_passes_it_to_child(
     output = tmp_path / "study"
     argv = [
         "run_rc_pooled_runtime_campaign.py",
-        "--old-labels", str(tmp_path / "old"),
-        "--new-labels", str(tmp_path / "new"),
-        "--source-revision", "a" * 40,
-        "--output", str(output),
+        "--old-labels",
+        str(tmp_path / "old"),
+        "--new-labels",
+        str(tmp_path / "new"),
+        "--source-revision",
+        "a" * 40,
+        "--output",
+        str(output),
     ]
     if reuse:
         argv.append("--reuse-line-search-assembly")
@@ -55,9 +63,7 @@ def test_pooled_runner_freezes_profile_and_passes_it_to_child(
 
 
 @pytest.mark.parametrize("reuse", [False, True])
-def test_pooled_audit_rejects_profile_drift_in_child_and_benchmark(
-    monkeypatch, reuse
-):
+def test_pooled_audit_rejects_profile_drift_in_child_and_benchmark(monkeypatch, reuse):
     monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     audit = importlib.import_module("audit_rc_pooled_runtime_campaign")
     key = "line_search_assembly_reuse"
@@ -65,14 +71,22 @@ def test_pooled_audit_rejects_profile_drift_in_child_and_benchmark(
     source = {"selected_assembly_reuse_profile": PROFILE if reuse else None}
     plan = {
         "source_revision": "source",
-        "cases": [{"case_id": "train", "split": "train",
-                   "model_hash": "model", "request": {"targets_m": [0.001]}}],
+        "cases": [
+            {
+                "case_id": "train",
+                "split": "train",
+                "model_hash": "model",
+                "request": {"targets_m": [0.001]},
+            }
+        ],
         **chosen,
     }
     result = dict(chosen)
     report = {
-        "source_revision": "source", "model_checksum": "model",
-        "request": {"targets_m": [0.001]}, **chosen,
+        "source_revision": "source",
+        "model_checksum": "model",
+        "request": {"targets_m": [0.001]},
+        **chosen,
     }
 
     audit.require_assembly_reuse_profile(source, plan, result)
