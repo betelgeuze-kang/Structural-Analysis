@@ -6,11 +6,11 @@
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "68cab73002fd7be8b45f221ad000c0f7288f339c4eb48d61447f7a0f4d63ff66"
+      "sha256": "5ebad255aac741f47cda4dbdda6cdeef23d2eaae259caf76f919162dad7b2821"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "1037201fb578e4d5b2a1f5289662a56288db57169cd9f7ccf713f448191a0044"
+      "sha256": "1b2bb95273c9a7570da10cf928bed8492b75cfad087daade1a67dd6c6bfc212d"
     }
   },
   "authority": {
@@ -30,7 +30,7 @@
       "lockfile_version": 3,
       "package_count": 68,
       "package_json_sha256": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
-      "package_lock_sha256": "059137a6850ede29433965a2b9d49e580bd00080c010a516c17a21fa08720d99",
+      "package_lock_sha256": "0a3bf9e86e6ac73b13c5b6a9b7c1166cf517b27ddcb8ad20af5d83600a144b6f",
       "postcss_version": "8.5.26",
       "requires": true
     },
@@ -42,7 +42,7 @@
   },
   "claim_boundary": "contract_pass covers the technical runtime packaging contract only. It grants no product license, commercial use, redistribution, third-party-material clearance, signing authority, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-08-28T07:42:07.243025+00:00",
+  "generated_at": "2026-09-29T08:03:39.364433+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
