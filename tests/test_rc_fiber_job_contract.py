@@ -98,6 +98,18 @@ def test_request_compiles_supported_model_without_solving_and_detaches():
     assert model.nodes[0]["coordinates"][0] == 0.0
 
 
+@pytest.mark.parametrize(
+    "profile", ["experimental_two_fixed_endpoints", "experimental_pin_roller_beam"]
+)
+def test_unavailable_durable_profile_is_rejected_before_default_model_compile(profile):
+    request = _request()
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        7, (-1e-6,), **{profile: True}
+    ).to_dict()
+    with pytest.raises(ValueError, match="only the one-fixed-endpoint profile"):
+        contract.validate_rc_fiber_job_request(request)
+
+
 def test_constant_load_request_requires_matching_v2_durable_result():
     request = _request()
     request["config"] = BoundedRCFiberDirectControlRequest(
