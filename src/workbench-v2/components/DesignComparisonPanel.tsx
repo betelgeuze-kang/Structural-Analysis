@@ -1,3 +1,4 @@
+import { longitudinalSteelDescription } from '../model/rcSteelLayers'
 import type { ReactElement } from 'react'
 import type { DesignComparisonLoadResult } from '../model/designComparisonProvider'
 import type { DesignComparisonRow } from '../model/designComparisonSchema'
@@ -7,7 +8,7 @@ import { EngineeringValueText } from './EngineeringValueText'
 const number = (value: number | null | undefined): ReactElement => <EngineeringValueText value={typeof value === 'number' ? { status: 'available', value } : { status: 'unavailable' }} />
 const change = (metric: string, value: number | null | undefined): ReactElement => <div className="wb2-muted" data-design-delta={metric}>Change: {number(value)}</div>
 const sections = (row: DesignComparisonRow): string => (row.canonical_model.sections as Array<Record<string, unknown>>)
-  .map((section) => `${section.id}: ${section.width_m} × ${section.depth_m} m; bars ${section.top_bar_count}+${section.bottom_bar_count} × ${section.bar_area_m2} m²`).join('; ')
+  .map((section) => `${section.id}: ${section.width_m} × ${section.depth_m} m; ${longitudinalSteelDescription(section)}`).join('; ')
 
 export function DesignComparisonPanel({ load, title = 'Physical design comparison', titleId = 'wb2-design-comparison-title' }: { load: DesignComparisonLoadResult; title?: string; titleId?: string }): ReactElement {
   if (load.status !== 'verified' || !load.bundle) {
@@ -34,7 +35,7 @@ export function DesignComparisonPanel({ load, title = 'Physical design compariso
       <table className="wb2-table" data-design-comparison-table>
         <thead><tr><th scope="col">Candidate / members</th><th scope="col">Concrete (m³)</th><th scope="col">Longitudinal rebar (kg)</th><th scope="col">Material estimate{price ? ` (${price.currency})` : ''}</th><th scope="col">Estimate reduction</th><th scope="col">Terminal translation (m)</th><th scope="col">Terminal fiber strain</th>{historyRequested ? <><th scope="col">Committed history translation (m)</th><th scope="col">Committed history fiber strain</th></> : null}{materialRequested ? materialLabels.map(label => <th scope="col" key={label} style={{ whiteSpace: 'normal', minWidth: '10rem' }}>{label}<br />Accepted-epoch maximum</th>) : null}<th scope="col">Reference / limits</th></tr></thead>
         <tbody>{report.rows.map((row) => <tr key={row.candidate_id} data-design-candidate={row.candidate_id} data-design-selected={report.selection.candidate_id === row.candidate_id}>
-          <td>{row.candidate_id}{report.selection.candidate_id === row.candidate_id ? ' · selected within declared scope' : ''}<br /><span className="wb2-mono">{row.quantities?.members.map((member) => `${member.member_id} (${member.section_id})`).join(', ') ?? 'UNAVAILABLE'}</span><br />{sections(row)}<br /><code className="wb2-mono">{row.model_checksum}</code></td>
+          <td>{row.candidate_id}{report.selection.candidate_id === row.candidate_id ? ' · selected within declared scope' : ''}<br /><span className="wb2-mono">{row.quantities?.members.map((member) => `${member.member_id} (${member.section_id})`).join(', ') ?? 'UNAVAILABLE'}</span><div data-design-section-description style={{ width: '16rem', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>{sections(row)}</div><code className="wb2-mono">{row.model_checksum}</code></td>
           <td>{number(row.quantities?.totals.gross_concrete_volume_m3)}{change('gross_concrete_volume_m3', row.difference_from_baseline?.quantity_delta.gross_concrete_volume_m3)}</td>
           <td>{number(row.quantities?.totals.longitudinal_rebar_mass_kg)}{change('longitudinal_rebar_mass_kg', row.difference_from_baseline?.quantity_delta.longitudinal_rebar_mass_kg)}</td>
           <td>{number(row.material_estimate?.total)}</td>

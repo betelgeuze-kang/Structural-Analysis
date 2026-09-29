@@ -1,0 +1,21 @@
+{
+  "schema_version": "rc-control-layout-experiment.v1",
+  "candidates": [
+    {"candidate_id": "shorter_span_360", "model_path": "portal-span-360.json"},
+    {"candidate_id": "longer_span_440", "model_path": "portal-span-440.json"}
+  ],
+  "prices": {
+    "concrete_per_m3": 100,
+    "rebar_per_kg": 1,
+    "currency": "KRW",
+    "as_of": "2026-09-28",
+    "source": "Synthetic development arithmetic only; not a market quotation"
+  },
+  "terminal_limits": {"maximum_translation_m": 1, "maximum_absolute_fiber_strain": 1},
+  "history_limits": {"maximum_translation_m": 1, "maximum_absolute_fiber_strain": 1},
+  "material_limits": {
+    "maximum_steel_accumulated_plastic_strain": 1,
+    "maximum_concrete_tensile_damage": 1,
+    "maximum_concrete_compressive_damage": 1
+  }
+}

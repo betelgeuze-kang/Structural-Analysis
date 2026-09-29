@@ -55,7 +55,8 @@ jobs:
   development_contracts:
     name: pytest-development-contracts
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # A hosted 2,482-test pass took 28m43s; setup and artifact upload exhausted 30m.
+    timeout-minutes: 45
     # Independent diagnostic coverage: external receipt preparation must not
     # suppress learning, candidate, input and runtime-identity regressions.
     # This is additional coverage; pytest-full still requires all full shards.
@@ -80,15 +81,47 @@ jobs:
       - name: Run development contracts from the committed checkout
         run: >-
           python -m pytest -q --junitxml=development-contracts.xml
+          tests/test_stateful_fiber_section.py
+          tests/test_public_rc_fiber_frame_api.py
+          tests/test_fiber_frame_design.py
+          tests/test_fiber_frame_physical_identity.py
+          tests/test_fiber_frame_candidate_learning.py
+          tests/test_bounded_planar_model_ir_adapter.py
+          tests/test_model_ir_v2_contract.py
+          tests/test_fiber_frame_candidate_search.py
+          tests/test_fiber_frame_candidate_cost.py
+          tests/test_fiber_frame_candidate_search_suite.py
           tests/test_bounded_rc_fiber_direct_control_api.py
           tests/test_rc_control_warm_start.py
           tests/test_rc_control_learning.py
           tests/test_rc_control_learning_split.py
           tests/test_rc_control_history_features.py
           tests/test_rc_control_svd_fit.py
+          tests/test_rc_control_initial_residual.py
+          tests/test_rc_control_trust_region.py
+          tests/test_rc_recovery_configuration.py
+          tests/test_rc_replay_streaming.py
+          tests/test_rc_branch_diagnostic.py
+          tests/test_rc_recovery_followup.py
+          tests/test_rc_adaptive_continuation_campaign.py
+          tests/test_rc_adaptive_campaign_audit.py
+          tests/test_rc_internal_portal_20mm_comparison.py
+          tests/test_audit_rc_internal_portal_20mm_comparison.py
           tests/test_rc_control_model_selection.py
           tests/test_rc_control_training_diagnostics.py
+          tests/test_rc_runtime_cost_diagnostic.py
+          tests/test_rc_offline_cost_tree.py
+          tests/test_rc_scalar_runtime_equivalence.py
+          tests/test_rc_same_parent_probe_records.py
           tests/test_planar_steel_refinement_witness_audit.py
+          tests/test_planar_concrete_localization_audit.py
+          tests/test_planar_1024_witness_probe.py
+          tests/test_planar_2048_witness_probe.py
+          tests/test_planar_4096_refinement_driver.py
+          tests/test_extract_planar_2048_features.py
+          tests/test_audit_planar_4096_refinement.py
+          tests/test_planar_path_artifact_writer.py
+          tests/test_planar_path_artifact_reader.py
           tests/test_planar_material_activity.py
           tests/test_rc_control_runtime_selection.py
           tests/test_rc_control_step_work.py
@@ -99,6 +132,7 @@ jobs:
           tests/test_rc_quadratic_seed.py
           tests/test_rc_native_assembly_reuse.py
           tests/test_rc_line_search_reuse_experiment.py
+          tests/test_rc_reuse_campaign.py
           tests/test_rc_control_search_accounting.py
           tests/test_rc_control_strategy_costs.py
           tests/test_rc_control_process_costs.py
@@ -116,13 +150,17 @@ jobs:
           tests/test_measured_response_workbook.py
           tests/test_measured_response_split.py
           tests/test_aci_column_archive.py
+          tests/test_rc_control_cost_pruned_design.py
           tests/test_rc_control_design.py
+          tests/test_rc_control_reinforcement_learning.py
           tests/test_rc_control_candidate_search.py
           tests/test_rc_control_candidate_cost.py
           tests/test_rc_control_cost_dominance.py
           tests/test_rc_search_http.py
           tests/test_rc_seed_original_audit.py
           tests/test_pinned_opensees_runtime.py
+          tests/test_external_reference_output_capture.py
+          tests/test_external_product_replay_identity.py
           tests/test_local_source_reference_comparison.py
           tests/test_nonlinear_failure_diagnostic.py
           tests/test_durable_failure_diagnostics.py
@@ -201,7 +239,9 @@ jobs:
           python scripts/build_bounded_planar_external_modal_buckling_case_package.py
           python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
           python scripts/build_bounded_planar_external_vv_matrix.py
-          python scripts/build_internal_license_due_diligence.py --fail-blocked
+          # Write the exact-current manifest before pytest. A blocked license
+          # contract is enforced after the test result has been retained.
+          python scripts/build_internal_license_due_diligence.py
           # These tracked receipts bind the exact Git commit. Rebuild them only in
           # the ephemeral runner so full pytest validates current-source bytes.
           python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py
@@ -252,10 +292,27 @@ jobs:
           --shard-count 4
           --
           -q
+          --junitxml=pytest-full-shard-${{ matrix.shard }}.xml
           --deselect
           tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
           --deselect
           tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::test_committed_receipt_is_reproducible
+
+      - name: Retain diagnostic shard test result independently of license status
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pytest-full-shard-diagnostic-${{ matrix.shard }}-${{ github.sha }}
+          path: pytest-full-shard-${{ matrix.shard }}.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Require exact current-source external license contract
+        if: ${{ always() && steps.materialize.outcome == 'success' }}
+        run: >-
+          python scripts/build_internal_license_due_diligence.py
+          --out "$RUNNER_TEMP/internal-license-gate.json"
+          --fail-blocked
 
   full:
     name: pytest-full

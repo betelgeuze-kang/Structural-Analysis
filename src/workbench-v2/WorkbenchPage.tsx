@@ -449,6 +449,7 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-results" className="wb2-section">
+        <p><a href="#/rc-pin-roller-original">Open RC pin/roller original bundle reviewer</a></p>
         <RcHistoryFilePanel />
         <NativeFrameArtifactsPanel
           load={nativeFrameLoad}

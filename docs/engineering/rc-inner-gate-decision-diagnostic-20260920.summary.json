@@ -1,0 +1,44 @@
+{
+  "source_revision": "42815feb1adc26694e7e4d51181fbbac09ab75f3",
+  "evaluation_inventory_sha256": "69dd07e07063ba88f8227bddc57ffcd02bc1de100e0adc335a35caea8faf0afb",
+  "aggregates": {
+    "prefix_cost": {
+      "counts": {
+        "outside_training_bounds": 346,
+        "below_threshold": 314
+      },
+      "positive_counts": {
+        "below_threshold": 29,
+        "outside_training_bounds": 3
+      },
+      "positive_in_raw_bounds": 29,
+      "positive_eligible_before_threshold": 29,
+      "positive_total": 32,
+      "rows": 660
+    },
+    "material_cost": {
+      "counts": {
+        "outside_training_bounds": 346,
+        "below_threshold": 312,
+        "proposed": 2
+      },
+      "positive_counts": {
+        "below_threshold": 29,
+        "outside_training_bounds": 3
+      },
+      "positive_in_raw_bounds": 29,
+      "positive_eligible_before_threshold": 29,
+      "positive_total": 32,
+      "rows": 660
+    }
+  },
+  "new_fits": 0,
+  "new_solves": 0,
+  "threshold_changed": false,
+  "reserved_evaluation": false,
+  "posthoc": true,
+  "independent_project_evaluation": false,
+  "wall_ns_before_report": 135376912,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-inner-gate-decisions-ga1a53qb",
+  "inventory_sha256": "9fca7d6451018ba6cd9ba34292b25790e0c18aeb669562f1baf2e7027aa1793d"
+}

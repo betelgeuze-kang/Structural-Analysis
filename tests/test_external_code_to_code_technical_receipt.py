@@ -30,6 +30,8 @@ module = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = module
 SPEC.loader.exec_module(module)
 
+from pinned_opensees_runtime import expected_binding  # noqa: E402
+
 
 def _stored_receipt() -> dict[str, object]:
     payload = json.loads(RECEIPT.read_text(encoding="utf-8"))
@@ -402,6 +404,135 @@ def test_validation_rejects_rehashed_comparison_tampering() -> None:
         )
 
 
+def test_planar_axial_reaction_roundoff_floor_is_scoped_and_fails_closed() -> None:
+    cases = (
+        "bounded_planar_member_feature_load_path",
+        "bounded_planar_prescribed_settlement_load_path",
+    )
+    for case_id in cases:
+        floor = module._comparison_absolute_tolerance(case_id, "support_N1_UX_N")
+        assert floor == 1.0e-6
+        assert module._comparison(
+            "support_N1_UX_N", 0.0, 4.96422719988357e-7,
+            absolute_tolerance=floor,
+        )["contract_pass"] is True
+        assert module._comparison(
+            "support_N1_UX_N", 0.0, 2.0e-6,
+            absolute_tolerance=floor,
+        )["contract_pass"] is False
+        assert module._comparison_absolute_tolerance(case_id, "support_N1_UY_N") == (
+            module.COMPARISON_ABSOLUTE_TOLERANCE
+        )
+    assert module._comparison_absolute_tolerance(
+        "bounded_planar_vertical_load_path", "support_N1_UX_N"
+    ) == module.COMPARISON_ABSOLUTE_TOLERANCE
+
+
+@pytest.mark.parametrize(
+    ("builder", "displacements", "reactions", "end_forces"),
+    [
+        (
+            module._bounded_planar_member_feature_metrics,
+            module.BOUNDED_PLANAR_MEMBER_FEATURE_DISPLACEMENT_SPECS,
+            module.BOUNDED_PLANAR_MEMBER_FEATURE_REACTION_SPECS,
+            module.BOUNDED_PLANAR_MEMBER_FEATURE_END_FORCE_SPECS,
+        ),
+        (
+            module._bounded_planar_settlement_metrics,
+            module.BOUNDED_PLANAR_SETTLEMENT_DISPLACEMENT_SPECS,
+            module.BOUNDED_PLANAR_SETTLEMENT_REACTION_SPECS,
+            module.BOUNDED_PLANAR_SETTLEMENT_END_FORCE_SPECS,
+        ),
+    ],
+)
+def test_planar_external_generation_uses_same_scoped_reaction_floor(
+    builder, displacements, reactions, end_forces,
+) -> None:
+    product = {
+        "node_displacements": {}, "support_reactions": {},
+        "member_end_forces": {"E1": {}},
+    }
+    reference = {
+        "node_displacements": {}, "support_reactions": {},
+        "member_end_forces": {"E1": {}},
+    }
+    for _quantity, node_id, component in displacements:
+        product["node_displacements"].setdefault(node_id, {})[component] = 0.0
+        reference["node_displacements"].setdefault(node_id, {})[component] = 0.0
+    for quantity, node_id, dof in reactions:
+        product["support_reactions"][(node_id, dof)] = 0.0
+        reference["support_reactions"].setdefault(node_id, {})[dof] = (
+            4.96422719988357e-7 if quantity == "support_N1_UX_N" else 0.0
+        )
+    for _quantity, end_name, component in end_forces:
+        product["member_end_forces"]["E1"].setdefault(end_name, {})[component] = 0.0
+        reference["member_end_forces"]["E1"].setdefault(end_name, {})[component] = 0.0
+    metrics = builder(product, reference)
+    axial = next(row for row in metrics if row["quantity"] == "support_N1_UX_N")
+    assert axial["absolute_tolerance"] == 1.0e-6
+    assert axial["contract_pass"] is True
+    assert all(
+        row["absolute_tolerance"] == 1.0e-10
+        for row in metrics if row is not axial
+    )
+
+
+def test_planar_axial_reaction_receipt_limit_accepts_current_and_legacy_only() -> None:
+    retained = _stored_receipt()
+    case = next(
+        row for row in retained["comparisons"]
+        if row["case_id"] == "bounded_planar_member_feature_load_path"
+    )
+    metric = next(row for row in case["metrics"] if row["quantity"] == "support_N1_UX_N")
+    allowed_limits = (
+        module.COMPARISON_ABSOLUTE_TOLERANCE,
+        module.PLANAR_AXIAL_REACTION_ABSOLUTE_TOLERANCE_N,
+    )
+    assert metric["absolute_tolerance"] in allowed_limits
+    module.validate_external_code_to_code_technical_receipt(
+        retained, repo_root=ROOT, require_current_sources=False,
+    )
+    for limit in allowed_limits:
+        compatible_case = deepcopy(case)
+        compatible_metric = next(
+            row for row in compatible_case["metrics"]
+            if row["quantity"] == "support_N1_UX_N"
+        )
+        # Keep the synthetic case passing under either accepted tolerance.
+        compatible_metric.update(
+            module._comparison(
+                "support_N1_UX_N",
+                metric["reference_value"],
+                metric["reference_value"],
+                absolute_tolerance=limit,
+            )
+        )
+        module.validate_external_comparison_cases([compatible_case])
+
+    for quantity, tolerance, error in (
+        ("support_N1_UX_N", 1.0e-5, "receipt_schema_invalid"),
+        ("support_N1_UY_N", 1.0e-6, "receipt_comparison_tolerance_invalid"),
+    ):
+        tampered = deepcopy(retained)
+        tampered_case = next(
+            row for row in tampered["comparisons"]
+            if row["case_id"] == "bounded_planar_member_feature_load_path"
+        )
+        tampered_metric = next(
+            row for row in tampered_case["metrics"]
+            if row["quantity"] == quantity
+        )
+        tampered_metric["absolute_tolerance"] = tolerance
+        tampered["artifact_hash"] = module._artifact_hash(tampered)
+        with pytest.raises(
+            module.ExternalCodeToCodeReceiptError,
+            match=error,
+        ):
+            module.validate_external_code_to_code_technical_receipt(
+                tampered, repo_root=ROOT, require_current_sources=False,
+            )
+
+
 def test_validation_rejects_frame3d_tolerance_tampering() -> None:
     tampered = deepcopy(_stored_receipt())
     frame3d = next(
@@ -567,8 +698,45 @@ def test_fresh_receipt_without_execution_source_fails_closed() -> None:
     replay["external_execution_reused"] = False
     replay["reuse_reason"] = None
     replay.pop("external_execution_source_commit_sha", None)
+    checksums = tampered["internal_source"]["input_checksums"]
+    pinned_runtime = Path("scripts/pinned_opensees_runtime.py")
+    checksums[str(pinned_runtime)] = module.input_checksums(
+        [pinned_runtime], repo_root=ROOT
+    )[str(pinned_runtime)]
+    tampered["internal_source"]["source_set_hash"] = module._hash_value(checksums)
+    tampered["runtimes"]["opensees"]["execution_outputs"].pop(
+        "runtime_binding", None
+    )
     tampered["artifact_hash"] = module._artifact_hash(tampered)
 
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="opensees_current_execution_binding_missing",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+    tampered["runtimes"]["opensees"]["execution_outputs"][
+        "runtime_binding"
+    ] = expected_binding()
+    tampered["blockers_remaining"] = [
+        blocker
+        for blocker in tampered["blockers_remaining"]
+        if blocker != module.REUSED_EXECUTION_BLOCKER
+    ]
+    replay["external_execution_source_commit_sha"] = tampered["source_commit_sha"]
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+    module.validate_external_code_to_code_technical_receipt(
+        tampered,
+        repo_root=ROOT,
+        require_current_sources=False,
+    )
+
+    replay.pop("external_execution_source_commit_sha")
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
     with pytest.raises(
         module.ExternalCodeToCodeReceiptError,
         match="receipt_replay_execution_source_invalid",
@@ -626,3 +794,16 @@ def test_cli_refresh_can_use_a_validated_current_reference_receipt(
     assert [row["case_id"] for row in payload["comparisons"]] == [
         row["case_id"] for row in _stored_receipt()["comparisons"]
     ]
+
+
+def test_validator_reports_replay_mismatch_path_without_accepting_it(monkeypatch):
+    payload = _stored_receipt()
+    current = deepcopy(payload['comparisons'])
+    current[0]['contract_pass'] = not current[0]['contract_pass']
+    monkeypatch.setattr(module, '_source_checksums', lambda root: payload['internal_source']['input_checksums'])
+    monkeypatch.setattr(module, '_current_product_comparison_cases', lambda *a, **k: current)
+    with pytest.raises(module.ExternalCodeToCodeReceiptError) as caught:
+        module.validate_external_code_to_code_technical_receipt(
+            payload, repo_root=ROOT, require_current_sources=True,
+        )
+    assert str(caught.value) == 'receipt_product_comparisons_stale:path=[0, "contract_pass"]'

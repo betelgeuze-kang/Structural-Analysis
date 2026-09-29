@@ -35,6 +35,13 @@ from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.model.schema import CanonicalModel
 
 
+from structural_analysis.benchmark.rc_control_reinforcement_features import (
+    REINFORCEMENT_FEATURE_NAMES, control_reinforcement_features,
+)
+
+REINFORCEMENT_POLICY_SCHEMA = "experimental-rc-control-reinforcement-policy.v1"
+REINFORCEMENT_TRAINING_SCHEMA = "experimental-rc-control-reinforcement-training.v1"
+
 POLICY_SCHEMA = "experimental-rc-control-candidate-policy.v1"
 LEGACY_FIT_METHOD = "svd-ridge-penalized-intercept.v1"
 CENTERED_FIT_METHOD = "svd-ridge-unpenalized-intercept.v2"
@@ -65,7 +72,9 @@ def control_candidate_features(model, request):
         study._bytes(request.to_dict())
     )
     values, geometry_context = candidate_preanalysis_features(
-        model, PublicRCFiberFrameConfig()
+        model,
+        PublicRCFiberFrameConfig(),
+        experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints,
     )
     return values, study._sha(
         study._bytes(
@@ -288,6 +297,33 @@ class RCControlCandidatePolicy:
         }
 
 
+@dataclass(frozen=True)
+class RCControlReinforcementPolicy(RCControlCandidatePolicy):
+    """Outer-area weights have a separate schema and cannot load as old policies."""
+
+    _schema: ClassVar[str] = REINFORCEMENT_POLICY_SCHEMA
+    _features: ClassVar[tuple[str, ...]] = REINFORCEMENT_FEATURE_NAMES
+
+    def predict(self, model, request):
+        values, context = control_reinforcement_features(model, request)
+        return self._predict_features(values, context)
+
+
+def load_rc_control_candidate_policy(raw: bytes):
+    """Dispatch only explicitly supported, strictly decoded policy schemas."""
+    if type(raw) is not bytes:
+        raise ValueError("policy bytes required")
+    document = strict_json_object_bytes(raw, maximum_bytes=2 * 1024 * 1024)
+    policy_types = {
+        POLICY_SCHEMA: RCControlCandidatePolicy,
+        REINFORCEMENT_POLICY_SCHEMA: RCControlReinforcementPolicy,
+    }
+    schema = document.get("schema_version")
+    if type(schema) is not str or schema not in policy_types:
+        raise ValueError("supported RC candidate policy schema required")
+    return policy_types[schema](raw.decode("utf-8"))
+
+
 def train_rc_control_candidate_policy(
     baseline: CanonicalModel,
     candidates: tuple[design.FiberFrameDesignCandidate, ...],
@@ -300,12 +336,17 @@ def train_rc_control_candidate_policy(
     ridge: float = 1.0,
     ood_margin: float = 0.0,
     fit_method: str = CENTERED_FIT_METHOD,
+    reinforcement_features: bool = False,
 ):
     """Generate full reference/replay labels, then fit only this training family.
 
     Screens are recorded but do not filter training rows. Infeasible examples
     are useful labels; incomplete or unverified physical paths are not labels.
     """
+    if type(reinforcement_features) is not bool:
+        raise ValueError("explicit reinforcement feature selection required")
+    descriptor_function = control_reinforcement_features if reinforcement_features else control_candidate_features
+    policy_class = RCControlReinforcementPolicy if reinforcement_features else RCControlCandidatePolicy
     wall, cpu = perf_counter_ns(), process_time_ns()
     if type(fit_method) is not str or fit_method not in FIT_METHODS:
         raise ValueError("supported candidate fit method required")
@@ -325,8 +366,13 @@ def train_rc_control_candidate_policy(
     models = [baseline.detached_analysis_snapshot()] + [
         design.apply_fiber_frame_section_changes(baseline, c) for c in candidates
     ]
-    descriptors = [control_candidate_features(m, request) for m in models]
-    model_ids = [candidate_model_identity(m) for m in models]
+    descriptors = [descriptor_function(m, request) for m in models]
+    model_ids = [
+        candidate_model_identity(
+            m, experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints
+        )
+        for m in models
+    ]
     if len(set(model_ids)) != len(models) or len({d[1] for d in descriptors}) != 1:
         raise ValueError(
             "unique physical training models in one fixed context required"
@@ -346,6 +392,7 @@ def train_rc_control_candidate_policy(
                 "ood_margin": ood_margin,
                 "fit_method": fit_method,
                 "independent_campaign": False,
+                **({"policy_schema": policy_class._schema, "features": list(policy_class._features)} if reinforcement_features else {}),
             }
         ),
     )
@@ -378,7 +425,10 @@ def train_rc_control_candidate_policy(
                 "complete finite training response/material targets required"
             )
         sample = {
-            "model_identity": candidate_model_identity(model),
+            "model_identity": candidate_model_identity(
+                model,
+                experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            ),
             "features": list(descriptor[0]),
             "targets": targets,
             "result_sha256": row["artifacts"]["result"]["sha256"],
@@ -398,9 +448,9 @@ def train_rc_control_candidate_policy(
         y = np.asarray([s["targets"] for s in samples])
         parameters = _candidate_fit_parameters(x, y, ridge, fit_method)
         p = {
-            "schema_version": POLICY_SCHEMA,
+            "schema_version": policy_class._schema,
             "context_hash": descriptors[0][1],
-            "features": list(FEATURE_NAMES),
+            "features": list(policy_class._features),
             "targets": list(TARGETS),
             **parameters,
             "ridge": ridge,
@@ -410,7 +460,7 @@ def train_rc_control_candidate_policy(
             "label_comparison_hash": labels["report_hash"],
         }
         p["policy_hash"] = study._sha(study._bytes(p))
-        policy = RCControlCandidatePolicy(study._bytes(p).decode())
+        policy = policy_class(study._bytes(p).decode())
     except BaseException as exc:
         study._save(
             root,
@@ -438,7 +488,7 @@ def train_rc_control_candidate_policy(
     study._save(root, "fit-outcome.json", study._bytes(fit))
     study._save(root, "policy.json", study._bytes(policy.to_dict()))
     report = {
-        "schema_version": "experimental-rc-control-candidate-training.v1",
+        "schema_version": REINFORCEMENT_TRAINING_SCHEMA if reinforcement_features else "experimental-rc-control-candidate-training.v1",
         "source_revision": source_revision,
         "label_comparison_hash": labels["report_hash"],
         "policy_hash": policy.policy_hash,

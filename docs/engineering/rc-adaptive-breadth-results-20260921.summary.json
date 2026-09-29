@@ -1,0 +1,340 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-adaptive-breadth-r0_ukbrk",
+  "audited_inventory_sha256": "03dc65610ed106d45f088643fc61666be819229c8ed68b4d4624abda2fd52c70",
+  "files": 4211,
+  "audit": {
+    "source_revision": "84714992ad47c187ea850a27813f7d740b9c48fb",
+    "totals": {
+      "paths": 128,
+      "complete_paths": 70,
+      "ordinary_native_calls": 462,
+      "additional_native_calls": 340,
+      "ordinary_newton": 2946,
+      "additional_newton": 1756
+    },
+    "cases": [
+      {
+        "case_id": "short-20mm",
+        "complete": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": true,
+          "adaptive": true
+        },
+        "paired_complete_histories_match": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            false,
+            false
+          ],
+          "adaptive": [
+            false,
+            false
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 4207774847,
+          "adaptive": 4193545237
+        },
+        "additional_native_calls": {
+          "fixed": 32,
+          "adaptive": 32
+        },
+        "adaptive_over_fixed_ratio": null
+      },
+      {
+        "case_id": "short-40mm",
+        "complete": {
+          "fixed": [
+            false,
+            false
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": false,
+          "adaptive": true
+        },
+        "paired_complete_histories_match": [
+          false,
+          false
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            false,
+            false
+          ],
+          "adaptive": [
+            false,
+            false
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 2329710148,
+          "adaptive": 4688964540
+        },
+        "additional_native_calls": {
+          "fixed": 16,
+          "adaptive": 36
+        },
+        "adaptive_over_fixed_ratio": null
+      },
+      {
+        "case_id": "short-60mm",
+        "complete": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": true,
+          "adaptive": true
+        },
+        "paired_complete_histories_match": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            false,
+            false
+          ],
+          "adaptive": [
+            false,
+            false
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 4453126813,
+          "adaptive": 4532234839
+        },
+        "additional_native_calls": {
+          "fixed": 32,
+          "adaptive": 32
+        },
+        "adaptive_over_fixed_ratio": null
+      },
+      {
+        "case_id": "short-80mm",
+        "complete": {
+          "fixed": [
+            false,
+            false
+          ],
+          "adaptive": [
+            false,
+            false
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": false,
+          "adaptive": false
+        },
+        "paired_complete_histories_match": [
+          false,
+          false
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            false,
+            false
+          ],
+          "adaptive": [
+            false,
+            false
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 2707170024,
+          "adaptive": 16255286750
+        },
+        "additional_native_calls": {
+          "fixed": 18,
+          "adaptive": 78
+        },
+        "adaptive_over_fixed_ratio": null
+      },
+      {
+        "case_id": "long-20mm",
+        "complete": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": true,
+          "adaptive": true
+        },
+        "paired_complete_histories_match": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            false,
+            false
+          ],
+          "adaptive": [
+            false,
+            false
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 3624999555,
+          "adaptive": 3658648819
+        },
+        "additional_native_calls": {
+          "fixed": 32,
+          "adaptive": 32
+        },
+        "adaptive_over_fixed_ratio": null
+      },
+      {
+        "case_id": "long-40mm",
+        "complete": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": true,
+          "adaptive": true
+        },
+        "paired_complete_histories_match": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 1279373747,
+          "adaptive": 1276196645
+        },
+        "additional_native_calls": {
+          "fixed": 0,
+          "adaptive": 0
+        },
+        "adaptive_over_fixed_ratio": 0.9975166740700675
+      },
+      {
+        "case_id": "long-60mm",
+        "complete": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": true,
+          "adaptive": true
+        },
+        "paired_complete_histories_match": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 1196675639,
+          "adaptive": 1191771113
+        },
+        "additional_native_calls": {
+          "fixed": 0,
+          "adaptive": 0
+        },
+        "adaptive_over_fixed_ratio": 0.9959015410357158
+      },
+      {
+        "case_id": "long-80mm",
+        "complete": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "complete_repeats_exact": {
+          "fixed": true,
+          "adaptive": true
+        },
+        "paired_complete_histories_match": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": {
+          "fixed": [
+            true,
+            true
+          ],
+          "adaptive": [
+            true,
+            true
+          ]
+        },
+        "summed_proposal_wall_ns": {
+          "fixed": 1298595486,
+          "adaptive": 1298512673
+        },
+        "additional_native_calls": {
+          "fixed": 0,
+          "adaptive": 0
+        },
+        "adaptive_over_fixed_ratio": 0.9999362287941913
+      }
+    ],
+    "policy_promoted": false,
+    "independent_physical_validation": false
+  }
+}

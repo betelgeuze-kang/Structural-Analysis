@@ -1,0 +1,18 @@
+{
+  "schema": "rc-reuse-campaign-plan.v1",
+  "repetitions": 2,
+  "arithmetic": "retained",
+  "record_assembly_timing": true,
+  "cases": [
+    {
+      "id": "large-reversal-failure",
+      "model": "../../public_rc_fiber_frame_cantilever.json",
+      "request": "large-reversal-failure.request.json"
+    },
+    {
+      "id": "concrete-damage",
+      "model": "../../public_rc_fiber_frame_cantilever.json",
+      "request": "concrete-damage.request.json"
+    }
+  ]
+}

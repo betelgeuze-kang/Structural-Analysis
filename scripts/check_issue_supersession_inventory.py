@@ -113,6 +113,9 @@ _RESOLVED_ISSUE_KEYS = {
     "state",
     "state_reason",
 }
+_RESOLVED_ISSUE_EVENT_KEYS = (_RESOLVED_ISSUE_KEYS - {"normalization_comment_id"}) | {
+    "closure_event_id"
+}
 _SUPERSEDED_PULL_REQUEST_KEYS = {
     "disposition",
     "merged",
@@ -614,7 +617,7 @@ def _validate_historical_rows(
     seen_resolved: set[int] = set()
     for row in resolved:
         number = row.get("number")
-        if set(row) != _RESOLVED_ISSUE_KEYS:
+        if set(row) not in (_RESOLVED_ISSUE_KEYS, _RESOLVED_ISSUE_EVENT_KEYS):
             blockers.append(f"resolved_issue_shape_invalid:{number}")
         if type(number) is not int or number <= 0 or number in seen_resolved:
             blockers.append(f"resolved_issue_number_invalid_or_duplicate:{number}")
@@ -630,9 +633,14 @@ def _validate_historical_rows(
         merge_sha = row.get("merge_commit_sha")
         if not isinstance(merge_sha, str) or _COMMIT_RE.fullmatch(merge_sha) is None:
             blockers.append(f"resolved_issue_merge_sha_invalid:{number}")
-        comment_id = row.get("normalization_comment_id")
-        if type(comment_id) is not int or comment_id <= 0:
-            blockers.append(f"resolved_issue_comment_missing:{number}")
+        if "closure_event_id" in row:
+            event_id = row["closure_event_id"]
+            if type(event_id) is not int or event_id <= 0:
+                blockers.append(f"resolved_issue_closure_event_missing:{number}")
+        else:
+            comment_id = row.get("normalization_comment_id")
+            if type(comment_id) is not int or comment_id <= 0:
+                blockers.append(f"resolved_issue_comment_missing:{number}")
     seen_prs: set[int] = set()
     for row in superseded:
         number = row.get("number")

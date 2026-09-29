@@ -14,9 +14,9 @@ import pytest
 from tests.test_rc_control_local_research import (
     SOURCE,
     ROOT,
-    model as model,
-    control_request as control_request,
-    options as options,
+    model as _model,
+    control_request as _control_request,
+    options as _options,
     evaluate,
     experiment_file,
 )
@@ -27,6 +27,12 @@ from structural_analysis.execution.rc_result_repository import (
     RCResultRepository,
     open_local_rc_repository,
 )
+
+
+# Register the shared fixtures without shadowing unused imports.
+model = _model
+control_request = _control_request
+options = _options
 
 
 pytestmark = pytest.mark.skipif(os.name != "posix", reason="POSIX local result store")

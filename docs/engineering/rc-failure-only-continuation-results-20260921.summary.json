@@ -1,0 +1,157 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-continuation-cost-9bbgpupq",
+  "inventory_sha256": "1153e03abe4cdf9bf7361df5ccaaeae13136b96e182d625341c5319ff25b60ba",
+  "file_count": 3721,
+  "audit": {
+    "source_revision": "1741221ac87752382ea9df16b5fc2d7ce9320227",
+    "totals": {
+      "paths": 80,
+      "completed_paths": 44,
+      "ordinary_native_calls": 346,
+      "additional_native_calls": 256,
+      "ordinary_newton_iterations": 1912,
+      "additional_newton_iterations": 786,
+      "all_native_calls": 602,
+      "all_newton_iterations": 2698
+    },
+    "pairs": [
+      {
+        "case": "w32-drift20",
+        "candidate": "cheap",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 655484020,
+          "on-failure": 245363076
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": 0.3743235052473133,
+        "fresh_reference_gates": [
+          {
+            "upfront": true,
+            "on-failure": true
+          },
+          {
+            "upfront": true,
+            "on-failure": true
+          }
+        ]
+      },
+      {
+        "case": "w48-drift20",
+        "candidate": "cheap",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 699761270,
+          "on-failure": 265214707
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": 0.3790074106273415,
+        "fresh_reference_gates": [
+          {
+            "upfront": true,
+            "on-failure": true
+          },
+          {
+            "upfront": true,
+            "on-failure": true
+          }
+        ]
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 750385250,
+          "on-failure": 997379481
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 32
+        },
+        "on_failure_over_upfront_ratio": 1.329156564577995,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 738238786,
+          "on-failure": 907990886
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 32
+        },
+        "on_failure_over_upfront_ratio": 1.2299419960305364,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 781043399,
+          "on-failure": 948657380
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 32
+        },
+        "on_failure_over_upfront_ratio": 1.214602647195537,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      }
+    ],
+    "all_paired_histories_match": true,
+    "policy_promoted": false
+  }
+}

@@ -139,6 +139,32 @@ def _reseal_worker(source, suite, index):
     _write_suite(source, suite)
 
 
+def test_legacy_section_decoder_only_fills_complete_old_layout():
+    old = {
+        "section_id": "RC1",
+        "width_m": 0.36,
+        "depth_m": None,
+        "cover_m": None,
+        "top_bar_count": None,
+        "bottom_bar_count": None,
+        "bar_area_m2": None,
+    }
+    row = {"candidates": [{"candidate_id": "narrow", "changes": [old]}]}
+    decoded = review._case_for_current_decoder(row)
+    assert decoded["candidates"][0]["changes"][0] == {
+        **old,
+        "top_bar_area_m2": None,
+        "bottom_bar_area_m2": None,
+        "top_cover_m": None,
+        "bottom_cover_m": None,
+    }
+    assert row["candidates"][0]["changes"][0] == old
+
+    partial = deepcopy(row)
+    partial["candidates"][0]["changes"][0]["top_cover_m"] = None
+    assert review._case_for_current_decoder(partial) == partial
+
+
 def test_relocated_review_uses_only_copied_bytes_and_preserves_eight_m2_pairs(
     complete_bundle, retained, monkeypatch
 ):

@@ -1,0 +1,219 @@
+{
+  "full_path_verified": false,
+  "known_work": {
+    "core_calls": 12,
+    "linear_solves": 92,
+    "newton_iterations": 92
+  },
+  "rows": [
+    {
+      "case_id": "train-a-amp050",
+      "comparisons": {
+        "reference": {
+          "exact_terminal_checkpoint": true,
+          "maximum_absolute_difference_mixed_SI_fields": 0.0,
+          "maximum_relative_difference": 0.0,
+          "mismatch_locations": {
+            "by_response_field": {},
+            "example_limit": 20,
+            "examples": [],
+            "examples_truncated": false,
+            "mismatch_count": 0
+          },
+          "physical_values_within_tolerance": true,
+          "step_response_pass": false,
+          "structure_match": true
+        },
+        "secant": {
+          "exact_terminal_checkpoint": false,
+          "maximum_absolute_difference_mixed_SI_fields": null,
+          "maximum_relative_difference": null,
+          "mismatch_locations": {
+            "by_response_field": {
+              "history_structure": 1
+            },
+            "example_limit": 20,
+            "examples": [
+              {
+                "arm_length": 1,
+                "kind": "sequence_lengths_differ",
+                "path": [],
+                "reference_length": 0
+              }
+            ],
+            "examples_truncated": false,
+            "mismatch_count": 1
+          },
+          "physical_values_within_tolerance": false,
+          "step_response_pass": false,
+          "structure_match": false
+        }
+      },
+      "metrics": {
+        "committed": false,
+        "control_error_m": -0.000861328125,
+        "relative_equilibrium": 0.09973544087243069,
+        "terminal_reason": "line_search_failed_to_reduce_residual"
+      },
+      "minimum_selected_alpha": 0.125,
+      "newton_iterations": 4,
+      "original_step_hash": "sha256:74e992c5be26b68255d5a907ee5df702a5f44f96e73cae69d2299f63c1a6264d",
+      "parent_exactly_matches_original": true,
+      "profile": "original",
+      "step_hash": "sha256:74e992c5be26b68255d5a907ee5df702a5f44f96e73cae69d2299f63c1a6264d"
+    },
+    {
+      "case_id": "train-a-amp050",
+      "comparisons": {
+        "reference": {
+          "exact_terminal_checkpoint": true,
+          "maximum_absolute_difference_mixed_SI_fields": 0.0,
+          "maximum_relative_difference": 0.0,
+          "mismatch_locations": {
+            "by_response_field": {},
+            "example_limit": 20,
+            "examples": [],
+            "examples_truncated": false,
+            "mismatch_count": 0
+          },
+          "physical_values_within_tolerance": true,
+          "step_response_pass": true,
+          "structure_match": true
+        },
+        "secant": {
+          "exact_terminal_checkpoint": false,
+          "maximum_absolute_difference_mixed_SI_fields": 1.4294011305999016e-35,
+          "maximum_relative_difference": 2.3411826346553777e-15,
+          "mismatch_locations": {
+            "by_response_field": {},
+            "example_limit": 20,
+            "examples": [],
+            "examples_truncated": false,
+            "mismatch_count": 0
+          },
+          "physical_values_within_tolerance": true,
+          "step_response_pass": true,
+          "structure_match": true
+        }
+      },
+      "metrics": {
+        "committed": true,
+        "control_error_m": 2.227271958021983e-35,
+        "relative_equilibrium": 2.0596838633863494e-17,
+        "terminal_reason": "residual_and_increment_converged"
+      },
+      "minimum_selected_alpha": 0.0078125,
+      "newton_iterations": 13,
+      "original_step_hash": "sha256:74e992c5be26b68255d5a907ee5df702a5f44f96e73cae69d2299f63c1a6264d",
+      "parent_exactly_matches_original": true,
+      "profile": "extended",
+      "step_hash": "sha256:42df4127a24f4a4fa14010506ab02f43d7cf05af054340d685225cd72d4651cb"
+    },
+    {
+      "case_id": "train-a-amp150",
+      "comparisons": {
+        "reference": {
+          "exact_terminal_checkpoint": true,
+          "maximum_absolute_difference_mixed_SI_fields": 0.0,
+          "maximum_relative_difference": 0.0,
+          "mismatch_locations": {
+            "by_response_field": {},
+            "example_limit": 20,
+            "examples": [],
+            "examples_truncated": false,
+            "mismatch_count": 0
+          },
+          "physical_values_within_tolerance": true,
+          "step_response_pass": false,
+          "structure_match": true
+        },
+        "secant": {
+          "exact_terminal_checkpoint": false,
+          "maximum_absolute_difference_mixed_SI_fields": null,
+          "maximum_relative_difference": null,
+          "mismatch_locations": {
+            "by_response_field": {
+              "history_structure": 1
+            },
+            "example_limit": 20,
+            "examples": [
+              {
+                "arm_length": 1,
+                "kind": "sequence_lengths_differ",
+                "path": [],
+                "reference_length": 0
+              }
+            ],
+            "examples_truncated": false,
+            "mismatch_count": 1
+          },
+          "physical_values_within_tolerance": false,
+          "step_response_pass": false,
+          "structure_match": false
+        }
+      },
+      "metrics": {
+        "committed": false,
+        "control_error_m": 0.00138427734375,
+        "relative_equilibrium": 0.19662427903897414,
+        "terminal_reason": "line_search_failed_to_reduce_residual"
+      },
+      "minimum_selected_alpha": 0.0625,
+      "newton_iterations": 4,
+      "original_step_hash": "sha256:30ea003bbd92ccc0c2c0ebd8f8c8b1ba3945a30f2f3424d24fc8e1458b67e05c",
+      "parent_exactly_matches_original": true,
+      "profile": "original",
+      "step_hash": "sha256:30ea003bbd92ccc0c2c0ebd8f8c8b1ba3945a30f2f3424d24fc8e1458b67e05c"
+    },
+    {
+      "case_id": "train-a-amp150",
+      "comparisons": {
+        "reference": {
+          "exact_terminal_checkpoint": true,
+          "maximum_absolute_difference_mixed_SI_fields": 0.0,
+          "maximum_relative_difference": 0.0,
+          "mismatch_locations": {
+            "by_response_field": {},
+            "example_limit": 20,
+            "examples": [],
+            "examples_truncated": false,
+            "mismatch_count": 0
+          },
+          "physical_values_within_tolerance": true,
+          "step_response_pass": true,
+          "structure_match": true
+        },
+        "secant": {
+          "exact_terminal_checkpoint": false,
+          "maximum_absolute_difference_mixed_SI_fields": 5.820766091346741e-11,
+          "maximum_relative_difference": 1.5420933696162473,
+          "mismatch_locations": {
+            "by_response_field": {},
+            "example_limit": 20,
+            "examples": [],
+            "examples_truncated": false,
+            "mismatch_count": 0
+          },
+          "physical_values_within_tolerance": true,
+          "step_response_pass": true,
+          "structure_match": true
+        }
+      },
+      "metrics": {
+        "committed": true,
+        "control_error_m": 1.1398443745882867e-35,
+        "relative_equilibrium": 6.832331632780997e-17,
+        "terminal_reason": "residual_and_increment_converged"
+      },
+      "minimum_selected_alpha": 0.015625,
+      "newton_iterations": 11,
+      "original_step_hash": "sha256:30ea003bbd92ccc0c2c0ebd8f8c8b1ba3945a30f2f3424d24fc8e1458b67e05c",
+      "parent_exactly_matches_original": true,
+      "profile": "extended",
+      "step_hash": "sha256:3dc9c94920866d1d93a91becba605d6df5ba5a4d55daac7acafd98d60748cd77"
+    }
+  ],
+  "scope": "posthoc_same_parent_single_step",
+  "source_revision": "148ede4b71f87a9e0f46f4d3a6d2c4bcd0d54a0d",
+  "wall_ns": 8755996662
+}

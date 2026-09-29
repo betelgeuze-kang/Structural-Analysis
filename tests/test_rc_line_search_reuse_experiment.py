@@ -8,6 +8,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from scripts import run_rc_reuse_campaign as campaign
+from structural_analysis.api import nonlinear_fiber_frame as public
+from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+    decode_bounded_rc_fiber_direct_control_request,
+)
+from structural_analysis.benchmark import rc_control_learning as learning
+from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+
 _spec = importlib.util.spec_from_file_location(
     "reuse_experiment",
     Path(__file__).resolve().parents[1] / "scripts/diagnose_rc_control_line_search_reuse.py",
@@ -153,7 +161,8 @@ def test_supplied_case_preserves_preload_and_targets_through_native_comparison(t
     request_path = tmp_path / "request.json"
     request_path.write_text(json.dumps(request.to_dict()))
     model_path = Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
-    output = tmp_path / "study"
+    case_directory = tmp_path / "case"
+    output = case_directory / "results"
     experiment.run(output, 2, case="supplied", arithmetic="retained",
                    model_path=model_path, request_path=request_path,
                    record_assembly_timing=timing)
@@ -163,6 +172,12 @@ def test_supplied_case_preserves_preload_and_targets_through_native_comparison(t
     assert summary["supplied_constant_load_count"] == 1
     assert summary["supplied_request_sha256"] == experiment.hashlib.sha256(
         request_path.read_bytes()).hexdigest()
+    campaign._validate_case_receipt(
+        case_directory,
+        {"model": model_path.read_bytes(), "request": request_path.read_bytes()},
+        source=summary["base_revision"], repetitions=2, arithmetic="retained",
+        record_assembly_timing=timing,
+    )
     assert [row["order"] for row in summary["rows"]] == [[False, True], [True, False]]
     for row in summary["rows"]:
         assert row["constant"] is True
@@ -178,9 +193,85 @@ def test_supplied_case_preserves_preload_and_targets_through_native_comparison(t
                     assert phase["phase_wall_ns"] is None
 
 
+def test_pin_roller_reversal_with_accepted_steel_plasticity_has_full_benchmark_history(
+    tmp_path,
+):
+    directory = Path("examples/research/rc_reuse_campaign")
+    model = load_neutral_json_bytes(
+        (directory / "pin-roller-steel-plastic.model.json").read_bytes()
+    )
+    request = decode_bounded_rc_fiber_direct_control_request(
+        (directory / "pin-roller-steel-plastic.request.json").read_bytes()
+    )
+    assert request.experimental_pin_roller_beam is True
+    assert request.targets_m == (-0.00005, -0.0001, -0.00015, 0.00005)
+    report = experiment.runtime.benchmark_rc_control_seed_paths(
+        model, request, source_revision="a" * 40,
+        output_directory=tmp_path / "comparison",
+        proposal=experiment.runtime.secant_seed,
+        proposal_identity="sha256:" + "b" * 64,
+        record_assembly_work=True,
+        record_assembly_timing=True,
+        **learning._arithmetic_kwargs(learning.RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    assert report["compiler_profile"] == (
+        public.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+    )
+    assert report["compiled_problem_contract_hash"].startswith("sha256:")
+    assert report["reference_repeat_exact"] is True
+    assert report["all_execution_work_reported"] is True
+    assert {name: value["full_history_pass"] for name, value in
+            report["comparisons"].items()} == {
+        "reference": True, "secant": True, "proposal": True,
+    }
+    assert all(arm["status"] == "complete" for arm in report["arms"].values())
+    assert report["fresh_reference"]["status"] == "complete"
+    step = json.loads(
+        (tmp_path / "comparison/reference/002-1-step.json").read_bytes()
+    )
+    assert step["committed"] is True
+    assert max(
+        fiber.get("accumulated_plastic_strain", 0.0)
+        for member in step["accepted_checkpoint"]["element_states"]
+        for point in member["integration_point_states"]
+        for fiber in point["fiber_states"]
+    ) > 0.0
+
+
 @pytest.mark.parametrize("timing", [None, 1, "true"])
 def test_invalid_timing_rejects_before_experiment_output(tmp_path, timing):
     output = tmp_path / "absent"
     with pytest.raises(ValueError, match="boolean assembly timing"):
         experiment.run(output, 2, record_assembly_timing=timing)
     assert not output.exists()
+
+
+@pytest.mark.parametrize("failed_gate", ["reference_repeat_exact", "all_execution_work_reported", "history"])
+def test_completed_benchmark_rejection_retains_cost_and_unknown_pair(tmp_path, monkeypatch, failed_gate):
+    calls = []
+
+    def benchmark(*args, **kwargs):
+        destination = kwargs["output_directory"]
+        destination.mkdir()
+        report = {"reference_repeat_exact": failed_gate != "reference_repeat_exact",
+                  "all_execution_work_reported": failed_gate != "all_execution_work_reported",
+                  "comparisons": {"secant": {"full_history_pass": failed_gate != "history"}}}
+        (destination / "comparison.json").write_text(json.dumps(report))
+        calls.append(destination)
+        return report
+
+    monkeypatch.setattr(experiment.runtime, "benchmark_rc_control_seed_paths", benchmark)
+    output = tmp_path / "failure-study"
+    with pytest.raises(ValueError, match="full path|full-history"):
+        experiment.run(output, 2, arithmetic="binary64", record_assembly_timing=True)
+    assert len(calls) == 1
+    assert not (output / "summary.json").exists()
+    receipt = json.loads((output / "failure.json").read_bytes())
+    assert receipt["whole_benchmark_wall_ratio"] is None
+    assert receipt["completed_pairs"] == receipt["completed_benchmarks_in_current_pair"] == []
+    assert receipt["reuse_enabled"] is False and receipt["repetition"] == 0
+    assert 0 <= receipt["benchmark_wall_ns"] <= receipt["study_wall_ns_through_failure"]
+    raw = (output / receipt["benchmark_directory"] / "comparison.json").read_bytes()
+    assert len(raw) == receipt["comparison_byte_length"]
+    assert experiment.hashlib.sha256(raw).hexdigest() == receipt["comparison_sha256"]
+    assert receipt["assembly_timing_recording"] is True

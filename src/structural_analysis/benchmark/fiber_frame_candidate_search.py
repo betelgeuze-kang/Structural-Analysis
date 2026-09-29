@@ -699,7 +699,7 @@ def _prepare_search_pool(baseline, declared, training, prices):
     for candidate in declared:
         row = {
             "candidate_id": candidate.candidate_id,
-            "changes": [asdict(change) for change in candidate.changes],
+            "changes": [change.to_dict() for change in candidate.changes],
             "screening_status": "blocked",
             "model_checksum": None,
             "preanalysis_material_estimate": None,

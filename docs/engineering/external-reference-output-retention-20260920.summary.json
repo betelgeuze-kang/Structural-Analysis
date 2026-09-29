@@ -1,0 +1,15 @@
+{
+  "source_revision": "740122e0a262f81a00fc199cbb189870e077ad5f",
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reference-capture-l8nvkj9g",
+  "inventory_sha256": "b5d8d2556823953d77047ac8f1b9191747f97a20227a799425bdbb0b143f1b20",
+  "verified_files": 793,
+  "parent_wall_ns": 1534014564,
+  "outer_wall_ns": 3263375660,
+  "original_numeric_payload_exact": true,
+  "capture_hashes_match": true,
+  "recorded_planar_attempts": 12,
+  "all_recorded_planar_attempts_pass": true,
+  "new_product_solves": 0,
+  "calculix_executions": 0,
+  "reference_promotion": false
+}

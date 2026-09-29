@@ -145,6 +145,7 @@ jobs:
           python -m pip install -e .[dev]
 
       - name: Materialize exact current-source V&V inputs
+        id: materialize
         shell: bash
         run: |
           python scripts/run_external_code_to_code_technical_receipt.py \
@@ -163,7 +164,9 @@ jobs:
           python scripts/build_bounded_planar_external_modal_buckling_case_package.py
           python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
           python scripts/build_bounded_planar_external_vv_matrix.py
-          python scripts/build_internal_license_due_diligence.py --fail-blocked
+          # Produce the exact-current manifest before tests; the blocked
+          # external license contract remains a required gate after JUnit.
+          python scripts/build_internal_license_due_diligence.py
           python scripts/build_bounded_planar_external_linear_case_package.py --check
           python scripts/build_bounded_planar_external_negative_case_package.py --check
           python scripts/build_bounded_planar_external_scaling_case_package.py --check
@@ -173,7 +176,26 @@ jobs:
       - name: Deterministic legacy evidence contracts shard
         env:
           LEGACY_TEST_MODULES: ${{ matrix.test_modules }}
-        run: python -m pytest -q $LEGACY_TEST_MODULES
+        run: >-
+          python -m pytest -q
+          --junitxml=legacy-evidence-shard-${{ matrix.shard }}.xml
+          $LEGACY_TEST_MODULES
+
+      - name: Retain diagnostic legacy evidence shard result independently of license status
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: legacy-evidence-shard-diagnostic-${{ matrix.shard }}-${{ github.sha }}
+          path: legacy-evidence-shard-${{ matrix.shard }}.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Require exact current-source external license contract
+        if: ${{ always() && steps.materialize.outcome == 'success' }}
+        run: >-
+          python scripts/build_internal_license_due_diligence.py
+          --out "$RUNNER_TEMP/internal-license-gate.json"
+          --fail-blocked
 
   legacy-evidence-complete:
     name: legacy-evidence-complete

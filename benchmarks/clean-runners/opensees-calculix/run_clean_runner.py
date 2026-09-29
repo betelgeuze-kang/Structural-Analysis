@@ -19,7 +19,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, mkdtemp
 from typing import Any
 
 from jsonschema import Draft202012Validator
@@ -170,6 +170,45 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise CleanRunnerError(f"json_object_required:{path}")
     return payload
+
+
+def _run_code_with_capture(
+    command: list[str], *, output_dir: Path, cwd: Path, env: dict[str, str]
+) -> None:
+    """Retain diagnostic outputs even when receipt generation fails.
+
+    This inventory is not part of the v1 signed summary or an approval claim.
+    Each attempt owns a fresh directory; failed attempts are never overwritten.
+    """
+    attempt = Path(mkdtemp(prefix="code-reference-attempt-", dir=output_dir))
+    completed = False
+    print(f"code_reference_diagnostic_directory={attempt}", flush=True)
+    try:
+        _run(
+            [*command, "--raw-output-dir", str(attempt / "raw")],
+            cwd=cwd,
+            env=env,
+        )
+        completed = True
+    finally:
+        files = []
+        for path in sorted(attempt.rglob("*")):
+            if path.is_file():
+                files.append({
+                    "path": path.relative_to(attempt).as_posix(),
+                    "byte_length": path.stat().st_size,
+                    "sha256": _file_hash(path),
+                })
+        (attempt / "inventory.json").write_text(
+            json.dumps({
+                "schema_version": "external-reference-diagnostic-inventory.v1",
+                "receipt_command_completed": completed,
+                "signed_summary_member": False,
+                "qualification_claim": False,
+                "files": files,
+            }, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
 
 def _run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> None:
@@ -1008,8 +1047,9 @@ def main(argv: list[str] | None = None) -> int:
 
         env = dict(os.environ)
         env["PYTHONPATH"] = str(repo_root / "src")
-        _run(
+        _run_code_with_capture(
             [sys.executable, str(code_script), "--out", str(code_out), *shared],
+            output_dir=output_dir,
             cwd=repo_root,
             env=env,
         )

@@ -14,6 +14,69 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PHASE2_REFRESH_COMMANDS = (
+    "python scripts/build_phase2_state_updated_steel_material_artifacts.py",
+    "python scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
+    "python scripts/build_phase2_state_updated_composite_section_artifacts.py",
+    "python scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+    "python scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
+)
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name", "consumer_steps"),
+    [
+        (
+            "ci.yml",
+            "verify",
+            ("Build current-HEAD readiness snapshot", "PR quality gate"),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "python_full_shards",
+            ("Run materialized repository test suite shard",),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "deterministic_quality",
+            ("Deterministic repository quality gate",),
+        ),
+        (
+            "nightly-heavy-solver.yml",
+            "heavy-full-quality",
+            (
+                "Run materialized repository Python suite",
+                "Full workstation/release quality gate",
+            ),
+        ),
+    ],
+)
+def test_phase2_source_receipts_materialize_before_consumers(
+    workflow_name: str, job_name: str, consumer_steps: tuple[str, ...]
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows" / workflow_name).read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"][job_name]["steps"]
+    names = [step["name"] for step in steps]
+    materialize_index = names.index("Materialize exact current-source test evidence")
+    run_lines = [line.strip() for line in steps[materialize_index]["run"].splitlines()]
+    refresh_indices = [run_lines.index(command) for command in PHASE2_REFRESH_COMMANDS]
+
+    assert refresh_indices == sorted(refresh_indices)
+    assert all(run_lines.count(command) == 1 for command in PHASE2_REFRESH_COMMANDS)
+    assert refresh_indices[-1] < next(
+        index
+        for index, line in enumerate(run_lines)
+        if line.startswith(
+            "python scripts/run_external_code_to_code_technical_receipt.py"
+        )
+    )
+    assert all(materialize_index < names.index(name) for name in consumer_steps)
+    if "Validate pristine commercial gap ledger" in names:
+        assert (
+            names.index("Validate pristine commercial gap ledger") < materialize_index
+        )
 
 
 @pytest.mark.parametrize(
@@ -30,7 +93,11 @@ def test_failed_materialization_upload_preserves_failure_and_limits_files(
     steps = {step["name"]: step for step in job["steps"]}
     materialize = steps["Materialize exact current-source test evidence"]
     assert materialize["id"] == "materialize"
-    assert "--fail-blocked" in materialize["run"]
+    if job_name == "full_shards":
+        assert "--fail-blocked" not in materialize["run"]
+        assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    else:
+        assert "--fail-blocked" in materialize["run"]
     assert not job.get("continue-on-error", False)
     assert all(not step.get("continue-on-error", False) for step in job["steps"])
     gate = "Run materialized repository test suite shard" if job_name == "full_shards" else "Build current-HEAD readiness snapshot"
@@ -52,6 +119,50 @@ def test_failed_materialization_upload_preserves_failure_and_limits_files(
         "artifacts/manifests/internal_license_due_diligence.current.v1.json",
     ]
     assert upload["with"]["retention-days"] == 7
+
+
+def test_full_shard_reports_pytest_before_enforcing_external_license_gate() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/python-test-collection.yml").read_text()
+    )
+    jobs = workflow["jobs"]
+    shard_steps = jobs["full_shards"]["steps"]
+    names = [step["name"] for step in shard_steps]
+    materialize = shard_steps[names.index("Materialize exact current-source test evidence")]
+    test_step = shard_steps[names.index("Run materialized repository test suite shard")]
+    upload = shard_steps[
+        names.index("Retain diagnostic shard test result independently of license status")
+    ]
+    license_gate = shard_steps[
+        names.index("Require exact current-source external license contract")
+    ]
+
+    assert names.index("Materialize exact current-source test evidence") < names.index(
+        "Run materialized repository test suite shard"
+    ) < names.index(
+        "Retain diagnostic shard test result independently of license status"
+    ) < names.index("Require exact current-source external license contract")
+    assert "if" not in test_step
+    assert "--junitxml=pytest-full-shard-${{ matrix.shard }}.xml" in test_step["run"]
+    assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    assert "--fail-blocked" not in materialize["run"]
+    assert upload["if"] == "${{ always() }}"
+    assert upload["with"] == {
+        "name": "pytest-full-shard-diagnostic-${{ matrix.shard }}-${{ github.sha }}",
+        "path": "pytest-full-shard-${{ matrix.shard }}.xml",
+        "if-no-files-found": "warn",
+        "retention-days": 14,
+    }
+    assert license_gate["if"] == (
+        "${{ always() && steps.materialize.outcome == 'success' }}"
+    )
+    assert license_gate["run"] == (
+        "python scripts/build_internal_license_due_diligence.py "
+        '--out "$RUNNER_TEMP/internal-license-gate.json" --fail-blocked'
+    )
+    assert all(not step.get("continue-on-error", False) for step in shard_steps)
+    assert jobs["full"]["needs"] == "full_shards"
+    assert jobs["full"]["if"] == "${{ always() }}"
 
 
 @pytest.mark.parametrize(
@@ -157,11 +268,7 @@ def test_all_supported_events_run_the_complete_pytest_suite() -> None:
     assert hosted_hip_source < pristine_ledger < materialize < full_suite
     assert "--deselect" in workflow[full_suite:]
     for command in (
-        "python scripts/build_phase2_state_updated_steel_material_artifacts.py",
-        "python scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
-        "python scripts/build_phase2_state_updated_composite_section_artifacts.py",
-        "python scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
-        "python scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
+        *PHASE2_REFRESH_COMMANDS,
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
         "python scripts/build_fracture_energy_concrete_benchmark.py",
         "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",
@@ -685,7 +792,7 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
         "- name: Download and reverify exact-SHA supplemental technical attestations",
         1,
     )[1].split(
-        "- name: Materialize attested exact-SHA clean-runner evidence when available",
+        "- name: Retain bounded supplemental consumer diagnostics",
         1,
     )[0]
 
@@ -704,16 +811,32 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
     assert "type(run_id) is not int" in step
     assert "type(run_attempt) is not int" in step
     assert "for lookup_attempt in {1..30}" in step
-    assert "gh run download" in step
+    assert "gh run download" not in step
+    assert "python scripts/consume_supplemental_artifact.py" in step
+    for argument in (
+        '--repository "$GITHUB_REPOSITORY"',
+        '--source-sha "$PRODUCT_STATE_SHA"',
+        '--run-id "$run_id"',
+        '--run-attempt "$run_attempt"',
+        '--family "$family"',
+        '--run-json "$family_root/workflow-run.json"',
+        '--inventory-json "$family_root/artifacts.json"',
+        '--target "$artifact_root"',
+        '--diagnostic "$transport_diagnostic_dir/$family.json"',
+    ):
+        assert argument in step
+    assert 'mkdir -p "$family_root"' in step
+    assert 'mkdir -p "$artifact_root"' not in step
+    assert 'mktemp -d "$RUNNER_TEMP/supplemental-consumer.XXXXXX"' in step
+    assert '>> "$GITHUB_OUTPUT"' in step
     assert "mark_supplemental_unavailable" in step
     assert "workflow_run_lookup_failed_after_bounded_retry" in step
     assert "successful_exact_sha_workflow_run_missing" in step
     assert "actions/runs/$run_id/artifacts?per_page=100" in step
-    assert 'artifact.get("expired")' in step
-    assert "type(artifact_id) is not int" in step
     assert "exact_sha_artifact_missing" in step
     assert "exact_sha_artifact_expired" in step
-    assert "available exact-SHA supplemental artifact download failed" in step
+    assert "exact-SHA supplemental artifact consumer failed" in step
+    assert 'if test "$artifact_status" != "available"; then' in step
     unavailable_branch = step.index('if test "$supplemental_available" != "true"; then')
     assert step.index("exit 0", unavailable_branch) < step.index(
         "scripts/build_bounded_planar_current_source_supplemental_attestation.py"
@@ -733,6 +856,27 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
         in step
     )
     assert '--out "$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"' in step
+
+    diagnostic_upload = workflow.split(
+        "- name: Retain bounded supplemental consumer diagnostics", 1
+    )[1].split(
+        "- name: Materialize attested exact-SHA clean-runner evidence when available", 1
+    )[0]
+    assert (
+        "always() && steps.consume_supplemental.outputs.diagnostic_dir != ''"
+        in diagnostic_upload
+    )
+    assert (
+        "path: ${{ steps.consume_supplemental.outputs.diagnostic_dir }}/*.json"
+        in diagnostic_upload
+    )
+    assert "retention-days: 7" in diagnostic_upload
+    assert "if-no-files-found: warn" in diagnostic_upload
+    assert "SUPPLEMENTAL_ATTESTATION_INPUT_DIR" not in diagnostic_upload
+    assert (
+        "bounded-planar-supplemental-consumer-${{ github.run_id }}-${{ github.run_attempt }}"
+        in diagnostic_upload
+    )
 
 
 def test_supplemental_workflows_upload_hidden_attestation_inputs() -> None:
@@ -932,6 +1076,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     jobs = workflow["jobs"]
     diagnostic = jobs["development_contracts"]
     assert diagnostic["name"] == "pytest-development-contracts"
+    assert diagnostic["timeout-minutes"] == "45"
     assert "needs" not in diagnostic and "if" not in diagnostic
     assert "continue-on-error" not in diagnostic
     assert workflow["permissions"] == {"contents": "read"}
@@ -942,16 +1087,50 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
     assert tests[:3] == ["python", "-m", "pytest"]
     assert "--junitxml=development-contracts.xml" in tests
     assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
-    selected = {x for x in tests if x.startswith("tests/")}
-    assert len(selected) == 47
+    selected_paths = [x for x in tests if x.startswith("tests/")]
+    selected = set(selected_paths)
+    assert len(selected_paths) == len(selected), "duplicate development module selection"
+    assert len(selected) == 84
     assert all((ROOT / path).is_file() for path in selected)
     assert {
+        "tests/test_stateful_fiber_section.py",
+        "tests/test_public_rc_fiber_frame_api.py",
+        "tests/test_fiber_frame_design.py",
+        "tests/test_fiber_frame_physical_identity.py",
+        "tests/test_fiber_frame_candidate_learning.py",
+        "tests/test_bounded_planar_model_ir_adapter.py",
+        "tests/test_model_ir_v2_contract.py",
+        "tests/test_fiber_frame_candidate_search.py",
+        "tests/test_fiber_frame_candidate_cost.py",
+        "tests/test_fiber_frame_candidate_search_suite.py",
         "tests/test_bounded_rc_fiber_direct_control_api.py",
         "tests/test_nonlinear_failure_diagnostic.py",
         "tests/test_durable_failure_diagnostics.py",
         "tests/test_durable_job_service.py",
         "tests/test_rc_control_runtime_selection.py",
+        "tests/test_rc_runtime_cost_diagnostic.py",
+        "tests/test_rc_control_initial_residual.py",
+        "tests/test_rc_control_trust_region.py",
+        "tests/test_rc_recovery_configuration.py",
+        "tests/test_rc_replay_streaming.py",
+        "tests/test_rc_branch_diagnostic.py",
+        "tests/test_rc_recovery_followup.py",
+        "tests/test_rc_adaptive_continuation_campaign.py",
+        "tests/test_rc_adaptive_campaign_audit.py",
+        "tests/test_rc_internal_portal_20mm_comparison.py",
+        "tests/test_audit_rc_internal_portal_20mm_comparison.py",
+        "tests/test_rc_offline_cost_tree.py",
+        "tests/test_rc_scalar_runtime_equivalence.py",
+        "tests/test_rc_same_parent_probe_records.py",
         "tests/test_planar_steel_refinement_witness_audit.py",
+        "tests/test_planar_concrete_localization_audit.py",
+        "tests/test_planar_1024_witness_probe.py",
+        "tests/test_planar_2048_witness_probe.py",
+        "tests/test_planar_4096_refinement_driver.py",
+        "tests/test_extract_planar_2048_features.py",
+        "tests/test_audit_planar_4096_refinement.py",
+        "tests/test_planar_path_artifact_writer.py",
+        "tests/test_planar_path_artifact_reader.py",
         "tests/test_planar_material_activity.py",
         "tests/test_rc_control_step_work.py",
         "tests/test_rc_control_iteration_cost.py",
@@ -961,6 +1140,7 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "tests/test_rc_quadratic_seed.py",
         "tests/test_rc_native_assembly_reuse.py",
         "tests/test_rc_line_search_reuse_experiment.py",
+        "tests/test_rc_reuse_campaign.py",
         "tests/test_rc_control_search_accounting.py",
         "tests/test_rc_control_strategy_costs.py",
         "tests/test_rc_control_process_costs.py",
@@ -975,12 +1155,16 @@ def test_development_contracts_remain_independent_without_replacing_full_gate():
         "tests/test_repository_python_workflow_contract.py",
         "tests/test_rc_constant_load_durable.py",
         "tests/test_rc_control_parent_step.py",
+        "tests/test_rc_control_cost_pruned_design.py",
+        "tests/test_rc_control_reinforcement_learning.py",
         "tests/test_rc_control_candidate_search.py",
         "tests/test_rc_control_candidate_cost.py",
         "tests/test_rc_control_cost_dominance.py",
         "tests/test_measured_response_split.py",
         "tests/test_aci_column_archive.py",
         "tests/test_pinned_opensees_runtime.py",
+        "tests/test_external_reference_output_capture.py",
+        "tests/test_external_product_replay_identity.py",
         "tests/test_local_source_reference_comparison.py",
     } <= selected
     assert all(

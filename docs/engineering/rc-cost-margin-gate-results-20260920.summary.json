@@ -1,0 +1,115 @@
+{
+  "fit_inventory_sha256": "0f0486a7f1ad66d0cd9e3a04bab616361d4b4ddfafc443129c8288725f759501",
+  "verified_fit_files": 783,
+  "verified_fit_bytes": 17647802,
+  "rows": [
+    {
+      "outer_group_index": 0,
+      "training_proposal_count": 0,
+      "training_true_positive": 0,
+      "training_false_positive": 0,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 8.56259507742152e-15,
+      "target_min": -0.5076713742679111,
+      "target_max": 0.14614977222814485,
+      "selected_measured_targets": [],
+      "selected_predicted_targets": []
+    },
+    {
+      "outer_group_index": 1,
+      "training_proposal_count": 2,
+      "training_true_positive": 0,
+      "training_false_positive": 2,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 4.4911990793039536e-15,
+      "target_min": -0.4088214162412749,
+      "target_max": 0.14761534595871695,
+      "selected_measured_targets": [
+        -0.012414391141745806,
+        -0.019211052561660447
+      ],
+      "selected_predicted_targets": [
+        0.04210515977508838,
+        0.01246905015244753
+      ]
+    },
+    {
+      "outer_group_index": 2,
+      "training_proposal_count": 4,
+      "training_true_positive": 0,
+      "training_false_positive": 4,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 5.80785419757035e-15,
+      "target_min": -0.5073512245813763,
+      "target_max": 0.12630070841647245,
+      "selected_measured_targets": [
+        -0.02283738859277018,
+        -0.01601553900098507,
+        -0.017138742109298333,
+        -0.015081390015836194
+      ],
+      "selected_predicted_targets": [
+        0.014383077723000383,
+        0.03397715638185572,
+        0.01079922977350986,
+        0.01990420603455066
+      ]
+    },
+    {
+      "outer_group_index": 3,
+      "training_proposal_count": 2,
+      "training_true_positive": 0,
+      "training_false_positive": 2,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 1.0880185641326534e-14,
+      "target_min": -0.5698278786970716,
+      "target_max": 0.1477514689929631,
+      "selected_measured_targets": [
+        -0.015452362472835546,
+        -0.014381914492393566
+      ],
+      "selected_predicted_targets": [
+        0.03461605718029233,
+        0.018322508586600617
+      ]
+    },
+    {
+      "outer_group_index": 4,
+      "training_proposal_count": 2,
+      "training_true_positive": 0,
+      "training_false_positive": 2,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 7.105427357601002e-15,
+      "target_min": -0.3167499885117133,
+      "target_max": 0.14445292104887741,
+      "selected_measured_targets": [
+        -0.015099548367980997,
+        -0.018057050043927658
+      ],
+      "selected_predicted_targets": [
+        0.03830431669162142,
+        0.03620319833692667
+      ]
+    }
+  ],
+  "actual_original_gate_fit_count": 5,
+  "original_wrapper_reported_new_fits": 0,
+  "wrapper_counter_correction": "The copied observer wrapper says zero new fits; the five committed fit receipts are authoritative. Preserve the original packet and count five fits.",
+  "original_fit_wall_ns": 34131919,
+  "original_driver_wall_ns": 257835063,
+  "original_outer_wall_ns": 2130935484,
+  "new_fits_in_this_audit": 0,
+  "new_solves": 0,
+  "reserved_evaluation": false,
+  "wall_ns_before_report": 284282448,
+  "audit_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-cost-margin-fit-audit-8zie0plx",
+  "audit_inventory_sha256": "d84bf39f65662c9e1781adf165cfcbe03dc2067f141b2c1394a3a02ce0f7f597",
+  "fit_source_revision": "b6d64ea51096a12c739614adb3e43ce07876c122",
+  "full_path_evaluation_performed": false,
+  "net_runtime_benefit_demonstrated": false
+}

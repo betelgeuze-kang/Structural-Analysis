@@ -48,6 +48,17 @@ from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
 from structural_analysis.benchmark.rc_control_assembly_phases import (
     summarize_rc_control_assembly_phases,
 )
+from structural_analysis.benchmark.rc_control_trust_region import (
+    TrustRegionReversalProposal,
+    TRUST_REGION_REVERSAL_IDENTITY,
+)
+from structural_analysis.benchmark.rc_control_frozen_continuation import (
+    FrozenParentContinuationProposal,
+    FROZEN_CONTINUATION_IDENTITY,
+    FROZEN_CONTINUATION_FAILURE_IDENTITY,
+    FROZEN_CONTINUATION_TARGET_FAILURE_IDENTITY,
+    ADAPTIVE_FROZEN_CONTINUATION_IDENTITY,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.assembly_work import (
     VectorAssemblyWorkRecorder,
@@ -318,6 +329,27 @@ def _preload(
     return step, response, coordinates, inv, failure
 
 
+def _guard_decision(context, guard, root, index):
+    """Time a decision on the accepted prefix before material capture."""
+    _save(root, f"{index:03d}-guard-context.json", _bytes(context.to_dict()))
+    _save(root, f"{index:03d}-guard-started.json", _bytes({
+        "status": "started", "unknown_guard_work_until_outcome": True,
+    }))
+    wall, cpu = perf_counter_ns(), process_time_ns()
+    result = {"status": "returned", "allow_proposal": None}
+    try:
+        allowed = guard(context)
+        if type(allowed) is not bool:
+            raise ValueError("proposal guard must return an exact boolean")
+        result["allow_proposal"] = allowed
+    except Exception as exc:
+        result.update(status="raised", exception_kind=type(exc).__name__)
+    finally:
+        result.update(wall_ns=perf_counter_ns() - wall, cpu_ns=process_time_ns() - cpu)
+    _save(root, f"{index:03d}-guard-outcome.json", _bytes(result))
+    return result
+
+
 def _path(
     compiled,
     request,
@@ -330,6 +362,11 @@ def _path(
     record_assembly_work=False,
     reuse_line_search_assembly=False,
     record_assembly_timing=False,
+    proposal_guard=None,
+    observe_initial_residuals=False,
+    continuation_on_failure=False,
+    continuation_all_failed_targets=False,
+    continuation_adaptive=False,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -392,7 +429,17 @@ def _path(
     for index, target in enumerate(() if failure else request.targets_m):
         material_state = None
         capture_cost = None
-        if capture_material_state:
+        guard_result = None
+        allow_proposal = True
+        if proposal_guard is not None:
+            guard_context = RCControlSeedContext(
+                source_hash, request.control_global_dof,
+                compiled.problem.free_global_dofs.index(request.control_global_dof),
+                target, tuple(targets), tuple(coordinates), None,
+            )
+            guard_result = _guard_decision(guard_context, proposal_guard, root, index)
+            allow_proposal = guard_result["allow_proposal"] is True
+        if capture_material_state and allow_proposal:
             from structural_analysis.benchmark.rc_control_material_features import (
                 committed_material_snapshot,
             )
@@ -424,8 +471,16 @@ def _path(
         }
         if capture_cost is not None:
             entry["committed_material_capture"] = capture_cost
+        if guard_result is not None:
+            entry["proposal_guard"] = guard_result
         entries.append(entry)
         _save(root, f"{index:03d}-context.json", _bytes(context.to_dict()))
+        if guard_result is not None and guard_result["status"] != "returned":
+            failure = {"phase": "proposal_guard", "kind": guard_result["exception_kind"]}
+            entry.update(proposal_wall_ns=0, proposal_cpu_ns=0,
+                         proposal_decision="guard_failed", proposal_error=failure)
+            _save(root, f"{index:03d}-proposal.json", _bytes(entry))
+            break
         _save(
             root,
             f"{index:03d}-proposal-started.json",
@@ -439,12 +494,32 @@ def _path(
         )
         pw, pc = perf_counter_ns(), process_time_ns()
         try:
+            numerical = None
+            if strategy == "proposal" and isinstance(proposal, (TrustRegionReversalProposal, FrozenParentContinuationProposal)):
+                if continuation_on_failure:
+                    numerical = {"status": "deferred", "seed": None, "unknown_work": False,
+                                 "native_core_calls_attempted": 0,
+                                 "reason": "ordinary_invocation_must_fail_first"}
+                elif isinstance(proposal, FrozenParentContinuationProposal):
+                    numerical = proposal.propose(
+                        compiled.problem, accepted, request, context,
+                        artifact_sink=lambda stage, payload: _save(
+                            root, f"{index:03d}-continuation-{stage:03d}.json", _bytes(payload)
+                        ),
+                    )
+                else:
+                    numerical = proposal.propose(compiled.problem, accepted, request, context)
+                entry["numerical_proposal"] = numerical
+                if numerical["unknown_work"]:
+                    failure = {"phase": "numerical_proposal", "kind": "unknown_work",
+                               "target_index": index}
             seed = (
+                numerical["seed"] if numerical is not None else
                 None
                 if strategy == "reference"
                 else secant_seed(context)
                 if strategy == "secant"
-                else proposal(context)
+                else proposal(context) if allow_proposal else None
             )
             if strategy == "proposal":
                 entry["proposal_decision"] = "proposed"
@@ -470,6 +545,9 @@ def _path(
                 ).initial_augmented_coordinates_m
             entry["proposal"] = None if seed is None else list(seed)
         except Exception as exc:
+            if isinstance(proposal, (TrustRegionReversalProposal, FrozenParentContinuationProposal)):
+                failure = {"phase": "numerical_proposal", "kind": type(exc).__name__,
+                           "target_index": index, "unknown_work": True}
             entry["proposal_error"] = {
                 "phase": "proposal",
                 "kind": type(exc).__name__,
@@ -481,14 +559,44 @@ def _path(
         finally:
             entry["proposal_wall_ns"] = perf_counter_ns() - pw
             entry["proposal_cpu_ns"] = process_time_ns() - pc
+        if observe_initial_residuals and entry.get("proposal_decision") == "proposed":
+            baseline = secant_seed(context)
+            if baseline is not None and seed is not None:
+                _save(root, f"{index:03d}-initial-residual-started.json", _bytes({
+                    "parent_hash": accepted.state_hash, "target_index": index,
+                    "unknown_observation_work_until_outcome": True,
+                }))
+                ow = perf_counter_ns()
+                from structural_analysis.benchmark.rc_control_initial_residual import (
+                    observe_rc_control_initial_residuals,
+                )
+                try:
+                    observation = observe_rc_control_initial_residuals(
+                        compiled.problem, accepted,
+                        control_global_dof=request.control_global_dof,
+                        target_m=target, config=request.solver_config,
+                        candidates={"secant": baseline, "proposal": seed},
+                    )
+                    entry["initial_residual_observation"] = observation
+                    if not observation["complete"]:
+                        failure = {"phase": "initial_residual_observation",
+                                   "kind": "incomplete_observation", "target_index": index}
+                except Exception as exc:
+                    entry["initial_residual_observation"] = {
+                        "complete": False, "unknown_work": True,
+                        "error_type": type(exc).__name__, "error": str(exc),
+                    }
+                    failure = {"phase": "initial_residual_observation",
+                               "kind": type(exc).__name__, "target_index": index}
+                finally:
+                    entry["initial_residual_observation_wall_ns"] = perf_counter_ns() - ow
         _save(root, f"{index:03d}-proposal.json", _bytes(entry))
         if failure:
             break
         # A rejected numerical proposal may fall back exactly once, with both
         # attempts retained. An exception leaves unknown work and stops the path.
-        for attempt, current in enumerate(
-            (seed, None) if seed is not None else (None,)
-        ):
+        attempt_seeds = [seed, None] if seed is not None else [None]
+        for attempt, current in enumerate(attempt_seeds):
             inv = {
                 "ordinal": attempt + 1,
                 "seed_used": current is not None,
@@ -599,6 +707,46 @@ def _path(
                     "target_index": index,
                 }
                 break
+            if (continuation_on_failure and strategy == "proposal" and attempt == 0
+                    and isinstance(proposal, FrozenParentContinuationProposal)):
+                pw, pc = perf_counter_ns(), process_time_ns()
+                _save(root, f"{index:03d}-continuation-started.json", _bytes({
+                    "failed_invocation": 1, "parent_hash": accepted.state_hash,
+                    "unknown_proposal_work_until_outcome": True,
+                }))
+                try:
+                    numerical = proposal.propose(
+                        compiled.problem, accepted, request, context,
+                        allow_nonreversal=continuation_all_failed_targets,
+                        adaptive=continuation_adaptive,
+                        artifact_sink=lambda stage, payload: _save(
+                            root, f"{index:03d}-continuation-{stage:03d}.json", _bytes(payload)
+                        ),
+                    )
+                    entry["numerical_proposal"] = numerical
+                    entry["recovery_after_failed_invocation"] = 1
+                    if numerical["unknown_work"]:
+                        failure = {"phase": "numerical_proposal", "kind": "unknown_work",
+                                   "target_index": index}
+                    elif numerical["seed"] is not None:
+                        recovered = StatefulFiberFrame2DDisplacementControlStepAdapter(
+                            compiled.problem, accepted, request.control_global_dof,
+                            target, request.solver_config, tuple(numerical["seed"]),
+                        ).initial_augmented_coordinates_m
+                        attempt_seeds.append(recovered)
+                        entry["proposal"] = list(recovered)
+                        entry["proposal_decision"] = "proposed_after_reference_failure"
+                    else:
+                        entry["proposal_decision"] = "recovery_declined"
+                except Exception as exc:
+                    failure = {"phase": "numerical_proposal", "kind": type(exc).__name__,
+                               "target_index": index, "unknown_work": True}
+                finally:
+                    entry["proposal_wall_ns"] += perf_counter_ns() - pw
+                    entry["proposal_cpu_ns"] += process_time_ns() - pc
+                    _save(root, f"{index:03d}-continuation-proposal.json", _bytes(entry))
+                if failure:
+                    break
         if failure or step is None or not step.committed:
             failure = failure or {
                 "phase": "numerical",
@@ -972,6 +1120,8 @@ def benchmark_rc_control_seed_paths(
     output_directory: Path,
     proposal: Callable[[RCControlSeedContext], tuple[float, ...] | None] | None = None,
     proposal_identity: str | None = None,
+    proposal_guard: Callable[[RCControlSeedContext], bool] | None = None,
+    proposal_guard_identity: str | None = None,
     arm_order: tuple[str, ...] | None = None,
     absolute_tolerance: float = 1e-10,
     relative_tolerance: float = 1e-8,
@@ -990,6 +1140,12 @@ def benchmark_rc_control_seed_paths(
     record_assembly_work: bool = False,
     reuse_line_search_assembly: bool = False,
     record_assembly_timing: bool = False,
+    observe_initial_residuals: bool = False,
+    trust_region_reversal: bool = False,
+    frozen_parent_continuation: bool = False,
+    continuation_on_failure: bool = False,
+    continuation_all_failed_targets: bool = False,
+    continuation_adaptive: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal.
 
@@ -998,6 +1154,50 @@ def benchmark_rc_control_seed_paths(
     original prefix, and cannot provide complete-path performance credit.
     """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(trust_region_reversal) is not bool:
+        raise ValueError("explicit boolean trust-region reversal option required")
+    if type(frozen_parent_continuation) is not bool:
+        raise ValueError("explicit boolean frozen-parent continuation option required")
+    if type(continuation_on_failure) is not bool or (continuation_on_failure and not frozen_parent_continuation):
+        raise ValueError("failure-only continuation requires the explicit frozen-parent strategy")
+    if type(continuation_all_failed_targets) is not bool or (continuation_all_failed_targets and not continuation_on_failure):
+        raise ValueError("all-target continuation requires the explicit failure-only strategy")
+    if type(continuation_adaptive) is not bool or (continuation_adaptive and not continuation_all_failed_targets):
+        raise ValueError("adaptive continuation requires explicit all-target failure recovery")
+    if continuation_on_failure and observe_initial_residuals:
+        raise ValueError("failure-only continuation does not support pre-invocation residual observations")
+    if trust_region_reversal and frozen_parent_continuation:
+        raise ValueError("one numerical reversal strategy required")
+    if trust_region_reversal or frozen_parent_continuation:
+        if (proposal is not None or proposal_identity is not None or
+                proposal_guard is not None or proposal_abstention_strategy != "reference" or
+                (trust_region_reversal and coordinate_precision != "binary64")):
+            raise ValueError("isolated numerical proposal strategy and supported coordinate precision required")
+        proposal = (TrustRegionReversalProposal() if trust_region_reversal
+                    else FrozenParentContinuationProposal())
+        numerical_identity = (TRUST_REGION_REVERSAL_IDENTITY if trust_region_reversal
+                              else FROZEN_CONTINUATION_IDENTITY)
+        if continuation_on_failure:
+            numerical_identity = FROZEN_CONTINUATION_FAILURE_IDENTITY
+        if continuation_all_failed_targets:
+            numerical_identity = FROZEN_CONTINUATION_TARGET_FAILURE_IDENTITY
+        if continuation_adaptive:
+            numerical_identity = ADAPTIVE_FROZEN_CONTINUATION_IDENTITY
+        proposal_identity = _sha(_bytes({"profile": numerical_identity}))
+    if type(observe_initial_residuals) is not bool or (
+        observe_initial_residuals and proposal is None
+    ):
+        raise ValueError("initial residual observation requires a boolean and proposer")
+    if (proposal_guard is None) != (proposal_guard_identity is None) or (
+        proposal_guard is not None and (
+            not callable(proposal_guard) or proposal is None
+            or proposal_abstention_strategy != "secant"
+            or type(proposal_guard_identity) is not str
+            or not re.fullmatch(r"sha256:[0-9a-f]{64}", proposal_guard_identity)
+        )
+    ):
+        raise ValueError("identified proposal guard requires proposer and secant abstention")
+
     if type(record_assembly_timing) is not bool or (
         record_assembly_timing and not record_assembly_work
     ):
@@ -1131,7 +1331,16 @@ def benchmark_rc_control_seed_paths(
     ):
         raise ValueError("declared path budget exceeded")
     model = model.detached_analysis_snapshot()
-    compiled, blockers, _ = public._compile(model)
+    compiled, blockers, _ = public._compile(
+        model,
+        **(
+            {"experimental_two_fixed_endpoints": True}
+            if request.experimental_two_fixed_endpoints
+            else {"experimental_pin_roller_beam": True}
+            if request.experimental_pin_roller_beam
+            else {}
+        ),
+    )
     if compiled is None or blockers:
         raise ValueError("supported RC model required")
     compiled = api._with_constant_loading(compiled, request.constant_nodal_loads)
@@ -1178,6 +1387,19 @@ def benchmark_rc_control_seed_paths(
         **(
             {"compiled_problem_contract_hash": compiled.problem.contract_hash}
             if request.constant_nodal_loads
+            else {}
+        ),
+        **(
+            {
+                "compiler_profile": public.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE,
+                "compiled_problem_contract_hash": compiled.problem.contract_hash,
+            }
+            if request.experimental_two_fixed_endpoints
+            else {
+                "compiler_profile": public.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
+                "compiled_problem_contract_hash": compiled.problem.contract_hash,
+            }
+            if request.experimental_pin_roller_beam
             else {}
         ),
         "source_revision": source_revision,
@@ -1257,6 +1479,18 @@ def benchmark_rc_control_seed_paths(
         "absolute_tolerance": absolute_tolerance,
         "relative_tolerance": relative_tolerance,
     }
+    if trust_region_reversal or frozen_parent_continuation:
+        identity["numerical_proposal"] = {
+            "identity": numerical_identity,
+            "trigger": "failed_target" if continuation_all_failed_targets else
+            "failed_accepted_direction_reversal" if continuation_on_failure else "accepted_direction_reversal",
+            "cost_included_in_path_wall": True,
+            "optimizer_assemblies_separate_from_newton_dispatches": True,
+            "optimizer_confers_acceptance": False,
+            "unknown_work_stops_path": True,
+        }
+    if continuation_all_failed_targets:
+        identity["numerical_proposal"]["maximum_additional_native_calls"] = (64 if continuation_adaptive else 16) * len(request.targets_m)
     if initial_prefix is not None:
         identity.update(
             schema_version="experimental-rc-control-parent-step-comparison.v1",
@@ -1270,7 +1504,8 @@ def benchmark_rc_control_seed_paths(
             comparison_scope="one_target_from_one_supplied_native_parent_and_accepted_prefix",
             prefix_reachability_verified=False,
             original_complete_path_executed=False,
-            maximum_numerical_core_calls=2 + 2 * (len(order) - 1),
+            maximum_numerical_core_calls=2 + 2 * (len(order) - 1)
+            + ((64 if continuation_adaptive else 16) if frozen_parent_continuation else 0),
         )
     if record_assembly_work:
         identity["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
@@ -1280,6 +1515,22 @@ def benchmark_rc_control_seed_paths(
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
         )
+    if observe_initial_residuals:
+        identity["initial_residual_observation"] = {
+            "schema_version": "rc-control-initial-residual-observation.v1",
+            "scope": "secant and actual proposal on proposal-arm accepted parent",
+            "changes_seed": False,
+            "cost_included_in_path_wall": True,
+            "assembly_counts_separate_from_newton_dispatches": True,
+        }
+    if proposal_guard is not None:
+        identity["proposal_guard"] = {
+            "identity": proposal_guard_identity,
+            "identity_is_attestation": False,
+            "input_scope": "accepted_prefix_before_material_capture",
+            "decline_strategy": "secant",
+            "errors_fail_path": True,
+        }
     _save(root, "request.json", _bytes(identity))
     _save(root, "model.json", _bytes(model.canonical_payload()))
     origin_bytes = (
@@ -1300,6 +1551,11 @@ def benchmark_rc_control_seed_paths(
             record_assembly_work,
             reuse_line_search_assembly,
             record_assembly_timing,
+            proposal_guard if name == "proposal" else None,
+            observe_initial_residuals and name == "proposal",
+            continuation_on_failure and name == "proposal",
+            continuation_all_failed_targets and name == "proposal",
+            continuation_adaptive and name == "proposal",
         )
         if initial_prefix is not None:
             unknown = any(
@@ -1307,6 +1563,15 @@ def benchmark_rc_control_seed_paths(
                 for entry in arm["entries"]
                 for inv in entry["invocations"]
             )
+            unknown = unknown or any(
+                not entry.get("initial_residual_observation", {"complete": True})["complete"]
+                for entry in arm["entries"]
+            )
+            unknown = unknown or any(
+                entry.get("numerical_proposal", {}).get("unknown_work", False)
+                for entry in arm["entries"]
+            )
+            unknown = unknown or bool((arm.get("failure") or {}).get("unknown_work"))
             changed = initial_prefix[0].canonical_bytes() != origin_bytes
             if unknown or changed:
                 _save(
@@ -1398,6 +1663,14 @@ def benchmark_rc_control_seed_paths(
                 *arm["entries"],
             ]
             for inv in entry["invocations"]
+        ) and not any(
+            bool((arm.get("failure") or {}).get("unknown_work"))
+            or any(
+                entry.get("numerical_proposal", {}).get("unknown_work", False)
+                or not entry.get("initial_residual_observation", {"complete": True})["complete"]
+                for entry in arm["entries"]
+            )
+            for arm in (*arms.values(), fresh)
         ),
         "claims": {
             "experimental_control": True,
@@ -1407,6 +1680,19 @@ def benchmark_rc_control_seed_paths(
             "design_approval": False,
         },
     }
+    if trust_region_reversal or frozen_parent_continuation:
+        observations = [entry["numerical_proposal"]
+                        for arm in (*arms.values(), fresh) for entry in arm["entries"]
+                        if "numerical_proposal" in entry]
+        report["numerical_proposal_work"] = {
+            "scope": "additional proposal work, separate from path invocation work",
+            "native_core_calls_attempted": sum(o.get("native_core_calls_attempted", 0) for o in observations),
+            "known_newton_iterations": sum(o.get("known_newton_iterations", 0) for o in observations),
+            "known_linear_solves": sum(o.get("known_linear_solves", 0) for o in observations),
+            "optimizer_assembly_attempts": sum(o.get("assembly_attempts", 0) for o in observations),
+            "unknown_work": any(o["unknown_work"] for o in observations)
+            or any(bool((arm.get("failure") or {}).get("unknown_work")) for arm in (*arms.values(), fresh)),
+        }
     if initial_prefix is not None:
         for comparison in comparisons.values():
             comparison["step_response_pass"] = comparison.pop("full_history_pass")

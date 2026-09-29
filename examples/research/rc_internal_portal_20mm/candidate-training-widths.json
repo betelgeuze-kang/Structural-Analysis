@@ -1,0 +1,15 @@
+{
+  "schema_version": "rc-fiber-design-experiment.v3",
+  "candidates": [
+    {"candidate_id": "training-044", "changes": [{"section_id": "RC1", "width_m": 0.44}]},
+    {"candidate_id": "training-054", "changes": [{"section_id": "RC1", "width_m": 0.54}]}
+  ],
+  "prices": null,
+  "terminal_limits": null,
+  "history_limits": {"maximum_translation_m": 1, "maximum_absolute_fiber_strain": 1},
+  "material_history_limits": {
+    "maximum_steel_accumulated_plastic_strain": 1,
+    "maximum_concrete_tensile_damage": 1,
+    "maximum_concrete_compressive_damage": 1
+  }
+}

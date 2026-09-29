@@ -23,6 +23,9 @@ from structural_analysis.benchmark import (
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+from structural_analysis.materials.rc_reinforcement_quantity import (
+    longitudinal_rebar_area_m2,
+)
 from structural_analysis.model.schema import CanonicalModel
 
 
@@ -55,6 +58,10 @@ _SECTION_FIELDS = (
     "top_bar_count",
     "bottom_bar_count",
     "bar_area_m2",
+    "top_bar_area_m2",
+    "bottom_bar_area_m2",
+    "top_cover_m",
+    "bottom_cover_m",
 )
 _EXCLUDED_COST_ITEMS = (
     "transverse_reinforcement",
@@ -122,6 +129,10 @@ class FiberFrameSectionChange:
     top_bar_count: int | None = None
     bottom_bar_count: int | None = None
     bar_area_m2: float | None = None
+    top_bar_area_m2: float | None = None
+    bottom_bar_area_m2: float | None = None
+    top_cover_m: float | None = None
+    bottom_cover_m: float | None = None
 
     def __post_init__(self) -> None:
         _identifier(self.section_id, "section_id")
@@ -138,6 +149,14 @@ class FiberFrameSectionChange:
                     raise FiberFrameDesignError(f"{name} must be an integer in [1, 64]")
             else:
                 object.__setattr__(self, name, _number(value, name))
+
+    def to_dict(self) -> dict[str, Any]:
+        """Preserve existing candidate hashes when new overrides are omitted."""
+        result = asdict(self)
+        for name in ("top_bar_area_m2", "bottom_bar_area_m2", "top_cover_m", "bottom_cover_m"):
+            if result[name] is None:
+                result.pop(name)
+        return result
 
 
 @dataclass(frozen=True)
@@ -159,6 +178,12 @@ class FiberFrameDesignCandidate:
             raise FiberFrameDesignError(
                 "a section can be changed only once per candidate"
             )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "candidate_id": self.candidate_id,
+            "changes": tuple(change.to_dict() for change in self.changes),
+        }
 
 
 @dataclass(frozen=True)
@@ -280,13 +305,25 @@ def calculate_fiber_frame_member_quantities(
     model: CanonicalModel,
     *,
     rebar_density_kg_per_m3: float = 7850.0,
+    experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
 ) -> dict[str, Any]:
     """Calculate explicit geometry quantities once per member, never per Gauss point."""
     if type(model) is not CanonicalModel:
         raise FiberFrameDesignError("model must be a CanonicalModel")
+    if type(experimental_two_fixed_endpoints) is not bool:
+        raise FiberFrameDesignError("explicit boolean two-fixed-endpoint profile required")
+    if type(experimental_pin_roller_beam) is not bool:
+        raise FiberFrameDesignError("explicit boolean pin-roller-beam profile required")
+    if experimental_two_fixed_endpoints and experimental_pin_roller_beam:
+        raise FiberFrameDesignError("experimental quantity profiles are mutually exclusive")
     density = _number(rebar_density_kg_per_m3, "rebar_density_kg_per_m3")
     snapshot = model.detached_analysis_snapshot()
-    compiled, unsupported, _ = public_api._compile(snapshot)
+    compiled, unsupported, _ = public_api._compile(
+        snapshot,
+        experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=experimental_pin_roller_beam,
+    )
     if compiled is None:
         raise FiberFrameDesignError(
             f"unsupported quantity model: {unsupported[0]['kind']}"
@@ -298,14 +335,7 @@ def calculate_fiber_frame_member_quantities(
         section = sections[member["section"]]
         length = math.dist(nodes[member["nodes"][0]], nodes[member["nodes"][1]])
         gross_area = section["width_m"] * section["depth_m"]
-        bar_area = (
-            section["top_bar_count"]
-            + section["bottom_bar_count"]
-            + sum(
-                layer["bar_count"]
-                for layer in section.get("intermediate_steel_layers", [])
-            )
-        ) * section["bar_area_m2"]
+        bar_area = longitudinal_rebar_area_m2(section)
         row = {
             "member_id": member["id"],
             "section_id": member["section"],
@@ -475,7 +505,7 @@ def _build_design_comparison_identity(
         "candidates": [
             {
                 "candidate_id": item.candidate_id,
-                "changes": [asdict(c) for c in item.changes],
+                "changes": [c.to_dict() for c in item.changes],
                 "model_checksum": checksum,
             }
             for item, checksum in zip(

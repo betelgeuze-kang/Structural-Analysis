@@ -1,0 +1,296 @@
+{
+  "exact_git_blob_count": 677,
+  "execution_order": [
+    "staged",
+    "full"
+  ],
+  "new_predeclared_inputs": {
+    "layout-span-comparison.json": {
+      "byte_length": 776,
+      "sha256": "f83684c69adfb452067d3179ac95ec3e00159d60bad6ecaf6e366d3b4cc98a11"
+    },
+    "layout-span-comparison.md": {
+      "byte_length": 1611,
+      "sha256": "9cb4278195915275dd03a95ba9e42e42d505d9240814eb305f4da45f98706ce8"
+    },
+    "portal-span-360.json": {
+      "byte_length": 2710,
+      "sha256": "11c10f4decda5f78d69f5c638a4a5dc53f79c26a1fe98d5fe32aa3a62c97b710"
+    },
+    "portal-span-440.json": {
+      "byte_length": 2710,
+      "sha256": "45081f5f9598f8b5ce6f6f7b79618b61dd0912df749cd70ee81120410ae4c9b0"
+    }
+  },
+  "runs": {
+    "full": {
+      "comparison_hash": "sha256:a14d2ac3793e38e93fedb4e2a0ca2ee492f9e1d0203a86af7748362a2672f989",
+      "execution_work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 24,
+          "known_linear_solve_count": 232,
+          "known_newton_iteration_count": 232,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "graph_reads": {
+        "read": 30,
+        "referenced": 27
+      },
+      "json_artifact_bytes": 5859985,
+      "json_artifact_count": 37,
+      "report_hash": "sha256:2ab6c2bc13ae99e41b6d73830bf39e0020ee4f85c9a158afb62988c26af3a77d",
+      "rows": [
+        {
+          "all_six_support_reactions": true,
+          "candidate_id": "baseline",
+          "eligible": true,
+          "performance": {
+            "accepted_epoch_count": 4,
+            "maximum_absolute_fiber_strain": 0.004398833257208155,
+            "maximum_concrete_compressive_damage": 0.40496903732692513,
+            "maximum_concrete_tensile_damage": 0.9999999430119478,
+            "maximum_load_factor": 2.889894603890783,
+            "maximum_steel_accumulated_plastic_strain": 0.004728275232705035,
+            "maximum_translation_m": 0.020682138769516953,
+            "minimum_load_factor": -4.207934054845959,
+            "terminal_load_factor": 2.889894603890783,
+            "terminal_maximum_absolute_fiber_strain": 0.0016618552080759777,
+            "terminal_maximum_translation_m": 0.010142103921583101
+          },
+          "quantities": {
+            "gross_concrete_volume_m3": 2.4,
+            "longitudinal_rebar_mass_kg": 243.036,
+            "longitudinal_rebar_volume_m3": 0.030959999999999998
+          },
+          "reaction_states": 4,
+          "synthetic_total": 483.036,
+          "verified": true
+        },
+        {
+          "all_six_support_reactions": true,
+          "candidate_id": "shorter_span_360",
+          "eligible": true,
+          "performance": {
+            "accepted_epoch_count": 4,
+            "maximum_absolute_fiber_strain": 0.004464822004770274,
+            "maximum_concrete_compressive_damage": 0.41936047692922906,
+            "maximum_concrete_tensile_damage": 0.9999999539381351,
+            "maximum_load_factor": 2.9215096344620153,
+            "maximum_steel_accumulated_plastic_strain": 0.004857713930732127,
+            "maximum_translation_m": 0.020721185964976862,
+            "minimum_load_factor": -4.198235253893796,
+            "terminal_load_factor": 2.9215096344620153,
+            "terminal_maximum_absolute_fiber_strain": 0.0016757600025154378,
+            "terminal_maximum_translation_m": 0.010143499042518085
+          },
+          "quantities": {
+            "gross_concrete_volume_m3": 2.304,
+            "longitudinal_rebar_mass_kg": 233.31455999999997,
+            "longitudinal_rebar_volume_m3": 0.0297216
+          },
+          "reaction_states": 4,
+          "synthetic_total": 463.71456,
+          "verified": true
+        },
+        {
+          "all_six_support_reactions": true,
+          "candidate_id": "longer_span_440",
+          "eligible": true,
+          "performance": {
+            "accepted_epoch_count": 4,
+            "maximum_absolute_fiber_strain": 0.004334710714723615,
+            "maximum_concrete_compressive_damage": 0.39328789945864784,
+            "maximum_concrete_tensile_damage": 0.9999999299020378,
+            "maximum_load_factor": 2.8654142202580237,
+            "maximum_steel_accumulated_plastic_strain": 0.0046057532829451905,
+            "maximum_translation_m": 0.02064706767829968,
+            "minimum_load_factor": -4.211579925570024,
+            "terminal_load_factor": 2.8654142202580237,
+            "terminal_maximum_absolute_fiber_strain": 0.0016474135778311353,
+            "terminal_maximum_translation_m": 0.010139770268888638
+          },
+          "quantities": {
+            "gross_concrete_volume_m3": 2.496,
+            "longitudinal_rebar_mass_kg": 252.75743999999997,
+            "longitudinal_rebar_volume_m3": 0.0321984
+          },
+          "reaction_states": 4,
+          "synthetic_total": 502.35744,
+          "verified": true
+        }
+      ],
+      "runtime_cpu_ns": 14588354087,
+      "runtime_wall_ns": 14591235450,
+      "selected_candidate_id": "shorter_span_360"
+    },
+    "staged": {
+      "comparison_hash": "sha256:2d8a71a3f6133afd339e54b451b14beb9f1fbc6df5b99c3d18b7cbc56bb1da94",
+      "cost_pruning": {
+        "considered_candidate_ids": [
+          "baseline",
+          "shorter_span_360",
+          "longer_span_440"
+        ],
+        "decision_wall_ns": 2511857,
+        "decisions": [
+          {
+            "action": "execute_full_reference",
+            "artifact": {
+              "byte_length": 1116,
+              "path": "decisions/00.json",
+              "sha256": "sha256:fb0192cffa83e2ab8aad39c024145eb470a1e1c28e9c577ee945b8d2d730ebcf"
+            },
+            "candidate_id": "baseline"
+          },
+          {
+            "action": "execute_prefix_screen",
+            "artifact": {
+              "byte_length": 1130,
+              "path": "decisions/01.json",
+              "sha256": "sha256:198c96ccdd999b91ea105ffe20ff45bd771ab765bf07472dced2762929b0e1b3"
+            },
+            "candidate_id": "shorter_span_360"
+          },
+          {
+            "action": "skip_cost_dominated",
+            "artifact": {
+              "byte_length": 1138,
+              "path": "decisions/02.json",
+              "sha256": "sha256:e391fad7b5bf3a229a5082694d7f2965d1db2bddb15afb7e616dfb85f7464838"
+            },
+            "candidate_id": "longer_span_440"
+          }
+        ],
+        "evaluated_candidate_ids": [
+          "baseline",
+          "shorter_span_360"
+        ],
+        "global_cost_optimality_proved": false,
+        "outside_consideration_horizon_candidate_ids": [],
+        "profile": "verified-incumbent-strict-cost.v1",
+        "skipped_cost_dominated_candidate_ids": [
+          "longer_span_440"
+        ],
+        "unevaluated_candidate_ids": [
+          "longer_span_440"
+        ],
+        "unevaluated_physical_feasibility": "unknown"
+      },
+      "execution_work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 20,
+          "known_linear_solve_count": 192,
+          "known_newton_iteration_count": 192,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "graph_reads": {
+        "read": 51,
+        "referenced": 48
+      },
+      "json_artifact_bytes": 5011918,
+      "json_artifact_count": 42,
+      "prefix_screening": {
+        "decisions": [
+          {
+            "action": "execute_full_reference",
+            "artifact": {
+              "byte_length": 997,
+              "path": "prefix/shorter_span_360/decision.json",
+              "sha256": "sha256:93f671881f9c760d28ab712b4331c9b329ba8c97742c8daacd7069ece207c32a"
+            },
+            "candidate_id": "shorter_span_360"
+          }
+        ],
+        "full_history_acceptance_from_prefix": false,
+        "full_reference_execution_work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 16,
+            "known_linear_solve_count": 156,
+            "known_newton_iteration_count": 156,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "full_reference_request_count": 2,
+        "prefix_execution_work": {
+          "api_invocation_count": 2,
+          "known_counters": {
+            "attempted_step_count": 4,
+            "known_linear_solve_count": 36,
+            "known_newton_iteration_count": 36,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        },
+        "prefix_request_count": 1,
+        "rejected_history_maximum_candidate_ids": []
+      },
+      "report_hash": "sha256:801f93241948deae1231421696b17377d74d6de04864e0cc0a10c66eceb23318",
+      "rows": [
+        {
+          "all_six_support_reactions": true,
+          "candidate_id": "baseline",
+          "eligible": true,
+          "performance": {
+            "accepted_epoch_count": 4,
+            "maximum_absolute_fiber_strain": 0.004398833257208155,
+            "maximum_concrete_compressive_damage": 0.40496903732692513,
+            "maximum_concrete_tensile_damage": 0.9999999430119478,
+            "maximum_load_factor": 2.889894603890783,
+            "maximum_steel_accumulated_plastic_strain": 0.004728275232705035,
+            "maximum_translation_m": 0.020682138769516953,
+            "minimum_load_factor": -4.207934054845959,
+            "terminal_load_factor": 2.889894603890783,
+            "terminal_maximum_absolute_fiber_strain": 0.0016618552080759777,
+            "terminal_maximum_translation_m": 0.010142103921583101
+          },
+          "quantities": {
+            "gross_concrete_volume_m3": 2.4,
+            "longitudinal_rebar_mass_kg": 243.036,
+            "longitudinal_rebar_volume_m3": 0.030959999999999998
+          },
+          "reaction_states": 4,
+          "synthetic_total": 483.036,
+          "verified": true
+        },
+        {
+          "all_six_support_reactions": true,
+          "candidate_id": "shorter_span_360",
+          "eligible": true,
+          "performance": {
+            "accepted_epoch_count": 4,
+            "maximum_absolute_fiber_strain": 0.004464822004770274,
+            "maximum_concrete_compressive_damage": 0.41936047692922906,
+            "maximum_concrete_tensile_damage": 0.9999999539381351,
+            "maximum_load_factor": 2.9215096344620153,
+            "maximum_steel_accumulated_plastic_strain": 0.004857713930732127,
+            "maximum_translation_m": 0.020721185964976862,
+            "minimum_load_factor": -4.198235253893796,
+            "terminal_load_factor": 2.9215096344620153,
+            "terminal_maximum_absolute_fiber_strain": 0.0016757600025154378,
+            "terminal_maximum_translation_m": 0.010143499042518085
+          },
+          "quantities": {
+            "gross_concrete_volume_m3": 2.304,
+            "longitudinal_rebar_mass_kg": 233.31455999999997,
+            "longitudinal_rebar_volume_m3": 0.0297216
+          },
+          "reaction_states": 4,
+          "synthetic_total": 463.71456,
+          "verified": true
+        }
+      ],
+      "runtime_cpu_ns": 12269579744,
+      "runtime_wall_ns": 12275821775,
+      "selected_candidate_id": "shorter_span_360"
+    }
+  },
+  "source_revision": "e0146cd9b33fa7c02d2fd8a81ec31c177fb64dba"
+}

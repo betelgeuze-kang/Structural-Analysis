@@ -1,0 +1,4632 @@
+{
+  "cases": [
+    {
+      "case_id": "train-a-amp050",
+      "fold_indices": [
+        0,
+        1,
+        2
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2838744122,
+          "material_capture": 0,
+          "proposal": 28638880,
+          "remaining_unattributed": 163616678.33333334,
+          "response_recovery": 537740247
+        },
+        "secant": {
+          "invocations": 2835211919.6666665,
+          "material_capture": 0,
+          "proposal": 28531667,
+          "remaining_unattributed": 163683318,
+          "response_recovery": 560164065.6666666
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 3532202.3333334923,
+        "material_capture": 0,
+        "proposal": 107213,
+        "remaining_unattributed": -66639.66666665673,
+        "response_recovery": -22423818.666666627
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 7,
+          "target_m": 0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.0025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-a-amp100",
+      "fold_indices": [
+        3,
+        4,
+        5
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3202965117.6666665,
+          "material_capture": 0,
+          "proposal": 28758677.333333332,
+          "remaining_unattributed": 169045278.66666666,
+          "response_recovery": 547860972.3333334
+        },
+        "secant": {
+          "invocations": 3231822558.6666665,
+          "material_capture": 0,
+          "proposal": 28711177.333333332,
+          "remaining_unattributed": 171792505,
+          "response_recovery": 548058028.6666666
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -28857441.0,
+        "material_capture": 0,
+        "proposal": 47500.0,
+        "remaining_unattributed": -2747226.3333333433,
+        "response_recovery": -197056.33333325386
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 8,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 8,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-a-amp150",
+      "fold_indices": [
+        6,
+        7,
+        8
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3621369338,
+          "material_capture": 0,
+          "proposal": 28856174.333333332,
+          "remaining_unattributed": 169197925,
+          "response_recovery": 565209046
+        },
+        "secant": {
+          "invocations": 3599598310.6666665,
+          "material_capture": 0,
+          "proposal": 28616574,
+          "remaining_unattributed": 168309066.66666666,
+          "response_recovery": 563854442
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 21771027.333333492,
+        "material_capture": 0,
+        "proposal": 239600.3333333321,
+        "remaining_unattributed": 888858.3333333433,
+        "response_recovery": 1354604
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 1,
+          "target_m": -0.0022500000000000003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 2,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.009000000000000001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 8,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 8,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.009000000000000001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 10,
+          "target_m": -0.0075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-b-amp050",
+      "fold_indices": [
+        9,
+        10,
+        11
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2298248532.3333335,
+          "material_capture": 49375243,
+          "proposal": 52481364,
+          "remaining_unattributed": 164891514,
+          "response_recovery": 545859506.6666666
+        },
+        "secant": {
+          "invocations": 2242933923.3333335,
+          "material_capture": 0,
+          "proposal": 28594636.333333332,
+          "remaining_unattributed": 163193972.66666666,
+          "response_recovery": 549402116.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 55314609.0,
+        "material_capture": 49375243,
+        "proposal": 23886727.666666668,
+        "remaining_unattributed": 1697541.3333333433,
+        "response_recovery": -3542609.666666746
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0035
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-b-amp100",
+      "fold_indices": [
+        12,
+        13,
+        14
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2657578676,
+          "material_capture": 50210987,
+          "proposal": 53125534.666666664,
+          "remaining_unattributed": 168014810.33333334,
+          "response_recovery": 546205849.6666666
+        },
+        "secant": {
+          "invocations": 2730281805.3333335,
+          "material_capture": 0,
+          "proposal": 29290607,
+          "remaining_unattributed": 168602374,
+          "response_recovery": 562661026
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -72703129.33333349,
+        "material_capture": 50210987,
+        "proposal": 23834927.666666664,
+        "remaining_unattributed": -587563.6666666567,
+        "response_recovery": -16455176.333333373
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.007
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 10,
+          "target_m": -0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-b-amp150",
+      "fold_indices": [
+        15,
+        16,
+        17
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3054876357.6666665,
+          "material_capture": 50192382.666666664,
+          "proposal": 53164661,
+          "remaining_unattributed": 170392245.66666666,
+          "response_recovery": 550333541.6666666
+        },
+        "secant": {
+          "invocations": 3048424757.6666665,
+          "material_capture": 0,
+          "proposal": 28975674,
+          "remaining_unattributed": 168891482.33333334,
+          "response_recovery": 549925351.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 6451600.0,
+        "material_capture": 50192382.666666664,
+        "proposal": 24188987,
+        "remaining_unattributed": 1500763.3333333135,
+        "response_recovery": 408190.33333325386
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0022500000000000003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.0105
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 7,
+          "target_m": 0.009000000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-c-amp050",
+      "fold_indices": [
+        18,
+        19,
+        20
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2051453375.6666667,
+          "material_capture": 0,
+          "proposal": 29103875,
+          "remaining_unattributed": 165544987.66666666,
+          "response_recovery": 538579129.6666666
+        },
+        "secant": {
+          "invocations": 2031024700,
+          "material_capture": 0,
+          "proposal": 28738210.666666668,
+          "remaining_unattributed": 165558708.33333334,
+          "response_recovery": 536177480
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 20428675.666666746,
+        "material_capture": 0,
+        "proposal": 365664.3333333321,
+        "remaining_unattributed": -13720.666666686535,
+        "response_recovery": 2401649.666666627
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 3,
+          "target_m": -0.004
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.0025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-c-amp100",
+      "fold_indices": [
+        21,
+        22,
+        23
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2253972160.6666665,
+          "material_capture": 0,
+          "proposal": 28699339.666666668,
+          "remaining_unattributed": 164698648,
+          "response_recovery": 572207863
+        },
+        "secant": {
+          "invocations": 2272007849.3333335,
+          "material_capture": 0,
+          "proposal": 28677099.333333332,
+          "remaining_unattributed": 164579816.33333334,
+          "response_recovery": 539899838.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -18035688.666666985,
+        "material_capture": 0,
+        "proposal": 22240.333333335817,
+        "remaining_unattributed": 118831.66666665673,
+        "response_recovery": 32308024.666666627
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.008
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-c-amp150",
+      "fold_indices": [
+        24,
+        25,
+        26
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2563341234,
+          "material_capture": 0,
+          "proposal": 28663793,
+          "remaining_unattributed": 165923342.66666666,
+          "response_recovery": 540395840
+        },
+        "secant": {
+          "invocations": 2551896412,
+          "material_capture": 0,
+          "proposal": 28659599.333333332,
+          "remaining_unattributed": 165700460.33333334,
+          "response_recovery": 546931867.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 11444822,
+        "material_capture": 0,
+        "proposal": 4193.666666667908,
+        "remaining_unattributed": 222882.33333331347,
+        "response_recovery": -6536027.333333373
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0022500000000000003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.012
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.0075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.009000000000000001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 2,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-d-amp050",
+      "fold_indices": [
+        27,
+        28,
+        29
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2315540918.6666665,
+          "material_capture": 49472589.333333336,
+          "proposal": 52500578.333333336,
+          "remaining_unattributed": 164751592.33333334,
+          "response_recovery": 538296399.3333334
+        },
+        "secant": {
+          "invocations": 2314905177.3333335,
+          "material_capture": 0,
+          "proposal": 28577821,
+          "remaining_unattributed": 163445198.33333334,
+          "response_recovery": 539887455
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 635741.3333330154,
+        "material_capture": 49472589.333333336,
+        "proposal": 23922757.333333336,
+        "remaining_unattributed": 1306394.0,
+        "response_recovery": -1591055.666666627
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0031
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0026
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.0021000000000000003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-d-amp100",
+      "fold_indices": [
+        30,
+        31,
+        32
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2775265092,
+          "material_capture": 48947184.666666664,
+          "proposal": 51952624,
+          "remaining_unattributed": 168549399.33333334,
+          "response_recovery": 544605555
+        },
+        "secant": {
+          "invocations": 2845890856.6666665,
+          "material_capture": 0,
+          "proposal": 28716264.666666668,
+          "remaining_unattributed": 168891893.66666666,
+          "response_recovery": 548359763.6666666
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -70625764.66666651,
+        "material_capture": 48947184.666666664,
+        "proposal": 23236359.333333332,
+        "remaining_unattributed": -342494.33333331347,
+        "response_recovery": -3754208.666666627
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.0062
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0052
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 10,
+          "target_m": -0.004200000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-d-amp150",
+      "fold_indices": [
+        33,
+        34,
+        35
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3060935218.6666665,
+          "material_capture": 49001119,
+          "proposal": 51956501,
+          "remaining_unattributed": 167963510.33333334,
+          "response_recovery": 560824156.3333334
+        },
+        "secant": {
+          "invocations": 3148957693.3333335,
+          "material_capture": 0,
+          "proposal": 28592711.666666668,
+          "remaining_unattributed": 166621783.33333334,
+          "response_recovery": 550447421.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -88022474.66666698,
+        "material_capture": 49001119,
+        "proposal": 23363789.333333332,
+        "remaining_unattributed": 1341727.0,
+        "response_recovery": 10376735.0
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 1,
+          "target_m": -0.00225
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.009300000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 8,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0078000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.006300000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-e-amp050",
+      "fold_indices": [
+        36,
+        37,
+        38
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2306651326.6666665,
+          "material_capture": 48634289.333333336,
+          "proposal": 51573152,
+          "remaining_unattributed": 164467785,
+          "response_recovery": 537763684.6666666
+        },
+        "secant": {
+          "invocations": 2175475689.3333335,
+          "material_capture": 0,
+          "proposal": 28708914,
+          "remaining_unattributed": 162118830,
+          "response_recovery": 535350294.3333333
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 131175637.33333302,
+        "material_capture": 48634289.333333336,
+        "proposal": 22864238,
+        "remaining_unattributed": 2348955,
+        "response_recovery": 2413390.3333333135
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0036
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.0029
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.0026
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-e-amp100",
+      "fold_indices": [
+        39,
+        40,
+        41
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2560283323.6666665,
+          "material_capture": 48882870.666666664,
+          "proposal": 51626676.666666664,
+          "remaining_unattributed": 165487842.66666666,
+          "response_recovery": 552823320.6666666
+        },
+        "secant": {
+          "invocations": 2471433135,
+          "material_capture": 0,
+          "proposal": 28853159.333333332,
+          "remaining_unattributed": 179749940,
+          "response_recovery": 543257894
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 88850188.66666651,
+        "material_capture": 48882870.666666664,
+        "proposal": 22773517.333333332,
+        "remaining_unattributed": -14262097.333333343,
+        "response_recovery": 9565426.666666627
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0072
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0058
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.0052
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-e-amp150",
+      "fold_indices": [
+        42,
+        43,
+        44
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2970148735,
+          "material_capture": 49375280.333333336,
+          "proposal": 52265275.333333336,
+          "remaining_unattributed": 167704623.33333334,
+          "response_recovery": 563215787.6666666
+        },
+        "secant": {
+          "invocations": 2959744619.6666665,
+          "material_capture": 0,
+          "proposal": 28844599.333333332,
+          "remaining_unattributed": 167718036.33333334,
+          "response_recovery": 572923811.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 10404115.333333492,
+        "material_capture": 49375280.333333336,
+        "proposal": 23420676.000000004,
+        "remaining_unattributed": -13413.0,
+        "response_recovery": -9708023.666666746
+      },
+      "ridge": 10000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.00225
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.0108
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 7,
+          "target_m": 0.0087
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.0078000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-a-amp050",
+      "fold_indices": [
+        45,
+        46,
+        47
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2843340921.3333335,
+          "material_capture": 0,
+          "proposal": 28536440.666666668,
+          "remaining_unattributed": 165515777,
+          "response_recovery": 538331789.3333334
+        },
+        "secant": {
+          "invocations": 2854633376,
+          "material_capture": 0,
+          "proposal": 28531369,
+          "remaining_unattributed": 165698852.66666666,
+          "response_recovery": 539472433.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -11292454.666666508,
+        "material_capture": 0,
+        "proposal": 5071.666666667908,
+        "remaining_unattributed": -183075.66666665673,
+        "response_recovery": -1140644.0
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 7,
+          "target_m": 0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.0025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-a-amp100",
+      "fold_indices": [
+        48,
+        49,
+        50
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3196166867.6666665,
+          "material_capture": 0,
+          "proposal": 28629629,
+          "remaining_unattributed": 168279472,
+          "response_recovery": 557420808.6666666
+        },
+        "secant": {
+          "invocations": 3206489816,
+          "material_capture": 0,
+          "proposal": 28576666.666666668,
+          "remaining_unattributed": 167027288,
+          "response_recovery": 559604522
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -10322948.333333492,
+        "material_capture": 0,
+        "proposal": 52962.33333333209,
+        "remaining_unattributed": 1252184,
+        "response_recovery": -2183713.333333373
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 8,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 8,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-a-amp150",
+      "fold_indices": [
+        51,
+        52,
+        53
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3596665996.3333335,
+          "material_capture": 0,
+          "proposal": 28548023,
+          "remaining_unattributed": 169766244,
+          "response_recovery": 548513367.3333334
+        },
+        "secant": {
+          "invocations": 3589027843.6666665,
+          "material_capture": 0,
+          "proposal": 28467878.666666668,
+          "remaining_unattributed": 166917944.66666666,
+          "response_recovery": 548012965.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 7638152.666666985,
+        "material_capture": 0,
+        "proposal": 80144.33333333209,
+        "remaining_unattributed": 2848299.3333333433,
+        "response_recovery": 500402.0
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 1,
+          "target_m": -0.0022500000000000003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 2,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.009000000000000001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 8,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 8,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": true,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.009000000000000001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 10,
+          "target_m": -0.0075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-b-amp050",
+      "fold_indices": [
+        54,
+        55,
+        56
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2342423195.3333335,
+          "material_capture": 48875592,
+          "proposal": 52291424.666666664,
+          "remaining_unattributed": 168716115,
+          "response_recovery": 536432379.3333333
+        },
+        "secant": {
+          "invocations": 2276476531.3333335,
+          "material_capture": 0,
+          "proposal": 28687751.666666668,
+          "remaining_unattributed": 163999706,
+          "response_recovery": 549025484.6666666
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 65946664.0,
+        "material_capture": 48875592,
+        "proposal": 23603672.999999996,
+        "remaining_unattributed": 4716409,
+        "response_recovery": -12593105.333333313
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0035
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-b-amp100",
+      "fold_indices": [
+        57,
+        58,
+        59
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2707741683.3333335,
+          "material_capture": 48698125.333333336,
+          "proposal": 51729968,
+          "remaining_unattributed": 180235885.66666666,
+          "response_recovery": 538473180.3333334
+        },
+        "secant": {
+          "invocations": 2666237215.6666665,
+          "material_capture": 0,
+          "proposal": 28509168.333333332,
+          "remaining_unattributed": 164508636,
+          "response_recovery": 538408586
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 41504467.666666985,
+        "material_capture": 48698125.333333336,
+        "proposal": 23220799.666666668,
+        "remaining_unattributed": 15727249.666666657,
+        "response_recovery": 64594.33333337307
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.007
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 10,
+          "target_m": -0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-b-amp150",
+      "fold_indices": [
+        60,
+        61,
+        62
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3069510564,
+          "material_capture": 49300939.666666664,
+          "proposal": 52381063,
+          "remaining_unattributed": 169076062.66666666,
+          "response_recovery": 551115484.3333334
+        },
+        "secant": {
+          "invocations": 3020896558.3333335,
+          "material_capture": 0,
+          "proposal": 28492347.333333332,
+          "remaining_unattributed": 167491975,
+          "response_recovery": 543594703.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 48614005.66666651,
+        "material_capture": 49300939.666666664,
+        "proposal": 23888715.666666668,
+        "remaining_unattributed": 1584087.6666666567,
+        "response_recovery": 7520781.0
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0022500000000000003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.0105
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 7,
+          "target_m": 0.009000000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-c-amp050",
+      "fold_indices": [
+        63,
+        64,
+        65
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2020983036.3333333,
+          "material_capture": 0,
+          "proposal": 28681829.666666668,
+          "remaining_unattributed": 161942200,
+          "response_recovery": 568880819
+        },
+        "secant": {
+          "invocations": 2020927716.3333333,
+          "material_capture": 0,
+          "proposal": 28497223.666666668,
+          "remaining_unattributed": 162426792.66666666,
+          "response_recovery": 531459872.6666667
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 55320.0,
+        "material_capture": 0,
+        "proposal": 184606.0,
+        "remaining_unattributed": -484592.66666665673,
+        "response_recovery": 37420946.33333331
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 3,
+          "target_m": -0.004
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.0025
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-c-amp100",
+      "fold_indices": [
+        66,
+        67,
+        68
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2262128508.6666665,
+          "material_capture": 0,
+          "proposal": 28619100.666666668,
+          "remaining_unattributed": 162459289.66666666,
+          "response_recovery": 546267994.3333334
+        },
+        "secant": {
+          "invocations": 2251141759.3333335,
+          "material_capture": 0,
+          "proposal": 28509398.666666668,
+          "remaining_unattributed": 165000725.33333334,
+          "response_recovery": 547971705.6666666
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 10986749.333333015,
+        "material_capture": 0,
+        "proposal": 109702.0,
+        "remaining_unattributed": -2541435.6666666865,
+        "response_recovery": -1703711.3333332539
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.008
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-c-amp150",
+      "fold_indices": [
+        69,
+        70,
+        71
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2533167801.3333335,
+          "material_capture": 0,
+          "proposal": 28624835.333333332,
+          "remaining_unattributed": 164168319,
+          "response_recovery": 538852947.6666666
+        },
+        "secant": {
+          "invocations": 2554937809,
+          "material_capture": 0,
+          "proposal": 28547603.666666668,
+          "remaining_unattributed": 178085728,
+          "response_recovery": 540366885
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": -21770007.666666508,
+        "material_capture": 0,
+        "proposal": 77231.66666666418,
+        "remaining_unattributed": -13917409,
+        "response_recovery": -1513937.333333373
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0022500000000000003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.012
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0045000000000000005
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.0075
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.009000000000000001
+        },
+        {
+          "decision": "abstained_to_secant",
+          "proposal_newton": 2,
+          "proposal_recorded_line_search_trials": 0,
+          "same_parent": true,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-d-amp050",
+      "fold_indices": [
+        72,
+        73,
+        74
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2415108360,
+          "material_capture": 48665772,
+          "proposal": 51689160.666666664,
+          "remaining_unattributed": 176262236.33333334,
+          "response_recovery": 549713456
+        },
+        "secant": {
+          "invocations": 2316713752,
+          "material_capture": 0,
+          "proposal": 28570307.333333332,
+          "remaining_unattributed": 176254252,
+          "response_recovery": 539151286
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 98394608,
+        "material_capture": 48665772,
+        "proposal": 23118853.333333332,
+        "remaining_unattributed": 7984.333333343267,
+        "response_recovery": 10562170
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0031
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0026
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.0021000000000000003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-d-amp100",
+      "fold_indices": [
+        75,
+        76,
+        77
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2890374342,
+          "material_capture": 48975391.666666664,
+          "proposal": 51777396.333333336,
+          "remaining_unattributed": 166078146,
+          "response_recovery": 544728636.6666666
+        },
+        "secant": {
+          "invocations": 2842313714.6666665,
+          "material_capture": 0,
+          "proposal": 28653543.333333332,
+          "remaining_unattributed": 165254216.33333334,
+          "response_recovery": 557635742.6666666
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 48060627.33333349,
+        "material_capture": 48975391.666666664,
+        "proposal": 23123853.000000004,
+        "remaining_unattributed": 823929.6666666567,
+        "response_recovery": -12907106.0
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.0062
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0052
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 10,
+          "target_m": -0.004200000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-d-amp150",
+      "fold_indices": [
+        78,
+        79,
+        80
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3175403172,
+          "material_capture": 48994212.333333336,
+          "proposal": 51776183.333333336,
+          "remaining_unattributed": 166803045.66666666,
+          "response_recovery": 546789743
+        },
+        "secant": {
+          "invocations": 3149389748,
+          "material_capture": 0,
+          "proposal": 28593930.666666668,
+          "remaining_unattributed": 165738540,
+          "response_recovery": 561103162
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 26013424,
+        "material_capture": 48994212.333333336,
+        "proposal": 23182252.666666668,
+        "remaining_unattributed": 1064505.6666666567,
+        "response_recovery": -14313419
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": true,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 1,
+          "target_m": -0.00225
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.009300000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 7,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 8,
+          "proposal_recorded_line_search_trials": 5,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 5,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0078000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.006300000000000001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-e-amp050",
+      "fold_indices": [
+        81,
+        82,
+        83
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2310531375.6666665,
+          "material_capture": 48819668,
+          "proposal": 51794278.666666664,
+          "remaining_unattributed": 165106361.66666666,
+          "response_recovery": 574547220.6666666
+        },
+        "secant": {
+          "invocations": 2189931304,
+          "material_capture": 0,
+          "proposal": 28755598,
+          "remaining_unattributed": 163825456.33333334,
+          "response_recovery": 537631420
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 120600071.66666651,
+        "material_capture": 48819668,
+        "proposal": 23038680.666666664,
+        "remaining_unattributed": 1280905.3333333135,
+        "response_recovery": 36915800.66666663
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00025
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 1,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 2,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0036
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 6,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 7,
+          "target_m": 0.0029
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 8,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 9,
+          "target_m": -0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.0026
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-e-amp100",
+      "fold_indices": [
+        84,
+        85,
+        86
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 2547347574.3333335,
+          "material_capture": 48837458.333333336,
+          "proposal": 51666629,
+          "remaining_unattributed": 164178492,
+          "response_recovery": 539106957.3333334
+        },
+        "secant": {
+          "invocations": 2470082288,
+          "material_capture": 0,
+          "proposal": 28686972,
+          "remaining_unattributed": 163456156.66666666,
+          "response_recovery": 564007944.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 77265286.33333349,
+        "material_capture": 48837458.333333336,
+        "proposal": 22979657,
+        "remaining_unattributed": 722335.3333333433,
+        "response_recovery": -24900987.0
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.0005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 1,
+          "target_m": -0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 2,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 3,
+          "target_m": -0.0072
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 4,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 3,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 5,
+          "target_m": 0.001
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 6,
+          "target_m": 0.004
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 7,
+          "target_m": 0.0058
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 9,
+          "target_m": -0.002
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 3,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 10,
+          "target_m": -0.0052
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    },
+    {
+      "case_id": "train-e-amp150",
+      "fold_indices": [
+        87,
+        88,
+        89
+      ],
+      "mean_path_components_ns": {
+        "proposal": {
+          "invocations": 3009846565.6666665,
+          "material_capture": 49064071.333333336,
+          "proposal": 51772896.333333336,
+          "remaining_unattributed": 166648165.33333334,
+          "response_recovery": 546820283.3333334
+        },
+        "secant": {
+          "invocations": 2949821349.3333335,
+          "material_capture": 0,
+          "proposal": 28677811.666666668,
+          "remaining_unattributed": 165097166,
+          "response_recovery": 547157509.3333334
+        }
+      },
+      "mean_proposal_minus_secant_components_ns": {
+        "invocations": 60025216.333333015,
+        "material_capture": 49064071.333333336,
+        "proposal": 23095084.666666668,
+        "remaining_unattributed": 1550999.3333333433,
+        "response_recovery": -337226.0
+      },
+      "ridge": 1000000.0,
+      "target_pairs": [
+        {
+          "decision": "abstained_to_reference",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": true,
+          "secant_newton": 4,
+          "secant_recorded_line_search_trials": 1,
+          "target_index": 0,
+          "target_m": -0.00075
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": true,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 1,
+          "target_m": -0.00225
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 2,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 3,
+          "target_m": -0.0108
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 4,
+          "target_m": -0.0045
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 5,
+          "target_m": 0.0015
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 7,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 6,
+          "target_m": 0.006
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 4,
+          "same_parent": false,
+          "secant_newton": 6,
+          "secant_recorded_line_search_trials": 4,
+          "target_index": 7,
+          "target_m": 0.0087
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 8,
+          "target_m": 0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 5,
+          "proposal_recorded_line_search_trials": 2,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 2,
+          "target_index": 9,
+          "target_m": -0.003
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 6,
+          "proposal_recorded_line_search_trials": 3,
+          "same_parent": false,
+          "secant_newton": 5,
+          "secant_recorded_line_search_trials": 3,
+          "target_index": 10,
+          "target_m": -0.0078000000000000005
+        },
+        {
+          "decision": "proposed",
+          "proposal_newton": 4,
+          "proposal_recorded_line_search_trials": 1,
+          "same_parent": false,
+          "secant_newton": 2,
+          "secant_recorded_line_search_trials": 0,
+          "target_index": 11,
+          "target_m": 0.0
+        }
+      ]
+    }
+  ],
+  "counterfactual_training_labels": false,
+  "interpretation": "Later arm parents may differ. Step differences describe complete strategies, not same-parent intervention labels. Any switching policy needs new full-path evaluation.",
+  "new_fits": 0,
+  "new_solver_calls": 0,
+  "schema_version": "rc-scalar-runtime-cost-diagnostic.v1",
+  "selection_result_hash": "sha256:2c75c33e00d0e84a6c071a9fef797c7833c5fdab04f05719dd9183cdd566e08f",
+  "source_inventory_sha256": "9de3a0339e632e8028adf30e12fdd4fc79a93a874af4cf7f1cabb0639a07ad32",
+  "timing_scope": "disjoint recorded path components; static gate outside path is excluded; remainder has no finer attribution"
+}

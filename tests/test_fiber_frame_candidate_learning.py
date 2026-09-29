@@ -371,3 +371,34 @@ def test_member_context_binds_non_feature_physics(change) -> None:
     )
     assert features == changed_features
     assert context != changed_context
+
+
+def test_unequal_area_features_account_for_steel_and_reject_old_policy_context():
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    base = _model()
+    before = learning.candidate_preanalysis_features(base, config)
+    base.sections[0].update(top_bar_area_m2=0.000387, bottom_bar_area_m2=0.000387)
+    assert learning.candidate_preanalysis_features(base, config) == before
+    base.sections[0].update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    values, context = learning.candidate_preanalysis_features(base, config)
+    assert values[learning.FEATURE_NAMES.index('longitudinal_rebar_volume_m3')] == pytest.approx(4 * (0.00005 + 0.0002) * 3)
+    assert context != before[1]
+    policy = learning._fit(_rows(), 1e-6, 0.1)
+    assert policy.predict(base, config).ood is True
+    base.sections[0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
+    swapped_values, swapped_context = learning.candidate_preanalysis_features(base, config)
+    assert swapped_values[3] == values[3]
+    assert swapped_context != context
+    assert policy.predict(base, config).ood is True
+
+
+def test_asymmetric_centroids_do_not_reuse_symmetric_policy_context():
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    model = _model()
+    before = learning.candidate_preanalysis_features(model, config)
+    model.sections[0].update(top_cover_m=0.05, bottom_cover_m=0.05)
+    assert learning.candidate_preanalysis_features(model, config) == before
+    model.sections[0].update(top_cover_m=0.04, bottom_cover_m=0.06)
+    assert learning.candidate_preanalysis_features(model, config)[1] != before[1]
+    policy = learning._fit(_rows(), 1e-6, 0.1)
+    assert policy.predict(model, config).ood is True

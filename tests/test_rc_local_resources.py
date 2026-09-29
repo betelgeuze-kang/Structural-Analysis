@@ -8,14 +8,20 @@ import pytest
 
 from tests.test_rc_control_local_research import (
     SOURCE,
-    model as model,
-    control_request as control_request,
-    options as options,
+    model as _model,
+    control_request as _control_request,
+    options as _options,
     candidate,
 )
 from structural_analysis.benchmark import rc_control_reuse as reuse
 from structural_analysis.benchmark import rc_control_cost_search as search
 from structural_analysis.execution.local_runtime_doctor import inspect_local_runtime
+
+
+# Register the shared fixtures without shadowing unused imports.
+model = _model
+control_request = _control_request
+options = _options
 
 
 def run(model, request, options, path, **kwargs):

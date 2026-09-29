@@ -1,0 +1,16 @@
+{
+  "wrapper_wall_ns": 21244115,
+  "capture_hashes_exact": true,
+  "numerical_payload_exact": true,
+  "binary_sha256": "85f6961eb174eaf4daf2b053e1c3fd50874c9c597bd4e1e31b7f5cdfc4dda4c3",
+  "new_product_solves": 0,
+  "reference_promotion": false,
+  "execution": {
+    "exit_code": 0,
+    "outer_wall_ns": 169720115
+  },
+  "source_revision": "740122e0a262f81a00fc199cbb189870e077ad5f",
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-calculix-capture-evam7jgy",
+  "verified_files": 19,
+  "inventory_sha256": "d08b39e754c15fc6babeb3406c31e258bf8320e95e0dac7a0e62d935dab8b5fc"
+}

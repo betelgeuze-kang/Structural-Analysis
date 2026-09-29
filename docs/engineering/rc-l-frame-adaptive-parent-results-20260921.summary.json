@@ -1,0 +1,65 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-adaptive-parent-37z5un86",
+  "audited_inventory_sha256": "2cf79a5ac62a6c9ffc6f89bde395331de077794865932df4e3f0112d7ceb8d59",
+  "files": 1087,
+  "audit": {
+    "rows": [
+      {
+        "repeat": 0,
+        "mode": "binary64",
+        "native_calls": 20,
+        "newton_iterations": 101,
+        "linear_solves": 101,
+        "failed_trials": 1,
+        "complete": true,
+        "confirmation_checkpoint_exact": true,
+        "accepted_fraction": 1.0
+      },
+      {
+        "repeat": 0,
+        "mode": "retained",
+        "native_calls": 20,
+        "newton_iterations": 121,
+        "linear_solves": 121,
+        "failed_trials": 1,
+        "complete": true,
+        "confirmation_checkpoint_exact": false,
+        "accepted_fraction": 1.0
+      },
+      {
+        "repeat": 1,
+        "mode": "retained",
+        "native_calls": 20,
+        "newton_iterations": 121,
+        "linear_solves": 121,
+        "failed_trials": 1,
+        "complete": true,
+        "confirmation_checkpoint_exact": false,
+        "accepted_fraction": 1.0
+      },
+      {
+        "repeat": 1,
+        "mode": "binary64",
+        "native_calls": 20,
+        "newton_iterations": 101,
+        "linear_solves": 101,
+        "failed_trials": 1,
+        "complete": true,
+        "confirmation_checkpoint_exact": true,
+        "accepted_fraction": 1.0
+      }
+    ],
+    "totals": {
+      "native_calls": 80,
+      "newton_iterations": 444,
+      "linear_solves": 444,
+      "failed_trials": 4
+    },
+    "repeated_terminal_checkpoints_exact": {
+      "binary64": true,
+      "retained": true
+    },
+    "full_path_qualification": false,
+    "independent_physics": false
+  }
+}

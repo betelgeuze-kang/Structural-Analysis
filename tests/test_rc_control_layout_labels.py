@@ -1,6 +1,7 @@
 """Actual train-only reference labels and failure-preserving publication."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -13,6 +14,11 @@ from structural_analysis.benchmark.fiber_frame_design import (
 from structural_analysis.benchmark.rc_control_layout_labels import (
     generate_control_layout_training_labels,
 )
+from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+    decode_bounded_rc_fiber_direct_control_request,
+)
+from structural_analysis.benchmark.rc_control_learning import RCControlLearningCase
+from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
 
 def generate(cases, root, **overrides):
@@ -23,6 +29,52 @@ def generate(cases, root, **overrides):
         material_limits=FiberFrameMaterialHistoryLimits(1, 1, 1),
     )
     return generate_control_layout_training_labels(cases, **(args | overrides))
+
+
+def test_two_fixed_portal_training_labels_use_explicit_profile_and_train_only(tmp_path):
+    source = Path("examples/research/rc_internal_portal_20mm")
+    original = json.loads((source / "original-model.json").read_bytes())
+    request = decode_bounded_rc_fiber_direct_control_request(
+        (source / "experimental-two-fixed-endpoints-request.json").read_bytes()
+    )
+    cases = []
+    for name, span, split in (
+        ("train-a", 3.2, "train"),
+        ("train-b", 4.0, "train"),
+        ("validation-c", 5.2, "validation"),
+        ("holdout-d", 6.4, "holdout"),
+    ):
+        raw = json.loads(json.dumps(original))
+        for node in raw["nodes"]:
+            if node["id"] in ("N2", "N4"):
+                node["coordinates"][0] = span
+        model = load_neutral_json_bytes(json.dumps(raw).encode())
+        cases.append(
+            RCControlLearningCase(
+                name, name, name, "portal-three-targets", split, model, request
+            )
+        )
+    output = tmp_path / "portal-labels"
+    report = generate(
+        tuple(cases),
+        output,
+        history_limits=FiberFrameHistoryLimits(1, 1),
+    )
+    assert report["status"] == "complete"
+    assert report["attempted_training_cases"] == report["verified_training_cases"] == 2
+    assert report["evaluation_paths_executed"] == 0
+    assert len(json.loads((output / "training-samples.json").read_bytes())) == 2
+    for wrapped in report["cases"]:
+        row = wrapped["row"]
+        assert row["full_reference_verification_pass"] is True
+        case_root = output / wrapped["artifact_directory"]
+        result = json.loads(
+            (case_root / row["artifacts"]["result"]["path"]).read_bytes()
+        )
+        assert result["request"]["experimental_two_fixed_endpoints"] is True
+        assert result["model"]["compiler_profile"] == (
+            "planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1"
+        )
 
 
 def test_real_labels_keep_verified_infeasible_cases_and_never_execute_evaluation(

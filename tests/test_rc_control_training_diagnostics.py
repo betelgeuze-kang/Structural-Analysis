@@ -247,3 +247,25 @@ def test_target_work_rejects_incomplete_or_misaligned_inputs(change):
     else:
         with pytest.raises(ValueError):
             run_target_work(report, decisions)
+
+
+def test_material_feature_names_cover_static_causal_and_final_material_positions():
+    from structural_analysis.benchmark.rc_control_material_features import MATERIAL_FEATURE_PROFILE
+
+    names = ['member_0_point_0_fiber_0_steel_plastic_strain',
+             'member_0_point_0_fiber_0_steel_accumulated_plastic_strain']
+    profile = {**PROFILE, 'model_feature_names': ['node_0_x_m'],
+               'feature_profile': MATERIAL_FEATURE_PROFILE, 'material_feature_names': names,
+               'arithmetic_profile': None}
+    samples = _samples()
+    for row in samples:
+        row['features'] = [2.0, *row['features'], 0.01, 0.02]
+        row['feature_profile'] = MATERIAL_FEATURE_PROFILE
+        _rehash(row)
+    policy = _fit(samples, profile, 1e-6, 0.1)
+    actual = audit.control_policy_feature_names(policy)
+    assert len(actual) == len(samples[0]['features']) == 11
+    assert actual == ['node_0_x_m', 'target_m', 'next_control_increment_m',
+                      'previous_control_increment_m', 'accepted_step_count',
+                      'accepted_augmented_coordinate_0', 'accepted_augmented_coordinate_1',
+                      'previous_augmented_increment_0', 'previous_augmented_increment_1', *names]

@@ -1,0 +1,686 @@
+{
+  "audit_solver_calls": 0,
+  "cases": [
+    {
+      "all_api_invocations": 24,
+      "id": "w32-drift20",
+      "pairs": [
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 4
+          },
+          "comparable": true,
+          "complete": true,
+          "known_work": true,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/r0-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/experiment.json"
+              ],
+              "return_code": 0,
+              "wall_ns": 3731370607
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/r0-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 0,
+              "wall_ns": 2789821033
+            }
+          },
+          "processes_complete": true,
+          "pruned_over_full_process_ratio": 0.747666561924011,
+          "retained_result_hashes_match": true,
+          "same_verified_selection": true,
+          "selected_candidate_id": "cheap",
+          "skipped_candidate_ids": [
+            "middle",
+            "costly"
+          ]
+        },
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 4
+          },
+          "comparable": true,
+          "complete": true,
+          "known_work": true,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/r1-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/experiment.json"
+              ],
+              "return_code": 0,
+              "wall_ns": 3802482181
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/r1-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift20/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 0,
+              "wall_ns": 2732656961
+            }
+          },
+          "processes_complete": true,
+          "pruned_over_full_process_ratio": 0.7186508262035692,
+          "retained_result_hashes_match": true,
+          "same_verified_selection": true,
+          "selected_candidate_id": "cheap",
+          "skipped_candidate_ids": [
+            "middle",
+            "costly"
+          ]
+        }
+      ],
+      "process_wall_ns_sums": {
+        "full": 7533852788,
+        "pruned": 5522477994
+      },
+      "pruned_over_full_ratio_of_sums": 0.7330217551896236,
+      "verification_blocked_candidates": [],
+      "verified_max_concrete_tensile_damage": 0.9948043881111984,
+      "verified_max_steel_plastic_strain": 0.0003022474859570741
+    },
+    {
+      "all_api_invocations": 28,
+      "id": "w32-drift40",
+      "pairs": [
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 6
+          },
+          "comparable": false,
+          "complete": false,
+          "known_work": false,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/r0-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/experiment.json"
+              ],
+              "return_code": 2,
+              "wall_ns": 4035529998
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/r0-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 2,
+              "wall_ns": 3551897995
+            }
+          },
+          "processes_complete": false,
+          "pruned_over_full_process_ratio": null,
+          "retained_result_hashes_match": false,
+          "same_verified_selection": true,
+          "selected_candidate_id": "baseline",
+          "skipped_candidate_ids": [
+            "costly"
+          ]
+        },
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 6
+          },
+          "comparable": false,
+          "complete": false,
+          "known_work": false,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/r1-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/experiment.json"
+              ],
+              "return_code": 2,
+              "wall_ns": 3977401345
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/r1-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w32-drift40/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 2,
+              "wall_ns": 3499271158
+            }
+          },
+          "processes_complete": false,
+          "pruned_over_full_process_ratio": null,
+          "retained_result_hashes_match": false,
+          "same_verified_selection": true,
+          "selected_candidate_id": "baseline",
+          "skipped_candidate_ids": [
+            "costly"
+          ]
+        }
+      ],
+      "process_wall_ns_sums": {
+        "full": 8012931343,
+        "pruned": 7051169153
+      },
+      "pruned_over_full_ratio_of_sums": null,
+      "verification_blocked_candidates": [
+        "cheap",
+        "middle"
+      ],
+      "verified_max_concrete_tensile_damage": 0.9999587314960319,
+      "verified_max_steel_plastic_strain": 0.003804924527717973
+    },
+    {
+      "all_api_invocations": 24,
+      "id": "w48-drift20",
+      "pairs": [
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 4
+          },
+          "comparable": true,
+          "complete": true,
+          "known_work": true,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/r0-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/experiment.json"
+              ],
+              "return_code": 0,
+              "wall_ns": 3911587672
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/r0-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 0,
+              "wall_ns": 2807318416
+            }
+          },
+          "processes_complete": true,
+          "pruned_over_full_process_ratio": 0.7176928274151694,
+          "retained_result_hashes_match": true,
+          "same_verified_selection": true,
+          "selected_candidate_id": "cheap",
+          "skipped_candidate_ids": [
+            "middle",
+            "costly"
+          ]
+        },
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 4
+          },
+          "comparable": true,
+          "complete": true,
+          "known_work": true,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/r1-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/experiment.json"
+              ],
+              "return_code": 0,
+              "wall_ns": 3942657340
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/r1-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift20/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 0,
+              "wall_ns": 2845563674
+            }
+          },
+          "processes_complete": true,
+          "pruned_over_full_process_ratio": 0.7217375055981913,
+          "retained_result_hashes_match": true,
+          "same_verified_selection": true,
+          "selected_candidate_id": "cheap",
+          "skipped_candidate_ids": [
+            "middle",
+            "costly"
+          ]
+        }
+      ],
+      "process_wall_ns_sums": {
+        "full": 7854245012,
+        "pruned": 5652882090
+      },
+      "pruned_over_full_ratio_of_sums": 0.7197231664358983,
+      "verification_blocked_candidates": [],
+      "verified_max_concrete_tensile_damage": 0.9962048479799359,
+      "verified_max_steel_plastic_strain": 0.0003665969706952446
+    },
+    {
+      "all_api_invocations": 28,
+      "id": "w48-drift40",
+      "pairs": [
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 6
+          },
+          "comparable": false,
+          "complete": false,
+          "known_work": false,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/r0-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/experiment.json"
+              ],
+              "return_code": 2,
+              "wall_ns": 4266351508
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/r0-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 2,
+              "wall_ns": 3554377067
+            }
+          },
+          "processes_complete": false,
+          "pruned_over_full_process_ratio": null,
+          "retained_result_hashes_match": false,
+          "same_verified_selection": true,
+          "selected_candidate_id": "middle",
+          "skipped_candidate_ids": [
+            "costly"
+          ]
+        },
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 6
+          },
+          "comparable": false,
+          "complete": false,
+          "known_work": false,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/r1-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/experiment.json"
+              ],
+              "return_code": 2,
+              "wall_ns": 4239231981
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/r1-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/w48-drift40/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 2,
+              "wall_ns": 3548988004
+            }
+          },
+          "processes_complete": false,
+          "pruned_over_full_process_ratio": null,
+          "retained_result_hashes_match": false,
+          "same_verified_selection": true,
+          "selected_candidate_id": "middle",
+          "skipped_candidate_ids": [
+            "costly"
+          ]
+        }
+      ],
+      "process_wall_ns_sums": {
+        "full": 8505583489,
+        "pruned": 7103365071
+      },
+      "pruned_over_full_ratio_of_sums": null,
+      "verification_blocked_candidates": [
+        "cheap"
+      ],
+      "verified_max_concrete_tensile_damage": 0.9999697753319415,
+      "verified_max_steel_plastic_strain": 0.0038069698283505404
+    },
+    {
+      "all_api_invocations": 32,
+      "id": "no-feasible-screen",
+      "pairs": [
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 8
+          },
+          "comparable": false,
+          "complete": true,
+          "known_work": true,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/r0-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/experiment.json"
+              ],
+              "return_code": 0,
+              "wall_ns": 3801758595
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/r0-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 0,
+              "wall_ns": 3784975260
+            }
+          },
+          "processes_complete": true,
+          "pruned_over_full_process_ratio": null,
+          "retained_result_hashes_match": true,
+          "same_verified_selection": false,
+          "selected_candidate_id": null,
+          "skipped_candidate_ids": []
+        },
+        {
+          "api_invocations": {
+            "full": 8,
+            "pruned": 8
+          },
+          "comparable": false,
+          "complete": true,
+          "known_work": true,
+          "matching_inputs": true,
+          "processes": {
+            "full": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/r1-full",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/experiment.json"
+              ],
+              "return_code": 0,
+              "wall_ns": 3710131347
+            },
+            "pruned": {
+              "arguments": [
+                "/usr/bin/python3",
+                "-m",
+                "structural_analysis.benchmark.rc_control_design_cli",
+                "--source-revision",
+                "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+                "--output",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/r1-pruned",
+                "--model",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/model.json",
+                "--request",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/request.json",
+                "--experiment",
+                "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e/study/no-feasible-screen/experiment.json",
+                "--prune-cost-dominated"
+              ],
+              "return_code": 0,
+              "wall_ns": 3792172863
+            }
+          },
+          "processes_complete": true,
+          "pruned_over_full_process_ratio": null,
+          "retained_result_hashes_match": true,
+          "same_verified_selection": false,
+          "selected_candidate_id": null,
+          "skipped_candidate_ids": []
+        }
+      ],
+      "process_wall_ns_sums": {
+        "full": 7511889942,
+        "pruned": 7577148123
+      },
+      "pruned_over_full_ratio_of_sums": null,
+      "verification_blocked_candidates": [],
+      "verified_max_concrete_tensile_damage": 0.9948043881111984,
+      "verified_max_steel_plastic_strain": 0.0003022474859570741
+    }
+  ],
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-large-drift-cost-q2qsvx_e",
+  "packet_verification": {
+    "inventory_sha256": "dc9cee74b0cefb318f6b6f846b925f091af116b994a8542ed4a2522cc4e748ca",
+    "source_files_verified": 6073,
+    "verified_bytes": 413230113,
+    "verified_files": 6966,
+    "wall_ns": 821926432
+  },
+  "process": {
+    "exit_code": 1,
+    "wall_ns": 74078467355
+  },
+  "qualification_claim": false,
+  "source_revision": "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+  "study_inventory_sha256": "b05d7fba1051b519c05d3fcf0e36e38fcc90a70ae5f15442d572271de6e8dad5",
+  "verified_study_files": 686
+}

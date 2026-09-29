@@ -322,9 +322,18 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   } }
 }
 
+// The experimental two-fixed-endpoint request uses v3 transport, while its
+// result and restart schema still follow whether a constant preload exists.
+// Durable-job admission above remains limited to its existing v1/v2 profiles.
+export function rcControlHasPreload(config: RcObject): boolean {
+  return (config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+    || config.schema_version === 'bounded-rc-fiber-direct-control-request.v3')
+    && Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0
+}
+
 /** Shared stored-history binding checks; no numerical execution. */
 export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model: RcObject, config: RcObject): RcObject[] {
-  const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+  const hasPreload = rcControlHasPreload(config)
   const offset = hasPreload ? 1 : 0
   const history = hasPreload ? [api.preload_response, ...api.response_history] : api.response_history
   const targets = config.targets_m
@@ -387,7 +396,7 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
 
 /** Shared original preload and complete execution-work bindings. */
 export async function validateRcPreload(api: RcObject, apiRaw: string, native: RcObject, config: RcObject, targets: number[]): Promise<void> {
-  const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+  const hasPreload = rcControlHasPreload(config)
   if (hasPreload) {
     const preload = object(api.preload_response), saved = object(native.preload_checkpoint)
     const attempts = api.path.preload_attempts

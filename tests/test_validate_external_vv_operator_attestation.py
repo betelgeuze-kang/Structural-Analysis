@@ -25,6 +25,7 @@ spec.loader.exec_module(module)
 
 import run_external_code_to_code_technical_receipt as code_receipt  # noqa: E402
 import run_external_modal_buckling_technical_receipt as modal_receipt  # noqa: E402
+from pinned_opensees_runtime import expected_binding  # noqa: E402
 
 
 def _write_json_artifact(path: Path, body: dict) -> dict:
@@ -117,6 +118,12 @@ def _build_submission(root: Path, *, fresh: bool = True) -> tuple[dict, Path]:
             }
         )
         if fresh:
+            # Synthetic intake fixture only: supply the pinned execution claim
+            # required by the receipt contract, without treating it as evidence
+            # that an external runtime or independent operator actually ran.
+            child["runtimes"]["opensees"]["execution_outputs"][
+                "runtime_binding"
+            ] = expected_binding()
             child["blockers_remaining"] = [
                 blocker
                 for blocker in child["blockers_remaining"]
@@ -905,6 +912,55 @@ def test_signed_fresh_bundle_is_integrity_valid_but_not_level2(tmp_path: Path) -
     assert result["operator_identity_credentials_verified"] is False
     assert result["claims"]["verification_hierarchy_level_2"] is False
     assert "operator_identity_authentication_missing" in result["blockers_remaining"]
+
+
+def test_signed_synthetic_bundle_cannot_omit_pinned_runtime_binding(
+    tmp_path: Path,
+) -> None:
+    attestation, bundle_root = _build_submission(tmp_path / "bundle")
+    child_path = bundle_root / attestation["bundle"]["code_to_code"]["path"]
+    child = json.loads(child_path.read_text(encoding="utf-8"))
+    assert (
+        child["runtimes"]["opensees"]["execution_outputs"]["runtime_binding"]
+        == expected_binding()
+    )
+    del child["runtimes"]["opensees"]["execution_outputs"]["runtime_binding"]
+    child = _write_json_artifact(child_path, child)
+
+    summary_path = bundle_root / attestation["bundle"]["clean_runner"]["path"]
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["product_receipts"]["code_to_code"].update(
+        {
+            "file_sha256": module.file_sha256(child_path),
+            "artifact_hash": child["artifact_hash"],
+        }
+    )
+    summary = _write_json_artifact(summary_path, summary)
+    attestation["bundle"]["code_to_code"] = _descriptor(child_path, bundle_root, child)
+    attestation["bundle"]["clean_runner"] = _descriptor(
+        summary_path, bundle_root, summary
+    )
+    _resign(attestation, bundle_root)
+
+    assert module._verify_signature(attestation, bundle_root, "openssl")[
+        "cryptographic_signature_verified"
+    ] is True
+    with pytest.raises(
+        code_receipt.ExternalCodeToCodeReceiptError,
+        match="opensees_current_execution_binding_missing",
+    ):
+        code_receipt.validate_external_code_to_code_technical_receipt(
+            child,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+    with pytest.raises(module.ExternalVVOperatorAttestationError) as exc_info:
+        module.validate_external_vv_operator_attestation(
+            attestation,
+            bundle_root=bundle_root,
+            repo_root=ROOT,
+        )
+    assert exc_info.value.code == "operator_attestation_code_to_code_receipt_invalid"
 
 
 @pytest.mark.parametrize(

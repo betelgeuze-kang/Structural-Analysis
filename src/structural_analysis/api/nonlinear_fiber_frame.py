@@ -1,9 +1,9 @@
 """Public bounded stateful RC fiber-frame API.
 
-The compiler accepts one deliberately narrow planar serial-cantilever profile.
-Every accepted final result is produced through the existing J1--J5 source
-chain and the exact source-specific engineering recovery operator.  General
-frame topology and unsupported model semantics fail closed before solve.
+The public load-control compiler accepts one narrow planar serial cantilever.
+Its accepted final results use the J1--J5 source chain and exact engineering
+recovery. An explicit two-fixed-endpoint compiler branch exists only for the
+experimental direct-control API; general frame topology still fails closed.
 """
 
 from __future__ import annotations
@@ -86,6 +86,12 @@ PUBLIC_RC_FIBER_FRAME_REPORT_SCHEMA_VERSION = (
 PUBLIC_RC_FIBER_FRAME_SOLVER_ID = "public_cpu_stateful_rc_fiber_frame_newton_v1"
 PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE = (
     "planar_serial_cantilever_explicit_rectangular_rc.v1"
+)
+EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE = (
+    "planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1"
+)
+EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE = (
+    "planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1"
 )
 PUBLIC_RC_FIBER_FRAME_CLAIM_BOUNDARY = (
     "This public Developer Preview path accepts only one XY-plane serial "
@@ -431,7 +437,7 @@ class _CompiledPublicRCFiberFrame:
     problem: StatefulFiberFrame2DProblem
     node_ids: tuple[str, ...]
     section_by_member: tuple[StatefulRCFiberSection, ...]
-    support_node_id: str
+    support_node_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -621,11 +627,20 @@ def validate_public_rc_fiber_frame_result(
 
 def _compile(
     model: CanonicalModel,
+    *,
+    experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
 ) -> tuple[
     _CompiledPublicRCFiberFrame | None,
     list[Mapping[str, Any]],
     list[str],
 ]:
+    if type(experimental_two_fixed_endpoints) is not bool:
+        raise ValueError("explicit boolean two-fixed-endpoint compiler opt-in required")
+    if type(experimental_pin_roller_beam) is not bool:
+        raise ValueError("explicit boolean pin-roller-beam compiler opt-in required")
+    if experimental_two_fixed_endpoints and experimental_pin_roller_beam:
+        raise ValueError("RC support compiler profiles are mutually exclusive")
     unsupported: list[Mapping[str, Any]] = [
         dict(row) for row in model.unsupported_features
     ]
@@ -633,14 +648,23 @@ def _compile(
     if unsupported:
         return None, unsupported, warnings
     try:
-        compiled = _compile_exact(model)
+        compiled = _compile_exact(
+            model,
+            experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=experimental_pin_roller_beam,
+        )
     except _PublicRCFiberFrameCompileError as exc:
         unsupported.append(exc.to_blocker())
         return None, unsupported, warnings
     return compiled, unsupported, warnings
 
 
-def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
+def _compile_exact(
+    model: CanonicalModel,
+    *,
+    experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
+) -> _CompiledPublicRCFiberFrame:
     if model.schema_version != CANONICAL_MODEL_SCHEMA_VERSION:
         _fail_compile(
             "rc_fiber_frame_schema_invalid",
@@ -831,6 +855,15 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
             row,
             _SECTION_KEYS
             | (
+                {
+                    "top_bar_area_m2",
+                    "bottom_bar_area_m2",
+                    "top_cover_m",
+                    "bottom_cover_m",
+                }
+                & row.keys()
+            )
+            | (
                 {"intermediate_steel_layers"}
                 if "intermediate_steel_layers" in row
                 else set()
@@ -901,12 +934,34 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
                 width_m=_positive_number(row["width_m"], f"{path}/width_m"),
                 depth_m=_positive_number(row["depth_m"], f"{path}/depth_m"),
                 cover_m=_positive_number(row["cover_m"], f"{path}/cover_m"),
+                top_cover_m=(
+                    _positive_number(row["top_cover_m"], f"{path}/top_cover_m")
+                    if "top_cover_m" in row
+                    else None
+                ),
+                bottom_cover_m=(
+                    _positive_number(row["bottom_cover_m"], f"{path}/bottom_cover_m")
+                    if "bottom_cover_m" in row
+                    else None
+                ),
                 concrete_layer_count=layer_count,
                 top_bar_count=top_bars,
                 bottom_bar_count=bottom_bars,
                 bar_area_m2=_positive_number(
                     row["bar_area_m2"],
                     f"{path}/bar_area_m2",
+                ),
+                top_bar_area_m2=(
+                    _positive_number(row["top_bar_area_m2"], f"{path}/top_bar_area_m2")
+                    if "top_bar_area_m2" in row
+                    else None
+                ),
+                bottom_bar_area_m2=(
+                    _positive_number(
+                        row["bottom_bar_area_m2"], f"{path}/bottom_bar_area_m2"
+                    )
+                    if "bottom_bar_area_m2" in row
+                    else None
                 ),
                 intermediate_steel_layers=row.get("intermediate_steel_layers"),
                 section_id=section_id,
@@ -1040,34 +1095,106 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
             "Only one connected, unbranched, acyclic member chain is supported.",
         )
 
-    if len(model.supports) != 1:
+    if experimental_pin_roller_beam:
+        # A horizontal pin/roller beam boundary, not a general planar frame.
+        # Consecutive chain members must traverse one horizontal X line without
+        # folding back or superposing separate physical beam intervals.
+        ordered = sorted(range(node_count), key=lambda index: coordinates[index][0])
+        if (
+            len({point[0] for point in coordinates}) != node_count
+            or len({point[1] for point in coordinates}) != 1
+            or any(
+                node_ids[right] not in adjacency[node_ids[left]]
+                for left, right in zip(ordered, ordered[1:])
+            )
+        ):
+            _fail_compile(
+                "rc_fiber_frame_pin_roller_beam_geometry_invalid",
+                "/nodes",
+                "The pin-roller beam must be one straight horizontal, X-monotone serial chain.",
+            )
+
+    required_support_count = (
+        2 if experimental_two_fixed_endpoints or experimental_pin_roller_beam else 1
+    )
+    if len(model.supports) != required_support_count:
         _fail_compile(
             "rc_fiber_frame_support_count_unsupported",
             "/supports",
-            "Exactly one zero-displacement endpoint support is required.",
+            (
+                "Exactly one pin (UX/UY) and one roller (UY) support are required."
+                if experimental_pin_roller_beam
+                else (
+                    "Exactly two zero-displacement endpoint supports are required "
+                    "for experimental direct control."
+                    if experimental_two_fixed_endpoints
+                    else "Exactly one zero-displacement endpoint support is required."
+                )
+            ),
         )
-    support = model.supports[0]
-    _exact_keys(support, {"node", "dofs"}, "/supports/0")
-    support_node_id = support["node"]
-    if type(support_node_id) is not str or support_node_id not in endpoints:
+    support_node_set: set[str] = set()
+    support_dofs_by_node: dict[str, tuple[str, ...]] = {}
+    for index, support in enumerate(model.supports):
+        path = f"/supports/{index}"
+        _exact_keys(support, {"node", "dofs"}, path)
+        support_node_id = support["node"]
+        if (
+            type(support_node_id) is not str
+            or support_node_id not in node_index
+            or (not experimental_pin_roller_beam and support_node_id not in endpoints)
+            or support_node_id in support_node_set
+        ):
+            _fail_compile(
+                "rc_fiber_frame_support_node_invalid",
+                f"{path}/node",
+                (
+                    "Pin and roller supports must occupy distinct chain nodes."
+                    if experimental_pin_roller_beam
+                    else "Each fully fixed support must occupy a distinct chain endpoint."
+                ),
+            )
+        support_dofs = support["dofs"]
+        valid_dofs = type(support_dofs) is list and all(
+            type(dof) is str for dof in support_dofs
+        )
+        if experimental_pin_roller_beam:
+            valid_dofs = valid_dofs and (
+                (len(support_dofs) == 2 and set(support_dofs) == {"UX", "UY"})
+                or (len(support_dofs) == 1 and support_dofs[0] == "UY")
+            )
+        else:
+            valid_dofs = (
+                valid_dofs
+                and len(support_dofs) == 3
+                and set(support_dofs) == set(_ACTIVE_COMPONENTS)
+            )
+        if not valid_dofs:
+            _fail_compile(
+                "rc_fiber_frame_support_dofs_invalid",
+                f"{path}/dofs",
+                (
+                    "The pin must restrain UX/UY and the roller UY; RZ remains free."
+                    if experimental_pin_roller_beam
+                    else "The endpoint must restrain exactly UX, UY, and RZ at zero."
+                ),
+            )
+        support_node_set.add(support_node_id)
+        support_dofs_by_node[support_node_id] = tuple(support_dofs)
+    if experimental_pin_roller_beam and sorted(
+        tuple(sorted(dofs)) for dofs in support_dofs_by_node.values()
+    ) != [("UX", "UY"), ("UY",)]:
         _fail_compile(
-            "rc_fiber_frame_support_node_invalid",
-            "/supports/0/node",
-            "The single support must be located at a chain endpoint.",
+            "rc_fiber_frame_pin_roller_support_roles_invalid",
+            "/supports",
+            "Exactly one UX/UY pin and one UY roller are required.",
         )
-    support_dofs = support["dofs"]
-    if (
-        type(support_dofs) is not list
-        or len(support_dofs) != 3
-        or set(support_dofs) != set(_ACTIVE_COMPONENTS)
-    ):
-        _fail_compile(
-            "rc_fiber_frame_support_dofs_invalid",
-            "/supports/0/dofs",
-            "The endpoint must restrain exactly UX, UY, and RZ at zero.",
-        )
-    support_index = node_index[support_node_id]
-    fixed_global_dofs = tuple(3 * support_index + offset for offset in range(3))
+    support_node_ids = tuple(node for node in node_ids if node in support_node_set)
+    fixed_global_dofs = tuple(
+        3 * node_index[node] + offset
+        for node in support_node_ids
+        for offset, component in enumerate(_ACTIVE_COMPONENTS)
+        if component in support_dofs_by_node[node]
+    )
 
     if len(model.loads) < 1 or len(model.loads) > _MAX_LOAD_ROWS:
         _fail_compile(
@@ -1087,11 +1214,15 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
                 f"{path}/node",
                 "Nodal load must reference a declared node.",
             )
-        if load_node_id == support_node_id:
+        if load_node_id in support_node_set:
             _fail_compile(
                 "rc_fiber_frame_support_load_unsupported",
                 f"{path}/node",
-                "Loads applied directly to the fully fixed endpoint are unsupported.",
+                (
+                    "Loads applied directly to a pin or roller support are unsupported."
+                    if experimental_pin_roller_beam
+                    else "Loads applied directly to the fully fixed endpoint are unsupported."
+                ),
             )
         if load_node_id in loaded_nodes:
             _fail_compile(
@@ -1170,7 +1301,7 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
         problem=problem,
         node_ids=tuple(node_ids),
         section_by_member=tuple(section_by_member),
-        support_node_id=support_node_id,
+        support_node_ids=support_node_ids,
     )
 
 
@@ -1563,15 +1694,22 @@ def _reaction_rows(
     reaction_global_si: Any,
 ) -> tuple[Mapping[str, Any], ...]:
     values = np.asarray(reaction_global_si, dtype=np.float64).reshape((-1, 6))
-    node_index = compiled.node_ids.index(compiled.support_node_id)
+    fixed = set(compiled.problem.fixed_global_dofs)
     return tuple(
         {
-            "node_id": compiled.support_node_id,
+            "node_id": node_id,
             "dof": component,
-            "value_si": float(values[node_index, _ACTIVE_TO_CANONICAL[component]]),
+            "value_si": float(
+                values[
+                    compiled.node_ids.index(node_id), _ACTIVE_TO_CANONICAL[component]
+                ]
+            ),
             "unit": "N" if component in {"UX", "UY"} else "N*m",
         }
+        for node_id in compiled.support_node_ids
         for component in _ACTIVE_COMPONENTS
+        if 3 * compiled.node_ids.index(node_id) + _ACTIVE_COMPONENTS.index(component)
+        in fixed
     )
 
 
@@ -1810,6 +1948,7 @@ def _fail_compile(kind: str, path: str, detail: str) -> NoReturn:
 
 
 __all__ = [
+    "EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE",
     "PUBLIC_RC_FIBER_FRAME_CLAIM_BOUNDARY",
     "PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE",
     "PUBLIC_RC_FIBER_FRAME_REPORT_SCHEMA_VERSION",

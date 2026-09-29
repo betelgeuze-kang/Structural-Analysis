@@ -8,6 +8,7 @@ observation. Hashes bind retained bytes, not independent provenance or authority
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -66,6 +67,44 @@ _SLOT_FIELDS = {
     "slot_wall_includes_worker_launch_and_parent_validation",
 }
 _WORKER_FILES = ("manifest.json", "search.json", "resources.json", "failure.json")
+_LEGACY_SECTION_CHANGE_FIELDS = {
+    "section_id",
+    "width_m",
+    "depth_m",
+    "cover_m",
+    "top_bar_count",
+    "bottom_bar_count",
+    "bar_area_m2",
+}
+_NEW_SECTION_CHANGE_FIELDS = (
+    "top_bar_area_m2",
+    "bottom_bar_area_m2",
+    "top_cover_m",
+    "bottom_cover_m",
+)
+
+
+def _case_for_current_decoder(row: dict[str, Any]) -> dict[str, Any]:
+    """Decode old sealed changes without rewriting their retained declarations.
+
+    The four reinforcement overrides were added after the original seven-field
+    candidate format. Only that exact old format receives in-memory defaults;
+    partially omitted current fields still fail the strict process decoder.
+    """
+    decoded = deepcopy(row)
+    candidates = decoded.get("candidates")
+    if type(candidates) is not list:
+        return decoded
+    for candidate_row in candidates:
+        if type(candidate_row) is not dict:
+            continue
+        changes = candidate_row.get("changes")
+        if type(changes) is not list:
+            continue
+        for change in changes:
+            if type(change) is dict and set(change) == _LEGACY_SECTION_CHANGE_FIELDS:
+                change.update({name: None for name in _NEW_SECTION_CHANGE_FIELDS})
+    return decoded
 
 
 def _require(value: bool, reason: str) -> None:
@@ -300,7 +339,9 @@ def _frozen_inputs(suite: dict[str, Any], artifacts: _Artifacts) -> dict[str, An
             normalized[key] = artifacts.path(f"inputs/{stem}-{index:03d}.json")
             identities.append(artifacts.identity(Path(normalized[key])))
         arguments = candidate._case_arguments(
-            normalized, Path(str(artifacts.logical_root)), read=artifacts.read
+            _case_for_current_decoder(normalized),
+            Path(str(artifacts.logical_root)),
+            read=artifacts.read,
         )
         case_id = normalized["case_id"]
         _require(case_id not in case_ids, "duplicate case ID")

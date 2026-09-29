@@ -1,0 +1,133 @@
+{
+  "original_report_count": 1980,
+  "decisions": 660,
+  "unique_samples": 165,
+  "positive": 32,
+  "totals": [
+    {
+      "secant_ns": 182733107272,
+      "consistent_label_savings_ns": 1276681120,
+      "per_repeat_hindsight_savings_ns": 1702374925,
+      "consistent_label_newton_saved": 36,
+      "consistent_label_savings_fraction": 0.006986589015309895,
+      "per_repeat_hindsight_savings_fraction": 0.009316182220149075
+    },
+    {
+      "secant_ns": 183337324421,
+      "consistent_label_savings_ns": 1321111594,
+      "per_repeat_hindsight_savings_ns": 2337464496,
+      "consistent_label_newton_saved": 36,
+      "consistent_label_savings_fraction": 0.007205906370523404,
+      "per_repeat_hindsight_savings_fraction": 0.012749528790070309
+    },
+    {
+      "secant_ns": 183091805691,
+      "consistent_label_savings_ns": 1312902797,
+      "per_repeat_hindsight_savings_ns": 2061002743,
+      "consistent_label_newton_saved": 36,
+      "consistent_label_savings_fraction": 0.0071707348783033855,
+      "per_repeat_hindsight_savings_fraction": 0.01125666293596071
+    }
+  ],
+  "by_case": [
+    {
+      "case_id": "train-a-amp050",
+      "decisions": 44,
+      "positive": 0,
+      "positive_with_newton_reduction_all_repeats": 0
+    },
+    {
+      "case_id": "train-a-amp100",
+      "decisions": 44,
+      "positive": 0,
+      "positive_with_newton_reduction_all_repeats": 0
+    },
+    {
+      "case_id": "train-a-amp150",
+      "decisions": 44,
+      "positive": 0,
+      "positive_with_newton_reduction_all_repeats": 0
+    },
+    {
+      "case_id": "train-b-amp050",
+      "decisions": 44,
+      "positive": 1,
+      "positive_with_newton_reduction_all_repeats": 1
+    },
+    {
+      "case_id": "train-b-amp100",
+      "decisions": 44,
+      "positive": 3,
+      "positive_with_newton_reduction_all_repeats": 3
+    },
+    {
+      "case_id": "train-b-amp150",
+      "decisions": 44,
+      "positive": 7,
+      "positive_with_newton_reduction_all_repeats": 7
+    },
+    {
+      "case_id": "train-c-amp050",
+      "decisions": 44,
+      "positive": 0,
+      "positive_with_newton_reduction_all_repeats": 0
+    },
+    {
+      "case_id": "train-c-amp100",
+      "decisions": 44,
+      "positive": 0,
+      "positive_with_newton_reduction_all_repeats": 0
+    },
+    {
+      "case_id": "train-c-amp150",
+      "decisions": 44,
+      "positive": 0,
+      "positive_with_newton_reduction_all_repeats": 0
+    },
+    {
+      "case_id": "train-d-amp050",
+      "decisions": 44,
+      "positive": 3,
+      "positive_with_newton_reduction_all_repeats": 3
+    },
+    {
+      "case_id": "train-d-amp100",
+      "decisions": 44,
+      "positive": 5,
+      "positive_with_newton_reduction_all_repeats": 5
+    },
+    {
+      "case_id": "train-d-amp150",
+      "decisions": 44,
+      "positive": 7,
+      "positive_with_newton_reduction_all_repeats": 7
+    },
+    {
+      "case_id": "train-e-amp050",
+      "decisions": 44,
+      "positive": 0,
+      "positive_with_newton_reduction_all_repeats": 0
+    },
+    {
+      "case_id": "train-e-amp100",
+      "decisions": 44,
+      "positive": 1,
+      "positive_with_newton_reduction_all_repeats": 1
+    },
+    {
+      "case_id": "train-e-amp150",
+      "decisions": 44,
+      "positive": 5,
+      "positive_with_newton_reduction_all_repeats": 5
+    }
+  ],
+  "scope": "Post-hoc overlapping same-parent timing arithmetic, not a realizable full-path upper bound or deployable policy",
+  "new_fits": 0,
+  "new_solves": 0,
+  "reserved_cases_opened": false,
+  "promotion": false,
+  "unique_positive_source_samples": 14,
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-recorded-opportunity-nbgkemcu",
+  "inventory_sha256": "a3e534ebe5e3be544e638c5a0543ba5915b06590f703756b7188864063902a4e",
+  "retained_rows_arithmetic_rechecked": true
+}

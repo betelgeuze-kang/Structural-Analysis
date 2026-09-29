@@ -1,0 +1,24 @@
+{
+  "source_revision": "3c53c12385388cd8f6f6c229bca324c651811329",
+  "packets": [
+    {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-portal-recovery-i1duj8d3",
+      "inventory_sha256": "7e292b741b180d78f6f2bffd940d878352fdb3d9c249f48bc3e8dbdcf9eadbf6",
+      "scheduled_comparisons": 12,
+      "returned_comparisons": 0,
+      "original_driver_unknown_work_flags_preserved": true,
+      "compiler_reason": "rc_fiber_frame_metadata_unsupported"
+    },
+    {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-portal-recovery-cy56u8c4",
+      "inventory_sha256": "61a80d4d577a899ef6e974b462c4650b04f44214c9afa98c9fc77c6919319408",
+      "scheduled_comparisons": 12,
+      "returned_comparisons": 0,
+      "original_driver_unknown_work_flags_preserved": true,
+      "compiler_reason": "rc_fiber_frame_support_count_unsupported"
+    }
+  ],
+  "completed_paths": 0,
+  "public_planar_load_control_not_equivalent_to_constant_axial_displacement_control": true,
+  "independent_validation": false
+}

@@ -1428,6 +1428,15 @@ def _compile_portal(
             row,
             _SECTION_KEYS
             | (
+                {
+                    "top_bar_area_m2",
+                    "bottom_bar_area_m2",
+                    "top_cover_m",
+                    "bottom_cover_m",
+                }
+                & row.keys()
+            )
+            | (
                 {"intermediate_steel_layers"}
                 if "intermediate_steel_layers" in row
                 else set()
@@ -1472,6 +1481,16 @@ def _compile_portal(
                 width_m=_positive(row["width_m"], f"{path}/width_m"),
                 depth_m=_positive(row["depth_m"], f"{path}/depth_m"),
                 cover_m=_positive(row["cover_m"], f"{path}/cover_m"),
+                top_cover_m=(
+                    _positive(row["top_cover_m"], f"{path}/top_cover_m")
+                    if "top_cover_m" in row
+                    else None
+                ),
+                bottom_cover_m=(
+                    _positive(row["bottom_cover_m"], f"{path}/bottom_cover_m")
+                    if "bottom_cover_m" in row
+                    else None
+                ),
                 concrete_layer_count=_integer(
                     row["concrete_layer_count"], f"{path}/concrete_layer_count", 2, 32
                 ),
@@ -1482,6 +1501,16 @@ def _compile_portal(
                     row["bottom_bar_count"], f"{path}/bottom_bar_count", 1, 64
                 ),
                 bar_area_m2=_positive(row["bar_area_m2"], f"{path}/bar_area_m2"),
+                top_bar_area_m2=(
+                    _positive(row["top_bar_area_m2"], f"{path}/top_bar_area_m2")
+                    if "top_bar_area_m2" in row
+                    else None
+                ),
+                bottom_bar_area_m2=(
+                    _positive(row["bottom_bar_area_m2"], f"{path}/bottom_bar_area_m2")
+                    if "bottom_bar_area_m2" in row
+                    else None
+                ),
                 intermediate_steel_layers=row.get("intermediate_steel_layers"),
                 section_id=section_id,
                 steel=steel[1],

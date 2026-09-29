@@ -89,6 +89,31 @@ def _exact_float64_equal(left: Any, right: Any) -> bool:
     )
 
 
+def _validated_augmented_coordinate_seed(
+    seed: Any,
+    *,
+    coordinate_count: int,
+    load_factor_coordinate_scale_m: float,
+) -> tuple[float, ...]:
+    try:
+        raw = np.asarray(seed, dtype=object)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("augmented_coordinate_seed_m is invalid") from exc
+    if raw.shape != (coordinate_count,):
+        raise ValueError("augmented_coordinate_seed_m has invalid shape")
+    values: list[float] = []
+    for value in raw:
+        if isinstance(value, (str, bytes)):
+            raise ValueError("augmented_coordinate_seed_m must be numeric and finite")
+        values.append(_finite(value, name="augmented_coordinate_seed_m"))
+    coordinates = np.asarray(values, dtype=np.float64)
+    if not np.all(np.isfinite(coordinates)) or not math.isfinite(
+        float(coordinates[-1]) / load_factor_coordinate_scale_m
+    ):
+        raise ValueError("augmented_coordinate_seed_m must be finite")
+    return tuple(float(value) for value in coordinates)
+
+
 def _free_generalized_coordinates(
     problem: StatefulCorotationalFiberFrame2DProblem,
     checkpoint: StatefulCorotationalFiberFrame2DCheckpoint,
@@ -211,6 +236,7 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
     control_global_dof: int
     target_control_displacement_m: float
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig
+    augmented_coordinate_seed_m: Any = None
 
     def __post_init__(self) -> None:
         validate_stateful_corotational_fiber_frame2d_checkpoint(
@@ -227,6 +253,18 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
             StatefulCorotationalFiberFrame2DDisplacementControlConfig
         ):
             raise ValueError("config type is invalid")
+        if self.augmented_coordinate_seed_m is not None:
+            object.__setattr__(
+                self,
+                "augmented_coordinate_seed_m",
+                _validated_augmented_coordinate_seed(
+                    self.augmented_coordinate_seed_m,
+                    coordinate_count=len(self.problem.free_global_dofs) + 1,
+                    load_factor_coordinate_scale_m=(
+                        self.config.load_factor_coordinate_scale_m
+                    ),
+                ),
+            )
         accepted = self.initial_free_displacements_m()[self.control_free_index]
         if target == accepted:
             raise ValueError("target control displacement must differ from the parent")
@@ -246,6 +284,11 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
         return _free_generalized_coordinates(self.problem, self.accepted_checkpoint)
 
     def initial_augmented_coordinates_m(self) -> np.ndarray:
+        if self.augmented_coordinate_seed_m is not None:
+            return np.asarray(self.augmented_coordinate_seed_m, dtype=np.float64)
+        return self._parent_augmented_coordinates_m()
+
+    def _parent_augmented_coordinates_m(self) -> np.ndarray:
         free = self.initial_free_displacements_m()
         return np.concatenate(
             (
@@ -376,6 +419,7 @@ def _blocked_solution(
     coordinates: np.ndarray,
     history: list[dict[str, Any]],
     line_search_history: list[dict[str, Any]],
+    work: dict[str, int],
     *,
     detail: str,
 ) -> StatefulCorotationalFiberFrame2DDisplacementControlSolution:
@@ -392,7 +436,9 @@ def _blocked_solution(
             "case_id": step_problem.case_id,
             "control_mode": "direct_displacement_control",
             "terminal_reason": detail,
-            "solver_executed": bool(history),
+            "solver_executed": work["assembly_call_count"] > 0,
+            **work,
+            "line_search_step_count": len(line_search_history),
             "contract_pass": False,
             "residual_gate_passed": False,
             "control_gate_passed": False,
@@ -430,13 +476,36 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
     coordinates = step_problem.initial_augmented_coordinates_m()
     history: list[dict[str, Any]] = []
     line_search_history: list[dict[str, Any]] = []
+    work = {
+        "iteration_count": 0,
+        "linear_solve_count": 0,
+        "assembly_call_count": 0,
+        "assembly_exception_count": 0,
+        "line_search_trial_count": 0,
+    }
 
     for iteration in range(config.maximum_iterations + 1):
-        assembly = step_problem.assemble(coordinates)
+        work["iteration_count"] += 1
+        work["assembly_call_count"] += 1
+        try:
+            assembly = step_problem.assemble(coordinates)
+        except (TypeError, ValueError, ArithmeticError, AttributeError, LookupError):
+            if step_problem.augmented_coordinate_seed_m is None:
+                raise
+            work["assembly_exception_count"] += 1
+            return _blocked_solution(
+                step_problem,
+                step_problem._parent_augmented_coordinates_m(),
+                history,
+                line_search_history,
+                work,
+                detail="invalid_seed_assembly",
+            )
         relative_residual = _relative_equilibrium(step_problem, assembly)
         residual_gate = relative_residual <= config.residual_tolerance
         control_gate = abs(assembly.control_error_m) <= config.control_tolerance_m
         try:
+            work["linear_solve_count"] += 1
             correction = np.linalg.solve(
                 assembly.augmented_jacobian_kn_per_m,
                 -assembly.augmented_residual_kn,
@@ -447,6 +516,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
                 coordinates,
                 history,
                 line_search_history,
+                work,
                 detail=(
                     "singular_augmented_jacobian_at_terminal_gate"
                     if residual_gate and control_gate
@@ -459,6 +529,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
                 coordinates,
                 history,
                 line_search_history,
+                work,
                 detail="invalid_augmented_correction",
             )
         free_correction = correction[:-1]
@@ -495,6 +566,8 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         best_merit = merit_before
         for alpha in config.line_search_alphas:
             trial_coordinates = coordinates + alpha * correction
+            work["line_search_trial_count"] += 1
+            work["assembly_call_count"] += 1
             try:
                 trial = step_problem.assemble(trial_coordinates)
             except (
@@ -504,6 +577,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
                 AttributeError,
                 LookupError,
             ):
+                work["assembly_exception_count"] += 1
                 attempts.append(
                     {
                         "alpha": alpha,
@@ -581,6 +655,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
                 coordinates,
                 history,
                 line_search_history,
+                work,
                 detail="line_search_failed_to_reduce_augmented_merit",
             )
         coordinates = selected
@@ -590,6 +665,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
                 coordinates,
                 history,
                 line_search_history,
+                work,
                 detail="maximum_iterations_exceeded",
             )
     else:
@@ -598,9 +674,11 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
             coordinates,
             history,
             line_search_history,
+            work,
             detail="iteration_loop_exhausted",
         )
 
+    work["assembly_call_count"] += 1
     final = step_problem.assemble(coordinates)
     final_relative = _relative_equilibrium(step_problem, final)
     final_free_increment = float(history[-1]["free_increment_abs_m"])
@@ -640,8 +718,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         "globalization": "backtracking_augmented_merit_line_search",
         "terminal_reason": "equilibrium_control_and_increment_converged",
         "solver_executed": True,
-        "iteration_count": len(history),
-        "linear_solve_count": len(history),
+        **work,
         "line_search_step_count": len(line_search_history),
         "line_search_used": any(
             row["line_search_alpha"] < 1.0
@@ -715,8 +792,9 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
     control_global_dof: int,
     target_control_displacement_m: float,
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig | None = None,
+    augmented_coordinate_seed_m: Any = None,
 ) -> StatefulCorotationalFiberFrame2DDisplacementControlStepResult:
-    """Solve and atomically commit one direct displacement-control target."""
+    """Solve one target from its parent, optionally starting at augmented seed coordinates."""
 
     validate_stateful_corotational_fiber_frame2d_checkpoint(
         problem,
@@ -736,6 +814,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
             if config is None
             else config
         ),
+        augmented_coordinate_seed_m=augmented_coordinate_seed_m,
     )
     solution = solve_stateful_corotational_fiber_frame2d_displacement_control(
         step_problem
@@ -861,6 +940,13 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
             ),
             "control_coordinate_gate_passed": control_gate,
             "solver_contract_pass": solver_contract,
+            "iteration_count": solution.metrics["iteration_count"],
+            "linear_solve_count": solution.metrics["linear_solve_count"],
+            "solver_assembly_call_count": solution.metrics["assembly_call_count"],
+            "assembly_call_count": solution.metrics["assembly_call_count"] + 1,
+            "assembly_exception_count": solution.metrics["assembly_exception_count"],
+            "line_search_step_count": solution.metrics["line_search_step_count"],
+            "line_search_trial_count": solution.metrics["line_search_trial_count"],
             "residual_gate_passed": solution.metrics.get("residual_gate_passed"),
             "control_gate_passed": solution.metrics.get("control_gate_passed"),
             "increment_gate_passed": solution.metrics.get("increment_gate_passed"),
@@ -912,36 +998,66 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
     control_global_dof: int,
     initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint | None = None,
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig | None = None,
+    allow_reversals: bool = False,
+    maximum_reversals: int = 0,
 ) -> StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
-    """Run a strictly monotone displacement target path until one step fails."""
+    """Run bounded targets from one accepted checkpoint until one step fails.
+
+    Reversal admission applies to this supplied path from ``initial_checkpoint``;
+    a checkpoint alone does not attest to directions in an earlier prefix.
+    """
 
     _require_connected_member_graph(problem)
     _controlled_free_index(problem, control_global_dof)
-    targets = tuple(
-        _finite(value, name="control displacement") for value in control_displacements_m
-    )
+    if type(allow_reversals) is not bool:
+        raise ValueError("allow_reversals must be an explicit boolean")
+    if (
+        type(maximum_reversals) is not int
+        or maximum_reversals < 0
+        or maximum_reversals > 254
+    ):
+        raise ValueError("maximum_reversals must be an integer in [0, 254]")
+    if not allow_reversals and maximum_reversals != 0:
+        raise ValueError("reversals require explicit opt-in and budget")
+    try:
+        source_targets = iter(control_displacements_m)
+    except TypeError as exc:
+        raise ValueError("control_displacements_m must be iterable") from exc
+    parsed_targets: list[float] = []
+    for value in source_targets:
+        if len(parsed_targets) >= 255:
+            raise ValueError("control_displacements_m exceeds the bounded path length")
+        parsed_targets.append(_finite(value, name="control displacement"))
+    targets = tuple(parsed_targets)
     if not targets:
         raise ValueError("control_displacements_m must be non-empty")
-    if len(targets) > 255:
-        raise ValueError("control_displacements_m exceeds the bounded path length")
     first = initial_checkpoint or (
         initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
     )
     validate_stateful_corotational_fiber_frame2d_checkpoint(problem, first)
     control_index = _controlled_free_index(problem, control_global_dof)
     accepted_control = _free_generalized_coordinates(problem, first)[control_index]
-    direction = math.copysign(1.0, targets[0] - accepted_control)
-    if targets[0] == accepted_control or any(
-        direction * (right - left) <= 0.0
-        for left, right in zip(
-            (accepted_control, *targets[:-1]),
-            targets,
-            strict=True,
-        )
-    ):
-        raise ValueError(
-            "control_displacements_m must advance strictly in one direction"
-        )
+    previous = accepted_control
+    prior_direction: int | None = None
+    reversals = 0
+    for target in targets:
+        if target == previous:
+            if allow_reversals:
+                raise ValueError("successive control targets must differ")
+            raise ValueError(
+                "control_displacements_m must advance strictly in one direction"
+            )
+        direction = 1 if target > previous else -1
+        if prior_direction is not None and direction != prior_direction:
+            reversals += 1
+            if not allow_reversals:
+                raise ValueError(
+                    "control_displacements_m must advance strictly in one direction"
+                )
+            if reversals > maximum_reversals:
+                raise ValueError("cumulative reversal budget exceeded")
+        prior_direction = direction
+        previous = target
     solver_config = config or (
         StatefulCorotationalFiberFrame2DDisplacementControlConfig()
     )

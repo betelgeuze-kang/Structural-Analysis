@@ -173,6 +173,13 @@ def _assemble_native_trial(
 ]:
     """Share one material trial pass without changing the Newton v1 receipt."""
 
+    if (
+        type(problem) is StatefulCorotationalFiberFrame2DProblem
+        and problem.constant_external_loads
+    ):
+        raise ValueError(
+            "native sparse assembly does not support constant external loads"
+        )
     validate_stateful_corotational_fiber_frame2d_checkpoint(
         problem, accepted_checkpoint
     )

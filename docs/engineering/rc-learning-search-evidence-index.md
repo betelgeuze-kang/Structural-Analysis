@@ -1,5 +1,10 @@
 # RC learning and candidate-search evidence index
 
+[Full roadmap status and remaining requirements](structural-roadmap-status-20260920.md)
+separates current implementation, measured benefit, numerical limitations and
+main/independent acceptance dependencies. Historical records below retain their
+own source scope.
+
 The [larger planar cohort](planar-larger-cohort-20260914.md) adds eight
 completed observations at 27/48 free equations, four passing full-history
 backend comparisons and four exact repetition pairs. No damage/plasticity or
@@ -472,3 +477,160 @@ completes four full paths and matches 7,350 timed calls to recorder phase counts
 The proposal uses fewer inclusive linear solves but more assembly time and a
 longer arm in this single instrumented observation. No learned gain, independent
 validation or removal of mandatory verification is claimed.
+
+
+The [optional assembly timer](rc-assembly-timing-option-20260914.md) reaches
+full control benchmarks, runtime policy selection and the ordered reuse CLI.
+The [order-balanced timer observation](rc-assembly-timing-overhead-20260914.md)
+preserves 112 original step records across 32 paths. Its small runtime spread
+does not resolve timer overhead or establish speedup; defaults remain untimed.
+
+
+The [remeshed geometry split screen](rc-remeshed-geometry-split-screen-20260914.md)
+first reproduces, then rejects straight-member subdivision aliases across
+train/holdout groups. It affects conservative grouping only, not the solver
+mesh, physical acceptance or authenticated project provenance. This does not
+retroactively qualify an existing training corpus.
+
+
+The yielded-prefix comparison has distinct arithmetic outcomes:
+
+| Evidence | Result and retained limit |
+| --- | --- |
+| [Binary64 execution](rc-yielded-reuse-timing-gate-20260914.md) | Four paths and 64 steps; secant/reference history mismatches stop execution before reuse, so paired cost stays null. |
+| [Force witness reconstruction](rc-yielded-force-origin-20260914.md) | Original M2 strain/force arithmetic replays exactly for 32 observations; this does not re-solve Newton or all constitutive responses. |
+| [Newton acceptance audit](rc-yielded-newton-origin-20260914.md) | Causal secant proposals and 32 saved convergence decisions are consistent; different Newton paths still fail the separate response comparison. |
+| [Retained-arithmetic reuse](rc-yielded-retained-reuse-timing-20260914.md) | Sixteen paths and 256 identical baseline/reuse steps pass; two ordered repeats observe about 20% lower enclosing cost with 210 fewer dispatches per benchmark. One authored path, no learned policy or general speedup claim. |
+
+The retained-arithmetic observation does not replace the failed binary64
+observation. Neither establishes independent physical validity, unseen-case
+learned benefit, or release qualification.
+
+
+[Completed c1 CI receipts](hosted-c1-completed-lanes-20260914.md) distinguish
+development/topology passes from full-suite preparation failure and one hosted
+browser failure. The [browser diagnostic preservation repair](runtime-browser-diagnostic-preservation-20260914.md)
+retains future failed traces before subsequent HTTP tests replace their output.
+These source-specific receipts do not qualify later commits automatically.
+
+## 2026-09-20 constant-axial cantilever reuse observations
+
+- [Elastic-material reversal path](rc-cantilever-reuse-timing-20260920.md):
+  16 paths, 128 steps, byte-exact paired results; no accepted damage or plasticity.
+- [Concrete-damaging reversal path](rc-cantilever-damage-reuse-timing-20260920.md):
+  separate larger targets, 16 paths, 128 steps; maximum tensile damage 0.9855,
+  no steel plasticity, byte-exact pairs and repeats; two observed time ratios
+  0.7975/0.7928. Deterministic retained reuse only, not learned or physical proof.
+- [Plastic reversal and increment sensitivity](rc-cantilever-plastic-reversal-reuse-20260920.md):
+  original large reversal fails in all baseline arms with exact rollback; a
+  separately declared 8 mm increment path completes 496 steps with steel
+  plasticity and concrete damage. Paired/repeated steps are byte exact and
+  observed reuse ratios are 0.8203/0.8226. No step-convergence or physical claim.
+- [8 mm / 4 mm increment sensitivity](rc-cantilever-increment-sensitivity-20260920.md):
+  the fine baseline completes all targets but rejects secant on one near-zero
+  moment mismatch. Reference-only common-target comparison observes reaction
+  and material-state sensitivity; fixed-request reuse equality is not convergence.
+
+## 2026-09-20 external drawing and unequal reinforcement
+
+- [Zenodo beam candidate and drawing review](zenodo-18862214-candidate-20260920.md):
+  attributed downloadable source and drawing observations retained; missing
+  material, channel, cover and shear/bond details prevent training admission.
+- [Unequal outer reinforcement](rc-unequal-outer-reinforcement-20260920.md):
+  separate top/bottom areas now reach public fibers, section changes and steel
+  quantities. Physical identity and fixed learned contexts retain the distinction;
+  the later learning and Workbench records below supersede its pending delivery boundary.
+- [Hosted 1d8f4e7a5 result](hosted-1d8-development-terminal-20260920.md):
+  1,293 development checks passed; full-suite evidence preparation still failed.
+  This receipt predates the unequal-area implementation.
+- [Workbench unequal-area review](rc-unequal-reinforcement-workbench-20260920.md):
+  corrected UI quantity checks and per-layer labels; 131 frontend checks passed,
+  including actual-report desktop/mobile rendering. No new physical evidence.
+- [Versioned outer-reinforcement learning](rc-control-reinforcement-learning-20260920.md):
+  separate 131-feature policy, freshly replayed labels and unseen-candidate
+  search/oracle connection; both strategies choose the same candidate in a small
+  internal test. No learning benefit or independent generalization established.
+- [Reinforcement-policy delivery](rc-reinforcement-policy-delivery-20260920.md):
+  actual train/search/standalone CLI execution, 57 byte-exact HTTP-handler
+  artifacts, 108 Python and 57 frontend checks, with desktop/mobile original
+  result downloads. No learned benefit or deployment qualification claimed.
+- [Four-case reinforcement cost observation](rc-reinforcement-cost-campaign-20260920.md):
+  four separate fits, eight order-balanced comparison pairs, including concrete
+  damage; same selections and exact repeated result hashes. Including training,
+  learned execution costs 2.01–2.06× price order in these cases; no promotion.
+- [Hosted 6c9c17e69 terminal results](hosted-6c9-development-terminal-20260920.md):
+  1,564 development tests passed; full shards remain blocked before test execution
+  by external technical receipt readiness. Later local changes require new checks.
+- [Actual cost-pruned design execution](rc-control-cost-pruned-design-20260920.md):
+  opt-in strict cost exclusions based on prior fresh verified feasible results;
+  a real comparison preserves selection/results while reducing six API calls to
+  four. Skipped feasibility remains unknown; subsequent delivery and timing are
+  recorded below.
+
+- [Cost-pruned search delivery](rc-cost-pruned-search-delivery-20260920.md):
+  explicit adaptive mode connected through both search CLIs, HTTP and Workbench;
+  original skip receipts verified and downloadable, excluded physical results
+  unavailable, exhaustive oracle retained. No learned benefit implied.
+- [Hosted 82c8a0d47 terminal outcome](hosted-82c-development-terminal-20260920.md):
+  1,574 development checks passed; full evidence preparation remains blocked.
+  Frontend 727/728 passed, with a bounded readiness wait adjusted using its failure
+  snapshot. Subsequent hosted confirmation remains required.
+- [Repeated strict-cost exclusion process study](rc-cost-pruning-process-campaign-20260920.md):
+  five declared cases, ten balanced pairs and 20 actual CLI processes. Four cases
+  select the same design with exact retained results, halve API calls and show
+  25.6–27.1% lower enclosing process time in this local observation. A no-feasible
+  case skips nothing and receives no qualified ratio. No learned benefit claimed.
+- [Connected runtime exclusions](rc-runtime-connected-exclusions-20260920.md):
+  opt-in exclusion of transitively related project/geometry/history cases from
+  each runtime fit, with exact excluded groups in the frozen plan and fit receipts.
+  Real small-case execution verifies complementary sample membership; it remains
+  internal tuning with no independent provenance or learned speedup claim.
+
+- [Supplemental development integration](supplemental-development-integration-20260920.md):
+  exact-ID verifier/consumer and production workflow wiring imported from current
+  main with controlled transport checks; no signature or scientific authority
+  inferred, and no main merge performed.
+- [Terminal 20a hosted outcome](hosted-20a-terminal-20260920.md): frontend 735 passed;
+  development layout readers rejected an erroneously expanded required-role set.
+  The optional adaptive receipt is now isolated and affected HTTP paths rerun.
+- [Original training-group audit](rc-original-training-groups-20260920.md):
+  protocol and 13 original input files verified; all four existing training cases
+  share one project group. Group withholding leaves no fitting data. The next
+  grouped runtime study requires additional defensible groups, not renamed cases.
+- [Candidate-boundary observation](rc-reinforcement-boundary-20260920.md): four
+  predeclared cases and eight measured pairs, followed by full-pool audits. One
+  pool contains a real narrow false-pass prediction blocked by full reanalysis;
+  two pools have no feasible design. Same online work and higher training-inclusive
+  costs still provide no learned benefit or independent validation.
+- [Actual boundary case in Workbench](rc-boundary-workbench-20260920.md): 91 original
+  artifacts retained and checked through the HTTP mount; desktop/mobile review
+  refuses selection of the actual false-pass candidate while preserving its
+  inspectable result. Exceeded limit values now wrap visibly above wide tables.
+- [Hosted integration outcome at 95ed](hosted-95ed-terminal-20260920.md): all
+  1,595 development contracts and frontend checks passed; full-suite shards still
+  stop at external replay/technical receipt preparation. Later boundary changes
+  require their own hosted run.
+- [Concrete damage localization](planar-concrete-localization-20260920.md): original
+  64/128-layer maxima reproduced exactly; largest tensile witness affects 10 of
+  1,152 cells, with mixed-onset children accounting for most witness-section
+  difference. Small mean differences do not replace the failed local screen.
+- [Frozen 256-layer experiment](planar-256-refinement-20260920.md): verified original
+  Git source, unchanged forty-target path and solver criteria; fresh refinement
+  completed at forty targets. Actual 128/256 comparison passes 400 nodal/steel
+  groups but fails 34/240 concrete groups; tensile damage still differs by 6.68%.
+- [Two common-coordinate material probes](planar-common-material-points-20260920.md):
+  exact replay of both original 128-layer witness histories; derived 256-history
+  values isolate a sampling-location contribution. Post-hoc, two-point diagnostic
+  only; original projected-field failures and physical-validation gaps remain.
+- [Original Zenodo flexural-beam table](zenodo-8062007-original-20260920.md): official
+  804-row CSV/manual acquired with source identities and CC BY 4.0 metadata;
+  155 explicit controls across 51 reference prefixes. Scalar endpoints and mixed
+  measured/imputed inputs remain outside solver-history training and validation.
+- [Hosted 19f terminal outcome](hosted-19f-terminal-20260920.md): 1,620 development
+  checks and 738 frontend tests passed, including the new material audit contracts.
+  Full repository shards still fail before test execution at external evidence
+  preparation; no independent numerical acceptance is inferred.
+- [Tan/Nguyen source reconciliation](tan-2019-source-reconciliation-20260920.md):
+  two explicit controls traced to publisher tables/drawing; peak endpoints match,
+  but D10 yield strength differs and stirrup descriptions need reconciliation.
+  Both remain one reviewed source group with no training split or admission.

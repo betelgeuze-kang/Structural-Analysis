@@ -1,0 +1,25 @@
+{
+  "original_sha256": "2f923d7537b4ddf10ce19e0959fd081767466442e9f438ef1265c7461154446b",
+  "rewritten_sha256": "2f923d7537b4ddf10ce19e0959fd081767466442e9f438ef1265c7461154446b",
+  "full_bytes_identical": true,
+  "verified_steps": 40,
+  "load_wall_ns": 70294879508,
+  "write_and_hash_wall_ns": 260227122766,
+  "step_verification_wall_ns": 71414121201,
+  "maximum_rss_kib": 17671728,
+  "structural_solves": 0,
+  "training_fits": 0,
+  "includes_full_source_loading": true,
+  "process": {
+    "exit_code": 0,
+    "wall_ns": 405654610658,
+    "new_solves": 0,
+    "new_fits": 0
+  },
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-1024-artifact-roundtrip-75uzdg9r",
+  "inventory_sha256": "3c4fec31d151d40725da3b87da6f38e13b476fea0e0562df2ca4a57abb4cdf6a",
+  "index_sha256": "effa668ba984929d1e8e0410146eef39dff438e359a44f6a49b7c4a8749dfbe5",
+  "observer_revision": "25b6a52d33f0c13a8043529f8364abbd2a55cec1",
+  "verified_payload_files": 812,
+  "verified_payload_bytes": 10688372335
+}

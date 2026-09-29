@@ -229,7 +229,10 @@ def _read_layout_search_graph(read, result):
             raise ValueError("original layout model identity or context differs")
         _same(
             row["quantities"],
-            calculate_fiber_frame_member_quantities(model),
+            calculate_fiber_frame_member_quantities(
+                model,
+                experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            ),
             "original layout quantities differ",
         )
         _same(

@@ -44,8 +44,14 @@ def control_layout_candidate_features(model, request):
         raise ValueError("exact bounded direct-control request required")
     request = decode_bounded_rc_fiber_direct_control_request(_bytes(request.to_dict()))
     config = PublicRCFiberFrameConfig()
-    section_values, _ = candidate_preanalysis_features(model, config)
-    physical = fiber_frame_physical_model_payload(model)
+    section_values, _ = candidate_preanalysis_features(
+        model,
+        config,
+        experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+    )
+    physical = fiber_frame_physical_model_payload(
+        model, experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints
+    )
     coordinates = physical.pop("node_coordinates_m")
     if not 2 <= len(coordinates) <= MAX_NODES:
         raise ValueError("bounded layout node count required")
@@ -80,8 +86,14 @@ def control_layout_candidate_features(model, request):
         "feature_names": list(LAYOUT_FEATURE_NAMES),
         "values": list(values),
         "context_hash": _sha(_bytes(context)),
-        "physical_model_identity": fiber_frame_physical_model_identity(model),
-        "geometry_shape_screen": geometry_shape_signature(model),
+        "physical_model_identity": fiber_frame_physical_model_identity(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        ),
+        "geometry_shape_screen": geometry_shape_signature(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        ),
         "same_context_is_independent_geometry": False,
         "existing_candidate_policy_compatible": False,
         "physical_result_authority": False,

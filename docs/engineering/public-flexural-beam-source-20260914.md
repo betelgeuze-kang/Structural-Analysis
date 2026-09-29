@@ -51,3 +51,12 @@ and blob API responses, original CSV, inspections and a reread SHA256/length
 inventory. These originals are retained outside training and protected evidence.
 The source discovery adds accessible data and explicit admission gaps, not new
 independent validation or a completed roadmap requirement.
+
+## Later original-record acquisition
+
+The [2026-09-20 official-record inspection](zenodo-8062007-original-20260920.md)
+now obtains the original 804-row Zenodo CSV and manual with file identities and
+record-level CC BY 4.0 metadata. It recovers source/specimen identifiers and units;
+155 explicit controls span 51 reference prefixes. This supersedes the earlier
+access gap for the original record, not the derivative GitHub license finding.
+Full-history and per-value provenance/model-suitability admission gaps remain.

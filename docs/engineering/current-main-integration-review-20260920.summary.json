@@ -1,0 +1,145 @@
+{
+  "development_source": "02c6ed78ef12e3989cbdd3eed7c2fc37dcad08bd",
+  "main_source": "234c3122c78dea064411aa16b06b18ab16157576",
+  "development_only_commits": 573,
+  "main_only_commits": 4,
+  "components": [
+    {
+      "path": ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+      "main_blob": "bfd278ae79420c827c4b7fe692ca7f5cf410ad62",
+      "development_blob": "bfd278ae79420c827c4b7fe692ca7f5cf410ad62",
+      "exact": true
+    },
+    {
+      "path": ".github/workflows/bounded-planar-upload-identity.yml",
+      "main_blob": "f869f4329a322efca6bdb64ab8c6a19d10752934",
+      "development_blob": "f869f4329a322efca6bdb64ab8c6a19d10752934",
+      "exact": true
+    },
+    {
+      "path": ".github/workflows/product-state-current.yml",
+      "main_blob": "56ca21916e3a06e8c233fbd6f1b101dc7076ad94",
+      "development_blob": "56ca21916e3a06e8c233fbd6f1b101dc7076ad94",
+      "exact": true
+    },
+    {
+      "path": ".github/workflows/supplemental-artifact-identity-ci.yml",
+      "main_blob": "3998f699473290d221a44f6f3a1f290a5dbbeec2",
+      "development_blob": "3998f699473290d221a44f6f3a1f290a5dbbeec2",
+      "exact": true
+    },
+    {
+      "path": "canonical/source-quarry-inventory.v1.json",
+      "main_blob": "b8aac2f9698d4fa38b15d95f0c47a6822372147e",
+      "development_blob": "cdc5e3cde6ca471aeb54beff5ea4a312f28b94e0",
+      "exact": false
+    },
+    {
+      "path": "docs/engineering/supplemental-current-main-20260909.md",
+      "main_blob": "6e54d15add372803111c9a63b387e7914617ab57",
+      "development_blob": "6e54d15add372803111c9a63b387e7914617ab57",
+      "exact": true
+    },
+    {
+      "path": "docs/engineering/supplemental-current-main-20260909.summary.json",
+      "main_blob": "8e8545cc47a01f82181734c32be90bc1f6c2e163",
+      "development_blob": "8e8545cc47a01f82181734c32be90bc1f6c2e163",
+      "exact": true
+    },
+    {
+      "path": "docs/engineering/supplemental-production-consumer-20260908.md",
+      "main_blob": "dc7cf593135e9e4f4ab9a299edc9809f63c9ff67",
+      "development_blob": "dc7cf593135e9e4f4ab9a299edc9809f63c9ff67",
+      "exact": true
+    },
+    {
+      "path": "scripts/check_github_actions_runner_policy.py",
+      "main_blob": "df11ab8214d89f7343131313a0dfaeecf3d0707e",
+      "development_blob": "df11ab8214d89f7343131313a0dfaeecf3d0707e",
+      "exact": true
+    },
+    {
+      "path": "scripts/consume_supplemental_artifact.py",
+      "main_blob": "1338c8bfe14f8dac5447258afd8c68d6183bad93",
+      "development_blob": "1338c8bfe14f8dac5447258afd8c68d6183bad93",
+      "exact": true
+    },
+    {
+      "path": "scripts/verify_supplemental_artifact_identity.py",
+      "main_blob": "6e3a22e8eb1a1b4a3ffa35cb38ac6360b069b6c6",
+      "development_blob": "6e3a22e8eb1a1b4a3ffa35cb38ac6360b069b6c6",
+      "exact": true
+    },
+    {
+      "path": "tests/test_consume_supplemental_artifact.py",
+      "main_blob": "04f06550eb5b6f18a239317c58037b1996effd7b",
+      "development_blob": "04f06550eb5b6f18a239317c58037b1996effd7b",
+      "exact": true
+    },
+    {
+      "path": "tests/test_repository_python_workflow_contract.py",
+      "main_blob": "b094672010d24c05912f37c9b99c4b31f1e30830",
+      "development_blob": "16c6a429356b015d4977dbbaaab7fcb9b385e19a",
+      "exact": false
+    },
+    {
+      "path": "tests/test_supplemental_artifact_identity.py",
+      "main_blob": "0a96fce2aaef8ee265a4f57241fd18f1097df8b0",
+      "development_blob": "0a96fce2aaef8ee265a4f57241fd18f1097df8b0",
+      "exact": true
+    },
+    {
+      "path": "tests/test_supplemental_production_workflow.py",
+      "main_blob": "949913c568d08e069d96d2fead5c6d76c210075a",
+      "development_blob": "949913c568d08e069d96d2fead5c6d76c210075a",
+      "exact": true
+    }
+  ],
+  "inventory_validation": {
+    "blockers": [],
+    "changed_file_count": 480,
+    "claim_boundary": {
+      "commercial_authority": false,
+      "hardware_authority": false,
+      "inventory_complete": true,
+      "numerical_authority": false,
+      "old_branch_import_allowed": false,
+      "old_branch_merge_allowed": false,
+      "operator_authority": false,
+      "readiness_promoted": false,
+      "release_authority": false,
+      "signature_authority": false,
+      "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
+    },
+    "contract_pass": true,
+    "external_only_file_blocker_count": 0,
+    "github_api_verified": false,
+    "policy_projection_digest": "sha256:29a62dd699c791676492f485d3cc1b3eb1079e0bd05b27be7f17f44e150c6085",
+    "pull_request_count": 2,
+    "schema_version": "source-quarry-inventory-check.v1",
+    "source_commit": "02c6ed78ef12e3989cbdd3eed7c2fc37dcad08bd",
+    "status": "pass",
+    "status_counts": {
+      "present": 71,
+      "superseded": 409
+    },
+    "unique_file_blocker_count": 0
+  },
+  "preview_conflict_files": [
+    "canonical/source-quarry-inventory.v1.json"
+  ],
+  "preview_conflict_fields": [
+    "inventory_digest"
+  ],
+  "workflow_test_merge_equals_development": true,
+  "workflow_test_merged_sha256": "ebf29e5a5ff9ae1997a499001e3e1ac51b236403f0cc0d226b86069e8d148430",
+  "local_tests": {
+    "passed": 75,
+    "subtests_passed": 137,
+    "wall_seconds": 15.23,
+    "scope": "offline production transport, identity, consumer and repository workflow contracts"
+  },
+  "actual_merge_performed": false,
+  "combined_source_tested": false,
+  "signature_or_physical_authority": false
+}

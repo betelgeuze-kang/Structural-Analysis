@@ -1,0 +1,69 @@
+{
+  "audit_revision": "97dc95d97077bcd6763f75e409741b6c53033542",
+  "fitting_samples_per_excluded_group": 132,
+  "generation_work": {
+    "known_work": {
+      "core_calls": 234,
+      "linear_solves": 1212,
+      "newton_iterations": 1212
+    },
+    "unknown_work": false
+  },
+  "groups": [
+    [
+      "train-a-amp050",
+      "train-a-amp100",
+      "train-a-amp150"
+    ],
+    [
+      "train-b-amp050",
+      "train-b-amp100",
+      "train-b-amp150"
+    ],
+    [
+      "train-c-amp050",
+      "train-c-amp100",
+      "train-c-amp150"
+    ],
+    [
+      "train-d-amp050",
+      "train-d-amp100",
+      "train-d-amp150"
+    ],
+    [
+      "train-e-amp050",
+      "train-e-amp100",
+      "train-e-amp150"
+    ]
+  ],
+  "independent_project_provenance": false,
+  "inventory_sha256": "23d28a47d891e1b45d7306007529a78d203a436677af0fd5fe9e7dbe4061af92",
+  "learning_wall_ns": 86013788545,
+  "new_fits_in_audit": 0,
+  "new_label_count": 66,
+  "new_label_step_bindings_verified": 66,
+  "new_policy_hash": "sha256:59dddba16cd15000fcc1b321c89f795dc628a567f69d9d7ca63d58a8b4e08219",
+  "new_sample_file_sha256": "sha256:1699a529d6e3c48f9d7978404a56e8138b1bf08d41b5ca9c0442fef1d4a54cc3",
+  "old_label_count": 99,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-interior-training-uxct1ncc",
+  "parent_process_seconds": 88.147518242,
+  "payload_bytes": 97392185,
+  "payload_file_count": 1955,
+  "policy_promoted": false,
+  "pooled_label_count": 165,
+  "range_eligibility_proves_runtime_benefit": false,
+  "range_eligible_counts": {
+    "train-b-amp050": 11,
+    "train-b-amp100": 11,
+    "train-b-amp150": 11,
+    "train-d-amp050": 11,
+    "train-d-amp100": 11,
+    "train-d-amp150": 11,
+    "train-e-amp050": 11,
+    "train-e-amp100": 11,
+    "train-e-amp150": 11
+  },
+  "reserved_evaluation_executed": false,
+  "retained_labels_inventory_sha256": "f850f7e65670bf4d6254039da2aca35269cbd1840b645d82308c2402017849f0",
+  "solver_calls": 0
+}

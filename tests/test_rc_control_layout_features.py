@@ -9,6 +9,7 @@ import pytest
 
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
+    decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.benchmark.rc_control_candidate_learning import (
     control_candidate_features,
@@ -130,3 +131,31 @@ def test_geometry_derived_rotation_scale_is_explicitly_encoded():
     assert a["values"][index] == 2.0
     assert b["values"][index] == 3.0
     assert a["context_hash"] == b["context_hash"]
+
+
+def test_outer_area_overrides_remain_bound_in_layout_context():
+    payload = raw_model()
+    before = describe(payload)
+    payload['sections'][0].update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    unequal = describe(payload)
+    payload['sections'][0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
+    swapped = describe(payload)
+    assert len({row['context_hash'] for row in (before, unequal, swapped)}) == 3
+    assert len({row['physical_model_identity'] for row in (before, unequal, swapped)}) == 3
+
+
+def test_two_fixed_portal_layout_features_keep_explicit_request_context():
+    root = Path("examples/research/rc_internal_portal_20mm")
+    original = json.loads((root / "original-model.json").read_bytes())
+    narrower = deepcopy(original)
+    narrower["sections"][0]["width_m"] = 0.36
+    request = decode_bounded_rc_fiber_direct_control_request(
+        (root / "experimental-two-fixed-endpoints-request.json").read_bytes()
+    )
+    baseline = describe(original, request)
+    changed = describe(narrower, request)
+    assert baseline["context_hash"] == changed["context_hash"]
+    assert baseline["values"] != changed["values"]
+    assert baseline["physical_model_identity"] != changed["physical_model_identity"]
+    with pytest.raises(ValueError, match="supported public RC profile"):
+        describe(original, replace(request, experimental_two_fixed_endpoints=False))

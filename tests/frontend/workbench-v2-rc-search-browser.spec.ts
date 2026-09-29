@@ -23,6 +23,9 @@ for (const width of [1440, 390]) {
   test.describe(`RC search browser ${width}`, () => {
     test.use({ viewport: { width, height: 1000 } })
     test('reviews strategies, original designs, full costs and exact downloads', async ({ page }) => {
+      // Twelve exact-byte downloads plus the final panel capture share this budget.
+      // The hosted mobile trace completed all assertions before timing out in capture.
+      test.setTimeout(60000)
       await setup(page); await page.goto(`${baseUrl}/#/workbench-v2`)
       const panel = await ready(page)
       await expect(panel.locator('[data-rc-search-arm]')).toHaveCount(3)

@@ -1,0 +1,1036 @@
+{
+  "completed_packet": {
+    "campaign_wall_ns_before_outcome_write": 115864515723,
+    "completed_paths": 16,
+    "directory": "/tmp/rc-internal-portal-20mm-1500212a51992a43ccf1dbbe1b6af5c50e8b8cf5",
+    "exact_source_comparison_eligible": true,
+    "observations_complete": true,
+    "outcome_file_hash": "sha256:2b58e829e27faa90ca853dca6a6ca2977d04062f4fb4a5b174907af680817df7",
+    "outcome_hash": "sha256:75e303d16620d22f27e123680df5b4b1ff873b74f0a2d228d9329c7fea47f9ed",
+    "plan_file_hash": "sha256:9d9287503cc99bdff63e46691949b1ec12f669e8eddf84a9d15468f2d4b315ff",
+    "plan_hash": "sha256:4c1dd44298039df5d10eba4401de363d4585f79257861ca2623c92193a3256e6",
+    "rows": [
+      {
+        "accepted_checkpoint_sequence_exact_agreement": false,
+        "arm_order": [
+          "reference",
+          "secant",
+          "frozen_parent_recovery",
+          "fresh_reference"
+        ],
+        "comparison_cost": {
+          "process_cpu_ns": 29065582155,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 29067683088
+        },
+        "identity": "20mm-r0-fixed",
+        "mode": "fixed",
+        "paths": [
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:31f6563a9416f045c1eca71c833cccb24ac7f0755175cbbafb72afb4bce0dd4c",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7566831764,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7567408970
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:355c322497e5b8394ad0ef384fa144e41f2dbdea0ae332e2e582a674b0745862",
+              "sha256:213a557c43710957bee5b74ed4d9264700d9f6fc9ebb07fdb83563e9a5c98aa6"
+            ],
+            "arm": "secant",
+            "known_work_lower_bound": {
+              "assembly_call_count": 141,
+              "assembly_exception_count": 0,
+              "core_calls": 5,
+              "iteration_count": 41,
+              "line_search_step_count": 37,
+              "line_search_trial_count": 90,
+              "linear_solve_count": 41
+            },
+            "path_hash": "sha256:871bb26abd3cd04b2097c3bd7a4be6d2010b09e9fcb38a3946635fa90c8cedc3",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 6506675875,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": false,
+                  "terminal_reason": "line_search_failed_to_reduce_augmented_merit"
+                },
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 6507124322
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "frozen_parent_recovery",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:46b9799c3807800c5369c8866d00f398a73edeafd88936d730b53de77afac93c",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7525279396,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7525812260
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "fresh_reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:6f66c0e305364d2257db4dab340e079a627ba9f85d57e00656f71d68c84a736e",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7465739620,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7466279881
+          }
+        ],
+        "recovery_exercised": false,
+        "repeat": 0,
+        "status": "returned",
+        "unknown_work": false
+      },
+      {
+        "accepted_checkpoint_sequence_exact_agreement": false,
+        "arm_order": [
+          "reference",
+          "secant",
+          "frozen_parent_recovery",
+          "fresh_reference"
+        ],
+        "comparison_cost": {
+          "process_cpu_ns": 28888851257,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 28894881792
+        },
+        "identity": "20mm-r0-adaptive",
+        "mode": "adaptive",
+        "paths": [
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:cbb89e6e80707a79edec01f84a95ebdf5d9a954aa81387cb3121db88ea8b4b6f",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7485157778,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7489553971
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:355c322497e5b8394ad0ef384fa144e41f2dbdea0ae332e2e582a674b0745862",
+              "sha256:213a557c43710957bee5b74ed4d9264700d9f6fc9ebb07fdb83563e9a5c98aa6"
+            ],
+            "arm": "secant",
+            "known_work_lower_bound": {
+              "assembly_call_count": 141,
+              "assembly_exception_count": 0,
+              "core_calls": 5,
+              "iteration_count": 41,
+              "line_search_step_count": 37,
+              "line_search_trial_count": 90,
+              "linear_solve_count": 41
+            },
+            "path_hash": "sha256:1fa29c71b6011dc20c2ab499d7728cef513c8607ea25e8f5b187be3064c3f578",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 6512020257,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": false,
+                  "terminal_reason": "line_search_failed_to_reduce_augmented_merit"
+                },
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 6512550817
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "frozen_parent_recovery",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:1e630492923c970b3630e385fcdafc724e2d9749e0c0fa7ea0375b6a74d8329f",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7448419222,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7448973445
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "fresh_reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:dd3effa75b61341c9d73bfccc89c869aa977531c812f2864f226d816523959f8",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7442187720,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7442736173
+          }
+        ],
+        "recovery_exercised": false,
+        "repeat": 0,
+        "status": "returned",
+        "unknown_work": false
+      },
+      {
+        "accepted_checkpoint_sequence_exact_agreement": false,
+        "arm_order": [
+          "fresh_reference",
+          "frozen_parent_recovery",
+          "secant",
+          "reference"
+        ],
+        "comparison_cost": {
+          "process_cpu_ns": 28971433163,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 28973577137
+        },
+        "identity": "20mm-r1-adaptive",
+        "mode": "adaptive",
+        "paths": [
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "fresh_reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:16e6facdf4db08b37ab37bb7efe68eb36e18499ba668ebae6e21e417b300084d",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7551753298,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7552335144
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "frozen_parent_recovery",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:cc46a56b343020ad3111739159874864489ad8abdcab0e39e687b51ba72424f1",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7448278722,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7448858608
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:355c322497e5b8394ad0ef384fa144e41f2dbdea0ae332e2e582a674b0745862",
+              "sha256:213a557c43710957bee5b74ed4d9264700d9f6fc9ebb07fdb83563e9a5c98aa6"
+            ],
+            "arm": "secant",
+            "known_work_lower_bound": {
+              "assembly_call_count": 141,
+              "assembly_exception_count": 0,
+              "core_calls": 5,
+              "iteration_count": 41,
+              "line_search_step_count": 37,
+              "line_search_trial_count": 90,
+              "linear_solve_count": 41
+            },
+            "path_hash": "sha256:aea6aba012743971227fdfa1229c8998a8a4e9e25d62fa3872e273c3246397fc",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 6493938979,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": false,
+                  "terminal_reason": "line_search_failed_to_reduce_augmented_merit"
+                },
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 6494418187
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:ecf80e86dd6f3e36bc8744f2b15463d9cd6e08b539d6807a503ddab245e4262e",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7476394324,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7476896180
+          }
+        ],
+        "recovery_exercised": false,
+        "repeat": 1,
+        "status": "returned",
+        "unknown_work": false
+      },
+      {
+        "accepted_checkpoint_sequence_exact_agreement": false,
+        "arm_order": [
+          "fresh_reference",
+          "frozen_parent_recovery",
+          "secant",
+          "reference"
+        ],
+        "comparison_cost": {
+          "process_cpu_ns": 28919911851,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 28925654825
+        },
+        "identity": "20mm-r1-fixed",
+        "mode": "fixed",
+        "paths": [
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "fresh_reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:ad2745e079293d729f001239c33439ce2db3585c5536566ce9a4389e78b12543",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7501599256,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7502118774
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "frozen_parent_recovery",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:81f6eb7f20f719d3df0c32a79c6be712769bea6488cfa04c4eb4e94a34698ed3",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7457651415,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7458160880
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:355c322497e5b8394ad0ef384fa144e41f2dbdea0ae332e2e582a674b0745862",
+              "sha256:213a557c43710957bee5b74ed4d9264700d9f6fc9ebb07fdb83563e9a5c98aa6"
+            ],
+            "arm": "secant",
+            "known_work_lower_bound": {
+              "assembly_call_count": 141,
+              "assembly_exception_count": 0,
+              "core_calls": 5,
+              "iteration_count": 41,
+              "line_search_step_count": 37,
+              "line_search_trial_count": 90,
+              "linear_solve_count": 41
+            },
+            "path_hash": "sha256:dc22691fc3367b71d4a0dbce8c149d12806cb38633179369f3dce1b9a306200f",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 6502056733,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": false,
+                  "terminal_reason": "line_search_failed_to_reduce_augmented_merit"
+                },
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 6506288109
+          },
+          {
+            "accepted_checkpoint_hashes": [
+              "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+              "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+              "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9"
+            ],
+            "arm": "reference",
+            "known_work_lower_bound": {
+              "assembly_call_count": 163,
+              "assembly_exception_count": 0,
+              "core_calls": 4,
+              "iteration_count": 44,
+              "line_search_step_count": 40,
+              "line_search_trial_count": 110,
+              "linear_solve_count": 44
+            },
+            "path_hash": "sha256:546c2b0352375477c53ed96b0cc56a0f06d5bf0813811fa39af7433349a7dc8b",
+            "preload_checkpoint_hash": "sha256:bdfbc4f719c8ea8d3565dab9a4f05dcbc0890e17d114c5aa3b5b01a60a426e70",
+            "preload_reexecuted_from_fresh_genesis": true,
+            "process_cpu_ns": 7457529736,
+            "status": "complete",
+            "target_attempt_statuses": [
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ],
+              [
+                {
+                  "committed": true,
+                  "terminal_reason": "equilibrium_control_and_increment_converged"
+                }
+              ]
+            ],
+            "unknown_work": false,
+            "wall_ns": 7458011085
+          }
+        ],
+        "recovery_exercised": false,
+        "repeat": 1,
+        "status": "returned",
+        "unknown_work": false
+      }
+    ],
+    "source_revision": "1500212a51992a43ccf1dbbe1b6af5c50e8b8cf5",
+    "source_unchanged": true,
+    "total_known_work_across_paths": {
+      "assembly_call_count": 2520,
+      "assembly_exception_count": 0,
+      "core_calls": 68,
+      "iteration_count": 692,
+      "line_search_step_count": 628,
+      "line_search_trial_count": 1680,
+      "linear_solve_count": 692
+    }
+  },
+  "evidence_status": "INTERNAL_OBSERVATION_ONLY",
+  "failed_packet": {
+    "campaign_wall_ns_before_outcome_write": 117467732308,
+    "completed_paths": 0,
+    "directory": "/tmp/rc-internal-portal-20mm-8a26f9d8f32bc9f362d72c5c08cca7e6ff5f2521",
+    "exact_source_comparison_eligible": false,
+    "failure_scope": "runner JSON serialization of NumPy boolean in +10 mm step artifact; unknown work retained",
+    "observations_complete": false,
+    "outcome_file_hash": "sha256:5ae9a511900ab8511bf925ea47525132c748fabe83f582ad8a066488c218be15",
+    "outcome_hash": "sha256:fcb7843cce901e463ccde53d1127aee4265170268ddd706c61ffa6ddd1b8e92f",
+    "plan_file_hash": "sha256:cb9bfb33a26d6732a4423bdb4d1c344d5d0697c5ecb0bdb042c3b14c54957379",
+    "plan_hash": "sha256:464b94999faa1b89cb8a235395e20a5365004cedb7f2b2a1765fb24d72b45dc0",
+    "rows": [
+      {
+        "arm_statuses": {
+          "fresh_reference": "incomplete",
+          "frozen_parent_recovery": "incomplete",
+          "reference": "incomplete",
+          "secant": "incomplete"
+        },
+        "comparison_cost": {
+          "process_cpu_ns": 29425255794,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 29436007108
+        },
+        "identity": "20mm-r0-fixed",
+        "status": "returned",
+        "unknown_work": true
+      },
+      {
+        "arm_statuses": {
+          "fresh_reference": "incomplete",
+          "frozen_parent_recovery": "incomplete",
+          "reference": "incomplete",
+          "secant": "incomplete"
+        },
+        "comparison_cost": {
+          "process_cpu_ns": 29323176110,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 29325552349
+        },
+        "identity": "20mm-r0-adaptive",
+        "status": "returned",
+        "unknown_work": true
+      },
+      {
+        "arm_statuses": {
+          "fresh_reference": "incomplete",
+          "frozen_parent_recovery": "incomplete",
+          "reference": "incomplete",
+          "secant": "incomplete"
+        },
+        "comparison_cost": {
+          "process_cpu_ns": 29264896703,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 29270865952
+        },
+        "identity": "20mm-r1-adaptive",
+        "status": "returned",
+        "unknown_work": true
+      },
+      {
+        "arm_statuses": {
+          "fresh_reference": "incomplete",
+          "frozen_parent_recovery": "incomplete",
+          "reference": "incomplete",
+          "secant": "incomplete"
+        },
+        "comparison_cost": {
+          "process_cpu_ns": 29429992158,
+          "scope": "sequential_arm_calls_and_return_or_exception_classification",
+          "wall_ns": 29432461421
+        },
+        "identity": "20mm-r1-fixed",
+        "status": "returned",
+        "unknown_work": true
+      }
+    ],
+    "source_revision": "8a26f9d8f32bc9f362d72c5c08cca7e6ff5f2521",
+    "source_unchanged": true
+  },
+  "posthoc_selected_final_value_differences": {
+    "scope": "r0-fixed stored accepted step artifacts, reference versus secant; no prespecified tolerance or full material-state/history audit",
+    "targets": [
+      {
+        "absolute_load_factor_difference": 0.0,
+        "maximum_absolute_global_displacement_component_difference_m": 0.0,
+        "maximum_absolute_reaction_component_difference": 0.0,
+        "maximum_reaction_difference_global_dof": 0,
+        "maximum_reaction_difference_unit": "kN",
+        "reference_checkpoint_hash": "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+        "secant_checkpoint_hash": "sha256:c4fcba34c6b3afcbad10a70f127d6124de914db60b79cdc364ee966ee9808b0b",
+        "target_m": -0.01
+      },
+      {
+        "absolute_load_factor_difference": 6.217248937900877e-15,
+        "maximum_absolute_global_displacement_component_difference_m": 3.157196726277789e-16,
+        "maximum_absolute_reaction_component_difference": 2.5721647034515627e-11,
+        "maximum_reaction_difference_global_dof": 1,
+        "maximum_reaction_difference_unit": "kN",
+        "reference_checkpoint_hash": "sha256:d1ee28d1617503ed73b561879fcb2e39df27e4b885e793fb22d52145d9a8af5e",
+        "secant_checkpoint_hash": "sha256:355c322497e5b8394ad0ef384fa144e41f2dbdea0ae332e2e582a674b0745862",
+        "target_m": -0.02
+      },
+      {
+        "absolute_load_factor_difference": 4.263256414560601e-14,
+        "maximum_absolute_global_displacement_component_difference_m": 6.956241138666996e-16,
+        "maximum_absolute_reaction_component_difference": 2.05631067728973e-11,
+        "maximum_reaction_difference_global_dof": 1,
+        "maximum_reaction_difference_unit": "kN",
+        "reference_checkpoint_hash": "sha256:4bf3a5336041937b1b4096a549cacfee45d1167a25ad0d9b424f5240d46390c9",
+        "secant_checkpoint_hash": "sha256:213a557c43710957bee5b74ed4d9264700d9f6fc9ebb07fdb83563e9a5c98aa6",
+        "target_m": 0.01
+      }
+    ]
+  },
+  "provenance_limits": {
+    "completed_packet_full_contents_location": "local /tmp only, approximately 45 MB",
+    "failed_packet_full_contents_location": "local /tmp only, approximately 34 MB",
+    "full_packets_published_to_github": false,
+    "independent_physics_or_replay_audit": false,
+    "read_only_artifact_integrity_check_performed": true,
+    "summary_contains_full_attempt_response_history": false,
+    "summary_is_hosted_or_independent_evidence": false
+  },
+  "qualification": {
+    "independent_physical_validation": false,
+    "learned_benefit_conclusion": null,
+    "public_direct_control_promotion": false,
+    "qualified_fixed_adaptive_timing_ratio": null,
+    "reason": "Recovery was not exercised, secant checkpoint sequences differ exactly, and no trained policy or physical validation exists.",
+    "speed_advantage_claim": false
+  },
+  "read_only_integrity_check": {
+    "completed_path_hashes_matched_comparison_rows": 16,
+    "completed_plan_and_outcome_canonical_hashes_verified": true,
+    "per_arm_repetitions_with_identical_checkpoint_sequence_step_hashes_and_work": 4,
+    "referenced_step_artifact_byte_hashes_verified": 68
+  },
+  "schema_version": "internal-rc-portal-20mm-comparison-report.v1",
+  "scope": {
+    "constant_nodal_loads_kn": [
+      {
+        "dof": "UY",
+        "node": "N3",
+        "value": -25.0
+      },
+      {
+        "dof": "UY",
+        "node": "N4",
+        "value": -25.0
+      }
+    ],
+    "control_global_dof": 9,
+    "converted_member_count": 3,
+    "differences_from_original_48_path_plan": [
+      "20mm_only_excludes_40mm_and_80mm_conditions",
+      "16_paths_across_4_comparisons_instead_of_48_paths_across_12",
+      "three_member_tags_converted_to_corotational_internal_formulation",
+      "no_public_direct_control_compiler_admission",
+      "no_internal_direct_terminal_polishing",
+      "one_step_internal_preload_uses_default_unpolished_load_solver",
+      "deterministic_frozen_parent_recovery_replaces_unavailable_learned_proposal"
+    ],
+    "fixed_bases": [
+      "N1",
+      "N2"
+    ],
+    "fresh_genesis_and_one_step_lambda_zero_preload_per_path": true,
+    "geometry_m": [
+      4.0,
+      3.0
+    ],
+    "modes": [
+      "fixed",
+      "adaptive"
+    ],
+    "original_request_terminal_polishing_supported_by_internal_direct_solver": false,
+    "planned_comparisons": 4,
+    "planned_paths": 16,
+    "reference_nodal_load_kn": {
+      "dof": "UX",
+      "node": "N4",
+      "value": 150.0
+    },
+    "repetitions": 2,
+    "targets_m": [
+      -0.01,
+      -0.02,
+      0.01
+    ],
+    "trained_proposal_policy_present": false,
+    "wall_budget_scope": "soft_deadline_checked_between_solver_invocations_only",
+    "wall_budget_seconds": 600
+  },
+  "source_identity": {
+    "candidate_model_hash": "sha256:431b960cf5d73d684bf8bac896669991b4e26bc64d4475c2b8650ee1bdc7cdfa",
+    "completed_runner_source_hash": "sha256:06874ca974e4c974c7f4dc6bdd16432231c7b1b4079e4516d59a5981de4e66ca",
+    "internal_problem_contract_hash": "sha256:5d53352c5d85cc8e47ad49df1d2c37bd671c81e4b6d45f1bcc1b5807254cbb51",
+    "original_model_hash": "sha256:6f8eec155f5fcf2f9ae942c021a8692e79ae1efd0d1b98342f8aea0b642d0ed6",
+    "original_request_hash": "sha256:e0cbc4995e2c98f4a30a0902ac321b4a0e66a9baa61ed20a88e5e73809df627e"
+  }
+}

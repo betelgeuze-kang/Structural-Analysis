@@ -102,6 +102,28 @@ def test_member_quantities_sum_shared_section_once_per_physical_member(model):
     )
 
 
+def test_two_fixed_endpoint_portal_quantities_require_explicit_profile():
+    portal = load_neutral_json(
+        Path("examples/research/rc_internal_portal_20mm/original-model.json")
+    )
+    with pytest.raises(design.FiberFrameDesignError, match="support_count_unsupported"):
+        design.calculate_fiber_frame_member_quantities(portal)
+    with pytest.raises(design.FiberFrameDesignError, match="explicit boolean"):
+        design.calculate_fiber_frame_member_quantities(
+            portal, experimental_two_fixed_endpoints=1
+        )
+    quantities = design.calculate_fiber_frame_member_quantities(
+        portal, experimental_two_fixed_endpoints=True
+    )
+    assert {member["member_id"] for member in quantities["members"]} == {
+        "left", "right", "beam"
+    }
+    assert quantities["totals"]["gross_concrete_volume_m3"] == pytest.approx(2.4)
+    assert quantities["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+        8 * 0.000387 * 10 * 7850
+    )
+
+
 def test_real_candidate_reanalysis_and_invalid_case_remain_in_denominator(comparison):
     report = comparison.to_dict()
     assert report["status"] == "partial"
@@ -338,3 +360,70 @@ def test_derived_quantity_overflow_and_unsupported_profile_rejected(model):
     model.elements[0]["type"] = "unimplemented"
     with pytest.raises(design.FiberFrameDesignError, match="unsupported quantity"):
         design.calculate_fiber_frame_member_quantities(model)
+
+
+def test_outer_area_changes_reach_member_quantities_and_keep_middle_bars(model):
+    before = model.canonical_payload()
+    candidate = design.FiberFrameDesignCandidate('unequal', (
+        design.FiberFrameSectionChange('RC1', top_bar_area_m2=0.00005,
+                                      bottom_bar_area_m2=0.0002),
+    ))
+    changed = design.apply_fiber_frame_section_changes(model, candidate)
+    assert model.canonical_payload() == before
+    changed.sections[0]['intermediate_steel_layers'] = [{'y_m': 0.0, 'bar_count': 3}]
+    quantities = design.calculate_fiber_frame_member_quantities(changed)
+    expected_area = 4 * 0.00005 + 4 * 0.0002 + 3 * 0.000387
+    assert quantities['totals']['longitudinal_rebar_volume_m3'] == pytest.approx(expected_area * 3)
+    assert quantities['totals']['longitudinal_rebar_mass_kg'] == pytest.approx(expected_area * 3 * 7850)
+
+
+def test_explicit_default_areas_preserve_quantity_totals(model):
+    before = design.calculate_fiber_frame_member_quantities(model)['totals']
+    model.sections[0].update(top_bar_area_m2=0.000387, bottom_bar_area_m2=0.000387)
+    assert design.calculate_fiber_frame_member_quantities(model)['totals'] == before
+
+
+def test_omitted_outer_area_changes_keep_legacy_serialized_identity():
+    change = design.FiberFrameSectionChange('RC1', width_m=0.35)
+    assert change.to_dict() == {
+        'section_id': 'RC1', 'width_m': 0.35, 'depth_m': None, 'cover_m': None,
+        'top_bar_count': None, 'bottom_bar_count': None, 'bar_area_m2': None,
+    }
+    explicit = design.FiberFrameSectionChange('RC1', top_bar_area_m2=0.00005)
+    assert explicit.to_dict()['top_bar_area_m2'] == 0.00005
+    assert 'bottom_bar_area_m2' not in explicit.to_dict()
+
+
+def test_unequal_area_candidate_is_reanalyzed_and_priced_from_actual_bars(model, prices):
+    candidate = design.FiberFrameDesignCandidate('unequal', (
+        design.FiberFrameSectionChange('RC1', top_bar_area_m2=0.0002,
+                                      bottom_bar_area_m2=0.0004),
+    ))
+    report = design.compare_public_rc_fiber_frame_designs(
+        model, (candidate,), CONFIG, prices=prices, source_revision=REVISION,
+    ).to_dict()
+    baseline, changed = report['rows']
+    assert changed['full_reference_verification_pass'] is True
+    assert changed['result']['result_hash'] != baseline['result']['result_hash']
+    mass = 4 * (0.0002 + 0.0004) * 3 * 7850
+    assert changed['quantities']['totals']['longitudinal_rebar_mass_kg'] == pytest.approx(mass)
+    assert changed['material_estimate']['total'] == pytest.approx(0.4 * 0.6 * 3 * 100 + mass * 2)
+    assert changed['material_estimate']['price_table_hash'] == baseline['material_estimate']['price_table_hash']
+    assert report['claims']['confirmed_currency_savings'] is False
+
+
+def test_centroid_change_reanalyzed_with_unchanged_quantities_and_prices(model, prices):
+    before = model.canonical_payload()
+    candidate = design.FiberFrameDesignCandidate('centroids', (
+        design.FiberFrameSectionChange('RC1', top_cover_m=0.04, bottom_cover_m=0.06),
+    ))
+    report = design.compare_public_rc_fiber_frame_designs(
+        model, (candidate,), CONFIG, prices=prices, source_revision=REVISION,
+    ).to_dict()
+    baseline, changed = report['rows']
+    assert model.canonical_payload() == before
+    assert changed['full_reference_verification_pass'] is True
+    assert changed['result']['result_hash'] != baseline['result']['result_hash']
+    assert changed['quantities']['totals'] == baseline['quantities']['totals']
+    assert changed['material_estimate']['total'] == baseline['material_estimate']['total']
+    assert changed['material_estimate']['price_table_hash'] == baseline['material_estimate']['price_table_hash']

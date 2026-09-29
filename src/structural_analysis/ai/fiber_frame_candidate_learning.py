@@ -28,6 +28,9 @@ from structural_analysis.ai.fiber_frame_warm_start_data import (
 )
 from structural_analysis.api import nonlinear_fiber_frame as public_api
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.rc_reinforcement_quantity import (
+    longitudinal_rebar_area_m2,
+)
 from structural_analysis.model.schema import CanonicalModel
 
 
@@ -140,14 +143,26 @@ def _number(value: Any, name: str) -> float:
     return result
 
 
-def candidate_model_identity(model: CanonicalModel) -> str:
+def candidate_model_identity(
+    model: CanonicalModel,
+    *,
+    experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
+) -> str:
     """Bind supported physics independently of authored entity labels or order."""
-    return fiber_frame_physical_model_identity(model)
+    return fiber_frame_physical_model_identity(
+        model,
+        experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=experimental_pin_roller_beam,
+    )
 
 
 def candidate_preanalysis_features(
     model: CanonicalModel,
     config: public_api.PublicRCFiberFrameConfig,
+    *,
+    experimental_two_fixed_endpoints: bool = False,
+    experimental_pin_roller_beam: bool = False,
 ) -> tuple[tuple[float, ...], str]:
     """Only section geometry and authored bars vary inside a fixed solve context."""
     if (
@@ -155,7 +170,11 @@ def candidate_preanalysis_features(
         or type(config) is not public_api.PublicRCFiberFrameConfig
     ):
         raise FiberFrameCandidateLearningError("exact model and config types required")
-    context = fiber_frame_physical_model_payload(model)
+    context = fiber_frame_physical_model_payload(
+        model,
+        experimental_two_fixed_endpoints=experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=experimental_pin_roller_beam,
+    )
     assigned = [member["section"] for member in context["members"]]
     n = len(assigned)
     if not 1 <= n <= _MAX_FEATURE_MEMBERS:
@@ -174,15 +193,7 @@ def candidate_preanalysis_features(
                 for row, length in zip(assigned, lengths, strict=True)
             ),
             math.fsum(
-                (
-                    row["top_bar_count"]
-                    + row["bottom_bar_count"]
-                    + sum(
-                        layer["bar_count"]
-                        for layer in row.get("intermediate_steel_layers", [])
-                    )
-                )
-                * row["bar_area_m2"]
+                longitudinal_rebar_area_m2(row)
                 * length
                 for row, length in zip(assigned, lengths, strict=True)
             ),

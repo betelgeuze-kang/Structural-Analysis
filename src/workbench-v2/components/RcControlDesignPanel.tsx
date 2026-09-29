@@ -1,3 +1,4 @@
+import { longitudinalSteelDescription } from '../model/rcSteelLayers'
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { loadRcControlDesign, type RcDesignSession } from '../model/rcControlDesignProvider'
 import { rcDesignBlockedStep } from '../model/rcControlDesignSchema'
@@ -58,9 +59,11 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
   const config = report.control_request.solver_config
   const newton = config.newton
   const current = report.rows.find((r: RcObject) => r.candidate_id === selected)
+  const baseline = report.rows[0]
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
     <p data-rc-design-authority>Original artifacts and stored full-path verification bindings checked. The browser does not rerun the solver. Caller limits, quantities and prices do not establish independent physical validation, code compliance, a verified quote or design approval.</p>
+    {report.cost_pruning ? <p data-rc-design-cost-pruning>{report.cost_pruning.skipped_count} candidates excluded by verified cost dominance. Their feasibility is not evaluated; no elapsed-time saving is asserted.</p> : null}
     <p>{report.control_request.targets_m.length} authored targets per design · {report.verified_count}/{report.candidate_denominator} designs have complete stored verification · execution {report.status}</p>
     {report.control_request.constant_nodal_loads ? <p data-rc-design-constants>Constant nodal loads (node, FX kN, FY kN, MZ kN·m): {report.control_request.constant_nodal_loads.map((r: RcObject) => `${r.node_id}, ${r.FX_kN}, ${r.FY_kN}, ${r.MZ_kNm}`).join('; ')}. Every analysis and fresh verification includes its own preload. Path screens include that accepted preload.</p> : null}
     <p>Source declaration <code>{report.source_revision}</code> · report <code data-rc-design-hash>{report.report_hash}</code></p>
@@ -105,11 +108,15 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.quantities?.totals.longitudinal_rebar_mass_kg)}<br />Δ {shown(row.quantity_delta?.longitudinal_rebar_mass_kg)}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.material_estimate?.total)} {report.prices?.currency}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.scoped_estimate_reduction)}</td>
-          <td>{row.status}<br /><button type="button" className="wb2-btn" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
+          <td>{row.status === 'skipped_cost_dominated' ? 'Not analyzed: more expensive than a verified feasible design' : row.full_reference_verification_pass && !row.selection_eligible ? 'Analysis verified; requested limits failed' : row.status}<br /><button type="button" className="wb2-btn" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
         </tr>)}</tbody></table>
     </div>
     {report.rows.map((row: RcObject) => <details key={row.candidate_id} data-rc-design-details={row.candidate_id} open={selected === row.candidate_id}>
       <summary>{row.candidate_id} — screens, execution cost and original artifacts</summary>
+      {Object.entries(row.screens ?? {}).filter(([, screen]) => (screen as RcObject).status === 'fail').map(([key, value]) => {
+        const screen = value as RcObject
+        return <p key={key} data-rc-design-limit-failure={key}>Requested limit exceeded: <strong>{metrics.find(([name]) => name === key)?.[1] ?? key}</strong>. Value {shown(screen.value)}; limit {shown(screen.limit)}.</p>
+      })}
       <p>Result identity <code>{row.artifacts.result?.sha256 ?? 'UNAVAILABLE'}</code>. {row.failure ? `Failure phase: ${row.failure.phase}; kind: ${row.failure.kind}.` : ''}</p>
       {row.failure && row.artifacts.result ? <div data-rc-design-failure={row.candidate_id}>
         <button type="button" className="wb2-btn" disabled={inspecting !== null} onClick={() => { void inspectFailure(row.candidate_id) }}>Inspect {row.candidate_id} original failure</button>
@@ -134,7 +141,22 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
     {current && models[current.candidate_id] ? <div data-rc-design-selected={selected}>
       <h3>Selected candidate: {selected}</h3>
       <p>Model <code>{current.quantities.model_checksum}</code> · result <code>{current.artifacts.result.sha256}</code> · price table <code>{report.price_table_hash}</code></p>
-      <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${s.top_bar_count} top and ${s.bottom_bar_count} bottom bars at ${s.bar_area_m2} m²`).join('; ')}</p>
+      <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${longitudinalSteelDescription(s)}`).join('; ')}</p>
+      <div className="wb2-table-scroll" role="region" aria-label={`${current.candidate_id} RC member quantities and declared prices`} data-rc-design-members={current.candidate_id} tabIndex={0}>
+        <table className="wb2-table"><thead><tr><th>Member</th><th>Length (m)</th><th>Gross concrete (m³) / Δ</th><th>Longitudinal rebar (kg) / Δ</th><th>Concrete estimate</th><th>Rebar estimate</th><th>Estimate reduction</th></tr></thead>
+          <tbody>{current.quantities.members.map((member: RcObject) => {
+            const before = baseline.quantities?.members.find((m: RcObject) => m.member_id === member.member_id)
+            const cost = current.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
+            const priorCost = baseline.material_estimate?.members.find((m: RcObject) => m.member_id === member.member_id)
+            return <tr key={member.member_id} data-rc-design-member={member.member_id}>
+              <td>{member.member_id} ({member.section_id})</td><td>{shown(member.length_m)}</td>
+              <td>{shown(member.gross_concrete_volume_m3)} / Δ {shown(before ? member.gross_concrete_volume_m3 - before.gross_concrete_volume_m3 : null)}</td>
+              <td>{shown(member.longitudinal_rebar_mass_kg)} / Δ {shown(before ? member.longitudinal_rebar_mass_kg - before.longitudinal_rebar_mass_kg : null)}</td>
+              <td>{shown(cost?.concrete)} {report.prices?.currency}</td><td>{shown(cost?.longitudinal_rebar)} {report.prices?.currency}</td>
+              <td>{shown(cost && priorCost ? priorCost.concrete + priorCost.longitudinal_rebar - cost.concrete - cost.longitudinal_rebar : null)} {report.prices?.currency}</td>
+            </tr>
+          })}</tbody></table>
+      </div>
       <div data-rc-design-discretization={current.candidate_id}>
         <h4>Selected model discretization</h4>
         <dl>

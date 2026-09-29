@@ -204,7 +204,10 @@ def _run_layout_search(
         ):
             raise ValueError("layout search fixed context mismatch")
         identities.add(identity)
-        quantities = design.calculate_fiber_frame_member_quantities(model)
+        quantities = design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        )
         raw = study._bytes(model.canonical_payload())
         pool.append(
             {

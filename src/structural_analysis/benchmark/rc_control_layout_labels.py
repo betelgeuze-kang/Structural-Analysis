@@ -103,7 +103,12 @@ def generate_control_layout_training_labels(
             if (
                 len(raw) != ref["byte_length"]
                 or study._sha(raw) != ref["sha256"]
-                or fiber_frame_physical_model_identity(load_neutral_json_bytes(raw))
+                or fiber_frame_physical_model_identity(
+                    load_neutral_json_bytes(raw),
+                    experimental_two_fixed_endpoints=(
+                        case.request.experimental_two_fixed_endpoints
+                    ),
+                )
                 != record["descriptor"]["physical_model_identity"]
             ):
                 raise ValueError("original label model identity mismatch")

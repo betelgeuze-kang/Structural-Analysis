@@ -11,6 +11,10 @@ from structural_analysis.ai.fiber_frame_physical_identity import (
     fiber_frame_physical_model_identity,
     fiber_frame_physical_model_payload,
 )
+from structural_analysis.ai.fiber_frame_candidate_learning import (
+    candidate_model_identity,
+    candidate_preanalysis_features,
+)
 from structural_analysis.ai.fiber_frame_warm_start_data import (
     FiberFrameWarmStartDataCase,
     FiberFrameWarmStartDataError,
@@ -124,6 +128,36 @@ def test_entity_aliases_and_declaration_order_keep_physical_identity(kind, monke
     )
 
 
+def test_two_fixed_portal_identity_and_features_require_explicit_profile():
+    source = Path(__file__).resolve().parents[1] / (
+        "examples/research/rc_internal_portal_20mm/original-model.json"
+    )
+    payload = json.loads(source.read_bytes())
+    original = _model(payload)
+    renamed = _model(_aliased(payload, "all"))
+    with pytest.raises(ValueError, match="supported public RC profile"):
+        candidate_model_identity(original)
+    with pytest.raises(ValueError, match="boolean two-fixed-endpoint"):
+        fiber_frame_physical_model_identity(
+            original, experimental_two_fixed_endpoints=1
+        )
+    profile = dict(experimental_two_fixed_endpoints=True)
+    physical = fiber_frame_physical_model_payload(original, **profile)
+    assert physical == fiber_frame_physical_model_payload(renamed, **profile)
+    assert physical["compiler_profile"] == (
+        public_api.EXPERIMENTAL_RC_FIBER_FRAME_TWO_FIXED_ENDPOINT_CONTROL_PROFILE
+    )
+    assert candidate_model_identity(original, **profile) == candidate_model_identity(
+        renamed, **profile
+    )
+    config = public_api.PublicRCFiberFrameConfig()
+    assert candidate_preanalysis_features(
+        original, config, **profile
+    ) == candidate_preanalysis_features(renamed, config, **profile)
+    with pytest.raises(ValueError, match="supported public RC profile"):
+        candidate_preanalysis_features(original, config)
+
+
 @pytest.mark.parametrize(
     "kind", ["nodes", "materials", "sections", "elements", "declaration_order", "all"]
 )
@@ -211,3 +245,54 @@ def test_unsupported_model_does_not_receive_a_supported_physical_identity(monkey
     monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", _forbidden)
     with pytest.raises(ValueError):
         fiber_frame_physical_model_identity(_model(payload))
+
+
+def test_outer_area_identity_preserves_defaults_and_distinguishes_swaps():
+    payload = _payload()
+    original = fiber_frame_physical_model_identity(_model(payload))
+    section = payload['sections'][0]
+    section.update(top_bar_area_m2=section['bar_area_m2'], bottom_bar_area_m2=section['bar_area_m2'])
+    assert fiber_frame_physical_model_identity(_model(payload)) == original
+    section.update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    unequal = fiber_frame_physical_model_identity(_model(payload))
+    section.update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
+    swapped = fiber_frame_physical_model_identity(_model(payload))
+    assert len({original, unequal, swapped}) == 3
+
+
+def test_unused_common_area_cannot_create_independent_unequal_models():
+    payload = _payload()
+    section = payload['sections'][0]
+    section.update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.0004)
+    first = fiber_frame_physical_model_identity(_model(payload))
+    section['bar_area_m2'] = 0.0003
+    assert fiber_frame_physical_model_identity(_model(payload)) == first
+    section['bar_area_m2'] = 0.0002
+    section.pop('top_bar_area_m2')
+    assert fiber_frame_physical_model_identity(_model(payload)) == first
+    section['intermediate_steel_layers'] = [{'y_m': 0.0, 'bar_count': 2}]
+    middle = fiber_frame_physical_model_identity(_model(payload))
+    section['bar_area_m2'] = 0.0003
+    section['top_bar_area_m2'] = 0.0002
+    assert fiber_frame_physical_model_identity(_model(payload)) != middle
+
+
+def test_centroid_distance_aliases_and_swaps_preserve_physical_identity():
+    payload = _payload()
+    original = fiber_frame_physical_model_identity(_model(payload))
+    section = payload['sections'][0]
+    section.update(top_cover_m=section['cover_m'], bottom_cover_m=section['cover_m'])
+    assert fiber_frame_physical_model_identity(_model(payload)) == original
+    section.update(top_cover_m=0.04, bottom_cover_m=0.06)
+    changed = fiber_frame_physical_model_identity(_model(payload))
+    section['cover_m'] = 0.07
+    assert fiber_frame_physical_model_identity(_model(payload)) == changed
+    section['cover_m'] = 0.04
+    section.pop('top_cover_m')
+    assert fiber_frame_physical_model_identity(_model(payload)) == changed
+    section.update(top_cover_m=0.06, bottom_cover_m=0.04)
+    assert len({original, changed, fiber_frame_physical_model_identity(_model(payload))}) == 3
+    section['intermediate_steel_layers'] = [{'y_m': 0.0, 'bar_count': 2}]
+    with_middle = fiber_frame_physical_model_identity(_model(payload))
+    section['cover_m'] = 0.08
+    assert fiber_frame_physical_model_identity(_model(payload)) == with_middle

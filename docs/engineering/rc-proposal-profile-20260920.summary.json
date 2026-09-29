@@ -1,0 +1,11 @@
+{
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-proposal-profile-h6fn70yt",
+  "source_revision": "4c9cc538b947f3da9374c8908301f580be1b07c8",
+  "inventory_sha256": "13bef045dcd8db91186204aca81f23405d8b3c18ec80363e0064541326bafae7",
+  "source_runtime_inventory_sha256": "9de3a0339e632e8028adf30e12fdd4fc79a93a874af4cf7f1cabb0639a07ad32",
+  "repeated_proposals": 100,
+  "original_seven_coordinate_proposal_exact": true,
+  "new_solver_calls": 0,
+  "new_fits": 0,
+  "timing_scope": "instrumented one-parent attribution; not speedup"
+}

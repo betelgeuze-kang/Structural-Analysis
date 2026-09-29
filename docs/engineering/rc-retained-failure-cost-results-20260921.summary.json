@@ -1,0 +1,623 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-retained-failure-cost-g4u_085h",
+  "audited_inventory_sha256": "6c2e9ac71afbb207fbfd4463cd4af80744e992fe23531c4bcd120428874307ef",
+  "files": 2447,
+  "audit": {
+    "source_revision": "8589636cdaa48fa41d3542f2375bb13a9bce66a4",
+    "totals": {
+      "paths": 64,
+      "complete_paths": 34,
+      "ordinary_native_calls": 202,
+      "additional_native_calls": 112,
+      "ordinary_newton": 1326,
+      "additional_newton": 654
+    },
+    "pairs": [
+      {
+        "case": 0,
+        "mode": "upfront",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 7.275957614183426e-12,
+              "exact_terminal_checkpoint": false
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 7.275957614183426e-12,
+              "exact_terminal_checkpoint": false
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": true,
+          "secant": true
+        },
+        "summed_wall_ns": {
+          "proposal": 10089410773,
+          "secant": 2729790559
+        },
+        "proposal_over_secant_ratio": 3.696038415744261
+      },
+      {
+        "case": 0,
+        "mode": "on-failure",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 7.275957614183426e-12,
+              "exact_terminal_checkpoint": false
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 7.275957614183426e-12,
+              "exact_terminal_checkpoint": false
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": true,
+          "secant": true
+        },
+        "summed_wall_ns": {
+          "proposal": 4598028659,
+          "secant": 2730500011
+        },
+        "proposal_over_secant_ratio": 1.6839511593028886
+      },
+      {
+        "case": 1,
+        "mode": "upfront",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 5.820766091346741e-11,
+              "exact_terminal_checkpoint": false
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 2.9103830456733704e-11,
+              "exact_terminal_checkpoint": false
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 5.820766091346741e-11,
+              "exact_terminal_checkpoint": false
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 2.9103830456733704e-11,
+              "exact_terminal_checkpoint": false
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": true,
+          "secant": true
+        },
+        "summed_wall_ns": {
+          "proposal": 13453471421,
+          "secant": 6242196824
+        },
+        "proposal_over_secant_ratio": 2.155246269914798
+      },
+      {
+        "case": 1,
+        "mode": "on-failure",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 2.9103830456733704e-11,
+              "exact_terminal_checkpoint": false
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": true,
+              "maximum_absolute_difference_mixed_SI_fields": 2.9103830456733704e-11,
+              "exact_terminal_checkpoint": false
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": true,
+          "secant": true
+        },
+        "summed_wall_ns": {
+          "proposal": 4397569919,
+          "secant": 6234683786
+        },
+        "proposal_over_secant_ratio": 0.7053396884176798
+      },
+      {
+        "case": 2,
+        "mode": "upfront",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": false,
+          "secant": false
+        },
+        "summed_wall_ns": {
+          "proposal": 1602969315,
+          "secant": 1563759831
+        },
+        "proposal_over_secant_ratio": null
+      },
+      {
+        "case": 2,
+        "mode": "on-failure",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": null,
+              "exact_terminal_checkpoint": false
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": null,
+              "exact_terminal_checkpoint": false
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": true,
+          "secant": false
+        },
+        "summed_wall_ns": {
+          "proposal": 14387860027,
+          "secant": 1559650758
+        },
+        "proposal_over_secant_ratio": null
+      },
+      {
+        "case": 3,
+        "mode": "upfront",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": false,
+          "secant": false
+        },
+        "summed_wall_ns": {
+          "proposal": 1336790826,
+          "secant": 1411962027
+        },
+        "proposal_over_secant_ratio": null
+      },
+      {
+        "case": 3,
+        "mode": "on-failure",
+        "fresh_gates": [
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          },
+          {
+            "proposal": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "reference": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            },
+            "secant": {
+              "full_history_pass": false,
+              "maximum_absolute_difference_mixed_SI_fields": 0.0,
+              "exact_terminal_checkpoint": true
+            }
+          }
+        ],
+        "repeated_histories_and_checkpoints_exact": {
+          "proposal": false,
+          "secant": false
+        },
+        "summed_wall_ns": {
+          "proposal": 7781743259,
+          "secant": 1334281229
+        },
+        "proposal_over_secant_ratio": null
+      }
+    ],
+    "mode_pairs": [
+      {
+        "case": 0,
+        "complete_history_matches": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": [
+          true,
+          true
+        ],
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            }
+          }
+        ],
+        "summed_wall_ns": {
+          "upfront": 10089410773,
+          "on-failure": 4598028659
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "failure_over_upfront_ratio": 0.4557281651476279
+      },
+      {
+        "case": 1,
+        "complete_history_matches": [
+          true,
+          true
+        ],
+        "fresh_reference_gates": [
+          true,
+          true
+        ],
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            }
+          }
+        ],
+        "summed_wall_ns": {
+          "upfront": 13453471421,
+          "on-failure": 4397569919
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "failure_over_upfront_ratio": 0.3268725060905602
+      },
+      {
+        "case": 2,
+        "complete_history_matches": [
+          false,
+          false
+        ],
+        "fresh_reference_gates": [
+          false,
+          false
+        ],
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              }
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            }
+          },
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              }
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null
+            }
+          }
+        ],
+        "summed_wall_ns": {
+          "upfront": 1602969315,
+          "on-failure": 14387860027
+        },
+        "additional_native_calls": {
+          "upfront": 0,
+          "on-failure": 32
+        },
+        "failure_over_upfront_ratio": null
+      },
+      {
+        "case": 3,
+        "complete_history_matches": [
+          false,
+          false
+        ],
+        "fresh_reference_gates": [
+          false,
+          false
+        ],
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              }
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              }
+            }
+          },
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              }
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              }
+            }
+          }
+        ],
+        "summed_wall_ns": {
+          "upfront": 1336790826,
+          "on-failure": 7781743259
+        },
+        "additional_native_calls": {
+          "upfront": 0,
+          "on-failure": 16
+        },
+        "failure_over_upfront_ratio": null
+      }
+    ],
+    "policy_promoted": false,
+    "independent_physical_validation": false,
+    "cross_arithmetic_speed_claim": false
+  }
+}

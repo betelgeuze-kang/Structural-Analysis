@@ -1040,12 +1040,32 @@ def test_forged_summary_or_level2_row_fails_closed() -> None:
     ):
         matrix._validate_status(forged_summary, ROOT)
 
-    forged_level2 = deepcopy(payload)
-    row = forged_level2["requirements"][0]
+    forged_promotion = deepcopy(payload)
+    row = next(
+        row
+        for row in forged_promotion["requirements"]
+        if row["status"] not in {"promotion_eligible", "current_product_replay_failed"}
+    )
     row["level2_eligible"] = True
     row["status"] = "promotion_eligible"
-    forged_level2["summary"]["current_product_replay_only_count"] -= 1
-    forged_level2["summary"]["promotion_eligible_count"] += 1
+    forged_promotion["summary"] = matrix._requirement_summary(
+        forged_promotion["requirements"]
+    )
+    forged_promotion["artifact_hash"] = matrix._artifact_hash(forged_promotion)
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match="matrix_status_schema_validation_failed",
+    ):
+        matrix._validate_status(forged_promotion, ROOT)
+
+    forged_level2 = deepcopy(payload)
+    row = next(
+        row
+        for row in forged_level2["requirements"]
+        if row["status"] not in {"promotion_eligible", "current_product_replay_failed"}
+    )
+    assert row["level2_eligible"] is False
+    row["level2_eligible"] = True
     forged_level2["artifact_hash"] = matrix._artifact_hash(forged_level2)
     with pytest.raises(
         matrix.BoundedPlanarVVMatrixError,

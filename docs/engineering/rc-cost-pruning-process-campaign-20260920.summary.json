@@ -1,0 +1,257 @@
+{
+  "source_revision": "8ae676acb1efb25bdbb983ae043f35289bdf9ce4",
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-cost-pruning-k4yedxy4/study",
+  "inventory_sha256": "33225a1daf91cdd068ad273c9b62cb8f5458c2275d1bcacd4f1c3c62836f3edc",
+  "verified_file_count": 662,
+  "protocol_sha256": "sha256:a5b2ab6e8a13a8c136043b6b578843540d2d3b42fc857aca021d3353580b6a8c",
+  "campaign_wall_ns": 54520113866,
+  "cases": [
+    {
+      "id": "w32-small",
+      "pair_count": 2,
+      "comparable_pairs": 2,
+      "full_process_sum_ns": 6037598838,
+      "pruned_process_sum_ns": 4403152038,
+      "ratios": [
+        0.7311720522513645,
+        0.7274263737473763
+      ],
+      "ratio_of_sums": 0.7292886056435272,
+      "invocations": [
+        {
+          "full": 8,
+          "pruned": 4
+        },
+        {
+          "full": 8,
+          "pruned": 4
+        }
+      ],
+      "skipped_ids": [
+        [
+          "middle",
+          "costly"
+        ],
+        [
+          "middle",
+          "costly"
+        ]
+      ],
+      "selections": [
+        "cheap",
+        "cheap"
+      ],
+      "repeat_result_hashes_match": true,
+      "maximum_performance": {
+        "accepted_epoch_count": 4,
+        "maximum_absolute_fiber_strain": 0.0002292363087146199,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.0,
+        "maximum_load_factor": 3.861605764092358,
+        "maximum_steel_accumulated_plastic_strain": 0.0,
+        "maximum_translation_m": 0.0020212746687927868,
+        "minimum_load_factor": -1.6408429063617642,
+        "terminal_load_factor": -1.6408429063617642,
+        "terminal_maximum_absolute_fiber_strain": 0.00016374137641763097,
+        "terminal_maximum_translation_m": 0.0010425886603922486
+      }
+    },
+    {
+      "id": "w32-large",
+      "pair_count": 2,
+      "comparable_pairs": 2,
+      "full_process_sum_ns": 6320845831,
+      "pruned_process_sum_ns": 4640071686,
+      "ratios": [
+        0.7288945802875272,
+        0.739366329098272
+      ],
+      "ratio_of_sums": 0.734090311654684,
+      "invocations": [
+        {
+          "full": 8,
+          "pruned": 4
+        },
+        {
+          "full": 8,
+          "pruned": 4
+        }
+      ],
+      "skipped_ids": [
+        [
+          "middle",
+          "costly"
+        ],
+        [
+          "middle",
+          "costly"
+        ]
+      ],
+      "selections": [
+        "cheap",
+        "cheap"
+      ],
+      "repeat_result_hashes_match": true,
+      "maximum_performance": {
+        "accepted_epoch_count": 4,
+        "maximum_absolute_fiber_strain": 0.0005808573117965795,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.7945855955279706,
+        "maximum_load_factor": 11.297740671340238,
+        "maximum_steel_accumulated_plastic_strain": 0.0,
+        "maximum_translation_m": 0.00800111621696711,
+        "minimum_load_factor": -6.7104343986583945,
+        "terminal_load_factor": -6.7104343986583945,
+        "terminal_maximum_absolute_fiber_strain": 0.00036172471781039024,
+        "terminal_maximum_translation_m": 0.00401104013419322
+      }
+    },
+    {
+      "id": "w48-small",
+      "pair_count": 2,
+      "comparable_pairs": 2,
+      "full_process_sum_ns": 5904401054,
+      "pruned_process_sum_ns": 4392347250,
+      "ratios": [
+        0.7431814282080715,
+        0.7446379380230409
+      ],
+      "ratio_of_sums": 0.743910721820693,
+      "invocations": [
+        {
+          "full": 8,
+          "pruned": 4
+        },
+        {
+          "full": 8,
+          "pruned": 4
+        }
+      ],
+      "skipped_ids": [
+        [
+          "middle",
+          "costly"
+        ],
+        [
+          "middle",
+          "costly"
+        ]
+      ],
+      "selections": [
+        "cheap",
+        "cheap"
+      ],
+      "repeat_result_hashes_match": true,
+      "maximum_performance": {
+        "accepted_epoch_count": 4,
+        "maximum_absolute_fiber_strain": 0.00019788284919432779,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.0,
+        "maximum_load_factor": 5.272828609941832,
+        "maximum_steel_accumulated_plastic_strain": 0.0,
+        "maximum_translation_m": 0.002009865120680606,
+        "minimum_load_factor": -2.3765736459920825,
+        "terminal_load_factor": -2.3765736459920825,
+        "terminal_maximum_absolute_fiber_strain": 0.00013243461590423073,
+        "terminal_maximum_translation_m": 0.0010199135066864481
+      }
+    },
+    {
+      "id": "w48-large",
+      "pair_count": 2,
+      "comparable_pairs": 2,
+      "full_process_sum_ns": 6319413568,
+      "pruned_process_sum_ns": 4612162788,
+      "ratios": [
+        0.7270082463754027,
+        0.7326728393198654
+      ],
+      "ratio_of_sums": 0.7298403148284027,
+      "invocations": [
+        {
+          "full": 8,
+          "pruned": 4
+        },
+        {
+          "full": 8,
+          "pruned": 4
+        }
+      ],
+      "skipped_ids": [
+        [
+          "middle",
+          "costly"
+        ],
+        [
+          "middle",
+          "costly"
+        ]
+      ],
+      "selections": [
+        "cheap",
+        "cheap"
+      ],
+      "repeat_result_hashes_match": true,
+      "maximum_performance": {
+        "accepted_epoch_count": 4,
+        "maximum_absolute_fiber_strain": 0.0005406759504582982,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.8435034711059253,
+        "maximum_load_factor": 13.832378557218295,
+        "maximum_steel_accumulated_plastic_strain": 0.0,
+        "maximum_translation_m": 0.00800000208412088,
+        "minimum_load_factor": -9.606295864656833,
+        "terminal_load_factor": -9.606295864656833,
+        "terminal_maximum_absolute_fiber_strain": 0.00033015779031211396,
+        "terminal_maximum_translation_m": 0.0040051085971059865
+      }
+    },
+    {
+      "id": "no-feasible-screen",
+      "pair_count": 2,
+      "comparable_pairs": 0,
+      "full_process_sum_ns": 5945152320,
+      "pruned_process_sum_ns": 5906381787,
+      "ratios": [
+        null,
+        null
+      ],
+      "ratio_of_sums": null,
+      "invocations": [
+        {
+          "full": 8,
+          "pruned": 8
+        },
+        {
+          "full": 8,
+          "pruned": 8
+        }
+      ],
+      "skipped_ids": [
+        [],
+        []
+      ],
+      "selections": [
+        null,
+        null
+      ],
+      "repeat_result_hashes_match": true,
+      "maximum_performance": {
+        "accepted_epoch_count": 4,
+        "maximum_absolute_fiber_strain": 0.0002292363087146199,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.0,
+        "maximum_load_factor": 3.861605764092358,
+        "maximum_steel_accumulated_plastic_strain": 0.0,
+        "maximum_translation_m": 0.0020212746687927868,
+        "minimum_load_factor": -1.6408429063617642,
+        "terminal_load_factor": -1.6408429063617642,
+        "terminal_maximum_absolute_fiber_strain": 0.00016374137641763097,
+        "terminal_maximum_translation_m": 0.0010425886603922486
+      }
+    }
+  ],
+  "ai_benefit_proved": false,
+  "independent_physical_validation": false,
+  "aggregate_ratio": null
+}

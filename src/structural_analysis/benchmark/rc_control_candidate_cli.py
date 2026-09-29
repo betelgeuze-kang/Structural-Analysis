@@ -16,7 +16,7 @@ from structural_analysis.benchmark.fiber_frame_design_cli import (
     read_design_experiment_with_material_history,
 )
 from structural_analysis.benchmark.rc_control_candidate_learning import (
-    RCControlCandidatePolicy,
+    load_rc_control_candidate_policy,
     FIT_METHODS,
     CENTERED_FIT_METHOD,
     train_rc_control_candidate_policy,
@@ -41,6 +41,7 @@ def main(argv=None):
             sub.add_argument("--" + field, type=Path, required=True)
         sub.add_argument("--source-revision", required=True)
         if name == "train":
+            sub.add_argument("--reinforcement-features", action="store_true")
             sub.add_argument("--ridge", type=float, default=1.0)
             sub.add_argument("--ood-margin", type=float, default=0.0)
             sub.add_argument(
@@ -55,6 +56,7 @@ def main(argv=None):
             sub.add_argument("--full-analysis-budget", type=int, default=3)
             sub.add_argument("--evaluate-exhaustive-oracle", action="store_true")
             sub.add_argument("--reuse-line-search-assembly", action="store_true")
+            sub.add_argument("--prune-cost-dominated", action="store_true")
     args = parser.parse_args(argv)
     model = load_neutral_json_bytes(
         _read(args.model, 16 * 1024 * 1024), source_path=str(args.model)
@@ -80,6 +82,7 @@ def main(argv=None):
             ridge=args.ridge,
             ood_margin=args.ood_margin,
             fit_method=args.fit_method,
+            reinforcement_features=args.reinforcement_features,
         )
         output = {
             "policy_hash": policy.policy_hash,
@@ -90,9 +93,7 @@ def main(argv=None):
     else:
         if prices is None:
             raise ValueError("search requires a common price table")
-        policy = RCControlCandidatePolicy(
-            _read(args.policy, 2 * 1024 * 1024).decode("utf-8")
-        )
+        policy = load_rc_control_candidate_policy(_read(args.policy, 2 * 1024 * 1024))
         training = strict_json_object_bytes(
             _read(args.training_report, 2 * 1024 * 1024), maximum_bytes=2 * 1024 * 1024
         )
@@ -106,6 +107,7 @@ def main(argv=None):
             evaluate_exhaustive_oracle=args.evaluate_exhaustive_oracle,
             ranking_strategy=args.ranking_strategy,
             reuse_line_search_assembly=args.reuse_line_search_assembly,
+            prune_cost_dominated=args.prune_cost_dominated,
         )
         output = {
             "report_hash": report["report_hash"],

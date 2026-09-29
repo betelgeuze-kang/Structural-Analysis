@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { gunzipSync } from 'node:zlib'
 import { validateRcControlSearch } from '../../src/workbench-v2/model/rcControlSearchSchema'
 import { fields, document, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
 import { layoutFiles, layoutRead } from './layoutSearchFixture'
@@ -129,6 +131,84 @@ for (const [id, files] of Object.entries(standaloneLayouts)) {
 }
 
 import { stagedFiles } from './layoutStagedFixture'
+import { portalSpanBytes, portalSpanRead } from './rcPortalLayoutSpanFixture'
+
+test('two-fixed portal span fixture preserves 79 deterministic byte-exact originals', () => {
+  const archive = readFileSync('tests/frontend/fixtures/rc-portal-layout-span-artifacts.json.gz')
+  const manifestBytes = readFileSync('tests/frontend/fixtures/rc-portal-layout-span-manifest.json')
+  expect(createHash('sha256').update(manifestBytes).digest('hex')).toBe('a7a152d37c7a8500b0b786215f5972f02f217e7b8ea405caa9771521837dd1de')
+  const manifest = JSON.parse(manifestBytes.toString('utf8'))
+  expect(manifest.producer_source_revision).toBe('e0146cd9b33fa7c02d2fd8a81ec31c177fb64dba')
+  expect(manifest.execution_order).toEqual(['staged', 'full'])
+  expect(archive.byteLength).toBe(2596579)
+  expect(createHash('sha256').update(archive).digest('hex')).toBe('fc9c3ac52bf3cc233e8f07333b27b1f34f6fab414892097b5be6a2a395e16174')
+  expect(archive.subarray(4, 8)).toEqual(Buffer.alloc(4)) // gzip mtime = 0
+  const unpacked = gunzipSync(archive)
+  expect(createHash('sha256').update(unpacked).digest('hex')).toBe('f4d366c7fbb24b155eae0de14439c4bc38bcc8e94f7d25a97cb47a7222c9800e')
+  const files: Record<string, string> = JSON.parse(unpacked.toString('utf8'))
+  const paths = Object.keys(files)
+  expect(paths).toEqual([...paths].sort())
+  expect(paths.filter(path => path.startsWith('staged/'))).toHaveLength(42)
+  expect(paths.filter(path => path.startsWith('full/'))).toHaveLength(37)
+  expect(Object.keys(manifest.originals)).toEqual(paths)
+  const originals = createHash('sha256')
+  let originalBytes = 0
+  for (const path of paths) {
+    const raw = Buffer.from(files[path], 'base64')
+    expect(manifest.originals[path]).toEqual({ byte_length: raw.byteLength, sha256: createHash('sha256').update(raw).digest('hex') })
+    const length = Buffer.alloc(8)
+    length.writeBigUInt64BE(BigInt(raw.byteLength))
+    originals.update(Buffer.from(path)).update(Buffer.from([0])).update(length).update(raw)
+    originalBytes += raw.byteLength
+  }
+  expect(originalBytes).toBe(10871903)
+  expect(originals.digest('hex')).toBe('9f4cd695244378eb7da37571a8de9be93f7727b0ba3165430b1f0ea9f3f855e4')
+  for (const [name, ref] of Object.entries(manifest.new_input_files) as [string, any][]) {
+    const raw = readFileSync(`examples/research/rc_internal_portal_20mm/${name}`)
+    expect({ byte_length: raw.byteLength, sha256: createHash('sha256').update(raw).digest('hex') }).toEqual(ref)
+  }
+})
+
+for (const run of ['staged', 'full'] as const) {
+  test(`two-fixed portal span ${run} reviews original geometry and full-path records`, async () => {
+    const review = await validateRcControlSearch(portalSpanBytes(run, 'result.json'), portalSpanRead(run))
+    expect(review.report.source_revision).toBe('e0146cd9b33fa7c02d2fd8a81ec31c177fb64dba')
+    expect(review.plan.control_request.experimental_two_fixed_endpoints).toBe(true)
+    expect(review.plan.control_request.constant_nodal_loads).toHaveLength(2)
+    expect(review.plan.control_request.targets_m).toEqual([-0.01, -0.02, 0.01])
+    expect(review.plan.pool.map((row: any) => row.candidate_id)).toEqual([
+      'baseline', 'shorter_span_360', 'longer_span_440',
+    ])
+    expect(review.report.arms.price_order.selected_candidate_id).toBe('shorter_span_360')
+    expect(review.designs.price_order.models.shorter_span_360.nodes.find((node: any) => node.id === 'N4').coordinates[0]).toBe(3.6)
+    expect(review.report.claims.net_savings_proved).toBe(false)
+    const ids = review.designs.price_order.report.rows.map((row: any) => row.candidate_id)
+    if (run === 'staged') {
+      expect(ids).toEqual(['baseline', 'shorter_span_360'])
+      expect(review.report.arms.price_order.cost_pruning.skipped_cost_dominated_candidate_ids).toEqual(['longer_span_440'])
+      expect(review.report.arms.price_order.cost_pruning.unevaluated_physical_feasibility).toBe('unknown')
+      expect(review.prefixes?.shorter_span_360.decision.action).toBe('execute_full_reference')
+      expect(review.prefixes?.shorter_span_360.row.full_reference_verification_pass).toBe(true)
+      expect(review.costOptimality).toBeNull()
+    } else {
+      expect(ids).toEqual(['baseline', 'shorter_span_360', 'longer_span_440'])
+      expect(review.designs.price_order.models.longer_span_440.nodes.find((node: any) => node.id === 'N4').coordinates[0]).toBe(4.4)
+      expect(review.designs.price_order.report.rows.every((row: any) => row.full_reference_verification_pass)).toBe(true)
+    }
+  })
+
+  test(`two-fixed portal span ${run} rejects changed original result`, async () => {
+    const target = run === 'staged'
+      ? 'price_order/prefix/shorter_span_360/baseline/result.json'
+      : 'price_order/longer_span_440/baseline/result.json'
+    await expect(validateRcControlSearch(portalSpanBytes(run, 'result.json'), async path =>
+      path === target
+        ? Uint8Array.from(Buffer.concat([Buffer.from(portalSpanBytes(run, path)), Buffer.from(' ')]))
+        : portalSpanBytes(run, path),
+    )).rejects.toThrow()
+  })
+}
+
 test('RC staged layout validates prefix originals and includes all work', async () => {
   const review = await validateRcControlSearch(stagedFiles['result.json'], async path => stagedFiles[path])
   expect(review.report.arms.price_order.selected_candidate_id).toBe('middle')

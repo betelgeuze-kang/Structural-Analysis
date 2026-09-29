@@ -1,13 +1,17 @@
-import { intermediateSteelBarCount } from './rcSteelLayers'
+import { longitudinalSteelArea } from './rcSteelLayers'
 import { sha256Bytes, sha256Hex } from './checksum'
-import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
+import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, rcControlHasPreload, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
 
 export const RC_STUDY_SCHEMA = 'experimental-rc-control-design-comparison.v1'
+export const RC_PRUNED_STUDY_SCHEMA = 'experimental-rc-control-cost-pruned-design.v1'
 const CLAIMS_STUDY = { experimental_rc_control: true, independent_physical_validation: false, design_authority: false, confirmed_currency_savings: false, performance_improvement: false, release_approved: false }
 const SCOPE = 'gross_concrete_and_straight_authored_longitudinal_rebar.v1'
 const EXCLUDED = ['transverse_reinforcement', 'laps_anchorage_hooks', 'waste', 'formwork', 'labor', 'fabrication', 'transport', 'tax']
 const QUANTITIES = ['gross_concrete_volume_m3', 'longitudinal_rebar_volume_m3', 'longitudinal_rebar_mass_kg']
-const ROLES = ['model', 'result', 'checkpoint', 'verification', 'analysis_started', 'analysis_outcome', 'verification_started', 'verification_outcome']
+const SINGLE_FIXED_PROFILE = 'planar_serial_cantilever_explicit_rectangular_rc.v1'
+const TWO_FIXED_PROFILE = 'planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1'
+const FIXED_DOFS = ['RZ', 'UX', 'UY']
+const ROLES = ['cost_skip', 'model', 'result', 'checkpoint', 'verification', 'analysis_started', 'analysis_outcome', 'verification_started', 'verification_outcome']
 export const artifactMaximum = (role: string): number => role === 'result' ? 64 * 1024 ** 2 : role === 'checkpoint' ? 128 * 1024 ** 2 : 16 * 1024 ** 2
 const nat = (v: unknown): v is number => Number.isSafeInteger(v) && Number(v) >= 0
 const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
@@ -86,6 +90,49 @@ function performance(history: RcObject[]): RcObject {
   return out
 }
 
+function twoFixedSupportIds(model: RcObject, constantLoads?: RcObject[]): string[] {
+  check(Array.isArray(model.nodes) && Array.isArray(model.elements) && Array.isArray(model.supports)
+    && model.nodes.length >= 2 && model.elements.length === model.nodes.length - 1
+    && model.supports.length === 2, 'study_two_fixed_topology_invalid')
+  const ids = model.nodes.map((node: RcObject) => node.id)
+  check(ids.every((id: unknown) => typeof id === 'string') && new Set(ids).size === ids.length, 'study_two_fixed_nodes_invalid')
+  const adjacent = new Map<string, Set<string>>(ids.map((id: string) => [id, new Set<string>()]))
+  for (const element of model.elements) {
+    check(Array.isArray(element.nodes) && element.nodes.length === 2
+      && adjacent.has(element.nodes[0]) && adjacent.has(element.nodes[1])
+      && element.nodes[0] !== element.nodes[1], 'study_two_fixed_member_invalid')
+    adjacent.get(element.nodes[0])!.add(element.nodes[1])
+    adjacent.get(element.nodes[1])!.add(element.nodes[0])
+  }
+  const endpoints = ids.filter((id: string) => adjacent.get(id)!.size === 1)
+  check(endpoints.length === 2 && ids.every((id: string) => adjacent.get(id)!.size >= 1 && adjacent.get(id)!.size <= 2), 'study_two_fixed_endpoints_invalid')
+  const visited = new Set<string>(), pending = [ids[0]]
+  while (pending.length) {
+    const id = pending.pop()!
+    if (visited.has(id)) continue
+    visited.add(id)
+    adjacent.get(id)!.forEach((neighbor) => pending.push(neighbor))
+  }
+  check(visited.size === ids.length, 'study_two_fixed_connection_invalid')
+  const supports = model.supports.map((support: RcObject) => {
+    check(support && same(Object.keys(support).sort(), ['dofs', 'node'])
+      && typeof support.node === 'string' && endpoints.includes(support.node)
+      && Array.isArray(support.dofs) && same([...support.dofs].sort(), FIXED_DOFS), 'study_two_fixed_support_invalid')
+    return support.node as string
+  })
+  check(new Set(supports).size === 2, 'study_two_fixed_support_invalid')
+  if (constantLoads) check(constantLoads.every((load: RcObject) => !supports.includes(load.node_id)), 'study_two_fixed_preload_support_invalid')
+  return supports
+}
+
+/** Check the public two-endpoint input and its complete retained reaction rows. */
+export function validateRcTwoFixedStudyProfile(model: RcObject, history: RcObject[], constantLoads?: RcObject[]): void {
+  const supports = twoFixedSupportIds(model, constantLoads)
+  const expected = supports.flatMap((node: string) => ['UX', 'UY', 'RZ'].map((dof) => `${node}:${dof}`)).sort()
+  check(history.length > 0 && history.every((row: RcObject) => Array.isArray(row.support_reactions)
+    && same(row.support_reactions.map((reaction: RcObject) => `${reaction.node_id}:${reaction.dof}`).sort(), expected)), 'study_two_fixed_reactions_invalid')
+}
+
 export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: string, report: RcObject): Promise<void> {
   const q = row.quantities
   check(q && q.schema_version === 'public-rc-fiber-member-quantities.v1' && q.scope === SCOPE && q.detailed_takeoff === false
@@ -99,7 +146,7 @@ export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: s
     check(nodes.length === 2 && nodes.every(Boolean) && section, 'study_geometry_invalid')
     const length = Math.hypot(...nodes[0].coordinates.map((v: number, i: number) => v - nodes[1].coordinates[i]))
     const volume = length * section.width_m * section.depth_m
-    const rebar = length * (section.top_bar_count + section.bottom_bar_count + intermediateSteelBarCount(section)) * section.bar_area_m2
+    const rebar = length * longitudinalSteelArea(section)
     const values = [volume, rebar, rebar * 7850]
     const actual = q.members.find((m: RcObject) => m.member_id === member.id)
     check(actual && actual.section_id === member.section && close(actual.length_m, length), 'study_member_identity_invalid')
@@ -111,6 +158,14 @@ export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: s
   check(estimate && estimate.scope === SCOPE && estimate.verified_quote === false && estimate.confirmed_currency_savings === false
     && same(estimate.excluded_items, EXCLUDED) && estimate.quantity_hash === q.quantity_hash && estimate.price_table_hash === report.price_table_hash
     && estimate.currency === price.currency && close(estimate.total, totals.gross_concrete_volume_m3 * price.concrete_per_m3 + totals.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_estimate_invalid')
+  check(Array.isArray(estimate.members) && estimate.members.length === q.members.length
+    && new Set(estimate.members.map((m: RcObject) => m.member_id)).size === q.members.length, 'study_member_estimate_count_invalid')
+  for (const member of q.members) {
+    const cost = estimate.members.find((m: RcObject) => m.member_id === member.member_id)
+    check(cost && same(Object.keys(cost).sort(), ['concrete', 'longitudinal_rebar', 'member_id'])
+      && close(cost.concrete, member.gross_concrete_volume_m3 * price.concrete_per_m3)
+      && close(cost.longitudinal_rebar, member.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_member_estimate_invalid')
+  }
 }
 
 export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, report: RcObject, read: StudyRead, profile: 'section' | 'layout' = 'section'): Promise<RcObject | null> {
@@ -121,6 +176,9 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
   } else {
     check(artifacts.model.value.schema_version === 'structural-analysis-canonical-model.v1', 'study_model_invalid')
     await verifyQuantities(row, artifacts.model.value, rowRaw, report)
+    if (report.control_request.schema_version === 'bounded-rc-fiber-direct-control-request.v3') {
+      twoFixedSupportIds(artifacts.model.value, rcControlHasPreload(report.control_request) ? report.control_request.constant_nodal_loads : undefined)
+    }
   }
   check(Array.isArray(row.invocations) && row.invocations.length <= 2, 'study_invocations_invalid')
   for (const [i, invocation] of row.invocations.entries()) {
@@ -131,6 +189,14 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
       && same(artifacts[`${phase}_started`]?.value, { phase, status: 'started', unknown_execution_work: true, work: null })
       && same(artifacts[`${phase}_outcome`]?.value, invocation), 'study_invocation_binding_invalid')
   }
+  if (row.status === 'skipped_cost_dominated') {
+    check(report.schema_version === RC_PRUNED_STUDY_SCHEMA && row.candidate_id !== 'baseline'
+      && same(Object.keys(artifacts).sort(), ['cost_skip', 'model']) && row.invocations.length === 0
+      && row.full_reference_verification_pass === false && row.selection_eligible === false
+      && row.performance === null && row.screens === null && row.failure === null, 'study_cost_skip_promotion')
+    return artifacts.model.value
+  }
+  check(!artifacts.cost_skip, 'study_unexpected_cost_skip')
   if (row.full_reference_verification_pass !== true) {
     check(row.full_reference_verification_pass === false && row.selection_eligible === false && row.performance === null && row.screens === null
       && ['invalid_candidate', 'execution_error', 'verification_blocked'].includes(row.status), 'study_unverified_promotion')
@@ -141,17 +207,22 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
   const api = apiDoc.value, native = nativeDoc.value, config = report.control_request, targets = config.targets_m
   check(api.request.line_search_assembly_reuse === report.line_search_assembly_reuse
     && native.scope.line_search_assembly_reuse === report.line_search_assembly_reuse, 'study_reuse_binding_invalid')
-  const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+  const hasPreload = rcControlHasPreload(config)
+  const twoFixed = config.schema_version === 'bounded-rc-fiber-direct-control-request.v3'
   const version = hasPreload ? 'v2' : 'v1'
   await selfHash(apiDoc.raw, api, 'result_hash'); await selfHash(nativeDoc.raw, native, 'artifact_hash')
   check(api.schema_version === `bounded-rc-fiber-direct-control-result.${version}` && api.status === 'ready' && api.contract_pass === true && api.failure === null
     && same(api.claims, CLAIMS) && same(api.unsupported_features, []) && same(api.path.claims, PATH_CLAIMS) && same(native.claims, PATH_CLAIMS), 'study_api_invalid')
   check(api.model.canonical_model_checksum === row.quantities.model_checksum
+    && api.model.compiler_profile === (twoFixed ? TWO_FIXED_PROFILE : SINGLE_FIXED_PROFILE)
     && api.control.global_dof === config.control_global_dof && api.control.unit === 'm' && ['UX', 'UY'].includes(api.control.component)
     && api.request.restart_input_sha256 === null && api.path.initial_checkpoint.epoch === (hasPreload ? 1 : 0)
+    && (hasPreload ? same(api.request.constant_nodal_loads, config.constant_nodal_loads) : api.request.constant_nodal_loads === undefined)
     && same(api.request.targets_m, targets) && api.request.allow_reversals === config.allow_reversals
     && api.request.maximum_reversals === config.maximum_reversals && api.request.maximum_targets === config.maximum_targets
     && same(api.request.configuration, { ...config.solver_config, augmented_coordinates: '[q_free_m,load_factor_coordinate_scale_m*lambda]', control_row_weight: 'F_reference*residual_tolerance/control_tolerance_m', profile: 'small-displacement-rc-fiber-direct-control.v1' }), 'study_request_binding_invalid')
+  check(twoFixed ? api.request.experimental_two_fixed_endpoints === true
+    : api.request.experimental_two_fixed_endpoints === undefined, 'study_two_fixed_request_invalid')
   check(validation.schema_version === 'bounded-rc-fiber-direct-control-validation.v1' && validation.verified_result_hash === api.result_hash
     && ['artifact_contract_pass', 'contract_pass', 'physical_path_complete', 'fresh_source_execution_invoked', 'solver_replay_performed'].every(k => validation[k] === true)
     && validation.unavailable_execution_work === false && same(validation.errors, []) && same(validation.claims, CLAIMS)
@@ -168,6 +239,7 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
   await validateRcPreload(api, apiDoc.raw, native, config, targets)
   if (hasPreload) check(same(api.path.initial_checkpoint, native.preload_checkpoint), 'study_preload_origin_invalid')
   const history = validateRcAcceptedHistory(api, native, artifacts.model.value, config)
+  if (twoFixed) validateRcTwoFixedStudyProfile(artifacts.model.value, history, hasPreload ? config.constant_nodal_loads : undefined)
   check(history[0].parent_checkpoint_hash === (hasPreload ? api.path.preload_attempts[0].step.parent_checkpoint.state_hash : api.path.initial_checkpoint.state_hash), 'study_genesis_invalid')
   const values = performance(history)
   check(same(Object.keys(values).sort(), Object.keys(row.performance).sort()), 'study_performance_keys_invalid')
@@ -185,9 +257,14 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
 export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): Promise<RcDesignReview> {
   const doc = document(raw), report = doc.value
   await selfHash(doc.raw, report, 'report_hash')
-  check(report.schema_version === RC_STUDY_SCHEMA && same(report.claims, CLAIMS_STUDY) && report.source_revision_is_attestation === false
+  const adaptive = report.schema_version === RC_PRUNED_STUDY_SCHEMA
+  check((adaptive || report.schema_version === RC_STUDY_SCHEMA) && same(report.claims, CLAIMS_STUDY) && report.source_revision_is_attestation === false
     && typeof report.source_revision === 'string' && /^[a-f0-9]{40}$/.test(report.source_revision), 'study_identity_invalid')
   const identityKeys = ['schema_version', 'baseline_checksum', 'candidates', 'control_request', 'history_limits', 'material_limits', 'terminal_limits', 'prices', 'price_table_hash', 'source_revision', 'source_revision_is_attestation']
+  if (adaptive) {
+    check(report.execution_policy === 'strict_verified_cost_dominance_in_authored_order.v1' && report.prices !== null, 'study_cost_policy_invalid')
+    identityKeys.push('execution_policy')
+  } else check(report.execution_policy === undefined && report.cost_pruning === undefined, 'study_unexpected_cost_policy')
   if (report.line_search_assembly_reuse !== undefined) {
     check(report.line_search_assembly_reuse === 'rc-control-immediate-line-search-reuse.v1', 'study_reuse_profile_invalid')
     identityKeys.push('line_search_assembly_reuse')
@@ -221,9 +298,28 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   // Candidates are validated serially. Large histories are not returned to React.
   const rowSlices = rawValues(members.get('rows')!.value)
   const models: Record<string, RcObject> = {}
+  let incumbent: RcObject | null = null
   for (const [i, row] of report.rows.entries()) {
     const model = await verifyRcDesignCandidate(row, rowSlices[i], report, read)
     if (model) models[row.candidate_id] = model
+    if (row.status === 'skipped_cost_dominated') {
+      check(adaptive && incumbent !== null && row.material_estimate.total > incumbent.estimate, 'study_cost_skip_without_prior_authority')
+      const receipt = document(await verifiedStudyBytes(read, row, 'cost_skip')).value
+      check(same(receipt, {
+        schema_version: 'rc-control-strict-cost-skip.v1', candidate_id: row.candidate_id,
+        model_sha256: row.artifacts.model.sha256, candidate_estimate: row.material_estimate.total,
+        price_table_hash: report.price_table_hash, incumbent,
+        reason: 'strictly_more_expensive_than_prior_full_verified_screen_pass',
+        candidate_feasibility: 'not_evaluated', solver_invocation_count: 0,
+      }), 'study_cost_skip_receipt_invalid')
+    }
+    if (adaptive && row.full_reference_verification_pass && row.selection_eligible
+      && row.invocations.every((inv: RcObject) => inv.status === 'returned' && inv.unknown_execution_work === false)
+      && (incumbent === null || row.material_estimate.total < incumbent.estimate)) {
+      incumbent = { candidate_id: row.candidate_id, estimate: row.material_estimate.total,
+        result_sha256: row.artifacts.result.sha256, verification_sha256: row.artifacts.verification.sha256,
+        model_sha256: row.artifacts.model.sha256 }
+    }
   }
   const base = report.rows[0]
   check(base.artifacts.model?.sha256 === report.baseline_checksum || base.status === 'invalid_candidate', 'study_baseline_invalid')
@@ -238,7 +334,8 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
       check(section, 'study_change_section_invalid')
       for (const [key, value] of Object.entries(change)) {
         if (key === 'section_id') continue
-        check(['width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2'].includes(key), 'study_change_field_invalid')
+        check(['width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2', 'top_bar_area_m2', 'bottom_bar_area_m2', 'top_cover_m', 'bottom_cover_m'].includes(key), 'study_change_field_invalid')
+        if (['top_bar_area_m2', 'bottom_bar_area_m2', 'top_cover_m', 'bottom_cover_m'].includes(key)) check(num(value) && value > 0, 'study_change_value_invalid')
         if (value !== null) { check(num(value) && value >= 0, 'study_change_value_invalid'); changed ||= section[key] !== value; section[key] = value }
       }
     }
@@ -253,16 +350,31 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   const eligible = report.rows.filter((r: RcObject) => r.selection_eligible)
   if (report.prices !== null) eligible.sort((a: RcObject, b: RcObject) => a.material_estimate.total - b.material_estimate.total || (a.candidate_id < b.candidate_id ? -1 : 1))
   const selected = report.prices !== null && eligible.length ? eligible[0].candidate_id : null
+  const skipped = report.rows.filter((r: RcObject) => r.status === 'skipped_cost_dominated')
+  const resolved = report.rows.every((r: RcObject) => r.full_reference_verification_pass || r.status === 'skipped_cost_dominated')
+  const expectedStatus = adaptive ? (resolved ? (skipped.length ? 'complete_with_cost_exclusions' : 'complete') : 'incomplete')
+    : (report.verified_count === report.rows.length ? 'complete' : 'incomplete')
+  if (adaptive) check(same(report.cost_pruning, {
+    skipped_candidate_ids: skipped.map((r: RcObject) => r.candidate_id), skipped_count: skipped.length,
+    api_invocation_count: report.rows.reduce((n: number, r: RcObject) => n + r.invocations.length, 0),
+    minimum_scoped_estimate_proved_within_declared_candidates: resolved && selected !== null,
+    skipped_candidate_feasibility_known: false,
+    all_requested_models_physically_verified: report.rows.every((r: RcObject) => r.full_reference_verification_pass),
+    saved_wall_time_measured: false,
+  }), 'study_cost_pruning_summary_invalid')
   check(report.selected_candidate_id === selected && report.selection_status === (report.prices === null ? 'prices_unavailable' : selected === null ? 'no_verified_feasible_candidate' : 'selected')
     && report.verified_count === report.rows.filter((r: RcObject) => r.full_reference_verification_pass).length
-    && report.status === (report.verified_count === report.rows.length ? 'complete' : 'incomplete') && nat(report.total_wall_ns) && nat(report.total_process_cpu_ns), 'study_selection_invalid')
+    && report.status === expectedStatus && nat(report.total_wall_ns) && nat(report.total_process_cpu_ns), 'study_selection_invalid')
   return { report, models }
 }
 
 export function validateRcStudyControl(config: RcObject): void {
-  check(['bounded-rc-fiber-direct-control-request.v1', 'bounded-rc-fiber-direct-control-request.v2'].includes(config?.schema_version) && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
+  check(['bounded-rc-fiber-direct-control-request.v1', 'bounded-rc-fiber-direct-control-request.v2', 'bounded-rc-fiber-direct-control-request.v3'].includes(config?.schema_version) && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
     && config.targets_m.every(num) && nat(config.control_global_dof) && num(config.solver_config?.control_tolerance_m) && config.solver_config.control_tolerance_m > 0, 'study_control_invalid')
-  if (config.schema_version.endsWith('.v2')) {
+  const twoFixed = config.schema_version.endsWith('.v3')
+  check(twoFixed ? config.experimental_two_fixed_endpoints === true
+    : config.experimental_two_fixed_endpoints === undefined, 'study_two_fixed_opt_in_invalid')
+  if (config.schema_version.endsWith('.v2') || (twoFixed && config.constant_nodal_loads !== undefined)) {
     check(Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0 && config.constant_nodal_loads.length <= 16
       && new Set(config.constant_nodal_loads.map((r: RcObject) => r?.node_id)).size === config.constant_nodal_loads.length
       && config.constant_nodal_loads.every((r: RcObject) => r && same(Object.keys(r).sort(), ['FX_kN', 'FY_kN', 'MZ_kNm', 'node_id']) && typeof r.node_id === 'string'

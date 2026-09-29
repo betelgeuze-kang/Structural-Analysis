@@ -292,3 +292,148 @@ def test_wide_section_interface_still_rejects_foreign_state(state):
         section.integrate((0.0, 0.0), state)
     with pytest.raises(ValueError, match="state type is invalid"):
         section.dissipated_energy_mj_per_m(state)
+
+
+def test_unequal_outer_bar_areas_preserve_elastic_coupling_and_identity():
+    common = 0.00005
+    section = make_rectangular_stateful_rc_fiber_section(
+        width_m=0.15, depth_m=0.4, cover_m=0.04,
+        top_bar_count=2, bottom_bar_count=2, bar_area_m2=common,
+        top_bar_area_m2=common, bottom_bar_area_m2=4*common,
+    )
+    steel_areas = {f.fiber_id: f.area_m2 for f in section.fibers if f.material_kind == 'steel'}
+    assert steel_areas == {'steel-top-layer': 2*common, 'steel-bottom-layer': 8*common}
+    response = section.integrate((1e-8, 2e-8), section.initial_state())
+    expected = np.zeros((2, 2))
+    for fiber in section.fibers:
+        modulus = (section.steel if fiber.material_kind == 'steel' else section.concrete).elastic_modulus_mpa * 1000
+        direction = np.array([1.0, -fiber.y_m])
+        expected += modulus * fiber.area_m2 * np.outer(direction, direction)
+    assert expected[0, 1] != 0
+    assert response.consistent_tangent == pytest.approx(expected)
+    assert response.resultants == pytest.approx(expected @ np.array([1e-8, 2e-8]))
+    swapped = make_rectangular_stateful_rc_fiber_section(
+        width_m=0.15, depth_m=0.4, cover_m=0.04,
+        top_bar_count=2, bottom_bar_count=2, bar_area_m2=common,
+        top_bar_area_m2=4*common, bottom_bar_area_m2=common,
+    )
+    other = swapped.integrate((0.0, 0.0), swapped.initial_state())
+    assert other.consistent_tangent[0, 1] == pytest.approx(-expected[0, 1])
+    assert swapped.contract_hash != section.contract_hash
+    with pytest.raises(ValueError, match='section_contract_hash'):
+        swapped.validate_state(section.initial_state())
+
+
+def test_outer_area_defaults_preserve_original_checkpoint_bytes():
+    old = make_rectangular_stateful_rc_fiber_section()
+    explicit = make_rectangular_stateful_rc_fiber_section(
+        top_bar_area_m2=3.87e-4, bottom_bar_area_m2=3.87e-4,
+    )
+    assert old.contract_hash == explicit.contract_hash
+    assert old.initial_state().canonical_bytes() == explicit.initial_state().canonical_bytes()
+
+
+@pytest.mark.parametrize('name', ['top_bar_area_m2', 'bottom_bar_area_m2'])
+@pytest.mark.parametrize('value', [0.0, -1.0, True, float('nan'), float('inf')])
+def test_outer_bar_area_rejects_invalid_values(name, value):
+    with pytest.raises(ValueError):
+        make_rectangular_stateful_rc_fiber_section(**{name: value})
+
+
+def test_outer_area_overrides_leave_intermediate_area_explicitly_common():
+    section = make_rectangular_stateful_rc_fiber_section(
+        bar_area_m2=0.00005, top_bar_area_m2=0.0001, bottom_bar_area_m2=0.0002,
+        intermediate_steel_layers=[{'y_m': 0.0, 'bar_count': 3}],
+    )
+    middle = next(f for f in section.fibers if f.fiber_id == 'steel-intermediate-00')
+    assert middle.area_m2 == pytest.approx(0.00015)
+
+
+def test_distinct_outer_centroid_distances_match_elastic_integral_and_parent_identity():
+    section = make_rectangular_stateful_rc_fiber_section(
+        depth_m=0.12, width_m=0.08, cover_m=0.02,
+        top_cover_m=0.022, bottom_cover_m=0.024,
+    )
+    steel = {f.fiber_id: f for f in section.fibers if f.material_kind == 'steel'}
+    assert steel['steel-top-layer'].y_m == pytest.approx(0.038)
+    assert steel['steel-bottom-layer'].y_m == pytest.approx(-0.036)
+    expected = np.zeros((2, 2))
+    for fiber in section.fibers:
+        material = section.steel if fiber.material_kind == 'steel' else section.concrete
+        direction = np.array([1., -fiber.y_m])
+        expected += material.elastic_modulus_mpa * 1000 * fiber.area_m2 * np.outer(direction, direction)
+    response = section.integrate((1e-8, 2e-8), section.initial_state())
+    assert response.consistent_tangent == pytest.approx(expected)
+    assert response.resultants == pytest.approx(expected @ np.array([1e-8, 2e-8]))
+    assert expected[0, 1] != 0
+    mirrored = make_rectangular_stateful_rc_fiber_section(
+        depth_m=0.12, width_m=0.08, cover_m=0.02,
+        top_cover_m=0.024, bottom_cover_m=0.022,
+    )
+    other = mirrored.integrate((0., 0.), mirrored.initial_state())
+    assert other.consistent_tangent[0, 1] == pytest.approx(-expected[0, 1])
+    with pytest.raises(ValueError, match='section_contract_hash'):
+        mirrored.validate_state(section.initial_state())
+
+
+def test_default_centroid_distances_preserve_legacy_state_bytes():
+    legacy = make_rectangular_stateful_rc_fiber_section()
+    explicit = make_rectangular_stateful_rc_fiber_section(top_cover_m=.05, bottom_cover_m=.05)
+    assert legacy == explicit
+    assert legacy.initial_state().canonical_bytes() == explicit.initial_state().canonical_bytes()
+
+
+@pytest.mark.parametrize('name', ['top_cover_m', 'bottom_cover_m'])
+@pytest.mark.parametrize('value', [0., -.01, .3, .31, True, float('nan'), float('inf')])
+def test_invalid_outer_centroid_distances_rejected(name, value):
+    with pytest.raises(ValueError):
+        make_rectangular_stateful_rc_fiber_section(**{name:value})
+
+
+def test_intermediate_layers_use_overridden_outer_bounds():
+    with pytest.raises(ValueError, match='between outer layers'):
+        make_rectangular_stateful_rc_fiber_section(
+            top_cover_m=.12,
+            intermediate_steel_layers=[{'y_m': .20, 'bar_count':2}],
+        )
+    with pytest.raises(ValueError, match='between outer layers'):
+        make_rectangular_stateful_rc_fiber_section(
+            bottom_cover_m=.12,
+            intermediate_steel_layers=[{'y_m': -.20, 'bar_count':2}],
+        )
+    section = make_rectangular_stateful_rc_fiber_section(
+        top_cover_m=.12, bottom_cover_m=.10,
+        intermediate_steel_layers=[{'y_m': .17, 'bar_count':2}],
+    )
+    assert section.fibers[-1].y_m == .17
+
+
+def test_native_fiber_serialization_observes_replacement_and_detaches_mapping():
+    from dataclasses import asdict
+
+    from structural_analysis.materials.stateful_fiber_section import StatefulSectionFiber
+
+    fiber = StatefulSectionFiber('S1', 0.15, 0.001, 'steel')
+    before = fiber.to_dict()
+    assert before == asdict(fiber)
+    before['area_m2'] = 99
+    assert fiber.area_m2 == 0.001
+    object.__setattr__(fiber, 'area_m2', 0.002)
+    assert fiber.to_dict() == asdict(fiber)
+    assert fiber.to_dict()['area_m2'] == 0.002
+
+
+def test_extended_fiber_serialization_preserves_recursive_detachment():
+    from dataclasses import asdict, dataclass, field
+
+    from structural_analysis.materials.stateful_fiber_section import StatefulSectionFiber
+
+    @dataclass(frozen=True)
+    class ExtendedFiber(StatefulSectionFiber):
+        metadata: dict = field(default_factory=lambda: {'tags': ['original']})
+
+    fiber = ExtendedFiber('C1', -0.15, 0.01, 'concrete')
+    encoded = fiber.to_dict()
+    assert encoded == asdict(fiber)
+    encoded['metadata']['tags'].append('detached')
+    assert fiber.metadata == {'tags': ['original']}

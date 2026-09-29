@@ -541,7 +541,7 @@
         "reference_value": {"type": "number"},
         "absolute_error": {"type": "number", "minimum": 0},
         "relative_error": {"type": "number", "minimum": 0},
-        "absolute_tolerance": {"const": 1e-10},
+        "absolute_tolerance": {"enum": [1e-10, 1e-6]},
         "relative_tolerance": {"enum": [1e-10, 1e-8, 1e-4]},
         "contract_pass": {"type": "boolean"}
       }

@@ -117,19 +117,13 @@ def _validated_training_data(samples, original_policy):
     return policy, grouped, profile
 
 
-def audit_rc_control_training_folds(
-    samples: list[dict[str, Any]], original_policy: RCControlSeedPolicy
-) -> dict[str, Any]:
-    """Refit fixed parameters by case using only each fold's training rows.
-
-    Original weights/scales/bounds never enter a withheld-case fit. This remains
-    a development diagnosis, not an independent campaign or runtime evaluation.
-    """
-    started = perf_counter_ns()
-    policy, grouped, profile = _validated_training_data(samples, original_policy)
+def control_policy_feature_names(original_policy: RCControlSeedPolicy) -> list[str]:
+    """Name the entire input vector, not just the appended material snapshot."""
+    if type(original_policy) is not RCControlSeedPolicy:
+        raise ValueError("exact control policy required")
+    policy = original_policy.to_dict()
     history_profile = policy.get("feature_profile") == HISTORY_FEATURE_PROFILE
     material_profile = policy.get("feature_profile") == MATERIAL_FEATURE_PROFILE
-    hashes = policy["training_sample_hashes"]
     count = len(policy["target_scale"])
     feature_names = (
         list(policy["model_feature_names"])
@@ -156,6 +150,25 @@ def audit_rc_control_training_folds(
         )
     if material_profile:
         feature_names += policy["material_feature_names"]
+    if len(feature_names) != len(policy["feature_mean"]):
+        raise ValueError("complete policy feature layout required")
+    return feature_names
+
+
+def audit_rc_control_training_folds(
+    samples: list[dict[str, Any]], original_policy: RCControlSeedPolicy
+) -> dict[str, Any]:
+    """Refit fixed parameters by case using only each fold's training rows.
+
+    Original weights/scales/bounds never enter a withheld-case fit. This remains
+    a development diagnosis, not an independent campaign or runtime evaluation.
+    """
+    started = perf_counter_ns()
+    policy, grouped, profile = _validated_training_data(samples, original_policy)
+    history_profile = policy.get("feature_profile") == HISTORY_FEATURE_PROFILE
+    material_profile = policy.get("feature_profile") == MATERIAL_FEATURE_PROFILE
+    hashes = policy["training_sample_hashes"]
+    feature_names = control_policy_feature_names(original_policy)
     folds = []
     for case in sorted(grouped):
         training = [row for row in samples if row["case_id"] != case]

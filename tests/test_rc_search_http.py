@@ -411,3 +411,50 @@ def test_rehashed_standalone_cross_bindings_reject(mutation):
         RcSearchArtifactBundle.from_reader(
             read, expected_report_hash=report["report_hash"]
         )
+
+
+@pytest.mark.parametrize("mutation", [None, "actual_count", "skip_ids", "skip_bytes"])
+def test_cost_pruned_original_graph_and_execution_bindings(mutation):
+    import base64
+    import gzip
+    from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+
+    packed = json.loads(
+        gzip.decompress(
+            Path(
+                "tests/frontend/fixtures/cost-pruned-search-artifacts.json.gz"
+            ).read_bytes()
+        )
+    )
+    artifacts = {name: base64.b64decode(raw) for name, raw in packed.items()}
+    report = json.loads(artifacts["result.json"])
+    if mutation in {"actual_count", "skip_ids"}:
+        arm = report["arms"]["learned_order"]
+        if mutation == "actual_count":
+            arm["actual_model_execution_count"] = 3
+        else:
+            arm["cost_excluded_candidate_ids"] = []
+        report.pop("report_hash")
+        report["report_hash"] = _sha(_bytes(report))
+        artifacts["result.json"] = _bytes(report)
+    elif mutation == "skip_bytes":
+        artifacts["learned_order/middle/cost-skip.json"] += b" "
+    def reader(name, maximum):
+        return artifacts[name]
+
+    if mutation:
+        with pytest.raises(ValueError):
+            RcSearchArtifactBundle.from_reader(
+                reader, expected_report_hash=report["report_hash"]
+            )
+    else:
+        mounted = RcSearchArtifactBundle.from_reader(
+            reader, expected_report_hash=report["report_hash"]
+        )
+        application = RcSearchArtifactWSGIApplication(
+            {("alpha", "experiment"): mounted}, authorize=authorizer
+        )
+        for name, raw in artifacts.items():
+            assert application.handle("GET", route(name), headers=HEADERS).body == raw
+        assert "learned_order/middle/result.json" not in mounted.artifacts
+        assert "exhaustive_oracle/middle/result.json" in mounted.artifacts

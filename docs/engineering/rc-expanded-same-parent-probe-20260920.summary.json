@@ -1,0 +1,1446 @@
+{
+  "audit": {
+    "all_report_work": {
+      "core_calls": 2376,
+      "linear_solves": 12708,
+      "newton_iterations": 12708
+    },
+    "cache_after": {
+      "currsize": 4,
+      "hits": 588,
+      "maxsize": 4,
+      "misses": 6
+    },
+    "complete_path_speedup_claim": false,
+    "current_invocation_wall_ns": 798886672791,
+    "faster_pair_means": 37,
+    "independent_evaluation": false,
+    "new_fits": 0,
+    "new_report_count": 594,
+    "passed_comparisons": 594,
+    "proposed_count": 594,
+    "report_count": 594,
+    "retained_report_count": 0,
+    "scope": "posthoc same-parent step diagnostics; previous labels and policy-fit costs remain separate; no fitted switching policy or oracle speedup",
+    "source_revision": "60e820c7d47f356a25f7a82d94c66ab861d2e38b"
+  },
+  "consistent_faster_pairs": [
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-b-amp050",
+      "mean_path_time_ratio": 0.8716220839534378,
+      "parent_hash": "sha256:b9a5187d16520c952f551c5d676e9e93ffc7300d42d3476eace86d361bcfa190",
+      "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8793135214393354,
+          "repetition": 0,
+          "report_hash": "sha256:eb7696b1b1212b5246db2d6961b4058d5bfd0b1d4c2ecd6bdb5a3b0568bbbaca",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8729746489103886,
+          "repetition": 1,
+          "report_hash": "sha256:a03b7bc599d6050800a762358ab330d035dac1168ece1500ee19e64d9f64f064",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8625780815105893,
+          "repetition": 2,
+          "report_hash": "sha256:5066779486769b8b522d66d3a94415d17dc788a62841676cf161921460ae29ea",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 6
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-b-amp100",
+      "mean_path_time_ratio": 0.8750233232571669,
+      "parent_hash": "sha256:89ae917976e427612c8eaaee41f40ec203f61a959f52973a32f5ce353bc5f046",
+      "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8754243228995531,
+          "repetition": 0,
+          "report_hash": "sha256:531647e0a26624f540a1aec63197b5bfe61b295225d7ed6ca9c9d58d21d5f83f",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8743832340802712,
+          "repetition": 1,
+          "report_hash": "sha256:092b8d64635bfd4adfe545121a9c868c16902ae44ff9e336668f4745410a7c9c",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8752624127916766,
+          "repetition": 2,
+          "report_hash": "sha256:bdfc6257dafd5c38139142d6726cf835748e42f4a3f67d4ee86ae874bfd57eb3",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 7
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-b-amp100",
+      "mean_path_time_ratio": 0.8708790923433295,
+      "parent_hash": "sha256:381053a53732d65465eab91f8494405cb20900ec3495c4b44eb6d7e6de4283b2",
+      "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8654450680895023,
+          "repetition": 0,
+          "report_hash": "sha256:1e19ca20182efa8455b61ab89c476b999d28b431d8f83b26b8911ffec2f4330e",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8713157577838146,
+          "repetition": 1,
+          "report_hash": "sha256:f2c66be4b9b488e1f3de29233316eaf75eacc4b750aeafc35fae17b5ea1322cb",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8758764511566716,
+          "repetition": 2,
+          "report_hash": "sha256:fb9a621aabf53d9f4a8ff7d54942c816eda39c098d982003df7e1a326895971c",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 9
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-b-amp150",
+      "mean_path_time_ratio": 0.8930611966605084,
+      "parent_hash": "sha256:ec74740346b2d1a8425908f509fb959635a64124a93cb58b035d6254e8aabef2",
+      "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8929227023929294,
+          "repetition": 0,
+          "report_hash": "sha256:a6054fbf2eba175dd00fc90ac854cd348a89e024a7e60271ce2bf4d2889fa370",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 10,
+              "newton_iterations": 10
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 10,
+              "newton_iterations": 10
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8960467881103263,
+          "repetition": 1,
+          "report_hash": "sha256:eb1b39f39a471f779e6d658dbb92ce7a529aeee9adc563fc78a5402dc60155c3",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 10,
+              "newton_iterations": 10
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 10,
+              "newton_iterations": 10
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8902140994782695,
+          "repetition": 2,
+          "report_hash": "sha256:a1ce0b2347da75c0bc4708cb558cffb45673c115d8bce17bc40179a40b4c1230",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 10,
+              "newton_iterations": 10
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 10,
+              "newton_iterations": 10
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 5
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-b-amp150",
+      "mean_path_time_ratio": 0.8776255013194372,
+      "parent_hash": "sha256:d3cff614290620fa6e35e8935173e2eaf3d79e3563c474f7d1fdad8e7d5d35f1",
+      "policy_hash": "sha256:4cc160d305334e85ac0ea5e3f6282ae2018e4dca97c9476bc3dbf51c416c7743",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8754231391669743,
+          "repetition": 0,
+          "report_hash": "sha256:bd62ab338c15762b7fd835822da34aef337761c3b476dbcfbc8ed2f24865cc91",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.883371267741553,
+          "repetition": 1,
+          "report_hash": "sha256:0ec3667d9e81b79889f04673a1b793a10a18cae8f84cc86da3722a21772fc95e",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8740820970497841,
+          "repetition": 2,
+          "report_hash": "sha256:872f38890553b18822d679e0808edfa288ed6d8281fb8a9fad457a44aaee2232",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 10
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-d-amp050",
+      "mean_path_time_ratio": 0.8736114367051765,
+      "parent_hash": "sha256:5ef850dfecdcc44aeb7dc98424f2dac14d09c0c8e16d04da06ed7148d492f737",
+      "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8789921397603025,
+          "repetition": 0,
+          "report_hash": "sha256:48217603e7216476656aee43ff593155fa8e80a8e545ed27c591848f9b2366c3",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8714179356692,
+          "repetition": 1,
+          "report_hash": "sha256:001952a95446d850eb0b8f324d98690a697bca5c89fdfacbdd5da429dae3c6f9",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8704242346860269,
+          "repetition": 2,
+          "report_hash": "sha256:08192f6b6a2060bf8c9ed83e92a25fab177d36ec0302aa144986e824d026e4da",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 8,
+              "newton_iterations": 8
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 6
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-d-amp050",
+      "mean_path_time_ratio": 0.8739674650655684,
+      "parent_hash": "sha256:d9ba2d82621fb18a323820ecfe498a52620dbca130e9df8976aba963109806c6",
+      "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.868978007907995,
+          "repetition": 0,
+          "report_hash": "sha256:bc35d0ee1c8c357e41d35b64f87ac38910ad26e533751619a7a7a45e37fd615a",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8752065985924028,
+          "repetition": 1,
+          "report_hash": "sha256:59bd3077048ab4ef7dea4b794d595a563f83c44606fa792238f6681d1ed6aa9b",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8777177886963077,
+          "repetition": 2,
+          "report_hash": "sha256:8361fe41f9f3c0de1dba2c775dc84e0372e8c87788b9ed3a8e8395230b47bf83",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 7
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-d-amp100",
+      "mean_path_time_ratio": 0.8754664860437447,
+      "parent_hash": "sha256:9f2996820c528b99923d0fa13bd73b9dd08cf3c5a8796952b60b95a05edcb464",
+      "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8761584656449419,
+          "repetition": 0,
+          "report_hash": "sha256:01c2bb14137d320eab86f26e6a673ea8304ca001b42e49e9114a59e787cbd3c5",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8745486009660546,
+          "repetition": 1,
+          "report_hash": "sha256:b8d1cd299f6610d637c897e7e880575ab4f8aa015532a520334311762abf1028",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8756923915202374,
+          "repetition": 2,
+          "report_hash": "sha256:e961b3badf3dd0ea839b44d347095b4968142d7780bfeb6ac38cfeac05760126",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 8
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-d-amp100",
+      "mean_path_time_ratio": 0.8760202351214817,
+      "parent_hash": "sha256:0570d052525b5a50a0df0d51f4977c7046fc5e9290ce0735d009fa017c8b45b8",
+      "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8827249776219119,
+          "repetition": 0,
+          "report_hash": "sha256:9d172f1ca09f0b97b59a359f6dba5caf41fcb0b3b1b44f7b9532ef43f5afa7dd",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8708014556672903,
+          "repetition": 1,
+          "report_hash": "sha256:2fcd001e6860b96d5952961fa7785f68a950fe946d52962dde01032f443ff716",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8745342720752429,
+          "repetition": 2,
+          "report_hash": "sha256:21da3c3ab6e631ac211e1a402d75e33d4c79aa444f691438d15b2791b2cce18e",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 7,
+              "newton_iterations": 7
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 9
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-d-amp100",
+      "mean_path_time_ratio": 0.8544585349074936,
+      "parent_hash": "sha256:bfb2b448f8586e232c73112aab5a5e81620eeb06393497f5ec65fac0dd8b1808",
+      "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.852888396515608,
+          "repetition": 0,
+          "report_hash": "sha256:8700fac91686272bc2eaca426f056a2477dcf906d4f87b809fd27a91066090aa",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8549970118530107,
+          "repetition": 1,
+          "report_hash": "sha256:a74f14212e1419e6eab1a0969498119d26d55fd8ee1668ee189ec8b1d9011624",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8554901963538621,
+          "repetition": 2,
+          "report_hash": "sha256:336d3482605159650499605abff665ceb55e00f667bf76317bbb5fd62be36438",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 10
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-d-amp150",
+      "mean_path_time_ratio": 0.851938701039241,
+      "parent_hash": "sha256:286b4d57149a919987a3ab5c30a6123072cfd3bbd7037d4ff8a4ba610752e4e1",
+      "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8508023526378491,
+          "repetition": 0,
+          "report_hash": "sha256:4aa44c442c814d7b0bbcb28aa6688e6140958a2132b274237cde0681cc945c1e",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8555168059057376,
+          "repetition": 1,
+          "report_hash": "sha256:62e37d909fd26aad029255a29161c05e87757a51a17b78d40e4a2f2f8982f17e",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8494969445741363,
+          "repetition": 2,
+          "report_hash": "sha256:d3c261622fbd3bf9824be86637bb6edc00ca3304adb817be586bced2a3ed21fd",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 4
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-d-amp150",
+      "mean_path_time_ratio": 0.8638368693753627,
+      "parent_hash": "sha256:4f60977690ead452684bead351257e69bb5d96da3a78cabf61b13e080df8f298",
+      "policy_hash": "sha256:c66dd7af4ba7764cfba1c96a5a14ee163d32f33e3ff041aa2717070118f37acd",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8709503860288677,
+          "repetition": 0,
+          "report_hash": "sha256:a2ffdae0e57c4a8477af6ff60341999db4ad49a3c5dd237f8eea7fa26040a1fe",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8712722555119717,
+          "repetition": 1,
+          "report_hash": "sha256:42757bbc6c626a66df1b88fe3cc1b13fe0c903c0c1771657a87481a0b2b3b25e",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8492879665852489,
+          "repetition": 2,
+          "report_hash": "sha256:27134ea0670d12d34863806795782d12bb5a033b845e4f7e682262b9803fd92a",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 10
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-e-amp100",
+      "mean_path_time_ratio": 0.8498821807959812,
+      "parent_hash": "sha256:4724b68d77be08af3148131fed92babb633c5b4a42a18dfdc85f300947ed0c3a",
+      "policy_hash": "sha256:63ad574f1485ab6907f9a322ce466b63e0e663fe3bf383eac3ba13e83bfa20c9",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8461664599646869,
+          "repetition": 0,
+          "report_hash": "sha256:631ac092cfa04d05958dbd9395ab73919857479f340f1f6b9bf904d37bbf3e76",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8496317230582524,
+          "repetition": 1,
+          "report_hash": "sha256:730de5931f9760e926995c89177eba7de741ba49501c909971a0636e36bc4b73",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8538483593650044,
+          "repetition": 2,
+          "report_hash": "sha256:6722b7012815eb1d4abc8a810afecdf096feddabd8708f65a08eb0d211303688",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 6,
+              "newton_iterations": 6
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 5,
+              "newton_iterations": 5
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 9
+    },
+    {
+      "all_comparisons_pass": true,
+      "case_id": "train-e-amp150",
+      "mean_path_time_ratio": 0.8438370044801136,
+      "parent_hash": "sha256:1cbdb4fdd1a6bbb5266ca20f95b17e6b515adca48cd15feba89d92534145661c",
+      "policy_hash": "sha256:63ad574f1485ab6907f9a322ce466b63e0e663fe3bf383eac3ba13e83bfa20c9",
+      "repetitions": [
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8512784596519437,
+          "repetition": 0,
+          "report_hash": "sha256:d6c5b9dd17d56367c3c6991b4d45789b69f45b04dd69cc776ab811b1687bd056",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8499958502125085,
+          "repetition": 1,
+          "report_hash": "sha256:897d7498855bb160f7ebc0e48cf4486dfa163bd6864c27a79ac4411b0eda5549",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            }
+          }
+        },
+        {
+          "comparison_pass": true,
+          "decision": "proposed",
+          "path_time_ratio": 0.8302367035758886,
+          "repetition": 2,
+          "report_hash": "sha256:c322e51ef12c0c79d24b5d24989fbb95ddf5e3453a6e06b31b7aaffed73e5c4a",
+          "work": {
+            "fresh-reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "reference": {
+              "core_calls": 1,
+              "linear_solves": 3,
+              "newton_iterations": 3
+            },
+            "secant": {
+              "core_calls": 1,
+              "linear_solves": 4,
+              "newton_iterations": 4
+            }
+          }
+        }
+      ],
+      "ridge": 10000.0,
+      "target_index": 4
+    }
+  ],
+  "counts_by_group": {
+    "b": {
+      "pairs": 66,
+      "faster_means": 9,
+      "faster_all_three": 5
+    },
+    "d": {
+      "pairs": 66,
+      "faster_means": 16,
+      "faster_all_three": 7
+    },
+    "e": {
+      "pairs": 66,
+      "faster_means": 12,
+      "faster_all_three": 2
+    }
+  },
+  "execution": {
+    "exit_code": 0,
+    "parent_wall_ns": 800288521363
+  },
+  "audit_process": {
+    "exit_code": 0,
+    "wall_ns": 3768674182,
+    "new_solves": 0,
+    "new_fits": 0
+  },
+  "audit_preparation": {
+    "observer_revision": "5bad29644b33108cde0613518b8ef892379a6c6f",
+    "source_sha256": {
+      "scripts/audit_rc_expanded_same_parent_probe.py": "268f254e145c882d29cc41c302c965bd910769f4b27216c348395b5f58b6c3ae",
+      "tests/test_rc_runtime_cost_diagnostic.py": "4975fd9011f33b3e4561961c0ada37dce73a9f7439438d71fbcd4dd2be68a002"
+    },
+    "numerical_source_unchanged_from_execution": true,
+    "execution_revision": "60e820c7d47f356a25f7a82d94c66ab861d2e38b",
+    "verified_archived_source_files": 944,
+    "new_solves": 0,
+    "new_fits": 0
+  },
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-expanded-parent-_ute9ly2",
+    "files": 21159,
+    "bytes": 900254363,
+    "inventory_sha256": "a4253944211bf09c291eb7d32f81e29d7e7a76079f4b13e4fb4ad984689d08c6"
+  }
+}

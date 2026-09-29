@@ -354,6 +354,13 @@ def _validate_assembly(
     problem, parent = assembly._source_problem, assembly._source_checkpoint
     if type(problem) is not StatefulCorotationalFiberFrame2DProblem:
         raise ValueError("sparse assembly source problem type is invalid")
+    if (
+        type(problem) is StatefulCorotationalFiberFrame2DProblem
+        and problem.constant_external_loads
+    ):
+        raise ValueError(
+            "sparse state assembly does not support constant external loads"
+        )
     validate_stateful_corotational_fiber_frame2d_checkpoint(problem, parent)
     if (
         assembly.problem_contract_hash != problem.contract_hash
@@ -524,6 +531,13 @@ def assemble_stateful_corotational_fiber_frame2d_sparse_state(
     target_load_factor: float,
     trial_free_coordinates_m: Any,
 ) -> StatefulCorotationalFiberFrame2DSparseAssembly:
+    if (
+        type(problem) is StatefulCorotationalFiberFrame2DProblem
+        and problem.constant_external_loads
+    ):
+        raise ValueError(
+            "sparse state assembly does not support constant external loads"
+        )
     native, rows = _assemble_native_trial(
         problem,
         checkpoint,

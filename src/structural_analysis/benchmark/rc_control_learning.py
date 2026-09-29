@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 import json
+from functools import lru_cache
+from types import MappingProxyType
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
@@ -57,6 +59,7 @@ from structural_analysis.units.schema import CoordinateSystem, UnitSystem
 _ID = re.compile(r"[A-Za-z][A-Za-z0-9_.:-]{0,127}")
 _HASH = re.compile(r"sha256:[0-9a-f]{64}")
 SVD_RIDGE_FIT_PROFILE = "svd-ridge.v1"
+CONSTANT_SAFE_SVD_FIT_PROFILE = "svd-ridge-exact-constant-centering.v1"
 NORMAL_RIDGE_FIT_PROFILE = "normal-equations"
 
 
@@ -244,7 +247,9 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
         ):
             raise ValueError("declared control path budget exceeded")
         model = case.model
-        physical = fiber_frame_physical_model_payload(model)
+        two_fixed = case.request.experimental_two_fixed_endpoints
+        compiler_option = {"experimental_two_fixed_endpoints": True} if two_fixed else {}
+        physical = fiber_frame_physical_model_payload(model, **compiler_option)
         # Separate geometry from section/material/load changes and entity names.
         geometry = {k: physical[k] for k in ("node_coordinates_m", "fixed_global_dofs")}
         geometry["members"] = [m["nodes"] for m in physical["members"]]
@@ -267,7 +272,7 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
             if key in owners and owners[key] != case.split:
                 raise ValueError(f"split_leakage: {key[0]}")
             owners[key] = case.split
-        compiled, blockers, _ = public._compile(model)
+        compiled, blockers, _ = public._compile(model, **compiler_option)
         if compiled is None or blockers:
             raise ValueError("supported RC learning model required")
         compiled = _with_constant_loading(compiled, case.request.constant_nodal_loads)
@@ -374,6 +379,25 @@ def _features(context, model_features):
     )
 
 
+def _freeze_policy_payload(value):
+    if type(value) is dict:
+        return MappingProxyType({k: _freeze_policy_payload(v) for k, v in value.items()})
+    if type(value) is list:
+        return tuple(_freeze_policy_payload(v) for v in value)
+    return value
+
+
+@lru_cache(maxsize=4)
+def _inference_policy_payload(encoded):
+    """Bounded immutable parse reuse keyed by exact JSON content, not identity.
+
+    Policy construction still performs the full strict validation. This cache
+    only avoids reparsing that policy on each proposal; dynamic material input
+    validation is unchanged. Public to_dict continues to return detached data.
+    """
+    return _freeze_policy_payload(json.loads(encoded))
+
+
 @dataclass(frozen=True)
 class RCControlSeedPolicy:
     """Immutable detached JSON; weights and preprocessing contain train rows only."""
@@ -386,9 +410,12 @@ class RCControlSeedPolicy:
         d = strict_json_object_bytes(self._json.encode(), maximum_bytes=8 * 1024 * 1024)
         if (
             d.get("schema_version")
-            == "experimental-rc-control-secant-correction-policy.v5"
+            in ("experimental-rc-control-secant-correction-policy.v5",
+                "experimental-rc-control-secant-correction-policy.v6")
         ):
-            if d.get("fit_solver_profile") != SVD_RIDGE_FIT_PROFILE:
+            constant_safe = d["schema_version"].endswith(".v6")
+            expected_fit = CONSTANT_SAFE_SVD_FIT_PROFILE if constant_safe else SVD_RIDGE_FIT_PROFILE
+            if d.get("fit_solver_profile") != expected_fit:
                 raise ValueError("exact SVD ridge fit profile required")
             if d.get("policy_hash") != _sha(
                 _bytes({k: v for k, v in d.items() if k != "policy_hash"})
@@ -413,6 +440,12 @@ class RCControlSeedPolicy:
             )
             base["policy_hash"] = _sha(_bytes(base))
             RCControlSeedPolicy(_bytes(base).decode())
+            if constant_safe:
+                for low, high, mean, scale in zip(
+                    d["feature_min"], d["feature_max"], d["feature_mean"], d["feature_scale"], strict=True
+                ):
+                    if low == high and (mean != low or scale != 1.0):
+                        raise ValueError("exact constant centering and unit scale required")
             return
         expected = {
             "schema_version",
@@ -596,7 +629,7 @@ class RCControlSeedPolicy:
         arithmetic_profile="binary64",
         load_factor_coordinate_scale_m=None,
     ):
-        d = self.to_dict()
+        d = _inference_policy_payload(self._json)
         try:
             arithmetic = _arithmetic_manifest(arithmetic_profile)
         except ValueError:
@@ -605,8 +638,8 @@ class RCControlSeedPolicy:
             return None
         if (
             d["model_context_hash"] != model_features.context_hash
-            or d["model_feature_names"] != list(model_features.feature_names)
-            or d["free_global_dofs"] != list(free_global_dofs)
+            or d["model_feature_names"] != tuple(model_features.feature_names)
+            or d["free_global_dofs"] != tuple(free_global_dofs)
             or d["solver_config_hash"] != solver_config_hash
             or d["control_free_index"] != context.control_free_index
             or len(context.accepted_targets_m) < 2
@@ -618,7 +651,7 @@ class RCControlSeedPolicy:
                 x, names = material_control_features(context, model_features)
             except (ValueError, TypeError):
                 return None
-            if names != d["material_feature_names"]:
+            if tuple(names) != d["material_feature_names"]:
                 return None
             correction_scales = 1.0
         elif history_profile:
@@ -657,6 +690,7 @@ def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PRO
     if type(fit_solver) is not str or fit_solver not in (
         NORMAL_RIDGE_FIT_PROFILE,
         SVD_RIDGE_FIT_PROFILE,
+        CONSTANT_SAFE_SVD_FIT_PROFILE,
     ):
         raise ValueError("supported RC ridge fit solver required")
     if type(ridge) not in (int, float) or not np.isfinite(ridge) or ridge <= 0:
@@ -669,10 +703,16 @@ def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PRO
         mean = x.mean(axis=0)
         scale = x.std(axis=0)
         scale = np.where(scale > 0, scale, 1.0)
+        if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE:
+            constant = x.min(axis=0) == x.max(axis=0)
+            mean = np.where(constant, x[0], mean)
+            scale = np.where(constant, 1.0, scale)
         target = y.std(axis=0)
         target = np.where(target > 0, target, 1.0)
+        if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE:
+            target = np.where(y.min(axis=0) == y.max(axis=0), 1.0, target)
         z = np.column_stack([(x - mean) / scale, np.ones(len(x))])
-        if fit_solver == SVD_RIDGE_FIT_PROFILE:
+        if fit_solver in (SVD_RIDGE_FIT_PROFILE, CONSTANT_SAFE_SVD_FIT_PROFILE):
             # Same positive ridge and penalized intercept as the original fit.
             # Avoid forming Z.T @ Z; retain every singular direction with its
             # ridge filter, without truncation or a data-selected rank cutoff.
@@ -703,10 +743,12 @@ def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PRO
         "ridge": ridge,
         "ood_margin": ood_margin,
     }
-    if fit_solver == SVD_RIDGE_FIT_PROFILE:
+    if fit_solver in (SVD_RIDGE_FIT_PROFILE, CONSTANT_SAFE_SVD_FIT_PROFILE):
         d.update(
-            schema_version="experimental-rc-control-secant-correction-policy.v5",
-            fit_solver_profile=SVD_RIDGE_FIT_PROFILE,
+            schema_version=("experimental-rc-control-secant-correction-policy.v6"
+                            if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE else
+                            "experimental-rc-control-secant-correction-policy.v5"),
+            fit_solver_profile=fit_solver,
         )
     d["policy_hash"] = _sha(_bytes(d))
     return RCControlSeedPolicy(_bytes(d).decode())
@@ -750,13 +792,22 @@ def run_rc_control_learning_study(
     arithmetic_profile="binary64",
     feature_profile="legacy",
     fit_solver=NORMAL_RIDGE_FIT_PROFILE,
+    defer_evaluation=False,
 ):
-    """Preflight every split, collect only train labels, freeze once, then evaluate."""
+    """Preflight all splits, collect train labels, fit, then optionally evaluate.
+
+    Explicit deferral preserves validation/holdout solver outputs for subsequent
+    training-only runtime selection. It does not attest that an external caller
+    has never evaluated these cases elsewhere.
+    """
     wall, cpu = perf_counter_ns(), process_time_ns()
     cases = tuple(cases)
+    if type(defer_evaluation) is not bool:
+        raise ValueError("explicit boolean evaluation deferral required")
     if type(fit_solver) is not str or fit_solver not in (
         NORMAL_RIDGE_FIT_PROFILE,
         SVD_RIDGE_FIT_PROFILE,
+        CONSTANT_SAFE_SVD_FIT_PROFILE,
     ):
         raise ValueError("supported RC ridge fit solver required")
     if type(feature_profile) is not str or feature_profile not in (
@@ -839,6 +890,7 @@ def run_rc_control_learning_study(
         _bytes(
             {
                 "source_revision": source_revision,
+                **({"evaluation_deferred": True} if defer_evaluation else {}),
                 **(
                     {"fit_solver_profile": fit_solver}
                     if fit_solver != NORMAL_RIDGE_FIT_PROFILE
@@ -1058,7 +1110,14 @@ def run_rc_control_learning_study(
     for case in cases:
         if case.split == "train":
             continue
-        if policy is None:
+        if defer_evaluation:
+            row = {
+                "case_id": case.case_id,
+                "split": case.split,
+                "status": "not_attempted",
+                "reason": "evaluation_explicitly_deferred",
+            }
+        elif policy is None:
             row = {
                 "case_id": case.case_id,
                 "split": case.split,
@@ -1146,6 +1205,7 @@ def run_rc_control_learning_study(
         **({"feature_profile": feature_profile} if feature_profile != "legacy" else {}),
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
+        **({"evaluation_deferred": True} if defer_evaluation else {}),
         "generation": generation,
         "fit": fit,
         "generation_work": _execution_work(generation),
@@ -1157,7 +1217,11 @@ def run_rc_control_learning_study(
         "measured_source_split_screen": measurement_screen,
         "whole_study_wall_ns": perf_counter_ns() - wall,
         "whole_study_cpu_ns": process_time_ns() - cpu,
-        "timing_scope": "preflight_all_generation_reference_secant_fresh_verification_fit_all_evaluation_proposals_recovery_and_io_excluding_final_report_write",
+        "timing_scope": (
+            "preflight_all_generation_reference_secant_fresh_verification_fit_deferred_evaluation_receipts_and_io_excluding_final_report_write"
+            if defer_evaluation else
+            "preflight_all_generation_reference_secant_fresh_verification_fit_all_evaluation_proposals_recovery_and_io_excluding_final_report_write"
+        ),
         "claims": {
             "policy_training_performed": policy is not None,
             "independent_validation": False,

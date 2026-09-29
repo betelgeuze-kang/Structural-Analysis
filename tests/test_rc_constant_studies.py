@@ -117,7 +117,7 @@ def test_nonzero_preload_origin_allows_first_zero_control_target(tmp_path):
     assert _execution_work([{"report": result}])["known_work"]["core_calls"] == 8
 
 
-def test_failed_preload_preserves_original_unknown_work_and_never_proposes(tmp_path):
+def test_failed_preload_records_original_work_and_never_proposes(tmp_path):
     req = request()
     req = replace(
         req,
@@ -137,16 +137,22 @@ def test_failed_preload_preserves_original_unknown_work_and_never_proposes(tmp_p
         proposal_identity="sha256:" + "b" * 64,
     )
     assert not result["reference_repeat_exact"]
-    assert not result["all_execution_work_reported"]
+    assert result["all_execution_work_reported"]
     for arm in ("reference", "secant", "proposal", "fresh-reference"):
         path = read(root, arm + "/path.json")
         assert path["failure"]["phase"] == "preload"
         assert path["entries"] == [] and path["terminal_checkpoint"]["epoch"] == 0
         assert read(root, arm + "/preload-outcome.json")["original_failure"]
+        assert path["preload_invocations"][0]["work"] == {
+            "core_calls": 1,
+            "newton_iterations": 2,
+            "linear_solves": 2,
+        }
+        assert path["preload_invocations"][0]["unknown_work"] is False
         assert not list((root / arm).glob("*-proposal-started.json"))
     assert _execution_work([{"report": result}]) == {
-        "known_work": {"core_calls": 4, "newton_iterations": 0, "linear_solves": 0},
-        "unknown_work": True,
+        "known_work": {"core_calls": 4, "newton_iterations": 8, "linear_solves": 8},
+        "unknown_work": False,
     }
 
 

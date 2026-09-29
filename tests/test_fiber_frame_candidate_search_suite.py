@@ -63,7 +63,7 @@ def _binding(case):
         "baseline_model_checksum": case.baseline.canonical_model_checksum,
         "candidates": [
             {
-                **asdict(candidate),
+                **candidate.to_dict(),
                 "model_checksum": design.apply_fiber_frame_section_changes(
                     case.baseline, candidate
                 ).canonical_model_checksum,

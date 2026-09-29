@@ -272,6 +272,15 @@ def compile_stateful_fiber_frame2d_execution_topology(
             "/problem",
             "Expected an exact supported stateful planar fiber-frame problem.",
         )
+    if (
+        type(problem) is StatefulCorotationalFiberFrame2DProblem
+        and problem.constant_external_loads
+    ):
+        _fail(
+            "fiber_frame_topology_constant_external_load_unsupported",
+            "/problem/constant_external_loads",
+            "The v1 topology plan does not represent constant external loads.",
+        )
     model_hash = _require_hash(model_ir_content_hash, "/model_ir_content_hash")
     nodes = _normalize_node_ids(node_ids, len(problem.node_coordinates_m))
     members = _stable_id_tuple(
@@ -556,6 +565,15 @@ def validate_fiber_frame_execution_topology_against_problem(
             "fiber_frame_topology_problem_type_invalid",
             "/problem",
             "Expected an exact supported stateful planar fiber-frame problem.",
+        )
+    if (
+        type(problem) is StatefulCorotationalFiberFrame2DProblem
+        and problem.constant_external_loads
+    ):
+        _fail(
+            "fiber_frame_topology_constant_external_load_unsupported",
+            "/problem/constant_external_loads",
+            "The v1 topology plan does not represent constant external loads.",
         )
     if plan.problem_contract_hash != problem.contract_hash:
         _fail(
