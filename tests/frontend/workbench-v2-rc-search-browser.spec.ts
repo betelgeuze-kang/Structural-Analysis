@@ -1,8 +1,38 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import { forceFloorBytes } from './rcForceFloorSearchFixture'
 const root = 'tests/frontend/fixtures/rc-control-search/'
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
+
+test('force-floor packet renders signed minimum, solver-selected design, quantities, and separate training cost', async ({ page }) => {
+  test.setTimeout(90000)
+  await page.setViewportSize({ width: 390, height: 1000 })
+  await page.addInitScript(() => {
+    window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/force-floor/result.json' }
+  })
+  await page.route('**/force-floor/**', async route => {
+    const path = new URL(route.request().url()).pathname.replace('/force-floor/', '')
+    await route.fulfill({ contentType: 'application/json', body: Buffer.from(forceFloorBytes(path)) })
+  })
+  await page.goto(`${baseUrl}/#/workbench-v2`)
+  const panel = await ready(page)
+  await expect(panel.locator('[data-rc-search-force-floor]')).toContainText('at least 180')
+  await expect(panel).toContainText('up to 4 full analyses per online strategy')
+  await expect(panel.locator('[data-rc-search-training]')).toContainText('7 labels')
+  await expect(panel.locator('[data-rc-search-training]')).toContainText('56 core calls across 14 full-path invocations')
+  await expect(panel.locator('[data-rc-search-arm="price_order"]')).toContainText('baseline')
+  await expect(panel.locator('[data-rc-search-arm="learned_order"]')).toContainText('w43')
+  await expect(panel.locator('[data-rc-search-cost="learned_order"]')).toContainText('Yes')
+  await expect(panel.locator('[data-rc-search-authority]')).toContainText('nonauthoritative')
+  await panel.getByRole('button', { name: 'Review Learned order', exact: true }).click()
+  await expect(panel.locator('[data-rc-design-force-floor]')).toContainText('at least 180')
+  await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'w43')
+  await expect(panel.locator('[data-rc-design-summary-field="concrete"]')).toBeVisible()
+  await expect(panel.locator('[data-rc-design-details="w43"] [data-rc-design-metric="load_factor_at_target"]')).toContainText('pass')
+  const bounds = await panel.boundingBox()
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(391)
+})
 async function setup(page: Page, directory = root, tamper = false) {
   await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/rc-search/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-search', bearerToken: 'synthetic-test-only' }) } })
   await page.route('**/rc-search/**', async route => {

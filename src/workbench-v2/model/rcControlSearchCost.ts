@@ -2,20 +2,28 @@ import type { RcObject } from './rcJobSchema'
 
 export const RC_COST_AUDIT_V1 = 'rc-control-candidate-cost-optimality.v1'
 export const RC_COST_AUDIT_V2 = 'rc-control-candidate-cost-optimality.v2'
+export const RC_COST_AUDIT_V4 = 'rc-control-candidate-cost-optimality.v4'
 
 /** Derive only after original models, quantities, prices and all design reports
  * have passed validateRcControlSearch's full artifact checks. */
-export function costOptimality(plan: RcObject, comparisons: Record<string, RcObject>, schemaVersion: typeof RC_COST_AUDIT_V1 | typeof RC_COST_AUDIT_V2 = RC_COST_AUDIT_V1): RcObject {
+export function costOptimality(plan: RcObject, comparisons: Record<string, RcObject>, schemaVersion: typeof RC_COST_AUDIT_V1 | typeof RC_COST_AUDIT_V2 | typeof RC_COST_AUDIT_V4 = RC_COST_AUDIT_V1): RcObject {
   const pool: RcObject[] = plan.pool, oracle = comparisons.exhaustive_oracle ?? null
+  const floor = schemaVersion === RC_COST_AUDIT_V4 ? plan.force_response_floor : null
   const estimates = new Map<string, number>(pool.map(r => [r.candidate_id, r.material_estimate.total]))
-  const predictedFailures = new Set<string>(schemaVersion === RC_COST_AUDIT_V2 && plan.plans.learned_order
+  const predictedFailures = new Set<string>(schemaVersion !== RC_COST_AUDIT_V1 && plan.plans.learned_order
     ? plan.predictions.filter((r: RcObject) => !r.prediction.abstained && Object.values(r.predicted_screens).some((s: any) => s.status === 'fail')).map((r: RcObject) => r.candidate_id)
     : [])
-  const requested = [...Object.keys(plan.history_limits), ...Object.keys(plan.material_limits), ...Object.keys(plan.terminal_limits ?? {}).map(k => `terminal_${k}`)].sort()
+  const requested = [...Object.keys(plan.history_limits), ...Object.keys(plan.material_limits), ...Object.keys(plan.terminal_limits ?? {}).map(k => `terminal_${k}`), ...(floor ? ['load_factor_at_target'] : [])].sort()
   const outcome = (r: RcObject): boolean | null => {
     if (!r.full_reference_verification_pass || !r.screens || !Object.keys(r.screens).length
       || JSON.stringify(Object.keys(r.screens).sort()) !== JSON.stringify(requested)
       || !Object.values(r.screens).every((s: any) => s && ['pass', 'fail'].includes(s.status))) return null
+    if (floor) {
+      const screen = r.screens.load_factor_at_target
+      if (!screen || screen.comparison !== 'at_least' || screen.limit !== floor.minimum_load_factor
+        || screen.value !== r.performance?.load_factor_at_target || typeof screen.value !== 'number' || !Number.isFinite(screen.value)
+        || screen.status !== (screen.value >= floor.minimum_load_factor ? 'pass' : 'fail')) return null
+    }
     return Object.values(r.screens).every((s: any) => s.status === 'pass')
   }
   const outcomes = new Map<string, boolean | null>(pool.map(r => [r.candidate_id, null]))
@@ -38,7 +46,7 @@ export function costOptimality(plan: RcObject, comparisons: Record<string, RcObj
     const arm: RcObject = { status: armStatus, selected_candidate_id: selectedId, selected_estimate: selectedEstimate,
       selected_minus_pool_minimum_estimate: gap, matches_pool_minimum: gap === null ? null : gap === 0,
       missed_cheaper_feasible_count: missed === null ? null : missed.length, missed_cheaper_feasible_candidate_ids: missed }
-    if (schemaVersion === RC_COST_AUDIT_V2) {
+    if (schemaVersion !== RC_COST_AUDIT_V1) {
       const falseNegativeMissed = name === 'learned_order' && missed !== null
         ? missed.filter((candidateId: string) => predictedFailures.has(candidateId)) : null
       arm.missed_cheaper_false_negative_count = falseNegativeMissed === null ? null : falseNegativeMissed.length
@@ -51,5 +59,6 @@ export function costOptimality(plan: RcObject, comparisons: Record<string, RcObj
     currency: pool[0].material_estimate.currency, quantity_scope: pool[0].material_estimate.scope,
     oracle_comparison_hash: oracle?.report_hash ?? null, oracle_unverifiable_candidate_ids: oracle ? unknown : null,
     pool_minimum_feasible_estimate: minimum, pool_minimum_feasible_candidate_ids: winners, arms,
-    global_design_optimality_proved: false, confirmed_currency_savings: false, independent_physical_validation: false }
+    global_design_optimality_proved: false, confirmed_currency_savings: false, independent_physical_validation: false,
+    ...(floor ? { force_response_floor: floor } : {}) }
 }

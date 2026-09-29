@@ -3,6 +3,7 @@ import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, rcControlHasPreload, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
 
 export const RC_STUDY_SCHEMA = 'experimental-rc-control-design-comparison.v1'
+export const RC_FORCE_FLOOR_STUDY_SCHEMA = 'experimental-rc-control-design-comparison.v2'
 export const RC_PRUNED_STUDY_SCHEMA = 'experimental-rc-control-cost-pruned-design.v1'
 const CLAIMS_STUDY = { experimental_rc_control: true, independent_physical_validation: false, design_authority: false, confirmed_currency_savings: false, performance_improvement: false, release_approved: false }
 const SCOPE = 'gross_concrete_and_straight_authored_longitudinal_rebar.v1'
@@ -63,6 +64,45 @@ export function validateRcStudyLimits(report: RcObject): RcObject {
     }
   }
   return result
+}
+
+export function validateRcForceFloor(report: RcObject): RcObject {
+  const floor = report.force_response_floor, request = report.control_request
+  check(floor && same(Object.keys(floor).sort(), ['target_index', 'target_control_displacement_m', 'minimum_load_factor'].sort())
+    && Number.isSafeInteger(floor.target_index) && floor.target_index >= 0 && floor.target_index < request.targets_m.length
+    && num(floor.target_control_displacement_m) && floor.target_control_displacement_m === request.targets_m[floor.target_index]
+    && num(floor.minimum_load_factor) && floor.minimum_load_factor > 0
+    && request.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
+    && request.experimental_pin_roller_beam === true && request.constant_nodal_loads === undefined,
+  'study_force_floor_invalid')
+  return floor
+}
+
+export function acceptedForceFactor(api: RcObject, model: RcObject, report: RcObject): number {
+  const floor = validateRcForceFloor(report), index = floor.target_index
+  const response = api.response_history[index], attempt = api.path.attempts[index]
+  const checkpoint = attempt?.step?.accepted_checkpoint
+  const controlled = response?.node_displacements?.filter((row: RcObject) => row.node_id === api.control.node_id)
+  const coordinate = `${api.control.component}_m`, dof = report.control_request.control_global_dof
+  const tolerance = report.control_request.solver_config.control_tolerance_m
+  const factor = response?.load_factor
+  check(model.units?.force === 'kN' && Array.isArray(model.loads) && model.loads.length > 0
+    && api.path.attempts.length === report.control_request.targets_m.length
+    && attempt?.committed === true && attempt.target_control_displacement_m === floor.target_control_displacement_m
+    && num(factor) && checkpoint && checkpoint.load_factor === factor
+    && response.checkpoint_hash === attempt.accepted_checkpoint_hash
+    && checkpoint.state_hash === attempt.accepted_checkpoint_hash
+    && response.source_step_hash === attempt.step.step_hash
+    && response.parent_checkpoint_hash === attempt.parent_checkpoint_hash
+    && checkpoint.parent_state_hash === attempt.parent_checkpoint_hash
+    && api.control.global_dof === dof && Array.isArray(checkpoint.global_displacements)
+    && dof >= 0 && dof < checkpoint.global_displacements.length
+    && controlled?.length === 1 && num(controlled[0][coordinate])
+    && num(checkpoint.global_displacements[dof])
+    && Math.abs(controlled[0][coordinate] - floor.target_control_displacement_m) <= tolerance
+    && Math.abs(checkpoint.global_displacements[dof] - floor.target_control_displacement_m) <= tolerance,
+  'study_force_factor_source_invalid')
+  return factor
 }
 function work(value: RcObject | null): void {
   if (value === null) return
@@ -288,13 +328,18 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
   if (pinRoller) validateRcPinRollerStudyProfile(artifacts.model.value, history)
   check(history[0].parent_checkpoint_hash === (hasPreload ? api.path.preload_attempts[0].step.parent_checkpoint.state_hash : api.path.initial_checkpoint.state_hash), 'study_genesis_invalid')
   const values = performance(history)
+  if (report.schema_version === RC_FORCE_FLOOR_STUDY_SCHEMA) values.load_factor_at_target = acceptedForceFactor(api, artifacts.model.value, report)
   check(same(Object.keys(values).sort(), Object.keys(row.performance).sort()), 'study_performance_keys_invalid')
   for (const [key, value] of Object.entries(values)) check(value === null ? row.performance[key] === null : close(row.performance[key], Number(value)), 'study_performance_invalid')
   const requested = validateRcStudyLimits(report)
+  if (report.schema_version === RC_FORCE_FLOOR_STUDY_SCHEMA) requested.load_factor_at_target = report.force_response_floor.minimum_load_factor
   check(same(Object.keys(requested).sort(), Object.keys(row.screens).sort()), 'study_screen_keys_invalid')
   for (const [key, limit] of Object.entries(requested)) {
     const value = row.performance[key]
-    check(same(row.screens[key], { value, limit, status: value === null ? 'unavailable' : value <= Number(limit) ? 'pass' : 'fail' }), 'study_screen_invalid')
+    const expected = key === 'load_factor_at_target'
+      ? { value, limit, status: value >= Number(limit) ? 'pass' : 'fail', comparison: 'at_least' }
+      : { value, limit, status: value === null ? 'unavailable' : value <= Number(limit) ? 'pass' : 'fail' }
+    check(same(row.screens[key], expected), 'study_screen_invalid')
   }
   check(row.selection_eligible === Object.values(row.screens).every((s: any) => s.status === 'pass'), 'study_eligibility_invalid')
   return artifacts.model.value
@@ -304,9 +349,12 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   const doc = document(raw), report = doc.value
   await selfHash(doc.raw, report, 'report_hash')
   const adaptive = report.schema_version === RC_PRUNED_STUDY_SCHEMA
-  check((adaptive || report.schema_version === RC_STUDY_SCHEMA) && same(report.claims, CLAIMS_STUDY) && report.source_revision_is_attestation === false
+  const forceFloor = report.schema_version === RC_FORCE_FLOOR_STUDY_SCHEMA
+  check((adaptive || forceFloor || report.schema_version === RC_STUDY_SCHEMA) && same(report.claims, CLAIMS_STUDY) && report.source_revision_is_attestation === false
     && typeof report.source_revision === 'string' && /^[a-f0-9]{40}$/.test(report.source_revision), 'study_identity_invalid')
   const identityKeys = ['schema_version', 'baseline_checksum', 'candidates', 'control_request', 'history_limits', 'material_limits', 'terminal_limits', 'prices', 'price_table_hash', 'source_revision', 'source_revision_is_attestation']
+  if (forceFloor) { validateRcForceFloor(report); identityKeys.push('force_response_floor') }
+  else check(report.force_response_floor === undefined, 'study_unexpected_force_floor')
   if (adaptive) {
     check(report.execution_policy === 'strict_verified_cost_dominance_in_authored_order.v1' && report.prices !== null, 'study_cost_policy_invalid')
     identityKeys.push('execution_policy')

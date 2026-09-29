@@ -60,9 +60,12 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
   const newton = config.newton
   const current = report.rows.find((r: RcObject) => r.candidate_id === selected)
   const baseline = report.rows[0]
+  const forceFloor = report.schema_version === 'experimental-rc-control-design-comparison.v2' ? report.force_response_floor : null
+  const shownMetrics = forceFloor ? [...metrics, ['load_factor_at_target', 'Signed load factor at target']] : metrics
   return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
     <p data-rc-design-authority>Original artifacts and stored full-path verification bindings checked. The browser does not rerun the solver. Caller limits, quantities and prices do not establish independent physical validation, code compliance, a verified quote or design approval.</p>
+    {forceFloor && <p data-rc-design-force-floor>Authored target {forceFloor.target_index} ({forceFloor.target_control_displacement_m} m): signed load factor must be at least {forceFloor.minimum_load_factor}. The accepted original response and checkpoint determine this screen.</p>}
     {report.control_request.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
       ? <p data-rc-design-pin-roller>Experimental horizontal pin/roller beam: the pin restrains UX and UY, the roller restrains UY, and both rotations remain free. This comparison has no constant preload.</p>
       : null}
@@ -118,7 +121,7 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
       <summary>{row.candidate_id} — screens, execution cost and original artifacts</summary>
       {Object.entries(row.screens ?? {}).filter(([, screen]) => (screen as RcObject).status === 'fail').map(([key, value]) => {
         const screen = value as RcObject
-        return <p key={key} data-rc-design-limit-failure={key}>Requested limit exceeded: <strong>{metrics.find(([name]) => name === key)?.[1] ?? key}</strong>. Value {shown(screen.value)}; limit {shown(screen.limit)}.</p>
+        return <p key={key} data-rc-design-limit-failure={key}>{key === 'load_factor_at_target' ? 'Required minimum not reached' : 'Requested limit exceeded'}: <strong>{shownMetrics.find(([name]) => name === key)?.[1] ?? key}</strong>. Value {shown(screen.value)}; limit {shown(screen.limit)}.</p>
       })}
       <p>Result identity <code>{row.artifacts.result?.sha256 ?? 'UNAVAILABLE'}</code>. {row.failure ? `Failure phase: ${row.failure.phase}; kind: ${row.failure.kind}.` : ''}</p>
       {row.failure && row.artifacts.result ? <div data-rc-design-failure={row.candidate_id}>
@@ -132,8 +135,8 @@ export function RcControlDesignReviewPanel({ session, onInvalid }: { session: Rc
           This diagnostic does not establish physical collapse or design suitability.
         </p> : <p role="status">No blocked control step is recorded in this result. Review the verification or execution records for the reported failure.</p> : null}
       </div> : null}
-      <div className="wb2-table-scroll" role="region" aria-label={`${row.candidate_id} RC screens`} tabIndex={0}><table className="wb2-table"><thead><tr><th>Metric</th><th>Maximum</th><th>Change from baseline</th><th>Caller limit</th><th>Status</th></tr></thead><tbody>
-        {metrics.map(([key, label]) => <tr key={key} data-rc-design-metric={key}><td>{label}</td><td style={{ whiteSpace: 'nowrap' }}>{shown(row.performance?.[key])}</td><td style={{ whiteSpace: 'nowrap' }} data-rc-design-performance-delta={key}>{shown(typeof row.performance?.[key] === 'number' && typeof report.rows[0].performance?.[key] === 'number' ? row.performance[key] - report.rows[0].performance[key] : null)}</td><td>{shown(row.screens?.[key]?.limit)}</td><td>{row.screens?.[key]?.status ?? 'not requested or unavailable'}</td></tr>)}
+      <div className="wb2-table-scroll" role="region" aria-label={`${row.candidate_id} RC screens`} tabIndex={0}><table className="wb2-table"><thead><tr><th>Metric</th><th>{forceFloor ? 'Accepted value / maximum' : 'Maximum'}</th><th>Change from baseline</th><th>Caller limit</th><th>Status</th></tr></thead><tbody>
+        {shownMetrics.map(([key, label]) => <tr key={key} data-rc-design-metric={key}><td>{label}</td><td style={{ whiteSpace: 'nowrap' }}>{shown(row.performance?.[key])}</td><td style={{ whiteSpace: 'nowrap' }} data-rc-design-performance-delta={key}>{shown(typeof row.performance?.[key] === 'number' && typeof report.rows[0].performance?.[key] === 'number' ? row.performance[key] - report.rows[0].performance[key] : null)}</td><td>{shown(row.screens?.[key]?.limit)}</td><td>{row.screens?.[key]?.status ?? 'not requested or unavailable'}</td></tr>)}
       </tbody></table></div>
       <p>Terminal signed load factor: {shown(row.performance?.terminal_load_factor)}. Maxima cover {report.control_request.constant_nodal_loads ? 'the accepted preload and targets' : 'accepted targets'}; they do not cover extrema between targets.</p>
       <div className="wb2-table-scroll" role="region" aria-label={`${row.candidate_id} RC execution costs`} tabIndex={0}><table className="wb2-table"><thead><tr><th>Entry</th><th>State</th><th>Core calls</th><th>Newton / linear</th><th>Unknown work</th><th>Elapsed / CPU (s)</th></tr></thead><tbody>

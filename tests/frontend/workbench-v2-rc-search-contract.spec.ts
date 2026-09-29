@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { validateRcControlSearch } from '../../src/workbench-v2/model/rcControlSearchSchema'
 import { fields, document, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
+import { forceFloorBytes, forceFloorRead } from './rcForceFloorSearchFixture'
+import { acceptedForceFactor } from '../../src/workbench-v2/model/rcControlDesignSchema'
 const root = 'tests/frontend/fixtures/rc-control-search/'
 const read = async (path: string) => new Uint8Array(readFileSync(root + path))
 const original = readFileSync(root + 'result.json')
@@ -15,6 +17,70 @@ function changed(raw: string, changes: Record<string, string>, hashField: string
   const serialize = () => `{${[...values].sort(([a], [b]) => a < b ? -1 : 1).map(([k, v]) => `${JSON.stringify(k)}:${v}`).join(',')}}`
   values.set(hashField, JSON.stringify(hash(serialize())))
   return new TextEncoder().encode(serialize())
+}
+
+test('force-floor search reviews original signed-factor, replay, quantities, prices and scoped costs', async () => {
+  const review = await validateRcControlSearch(forceFloorBytes('result.json'), forceFloorRead)
+  expect(review.report.schema_version).toBe('experimental-rc-control-force-floor-learned-search.v2')
+  expect(review.plan.force_response_floor).toEqual({ target_index: 2, target_control_displacement_m: -.00014, minimum_load_factor: 180 })
+  expect(review.designs.price_order.report.selected_candidate_id).toBe('baseline')
+  expect(review.designs.learned_order.report.selected_candidate_id).toBe('w43')
+  expect(review.designs.learned_order.report.rows[1].screens.load_factor_at_target).toMatchObject({ comparison: 'at_least', status: 'pass' })
+  expect(review.designs.price_order.report.rows[1].screens.load_factor_at_target).toMatchObject({ comparison: 'at_least', status: 'fail' })
+  expect(review.costOptimality?.schema_version).toBe('rc-control-candidate-cost-optimality.v4')
+  expect(review.costOptimality?.arms.learned_order.matches_pool_minimum).toBe(true)
+  expect(review.costOptimality?.arms.price_order.missed_cheaper_feasible_candidate_ids).toContain('w43')
+  expect(review.report.historical_training_execution_work.known_counters.unknown_solver_work_attempt_count).toBe(0)
+})
+
+test('force-floor search refuses a shifted authored target even when the plan is rehashed', async () => {
+  const planRaw = new TextDecoder().decode(forceFloorBytes('plan.json'))
+  const floor = { ...document(forceFloorBytes('plan.json')).value.force_response_floor, target_index: 1 }
+  const forged = changed(planRaw, { force_response_floor: JSON.stringify(floor) }, 'plan_hash')
+  await expect(validateRcControlSearch(forceFloorBytes('result.json'), path =>
+    path === 'plan.json' ? Promise.resolve(forged) : forceFloorRead(path))).rejects.toThrow('study_force_floor_invalid')
+})
+
+test('force-floor source check refuses an altered accepted signed factor', () => {
+  const api = document(forceFloorBytes('price_order/baseline/result.json')).value
+  const model = document(forceFloorBytes('price_order/baseline/model.json')).value
+  const comparison = document(forceFloorBytes('price_order/comparison.json')).value
+  expect(acceptedForceFactor(api, model, comparison)).toBe(comparison.rows[0].performance.load_factor_at_target)
+  const altered = structuredClone(api)
+  altered.response_history[2].load_factor += 1
+  expect(() => acceptedForceFactor(altered, model, comparison)).toThrow('study_force_factor_source_invalid')
+})
+
+test('force-floor search refuses a reversed lower-bound screen after comparison rehash', async () => {
+  const path = 'price_order/comparison.json', raw = new TextDecoder().decode(forceFloorBytes(path))
+  const rows = fields(raw).get('rows')!.value.replace('"comparison":"at_least","limit":180.0,"status":"fail"',
+    '"comparison":"at_most","limit":180.0,"status":"pass"')
+  expect(rows).not.toBe(fields(raw).get('rows')!.value)
+  const forged = changed(raw, { rows }, 'report_hash')
+  await expect(validateRcControlSearch(forceFloorBytes('result.json'), source =>
+    source === path ? Promise.resolve(forged) : forceFloorRead(source))).rejects.toThrow('study_screen_invalid')
+})
+
+test('force-floor search refuses rehashed unknown online work', async () => {
+  const raw = new TextDecoder().decode(forceFloorBytes('result.json'))
+  const arms = structuredClone(document(forceFloorBytes('result.json')).value.arms)
+  arms.learned_order.unknown_work_until_outcome = true
+  const forged = changed(raw, { arms: JSON.stringify(arms) }, 'report_hash')
+  await expect(validateRcControlSearch(forged, forceFloorRead)).rejects.toThrow('force_search_arm_invalid')
+})
+
+for (const [name, source, replacement] of [
+  ['quantity', '"gross_concrete_volume_m3":0.627', '"gross_concrete_volume_m3":0.6271'],
+  ['cost', '"total":113.49452399999998', '"total":1'],
+] as const) {
+  test(`force-floor search refuses a rehashed altered ${name} in original comparison`, async () => {
+    const path = 'price_order/comparison.json', raw = new TextDecoder().decode(forceFloorBytes(path))
+    const rows = fields(raw).get('rows')!.value.replace(source, replacement)
+    expect(rows).not.toBe(fields(raw).get('rows')!.value)
+    const forged = changed(raw, { rows }, 'report_hash')
+    await expect(validateRcControlSearch(forceFloorBytes('result.json'), artifact =>
+      artifact === path ? Promise.resolve(forged) : forceFloorRead(artifact))).rejects.toThrow(name === 'quantity' ? 'logical_hash_mismatch' : 'study_estimate_invalid')
+  })
 }
 for (const mutation of ['erased_wall', 'erased_cpu', 'wrong_phase', 'raised', 'invalid_clock']) {
   test(`RC search rejects rehashed historical training ${mutation}`, async () => {
