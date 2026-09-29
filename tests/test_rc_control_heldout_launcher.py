@@ -28,10 +28,10 @@ def development(source, tmp_path, monkeypatch):
     return source, plan(source), tmp_path / "packet"
 
 
-def _launch(development, slot_index=0, **kwargs):
+def _launch(development, slot_index=0, *, reuse_assembly=False, **kwargs):
     source, frozen, root = development
     return launcher.launch_heldout_slot(
-        frozen, source[0], selected(source), slot_index=slot_index,
+        frozen, source[0], selected(source, reuse_assembly=reuse_assembly), slot_index=slot_index,
         packet_root=root, **kwargs,
     )
 
@@ -68,11 +68,14 @@ print("before exit", flush=True)
 '''
 
 
+@pytest.mark.parametrize("reuse_assembly", [False, True])
 def test_actual_full_path_child_binds_original_bytes_and_preserves_missing_slots(
-    development, monkeypatch,
+    development, monkeypatch, reuse_assembly,
 ):
+    source, _, root = development
+    development = source, plan(source, reuse_assembly=reuse_assembly), root
     _driver(monkeypatch, _REAL_DEVELOPMENT_CHILD)
-    result = _launch(development)
+    result = _launch(development, reuse_assembly=reuse_assembly)
     _, frozen, root = development
     attempt = result["attempt"]
     assert attempt["return_code"] == 0
@@ -82,6 +85,9 @@ def test_actual_full_path_child_binds_original_bytes_and_preserves_missing_slots
     assert attempt["started"]["sha256"] == _sha((root / "slot-0000/started.json").read_bytes())
     outcome = runtime._read_receipt(root / "slot-0000/outcome.json")
     assert outcome["status"] == "completed"
+    report = runtime._read_receipt(root / "slot-0000/benchmark/comparison.json")
+    assert ("line_search_assembly_reuse" in report) is reuse_assembly
+    assert all(row["full_history_pass"] for row in report["comparisons"].values())
     assert attempt["wall_ns"] >= outcome["wall_ns"]
     assert attempt["cpu_ns"] is None
     costs = result["lifecycle_audit"]
@@ -94,7 +100,7 @@ def test_actual_full_path_child_binds_original_bytes_and_preserves_missing_slots
     assert not costs["net_benefit_proved"]
     assert costs["selected_strategy"] == "secant"
     with pytest.raises(ValueError, match="no replacement"):
-        _launch(development)
+        _launch(development, reuse_assembly=reuse_assembly)
     changed = root / attempt["stdout"]["path"]
     changed.write_bytes(b"changed stdout")
     with pytest.raises(ValueError, match="byte binding"):
@@ -358,3 +364,23 @@ def test_child_exiting_during_timeout_kill_is_reaped_without_launch_error(tmp_pa
     assert observed["timed_out"] is True
     assert observed["launch_error"] is None
     assert observed["wall_ns"] > 0
+
+
+@pytest.mark.parametrize("downgrade", [False, True])
+def test_parent_rejects_selected_profile_mismatch_before_packet_creation(source, tmp_path, downgrade):
+    choice = selected(source, reuse_assembly=True)
+    frozen = plan(source, reuse_assembly=True)
+    if downgrade:
+        frozen["schema_version"] = "rc-heldout-runtime-plan.v1"
+        frozen.pop("execution_profile")
+    else:
+        frozen["execution_profile"]["reuse_line_search_assembly"] = False
+    frozen["plan_hash"] = _sha(_bytes({
+        k: v for k, v in frozen.items() if k != "plan_hash"
+    }))
+    root = tmp_path / "packet"
+    with pytest.raises(ValueError, match="execution profile differs"):
+        launcher.launch_heldout_slot(
+            frozen, source[0], choice, slot_index=0, packet_root=root,
+        )
+    assert not root.exists()

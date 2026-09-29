@@ -133,6 +133,42 @@ def _selected_policy(selection, source_revision):
     return policy
 
 
+def _selection_assembly_reuse(selection):
+    if "line_search_assembly_reuse" not in selection:
+        return False
+    if selection["line_search_assembly_reuse"] != (
+        "rc-control-immediate-line-search-reuse.v1"
+    ):
+        raise ValueError("unsupported selected line-search assembly reuse profile")
+    return True
+
+
+def _plan_assembly_reuse(plan, selection=None):
+    if plan.get("plan_hash") != _sha(_bytes({
+        k: v for k, v in plan.items() if k != "plan_hash"
+    })):
+        raise ValueError("held-out plan hash mismatch")
+    if plan.get("schema_version") == "rc-heldout-runtime-plan.v1":
+        if "execution_profile" in plan:
+            raise ValueError("legacy held-out plan cannot declare an execution profile")
+        reuse = False
+    elif plan.get("schema_version") == "rc-heldout-runtime-plan.v2":
+        profile = plan.get("execution_profile")
+        if (
+            type(profile) is not dict
+            or set(profile) != {"schema_version", "reuse_line_search_assembly"}
+            or profile["schema_version"] != "rc-heldout-execution-profile.v1"
+            or type(profile["reuse_line_search_assembly"]) is not bool
+        ):
+            raise ValueError("invalid held-out execution profile")
+        reuse = profile["reuse_line_search_assembly"]
+    else:
+        raise ValueError("unsupported held-out runtime plan schema")
+    if selection is not None and reuse != _selection_assembly_reuse(selection):
+        raise ValueError("held-out execution profile differs from development selection")
+    return reuse
+
+
 def declare_heldout_runtime(
     cases,
     selection,
@@ -160,6 +196,7 @@ def declare_heldout_runtime(
     ):
         raise ValueError("predeclared relative threshold required")
     policy = _selected_policy(selection, source_revision)
+    reuse_assembly = _selection_assembly_reuse(selection)
     cases = tuple(cases)
     learning._preflight(cases, arithmetic_profile)
     by_id = {case.case_id: case for case in cases}
@@ -216,7 +253,11 @@ def declare_heldout_runtime(
         for case_index, case_id in enumerate(admitted)
     ]
     plan = {
-        "schema_version": "rc-heldout-runtime-plan.v1",
+        "schema_version": "rc-heldout-runtime-plan.v2",
+        "execution_profile": {
+            "schema_version": "rc-heldout-execution-profile.v1",
+            "reuse_line_search_assembly": reuse_assembly,
+        },
         "source_revision": source_revision,
         "selection_result_hash": selection["result_hash"],
         "policy_hash": policy.policy_hash,
@@ -274,6 +315,7 @@ def run_heldout_slot(plan, cases, selection, *, slot_index, output_directory):
     wall, cpu = perf_counter_ns(), process_time_ns()
     lw, lc = perf_counter_ns(), process_time_ns()
     policy = _selected_policy(selection, plan["source_revision"])
+    reuse_assembly = _plan_assembly_reuse(plan, selection)
     policy_load_cost = {"wall_ns": perf_counter_ns() - lw,
                         "cpu_ns": process_time_ns() - lc}
     if policy.policy_hash != plan["policy_hash"]:
@@ -365,6 +407,7 @@ def run_heldout_slot(plan, cases, selection, *, slot_index, output_directory):
             output_directory=root / "benchmark",
             proposal=propose, proposal_identity=loaded.policy_hash,
             proposal_abstention_strategy="secant",
+            reuse_line_search_assembly=reuse_assembly,
             arm_order=tuple(slot["arm_order"]),
             absolute_tolerance=plan["absolute_tolerance"],
             relative_tolerance=plan["relative_tolerance"],
@@ -413,8 +456,7 @@ def run_heldout_slot(plan, cases, selection, *, slot_index, output_directory):
 
 def summarize_heldout_runtime(plan, outcomes):
     """Retain all slots in the denominator; publish no net-benefit claim."""
-    if plan.get("plan_hash") != _sha(_bytes({k: v for k, v in plan.items() if k != "plan_hash"})):
-        raise ValueError("held-out plan hash mismatch")
+    _plan_assembly_reuse(plan)
     if type(outcomes) is not dict or set(outcomes) - set(range(len(plan["schedule"]))):
         raise ValueError("only declared slot outcomes allowed")
     rows = []
@@ -499,6 +541,7 @@ def audit_heldout_receipts(plan, root):
     authenticate external source rights, independent physics or lifecycle cost.
     """
     audit_wall, audit_cpu = perf_counter_ns(), process_time_ns()
+    reuse_assembly = _plan_assembly_reuse(plan)
     root = Path(root)
     outcomes = {}
     rows = {row["case_id"]: row for row in plan["cases"]}
@@ -562,10 +605,26 @@ def audit_heldout_receipts(plan, root):
                 or _sha(_bytes(report.get("request"))) != rows[slot["case_id"]]["request_hash"]
                 or report.get("proposal_identity") != plan["policy_hash"]
                 or report.get("arm_order") != slot["arm_order"]
+                or _selection_assembly_reuse(report) != reuse_assembly
                 or report.get("absolute_tolerance") != plan["absolute_tolerance"]
                 or report.get("relative_tolerance") != plan["relative_tolerance"]
             ):
                 raise ValueError("full-path original report binding mismatch")
+            # The producer writes this identity before running any arm, then
+            # extends it unchanged with results in comparison.json. Bind every
+            # original field, including absent legacy execution-profile opt-ins.
+            request_identity = _read_receipt(folder / "benchmark" / "request.json")
+            report_identity = {
+                key: value for key, value in report.items()
+                if key not in {
+                    "arms", "fresh_reference", "comparisons", "reference_repeat_exact",
+                    "whole_study_wall_ns", "whole_study_cpu_ns", "whole_study_timing_scope",
+                    "all_execution_work_reported", "claims", "numerical_proposal_work",
+                    "assembly_phase_work", "assembly_phase_summary_wall_ns", "report_hash",
+                }
+            }
+            if _bytes(request_identity) != _bytes(report_identity):
+                raise ValueError("original benchmark request differs from comparison identity")
             benchmark_cost = ledger.get("benchmark", {})
             if any(
                 type(benchmark_cost.get(key)) is not int

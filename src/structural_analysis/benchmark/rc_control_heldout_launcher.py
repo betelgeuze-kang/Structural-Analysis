@@ -166,6 +166,7 @@ def launch_heldout_slot(
     if plan["selection_result_hash"] != selection.get("result_hash"):
         raise ValueError("development selection changed")
     policy = runtime._selected_policy(selection, plan["source_revision"])
+    runtime._plan_assembly_reuse(plan, selection)
     if policy.policy_hash != plan["policy_hash"]:
         raise ValueError("selected policy changed")
     runtime._require_clean_source(plan["source_revision"])

@@ -144,6 +144,7 @@ def _reference_design_row(
         row["quantities"] = design.calculate_fiber_frame_member_quantities(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         )
         row["material_estimate"] = design._estimate(row["quantities"], prices)
         model_bytes = _bytes(model.canonical_payload())
