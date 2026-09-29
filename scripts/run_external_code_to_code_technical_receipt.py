@@ -2504,6 +2504,63 @@ def _product_replay_numbers_close(stored: float, current: float) -> bool:
     )
 
 
+_REPLAY_METRIC_FIELDS = frozenset({
+    "quantity", "product_value", "reference_value", "absolute_error",
+    "relative_error", "absolute_tolerance", "relative_tolerance", "contract_pass",
+})
+
+
+def _replay_metric_errors_consistent(metric: dict[str, Any]) -> bool:
+    # Validate each derived diagnostic against its own primitive values before
+    # comparing primitive response drift. A near-zero denominator must not
+    # amplify an otherwise allowed response difference into stale provenance.
+    fields = (
+        "product_value", "reference_value", "absolute_error", "relative_error",
+        "absolute_tolerance", "relative_tolerance",
+    )
+    if any(isinstance(metric[key], bool) or not isinstance(metric[key], (int, float))
+           for key in fields):
+        return False
+    try:
+        values = {key: float(metric[key]) for key in fields}
+    except (OverflowError, ValueError):
+        return False
+    if not all(math.isfinite(value) for value in values.values()):
+        return False
+    if values["absolute_tolerance"] < 0 or values["relative_tolerance"] < 0:
+        return False
+    tolerances = (values["absolute_tolerance"], values["relative_tolerance"])
+    # The stored receipt validator uses a unity scale for the base cases and
+    # a tiny floor for bounded 3-D cases; require one of those known contracts.
+    if tolerances == (
+        COMPARISON_ABSOLUTE_TOLERANCE, COMPARISON_RELATIVE_TOLERANCE,
+    ):
+        scale = max(abs(values["product_value"]), abs(values["reference_value"]), 1.0)
+    elif tolerances in {
+        (SPATIAL_FRAME3D_ABSOLUTE_TOLERANCE, SPATIAL_FRAME3D_RELATIVE_TOLERANCE),
+        (FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE,
+         FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE),
+    }:
+        scale = max(
+            abs(values["product_value"]), abs(values["reference_value"]),
+            np.finfo(np.float64).tiny,
+        )
+    else:
+        return False
+    absolute = abs(values["product_value"] - values["reference_value"])
+    relative = absolute / max(abs(values["reference_value"]), np.finfo(np.float64).tiny)
+    expected_pass = absolute <= (
+        values["absolute_tolerance"] + values["relative_tolerance"] * scale
+    )
+    return (
+        math.isfinite(relative)
+        and math.isclose(values["absolute_error"], absolute, rel_tol=1e-14, abs_tol=1e-30)
+        and math.isclose(values["relative_error"], relative, rel_tol=1e-14, abs_tol=1e-30)
+        and type(metric["contract_pass"]) is bool
+        and metric["contract_pass"] is expected_pass
+    )
+
+
 def _product_replay_values_match(stored: Any, current: Any) -> bool:
     """Compare replay payloads while allowing bounded numerical runtime drift."""
     if isinstance(stored, bool) or isinstance(current, bool):
@@ -2513,30 +2570,21 @@ def _product_replay_values_match(stored: Any, current: Any) -> bool:
     if isinstance(stored, (int, float)) and isinstance(current, (int, float)):
         return _product_replay_numbers_close(stored, current)
     if isinstance(stored, dict):
-        # These two metric fields are recomputed and checked against the stored
-        # product/reference pair before current-source replay comparison.
-        metric_keys = {
-            "quantity",
-            "product_value",
-            "reference_value",
-            "absolute_error",
-            "relative_error",
-            "absolute_tolerance",
-            "relative_tolerance",
-            "contract_pass",
-        }
-        derived_keys = (
-            {"absolute_error", "relative_error"}
-            if stored.keys() == metric_keys
-            else set()
-        )
+        if stored.keys() == _REPLAY_METRIC_FIELDS and isinstance(current, dict):
+            if current.keys() != _REPLAY_METRIC_FIELDS or not all(
+                _replay_metric_errors_consistent(metric) for metric in (stored, current)
+            ):
+                return False
+            return all(
+                _product_replay_values_match(stored[key], current[key])
+                for key in stored if key != "relative_error"
+            )
         return (
             isinstance(current, dict)
             and stored.keys() == current.keys()
             and all(
                 _product_replay_values_match(stored[key], current[key])
                 for key in stored
-                if key not in derived_keys
             )
         )
     if isinstance(stored, list):
@@ -2568,6 +2616,34 @@ def _planar_load_path_attempts_complete(
         )
         for attempt, target in zip(attempts, PLANAR_LOAD_PATH_TARGETS, strict=True)
     )
+
+
+def _product_replay_mismatch_path(stored: Any, current: Any) -> tuple[Any, ...] | None:
+    """Locate a rejected field without changing the acceptance predicate."""
+    if _product_replay_values_match(stored, current):
+        return None
+    if isinstance(stored, dict) and isinstance(current, dict):
+        for key in sorted(stored.keys() | current.keys()):
+            if key not in stored or key not in current:
+                return (key,)
+        consistent_metric = stored.keys() == _REPLAY_METRIC_FIELDS and all(
+            _replay_metric_errors_consistent(metric) for metric in (stored, current)
+        )
+        for key in sorted(stored):
+            if consistent_metric and key == "relative_error":
+                continue
+            child = _product_replay_mismatch_path(stored[key], current[key])
+            if child is not None:
+                return (key, *child)
+    elif isinstance(stored, list) and isinstance(current, list):
+        for index, (left, right) in enumerate(zip(stored, current)):
+            child = _product_replay_mismatch_path(left, right)
+            if child is not None:
+                return (index, *child)
+        if len(stored) != len(current):
+            return (min(len(stored), len(current)),)
+    # Also covers a malformed metric whose leaves separately compare equal.
+    return ()
 
 
 def _case(
@@ -4195,8 +4271,12 @@ def validate_external_code_to_code_technical_receipt(
             payload["comparisons"],
             current_comparisons,
         ):
+            mismatch_path = _product_replay_mismatch_path(
+                payload["comparisons"], current_comparisons,
+            )
             raise ExternalCodeToCodeReceiptError(
-                "receipt_product_comparisons_stale"
+                "receipt_product_comparisons_stale:path="
+                + json.dumps(mismatch_path, ensure_ascii=True)
             )
         if replay["current_product_replay_pass"] is not expected_technical_pass:
             raise ExternalCodeToCodeReceiptError(
