@@ -1,0 +1,82 @@
+{
+  "schema_version": "rc-flexural-public-source-qualification.v1",
+  "source_id": "mathern-yang-2021-unstrengthened-reference",
+  "qualification_date": "2026-09-29",
+  "source_status": "licensed_article_and_drawing_only",
+  "source_role": "prospective_independent_evaluation_source_only",
+  "training_row_count": 0,
+  "measured_evaluation_row_count": 0,
+  "measured_rows_ingested": false,
+  "curve_digitization_executed": false,
+  "solver_comparison_executed": false,
+  "physical_validation_claim": false,
+  "source": {
+    "title": "A Practical Finite Element Modeling Strategy to Capture Cracking and Crushing Behavior of Reinforced Concrete Structures",
+    "authors": ["Alexandre Mathern", "Jincheng Yang"],
+    "publication": "Materials 2021, 14(3), 506",
+    "doi": "10.3390/ma14030506",
+    "publisher_url": "https://doi.org/10.3390/ma14030506",
+    "accessible_institutional_full_text": "https://research.chalmers.se/publication/522649/file/522649_Fulltext.pdf",
+    "full_text_sha256_observed": "334ac704e096982ed0ea69b905895a7e8434172deb359fdcee0af20dba96c060",
+    "license_in_article": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "rights_scope": "The published article, including its figures, is CC BY 4.0 with attribution and change notice; no separate unpublished acquisition file or its rights have been identified.",
+    "data_availability_statement": "The article says the data supporting its findings are contained within the article; it does not link an ordered numeric measurement file.",
+    "cited_locations": [
+      "Section 2 and Figure 1, article pp. 3-4 (institutional PDF pp. 4-5): specimen, geometry, loading, sensors, and material table",
+      "Section 5.1 and Figure 19, article p. 20 (institutional PDF p. 21): measured load-versus-net-midspan-deflection plot and failure endpoint",
+      "Data Availability Statement, article p. 23 (institutional PDF p. 24)"
+    ]
+  },
+  "specimen": {
+    "identity": "unstrengthened conventional-steel RC reference beam only",
+    "excluded_companion": "externally bonded CFRP-strengthened beam",
+    "dominant_reported_mechanism": "flexural failure after tensile steel yielding, governed by compression-zone concrete crushing",
+    "geometry_from_figure_1_mm": {
+      "rectangular_section_width": 200,
+      "rectangular_section_depth": 300,
+      "support_center_span": 4200,
+      "load_nose_spacing": 1300,
+      "nominal_each_support_to_nearby_nose": 1450,
+      "nominal_each_end_overhang": 150
+    },
+    "geometry_provenance": "Figure 1 dimension transcription; the 1450 mm support-to-nose value follows symmetric 4200 and 1300 mm dimensions, not a surveyed station record.",
+    "reinforcement_from_figure_1": [
+      "two top and two bottom nominal diameter 16 mm B500C steel bars",
+      "diameter 10 mm stirrups at 75 mm spacing",
+      "Figure 1 shows nominal side/top/bottom bar offsets; specimen-specific as-built bar coordinates are not published."
+    ],
+    "loading": "two synchronized hydraulic jacks at the two noses, displacement controlled; Figure 1 labels each nose Load/2",
+    "supports": "two movable steel roller supports described in Section 2; a model's horizontal rigid-body restraint and bearing compliance need an explicit convention",
+    "material_boundary": "Table 1's concrete Ec=36.9 GPa, fc=51.1 MPa, and fct=3.6 MPa are code-estimated for C35/45 at 287 days; diameter-16 mm steel coupon Es=201 GPa and fy=510 MPa were experimentally measured. These are not a complete measured nonlinear material law.",
+    "observable_endpoint": "Figure 19 plots experimental total load against net midspan deflection, derived from three LVDTs; Section 5.1 reports the test stopped at 65.0 kN and 79 mm when concrete crushing was observed.",
+    "pretest_condition": "The authors attribute a weaker early cracking-stage response partly to shrinkage cracks and unexpected load during transport."
+  },
+  "numeric_measurement_availability": {
+    "ordered_numeric_curve_file_identified": false,
+    "original_acquisition_file_identified": false,
+    "published_observations": "Figure 19 experimental plot and the reported 65.0 kN, 79 mm stopping endpoint",
+    "plot_is_not_an_ordered_raw_history": true,
+    "digitized_points_created": false,
+    "sampling_times_or_uncertainty_reported_for_plot": false
+  },
+  "crosswalk_and_model_boundary": {
+    "closer_mechanism_match_than_titanium_grout_source": "The isolated reference has ordinary steel longitudinal bars and reported flexural crushing, without the companion beam's CFRP or the Zenodo 18735817 specimen's titanium/grout interface.",
+    "current_public_compiler_compatible": false,
+    "model_blockers": [
+      "The public RC compiler on the main branch has a fully fixed serial-chain endpoint, not this two-bearing four-point setup; the experimental pin/roller path on PR 439 is not merged and is not the source's two-roller bearing description.",
+      "The source paper models steel-concrete bond slip and localized cracking, neither of which is established negligible for the current Euler-Bernoulli fiber element.",
+      "Concrete nonlinear properties are not all independently measured, and early shrinkage/transport damage is reported.",
+      "No ordered numeric load-deflection measurement file, published digitization uncertainty, or fixed-parameter held-out comparison is available in this intake."
+    ]
+  },
+  "admission_gates": {
+    "article_access_and_license": "qualified_for_source_citation",
+    "drawing_and_endpoint_source": "qualified_for_source_only_record",
+    "ordered_measurement_file": "not_identified",
+    "specimen_to_supported_physics": "unverified",
+    "independent_held_out_comparison": "not_run",
+    "measured_evaluation_rows": "not_admitted",
+    "measured_training_rows": "not_admitted"
+  }
+}
