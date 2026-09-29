@@ -25,6 +25,7 @@ training rows or a locked physical-validation specimen.
 
 | Source record | Available evidence in the recorded intake | Why it remains on HOLD |
 | --- | --- | --- |
+| [Oregon State / U.S. DOT titanium-strengthened flexural specimen](../../benchmarks/rc_fiber/zenodo_18735817_flexural_source.v1.json) | Published CSV with 76,114 ordered displacement/load pairs, dataset-specific CC BY 4.0 record, drawing and test report | Distinct steel/titanium bars, grout interface, support/channel correspondence and model applicability unresolved. The history and peak were already inspected; the proposed predebonding window is exploratory and cannot receive blind or locked-evaluation credit |
 | [Mathern–Yang conventional reference](../../benchmarks/rc_fiber/mathern_yang_2021_reference_source.v1.json) | Article geometry, setup, measured plot and reported flexural endpoint; strengthened companion excluded | No ordered numerical measurement file identified; specimen inputs and channel/model correspondence still required |
 | [SND stainless-steel beam](snd-rc-flexural-data-byte-access-20260929.md) | Catalogue metadata and listed actuator/DIC files | Original bytes were inaccessible at the recorded check; filenames and open metadata do not establish channels or measurements |
 | [Sawicki/Braunschweig cast beam](braunschweig-cast-rc-flexure-source-screen-20260929.md) | Article setup and dataset metadata | Dataset bytes and columns unverified; dataset-specific noncommercial/share-alike terms remain distinct from the article license |
