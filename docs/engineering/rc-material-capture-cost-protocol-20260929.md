@@ -15,10 +15,11 @@ lineage.
 ## Fixed comparison
 
 The candidate changes only the optional committed-material snapshot producer:
-it retains native-checkpoint validation and the exact feature names, values,
-source/parent hashes, JSON bytes and snapshot hash, while replacing a redundant
-parse and re-hash of freshly produced JSON with equivalent direct validation.
-The original producer remains selectable as the baseline. Neither arm changes
+it caches the immutable ordered field descriptors and names within one fresh
+path, while reading every value from its current accepted parent. It retains
+full native-checkpoint validation, the strict JSON decode and re-hash, and the
+exact feature names, values, source/parent hashes, JSON bytes and snapshot hash.
+The original uncached producer remains selectable as the baseline. Neither arm changes
 the solver, policy weights, model, load history, guard, acceptance tolerances,
 fallback or accepted-state authority. A mismatch in output bytes, malformed
 state admission, failed response-history check, unknown solver work, or missing
