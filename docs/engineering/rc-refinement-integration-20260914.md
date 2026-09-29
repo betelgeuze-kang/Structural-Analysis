@@ -2,13 +2,13 @@
 
 ## Scope and integration history
 
-This local research slice integrates the #442/#448 result-reuse implementation
+The initial local research slice integrated the #442/#448 result-reuse implementation
 with #439 at `9453bc210325305569442cbf7ac2fc075f8d1be0` without replacing its
 newer single-model reference evaluator. The historical private helper delegates
 to the current `_reference_design_row`. Current scientific comparisons, material
 laws, solver tolerances, trial-state semantics and verification rules remain.
-Old workflow additions are superseded by a separate additive integration workflow;
-the latest full-suite workflow and its tests are retained unchanged.
+The integration uses an additive job in the existing reviewed CPU workflow. Its
+regressions and diagnostics remain separate from the required full-suite shards.
 
 The shared neutral JSON loader now rejects duplicate keys at any nesting level,
 NaN/Infinity and overflowing exponents, invalid UTF-8/lone surrogates and excessive
@@ -114,10 +114,38 @@ unknown-work rejection, concrete-field unavailability, screen-outcome instabilit
 finite-pool comparison against exhaustive refinement, and separate-process CLI
 repricing. Synthetic fault injection is not a physical experiment.
 
-Local execution uses the digest-verified complete base Python wheel plus exact
-affected files/fixtures, not a full repository checkout. An additive hosted job
+The initial local execution used the digest-verified complete base Python wheel
+plus exact affected files/fixtures, not a full repository checkout. An additive hosted job
 runs these checks, formatting and lint on the committed tree. Required full-suite
 checks, external-reference materialization and owner review are NOT replaced.
 A successful finite-grid study is not an independent material validation, a mesh-
 objective fracture model, a new spatial element refinement, a GPU acceleration
 claim, or a user-facing browser integration. These remain separate work.
+
+## Current-source integration on 2026-09-29
+
+PR #450 now retains the full heads of #444
+(`264cd592b295c5d72481c029e7390561643c0fed`) and #446
+(`2e1c2b41048ee6ea3caea7263de7a216be47a4a0`), together with current development
+base `3021a69b54d073b6f5dee7e329545bbe4f1237a7`. The missing durable research note
+is restored with its original bytes. All original local, durable, persistence,
+resource and AMD-discovery regression functions are preserved. Later atomic
+first-owner publication, strict work accounting and source checks remain intact.
+The combined diagnostic job covers both predecessor slices; the current parent
+full-shard execution and result retention remain required.
+
+A clean full checkout of integration source
+`7a35d59f107737b0502ebe56aeedfe30e63e9d7d` passed **418 tests across 19 complete
+test files**, with no skips or deselections. The scope includes actual small RC
+solves, second-interpreter reuse, chunk pause/reopen, interrupted writes and
+process reservations, cooperative budgets, finite refinement/candidate decisions,
+current durable/preload behavior, strict input, source inventory and workflow
+contracts. The tracked checkout remained clean after execution. Formatting and
+lint passed for all 21 files selected by the integration job. Shared fixture
+registration was made explicit without changing the original test functions;
+formatting of the current reference evaluator preserved its Python AST.
+
+This document is the only change after that execution. Current-head hosted CI,
+review and main integration remain outstanding; #443, #445 and #449 remain open.
+The local software checks do not establish independent physical accuracy,
+general AI acceleration, GPU execution, live browser delivery or release approval.
