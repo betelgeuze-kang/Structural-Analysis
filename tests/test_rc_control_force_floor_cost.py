@@ -10,7 +10,9 @@ from structural_analysis.benchmark.rc_control_candidate_cost import (
     COST_AUDIT_V1,
     COST_AUDIT_V2,
     COST_AUDIT_V3,
+    COST_AUDIT_V4,
     FORCE_FLOOR_COMPARISON,
+    FORCE_FLOOR_LEARNED_PLAN,
     FORCE_FLOOR_PLAN,
     candidate_cost_optimality_audit,
 )
@@ -94,6 +96,49 @@ def _legacy_case():
     return plan, reports
 
 
+def _learned_case():
+    plan, reports = _case()
+    plan["schema_version"] = FORCE_FLOOR_LEARNED_PLAN
+    plan["policy_hash"] = "sha256:" + "b" * 64
+    plan["training_report_hash"] = "sha256:" + "c" * 64
+    plan["plans"]["learned_order"] = {"shortlist": ["middle"]}
+    reports["learned_order"] = deepcopy(reports["price_order"])
+    reports["learned_order"]["rows"] = [
+        row
+        for row in reports["learned_order"]["rows"]
+        if row["candidate_id"] in ("baseline", "middle")
+    ]
+    reports["learned_order"]["report_hash"] = "learned_order"
+    reports["exhaustive_oracle"]["rows"][1]["screens"]["load_factor_at_target"].update(
+        value=1.1, status="pass"
+    )
+    plan["predictions"] = []
+    for name, factor in (("cheap", 0.8), ("middle", 1.2)):
+        plan["predictions"].append(
+            {
+                "candidate_id": name,
+                "prediction": {
+                    "policy_hash": plan["policy_hash"],
+                    "abstained": False,
+                    "performance": {"load_factor_at_target": factor},
+                },
+                "predicted_force_floor_status": "available",
+                "predicted_screens": {
+                    "limit": {"status": "pass"},
+                    "load_factor_at_target": {
+                        "value": factor,
+                        "limit": FLOOR["minimum_load_factor"],
+                        "status": "pass"
+                        if factor >= FLOOR["minimum_load_factor"]
+                        else "fail",
+                        "comparison": "at_least",
+                    },
+                },
+            }
+        )
+    return plan, reports
+
+
 def test_cheaper_signed_floor_failure_is_excluded_from_oracle_minimum():
     plan, reports = _case()
     audit = candidate_cost_optimality_audit(plan, reports)
@@ -103,6 +148,47 @@ def test_cheaper_signed_floor_failure_is_excluded_from_oracle_minimum():
     assert audit["pool_minimum_feasible_candidate_ids"] == ["middle"]
     assert audit["pool_minimum_feasible_estimate"] == 200
     assert audit["arms"]["price_order"]["selected_minus_pool_minimum_estimate"] == 0
+
+
+def test_v4_signed_floor_false_negative_is_missed_cheaper_feasible_candidate():
+    plan, reports = _learned_case()
+    audit = candidate_cost_optimality_audit(plan, reports)
+    assert audit["schema_version"] == COST_AUDIT_V4
+    assert audit["pool_minimum_feasible_candidate_ids"] == ["cheap"]
+    assert audit["arms"]["learned_order"]["selected_minus_pool_minimum_estimate"] == 100
+    assert audit["arms"]["learned_order"][
+        "missed_cheaper_false_negative_candidate_ids"
+    ] == ["cheap"]
+    assert (
+        audit["arms"]["price_order"]["missed_cheaper_false_negative_candidate_ids"]
+        is None
+    )
+
+
+def test_v4_abstention_cannot_be_counted_as_signed_floor_failure():
+    plan, reports = _learned_case()
+    prediction = plan["predictions"][0]
+    prediction["prediction"].update(abstained=True, performance=None)
+    prediction["predicted_force_floor_status"] = "unavailable"
+    prediction["predicted_screens"] = None
+    audit = candidate_cost_optimality_audit(plan, reports)
+    assert audit["arms"]["learned_order"]["missed_cheaper_false_negative_count"] == 0
+
+
+@pytest.mark.parametrize("mutation", ["status", "limit", "factor", "availability"])
+def test_v4_forged_predicted_floor_cannot_support_cost_audit(mutation):
+    plan, reports = _learned_case()
+    row = plan["predictions"][0]
+    if mutation == "status":
+        row["predicted_screens"]["load_factor_at_target"]["status"] = "pass"
+    elif mutation == "limit":
+        row["predicted_screens"]["load_factor_at_target"]["limit"] = 0.5
+    elif mutation == "factor":
+        row["prediction"]["performance"]["load_factor_at_target"] = 1.1
+    else:
+        row["predicted_force_floor_status"] = "unavailable"
+    with pytest.raises(ValueError, match="learned .* floor prediction"):
+        candidate_cost_optimality_audit(plan, reports)
 
 
 def test_selected_cheaper_floor_failure_cannot_be_certified():
@@ -125,9 +211,7 @@ def test_selected_cheaper_floor_failure_cannot_be_certified():
 )
 def test_missing_or_forged_oracle_floor_screen_keeps_minimum_unknown(mutation):
     plan, reports = _case()
-    screen = reports["exhaustive_oracle"]["rows"][1]["screens"][
-        "load_factor_at_target"
-    ]
+    screen = reports["exhaustive_oracle"]["rows"][1]["screens"]["load_factor_at_target"]
     mutation(screen)
     audit = candidate_cost_optimality_audit(plan, reports)
     assert audit["status"] == "oracle_incomplete"
@@ -144,13 +228,11 @@ def test_comparison_floor_identity_must_match_plan(mutation):
     elif mutation == "target":
         reports["price_order"]["force_response_floor"]["target_index"] = 1
     elif mutation == "type":
-        reports["price_order"]["force_response_floor"][
-            "minimum_load_factor"
-        ] = 1
+        reports["price_order"]["force_response_floor"]["minimum_load_factor"] = 1
     else:
-        reports["exhaustive_oracle"]["force_response_floor"][
-            "minimum_load_factor"
-        ] = 0.9
+        reports["exhaustive_oracle"]["force_response_floor"]["minimum_load_factor"] = (
+            0.9
+        )
     with pytest.raises(ValueError, match="comparison force floor mismatch"):
         candidate_cost_optimality_audit(plan, reports)
 
@@ -159,7 +241,10 @@ def test_comparison_floor_identity_must_match_plan(mutation):
     ("field", "replacement"),
     [
         ("schema_version", "experimental-rc-control-design-comparison.v1"),
-        ("control_request", {"schema_version": "test-request.v1", "targets_m": [-0.03]}),
+        (
+            "control_request",
+            {"schema_version": "test-request.v1", "targets_m": [-0.03]},
+        ),
         ("baseline_checksum", "sha256:other-baseline"),
         ("source_revision", "b" * 40),
     ],
@@ -171,7 +256,10 @@ def test_floor_comparison_source_identity_must_match_frozen_plan(field, replacem
         candidate_cost_optimality_audit(plan, reports)
 
 
-@pytest.mark.parametrize("field", ["schema_version", "control_request", "baseline_checksum", "source_revision"])
+@pytest.mark.parametrize(
+    "field",
+    ["schema_version", "control_request", "baseline_checksum", "source_revision"],
+)
 def test_floor_comparison_cannot_omit_source_identity(field):
     plan, reports = _case()
     del reports["price_order"][field]
@@ -186,7 +274,9 @@ def test_floor_comparison_price_identity_must_match_frozen_plan():
         candidate_cost_optimality_audit(plan, reports)
 
 
-@pytest.mark.parametrize("field", ["control_request", "baseline_checksum", "source_revision"])
+@pytest.mark.parametrize(
+    "field", ["control_request", "baseline_checksum", "source_revision"]
+)
 def test_floor_plan_requires_source_identity(field):
     plan, reports = _case()
     del plan[field]

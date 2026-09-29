@@ -10,14 +10,19 @@ import math
 COST_AUDIT_V1 = "rc-control-candidate-cost-optimality.v1"
 COST_AUDIT_V2 = "rc-control-candidate-cost-optimality.v2"
 COST_AUDIT_V3 = "rc-control-candidate-cost-optimality.v3"
+COST_AUDIT_V4 = "rc-control-candidate-cost-optimality.v4"
 FORCE_FLOOR_PLAN = "experimental-rc-control-force-floor-price-search-plan.v1"
+FORCE_FLOOR_LEARNED_PLAN = "experimental-rc-control-force-floor-learned-search-plan.v2"
 FORCE_FLOOR_COMPARISON = "experimental-rc-control-design-comparison.v2"
 
 
 def _force_floor_screen_matches(floor, screen):
     """Keep a reported signed response from being certified by a forged status."""
     if type(screen) is not dict or set(screen) != {
-        "value", "limit", "status", "comparison"
+        "value",
+        "limit",
+        "status",
+        "comparison",
     }:
         return False
     value = screen["value"]
@@ -29,9 +34,8 @@ def _force_floor_screen_matches(floor, screen):
         and math.isfinite(screen["limit"])
         and screen["limit"] == floor["minimum_load_factor"]
         and screen["comparison"] == "at_least"
-        and screen["status"] == (
-            "pass" if value >= floor["minimum_load_factor"] else "fail"
-        )
+        and screen["status"]
+        == ("pass" if value >= floor["minimum_load_factor"] else "fail")
     )
 
 
@@ -39,7 +43,7 @@ def verified_limit_outcome(plan, row):
     requested = set(plan["history_limits"]) | set(plan["material_limits"])
     requested.update("terminal_" + k for k in (plan["terminal_limits"] or {}))
     floor = None
-    if plan.get("schema_version") == FORCE_FLOOR_PLAN:
+    if plan.get("schema_version") in (FORCE_FLOOR_PLAN, FORCE_FLOOR_LEARNED_PLAN):
         floor = plan.get("force_response_floor")
         if type(floor) is not dict or "minimum_load_factor" not in floor:
             return None
@@ -63,9 +67,7 @@ def verified_limit_outcome(plan, row):
     return all(s["status"] == "pass" for s in screens.values())
 
 
-def candidate_cost_optimality_audit(
-    plan, comparisons, *, schema_version=None
-):
+def candidate_cost_optimality_audit(plan, comparisons, *, schema_version=None):
     """Require every oracle result before identifying a finite-pool minimum.
 
     Unknown outcomes remain unknown even when their declared prices exceed the
@@ -74,23 +76,41 @@ def candidate_cost_optimality_audit(
     V2 also intersects missed cheaper feasible alternatives with predicted
     limit failures for the learned arm; abstentions never count as failures.
     V3 carries the force floor identity and treats a missing or internally
-    inconsistent signed response screen as unverifiable.
+    inconsistent signed response screen as unverifiable. V4 binds learned
+    signed-factor predictions to that same floor and preserves abstentions.
     """
-    floor_plan = plan.get("schema_version") == FORCE_FLOOR_PLAN
+    floor_schema = plan.get("schema_version")
+    floor_plan = floor_schema in (FORCE_FLOOR_PLAN, FORCE_FLOOR_LEARNED_PLAN)
     if schema_version is None:
-        schema_version = COST_AUDIT_V3 if floor_plan else COST_AUDIT_V2
-    if schema_version not in (COST_AUDIT_V1, COST_AUDIT_V2, COST_AUDIT_V3):
+        schema_version = (
+            COST_AUDIT_V4
+            if floor_schema == FORCE_FLOOR_LEARNED_PLAN
+            else COST_AUDIT_V3
+            if floor_plan
+            else COST_AUDIT_V2
+        )
+    if schema_version not in (
+        COST_AUDIT_V1,
+        COST_AUDIT_V2,
+        COST_AUDIT_V3,
+        COST_AUDIT_V4,
+    ):
         raise ValueError("unsupported cost audit schema version")
-    if floor_plan != (schema_version == COST_AUDIT_V3):
-        raise ValueError("force floor plan requires cost audit v3")
+    if (
+        (floor_schema == FORCE_FLOOR_PLAN and schema_version != COST_AUDIT_V3)
+        or (
+            floor_schema == FORCE_FLOOR_LEARNED_PLAN and schema_version != COST_AUDIT_V4
+        )
+        or (not floor_plan and schema_version in (COST_AUDIT_V3, COST_AUDIT_V4))
+    ):
+        raise ValueError("force floor plan requires its matching cost audit version")
     floor = None
     if floor_plan:
         floor = plan.get("force_response_floor")
         if (
             type(floor) is not dict
-            or set(floor) != {
-                "target_index", "target_control_displacement_m", "minimum_load_factor"
-            }
+            or set(floor)
+            != {"target_index", "target_control_displacement_m", "minimum_load_factor"}
             or type(floor["target_index"]) is not int
             or floor["target_index"] < 0
             or type(floor["target_control_displacement_m"]) not in (int, float)
@@ -109,9 +129,17 @@ def candidate_cost_optimality_audit(
     pool = {row["candidate_id"]: row for row in plan["pool"]}
     if len(pool) != len(plan["pool"]) or "baseline" not in pool:
         raise ValueError("cost audit requires a unique pool including baseline")
+    if schema_version == COST_AUDIT_V4 and (
+        type(plan.get("policy_hash")) is not str
+        or type(plan.get("training_report_hash")) is not str
+        or set(plan["plans"]) != {"price_order", "learned_order"}
+    ):
+        raise ValueError(
+            "learned force floor audit needs frozen arm and policy identities"
+        )
     predicted_failures = set()
     if (
-        schema_version in (COST_AUDIT_V2, COST_AUDIT_V3)
+        schema_version in (COST_AUDIT_V2, COST_AUDIT_V3, COST_AUDIT_V4)
         and "learned_order" in plan["plans"]
     ):
         predictions = plan["predictions"]
@@ -127,11 +155,32 @@ def candidate_cost_optimality_audit(
         for row in predictions:
             prediction = row["prediction"]
             screens = row["predicted_screens"]
+            if schema_version == COST_AUDIT_V4:
+                status = row.get("predicted_force_floor_status")
+                expected_status = (
+                    "unavailable"
+                    if prediction.get("abstained") is True
+                    else "available"
+                )
+                if (
+                    status != expected_status
+                    or prediction.get("policy_hash") != plan["policy_hash"]
+                ):
+                    raise ValueError(
+                        "learned force floor prediction identity or availability mismatch"
+                    )
             if type(prediction.get("abstained")) is not bool:
                 raise ValueError("cost audit needs explicit prediction abstention")
             if prediction["abstained"]:
                 if screens is not None:
                     raise ValueError("abstained prediction cannot have screens")
+                if (
+                    schema_version == COST_AUDIT_V4
+                    and prediction.get("performance") is not None
+                ):
+                    raise ValueError(
+                        "abstained force floor prediction has physical values"
+                    )
             elif (
                 type(screens) is not dict
                 or set(screens) != requested_screens
@@ -142,6 +191,13 @@ def candidate_cost_optimality_audit(
                 )
             ):
                 raise ValueError("cost audit needs complete prediction screens")
+            elif schema_version == COST_AUDIT_V4 and (
+                not _force_floor_screen_matches(floor, screens["load_factor_at_target"])
+                or type(prediction.get("performance")) is not dict
+                or prediction["performance"].get("load_factor_at_target")
+                != screens["load_factor_at_target"]["value"]
+            ):
+                raise ValueError("learned signed force floor prediction mismatch")
             elif any(screen["status"] == "fail" for screen in screens.values()):
                 predicted_failures.add(row["candidate_id"])
     estimates = {}
@@ -275,7 +331,7 @@ def candidate_cost_optimality_audit(
             "missed_cheaper_feasible_count": None if missed is None else len(missed),
             "missed_cheaper_feasible_candidate_ids": missed,
         }
-        if schema_version in (COST_AUDIT_V2, COST_AUDIT_V3):
+        if schema_version in (COST_AUDIT_V2, COST_AUDIT_V3, COST_AUDIT_V4):
             false_negative_missed = (
                 [
                     candidate_id
