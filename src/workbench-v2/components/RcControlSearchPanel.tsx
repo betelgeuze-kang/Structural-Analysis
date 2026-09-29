@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { loadRcControlSearch, type RcSearchSession, type PrefixRole } from '../model/rcControlSearchProvider'
 import { RC_SEARCH_ARMS, searchWork } from '../model/rcControlSearchSchema'
-import { RC_COST_AUDIT_V2 } from '../model/rcControlSearchCost'
+import { RC_COST_AUDIT_V2, RC_COST_AUDIT_V4 } from '../model/rcControlSearchCost'
 import type { JobAuthorizationProvider } from '../model/jobTransport'
 import type { RcObject } from '../model/rcJobSchema'
 import { RcControlDesignReviewPanel } from './RcControlDesignPanel'
@@ -119,7 +119,7 @@ export function RcControlSearchPanel({ url, authorize, expectedReportHash, onInv
       : cost.status === 'oracle_incomplete' ? `Pool minimum unavailable: ${cost.oracle_unverifiable_candidate_ids.join(', ')} could not be verified.`
       : 'Pool minimum unavailable: no candidate passed every requested limit.'}</p>
     <div className="wb2-table-scroll" role="region" aria-label="RC candidate pool cost" tabIndex={0}><table className="wb2-table" style={{ minWidth: 900, overflowWrap: 'normal' }}><thead><tr><th>Strategy</th><th>Estimate above pool minimum ({cost.currency})</th><th>Matches pool minimum</th><th>Cheaper feasible alternatives not requested</th><th>Cheaper missed and predicted failure</th></tr></thead><tbody>
-      {arms.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{shownCandidates(a.missed_cheaper_feasible_count, a.missed_cheaper_feasible_candidate_ids)}</td><td data-rc-search-cheaper-false-negative={name}>{cost.schema_version !== RC_COST_AUDIT_V2 ? 'Not reported' : name === 'price_order' ? 'Not applicable' : shownCandidates(a.missed_cheaper_false_negative_count, a.missed_cheaper_false_negative_candidate_ids)}</td></tr> })}
+      {arms.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{shownCandidates(a.missed_cheaper_feasible_count, a.missed_cheaper_feasible_candidate_ids)}</td><td data-rc-search-cheaper-false-negative={name}>{cost.schema_version !== RC_COST_AUDIT_V2 && cost.schema_version !== RC_COST_AUDIT_V4 ? 'Not reported' : name === 'price_order' ? 'Not applicable' : shownCandidates(a.missed_cheaper_false_negative_count, a.missed_cheaper_false_negative_candidate_ids)}</td></tr> })}
     </tbody></table></div>
     <p>Recomputed from verified design records using one price table and material scope. The baseline is included. The final column intersects missed cheaper feasible candidates with recorded predicted failures; it is unavailable without a complete exhaustive check. A minimum requires every candidate to be verified; unknown values do not mean zero. This finite-pool comparison does not establish a global design optimum or quoted monetary savings.</p>
     </>}

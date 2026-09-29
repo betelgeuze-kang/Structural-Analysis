@@ -33,9 +33,12 @@ def test_pin_roller_quantities_require_opt_in_and_include_overhangs():
     for member in refined["elements"]:
         member["integration_order"] = 3
     refined["sections"][0]["concrete_layer_count"] = 8
-    assert design.calculate_fiber_frame_member_quantities(
-        _model(refined), experimental_pin_roller_beam=True
-    )["totals"] == quantities["totals"]
+    assert (
+        design.calculate_fiber_frame_member_quantities(
+            _model(refined), experimental_pin_roller_beam=True
+        )["totals"]
+        == quantities["totals"]
+    )
 
 
 @pytest.mark.parametrize("value", [1, "true", None])
@@ -70,15 +73,12 @@ def test_pin_roller_quantity_preflight_keeps_the_solver_boundary(invalid):
         )
 
 
-@pytest.mark.parametrize("constant_load", [False, True])
 def test_pin_roller_design_preserves_profile_through_price_solve_and_replay(
-    tmp_path, constant_load
+    tmp_path,
 ):
     model = _model()
     original = model.canonical_payload()
     request = _request((-1e-6, -2e-6))
-    if constant_load:
-        request = replace(request, constant_nodal_loads=(("N4", 0.0, -0.01, 0.0),))
     report = study.compare_rc_control_designs(
         model,
         (
@@ -108,7 +108,8 @@ def test_pin_roller_design_preserves_profile_through_price_solve_and_replay(
     for row in report["rows"]:
         assert row["full_reference_verification_pass"] is True
         assert [item["phase"] for item in row["invocations"]] == [
-            "analysis", "verification"
+            "analysis",
+            "verification",
         ]
         assert all(not item["unknown_execution_work"] for item in row["invocations"])
         result = json.loads(
@@ -120,16 +121,51 @@ def test_pin_roller_design_preserves_profile_through_price_solve_and_replay(
         )
         assert result["path"]["accepted_target_prefix_m"] == list(request.targets_m)
         history = result["response_history"]
-        if constant_load:
-            history = [result["preload_response"], *history]
-            assert result["request"]["constant_nodal_loads"] == (
-                request.to_dict()["constant_nodal_loads"]
-            )
         assert row["performance"]["accepted_epoch_count"] == len(history)
         for response in history:
-            assert {(r["node_id"], r["dof"]) for r in response["support_reactions"]} == {
-                ("N2", "UX"), ("N2", "UY"), ("N6", "UY")
-            }
-    for claim in ("independent_physical_validation", "design_authority",
-                  "confirmed_currency_savings", "release_approved"):
+            assert {
+                (r["node_id"], r["dof"]) for r in response["support_reactions"]
+            } == {("N2", "UX"), ("N2", "UY"), ("N6", "UY")}
+    for claim in (
+        "independent_physical_validation",
+        "design_authority",
+        "confirmed_currency_savings",
+        "release_approved",
+    ):
         assert report["claims"][claim] is False
+
+
+def test_pin_roller_preloaded_design_is_rejected_before_solver_or_output(
+    tmp_path, monkeypatch
+):
+    model = _model()
+    original = model.canonical_payload()
+    request = replace(
+        _request((-1e-6, -2e-6)),
+        constant_nodal_loads=(("N4", 0.0, -0.01, 0.0),),
+    )
+    monkeypatch.setattr(
+        study.api,
+        "analyze_bounded_rc_fiber_direct_control",
+        lambda *_a, **_kw: pytest.fail("unsupported pin-roller preload reached solver"),
+    )
+    output = tmp_path / "preloaded-beam"
+    with pytest.raises(ValueError, match="pin-roller.*constant preloads"):
+        study.compare_rc_control_designs(
+            model,
+            (
+                design.FiberFrameDesignCandidate(
+                    "narrower", (design.FiberFrameSectionChange("RC1", width_m=0.36),)
+                ),
+            ),
+            request,
+            history_limits=design.FiberFrameHistoryLimits(1, 1),
+            material_limits=design.FiberFrameMaterialHistoryLimits(1, 1, 1),
+            prices=design.FiberFrameMaterialPrices(
+                100, 1, "KRW", "2026-09-29", "synthetic test prices; not a quote"
+            ),
+            source_revision="a" * 40,
+            output_directory=output,
+        )
+    assert model.canonical_payload() == original
+    assert not output.exists()
