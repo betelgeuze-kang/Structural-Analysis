@@ -65,3 +65,39 @@ No stored receipt was rewritten, rehashed or promoted. A new exact-source
 hosted execution is still required to see whether the comparison change resolves
 the consumer failure; independent verification, legal approval and release
 authority remain separate blockers.
+
+## 2026-09-29 current-main integration and complete local check
+
+Source `cf679f9a8ff7d230b12ba12354711f1d9a1efc8e` incorporates main
+`215358123e6d8ac1d25b1435e6b43469367242b2`. On that source the complete
+`tests/test_external_code_to_code_technical_receipt.py` file passed: 33 tests,
+none deselected. Ruff also passed for the receipt generator and test file.
+This completes the previously outstanding local full-file check on this branch.
+The subsequent change is this documentation record; execution inputs remain
+bound to the source above, not silently relabeled to the documentation commit.
+
+The current-source check first rejected the preserved original receipt with
+`receipt_sources_stale`, as expected. A separate fresh receipt was then generated
+by actually running OpenSees 3.7.1.2 and CalculiX 2.17-3: all 12 cases and 94
+metrics passed, and the strict current-source CLI check passed. All 207 input
+checksums matched Git blobs from the executed source. Before execution, the five
+package hashes and 34 installed runtime files were checked against the original
+wheel/deb contents. The fresh receipt records external execution on that source
+with `external_runtime_executed_in_this_generation=true` and
+`external_execution_reused=false`.
+
+The full test file used a separate product replay prepared from the immutable
+legacy receipt, matching the CI preparation path. That replay preserves
+`external_execution_reused=true`,
+`external_runtime_executed_in_this_generation=false` and the unknown legacy
+`external_execution_source_commit_sha=null`. It receives no fresh-execution
+credit. The original tracked receipt was restored byte-for-byte after the tests;
+the fresh receipt, legacy replay and command logs remain separate local audit
+artifacts.
+
+These checks ran on the same operator's local Python 3.10.12 host with the CI
+thread policy (`OPENBLAS_CORETYPE=Haswell`, one OpenBLAS/OMP thread). They are not
+a hosted reproduction or independent verification. The earlier hosted failure
+still has no known rejected field path. Required checks on the published head
+and subsequent exact-main Product State execution remain necessary; physical
+acceptance tolerances, legal approval and release authority are unchanged.
