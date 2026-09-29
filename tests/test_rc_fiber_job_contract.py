@@ -99,6 +99,41 @@ def test_request_compiles_supported_model_without_solving_and_detaches():
     assert model.nodes[0]["coordinates"][0] == 0.0
 
 
+@pytest.mark.parametrize(
+    ("profile", "reason"),
+    [
+        ("experimental_two_fixed_endpoints", "support/loading profile is unsupported"),
+        ("experimental_pin_roller_beam", "unsupported canonical model"),
+    ],
+)
+def test_unavailable_durable_profile_or_incompatible_geometry_is_rejected(profile, reason):
+    request = _request()
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        7, (-1e-6,), **{profile: True}
+    ).to_dict()
+    with pytest.raises(ValueError, match=reason):
+        contract.validate_rc_fiber_job_request(request)
+
+
+def test_canonical_pin_roller_preload_is_rejected_before_model_compile(monkeypatch):
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        control_global_dof=10,
+        targets_m=(-1e-6,),
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),),
+    ).to_dict()
+
+    def unexpected_compile(*args, **kwargs):
+        raise AssertionError("unsupported durable profile reached model compilation")
+
+    monkeypatch.setattr(contract, "_compile", unexpected_compile)
+    with pytest.raises(ValueError, match="support/loading profile is unsupported"):
+        contract.validate_rc_fiber_job_request(request)
+
+
 def test_constant_load_request_requires_matching_v2_durable_result():
     request = _request()
     request["config"] = BoundedRCFiberDirectControlRequest(

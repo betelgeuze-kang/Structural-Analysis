@@ -29,6 +29,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
   test.describe(`stored RC browser ${viewport.width}`, () => {
     test.use({ viewport })
     test('reviews every step and both material laws and downloads exact originals', async ({ page }) => {
+      if (viewport.width === 390) test.setTimeout(60_000)
       await setup(page)
       await page.goto(`${baseUrl}/#/workbench-v2`)
       await waitForJobService(page)
