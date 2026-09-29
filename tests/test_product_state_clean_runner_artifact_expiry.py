@@ -107,20 +107,30 @@ def _run_inventory(
     return result, input_dir
 
 
-def test_missing_producer_candidate_records_zero_credit_and_no_summary(
+@pytest.mark.parametrize("unavailable_reason", ["missing", "expired"])
+def test_unavailable_producer_candidate_records_zero_credit_and_no_summary(
     tmp_path: Path,
+    unavailable_reason: str,
 ) -> None:
     final_name = f"opensees-calculix-current-source-{RUN_ID}-{RUN_ATTEMPT}"
-    result, input_dir = _run_inventory(tmp_path, [_artifact(201, final_name)])
+    artifacts = [_artifact(201, final_name)]
+    if unavailable_reason == "expired":
+        producer_name = (
+            f"opensees-calculix-current-source-candidate-{RUN_ID}-{RUN_ATTEMPT}"
+        )
+        producer = _artifact(202, producer_name)
+        producer["expired"] = True
+        artifacts.append(producer)
+    result, input_dir = _run_inventory(tmp_path, artifacts)
 
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == "unavailable"
     lookup = json.loads((input_dir / "lookup.json").read_text(encoding="utf-8"))
     assert lookup["artifact_status"] == "unavailable"
     assert lookup["artifact_unavailable_reason"] == (
-        "exact_sha_producer_candidate_artifact_missing"
+        f"exact_sha_producer_candidate_artifact_{unavailable_reason}"
     )
-    assert lookup["producer_candidate_match_count"] == 0
+    assert lookup["producer_candidate_match_count"] == len(artifacts) - 1
     assert lookup["same_operator_execution_credit"] == 0
     assert not (input_dir / "clean_runner_receipt.json").exists()
     assert not (input_dir / "artifact.json").exists()
@@ -137,7 +147,7 @@ def test_missing_producer_candidate_records_zero_credit_and_no_summary(
     assert code_receipts is None and modal_receipts is None
 
 
-def test_missing_producer_candidate_exits_before_artifact_download() -> None:
+def test_unavailable_producer_candidate_exits_before_artifact_download() -> None:
     shell = _download_step()
     zero_credit = shell.index('if test "$artifact_id" = "unavailable"; then')
     download = shell.index("if ! gh api -H 'Accept: application/vnd.github+json'")
@@ -148,11 +158,18 @@ def test_missing_producer_candidate_exits_before_artifact_download() -> None:
 
 @pytest.mark.parametrize(
     "failure",
-    ["missing_final", "duplicate_producer", "invalid_final", "expired_producer"],
+    [
+        "missing_final",
+        "duplicate_producer",
+        "duplicate_expired_producer",
+        "invalid_final",
+        "expired_final",
+        "invalid_expired_producer",
+        "expired_identity_collision",
+        "invalid_expired_flag",
+    ],
 )
-def test_only_missing_producer_candidate_is_nonfatal(
-    tmp_path: Path, failure: str
-) -> None:
+def test_malformed_inventory_remains_fatal(tmp_path: Path, failure: str) -> None:
     final_name = f"opensees-calculix-current-source-{RUN_ID}-{RUN_ATTEMPT}"
     producer_name = f"opensees-calculix-current-source-candidate-{RUN_ID}-{RUN_ATTEMPT}"
     final = _artifact(201, final_name)
@@ -162,18 +179,33 @@ def test_only_missing_producer_candidate_is_nonfatal(
         artifacts = [producer]
     elif failure == "duplicate_producer":
         artifacts.append(_artifact(203, producer_name))
+    elif failure == "duplicate_expired_producer":
+        producer["expired"] = True
+        artifacts.append(_artifact(203, producer_name))
     elif failure == "invalid_final":
         final["digest"] = "invalid"
         artifacts = [final]
-    else:
+    elif failure == "expired_final":
+        final["expired"] = True
+    elif failure == "invalid_expired_producer":
         producer["expired"] = True
+        producer["workflow_run"]["head_sha"] = "b" * 40
+    elif failure == "expired_identity_collision":
+        producer = _artifact(201, producer_name)
+        producer["expired"] = True
+        artifacts = [final, producer]
+    else:
+        producer["expired"] = "true"
 
     result, input_dir = _run_inventory(tmp_path, artifacts)
     assert result.returncode != 0
     expected = (
-        "clean_runner_artifact_metadata_invalid"
-        if failure in {"invalid_final", "expired_producer"}
+        "clean_runner_artifact_identity_collision"
+        if failure == "expired_identity_collision"
         else "clean_runner_artifact_inventory_invalid"
+        if failure
+        in {"missing_final", "duplicate_producer", "duplicate_expired_producer"}
+        else "clean_runner_artifact_metadata_invalid"
     )
     assert expected in result.stderr
     lookup = json.loads((input_dir / "lookup.json").read_text(encoding="utf-8"))

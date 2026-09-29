@@ -1095,7 +1095,7 @@ jobs:
           if len(matches) != 1 or len(producer_matches) > 1:
               raise SystemExit("clean_runner_artifact_inventory_invalid")
           artifact = matches[0]
-          def validate_artifact(candidate, candidate_name):
+          def validate_artifact(candidate, candidate_name, *, allow_expired=False):
               expected_url = (
                   f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/"
                   f"actions/artifacts/{candidate.get('id')}/zip"
@@ -1108,7 +1108,10 @@ jobs:
                   and candidate["digest"].startswith("sha256:")
                   and type(candidate.get("size_in_bytes")) is int
                   and candidate["size_in_bytes"] > 0
-                  and candidate.get("expired") is False
+                  and (
+                      candidate.get("expired") is False
+                      or (allow_expired and candidate.get("expired") is True)
+                  )
                   and candidate.get("archive_download_url") == expected_url
                   and workflow_run.get("id") == run["id"]
                   and workflow_run.get("head_sha") == run["head_sha"]
@@ -1116,24 +1119,30 @@ jobs:
               ):
                   raise SystemExit("clean_runner_artifact_metadata_invalid")
           validate_artifact(artifact, expected_name)
-          if not producer_matches:
+          producer_artifact = producer_matches[0] if producer_matches else None
+          if producer_artifact is not None:
+              validate_artifact(
+                  producer_artifact, expected_producer_name, allow_expired=True
+              )
+              if artifact["id"] == producer_artifact["id"]:
+                  raise SystemExit("clean_runner_artifact_identity_collision")
+          if producer_artifact is None or producer_artifact["expired"] is True:
+              reason = "missing" if producer_artifact is None else "expired"
               lookup = root / "lookup.json"
               payload = json.loads(lookup.read_text())
               payload.update(
                   {
                       "artifact_status": "unavailable",
-                      "artifact_unavailable_reason": "exact_sha_producer_candidate_artifact_missing",
-                      "producer_candidate_match_count": 0,
+                      "artifact_unavailable_reason": (
+                          f"exact_sha_producer_candidate_artifact_{reason}"
+                      ),
+                      "producer_candidate_match_count": len(producer_matches),
                       "same_operator_execution_credit": 0,
                   }
               )
               lookup.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
               print("unavailable")
               raise SystemExit(0)
-          producer_artifact = producer_matches[0]
-          validate_artifact(producer_artifact, expected_producer_name)
-          if artifact["id"] == producer_artifact["id"]:
-              raise SystemExit("clean_runner_artifact_identity_collision")
           (root / "artifact.json").write_text(json.dumps(artifact, sort_keys=True) + "\n")
           (root / "producer-artifact.json").write_text(
               json.dumps(producer_artifact, sort_keys=True) + "\n"
