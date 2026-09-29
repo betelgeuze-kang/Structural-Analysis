@@ -14,7 +14,9 @@ def test_source_qualification_cannot_be_mistaken_for_data_or_model_admission() -
     record = json.loads(SOURCE.read_text(encoding="utf-8"))
 
     assert record["source_status"] == "original_measurement_source_qualified"
-    assert record["source_role"] == "prospective_held_out_evaluation_only"
+    assert record["source_role"] == "source_only_retrospective_lead"
+    assert record["response_exposure"]["published_history_and_peak_inspected"] is True
+    assert record["response_exposure"]["blind_or_independent_locked_credit"] is False
     assert record["dataset"]["license_id_from_dataset_metadata"] == "cc-by-4.0"
     assert record["dataset"]["doi"] == "10.5281/zenodo.18735817"
 
@@ -32,8 +34,8 @@ def test_source_qualification_cannot_be_mistaken_for_data_or_model_admission() -
 
     boundary = record["crosswalk_and_model_boundary"]
     assert boundary["current_public_compiler_compatible"] is False
-    window = boundary["prospective_predebonding_window"]
-    assert window["status"] == "proposal_only_no_comparison_authority"
+    window = boundary["post_inspection_predebonding_window"]
+    assert window["status"] == "exploratory_proposal_no_comparison_authority"
     assert 0 < window["first_excluded_data_row_1_based"] < measurement["data_row_count"]
 
     gates = record["admission_gates"]

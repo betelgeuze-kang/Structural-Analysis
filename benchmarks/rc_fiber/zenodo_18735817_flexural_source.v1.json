@@ -4,11 +4,16 @@
   "qualification_date": "2026-09-28",
   "source_status": "original_measurement_source_qualified",
   "specimen_label_in_source": "Flexural Specimen",
-  "source_role": "prospective_held_out_evaluation_only",
+  "source_role": "source_only_retrospective_lead",
   "training_row_count": 0,
   "measured_rows_ingested": false,
   "comparison_executed": false,
   "physical_validation_claim": false,
+  "response_exposure": {
+    "published_history_and_peak_inspected": true,
+    "blind_or_independent_locked_credit": false,
+    "reason": "The published response and peak were inspected before a parameter, metric, or prediction freeze."
+  },
   "dataset": {
     "title": "CREATE Year1 Dataset for Combining Structural and Cathodic Protection with Titanium Alloy Bars",
     "doi": "10.5281/zenodo.18735817",
@@ -89,12 +94,12 @@
       "The Euler-Bernoulli fiber element has no shear deformation or bond-slip/grout-interface law; the report observes diagonal cracking and late localized debonding.",
       "Concrete tensile law, support compliance, centerline-displacement reference, and CSV sample-time mapping remain unresolved."
     ],
-    "prospective_predebonding_window": {
-      "status": "proposal_only_no_comparison_authority",
+    "post_inspection_predebonding_window": {
+      "status": "exploratory_proposal_no_comparison_authority",
       "rule": "Stop before the first original CSV data row with applied load >= 160 kip; retain original row order and partial unloads.",
       "first_excluded_data_row_1_based": 62105,
-      "rationale": "The report attributes abrupt steel/TiAB strain changes to spalling and localized debonding at about 2 kip below the 178 kip ultimate load. A 160 kip ceiling is a conservative prospective limit, not proof that earlier bond or shear effects are negligible.",
-      "further_condition": "Use only after a fixed-parameter, independent held-out comparison plan resolves topology, distinct materials, support motion and source-channel semantics."
+      "rationale": "The report attributes abrupt steel/TiAB strain changes to spalling and localized debonding at about 2 kip below the 178 kip ultimate load. The 160 kip ceiling was proposed after source inspection; it is not an independent or blind threshold and does not prove earlier bond or shear effects negligible.",
+      "further_condition": "A retrospective development comparison would first need resolved topology, distinct materials, support motion and source-channel semantics with fixed parameters and metrics. Independent blind credit requires a separate response-unseen specimen and prediction lock."
     }
   },
   "admission_gates": {

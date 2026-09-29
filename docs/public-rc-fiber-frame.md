@@ -215,8 +215,10 @@ This slice does not validate or authorize:
 The [Zenodo 18735817 flexural specimen source record](../benchmarks/rc_fiber/zenodo_18735817_flexural_source.v1.json)
 identifies an author-published, CC BY 4.0 load–displacement file and its U.S.
 DOT specimen drawing. It records the original file hash, ordered channel units,
-geometry and material crosswalk, and an optional prospective comparison window.
-This is source qualification only: zero measured rows have been ingested, the
+geometry and material crosswalk, and a post-inspection exploratory comparison
+window. The published response and peak were already inspected, so this source
+cannot receive blind or independent locked-evaluation credit. This is source
+qualification only: zero measured rows have been ingested, the
 current public compiler cannot represent the simply supported four-point
 specimen or its separate titanium/grout interface, and no experimental
 comparison or training permission follows from the record.
