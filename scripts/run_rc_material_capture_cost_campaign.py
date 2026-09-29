@@ -157,6 +157,12 @@ def run_slot(root: Path, index: int):
         raise ValueError("campaign requires its exact clean committed source")
     if type(index) is not int or not 0 <= index < len(plan["schedule"]):
         raise ValueError("declared slot index required")
+    previous = root / f"slot-{index - 1:04d}"
+    if index and not (
+        (previous / "outcome.json").is_file()
+        and (previous / "inventory.json").is_file()
+    ):
+        raise ValueError("previous slot must have a recorded outcome and inventory")
     slot = plan["schedule"][index]
     wall, cpu = perf_counter_ns(), process_time_ns()
     loading_wall, loading_cpu = perf_counter_ns(), process_time_ns()
@@ -174,6 +180,12 @@ def run_slot(root: Path, index: int):
         "plan_hash": plan["plan_hash"],
         "slot": slot,
         "pid": os.getpid(),
+        "previous_outcome_sha256": (
+            None if index == 0 else "sha256:" + pilot._file_hash(previous / "outcome.json")
+        ),
+        "previous_inventory_sha256": (
+            None if index == 0 else "sha256:" + pilot._file_hash(previous / "inventory.json")
+        ),
         "unknown_work_until_outcome": True,
     }
     _save(folder, "started.json", _bytes(started))
@@ -284,9 +296,43 @@ def _costs(report):
     entries = report["arms"]["proposal"]["entries"]
     if (
         len(entries) != 12
-        or sum("committed_material_capture" in row for row in entries) != 9
+        or [
+            index
+            for index, row in enumerate(entries)
+            if "committed_material_capture" in row
+        ] != list(range(2, 11))
     ):
         raise ValueError("fixed guarded proposal capture roster changed")
+
+    def contained(value, enclosing, label):
+        if (
+            type(value) is not int
+            or type(enclosing) is not int
+            or value < 0
+            or enclosing < 0
+            or value > enclosing
+        ):
+            raise ValueError(f"{label} timing exceeds its enclosing scope")
+
+    for unit in ("wall_ns", "cpu_ns"):
+        proposal_path = report["arms"]["proposal"][unit]
+        whole_study = report[f"whole_study_{unit}"]
+        contained(proposal_path, whole_study, "proposal path")
+        for arm in (*report["arms"].values(), report["fresh_reference"]):
+            contained(arm[unit], whole_study, "arm path")
+        for row in entries:
+            for child in (
+                row.get("committed_material_capture"),
+                row.get("proposal_guard"),
+                *row["invocations"],
+            ):
+                if child is not None:
+                    contained(child[unit], proposal_path, "nested proposal")
+            for key in (f"proposal_{unit}", f"recovery_{unit}"):
+                if key in row:
+                    contained(row[key], proposal_path, "nested proposal")
+        for invocation in report["arms"]["proposal"]["preload_invocations"]:
+            contained(invocation[unit], proposal_path, "preload solver")
 
     def timed_sum(rows, key):
         values = [row[key] for row in rows]
@@ -317,6 +363,9 @@ def _costs(report):
         ),
         "solver_attempt_wall_ns": timed_sum(
             [attempt for row in entries for attempt in row["invocations"]], "wall_ns"
+        ),
+        "preload_solver_attempt_wall_ns": timed_sum(
+            report["arms"]["proposal"]["preload_invocations"], "wall_ns"
         ),
         "recovery_wall_ns": timed_sum(
             [row for row in entries if "recovery_wall_ns" in row], "recovery_wall_ns"
@@ -362,7 +411,7 @@ def audit(root: Path, *, write=True):
                     "slot": slot,
                     "status": "missing",
                     "ratio": None,
-                    "actual_proposals": 0,
+                    "actual_proposals": None,
                     "unknown_work": True,
                     "costs": None,
                 }
@@ -378,12 +427,30 @@ def audit(root: Path, *, write=True):
             or outcome.get("pid") != started.get("pid")
             or type(outcome.get("pid")) is not int
             or outcome["pid"] in pids
+            or started.get("previous_outcome_sha256")
+            != (
+                None
+                if slot["slot_index"] == 0
+                else "sha256:"
+                + pilot._file_hash(
+                    root / f"slot-{slot['slot_index'] - 1:04d}" / "outcome.json"
+                )
+            )
+            or started.get("previous_inventory_sha256")
+            != (
+                None
+                if slot["slot_index"] == 0
+                else "sha256:"
+                + pilot._file_hash(
+                    root / f"slot-{slot['slot_index'] - 1:04d}" / "inventory.json"
+                )
+            )
             or pilot._json(folder / "inventory.json") != pilot._inventory(folder)
         ):
             raise ValueError("original capture-cost slot receipt changed")
         pids.add(outcome["pid"])
         ratio = None
-        actual = 0
+        actual = None
         costs = None
         if outcome["status"] == "completed":
             report = pilot._json(folder / "benchmark/comparison.json")
@@ -426,6 +493,17 @@ def audit(root: Path, *, write=True):
             ):
                 ratio = score["proposal_over_secant_path_wall_ratio"]
             costs = _costs(report)
+            for unit in ("wall_ns", "cpu_ns"):
+                if (
+                    type(outcome.get(unit)) is not int
+                    or type(outcome.get("cost_ledger", {}).get("benchmark", {}).get(unit))
+                    is not int
+                    or not 0
+                    <= report[f"whole_study_{unit}"]
+                    <= outcome["cost_ledger"]["benchmark"][unit]
+                    <= outcome[unit]
+                ):
+                    raise ValueError("benchmark timing exceeds enclosing slot")
             observed[(slot["case_id"], slot["repetition_index"], slot["mode"])] = folder
         rows.append(
             {
@@ -498,8 +576,10 @@ def audit(root: Path, *, write=True):
                     "mean_ratio": sum(ratios) / len(ratios)
                     if all(ratio is not None for ratio in ratios)
                     else None,
-                    "actual_proposals": sum(
-                        row["actual_proposals"] for row in selected
+                    "actual_proposals": (
+                        sum(row["actual_proposals"] for row in selected)
+                        if all(row["actual_proposals"] is not None for row in selected)
+                        else None
                     ),
                 }
             )

@@ -35,6 +35,11 @@ Three repetitions per case and mode give twelve declared slots and 48 full
 paths, zero warmups. Rotate the three benchmark arm orders as in #496. Alternate
 the baseline/direct process order across six matched case/repetition pairs.
 Preserve each failed, incomplete or unrun slot in the twelve-slot denominator.
+Launch slots strictly in declared index order. A slot may start only after the
+preceding outcome and inventory exist; its started receipt binds the SHA-256 of
+both preceding files. A raised slot may be followed after its outcome is
+recorded, while a missing or started-only slot blocks later launches. Missing
+and raised slots have unknown, rather than zero, actual proposal counts.
 Source revision, case/model/request hashes, arm order, mode, policy/guard hashes,
 all tolerances and the schedule must be frozen in a plan before the first slot.
 
@@ -42,7 +47,10 @@ Record separate wall/CPU scopes for parent process launch-through-exit where
 available, input loading/preflight, each full benchmark, each path, committed
 material capture, proposal callback, guard callback, numerical attempts,
 recovery and read-only audit. Report actual proposal and fallback counts and
-known/unknown solver work. These scopes overlap and must not be summed. Prior
+known/unknown solver work. These scopes overlap and must not be summed.
+Validate that capture occurs exactly at allowed indices 2 through 10 and that
+each individual nested timing fits within its enclosing proposal path, each
+path within the benchmark, and the benchmark within its slot. Prior
 label generation, fits and selection are historical costs, not zero costs; this
 campaign does not establish full AI lifecycle break-even.
 

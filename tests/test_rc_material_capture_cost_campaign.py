@@ -87,9 +87,83 @@ def test_missing_slots_remain_unknown_in_twelve_slot_denominator(
     assert all(
         row["status"] == "missing" and row["unknown_work"] for row in report["slots"]
     )
+    assert all(row["actual_proposals"] is None for row in report["slots"])
+    assert all(
+        case["actual_proposals"] is None
+        for mode in report["modes"]
+        for case in mode["cases"]
+    )
     assert all(row["equal_case_mean_ratio"] is None for row in report["modes"])
     assert not report["all_pairs_exact"]
     assert not (tmp_path / "audit.json").exists()
+
+
+def test_out_of_order_slot_cannot_start(tmp_path, campaign, monkeypatch):
+    plan = fixture_plan(campaign)
+    campaign._save(tmp_path, "plan.json", campaign._bytes(plan))
+    monkeypatch.setattr(campaign.pilot, "_clean_head", lambda: plan["source_revision"])
+    with pytest.raises(ValueError, match="previous slot must have"):
+        campaign.run_slot(tmp_path, 1)
+    assert not (tmp_path / "slot-0001").exists()
+
+
+def test_audit_rejects_wrong_slot_chain(tmp_path, campaign, monkeypatch):
+    plan = fixture_plan(campaign)
+    campaign._save(tmp_path, "plan.json", campaign._bytes(plan))
+    monkeypatch.setattr(campaign.pilot, "_clean_head", lambda: plan["source_revision"])
+    monkeypatch.setattr(campaign, "_inputs", lambda _: None)
+    folder = tmp_path / "slot-0000"
+    folder.mkdir()
+    receipt = {"plan_hash": plan["plan_hash"], "slot": plan["schedule"][0], "pid": 10}
+    campaign._save(
+        folder,
+        "started.json",
+        campaign._bytes(
+            {
+                **receipt,
+                "previous_outcome_sha256": "sha256:" + "0" * 64,
+                "previous_inventory_sha256": None,
+            }
+        ),
+    )
+    campaign._save(folder, "outcome.json", campaign._bytes({**receipt, "status": "raised"}))
+    campaign._save(folder, "inventory.json", campaign._bytes(campaign.pilot._inventory(folder)))
+    with pytest.raises(ValueError, match="receipt changed"):
+        campaign.audit(tmp_path, write=False)
+
+
+def test_raised_slot_keeps_unknown_proposal_count(tmp_path, campaign, monkeypatch):
+    plan = fixture_plan(campaign)
+    campaign._save(tmp_path, "plan.json", campaign._bytes(plan))
+    monkeypatch.setattr(campaign.pilot, "_clean_head", lambda: plan["source_revision"])
+    monkeypatch.setattr(campaign, "_inputs", lambda _: None)
+    folder = tmp_path / "slot-0000"
+    folder.mkdir()
+    receipt = {"plan_hash": plan["plan_hash"], "slot": plan["schedule"][0], "pid": 10}
+    campaign._save(
+        folder,
+        "started.json",
+        campaign._bytes(
+            {
+                **receipt,
+                "previous_outcome_sha256": None,
+                "previous_inventory_sha256": None,
+            }
+        ),
+    )
+    campaign._save(
+        folder,
+        "outcome.json",
+        campaign._bytes(
+            {**receipt, "status": "raised", "unknown_work_until_outcome": True}
+        ),
+    )
+    campaign._save(folder, "inventory.json", campaign._bytes(campaign.pilot._inventory(folder)))
+    result = campaign.audit(tmp_path, write=False)
+    assert result["slots"][0]["status"] == "raised"
+    assert result["slots"][0]["actual_proposals"] is None
+    assert result["modes"][0]["cases"][0]["actual_proposals"] is None
+    assert result["modes"][0]["equal_case_mean_ratio"] is None
 
 
 def test_capture_cost_scopes_are_kept_separate(campaign):
@@ -106,20 +180,75 @@ def test_capture_cost_scopes_are_kept_separate(campaign):
         entries.append(entry)
     report = {
         "arms": {
-            "proposal": {"entries": entries, "wall_ns": 1000},
-            "secant": {"wall_ns": 900},
-        }
+            "proposal": {
+                "entries": entries,
+                "wall_ns": 1000,
+                "cpu_ns": 1000,
+                "preload_invocations": [{"wall_ns": 23, "cpu_ns": 22}],
+            },
+            "secant": {"wall_ns": 900, "cpu_ns": 900},
+            "reference": {"wall_ns": 850, "cpu_ns": 850},
+        },
+        "fresh_reference": {"wall_ns": 950, "cpu_ns": 950},
+        "whole_study_wall_ns": 2000,
+        "whole_study_cpu_ns": 2000,
     }
+    for entry in entries:
+        entry["proposal_cpu_ns"] = 5
+        entry["proposal_guard"]["cpu_ns"] = 2
+        entry["invocations"][0]["cpu_ns"] = 11
+        entry["recovery_cpu_ns"] = 3
     cost = campaign._costs(report)
     assert cost["capture_wall_ns"] == 63
     assert cost["capture_cpu_ns"] == 54
     assert cost["proposal_callback_wall_ns"] == 60
     assert cost["guard_callback_wall_ns"] == 24
     assert cost["solver_attempt_wall_ns"] == 132
+    assert cost["preload_solver_attempt_wall_ns"] == 23
     assert cost["recovery_wall_ns"] == 36
     assert cost["proposal_path_wall_ns"] == 1000
     del entries[2]["committed_material_capture"]
     with pytest.raises(ValueError, match="capture roster"):
+        campaign._costs(report)
+
+
+def test_capture_cost_rejects_shifted_roster_and_nested_scope(campaign):
+    entries = []
+    for index in range(12):
+        row = {
+            "proposal_wall_ns": 5,
+            "proposal_cpu_ns": 5,
+            "proposal_guard": {"wall_ns": 2, "cpu_ns": 2},
+            "invocations": [{"wall_ns": 11, "cpu_ns": 11}],
+        }
+        if 2 <= index <= 10:
+            row["committed_material_capture"] = {"wall_ns": 7, "cpu_ns": 7}
+        entries.append(row)
+    report = {
+        "arms": {
+            "proposal": {
+                "entries": entries,
+                "wall_ns": 1000,
+                "cpu_ns": 1000,
+                "preload_invocations": [],
+            },
+            "secant": {"wall_ns": 900, "cpu_ns": 900},
+            "reference": {"wall_ns": 850, "cpu_ns": 850},
+        },
+        "fresh_reference": {"wall_ns": 950, "cpu_ns": 950},
+        "whole_study_wall_ns": 2000,
+        "whole_study_cpu_ns": 2000,
+    }
+    assert campaign._costs(report)["capture_wall_ns"] == 63
+    entries[2].pop("committed_material_capture")
+    entries[1]["committed_material_capture"] = {"wall_ns": 7, "cpu_ns": 7}
+    with pytest.raises(ValueError, match="capture roster"):
+        campaign._costs(report)
+    entries[2]["committed_material_capture"] = entries[1].pop(
+        "committed_material_capture"
+    )
+    entries[2]["committed_material_capture"]["wall_ns"] = 1001
+    with pytest.raises(ValueError, match="nested proposal timing"):
         campaign._costs(report)
 
 
