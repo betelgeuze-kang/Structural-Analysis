@@ -156,6 +156,37 @@ def test_coherently_resealed_policy_weight_change_is_rejected():
         audit.check_policy_fit(forged, samples, LEARNING)
 
 
+def test_near_constant_real_packet_strain_uses_physical_unit_fit():
+    samples, context, floor = _training_samples()
+    # The seven frozen exact-source training labels differed by only float ulps.
+    # That one-ulp reduction-order difference changes a normalized ~1e15
+    # intercept while preserving the physical response to ~4e-20.
+    strain_labels = (
+        0.00012073302191879279,
+        0.00012073302191879279,
+        0.00012073302191879279,
+        0.00012073302191879277,
+        0.000120733021918793,
+        0.00012073302191879299,
+        0.00012073302191879299,
+    )
+    for sample, value in zip(samples, strain_labels, strict=True):
+        sample["targets"][3] = value
+    policy = _policy(samples, context, floor)
+    independent = audit._centered_ridge(samples, 1.0)
+    assert abs(policy["weights"][-1][3] - independent["weights"][-1][3]) > 1e9
+    audit.check_policy_fit(policy, samples, LEARNING)
+    forged = json.loads(audit.canonical(policy))
+    forged["weights"][0][7] += 1.0  # Signed force factor remains strictly checked.
+    forged["policy_hash"] = audit.sha(
+        audit.canonical(
+            {key: value for key, value in forged.items() if key != "policy_hash"}
+        )
+    )
+    with pytest.raises(audit.AuditError, match="policy weights"):
+        audit.check_policy_fit(forged, samples, LEARNING)
+
+
 def test_resealed_prediction_and_ranking_cannot_change_signed_factor():
     samples, context, floor = _training_samples()
     policy = _policy(samples, context, floor)

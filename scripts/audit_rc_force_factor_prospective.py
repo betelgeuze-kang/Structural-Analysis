@@ -560,16 +560,64 @@ def check_policy_fit(policy, samples, learning):
         "force-factor policy fit profile differs from frozen learning plan",
     )
     expected = _centered_ridge(samples, learning["ridge"])
-    for key in ("minimum", "maximum", "mean", "scale", "target_scale"):
+    for key in ("minimum", "maximum", "mean", "scale"):
         vector_close(policy.get(key), expected[key], f"policy {key}")
+    target_scales = policy.get("target_scale")
+    require(
+        type(target_scales) is list
+        and len(target_scales) == len(TARGETS)
+        and all(finite(value) and value > 0 for value in target_scales),
+        "policy target scales invalid",
+    )
     actual_weights = policy.get("weights")
     require(
         type(actual_weights) is list
         and len(actual_weights) == len(expected["weights"]),
         "policy weight dimensions differ from frozen features",
     )
-    for actual, expected_row in zip(actual_weights, expected["weights"], strict=True):
-        vector_close(actual, expected_row, "policy weights")
+    require(
+        all(
+            type(row) is list
+            and len(row) == len(TARGETS)
+            and all(finite(value) for value in row)
+            for row in actual_weights
+        ),
+        "policy weights nonfinite or incomplete",
+    )
+    for target_index in range(len(TARGETS)):
+        labels = [sample["targets"][target_index] for sample in samples]
+        magnitude = max(abs(value) for value in labels)
+        # An almost constant target can differ by only a few float ulps. One
+        # ulp in NumPy's mean then changes its ~1e-19 target scale and a ~1e15
+        # normalized intercept, although physical-unit coefficients agree.
+        # Compare the actual affine response in target units for this case.
+        rounding_bound = max(128 * math.ulp(magnitude), 1e-30)
+        near_constant = max(labels) - min(labels) <= rounding_bound
+        for row_index, actual_row in enumerate(actual_weights):
+            actual = actual_row[target_index]
+            reference = expected["weights"][row_index][target_index]
+            if near_constant:
+                require(
+                    close(
+                        actual * target_scales[target_index],
+                        reference * expected["target_scale"][target_index],
+                        rel=0.0,
+                        absolute=rounding_bound,
+                    ),
+                    "policy physical-unit weights differ from independent arithmetic",
+                )
+            else:
+                require(
+                    close(actual, reference),
+                    "policy weights differs from independent arithmetic",
+                )
+        if not near_constant:
+            require(
+                close(
+                    target_scales[target_index], expected["target_scale"][target_index]
+                ),
+                "policy target scale differs from independent arithmetic",
+            )
     return expected
 
 
