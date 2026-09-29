@@ -133,6 +133,27 @@ frame/shell 또는 재료·기하 비선형 비교와 독립 운영자 검토를
 `current_product_replay_receipt.json`을 별도로 검사한다. 다른 generation의 container
 child 영수증 hash로 대체하거나 재생성 때 바뀌는 hash를 문서에 복제하지 않는다.
 
+### 2026-09-29 main 통합 후 실제 외부 재실행
+
+`host_fresh_receipt_4b6ee9183.json`은 main `215358123`을 포함한 source commit
+`4b6ee9183d69cb907566472651590625cbef6f69`에서 OpenSees와 CalculiX를 새로 실행한
+별도 원본이다. 고정된 외부 package 다섯 개의 SHA-256을 확인하고 새 임시 runtime에
+추출한 뒤 실행했다. 12개 사례의 94개 수치 비교가 기존 허용오차를 통과했고,
+세 planar 경로 각각의 네 목표 하중계수 `0.25, 0.5, 0.75, 1.0` 및 시도 기록이
+저장된 영수증에 남았다. 208개 입력 hash는 선언한 source commit의 Git blob과
+대조했다. 이 원본의 `external_runtime_executed_in_this_generation=true`이며
+`external_execution_reused=false`다.
+
+기존 `host_fresh_receipt_84602ccf9.json`과 container 기록은 변경하지 않는다.
+`current_product_replay_receipt.json`은 기존 외부 원본을 사용해 새 제품 source를
+다시 계산한 별도 자료로서 재사용 표시와 재실행 제한을 유지한다. 새 실제 실행
+원본과 제품 replay의 실행 이력을 서로 바꾸어 표시하지 않는다.
+
+이 결과는 같은 운영자·같은 host의 제한된 코드 간 비교다. 실제 실패 시도의
+저장·거부 검사는 주입된 회귀 사례로 확인하며, 이번 외부 실행에서 세 planar
+경로는 모두 성공했다. 실제 실험 검증, 독립 운영자 재현, 상용 재배포 승인,
+Verification Level 2와 출시 준비 완료를 의미하지 않는다.
+
 ## 전체 모델 modal·buckling 추가 영수증
 
 `external_modal_buckling_technical_execution_receipt.json`은 같은 고정 runtime

@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:5a227afe2d191f7918c212c9933f6cc3c6041ddd1c52baea29f1f0e5b59484be",
+  "artifact_hash": "sha256:fd4389ef23c3f22a9d5d513b32907f0499580b7cc56afb079e1caca4c3bba35e",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -9,8 +9,7 @@
     "code_to_code_structural_family_breadth_insufficient",
     "public_corotational_material_nonlinear_family_breadth_missing",
     "verification_level_2_not_achieved",
-    "release_readiness_not_established",
-    "external_runtime_current_source_rerun_missing"
+    "release_readiness_not_established"
   ],
   "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system, a linear cantilever, the public one-bay corotational portal's four-step elastic-state load path, and one bounded planar member with finite rigid offsets, an RZ end release, and a uniform dead member load, plus a prescribed support-settlement path with an explicit free-equation reference load, and a bounded 3D Timoshenko cantilever under combined out-of-plane shear and torsion, plus a source-bound Frame3D UX direct-displacement path that crosses axial steel yield under four requested targets, a bounded cyclic UX path through five requested targets with two direction reversals, and a source-bound Frame3D RX direct-displacement path under four torsional targets, plus separate source-bound RY and RZ direct-displacement paths under four pure-axis bending-moment targets each, with OpenSees, plus one axial member and one six-member tetrahedral spatial truss with CalculiX. The portal comparison covers terminal free-node displacements and support reactions from the public J1-J5 and exact-recovery path, while the member feature and settlement comparisons add physical-node displacement and support-reaction recovery plus member-end moment recovery. The spatial Frame3D elastic case checks five tip translations/rotations and five base force/moment reactions. The axial direct-control slice additionally checks target coordinate, proportional load factor, base reaction, axial stress, plastic strain, backstress, accumulated plastic strain, and dissipated energy against a 3D six-DOF OpenSees forceBeamColumn with a monotonic-equivalent Steel01 section. The cyclic axial slice checks each requested coordinate, proportional load factor, and base reaction plus the final plastic strain, backstress, accumulated plastic strain, and dissipated energy against a six-DOF forceBeamColumn Aggregator with the OpenSees Hardening material. The rotational slice checks the target angle, proportional moment-load factor, and base torsional reaction against the same six-DOF section with elastic GJ. The bending rotational slice checks the analogous angle, load factor, and base moment for both principal bending axes. Coupled MY+MZ reference-load behavior and its second-order torsional coupling remain outside this receipt. The other cases deliberately stay below material yield and damage thresholds. It is a technical code-to-code execution receipt only. OpenSeesPy declares commercial redistribution licensing requirements, and no product/legal approval is attached for either runtime. The external packages are not bundled. Therefore this receipt does not enter the verification-hierarchy operator manifest, does not achieve Verification Level 2, and does not prove general cyclic or multi-DOF material-nonlinear family breadth, broad frame/shell static or modal coverage, nonlinear CalculiX comparison, buckling breadth, sparse/HIP, commercial-equivalence, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
   "claims": {
@@ -116,7 +115,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 30721,
+          "analyze_wall_ns": 28121,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 2,
@@ -206,7 +205,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 13370,
+          "analyze_wall_ns": 13450,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 3,
@@ -296,7 +295,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 8751,
+          "analyze_wall_ns": 8911,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 2,
@@ -386,7 +385,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 18260,
+          "analyze_wall_ns": 12230,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 3,
@@ -610,7 +609,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 11600,
+          "analyze_wall_ns": 10550,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 2,
@@ -700,7 +699,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 4020,
+          "analyze_wall_ns": 4160,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 2,
@@ -790,7 +789,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 7000,
+          "analyze_wall_ns": 6850,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 4,
@@ -880,7 +879,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 3720,
+          "analyze_wall_ns": 3660,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 2,
@@ -1064,7 +1063,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 14401,
+          "analyze_wall_ns": 12110,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 1,
@@ -1154,7 +1153,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 3550,
+          "analyze_wall_ns": 3530,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 1,
@@ -1244,7 +1243,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 2630,
+          "analyze_wall_ns": 2730,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 1,
@@ -1334,7 +1333,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 2500,
+          "analyze_wall_ns": 2560,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 1,
@@ -2261,7 +2260,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-09-29T12:01:41.863704+00:00",
+  "generated_at": "2026-09-29T11:58:27.114321+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -2476,13 +2475,13 @@
     "source_set_hash": "sha256:7bc9c6fe0efe9a943d72b1b785a7843a72cf63f287ac55557e655338a74f1835"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-09-29T12:01:41.863704+00:00",
+    "current_product_replay_generated_at": "2026-09-29T11:58:27.130338+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-09-28T13:52:02.364362+00:00",
-    "external_execution_reused": true,
-    "external_execution_source_commit_sha": "84602ccf9065c8aa407f91adbb24b2b947676b29",
-    "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current product replay after main integration; retain the historical external execution and do not transfer freshness. Separate fresh current-source execution is recorded in host_fresh_receipt_4b6ee9183.json."
+    "external_execution_generated_at": "2026-09-29T11:58:27.130331+00:00",
+    "external_execution_reused": false,
+    "external_execution_source_commit_sha": "4b6ee9183d69cb907566472651590625cbef6f69",
+    "external_runtime_executed_in_this_generation": true,
+    "reuse_reason": null
   },
   "runtimes": {
     "calculix": {
@@ -2491,17 +2490,17 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
-        "frd_sha256": "sha256:bd3d5950498c9af1259ae5a9d328845527148b74308fb8e971ea41cda79ece9b",
+        "frd_sha256": "sha256:faf7a384d02d54a6e29d4395712d4e2c56f45d1d59f482e0021399954a23bd4e",
         "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
         "return_code": 0,
         "spatial_truss_dat_sha256": "sha256:d754b6dc5fd1e316b516629ed970a5bf1f6e274849c436222b8ea5eb63545cd6",
-        "spatial_truss_frd_sha256": "sha256:72d9a3a587791f4331886c10841be44873bfcbbfc5d3e4ac49aee5cf1535321d",
+        "spatial_truss_frd_sha256": "sha256:a7ecc23a5e23d91a0147be8ac1b718bf8f84da27c6be75edede4ba69bde09faa",
         "spatial_truss_input_deck_sha256": "sha256:6675595b476187c36132d260a624bb85d0a9d155c31ff6aba38006f6ab3645b1",
         "spatial_truss_return_code": 0,
         "spatial_truss_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "spatial_truss_stdout_sha256": "sha256:a1c77b71c99d527e755ad8cf4f0dd501334f6fb94d0465aec6a3c308a9c2bdcf",
+        "spatial_truss_stdout_sha256": "sha256:d7f0b3dcbc29daf8c5f939e655f9b5081716a1e98cf8aaf34c3eef15e9e17e13",
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:2b0f9b1e343fe457f62aa999e2375e369f87a5676c29158a8cb36711782670cd",
+        "stdout_sha256": "sha256:30791f861a40a3cbff4fa90d596553425545f299bbdc8eebf4ed1b5f60aa0943",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -2524,7 +2523,7 @@
         "driver_sha256": "sha256:f46dbe613df6525c32968bf81ac0b02ea0b4c1123174add02745f7861b0444e1",
         "return_code": 0,
         "stderr_sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea",
-        "stdout_sha256": "sha256:38c06456af30be7f58f76c2da91567de95b73b4019a623a662e1c8b6eb14151e"
+        "stdout_sha256": "sha256:fcc386a3261f0973d4baa439c91c2f075d19081f382d9017bc1780808b9a4105"
       },
       "independent_from_product": true,
       "license": {
