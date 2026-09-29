@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 import sys
 
+import pytest
+
 
 SCRIPT_PATH = (
     Path(__file__).resolve().parent.parent
@@ -53,6 +55,49 @@ def test_sealed_attestor_has_exact_fresh_hosted_runner_allowlist() -> None:
             "attest",
         )
     ] == frozenset({"ubuntu-24.04"})
+
+
+@pytest.mark.parametrize(
+    ("filename", "job"),
+    [
+        ("rc-pin-roller-budget-evidence.yml", "budget-packet"),
+        ("rc-pin-roller-replication-evidence.yml", "replication-packet"),
+    ],
+)
+def test_rc_synthetic_evidence_allows_only_declared_job_and_runner(
+    tmp_path: Path, filename: str, job: str
+) -> None:
+    workflow_dir = _workflow_dir(tmp_path)
+    path = workflow_dir / filename
+    template = "name: RC synthetic evidence\njobs:\n  {job}:\n    runs-on: {runner}\n"
+
+    def check(job_name: str, runner: str, extra_job: str = "") -> dict:
+        path.write_text(
+            template.format(job=job_name, runner=runner) + extra_job,
+            encoding="utf-8",
+        )
+        return check_github_actions_runner_policy.check_runner_policy(
+            workflow_dir=workflow_dir
+        )
+
+    assert check(job, "ubuntu-24.04")["contract_pass"] is True
+    for runner in ("ubuntu-latest", "ubuntu-22.04", "[self-hosted, linux, x64]"):
+        payload = check(job, runner)
+        assert payload["contract_pass"] is False
+        assert any("hosted_job_runner_not_exact" in b for b in payload["blockers"])
+
+    for payload in (
+        check("other-job", "ubuntu-24.04"),
+        check(job, "ubuntu-24.04", "  other-job:\n    runs-on: ubuntu-24.04\n"),
+    ):
+        assert payload["contract_pass"] is False
+        assert any("unapproved_github_hosted_runner" in b for b in payload["blockers"])
+
+    payload = check(
+        job, "ubuntu-24.04", "  hardware-job:\n    runs-on: [self-hosted, linux, x64]\n"
+    )
+    assert payload["contract_pass"] is True
+    assert payload["rows"][-1]["execution_class"] == "hardware_or_private_self_hosted"
 
 
 def test_pages_mixed_runner_policy_accepts_only_exact_deploy_runner(
