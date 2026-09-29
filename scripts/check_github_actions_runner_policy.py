@@ -71,6 +71,14 @@ DEFAULT_GITHUB_HOSTED_JOB_ALLOWLIST: dict[tuple[str, str], frozenset[str]] = {
         "attest",
     ): frozenset({"ubuntu-24.04"}),
     (".github/workflows/deploy-pages.yml", "deploy"): frozenset({"ubuntu-24.04"}),
+    (
+        ".github/workflows/rc-pin-roller-budget-evidence.yml",
+        "budget-packet",
+    ): frozenset({"ubuntu-24.04"}),
+    (
+        ".github/workflows/rc-pin-roller-replication-evidence.yml",
+        "replication-packet",
+    ): frozenset({"ubuntu-24.04"}),
 }
 
 

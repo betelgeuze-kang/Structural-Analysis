@@ -1,0 +1,41 @@
+{
+  "schema_version": "synthetic-rc-pin-roller-heldout-replication-protocol.v1",
+  "source_model": "examples/research/rc_reuse_campaign/pin-roller-replication.model.json",
+  "source_model_sha256": "sha256:c752083ff4c3d562ec48a85d829b99ae02a1713c2c69885c22fb21f0c5325e42",
+  "source_request": "examples/research/rc_reuse_campaign/pin-roller-replication.request.json",
+  "source_request_sha256": "sha256:b647ac8dd1bb7f391555b8b5c8ffbee46eee320faca341e350a0a5b6f630a85e",
+  "geometry_rule": "Original seven-node horizontal pin/roller beam X coordinates multiplied by 1.1 about N1; original topology, support roles, materials, section layout, and reference loads retained",
+  "history_rule": "Four authored displacement targets at N4 UY: -0.00004, -0.00009, -0.00014, +0.00004 m; one reversal",
+  "training_widths_m": [0.32, 0.40, 0.48, 0.56],
+  "online_widths_m": [0.44, 0.34, 0.38, 0.42, 0.46, 0.52],
+  "full_analysis_budget_per_online_arm_including_baseline": 3,
+  "ranking_strategy": "feasibility_then_cheaper_boundary.v1",
+  "history_maximum_absolute_fiber_strain_limit": 0.0001585,
+  "terminal_limits": {
+    "maximum_translation_m": 1.0,
+    "maximum_absolute_fiber_strain": 1.0
+  },
+  "history_maximum_translation_limit_m": 1.0,
+  "material_history_limits": {
+    "maximum_steel_accumulated_plastic_strain": 1.0,
+    "maximum_concrete_tensile_damage": 1.0,
+    "maximum_concrete_compressive_damage": 1.0
+  },
+  "synthetic_prices": {
+    "concrete_per_m3": 100,
+    "rebar_per_kg": 1,
+    "currency": "KRW",
+    "as_of": "2026-09-29",
+    "source": "Invented arithmetic for synthetic study; not a quote"
+  },
+  "line_search_assembly_reuse": false,
+  "cost_dominance_pruning": false,
+  "evaluate_exhaustive_oracle_after_online_arms": true,
+  "failed_or_incomplete_paths": "Retain originals and measured costs; unavailable total work and selection remain null",
+  "claims": {
+    "separate_authored_geometry_history_replication": true,
+    "prior_policy_transfer": false,
+    "independent_project_or_physical_validation": false,
+    "real_price_savings": false
+  }
+}

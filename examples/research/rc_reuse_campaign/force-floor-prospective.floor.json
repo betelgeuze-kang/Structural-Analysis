@@ -1,0 +1,6 @@
+{
+  "schema_version": "experimental-rc-control-force-response-floor.v1",
+  "target_index": 2,
+  "target_control_displacement_m": -0.00014,
+  "minimum_load_factor": 180.0
+}

@@ -13,7 +13,10 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
 )
 from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.benchmark import rc_control_design as study
-from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.io.neutral.loader import (
+    load_neutral_json,
+    load_neutral_json_bytes,
+)
 
 
 def inputs():
@@ -36,6 +39,165 @@ def inputs():
         ),
         source_revision="a" * 40,
     )
+
+
+def pin_roller_inputs():
+    return dict(
+        baseline=load_neutral_json(
+            Path(
+                "examples/research/rc_reuse_campaign/pin-roller-steel-plastic.model.json"
+            )
+        ),
+        candidates=(
+            design.FiberFrameDesignCandidate(
+                "wider", (design.FiberFrameSectionChange("RC1", width_m=0.5),)
+            ),
+        ),
+        request=BoundedRCFiberDirectControlRequest(
+            10, (-1e-6, -2e-6), experimental_pin_roller_beam=True
+        ),
+        history_limits=design.FiberFrameHistoryLimits(1, 1),
+        material_limits=design.FiberFrameMaterialHistoryLimits(1, 1, 1),
+        prices=design.FiberFrameMaterialPrices(
+            100, 1, "KRW", "2026-09-28", "synthetic test only"
+        ),
+        source_revision="a" * 40,
+    )
+
+
+def test_explicit_pin_roller_design_pair_reanalyzes_and_prices_verified_paths(tmp_path):
+    args = pin_roller_inputs()
+    original = args["baseline"].canonical_payload()
+    root = tmp_path / "pin-roller-design"
+    report = study.compare_rc_control_designs(**args, output_directory=root)
+    assert args["baseline"].canonical_payload() == original
+    assert report["status"] == "complete"
+    assert report["candidate_denominator"] == report["verified_count"] == 2
+    assert report["selected_candidate_id"] == "baseline"
+    assert report["control_request"] == args["request"].to_dict()
+    assert report["source_revision_is_attestation"] is False
+    assert report["claims"]["independent_physical_validation"] is False
+    baseline, wider = report["rows"]
+    assert wider["quantity_delta"]["gross_concrete_volume_m3"] == pytest.approx(0.114)
+    assert wider["scoped_estimate_reduction"] == pytest.approx(-11.4)
+
+    for row, width in zip(report["rows"], (0.4, 0.5), strict=True):
+        assert row["status"] == "verified"
+        assert row["full_reference_verification_pass"] is True
+        assert row["selection_eligible"] is True
+        assert row["performance"]["accepted_epoch_count"] == 2
+        assert [(i["phase"], i["status"]) for i in row["invocations"]] == [
+            ("analysis", "returned"),
+            ("verification", "returned"),
+        ]
+        assert [i["work"]["attempted_step_count"] for i in row["invocations"]] == [
+            2,
+            2,
+        ]
+        assert all(i["unknown_execution_work"] is False for i in row["invocations"])
+
+        def artifact(role):
+            ref = row["artifacts"][role]
+            raw = (root / ref["path"]).read_bytes()
+            assert len(raw) == ref["byte_length"]
+            assert "sha256:" + hashlib.sha256(raw).hexdigest() == ref["sha256"]
+            return raw
+
+        model = load_neutral_json_bytes(artifact("model"))
+        result = json.loads(artifact("result"))
+        verification = json.loads(artifact("verification"))
+        assert model.canonical_payload()["sections"][0]["width_m"] == width
+        assert result["model"]["compiler_profile"] == (
+            "planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1"
+        )
+        assert result["request"]["experimental_pin_roller_beam"] is True
+        assert result["path"]["accepted_target_prefix_m"] == list(
+            args["request"].targets_m
+        )
+        assert verification["verified_result_hash"] == result["result_hash"]
+        assert verification["fresh_source_execution_invoked"] is True
+        assert verification["solver_replay_performed"] is True
+        assert all(
+            {
+                (reaction["node_id"], reaction["dof"])
+                for reaction in response["support_reactions"]
+            }
+            == {("N2", "UX"), ("N2", "UY"), ("N6", "UY")}
+            for response in result["response_history"]
+        )
+
+        quantities = row["quantities"]
+        estimate = row["material_estimate"]
+        assert quantities["model_checksum"] == model.canonical_model_checksum
+        assert len(quantities["members"]) == 6
+        assert sum(
+            member["length_m"] for member in quantities["members"]
+        ) == pytest.approx(1.9)
+        assert quantities["totals"]["gross_concrete_volume_m3"] == pytest.approx(
+            width * 0.6 * 1.9
+        )
+        assert quantities["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+            8 * 0.000387 * 1.9 * 7850
+        )
+        assert estimate["quantity_hash"] == quantities["quantity_hash"]
+        assert estimate["price_table_hash"] == report["price_table_hash"]
+        assert estimate["total"] == pytest.approx(
+            width * 0.6 * 1.9 * 100 + 8 * 0.000387 * 1.9 * 7850
+        )
+
+
+def test_pin_roller_design_rejects_preload_before_publication(tmp_path):
+    args = pin_roller_inputs()
+    args["request"] = replace(
+        args["request"], constant_nodal_loads=(("N3", -1.0, 0.0, 0.0),)
+    )
+    root = tmp_path / "pin-roller-design"
+    with pytest.raises(ValueError, match="pin-roller.*constant preloads"):
+        study.compare_rc_control_designs(**args, output_directory=root)
+    assert not root.exists()
+
+
+def test_pin_roller_design_invalid_geometry_blocks_before_solver(tmp_path, monkeypatch):
+    args = pin_roller_inputs()
+    payload = args["baseline"].canonical_payload()
+    payload["nodes"][3]["coordinates"][1] = 0.01
+    args["baseline"] = load_neutral_json_bytes(json.dumps(payload).encode())
+    monkeypatch.setattr(
+        study.api,
+        "analyze_bounded_rc_fiber_direct_control",
+        lambda *_a, **_kw: pytest.fail("invalid geometry reached solver"),
+    )
+    report = study.compare_rc_control_designs(
+        **args, output_directory=tmp_path / "pin-roller-design"
+    )
+    assert report["candidate_denominator"] == 2
+    assert report["verified_count"] == 0
+    assert report["selected_candidate_id"] is None
+    for row in report["rows"]:
+        assert row["status"] == "invalid_candidate"
+        assert row["invocations"] == []
+        assert row["quantities"] is None and row["material_estimate"] is None
+        assert (
+            "rc_fiber_frame_pin_roller_beam_geometry_invalid"
+            in row["failure"]["detail"]
+        )
+
+
+def test_pin_roller_design_failure_retains_priced_denominator_and_unknown_work(
+    tmp_path, no_solver
+):
+    report = study.compare_rc_control_designs(
+        **pin_roller_inputs(), output_directory=tmp_path / "pin-roller-design"
+    )
+    assert report["candidate_denominator"] == 2
+    assert report["verified_count"] == 0
+    assert report["selected_candidate_id"] is None
+    for row in report["rows"]:
+        assert row["status"] == "execution_error"
+        assert row["quantities"] is not None and row["material_estimate"] is not None
+        assert row["performance"] is None and row["screens"] is None
+        assert row["invocations"][0]["work"] is None
+        assert row["invocations"][0]["unknown_execution_work"] is True
 
 
 def test_constant_design_reanalysis_includes_preload_response_and_cost(tmp_path):
@@ -201,7 +363,9 @@ def test_actual_full_reference_reanalysis_and_common_quantities(actual):
             member = quantities[member_id]
             cost = estimates[member_id]
             assert member["length_m"] == pytest.approx(length)
-            assert member["gross_concrete_volume_m3"] == pytest.approx(width * 0.6 * length)
+            assert member["gross_concrete_volume_m3"] == pytest.approx(
+                width * 0.6 * length
+            )
             assert member["longitudinal_rebar_mass_kg"] == pytest.approx(
                 8 * 0.000387 * length * 7850
             )

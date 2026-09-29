@@ -26,6 +26,8 @@ from structural_analysis.model.schema import CanonicalModel
 
 SCHEMA = "experimental-rc-control-design-comparison.v1"
 PRUNED_SCHEMA = "experimental-rc-control-cost-pruned-design.v1"
+FORCE_RESPONSE_FLOOR_SCHEMA = "experimental-rc-control-design-comparison.v2"
+PRUNED_FORCE_RESPONSE_FLOOR_SCHEMA = "experimental-rc-control-cost-pruned-design.v2"
 
 
 def _bytes(value):
@@ -107,6 +109,100 @@ def _screens(performance, history_limits, material_limits, terminal_limits=None)
     }
 
 
+def _validated_force_response_floor(force_response_floor, baseline, request):
+    """Detach an opt-in lower screen before any comparison output is created."""
+    if force_response_floor is None:
+        return None
+    if type(baseline) is not CanonicalModel or type(request) is not BoundedRCFiberDirectControlRequest:
+        raise ValueError("exact model and direct-control request required for force floor")
+    if type(force_response_floor) is not dict or set(force_response_floor) != {
+        "target_index", "target_control_displacement_m", "minimum_load_factor"
+    }:
+        raise ValueError("exact force-response floor fields required")
+    if not request.experimental_pin_roller_beam or request.constant_nodal_loads:
+        raise ValueError("force-response floor requires pin/roller reference loading without preload")
+    index = force_response_floor["target_index"]
+    if type(index) is not int or not 0 <= index < len(request.targets_m):
+        raise ValueError("force-response floor requires an authored target index")
+    target = force_response_floor["target_control_displacement_m"]
+    if (
+        type(target) not in (int, float)
+        or not math.isfinite(target)
+        or target != request.targets_m[index]
+    ):
+        raise ValueError("force-response floor target differs from authored displacement")
+    minimum = force_response_floor["minimum_load_factor"]
+    if type(minimum) not in (int, float) or not math.isfinite(minimum) or minimum <= 0:
+        raise ValueError("positive finite force-response load-factor floor required")
+    model = baseline.canonical_payload()
+    if model.get("units", {}).get("force") != "kN" or not model.get("loads"):
+        raise ValueError("force-response floor requires fixed kN reference loads")
+    return {
+        "target_index": index,
+        "target_control_displacement_m": request.targets_m[index],
+        "minimum_load_factor": float(minimum),
+    }
+
+
+def _verified_indexed_load_factor(payload, request, floor):
+    """Read the signed factor from the accepted target bound to its checkpoint."""
+    index = floor["target_index"]
+    target = floor["target_control_displacement_m"]
+    history = payload.get("response_history")
+    path = payload.get("path") or {}
+    attempts = path.get("attempts")
+    if (
+        type(history) is not list
+        or len(history) != len(request.targets_m)
+        or type(attempts) is not list
+        or len(attempts) != len(history)
+        or path.get("accepted_target_prefix_m") != list(request.targets_m)
+    ):
+        raise ValueError("complete accepted force-response target history required")
+    response = history[index]
+    attempt = attempts[index]
+    step = attempt.get("step") or {}
+    checkpoint = step.get("accepted_checkpoint") or {}
+    factor = response.get("load_factor")
+    if (
+        attempt.get("committed") is not True
+        or attempt.get("target_control_displacement_m") != target
+        or type(factor) not in (int, float)
+        or not math.isfinite(factor)
+        or response.get("checkpoint_hash") != attempt.get("accepted_checkpoint_hash")
+        or checkpoint.get("state_hash") != attempt.get("accepted_checkpoint_hash")
+        or response.get("source_step_hash") != step.get("step_hash")
+        or response.get("parent_checkpoint_hash") != attempt.get("parent_checkpoint_hash")
+        or checkpoint.get("parent_state_hash") != attempt.get("parent_checkpoint_hash")
+        or checkpoint.get("load_factor") != factor
+    ):
+        raise ValueError("force-response factor differs from accepted target checkpoint")
+    control = payload.get("control") or {}
+    coordinate = control.get("component")
+    nodes = [
+        node for node in response.get("node_displacements", ())
+        if node.get("node_id") == control.get("node_id")
+    ]
+    displacements = checkpoint.get("global_displacements")
+    dof = request.control_global_dof
+    tolerance = request.solver_config.control_tolerance_m
+    if (
+        control.get("global_dof") != dof
+        or coordinate not in ("UX", "UY")
+        or len(nodes) != 1
+        or type(displacements) is not list
+        or not 0 <= dof < len(displacements)
+        or any(
+            type(value) not in (int, float)
+            or not math.isfinite(value)
+            or abs(value - target) > tolerance
+            for value in (nodes[0].get(coordinate + "_m"), displacements[dof])
+        )
+    ):
+        raise ValueError("force-response target coordinate differs from authored displacement")
+    return factor
+
+
 def _reference_design_row(
     baseline,
     candidate,
@@ -119,6 +215,7 @@ def _reference_design_row(
     terminal_limits,
     *,
     cost_incumbent=None,
+    force_response_floor=None,
 ):
     """Shared single-model execution, original artifacts and fresh verification."""
     candidate_id = "baseline" if candidate is None else candidate.candidate_id
@@ -141,6 +238,11 @@ def _reference_design_row(
             if candidate is None
             else design.apply_fiber_frame_section_changes(baseline, candidate)
         )
+        if force_response_floor is not None:
+            reference = baseline.canonical_payload()
+            changed = model.canonical_payload()
+            if changed.get("loads") != reference.get("loads") or changed.get("units", {}).get("force") != "kN":
+                raise ValueError("candidate reference load pattern differs from floor baseline")
         row["quantities"] = design.calculate_fiber_frame_member_quantities(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
@@ -286,8 +388,11 @@ def _reference_design_row(
         # Preserve that distinction instead of making every block look like a
         # mismatch introduced by fresh verification.
         path = payload.get("path") or {}
-        failed = [attempt for attempt in path.get("attempts", ())
-                  if attempt.get("committed") is False]
+        failed = [
+            attempt
+            for attempt in path.get("attempts", ())
+            if attempt.get("committed") is False
+        ]
         if failed:
             attempt = failed[-1]
             work = attempt.get("solver_work") or {}
@@ -309,6 +414,16 @@ def _reference_design_row(
     row["screens"] = _screens(
         row["performance"], history_limits, material_limits, terminal_limits
     )
+    if force_response_floor is not None:
+        factor = _verified_indexed_load_factor(payload, request, force_response_floor)
+        row["performance"]["load_factor_at_target"] = factor
+        minimum = force_response_floor["minimum_load_factor"]
+        row["screens"]["load_factor_at_target"] = {
+            "value": factor,
+            "limit": minimum,
+            "status": "pass" if factor >= minimum else "fail",
+            "comparison": "at_least",
+        }
     row["selection_eligible"] = all(
         screen["status"] == "pass" for screen in row["screens"].values()
     )
@@ -328,6 +443,7 @@ def compare_rc_control_designs(
     terminal_limits: design.FiberFrameTerminalLimits | None = None,
     reuse_line_search_assembly: bool = False,
     prune_cost_dominated: bool = False,
+    force_response_floor: dict | None = None,
 ) -> dict:
     """Analyze and freshly reverify requested models from epoch zero.
 
@@ -351,6 +467,11 @@ def compare_rc_control_designs(
     request = decode_bounded_rc_fiber_direct_control_request(_bytes(request.to_dict()))
     if not request.targets_m:
         raise ValueError("at least one authored target required")
+    if request.experimental_pin_roller_beam and request.constant_nodal_loads:
+        raise ValueError(
+            "pin-roller design comparison does not support constant preloads"
+        )
+    force_response_floor = _validated_force_response_floor(force_response_floor, baseline, request)
     if type(candidates) is not tuple or not 1 <= len(candidates) <= 16:
         raise ValueError("one to sixteen candidates required")
     if any(type(c) is not design.FiberFrameDesignCandidate for c in candidates):
@@ -395,7 +516,12 @@ def compare_rc_control_designs(
     root.mkdir(parents=True, exist_ok=False)
     start_wall, start_cpu = perf_counter_ns(), process_time_ns()
     identity = {
-        "schema_version": PRUNED_SCHEMA if prune_cost_dominated else SCHEMA,
+        "schema_version": (
+            PRUNED_FORCE_RESPONSE_FLOOR_SCHEMA if prune_cost_dominated
+            else FORCE_RESPONSE_FLOOR_SCHEMA
+        ) if force_response_floor is not None else (
+            PRUNED_SCHEMA if prune_cost_dominated else SCHEMA
+        ),
         "baseline_checksum": baseline.canonical_model_checksum,
         "candidates": [candidate.to_dict() for candidate in candidates],
         "control_request": request.to_dict(),
@@ -407,8 +533,12 @@ def compare_rc_control_designs(
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
     }
+    if force_response_floor is not None:
+        identity["force_response_floor"] = force_response_floor
     if prune_cost_dominated:
-        identity["execution_policy"] = "strict_verified_cost_dominance_in_authored_order.v1"
+        identity["execution_policy"] = (
+            "strict_verified_cost_dominance_in_authored_order.v1"
+        )
     if reuse_line_search_assembly:
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
@@ -421,21 +551,33 @@ def compare_rc_control_designs(
     incumbent = None
     for candidate in (None, *candidates):
         row = _reference_design_row(
-            baseline, candidate, request, root, kwargs, prices,
-            history_limits, material_limits, terminal_limits,
+            baseline,
+            candidate,
+            request,
+            root,
+            kwargs,
+            prices,
+            history_limits,
+            material_limits,
+            terminal_limits,
             **({"cost_incumbent": incumbent} if prune_cost_dominated else {}),
+            **({"force_response_floor": force_response_floor} if force_response_floor is not None else {}),
         )
         rows.append(row)
         if (
             prune_cost_dominated
             and row["full_reference_verification_pass"]
             and row["selection_eligible"]
-            and all(inv["status"] == "returned" and inv["unknown_execution_work"] is False for inv in row["invocations"])
+            and all(
+                inv["status"] == "returned" and inv["unknown_execution_work"] is False
+                for inv in row["invocations"]
+            )
         ):
             estimate = row["material_estimate"]["total"]
             if incumbent is None or estimate < incumbent["estimate"]:
                 incumbent = {
-                    "candidate_id": row["candidate_id"], "estimate": estimate,
+                    "candidate_id": row["candidate_id"],
+                    "estimate": estimate,
                     "result_sha256": row["artifacts"]["result"]["sha256"],
                     "verification_sha256": row["artifacts"]["verification"]["sha256"],
                     "model_sha256": row["artifacts"]["model"]["sha256"],
@@ -499,14 +641,21 @@ def compare_rc_control_designs(
             or row["status"] == "skipped_cost_dominated"
             for row in rows
         )
-        report["status"] = ("complete_with_cost_exclusions" if skipped else "complete") if resolved else "incomplete"
+        report["status"] = (
+            ("complete_with_cost_exclusions" if skipped else "complete")
+            if resolved
+            else "incomplete"
+        )
         report["cost_pruning"] = {
             "skipped_candidate_ids": [row["candidate_id"] for row in skipped],
             "skipped_count": len(skipped),
             "api_invocation_count": sum(len(row["invocations"]) for row in rows),
-            "minimum_scoped_estimate_proved_within_declared_candidates": resolved and selected is not None,
+            "minimum_scoped_estimate_proved_within_declared_candidates": resolved
+            and selected is not None,
             "skipped_candidate_feasibility_known": False,
-            "all_requested_models_physically_verified": all(row["full_reference_verification_pass"] for row in rows),
+            "all_requested_models_physically_verified": all(
+                row["full_reference_verification_pass"] for row in rows
+            ),
             "saved_wall_time_measured": False,
         }
     design._finite_tree(report)

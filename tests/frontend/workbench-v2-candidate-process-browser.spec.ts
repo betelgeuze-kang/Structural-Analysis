@@ -3,14 +3,15 @@ import { expect, test, type Page } from '@playwright/test'
 import { candidateProcessIncompleteFixture, candidateProcessObservedFixture } from './candidateProcessObservedFixture'
 import { designComparisonFixture } from './designComparisonFixture'
 import { waitForCandidateProcess } from './candidateProcessBrowserWait'
+import { candidateProcessCostFixture, candidateProcessStopCostFixture } from './candidateProcessCostFixture'
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 const identity = (bytes: Uint8Array): string => `sha256:${createHash('sha256').update(bytes).digest('hex')}`
 const encode = (value: unknown): Uint8Array => Buffer.from(JSON.stringify(value))
 test.setTimeout(120000)
 
-async function serveReview(page: Page, options: { corruptSuite?: boolean; standalone?: boolean; incomplete?: boolean } = {}) {
-  const fixture = options.incomplete ? candidateProcessIncompleteFixture() : candidateProcessObservedFixture()
+async function serveReview(page: Page, options: { corruptSuite?: boolean; corruptCost?: boolean; standalone?: boolean; incomplete?: boolean; costAudit?: boolean; stopCostAudit?: boolean } = {}) {
+  const fixture = options.stopCostAudit ? candidateProcessStopCostFixture() : options.costAudit ? candidateProcessCostFixture() : options.incomplete ? candidateProcessIncompleteFixture() : candidateProcessObservedFixture()
   await page.addInitScript((standalone) => {
     window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
       candidateSearchProcessUrl: '/candidate-review/manifest.json',
@@ -24,11 +25,55 @@ async function serveReview(page: Page, options: { corruptSuite?: boolean; standa
     requests.push(relative)
     const bytes = fixture.files.get(relative)
     if (!bytes) return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
-    return route.fulfill({ contentType: 'application/json', body: options.corruptSuite && relative === 'suite.json'
+    return route.fulfill({ contentType: 'application/json', body: (options.corruptSuite && relative === 'suite.json') || (options.corruptCost && relative === 'cost/candidate-pool-audit.json')
       ? Buffer.concat([Buffer.from(bytes), Buffer.from('\n')]) : Buffer.from(bytes) })
   })
   return { ...fixture, requests }
 }
+
+for (const [name, viewport] of [
+  ['desktop', { width: 1440, height: 1000 }],
+  ['mobile', { width: 390, height: 844 }],
+] as const) test.describe(`v4 finite-pool cost audit on ${name}`, () => {
+  test.use({ viewport })
+  test('keeps a planned but unattempted cheaper stop candidate distinct', async ({ page }) => {
+    await serveReview(page, { stopCostAudit: true })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = await waitForCandidateProcess(page)
+    await expect(panel.locator('[data-candidate-pool-cost-status]')).toHaveText('complete')
+    await expect(panel.locator('[data-candidate-pool-missed="learned"]')).toHaveText('0')
+    await expect(panel.locator('[data-candidate-pool-unrequested="learned"]')).toHaveText('1 · near-limit')
+  })
+  test('shows only independently verified group costs and exports exact sidecar bytes', async ({ page }) => {
+    const fixture = await serveReview(page, { costAudit: true })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = await waitForCandidateProcess(page)
+    await expect(panel.locator('[data-candidate-pool-cost-status]')).toHaveText('complete')
+    await expect(panel.locator('[data-candidate-cost="pool-denominator"]')).toHaveText('3')
+    expect(Number(await panel.locator('[data-candidate-cost="pool-minimum"]').innerText())).toBeCloseTo(144.0108, 4)
+    await expect(panel.locator('[data-candidate-pool-minimum-ids]')).toHaveText('near-limit')
+    await expect(panel.locator('[data-candidate-pool-missed="deterministic"]')).toContainText('near-limit')
+    await expect(panel.locator('[data-candidate-pool-missed="learned"]')).toHaveText('0')
+    const original = fixture.files.get('cost/candidate-pool-audit.json')!
+    expect((await downloadedBytes(page, 'Download cost audit JSON')).equals(Buffer.from(original))).toBe(true)
+    const exported = JSON.parse((await downloadedBytes(page, 'Export bundle (JSON)')).toString('utf8'))
+    expect(exported.candidate_process_review.cost_audit).toEqual(JSON.parse(Buffer.from(original).toString('utf8')))
+    await panel.getByRole('combobox', { name: 'Search case', exact: true }).selectOption('pool-b')
+    await expect(panel.locator('[data-candidate-pool-cost-status]')).toHaveText(fixture.suite.declaration.configuration.oracle_audit ? 'complete' : 'oracle_not_run')
+    const bounds = await panel.evaluate(element => ({ right: element.getBoundingClientRect().right, viewport: innerWidth, content: element.scrollWidth, width: element.clientWidth }))
+    expect(bounds.right).toBeLessThanOrEqual(bounds.viewport)
+    expect(bounds.content).toBeLessThanOrEqual(bounds.width)
+  })
+})
+
+test('changed v4 cost bytes keep all pool claims and artifact downloads unavailable', async ({ page }) => {
+  await serveReview(page, { costAudit: true, corruptCost: true })
+  await page.goto(`${baseUrl}/#/workbench-v2`)
+  const panel = await waitForCandidateProcess(page, 'invalid')
+  await expect(panel.locator('[data-candidate-pool-cost]')).toHaveCount(0)
+  await expect(panel.getByRole('button', { name: 'Download cost audit JSON' })).toHaveCount(0)
+  await expect(panel.getByRole('button', { name: 'Download whole search JSON' })).toHaveCount(0)
+})
 
 async function downloadedBytes(page: Page, buttonName: string): Promise<Buffer> {
   // Chromium throttles the 11th rapid download even with trusted clicks and delayed URL revocation.

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { setTimeout as delay } from 'node:timers/promises'
 import { portalDesignBytes } from './rcPortalDesignFixture'
+import { pinRollerDesignBytes } from './rcPinRollerDesignFixture'
 const directory = 'tests/frontend/fixtures/rc-control-design/'
 const report = JSON.parse(readFileSync(`${directory}comparison.json`, 'utf8'))
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
@@ -30,6 +31,17 @@ async function setupPortal(page: Page) {
     await route.fulfill({ contentType: 'application/json', body: Buffer.from(portalDesignBytes(relative)) })
   })
 }
+async function setupPinRoller(page: Page) {
+  await page.addInitScript(() => {
+    window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlDesignUrl: '/rc-study/comparison.json', jobAuthorization: () => ({ tenantId: 'synthetic-study', bearerToken: 'synthetic-only' }) }
+  })
+  await page.route('**/rc-study/**', async route => {
+    expect(await route.request().headerValue('authorization')).toBe('Bearer synthetic-only')
+    expect(await route.request().headerValue('x-structural-tenant')).toBe('synthetic-study')
+    const relative = new URL(route.request().url()).pathname.replace('/rc-study/', '')
+    await route.fulfill({ contentType: 'application/json', body: Buffer.from(pinRollerDesignBytes(relative)) })
+  })
+}
 // Wait only at the asynchronous original-artifact validation boundary. A wrong
 // terminal state fails immediately; integrity and rendering limits stay strict.
 async function waitForRcDesign(page: Page, expected: 'verified' | 'invalid' = 'verified') {
@@ -45,6 +57,25 @@ async function waitForRcDesign(page: Page, expected: 'verified' | 'invalid' = 'v
 for (const width of [1440, 390]) {
   test.describe(`RC study browser ${width}`, () => {
     test.use({ viewport: { width, height: 1000 } })
+    test('reviews the verified pin/roller design pair with six-member quantities', async ({ page }) => {
+      await setupPinRoller(page)
+      await page.goto(`${baseUrl}/#/workbench-v2`)
+      const panel = await waitForRcDesign(page)
+      await expect(panel.locator('[data-rc-design-pin-roller]')).toContainText('pin restrains UX and UY')
+      await expect(panel.locator('[data-rc-design-constants]')).toHaveCount(0)
+      await expect(panel.locator('[data-rc-design-candidate]')).toHaveCount(2)
+      await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'baseline')
+      await expect(panel.locator('[data-rc-design-members="baseline"] tbody tr')).toHaveCount(6)
+      await expect(panel.locator('[data-rc-design-summary-field="estimate"]')).toBeVisible()
+      const costs = panel.getByRole('region', { name: 'baseline RC execution costs' })
+      await expect(costs.locator('tbody tr')).toHaveCount(2)
+      for (const row of await costs.locator('tbody tr').all()) await expect(row.locator('td').nth(2)).toHaveText('2')
+      const pending = page.waitForEvent('download')
+      await panel.getByRole('button', { name: 'Download original RC comparison' }).click()
+      expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(pinRollerDesignBytes('comparison.json')))
+      const bounds = await panel.boundingBox()
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
+    })
     test('reviews two-fixed portal originals and three-member quantities', async ({ page }) => {
       await setupPortal(page)
       await page.goto(`${baseUrl}/#/workbench-v2`)

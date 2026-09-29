@@ -1,0 +1,133 @@
+{
+  "schema_version": "rc-fiber-design-experiment.v3",
+  "candidates": [
+    {
+      "candidate_id": "w33",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.33
+        }
+      ]
+    },
+    {
+      "candidate_id": "w35",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.35
+        }
+      ]
+    },
+    {
+      "candidate_id": "w37",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.37
+        }
+      ]
+    },
+    {
+      "candidate_id": "w39",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.39
+        }
+      ]
+    },
+    {
+      "candidate_id": "w41",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.41
+        }
+      ]
+    },
+    {
+      "candidate_id": "w43",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.43
+        }
+      ]
+    },
+    {
+      "candidate_id": "w45",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.45
+        }
+      ]
+    },
+    {
+      "candidate_id": "w47",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.47
+        }
+      ]
+    },
+    {
+      "candidate_id": "w49",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.49
+        }
+      ]
+    },
+    {
+      "candidate_id": "w51",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.51
+        }
+      ]
+    },
+    {
+      "candidate_id": "w53",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.53
+        }
+      ]
+    },
+    {
+      "candidate_id": "w55",
+      "changes": [
+        {
+          "section_id": "RC1",
+          "width_m": 0.55
+        }
+      ]
+    }
+  ],
+  "history_limits": {
+    "maximum_absolute_fiber_strain": 0.0001585,
+    "maximum_translation_m": 1.0
+  },
+  "material_history_limits": {
+    "maximum_concrete_compressive_damage": 1.0,
+    "maximum_concrete_tensile_damage": 1.0,
+    "maximum_steel_accumulated_plastic_strain": 1.0
+  },
+  "terminal_limits": {
+    "maximum_absolute_fiber_strain": 1.0,
+    "maximum_translation_m": 1.0
+  },
+  "prices": {
+    "as_of": "2026-09-29",
+    "concrete_per_m3": 100,
+    "currency": "KRW",
+    "rebar_per_kg": 1,
+    "source": "Invented arithmetic for synthetic study; not a quote"
+  }
+}

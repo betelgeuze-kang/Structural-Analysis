@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 from dataclasses import asdict
+from itertools import combinations
 import hashlib
 import json
 from pathlib import Path
@@ -24,6 +25,31 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
 FIXTURES = Path(__file__).parent / "fixtures/fiber_frame_candidate_process"
 SOURCE = "a" * 40
+
+
+def test_legacy_section_change_shape_accepts_omitted_later_overrides_only():
+    legacy = {
+        "section_id": "section",
+        "width_m": None,
+        "depth_m": 0.4,
+        "cover_m": None,
+        "top_bar_count": None,
+        "bottom_bar_count": None,
+        "bar_area_m2": None,
+    }
+    process._validate_section_change_fields(legacy)
+    process._validate_section_change_fields(
+        {**legacy, **dict.fromkeys(process._SECTION_CHANGE_OPTIONAL_FIELDS)}
+    )
+    for optional in process._SECTION_CHANGE_OPTIONAL_FIELDS:
+        with pytest.raises(ValueError, match="fields"):
+            process._validate_section_change_fields({**legacy, optional: None})
+    with pytest.raises(ValueError, match="fields"):
+        process._validate_section_change_fields(
+            {k: v for k, v in legacy.items() if k != "section_id"}
+        )
+    with pytest.raises(ValueError, match="fields"):
+        process._validate_section_change_fields({**legacy, "unrecognized": 1})
 
 
 @pytest.fixture(autouse=True)
@@ -91,6 +117,47 @@ def request_file(tmp_path):
     path = tmp_path / "request.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
+
+
+@pytest.mark.parametrize(
+    "present_overrides",
+    [
+        combination
+        for count in range(1, 4)
+        for combination in combinations(
+            sorted(process._SECTION_CHANGE_OPTIONAL_FIELDS), count
+        )
+    ],
+)
+def test_partial_current_section_change_rejected_before_worker(
+    request_file, tmp_path, present_overrides, forbid_solver_and_workers
+):
+    payload = json.loads(request_file.read_bytes())
+    change = payload["cases"][0]["candidates"][0]["changes"][0]
+    for name in process._SECTION_CHANGE_OPTIONAL_FIELDS - set(present_overrides):
+        change.pop(name)
+    request_file.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="fields"):
+        _freeze(request_file, tmp_path / "output")
+    assert forbid_solver_and_workers == []
+
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_complete_section_change_shapes_freeze_without_rewriting_request(
+    request_file, tmp_path, legacy, forbid_solver_and_workers
+):
+    if legacy:
+        payload = json.loads(request_file.read_bytes())
+        for candidate in payload["cases"][0]["candidates"]:
+            for change in candidate["changes"]:
+                for name in process._SECTION_CHANGE_OPTIONAL_FIELDS:
+                    change.pop(name)
+        request_file.write_text(json.dumps(payload), encoding="utf-8")
+    original = request_file.read_bytes()
+    _freeze(request_file, tmp_path / "output")
+    assert request_file.read_bytes() == original
+    assert forbid_solver_and_workers == []
 
 
 def _request(path, mutate):

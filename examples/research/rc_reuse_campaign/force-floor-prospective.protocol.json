@@ -1,0 +1,23 @@
+{
+  "schema_version": "experimental-rc-control-force-floor-protocol.v1",
+  "inputs": {
+    "model": {
+      "path": "examples/research/rc_reuse_campaign/pin-roller-replication.model.json",
+      "sha256": "sha256:c752083ff4c3d562ec48a85d829b99ae02a1713c2c69885c22fb21f0c5325e42"
+    },
+    "request": {
+      "path": "examples/research/rc_reuse_campaign/pin-roller-replication.request.json",
+      "sha256": "sha256:b647ac8dd1bb7f391555b8b5c8ffbee46eee320faca341e350a0a5b6f630a85e"
+    },
+    "experiment": {
+      "path": "examples/research/rc_reuse_campaign/force-floor-prospective.experiment.json",
+      "sha256": "sha256:eef32e963904799a21f11c6d358aff4e4852a78870540cbe663e967cdab35d75"
+    },
+    "floor_plan": {
+      "path": "examples/research/rc_reuse_campaign/force-floor-prospective.floor.json",
+      "sha256": "sha256:447ff81a595af8a970b635a0c58992b98ddd10ce20f833e5e0fee5a909ca3da7"
+    }
+  },
+  "full_analysis_budget": 4,
+  "reuse_line_search_assembly": false
+}

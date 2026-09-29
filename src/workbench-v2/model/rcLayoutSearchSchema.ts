@@ -3,7 +3,7 @@ import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
 import { artifactMaximum, validateRcStudyControl, validateRcStudyLimits, verifyRcDesignCandidate, verifyQuantities, type RcDesignReview, type StudyRead } from './rcControlDesignSchema'
 import { candidateRanking, CHEAPER_BOUNDARY_RANKING } from './rcControlCandidateRanking'
-import { costOptimality } from './rcControlSearchCost'
+import { costOptimality, RC_COST_AUDIT_V1, RC_COST_AUDIT_V2 } from './rcControlSearchCost'
 import { layoutPruningPolicy, validateLayoutPruning } from './rcLayoutCostPruning'
 import { validateStagingPolicy, validateLayoutStaging } from './rcLayoutStaging'
 import type { RcSearchReview } from './rcControlSearchSchema'
@@ -152,7 +152,8 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
         scoped_estimate_reduction: r.material_estimate && base.material_estimate ? base.material_estimate.total - r.material_estimate.total : null })) }
     designs[name] = { report: comparison, models, displayReport }
   }
-  const cost = pruned ? null : costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, value]) => [name, value.report])))
+  const costSchema = report.candidate_cost_optimality_audit?.schema_version === RC_COST_AUDIT_V2 ? RC_COST_AUDIT_V2 : RC_COST_AUDIT_V1
+  const cost = pruned ? null : costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, value]) => [name, value.report])), costSchema)
   check(same(report.candidate_cost_optimality_audit, cost) && same(report.candidate_coverage_audit, (priceOnly || pruned ? null : coverage(plan, designs.exhaustive_oracle?.report ?? null))), 'layout_audit_invalid')
   check([report.ranking_wall_ns, report.online_and_optional_oracle_wall_ns, report.online_and_optional_oracle_cpu_ns].every(nat)
     && report.online_and_optional_oracle_wall_ns >= report.ranking_wall_ns + names.reduce((s, n) => s + (n === 'exhaustive_oracle' ? report.oracle : report.arms[n]).wall_ns, 0)

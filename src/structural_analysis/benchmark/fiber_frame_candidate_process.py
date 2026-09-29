@@ -44,6 +44,30 @@ CASE_FIELDS = {
     "full_analysis_budget",
     "exploration_slots",
 }
+_SECTION_CHANGE_LEGACY_FIELDS = {
+    "section_id",
+    "width_m",
+    "depth_m",
+    "cover_m",
+    "top_bar_count",
+    "bottom_bar_count",
+    "bar_area_m2",
+}
+_SECTION_CHANGE_OPTIONAL_FIELDS = {
+    "top_bar_area_m2",
+    "bottom_bar_area_m2",
+    "top_cover_m",
+    "bottom_cover_m",
+}
+
+
+def _validate_section_change_fields(change: Any) -> None:
+    # Preserve the exact legacy shape; current requests declare all overrides.
+    if type(change) is not dict or set(change) not in (
+        _SECTION_CHANGE_LEGACY_FIELDS,
+        _SECTION_CHANGE_LEGACY_FIELDS | _SECTION_CHANGE_OPTIONAL_FIELDS,
+    ):
+        raise ValueError("candidate change fields do not match the contract")
 
 
 def _case_fields(row: dict[str, Any]) -> set[str]:
@@ -207,7 +231,7 @@ def _case_arguments(
             raise ValueError("candidate changes must be an array")
         changes = []
         for change in candidate["changes"]:
-            process._fields(change, {f.name for f in fields(FiberFrameSectionChange)})
+            _validate_section_change_fields(change)
             changes.append(FiberFrameSectionChange(**change))
         candidates.append(
             FiberFrameDesignCandidate(candidate["candidate_id"], tuple(changes))

@@ -1,0 +1,49 @@
+{
+  "schema_version": "experimental-rc-control-force-factor-protocol.v2",
+  "inputs": {
+    "model": {
+      "path": "examples/research/rc_reuse_campaign/pin-roller-replication.model.json",
+      "sha256": "sha256:c752083ff4c3d562ec48a85d829b99ae02a1713c2c69885c22fb21f0c5325e42"
+    },
+    "request": {
+      "path": "examples/research/rc_reuse_campaign/pin-roller-replication.request.json",
+      "sha256": "sha256:b647ac8dd1bb7f391555b8b5c8ffbee46eee320faca341e350a0a5b6f630a85e"
+    },
+    "training_experiment": {
+      "path": "examples/research/rc_reuse_campaign/force-factor-prospective.training-experiment.json",
+      "sha256": "sha256:ce5301111ccea401cd053487747157867c590f01a063d40c9e2af00d501dc754"
+    },
+    "experiment": {
+      "path": "examples/research/rc_reuse_campaign/force-factor-prospective.experiment.json",
+      "sha256": "sha256:c988ecc73e0b0468b955399c9246967a122c93828c0b7a82b2fce646c0a7ad30"
+    },
+    "floor_plan": {
+      "path": "examples/research/rc_reuse_campaign/force-factor-prospective.floor.json",
+      "sha256": "sha256:447ff81a595af8a970b635a0c58992b98ddd10ce20f833e5e0fee5a909ca3da7"
+    },
+    "learning_plan": {
+      "path": "examples/research/rc_reuse_campaign/force-factor-prospective.learning.json",
+      "sha256": "sha256:d482093bba430e4f37ce49bb1f979132aadbbe5f5ab83efcbf035980f5b240e0"
+    }
+  },
+  "baselines": {
+    "training": {
+      "section_id": "RC1",
+      "width_m": 0.44
+    },
+    "evaluation": {
+      "section_id": "RC1",
+      "width_m": 0.5
+    }
+  },
+  "full_analysis_budget": 4,
+  "reuse_line_search_assembly": false,
+  "schedule": [
+    "training",
+    "price_order",
+    "learned_order",
+    "exhaustive_oracle"
+  ],
+  "floor_selection_provenance": "posthoc_threshold_from_prior_force_floor_packet",
+  "independent_project_geometry_history_split": false
+}

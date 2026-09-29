@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { rcDesignBlockedStep, validateRcDesignStudy, validateRcStudyControl, validateRcTwoFixedStudyProfile } from '../../src/workbench-v2/model/rcControlDesignSchema'
+import { rcDesignBlockedStep, validateRcDesignStudy, validateRcPinRollerStudyProfile, validateRcStudyControl, validateRcTwoFixedStudyProfile } from '../../src/workbench-v2/model/rcControlDesignSchema'
 import { portalDesignBytes, portalDesignRead } from './rcPortalDesignFixture'
+import { pinRollerDesignBytes, pinRollerDesignRead } from './rcPinRollerDesignFixture'
 const root = 'tests/frontend/fixtures/rc-control-design/'
 const original = readFileSync(`${root}comparison.json`)
 const hash = (s: string | Uint8Array) => `sha256:${createHash('sha256').update(s).digest('hex')}`
@@ -75,6 +76,48 @@ test('two-fixed study binds original endpoint supports and every support reactio
   interiorSupport.supports[1].node = 'N3'
   expect(() => validateRcTwoFixedStudyProfile(interiorSupport, histories)).toThrow('study_two_fixed_support_invalid')
 })
+test('pin/roller study admits only v4 opt-in without a constant preload', () => {
+  const request = JSON.parse(new TextDecoder().decode(pinRollerDesignBytes('comparison.json'))).control_request
+  expect(() => validateRcStudyControl(request)).not.toThrow()
+  expect(() => validateRcStudyControl({ ...request, experimental_pin_roller_beam: false })).toThrow('study_pin_roller_opt_in_invalid')
+  expect(() => validateRcStudyControl({ ...request, experimental_pin_roller_beam: undefined })).toThrow('study_pin_roller_opt_in_invalid')
+  expect(() => validateRcStudyControl({ ...request, experimental_two_fixed_endpoints: true })).toThrow('study_two_fixed_opt_in_invalid')
+  expect(() => validateRcStudyControl({ ...request, schema_version: 'bounded-rc-fiber-direct-control-request.v3' })).toThrow('study_two_fixed_opt_in_invalid')
+  expect(() => validateRcStudyControl({ ...request, constant_nodal_loads: [{ node_id: 'N3', FX_kN: 1, FY_kN: 0, MZ_kNm: 0 }] })).toThrow('study_pin_roller_preload_invalid')
+})
+test('pin/roller study binds the horizontal chain, support roles, and every accepted reaction', () => {
+  const model = JSON.parse(new TextDecoder().decode(pinRollerDesignBytes('baseline/model.json')))
+  const result = JSON.parse(new TextDecoder().decode(pinRollerDesignBytes('baseline/result.json')))
+  expect(() => validateRcPinRollerStudyProfile(model, result.response_history)).not.toThrow()
+  const changed = structuredClone(model)
+  changed.nodes[3].coordinates[1] = .01
+  expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_geometry_invalid')
+  changed.nodes[3].coordinates[1] = 0
+  changed.nodes[3].coordinates[2] = .01
+  expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_geometry_invalid')
+  changed.nodes[3].coordinates[2] = 0
+  changed.supports[1].extra = true
+  expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_support_invalid')
+  delete changed.supports[1].extra
+  changed.supports[1].dofs = ['UX', 'UY']
+  expect(() => validateRcPinRollerStudyProfile(changed, result.response_history)).toThrow('study_pin_roller_support_invalid')
+  const missing = structuredClone(result.response_history)
+  missing[1].support_reactions.pop()
+  expect(() => validateRcPinRollerStudyProfile(model, missing)).toThrow('study_pin_roller_reactions_invalid')
+})
+test('producer-derived pin/roller study retains two freshly replayed designs and common synthetic prices', async () => {
+  const review = await validateRcDesignStudy(pinRollerDesignBytes('comparison.json'), pinRollerDesignRead)
+  expect(review.report.control_request.schema_version).toBe('bounded-rc-fiber-direct-control-request.v4')
+  expect(review.report.control_request.experimental_pin_roller_beam).toBe(true)
+  expect(review.report.verified_count).toBe(2)
+  expect(review.report.selected_candidate_id).toBe('baseline')
+  expect(review.report.rows.map((row: any) => row.status)).toEqual(['verified', 'verified'])
+  for (const row of review.report.rows) {
+    expect(row.performance.accepted_epoch_count).toBe(2)
+    expect(row.quantities.members).toHaveLength(6)
+    expect(row.invocations.map((invocation: any) => invocation.work.attempted_step_count)).toEqual([2, 2])
+  }
+})
 test('producer-derived two-fixed portal study retains three fresh-verified designs, quantities and common prices', async () => {
   const review = await validateRcDesignStudy(portalDesignBytes('comparison.json'), portalDesignRead)
   expect(review.report.control_request.schema_version).toBe('bounded-rc-fiber-direct-control-request.v3')
@@ -109,6 +152,40 @@ async function validateAlteredPortalResult(changedResult: string) {
     ? new TextEncoder().encode(changedResult)
     : path === 'baseline/verification.json' ? new TextEncoder().encode(changedVerification) : portalDesignRead(path))
 }
+async function validateAlteredPinRollerResult(changedResult: string) {
+  const originalResult = new TextDecoder().decode(pinRollerDesignBytes('baseline/result.json'))
+  const originalVerification = new TextDecoder().decode(pinRollerDesignBytes('baseline/verification.json'))
+  const changedVerification = originalVerification.replace(JSON.parse(originalResult).result_hash, JSON.parse(changedResult).result_hash)
+  expect(changedVerification).not.toBe(originalVerification)
+  let report = new TextDecoder().decode(pinRollerDesignBytes('comparison.json'))
+  report = report.replace(hash(pinRollerDesignBytes('baseline/result.json')), hash(changedResult))
+    .replace(hash(pinRollerDesignBytes('baseline/verification.json')), hash(changedVerification))
+  const changedReport = new TextEncoder().encode(rehashNamed(report, 'report_hash'))
+  return validateRcDesignStudy(changedReport, async path => path === 'baseline/result.json'
+    ? new TextEncoder().encode(changedResult)
+    : path === 'baseline/verification.json' ? new TextEncoder().encode(changedVerification) : pinRollerDesignRead(path))
+}
+test('pin/roller study rejects a self-hashed result with a wrong compiler profile', async () => {
+  const original = new TextDecoder().decode(pinRollerDesignBytes('baseline/result.json'))
+  const profile = 'planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1'
+  expect(original).toContain(profile)
+  await expect(validateAlteredPinRollerResult(rehashNamed(original.replace(profile, profile.replace('.v1', '.v0')), 'result_hash'))).rejects.toThrow('study_request_binding_invalid')
+})
+test('pin/roller study rejects a self-hashed result without its explicit opt-in', async () => {
+  const original = new TextDecoder().decode(pinRollerDesignBytes('baseline/result.json'))
+  const flag = '"experimental_pin_roller_beam":true'
+  expect(original).toContain(flag)
+  await expect(validateAlteredPinRollerResult(rehashNamed(original.replace(flag, '"experimental_pin_roller_beam":null'), 'result_hash'))).rejects.toThrow('study_pin_roller_request_invalid')
+})
+test('pin/roller study rejects a self-hashed accepted row missing one roller reaction', async () => {
+  const original = new TextDecoder().decode(pinRollerDesignBytes('baseline/result.json'))
+  const historyAt = original.indexOf('"response_history":')
+  const reactionAt = original.indexOf('"support_reactions":[', historyAt)
+  const rollerAt = original.indexOf('"node_id":"N6"', reactionAt)
+  expect(rollerAt).toBeGreaterThan(reactionAt)
+  const changed = rehashNamed(original.slice(0, rollerAt) + '"node_id":"N7"' + original.slice(rollerAt + '"node_id":"N6"'.length), 'result_hash')
+  await expect(validateAlteredPinRollerResult(changed)).rejects.toThrow('study_pin_roller_reactions_invalid')
+})
 test('two-fixed study rejects a self-hashed but wrong compiler profile', async () => {
   const originalResult = new TextDecoder().decode(portalDesignBytes('baseline/result.json'))
   const profile = 'planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1'

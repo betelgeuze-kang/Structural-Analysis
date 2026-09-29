@@ -176,7 +176,8 @@ def test_unlaunched_v3_keeps_all_slots_zero_requests_and_portable_review(
         tmp_path / "suite/suite.json", tmp_path / "review"
     )
     manifest = json.loads(target.read_bytes())
-    assert manifest["schema_version"] == review.STOP_SCHEMA_VERSION
+    assert manifest["schema_version"] == review.COST_SCHEMA_VERSION
+    assert manifest["source_suite_schema_version"] == process.STOP_SCHEMA_VERSION
     bundle = review.validate_fiber_frame_candidate_process_review_bundle(
         tmp_path / "review"
     )
@@ -188,9 +189,23 @@ def test_unlaunched_v3_keeps_all_slots_zero_requests_and_portable_review(
         ]
         is None
     )
-    manifest["schema_version"] = review.MATERIAL_SCHEMA_VERSION
+    legacy = {
+        key: value
+        for key, value in manifest.items()
+        if key not in review._COST_MANIFEST_FIELDS
+    }
+    legacy["schema_version"] = review.STOP_SCHEMA_VERSION
+    target.write_bytes(process.process._bytes(legacy))
+    assert (
+        review.validate_fiber_frame_candidate_process_review_bundle(
+            tmp_path / "review"
+        )["suite"]["schema_version"]
+        == process.STOP_SCHEMA_VERSION
+    )
     target.write_bytes(process.process._bytes(manifest))
-    with pytest.raises(ValueError, match="review schema"):
+    manifest["source_suite_schema_version"] = process.MATERIAL_SCHEMA_VERSION
+    target.write_bytes(process.process._bytes(manifest))
+    with pytest.raises(ValueError, match="source suite schema"):
         review.validate_fiber_frame_candidate_process_review_bundle(tmp_path / "review")
 
 

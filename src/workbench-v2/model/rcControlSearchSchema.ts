@@ -3,8 +3,9 @@ import { validateRcLayoutSearch } from './rcLayoutSearchSchema'
 import { sha256Bytes } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
 import { validateRcDesignStudy, verifyQuantities, type RcDesignReview, type StudyRead } from './rcControlDesignSchema'
-import { costOptimality } from './rcControlSearchCost'
+import { costOptimality, RC_COST_AUDIT_V1, RC_COST_AUDIT_V2 } from './rcControlSearchCost'
 import { candidateRanking, CHEAPER_BOUNDARY_RANKING, LEGACY_RANKING } from './rcControlCandidateRanking'
+import { validateRcForceFloorSearch } from './rcForceFloorSearchSchema'
 
 export const RC_SEARCH_ARMS = ['price_order', 'learned_order'] as const
 const MAX = 2 * 1024 ** 2
@@ -31,7 +32,7 @@ export function searchWork(rows: RcObject[]): RcObject {
   }
   return { known_counters: totals, unknown_work: false, api_invocation_count: invocations.length }
 }
-function coverage(plan: RcObject, oracle: RcObject | null): RcObject {
+export function coverage(plan: RcObject, oracle: RcObject | null): RcObject {
   const predictions = new Map<string, RcObject>(plan.predictions.map((p: RcObject) => [p.candidate_id, p]))
   const rows = plan.pool.slice(1).map((p: RcObject) => {
     const prediction = predictions.get(p.candidate_id)!
@@ -77,6 +78,9 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
   }
   const resultDoc = document(raw), report = resultDoc.value
   await selfHash(resultDoc.raw, report, 'report_hash')
+  if (report.schema_version === 'experimental-rc-control-force-floor-learned-search.v2') {
+    return validateRcForceFloorSearch(raw, read, searchWork, coverage)
+  }
   if (['experimental-rc-control-layout-search.v1', 'experimental-rc-control-layout-strategy.v1', 'experimental-rc-control-layout-cost-pruned-strategy.v1', 'experimental-rc-control-layout-staged-strategy.v1'].includes(report.schema_version)) return validateRcLayoutSearch(raw, read, searchWork, coverage)
   const standalone = report.schema_version === 'experimental-rc-control-candidate-strategy.v1'
   check(!standalone || RC_SEARCH_ARMS.includes(report.strategy), 'search_strategy_invalid')
@@ -200,7 +204,8 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     await verifyQuantities({ ...row, artifacts: { model: ref } }, model, poolSlices[index], common)
   }
   check(same(report.candidate_coverage_audit, priceOnly ? null : coverage(plan, designs.exhaustive_oracle?.report ?? null)), 'search_coverage_invalid')
-  const cost = costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, review]) => [name, review.report])))
+  const costSchema = report.candidate_cost_optimality_audit?.schema_version === RC_COST_AUDIT_V2 ? RC_COST_AUDIT_V2 : RC_COST_AUDIT_V1
+  const cost = costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, review]) => [name, review.report])), costSchema)
   check(standalone || report.schema_version === 'experimental-rc-control-candidate-search.v3'
     ? same(report.candidate_cost_optimality_audit, cost) : !('candidate_cost_optimality_audit' in report), 'search_cost_optimality_invalid')
   check([report.ranking_wall_ns, report.online_and_optional_oracle_wall_ns, report.online_and_optional_oracle_cpu_ns].every(nat)

@@ -14,18 +14,21 @@ self.onmessage = async ({ data }) => {
       const base = new URL(data.url), directory = new URL('.', base)
       if (base.origin !== self.location.origin || !/^https?:$/.test(base.protocol) || base.search || base.hash || base.username || base.password) throw new Error('invalid origin')
       const headers = new Headers(data.headers); headers.set('Accept', 'application/json')
+      let initializing = true
       read = async (relative, maximum, expected) => {
         const target = new URL(relative, base)
         if (target.origin !== base.origin || !target.pathname.startsWith(directory.pathname) || target.search || target.hash || target.username || target.password) throw new Error('invalid artifact path')
         const response = await fetch(target.href, { headers, credentials: 'include', cache: 'no-store', redirect: 'error' })
         if (!response.ok) { await response.body?.cancel(); throw new Error('artifact unavailable') }
         const bytes = await readBoundedJobBytes(response, maximum, 'rc search', expected)
+        if (initializing) self.postMessage({ id, progress: 'artifact_read' })
         if (/^(price_order|learned_order)\/prefix\/[A-Za-z0-9_-]+\/(decision|request|row)\.json$/.test(relative) || ['price-table.json', 'plan.json', 'policy.json', 'historical-training.json', 'price_order/comparison.json', 'learned_order/comparison.json', 'exhaustive_oracle/comparison.json'].includes(relative) || /^pool\/[A-Za-z0-9_-]+\.json$/.test(relative) || /^(price_order|learned_order)\/decisions\/[0-9]{2}\.json$/.test(relative)) originals.set(relative, bytes)
         return bytes
       }
       const original = await read(base.href, 2 * 1024 ** 2)
       originals.set('result.json', original)
       review = await validateRcControlSearch(original, read)
+      initializing = false
       self.postMessage({ id, value: review })
     } else if (type === 'metadata' && review && ['result', 'plan', 'policy', 'historical-training', 'price-table'].includes(data.role)) {
       const bytes = originals.get(`${data.role}.json`)

@@ -502,7 +502,7 @@ def test_unlaunched_v2_suite_keeps_denominators_and_review(
     )
     assert (
         json.loads(manifest.read_bytes())["schema_version"]
-        == review.MATERIAL_SCHEMA_VERSION
+        == review.COST_SCHEMA_VERSION
     )
     assert (
         review.validate_fiber_frame_candidate_process_review_bundle(
@@ -510,10 +510,25 @@ def test_unlaunched_v2_suite_keeps_denominators_and_review(
         )["suite"]["status"]
         == "incomplete"
     )
+    original_manifest = json.loads(manifest.read_bytes())
+    legacy = {
+        key: value
+        for key, value in original_manifest.items()
+        if key not in review._COST_MANIFEST_FIELDS
+    }
+    legacy["schema_version"] = review.MATERIAL_SCHEMA_VERSION
+    manifest.write_bytes(process.process._bytes(legacy))
+    assert (
+        review.validate_fiber_frame_candidate_process_review_bundle(
+            tmp_path / "review"
+        )["suite"]["schema_version"]
+        == process.MATERIAL_SCHEMA_VERSION
+    )
+    manifest.write_bytes(process.process._bytes(original_manifest))
     damaged = json.loads(manifest.read_bytes())
-    damaged["schema_version"] = review.SCHEMA_VERSION
+    damaged["source_suite_schema_version"] = process.SCHEMA_VERSION
     manifest.write_bytes(process.process._bytes(damaged))
-    with pytest.raises(ValueError, match="review schema"):
+    with pytest.raises(ValueError, match="source suite schema"):
         review.validate_fiber_frame_candidate_process_review_bundle(tmp_path / "review")
 
 

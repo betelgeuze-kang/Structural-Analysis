@@ -75,6 +75,7 @@ def control_candidate_features(model, request):
         model,
         PublicRCFiberFrameConfig(),
         experimental_two_fixed_endpoints=restored.experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=restored.experimental_pin_roller_beam,
     )
     return values, study._sha(
         study._bytes(
@@ -343,6 +344,15 @@ def train_rc_control_candidate_policy(
     Screens are recorded but do not filter training rows. Infeasible examples
     are useful labels; incomplete or unverified physical paths are not labels.
     """
+    if type(request) is not BoundedRCFiberDirectControlRequest:
+        raise ValueError("exact direct-control request required")
+    request = decode_bounded_rc_fiber_direct_control_request(
+        study._bytes(request.to_dict())
+    )
+    if request.experimental_pin_roller_beam and request.constant_nodal_loads:
+        raise ValueError(
+            "pin-roller design comparison does not support constant preloads"
+        )
     if type(reinforcement_features) is not bool:
         raise ValueError("explicit reinforcement feature selection required")
     descriptor_function = control_reinforcement_features if reinforcement_features else control_candidate_features
@@ -369,7 +379,9 @@ def train_rc_control_candidate_policy(
     descriptors = [descriptor_function(m, request) for m in models]
     model_ids = [
         candidate_model_identity(
-            m, experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints
+            m,
+            experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         )
         for m in models
     ]
@@ -428,6 +440,7 @@ def train_rc_control_candidate_policy(
             "model_identity": candidate_model_identity(
                 model,
                 experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+                experimental_pin_roller_beam=request.experimental_pin_roller_beam,
             ),
             "features": list(descriptor[0]),
             "targets": targets,
