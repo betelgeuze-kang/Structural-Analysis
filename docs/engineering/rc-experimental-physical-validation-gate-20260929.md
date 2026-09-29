@@ -15,6 +15,28 @@ The [Muhtar 2020 article](https://pmc.ncbi.nlm.nih.gov/articles/PMC7058898/) has
 
 The [Sawicki et al. 2026 article](https://link.springer.com/article/10.1617/s11527-026-02945-5) is a stronger third-laboratory **source lead**: its conventionally cast four-point-bending beam has a reinforcement drawing, test setup, support-corrected midspan deflection description and material-test discussion. The article is CC BY 4.0, but the [linked original dataset DOI](https://api.datacite.org/dois/10.24355/dbbs.084-202506031524-0) declares **CC BY-NC-SA 4.0**; its repository file roster and original numeric bytes were not verified because the LeoPARD endpoint returned an access screen. Commercial-ready reuse rights are therefore **not cleared**, and paper figures cannot substitute for the unseen original file. The [Chalmers post-tensioned/fibre-reinforced beam dataset](https://researchdata.se/en/catalogue/dataset/2025-114) describes applied force and deflection, but declares **CC BY-NC-ND 4.0** and has a different structural mechanism. Neither is admitted for this service objective. A permissively licensed article does not change its linked dataset's license.
 
+## Other retained source intakes
+
+The following records are part of the same source review. Their original intake
+observations and rights boundaries remain in the linked files. The **16,112-pair
+count above applies only to the two He/Chen workbook extractors**, not to a
+combined training corpus. None of these additional records admits measured
+training rows or a locked physical-validation specimen.
+
+| Source record | Available evidence in the recorded intake | Why it remains on HOLD |
+| --- | --- | --- |
+| [Mathern–Yang conventional reference](../../benchmarks/rc_fiber/mathern_yang_2021_reference_source.v1.json) | Article geometry, setup, measured plot and reported flexural endpoint; strengthened companion excluded | No ordered numerical measurement file identified; specimen inputs and channel/model correspondence still required |
+| [SND stainless-steel beam](snd-rc-flexural-data-byte-access-20260929.md) | Catalogue metadata and listed actuator/DIC files | Original bytes were inaccessible at the recorded check; filenames and open metadata do not establish channels or measurements |
+| [Sawicki/Braunschweig cast beam](braunschweig-cast-rc-flexure-source-screen-20260929.md) | Article setup and dataset metadata | Dataset bytes and columns unverified; dataset-specific noncommercial/share-alike terms remain distinct from the article license |
+| [Alberta `SF-0B` file](muhammad-2026-alberta-rc-beam-source-hold-20260929.md) | Byte-verified XLS with 2,144 ordered force/midspan pairs | Filename-to-specimen identity, signs/offsets, geometry/material inputs and failure mechanism unresolved; data and thesis rights differ |
+| [Matthews compiled corpus](matthews-2023-zenodo-corroded-beams-corpus-screen-20260929.md), including the [Torres-Acosta controls](torres-acosta-2003-zenodo-control-crosswalk-20260929.md) | Specimen-level scalar endpoints and original-paper crosswalk | No ordered response path per specimen; measured, derived and assumed fields require separate treatment. Torres-Acosta rows 161/162 are the same specimens in both records, not extra examples |
+| [Kawashima TP-11 pier](kawashima-tp11-builtenvdata-source-intake-20260929.md) | Original archive, cyclic TXT history and documented force/displacement corrections | A cyclic pier has a different support, axial-load and response scope from the flexural beam gate; its sensor correction, model applicability and admission decisions remain separate |
+
+Source discovery, immutable-byte extraction, retrospective comparison and locked
+independent validation are separate stages. Keeping these records in one review
+does not turn inaccessible assets, scalar outcomes, repeated rows or a different
+structural mechanism into additional eligible full-path examples.
+
 ## Comparison eligibility, in order
 
 1. **Fix identity and rights.** Record versioned DOI/URL, publisher and author, original byte hash, specimen ID, laboratory and study ancestry, dataset-specific reuse terms and intended training/validation rights. Preserve the original row order and link every derived value to an original cell or instrument channel. Article reuse terms do not automatically govern a separately licensed dataset.
