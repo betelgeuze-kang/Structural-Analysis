@@ -20,6 +20,50 @@ The original bytes were downloaded into a separate temporary source-audit direct
 
 The workbook size and MD5 match the live Zenodo API's `files` entry. The PDF hashes are locally observed identifiers, not a publisher-supplied checksum. The [CC BY 4.0 terms](https://creativecommons.org/licenses/by/4.0/) support reuse and adaptation with attribution, license linkage and indication of changes. Any later derived asset must preserve creator, versioned DOI, file hash, sheet/cell coordinates, measurement role and transformation provenance. This rights screen does not resolve physical-input gaps or constitute dataset admission.
 
+## Offline source-only extraction, 2026-09-29
+
+[`extract_he_2023_ref_measurements.py`](../../scripts/extract_he_2023_ref_measurements.py)
+now checks the versioned Zenodo record, creator, CC BY 4.0 metadata, article
+link, original workbook length/MD5/SHA-256, worksheet binding, channel labels,
+units, formulas, and complete `B5:C2636` pair roster before writing a derived
+file. It preserves worksheet row order and each numeric cell's original Excel
+XML decimal text; it does not zero-shift, sort, interpolate or select solver
+targets. The original workbook and API record were fetched on 2026-09-29 into
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/he-2023-reference-original-20260929`.
+The offline derived packet is
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/he-2023-reference-source-only-rows-20260929`.
+Its `measurements.jsonl` has 2,632 rows and SHA-256
+`f7dc12eb93be7bb22812e502cf6fb1802f9105c657ab2032c8cc1ce4e7673126`;
+`source-receipt.json` has SHA-256
+`86b92cb7309003c8fc5b7870dc8423bcb49e95d6081962af3017002e12d0cdac`.
+The downloaded API response has SHA-256
+`707e088b1e1e23633343dec6272ed6dfadab7d437b8074fa4541c765c7f90c94`;
+this is one retrieval receipt, not a claim that dynamic API bytes are immutable.
+
+An independent `openpyxl` read of the original workbook matched all 2,632
+derived row numbers and both numeric values. The peak remains worksheet row
+2153, and 74 adjacent deflection decreases remain present. Of those, 59 are
+before the peak and 15 after it; 1,095 pre-peak adjacent load readings also
+decrease, and one recorded load is slightly negative. These are retained
+measurement observations, not deleted as noise. Six focused parser
+tests pass, including rejection of missing pairs, formulas, numeric-looking
+text, extra unreviewed rows, wrong license, and wrong workbook bytes. No
+original workbook or measured row was added to Git. The receipt explicitly
+records **one experimental specimen, zero admitted training rows, zero locked
+evaluation rows, and zero fixed-parameter solver comparisons**.
+
+This source-only extraction supplies a stable measurement input for later
+crosswalk work. It does not resolve total actuator versus per-nose load,
+specimen-specific concrete/steel properties, bar/cover datum, or whether shear,
+bond, and support motion materially affect the measured LVDT response. The
+current direct-control request also cannot accept the entire noisy 2,632-row
+history as one path: it defaults to at most 255 displacement targets and zero
+reversals. Any reduced comparison window, row-selection/transformation rule,
+force convention, uncertainty metric, and locked independent specimen must be
+specified before a solver result is compared with this curve. This one specimen
+cannot simultaneously supply tuning labels and an independent generalization
+test.
+
 ## Numerical channel and specimen correspondence
 
 The workbook was inspected read-only without export, recalculation or editing. `Ref beam!B2` labels the block `LVDT results`; `B3:C3` are `Deflection` and `Load`; `B4:C4` are `mm` and `kN`. `B5:C2636` contains 2,632 finite numeric pairs, with no formulas, blank pair, or one-sided missing value in that range. The first pair is `(0.003476 mm, 0 kN)`; the last is approximately `(28.981449 mm, 48.011187 kN)`. These are **successive observations of one experiment**, not independent cases and not evidence of 2,632 specimens.
