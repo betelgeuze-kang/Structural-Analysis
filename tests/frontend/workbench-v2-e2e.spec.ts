@@ -376,7 +376,7 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(recovery.locator('[data-native-frame-element-recovery-claim-boundary]')).toContainText(/not a stress contour/i)
   })
 
-  test('submits and runs ModelIR through the same-origin workstation before strict bundle replay', async ({ page }) => {
+  async function verifyNativeSubmission(page: Page, publicationWindow = false): Promise<void> {
     const result = nativeFrameResultFixture()
     const model = await nativeFrameModelFixture()
     model.model_id = 'browser-upload'
@@ -451,12 +451,28 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
       submittedJobId = String(submittedEnvelope.job_id)
       await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify(jobView('queued')) })
     })
-    await page.route('**/api/v1/frame3d/jobs/*/run', (route) => route.fulfill({
-      contentType: 'application/json', body: JSON.stringify(jobView('succeeded')),
-    }))
-    await page.route('**/api/v1/frame3d/jobs/*/view.json', (route) => route.fulfill({
-      contentType: 'application/json', body: JSON.stringify(jobView('succeeded')),
-    }))
+    let releaseRun: (() => void) | undefined
+    const pollingObserved = new Promise<void>((resolve) => { releaseRun = resolve })
+    let polls = 0
+    let runRequests = 0
+    await page.route('**/api/v1/frame3d/jobs/*/run', async (route) => {
+      runRequests += 1
+      if (publicationWindow) await pollingObserved
+      await route.fulfill({ contentType: 'application/json', body: JSON.stringify(jobView('succeeded')) })
+    })
+    await page.route('**/api/v1/frame3d/jobs/*/view.json', async (route) => {
+      polls += 1
+      if (publicationWindow && polls === 1) {
+        await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({
+          schema_version: 'structural-native-workstation-http-error.v1', success: false,
+          issues: [{ code: 'workstation_job_not_found', detail: 'native_job_event_file_set_invalid' }],
+          claim_boundary: 'http_operation_failed_closed_without_job_result_design_or_release_authority',
+        }) })
+        releaseRun?.()
+      } else {
+        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(jobView('succeeded')) })
+      }
+    })
     await page.route('**/api/v1/frame3d/jobs/*/bundle/manifest.json', (route) => route.fulfill({
       contentType: 'application/json', body: manifestBody,
     }))
@@ -484,6 +500,8 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
 
     await expect(page.locator('[data-native-frame-run="succeeded"]')).toBeVisible()
     expect(submittedJobId).toMatch(/^job_[0-9a-f]{32}$/)
+    expect(runRequests).toBe(1)
+    if (publicationWindow) expect(polls).toBeGreaterThanOrEqual(2)
     expect(submittedEnvelope).toMatchObject({
       schema_version: 'structural-native-linear-frame3d-job-submission.v1',
       model_ir_json: modelText,
@@ -495,6 +513,14 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
     await expect(page.locator('[data-native-frame-run="succeeded"]')).toContainText(/resume, crash recovery/i)
+  }
+
+  test('submits and runs ModelIR through the same-origin workstation before strict bundle replay', async ({ page }) => {
+    await verifyNativeSubmission(page)
+  })
+
+  test('submits and runs ModelIR through strict bundle replay after a publication-window poll error', async ({ page }) => {
+    await verifyNativeSubmission(page, true)
   })
 
   test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {
