@@ -398,6 +398,41 @@ def _inference_policy_payload(encoded):
     return _freeze_policy_payload(json.loads(encoded))
 
 
+@lru_cache(maxsize=4)
+def _inference_policy_numeric_storage(encoded):
+    """Reuse exact numeric representations without caching mutable array metadata.
+
+    Constructor validation and every dynamic proposal check remain unchanged.
+    Preparation is lazy within the first proposal that reaches numeric inference.
+    Exact JSON content identifies each bounded entry; immutable bytes preserve
+    the original NumPy dtype, shape and C-order representation of every field.
+    """
+    payload = _inference_policy_payload(encoded)
+    storage = {}
+    for name in (
+        "feature_min",
+        "feature_max",
+        "feature_mean",
+        "feature_scale",
+        "weights",
+        "target_scale",
+    ):
+        array = np.asarray(payload[name])
+        storage[name] = (array.tobytes(order="C"), array.dtype.str, array.shape)
+    return MappingProxyType(storage)
+
+
+def _inference_policy_arrays(encoded):
+    # Every call owns its view metadata. The immutable backing bytes also prevent
+    # writeability being re-enabled; reshaping a returned view cannot poison reuse.
+    return {
+        name: np.frombuffer(data, dtype=dtype).reshape(shape, order="C")
+        for name, (data, dtype, shape) in _inference_policy_numeric_storage(
+            encoded
+        ).items()
+    }
+
+
 @dataclass(frozen=True)
 class RCControlSeedPolicy:
     """Immutable detached JSON; weights and preprocessing contain train rows only."""
@@ -663,7 +698,8 @@ class RCControlSeedPolicy:
         else:
             x = _features(context, model_features)
             correction_scales = 1.0
-        low, high = np.asarray(d["feature_min"]), np.asarray(d["feature_max"])
+        arrays = _inference_policy_arrays(self._json)
+        low, high = arrays["feature_min"], arrays["feature_max"]
         if x.shape != low.shape:
             return None
         with np.errstate(over="raise", invalid="raise", divide="raise"):
@@ -673,11 +709,11 @@ class RCControlSeedPolicy:
             seed = secant_seed(context)
             if seed is None:
                 return None
-            z = (x - d["feature_mean"]) / d["feature_scale"]
+            z = (x - arrays["feature_mean"]) / arrays["feature_scale"]
             value = (
                 np.asarray(seed)
-                + (np.append(z, 1.0) @ np.asarray(d["weights"]))
-                * d["target_scale"]
+                + (np.append(z, 1.0) @ arrays["weights"])
+                * arrays["target_scale"]
                 * correction_scales
             )
             value[context.control_free_index] = context.target_m
