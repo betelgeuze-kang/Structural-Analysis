@@ -23,9 +23,10 @@ def test_reference_beam_source_stays_source_only() -> None:
     assert "CFRP" in record["specimen"]["excluded_companion"]
 
     geometry = record["specimen"]["geometry_from_figure_1_mm"]
-    assert geometry["nominal_each_support_to_nearby_nose"] == (
-        geometry["support_center_span"] - geometry["load_nose_spacing"]
-    ) / 2
+    assert (
+        geometry["nominal_each_support_to_nearby_nose"]
+        == (geometry["support_center_span"] - geometry["load_nose_spacing"]) / 2
+    )
 
     assert record["training_row_count"] == 0
     assert record["measured_evaluation_row_count"] == 0
@@ -33,9 +34,15 @@ def test_reference_beam_source_stays_source_only() -> None:
     assert record["curve_digitization_executed"] is False
     assert record["solver_comparison_executed"] is False
     assert record["physical_validation_claim"] is False
-    assert record["numeric_measurement_availability"][
-        "ordered_numeric_curve_file_identified"
-    ] is False
-    assert record["crosswalk_and_model_boundary"]["current_public_compiler_compatible"] is False
+    assert (
+        record["numeric_measurement_availability"][
+            "ordered_numeric_curve_file_identified"
+        ]
+        is False
+    )
+    assert (
+        record["crosswalk_and_model_boundary"]["current_public_compiler_compatible"]
+        is False
+    )
     assert record["admission_gates"]["measured_evaluation_rows"] == "not_admitted"
     assert record["admission_gates"]["measured_training_rows"] == "not_admitted"

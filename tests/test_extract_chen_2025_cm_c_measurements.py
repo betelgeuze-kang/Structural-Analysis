@@ -10,11 +10,18 @@ import pytest
 from scripts import extract_chen_2025_cm_c_measurements as intake
 
 
-def _workbook(*, missing_h3: bool = False, formula_g2: bool = False,
-              text_g2: bool = False, extra_tail: bool = False,
-              wrong_label: bool = False) -> bytes:
+def _workbook(
+    *,
+    missing_h3: bool = False,
+    formula_g2: bool = False,
+    text_g2: bool = False,
+    extra_tail: bool = False,
+    wrong_label: bool = False,
+) -> bytes:
     cells = [
-        '<c r="H1" t="s"><v>1</v></c>' if wrong_label else '<c r="H1" t="s"><v>0</v></c>',
+        '<c r="H1" t="s"><v>1</v></c>'
+        if wrong_label
+        else '<c r="H1" t="s"><v>0</v></c>',
         '<c r="G2"><v>0</v></c>',
         '<c r="H2"><v>5.2542099999999996</v></c>',
         '<c r="G3"><v>-1.687E-4</v></c>',
@@ -28,16 +35,24 @@ def _workbook(*, missing_h3: bool = False, formula_g2: bool = False,
         cells[1] = '<c r="G2" t="s"><v>2</v></c>'
     if extra_tail:
         cells.append('<c r="G4"><v>0.1</v></c>')
-    sheet = ('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-             '<sheetData>' + "".join(cells) + '</sheetData></worksheet>')
-    workbook = ('<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
-                'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-                '<sheets><sheet name="load-mid-span deflection" sheetId="2" r:id="rId2"/>'
-                '</sheets></workbook>')
-    relations = ('<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-                 '<Relationship Id="rId2" Target="worksheets/sheet2.xml"/></Relationships>')
-    strings = ('<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-               '<si><t>CM-C</t></si><si><t>ASC-C</t></si><si><t>0</t></si></sst>')
+    sheet = (
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        "<sheetData>" + "".join(cells) + "</sheetData></worksheet>"
+    )
+    workbook = (
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        '<sheets><sheet name="load-mid-span deflection" sheetId="2" r:id="rId2"/>'
+        "</sheets></workbook>"
+    )
+    relations = (
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId2" Target="worksheets/sheet2.xml"/></Relationships>'
+    )
+    strings = (
+        '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        "<si><t>CM-C</t></si><si><t>ASC-C</t></si><si><t>0</t></si></sst>"
+    )
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("xl/workbook.xml", workbook)
@@ -65,27 +80,39 @@ def test_preserves_worksheet_rows_and_numeric_xml() -> None:
     ],
 )
 def test_rejects_ambiguous_or_modified_measurement_channel(
-    mutation: dict[str, bool], reason: str,
+    mutation: dict[str, bool],
+    reason: str,
 ) -> None:
     with pytest.raises(ValueError, match=reason):
         intake.parse_cm_c_sheet(_workbook(**mutation), last_row=3)
 
 
 def _dataset(*, license_name: str = "CC BY 4.0") -> bytes:
-    return json.dumps({
-        "id": "5y8dzgpg9j", "version": 1, "doi": {"id": intake.DATASET_DOI},
-        "owner": {"first_name": "Yidong", "last_name": "Chen"},
-        "data_licence": {"short_name": license_name,
-                         "url": "http://creativecommons.org/licenses/by/4.0"},
-    }).encode()
+    return json.dumps(
+        {
+            "id": "5y8dzgpg9j",
+            "version": 1,
+            "doi": {"id": intake.DATASET_DOI},
+            "owner": {"first_name": "Yidong", "last_name": "Chen"},
+            "data_licence": {
+                "short_name": license_name,
+                "url": "http://creativecommons.org/licenses/by/4.0",
+            },
+        }
+    ).encode()
 
 
 def _files(*, sha256: str = intake.SOURCE_SHA256) -> bytes:
-    return json.dumps([{
-        "filename": intake.SOURCE_NAME, "id": intake.SOURCE_FILE_ID,
-        "size": intake.SOURCE_SIZE,
-        "content_details": {"size": intake.SOURCE_SIZE, "sha256_hash": sha256},
-    }]).encode()
+    return json.dumps(
+        [
+            {
+                "filename": intake.SOURCE_NAME,
+                "id": intake.SOURCE_FILE_ID,
+                "size": intake.SOURCE_SIZE,
+                "content_details": {"size": intake.SOURCE_SIZE, "sha256_hash": sha256},
+            }
+        ]
+    ).encode()
 
 
 def test_source_rights_and_file_identity_are_distinct_gates(tmp_path: Path) -> None:
