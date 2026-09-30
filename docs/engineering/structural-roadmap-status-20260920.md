@@ -1,0 +1,434 @@
+# Structural Analysis roadmap: current evidence and completion requirements
+
+Current overview refreshed on 2026-09-21; each numerical source below remains pinned.
+The chronological observations below retain their original status at execution.
+The evidence below retains each experiment's original source revision. A document
+refresh does not rerun those experiments or qualify the current head. All five
+original workstreams remain open at their full scope.
+
+| Original workstream | Strongest retained evidence | Remaining requirement |
+| --- | --- | --- |
+| Repeated nonlinear runtime | [Five-case process study](rc-cost-pruning-process-campaign-20260920.md): deterministic cost exclusion lowers enclosing process time 25.6–27.1% in four cases; no-feasible case remains without a ratio. [54-fold study](rc-expanded-runtime-campaign-20260920.md) executes 216 full nonlinear paths with fixed history comparisons. | Broader topology/material regimes, repeat robustness and the complete preparation/transport/review cost before claiming user-time savings. Internal runs are not independent physical validation. |
+| Canonical RC changes, quantities and common prices | [Unequal reinforcement and canonical reanalysis](rc-unequal-outer-reinforcement-20260920.md), [outer centroid distances](rc-outer-centroid-distances-20260920.md), full accepted paths, fresh verification, member quantities and common declared prices reach original-artifact review. | Representative independently validated designs and authoritative quantity/price scope for commercial savings. Synthetic prices and verified internal calculations are not a construction quote or design approval. |
+| Learned warm starts with split and cost discipline | [Observed v6 campaign](rc-v6-observed-results-20260920.md): 90 comparisons/360 paths pass, with 594 paired residual observations on 99 case/target pairs. Learned residuals improve in 180 repeated rows, worsen in 414. Added observations cost 1,188 assemblies/30.24 seconds; instrumented learned/secant scores are 1.126772112 and 1.118387498. Secant remains selected. | Useful learned decisions on diverse excluded groups and untouched project/geometry/history evaluation, with full costs. Smaller initial residual does not establish faster convergence; no residual-selected policy or independent confirmation is claimed. |
+| Multifidelity selection and Workbench | Shortlist/ranking, full reanalysis, exhaustive comparison, cost optimality, errors and [strict cost exclusion delivery](rc-cost-pruned-search-delivery-20260920.md) reach desktop/mobile original-artifact review. Actual boundary violations are rejected by full analysis. | Useful learned decisions near meaningful feasibility boundaries on new cases with fixed budgets. The [four-case learned ranking](rc-reinforcement-cost-campaign-20260920.md) costs 2.01–2.06 times price order including training and selects the same candidates. |
+| Broader planar/sparse and later material/3D capability | [2,048-layer full-history study](planar-2048-refinement-20260920.md): all 40 targets commit; 400 nodal/steel groups pass and concrete failures decrease 70/240 → 34/240 → 27/240 → 14/240 → 1/240 across successive layer pairs. | The original 1% screen still fails for tensile damage at 74 mm, E3:gauss-2, cell 269: 1.0850199%. Compression now peaks at 0.1241516%, but uniform convergence is not proved. Sparse speed, broader paths, independent physics and new material/3D scopes remain unproved. |
+
+## Current integration and acceptance boundaries
+
+[Internal portal preload and reversal boundary](rc-internal-portal-preload-20260927.md): the dense corotational fiber-frame path now accepts bounded opt-in reversals and an independently hashed constant nodal-load channel. A synthetic two-base portal test commits one-step `lambda = 0` preload equilibrium before cyclic displacement control and verifies restart and rollback. A separate preflight transforms the preserved 4 m by 3 m model to the corotational formulation and completes one 20 mm path under -25 kN at both roof nodes, twice with identical numerical/work fields. Public two-base RC direct control, a staged axial-load history, native sparse handling of that load, the 40/80 mm cases and the proposed 48-path comparison, and independent physical validation remain open.
+
+[Portal recovery admission](rc-portal-recovery-admission-20260921.md) confirms that the current serial-chain RC direct-control compiler rejects two fixed supports before numerical arms. Existing public planar load-control results do not supply the requested constant-axial cyclic path; the proposed 48-path portal study did not execute. Broader topology integration remains open.
+
+[Measured full-campaign rerun](rc-measured-adaptive-campaign-20260921.md) at source 0f713 reproduces all 128 original histories/checkpoints and 70 complete paths. It separately measures 116.338 s enclosing runner and 12.116 s enclosing audit, with nested comparison costs retained. These are observed component costs, not a full user-flow or qualified speedup claim.
+
+[Scoped audit timing](rc-adaptive-campaign-audit-20260921.md) now optionally writes wall/CPU cost receipts bound to an unchanged audit hash. Twenty-three audit/runner tests pass, and an actual frozen-source 128-path audit matches the earlier result exactly. Startup, transport and browser costs remain outside this scope.
+
+[Second-stop recovery check](rc-76mm-recovery-check-20260921.md): all eight TRF/native follow-ups at -76.20 mm and -80 mm fail original native acceptance despite optimizer success. This prevents treating the earlier isolated accepted seed as a generally effective recovery method; full-path robustness remains unresolved.
+
+[Alternate-seed witness](rc-80mm-alternate-seed-20260921.md): parent-start trust-region proposals pass original Newton at the previously failed internal target in both orders. Direct -80 mm proposals fail; continuing only recovered coordinates against the original material parent reaches approximately -76.20 mm before another bounded stop. The original path remains incomplete and all optimizer/native/interrupted-driver costs are retained.
+
+[Material-transition witness](rc-80mm-material-transition-20260921.md) locates a repeated concrete compression-peak tangent sign change in M1, first integration point, second fiber. Stresses remain near -30 MPa while tangents switch between approximately -12,000 and +30,000 MPa. This identifies a local constitutive transition, not an established solver defect or proof that equilibrium is absent.
+
+[80 mm local diagnosis](rc-80mm-local-diagnostic-20260921.md) exactly reproduces the failed residual/Newton direction in both orders. A smaller 1/64 fraction descends, but six native follow-ups show a grid down to 1/65536 and a 100-iteration limit still fail unchanged tolerances. All 84 diagnostic assemblies and 92 follow-up Newton iterations are retained; no numerical remedy is promoted.
+
+[80 mm arithmetic isolation](rc-adaptive-80mm-results-20260921.md): binary64 and retained arithmetic, each repeated in reversed order, both fail the same -80 mm original target at the same internal recovery coordinate. All 16 paths remain incomplete, with 208 native calls / 1,380 Newton iterations retained. Precision alone does not resolve this witness; local residual/tangent and path-following diagnosis remains open.
+
+[Measured audit cost](rc-adaptive-audit-cost-20260921.md): three fresh processes at source 2588 reproduce identical 128-path audit results in 11.915–12.129 seconds. Original 3,492 JSON files remain unchanged. This isolates cached-read validation cost; source preparation, transport and browser review remain outside the measurement, and no full user-flow speedup is claimed.
+
+[Reusable campaign audit](rc-adaptive-campaign-audit-20260921.md) now validates original target histories, native work, parent/response bindings and comparison gates without rerunning solves. It reproduces all prior 128-path case outcomes and counts, including 70 complete paths / 802 calls / 4,702 Newton iterations and linear solves. Rehashed contradictory completion/work and missing/ambiguous metadata are rejected; original clocks and independent physics remain unauthenticated. Forty focused audit/runner/workflow tests pass. [Hosted predecessor 932](hosted-932-terminal-20260921.md) passes 2,017 development / 814 frontend tests, while full CI remains failed.
+
+[Reusable adaptive breadth campaign](rc-adaptive-breadth-results-20260921.md) runs eight conditions / 128 paths on two L-frame geometries, with 70 complete and all 802 native calls / 4,702 Newton iterations known. Adaptive recovery adds short/40 mm completion and preserves the other completed cases, but short/80 mm still fails at the minimum increment after accepting only its first target. Near-one qualified ratios occur only when recovery is never invoked; no learned/adaptive speed gain is claimed. The repository runner and CI orchestration tests make the campaign repeatable.
+
+[Adaptive failed-target recovery](rc-adaptive-full-path-results-20260921.md) now completes the short/40 mm original three-target history in both arithmetic profiles and both orders. All four proposal histories/checkpoints repeat exactly; twelve ordinary/secant/fresh paths still fail, so no qualified speed ratio follows. The study counts 116 native calls / 594 Newton iterations. The opt-in bounded scheduler preserves the material parent, unchanged tolerances and failed attempts; 111 focused tests pass. [Hosted predecessor 000](hosted-000-terminal-20260921.md) passes 2,008 development / 814 frontend tests but full CI remains failed and does not qualify adaptive code.
+
+[Retained failed-target recovery](rc-retained-failure-cost-results-20260921.md) runs 64 paths (34 complete), counting 314 native calls / 1,980 Newton iterations. On two ordinary-solvable cases it avoids all internal trials and costs 0.456/0.327 times upfront continuation; this is avoided work, not AI gain. Short/20 mm completes after recovery, while short/40 mm fails at the same trial/residual as binary64. Retained arithmetic alone does not close the hard convergence gap.
+
+[Retained full-path cost](rc-retained-continuation-cost-results-20260921.md) completes 32 repeated paths with 260 native calls / 1,540 Newton iterations. Retained histories pass and repeat exactly, but upfront continuation costs 3.82 and 2.10 times same-profile secant on the two cases. Binary64 comparison failures retain null ratios. Numerical agreement does not establish acceleration; failure-only retained recovery still needs its own comparison.
+
+[Retained-coordinate continuation](rc-retained-continuation-20260921.md) now carries absolute seed coordinates correctly and replays the complete retained arithmetic profile. Short/2 mm and long/40 mm L-frame focused tests pass unchanged history comparisons; 249 JSON artifacts reproduce, with 65 additional replay native calls / 419 Newton iterations. Terminal polishing is explicitly enabled, so this does not isolate arithmetic alone or replace earlier binary64 failures. All 102 distinct focused cases pass across corrected runs; broader performance and physical qualification remain open.
+
+The [L-frame breadth study](rc-l-frame-continuation-results-20260921.md) retains 96 paths, including prefix failures and unchanged near-zero force/moment comparison failures. The [all-failed-target extension](rc-failed-target-continuation-results-20260921.md) then completes short/20 mm in both orders but leaves short/40 mm incomplete; all 118 native calls / 448 Newton iterations are counted. No reference speed ratio is available. [Hosted 6f](hosted-6f-terminal-20260921.md) passes 1,994 development and 814 frontend tests, while full preparation remains failed; these receipts do not qualify later failure-only/all-target code.
+
+The [failure-only continuation comparison](rc-failure-only-continuation-results-20260921.md) runs twenty comparisons / eighty paths across five model/history combinations. All proposal histories match between modes. On two ordinary-solvable 20 mm cases it removes all 32 repeated internal proposal calls and costs 0.374–0.379 times upfront continuation; on three 40 mm cases it costs 1.215–1.329 times upfront due to the preserved failed first attempt. These are internal-strategy comparisons, not learned or independently qualified acceleration. All 602 native calls / 2,698 Newton iterations are retained.
+
+[Hosted e67](hosted-e67-terminal-20260921.md) passes 1,986 development and 814 frontend tests; full-suite preparation remains failed. It does not qualify later continuation/replay code.
+
+The [fresh artifact replayer](rc-continuation-artifact-replay-results-20260921.md) now reproduces all six continuation studies / 756 original JSON artifacts with explicit additional cost (198 native calls / 898 Newton iterations). Native/work content and loaded source fingerprints are checked; clocks remain separately measured. Rehashed numerical/work tampering tests fail as intended. Experimental replay passes while ordinary-reference comparisons remain failed; this does not extend public product eligibility or independent physical authority.
+
+The [frozen-parent continuation strategy](rc-frozen-continuation-path-results-20260921.md) completes all three original reversal models in both orders (six proposal paths within 24 attempted paths). Complete accepted histories and checkpoints repeat exactly. Its 96 additional native calls are explicitly counted: 198 total native calls / 898 Newton iterations across the study. Intermediate checkpoints are never adopted as material-history parents. Ordinary/secant/fresh references still fail, so no qualified speed ratio or independent/design approval follows. Product artifact replay and broader validation remain open.
+
+[Hosted 610e](hosted-610e-terminal-20260921.md) now passes 1,980 development and 814 frontend tests; full-suite shards remain blocked in evidence preparation. These receipts do not cover later trust-region code.
+
+The [opt-in full-path reversal strategy](rc-trust-region-path-results-20260921.md) now executes six comparisons / 24 paths from frozen b9e767cc9. The w48 cheap proposal completes both orderings with equal final checkpoints; all ordinary/fresh references and both w32 proposal cases remain incomplete. All 106 core calls, 672 Newton iterations and 362 additional optimizer assemblies are retained. Full-reference comparisons remain failed, so completion is not credited as speedup or independent validation. Unknown optimizer work now propagates to the whole-report work flag.
+
+The [bounded trust-region probe](rc-reversal-trust-results-20260921.md) accepts one of six starts under original Newton gates. The [fresh-prefix reproduction](rc-reversal-fresh-prefix-results-20260921.md) then reconstructs all three models twice from zero state: width 0.48 m / cheap completes the terminal +20 mm reversal twice with equal checkpoints; both width 0.32 m candidates still fail. This is a custom prefix-plus-terminal diagnostic, not public complete-path validation, production promotion, independent physics or speedup. All optimizer/native costs and unsuccessful attempts are retained.
+
+The [2,048-layer witness replay](planar-2048-witness-results-20260920.md) is complete: all 40 coarse targets replay exactly and the single 74 mm discrepancy is attributed to the sampling term in that witness. The original 1% screen remains failed; no uniform-convergence or physical-accuracy claim follows.
+
+[Hosted 6a02](hosted-6a02-terminal-20260921.md) passes 1,978 development tests and 814 frontend tests. Full Python shards still fail preparation before actual repository tests. Later reporting and large-drift campaign changes need their own checks. The [large-drift cost campaign](rc-large-drift-cost-results-20260921.md) now completes all twenty processes: 20 mm cases record steel plasticity and 26.7–28.0% lower process time with matching verified results. Some 40 mm candidates fail fresh verification, so their ratios remain null and the campaign exits 1. The [failure audit](rc-large-drift-failure-20260921.md) identifies original +20 mm reversal nonconvergence with exact rollback, reproduced by fresh verification. The report now exposes that distinction. The [fixed globalization probe](rc-reversal-globalization-results-20260921.md) finds that extending binary backtracking through 1/65536 and increasing the iteration limit to 100 still fail all three models. The [retained-direction diagnostic](rc-reversal-direction-20260921.md) reproduces residuals and Newton directions exactly and finds local descent beyond both failed alpha grids, without proving full-path convergence. The [fixed secant probe](rc-reversal-secant-results-20260921.md) also leaves all eighteen attempted paths incomplete. Numerical resolution and broader qualification remain open.
+
+The [accepted-material representation audit](rc-accepted-material-summary-results-20260920.md)
+reconstructs all 165 retained training parents and their exact native snapshots,
+yielding 27 unweighted state statistics per row. This is preparation for a
+separate representation experiment, with zero new fits or solves and no runtime
+policy change. It does not reverse the negative learned-gate results above.
+The subsequent [fixed material-input gate](rc-material-cost-gate-results-20260920.md)
+fits five excluded-group complements but selects two training true positives
+and 25 false positives. It remains offline and is not promoted; this does not
+establish full-path benefit or independent generalization.
+Further [work-counter diagnosis](rc-nested-work-benefit-20260920.md) finds all
+32 original time-positive pairs reduce iterations, while 23 other work
+reductions fail the repeat-aware time rule. The
+[same-parent policy comparison](rc-policy-sensitive-labels-20260920.md) finds
+13 time-label and 48 work-category changes across four policies per parent.
+Ten [three-group-excluded 66-row seeds](rc-gate-inner-validation-preparation-20260920.md)
+are now prepared to avoid leakage in an additional inner validation split.
+The new [timing campaign](rc-inner-label-campaign-preparation-20260920.md) is
+[completed and audited](rc-inner-label-results-20260920.md): all 2,970 comparisons pass, producing 24 positive and 966 negative pair labels. The [forty fixed gate evaluations](rc-inner-gate-evaluation-results-20260920.md) are independently checked: prefix cost declines all validation decisions; material cost selects two false positives and no true positives. Neither is promoted; reserved cases remain untouched.
+
+[Current-main integration review](current-main-integration-review-20260920.md)
+rechecks main `234c3122c78dea064411aa16b06b18ab16157576`. Thirteen of its fifteen
+changed components are byte-identical here; the workflow contract test merges
+cleanly to the existing development version. The textual conflict is the generated
+inventory digest. The current offline inventory passes (480 entries: 71 present,
+409 superseded), and 75 transport/workflow tests plus 137 subtests pass. This does
+not perform a merge, authenticate real supplemental signatures or waive exact
+combined-source checks. Rebuild the inventory against the eventual merged source;
+do not import historical hash values as current evidence.
+
+[Hosted 695b](hosted-695b-terminal-20260920.md) passes 1,686 Python development tests
+and all 814 frontend tests, including the material-boundary review and scoped
+L-frame screenshot budget correction. The prior 90cc frontend failures remain
+recorded separately; the correction removes no assertions or screenshots.
+The [Workbench registration correction](workbench-suite-registration-20260920.md)
+restores five previously omitted files and prevents silent future omissions.
+Full Python shards remain blocked before actual tests by external replay/technical
+receipt preparation. Passing local or hosted development contracts is not
+full-suite or release completion.
+
+Public experiment candidates retain unresolved geometry/material/channel or
+model-mechanism questions and their source-specific license boundaries. Software
+support for unequal reinforcement or centroid distances does not resolve those
+experimental uncertainties. Independent validation, source rights, required
+hardware, owner/operator actions and signed acceptance remain separate.
+
+## Chronological decisions and observations
+
+The following entries are an execution history. Later completion entries supersede
+earlier running states; the overview table above gives the current outcome.
+
+The [interior training expansion](rc-interior-training-coverage-20260920.md)
+adds 66 new source-verified labels while retaining the old 99 and leaving both
+reserved cases unexecuted. Whole-group reference-parent range eligibility now
+covers B/D/E (99 of 165 samples). No actual pooled-policy runtime benefit has
+been measured; complementary-group fitting and full-path cost comparison remain
+required before any policy promotion.
+
+The [pooled runtime campaign](rc-pooled-runtime-campaign-20260920.md) has now
+started its predeclared 90 comparisons/360 full paths using the retained 165
+samples. It remains live with no final strategy or speed result. The prepared
+auditor will verify complete rosters, 132-sample complementary fits, exact case
+bindings and separate costs after termination; a partial fold is not a result.
+
+The [material-boundary L-frame campaign](rc-l-frame-boundary-campaign-20260920.md)
+now verifies repeated rejection of a cheaper candidate after successful full
+analysis and fresh verification. Baseline remains selected; higher-cost excluded
+candidates retain unknown feasibility in the pruned report. This uses a post-hoc
+synthetic limit on the same model and is not independent design validation.
+
+The [all-coordinate material replay](planar-all-common-material-points-20260920.md)
+now covers 2,304 points and forty targets, exactly reproducing all 92,160 coarse
+states and stresses. Its derived fine-history damage maxima occur at neighboring
+cells rather than the original two witnesses. It improves spatial diagnosis but
+does not replace the failed projected-field screen or establish convergence.
+
+1. Publish prepared local work after the current CI reaches terminal state; retain
+   exact-head receipts, failures and the original measurement packets.
+2. Preserve the completed negative trained-gate result. Any revised policy needs
+   a new development protocol and full own-history evaluation; do not tune the
+   fixed threshold on observed outer cases and label that independent evidence.
+3. Extend candidate-selection evidence to meaningful feasibility boundaries and
+   broader nonlinear regimes while retaining competitive deterministic baselines.
+4. Continue concrete-field convergence and physically compatible source-data
+   reconstruction; qualify new planar/sparse/material/3D scopes separately.
+5. Preserve the prepared supplemental integration, rebuild generated metadata on
+   an authorized combined source, and require the remaining external acceptance.
+
+## Historical progression
+
+The subsequent [public L-frame cost campaign](rc-l-frame-cost-campaign-20260920.md)
+executes eight CLI processes with steel plasticity and concrete damage, preserving
+full paths, fresh verification and identical selected-result hashes. Deterministic
+cost exclusion lowers process time by 48.39% in this single known family. Its
+original artifacts also pass desktop/mobile Workbench checks. This adds a broader
+observed material regime and two-member design delivery; it does not establish
+learned acceleration, independent physics or whole-user-flow savings.
+
+The following dated observations explain how the current state was reached.
+Later sections supersede earlier experimental limitations only within the stated
+scope; none closes the five-workstream completion requirements above.
+
+## Subsequent integration progress
+
+[Supplemental development integration](supplemental-development-integration-20260920.md)
+now imports exact current-main transport scripts and applies its production
+workflow changes to this branch. This supersedes the missing-local-plumbing
+portion of the snapshot above; branch ancestry, authorized merge and operational
+attestation remain unclosed. [Terminal 20a results](hosted-20a-terminal-20260920.md)
+record the completed CI, including the layout role-set regression and correction.
+
+[Original training-group audit](rc-original-training-groups-20260920.md) confirms
+that the preserved four-case warm-start corpus has only one connected project
+group. It cannot support the planned grouped tuning by itself. Additional
+defensible source groups are required; no holdout was moved into training.
+
+The [candidate-boundary observation](rc-reinforcement-boundary-20260920.md) now
+includes one actual mixed-feasibility pool and a learned false-pass prediction
+rejected by full reanalysis. It still produces identical online work, two
+no-feasible-design cases and no learned benefit. Its tiny strain-screen crossing
+is not a robust physical boundary or independent generalization result.
+
+[Concrete damage localization](planar-concrete-localization-20260920.md) narrows
+where the retained 64/128-layer differences occur. The original maxima remain
+unchanged; localized damage-onset cells dominate the witness-section discrepancy.
+This informs subsequent mesh investigation without closing material convergence
+or substituting average error for the original local screen.
+
+The [fresh 256-layer full-history experiment](planar-256-refinement-20260920.md)
+completed forty targets and supports all 400 bounded 128/256 nodal/steel
+comparisons under the existing screen. Concrete failures reduce from 70/240
+(64/128) to 34/240 (128/256), but tensile damage still differs by 6.68%. This
+advances the numerical investigation without closing material-field convergence,
+independent verification, public scope expansion or performance qualification.
+
+## Outer-centroid geometry progress
+
+[Independent outer centroid distances](rc-outer-centroid-distances-20260920.md)
+now connect explicit asymmetric reinforcement positions to public/ModelIR compilation,
+canonical design changes, full reference reanalysis and unchanged quantity scope.
+Focused implementation checks pass; source-data conflicts and independent physical
+verification remain open. This resolves one geometry representation restriction
+without qualifying the Tan/Nguyen experiments or demonstrating learned acceleration.
+
+## Grouped nonlinear runtime result
+
+The [three-group nonlinear campaign](rc-grouped-runtime-campaign-20260920.md)
+completed 18 counterbalanced folds with full-history comparisons passing, but
+all 216 proposal decisions abstained. Secant remains selected. The audit binds
+complementary training samples to each excluded group and retains initial failed
+protocol costs. Reserved validation/holdout paths remain unexecuted. Material
+history coverage, useful learned benefit and independent validation remain open.
+
+## Training coverage and current hosted evidence
+
+The [history-coverage expansion](rc-training-history-coverage-plan-20260920.md)
+retains 77/99 expected labels: two reference paths fail line search while their
+secant counterparts complete. No fit, range conclusion or reserved evaluation
+was authorized from that incomplete study. Exact rollback and failed residuals
+are retained for the next numerical investigation.
+
+[Hosted 1804038c0](hosted-180-terminal-20260920.md) passed 1,667 development and
+755 frontend tests. Full Python shards remain blocked before test execution by
+external replay/technical receipt preparation. Later local commits require their
+own exact-head hosted checks; this is not full roadmap or release closure.
+
+## Globalization diagnosis and corrected coverage
+
+The [same-parent probe](rc-line-search-probe-20260920.md) reproduced both blocked
+step hashes and resolved them with smaller permitted line-search steps, without
+changing acceptance tolerances. The [full-history follow-up](rc-diagnostic-label-correction-20260920.md)
+verified all nine training cases and yielded 99 labels. Its postprocessing naming
+error was corrected without rerunning numerical work; previous specific field
+names are explicitly superseded. Middle-geometry reference-parent range coverage
+improves, but actual learned proposals and net runtime benefit remain unproved.
+
+## Complete expanded runtime follow-up
+
+The [54-fold follow-up](rc-expanded-runtime-campaign-20260920.md) now demonstrates
+198 actual learned proposals, with all 216 full paths and 54 history comparisons
+passing. Both learned candidates remain slower overall (ratios 1.014294 and
+1.013226), so secant is retained. All middle-geometry case means are also slower;
+isolated one-iteration reductions do not recover the added path cost. No reserved
+evaluation was executed. The audit verifies complete group exclusion and all
+2,808 invocation costs without rerunning the experiment. This advances runtime
+evidence and proposal coverage, but does not close the learned-benefit goal.
+
+[Hosted 66da58e5](hosted-66-terminal-20260920.md) passed 1,673 Python development
+tests and 755 frontend tests. Full Python shards still stop at external evidence
+preparation. Newer revisions need their own receipts; all five roadmap goals
+remain active and independent verification requirements are unchanged.
+
+## Matched-parent local benefit remains insufficient for a selector
+
+The [matched-parent probe](rc-same-parent-seed-probe-20260920.md) completed
+198 comparisons from 33 retained middle-geometry states and two existing policies.
+All single-step response comparisons passed. One of 66 pairs was faster across
+all three repeats and reduced Newton iterations from five to four; two additional
+faster means were inconsistent across repeats. The run preserves two completed
+reports from a failed progress writer and resumes only the remaining work.
+This identifies a local seed benefit without establishing a trained gate,
+independent generalization, or whole-path speedup. Secant remains the selected
+complete-path strategy; all five roadmap goals remain open.
+
+## Five-group runtime outcome and latest hosted checks
+
+The [165-label pooled campaign](rc-pooled-runtime-campaign-20260920.md) completes
+90 comparisons and 360 paths with all history checks passing. It makes 594
+proposals, but both candidate mean runtime ratios remain above secant (1.016430
+and 1.027037). No active-proposal case wins all three repetitions; secant remains
+selected, with no policy promotion or reserved evaluation. The complete audit
+checks exclusion identities, exact case binding and 4,680 core calls without
+rerunning numerical work. Next diagnosis must separate actual iteration savings
+from proposal and capture cost before defining another learning target.
+
+[Hosted 3d6fe9ec2](hosted-3d6-terminal-20260920.md) passes 1,691 Python development
+and 814 frontend tests. Full Python tests remain skipped after external-evidence
+preparation failures. The 34/240 projected concrete-field failures, independent
+physics and all five roadmap completion requirements remain open.
+
+## Capture-cost implementation follow-up
+
+[Native scalar fiber serialization](rc-native-fiber-serialization-20260920.md)
+removes recursive copying of native immutable scalar fields during repeated
+contract validation. Validation and fresh content hashing remain enabled;
+extended types keep recursive serialization. One retained parent has identical
+original snapshot bytes in all 1,231 comparisons, and six counterbalanced capture
+measurements are 12.6–13.3% shorter. This is a capture-only observation; complete
+path performance, independent generalization and all roadmap goals remain open.
+
+The [new full-path follow-up](rc-scalar-runtime-followup-20260920.md) has passed
+preflight and started on frozen 85af596ed source: the same 165 labels, five groups,
+90 comparisons and 360 paths. It has no final selection result yet. Preserve its
+live process and audit the completed result before revising the secant decision.
+
+[Hosted c36cf1da6](hosted-c36-terminal-20260920.md) finishes with 1,691 development
+and 814 frontend tests passing. All full Python shards remain blocked before
+actual test execution. Later scalar-serialization and audit changes require
+new-head CI; the frozen numerical follow-up continues separately.
+
+
+## Scalar follow-up completed without AI promotion
+
+The [new complete study](rc-scalar-runtime-followup-20260920.md) passes both
+full-runtime and cross-revision audits: 90 comparisons, 360 paths and 9,360 exact
+numerical/context file matches. Work remains 4,680 core calls and 24,054 Newton
+iterations. Learned/secant ratios are 1.015901 and 1.026031, so secant remains
+selected. No active-proposal case wins all three repeats, and no reserved
+validation or policy promotion occurs. Historical elapsed-time differences do
+not prove a controlled implementation speedup. All roadmap goals remain open.
+
+## Policy parse reuse implementation and complete-path evaluation
+
+[Immutable content-keyed policy parse reuse](rc-inference-policy-reuse-20260920.md)
+preserves all 1,080 original context decisions and 594 recorded proposals, with
+69 learning regression tests passing. Six cold-parse-inclusive proposal-stage
+measurements are roughly 43% shorter on one retained parent; this is not whole
+path benefit. A [new frozen full-path study](rc-policy-runtime-followup-20260920.md)
+has started with all 165 labels and 90 planned comparisons. First preparation
+cost is included; bounded cache reuse across repeats is explicit. The existing
+secant selection remains authoritative pending the complete audited outcome.
+
+## Policy reuse full-path result
+
+The [policy-reuse study](rc-policy-runtime-followup-20260920.md) completes all
+90 comparisons/360 paths and passes runtime, numerical-equivalence and cache
+accounting audits. All 9,360 numerical/context files match. Six cold parses and
+642 hits account for all 648 policy calls; 432 calls are bypassed by static gates.
+Overall learned/secant ratios remain 1.011963 and 1.021737, so secant remains
+selected. D-amp150 with ridge 10,000 is faster in all three repeats but its mean
+improvement is only about 0.96%, below the 1% rule; it is not a validated selector.
+No policy promotion, reserved evaluation or independent physics is supplied.
+
+[Hosted e2cb16ca8](hosted-e2cb-terminal-20260920.md) passes 1,713 development and
+814 frontend tests. Full Python shards still skip tests after evidence
+preparation fails. All five roadmap completion requirements remain open.
+
+## Concrete discrepancy decomposition
+
+The [retained error decomposition](planar-concrete-error-decomposition-20260920.md)
+reproduces all 80 original damage maxima and witness locations without new solves
+or material integration. At the controlling tensile witness, 98.16% of the signed
+error magnitude is the difference between fine-history center damage and the
+fine-child average; the controlling compression witness is entirely that term.
+These mixed-onset cells identify a spatial-resolution investigation, not physical
+causality or convergence. Cancellation elsewhere prevents interpreting global
+absolute sums as additive percentages. The 34/240 original failures remain open.
+
+## Predeclared 512-layer follow-up running
+
+The [512-layer full-history observation](planar-512-refinement-20260920.md) has
+started on the same frozen numerical source and original 40 targets. Only concrete
+subdivision changes. The 256/512 comparison retains all original group thresholds,
+accepted-chain checks and local witnesses. Its focused regression suite passes
+52 tests. No new convergence result is available yet; the previous 34/240 concrete
+failures and independent physical-validation requirements remain open.
+
+## Hosted 11d9 checks complete
+
+[Exact-source 11d9 receipts](hosted-11d9-terminal-20260920.md) pass 1,719 Python
+development and 814 frontend tests. All full Python shards fail during evidence
+preparation and skip actual full tests; the external replay/technical receipt
+blockers remain explicit. Later comparison changes require new-head checks.
+
+## Broader matched-parent preparation
+
+The [B/D/E matched-parent diagnostic](rc-expanded-same-parent-probe-20260920.md)
+preflights all 198 policy/parent pairs using the retained 165 labels and exact
+132-sample whole-group complements. No fits, solver calls or reserved evaluations
+are performed in preparation. Its 594 comparisons are not yet executed; launch
+must follow the live 512-layer solve to avoid competing numerical measurements.
+
+## 512-layer observation completed
+
+The [completed 512-layer study](planar-512-refinement-20260920.md) commits all 40
+targets, verifies all 466 packet files and completes the original 640-group audit
+without more solves. All 400 nodal/steel groups pass; 27/240 concrete groups fail,
+all tensile damage (maximum 3.645%). This narrows the remaining field discrepancy
+but does not close material convergence or independent physics. The prepared
+B/D/E matched-parent diagnostic starts only after the solve and comparison exit.
+
+## Hosted 31ca checks complete
+
+[Exact-source 31ca receipts](hosted-31ca-terminal-20260920.md) pass 1,744 Python
+development and 814 frontend tests. Full shards still fail during evidence
+preparation and skip actual tests. Later matched-parent changes need new-head
+checks; no independent or release acceptance is added by these receipts.
+
+## Expanded matched-parent outcome
+
+The [completed B/D/E diagnosis](rc-expanded-same-parent-probe-20260920.md) passes
+all 594 comparisons and verifies 21,159 packet files. Fourteen of 198 pairs are
+faster in all three repeats (B five, D seven, E two), all at ridge 10,000 with
+fewer Newton iterations. These are local retained-parent benefits, not full-path
+acceleration. There are no new fits or reserved evaluations. Any future switching
+rule needs pre-solve features, leakage-resistant label construction and complete
+path costs; the existing overall runtime selection continues to retain secant.
+
+## Nested switching-label provenance prepared
+
+The [nested preparation](rc-nested-switch-preparation-20260920.md) fits and audits
+ten 99-sample seed policies excluding both outer and inner connected groups.
+All twenty attempted reuses of the old 132-sample policies are rejected because
+they contain 33 outer-group samples. No switching labels, trained gate, structural
+solves or reserved evaluations are added. The next implementation must support
+and time a pre-capture decision before evaluating a gate on complete paths.
+
+## Pre-capture guard implemented and checked
+
+The [opt-in timed guard](rc-pre-capture-guard-20260920.md) can decline before
+material capture and inference while preserving secant execution. Its 166-test
+combined suite passes. A frozen full nonlinear B case makes twelve guard calls,
+zero captures/proposals and exactly matches 26 secant numerical/context files;
+all full-history comparisons pass. The single guarded arm is slightly slower
+than secant, so no speed benefit is claimed. No trained switch or nested label
+comparison has yet executed; all original roadmap requirements remain open.
+
+## Hosted 317e checks complete
+
+[Exact-source 317e receipts](hosted-317e-terminal-20260920.md) pass 1,754 Python
+development and 814 frontend tests. Full shards remain blocked before execution
+by external replay/technical preparation. The nested seed and pre-capture guard
+commits require new-head checks and do not close independent acceptance.
+
+The [fixed tree comparison](rc-inner-cost-tree-results-20260920.md) completed 20 fits and a separate output audit: TP 1, FP 1, TN 627, FN 31 across 660 overlapping decisions from 165 samples. No promotion or reserved evaluation follows. The [2,048-layer witness replay](planar-2048-witness-results-20260920.md) completed, exactly replaying all 40 coarse targets; the sole 74 mm witness difference decomposes entirely into the sampling term. The original 1% screen remains failed.

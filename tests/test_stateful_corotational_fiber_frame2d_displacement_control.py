@@ -108,6 +108,22 @@ def _arch_problem(case_id: str) -> StatefulCorotationalFiberFrame2DProblem:
     )
 
 
+def _two_base_portal_problem(case_id: str) -> StatefulCorotationalFiberFrame2DProblem:
+    coordinates = ((0.0, 0.0), (2.0, 0.0), (0.0, 2.0), (2.0, 2.0))
+    return StatefulCorotationalFiberFrame2DProblem(
+        case_id=case_id,
+        node_coordinates_m=coordinates,
+        members=(
+            _member(coordinates, "left-column", 0, 2),
+            _member(coordinates, "roof-beam", 2, 3),
+            _member(coordinates, "right-column", 1, 3),
+        ),
+        fixed_global_dofs=(0, 1, 2, 3, 4, 5),
+        reference_external_loads=((9, 1.0),),
+        rotation_coordinate_scale_m=2.0,
+    )
+
+
 @pytest.fixture(scope="module")
 def direct_arch_path():
     problem = _arch_problem("direct-control-shallow-arch")
@@ -263,6 +279,190 @@ def test_direct_control_solves_coupled_multi_equation_frame() -> None:
     )
 
 
+def test_two_base_portal_cyclic_path_repeats_and_restarts_exact_checkpoint() -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-portal")
+    targets = (-1.0e-5, -2.0e-5, -1.0e-5, 1.0e-5)
+    first = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        targets,
+        control_global_dof=9,
+        allow_reversals=True,
+        maximum_reversals=1,
+    )
+    repeated = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        targets,
+        control_global_dof=9,
+        allow_reversals=True,
+        maximum_reversals=1,
+    )
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, targets[:1], control_global_dof=9
+    )
+    assert prefix.contract_pass is True
+    restored = load_stateful_corotational_fiber_frame2d_checkpoint_bytes(
+        dump_stateful_corotational_fiber_frame2d_checkpoint_bytes(
+            problem, prefix.final_checkpoint
+        ),
+        problem,
+    )
+    suffix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        targets[1:],
+        control_global_dof=9,
+        initial_checkpoint=restored,
+        allow_reversals=True,
+        maximum_reversals=1,
+    )
+
+    assert first.contract_pass is True
+    assert repeated.contract_pass is True
+    assert suffix.contract_pass is True
+    assert len(problem.free_global_dofs) == 6
+    assert first.final_checkpoint.global_displacements[9] == targets[-1]
+    assert (
+        first.final_checkpoint.canonical_bytes()
+        == repeated.final_checkpoint.canonical_bytes()
+    )
+    assert (
+        first.final_checkpoint.canonical_bytes()
+        == suffix.final_checkpoint.canonical_bytes()
+    )
+    assert tuple(
+        step.accepted_checkpoint.canonical_bytes() for step in first.steps
+    ) == (tuple(step.accepted_checkpoint.canonical_bytes() for step in repeated.steps))
+    assert tuple(
+        step.accepted_checkpoint.canonical_bytes() for step in first.steps[1:]
+    ) == (tuple(step.accepted_checkpoint.canonical_bytes() for step in suffix.steps))
+    assert all(
+        step.metrics["parent_checkpoint_immutable"] is True
+        and step.metrics["solver_contract_pass"] is True
+        for step in first.steps
+    )
+
+
+def test_cyclic_portal_failure_rolls_back_after_a_restarted_commit(monkeypatch) -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-rollback")
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, (-1.0e-5,), control_global_dof=9
+    )
+    assert prefix.contract_pass is True
+    parent_bytes = prefix.final_checkpoint.canonical_bytes()
+    original_step = solve_stateful_corotational_fiber_frame2d_displacement_control_step
+
+    def fail_second_target(*args, **kwargs):
+        if kwargs["target_control_displacement_m"] == -1.0e-5:
+            kwargs["config"] = (
+                StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+                    maximum_iterations=0,
+                )
+            )
+        return original_step(*args, **kwargs)
+
+    monkeypatch.setattr(
+        "structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control.solve_stateful_corotational_fiber_frame2d_displacement_control_step",
+        fail_second_target,
+    )
+
+    def run_restarted_path():
+        return run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (-2.0e-5, -1.0e-5),
+            control_global_dof=9,
+            initial_checkpoint=prefix.final_checkpoint,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
+
+    blocked = run_restarted_path()
+    repeated = run_restarted_path()
+
+    assert blocked.status == "blocked"
+    assert blocked.contract_pass is False
+    assert len(blocked.steps) == 2
+    assert blocked.steps[0].committed is True
+    assert blocked.steps[0].parent_checkpoint.canonical_bytes() == parent_bytes
+    assert blocked.steps[1].committed is False
+    assert blocked.steps[1].metrics["rollback_exact"] is True
+    assert blocked.final_checkpoint is blocked.steps[0].accepted_checkpoint
+    assert blocked.final_checkpoint.global_displacements[9] == -2.0e-5
+    assert blocked.final_checkpoint.canonical_bytes() == (
+        repeated.final_checkpoint.canonical_bytes()
+    )
+    assert tuple(step.committed for step in blocked.steps) == (
+        tuple(step.committed for step in repeated.steps)
+    )
+
+
+@pytest.mark.parametrize(
+    ("allow_reversals", "maximum_reversals", "targets", "message"),
+    (
+        (False, 1, (-1e-5,), "explicit opt-in"),
+        (1, 1, (-1e-5,), "explicit boolean"),
+        (True, True, (-1e-5,), "integer in"),
+        (True, -1, (-1e-5,), "integer in"),
+        (True, 1.0, (-1e-5,), "integer in"),
+        (True, 255, (-1e-5,), "integer in"),
+        (True, 0, (-1e-5, -2e-5, -1e-5), "reversal budget"),
+        (True, 1, (-1e-5, -2e-5, -1e-5, -2e-5), "reversal budget"),
+        (True, 1, (-1e-5, -1e-5), "successive control targets"),
+    ),
+)
+def test_cyclic_path_rejects_invalid_contract_before_solve(
+    monkeypatch, allow_reversals, maximum_reversals, targets, message
+) -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-invalid")
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("invalid path must not enter the Newton step")
+
+    monkeypatch.setattr(
+        "structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control.solve_stateful_corotational_fiber_frame2d_displacement_control_step",
+        forbidden,
+    )
+    with pytest.raises(ValueError, match=message):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            targets,
+            control_global_dof=9,
+            allow_reversals=allow_reversals,
+            maximum_reversals=maximum_reversals,
+        )
+
+
+def test_cyclic_path_rejects_initial_or_restart_target_and_target_budget() -> None:
+    problem = _two_base_portal_problem("direct-control-cyclic-target-budget")
+    with pytest.raises(ValueError, match="successive control targets"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (0.0, 1.0e-5),
+            control_global_dof=9,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem, (-1.0e-5,), control_global_dof=9
+    )
+    assert prefix.contract_pass is True
+    with pytest.raises(ValueError, match="successive control targets"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (-1.0e-5, -2.0e-5),
+            control_global_dof=9,
+            initial_checkpoint=prefix.final_checkpoint,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
+    with pytest.raises(ValueError, match="bounded path length"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (1.0e-6 * index for index in range(1, 257)),
+            control_global_dof=9,
+            allow_reversals=True,
+            maximum_reversals=1,
+        )
+
+
 def test_invalid_full_step_trial_is_rejected_and_backtracking_continues(
     monkeypatch,
 ) -> None:
@@ -309,6 +509,15 @@ def test_invalid_full_step_trial_is_rejected_and_backtracking_continues(
     assert first_attempts[0]["failure"] == "invalid_trial_assembly"
     assert len(first_attempts) >= 2
     assert any(row["accepted"] is True for row in first_attempts[1:])
+    assert solution.metrics["assembly_exception_count"] == 1
+    assert solution.metrics["line_search_trial_count"] == sum(
+        row["attempt_count"] for row in solution.line_search_history
+    )
+    assert solution.metrics["assembly_call_count"] == (
+        solution.metrics["iteration_count"]
+        + solution.metrics["line_search_trial_count"]
+        + 1  # Final parent-bound assembly.
+    )
 
 
 def test_direct_control_rejects_disconnected_member_graph() -> None:
@@ -355,6 +564,222 @@ def test_failed_direct_control_step_rolls_back_exact_parent() -> None:
     assert result.trial_solution.metrics["contract_pass"] is False
     assert result.trial_solution.metrics["fallback_used"] is False
     assert result.trial_solution.metrics["regularization_used"] is False
+    assert result.trial_solution.metrics["iteration_count"] == 1
+    assert result.trial_solution.metrics["linear_solve_count"] == 1
+    assert result.trial_solution.metrics["line_search_trial_count"] >= 1
+    assert result.trial_solution.metrics["assembly_call_count"] == (
+        1 + result.trial_solution.metrics["line_search_trial_count"]
+    )
+    assert result.metrics["assembly_call_count"] == (
+        result.trial_solution.metrics["assembly_call_count"] + 1
+    )
+
+
+@pytest.mark.parametrize(
+    "seed",
+    (
+        (),
+        (0.0,),
+        ((0.0, 0.0),),
+        (0.0, np.nan),
+        (np.inf, 0.0),
+        (True, 0.0),
+        ("0.0", 0.0),
+        (0.0, 1.0e308),
+    ),
+)
+def test_direct_control_rejects_invalid_augmented_seed_before_solve(
+    monkeypatch, seed
+) -> None:
+    problem = _arch_problem("direct-control-invalid-seed")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("invalid seed must not enter the Newton solve")
+
+    monkeypatch.setattr(
+        "structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control.solve_stateful_corotational_fiber_frame2d_displacement_control",
+        forbidden,
+    )
+    with pytest.raises(ValueError, match="augmented_coordinate_seed_m"):
+        solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+            problem,
+            parent,
+            control_global_dof=4,
+            target_control_displacement_m=-0.01,
+            augmented_coordinate_seed_m=seed,
+        )
+    assert parent.canonical_bytes() == parent_bytes
+
+
+def test_single_step_augmented_seed_preserves_parent_and_no_seed_checkpoint() -> None:
+    problem = _arch_problem("direct-control-seed-regression")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    plain = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+    )
+    explicit_none = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        augmented_coordinate_seed_m=None,
+    )
+    seed = plain.trial_solution.augmented_coordinates_m.copy()
+    seed_bytes = seed.tobytes()
+    step_problem = StatefulCorotationalFiberFrame2DDisplacementControlStepProblem(
+        problem=problem,
+        accepted_checkpoint=parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        config=StatefulCorotationalFiberFrame2DDisplacementControlConfig(),
+        augmented_coordinate_seed_m=seed,
+    )
+    seed[0] = 123.0
+    normalized_seed = step_problem.initial_augmented_coordinates_m()
+    assert normalized_seed.tobytes() == seed_bytes
+    normalized_seed[0] = 456.0
+    assert step_problem.initial_augmented_coordinates_m().tobytes() == seed_bytes
+    seeded = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        augmented_coordinate_seed_m=step_problem.initial_augmented_coordinates_m(),
+    )
+
+    assert plain.committed and explicit_none.committed and seeded.committed
+    assert plain.accepted_checkpoint.state_hash == (
+        "sha256:7fb7afb78809bc510540ee2f45682fe250da7b13bed4a5af545d95814497ded3"
+    )
+    assert (
+        plain.accepted_checkpoint.canonical_bytes()
+        == explicit_none.accepted_checkpoint.canonical_bytes()
+        == seeded.accepted_checkpoint.canonical_bytes()
+    )
+    assert seeded.trial_solution.metrics["iteration_count"] == 1
+    assert seeded.trial_solution.metrics["linear_solve_count"] == 1
+    assert seeded.trial_solution.metrics["assembly_call_count"] == 2
+    assert parent.canonical_bytes() == parent_bytes
+    assert seeded.accepted_checkpoint.parent_state_hash == parent.state_hash
+
+
+def test_augmented_seed_solves_multi_equation_two_base_portal() -> None:
+    problem = _two_base_portal_problem("direct-control-multi-dof-seed")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    plain = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=9,
+        target_control_displacement_m=-2.0e-5,
+    )
+    seed = plain.trial_solution.augmented_coordinates_m.copy()
+    seeded = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=9,
+        target_control_displacement_m=-2.0e-5,
+        augmented_coordinate_seed_m=seed,
+    )
+
+    assert len(problem.free_global_dofs) == 6
+    assert seed.shape == (7,)
+    assert plain.committed and seeded.committed
+    assert seeded.accepted_checkpoint.canonical_bytes() == (
+        plain.accepted_checkpoint.canonical_bytes()
+    )
+    assert seeded.accepted_checkpoint.parent_state_hash == parent.state_hash
+    assert parent.canonical_bytes() == parent_bytes
+
+
+def test_invalid_seed_assembly_counts_work_and_rolls_back(monkeypatch) -> None:
+    problem = _arch_problem("direct-control-seed-assembly-failure")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    seed = np.asarray((-0.01, 0.0), dtype=np.float64)
+    original_assemble = (
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem.assemble
+    )
+
+    def reject_seed(self, coordinates_m):
+        if np.array_equal(coordinates_m, seed):
+            raise ValueError("synthetic invalid seed geometry")
+        return original_assemble(self, coordinates_m)
+
+    monkeypatch.setattr(
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem,
+        "assemble",
+        reject_seed,
+    )
+    result = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+        augmented_coordinate_seed_m=seed,
+    )
+
+    assert result.status == "blocked"
+    assert result.accepted_checkpoint is parent
+    assert result.metrics["rollback_exact"] is True
+    assert parent.canonical_bytes() == parent_bytes
+    assert result.trial_solution.metrics["terminal_reason"] == "invalid_seed_assembly"
+    assert result.trial_solution.metrics["solver_executed"] is True
+    assert result.trial_solution.metrics["iteration_count"] == 1
+    assert result.trial_solution.metrics["linear_solve_count"] == 0
+    assert result.trial_solution.metrics["assembly_call_count"] == 1
+    assert result.trial_solution.metrics["assembly_exception_count"] == 1
+    assert result.metrics["assembly_call_count"] == 2
+
+
+def test_failed_augmented_linear_solve_is_counted_before_rollback(monkeypatch) -> None:
+    problem = _arch_problem("direct-control-singular-work")
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+    original_assemble = (
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem.assemble
+    )
+
+    def singular_augmented_jacobian(self, coordinates_m):
+        assembly = original_assemble(self, coordinates_m)
+        return replace(
+            assembly,
+            augmented_jacobian_kn_per_m=np.zeros_like(
+                assembly.augmented_jacobian_kn_per_m
+            ),
+        )
+
+    monkeypatch.setattr(
+        StatefulCorotationalFiberFrame2DDisplacementControlStepProblem,
+        "assemble",
+        singular_augmented_jacobian,
+    )
+    result = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        parent,
+        control_global_dof=4,
+        target_control_displacement_m=-0.01,
+    )
+
+    assert result.status == "blocked"
+    assert result.accepted_checkpoint is parent
+    assert result.metrics["rollback_exact"] is True
+    assert parent.canonical_bytes() == parent_bytes
+    assert result.trial_solution.metrics["terminal_reason"] == (
+        "singular_augmented_jacobian"
+    )
+    assert result.trial_solution.convergence_history == []
+    assert result.trial_solution.metrics["solver_executed"] is True
+    assert result.trial_solution.metrics["iteration_count"] == 1
+    assert result.trial_solution.metrics["linear_solve_count"] == 1
+    assert result.trial_solution.metrics["assembly_call_count"] == 1
+    assert result.metrics["assembly_call_count"] == 2
 
 
 def test_direct_control_rejects_ambiguous_or_unsupported_configuration() -> None:

@@ -1,0 +1,242 @@
+{
+  "schema_version": "rc-workbench-review-observation.v1",
+  "source_parent": "b24a856916eea4875bb9273ca3fb97905b9c800f",
+  "source_files": [
+    {
+      "path": "scripts/verify-workbench-v2-e2e.mjs",
+      "byte_length": 5003,
+      "sha256": "sha256:a396aca53ee8d7a76d973c26ebbe5156470fc9c594bca3b55b2f1acaded96819"
+    },
+    {
+      "path": "src/workbench-v2/WorkbenchPage.tsx",
+      "byte_length": 24184,
+      "sha256": "sha256:a8e49d5236ce98e8078f4166a76d1b80899cdc03b8fdc69112f4e1ee800e21ab"
+    },
+    {
+      "path": "src/workbench-v2/components/JobServicePanel.tsx",
+      "byte_length": 5771,
+      "sha256": "sha256:e185622acee58316676d6e4594254ff97ad276548da67a6eadf2406842ad8eac"
+    },
+    {
+      "path": "src/workbench-v2/components/RcJobResultPanel.tsx",
+      "byte_length": 9887,
+      "sha256": "sha256:f45dba9e752e8850145d44a9a56eb46716adb90b22366969bc40d4c8fa6c4ebf"
+    },
+    {
+      "path": "src/workbench-v2/model/jobProvider.ts",
+      "byte_length": 20811,
+      "sha256": "sha256:c287791ca11683858b41abdab7dd89eee6e46e9d8e644db11a229ba5b6acead4"
+    },
+    {
+      "path": "src/workbench-v2/model/rcJobSchema.ts",
+      "byte_length": 21955,
+      "sha256": "sha256:85caa327da48e7c62e54ae2b6865348b49a105871bb2f6c481fe63fc1a5b6554"
+    },
+    {
+      "path": "src/workbench-v2/model/rcJobReview.ts",
+      "byte_length": 3871,
+      "sha256": "sha256:569c014e50c295519c2eb0bad95bb6ef86ea04224ff84bac162c16a7fdff64a3"
+    },
+    {
+      "path": "src/workbench-v2/model/rcJobReview.worker.ts",
+      "byte_length": 2037,
+      "sha256": "sha256:02662fb4fc5f238dc25dcbe5768cb8d79d285fb4ae5add4711b5a8e2479f560a"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-rc-job-contract.spec.ts",
+      "byte_length": 5095,
+      "sha256": "sha256:da3f5fdd36a03a197dac9c4af692a11171cf47c9569ef2b91508e8c6e63b1fb8"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-rc-job-browser.spec.ts",
+      "byte_length": 6807,
+      "sha256": "sha256:8f8542b33b265d9f14988bda832cec844a8ea4b1761c9c9eabbae46bbd6306bf"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-durable-job/checkpoint.json",
+      "byte_length": 52905,
+      "sha256": "sha256:19d94ea4c391a6310eb587e7a95a94c3dc3651c00f5aa916fcf657cb8ebd7d85"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-durable-job/evidence.json",
+      "byte_length": 2386,
+      "sha256": "sha256:e19ab73107c4b111e1f75cebb5f34ba9666a293d40fa684c3dbc2097e72e6b32"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-durable-job/job.json",
+      "byte_length": 1714,
+      "sha256": "sha256:a04c98cb7f191ff844a769ce6f2d6cee5517f7174f690561251e9fcf31103dc5"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-durable-job/provenance.json",
+      "byte_length": 1268,
+      "sha256": "sha256:a52fae1002c21bd5039008017f8253d4b4ea474d2f5701a8493c095358e87d82"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-durable-job/request.json",
+      "byte_length": 2285,
+      "sha256": "sha256:0bd7b8603fb306adf2a78772b2a4184beff4aac1bfc26e06e4955f2000771820"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-durable-job/result.json",
+      "byte_length": 932568,
+      "sha256": "sha256:15b32f857af632b8c643826b7cb3c6135412c06f005029137bb5a4ec24c8c5b9"
+    }
+  ],
+  "built_assets": [
+    {
+      "path": "dist/assets/rcJobReview.worker-QyVj_2G8.js",
+      "byte_length": 170591,
+      "sha256": "sha256:bb984a738ac5fee84e5634a159351a12bf47c4e7167c8ae572b2878a8d366942"
+    },
+    {
+      "path": "dist/assets/workbench-FWjFaxTC.js",
+      "byte_length": 721437,
+      "sha256": "sha256:d2ecdb2a73b2cc83f3c93870d7d1125602fbf482131f232a41db34e183ac2397"
+    }
+  ],
+  "raw_root": "/tmp/structural-rc-workbench-observation.ke6lwli3",
+  "inventory_sha256": "sha256:43b84da95aa6ccae42c90e44f8c09289761d0b79594eb18fe23a43df22fe76be",
+  "inventoried_files": 50,
+  "inventoried_bytes": 12944896,
+  "verification": {
+    "final_focused": {
+      "passed": 27,
+      "failed": 0,
+      "seconds": 33.4
+    },
+    "initial_rc": {
+      "passed": 11,
+      "failed": 2,
+      "cause": "Selecting the already selected material point cleared history without triggering reload; fixed in the handler."
+    },
+    "typescript": "passed",
+    "build": "passed",
+    "viewer_delivery": "passed",
+    "numerical_calls": 0
+  },
+  "large_browser_observation": {
+    "status": "passed",
+    "observations": [
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "loadedMs": 4900.970941,
+        "responsiveTimerTicks": 94,
+        "reviewedSteps": [
+          1,
+          122,
+          242
+        ],
+        "materialHistoryRows": 242,
+        "historyPageSizes": [
+          20,
+          2
+        ],
+        "pageErrors": []
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "loadedMs": 4983.98434,
+        "responsiveTimerTicks": 83,
+        "reviewedSteps": [
+          1,
+          122,
+          242
+        ],
+        "materialHistoryRows": 242,
+        "historyPageSizes": [
+          20,
+          2
+        ],
+        "pageErrors": []
+      }
+    ],
+    "requests": [
+      {
+        "role": "job",
+        "bytes": 1721
+      },
+      {
+        "role": "request",
+        "bytes": 6073
+      },
+      {
+        "role": "checkpoint",
+        "bytes": 118859
+      },
+      {
+        "role": "result",
+        "bytes": 65680274
+      },
+      {
+        "role": "evidence",
+        "bytes": 2314
+      },
+      {
+        "role": "job",
+        "bytes": 1721
+      },
+      {
+        "role": "request",
+        "bytes": 6073
+      },
+      {
+        "role": "checkpoint",
+        "bytes": 118859
+      },
+      {
+        "role": "result",
+        "bytes": 65680274
+      },
+      {
+        "role": "evidence",
+        "bytes": 2314
+      }
+    ],
+    "missingAssets": [
+      "/evidence/manifest.json",
+      "/src/structure-viewer/index.midas33.data.js",
+      "/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "/src/structure-viewer/drawings/manifest.json",
+      "/evidence/manifest.json",
+      "/src/structure-viewer/index.midas33.data.js",
+      "/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "/src/structure-viewer/drawings/manifest.json"
+    ],
+    "numericalCalls": 0,
+    "scope": "Existing 242-target producer artifacts; no numerical execution; local Chromium observation only."
+  },
+  "earlier_large_failures": [
+    "failure.json",
+    "failure-v2.json"
+  ],
+  "earlier_successful_observations": [
+    "receipt-v3.json",
+    "receipt-v4.json",
+    "receipt-v5.json"
+  ],
+  "claim_boundary": {
+    "stored_original_artifact_review": true,
+    "browser_solver_execution": false,
+    "independent_physical_validation": false,
+    "mobile_hardware_qualification": false,
+    "new_head_hosted_acceptance": false,
+    "roadmap_complete": false
+  },
+  "preceding_head_ci_snapshot": {
+    "sha": "b24a856916eea4875bb9273ca3fb97905b9c800f",
+    "success": 59,
+    "failure": 12,
+    "skipped": 5,
+    "in_progress": 1,
+    "final": false
+  }
+}

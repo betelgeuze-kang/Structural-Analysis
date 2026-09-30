@@ -1,0 +1,212 @@
+{
+  "packet_inventory_sha256": "dc9cee74b0cefb318f6b6f846b925f091af116b994a8542ed4a2522cc4e748ca",
+  "rows": [
+    {
+      "case": "w32-drift40",
+      "repeat": 0,
+      "mode": "full",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.10949988558613598,
+      "iterations": 14,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:de36df2381bd130cfc18792a02319060c4b31f8c8918ed2036b214501ceab860"
+    },
+    {
+      "case": "w32-drift40",
+      "repeat": 0,
+      "mode": "full",
+      "candidate": "middle",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.5720162149872313,
+      "iterations": 12,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:fb2178cd99a377b8c54945afd517dac1f272c89547473d07089a6ed19f67a9b0"
+    },
+    {
+      "case": "w32-drift40",
+      "repeat": 0,
+      "mode": "pruned",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.10949988558613598,
+      "iterations": 14,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:de36df2381bd130cfc18792a02319060c4b31f8c8918ed2036b214501ceab860"
+    },
+    {
+      "case": "w32-drift40",
+      "repeat": 0,
+      "mode": "pruned",
+      "candidate": "middle",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.5720162149872313,
+      "iterations": 12,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:fb2178cd99a377b8c54945afd517dac1f272c89547473d07089a6ed19f67a9b0"
+    },
+    {
+      "case": "w32-drift40",
+      "repeat": 1,
+      "mode": "full",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.10949988558613598,
+      "iterations": 14,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:de36df2381bd130cfc18792a02319060c4b31f8c8918ed2036b214501ceab860"
+    },
+    {
+      "case": "w32-drift40",
+      "repeat": 1,
+      "mode": "full",
+      "candidate": "middle",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.5720162149872313,
+      "iterations": 12,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:fb2178cd99a377b8c54945afd517dac1f272c89547473d07089a6ed19f67a9b0"
+    },
+    {
+      "case": "w32-drift40",
+      "repeat": 1,
+      "mode": "pruned",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.10949988558613598,
+      "iterations": 14,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:de36df2381bd130cfc18792a02319060c4b31f8c8918ed2036b214501ceab860"
+    },
+    {
+      "case": "w32-drift40",
+      "repeat": 1,
+      "mode": "pruned",
+      "candidate": "middle",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.5720162149872313,
+      "iterations": 12,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:fb2178cd99a377b8c54945afd517dac1f272c89547473d07089a6ed19f67a9b0"
+    },
+    {
+      "case": "w48-drift40",
+      "repeat": 0,
+      "mode": "full",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.14010521754163582,
+      "iterations": 10,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:453fdb86cf227a97c5654478d939567a87027d64c714b2d1af70c3ab6e8f990e"
+    },
+    {
+      "case": "w48-drift40",
+      "repeat": 0,
+      "mode": "pruned",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.14010521754163582,
+      "iterations": 10,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:453fdb86cf227a97c5654478d939567a87027d64c714b2d1af70c3ab6e8f990e"
+    },
+    {
+      "case": "w48-drift40",
+      "repeat": 1,
+      "mode": "full",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.14010521754163582,
+      "iterations": 10,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:453fdb86cf227a97c5654478d939567a87027d64c714b2d1af70c3ab6e8f990e"
+    },
+    {
+      "case": "w48-drift40",
+      "repeat": 1,
+      "mode": "pruned",
+      "candidate": "cheap",
+      "target": 0.02,
+      "accepted_targets": [
+        -0.02,
+        -0.04
+      ],
+      "reason": "line_search_failed_to_reduce_residual",
+      "relative_residual": 0.14010521754163582,
+      "iterations": 10,
+      "rollback_exact": true,
+      "parent_unchanged": true,
+      "original_result_hash": "sha256:453fdb86cf227a97c5654478d939567a87027d64c714b2d1af70c3ab6e8f990e"
+    }
+  ],
+  "audit_solver_calls": 0,
+  "finding": "original path nonconvergence; fresh verifier reproduces incomplete path without artifact mismatch",
+  "tolerances_changed": false
+}

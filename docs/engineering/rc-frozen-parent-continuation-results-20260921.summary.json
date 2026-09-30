@@ -1,0 +1,52 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-frozen-continuation-ulcth71i",
+  "inventory_sha256": "54351ec7325076f2b971808daaf7dc5b756921e9b6df8f233d4a4776bce484a0",
+  "file_count": 116,
+  "audit": {
+    "native_calls": 51,
+    "completed_models": 3,
+    "rows": [
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "complete": true,
+        "stages": 17,
+        "parent_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6",
+        "newton_iterations": 52,
+        "assembly_dispatches": 105,
+        "wall_ns": 244377072,
+        "final_relative_residual": 9.379164112033322e-13,
+        "terminal_repeat_equal": true
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "complete": true,
+        "stages": 17,
+        "parent_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da",
+        "newton_iterations": 51,
+        "assembly_dispatches": 104,
+        "wall_ns": 242388946,
+        "final_relative_residual": 5.305385760342082e-15,
+        "terminal_repeat_equal": true
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "complete": true,
+        "stages": 17,
+        "parent_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2",
+        "newton_iterations": 55,
+        "assembly_dispatches": 115,
+        "wall_ns": 259529021,
+        "final_relative_residual": 3.157967714489334e-17,
+        "terminal_repeat_equal": true
+      }
+    ],
+    "newton_iterations": 158,
+    "assembly_dispatches": 324,
+    "wall_ns": 746295039,
+    "all_stages_use_original_material_parent": true,
+    "full_path_qualification": false
+  }
+}

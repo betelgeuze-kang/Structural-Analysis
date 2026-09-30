@@ -1,0 +1,252 @@
+{
+  "source_revision": "259697d6ee946057bec3e8bfbe35ac155929e205",
+  "rows": [
+    {
+      "case": "train-a",
+      "arms": {
+        "reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1355,
+          "newton_assemblies": 2672,
+          "unknown_work": false,
+          "wall_ns": 93819517854,
+          "proposal_wall_ns": 457696
+        },
+        "secant": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 969,
+          "newton_assemblies": 1640,
+          "unknown_work": false,
+          "wall_ns": 67729067621,
+          "proposal_wall_ns": 752905052
+        },
+        "proposal": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 957,
+          "newton_assemblies": 1625,
+          "unknown_work": false,
+          "wall_ns": 66808808060,
+          "proposal_wall_ns": 761862503
+        },
+        "fresh-reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1355,
+          "newton_assemblies": 2672,
+          "unknown_work": false,
+          "wall_ns": 94031132216,
+          "proposal_wall_ns": 459141
+        }
+      },
+      "comparisons": {
+        "reference": true,
+        "secant": true,
+        "proposal": true
+      },
+      "reference_repeat_exact": true,
+      "proposal_used": 236,
+      "abstentions": 6,
+      "proposal_to_secant_wall_ratio": 0.9864126350277017
+    },
+    {
+      "case": "train-b",
+      "arms": {
+        "reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1165,
+          "newton_assemblies": 2228,
+          "unknown_work": false,
+          "wall_ns": 81422145169,
+          "proposal_wall_ns": 451543
+        },
+        "secant": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 870,
+          "newton_assemblies": 1436,
+          "unknown_work": false,
+          "wall_ns": 61832936332,
+          "proposal_wall_ns": 750823399
+        },
+        "proposal": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 863,
+          "newton_assemblies": 1458,
+          "unknown_work": false,
+          "wall_ns": 62392029683,
+          "proposal_wall_ns": 766143535
+        },
+        "fresh-reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1165,
+          "newton_assemblies": 2228,
+          "unknown_work": false,
+          "wall_ns": 81709380730,
+          "proposal_wall_ns": 453900
+        }
+      },
+      "comparisons": {
+        "reference": true,
+        "secant": true,
+        "proposal": true
+      },
+      "reference_repeat_exact": true,
+      "proposal_used": 236,
+      "abstentions": 6,
+      "proposal_to_secant_wall_ratio": 1.0090419990407387
+    },
+    {
+      "case": "train-c",
+      "arms": {
+        "reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1376,
+          "newton_assemblies": 2854,
+          "unknown_work": false,
+          "wall_ns": 99419007086,
+          "proposal_wall_ns": 462281
+        },
+        "secant": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 990,
+          "newton_assemblies": 1711,
+          "unknown_work": false,
+          "wall_ns": 69888397536,
+          "proposal_wall_ns": 757246703
+        },
+        "proposal": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 971,
+          "newton_assemblies": 1670,
+          "unknown_work": false,
+          "wall_ns": 69046921037,
+          "proposal_wall_ns": 769281326
+        },
+        "fresh-reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1376,
+          "newton_assemblies": 2854,
+          "unknown_work": false,
+          "wall_ns": 99700167824,
+          "proposal_wall_ns": 463562
+        }
+      },
+      "comparisons": {
+        "reference": true,
+        "secant": true,
+        "proposal": true
+      },
+      "reference_repeat_exact": true,
+      "proposal_used": 236,
+      "abstentions": 6,
+      "proposal_to_secant_wall_ratio": 0.987959711072692
+    },
+    {
+      "case": "train-d",
+      "arms": {
+        "reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1171,
+          "newton_assemblies": 2154,
+          "unknown_work": false,
+          "wall_ns": 80619154586,
+          "proposal_wall_ns": 467935
+        },
+        "secant": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 852,
+          "newton_assemblies": 1424,
+          "unknown_work": false,
+          "wall_ns": 61477011157,
+          "proposal_wall_ns": 754915914
+        },
+        "proposal": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 844,
+          "newton_assemblies": 1436,
+          "unknown_work": false,
+          "wall_ns": 62445020108,
+          "proposal_wall_ns": 773390755
+        },
+        "fresh-reference": {
+          "status": "complete",
+          "targets_attempted": 242,
+          "response_rows": 242,
+          "core_calls": 242,
+          "inclusive_linear_solves": 1171,
+          "newton_assemblies": 2154,
+          "unknown_work": false,
+          "wall_ns": 79794260728,
+          "proposal_wall_ns": 449144
+        }
+      },
+      "comparisons": {
+        "reference": true,
+        "secant": true,
+        "proposal": true
+      },
+      "reference_repeat_exact": true,
+      "proposal_used": 236,
+      "abstentions": 6,
+      "proposal_to_secant_wall_ratio": 1.0157458687854537
+    }
+  ],
+  "new_fits": 0,
+  "campaign_wall_ns": 1255087976403,
+  "full_paths_executed": 16,
+  "independent_validation": false,
+  "policy_adopted": false,
+  "repeated_runtime_claim": false,
+  "audit_validation_wall_ns": 43199151731,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-full-r7wempke",
+    "inventory_sha256": "8ac7698e73346eefcd759b0110633df510fad08df4d63b2dcae998299d312369",
+    "files": 23924,
+    "bytes": 1415485590
+  },
+  "audit_through_inventory_readback_wall_ns": 45887974290,
+  "audit_timing_scope": "validation includes source/input/step/hash/response/proposal checks; through_inventory additionally includes audit/log writes, inventory construction and complete readback; excludes final receipt write and chmod; nested intervals must not be summed"
+}

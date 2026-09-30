@@ -4,14 +4,18 @@ import { WorkbenchPage } from './workbench-v2/WorkbenchPage'
 import './index.css'
 
 const LegacyApp = lazy(() => import('./App'))
+const RcPinRollerOriginalPanel = lazy(() => import('./workbench-v2/components/RcPinRollerOriginalPanel')
+  .then(module => ({ default: module.RcPinRollerOriginalPanel })))
 
-export type ProductSurface = 'workbench-v2' | 'legacy-app'
+export type ProductSurface = 'workbench-v2' | 'legacy-app' | 'rc-pin-roller-original'
 
 export function resolveProductSurface(location: Pick<Location, 'pathname' | 'hash'>): ProductSurface {
   const path = location.pathname.replace(/\/+$/, '')
   const hash = location.hash.replace(/\/+$/, '')
   const legacyRoute = path.endsWith('/legacy') || hash === '#/legacy'
-  return legacyRoute ? 'legacy-app' : 'workbench-v2'
+  if (legacyRoute) return 'legacy-app'
+  if (path.endsWith('/rc-pin-roller-original') || hash === '#/rc-pin-roller-original') return 'rc-pin-roller-original'
+  return 'workbench-v2'
 }
 
 export function resolveSameOriginJobUrl(value: string | undefined, origin: string): string | undefined {
@@ -63,6 +67,10 @@ function RootRouter(): ReactElement {
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobStatusUrl,
     window.location.origin,
   )
+  const designComparisonUrl = import.meta.env.VITE_DESIGN_COMPARISON_URL
+    || window.__STRUCTURAL_WORKBENCH_CONFIG__?.designComparisonUrl
+  const candidateSearchProcessUrl = import.meta.env.VITE_CANDIDATE_SEARCH_PROCESS_URL
+    || window.__STRUCTURAL_WORKBENCH_CONFIG__?.candidateSearchProcessUrl
   const nativeFrameResultUrl = resolveSameOriginJobUrl(
     import.meta.env.VITE_NATIVE_FRAME_RESULT_URL
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameResultUrl,
@@ -99,11 +107,21 @@ function RootRouter(): ReactElement {
     window.location.origin,
   )
 
-  return surface === 'legacy-app' ? (
+  return surface === 'rc-pin-roller-original' ? (
+    <Suspense fallback={<p role="status">Loading original bundle reviewer…</p>}>
+      <RcPinRollerOriginalPanel />
+    </Suspense>
+  ) : surface === 'legacy-app' ? (
     <LegacyAppSurface />
   ) : (
     <WorkbenchPage
       jobStatusUrl={jobStatusUrl}
+      jobAuthorization={window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobAuthorization}
+      rcControlStrategyCohortUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlStrategyCohortUrl}
+      rcControlSearchUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlSearchUrl}
+      rcControlDesignUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlDesignUrl}
+      designComparisonUrl={designComparisonUrl}
+      candidateSearchProcessUrl={candidateSearchProcessUrl}
       nativeFrameResultUrl={nativeFrameResultUrl}
       nativeFrameReportUrl={nativeFrameReportUrl}
       nativeFrameBundleUrl={nativeFrameBundleUrl}

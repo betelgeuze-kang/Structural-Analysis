@@ -1,0 +1,50 @@
+{
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-container-capture-2kueowb_",
+  "inventory_sha256": "sha256:9c80b578be045228f37c94eccee56b6d95b5a536a4318b32a4bee15f3d0b9cdc",
+  "verified_packet_files": 32,
+  "raw_files_verified": 16,
+  "receipt_output_hashes_verified": 15,
+  "opensees_runtime_binding_matches": true,
+  "execution": {
+    "exit_code": 1,
+    "wall_ns": 230362251246,
+    "source_revision_unchanged": true
+  },
+  "source_revision": "2b41f71e7a67d61a8b721c1b219155f8c81de0a2",
+  "failed_comparisons": [
+    {
+      "case_id": "bounded_planar_member_feature_load_path",
+      "metrics": [
+        {
+          "absolute_error": 4.96424095305589e-07,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": false,
+          "product_value": -1.3753172320614404e-12,
+          "quantity": "support_N1_UX_N",
+          "reference_value": 4.96422719988357e-07,
+          "relative_error": 1.000002770455857,
+          "relative_tolerance": 1e-10
+        }
+      ]
+    },
+    {
+      "case_id": "bounded_planar_prescribed_settlement_load_path",
+      "metrics": [
+        {
+          "absolute_error": 3.631256504377234e-07,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": false,
+          "product_value": -1000.0000000000011,
+          "quantity": "support_N1_UX_N",
+          "reference_value": -999.9999996368755,
+          "relative_error": 3.631256505695832e-10,
+          "relative_tolerance": 1e-10
+        }
+      ]
+    }
+  ],
+  "code_technical_pass": false,
+  "modal_technical_pass": true,
+  "clean_runner_summary_emitted": false,
+  "signed_acceptance": false
+}

@@ -1,0 +1,6 @@
+{
+  "scope": "Controlled metadata and runtime intervals, not new physical execution or performance evidence",
+  "original_artifacts_reused_from": "tests/frontend/fixtures/rc-control-search-cost-no-oracle",
+  "solver_calls": 0,
+  "fits": 0
+}

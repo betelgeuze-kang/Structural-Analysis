@@ -1,0 +1,13 @@
+# Stepwise storage for the retained research path schema
+
+The 1,024-layer numerical process peaked at 25,006,308 KiB RSS. Its driver previously built the complete path dictionary and complete indented JSON string, and subsequently read entire output files for hashing. Increasing layer count without addressing both output and input memory would be premature.
+
+The research driver now serializes one converted step at a time, retaining the original full `repeat-0.json` representation. SHA-256 uses bounded chunks, compatible with Python 3.10. A second copy of each step is stored separately, together with ordered metadata containing an empty steps placeholder and a final `path-index.json` with byte lengths and hashes. The complete index is written only after serialization succeeds. Original files are never overwritten.
+
+This deliberately spends disk space and serialization work to permit later per-step validation without decoding the complete full-path artifact. The subsequent bounded reader is verified separately. The full result remains present; no checkpoint or material field is discarded. The driver still retains the solver's original path object, but does not construct every step dictionary or one complete output string simultaneously. The elapsed through-output-hashing interval now includes the step copies and index; it is not directly comparable to older output-only intervals as a speed result.
+
+Synthetic focused checks pass 71 tests in 2.06 s, including exact standard-JSON bytes for empty, failed and nonempty paths; Unicode/newline/float preservation; index hashes; no completed index after a nonfinite value; refusal to overwrite; and release of a converted step before requesting its successor. An initial release test found `enumerate` retaining the previous yielded step; explicit ordinal accounting resolves it. Ruff and diff checks pass.
+
+The [completed actual artifact round trip](planar-path-roundtrip-20260920.md) reproduces the full 1,024-layer result hash and all forty step objects. The [bounded-reader observation](planar-bounded-reader-results-20260920.md) subsequently validates original bytes and accepted/material bindings while retaining compact comparison features. Neither observation repeats a numerical solve or training fit.
+
+The bounded reader now has a full-size receipt; further refinement still requires an explicit resource plan and its own predeclared numerical protocol. No 2,048-layer run is started by this storage change, and the research resolution enum remains unchanged. The fourteen original concrete failures and all independent-validation requirements remain open.

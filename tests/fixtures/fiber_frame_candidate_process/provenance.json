@@ -1,0 +1,50 @@
+{
+  "artifacts": {
+    "base.json": {
+      "byte_length": 2040,
+      "preserved_exact_bytes": true,
+      "sha256": "sha256:783a572823311ea2614e2df0207109d16bd4e8e2fb2a96240c77ecaacb505ea9"
+    },
+    "training.json": {
+      "byte_length": 31759,
+      "preserved_exact_bytes": true,
+      "sha256": "sha256:7654095ce46654a6a59865131ec4199696bdc677f31f62a595374cbe78d8c605"
+    }
+  },
+  "fixture_scope": "Frozen actual two-train/validation/holdout labels from one local synthetic section family; reusable candidate-policy input, not an independent corpus or a new timing observation.",
+  "generalized_speedup_claimed": false,
+  "historical_known_solver_execution_count": 4,
+  "historical_training_analysis_request_count": 4,
+  "historical_unknown_solver_execution_count": 0,
+  "independent_physical_validation_claimed": false,
+  "independent_project_generalization_verified": false,
+  "origin_observation_directory": "/tmp/structural-candidate-suite-observation.1mscbvmx",
+  "origin_producer": "train_fiber_frame_candidate_policy",
+  "origin_protocol_raw_sha256": "sha256:f76d2c57427e978000e98b0f5cdfdfa31c9c010d8afc35d0332c0bd9a9fba4fe",
+  "origin_receipt_raw_sha256": "sha256:a942700ea39fcb9608641845f0f94b5ba3ead9a9cb7fe3d804a1abdbc30dbad0",
+  "policy_artifact_hash": "sha256:fd547602514b70f0bdd8d3e9ab58d63981452f2cadc32c7a17b834d29f5a06a5",
+  "production_promotion_eligible": false,
+  "schema_version": "fiber-frame-candidate-process-actual-fixture-provenance.v1",
+  "source_revision": "412fda612e442368da0ee3b0add743654d3fdc8d",
+  "source_revision_is_attestation": false,
+  "training_reexecuted_during_fixture_copy": false,
+  "training_report_hash": "sha256:65f47bd2d42c64fcf643b176311c76ddfdd4ba58560a11e1e2bf8bd9b4e8bd60",
+  "training_sample_splits": [
+    {
+      "case_id": "train-case-0",
+      "split": "train"
+    },
+    {
+      "case_id": "train-case-1",
+      "split": "train"
+    },
+    {
+      "case_id": "train-case-2",
+      "split": "validation"
+    },
+    {
+      "case_id": "train-case-3",
+      "split": "holdout"
+    }
+  ]
+}

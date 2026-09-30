@@ -1,0 +1,57 @@
+from pathlib import Path
+from collections import Counter
+import hashlib,json,os,subprocess,tempfile,time
+source=Path('/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-e_rj5919');root=Path(tempfile.mkdtemp(prefix='structural-rc-parent-cost-observer-',dir=source.parent));Path('/tmp/structural-rc-parent-cost-observer-root.txt').write_text(str(root));start=time.perf_counter_ns();bindings=[]
+def original(name):
+ raw=(source/name).read_bytes();bindings.append({'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()});return json.loads(raw)
+def save(name,value):
+ with (root/name).open('x') as f:json.dump(value,f,indent=2,allow_nan=False);f.write('\n')
+def canonical(d):return json.dumps(d,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
+parent=original('process-outcome.json');worker=original('worker-outcome.json');result=original('result.json');protocol=original('protocol.json');assert parent['exit_code']==0 and worker['status']=='completed'
+for pid in [parent['parent_pid'],parent['worker_pid']]:
+ try:os.kill(pid,0)
+ except ProcessLookupError:pass
+ else:raise RuntimeError('Numerical writer still live')
+assert len(result['comparisons'])==protocol['comparison_count']==worker['completed_comparisons']==968
+assert result['all_original_secant_children_reproduced'] and result['all_same_parent_comparisons_pass'] and result['fits']==0
+groups={};all_work=Counter();rows=[]
+for n,record in enumerate(result['comparisons']):
+ outcome=original(f'study/comparison-{n:04d}-outcome.json');assert outcome==record and record['ordinal']==n
+ report=original(f'study/comparison-{n:04d}/comparison.json');payload=dict(report);digest=payload.pop('report_hash');assert digest==record['report_hash']=='sha256:'+hashlib.sha256(canonical(payload)).hexdigest()
+ assert report['schema_version']=='experimental-rc-control-parent-step-comparison.v1' and report['source_target_index']==record['source_target_index']
+ assert report['all_execution_work_reported'] and report['reference_repeat_exact'] and all(c['step_response_pass'] for c in report['comparisons'].values())
+ assert record['same_parent_comparison_pass'] and record['original_secant_child_reproduced']
+ key=record['case_id'];group=groups.setdefault(key,Counter());group['parents']+=1;work={}
+ for arm,p in [*report['arms'].items(),('fresh-reference',report['fresh_reference'])]:
+  assert p['status']=='complete' and len(p['entries'])==p['accepted_target_count']==1;entry=p['entries'][0];assert entry['parent_hash']==report['initial_parent_hash']==record['native_parent_hash']
+  count=Counter()
+  for inv in entry['invocations']:
+   assert not inv['unknown_work']
+   for metric in ['core_calls','newton_iterations','linear_solves']:
+    assert type(inv['work'][metric]) is int and inv['work'][metric]>=0;count[metric]+=inv['work'][metric]
+  work[arm]=dict(count);all_work.update(count)
+  for metric,value in count.items():group[arm+'_'+metric]+=value
+  assert type(p['wall_ns']) is int and p['wall_ns']>0;group[arm+'_summed_step_wall_ns']+=p['wall_ns']
+ assert work==record['arm_work'];secant=report['arms']['secant'];proposed=report['arms']['proposal'];delta=work['proposal']['newton_iterations']-work['secant']['newton_iterations'];assert delta==record['proposal_minus_secant_newton']
+ wall_delta=proposed['wall_ns']-secant['wall_ns'];used=record['policy_proposed'];assert type(used) is bool
+ tag='actual_proposal' if used else 'abstention';group[tag+'_count']+=1
+ group[tag+('_fewer_newton' if delta<0 else '_more_newton' if delta>0 else '_equal_newton')]+=1
+ group[tag+('_lower_wall' if wall_delta<0 else '_higher_wall' if wall_delta>0 else '_equal_wall')]+=1
+ group[tag+'_newton_delta']+=delta;group[tag+'_wall_delta_ns']+=wall_delta
+ if used:
+  group['proposed_fewer_newton_but_not_lower_wall']+=delta<0 and wall_delta>=0
+  group['proposed_not_fewer_newton_but_lower_wall']+=delta>=0 and wall_delta<0
+  group['observed_positive_newton_reduction_sum']+=max(-delta,0)
+  group['observed_positive_wall_reduction_ns']+=max(-wall_delta,0)
+  group['additional_proposal_material_capture_wall_ns']+=proposed['entries'][0]['committed_material_capture']['wall_ns']
+ group['ideal_local_step_time_floor_ns']+=min(proposed['wall_ns'],secant['wall_ns']) if used else secant['wall_ns']
+ group['ideal_local_newton_floor']+=min(work['proposal']['newton_iterations'],work['secant']['newton_iterations']) if used else work['secant']['newton_iterations']
+ rows.append({'ordinal':n,'case_id':key,'source_target_index':record['source_target_index'],'report_hash':digest,'policy_proposed':used,'secant_newton':work['secant']['newton_iterations'],'proposal_newton':work['proposal']['newton_iterations'],'proposal_minus_secant_newton':delta,'secant_wall_ns':secant['wall_ns'],'proposal_wall_ns':proposed['wall_ns'],'proposal_minus_secant_wall_ns':wall_delta,'local_advantage_is_complete_path_savings':False})
+assert dict(all_work)==result['work']==worker['work']
+for group in groups.values():
+ assert group['parents']==242
+ group['summed_step_time_ratio']=group['proposal_summed_step_wall_ns']/group['secant_summed_step_wall_ns']
+ group['optimistic_local_time_fraction_remaining']=group['ideal_local_step_time_floor_ns']/group['secant_summed_step_wall_ns']
+ group['optimistic_local_newton_fraction_remaining']=group['ideal_local_newton_floor']/group['secant_newton_iterations']
+summary={'schema_version':'rc-same-parent-cost-observer.v1','numerical_source_revision':result['source_revision'],'observer_revision':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'source_packet':str(source),'original_audit_completed':False,'source_packet_sealed':False,'comparison_count':len(rows),'work_recounted':dict(all_work),'groups':{k:dict(v) for k,v in groups.items()},'ideal_local_floor_assumptions':['retrospective perfect knowledge of each recorded action cost','zero selector feature, inference and verification overhead','each action starts from the original secant parent regardless of earlier choices','full original learned proposal capture and inference charged when proposal selected','single shared-host observation per parent; no repeated parent-time inference'],'complete_path_savings_claim':False,'deployable_policy_claim':False,'training_admitted':False,'fits':0,'new_numerical_calls':0,'numerical_parent_wall_ns':parent['parent_wall_ns'],'observer_wall_ns_before_final_writes':time.perf_counter_ns()-start}
+save('summary.json',summary);save('rows.json',rows);save('input-bindings.json',{'root':str(source),'files':bindings});(root/'observer.py').write_bytes(Path(__file__).read_bytes());print(root);print(json.dumps(summary,indent=2))

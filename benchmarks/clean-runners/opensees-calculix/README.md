@@ -101,3 +101,20 @@ An independent operator submits a fresh bundle through
 That contract binds the summary, both child receipts, all four binary mode vectors, the source
 commit, and a detached RSA-SHA256 signature. Passing the intake proves submission integrity,
 not operator identity, legal approval, Verification Level 2, or release readiness.
+
+## Failed-reference diagnostics
+
+Fresh code-to-code execution now passes `--raw-output-dir` to the receipt
+generator. Each attempt creates a distinct `code-reference-attempt-*/` directory
+inside the writable output mount. Its `raw/` subtree retains decoded OpenSees
+outputs and CalculiX decks/results as they become available, including on
+receipt-generation failure. `inventory.json` records relative paths, byte lengths
+and hashes of files actually present when the command finishes or raises. An
+empty inventory is possible when execution fails before any output is returned.
+Previous attempts remain intact. Modal/buckling capture is not added by this change.
+
+These are diagnostic sidecars, not members of the v1 signed summary. The inventory
+records command completion separately from qualification and never claims approval.
+It does not make failed reference comparisons pass. Signed-schema/attestation
+binding and a fresh container execution remain required before claiming that
+these files form independently verified acceptance evidence.

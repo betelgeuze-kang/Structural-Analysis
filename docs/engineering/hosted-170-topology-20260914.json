@@ -1,0 +1,30 @@
+{
+  "head": "17010d495d651d3d53407db4dfc7b9dcee0867ad",
+  "jobs": [
+    {
+      "id": 103769241422,
+      "run_id": 34774223461,
+      "name": "topology-contract",
+      "conclusion": "success",
+      "failed_steps": [],
+      "skipped_steps": [],
+      "selected_log_lines": [
+        "2026-09-13T18:35:04.7504087Z ======================= 413 passed in 942.81s (0:15:42) ========================",
+        "2026-09-13T18:35:25.6220185Z 22 passed in 20.31s",
+        "2026-09-13T18:36:59.4335687Z 86 passed in 93.22s (0:01:33)",
+        "2026-09-13T18:38:22.3335220Z 9 passed in 82.31s (0:01:22)",
+        "2026-09-13T18:39:34.2209975Z 28 passed in 71.30s (0:01:11)",
+        "2026-09-13T18:39:36.2010240Z 16 passed in 1.38s",
+        "2026-09-13T18:39:38.0914302Z 13 passed in 1.35s",
+        "2026-09-13T18:40:29.8729479Z 65 passed in 49.44s",
+        "2026-09-13T18:54:29.1712079Z 984 passed in 838.97s (0:13:58)"
+      ]
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-170-topology-4sdwnwgw",
+    "inventory_sha256": "9aa16cface0e1495dbf4413e25148ead9a1968ad604e562e36aca0ca2d970439",
+    "files": 5,
+    "bytes": 191139
+  }
+}

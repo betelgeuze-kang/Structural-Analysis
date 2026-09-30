@@ -478,13 +478,7 @@ def build_operator_attested_matrix(
     fresh_technical_count = sum(
         1 for row in rows if row["fresh_current_source_technical_validation"]
     )
-    fresh_external_count = sum(
-        1 for row in rows if row["status"] == "fresh_external_technical"
-    )
-    fresh_preflight_count = sum(
-        1 for row in rows if row["status"] == "fresh_independent_preflight_technical"
-    )
-    missing_count = sum(1 for row in rows if row["status"] == "missing")
+    summary = matrix_builder._requirement_summary(rows)
     complete = technical_count == len(rows)
     fresh_technical_complete = fresh_technical_count == len(rows)
     fresh_external_complete = all(
@@ -493,6 +487,11 @@ def build_operator_attested_matrix(
         if row["verification_method"] == "external_solver_execution"
     )
     blockers = [
+        *(
+            ["current_product_replay_failed"]
+            if summary.get("current_product_replay_failed_count", 0)
+            else []
+        ),
         *([] if complete else ["recommended_external_vv_matrix_incomplete"]),
         *(
             []
@@ -517,24 +516,7 @@ def build_operator_attested_matrix(
             "supplemental_receipt_bindings": supplemental_bindings,
             "operator_intake_binding": _operator_binding(intake),
             "requirements": rows,
-            "summary": {
-                "requirement_count": len(rows),
-                "technical_reference_present_count": technical_count,
-                "fresh_current_source_technical_count": fresh_technical_count,
-                "current_product_replay_only_count": sum(
-                    1 for row in rows if row["status"] == "current_product_replay_only"
-                ),
-                "fresh_external_technical_count": fresh_external_count,
-                "fresh_independent_preflight_technical_count": (fresh_preflight_count),
-                "promotion_eligible_count": 0,
-                "missing_count": missing_count,
-                "execution_package_available_count": sum(
-                    1 for row in rows if row["execution_package_available"]
-                ),
-                "current_source_execution_prepared_count": sum(
-                    1 for row in rows if row["current_source_execution_prepared"]
-                ),
-            },
+            "summary": summary,
             "status": "blocked",
             "contract_pass": True,
             "blockers": sorted(set(blockers)),

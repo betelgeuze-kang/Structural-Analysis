@@ -1,0 +1,79 @@
+{
+  "counterbalanced_snapshot_measurements": [
+    {
+      "repetition": 0,
+      "order": [
+        "legacy",
+        "direct"
+      ],
+      "samples_per_arm": 100,
+      "legacy_ns": 471358925,
+      "direct_ns": 412104226
+    },
+    {
+      "repetition": 1,
+      "order": [
+        "direct",
+        "legacy"
+      ],
+      "samples_per_arm": 100,
+      "direct_ns": 407921297,
+      "legacy_ns": 467665521
+    },
+    {
+      "repetition": 2,
+      "order": [
+        "legacy",
+        "direct"
+      ],
+      "samples_per_arm": 100,
+      "legacy_ns": 468400608,
+      "direct_ns": 407881267
+    },
+    {
+      "repetition": 3,
+      "order": [
+        "direct",
+        "legacy"
+      ],
+      "samples_per_arm": 100,
+      "direct_ns": 408868422,
+      "legacy_ns": 467810671
+    },
+    {
+      "repetition": 4,
+      "order": [
+        "legacy",
+        "direct"
+      ],
+      "samples_per_arm": 100,
+      "legacy_ns": 468797726,
+      "direct_ns": 406328968
+    },
+    {
+      "repetition": 5,
+      "order": [
+        "direct",
+        "legacy"
+      ],
+      "samples_per_arm": 100,
+      "direct_ns": 399168284,
+      "legacy_ns": 458840200
+    }
+  ],
+  "new_solves": 0,
+  "new_fits": 0,
+  "direct_over_legacy_ratios": [
+    0.8742896424417974,
+    0.8722500990189525,
+    0.8707957676263307,
+    0.8740040519511793,
+    0.8667468834949085,
+    0.8699505492326086
+  ],
+  "parent_source_revision": "c36cf1da6c89306d7beecaab3586d07830a77819",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-capture-scalar-ord1k2vz",
+  "scope": "One retained D-amp100 target-6 parent; snapshot capture only; not whole-path speedup",
+  "original_snapshot_exact_byte_checks": 1231,
+  "inventory_sha256": "69d47b2fa0458ef8f5d0f5f867ce9c4ccabc5fd3b860e74a291a6137546f60ae"
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "rc-immediate-line-search-reuse-experiment.v1",
+  "base_revision": "6316cd010b48cca2dcd77d4bc17656f6d5f106b7",
+  "script_sha256": "426562cf3c9dfad984c0a91236906f2455da247798770d5767f6e7c7d4e0c8da",
+  "model_sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d",
+  "scope": "single authored small L-frame; four arithmetic/preload configurations",
+  "timing_scope": "whole benchmark including serialization, verification, and recording",
+  "default_solver_changed": false,
+  "learned_policy": false,
+  "independent_physical_validation": false,
+  "concurrent_execution_supported": false,
+  "groups": [
+    {
+      "retained": false,
+      "constant": false,
+      "repetitions": 4,
+      "baseline_dispatches_per_benchmark": 52,
+      "reuse_dispatches_per_benchmark": 44,
+      "wall_ratio": 0.9336333748584369,
+      "min_ratio": 0.9231940049185895,
+      "max_ratio": 0.9382958816792893
+    },
+    {
+      "retained": false,
+      "constant": true,
+      "repetitions": 4,
+      "baseline_dispatches_per_benchmark": 72,
+      "reuse_dispatches_per_benchmark": 64,
+      "wall_ratio": 0.9619813239899954,
+      "min_ratio": 0.9506950846455008,
+      "max_ratio": 0.974517681776887
+    },
+    {
+      "retained": true,
+      "constant": false,
+      "repetitions": 4,
+      "baseline_dispatches_per_benchmark": 64,
+      "reuse_dispatches_per_benchmark": 56,
+      "wall_ratio": 0.9185146185603771,
+      "min_ratio": 0.9129756668165129,
+      "max_ratio": 0.9280376029737292
+    },
+    {
+      "retained": true,
+      "constant": true,
+      "repetitions": 4,
+      "baseline_dispatches_per_benchmark": 88,
+      "reuse_dispatches_per_benchmark": 80,
+      "wall_ratio": 0.9493636706403044,
+      "min_ratio": 0.9372714629147276,
+      "max_ratio": 0.9569812675660128
+    }
+  ],
+  "paired_step_records": 224,
+  "actual_step_executions": 448,
+  "baseline_dispatches": 1104,
+  "reuse_dispatches": 976,
+  "reused_dispatches": 128,
+  "aggregate_wall_ratio": 0.9405528155435151,
+  "unit_tests_passed": 11,
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-line-search-reuse-GjtEqmkG",
+    "files": 2981,
+    "bytes": 146526497,
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-line-search-reuse-GjtEqmkG.inventory.json",
+    "inventory_sha256": "56550511160bba74ae886f9d22bff01c5c3abf69be6212b47717a3c5318df039"
+  }
+}

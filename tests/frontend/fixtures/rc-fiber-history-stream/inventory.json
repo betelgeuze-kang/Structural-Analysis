@@ -1,0 +1,12 @@
+{
+  "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-stream-m1el__kd",
+  "source_revision": "f8dcfbb6af25e95e3a550558b28db94f69d9c7bc",
+  "original_path": "cyclic/full/history.ndjson",
+  "original_bytes": 44903261,
+  "original_sha256": "6a426234f7b54ba146b8449ab4b12a4e4ce2b7740f9a4508790115e36c7be636",
+  "gzip_bytes": 4076451,
+  "gzip_sha256": "91eb00f5af059f8f5a82d79d6b7486080607f4944dd50920a49c1176bb5706ac",
+  "record_count": 1012,
+  "lateral_target_count": 1010,
+  "independent_physical_validation": false
+}

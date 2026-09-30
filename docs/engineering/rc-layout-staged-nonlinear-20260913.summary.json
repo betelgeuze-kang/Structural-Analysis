@@ -1,0 +1,378 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-staged-nonlinear-_z7gem9v",
+    "files": 1139,
+    "bytes": 150268719,
+    "inventory_sha256": "da2df2ad930653cdfa0d0b7d6420f0c446391322f5079d16ca8e28446b0cc981"
+  },
+  "audit": {
+    "source_revision": "d7b173a9ddf10e16cf74373dc31f5040a1f78ce3",
+    "source_files_checked": 646,
+    "counters": {
+      "artifact_bindings": 366,
+      "full_rows": 22,
+      "prefix_rows": 10,
+      "cost_decisions": 40,
+      "prefix_decisions": 10,
+      "exact_full_repeats": 15,
+      "exact_prefix_matches": 10,
+      "material_nonlinear_full_rows": 22
+    },
+    "executions": [
+      {
+        "stem": "amplitude_1000-o0-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 16877659873,
+        "call_wall_ns": 15081660186,
+        "full_rows": 3,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 218,
+            "known_newton_iteration_count": 218,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 6
+        },
+        "case": "amplitude_1000",
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      },
+      {
+        "stem": "amplitude_1000-o0-staged",
+        "mode": "staged",
+        "process_wall_ns": 16211385170,
+        "call_wall_ns": 14417483142,
+        "full_rows": 2,
+        "prefix_rows": 2,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 32,
+            "known_linear_solve_count": 208,
+            "known_newton_iteration_count": 208,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "case": "amplitude_1000",
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      },
+      {
+        "stem": "amplitude_1000-o1-staged",
+        "mode": "staged",
+        "process_wall_ns": 16355728370,
+        "call_wall_ns": 14553197899,
+        "full_rows": 2,
+        "prefix_rows": 2,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 32,
+            "known_linear_solve_count": 208,
+            "known_newton_iteration_count": 208,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "case": "amplitude_1000",
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      },
+      {
+        "stem": "amplitude_1000-o1-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 16907439930,
+        "call_wall_ns": 15143456046,
+        "full_rows": 3,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 218,
+            "known_newton_iteration_count": 218,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 6
+        },
+        "case": "amplitude_1000",
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      },
+      {
+        "stem": "amplitude_1500-o0-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 21809578195,
+        "call_wall_ns": 20011446894,
+        "full_rows": 4,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 48,
+            "known_linear_solve_count": 294,
+            "known_newton_iteration_count": 294,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "case": "amplitude_1500",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      },
+      {
+        "stem": "amplitude_1500-o0-staged",
+        "mode": "staged",
+        "process_wall_ns": 18450301675,
+        "call_wall_ns": 16640563483,
+        "full_rows": 2,
+        "prefix_rows": 3,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 240,
+            "known_newton_iteration_count": 240,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 10
+        },
+        "case": "amplitude_1500",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      },
+      {
+        "stem": "amplitude_1500-o1-staged",
+        "mode": "staged",
+        "process_wall_ns": 18391391139,
+        "call_wall_ns": 16576286931,
+        "full_rows": 2,
+        "prefix_rows": 3,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 240,
+            "known_newton_iteration_count": 240,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 10
+        },
+        "case": "amplitude_1500",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      },
+      {
+        "stem": "amplitude_1500-o1-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 21849905979,
+        "call_wall_ns": 20058380186,
+        "full_rows": 4,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 48,
+            "known_linear_solve_count": 294,
+            "known_newton_iteration_count": 294,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "case": "amplitude_1500",
+        "selected_candidate_id": "large",
+        "selected_estimate": 289.8216
+      }
+    ],
+    "process_sums_ns": {
+      "pruned": 77444583977,
+      "staged": 69408806354
+    },
+    "paired_staged_over_pruned": {
+      "amplitude_1000": [
+        0.9605232770411571,
+        0.9673687109175493
+      ],
+      "amplitude_1500": [
+        0.8459724213845576,
+        0.841714886859285
+      ]
+    },
+    "ratio_of_process_sums": 0.8962383525052375,
+    "enclosing_campaign_wall_ns": 146864048953,
+    "audit_wall_ns": 2727357554,
+    "audit_solver_calls": 0,
+    "independent_cases": false,
+    "learned_net_benefit": false
+  },
+  "material_response": [
+    {
+      "case": "amplitude_1000",
+      "candidate_id": "baseline",
+      "performance": {
+        "accepted_epoch_count": 6,
+        "maximum_absolute_fiber_strain": 0.0031664323668705984,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9999968068022423,
+        "maximum_load_factor": 1.128174388340781,
+        "maximum_steel_accumulated_plastic_strain": 0.0024565503343299067,
+        "maximum_translation_m": 0.03684894314904752,
+        "minimum_load_factor": -0.9535752160409348,
+        "terminal_load_factor": 0.040264978990238634,
+        "terminal_maximum_absolute_fiber_strain": 0.0012294318113719974,
+        "terminal_maximum_translation_m": 0.011646286699710828
+      }
+    },
+    {
+      "case": "amplitude_1000",
+      "candidate_id": "small",
+      "performance": {
+        "accepted_epoch_count": 6,
+        "maximum_absolute_fiber_strain": 0.00416645830449644,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9999998791875331,
+        "maximum_load_factor": 1.2991256058645229,
+        "maximum_steel_accumulated_plastic_strain": 0.004210855515113677,
+        "maximum_translation_m": 0.03709274533156483,
+        "minimum_load_factor": -1.0944294185797558,
+        "terminal_load_factor": 0.23653437775952293,
+        "terminal_maximum_absolute_fiber_strain": 0.0024189417358666363,
+        "terminal_maximum_translation_m": 0.013947627806065366
+      }
+    },
+    {
+      "case": "amplitude_1000",
+      "candidate_id": "middle",
+      "performance": {
+        "accepted_epoch_count": 6,
+        "maximum_absolute_fiber_strain": 0.0022903441340912543,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9999388584920818,
+        "maximum_load_factor": 0.9761843308131252,
+        "maximum_steel_accumulated_plastic_strain": 0.0008639406744319056,
+        "maximum_translation_m": 0.03435227556993903,
+        "minimum_load_factor": -0.7377018637592165,
+        "terminal_load_factor": 0.043256961628449386,
+        "terminal_maximum_absolute_fiber_strain": 0.0006677290957610646,
+        "terminal_maximum_translation_m": 0.008566853689372681
+      }
+    },
+    {
+      "case": "amplitude_1500",
+      "candidate_id": "baseline",
+      "performance": {
+        "accepted_epoch_count": 6,
+        "maximum_absolute_fiber_strain": 0.004877796867028206,
+        "maximum_concrete_compressive_damage": 0.08755317704651766,
+        "maximum_concrete_tensile_damage": 0.9999999877858332,
+        "maximum_load_factor": 1.1601229086622549,
+        "maximum_steel_accumulated_plastic_strain": 0.005504182049314495,
+        "maximum_translation_m": 0.056666019090269706,
+        "minimum_load_factor": -0.9836203290174803,
+        "terminal_load_factor": 0.3536064023737892,
+        "terminal_maximum_absolute_fiber_strain": 0.0030510694345723204,
+        "terminal_maximum_translation_m": 0.021903559556683244
+      }
+    },
+    {
+      "case": "amplitude_1500",
+      "candidate_id": "small",
+      "performance": {
+        "accepted_epoch_count": 6,
+        "maximum_absolute_fiber_strain": 0.00637077298734476,
+        "maximum_concrete_compressive_damage": 0.33410674194994094,
+        "maximum_concrete_tensile_damage": 0.9999999998938985,
+        "maximum_load_factor": 1.3601059626294922,
+        "maximum_steel_accumulated_plastic_strain": 0.008230946618643084,
+        "maximum_translation_m": 0.05602122778199687,
+        "minimum_load_factor": -1.179281747480003,
+        "terminal_load_factor": 0.6219271888400145,
+        "terminal_maximum_absolute_fiber_strain": 0.004054678210710901,
+        "terminal_maximum_translation_m": 0.022185856793646933
+      }
+    },
+    {
+      "case": "amplitude_1500",
+      "candidate_id": "middle",
+      "performance": {
+        "accepted_epoch_count": 6,
+        "maximum_absolute_fiber_strain": 0.0035657124391232494,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9999991440777436,
+        "maximum_load_factor": 0.9749535700134556,
+        "maximum_steel_accumulated_plastic_strain": 0.003157900580883492,
+        "maximum_translation_m": 0.05345414724398555,
+        "minimum_load_factor": -0.8218940860091952,
+        "terminal_load_factor": 0.09131648109303289,
+        "terminal_maximum_absolute_fiber_strain": 0.0017133860405027048,
+        "terminal_maximum_translation_m": 0.01808201900726385
+      }
+    },
+    {
+      "case": "amplitude_1500",
+      "candidate_id": "large",
+      "performance": {
+        "accepted_epoch_count": 6,
+        "maximum_absolute_fiber_strain": 0.0025213142707170835,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9999722231663527,
+        "maximum_load_factor": 0.8308369937255714,
+        "maximum_steel_accumulated_plastic_strain": 0.0012581413719350426,
+        "maximum_translation_m": 0.05184953753961736,
+        "minimum_load_factor": -0.6582315854121478,
+        "terminal_load_factor": 0.006324749735084757,
+        "terminal_maximum_absolute_fiber_strain": 0.0007308119613258595,
+        "terminal_maximum_translation_m": 0.01354673294566187
+      }
+    }
+  ],
+  "hosted_repository_ci": {
+    "source_revision": "dea625b1a023954a3c2f7a39168f9f55cddcdc6a",
+    "run_id": 34723974528,
+    "jobs": [
+      {
+        "id": 103635136476,
+        "name": "pytest-development-contracts",
+        "conclusion": "success"
+      },
+      {
+        "id": 103635136520,
+        "name": "pytest-full-shard-0",
+        "conclusion": "failure"
+      },
+      {
+        "id": 103635136536,
+        "name": "pytest-collection",
+        "conclusion": "success"
+      },
+      {
+        "id": 103635136558,
+        "name": "pytest-full-shard-2",
+        "conclusion": "failure"
+      },
+      {
+        "id": 103635136561,
+        "name": "pytest-full-shard-3",
+        "conclusion": "failure"
+      },
+      {
+        "id": 103635136575,
+        "name": "pytest-full-shard-1",
+        "conclusion": "failure"
+      },
+      {
+        "id": 103636365910,
+        "name": "pytest-full",
+        "conclusion": "failure"
+      }
+    ],
+    "development_tests_passed": 951,
+    "development_tests_wall_s": 867.49,
+    "development_log_sha256": "89dff79b3590789c76f98be79cfcfd23fe975049f7c812ba720494b5225dc185",
+    "whole_suite_passed": false
+  }
+}

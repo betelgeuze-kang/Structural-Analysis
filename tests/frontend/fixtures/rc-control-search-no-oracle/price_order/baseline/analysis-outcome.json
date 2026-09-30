@@ -1,0 +1,1 @@
+{"phase":"analysis","process_cpu_ns":459730034,"status":"returned","unknown_execution_work":false,"wall_ns":459762369,"work":{"attempted_step_count":8,"known_linear_solve_count":22,"known_newton_iteration_count":22,"unknown_solver_work_attempt_count":0}}

@@ -631,7 +631,7 @@ def _bounded_frame3d_direct_control_issues(
     for index, element in enumerate(payload["elements"]):
         base = f"/elements/{index}"
         node_i, node_j = (str(value) for value in element["node_ids"])
-        pair = tuple(sorted((node_i, node_j)))
+        pair = (node_i, node_j) if node_i <= node_j else (node_j, node_i)
         if pair in undirected_pairs:
             yield ModelIRValidationIssue(
                 "bounded_frame3d_parallel_member_unsupported",
@@ -921,6 +921,19 @@ def _bounded_planar_issues(
             )
         parameters = section["parameters"]
         cover = float(parameters["cover_m"])
+        previous = -float(parameters["depth_m"]) / 2 + cover
+        for layer_index, layer in enumerate(
+            parameters.get("intermediate_steel_layers", [])
+        ):
+            y = float(layer["y_m"])
+            if not previous < y < float(parameters["depth_m"]) / 2 - cover:
+                yield ModelIRValidationIssue(
+                    "bounded_planar_intermediate_steel_layer_invalid",
+                    f"{base}/parameters/intermediate_steel_layers/{layer_index}/y_m",
+                    "Layers must increase strictly between the outer steel layers.",
+                )
+            previous = y
+
         if 2.0 * cover >= min(
             float(parameters["width_m"]), float(parameters["depth_m"])
         ):
@@ -961,7 +974,7 @@ def _bounded_planar_issues(
     for index, element in enumerate(payload["elements"]):
         base = f"/elements/{index}"
         node_i, node_j = (str(value) for value in element["node_ids"])
-        pair = tuple(sorted((node_i, node_j)))
+        pair = (node_i, node_j) if node_i <= node_j else (node_j, node_i)
         if pair in undirected_pairs:
             yield ModelIRValidationIssue(
                 "bounded_planar_parallel_member_unsupported",

@@ -1,0 +1,115 @@
+{
+  "schema_version": "rc-candidate-pool-cost-observation.v1",
+  "original_audit": {
+    "schema_version": "rc-search-cost-original-audit.v1",
+    "numerical_source_revision": "2fa9ae0d7e5928eace28538f9ae1434085151f09",
+    "source_files_checked": 515,
+    "original_fixture_and_reference_checks": 228,
+    "observations": [
+      {
+        "phase": "search",
+        "report_hash": "sha256:321971bdbf44a611a452a1d97ef27cb24eff665d94e9ca1ca0a48010d456cf7a",
+        "wall_ns": 7328012923,
+        "cpu_ns": 7310112273,
+        "arms": [
+          {
+            "name": "learned_order",
+            "selected": "cheap",
+            "core": 32,
+            "newton": 88,
+            "linear": 88
+          },
+          {
+            "name": "price_order",
+            "selected": "cheap",
+            "core": 32,
+            "newton": 88,
+            "linear": 88
+          },
+          {
+            "name": "exhaustive_oracle",
+            "selected": "cheap",
+            "core": 64,
+            "newton": 164,
+            "linear": 164
+          }
+        ]
+      },
+      {
+        "phase": "search-no-oracle",
+        "report_hash": "sha256:0078e80fe3d14b9a0e8c3deda04ade13d02cca82367c999790e8f8913e2fd0be",
+        "wall_ns": 3605335689,
+        "cpu_ns": 3600460577,
+        "arms": [
+          {
+            "name": "learned_order",
+            "selected": "cheap",
+            "core": 32,
+            "newton": 88,
+            "linear": 88
+          },
+          {
+            "name": "price_order",
+            "selected": "cheap",
+            "core": 32,
+            "newton": 88,
+            "linear": 88
+          }
+        ]
+      }
+    ],
+    "new_core_calls": 192,
+    "new_newton_iterations": 516,
+    "new_linear_solves": 516,
+    "new_model_result_rows": 12,
+    "new_paths_including_fresh_verification": 24,
+    "new_training_fits": 0,
+    "historical_training_reused_once_in_combined_accounting": true,
+    "browser_requests_by_status": {
+      "200": 159,
+      "401": 3,
+      "404": 2,
+      "405": 1
+    },
+    "browser_report_hash": "sha256:321971bdbf44a611a452a1d97ef27cb24eff665d94e9ca1ca0a48010d456cf7a",
+    "audit_wall_ns": 1411026411,
+    "audit_new_structural_calls": 0,
+    "audit_new_fits": 0,
+    "independent_physics": false,
+    "learned_benefit_proved": false
+  },
+  "verification": {
+    "verification_source_revision": "abb6e9bec1b2b1e24176b15e1f77dd9e372fbdbf",
+    "python": {
+      "passed": 85,
+      "seconds": 11.74,
+      "command": "PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 -m pytest -q tests/test_rc_control_candidate_cost.py tests/test_rc_control_candidate_search.py tests/test_rc_search_http.py"
+    },
+    "frontend": {
+      "passed": 37,
+      "seconds": 39.5,
+      "command": "node scripts/verify-workbench-v2-e2e.mjs --with-job-api --grep \"RC search\" --workers=1",
+      "node_version": "24.20.0",
+      "pinned_runtime_verified_by_harness": true,
+      "includes_typescript_build_and_viewer_delivery": true,
+      "desktop_and_mobile_screenshots_visually_reviewed": true
+    },
+    "initial_mypy_errors": "Optional arithmetic operands and common tuple not narrowed",
+    "final_mypy_passed_sources": 3,
+    "ruff_passed": true,
+    "git_diff_check_passed": true,
+    "all_recorded_numerical_and_http_processes_terminal": true
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-search-cost-2__vnvta",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-search-cost-2__vnvta.inventory.json",
+    "inventory_sha256": "21338507970a1da4da9c4a1d56afb2f3208607b62c8466a9f766183b3491d25b",
+    "file_count": 676,
+    "total_bytes": 16632913,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T02:01:50.680893+00:00",
+    "seal_wall_ns": 61799033,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "roadmap_complete": false
+}

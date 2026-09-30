@@ -1,0 +1,244 @@
+{
+  "source_revision": "29af2b0f9bcd481058cae1cabb192b91f65c4506",
+  "rows": [
+    {
+      "case_id": "two_story",
+      "policy": "default6",
+      "status": "blocked",
+      "contract_pass": false,
+      "attempted_steps": 2,
+      "committed_steps": 1,
+      "compile_wall_ns": 431558211,
+      "path_wall_ns": 1902773200,
+      "history_rows": 10,
+      "line_search_trials": 19,
+      "steps": [
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 5.673731114560117e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": false,
+          "terminal_reason": "line_search_failed_to_reduce_residual",
+          "final_relative_residual": 0.033626080662215445,
+          "rollback_exact": true
+        }
+      ],
+      "artifact": "two_story-default6.json",
+      "artifact_sha256": "7f80f98f69c89e00a1f43dbfc8d39b0c63fe5f1dc0e20db681e07dfdc50f8bc0"
+    },
+    {
+      "case_id": "two_story",
+      "policy": "extended7",
+      "status": "blocked",
+      "contract_pass": false,
+      "attempted_steps": 2,
+      "committed_steps": 1,
+      "compile_wall_ns": 408205542,
+      "path_wall_ns": 2357366188,
+      "history_rows": 11,
+      "line_search_trials": 27,
+      "steps": [
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 5.673731114560117e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": false,
+          "terminal_reason": "line_search_failed_to_reduce_residual",
+          "final_relative_residual": 0.03231103036903883,
+          "rollback_exact": true
+        }
+      ],
+      "artifact": "two_story-extended7.json",
+      "artifact_sha256": "62266d3d8050df0e3f13354135202ccbe6d7684e0423642d1b538b9bc9d1de9d"
+    },
+    {
+      "case_id": "two_story",
+      "policy": "extended12",
+      "status": "blocked",
+      "contract_pass": false,
+      "attempted_steps": 2,
+      "committed_steps": 1,
+      "compile_wall_ns": 405042480,
+      "path_wall_ns": 3882404307,
+      "history_rows": 13,
+      "line_search_trials": 52,
+      "steps": [
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 5.673731114560117e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": false,
+          "terminal_reason": "line_search_failed_to_reduce_residual",
+          "final_relative_residual": 0.03215055535236501,
+          "rollback_exact": true
+        }
+      ],
+      "artifact": "two_story-extended12.json",
+      "artifact_sha256": "4f61070a6c17bc6d9e9a2492ba9338a28d629637a1a31f277d099af2da8ab623"
+    },
+    {
+      "case_id": "two_bay",
+      "policy": "default6",
+      "status": "ready",
+      "contract_pass": true,
+      "attempted_steps": 4,
+      "committed_steps": 4,
+      "compile_wall_ns": 395198516,
+      "path_wall_ns": 2197362551,
+      "history_rows": 21,
+      "line_search_trials": 17,
+      "steps": [
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 7.379412636510096e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 2.7479018172016367e-11,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.75,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 4.759688939278324e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 1.0,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 8.849383448250592e-13,
+          "rollback_exact": null
+        }
+      ],
+      "artifact": "two_bay-default6.json",
+      "artifact_sha256": "4b61880583716b235f69fd98139d902b9f9d292b07c0f3ad7939be2e5456d389"
+    },
+    {
+      "case_id": "two_bay",
+      "policy": "extended7",
+      "status": "ready",
+      "contract_pass": true,
+      "attempted_steps": 4,
+      "committed_steps": 4,
+      "compile_wall_ns": 399366252,
+      "path_wall_ns": 2200837258,
+      "history_rows": 21,
+      "line_search_trials": 17,
+      "steps": [
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 7.379412636510096e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 2.7479018172016367e-11,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.75,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 4.759688939278324e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 1.0,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 8.849383448250592e-13,
+          "rollback_exact": null
+        }
+      ],
+      "artifact": "two_bay-extended7.json",
+      "artifact_sha256": "4b61880583716b235f69fd98139d902b9f9d292b07c0f3ad7939be2e5456d389"
+    },
+    {
+      "case_id": "two_bay",
+      "policy": "extended12",
+      "status": "ready",
+      "contract_pass": true,
+      "attempted_steps": 4,
+      "committed_steps": 4,
+      "compile_wall_ns": 402402587,
+      "path_wall_ns": 2205105071,
+      "history_rows": 21,
+      "line_search_trials": 17,
+      "steps": [
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 7.379412636510096e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 2.7479018172016367e-11,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.75,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 4.759688939278324e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 1.0,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 8.849383448250592e-13,
+          "rollback_exact": null
+        }
+      ],
+      "artifact": "two_bay-extended12.json",
+      "artifact_sha256": "4b61880583716b235f69fd98139d902b9f9d292b07c0f3ad7939be2e5456d389"
+    }
+  ],
+  "experiment_wall_ns": 17663993986,
+  "public_result_authority": false,
+  "repetitions": 1,
+  "speedup_claimed": false,
+  "audit": {
+    "artifact_count": 6,
+    "chain_and_failure_rollback_checked": true,
+    "history_and_line_search_counts_recomputed": true,
+    "two_bay_full_path_bytes_equal_across_policies": true,
+    "two_story_first_step_equal_across_policies": true
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-line-search-pilot-clisvm1a",
+    "payload_files": 10,
+    "payload_bytes": 17190521,
+    "inventory_sha256": "9bdd3a2917e80f5d145aecb074f9ede9ccbb6e5bd61978412d5cfbe3a34b4d83"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "source_revision": "29af2b0f9bcd481058cae1cabb192b91f65c4506",
+  "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-topology-highload-ltygx_ms",
+  "source_files_checked": 461,
+  "input_identity": {
+    "byte_length": 11626,
+    "sha256": "sha256:a3ddb5ce642aac64ed609a3d7f1924c382f83ca21583d12adfc32743aca16b9e"
+  },
+  "backend": "numpy_linalg_solve_dense",
+  "api_executions": 1,
+  "api_wall_ns_including_capture_wrapper": 2544795594,
+  "public_result_bytes_identical": true,
+  "independent_physical_validation": false,
+  "accepted_result": false,
+  "steps": [
+    {
+      "target_load_factor": 0.25,
+      "committed": true,
+      "terminal_reason": "residual_and_increment_converged",
+      "rows": [
+        {
+          "iteration": 0,
+          "relative_residual": 0.25,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "increment_abs_m": 0.004394073525305781,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 1,
+          "relative_residual": 0.014845182155081038,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "increment_abs_m": 0.0001113377757202402,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 2,
+          "relative_residual": 2.019991979974615e-05,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "increment_abs_m": 2.468282308881395e-07,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 3,
+          "relative_residual": 1.023909419473057e-10,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "increment_abs_m": 2.064804924262198e-12,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 4,
+          "relative_residual": 5.673731114560117e-13,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 0,
+          "increment_abs_m": 8.663652067504067e-16,
+          "residual_gate_passed": true,
+          "increment_gate_passed": true,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "target_load_factor": 0.5,
+      "committed": false,
+      "terminal_reason": "line_search_failed_to_reduce_residual",
+      "rows": [
+        {
+          "iteration": 0,
+          "relative_residual": 0.25000000000012834,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "increment_abs_m": 0.0045132602815294446,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 1,
+          "relative_residual": 0.16726341174762732,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "increment_abs_m": 0.007221841656127449,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 2,
+          "relative_residual": 0.08057912119220782,
+          "line_search_alpha": 0.03125,
+          "line_search_attempt_count": 6,
+          "increment_abs_m": 0.0004853490936361886,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 3,
+          "relative_residual": 0.07806875480024435,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "increment_abs_m": 0.0005363766854588198,
+          "residual_gate_passed": false,
+          "increment_gate_passed": false,
+          "accepted": true
+        },
+        {
+          "iteration": 4,
+          "relative_residual": 0.033626080662215445,
+          "line_search_alpha": 0.0,
+          "line_search_attempt_count": 6,
+          "increment_abs_m": 0.0,
+          "residual_gate_passed": false,
+          "increment_gate_passed": true,
+          "accepted": false
+        }
+      ]
+    }
+  ],
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-two-story-diagnostic-x7ekn8kg",
+    "payload_files": 3,
+    "payload_bytes": 36613,
+    "inventory_sha256": "91a45669be79aadb4cc1ca1f65cc029976843d6d52a72983ab85524de21f932b"
+  }
+}

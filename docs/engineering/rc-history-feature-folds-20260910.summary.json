@@ -1,0 +1,374 @@
+{
+  "plan_source_revision": "0c23f2d5d51e6f477a7e513a16606c62b4cbb501",
+  "source_files_match_git_and_unchanged": 599,
+  "inputs_unchanged": true,
+  "feature_profile": "length-normalized-accepted-control-history.v1",
+  "coordinate_order": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    "scaled_load_factor_coordinate"
+  ],
+  "folds": [
+    {
+      "case": "train-a",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 0,
+      "legacy_range_eligible": 0,
+      "ood": 241,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        0.9983622277325865,
+        1.6353691567523139,
+        6.37886631874721,
+        6.112854113528233,
+        1.0,
+        6.378866463083494,
+        1.2411556974587747
+      ],
+      "ungated_new_to_legacy_rmse_ratios_by_coordinate": [
+        0.9363376494942265,
+        2.43642001969946,
+        3.401105041607897,
+        3.6673268843812807,
+        1.0,
+        3.4011051458086623,
+        1.8129441962609503
+      ],
+      "range_violations_by_feature": {
+        "normalized_node_2_reference_fy_kn": 241,
+        "normalized_member_0_fiber_0_y_m": 241,
+        "normalized_member_0_fiber_0_area_m2": 241,
+        "normalized_member_0_fiber_1_y_m": 241,
+        "normalized_member_0_fiber_1_area_m2": 241,
+        "normalized_member_0_fiber_2_y_m": 241,
+        "normalized_member_0_fiber_2_area_m2": 241,
+        "normalized_member_0_fiber_3_y_m": 241,
+        "normalized_member_0_fiber_3_area_m2": 241,
+        "normalized_member_0_fiber_4_y_m": 241,
+        "normalized_member_0_fiber_4_area_m2": 241,
+        "normalized_member_0_fiber_5_y_m": 241,
+        "normalized_member_0_fiber_5_area_m2": 241,
+        "normalized_member_0_fiber_6_y_m": 241,
+        "normalized_member_0_fiber_6_area_m2": 241,
+        "normalized_member_0_fiber_7_y_m": 241,
+        "normalized_member_0_fiber_7_area_m2": 241,
+        "normalized_member_0_fiber_8_y_m": 241,
+        "normalized_member_0_fiber_8_area_m2": 241,
+        "normalized_member_0_fiber_9_y_m": 241,
+        "normalized_member_0_fiber_9_area_m2": 241,
+        "normalized_member_0_fiber_10_y_m": 241,
+        "normalized_member_0_fiber_10_area_m2": 241,
+        "normalized_member_0_fiber_11_y_m": 241,
+        "normalized_member_0_fiber_11_area_m2": 241,
+        "normalized_member_0_fiber_12_y_m": 241,
+        "normalized_member_0_fiber_12_area_m2": 241,
+        "normalized_member_0_fiber_13_y_m": 241,
+        "normalized_member_0_fiber_13_area_m2": 241,
+        "normalized_member_1_fiber_0_y_m": 241,
+        "normalized_member_1_fiber_0_area_m2": 241,
+        "normalized_member_1_fiber_1_y_m": 241,
+        "normalized_member_1_fiber_1_area_m2": 241,
+        "normalized_member_1_fiber_2_y_m": 241,
+        "normalized_member_1_fiber_2_area_m2": 241,
+        "normalized_member_1_fiber_3_y_m": 241,
+        "normalized_member_1_fiber_3_area_m2": 241,
+        "normalized_member_1_fiber_4_y_m": 241,
+        "normalized_member_1_fiber_4_area_m2": 241,
+        "normalized_member_1_fiber_5_y_m": 241,
+        "normalized_member_1_fiber_5_area_m2": 241,
+        "normalized_member_1_fiber_6_y_m": 241,
+        "normalized_member_1_fiber_6_area_m2": 241,
+        "normalized_member_1_fiber_7_y_m": 241,
+        "normalized_member_1_fiber_7_area_m2": 241,
+        "normalized_member_1_fiber_8_y_m": 241,
+        "normalized_member_1_fiber_8_area_m2": 241,
+        "normalized_member_1_fiber_9_y_m": 241,
+        "normalized_member_1_fiber_9_area_m2": 241,
+        "normalized_member_1_fiber_10_y_m": 241,
+        "normalized_member_1_fiber_10_area_m2": 241,
+        "normalized_member_1_fiber_11_y_m": 241,
+        "normalized_member_1_fiber_11_area_m2": 241,
+        "normalized_member_1_fiber_12_y_m": 241,
+        "normalized_member_1_fiber_12_area_m2": 241,
+        "normalized_member_1_fiber_13_y_m": 241,
+        "normalized_member_1_fiber_13_area_m2": 241,
+        "normalized_target": 17,
+        "normalized_accepted_coordinate_1": 17,
+        "normalized_accepted_coordinate_4": 16,
+        "accepted_control_min": 202,
+        "accepted_control_max": 97,
+        "accepted_control_travel": 33,
+        "last_reversal_control": 96,
+        "branch_control_travel": 23
+      },
+      "fit_wall_ns": 6821077
+    },
+    {
+      "case": "train-b",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 241,
+      "legacy_range_eligible": 241,
+      "ood": 0,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        1.458274634253473,
+        1.1923249744979239,
+        1.4528899569983973,
+        1.3348492486776267,
+        1.0,
+        1.4528899527261814,
+        1.156893532531379
+      ],
+      "ungated_new_to_legacy_rmse_ratios_by_coordinate": [
+        1.4106368980843849,
+        1.0066551219038105,
+        0.9599723671769627,
+        0.9146289741974383,
+        1.0,
+        0.9599723631273843,
+        0.7461425232733109
+      ],
+      "range_violations_by_feature": {},
+      "fit_wall_ns": 6457337
+    },
+    {
+      "case": "train-c",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 0,
+      "legacy_range_eligible": 0,
+      "ood": 241,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        0.9527538503012993,
+        0.8759999973274978,
+        1.6414765277116015,
+        1.2087103903996315,
+        1.0,
+        1.6414765324279312,
+        0.9543962775012291
+      ],
+      "ungated_new_to_legacy_rmse_ratios_by_coordinate": [
+        0.829763228445617,
+        1.1356680639435672,
+        1.1168486662791601,
+        0.9122271024160721,
+        1.0,
+        1.1168486694881608,
+        1.1382330938235872
+      ],
+      "range_violations_by_feature": {
+        "normalized_node_1_x_m": 241,
+        "normalized_node_2_x_m": 241,
+        "normalized_node_2_y_m": 241,
+        "normalized_member_0_length_m": 241,
+        "normalized_member_1_length_m": 241,
+        "normalized_accepted_coordinate_2": 5,
+        "normalized_accepted_coordinate_3": 35,
+        "normalized_accepted_coordinate_5": 5,
+        "normalized_previous_increment_2": 16,
+        "normalized_previous_increment_3": 108,
+        "normalized_previous_increment_5": 16,
+        "normalized_previous_increment_6": 1
+      },
+      "fit_wall_ns": 6472096
+    },
+    {
+      "case": "train-d",
+      "training_rows": 723,
+      "withheld_rows": 241,
+      "range_eligible": 0,
+      "legacy_range_eligible": 0,
+      "ood": 241,
+      "ungated_learned_to_secant_rmse_ratios_by_coordinate": [
+        2.2307494128648275,
+        3.849044088352528,
+        5.02555201335688,
+        8.322867025565051,
+        1.0,
+        5.025552051389542,
+        1.7362657133367987
+      ],
+      "ungated_new_to_legacy_rmse_ratios_by_coordinate": [
+        1.1580411385810199,
+        1.0374920950907616,
+        1.5871846601986737,
+        1.3511167954120553,
+        1.0,
+        1.587184674188015,
+        0.4873871224774818
+      ],
+      "range_violations_by_feature": {
+        "normalized_node_2_y_m": 241,
+        "normalized_node_2_reference_fy_kn": 241,
+        "normalized_member_0_fiber_0_y_m": 241,
+        "normalized_member_0_fiber_0_area_m2": 241,
+        "normalized_member_0_fiber_1_y_m": 241,
+        "normalized_member_0_fiber_1_area_m2": 241,
+        "normalized_member_0_fiber_2_y_m": 241,
+        "normalized_member_0_fiber_2_area_m2": 241,
+        "normalized_member_0_fiber_3_y_m": 241,
+        "normalized_member_0_fiber_3_area_m2": 241,
+        "normalized_member_0_fiber_4_y_m": 241,
+        "normalized_member_0_fiber_4_area_m2": 241,
+        "normalized_member_0_fiber_5_y_m": 241,
+        "normalized_member_0_fiber_5_area_m2": 241,
+        "normalized_member_0_fiber_6_y_m": 241,
+        "normalized_member_0_fiber_6_area_m2": 241,
+        "normalized_member_0_fiber_7_y_m": 241,
+        "normalized_member_0_fiber_7_area_m2": 241,
+        "normalized_member_0_fiber_8_y_m": 241,
+        "normalized_member_0_fiber_8_area_m2": 241,
+        "normalized_member_0_fiber_9_y_m": 241,
+        "normalized_member_0_fiber_9_area_m2": 241,
+        "normalized_member_0_fiber_10_y_m": 241,
+        "normalized_member_0_fiber_10_area_m2": 241,
+        "normalized_member_0_fiber_11_y_m": 241,
+        "normalized_member_0_fiber_11_area_m2": 241,
+        "normalized_member_0_fiber_12_y_m": 241,
+        "normalized_member_0_fiber_12_area_m2": 241,
+        "normalized_member_0_fiber_13_y_m": 241,
+        "normalized_member_0_fiber_13_area_m2": 241,
+        "normalized_member_1_length_m": 241,
+        "normalized_member_1_fiber_0_y_m": 241,
+        "normalized_member_1_fiber_0_area_m2": 241,
+        "normalized_member_1_fiber_1_y_m": 241,
+        "normalized_member_1_fiber_1_area_m2": 241,
+        "normalized_member_1_fiber_2_y_m": 241,
+        "normalized_member_1_fiber_2_area_m2": 241,
+        "normalized_member_1_fiber_3_y_m": 241,
+        "normalized_member_1_fiber_3_area_m2": 241,
+        "normalized_member_1_fiber_4_y_m": 241,
+        "normalized_member_1_fiber_4_area_m2": 241,
+        "normalized_member_1_fiber_5_y_m": 241,
+        "normalized_member_1_fiber_5_area_m2": 241,
+        "normalized_member_1_fiber_6_y_m": 241,
+        "normalized_member_1_fiber_6_area_m2": 241,
+        "normalized_member_1_fiber_7_y_m": 241,
+        "normalized_member_1_fiber_7_area_m2": 241,
+        "normalized_member_1_fiber_8_y_m": 241,
+        "normalized_member_1_fiber_8_area_m2": 241,
+        "normalized_member_1_fiber_9_y_m": 241,
+        "normalized_member_1_fiber_9_area_m2": 241,
+        "normalized_member_1_fiber_10_y_m": 241,
+        "normalized_member_1_fiber_10_area_m2": 241,
+        "normalized_member_1_fiber_11_y_m": 241,
+        "normalized_member_1_fiber_11_area_m2": 241,
+        "normalized_member_1_fiber_12_y_m": 241,
+        "normalized_member_1_fiber_12_area_m2": 241,
+        "normalized_member_1_fiber_13_y_m": 241,
+        "normalized_member_1_fiber_13_area_m2": 241
+      },
+      "fit_wall_ns": 6353185
+    }
+  ],
+  "diagnostic_wall_ns": 440552405,
+  "process": {
+    "pid": 907055,
+    "return_code": 0,
+    "parent_wall_ns": 4606692664,
+    "stdout_sha256": "19282f13995b2d2b1d6d609b2d4c9d829734e0cfce6a6a890bb64681491d752d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "worker": {
+    "pid": 907055,
+    "wall_ns_through_report_write": 3108147384,
+    "derivation_wall_ns": 1380070065,
+    "full_training_fit_wall_ns": 9162606,
+    "peak_rss_kib": 335720,
+    "original_policy_unchanged": true,
+    "source_labels_and_sample_order_unchanged": true,
+    "fit_count": 5,
+    "structural_solver_calls": 0
+  },
+  "validation_holdout_response_samples_read": 0,
+  "structural_solver_calls": 0,
+  "policy_promoted": false,
+  "independent_project_split": false,
+  "ungated_predictions_not_runtime_proposals": true,
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-history-folds-1qao5ssc",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-history-folds-1qao5ssc.inventory.json",
+    "inventory_sha256": "8358e827821738bb718e858db5fe72fee0f40b99cb7a77051cc8ced3d46570ce",
+    "file_count": 15,
+    "total_bytes": 58633830,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T18:28:06.094545+00:00",
+    "seal_wall_ns": 110092689,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "preceding_head_ci": {
+    "head": "e21287c43703dd168a8051c9167dc82713d8b52b",
+    "jobs": [
+      {
+        "run_id": 34387415218,
+        "job_id": 102587078115,
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "matching_lines": [
+          "2026-09-09T18:19:44.2046946Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-09T18:19:44.2048666Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      },
+      {
+        "run_id": 34387415269,
+        "job_id": 102587080849,
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "matching_lines": [
+          "2026-09-09T18:18:26.3603867Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-09T18:18:26.3604705Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      },
+      {
+        "run_id": 34387415269,
+        "job_id": 102587080885,
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "matching_lines": [
+          "2026-09-09T18:21:37.8344613Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-09T18:21:37.8345308Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      },
+      {
+        "run_id": 34387415269,
+        "job_id": 102587080973,
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "matching_lines": [
+          "2026-09-09T18:26:24.0355717Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-09T18:26:24.0356892Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      },
+      {
+        "run_id": 34387415269,
+        "job_id": 102587081058,
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "matching_lines": [
+          "2026-09-09T18:24:03.1500786Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-09T18:24:03.1501604Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+        ]
+      }
+    ],
+    "seal": {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-ci-gmhdxhky",
+      "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-history-ci-gmhdxhky.inventory.json",
+      "inventory_sha256": "fafbdf312c34e2c3464f5b5f8221a2f2f44acbc337e227a49d79eba853b93638",
+      "file_count": 14,
+      "total_bytes": 531247,
+      "all_files_reread_exact": true,
+      "sealed_at_utc": "2026-09-09T18:30:28.988008+00:00",
+      "seal_wall_ns": 1796378,
+      "immutable_by_workflow_not_filesystem_permissions": true
+    }
+  }
+}

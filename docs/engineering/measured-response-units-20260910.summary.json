@@ -1,0 +1,135 @@
+{
+  "schema_version": "measured-response-units-observation.v1",
+  "original_audit": {
+    "schema_version": "measured-si-original-source-audit.v1",
+    "source_revision": "63427c4eedd60b465c4c298a22f6968473b8041b",
+    "source_files": [
+      {
+        "path": "src/structural_analysis/io/measured_response_workbook.py",
+        "bytes": 5457,
+        "sha256": "f812e2155e0c68ffcdad8b106884d7a1c9e7bebee3e56c76899b5cfd5cb8a54f"
+      },
+      {
+        "path": "src/structural_analysis/io/measured_numeric_workbook.py",
+        "bytes": 9005,
+        "sha256": "83ba27bd23539c21e0e2ed50178f146a39df39357a94f2d13e274341ce476fde"
+      },
+      {
+        "path": "src/structural_analysis/io/measured_drift_load.py",
+        "bytes": 3694,
+        "sha256": "0e359441b16a7f4ff2751cb472170716cd3887c386b623eb10574bdcc874c7a9"
+      },
+      {
+        "path": "examples/sera_arista_unretrofitted_channels.json",
+        "bytes": 24781,
+        "sha256": "adc1a1198bf9569b012002793002875ad0acbd062fe1148651a40e958965b22c"
+      },
+      {
+        "path": "tests/test_measured_response_workbook.py",
+        "bytes": 5695,
+        "sha256": "1f946e09e139382faa18d2691659326ec6ceb4de9223786120029fe5cda9ab29"
+      }
+    ],
+    "original_workbook": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-zenodo-drawing-intake.4urv2oe1/SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+    "original_workbook_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+    "original_numeric_tokens_and_exact_rational_conversions": 470844,
+    "original_decimal_sign_digits_and_exponent_shifts_verified": 470844,
+    "original_header_text_cells_verified": 201,
+    "source_row_count": 4059,
+    "channel_count": 116,
+    "decimal_context_precision": 3,
+    "decimal_context_flags_raised": false,
+    "decoder_wall_ns": 2015569648,
+    "independent_xml_extraction_wall_ns": 1216931578,
+    "conversion_and_independent_rational_audit_wall_ns": 3215178180,
+    "process_wall_ns_before_summary": 6597792906,
+    "maximum_rss_kib": 545240,
+    "converted_file_sha256": "79b8992b352e6428f3e2c7f0f9147213ee3ce338496ee376baecba83dffa00be",
+    "structural_calls": 0,
+    "newton_solves": 0,
+    "training_fits": 0,
+    "solver_request_created": false,
+    "training_admitted": false,
+    "independent_split_assigned": false,
+    "sampling_interval_inferred": false,
+    "reference_height_inferred": false,
+    "original_file_modified": false
+  },
+  "parent_process": {
+    "exit_code": 0,
+    "parent_wall_ns": 8247563150,
+    "pid": 884161
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-si-cjmnb90m",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-si-cjmnb90m.inventory.json",
+    "inventory_sha256": "d3d540897718b8a82bac65aa259ae5bd7d09e1e9a0f77f2b823f3deeca388011",
+    "file_count": 11,
+    "total_bytes": 15837112,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T17:08:24.616758+00:00",
+    "seal_wall_ns": 29801951,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "source_followup": {
+    "schema_version": "arista-source-reconstruction-followup.v1",
+    "source_references": [
+      {
+        "url": "https://ktisis.cut.ac.cy/entities/publication/724f6415-e476-4904-82dd-6edd1f3b9331",
+        "doi": "10.1007/s10518-020-00900-5",
+        "observed_via": "web page reader, current repository landing page",
+        "scope": "abstract only",
+        "finding": "The authors report important bar-slip effects in the experimental frame response.",
+        "full_text_obtained": false
+      },
+      {
+        "url": "https://www.strulab.civil.upatras.gr/research/sera/",
+        "observed_via": "primary laboratory search result",
+        "scope": "project summary",
+        "finding": "The laboratory describes concentration of column deformation associated with smooth-bar slippage."
+      },
+      {
+        "url": "https://nemertes.library.upatras.gr/handle/10889/12826",
+        "scope": "thesis metadata located through OpenArchives; original full text unavailable",
+        "direct_download_failure": "HTTP 404",
+        "full_text_obtained": false
+      }
+    ],
+    "technical_reports": "D10.1 and D17.1 direct downloads and D17.1 rendered-page requests return 404; indexed PDF text was not treated as visually verified drawings",
+    "sera_access_page": "direct TLS certificate validation failed; no insecure TLS retry",
+    "material_reinforcement_loading_reference_gaps_closed": false,
+    "new_paper_or_drawing_training_admitted": false,
+    "next_source_requirement": "Resolve material tests, reinforcement and gravity/lateral commands, measurement reference points and appropriate bond-slip representation before a corresponding physical model or training admission."
+  },
+  "source_followup_seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-arista-technical-wgau1tac",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-arista-technical-wgau1tac.inventory.json",
+    "inventory_sha256": "edd1b23949f60bbb1be7e905740af6224d6a4ae444892377154c750cf00f6c29",
+    "file_count": 3,
+    "total_bytes": 2287,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T17:08:24.642443+00:00",
+    "seal_wall_ns": 498044,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "verification": {
+    "combined_passed": 76,
+    "combined_seconds": 1.82,
+    "command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q tests/test_measured_response_workbook.py tests/test_measured_numeric_workbook.py tests/test_measured_drift_load.py",
+    "mypy_passed_source_files": 1,
+    "ruff_check_and_format_passed": true,
+    "diff_check_passed": true
+  },
+  "claims": {
+    "original_si_unit_conversion_verified": true,
+    "campaign_id_is_caller_label": true,
+    "independent_split_verified": false,
+    "physical_sensor_correspondence_verified": false,
+    "structural_solver_request_created": false,
+    "external_training_admitted": false,
+    "physical_validation": false,
+    "learned_speedup": false,
+    "release_approval": false,
+    "full_roadmap_complete": false
+  }
+}

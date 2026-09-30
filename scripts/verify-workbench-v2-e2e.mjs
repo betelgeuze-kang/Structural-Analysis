@@ -3,6 +3,7 @@ import http from 'node:http'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { validateWorkbenchTestRegistration } from './workbench-test-registration.mjs'
 import {
   sanitizedFrontendEnvironment,
   trustedNode,
@@ -18,11 +19,62 @@ const specs = [
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
   'tests/frontend/workbench-v2-live-provider-guard.spec.ts',
   'tests/frontend/workbench-v2-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-job-transport.spec.ts',
+  'tests/frontend/workbench-v2-rc-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-cohort-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-cohort-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-layout-search-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-layout-search-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-search-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-portal-candidate-contract.spec.ts',
+  'tests/frontend/workbench-v2-reinforcement-search-contract.spec.ts',
+  'tests/frontend/workbench-v2-cost-pruned-search.spec.ts',
+  'tests/frontend/workbench-v2-l-frame-cost.spec.ts',
+  'tests/frontend/workbench-v2-rc-search-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-portal-candidate-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-design-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-design-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-job-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-constant-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-constant-job-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-history-file-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-history-file-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-pin-roller-original-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-pin-roller-original-browser.spec.ts',
+  'tests/frontend/workbench-v2-frame3d-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-extended-sparse-job-contract.spec.ts',
+  'tests/frontend/frame3d-job-browser.spec.ts',
+  'tests/frontend/workbench-v2-design-comparison-contract.spec.ts',
+  'tests/frontend/workbench-v2-centroid-distance-contract.spec.ts',
+  'tests/frontend/workbench-v2-material-history-contract.spec.ts',
+  'tests/frontend/workbench-v2-intermediate-steel-contract.spec.ts',
+  'tests/frontend/workbench-v2-unequal-steel-contract.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-contract.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-history-contract.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-browser.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-stop-contract.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-stop-browser.spec.ts',
   'tests/frontend/workbench-v2-native-frame-contract.spec.ts',
   'tests/frontend/workbench-v2-engineering-value-state.spec.ts',
   'tests/frontend/workbench-v2-status-taxonomy.spec.ts',
 ]
-const passthrough = process.argv.slice(2)
+// The hermetic frontend lane has no Python solver installation. Opt into the
+// actual WSGI/browser integration only in a Python-enabled test environment.
+const withJobApi = process.argv.includes('--with-job-api')
+const pythonSpecs = [
+  'tests/frontend/workbench-v2-job-api-browser.spec.ts',
+  'tests/frontend/workbench-v2-failure-diagnostic-browser.spec.ts',
+  'tests/frontend/workbench-v2-failure-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-search-http-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-cohort-http-browser.spec.ts',
+  'tests/frontend/workbench-v2-checkpoint-retry-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-existing-checkpoint-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-successful-retry-history-browser.spec.ts',
+]
+validateWorkbenchTestRegistration(rootDir, specs, pythonSpecs)
+if (withJobApi) specs.push(...pythonSpecs)
+const passthrough = process.argv.slice(2).filter((arg) => arg !== '--with-job-api')
 
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -50,6 +102,10 @@ function serveDist() {
       return
     }
     if (!existsSync(target) || !statSync(target).isFile()) {
+      if (path.extname(target)) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' }).end('Not found')
+        return
+      }
       target = path.join(distDir, 'index.html')
     }
     if (!existsSync(target)) {
@@ -74,6 +130,7 @@ async function main() {
   const playwright = trustedRepoTool(rootDir, 'node_modules/playwright/cli.js', 'playwright_cli')
   // Build with base '/' for local serving.
   for (const [args, extraEnvironment] of [
+    [['--test', trustedRepoTool(rootDir, 'tests/workbench-test-registration.test.mjs', 'workbench_registration_test')], {}],
     [[typescript, '--noEmit'], {}],
     [[vite, 'build'], { VITE_BASE_PATH: '/' }],
     [[delivery], {}],

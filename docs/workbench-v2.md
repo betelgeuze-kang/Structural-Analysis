@@ -126,6 +126,34 @@ runner are present, and what is still required to compare. **No accuracy delta i
 computed in the app** — real numbers come only from a run against attached
 references on a registered runner.
 
+## Physical RC design comparison
+
+The existing Compare section can also read a bounded physical-design bundle from
+the optional `VITE_DESIGN_COMPARISON_URL` setting or the runtime configuration's
+`designComparisonUrl`. Point it at the `rc-fiber-design-comparison-bundle.v1`
+manifest, not directly at a report. An unconfigured or invalid bundle is explicitly
+unavailable. The reader accepts only a same-origin manifest and an ordinary JSON
+filename in that manifest's directory, rejects redirects, and verifies the exact
+report byte length and SHA-256 before parsing. Missing Web Crypto leaves all
+comparison values unavailable.
+Source identity is either a complete Git commit SHA or a source SHA-256 digest,
+and the manifest and report must declare the same identity.
+
+The reader checks source/model/result/checkpoint, declared physical section
+changes, quantity/price bindings, arithmetic deltas, and selection eligibility.
+It displays the producer's member sections, gross concrete, authored straight
+longitudinal reinforcement, scoped material estimate, terminal response screens,
+and full-reference status. It does not perform structural analysis or grant
+engineering approval. Prices retain their currency, date, source and table hash;
+missing prices never become zero cost. Detailed takeoff, verified quotes and
+confirmed currency savings remain absent from this bounded contract.
+
+Export includes `physical_design_comparison` using the same validated bundle
+object displayed in Compare, with its original manifest and report-byte digest.
+That digest refers to the original fetched report bytes, not a reserialization of
+the embedded JSON projection. Its source identity is independent of the case and
+human review envelope elsewhere in the export.
+
 ## Evidence reader
 
 The Evidence panel reads a published, read-only bundle. It surfaces source

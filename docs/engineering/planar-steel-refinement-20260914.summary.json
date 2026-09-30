@@ -1,0 +1,391 @@
+{
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-matched-refinement-7q_xoc5w",
+  "common_section_geometry": {
+    "width_m": 0.4,
+    "depth_m": 0.6,
+    "cover_m": 0.05,
+    "top_bar_count": 4,
+    "bottom_bar_count": 4,
+    "bar_area_m2": 0.000387
+  },
+  "population": [
+    {
+      "layers": 8,
+      "load_factor": 0.25,
+      "yielded_member_count": 0,
+      "yielded_steel_point_count": 0,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.5386373755195173,
+      "max_compressive_damage": 0.0
+    },
+    {
+      "layers": 8,
+      "load_factor": 0.5,
+      "yielded_member_count": 0,
+      "yielded_steel_point_count": 0,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.9620786078025856,
+      "max_compressive_damage": 0.0
+    },
+    {
+      "layers": 8,
+      "load_factor": 0.75,
+      "yielded_member_count": 5,
+      "yielded_steel_point_count": 9,
+      "max_accumulated_plastic_strain": 0.001500468938433818,
+      "max_tensile_damage": 0.9999921069165268,
+      "max_compressive_damage": 0.49799622583177594
+    },
+    {
+      "layers": 16,
+      "load_factor": 0.25,
+      "yielded_member_count": 0,
+      "yielded_steel_point_count": 0,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.5725143970942888,
+      "max_compressive_damage": 0.0
+    },
+    {
+      "layers": 16,
+      "load_factor": 0.5,
+      "yielded_member_count": 0,
+      "yielded_steel_point_count": 0,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.9669387887643246,
+      "max_compressive_damage": 0.0
+    },
+    {
+      "layers": 16,
+      "load_factor": 0.75,
+      "yielded_member_count": 5,
+      "yielded_steel_point_count": 9,
+      "max_accumulated_plastic_strain": 0.0014521185956969502,
+      "max_tensile_damage": 0.9999938303112753,
+      "max_compressive_damage": 0.5360865945306962
+    },
+    {
+      "layers": 32,
+      "load_factor": 0.25,
+      "yielded_member_count": 0,
+      "yielded_steel_point_count": 0,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.5898443950829774,
+      "max_compressive_damage": 0.0
+    },
+    {
+      "layers": 32,
+      "load_factor": 0.5,
+      "yielded_member_count": 0,
+      "yielded_steel_point_count": 0,
+      "max_accumulated_plastic_strain": 0.0,
+      "max_tensile_damage": 0.9694717072987252,
+      "max_compressive_damage": 0.0
+    },
+    {
+      "layers": 32,
+      "load_factor": 0.75,
+      "yielded_member_count": 5,
+      "yielded_steel_point_count": 9,
+      "max_accumulated_plastic_strain": 0.0014324895906971727,
+      "max_tensile_damage": 0.999994626606849,
+      "max_compressive_damage": 0.555710010995802
+    }
+  ],
+  "comparisons": [
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.25,
+      "metrics": {
+        "plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "accumulated_plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "backstress_mpa": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-09,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "stress_mpa": {
+          "absolute_difference": 0.5104399233093702,
+          "finer_infinity_norm": 41.87180460163292,
+          "normalizer": 41.87180460163292,
+          "relative_group_difference": 0.012190540344885542,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        }
+      }
+    },
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.5,
+      "metrics": {
+        "plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "accumulated_plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "backstress_mpa": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-09,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "stress_mpa": {
+          "absolute_difference": 1.5327761446148145,
+          "finer_infinity_norm": 112.79086335944355,
+          "normalizer": 112.79086335944355,
+          "relative_group_difference": 0.013589541732029671,
+          "witness": "E1:0:top",
+          "within_exploratory_one_percent": false
+        }
+      }
+    },
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.75,
+      "metrics": {
+        "plastic_strain": {
+          "absolute_difference": 5.286747704001172e-05,
+          "finer_infinity_norm": 0.0014521185956969502,
+          "normalizer": 0.0014521185956969502,
+          "relative_group_difference": 0.03640713451137768,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "accumulated_plastic_strain": {
+          "absolute_difference": 5.286747704001172e-05,
+          "finer_infinity_norm": 0.0014521185956969502,
+          "normalizer": 0.0014521185956969502,
+          "relative_group_difference": 0.03640713451137768,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "backstress_mpa": {
+          "absolute_difference": 0.2643373852000588,
+          "finer_infinity_norm": 7.260592978484751,
+          "normalizer": 7.260592978484751,
+          "relative_group_difference": 0.0364071345113777,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "absolute_difference": 0.013216869260002928,
+          "finer_infinity_norm": 0.36302964892423756,
+          "normalizer": 0.36302964892423756,
+          "relative_group_difference": 0.03640713451137767,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "stress_mpa": {
+          "absolute_difference": 5.452833661172377,
+          "finer_infinity_norm": 261.6169487655756,
+          "normalizer": 261.6169487655756,
+          "relative_group_difference": 0.020842814989247664,
+          "witness": "E3:1:top",
+          "within_exploratory_one_percent": false
+        }
+      }
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.25,
+      "metrics": {
+        "plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "accumulated_plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "backstress_mpa": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-09,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "stress_mpa": {
+          "absolute_difference": 0.12216519803866532,
+          "finer_infinity_norm": 41.794747534447,
+          "normalizer": 41.794747534447,
+          "relative_group_difference": 0.0029229796863344476,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": true
+        }
+      }
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.5,
+      "metrics": {
+        "plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "accumulated_plastic_strain": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "backstress_mpa": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-09,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "absolute_difference": 0.0,
+          "finer_infinity_norm": 0.0,
+          "normalizer": 1e-12,
+          "relative_group_difference": 0.0,
+          "witness": "E1:0:bottom",
+          "within_exploratory_one_percent": true
+        },
+        "stress_mpa": {
+          "absolute_difference": 0.24954238600021483,
+          "finer_infinity_norm": 112.61690059663461,
+          "normalizer": 112.61690059663461,
+          "relative_group_difference": 0.00221585201402419,
+          "witness": "E4:2:bottom",
+          "within_exploratory_one_percent": true
+        }
+      }
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.75,
+      "metrics": {
+        "plastic_strain": {
+          "absolute_difference": 2.2802685897794226e-05,
+          "finer_infinity_norm": 0.0014324895906971727,
+          "normalizer": 0.0014324895906971727,
+          "relative_group_difference": 0.015918221008989306,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "accumulated_plastic_strain": {
+          "absolute_difference": 2.2802685897794226e-05,
+          "finer_infinity_norm": 0.0014324895906971727,
+          "normalizer": 0.0014324895906971727,
+          "relative_group_difference": 0.015918221008989306,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "backstress_mpa": {
+          "absolute_difference": 0.11401342948897142,
+          "finer_infinity_norm": 7.162447953485864,
+          "normalizer": 7.162447953485864,
+          "relative_group_difference": 0.015918221008989344,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "absolute_difference": 0.005700671474448582,
+          "finer_infinity_norm": 0.35812239767429316,
+          "normalizer": 0.35812239767429316,
+          "relative_group_difference": 0.01591822100898938,
+          "witness": "E3:2:top",
+          "within_exploratory_one_percent": false
+        },
+        "stress_mpa": {
+          "absolute_difference": 2.2288629810815337,
+          "finer_infinity_norm": 261.4599167255774,
+          "normalizer": 261.4599167255774,
+          "relative_group_difference": 0.008524683282221418,
+          "witness": "E3:1:top",
+          "within_exploratory_one_percent": true
+        }
+      }
+    }
+  ],
+  "accepted_material_states_bound_exactly": true,
+  "steel_mapping": "Same member, integration index and outer bottom/top layer; source geometry and material arrays equal across grids. Concrete positions are not matched.",
+  "structural_solves": 0,
+  "training_fits": 0,
+  "aggregation_wall_ns": 3285836,
+  "independent_physical_validation": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-steel-refinement-isvp9gez",
+    "payload_files": 2,
+    "payload_bytes": 108783,
+    "inventory_sha256": "d2b4f593459859427696f32aaa09c716bbb8b101592af9012702e38020207b98"
+  }
+}

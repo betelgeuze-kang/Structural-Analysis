@@ -1,0 +1,110 @@
+{
+  "source_revision": "3848da24c8a24472c44ee622d0953c9c9cb3948e",
+  "case_count": 12,
+  "metric_count": 94,
+  "raw_hashes_verified": 17,
+  "source_worktree_and_git_hashes_verified": 219,
+  "analyze_call_count": 35,
+  "analyze_codes_all_zero": true,
+  "calculix_dat_direct_parse_matches": true,
+  "all_reference_values_bound_to_raw": true,
+  "all_fraction_threshold_checks_pass": true,
+  "maximum_error_to_bound": 0.37653192143262826,
+  "authority": {
+    "official_wheel_execution": false,
+    "reference_profile_adopted": false,
+    "independent_operator_verification": false,
+    "product_legal_approval": false,
+    "commercial_redistribution_approved": false,
+    "verification_hierarchy_credit": false,
+    "release_readiness": false
+  },
+  "audit_wall_ns": 677506625,
+  "profile": {
+    "profile_id": "local-opensees371-corot2d-rationalized.v1",
+    "upstream_revision": "fe578a5b51333e5489097f327f89d16de0797f56",
+    "inventory_sha256": "bc7e9bf83cb1b7fa20d11b44b6fade66fad54c99efdbdf3113d69aa553585eaa",
+    "binary_sha256": "c88c80e2bd2e8aa430cd831091dc8b1c3d22656d508f91d76cebdaf286b6326f",
+    "patch_sha256": "e07e0d30f21237cb3736749a377e81874127b6bfd697c7d2d1133e944c258163",
+    "source_archive_sha256": "fba481b1982c415e9c9f6273c8df135bc5c2e49ad29dcdd43d482e5f97a125f0",
+    "dependency_hashes": {
+      "/lib/x86_64-linux-gnu/libpython3.10.so.1.0": "d7bc028c6a98ac8c17edeada13609ea36db324d7f49c26b6ca93994e8c830453",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-build-ns6vb9v4/deps/usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3": "86b2c20720e2aafb6b84d20d252cd39c5b22a6f7452f8bb920a06d8c8439124c",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-build-ns6vb9v4/deps/usr/lib/x86_64-linux-gnu/blas/libblas.so.3": "bd8a282c845e100cbb28dd31f9cf19757d508bf7a07a7f62bbe8c04cafb81646",
+      "/lib/x86_64-linux-gnu/libgfortran.so.5": "f7379c9331de9d66c03b439a070e8056b7419fc4213320d647952b998d026b30",
+      "/lib/x86_64-linux-gnu/libstdc++.so.6": "ff0825e113603c3866680d5d52216bc6d8eedf3a59f52a0aef67ff01994db128",
+      "/lib/x86_64-linux-gnu/libm.so.6": "3dd5511ae94785c9f921429b0f2b2f7aabb461b6f0e6de6dfdbef15f24bdfee6",
+      "/lib/x86_64-linux-gnu/libgcc_s.so.1": "fc9d43b2f6c20e53b009238f767c5b949d202389e20de9e202ea684b4ba3729a",
+      "/lib/x86_64-linux-gnu/libc.so.6": "b2cf6c33b74d2f22543b7a469a75b538911e690f769d0b238843a49465b83793",
+      "/lib/x86_64-linux-gnu/libexpat.so.1": "5491355459d82059a2e58134c5bf3a890f6f6e1a6fb209f152c25cde7522def0",
+      "/lib/x86_64-linux-gnu/libz.so.1": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "/lib/x86_64-linux-gnu/libquadmath.so.0": "a962d0383ce4c2a39a81017ffd9e5b51f32fd314e411c09ddd6da21593079a8c",
+      "/lib64/ld-linux-x86-64.so.2": "41daf7836f7fce21a40ca63a00c5caf21b05a35a76ccc075d86f1716212cdf01"
+    },
+    "fresh_build_performed": false,
+    "build_origin": "previously_audited_local_modified_build"
+  },
+  "comparison_artifact_hash": "sha256:3526fd6e291ec233334d2ef34aeffaae20cef2befd1d2b9e6099bbc4949569a9",
+  "case_metric_counts": {
+    "two_dof_shear_modal": 2,
+    "cantilever_tip_load": 3,
+    "public_corotational_portal_load_path": 12,
+    "bounded_planar_member_feature_load_path": 8,
+    "bounded_planar_prescribed_settlement_load_path": 9,
+    "spatial_frame3d_cantilever_combined_load": 10,
+    "frame3d_direct_control_axial_yield": 8,
+    "frame3d_direct_control_cyclic_axial_reversal": 19,
+    "frame3d_direct_control_torsion": 3,
+    "frame3d_direct_control_bending_rotations": 6,
+    "axial_member_tip_load": 2,
+    "tetrahedral_spatial_truss_combined_load": 12
+  },
+  "timing_ns": {
+    "process_parent": 81541456567,
+    "report_parent": 80141687541,
+    "product_comparison_parent": 76282311525,
+    "opensees_wrapper_parent": 134946594,
+    "calculix_wrapper_parent": 20337904
+  },
+  "observation": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-source-reference-kq9c46tq",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-source-reference-kq9c46tq.inventory.json",
+    "inventory_sha256": "dca428fc4a449af8f956b80ee9e1f2b456206a7f2bcca45318cbd54ca39f4d1b",
+    "file_count": 30,
+    "total_bytes": 2570920,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T03:22:02.894984+00:00",
+    "seal_wall_ns": 6801226,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "fresh_source_build": false,
+  "fresh_training_fit": false,
+  "full_product_checkpoint_sidecars_captured": false,
+  "total_product_core_newton_work_instrumented": false,
+  "protected_receipts_modified": false,
+  "full_CI_completed": false,
+  "verification": {
+    "origin": "completed tool output summaries; original test logs not captured",
+    "initial_selection": {
+      "passed": 45,
+      "failed": 1,
+      "deselected": 7,
+      "seconds": 6.53
+    },
+    "final_selection": {
+      "passed": 46,
+      "deselected": 7,
+      "seconds": 6.11
+    },
+    "ruff": "passed",
+    "diff_check": "passed",
+    "new_cli_module_mypy": "passed",
+    "initial_mypy_file_target": "import resolution failed",
+    "full_repository_tests": "not rerun"
+  },
+  "reference_assets": {
+    "calculix-ccx_2.17-3_amd64.deb": "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e",
+    "libarpack2_3.8.0-1_amd64.deb": "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a",
+    "libspooles2.2_2.2-14_amd64.deb": "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917"
+  }
+}

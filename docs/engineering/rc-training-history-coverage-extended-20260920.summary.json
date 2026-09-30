@@ -1,0 +1,70 @@
+{
+  "amplitude_one_feature_vectors_exact_count": 33,
+  "baseline_range_eligible_count": 0,
+  "baseline_sample_count": 33,
+  "cases": [
+    {
+      "case_id": "train-a-amp050",
+      "range_eligible": 0,
+      "samples": 11
+    },
+    {
+      "case_id": "train-a-amp100",
+      "range_eligible": 0,
+      "samples": 11
+    },
+    {
+      "case_id": "train-a-amp150",
+      "range_eligible": 0,
+      "samples": 11
+    },
+    {
+      "case_id": "train-b-amp050",
+      "range_eligible": 11,
+      "samples": 11
+    },
+    {
+      "case_id": "train-b-amp100",
+      "range_eligible": 11,
+      "samples": 11
+    },
+    {
+      "case_id": "train-b-amp150",
+      "range_eligible": 11,
+      "samples": 11
+    },
+    {
+      "case_id": "train-c-amp050",
+      "range_eligible": 0,
+      "samples": 11
+    },
+    {
+      "case_id": "train-c-amp100",
+      "range_eligible": 0,
+      "samples": 11
+    },
+    {
+      "case_id": "train-c-amp150",
+      "range_eligible": 0,
+      "samples": 11
+    }
+  ],
+  "generation_work": {
+    "known_work": {
+      "core_calls": 351,
+      "linear_solves": 1894,
+      "newton_iterations": 1894
+    },
+    "unknown_work": false
+  },
+  "learning_wall_ns": 134743465748,
+  "net_savings_proved": false,
+  "parent_wall_ns": null,
+  "plan_hash": "sha256:b20a6e83edddbc1ba4ba88ee595a4c00dc14b1714c1da93ae88048548bde36be",
+  "range_eligibility_is_runtime_proposal": false,
+  "range_eligible_count": 33,
+  "range_summary_recovered_without_solver_or_fit": true,
+  "reserved_evaluation_executed": false,
+  "sample_count": 99,
+  "source_revision": "05e588704cb7bf6d6b919c8541f6b8733593d1ad"
+}

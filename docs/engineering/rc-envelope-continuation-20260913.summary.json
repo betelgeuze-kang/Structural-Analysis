@@ -1,0 +1,112 @@
+{
+  "failed_packet": {
+    "packet": {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-campaign-85bqovab",
+      "files": 6706,
+      "bytes": 387751565,
+      "inventory_sha256": "fbf3903510a533a3074a487c671e7a377e036a0ecd201534d0aafd6a282d382f"
+    },
+    "terminal_audit": {
+      "status": "terminal_orchestration_failure",
+      "completed_slot_ids": [
+        "train-b-r0"
+      ],
+      "completed_report_hash": "sha256:74a3433960126af9d5a02a4ecf67eecdfabe423e308260e32bba09a02466b11e",
+      "unstarted_numerical_slot_ids": [
+        "train-b-r1",
+        "train-b-r2",
+        "validation-r0",
+        "validation-r1",
+        "validation-r2",
+        "holdout-r0",
+        "holdout-r1",
+        "holdout-r2"
+      ],
+      "failure": "immutable active-slot.json written a second time before the next numerical path",
+      "first_slot_full_comparison_pass_reported": true,
+      "independent_reconstruction_pending": true,
+      "second_slot_numerical_directory_exists": false,
+      "completed_slot_will_not_be_rerun": true
+    }
+  },
+  "continuation_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-resume-f0nrbjdg",
+  "continuation_handle": 38993,
+  "worker_pid_at_launch": 133979,
+  "resume_binding": {
+    "prior_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-campaign-85bqovab",
+    "prior_inventory_sha256": "fbf3903510a533a3074a487c671e7a377e036a0ecd201534d0aafd6a282d382f",
+    "carried_completed_slot": {
+      "id": "train-b-r0",
+      "case_id": "train-b",
+      "repetition": 0,
+      "arm_order": [
+        "reference",
+        "secant",
+        "proposal"
+      ],
+      "policy_file": "study/fit-0001-policy.json"
+    },
+    "carried_report_hash": "sha256:74a3433960126af9d5a02a4ecf67eecdfabe423e308260e32bba09a02466b11e",
+    "completed_slot_reexecuted": false,
+    "remaining_numerical_slots": 8,
+    "cause": "write-once progress filename collision before second numerical slot",
+    "record_fix": "immutable per-slot started and outcome files; final aggregate written once",
+    "source_revision_unchanged": true,
+    "total_cost_must_include_failed_parent_interval": true
+  },
+  "protocol_sha256": "6d2bbac74aa19cd5119ed9c58bc7ec567c6b4f4c11d2116b18bd620ca40742fe",
+  "worker_write_check": {
+    "worker_sha256": "98b9a5a2c204c82312cfcc797de6ed4293fe826be5aaaee8d7e54d65d61c1c8d",
+    "completed_loop_iterations": 8,
+    "unique_numerical_double_calls": 8,
+    "actual_numerical_calls": 0,
+    "actual_policy_calls": 0,
+    "per_slot_records_preserved": true,
+    "final_aggregate_written_once": true,
+    "duplicate_final_write_rejected": true,
+    "physical_or_performance_validation": false,
+    "dry_run_root": "/tmp/rc-envelope-progress-dry-run-qbym4r3c"
+  },
+  "completed_first_slot": {
+    "arm_order": [
+      "reference",
+      "secant",
+      "proposal"
+    ],
+    "case_id": "train-b",
+    "composition_hash": "sha256:cf0433ffeed9267ce11b066e097b3b8a0f6509aa5eed721017bbfd275c3c910a",
+    "consult_policy_count": 50,
+    "id": "train-b-r0",
+    "policy_file": "study/fit-0001-policy.json",
+    "repetition": 0,
+    "report_hash": "sha256:74a3433960126af9d5a02a4ecf67eecdfabe423e308260e32bba09a02466b11e",
+    "score": {
+      "abstained_count": 193,
+      "execution_work": {
+        "known_work": {
+          "core_calls": 968,
+          "linear_solves": 4069,
+          "newton_iterations": 4069
+        },
+        "unknown_work": false
+      },
+      "full_comparison_pass": true,
+      "proposal_over_secant_path_wall_ratio": 1.022057311198266,
+      "proposal_path_wall_ns": 60294137890,
+      "proposal_scored_wall_ns": 60296431438,
+      "proposal_setup_wall_ns": 2293548,
+      "proposed_count": 49,
+      "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded; static model gate computation and record write added to proposal time",
+      "secant_path_wall_ns": 58995156903,
+      "whole_benchmark_wall_ns": 267444536267,
+      "whole_scored_benchmark_wall_ns": 267446829815
+    },
+    "static_model_rejected": false,
+    "status": "completed",
+    "wall_ns": 267512845554
+  },
+  "remaining_slots": 8,
+  "final_numerical_audit_complete": false,
+  "completed_slot_reexecuted": false,
+  "source_manifest_identical": true
+}

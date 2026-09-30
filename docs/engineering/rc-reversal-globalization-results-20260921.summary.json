@@ -1,0 +1,323 @@
+{
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reversal-grid-syqkihoy",
+  "inventory_sha256": "c5cad2a77ed4ef1b7d4c43572d71e88eeafb0300e8f15f4488fff2f6c7a86fcc",
+  "verified_files": 60,
+  "summary": {
+    "rows": [
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "profile": "original",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 341824887,
+        "verification_wall_ns": 329869788,
+        "result_hash": "sha256:de36df2381bd130cfc18792a02319060c4b31f8c8918ed2036b214501ceab860",
+        "baseline_hash_matches": true,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.10949988558613598,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 28,
+          "known_newton_iteration_count": 28,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 28,
+          "known_newton_iteration_count": 28,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "profile": "fine25",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 392242152,
+        "verification_wall_ns": 396862261,
+        "result_hash": "sha256:ab164f6eead692f661dbc6ce514d0ad605ee27dfbff84ec5bc71359e31588cdf",
+        "baseline_hash_matches": null,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.10939722593121852,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "cheap",
+        "profile": "fine100",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 391618431,
+        "verification_wall_ns": 396971055,
+        "result_hash": "sha256:b26bfc90b737ebcd030f7ccfc5ebe41e30308bd7b59f5cc267e81993d1130690",
+        "baseline_hash_matches": null,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.10939722593121852,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "profile": "original",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 301899919,
+        "verification_wall_ns": 309061732,
+        "result_hash": "sha256:fb2178cd99a377b8c54945afd517dac1f272c89547473d07089a6ed19f67a9b0",
+        "baseline_hash_matches": true,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.5720162149872313,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 26,
+          "known_newton_iteration_count": 26,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 26,
+          "known_newton_iteration_count": 26,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "profile": "fine25",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 549828485,
+        "verification_wall_ns": 558592110,
+        "result_hash": "sha256:0a79b82737ebd7e41feb657b67ea101562cb7344a9b6772e7b4529fe3f26cbad",
+        "baseline_hash_matches": null,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.5693857330437788,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 34,
+          "known_newton_iteration_count": 34,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 34,
+          "known_newton_iteration_count": 34,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w32-drift40",
+        "candidate": "middle",
+        "profile": "fine100",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 583070094,
+        "verification_wall_ns": 553767411,
+        "result_hash": "sha256:fb61c13a1950119a7e6ad87bb2707ca2a001b8f061041ddbf6752009900fb0b4",
+        "baseline_hash_matches": null,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.5693857330437788,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 34,
+          "known_newton_iteration_count": 34,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 34,
+          "known_newton_iteration_count": 34,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "profile": "original",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 298672862,
+        "verification_wall_ns": 304964437,
+        "result_hash": "sha256:453fdb86cf227a97c5654478d939567a87027d64c714b2d1af70c3ab6e8f990e",
+        "baseline_hash_matches": true,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.14010521754163582,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 24,
+          "known_newton_iteration_count": 24,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 24,
+          "known_newton_iteration_count": 24,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "profile": "fine25",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 477987071,
+        "verification_wall_ns": 487342505,
+        "result_hash": "sha256:66bdfd27bcbdaa3c50a4ba005c8ba7f143298cad064d57c62b88787fe8b43dda",
+        "baseline_hash_matches": null,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.13907892877247016,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      },
+      {
+        "case": "w48-drift40",
+        "candidate": "cheap",
+        "profile": "fine100",
+        "status": "returned",
+        "unknown_work": false,
+        "analysis_wall_ns": 481166144,
+        "verification_wall_ns": 488243413,
+        "result_hash": "sha256:419a21b583f869399642225c1197b17963e61f70afec69a236ae99ccd0b38b02",
+        "baseline_hash_matches": null,
+        "complete": false,
+        "artifact_contract_pass": true,
+        "verification_errors": [],
+        "accepted_targets": [
+          -0.02,
+          -0.04
+        ],
+        "reason": "line_search_failed_to_reduce_residual",
+        "relative_residual": 0.13907892877247016,
+        "analysis_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification_work": {
+          "attempted_step_count": 4,
+          "known_linear_solve_count": 30,
+          "known_newton_iteration_count": 30,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "rollback_exact": true,
+        "parent_unchanged": true
+      }
+    ],
+    "wall_ns": 7660691871,
+    "speedup_claim": false,
+    "independent_physical_validation": false
+  },
+  "source_packet_inventory_sha256": "dc9cee74b0cefb318f6b6f846b925f091af116b994a8542ed4a2522cc4e748ca",
+  "source_revision": "ca07bb1eafebd5dbedb589b4ce2ac3a468030c08",
+  "all_baseline_hashes_match": true,
+  "all_artifact_contracts_pass": true,
+  "all_nine_physical_paths_incomplete": true
+}

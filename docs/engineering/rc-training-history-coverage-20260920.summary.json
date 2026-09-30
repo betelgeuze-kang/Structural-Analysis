@@ -1,0 +1,200 @@
+{
+  "generation": [
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 6,
+          "failure": {
+            "kind": "all_attempts_blocked",
+            "phase": "numerical",
+            "target_index": 6
+          },
+          "status": "incomplete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "blocked_reference_metrics": {
+        "control_error_m": -0.000861328125,
+        "relative_equilibrium": 0.09973544087243069,
+        "rollback_exact": true,
+        "target_control_displacement_m": 0.002,
+        "terminal_reason": "line_search_failed_to_reduce_residual"
+      },
+      "case_id": "train-a-amp050",
+      "labels_eligible": false
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "case_id": "train-a-amp100",
+      "labels_eligible": true
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 2,
+          "failure": {
+            "kind": "all_attempts_blocked",
+            "phase": "numerical",
+            "target_index": 2
+          },
+          "status": "incomplete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "blocked_reference_metrics": {
+        "control_error_m": 0.00138427734375,
+        "relative_equilibrium": 0.19662427903897414,
+        "rollback_exact": true,
+        "target_control_displacement_m": -0.0045000000000000005,
+        "terminal_reason": "line_search_failed_to_reduce_residual"
+      },
+      "case_id": "train-a-amp150",
+      "labels_eligible": false
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "case_id": "train-b-amp050",
+      "labels_eligible": true
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "case_id": "train-b-amp100",
+      "labels_eligible": true
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "case_id": "train-b-amp150",
+      "labels_eligible": true
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "case_id": "train-c-amp050",
+      "labels_eligible": true
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "case_id": "train-c-amp100",
+      "labels_eligible": true
+    },
+    {
+      "arms": {
+        "reference": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        },
+        "secant": {
+          "accepted_target_count": 12,
+          "failure": null,
+          "status": "complete"
+        }
+      },
+      "case_id": "train-c-amp150",
+      "labels_eligible": true
+    }
+  ],
+  "outcome": {
+    "actual_runtime_proposals": null,
+    "evaluation_work": {
+      "known_work": {
+        "core_calls": 0,
+        "linear_solves": 0,
+        "newton_iterations": 0
+      },
+      "unknown_work": false
+    },
+    "generation_work": {
+      "known_work": {
+        "core_calls": 323,
+        "linear_solves": 1670,
+        "newton_iterations": 1670
+      },
+      "unknown_work": false
+    },
+    "independent_validation": false,
+    "learning_report_hash": "sha256:9b92a99dd9ff380948592db42f5270d4b77e48bbb8dbb2b7e6835ff62a4c5964",
+    "learning_wall_ns": 117067391478,
+    "net_savings_proved": false,
+    "parent_wall_ns_before_final_write": 117191702327,
+    "plan_hash": "sha256:36ee7c9d5dcaefd807c43cedc44981cbecdf37fdc2899e4808bcf7795933afaa",
+    "reference_parent_range_checks": [],
+    "sample_count": 77,
+    "schema_version": "rc-grouped-training-history-coverage-outcome.v1",
+    "status": "incomplete_labels"
+  },
+  "source_revision": "1cb62a5964ed0bac2cc0c97233ace5b3860f983b"
+}

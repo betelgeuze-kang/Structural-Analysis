@@ -1,0 +1,496 @@
+{
+  "schema_version": "rc-counterbalanced-runtime-progress-snapshot.v1",
+  "snapshot_unix_ns": 1789019324364560478,
+  "source_revision": "f933f9651180fe65ceab2e8cfafb84e5bbf810d3",
+  "source_file_count": 446,
+  "source_manifest_sha256": "0f012397630cb68be9acaaa261627ab4c2834cb6b932566c4f57835716163f1e",
+  "protocol_sha256": "dcabae9282632cd4f8d23daab5961b0ab2fb4c6bb537bed1c8af49f160108f01",
+  "protocol": {
+    "schema_version": "rc-counterbalanced-runtime-prospective-protocol.v1",
+    "planning_revision": "cbbf2df462a6ca7a4427830cbf85701c352184db",
+    "prior_packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-secant-abstention-fhn1qvyq",
+    "prior_inventory_sha256": "df41ee6c060fe8dd5e5bb4586c6c801177b5d5d7ec56929ec37bdc1bc08ed064",
+    "ridge_grid": [
+      10000.0
+    ],
+    "ridge_choice": "smaller recorded mean runtime ratio among the two prior development candidates; both failed adoption; this choice is tuning, not a fresh independent evaluation",
+    "repetitions": 3,
+    "arm_order_schedule": [
+      [
+        "reference",
+        "secant",
+        "proposal"
+      ],
+      [
+        "secant",
+        "proposal",
+        "reference"
+      ],
+      [
+        "proposal",
+        "reference",
+        "secant"
+      ]
+    ],
+    "case_count": 4,
+    "case_order": "sorted training case IDs; all three repetitions for a case share one frozen fit",
+    "expected_fold_count": 12,
+    "expected_full_path_count": 48,
+    "targets_per_path": 242,
+    "nominal_core_calls_without_retries": 11616,
+    "maximum_core_calls": 17424,
+    "maximum_fits": 5,
+    "nominal_training_fits": 4,
+    "one_possible_final_training_refit_only_if_existing_runtime_rule_eligible": true,
+    "arithmetic_profile": "retained-twofold-refinement.v1",
+    "proposal_abstention_strategy": "secant",
+    "static_model_abstention": true,
+    "minimum_relative_improvement": 0.01,
+    "new_training_labels": 0,
+    "validation_or_holdout_execution": false,
+    "warmup_repetitions_excluded": 0,
+    "repeats_are_independent_cases": false,
+    "independent_evaluation": false,
+    "paired_static_gate_on_off_comparison": false,
+    "historical_timings_not_a_matched_control": true,
+    "hardware_isolation": false,
+    "automatic_retry": false,
+    "automatic_extra_repetitions": false,
+    "automatic_promotion": false,
+    "source_labels_authenticate_independent_measurements": false,
+    "historical_label_generation_cost": {
+      "historical_original_generation_core_calls": 2904,
+      "historical_original_generation_newton_iterations": 13815,
+      "historical_original_generation_path_seconds": 1045.632468841
+    },
+    "expected_artifact_storage_order_gigabytes": 4,
+    "planned_inputs_policy_and_thresholds_fixed_before_new_fits_or_paths": true
+  },
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-counterbalanced-runtime-fx57v2kf",
+  "packet_sealed": false,
+  "numerical_processes": {
+    "parent_pid": 1110723,
+    "worker_pid": 1111200,
+    "source_revision": "f933f9651180fe65ceab2e8cfafb84e5bbf810d3",
+    "automatic_retry": false
+  },
+  "audit_supervisor_pid": 1111682,
+  "worker_and_supervisor_confirmed_live_at_snapshot": true,
+  "completed_folds_at_snapshot": 1,
+  "completed_fold_indices": [
+    0
+  ],
+  "completed_prefix_comparisons_pass": true,
+  "aggregate_result_available": false,
+  "original_audit_available": false,
+  "new_speedup_claim": false,
+  "local_checks": {
+    "initial_module": {
+      "passed": 51,
+      "seconds": 98.33
+    },
+    "additional_subset": {
+      "passed": 3,
+      "deselected": 50,
+      "seconds": 14.81,
+      "overlap_with_initial": 1
+    },
+    "unique_final_checks_covered": 53,
+    "ruff": true,
+    "scoped_mypy": true
+  },
+  "preceding_ci": {
+    "run": 34441285174,
+    "head": "cbbf2df462a6ca7a4427830cbf85701c352184db",
+    "tested_merge": "e4295a432ce2a80a0e86234d92772cd6f58944f4",
+    "passed": 374,
+    "suite_seconds": 414.056,
+    "job_id": 102756679795,
+    "artifact_id": 10138209598,
+    "artifact_zip_sha256": "sha256:f73ebe50fffd452bac95d7877e2ed6cbcfd43c07c13775504f9afbce0ee08bc3",
+    "four_full_shards_preparation_failed_suite_skipped": true,
+    "new_repetition_source_included": false
+  },
+  "latest_numerical_completion_snapshot": {
+    "snapshot_unix_ns": 1789023018917997273,
+    "status": "numerical_completed_original_audit_running",
+    "worker_outcome": {
+      "pid": 1111200,
+      "status": "completed",
+      "source_policy_unchanged": true,
+      "fit_attempt_count": 4,
+      "fit_completed_count": 4,
+      "completed_folds": 12,
+      "selected_strategy": "secant",
+      "selected_ridge": null,
+      "selected_score": 1.0,
+      "new_training_labels": 0,
+      "validation_or_holdout_execution": false,
+      "wall_ns_through_reports": 4034061813233,
+      "cpu_ns": 4032800160266,
+      "peak_rss_kib": 369464
+    },
+    "parent_outcome": {
+      "parent_pid": 1110723,
+      "worker_pid": 1111200,
+      "exit_code": 0,
+      "parent_wall_ns": 4034275963386
+    },
+    "audit_started": {
+      "parent_pid": 1111682,
+      "worker_pid": 1126637,
+      "script_sha256": "9331e395a50a79ac883a115e42b07c0692a73abf51094c885c6fc28f1f650fd8",
+      "original_processes_absent": true,
+      "unknown_work_until_outcome": true
+    },
+    "audit_outcome_available": false,
+    "packet_sealed": false,
+    "completed_full_paths": 48,
+    "reported_work": {
+      "core_calls": 11616,
+      "newton_iterations": 52779,
+      "linear_solves": 52779
+    },
+    "all_fold_comparison_scores_pass": true,
+    "all_fold_work_known": true,
+    "candidates_reported_pending_audit": [
+      {
+        "case_repeat_scores": [
+          {
+            "case_id": "train-a",
+            "fold_indices": [
+              0,
+              1,
+              2
+            ],
+            "maximum_ratio": 1.0055526442212872,
+            "mean_ratio": 0.9997787972905385,
+            "minimum_ratio": 0.9967197941782949,
+            "ratios": [
+              1.0055526442212872,
+              0.9970639534720337,
+              0.9967197941782949
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.005003258207373766,
+            "valid_repetitions": 3
+          },
+          {
+            "case_id": "train-b",
+            "fold_indices": [
+              3,
+              4,
+              5
+            ],
+            "maximum_ratio": 1.1284924058078505,
+            "mean_ratio": 1.1257639849770775,
+            "minimum_ratio": 1.1222513591732766,
+            "ratios": [
+              1.1265481899501055,
+              1.1284924058078505,
+              1.1222513591732766
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.0031935714887133815,
+            "valid_repetitions": 3
+          },
+          {
+            "case_id": "train-c",
+            "fold_indices": [
+              6,
+              7,
+              8
+            ],
+            "maximum_ratio": 1.0054170627355161,
+            "mean_ratio": 0.9992249373938002,
+            "minimum_ratio": 0.9935818805733921,
+            "ratios": [
+              1.0054170627355161,
+              0.9935818805733921,
+              0.9986758688724925
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.005936665005159271,
+            "valid_repetitions": 3
+          },
+          {
+            "case_id": "train-d",
+            "fold_indices": [
+              9,
+              10,
+              11
+            ],
+            "maximum_ratio": 1.0061754223894028,
+            "mean_ratio": 0.9976154722942367,
+            "minimum_ratio": 0.9891645039190884,
+            "ratios": [
+              0.9975064905742191,
+              1.0061754223894028,
+              0.9891645039190884
+            ],
+            "requested_repetitions": 3,
+            "sample_standard_deviation": 0.008505982868686883,
+            "valid_repetitions": 3
+          }
+        ],
+        "fold_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "proposed_count": 723,
+        "ridge": 10000.0,
+        "score": 1.0305957979889133
+      }
+    ],
+    "candidate_promoted": false,
+    "selected_strategy": "secant",
+    "independent_evaluation": false,
+    "net_savings_proved": false,
+    "bindings": [
+      {
+        "path": "study/result.json",
+        "bytes": 233065,
+        "sha256": "b195e8f7a782de866130c1494ad3999b2707a931590d543d073ab0f5da4fab47"
+      },
+      {
+        "path": "worker-outcome.json",
+        "bytes": 413,
+        "sha256": "c101d631c745abaa3f3f277e1740e410ce184f7e2522c68a5c3169ab56355bb3"
+      },
+      {
+        "path": "process-outcome.json",
+        "bytes": 106,
+        "sha256": "ae42f5c3195c3ca69828b964c502a8b126f07c7de82998e0aa3be7e71a7b18e6"
+      },
+      {
+        "path": "audit-attempt-1-started.json",
+        "bytes": 215,
+        "sha256": "cbad1dfd78651020eecc450c3ea7f0dfad3efcbf081184110e21b9257d44da6e"
+      }
+    ]
+  },
+  "audited_sealed_completion": {
+    "completion": {
+      "schema_version": "rc-counterbalanced-runtime-completion.v1",
+      "source_revision": "f933f9651180fe65ceab2e8cfafb84e5bbf810d3",
+      "source_files_verified": 446,
+      "repetitions": 3,
+      "four_path_folds": 12,
+      "complete_paths": 48,
+      "fits_checked": 4,
+      "runtime_work": {
+        "core_calls": 11616,
+        "linear_solves": 52779,
+        "newton_iterations": 52779
+      },
+      "candidates": [
+        {
+          "case_repeat_scores": [
+            {
+              "case_id": "train-a",
+              "fold_indices": [
+                0,
+                1,
+                2
+              ],
+              "maximum_ratio": 1.0055526442212872,
+              "mean_ratio": 0.9997787972905385,
+              "minimum_ratio": 0.9967197941782949,
+              "ratios": [
+                1.0055526442212872,
+                0.9970639534720337,
+                0.9967197941782949
+              ],
+              "requested_repetitions": 3,
+              "sample_standard_deviation": 0.005003258207373766,
+              "valid_repetitions": 3
+            },
+            {
+              "case_id": "train-b",
+              "fold_indices": [
+                3,
+                4,
+                5
+              ],
+              "maximum_ratio": 1.1284924058078505,
+              "mean_ratio": 1.1257639849770775,
+              "minimum_ratio": 1.1222513591732766,
+              "ratios": [
+                1.1265481899501055,
+                1.1284924058078505,
+                1.1222513591732766
+              ],
+              "requested_repetitions": 3,
+              "sample_standard_deviation": 0.0031935714887133815,
+              "valid_repetitions": 3
+            },
+            {
+              "case_id": "train-c",
+              "fold_indices": [
+                6,
+                7,
+                8
+              ],
+              "maximum_ratio": 1.0054170627355161,
+              "mean_ratio": 0.9992249373938002,
+              "minimum_ratio": 0.9935818805733921,
+              "ratios": [
+                1.0054170627355161,
+                0.9935818805733921,
+                0.9986758688724925
+              ],
+              "requested_repetitions": 3,
+              "sample_standard_deviation": 0.005936665005159271,
+              "valid_repetitions": 3
+            },
+            {
+              "case_id": "train-d",
+              "fold_indices": [
+                9,
+                10,
+                11
+              ],
+              "maximum_ratio": 1.0061754223894028,
+              "mean_ratio": 0.9976154722942367,
+              "minimum_ratio": 0.9891645039190884,
+              "ratios": [
+                0.9975064905742191,
+                1.0061754223894028,
+                0.9891645039190884
+              ],
+              "requested_repetitions": 3,
+              "sample_standard_deviation": 0.008505982868686883,
+              "valid_repetitions": 3
+            }
+          ],
+          "fold_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "proposed_count": 723,
+          "ridge": 10000.0,
+          "score": 1.0305957979889133
+        }
+      ],
+      "selected_strategy": "secant",
+      "selected_ridge": null,
+      "source_labels": 964,
+      "new_training_labels": 0,
+      "native_terminal_reopens": 48,
+      "stored_proposals_reconstructed": 2904,
+      "material_snapshots_reconstructed": 726,
+      "same_solver_assembly_response_replays": 11616,
+      "physics_audit": {
+        "independent_assembly_rebuilds": {
+          "section_replays": 69696,
+          "member_replays": 23232,
+          "material_integrations": 0,
+          "newton_solves": 0,
+          "state_commits": 0,
+          "assembly_replays": 11616
+        },
+        "independent_assembly_rebuild_seconds": 245.778389058,
+        "terminal_candidate_pairs_verified": 23091,
+        "terminal_accepted_pairs_verified": 18207,
+        "projection_counts": {
+          "coordinates": 161637,
+          "nonzero_projection_error": 18117
+        },
+        "maximum_twofold_projection_error": 6.018531076210112e-36,
+        "material_base_law_replays": {
+          "concrete": 836352,
+          "steel": 139392
+        },
+        "exact_fiber_inputs_checked": 975744,
+        "retained_low_strain_components_nonzero": 975744,
+        "independent_100_digit_stresses_checked": 975744,
+        "native_material_state_and_branch_replays_exact": true,
+        "rounded_base_vs_retained_stress_differences": {
+          "concrete/stress_mpa": 1.480411908911462e-14,
+          "concrete/consistent_tangent_mpa": 9.094947017729282e-12,
+          "steel/stress_mpa": 1.7053025658242404e-13,
+          "steel/consistent_tangent_mpa": 0.0
+        }
+      },
+      "numerical_parent_wall_ns": 4034275963386,
+      "audit_parent_wall_ns": 1690456092105,
+      "audit_newton_calls": 0,
+      "audit_fits": 0,
+      "independent_physical_validation": false,
+      "independent_evaluation": false,
+      "net_savings_proved": false,
+      "matched_static_gate_on_off_comparison": false,
+      "hardware_isolation": false,
+      "candidate_promoted": false,
+      "historical_label_generation_cost": {
+        "historical_original_generation_core_calls": 2904,
+        "historical_original_generation_newton_iterations": 13815,
+        "historical_original_generation_path_seconds": 1045.632468841
+      },
+      "historical_completion_summary_preserved_sha256": "279954c4058d9620d59ca73990b06e92c9792227a24db9fb0b35519d6d5d2ffd",
+      "all_original_processes_confirmed_absent": true
+    },
+    "seal": {
+      "file_count": 70364,
+      "bytes": 3986844683,
+      "inventory_sha256": "bf29c500319c9c49f24066ee78d5b7a8e38c7c333267b84d89c62ef257c90ad6",
+      "all_payload_files_reread": true,
+      "no_live_writers": true,
+      "sealed_unix_ns": 1789024613876524476
+    },
+    "original_audit_available": true,
+    "packet_sealed": true,
+    "bindings": [
+      {
+        "path": "repeated-completion-summary.json",
+        "bytes": 5017,
+        "sha256": "997ef0beebcc6109498b2adb977f6a0755774119f8a897b0c6b0b72d88bdcba9"
+      },
+      {
+        "path": "original-audit.json",
+        "bytes": 115270,
+        "sha256": "f98d2a8b8a79267e63fa713c85a0dd99517f0eb6f31502a0c849191f58931e53"
+      },
+      {
+        "path": "process-outcome.json",
+        "bytes": 106,
+        "sha256": "ae42f5c3195c3ca69828b964c502a8b126f07c7de82998e0aa3be7e71a7b18e6"
+      },
+      {
+        "path": "audit-attempt-1-outcome.json",
+        "bytes": 106,
+        "sha256": "0fbad6f208259275aa3639a234867381dc9d74ae5310f51497c31e555bb7df7a"
+      },
+      {
+        "path": "audit-supervisor-outcome.json",
+        "bytes": 107,
+        "sha256": "a5e4e6b1e20abed0523875a4b7221bb206571ed5df097cd0d7d0c617f8cfbb9d"
+      },
+      {
+        "path": "seal-source.py",
+        "bytes": 4782,
+        "sha256": "27ff6dc40340eeb6a05673567586e5c6e224d2c364448c875792703175f0ab14"
+      }
+    ]
+  }
+}

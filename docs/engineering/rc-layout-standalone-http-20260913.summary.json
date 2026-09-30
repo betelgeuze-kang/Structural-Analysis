@@ -1,0 +1,97 @@
+{
+  "observation": {
+    "admissions": [
+      {
+        "artifacts": 25,
+        "id": "b2-o0-price_order",
+        "report_hash": "sha256:9da2decd8288e3412f458489014224fa8bd1063d7716d323753c053b9b14bb87",
+        "wall_ns": 30973019
+      },
+      {
+        "artifacts": 27,
+        "id": "b2-o0-learned_order",
+        "report_hash": "sha256:8e1e5109c1a4082f07d5cfd8bfbe8a8b6febfc0959c95c953bf6fb907bbb18bc",
+        "wall_ns": 48523839
+      },
+      {
+        "artifacts": 27,
+        "id": "b2-o1-learned_order",
+        "report_hash": "sha256:02eb126cd34767f0dd9059bbddb6e45e972efbd88ed9d4befb36891c09310cbc",
+        "wall_ns": 47401311
+      },
+      {
+        "artifacts": 25,
+        "id": "b2-o1-price_order",
+        "report_hash": "sha256:b309ba95e14c6aea5ef52cff5991395d0fa8b303dbbdcfe8ee863228a582de2d",
+        "wall_ns": 28308111
+      },
+      {
+        "artifacts": 33,
+        "id": "b3-o0-price_order",
+        "report_hash": "sha256:080cd0f4f0b3df6e138ff08d764c5d71aba84752fe5e83f295755225b4196930",
+        "wall_ns": 31132876
+      },
+      {
+        "artifacts": 35,
+        "id": "b3-o0-learned_order",
+        "report_hash": "sha256:3e2a5f719891469cdc2826bb2012dfbcad5c2491ecf241dc906be4630dfc7395",
+        "wall_ns": 49828383
+      },
+      {
+        "artifacts": 35,
+        "id": "b3-o1-learned_order",
+        "report_hash": "sha256:a9e659c15f51ddedaecde19c0220497ae6b917a06faa56a4b2611de86ba235d3",
+        "wall_ns": 49623857
+      },
+      {
+        "artifacts": 33,
+        "id": "b3-o1-price_order",
+        "report_hash": "sha256:90c170a28892768606889efac21709a0432e353967f79dffc58226afa2154ef7",
+        "wall_ns": 31025482
+      },
+      {
+        "artifacts": 49,
+        "id": "b5-o0-price_order",
+        "report_hash": "sha256:c80644bc04fc72065d23a833fd7d9c23cc9e11ff1144fd754884af20631c5676",
+        "wall_ns": 37005593
+      },
+      {
+        "artifacts": 51,
+        "id": "b5-o0-learned_order",
+        "report_hash": "sha256:9ebc4eece5fb02ac805490e13b8c692f86fc4ec89aa9ef37f583ecc4f05e7bfb",
+        "wall_ns": 55661899
+      },
+      {
+        "artifacts": 51,
+        "id": "b5-o1-learned_order",
+        "report_hash": "sha256:44232a9b9f43d965d4f31e93926e8e30cc9f252b60d1d162a3c0b6875846b659",
+        "wall_ns": 55302007
+      },
+      {
+        "artifacts": 49,
+        "id": "b5-o1-price_order",
+        "report_hash": "sha256:4f757d0509ddb7039624d131bf6405448d699e5be0c17965ded79ab4d0021206",
+        "wall_ns": 36568078
+      }
+    ],
+    "cost_observation_excludes_this_delivery": true,
+    "http_responses": 440,
+    "http_transfer_and_teardown_wall_ns": 268066080,
+    "independent_physical_validation": false,
+    "net_savings_proved": false,
+    "new_fits": 0,
+    "new_numerical_paths": 0,
+    "original_graph_bytes_changed": false,
+    "original_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-costs-y3fu39g2",
+    "original_source_revision": "596e058f167e8663f62e3bc3e8c6ab0bff18807a",
+    "source_revision": "6512d5090943033aa29ab406bcb25ce8608a7e99",
+    "strategy_executions_reviewed": 12,
+    "workbench_review_executed": false
+  },
+  "packet": {
+    "bytes": 68367877,
+    "files": 443,
+    "inventory_sha256": "6bfbec705085bc7b964d6acd2ec22266a8443d92bcb425604940b5d13fcbdca9",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-standalone-http-k2szhu8w"
+  }
+}

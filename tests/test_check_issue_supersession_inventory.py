@@ -154,10 +154,15 @@ def _live_fixture(payload: dict) -> list[dict]:
         )
     projection = inventory.issue_projection(payload["open_issues"])
     payload["open_issue_projection_sha256"] = inventory.projection_sha256(projection)
+    payload["implemented_but_open_issues"] = [
+        deepcopy(row)
+        for row in payload["open_issues"]
+        if row["merged_implementation_pull_requests"]
+    ]
     return rows
 
 
-def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> None:
+def test_inventory_tracks_external_and_repository_work_without_authority() -> None:
     report = inventory.build_report(ROOT)
 
     assert report["contract_pass"] is True
@@ -170,6 +175,17 @@ def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> No
         291,
         293,
         297,
+        438,
+        441,
+        443,
+        445,
+        447,
+        449,
+        451,
+        454,
+        457,
+        458,
+        460,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -183,6 +199,109 @@ def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> No
     }
     assert report["authority"] == inventory.FALSE_AUTHORITY
     assert all(value is False for value in report["authority"].values())
+
+
+def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> None:
+    payload = _payload()
+    rows = {row["number"]: row for row in payload["open_issues"]}
+    for number in (247, 258, 260, 290, 291, 293, 297, 438):
+        row = rows[number]
+        assert row["classification"] in inventory.EXTERNAL_CLASSIFICATIONS
+        assert row["closable_by_repository_code_alone"] is False
+        assert row["required_external_inputs"]
+        assert row["current_product_authority"] is False
+    assert rows[438]["linked_pull_requests"] == [439, 440]
+    assert rows[438]["merged_implementation_pull_requests"] == [440]
+    assert payload["implemented_but_open_issues"] == [rows[438]]
+    for number, pull_requests in (
+        (441, [442]),
+        (443, [444]),
+        (445, [446]),
+        (447, [448]),
+        (449, [450, 452]),
+        (451, [452]),
+        (454, [453]),
+        (457, [455]),
+        (458, [456]),
+        (460, [459]),
+    ):
+        row = rows[number]
+        assert row["classification"] == "repository_implementation"
+        assert row["closable_by_repository_code_alone"] is True
+        assert row["required_external_inputs"] == []
+        assert row["linked_pull_requests"] == pull_requests
+        assert row["merged_implementation_pull_requests"] == []
+        assert row["current_product_authority"] is False
+    resolved = {row["number"]: row for row in payload["resolved_issues"]}
+    assert resolved[433]["resolved_by_pull_request"] == 440
+    assert resolved[433]["closure_event_id"] == 31078133852
+    assert resolved[435]["resolved_by_pull_request"] == 440
+    assert resolved[435]["closure_event_id"] == 31078134023
+    superseded = {row["number"]: row for row in payload["superseded_pull_requests"]}
+    assert superseded[432]["superseded_by_pull_request"] == 440
+    assert superseded[434]["superseded_by_pull_request"] == 440
+
+
+@pytest.mark.parametrize(
+    "classification,closable,external_inputs,blocker",
+    [
+        (
+            "independent_human_review",
+            True,
+            ["reviewer"],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        ("independent_human_review", False, [], "open_issue_external_inputs_invalid"),
+        (
+            "repository_implementation",
+            False,
+            [],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        (
+            "repository_implementation",
+            True,
+            ["external_operator"],
+            "open_issue_external_inputs_invalid",
+        ),
+        (
+            "repository_implementation",
+            1,
+            [],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        (
+            "independent_human_review",
+            0,
+            ["reviewer"],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        ("unregistered_work_kind", True, [], "open_issue_classification_invalid"),
+    ],
+)
+def test_issue_work_classification_cannot_bypass_external_input_boundary(
+    classification, closable, external_inputs, blocker
+) -> None:
+    row = deepcopy(_payload()["open_issues"][0])
+    row.update(
+        classification=classification,
+        closable_by_repository_code_alone=closable,
+        required_external_inputs=external_inputs,
+    )
+    blockers = []
+    inventory._validate_open_rows([row], blockers)
+    assert f"{blocker}:{row['number']}" in blockers
+
+
+@pytest.mark.parametrize("authority", [True, 0, None])
+def test_repository_work_never_grants_product_authority(authority) -> None:
+    row = deepcopy(
+        next(row for row in _payload()["open_issues"] if row["number"] == 441)
+    )
+    row["current_product_authority"] = authority
+    blockers = []
+    inventory._validate_open_rows([row], blockers)
+    assert "open_issue_product_authority_invalid:441" in blockers
 
 
 def test_offline_report_validates_against_schema() -> None:
@@ -205,7 +324,11 @@ def test_implemented_but_open_summary_is_derived_from_open_rows(
     assert stale_report["contract_pass"] is False
     assert "implemented_but_open_issues_inconsistent" in stale_report["blockers"]
 
-    payload["implemented_but_open_issues"] = [deepcopy(implemented_row)]
+    payload["implemented_but_open_issues"] = [
+        deepcopy(row)
+        for row in payload["open_issues"]
+        if row["merged_implementation_pull_requests"]
+    ]
     exact_path = _write(tmp_path / "exact-summary.json", payload)
 
     exact_report = inventory.build_report(ROOT, inventory_path=exact_path)
@@ -595,6 +718,18 @@ def test_every_inventory_row_family_is_exact_and_nonpromoting(tmp_path: Path) ->
             lambda payload: payload["resolved_issues"][0].__setitem__(
                 "merge_commit_sha", int("1" * 40)
             ),
+        ),
+        (
+            "resolved_issue_closure_event_missing:433",
+            lambda payload: next(
+                row for row in payload["resolved_issues"] if row["number"] == 433
+            ).__setitem__("closure_event_id", True),
+        ),
+        (
+            "resolved_issue_shape_invalid:433",
+            lambda payload: next(
+                row for row in payload["resolved_issues"] if row["number"] == 433
+            ).__setitem__("normalization_comment_id", 1),
         ),
         (
             "merged_pull_request_not_linked:258",

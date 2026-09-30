@@ -1,0 +1,36 @@
+{
+  "artifacts": [
+    {
+      "byte_length": 2843,
+      "path": "checkpoint.json",
+      "sha256": "sha256:e3394708d503ad417b66322d0c7beb931afa7ecfb2069b9240340239b6c2e2d9"
+    },
+    {
+      "byte_length": 2247,
+      "path": "evidence.json",
+      "sha256": "sha256:86ebc7d9d8cbd2a243b164e56939a0e987d9004f7c08a80cbb223ec1fd69ca51"
+    },
+    {
+      "byte_length": 1710,
+      "path": "job.json",
+      "sha256": "sha256:d3c6a107c9aaae88524d3a73195aa30a672deb8f3ee85373669110936f150664"
+    },
+    {
+      "byte_length": 31273,
+      "path": "result.json",
+      "sha256": "sha256:c9f8de4b297225fee95cadf2acd25ac1b2b7f5261cd02942501d4e64e119b65c"
+    }
+  ],
+  "control_dof": "UX",
+  "control_targets": [
+    0.003,
+    0.006
+  ],
+  "fixture_scope": "actual same-operator bounded job from committed Python export; no independent numerical or release authority",
+  "model_example": "bounded_frame3d_direct_control_axial_yield.model-ir.v2.json",
+  "pid": 293746,
+  "schema_version": "frame3d-workbench-fixture-provenance.v1",
+  "solver_attempts": 2,
+  "source_export": "/tmp/structural-frame3d-ui-fixtures.tv4o8v4t/source",
+  "source_revision": "f456217aa7e5fe120bbcf86530e5217b5a4720fc"
+}

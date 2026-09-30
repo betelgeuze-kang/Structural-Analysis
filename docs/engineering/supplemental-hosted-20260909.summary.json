@@ -1,0 +1,190 @@
+{
+  "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+  "merge_sha": "e76bb929f3a0d2987f2d8e7e3479995ebd97a50a",
+  "merge_tree_matches_head": true,
+  "tree_sha": "d322d18227fbdd2b62d1ea46efccba75531572ec",
+  "run_id": 34363325365,
+  "job_id": 102505610714,
+  "conclusion": "success",
+  "log_sha256": "5e9c36519ef210ead62eaa243da63c6b985cbee2d618832ae7a3a5e310fe7c06",
+  "record_root": "/tmp/structural-r2-hosted-20260909.hd1laxya",
+  "real_signatures_or_product_execution": false,
+  "schema_version": "supplemental-current-main-hosted-observation.v1",
+  "repository": "betelgeuze-kang/Structural-Analysis",
+  "pr_number": 440,
+  "base_sha": "4de4e3f55aae1d267cf704cec7d7533f3a627498",
+  "workflow_contract": {
+    "run_id": 34363325310,
+    "job_id": 102505610860,
+    "conclusion": "success",
+    "log_sha256": "c13ec94ca22fd9a284b051d0223122ecf05927d6314bdaba739c9feb2c73e105"
+  },
+  "identity_test_counts": {
+    "producer": 19,
+    "consumer": 28,
+    "production_shell": 10
+  },
+  "identity_test_seconds": {
+    "producer": 0.236,
+    "consumer": 0.069,
+    "production_shell": 16.814
+  },
+  "runs": [
+    {
+      "id": 34363325328,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:23:54Z"
+    },
+    {
+      "id": 34363325497,
+      "name": "Frontend Web CI",
+      "event": "pull_request",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:23:55Z"
+    },
+    {
+      "id": 34363325350,
+      "name": "Git LFS Integrity",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:24:14Z"
+    },
+    {
+      "id": 34363325327,
+      "name": "PR Metadata",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:24:22Z"
+    },
+    {
+      "id": 34363325365,
+      "name": "Supplemental Artifact Identity Contract",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:24:37Z"
+    },
+    {
+      "id": 34363325423,
+      "name": "Fiber-frame Execution Topology CI",
+      "event": "pull_request",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:24:34Z"
+    },
+    {
+      "id": 34363325348,
+      "name": "Molecular Quarantine CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:24:34Z"
+    },
+    {
+      "id": 34363325315,
+      "name": "Issue State Current",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:24:59Z"
+    },
+    {
+      "id": 34363325247,
+      "name": "Repository Python Tests",
+      "event": "pull_request",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:25:19Z"
+    },
+    {
+      "id": 34363325281,
+      "name": "Legacy Evidence CI",
+      "event": "pull_request",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:26:04Z"
+    },
+    {
+      "id": 34363325310,
+      "name": "Workflow Contract CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:26:06Z"
+    },
+    {
+      "id": 34363325245,
+      "name": "P0 Canonical Verification Contract",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:26:02Z"
+    },
+    {
+      "id": 34363325337,
+      "name": "Native PR Fast",
+      "event": "pull_request",
+      "status": "queued",
+      "conclusion": null,
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:26:45Z"
+    },
+    {
+      "id": 34363287742,
+      "name": "CI",
+      "event": "push",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:23:33Z"
+    },
+    {
+      "id": 34363287749,
+      "name": "Workflow Contract CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:25:17Z"
+    },
+    {
+      "id": 34363287790,
+      "name": "P0 Canonical Verification Contract",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:25:48Z"
+    },
+    {
+      "id": 34363287674,
+      "name": "Frontend Web CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f788a3c55964ef963f8145835e188d4a3f3792da",
+      "updated_at": "2026-09-09T14:26:33Z"
+    }
+  ],
+  "full_hosted_acceptance": false,
+  "independent_physical_validation": false,
+  "release_authority": false
+}

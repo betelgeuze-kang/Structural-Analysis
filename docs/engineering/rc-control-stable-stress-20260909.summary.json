@@ -1,0 +1,350 @@
+{
+  "schema_version": "rc-stable-stress-observation.v1",
+  "source_revision": "de7b0d634a30921fff7c0b562cf1e0f09d1e13ed",
+  "source_files_verified_against_git": 417,
+  "unchanged_original_input_hashes_verified": true,
+  "all_original_record_gates_and_parent_chains_pass": true,
+  "all_six_terminal_native_reopens_exact": true,
+  "all_reference_fresh_histories_and_checkpoints_exact": true,
+  "full_comparisons_recomputed": true,
+  "main_work": {
+    "core_calls": 1452,
+    "linear_solves": 6048,
+    "newton_iterations": 6048
+  },
+  "main_polishing_work_included": {
+    "attempted": 1452,
+    "accepted": 1133,
+    "assembly_call_count": 1452,
+    "linear_solve_count": 1133
+  },
+  "development_probe_parent_seconds": 344.696892882,
+  "separate_original_material_state_replays": {
+    "concrete": 104544,
+    "steel": 17424
+  },
+  "all_replayed_state_updates_and_branch_decisions_exact": true,
+  "max_stable_minus_original_same_input_absolute": {
+    "concrete/stress_mpa": 9.186926750840985e-15,
+    "concrete/consistent_tangent_mpa": 7.275957614183426e-12,
+    "steel/stress_mpa": 5.684341886080802e-14,
+    "steel/consistent_tangent_mpa": 0.0
+  },
+  "audit_wall_seconds": 19.627652848,
+  "repeat_admission": false,
+  "claims": {
+    "independent_validation": false,
+    "accepted_acceleration": false,
+    "native_material_state_precision_repair": false
+  },
+  "cases": {
+    "base": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 1.1641532182693481e-09,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 183,
+          "support_reactions": 80
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 61.685434897,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1151,
+            "newton_iterations": 1151
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 191,
+            "assembly_call_count": 242,
+            "linear_solve_count": 191
+          },
+          "native_checkpoint_hash": "sha256:5a6c49e1a6e279aece7dae7ae06a9ed9e822ca63dcfc4b491885ae1dc44b2195"
+        },
+        "secant": {
+          "wall_seconds": 44.259600636,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 762,
+            "newton_iterations": 762
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 184,
+            "assembly_call_count": 242,
+            "linear_solve_count": 184
+          },
+          "native_checkpoint_hash": "sha256:977bb935fbe5875ae031ef8a58b99395250f9e56e7a5b1375a7d5597655bcc82"
+        },
+        "fresh-reference": {
+          "wall_seconds": 62.803020419,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1151,
+            "newton_iterations": 1151
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 191,
+            "assembly_call_count": 242,
+            "linear_solve_count": 191
+          },
+          "native_checkpoint_hash": "sha256:5a6c49e1a6e279aece7dae7ae06a9ed9e822ca63dcfc4b491885ae1dc44b2195"
+        }
+      }
+    },
+    "long": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 9.313225746154785e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 165,
+          "support_reactions": 79
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 59.877740358,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1112,
+            "newton_iterations": 1112
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 178,
+            "assembly_call_count": 242,
+            "linear_solve_count": 178
+          },
+          "native_checkpoint_hash": "sha256:96b9b3cb5c9afe9399818b3daf198f413aae37bfd5280d0eb136dc47e9d8961c"
+        },
+        "secant": {
+          "wall_seconds": 44.021778615,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 760,
+            "newton_iterations": 760
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 211,
+            "assembly_call_count": 242,
+            "linear_solve_count": 211
+          },
+          "native_checkpoint_hash": "sha256:39518fa864811a9bb8d8db854f4fe7905528d8b9a99da23e2890dceb0f76c6ca"
+        },
+        "fresh-reference": {
+          "wall_seconds": 60.270664248,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1112,
+            "newton_iterations": 1112
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 178,
+            "assembly_call_count": 242,
+            "linear_solve_count": 178
+          },
+          "native_checkpoint_hash": "sha256:96b9b3cb5c9afe9399818b3daf198f413aae37bfd5280d0eb136dc47e9d8961c"
+        }
+      }
+    }
+  },
+  "compatibility": {
+    "exact_step_pairs": 27,
+    "exact_history_checkpoint_pairs": 9,
+    "source_paths_verified": true,
+    "separate_work": {
+      "core_calls": 54,
+      "linear_solves": 132,
+      "newton_iterations": 132
+    }
+  },
+  "force_diagnostic": {
+    "schema_version": "rc-force-arithmetic-observation.v1",
+    "diagnostic_source_revision": "de7b0d634a30921fff7c0b562cf1e0f09d1e13ed",
+    "source_file_count": 417,
+    "cases": {
+      "base": {
+        "original_source_revision": "de7b0d634a30921fff7c0b562cf1e0f09d1e13ed",
+        "target_count": 242,
+        "selected_force_fields": 3630,
+        "counterfactual_force_mismatch_counts": {
+          "original": {
+            "member": 183,
+            "reaction": 80
+          },
+          "exact_stored_coefficients": {
+            "member": 190,
+            "reaction": 83
+          },
+          "exact_geometry_coefficients": {
+            "member": 190,
+            "reaction": 83
+          },
+          "exact_stored_stresses": {
+            "member": 205,
+            "reaction": 90
+          }
+        },
+        "original_failure_attribution": {
+          "member": {
+            "original_failures": 183,
+            "component_nonzero_counts": {
+              "force_product_sum_transform_and_si_rounding": 181,
+              "geometry_coefficient_rounding": 7,
+              "section_resultant_rounding": 183,
+              "retained_stress_and_load_difference": 183
+            },
+            "component_largest_abs_counts": {
+              "retained_stress_and_load_difference": 181,
+              "section_resultant_rounding": 2
+            },
+            "max_component_abs_si": {
+              "force_product_sum_transform_and_si_rounding": 3.663576125918047e-11,
+              "geometry_coefficient_rounding": 9.093813212964443e-27,
+              "section_resultant_rounding": 9.708510538707237e-11,
+              "retained_stress_and_load_difference": 4.871998760009923e-10
+            }
+          },
+          "reaction": {
+            "original_failures": 80,
+            "component_nonzero_counts": {
+              "force_product_sum_transform_and_si_rounding": 79,
+              "geometry_coefficient_rounding": 0,
+              "section_resultant_rounding": 80,
+              "retained_stress_and_load_difference": 80
+            },
+            "component_largest_abs_counts": {
+              "retained_stress_and_load_difference": 79,
+              "section_resultant_rounding": 1
+            },
+            "max_component_abs_si": {
+              "force_product_sum_transform_and_si_rounding": 3.157967714489334e-11,
+              "geometry_coefficient_rounding": 0,
+              "section_resultant_rounding": 9.708510538707237e-11,
+              "retained_stress_and_load_difference": 4.871998760009923e-10
+            }
+          }
+        },
+        "work": {
+          "model_compilations": 1,
+          "original_step_force_replays": 484,
+          "section_integrations": 0,
+          "constituent_integrations": 0,
+          "newton_solves": 0,
+          "state_commits": 0
+        },
+        "wall_seconds": 6.025673979
+      },
+      "long": {
+        "original_source_revision": "de7b0d634a30921fff7c0b562cf1e0f09d1e13ed",
+        "target_count": 242,
+        "selected_force_fields": 3630,
+        "counterfactual_force_mismatch_counts": {
+          "original": {
+            "member": 165,
+            "reaction": 79
+          },
+          "exact_stored_coefficients": {
+            "member": 173,
+            "reaction": 83
+          },
+          "exact_geometry_coefficients": {
+            "member": 173,
+            "reaction": 83
+          },
+          "exact_stored_stresses": {
+            "member": 154,
+            "reaction": 74
+          }
+        },
+        "original_failure_attribution": {
+          "member": {
+            "original_failures": 165,
+            "component_nonzero_counts": {
+              "force_product_sum_transform_and_si_rounding": 165,
+              "geometry_coefficient_rounding": 165,
+              "section_resultant_rounding": 165,
+              "retained_stress_and_load_difference": 165
+            },
+            "component_largest_abs_counts": {
+              "section_resultant_rounding": 10,
+              "retained_stress_and_load_difference": 155
+            },
+            "max_component_abs_si": {
+              "force_product_sum_transform_and_si_rounding": 6.31593542897867e-11,
+              "geometry_coefficient_rounding": 2.2859436009071097e-26,
+              "section_resultant_rounding": 1.411848415955319e-10,
+              "retained_stress_and_load_difference": 4.903761391934615e-10
+            }
+          },
+          "reaction": {
+            "original_failures": 79,
+            "component_nonzero_counts": {
+              "force_product_sum_transform_and_si_rounding": 79,
+              "geometry_coefficient_rounding": 79,
+              "section_resultant_rounding": 79,
+              "retained_stress_and_load_difference": 79
+            },
+            "component_largest_abs_counts": {
+              "section_resultant_rounding": 5,
+              "retained_stress_and_load_difference": 74
+            },
+            "max_component_abs_si": {
+              "force_product_sum_transform_and_si_rounding": 6.31593542897867e-11,
+              "geometry_coefficient_rounding": 2.2859436009071097e-26,
+              "section_resultant_rounding": 1.411848415955319e-10,
+              "retained_stress_and_load_difference": 4.903761391934615e-10
+            }
+          }
+        },
+        "work": {
+          "model_compilations": 1,
+          "original_step_force_replays": 484,
+          "section_integrations": 0,
+          "constituent_integrations": 0,
+          "newton_solves": 0,
+          "state_commits": 0
+        },
+        "wall_seconds": 5.960665163
+      }
+    },
+    "actual_forbidden_call_counts": {},
+    "input_hashes_verified_before_and_after_diagnostic": true,
+    "all_decompositions_close_exactly": true,
+    "claims": {
+      "unique_attribution": false,
+      "new_equilibrium_solution": false,
+      "numerical_repair": false,
+      "accepted_performance_improvement": false,
+      "independent_validation": false
+    }
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-stable-stress.n9nh6e2x",
+    "file_count": 9541,
+    "total_bytes": 465975673,
+    "inventory_sha256": "de596f3aea3311a39aab61b1c4e0e0e71c371fc7f350c89494c13186787ac8f2",
+    "all_files_reread_exact": true
+  },
+  "validation": {
+    "initial_neighborhood_tests": 162,
+    "initial_neighborhood_seconds": 21.64,
+    "later_focused_integration_tests": 15,
+    "later_focused_integration_seconds": 7.05,
+    "hosted_acceptance": false
+  },
+  "next_scope": "Separate remaining finite fiber-strain projection and persistent native material history at the failed force values before further original trial/commit/recovery changes; full roadmap stays active."
+}

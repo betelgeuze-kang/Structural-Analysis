@@ -1,0 +1,152 @@
+{
+  "fit_inventory_sha256": "f6ed0022b11f9ce55191bbf03efc1f99a182cd3461ebd697e8df94f886352716",
+  "verified_fit_files": 1390,
+  "verified_fit_bytes": 127913980,
+  "rows": [
+    {
+      "outer_group_index": 0,
+      "training_proposal_count": 1,
+      "training_true_positive": 0,
+      "training_false_positive": 1,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 9.51322354225681e-15,
+      "target_min": -0.5076713742679111,
+      "target_max": 0.14614977222814485,
+      "selected_measured_targets": [
+        -0.02626989075417585
+      ],
+      "selected_predicted_targets": [
+        0.01250583204657902
+      ]
+    },
+    {
+      "outer_group_index": 1,
+      "training_proposal_count": 8,
+      "training_true_positive": 1,
+      "training_false_positive": 7,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 1.5210055437364645e-14,
+      "target_min": -0.4088214162412749,
+      "target_max": 0.14761534595871695,
+      "selected_measured_targets": [
+        -0.0749437683546561,
+        -0.01920074172883579,
+        -0.019211052561660447,
+        -0.015800615357234538,
+        0.14761534595871695,
+        -0.027219737044547054,
+        -0.021171808669311343,
+        -0.013168440039166285
+      ],
+      "selected_predicted_targets": [
+        0.01596083365913785,
+        0.020479483189406622,
+        0.04147382078010527,
+        0.02425802019082275,
+        0.02846778038184982,
+        0.01965783401697669,
+        0.023975510196516475,
+        0.016582378255867974
+      ]
+    },
+    {
+      "outer_group_index": 2,
+      "training_proposal_count": 8,
+      "training_true_positive": 0,
+      "training_false_positive": 8,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 1.429412144204889e-14,
+      "target_min": -0.5073512245813763,
+      "target_max": 0.12630070841647245,
+      "selected_measured_targets": [
+        -0.018545832403036977,
+        -0.014478227297944235,
+        -0.01691041206496524,
+        -0.017138742109298333,
+        -0.019658112994732635,
+        -0.013571358824183477,
+        -0.015081390015836194,
+        -0.01960101010942017
+      ],
+      "selected_predicted_targets": [
+        0.015763307047008943,
+        0.010518782700406668,
+        0.02234126461934481,
+        0.037262513023125186,
+        0.01981835406024529,
+        0.017259431385485535,
+        0.033857647993168996,
+        0.015878250285062817
+      ]
+    },
+    {
+      "outer_group_index": 3,
+      "training_proposal_count": 3,
+      "training_true_positive": 0,
+      "training_false_positive": 3,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 4.472117121068209e-15,
+      "target_min": -0.5698278786970716,
+      "target_max": 0.1477514689929631,
+      "selected_measured_targets": [
+        -0.012774612520491502,
+        -0.014381914492393566,
+        -0.030740650481619447
+      ],
+      "selected_predicted_targets": [
+        0.025755841794106345,
+        0.02594472938864187,
+        0.058576169408561946
+      ]
+    },
+    {
+      "outer_group_index": 4,
+      "training_proposal_count": 7,
+      "training_true_positive": 1,
+      "training_false_positive": 6,
+      "normalization_exact": true,
+      "original_cost_rows_exact": true,
+      "normal_equation_residual_max": 7.473188734508085e-15,
+      "target_min": -0.3167499885117133,
+      "target_max": 0.14445292104887741,
+      "selected_measured_targets": [
+        -0.016913708937139615,
+        -0.01430095199634529,
+        -0.015099548367980997,
+        -0.017249374204223233,
+        -0.018057050043927658,
+        -0.019961990543358565,
+        0.1085473777408118
+      ],
+      "selected_predicted_targets": [
+        0.011255661761081188,
+        0.025258325864446377,
+        0.014822462351212096,
+        0.013001317445889402,
+        0.05725949804529029,
+        0.03249048354376735,
+        0.020248714497844003
+      ]
+    }
+  ],
+  "actual_original_gate_fit_count": 5,
+  "original_wrapper_completed_fits": 5,
+  "original_fit_wall_ns": 50105787,
+  "original_driver_wall_ns": 322196481,
+  "original_outer_wall_ns": 2215881553,
+  "new_fits_in_this_audit": 0,
+  "new_solves": 0,
+  "reserved_evaluation": false,
+  "wall_ns_before_report": 450282962,
+  "source_revision": "72d28a432cdb2f77073632c5dd56058891a1cde5",
+  "fit_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-material-cost-fits-ve4gcy36",
+  "audit_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-material-cost-fit-audit-ku4w0je7",
+  "audit_inventory_sha256": "07851a966d3eab634d98ca850c51888adca0dd5fe9bc867e71a07d80421e2ad4",
+  "promoted": false,
+  "online_adapter": false,
+  "full_path_evaluation_performed": false
+}

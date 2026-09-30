@@ -1,0 +1,343 @@
+{
+  "scope": "read_only_replay_of_hash_bound_accepted_histories;no_new_solves_or_independent_validation",
+  "results": [
+    {
+      "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-larger-cohort-cgh0zfaw/experiment",
+      "source_revision": "99c362c29dc608064428c6169330e9552cb45d84",
+      "counts": {
+        "rows": 8,
+        "available": 8,
+        "steel_positive": 0,
+        "concrete_positive": 0,
+        "unknown": 0
+      },
+      "material_activity": [
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 2520,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 2520,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 4704,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 4704,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 2520,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 2520,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 4704,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 4704,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": false,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.0,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        }
+      ]
+    },
+    {
+      "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-topology-highload-ltygx_ms/experiment",
+      "source_revision": "29af2b0f9bcd481058cae1cabb192b91f65c4506",
+      "counts": {
+        "rows": 18,
+        "available": 9,
+        "steel_positive": 0,
+        "concrete_positive": 9,
+        "unknown": 9
+      },
+      "material_activity": [
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": false,
+          "reason": "history_unavailable_or_unverified",
+          "accepted_step_count": null,
+          "material_observation_count": null,
+          "steel_plasticity_observed": null,
+          "concrete_damage_observed": null,
+          "maximum_accumulated_steel_plastic_strain": null,
+          "maximum_concrete_tensile_damage": null,
+          "maximum_concrete_compressive_damage": null,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        },
+        {
+          "available": true,
+          "reason": null,
+          "accepted_step_count": 4,
+          "material_observation_count": 240,
+          "steel_plasticity_observed": false,
+          "concrete_damage_observed": true,
+          "maximum_accumulated_steel_plastic_strain": 0.0,
+          "maximum_concrete_tensile_damage": 0.973963347604064,
+          "maximum_concrete_compressive_damage": 0.0,
+          "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation"
+        }
+      ]
+    }
+  ]
+}

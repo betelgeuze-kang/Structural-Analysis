@@ -1,9 +1,33 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
+import subprocess
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_delivery_rejects_missing_or_modified_runtime_asset(tmp_path, changed):
+    source = tmp_path / "src/structure-viewer"
+    emitted = tmp_path / "dist/src/structure-viewer"
+    scripts = tmp_path / "scripts"
+    for directory in (source, emitted, scripts):
+        directory.mkdir(parents=True)
+    (source / "viewer-runtime-assets.json").write_text(json.dumps(["data.js"]))
+    (source / "data.js").write_bytes(b"original data")
+    (emitted / "index.html").write_text("viewer entry")
+    (tmp_path / "dist/index.html").write_text("workbench entry")
+    if changed:
+        (emitted / "data.js").write_bytes(b"different data")
+    target = scripts / "verify-workbench-viewer-delivery.mjs"
+    target.write_bytes((ROOT / "scripts/verify-workbench-viewer-delivery.mjs").read_bytes())
+    result = subprocess.run(["node", str(target)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "Runtime asset missing or changed: data.js" in result.stderr
 
 
 def _read(relative_path: str) -> str:
@@ -14,12 +38,17 @@ def test_workbench_v2_is_the_default_product_surface() -> None:
     main = _read("src/main.tsx")
 
     assert "export function resolveProductSurface" in main
+    assert "export type ProductSurface = 'workbench-v2' | 'legacy-app' | 'rc-pin-roller-original'" in main
     assert "path.endsWith('/legacy') || hash === '#/legacy'" in main
-    assert "return legacyRoute ? 'legacy-app' : 'workbench-v2'" in main
+    assert "if (legacyRoute) return 'legacy-app'" in main
+    assert "if (path.endsWith('/rc-pin-roller-original') || hash === '#/rc-pin-roller-original') return 'rc-pin-roller-original'" in main
+    assert "return 'workbench-v2'" in main
     assert "export function resolveSameOriginJobUrl" in main
     assert "resolved.origin === origin ? resolved.toString() : undefined" in main
     assert "import.meta.env.VITE_JOB_STATUS_URL" in main
-    assert "return surface === 'legacy-app' ? (" in main
+    assert "return surface === 'rc-pin-roller-original' ? (" in main
+    assert "<RcPinRollerOriginalPanel />" in main
+    assert ") : surface === 'legacy-app' ? (" in main
     assert "<LegacyAppSurface />" in main
     assert "<WorkbenchPage" in main
     assert "jobStatusUrl={jobStatusUrl}" in main

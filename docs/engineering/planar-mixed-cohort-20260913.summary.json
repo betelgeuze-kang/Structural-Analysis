@@ -1,0 +1,201 @@
+{
+  "source_revision": "abe9f2abf217a50df79f8e17af145970d98e2683",
+  "counts": {
+    "api_entered": 27,
+    "artifact_contract_pass": 27,
+    "declared": 27,
+    "launched": 27,
+    "physical_converged": 9,
+    "resource_eligible": 27
+  },
+  "source_files_checked": 458,
+  "artifact_identities_checked": 234,
+  "comparison_count": 18,
+  "exact_converged_repeat_pairs": 6,
+  "exact_failed_diagnostic_repeat_pairs": 12,
+  "summary": [
+    {
+      "case_id": "short_30",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 2.945830484,
+      "converged_workload_ratio_to_dense": 1.0
+    },
+    {
+      "case_id": "short_30",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 2.976082286,
+      "converged_workload_ratio_to_dense": 1.0102693628042447
+    },
+    {
+      "case_id": "short_30",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 6.772223198,
+      "converged_workload_ratio_to_dense": 2.298918160696174
+    },
+    {
+      "case_id": "tall_30",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.34733615,
+      "converged_workload_ratio_to_dense": null
+    },
+    {
+      "case_id": "tall_30",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.37575045,
+      "converged_workload_ratio_to_dense": null
+    },
+    {
+      "case_id": "tall_30",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.478076423,
+      "converged_workload_ratio_to_dense": null
+    },
+    {
+      "case_id": "base_40",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.024639876,
+      "converged_workload_ratio_to_dense": null
+    },
+    {
+      "case_id": "base_40",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.074832951,
+      "converged_workload_ratio_to_dense": null
+    },
+    {
+      "case_id": "base_40",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "repetitions": 3,
+      "converged_count": 0,
+      "workload_median_seconds_including_failures": 2.206669366,
+      "converged_workload_ratio_to_dense": null
+    }
+  ],
+  "experiment_wall_seconds": 139.725813761,
+  "scope": "Retained-byte audit and recomputed internal comparisons; generated related portal variants, not independent projects or external physical validation. Failure timings retained; no speed ratio for nonconverged groups.",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-mixed-cohort-eto8cjp_",
+  "inventory_sha256": "e3a6901d1a0434e02b0b3bd4a20a56daf45e0f8e42ff8dff2d9ec835586f4fb6",
+  "representative_rows": [
+    {
+      "slot": 0,
+      "case_id": "short_30",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.000720234247165588,
+        "dissipated_energy_density_mj_per_m3": 0.002795710560129443,
+        "tensile_damage": 0.9864101971637728,
+        "tensile_history_strain": 0.0008281408372376809,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "slot": 3,
+      "case_id": "tall_30",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "status": "not_converged",
+      "observed_load_path": {
+        "attempted_step_count": 4,
+        "committed_step_count": 3,
+        "convergence_history_row_count": 23,
+        "newly_attempted_step_count": 4,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 4,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 7,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.5,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 9,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.75,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 3,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 1.0,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      },
+      "committed_steps": 3,
+      "material_maxima": null
+    },
+    {
+      "slot": 6,
+      "case_id": "base_40",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "status": "not_converged",
+      "observed_load_path": {
+        "attempted_step_count": 3,
+        "committed_step_count": 2,
+        "convergence_history_row_count": 18,
+        "newly_attempted_step_count": 3,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 4,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 7,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.5,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 7,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.75,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      },
+      "committed_steps": 2,
+      "material_maxima": null
+    }
+  ]
+}

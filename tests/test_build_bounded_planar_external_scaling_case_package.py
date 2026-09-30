@@ -120,7 +120,8 @@ def test_characteristic_length_pair_obeys_similarity_contract() -> None:
         <= product["relative_tolerance"]
         == package._INVARIANCE_RELATIVE_TOLERANCE
     )
-    assert product["maximum_relative_difference"] > 0.0
+    # Exact normalized agreement is valid, including power-of-two scaling.
+    assert product["maximum_relative_difference"] >= 0.0
     assert product["maximum_relative_difference"] <= (
         0.2 * package._INVARIANCE_RELATIVE_TOLERANCE
     )

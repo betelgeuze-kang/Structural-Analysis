@@ -1,0 +1,61 @@
+{
+  "hosted_source": "d8b22b206c0edcf66efe45b1a7c07390d9f43a7b",
+  "hosted_run_id": 34749003181,
+  "hosted_job_id": 103701977816,
+  "hosted_failed_step": "Fiber-frame regression neighborhood",
+  "hosted_failed_step_result": {
+    "passed": 980,
+    "failed": 2,
+    "seconds": 884.04
+  },
+  "local_base_revision": "038d3d12722f74ec3619998d7a03652ea3560892",
+  "local_validation": {
+    "original_reproduction": {
+      "failed": 2,
+      "deselected": 93,
+      "seconds": 1.99
+    },
+    "module_after_expectation_fix": {
+      "passed": 95,
+      "seconds": 21.61
+    },
+    "after_also_forging_newton_iteration_count": {
+      "passed": 2,
+      "deselected": 93,
+      "seconds": 2.0
+    },
+    "ruff": "passed",
+    "diff_check": "passed"
+  },
+  "production_solver_changed": false,
+  "failure_or_tolerance_relaxed": false,
+  "full_hosted_pass": false,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-api-failed-work-lsjvjakh",
+  "files": [
+    {
+      "path": "structural-d8-topology.log",
+      "bytes": 171137,
+      "sha256": "1c7d15df50ebbe5f2431fad8452cb95c78fdd7746f179bb0d2c2be50b1adee8e"
+    },
+    {
+      "path": "structural-api-work-before.log",
+      "bytes": 1567,
+      "sha256": "36f5de8f02a80c178f367d8d3fb1ac51854676a120a276d1a6acc6aeb8d0fe06"
+    },
+    {
+      "path": "structural-api-work-after.log",
+      "bytes": 180,
+      "sha256": "ab2037cdc963418716ffbf86e40817b816dd2d29b79acff610792120cfe6b055"
+    },
+    {
+      "path": "structural-api-work-final-focused.log",
+      "bytes": 113,
+      "sha256": "fb178972f0e3d0246d833d06c2eb3f2ef43e03c89f0828b07235c12a050ffb07"
+    },
+    {
+      "path": "test_bounded_rc_fiber_direct_control_api.py",
+      "bytes": 49785,
+      "sha256": "836f82f0a021366d0a62f78fd8e272fc22ecb98717581adc1626f571f4f1ce38"
+    }
+  ]
+}

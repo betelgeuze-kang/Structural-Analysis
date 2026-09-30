@@ -1,0 +1,179 @@
+{
+  "schema_version": "rc-learning-training-expansion-plan.v1",
+  "source_revision": "bdfa9a0262cf6fb74d27a7914744487178c5f150",
+  "arithmetic_profile": "retained-twofold-refinement.v1",
+  "ridge": 1e-06,
+  "ood_margin": 0.1,
+  "generation_arm_order": [
+    "reference",
+    "secant"
+  ],
+  "evaluation_arm_order": [
+    "reference",
+    "secant",
+    "proposal"
+  ],
+  "cases": [
+    {
+      "case_id": "train-a",
+      "split": "train",
+      "project_id": "declared-development-train",
+      "geometry_family_id": "declared-geometry-train-a",
+      "load_history_id": "declared-history-train",
+      "lengths_m": [
+        2.0,
+        1.5
+      ],
+      "model_path": "train-a-model.json",
+      "request_path": "train-a-request.json"
+    },
+    {
+      "case_id": "train-b",
+      "split": "train",
+      "project_id": "declared-development-train",
+      "geometry_family_id": "declared-geometry-train-b",
+      "load_history_id": "declared-history-train",
+      "lengths_m": [
+        3.0,
+        2.5
+      ],
+      "model_path": "train-b-model.json",
+      "request_path": "train-b-request.json"
+    },
+    {
+      "case_id": "train-c",
+      "split": "train",
+      "project_id": "declared-development-train",
+      "geometry_family_id": "declared-geometry-train-c",
+      "load_history_id": "declared-history-train-c",
+      "lengths_m": [
+        1.75,
+        2.5
+      ],
+      "model_path": "train-c-model.json",
+      "request_path": "train-c-request.json",
+      "training_history_transform": {
+        "negative_factor": 0.9,
+        "nonnegative_factor": 1.1,
+        "source": "train-a-request.json"
+      }
+    },
+    {
+      "case_id": "train-d",
+      "split": "train",
+      "project_id": "declared-development-train",
+      "geometry_family_id": "declared-geometry-train-d",
+      "load_history_id": "declared-history-train-d",
+      "lengths_m": [
+        3.25,
+        1.25
+      ],
+      "model_path": "train-d-model.json",
+      "request_path": "train-d-request.json",
+      "training_history_transform": {
+        "negative_factor": 1.1,
+        "nonnegative_factor": 0.9,
+        "source": "train-a-request.json"
+      }
+    },
+    {
+      "case_id": "validation",
+      "split": "validation",
+      "project_id": "declared-development-validation",
+      "geometry_family_id": "declared-geometry-validation",
+      "load_history_id": "declared-history-validation",
+      "lengths_m": [
+        2.5,
+        2.0
+      ],
+      "model_path": "validation-model.json",
+      "request_path": "validation-request.json"
+    },
+    {
+      "case_id": "holdout",
+      "split": "holdout",
+      "project_id": "declared-development-holdout",
+      "geometry_family_id": "declared-geometry-holdout",
+      "load_history_id": "declared-history-holdout",
+      "lengths_m": [
+        6.0,
+        4.7
+      ],
+      "model_path": "holdout-model.json",
+      "request_path": "holdout-request.json"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "holdout-model.json",
+      "byte_length": 2316,
+      "sha256": "a898e9f3c449abaa3988d3bd807adf93b5e855203c2153a04fd03dc30045fc2e"
+    },
+    {
+      "path": "holdout-request.json",
+      "byte_length": 6742,
+      "sha256": "64284786e59bb4ad3e611128e2c3623515d807d474fef6bceccc61b21f5fcc81"
+    },
+    {
+      "path": "train-a-model.json",
+      "byte_length": 2316,
+      "sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d"
+    },
+    {
+      "path": "train-a-request.json",
+      "byte_length": 5642,
+      "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+    },
+    {
+      "path": "train-b-model.json",
+      "byte_length": 2316,
+      "sha256": "fcf9ad40439fc3fd1c8289904fcfbf7690247b3aeb0d8b55cdb2c25b8bd72377"
+    },
+    {
+      "path": "train-b-request.json",
+      "byte_length": 5642,
+      "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+    },
+    {
+      "path": "train-c-model.json",
+      "byte_length": 2318,
+      "sha256": "157523e01f5525b00b6da76d182318cfa68c4446aecd323880948a2abad2fb72"
+    },
+    {
+      "path": "train-c-request.json",
+      "byte_length": 5724,
+      "sha256": "089f48bd154481daa914c2fde96980d0c58d4734163b8e5c02bb42f0e47626ea"
+    },
+    {
+      "path": "train-d-model.json",
+      "byte_length": 2319,
+      "sha256": "9d871f918523da1546ac27f3e24b9b05ec8a11e4d92794f6d91b0b3b05114460"
+    },
+    {
+      "path": "train-d-request.json",
+      "byte_length": 5936,
+      "sha256": "1290200a0ea7093aec43d6f3a0d7117bd75b67eaa116b339ea5feed0abd6a217"
+    },
+    {
+      "path": "validation-model.json",
+      "byte_length": 2316,
+      "sha256": "4f640aaa1e16b3fdaaebffa8907909ba35c62fb3098c033d74b19fbec65cd1d0"
+    },
+    {
+      "path": "validation-request.json",
+      "byte_length": 6406,
+      "sha256": "ae4aceccf9590162e450bc7399787d622649a142740ffa1a8bec654c1e4ba6a5"
+    }
+  ],
+  "independent_provenance": false,
+  "project_and_family_ids_are_authored_partition_labels": true,
+  "existing_validation_and_holdout_reused_development_cases": true,
+  "new_blind_validation": false,
+  "automatic_retry": false,
+  "automatic_repetitions": false,
+  "expected_targets_per_case": 242,
+  "expected_complete_path_count": 20,
+  "nominal_core_target_count_without_rejected_retries": 4840,
+  "fit_sample_count_if_all_train_paths_eligible": 964,
+  "purpose": "Isolate broader authored training geometry/history coverage with unchanged learner, solver, hyperparameters, comparison criteria, and original development evaluation inputs. No independent corpus, physical-validation, or runtime-improvement claim."
+}

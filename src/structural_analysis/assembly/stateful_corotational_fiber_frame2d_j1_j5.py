@@ -27,6 +27,7 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
     StatefulCorotationalFiberFrame2DLoadPathResult,
+    _sparse_accepted_assembly_binding,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.solvers.nonlinear.newton import RESIDUAL_FORMULA
@@ -485,6 +486,12 @@ def _validate_portal_profile(
     problem: StatefulCorotationalFiberFrame2DProblem,
 ) -> tuple[tuple[int, int], tuple[int, int]]:
     coordinates = problem.node_coordinates_m
+    if problem.constant_external_loads:
+        _fail(
+            "corotational_portal_constant_external_load_unsupported",
+            "/constant_external_loads",
+            "The v1 portal profile supports proportional nodal loads only.",
+        )
     if problem.prescribed_displacements:
         _fail(
             "corotational_portal_prescribed_displacement_unsupported",
@@ -692,6 +699,7 @@ def _build_stage_receipts(
                         "parent": step.parent_checkpoint.state_hash,
                         "accepted": step.accepted_checkpoint.state_hash,
                         "assembly_parent": step.trial_assembly.parent_checkpoint_hash,
+                        **_sparse_accepted_assembly_binding(problem, step),
                         "solver_contract_pass": step.metrics.get(
                             "solver_contract_pass"
                         ),

@@ -1,0 +1,268 @@
+{
+  "api_invocations": 7,
+  "claims": {
+    "general_cyclic_validation": false,
+    "independent_physical_validation": false,
+    "internal_source_consistency_only": true,
+    "performance_improvement": false,
+    "production_or_release_authority": false,
+    "public_j1_j5_calls": 0
+  },
+  "core_calls": 1454,
+  "cost_scope": "Observer-inclusive correctness cost; CLI API intervals exclude parsing/publication; separate fresh process launch-to-exit recorded. No speed comparison.",
+  "first_accepted_plastic_epoch": 15,
+  "full_response_history_sha256": "17a3e06a138c8a58a3e2e8e324354e3b7ff8cac57464f28d99326f6c494c9737",
+  "full_target_count": 242,
+  "known_linear_solves": 5954,
+  "known_newton_iterations": 5954,
+  "launch_wall_ns": 689390239581,
+  "model_sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d",
+  "per_epoch_material_point_count": [
+    84
+  ],
+  "raw_root": "/tmp/structural-rc-control-api-observation.ry94k4xt",
+  "reversals": 2,
+  "rows": [
+    {
+      "analysis_api_timing": {
+        "process_cpu_ns": 97685762377,
+        "wall_ns": 97705665849
+      },
+      "api_call_count": 2,
+      "cli_exit_code": 0,
+      "core_call_count": 484,
+      "known_linear_solve_count": 1920,
+      "known_newton_iteration_count": 1920,
+      "launch_wall_ns": 228225130664,
+      "lifetime_peak_rss_bytes": 1246588928,
+      "mode": "full",
+      "output_artifacts": [
+        {
+          "byte_length": 111488333,
+          "path": "full/result.json",
+          "sha256": "7f9e8181f10bb32d0a08c9915d0182a99fd009503e8706a15c3a0bc84e937572"
+        },
+        {
+          "byte_length": 127345,
+          "path": "full/checkpoint.json",
+          "sha256": "6fc6538139495294d0db7f391acecaa7ea54e4801154b739712424208c2269e3"
+        }
+      ],
+      "pid": 597784,
+      "report_artifact": {
+        "byte_length": 11163,
+        "path": "full/report.json",
+        "sha256": "3bbd829864b77601df828edf14f51fcf162f52a1bd437cd0d0a6926e9159ab25"
+      },
+      "response_reassembly_verified_count": 484,
+      "verification_api_timing": {
+        "process_cpu_ns": 105701363678,
+        "wall_ns": 105731824069
+      },
+      "worker_process_cpu_ns": 227935613101
+    },
+    {
+      "analysis_api_timing": {
+        "process_cpu_ns": 51838152752,
+        "wall_ns": 51841672257
+      },
+      "api_call_count": 2,
+      "cli_exit_code": 0,
+      "core_call_count": 244,
+      "known_linear_solve_count": 1154,
+      "known_newton_iteration_count": 1154,
+      "launch_wall_ns": 120751536891,
+      "lifetime_peak_rss_bytes": 748916736,
+      "mode": "prefix",
+      "output_artifacts": [
+        {
+          "byte_length": 56313776,
+          "path": "prefix/result.json",
+          "sha256": "59047f50ef2c4973b28ace5c54325d2f852da36cec69503a04a9b4880b42d141"
+        },
+        {
+          "byte_length": 80739,
+          "path": "prefix/checkpoint.json",
+          "sha256": "0e652adf4c41f6c9708999ec08cc68769f1a47ead70174e3e35c6c47eac74a01"
+        }
+      ],
+      "pid": 599093,
+      "report_artifact": {
+        "byte_length": 8290,
+        "path": "prefix/report.json",
+        "sha256": "88291c5c17817481b8aca38557451b509817bad93e349e5614884dfa573c637d"
+      },
+      "response_reassembly_verified_count": 244,
+      "verification_api_timing": {
+        "process_cpu_ns": 55551912637,
+        "wall_ns": 55555406543
+      },
+      "worker_process_cpu_ns": 120517781202
+    },
+    {
+      "analysis_api_timing": {
+        "process_cpu_ns": 99270732996,
+        "wall_ns": 99278316218
+      },
+      "api_call_count": 2,
+      "cli_exit_code": 0,
+      "core_call_count": 484,
+      "known_linear_solve_count": 1920,
+      "known_newton_iteration_count": 1920,
+      "launch_wall_ns": 230772129371,
+      "lifetime_peak_rss_bytes": 1226211328,
+      "mode": "resume",
+      "output_artifacts": [
+        {
+          "byte_length": 111487646,
+          "path": "resume/result.json",
+          "sha256": "0366ed7fcdf2ece1e4d68f27c63f2d06a979e08d0da259c4783fb5b734bf1fa0"
+        },
+        {
+          "byte_length": 127345,
+          "path": "resume/checkpoint.json",
+          "sha256": "6fc6538139495294d0db7f391acecaa7ea54e4801154b739712424208c2269e3"
+        }
+      ],
+      "pid": 599456,
+      "report_artifact": {
+        "byte_length": 8821,
+        "path": "resume/report.json",
+        "sha256": "2d9ce104739b45d3ef22289542be586a16b9d431c34f574b11f33990cd5a9360"
+      },
+      "response_reassembly_verified_count": 484,
+      "verification_api_timing": {
+        "process_cpu_ns": 106518081602,
+        "wall_ns": 106525434084
+      },
+      "worker_process_cpu_ns": 230544471963
+    },
+    {
+      "analysis_api_timing": null,
+      "api_call_count": 1,
+      "cli_exit_code": 0,
+      "core_call_count": 242,
+      "known_linear_solve_count": 960,
+      "known_newton_iteration_count": 960,
+      "launch_wall_ns": 109640757203,
+      "lifetime_peak_rss_bytes": 997253120,
+      "mode": "verify",
+      "output_artifacts": [],
+      "pid": 600027,
+      "report_artifact": {
+        "byte_length": 9663,
+        "path": "verify/report.json",
+        "sha256": "b5ca4f3dd04c3224cc40cd9e0bfeac8ed21bceacded45f793b21ceb2e3700ec5"
+      },
+      "response_reassembly_verified_count": 242,
+      "verification_api_timing": {
+        "process_cpu_ns": 105850693153,
+        "wall_ns": 105857546217
+      },
+      "worker_process_cpu_ns": 109434363445
+    }
+  ],
+  "schema_version": "rc-control-api-cli-observation-summary.v1",
+  "source_file_count": 402,
+  "source_revision": "7f78b4c833dc805bf54d53b7ac8e750914a51238",
+  "terminal_checkpoint_hash": "sha256:6dabcfde2a29021849d606aa48cf4173e7da9b7e6c9ed4bfc640950295f073f4",
+  "terminal_epoch": 242,
+  "terminal_load_factor": 1.3828147147200147,
+  "terminal_material_state_maxima": {
+    "accumulated_plastic_strain": 0.009756536290480443,
+    "compressive_damage": 0.13048993532825948,
+    "tensile_damage": 0.9999999999661977
+  },
+  "unknown_solver_work_attempts": 0,
+  "verified_response_reassemblies": 1454,
+  "saved_artifact_audit": {
+    "schema_version": "rc-control-api-saved-audit.v1",
+    "status": "passed",
+    "checks": 8493,
+    "errors": [],
+    "audit_wall_ns": 11472902566,
+    "scope": {
+      "saved_json_raw_hash_and_projection_consistency": true,
+      "newton_calls": 0,
+      "physical_reassembly_calls": 0,
+      "project_imports": 0,
+      "source_execution_attestation": false,
+      "independent_physical_validation": false,
+      "limitations": [
+        "Stored gate flags and execution events are unsigned local assertions.",
+        "Arithmetic projection checks do not independently verify constitutive or equilibrium physics.",
+        "No CI/public J1-J5, generalized cyclic, performance, design or release authority.",
+        "Only first full API native bytes are independently retained; other calls bind by saved exact hashes.",
+        "Process peak RSS includes observer; nested intervals are not additive. Audit costs are separate."
+      ]
+    },
+    "summary": {
+      "accepted_reversal_count": 2,
+      "first_positive_steel_epoch": 15,
+      "source_revision": "7f78b4c833dc805bf54d53b7ac8e750914a51238",
+      "source_file_count": 402,
+      "totals": {
+        "api": 7,
+        "core": 1454,
+        "iterations": 5954,
+        "linear": 5954,
+        "unknown": 0
+      },
+      "modes": {
+        "full": {
+          "core_call_count": 484,
+          "api_call_count": 2,
+          "worker_wall_ns": 228013101939,
+          "worker_process_cpu_ns": 227935613101,
+          "lifetime_peak_rss_bytes": 1246588928,
+          "launch_wall_ns": 228225130664
+        },
+        "prefix": {
+          "core_call_count": 244,
+          "api_call_count": 2,
+          "worker_wall_ns": 120560905041,
+          "worker_process_cpu_ns": 120517781202,
+          "lifetime_peak_rss_bytes": 748916736,
+          "launch_wall_ns": 120751536891
+        },
+        "resume": {
+          "core_call_count": 484,
+          "api_call_count": 2,
+          "worker_wall_ns": 230583290594,
+          "worker_process_cpu_ns": 230544471963,
+          "lifetime_peak_rss_bytes": 1226211328,
+          "launch_wall_ns": 230772129371
+        },
+        "verify": {
+          "core_call_count": 242,
+          "api_call_count": 1,
+          "worker_wall_ns": 109462536181,
+          "worker_process_cpu_ns": 109434363445,
+          "lifetime_peak_rss_bytes": 997253120,
+          "launch_wall_ns": 109640757203
+        }
+      },
+      "pids": [
+        597784,
+        599093,
+        599456,
+        600027
+      ],
+      "terminal_native_checkpoint_sha256": "c7bcd0813a099e7aaf25bfa4ee40213e60219a53469a5c3fe31890ae9677f6bb",
+      "full_restart_sha256": "6fc6538139495294d0db7f391acecaa7ea54e4801154b739712424208c2269e3",
+      "parent_launch_wall_ns": 689390239581
+    },
+    "report_identity": {
+      "path": "/tmp/structural-rc-control-api-observation.ry94k4xt/audit-report.json",
+      "byte_length": 301314,
+      "sha256": "83672a0466f90b782626eaecc2c33f214bd6fc7185bf61c9dbdcf93e9020b916"
+    }
+  },
+  "raw_inventory": {
+    "path": "/tmp/structural-rc-control-api-observation.ry94k4xt/final-inventory.json",
+    "sha256": "0c2c16301c7901162e5502cedae3bce1f1f7459715f94efc796b207800722f8c",
+    "file_count": 1000,
+    "total_bytes": 376225557,
+    "scope": "All sealed observation files except the inventory itself; unsigned local consistency, not execution attestation."
+  }
+}

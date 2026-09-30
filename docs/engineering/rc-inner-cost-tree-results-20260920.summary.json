@@ -1,0 +1,304 @@
+{
+  "input_inventory_sha256": "eb06c7a18a4e2a6100d24f3cfc3004878d11ad77870fd6d55a0bc3d8fdc62483",
+  "verified_files": 2565,
+  "new_fits": 0,
+  "new_solves": 0,
+  "actual_original_fits": 20,
+  "aggregate": {
+    "declined_unverified": 0,
+    "false_negative": 31,
+    "false_positive": 1,
+    "proposed_unverified": 0,
+    "true_negative": 627,
+    "true_positive": 1
+  },
+  "unique_source_samples": 165,
+  "folds": [
+    {
+      "name": "outer-0-validation-1-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 4,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 29,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-0-validation-2-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-0-validation-3-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-0-validation-4-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 1,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 32,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-1-validation-0-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-1-validation-2-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-1-validation-3-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 4,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 29,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-1-validation-4-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 2,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 31,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-2-validation-0-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-2-validation-1-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 1,
+        "false_positive": 1,
+        "proposed_unverified": 0,
+        "true_negative": 30,
+        "true_positive": 1
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-2-validation-3-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 5,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 28,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-2-validation-4-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-3-validation-0-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-3-validation-1-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 3,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 30,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-3-validation-2-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-3-validation-4-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 3,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 30,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-4-validation-0-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-4-validation-1-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 2,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 31,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-4-validation-2-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 0,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 33,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    },
+    {
+      "name": "outer-4-validation-3-prefix-tree",
+      "counts": {
+        "declined_unverified": 0,
+        "false_negative": 6,
+        "false_positive": 0,
+        "proposed_unverified": 0,
+        "true_negative": 27,
+        "true_positive": 0
+      },
+      "partition_support_and_leaf_means_exact": true
+    }
+  ],
+  "fit_wall_ns": 1155721395,
+  "driver_wall_ns": 2884950647,
+  "outer_wall_ns": 4720658331,
+  "audit_wall_ns": 1811965860,
+  "posthoc_model_family": true,
+  "promoted": false,
+  "reserved_evaluation": false,
+  "scope": "Retained partitions, leaf means, bindings, targets and decisions; not an independent split-optimality implementation.",
+  "evaluation_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-inner-cost-tree-4nuqj48r",
+  "audit_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-inner-cost-tree-audit-eab0w9l2",
+  "audit_inventory_sha256": "caaec1eb86c672ff0b61a2ebb67b661142653764f3e1a63fc6db6a7454aa7ae1",
+  "source_revision": "ce6c18f24a8597e7976c0bf2eec94bba0e06f15e",
+  "selected": [
+    {
+      "fold": "outer-2-validation-1-prefix-tree-score.json",
+      "case_id": "train-b-amp100",
+      "category": "false_positive",
+      "decision": true,
+      "measured_label": false,
+      "measured_worst_repeat_margin": -0.029863025630256557,
+      "parent_hash": "sha256:d5b8a54211ea8731bf8d24f34ec0c3399f48baee7cc4693f55a72804ca2fe794",
+      "producing_seed_policy_hash": "sha256:45324510230a63ced3450cbb3cf1d759af477b604c56b6835db8202bb473cf47",
+      "report_hashes": [
+        "sha256:09325f3779d19b58dc85cb660616dc7ed06013ada4dc2613c24028c6213c8f39",
+        "sha256:e2c0a3c06419592b05ae0ca72e586c4b4e121d334d96732fea9b0a3bc10a8ff8",
+        "sha256:4ada11da4d5084e30547488554c3fc799a79cd38008e694b1b00b7b0d2aff2ac"
+      ],
+      "source_sample_hash": "sha256:15a275710f9a24d0cafdb392426492ced07d5121d27ecae4c67ad16c52049dad"
+    },
+    {
+      "fold": "outer-2-validation-1-prefix-tree-score.json",
+      "case_id": "train-b-amp150",
+      "category": "true_positive",
+      "decision": true,
+      "measured_label": true,
+      "measured_worst_repeat_margin": 0.1218808351509596,
+      "parent_hash": "sha256:d3cff614290620fa6e35e8935173e2eaf3d79e3563c474f7d1fdad8e7d5d35f1",
+      "producing_seed_policy_hash": "sha256:45324510230a63ced3450cbb3cf1d759af477b604c56b6835db8202bb473cf47",
+      "report_hashes": [
+        "sha256:b147431df242aa3d5f6d180f6dc75befbb93972d978df66d1429282932e8ab88",
+        "sha256:329dc91512a6b1e97e466798cfe2e4b32219b666d840e22bf035817bd48d6ef4",
+        "sha256:3cdea6e55b384bb32914ab9c05fa2d306437c1645bab203aab08af12787f35f0"
+      ],
+      "source_sample_hash": "sha256:faaffbae39768f427d04ecb5abcba8214c75d39550a7ecc3b7c4a34e7d50306b"
+    }
+  ]
+}

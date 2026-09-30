@@ -1,0 +1,127 @@
+{
+  "source_revision": "53aba2aeb8fe42f6e09bf2b3c7216737dbcef1de",
+  "input_packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-full-r7wempke",
+    "inventory_sha256": "8ac7698e73346eefcd759b0110633df510fad08df4d63b2dcae998299d312369",
+    "files": 23924,
+    "bytes": 1415485590
+  },
+  "groups": [
+    {
+      "case": "train-a",
+      "arm": "secant",
+      "counts": {
+        "primary_convergence_rows": 578,
+        "terminal_linear_solves": 391,
+        "terminal_assembly_calls": 484,
+        "accepted_terminal_corrections": 391,
+        "attempted_terminal_refinements": 484,
+        "line_search_trials": 336,
+        "total_recorded_linear_solves": 969
+      }
+    },
+    {
+      "case": "train-a",
+      "arm": "proposal",
+      "counts": {
+        "primary_convergence_rows": 571,
+        "terminal_linear_solves": 386,
+        "terminal_assembly_calls": 483,
+        "accepted_terminal_corrections": 386,
+        "attempted_terminal_refinements": 483,
+        "line_search_trials": 329,
+        "total_recorded_linear_solves": 957
+      }
+    },
+    {
+      "case": "train-b",
+      "arm": "secant",
+      "counts": {
+        "primary_convergence_rows": 478,
+        "terminal_linear_solves": 392,
+        "terminal_assembly_calls": 480,
+        "accepted_terminal_corrections": 392,
+        "attempted_terminal_refinements": 480,
+        "line_search_trials": 236,
+        "total_recorded_linear_solves": 870
+      }
+    },
+    {
+      "case": "train-b",
+      "arm": "proposal",
+      "counts": {
+        "primary_convergence_rows": 488,
+        "terminal_linear_solves": 375,
+        "terminal_assembly_calls": 482,
+        "accepted_terminal_corrections": 375,
+        "attempted_terminal_refinements": 482,
+        "line_search_trials": 246,
+        "total_recorded_linear_solves": 863
+      }
+    },
+    {
+      "case": "train-c",
+      "arm": "secant",
+      "counts": {
+        "primary_convergence_rows": 616,
+        "terminal_linear_solves": 374,
+        "terminal_assembly_calls": 479,
+        "accepted_terminal_corrections": 374,
+        "attempted_terminal_refinements": 479,
+        "line_search_trials": 374,
+        "total_recorded_linear_solves": 990
+      }
+    },
+    {
+      "case": "train-c",
+      "arm": "proposal",
+      "counts": {
+        "primary_convergence_rows": 594,
+        "terminal_linear_solves": 377,
+        "terminal_assembly_calls": 482,
+        "accepted_terminal_corrections": 377,
+        "attempted_terminal_refinements": 482,
+        "line_search_trials": 352,
+        "total_recorded_linear_solves": 971
+      }
+    },
+    {
+      "case": "train-d",
+      "arm": "secant",
+      "counts": {
+        "primary_convergence_rows": 471,
+        "terminal_linear_solves": 381,
+        "terminal_assembly_calls": 482,
+        "accepted_terminal_corrections": 381,
+        "attempted_terminal_refinements": 482,
+        "line_search_trials": 229,
+        "total_recorded_linear_solves": 852
+      }
+    },
+    {
+      "case": "train-d",
+      "arm": "proposal",
+      "counts": {
+        "primary_convergence_rows": 477,
+        "terminal_linear_solves": 367,
+        "terminal_assembly_calls": 482,
+        "accepted_terminal_corrections": 367,
+        "attempted_terminal_refinements": 482,
+        "line_search_trials": 235,
+        "total_recorded_linear_solves": 844
+      }
+    }
+  ],
+  "authenticated_step_count": 1936,
+  "new_solves": 0,
+  "new_fits": 0,
+  "phase_timing_available": false,
+  "same_native_parent_comparison": false,
+  "aggregation_wall_ns": 15400538822,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-terminal-work-nk8s7_lm",
+    "inventory_sha256": "8fb801b622d06c2d7b22f33482128ad916a2867d06efa17d11e1ad8630ca0dfd",
+    "files": 3,
+    "bytes": 1085757
+  }
+}

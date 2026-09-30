@@ -1,0 +1,184 @@
+{
+  "schema_version": "rc-nested-selection-summary.v1",
+  "source_revision": "d4825c2278528dbc42dc32f242fb2b45563c8ebb",
+  "sealed_packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-nested-selection-o06pikgv",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-nested-selection-o06pikgv.inventory.json",
+    "inventory_sha256": "27cd2d35345975735fc2c5ad73597a131052a581284e762532c48e0e6dfa7b64",
+    "file_count": 913,
+    "total_bytes": 121854850,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T22:44:14.404224+00:00",
+    "seal_wall_ns": 247718034,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "protocol": {
+    "source_revision": "d4825c2278528dbc42dc32f242fb2b45563c8ebb",
+    "source_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-ridge-numerics-zck8ugir",
+    "source_inventory_sha256": "51cfc77078aee7dffdc77ed4e7de005427c06769d7fbe7f430b599020e12794a",
+    "original_files": [
+      {
+        "path": "training-samples.json",
+        "bytes": 72036537,
+        "sha256": "0d36868b67eea7c0c523e17cce8d5cb7914c9b88ba1ee45572ee9b70b2f3bf67"
+      },
+      {
+        "path": "integrated-policy.json",
+        "bytes": 246340,
+        "sha256": "f87f40a2434d1804ba57196d5df07210d3011f45c58f973922090bd5bfb68c48"
+      }
+    ],
+    "ridge_grid": [
+      1e-06,
+      0.0001,
+      0.01,
+      1.0,
+      100.0,
+      10000.0,
+      1000000.0
+    ],
+    "minimum_relative_improvement": 0.01,
+    "maximum_fits": 256,
+    "maximum_expected_fits": 117,
+    "training_rows": 964,
+    "cases": 4,
+    "evaluation_responses_read": false,
+    "independent_campaign": false,
+    "automatic_retry": false,
+    "automatic_promotion": false
+  },
+  "worker": {
+    "pid": 978978,
+    "status": "completed",
+    "fit_attempt_count": 114,
+    "fit_completed_count": 114,
+    "structural_solver_calls": 0,
+    "material_integrations": 0,
+    "original_policy_unchanged": true,
+    "selected_strategy": "learned_svd",
+    "selected_ridge": 10000.0,
+    "wall_ns_through_reports": 11131848885,
+    "cpu_ns": 11114558997,
+    "peak_rss_kib": 342076
+  },
+  "parent": {
+    "parent_pid": 978521,
+    "worker_pid": 978978,
+    "exit_code": 0,
+    "parent_wall_ns": 11340960791
+  },
+  "original_audit": {
+    "schema_version": "rc-nested-selection-original-audit.v1",
+    "pid": 980637,
+    "fit_policies_checked": 114,
+    "inner_scores_checked": 112,
+    "outer_scores_checked": 4,
+    "all_selection_decisions_reproduced": true,
+    "all_training_partitions_and_preprocessing_checked": true,
+    "source_files_exact": 440,
+    "original_files_exact": 2,
+    "source_revision": "d4825c2278528dbc42dc32f242fb2b45563c8ebb",
+    "outer": [
+      {
+        "case_id": "train-a",
+        "selected_strategy": "secant",
+        "selected_ridge": null,
+        "inner_score": 1.0,
+        "outer_relative_loss": 1.0,
+        "outer_range_eligible_count": null
+      },
+      {
+        "case_id": "train-b",
+        "selected_strategy": "secant",
+        "selected_ridge": null,
+        "inner_score": 1.0,
+        "outer_relative_loss": 1.0,
+        "outer_range_eligible_count": null
+      },
+      {
+        "case_id": "train-c",
+        "selected_strategy": "learned_svd",
+        "selected_ridge": 10000.0,
+        "inner_score": 0.9836520204974426,
+        "outer_relative_loss": 0.946266192716078,
+        "outer_range_eligible_count": 0
+      },
+      {
+        "case_id": "train-d",
+        "selected_strategy": "secant",
+        "selected_ridge": null,
+        "inner_score": 1.0,
+        "outer_relative_loss": 1.0,
+        "outer_range_eligible_count": null
+      }
+    ],
+    "final_ridge": 10000.0,
+    "final_inner_score": 0.9826793992003751,
+    "fit_count": 0,
+    "structural_solver_calls": 0,
+    "material_integrations": 0,
+    "all_original_processes_absent": true,
+    "wall_ns": 3989446018,
+    "cpu_ns": 2884229082,
+    "peak_rss_kib": 2478668
+  },
+  "full_training_candidates": [
+    {
+      "ridge": 1e-06,
+      "score": 1340295.2344994738,
+      "fold_count": 4
+    },
+    {
+      "ridge": 0.0001,
+      "score": 14462.331435866527,
+      "fold_count": 4
+    },
+    {
+      "ridge": 0.01,
+      "score": 1528.3931631268285,
+      "fold_count": 4
+    },
+    {
+      "ridge": 1.0,
+      "score": 22.336582333965993,
+      "fold_count": 4
+    },
+    {
+      "ridge": 100.0,
+      "score": 1.0694651883381057,
+      "fold_count": 4
+    },
+    {
+      "ridge": 10000.0,
+      "score": 0.9826793992003751,
+      "fold_count": 4
+    },
+    {
+      "ridge": 1000000.0,
+      "score": 0.9946592446899942,
+      "fold_count": 4
+    }
+  ],
+  "tests": {
+    "selection": {
+      "passed": 40,
+      "wall_seconds": 77.58,
+      "source_revision": "d4825c2278528dbc42dc32f242fb2b45563c8ebb"
+    },
+    "capture_scope": {
+      "passed": 33,
+      "wall_seconds": 83.9,
+      "source_revision": "6ea17e2fe1d3c60c4270d8e3d4f541a3488dcb4b",
+      "log": "/tmp/rc-capture-scope-tests-20260910.log"
+    }
+  },
+  "claims": {
+    "training_only_model_selection": true,
+    "independent_campaign": false,
+    "runtime_improvement": false,
+    "physical_validation": false,
+    "automatic_promotion": false,
+    "roadmap_complete": false
+  },
+  "full_training_selection_record": "study/full-training-selection.json in the sealed packet"
+}

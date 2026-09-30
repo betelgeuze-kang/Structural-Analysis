@@ -1,0 +1,7 @@
+# Frozen-parent target continuation diagnostic
+
+Use the original three authenticated reversal parents at -40 mm and frozen ca07bb1ea. For each model, attempt sixteen evenly spaced trial control targets from -40 to +20 mm, using ordinary native Newton with unchanged tolerances. Each trial solve receives exactly the same original -40 mm material checkpoint. Only the previous returned coordinate vector is used as the next starting guess. Stop on the first failed/unknown trial; preserve its work. No trial checkpoint may become the parent of a later trial.
+
+Intermediate native solves may return accepted checkpoint objects, but those are explicitly discarded as search intermediates. They are not additional accepted points in the requested material history. This distinguishes frozen-parent root continuation from subdividing the committed loading path. If the final +20 mm solve succeeds, repeat it once from the same original parent with the found coordinate seed and compare exact checkpoint bytes. Maximum work is 51 native calls (16 stages plus one final confirmation for each of three models); failures reduce the executed count but remain in the denominator.
+
+Retain all stages, targets, parent hashes, checkpoints, work counters and clocks. A surviving final candidate still needs whole original-path execution, fresh verification and independent physics; internal trial-stage success is not a new physical validation or speedup claim. No production policy/default changes are made by this diagnostic.

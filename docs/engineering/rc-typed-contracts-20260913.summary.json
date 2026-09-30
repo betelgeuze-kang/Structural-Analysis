@@ -1,0 +1,37 @@
+{
+  "source_revision": "14745f1be8988c8a3f678bf38a376d07a52f77a7",
+  "rows": [
+    {
+      "case": 0,
+      "result_json_equal": true,
+      "result_hash": "sha256:cc3eba75e14727e00fe2cd9e97933a02c2e2f7b1adf9b70b36905494f8cef123",
+      "api_ns": 4248495633
+    },
+    {
+      "case": 1,
+      "result_json_equal": true,
+      "result_hash": "sha256:7ca7bc441d847947fc0f9c5989bb867d7d2bfb4f869ad915c573870347e5d64f",
+      "api_ns": 4165005989
+    }
+  ],
+  "tests_unique": 169,
+  "mypy_files_passed": 9,
+  "byte_comparisons": [
+    {
+      "case": 0,
+      "same_sorted_json_bytes": true,
+      "sha256": "b9cc327761abcb2379e742b23307823c5ff52b318ee01d06a74f8c93ab509985"
+    },
+    {
+      "case": 1,
+      "same_sorted_json_bytes": true,
+      "sha256": "ad2265ce08b498fbbce2adb10e8de987b5d7fa720786f34e24724a999ebcd95c"
+    }
+  ],
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-typed-results-m2tmbg7j",
+    "file_count_excluding_inventory": 8,
+    "bytes_excluding_inventory": 57691,
+    "inventory_sha256": "605e3216d7006b5fd9616fab75b5c3d41f5fe06af4c913193324e87c94a4cfa4"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "parent_count": 165,
+  "pair_count": 660,
+  "parents_with_time_label_changes": 13,
+  "parents_with_work_category_changes": 48,
+  "new_fits": 0,
+  "new_solves": 0,
+  "reserved_evaluation": false,
+  "contradictory_labels_within_one_gate_claim": false,
+  "independent_generalization_claim": false,
+  "source_revision": "efb00a50d767b5b2d796944a585957224e559663",
+  "observer_sha256": "064c57caa2ed78b4e2c56e93aa7a355b54a4d52d11419594b2c1f7a6beaf1261",
+  "dependency_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-nested-work-diagnostic-45ff57w7",
+  "dependency_inventory_sha256": "a2f1ed58e38ab91ad79496d54fc5da252d69b5cc4ec06c07ad63cdb310d3b8d3",
+  "dependency_verification_wall_ns": 110263972,
+  "diagnostic_wall_ns": 166524211,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-policy-sensitive-labels-9vjk2d4p",
+  "inventory_sha256": "b8c8a1f3f2c0b6e4eedf2bea9a6f09e4e441caba6c7b06f330c3f186a9513142",
+  "verified_files": 4,
+  "verified_bytes": 475921,
+  "inventory_completion": {
+    "original_wrapper_exit_code": 1,
+    "reason": "Final inventory enumerated __pycache__ as a file and raised IsADirectoryError after diagnostic.json was complete.",
+    "correction": "Finalize inventory by recursively enumerating files; original observer and diagnostic preserved.",
+    "diagnostic_reexecuted": false,
+    "new_fits": 0,
+    "new_solves": 0
+  }
+}

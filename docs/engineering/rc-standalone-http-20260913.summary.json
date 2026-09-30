@@ -1,0 +1,23 @@
+{
+  "source_revision": "34a7ac63aa681cfbe53bbab53353d0700e69dc58",
+  "source_archive_sha256": "b06a13de40b7788d19d5a5562d4140335b3c1c17bdc7a8a84728f79d9990e6d0",
+  "original_inventory_sha256": "9d99cdce0f6115905c729696b742af59b004412fce7a29de750cc7b0920b95aa",
+  "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-standalone-strategy-hmxpb46v",
+  "mount_count": 8,
+  "original_file_inventory_checks": 568,
+  "successful_http_responses": 568,
+  "denied_http_responses": 32,
+  "wall_ns": 388491729,
+  "listener_closed": true,
+  "solver_calls": 0,
+  "fits": 0,
+  "browser_executed": false,
+  "standalone_workbench_validator_implemented": false,
+  "independent_validation": false,
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-standalone-http-1i7tu5jj",
+    "file_count": 4,
+    "byte_count": 51778618,
+    "inventory_sha256": "b3c98540295441e13b343b5bf7f8f6d09f3b0af12cb88a5c3d46797ef9ae48d7"
+  }
+}

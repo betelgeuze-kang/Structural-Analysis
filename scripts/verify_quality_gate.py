@@ -399,6 +399,30 @@ def _pr_commands(
             "tests/test_stateful_fiber_section.py",
             "tests/test_stateful_fiber_beam2d.py",
             "tests/test_stateful_fiber_frame2d.py",
+            "tests/test_stateful_fiber_frame2d_displacement_control.py",
+            "tests/test_stateful_fiber_frame2d_control_path.py",
+            "tests/test_bounded_rc_fiber_direct_control_api.py",
+            "tests/test_rc_fiber_frame_direct_control_request.py",
+            "tests/test_rc_fiber_frame_direct_control_cli.py",
+            "tests/test_rc_control_design.py",
+            "tests/test_rc_control_warm_start.py",
+            "tests/test_rc_control_learning.py",
+            "tests/test_rc_control_learning_split.py",
+            "tests/test_rc_control_section_error.py",
+            "tests/test_rc_control_force_error.py",
+            "tests/test_rc_control_fiber_history.py",
+            "tests/test_fiber_beam2d_exact_strain.py",
+            "tests/test_rc_control_twofold_coordinates.py",
+            "tests/test_rc_control_stable_stress.py",
+            "tests/test_rc_control_direct_fiber.py",
+            "tests/test_rc_control_retained_strain.py",
+            "tests/test_rc_control_rational_accumulation.py",
+            "tests/test_rc_rational_history.py",
+            "tests/test_rc_terminal_twofold.py",
+            "tests/test_rc_fiber_job_contract.py",
+            "tests/test_rc_fiber_job_service.py",
+            "tests/test_rc_fiber_durable_worker.py",
+            "tests/test_material_trial_runtime.py",
             "tests/test_stateful_fiber_frame2d_execution_topology.py",
             "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py",
             "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py",
@@ -409,6 +433,66 @@ def _pr_commands(
             "tests/test_public_rc_fiber_frame_api.py",
             "tests/test_durable_job_service.py",
             "tests/test_fiber_frame_solver_episode_adapter.py",
+            "tests/test_fiber_frame_runtime_benchmark.py",
+            "tests/test_newton_terminal_polishing.py",
+            "tests/test_fiber_frame_terminal_polishing.py",
+            "tests/test_fiber_frame_runtime_suite.py",
+            "tests/test_fiber_frame_runtime_process.py",
+            "tests/test_fiber_frame_runtime_strategy.py",
+            "tests/test_fiber_frame_strategy_process.py",
+            "tests/test_fiber_frame_design.py",
+            "tests/test_fiber_frame_design_cli.py",
+            "tests/test_fiber_frame_warm_start_learning.py",
+            "tests/test_fiber_frame_warm_start_features.py",
+            "tests/test_fiber_frame_conditioned_warm_start_learning.py",
+            "tests/test_fiber_frame_conditioned_runtime.py",
+            "tests/test_fiber_frame_conditioned_learning_process.py",
+            "tests/test_fiber_frame_secant_correction_warm_start_learning.py",
+            "tests/test_fiber_frame_secant_correction_learning_process.py",
+            "tests/test_fiber_frame_warm_start_data.py",
+            "tests/test_fiber_frame_physical_identity.py",
+            "tests/test_fiber_frame_learning_study.py",
+            "tests/test_fiber_frame_learning_process.py",
+            "tests/test_fiber_frame_candidate_learning.py",
+            "tests/test_fiber_frame_candidate_history_learning.py",
+            "tests/test_fiber_frame_candidate_history_search.py",
+            "tests/test_fiber_frame_design_assembly.py",
+            "tests/test_fiber_frame_candidate_material_row_order.py",
+            "tests/test_fiber_frame_candidate_stop.py",
+            "tests/test_fiber_frame_candidate_stop_process.py",
+            "tests/test_fiber_frame_candidate_stop_suite.py",
+            "tests/test_fiber_frame_candidate_history_process.py",
+            "tests/test_fiber_frame_candidate_search.py",
+            "tests/test_fiber_frame_candidate_search_suite.py",
+            "tests/test_fiber_frame_candidate_process.py",
+            "tests/test_fiber_frame_candidate_process_contract.py",
+            "tests/test_fiber_frame_candidate_material_contract.py",
+            "tests/test_fiber_frame_candidate_review.py",
+            "tests/test_fiber_frame_history_design.py",
+            "tests/test_fiber_frame_constitutive_history.py",
+            "tests/test_fiber_frame_constitutive_history_integration.py",
+            "tests/test_fiber_frame_material_history_design.py",
+            "tests/test_fiber_frame_material_history_design_integration.py",
+            "tests/test_stateful_fiber_frame2d_nonlinear_history.py",
+            "tests/test_planar_frame_public_sparse_integration.py",
+            "tests/test_planar_frame_extended_sparse.py",
+            "tests/test_planar_frame_backend_process.py",
+            "tests/test_planar_frame_backend_comparison.py",
+            "tests/test_planar_frame_history_comparison.py",
+            "tests/test_planar_frame_history_process.py",
+            "tests/test_corotational_checkpoint_transition_recovery.py",
+            "tests/test_corotational_fiber_frame_sparse_state.py",
+            "tests/test_planar_frame_sparse_state_integration.py",
+            "tests/test_durable_extended_sparse.py",
+            "tests/test_corotational_engineering_validation_reuse.py",
+            "tests/test_extended_sparse_newton.py",
+            "tests/test_corotational_frame2d_stable_kinematics.py",
+            "tests/test_frame3d_persisted_process_restart.py",
+            "tests/test_frame3d_direct_control_request.py",
+            "tests/test_bounded_frame3d_direct_control_cli.py",
+            "tests/test_frame3d_job_service.py",
+            "tests/test_frame3d_durable_worker.py",
+            "tests/test_frame3d_execution_attempt_hook.py",
             "tests/test_stateful_fiber_frame2d_material_state_bundle.py",
             "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py",
             "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py",
@@ -553,13 +637,16 @@ def _command_groups(
         raise ValueError("materialized Python suite is valid only for full mode")
     if python_suite_verified_in_prior_step and mode != "full":
         raise ValueError("prior-step Python verification is valid only for full mode")
-    if sum(
-        (
-            python_suite_delegated_to_workflow_shards,
-            python_suite_verified_in_prior_step,
-            materialized_python_suite,
+    if (
+        sum(
+            (
+                python_suite_delegated_to_workflow_shards,
+                python_suite_verified_in_prior_step,
+                materialized_python_suite,
+            )
         )
-    ) > 1:
+        > 1
+    ):
         raise ValueError("Python suite ownership modes are mutually exclusive")
     if mode == "pr":
         # Quarantined non-structural paths are valid while they remain fully
@@ -821,20 +908,21 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.python_suite_delegated_to_workflow_shards and args.mode != "full":
-        parser.error(
-            "--python-suite-delegated-to-workflow-shards requires --mode full"
-        )
+        parser.error("--python-suite-delegated-to-workflow-shards requires --mode full")
     if args.materialized_python_suite and args.mode != "full":
         parser.error("--materialized-python-suite requires --mode full")
     if args.python_suite_verified_in_prior_step and args.mode != "full":
         parser.error("--python-suite-verified-in-prior-step requires --mode full")
-    if sum(
-        (
-            args.python_suite_delegated_to_workflow_shards,
-            args.python_suite_verified_in_prior_step,
-            args.materialized_python_suite,
+    if (
+        sum(
+            (
+                args.python_suite_delegated_to_workflow_shards,
+                args.python_suite_verified_in_prior_step,
+                args.materialized_python_suite,
+            )
         )
-    ) > 1:
+        > 1
+    ):
         parser.error("Python suite ownership modes are mutually exclusive")
     if args.python_suite_delegated_to_workflow_shards:
         print(
@@ -859,9 +947,7 @@ def main(argv: list[str] | None = None) -> int:
         python_suite_delegated_to_workflow_shards=(
             args.python_suite_delegated_to_workflow_shards
         ),
-        python_suite_verified_in_prior_step=(
-            args.python_suite_verified_in_prior_step
-        ),
+        python_suite_verified_in_prior_step=(args.python_suite_verified_in_prior_step),
         materialized_python_suite=args.materialized_python_suite,
     ):
         print(" ".join(command), flush=True)

@@ -535,6 +535,7 @@ class _RecoveryReplay:
     arrays: Mapping[str, np.ndarray]
     descriptors: tuple[FiberFrameNonlinearRecoveryArrayDescriptor, ...]
     array_bundle_hash: str
+    fiber_labels: tuple[Mapping[str, Any], ...]
 
 
 def create_fiber_frame_nonlinear_recovery_operator(
@@ -543,8 +544,9 @@ def create_fiber_frame_nonlinear_recovery_operator(
     """Replay the exact terminal transition and freeze engineering artifacts."""
 
     adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(source_adapter)
-    operator = _build_recovery_operator(adapter)
-    return validate_fiber_frame_nonlinear_recovery_operator(operator)
+    # The builder independently replays the constitutive/assembly transition and
+    # checks the frozen arrays, bindings, gates and hash before returning them.
+    return _build_recovery_operator(adapter)
 
 
 def create_fiber_frame_nonlinear_engineering_result_ir(
@@ -557,9 +559,12 @@ def create_fiber_frame_nonlinear_engineering_result_ir(
 
     adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(source_adapter)
     operator = (
-        create_fiber_frame_nonlinear_recovery_operator(adapter)
+        _build_recovery_operator(adapter)
         if recovery_operator is None
-        else validate_fiber_frame_nonlinear_recovery_operator(recovery_operator)
+        else _validate_recovery_replay(
+            validate_fiber_frame_nonlinear_recovery_operator_shape(recovery_operator),
+            adapter,
+        )
     )
     if operator._source_adapter is not adapter:
         _fail(
@@ -610,7 +615,8 @@ def create_fiber_frame_nonlinear_engineering_result_ir(
             _result_payload(provisional, include_hash=False)
         ),
     )
-    return validate_fiber_frame_nonlinear_engineering_result_ir(result_ir)
+    _validate_engineering_result_header(result_ir)
+    return _validate_engineering_result_bindings(result_ir, adapter, operator)
 
 
 def _build_recovery_operator(
@@ -697,11 +703,31 @@ def _build_recovery_operator(
 def _replay_terminal_engineering_outputs(
     adapter: FiberFrameNonlinearNumericalResultAdapter,
 ) -> _RecoveryReplay:
+    return _replay_epoch_engineering_outputs(
+        adapter, adapter.source_binding.terminal_epoch
+    )
+
+
+def _replay_epoch_engineering_outputs(
+    adapter: FiberFrameNonlinearNumericalResultAdapter,
+    epoch: int,
+) -> _RecoveryReplay:
+    """Recover one committed epoch from an already validated complete adapter.
+
+    This private helper never revalidates or resolves the whole Newton path.
+    Callers must validate the complete J1--J5 source before selecting epochs.
+    """
     source = adapter.source_binding
     problem: StatefulFiberFrame2DProblem = source._problem
     plan: FiberFrameNonlinearExecutionTopologyPlan = source._topology_plan
     checkpoint_chain = source._checkpoint_chain
-    terminal_projection = source._material_chain.projections[-1]
+    if type(epoch) is not int or not 1 <= epoch <= source.terminal_epoch:
+        _fail(
+            "fiber_frame_recovery_epoch_invalid",
+            "/epoch",
+            "Recovery requires a positive committed epoch of the complete source.",
+        )
+    terminal_projection = source._material_chain.projections[epoch]
     terminal_bundle = validate_material_state_bundle(terminal_projection.bundle)
 
     if len(checkpoint_chain.checkpoints) < 2:
@@ -710,8 +736,59 @@ def _replay_terminal_engineering_outputs(
             "/source/checkpoint_chain",
             "Exact recovery requires a positive-epoch terminal checkpoint.",
         )
-    parent_checkpoint = checkpoint_chain.checkpoints[-2]
-    terminal_checkpoint = checkpoint_chain.checkpoints[-1]
+    parent_checkpoint = checkpoint_chain.checkpoints[epoch - 1]
+    terminal_checkpoint = checkpoint_chain.checkpoints[epoch]
+    kinematic = source._kinematic_chain.committed_states[epoch]
+    epoch_binding = source._execution_state_binding.epoch_bindings[epoch]
+    step_receipt = source._terminal_receipt.step_receipts[epoch - 1]
+    terminal_trial = source._load_path.steps[epoch - 1]
+    if (
+        not terminal_trial.committed
+        or terminal_checkpoint.epoch != epoch
+        or terminal_trial.accepted_checkpoint.canonical_bytes()
+        != terminal_checkpoint.canonical_bytes()
+        or terminal_trial.parent_checkpoint.canonical_bytes()
+        != parent_checkpoint.canonical_bytes()
+        or kinematic.epoch != epoch
+        or kinematic.checkpoint_state_hash != terminal_checkpoint.state_hash
+        or kinematic.parent_checkpoint_state_hash != parent_checkpoint.state_hash
+        or terminal_projection.receipt.checkpoint_state_hash
+        != terminal_checkpoint.state_hash
+        or terminal_projection.receipt.parent_checkpoint_state_hash
+        != parent_checkpoint.state_hash
+        or terminal_projection.receipt.solver_state_hash != kinematic.state_hash
+        or terminal_bundle.solver_state_hash != kinematic.state_hash
+        or terminal_projection.receipt.material_state_bundle_hash
+        != terminal_bundle.bundle_hash
+        or epoch_binding.epoch != epoch
+        or epoch_binding.checkpoint_state_hash != terminal_checkpoint.state_hash
+        or epoch_binding.parent_checkpoint_state_hash != parent_checkpoint.state_hash
+        or epoch_binding.committed_kinematic_state_hash != kinematic.state_hash
+        or epoch_binding.material_projection_receipt_hash
+        != terminal_projection.receipt.receipt_hash
+        or epoch_binding.committed_material_state_bundle_hash
+        != terminal_bundle.bundle_hash
+        or step_receipt.epoch != epoch
+        or step_receipt.accepted_checkpoint_state_hash != terminal_checkpoint.state_hash
+        or step_receipt.parent_checkpoint_state_hash != parent_checkpoint.state_hash
+        or step_receipt.committed_kinematic_state_hash != kinematic.state_hash
+        or step_receipt.committed_material_state_bundle_hash
+        != terminal_bundle.bundle_hash
+        or any(
+            value != terminal_checkpoint.load_factor
+            for value in (
+                kinematic.load_factor,
+                epoch_binding.load_factor,
+                terminal_projection.receipt.checkpoint_load_factor,
+                step_receipt.target_load_factor,
+            )
+        )
+    ):
+        _fail(
+            "fiber_frame_recovery_epoch_binding_mismatch",
+            f"/epochs/{epoch}",
+            "Selected checkpoint, parent, material, kinematic and J4/J5 sources differ.",
+        )
     free_solver_dofs = np.asarray(plan.array("free_solver_dofs"), dtype=np.int64)
     problem_free_dofs = np.asarray(problem.free_global_dofs, dtype=np.int64)
     if not np.array_equal(free_solver_dofs, problem_free_dofs):
@@ -724,12 +801,24 @@ def _replay_terminal_engineering_outputs(
     # Reconstructing them from J3 physical displacements can change one ULP and
     # would replay a different material trial.  The physical checkpoint and all
     # constitutive outputs below must still match at the binary level.
-    terminal_trial = source._load_path.steps[-1]
     solver_generalized = terminal_trial.trial_assembly.generalized_coordinates_m
+    if (
+        array_data_hash(
+            immutable_array(
+                terminal_trial.trial_solution.free_displacements_m, dtype="<f8"
+            )
+        )
+        != step_receipt.source_solution_data_hash
+    ):
+        _fail(
+            "fiber_frame_recovery_epoch_solution_mismatch",
+            f"/epochs/{epoch}/source_solution",
+            "Original Newton coordinate bytes differ from the selected J5 receipt.",
+        )
     replay = assemble_stateful_fiber_frame2d(
         problem,
         parent_checkpoint,
-        target_load_factor=source.terminal_load_factor,
+        target_load_factor=terminal_checkpoint.load_factor,
         trial_free_coordinates_m=terminal_trial.trial_solution.free_displacements_m,
     )
     _require_exact_array(
@@ -741,6 +830,11 @@ def _replay_terminal_engineering_outputs(
         replay.global_displacements,
         np.asarray(terminal_checkpoint.global_displacements, dtype=np.float64),
         "/replay/global_displacements",
+    )
+    _require_exact_array(
+        physical_3dof_to_canonical_6dof(plan, replay.global_displacements),
+        kinematic.array("canonical_displacement_si"),
+        "/replay/canonical_displacement_si",
     )
     if (
         replay.parent_checkpoint_hash != parent_checkpoint.state_hash
@@ -1241,7 +1335,9 @@ def _replay_terminal_engineering_outputs(
     free_residual_scaled_linf = _linf(scaled_residual[free_physical])
     if not math.isclose(
         free_residual_scaled_linf,
-        source.full_residual_receipt.scaled_residual_linf,
+        source.full_residual_receipt.scaled_residual_linf
+        if epoch == source.terminal_epoch
+        else step_receipt.scaled_residual_linf,
         rel_tol=0.0,
         abs_tol=FIBER_FRAME_NONLINEAR_RECOVERY_CONSISTENCY_TOLERANCE,
     ):
@@ -1349,15 +1445,11 @@ def _replay_terminal_engineering_outputs(
                 ),
                 "execution_state_binding_hash": (source.execution_state_binding_hash),
                 "checkpoint_chain_hash": source.checkpoint_chain_hash,
-                "terminal_checkpoint_state_hash": (
-                    source.terminal_checkpoint_state_hash
-                ),
-                "terminal_kinematic_state_hash": (source.terminal_kinematic_state_hash),
-                "terminal_material_state_bundle_hash": (
-                    source.terminal_material_state_bundle_hash
-                ),
+                "terminal_checkpoint_state_hash": (terminal_checkpoint.state_hash),
+                "terminal_kinematic_state_hash": kinematic.state_hash,
+                "terminal_material_state_bundle_hash": (terminal_bundle.bundle_hash),
                 "terminal_receipt_hash": source.terminal_receipt_hash,
-                "terminal_load_factor": source.terminal_load_factor,
+                "terminal_load_factor": terminal_checkpoint.load_factor,
             }
         ),
         orders=MappingProxyType(
@@ -1374,7 +1466,7 @@ def _replay_terminal_engineering_outputs(
         ),
         counts=MappingProxyType(
             {
-                "terminal_epoch": source.terminal_epoch,
+                "terminal_epoch": epoch,
                 "physical_dof_count": plan.physical_dof_count,
                 "member_count": len(problem.members),
                 "integration_point_count": len(integration_point_xi),
@@ -1386,6 +1478,7 @@ def _replay_terminal_engineering_outputs(
         arrays=arrays,
         descriptors=descriptors,
         array_bundle_hash=array_bundle_hash,
+        fiber_labels=tuple(MappingProxyType(row) for row in fiber_order_rows),
     )
 
 
@@ -2086,6 +2179,25 @@ def validate_fiber_frame_nonlinear_recovery_operator(
     adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(
         checked._source_adapter
     )
+    return _validate_recovery_replay(checked, adapter)
+
+
+def _validate_recovery_replay(
+    checked: FiberFrameNonlinearRecoveryOperator,
+    adapter: FiberFrameNonlinearNumericalResultAdapter,
+) -> FiberFrameNonlinearRecoveryOperator:
+    """Compare shape-checked artifacts with one freshly validated exact source.
+
+    Only synchronous callers in this module may reuse their checked adapter.
+    Retained Newton histories are mutable; nothing is cached between public
+    calls, and every public validation still checks the complete source anew.
+    """
+    if checked._source_adapter is not adapter:
+        _fail(
+            "fiber_frame_engineering_result_source_identity_mismatch",
+            "/source",
+            "Recovery operator and engineering result must retain one source adapter.",
+        )
     expected = _build_recovery_operator(adapter)
     if _operator_payload(checked, include_hash=True) != _operator_payload(
         expected,
@@ -2111,6 +2223,22 @@ def validate_fiber_frame_nonlinear_engineering_result_ir(
 ) -> FiberFrameNonlinearEngineeringResultIR:
     """Validate one bounded authoritative engineering result and its operator."""
 
+    _validate_engineering_result_header(result)
+    adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(
+        result._source_adapter
+    )
+    operator = _validate_recovery_replay(
+        validate_fiber_frame_nonlinear_recovery_operator_shape(
+            result._recovery_operator
+        ),
+        adapter,
+    )
+    return _validate_engineering_result_bindings(result, adapter, operator)
+
+
+def _validate_engineering_result_header(
+    result: FiberFrameNonlinearEngineeringResultIR,
+) -> None:
     if type(result) is not FiberFrameNonlinearEngineeringResultIR:
         _fail(
             "fiber_frame_engineering_result_type_invalid",
@@ -2139,13 +2267,19 @@ def validate_fiber_frame_nonlinear_engineering_result_ir(
             "/source",
             "Engineering result must retain its exact adapter and recovery operator.",
         )
-    adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(
-        result._source_adapter
-    )
-    operator = validate_fiber_frame_nonlinear_recovery_operator(
-        result._recovery_operator
-    )
-    if operator._source_adapter is not adapter:
+
+
+def _validate_engineering_result_bindings(
+    result: FiberFrameNonlinearEngineeringResultIR,
+    adapter: FiberFrameNonlinearNumericalResultAdapter,
+    operator: FiberFrameNonlinearRecoveryOperator,
+) -> FiberFrameNonlinearEngineeringResultIR:
+    """Check a result against sources validated in the same synchronous call."""
+    if (
+        result._source_adapter is not adapter
+        or result._recovery_operator is not operator
+        or operator._source_adapter is not adapter
+    ):
         _fail(
             "fiber_frame_engineering_result_source_identity_mismatch",
             "/source",

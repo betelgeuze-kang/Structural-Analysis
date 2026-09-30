@@ -24,12 +24,9 @@ from release_evidence_metadata import (  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT = Path(
-    "artifacts/manifests/internal_license_due_diligence.current.v1.json"
-)
+DEFAULT_OUT = Path("artifacts/manifests/internal_license_due_diligence.current.v1.json")
 SCHEMA_PATH = Path(
-    "src/structural_analysis/schemas/"
-    "internal_license_due_diligence_v1.schema.json"
+    "src/structural_analysis/schemas/internal_license_due_diligence_v1.schema.json"
 )
 REPOSITORY_LICENSE = Path("LICENSE")
 DATASET_LICENSE_MANIFEST = Path(
@@ -118,7 +115,9 @@ def _text(value: Any) -> str:
 
 def _is_git_sha(value: Any) -> bool:
     text = _text(value).lower()
-    return len(text) == 40 and all(character in "0123456789abcdef" for character in text)
+    return len(text) == 40 and all(
+        character in "0123456789abcdef" for character in text
+    )
 
 
 def _artifact_hash(payload: dict[str, Any]) -> str:
@@ -213,9 +212,7 @@ def build_internal_license_due_diligence(
         if _text(row.get("source_id"))
     }
     analytic_seed = _as_dict(dataset_by_id.get("analytic-small"))
-    operator_imports = _as_dict(
-        dataset_by_id.get("commercial-cross-solver-imports")
-    )
+    operator_imports = _as_dict(dataset_by_id.get("commercial-cross-solver-imports"))
     ifc_sources = [
         row for row in _as_list(ifc_source.get("sources")) if isinstance(row, dict)
     ]
@@ -348,9 +345,7 @@ def build_internal_license_due_diligence(
             inventory_id="developer_preview_repo_generated_seed_corpus",
             category="repo_generated_dataset",
             source_evidence_path=DATASET_LICENSE_MANIFEST,
-            source_evidence_sha256=checksums[
-                DATASET_LICENSE_MANIFEST.as_posix()
-            ],
+            source_evidence_sha256=checksums[DATASET_LICENSE_MANIFEST.as_posix()],
             material_presence="repository_generated_seed_only",
             declared_license_posture=(
                 "repository_default_no_license_signed_rights_holder_decision_required"
@@ -456,9 +451,7 @@ def build_internal_license_due_diligence(
             inventory_id="commercial_operator_reference_imports",
             category="operator_supplied_reference",
             source_evidence_path=DATASET_LICENSE_MANIFEST,
-            source_evidence_sha256=checksums[
-                DATASET_LICENSE_MANIFEST.as_posix()
-            ],
+            source_evidence_sha256=checksums[DATASET_LICENSE_MANIFEST.as_posix()],
             material_presence="operator_files_not_attached",
             declared_license_posture="operator_supplied_not_bundled",
             spdx_or_license_ref=(
@@ -485,9 +478,7 @@ def build_internal_license_due_diligence(
     redistribution_complete = all(
         _text(row["redistribution_boundary"]) for row in inventory
     )
-    source_use_complete = all(
-        _text(row["source_use_declaration"]) for row in inventory
-    )
+    source_use_complete = all(_text(row["source_use_declaration"]) for row in inventory)
     require(spdx_complete, "spdx_or_license_ref_missing")
     require(redistribution_complete, "redistribution_boundary_missing")
     require(source_use_complete, "source_use_declaration_missing")
@@ -682,6 +673,8 @@ def main(argv: list[str] | None = None) -> int:
             f"{payload['status']} | inventory={len(payload['inventory'])} | "
             f"legal_approval={payload['claims']['product_legal_approval']}"
         )
+        for blocker in payload["blockers"]:
+            print(f"Internal license due diligence blocker: {blocker}")
     if args.fail_blocked and payload["contract_pass"] is not True:
         return 1
     return 0

@@ -1,0 +1,16 @@
+{
+  "source_revision": "b8e7c54663b6d1f45477f1d99ce623ba596601b3",
+  "run_id": 34776135840,
+  "job_id": 103774474281,
+  "conclusion": "success",
+  "passed": 1217,
+  "elapsed_seconds": 1134.36,
+  "skipped_steps": 0,
+  "full_repository_suite_passed": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-b8e-development-vvm6y5ba",
+    "payload_files": 2,
+    "payload_bytes": 98393,
+    "inventory_sha256": "02165d0308301446d2f18e928582d74397cbadf1c775d14501c49457e41d0ed6"
+  }
+}

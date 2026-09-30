@@ -1,0 +1,103 @@
+{
+  "schema_version": "workbench-job-authenticated-reads-observation.v1",
+  "source_parent": "ec291c5bb1605492d0ee5c44c34515d023fa0d9e",
+  "source_files": [
+    {
+      "path": "src/main.tsx",
+      "byte_length": 4956,
+      "sha256": "sha256:b9672f727c972beb216c2038e03610981c5d96fe341f10bcfa66d0eb7993d6bb"
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "byte_length": 1367,
+      "sha256": "sha256:c72865fefe0269f8f50491200662608fdef9e7998f80188d462a4818bd2aea80"
+    },
+    {
+      "path": "src/workbench-v2/WorkbenchPage.tsx",
+      "byte_length": 24146,
+      "sha256": "sha256:88654a092ca07b9c1bbbd5855601ade59f98e9a4e63f614f3977dfc295bf101d"
+    },
+    {
+      "path": "src/workbench-v2/model/jobProvider.ts",
+      "byte_length": 20337,
+      "sha256": "sha256:034a3e456ac0eb5587077ba1bcecade2e19f907e8ee9fa66beff4af84041605a"
+    },
+    {
+      "path": "src/workbench-v2/model/jobTransport.ts",
+      "byte_length": 5836,
+      "sha256": "sha256:ccc55354f18fbdfbca53d2afadca23612dd3ab1e753170789f51a3a8fd097c10"
+    },
+    {
+      "path": "scripts/verify-workbench-v2-e2e.mjs",
+      "byte_length": 4890,
+      "sha256": "sha256:64a8ca63ff1db89642fad2004d125e82dfdd1523bc3fda459b8bde28170af2c0"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-frame3d-job-contract.spec.ts",
+      "byte_length": 17024,
+      "sha256": "sha256:fcf46fc23db3fb75aa676d5ad736bb76b383ed2aa704684358ca5fe851739b0f"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-job-transport.spec.ts",
+      "byte_length": 10835,
+      "sha256": "sha256:771e8e96b4366570cde9f34a52f7baf8b82cfd3efbeb03f301ccb3a2b58f85c5"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-job-api-browser.spec.ts",
+      "byte_length": 4152,
+      "sha256": "sha256:f309e1ba3faee938fd410691ebea88eda4a1ce1af2bf53b7e047b955f8831c18"
+    },
+    {
+      "path": "tests/frontend/job_transport_server.py",
+      "byte_length": 4074,
+      "sha256": "sha256:c83d17433de023b534105c2279a323794b3ce111308df4073d4e21177cad95eb"
+    }
+  ],
+  "raw_root": "/tmp/structural-job-transport-final-record.qj6xturi",
+  "inventory_sha256": "sha256:2ace918753e886e5f64329a75874763155f75e54b50bd242c9db5e31bb0ea135",
+  "inventoried_files": 15,
+  "inventoried_bytes": 473322,
+  "verification": {
+    "initial_focused": {
+      "passed": 32,
+      "seconds": 22.6
+    },
+    "initial_broad": {
+      "passed": 425,
+      "failed": 1,
+      "failure": "caller AbortSignal object identity assertion; replaced with ownership and cancellation behavior assertions"
+    },
+    "final_focused": {
+      "passed": 29,
+      "failed": 0,
+      "seconds": 17.4,
+      "includes_real_python_api_browser_tests": 2
+    },
+    "typescript": "passed",
+    "build": "passed",
+    "viewer_delivery": "passed",
+    "fixture_ruff": "passed",
+    "fixture_format": "passed",
+    "numerical_calls": 0
+  },
+  "preceding_head_ci_snapshot": {
+    "sha": "ec291c5bb1605492d0ee5c44c34515d023fa0d9e",
+    "success": 59,
+    "failure": 12,
+    "skipped": 5,
+    "in_progress": 1,
+    "final": false
+  },
+  "claim_boundary": {
+    "transport_and_local_browser_tests": true,
+    "rc_physical_review_implemented": false,
+    "mobile_hardware_qualification": false,
+    "independent_numerical_validation": false,
+    "new_head_hosted_acceptance": false,
+    "roadmap_complete": false
+  },
+  "pre_format_record": "/tmp/structural-job-transport-record.2g59b6c_",
+  "post_test_changes": [
+    "Removed one trailing blank line in workbench-v2-job-api-browser.spec.ts after staged whitespace check; executable sources unchanged."
+  ]
+}

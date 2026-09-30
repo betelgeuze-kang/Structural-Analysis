@@ -5,12 +5,197 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import subprocess
+import sys
 import textwrap
 
 import pytest
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PHASE2_REFRESH_COMMANDS = (
+    "python scripts/build_phase2_state_updated_steel_material_artifacts.py",
+    "python scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
+    "python scripts/build_phase2_state_updated_composite_section_artifacts.py",
+    "python scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+    "python scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
+)
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name", "consumer_steps"),
+    [
+        (
+            "ci.yml",
+            "verify",
+            ("Build current-HEAD readiness snapshot", "PR quality gate"),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "python_full_shards",
+            ("Run materialized repository test suite shard",),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "deterministic_quality",
+            ("Deterministic repository quality gate",),
+        ),
+        (
+            "nightly-heavy-solver.yml",
+            "heavy-full-quality",
+            (
+                "Run materialized repository Python suite",
+                "Full workstation/release quality gate",
+            ),
+        ),
+    ],
+)
+def test_phase2_source_receipts_materialize_before_consumers(
+    workflow_name: str, job_name: str, consumer_steps: tuple[str, ...]
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows" / workflow_name).read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"][job_name]["steps"]
+    names = [step["name"] for step in steps]
+    materialize_index = names.index("Materialize exact current-source test evidence")
+    run_lines = [line.strip() for line in steps[materialize_index]["run"].splitlines()]
+    refresh_indices = [run_lines.index(command) for command in PHASE2_REFRESH_COMMANDS]
+
+    assert refresh_indices == sorted(refresh_indices)
+    assert all(run_lines.count(command) == 1 for command in PHASE2_REFRESH_COMMANDS)
+    assert refresh_indices[-1] < next(
+        index
+        for index, line in enumerate(run_lines)
+        if line.startswith(
+            "python scripts/run_external_code_to_code_technical_receipt.py"
+        )
+    )
+    assert all(materialize_index < names.index(name) for name in consumer_steps)
+    if "Validate pristine commercial gap ledger" in names:
+        assert (
+            names.index("Validate pristine commercial gap ledger") < materialize_index
+        )
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name"),
+    [("python-test-collection.yml", "full_shards"), ("ci.yml", "verify")],
+)
+def test_failed_materialization_upload_preserves_failure_and_limits_files(
+    workflow_name: str, job_name: str,
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows" / workflow_name).read_text()
+    )
+    job = workflow["jobs"][job_name]
+    steps = {step["name"]: step for step in job["steps"]}
+    materialize = steps["Materialize exact current-source test evidence"]
+    assert materialize["id"] == "materialize"
+    if job_name == "full_shards":
+        assert "--fail-blocked" not in materialize["run"]
+        assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    else:
+        assert "--fail-blocked" in materialize["run"]
+    assert not job.get("continue-on-error", False)
+    assert all(not step.get("continue-on-error", False) for step in job["steps"])
+    gate = "Run materialized repository test suite shard" if job_name == "full_shards" else "Build current-HEAD readiness snapshot"
+    assert "if" not in steps[gate]
+    condition = "${{ failure() && steps.materialize.outcome == 'failure' }}"
+    assert steps["Describe failed materialization diagnostics"]["if"] == condition
+    upload = steps["Upload failed materialization diagnostics"]
+    assert upload["if"] == condition
+    assert upload["with"]["name"] == (
+        "materialization-failure-shard-${{ matrix.shard }}-${{ github.sha }}"
+        if job_name == "full_shards" else "materialization-failure-verify-${{ github.sha }}"
+    )
+    assert upload["with"]["path"].splitlines() == [
+        "materialization-failure-context.json",
+        "implementation/phase1/release_evidence/productization/"
+        "external_code_to_code_technical_execution_receipt.json",
+        "implementation/phase1/release_evidence/productization/"
+        "external_modal_buckling_technical_execution_receipt.json",
+        "artifacts/manifests/internal_license_due_diligence.current.v1.json",
+    ]
+    assert upload["with"]["retention-days"] == 7
+
+
+def test_full_shard_reports_pytest_before_enforcing_external_license_gate() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/python-test-collection.yml").read_text()
+    )
+    jobs = workflow["jobs"]
+    shard_steps = jobs["full_shards"]["steps"]
+    names = [step["name"] for step in shard_steps]
+    materialize = shard_steps[names.index("Materialize exact current-source test evidence")]
+    test_step = shard_steps[names.index("Run materialized repository test suite shard")]
+    upload = shard_steps[
+        names.index("Retain diagnostic shard test result independently of license status")
+    ]
+    license_gate = shard_steps[
+        names.index("Require exact current-source external license contract")
+    ]
+
+    assert names.index("Materialize exact current-source test evidence") < names.index(
+        "Run materialized repository test suite shard"
+    ) < names.index(
+        "Retain diagnostic shard test result independently of license status"
+    ) < names.index("Require exact current-source external license contract")
+    assert "if" not in test_step
+    assert "--junitxml=pytest-full-shard-${{ matrix.shard }}.xml" in test_step["run"]
+    assert "python scripts/build_internal_license_due_diligence.py" in materialize["run"]
+    assert "--fail-blocked" not in materialize["run"]
+    assert upload["if"] == "${{ always() }}"
+    assert upload["with"] == {
+        "name": "pytest-full-shard-diagnostic-${{ matrix.shard }}-${{ github.sha }}",
+        "path": "pytest-full-shard-${{ matrix.shard }}.xml",
+        "if-no-files-found": "warn",
+        "retention-days": 14,
+    }
+    assert license_gate["if"] == (
+        "${{ always() && steps.materialize.outcome == 'success' }}"
+    )
+    assert license_gate["run"] == (
+        "python scripts/build_internal_license_due_diligence.py "
+        '--out "$RUNNER_TEMP/internal-license-gate.json" --fail-blocked'
+    )
+    assert all(not step.get("continue-on-error", False) for step in shard_steps)
+    assert jobs["full"]["needs"] == "full_shards"
+    assert jobs["full"]["if"] == "${{ always() }}"
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name"),
+    [("python-test-collection.yml", "full_shards"), ("ci.yml", "verify")],
+)
+def test_failure_context_is_valid_json_without_generation_or_qualification_credit(
+    tmp_path: Path, workflow_name: str, job_name: str,
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows" / workflow_name).read_text()
+    )
+    step = next(step for step in workflow["jobs"][job_name]["steps"]
+                if step["name"] == "Describe failed materialization diagnostics")
+    lines = step["run"].splitlines()
+    assert lines[0] == "python - <<'PYTHON'" and lines[-1] == "PYTHON"
+    subprocess.run(
+        [sys.executable, "-c", "\n".join(lines[1:-1])],
+        cwd=tmp_path,
+        env={"GITHUB_SHA": "a" * 40, "GITHUB_RUN_ID": "123",
+             "GITHUB_RUN_ATTEMPT": "2", "GITHUB_JOB": job_name},
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    payload = json.loads((tmp_path / "materialization-failure-context.json").read_bytes())
+    assert payload["job"] == job_name
+    assert payload["workflow_sha"] == "a" * 40
+    assert payload["run_id"] == "123" and payload["run_attempt"] == "2"
+    assert payload["diagnostic_only"] is True
+    assert payload["receipt_generation_attested"] is False
+    assert payload["may_include_tracked_or_partially_rewritten_receipts"] is True
+    assert payload["qualification_inferred"] is False
 
 
 def test_every_pull_request_collects_the_complete_pytest_suite() -> None:
@@ -22,7 +207,7 @@ def test_every_pull_request_collects_the_complete_pytest_suite() -> None:
     assert "paths:" not in workflow
     assert "python -m pytest --collect-only -q" in workflow
     assert "collect:\n    if:" not in workflow
-    assert workflow.count("python -m pip install numpy==1.26.4 scipy==1.12.0") == 2
+    assert workflow.count("python -m pip install numpy==1.26.4 scipy==1.12.0") == 3
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
@@ -83,6 +268,7 @@ def test_all_supported_events_run_the_complete_pytest_suite() -> None:
     assert hosted_hip_source < pristine_ledger < materialize < full_suite
     assert "--deselect" in workflow[full_suite:]
     for command in (
+        *PHASE2_REFRESH_COMMANDS,
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
         "python scripts/build_fracture_energy_concrete_benchmark.py",
         "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",
@@ -876,3 +1062,124 @@ def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:
     assert workflow.count("  full:\n") == 1
     assert "needs: full_shards" in workflow.split("  full:\n", 1)[1]
     assert "FULL_SHARDS_RESULT: ${{ needs.full_shards.result }}" in workflow
+
+
+def test_development_contracts_remain_independent_without_replacing_full_gate():
+    import shlex
+    import yaml
+
+    workflow = yaml.load(
+        (ROOT / ".github/workflows/python-test-collection.yml").read_text(),
+        Loader=yaml.BaseLoader,
+    )
+    jobs = workflow["jobs"]
+    diagnostic = jobs["development_contracts"]
+    assert diagnostic["name"] == "pytest-development-contracts"
+    assert diagnostic["timeout-minutes"] == "45"
+    assert "needs" not in diagnostic and "if" not in diagnostic
+    assert "continue-on-error" not in diagnostic
+    assert workflow["permissions"] == {"contents": "read"}
+    assert all("continue-on-error" not in step for step in diagnostic["steps"])
+    commands = [step["run"] for step in diagnostic["steps"] if "run" in step]
+    assert len(commands) == 2
+    tests = shlex.split(commands[1])
+    assert tests[:3] == ["python", "-m", "pytest"]
+    assert "--junitxml=development-contracts.xml" in tests
+    assert not any(x in tests for x in ("-k", "--deselect", "--ignore"))
+    selected_paths = [x for x in tests if x.startswith("tests/")]
+    selected = set(selected_paths)
+    assert len(selected_paths) == len(selected), "duplicate development module selection"
+    assert len(selected) == 84
+    assert all((ROOT / path).is_file() for path in selected)
+    assert {
+        "tests/test_stateful_fiber_section.py",
+        "tests/test_public_rc_fiber_frame_api.py",
+        "tests/test_fiber_frame_design.py",
+        "tests/test_fiber_frame_physical_identity.py",
+        "tests/test_fiber_frame_candidate_learning.py",
+        "tests/test_bounded_planar_model_ir_adapter.py",
+        "tests/test_model_ir_v2_contract.py",
+        "tests/test_fiber_frame_candidate_search.py",
+        "tests/test_fiber_frame_candidate_cost.py",
+        "tests/test_fiber_frame_candidate_search_suite.py",
+        "tests/test_bounded_rc_fiber_direct_control_api.py",
+        "tests/test_nonlinear_failure_diagnostic.py",
+        "tests/test_durable_failure_diagnostics.py",
+        "tests/test_durable_job_service.py",
+        "tests/test_rc_control_runtime_selection.py",
+        "tests/test_rc_runtime_cost_diagnostic.py",
+        "tests/test_rc_control_initial_residual.py",
+        "tests/test_rc_control_trust_region.py",
+        "tests/test_rc_recovery_configuration.py",
+        "tests/test_rc_replay_streaming.py",
+        "tests/test_rc_branch_diagnostic.py",
+        "tests/test_rc_recovery_followup.py",
+        "tests/test_rc_adaptive_continuation_campaign.py",
+        "tests/test_rc_adaptive_campaign_audit.py",
+        "tests/test_rc_internal_portal_20mm_comparison.py",
+        "tests/test_audit_rc_internal_portal_20mm_comparison.py",
+        "tests/test_rc_offline_cost_tree.py",
+        "tests/test_rc_scalar_runtime_equivalence.py",
+        "tests/test_rc_same_parent_probe_records.py",
+        "tests/test_planar_steel_refinement_witness_audit.py",
+        "tests/test_planar_concrete_localization_audit.py",
+        "tests/test_planar_1024_witness_probe.py",
+        "tests/test_planar_2048_witness_probe.py",
+        "tests/test_planar_4096_refinement_driver.py",
+        "tests/test_extract_planar_2048_features.py",
+        "tests/test_audit_planar_4096_refinement.py",
+        "tests/test_planar_path_artifact_writer.py",
+        "tests/test_planar_path_artifact_reader.py",
+        "tests/test_planar_material_activity.py",
+        "tests/test_rc_control_step_work.py",
+        "tests/test_rc_control_iteration_cost.py",
+        "tests/test_newton_assembly_work.py",
+        "tests/test_rc_control_assembly_work.py",
+        "tests/test_rc_control_assembly_phases.py",
+        "tests/test_rc_quadratic_seed.py",
+        "tests/test_rc_native_assembly_reuse.py",
+        "tests/test_rc_line_search_reuse_experiment.py",
+        "tests/test_rc_reuse_campaign.py",
+        "tests/test_rc_control_search_accounting.py",
+        "tests/test_rc_control_strategy_costs.py",
+        "tests/test_rc_control_process_costs.py",
+        "tests/test_rc_control_layout_features.py",
+        "tests/test_rc_control_layout_dataset.py",
+        "tests/test_rc_control_layout_labels.py",
+        "tests/test_rc_control_layout_learning.py",
+        "tests/test_rc_control_layout_search.py",
+        "tests/test_rc_layout_search_http.py",
+        "tests/test_rc_layout_staged_http.py",
+        "tests/test_rc_strategy_cohort.py",
+        "tests/test_repository_python_workflow_contract.py",
+        "tests/test_rc_constant_load_durable.py",
+        "tests/test_rc_control_parent_step.py",
+        "tests/test_rc_control_cost_pruned_design.py",
+        "tests/test_rc_control_reinforcement_learning.py",
+        "tests/test_rc_control_candidate_search.py",
+        "tests/test_rc_control_candidate_cost.py",
+        "tests/test_rc_control_cost_dominance.py",
+        "tests/test_measured_response_split.py",
+        "tests/test_aci_column_archive.py",
+        "tests/test_pinned_opensees_runtime.py",
+        "tests/test_external_reference_output_capture.py",
+        "tests/test_external_product_replay_identity.py",
+        "tests/test_local_source_reference_comparison.py",
+    } <= selected
+    assert all(
+        "materializ" not in cmd and "--refresh-product-replay" not in cmd
+        for cmd in commands
+    )
+    upload = diagnostic["steps"][-1]
+    assert upload["if"] == "${{ always() }}"
+    assert upload["with"]["path"] == "development-contracts.xml"
+    # A successful diagnostic cannot mask failed, cancelled or skipped shards.
+    full = jobs["full"]
+    assert full["needs"] == "full_shards"
+    assert full["if"] == "${{ always() }}"
+    assert full["steps"][0]["run"] == 'test "$FULL_SHARDS_RESULT" = "success"'
+    assert (
+        full["steps"][0]["env"]["FULL_SHARDS_RESULT"]
+        == "${{ needs.full_shards.result }}"
+    )
+    assert "continue-on-error" not in jobs["full_shards"]

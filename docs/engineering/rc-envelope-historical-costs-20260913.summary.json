@@ -1,0 +1,129 @@
+{
+  "schema_version": "rc-envelope-historical-cost-provenance.v1",
+  "input_bindings": [
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-learned-runtime-5ixhrw6z.inventory.json",
+      "bytes": 12634637,
+      "sha256": "a16d571fa22739ba5b9bfd16e5fbf093390c66e0f29f49f3b094bdccb661411a"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-nested-selection-o06pikgv.inventory.json",
+      "bytes": 168764,
+      "sha256": "27cd2d35345975735fc2c5ad73597a131052a581284e762532c48e0e6dfa7b64"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-ridge-numerics-zck8ugir.inventory.json",
+      "bytes": 94932,
+      "sha256": "51cfc77078aee7dffdc77ed4e7de005427c06769d7fbe7f430b599020e12794a"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-training-expansion.vdyyju94-inventory.json",
+      "bytes": 5599989,
+      "sha256": "0526defa221f9106038fb35c87d3bc32daa9bcabefb6cd7269bd12a92217e6e4"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-learned-runtime-5ixhrw6z/protocol.json",
+      "bytes": 6258,
+      "sha256": "116c871059b13cd0d2b8d8c70b344975e1e26762268e9137109a44eae079ac9e"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-learned-runtime-5ixhrw6z/study/result.json",
+      "bytes": 233206,
+      "sha256": "9afd698ae50449dfdb4c034096a93721aa46664e4bca6874644f45118383c14e"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-nested-selection-o06pikgv/study/result.json",
+      "bytes": 7210504,
+      "sha256": "59cd44089fea55be3e58a5d21ed5a7bf123de69a1aec31ec339a96a36dc1e462"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-nested-selection-o06pikgv/process-outcome.json",
+      "bytes": 102,
+      "sha256": "07d42d0be9707078987ddd7f9b7b62e374f54fefb2869ac1b489ce6df81523d9"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-training-expansion.vdyyju94/complete-cost-accounting.json",
+      "bytes": 15810,
+      "sha256": "43090d66ee46380fe88f6643c8f68458535b8d386ebab7fb90b536775a073c8b"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-learned-runtime-5ixhrw6z/study/fit-0001-policy.json",
+      "bytes": 186485,
+      "sha256": "e9c488750077004a6cbd94a2e872bfe81b57452f75724c926ccc622b0df59569"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-nested-selection-o06pikgv/study/fit-0113-policy.json",
+      "bytes": 204243,
+      "sha256": "018613efe7f0cc4166b3c160d849d09765262479c6f9afecad91b9161716dc38"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-learned-runtime-5ixhrw6z/integrated-policy.json",
+      "bytes": 246340,
+      "sha256": "f87f40a2434d1804ba57196d5df07210d3011f45c58f973922090bd5bfb68c48"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-ridge-numerics-zck8ugir/integrated-policy.json",
+      "bytes": 246340,
+      "sha256": "f87f40a2434d1804ba57196d5df07210d3011f45c58f973922090bd5bfb68c48"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-ridge-numerics-zck8ugir/integrated-worker-outcome.json",
+      "bytes": 376,
+      "sha256": "d64738c2fc8b85dfeddf3de39cbd8b2ca3b1343ba43306a23282aed8e5f286f6"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-ridge-numerics-zck8ugir/integrated-process-outcome.json",
+      "bytes": 101,
+      "sha256": "af5dd6fc1a16e1e95335080ef60d87bbffe440cc0a28fa7497732e9ad4123a4b"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-resume-f0nrbjdg/original/study/fit-0001-policy.json",
+      "bytes": 186485,
+      "sha256": "e9c488750077004a6cbd94a2e872bfe81b57452f75724c926ccc622b0df59569"
+    },
+    {
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-envelope-resume-f0nrbjdg/original/integrated-policy.json",
+      "bytes": 246340,
+      "sha256": "f87f40a2434d1804ba57196d5df07210d3011f45c58f973922090bd5bfb68c48"
+    }
+  ],
+  "source_inventory_scope": "Only listed files checked against pinned inventories; full packet re-audit not performed here.",
+  "generation": {
+    "path_wall_ns": 1045632468841,
+    "known_work": {
+      "core_calls": 2904,
+      "linear_solves": 13815,
+      "newton_iterations": 13815
+    },
+    "path_count": 12,
+    "scope": "Shared historical training generation, reference/secant/fresh-reference paths. Includes verification paths. Not full generation parent cost.",
+    "charge_once_across_reused_policies": true
+  },
+  "withheld_train_b_policy": {
+    "policy_hash": "sha256:2a924b90d6347379185a1ef1f4cbe689e794213ec73f0510abaa5e2cdedc9778",
+    "fit_wall_ns": 78683420,
+    "fit_scope": "One fit, already included in the prior native experiment parent. Not all model research cost."
+  },
+  "integrated_policy": {
+    "policy_hash": "sha256:50c4aa07f672ef2183dfc7b280c6b667de24e99bbfc7ff3b92ff4474ba8f943c",
+    "ridge": 1e-06,
+    "full_fit_wall_ns": 106241841,
+    "fit_and_fold_count": 5,
+    "worker_wall_ns_through_reports": 1491425737,
+    "parent_wall_ns": 3335099386,
+    "scope": "Full fit is within worker, within parent. Parent also contains four withheld fits and diagnostics. Do not sum these clocks."
+  },
+  "later_selection_not_the_reused_integrated_policy": {
+    "policy_hash": "sha256:e847a2f46c57c77e78d06269ab6352cc3aecdc0f616597f54fa51440c04e40a9",
+    "ridge": 10000.0,
+    "selection_parent_wall_ns": 11340960791,
+    "scope": "Historical research overhead, not the training cost of the reused integrated policy. Selection left the root integrated-policy.json unchanged."
+  },
+  "current_experiment_new_fits": 0,
+  "current_experiment_new_training_labels": 0,
+  "complete_research_lifecycle_cost_ns": null,
+  "complete_research_lifecycle_cost_status": "Not reconstructed; additional historical diagnostics, failed audits and preparation are not fully metered here.",
+  "current_numeric_parent_cost": "Must retain original failed parent plus resumed parent; carried first slot is not rerun or charged twice.",
+  "net_savings_proved": false,
+  "independent_physical_validation": false
+}

@@ -1,0 +1,26 @@
+{
+  "aci_record": 272,
+  "peer_record": 201,
+  "specimen": "Thomsen and Wallace 1994 A1",
+  "aci_sha256": "6b6e9df802f8d8cf13458ac454bf9129c0dab66c155564755f3f2dfd8dd2474e",
+  "peer_sha256": "49a5ae183c4bf70446fa09cf926cdd03393d72c86fc44dc80982b3c35e55c7a6",
+  "pair_count_each": 866,
+  "ordered_displacement_exact_mm_count": 866,
+  "maximum_displacement_difference_mm": "0.00000",
+  "standard_kip_to_kn_factor": "4.4482216152605",
+  "maximum_force_difference_kn": "0.001847457679920018585",
+  "training_admitted": false,
+  "solves": 0,
+  "descriptive_origin_fit_kn_per_kip": "4.448398576523328923444834696",
+  "descriptive_fit_maximum_residual_kn": "2.045587900124666091E-8",
+  "origin_fit_is_inferred_not_authoritative_conversion": true,
+  "training_fits": 0,
+  "interpretation": "Shared specimen lineage supported by matching authors, specimen and every ordered displacement; force scaling is descriptive, not an approved correction.",
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-aci-history-_ae5b331",
+    "inventory_sha256": "803971a84692d23ae2af170f516cbdb1622fcf77bb11f0248092b6f0278bb5a2",
+    "payload_files": 5,
+    "payload_bytes": 22054
+  },
+  "raw_files_redistributed_in_git": false
+}

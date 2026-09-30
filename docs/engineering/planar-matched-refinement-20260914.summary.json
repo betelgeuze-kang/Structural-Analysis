@@ -1,0 +1,921 @@
+{
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "records": [
+    {
+      "layers": 8,
+      "status": "ready",
+      "contract_pass": true,
+      "committed_steps": 3,
+      "attempted_steps": 3,
+      "compile_wall_ns": 443543911,
+      "path_wall_ns": 3929296733,
+      "artifact": "layers-8.json",
+      "artifact_sha256": "183ffdf46404028d31931280d6e637a3d460f0605d5111bb362c1d6dc7cb10e2"
+    },
+    {
+      "layers": 16,
+      "status": "ready",
+      "contract_pass": true,
+      "committed_steps": 3,
+      "attempted_steps": 3,
+      "compile_wall_ns": 433790081,
+      "path_wall_ns": 5547420536,
+      "artifact": "layers-16.json",
+      "artifact_sha256": "e1ead16a36168c2e4d408eba0d9ff62cea07a43ba8abe7487d6493cbaf9cd725"
+    },
+    {
+      "layers": 32,
+      "status": "ready",
+      "contract_pass": true,
+      "committed_steps": 3,
+      "attempted_steps": 3,
+      "compile_wall_ns": 473347692,
+      "path_wall_ns": 11336769913,
+      "artifact": "layers-32.json",
+      "artifact_sha256": "f581fe2de44f7687c1dcb4afefd9bfe0c197c7e4da8b30d32302bbb51ec97f4c"
+    }
+  ],
+  "experiment_wall_ns": 23004942136,
+  "original_full_load_path_completed": false,
+  "independent_physical_validation": false,
+  "observed_work": [
+    {
+      "layers": 8,
+      "history_rows": 22,
+      "line_search_trials": 19
+    },
+    {
+      "layers": 16,
+      "history_rows": 21,
+      "line_search_trials": 20
+    },
+    {
+      "layers": 32,
+      "history_rows": 25,
+      "line_search_trials": 30
+    }
+  ],
+  "comparisons": [
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.25,
+      "metrics": {
+        "roof_right_ux": {
+          "unit": "m",
+          "absolute_infinity_difference": 4.544625064975159e-05,
+          "finer_infinity_norm": 0.0038810092409771843,
+          "normalizer": 0.0038810092409771843,
+          "relative_difference": 0.011709905292137066,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.003926455491626936
+          ],
+          "fine_values": [
+            0.0038810092409771843
+          ]
+        },
+        "all_translations": {
+          "unit": "m",
+          "absolute_infinity_difference": 4.544625064975159e-05,
+          "finer_infinity_norm": 0.0038810092409771843,
+          "normalizer": 0.0038810092409771843,
+          "relative_difference": 0.011709905292137066,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0016160889808715178,
+            6.829148784630777e-05,
+            0.0016430923900904938,
+            -0.00020026447741067132,
+            0.003882212852019481,
+            9.29819923804498e-05,
+            0.003926455491626936,
+            -0.00036874121752508753
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0015975370236883972,
+            6.793053934022834e-05,
+            0.001623108334313275,
+            -0.00020026728311749536,
+            0.003837309938941433,
+            9.245256430553557e-05,
+            0.0038810092409771843,
+            -0.0003687113531588689
+          ]
+        },
+        "all_rotations": {
+          "unit": "rad",
+          "absolute_infinity_difference": 7.805299835684652e-06,
+          "finer_infinity_norm": 0.0006055950392619221,
+          "normalizer": 0.0006055950392619221,
+          "relative_difference": 0.012888645595904281,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.0,
+            0.0,
+            -0.0005890994440569471,
+            -0.0006134003390976067,
+            -0.0004579368461604686,
+            -0.00046448042700332574
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            -0.0005818629974299801,
+            -0.0006055950392619221,
+            -0.0004531101122819526,
+            -0.0004595597510723232
+          ]
+        },
+        "support_forces": {
+          "unit": "kN",
+          "absolute_infinity_difference": 0.11696946292690313,
+          "finer_infinity_norm": 520.8757161428846,
+          "normalizer": 520.8757161428846,
+          "relative_difference": 0.00022456309499906986,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            -69.50946260896804,
+            -145.84064871698726,
+            -80.49053739102877,
+            520.8406487154142,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            -69.62643207189494,
+            -145.87571614276413,
+            -80.37356792815399,
+            520.8757161428846,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "support_moments": {
+          "unit": "kNm",
+          "absolute_infinity_difference": 0.32353656917814533,
+          "finer_infinity_norm": 172.2197178807405,
+          "normalizer": 172.2197178807405,
+          "relative_difference": 0.001878626751683506,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            145.51126031441407,
+            172.54325444991863,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            145.67748930711704,
+            172.2197178807405,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "all_metrics_within_exploratory_screen": false
+    },
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.5,
+      "metrics": {
+        "roof_right_ux": {
+          "unit": "m",
+          "absolute_infinity_difference": 0.0001295545983784844,
+          "finer_infinity_norm": 0.011834193434620898,
+          "normalizer": 0.011834193434620898,
+          "relative_difference": 0.010947480205915242,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.011963748032999382
+          ],
+          "fine_values": [
+            0.011834193434620898
+          ]
+        },
+        "all_translations": {
+          "unit": "m",
+          "absolute_infinity_difference": 0.0001295545983784844,
+          "finer_infinity_norm": 0.011834193434620898,
+          "normalizer": 0.011834193434620898,
+          "relative_difference": 0.010947480205915242,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.004766430286534647,
+            0.0003915684621346259,
+            0.005061305382122511,
+            -0.00036262273422766884,
+            0.011649292743406313,
+            0.0005586519625788514,
+            0.011963748032999382,
+            -0.0007048064618625507
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.004708961269468898,
+            0.0003849029528494172,
+            0.0049986325147641725,
+            -0.0003634774682804845,
+            0.011525049540647807,
+            0.0005539540898356822,
+            0.011834193434620898,
+            -0.0007048983531693803
+          ]
+        },
+        "all_rotations": {
+          "unit": "rad",
+          "absolute_infinity_difference": 2.2257584487646136e-05,
+          "finer_infinity_norm": 0.00198159095502465,
+          "normalizer": 0.00198159095502465,
+          "relative_difference": 0.011232179088831812,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.0,
+            0.0,
+            -0.0016403276411045976,
+            -0.0020038485395122963,
+            -0.0014205321674801387,
+            -0.0016744629682444976
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            -0.0016221518062213324,
+            -0.00198159095502465,
+            -0.0014034163701648426,
+            -0.0016559979231970609
+          ]
+        },
+        "support_forces": {
+          "unit": "kN",
+          "absolute_infinity_difference": 0.4827433702578361,
+          "finer_infinity_norm": 1038.4524777683184,
+          "normalizer": 1038.4524777683184,
+          "relative_difference": 0.00046486804219994114,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            -110.62305907734034,
+            -288.582440244554,
+            -189.37694092649593,
+            1038.5824402175135,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            -111.10580244759818,
+            -288.4524778137644,
+            -188.89419755986648,
+            1038.4524777683184,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "support_moments": {
+          "unit": "kNm",
+          "absolute_infinity_difference": 1.0578664504636777,
+          "finer_infinity_norm": 429.0032568363748,
+          "normalizer": 429.0032568363748,
+          "relative_difference": 0.0024658704417881753,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            224.7931412091733,
+            429.638467006736,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            225.851007659637,
+            429.0032568363748,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "all_metrics_within_exploratory_screen": false
+    },
+    {
+      "coarse_layers": 8,
+      "fine_layers": 16,
+      "load_factor": 0.75,
+      "metrics": {
+        "roof_right_ux": {
+          "unit": "m",
+          "absolute_infinity_difference": 0.0007833729262520656,
+          "finer_infinity_norm": 0.04219440575454624,
+          "normalizer": 0.04219440575454624,
+          "relative_difference": 0.018565800661090266,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.04297777868079831
+          ],
+          "fine_values": [
+            0.04219440575454624
+          ]
+        },
+        "all_translations": {
+          "unit": "m",
+          "absolute_infinity_difference": 0.0007833729262520656,
+          "finer_infinity_norm": 0.04219440575454624,
+          "normalizer": 0.04219440575454624,
+          "relative_difference": 0.018565800661090266,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.013759426631543479,
+            0.0024257994000303784,
+            0.017640909231111897,
+            -0.00029215946965921485,
+            0.0384752209881161,
+            0.004363529249561638,
+            0.04297777868079831,
+            -0.0008809159925711592
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.013539653716391533,
+            0.002382401229150858,
+            0.017324390791943294,
+            -0.0002905877155085107,
+            0.03776450182627923,
+            0.004258448628683496,
+            0.04219440575454624,
+            -0.0008774347956605393
+          ]
+        },
+        "all_rotations": {
+          "unit": "rad",
+          "absolute_infinity_difference": 0.00014644251162242508,
+          "finer_infinity_norm": 0.007568534417710693,
+          "normalizer": 0.007568534417710693,
+          "relative_difference": 0.019348859837347552,
+          "within_exploratory_screen": false,
+          "coarse_values": [
+            0.0,
+            0.0,
+            -0.005146351832471629,
+            -0.007699735107462632,
+            -0.005789706897105147,
+            -0.007631685338897886
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            -0.0050642747280644045,
+            -0.007568534417710693,
+            -0.00567449590624223,
+            -0.007485242827275461
+          ]
+        },
+        "support_forces": {
+          "unit": "kN",
+          "absolute_infinity_difference": 0.3569603494913167,
+          "finer_infinity_norm": 1538.4679124891713,
+          "normalizer": 1538.4679124891713,
+          "relative_difference": 0.00023202326586959558,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            -124.74972676471944,
+            -413.8248728390642,
+            -325.2502732353896,
+            1538.8248728368417,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            -124.40233744251421,
+            -413.4679124895729,
+            -325.59766255747087,
+            1538.4679124891713,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "support_moments": {
+          "unit": "kNm",
+          "absolute_infinity_difference": 1.2337955286149054,
+          "finer_infinity_norm": 831.0136964130088,
+          "normalizer": 831.0136964130088,
+          "relative_difference": 0.0014846873570681998,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            262.8741965892743,
+            829.7799008843939,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            262.18851444493623,
+            831.0136964130088,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "all_metrics_within_exploratory_screen": false
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.25,
+      "metrics": {
+        "roof_right_ux": {
+          "unit": "m",
+          "absolute_infinity_difference": 1.0638745330498155e-05,
+          "finer_infinity_norm": 0.003870370495646686,
+          "normalizer": 0.003870370495646686,
+          "relative_difference": 0.0027487666471373733,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.0038810092409771843
+          ],
+          "fine_values": [
+            0.003870370495646686
+          ]
+        },
+        "all_translations": {
+          "unit": "m",
+          "absolute_infinity_difference": 1.0638745330498155e-05,
+          "finer_infinity_norm": 0.003870370495646686,
+          "normalizer": 0.003870370495646686,
+          "relative_difference": 0.0027487666471373733,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0015975370236883972,
+            6.793053934022834e-05,
+            0.001623108334313275,
+            -0.00020026728311749536,
+            0.003837309938941433,
+            9.245256430553557e-05,
+            0.0038810092409771843,
+            -0.0003687113531588689
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.00159335056910184,
+            6.793921575326332e-05,
+            0.0016185626557675041,
+            -0.00020027072758523065,
+            0.0038268016500129743,
+            9.242060817852174e-05,
+            0.003870370495646686,
+            -0.00036870743280590555
+          ]
+        },
+        "all_rotations": {
+          "unit": "rad",
+          "absolute_infinity_difference": 1.8096328132908863e-06,
+          "finer_infinity_norm": 0.0006037854064486312,
+          "normalizer": 0.0006037854064486312,
+          "relative_difference": 0.002997145664607656,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.0,
+            0.0,
+            -0.0005818629974299801,
+            -0.0006055950392619221,
+            -0.0004531101122819526,
+            -0.0004595597510723232
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            -0.0005801199923478879,
+            -0.0006037854064486312,
+            -0.00045197068414805515,
+            -0.00045837721134213167
+          ]
+        },
+        "support_forces": {
+          "unit": "kN",
+          "absolute_infinity_difference": 0.015254135378881983,
+          "finer_infinity_norm": 520.8909702782635,
+          "normalizer": 520.8909702782635,
+          "relative_difference": 2.9284699196711206e-05,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            -69.62643207189494,
+            -145.87571614276413,
+            -80.37356792815399,
+            520.8757161428846,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            -69.63176452375457,
+            -145.89097027746467,
+            -80.36823547629047,
+            520.8909702782635,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "support_moments": {
+          "unit": "kNm",
+          "absolute_infinity_difference": 0.034937686594275874,
+          "finer_infinity_norm": 172.1847801941462,
+          "normalizer": 172.1847801941462,
+          "relative_difference": 0.0002029080999777218,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            145.67748930711704,
+            172.2197178807405,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            145.647421514705,
+            172.1847801941462,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "all_metrics_within_exploratory_screen": true
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.5,
+      "metrics": {
+        "roof_right_ux": {
+          "unit": "m",
+          "absolute_infinity_difference": 1.9754577572115434e-05,
+          "finer_infinity_norm": 0.011814438857048783,
+          "normalizer": 0.011814438857048783,
+          "relative_difference": 0.0016720707442088433,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.011834193434620898
+          ],
+          "fine_values": [
+            0.011814438857048783
+          ]
+        },
+        "all_translations": {
+          "unit": "m",
+          "absolute_infinity_difference": 2.027999736895804e-05,
+          "finer_infinity_norm": 0.011814438857048783,
+          "normalizer": 0.011814438857048783,
+          "relative_difference": 0.0017165434274399327,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.004708961269468898,
+            0.0003849029528494172,
+            0.0049986325147641725,
+            -0.0003634774682804845,
+            0.011525049540647807,
+            0.0005539540898356822,
+            0.011834193434620898,
+            -0.0007048983531693803
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.00470158711154313,
+            0.0003856373248149116,
+            0.004991422369255237,
+            -0.0003632244258432243,
+            0.011504769543278849,
+            0.0005540182519984556,
+            0.011814438857048783,
+            -0.0007046575680747355
+          ]
+        },
+        "all_rotations": {
+          "unit": "rad",
+          "absolute_infinity_difference": 3.2142220356681447e-06,
+          "finer_infinity_norm": 0.001978376732988982,
+          "normalizer": 0.001978376732988982,
+          "relative_difference": 0.001624676423894258,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.0,
+            0.0,
+            -0.0016221518062213324,
+            -0.00198159095502465,
+            -0.0014034163701648426,
+            -0.0016559979231970609
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            -0.0016196356566073526,
+            -0.001978376732988982,
+            -0.0014020671080529682,
+            -0.0016535390443332132
+          ]
+        },
+        "support_forces": {
+          "unit": "kN",
+          "absolute_infinity_difference": 0.05878418211625558,
+          "finer_infinity_norm": 1038.4508277374082,
+          "normalizer": 1038.4508277374082,
+          "relative_difference": 5.66075740382772e-05,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            -111.10580244759818,
+            -288.4524778137644,
+            -188.89419755986648,
+            1038.4524777683184,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            -111.04701827025261,
+            -288.45082780208105,
+            -188.95298174198274,
+            1038.4508277374082,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "support_moments": {
+          "unit": "kNm",
+          "absolute_infinity_difference": 0.0807870896045415,
+          "finer_infinity_norm": 429.0759003597358,
+          "normalizer": 429.0759003597358,
+          "relative_difference": 0.00018828158266826425,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            225.851007659637,
+            429.0032568363748,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            225.77022057003245,
+            429.0759003597358,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "all_metrics_within_exploratory_screen": true
+    },
+    {
+      "coarse_layers": 16,
+      "fine_layers": 32,
+      "load_factor": 0.75,
+      "metrics": {
+        "roof_right_ux": {
+          "unit": "m",
+          "absolute_infinity_difference": 0.00029234776583884903,
+          "finer_infinity_norm": 0.04190205798870739,
+          "normalizer": 0.04190205798870739,
+          "relative_difference": 0.006976930964050424,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.04219440575454624
+          ],
+          "fine_values": [
+            0.04190205798870739
+          ]
+        },
+        "all_translations": {
+          "unit": "m",
+          "absolute_infinity_difference": 0.00029234776583884903,
+          "finer_infinity_norm": 0.04190205798870739,
+          "normalizer": 0.04190205798870739,
+          "relative_difference": 0.006976930964050424,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.013539653716391533,
+            0.002382401229150858,
+            0.017324390791943294,
+            -0.0002905877155085107,
+            0.03776450182627923,
+            0.004258448628683496,
+            0.04219440575454624,
+            -0.0008774347956605393
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.013459880630315873,
+            0.002369234074105019,
+            0.017205001055672603,
+            -0.00029485465347140095,
+            0.03750609360551961,
+            0.004226382695118559,
+            0.04190205798870739,
+            -0.0008806180704940664
+          ]
+        },
+        "all_rotations": {
+          "unit": "rad",
+          "absolute_infinity_difference": 5.5401519291415485e-05,
+          "finer_infinity_norm": 0.007513132898419278,
+          "normalizer": 0.007513132898419278,
+          "relative_difference": 0.007373957048340202,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            0.0,
+            0.0,
+            -0.0050642747280644045,
+            -0.007568534417710693,
+            -0.00567449590624223,
+            -0.007485242827275461
+          ],
+          "fine_values": [
+            0.0,
+            0.0,
+            -0.005028691953442528,
+            -0.007513132898419278,
+            -0.0056377371392062605,
+            -0.0074324322921779625
+          ]
+        },
+        "support_forces": {
+          "unit": "kN",
+          "absolute_infinity_difference": 0.20495367277044352,
+          "finer_infinity_norm": 1538.5525974854006,
+          "normalizer": 1538.5525974854006,
+          "relative_difference": 0.0001332120027000821,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            -124.40233744251421,
+            -413.4679124895729,
+            -325.59766255747087,
+            1538.4679124891713,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            -124.19738376974486,
+            -413.55259748501317,
+            -325.8026162302413,
+            1538.5525974854006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "support_moments": {
+          "unit": "kNm",
+          "absolute_infinity_difference": 0.5331257910355589,
+          "finer_infinity_norm": 830.8777585116194,
+          "normalizer": 830.8777585116194,
+          "relative_difference": 0.0006416416681926424,
+          "within_exploratory_screen": true,
+          "coarse_values": [
+            262.18851444493623,
+            831.0136964130088,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fine_values": [
+            261.6553886539007,
+            830.8777585116194,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "all_metrics_within_exploratory_screen": true
+    }
+  ],
+  "checkpoint_chains_and_committed_gates_checked": true,
+  "material_state_correspondence_verified": false,
+  "physical_validation": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-matched-refinement-7q_xoc5w",
+    "payload_files": 8,
+    "payload_bytes": 30288019,
+    "inventory_sha256": "c5af102531c35431d3380b3a72daed00969c87e441f54bf61e7881103bc3f457"
+  }
+}

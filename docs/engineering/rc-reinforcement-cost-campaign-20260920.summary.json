@@ -1,0 +1,99 @@
+{
+  "aggregate_ratio": null,
+  "campaign_wall_ns": 66220871492,
+  "cases": [
+    {
+      "case_wall_ns": 15939143370,
+      "full_process_inclusive_ratio": 2.043281848591264,
+      "id": "w32-small",
+      "learned_process_wall_ns": 5291695213,
+      "pairs": 2,
+      "price_process_wall_ns": 5236130858,
+      "selections": [
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        },
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        }
+      ],
+      "status": "completed",
+      "training_process_wall_ns": 5407195926,
+      "uncomparable_pair_count": 0
+    },
+    {
+      "case_wall_ns": 17140258722,
+      "full_process_inclusive_ratio": 2.047696104467804,
+      "id": "w32-large",
+      "learned_process_wall_ns": 5550817715,
+      "pairs": 2,
+      "price_process_wall_ns": 5622709632,
+      "selections": [
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        },
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        }
+      ],
+      "status": "completed",
+      "training_process_wall_ns": 5962782895,
+      "uncomparable_pair_count": 0
+    },
+    {
+      "case_wall_ns": 15972847350,
+      "full_process_inclusive_ratio": 2.013966144904894,
+      "id": "w48-small",
+      "learned_process_wall_ns": 5293436964,
+      "pairs": 2,
+      "price_process_wall_ns": 5298289650,
+      "selections": [
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        },
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        }
+      ],
+      "status": "completed",
+      "training_process_wall_ns": 5377139017,
+      "uncomparable_pair_count": 0
+    },
+    {
+      "case_wall_ns": 17160510696,
+      "full_process_inclusive_ratio": 2.059074972385715,
+      "id": "w48-large",
+      "learned_process_wall_ns": 5696538914,
+      "pairs": 2,
+      "price_process_wall_ns": 5608415165,
+      "selections": [
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        },
+        {
+          "learned_order": "cheap",
+          "price_order": "cheap"
+        }
+      ],
+      "status": "completed",
+      "training_process_wall_ns": 5851608387,
+      "uncomparable_pair_count": 0
+    }
+  ],
+  "completed_case_count": 4,
+  "independent_generalization": false,
+  "net_savings_proved": false,
+  "planned_case_count": 4,
+  "protocol_sha256": "sha256:778370230309ce64da3fce2ec858fedc8f771aeb1c605bb6920b17886affc14f",
+  "packet_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reinforcement-cost-fdaa8ebg/study",
+  "source_revision": "f162e6d1bc22143cb0959c6ddff23113181e3d99",
+  "inventory_sha256": "737f15fd8915fc917276acfce16aaa5e39c6d5bb2a38e78625955930a28478f9",
+  "inventory_file_count": 1023
+}

@@ -1,0 +1,160 @@
+{
+  "source_commit": "1e9e1fb29f14d92325e803c3ead36e5641e598de",
+  "tested_working_tree_committed_without_code_changes": true,
+  "source_snapshot_files": [
+    {
+      "path": "scripts/verify-workbench-v2-e2e.mjs",
+      "bytes": 5253,
+      "sha256": "0253470bff27df070db777da29cb3b10e51f0a65e50b091b97b689d33eb0b139"
+    },
+    {
+      "path": "src/workbench-v2/components/RcJobResultPanel.tsx",
+      "bytes": 10623,
+      "sha256": "7639b38c35ced5aedc9878d531cc9f18a12299f0de96caf8dfe489a3cd242e2e"
+    },
+    {
+      "path": "src/workbench-v2/model/rcControlDesignSchema.ts",
+      "bytes": 20038,
+      "sha256": "df2a86e45e8e2dfdbfd9d0979b792a2838dc4c3bd6e4da7f3a24973c1923d459"
+    },
+    {
+      "path": "src/workbench-v2/model/rcJobReview.ts",
+      "bytes": 3871,
+      "sha256": "569c014e50c295519c2eb0bad95bb6ef86ea04224ff84bac162c16a7fdff64a3"
+    },
+    {
+      "path": "src/workbench-v2/model/rcJobReview.worker.ts",
+      "bytes": 2037,
+      "sha256": "02662fb4fc5f238dc25dcbe5768cb8d79d285fb4ae5add4711b5a8e2479f560a"
+    },
+    {
+      "path": "src/workbench-v2/model/rcJobSchema.ts",
+      "bytes": 27985,
+      "sha256": "8cfaba46a16fc07e3ed19a1bc0663bff044a63c935d514a3d57c5d5ded6f946c"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-constant-durable-job/README.md",
+      "bytes": 652,
+      "sha256": "0c5b5e3bbfc703392535015262cec6323c6a69e606eec1f653c83efee3f7d417"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-constant-durable-job/checkpoint.json",
+      "bytes": 24349,
+      "sha256": "d9dfad25b89ec6b7bd1a011361e0ca98158e910887d8f335882426ec8ed273a4"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-constant-durable-job/evidence.json",
+      "bytes": 2385,
+      "sha256": "d371aa53d64102bb22d3bf62e3be051dc3b66db6776ed8c3600e0625bc8edaf8"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-constant-durable-job/inventory.json",
+      "bytes": 665,
+      "sha256": "10c150619d532cd85d7bbf28263df1393b1ec2063f32c87da3876f5dd5d3d993"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-constant-durable-job/job.json",
+      "bytes": 1714,
+      "sha256": "5a2dcf5752771777bd89109a8f2a72d697091d6899290ad8ca17ab9538eac2ef"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-constant-durable-job/request.json",
+      "bytes": 2236,
+      "sha256": "ae5c3655b1665145e3090ee3857b4f462c9520146f2660702bca861bdead0ed0"
+    },
+    {
+      "path": "tests/frontend/fixtures/rc-fiber-constant-durable-job/result.json",
+      "bytes": 206910,
+      "sha256": "50b38d146c56e4219fbd2ba05d9073542088f3819bbeb0541f2cea88ea7eab73"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-rc-constant-job-browser.spec.ts",
+      "bytes": 5136,
+      "sha256": "be292b3b1d9d863bc739369e58b93c4e95ec89ad8a2f366c9c9105b299d8eed9"
+    },
+    {
+      "path": "tests/frontend/workbench-v2-rc-constant-job-contract.spec.ts",
+      "bytes": 5563,
+      "sha256": "4a4d5d1f0a6cd61acc07eae2c323d211cccc4b7d0ef85f715c47784a4147f8b9"
+    }
+  ],
+  "built_assets": [
+    {
+      "path": "dist/assets/workbench-B83-G2nc.js",
+      "bytes": 732864,
+      "sha256": "5fc5f5ca25f305f69382c260d3b2d79f52f4923f72d758af570f3cd1890e3a50"
+    },
+    {
+      "path": "dist/assets/workbench--mDpWKyy.css",
+      "bytes": 57544,
+      "sha256": "d8205dc6a0176457a8b562b3a0caf0f4c9f9aeeb089b61648efcc2b49c35429d"
+    },
+    {
+      "path": "dist/assets/rcJobReview.worker-DIOn9FrH.js",
+      "bytes": 174286,
+      "sha256": "8df73eb4c4dca9a723007a4fba92ab9bd8f231996a44f9bcb5bdd41ab2e1fbbe"
+    }
+  ],
+  "tests": {
+    "rc_job_browser_and_contracts": {
+      "passed": 22,
+      "seconds": 29.5
+    },
+    "shared_rc_design_contracts": {
+      "passed": 19,
+      "seconds": 13.5
+    },
+    "earlier_16_contracts_overlap": true,
+    "typescript": "passed",
+    "vite_build": "passed",
+    "viewer_delivery": "passed"
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "per_viewport": {
+    "selected_response_rows": 4,
+    "material_laws": [
+      "concrete",
+      "steel"
+    ],
+    "material_epochs": 4,
+    "exact_original_download_roles": [
+      "request",
+      "checkpoint",
+      "result",
+      "evidence",
+      "terminal"
+    ],
+    "displayed_core_calls": 18,
+    "displayed_reserved_invocations": 6
+  },
+  "screenshots_visually_reviewed": true,
+  "numerical_calls_in_this_review": 0,
+  "producer_source_commit": "5f73252c2fbe0c20ae1e8a504b498110fb15182b",
+  "producer_inventory_sha256": "c08294d15c379c6adce9033bad84bb3eab8e1f11dc3fc2f8f9dc4a8acb01b535",
+  "limits": [
+    "stored authored fixture, not independent physical validation",
+    "route-served original HTTP artifacts, not production service deployment",
+    "no learning fit, external-data admission or speed improvement",
+    "255-target limit and topology/public-experiment reconstruction remain open"
+  ],
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-workbench-sqjnl9uv",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-workbench-sqjnl9uv.inventory.json",
+    "inventory_sha256": "ee2e5cdac0b51c6ed6e80d41201796e6b4c9e864877e350116430e45f7bc6fd9",
+    "file_count": 32,
+    "total_bytes": 1763119,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T19:41:53.974994+00:00",
+    "seal_wall_ns": 5678919,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

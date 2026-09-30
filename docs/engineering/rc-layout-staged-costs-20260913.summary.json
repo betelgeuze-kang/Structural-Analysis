@@ -1,0 +1,179 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-staged-costs-_dieg276",
+    "files": 876,
+    "bytes": 123155181,
+    "inventory_sha256": "9a192b671d0d4c128cd6fc970d9b16ab5c9cd97a1d97ba772c7b9c4c9ebf16ea"
+  },
+  "protocol": {
+    "source_revision": "af3793dd3a8a34891ea81c8b76a4428c1a7ae790",
+    "input_bindings": [
+      {
+        "path": "plan.json",
+        "bytes": 11771,
+        "sha256": "7b725f4c0e486167d20a33d886b4e58affd5eec3dc69103a0a5ac22d8fd494d1"
+      },
+      {
+        "path": "price-table.json",
+        "bytes": 133,
+        "sha256": "c41f66b4625315f962ed6105a4b9ef1248c8dc27155c7dd583edefdf15312fee"
+      },
+      {
+        "path": "pool/baseline.json",
+        "bytes": 1462,
+        "sha256": "479d5ad64a850b0ab0e149fe42651373c6ead4644afbc2fef34883bf53dd03ad"
+      },
+      {
+        "path": "pool/small.json",
+        "bytes": 1462,
+        "sha256": "a765f2d26ecec4a3cdb0cefc919f69880458a40e8f432ecc7b4f161ddf9f8a41"
+      },
+      {
+        "path": "pool/middle.json",
+        "bytes": 1462,
+        "sha256": "ae676aa07e9c71d8a46d55306bdd7a92dc5d9d7c1690ad78e86d39fb06624f13"
+      },
+      {
+        "path": "pool/large.json",
+        "bytes": 1462,
+        "sha256": "db44ba2870d27061f8a5bfa9e1a1778c80c0b505fedf73e473c83347fe0dba18"
+      },
+      {
+        "path": "pool/outside.json",
+        "bytes": 1462,
+        "sha256": "c75a12fdbd7eac519379b72692c8d747ae73a56e5662417a402a21c31a7fa19c"
+      }
+    ],
+    "schedule": [
+      [
+        "pruned",
+        "staged"
+      ],
+      [
+        "staged",
+        "pruned"
+      ]
+    ],
+    "staged_prefix_target_count": 2,
+    "baseline_always_full": true,
+    "new_fits": 0,
+    "new_training_labels": 0,
+    "host_isolated": false,
+    "automatic_retry": false,
+    "independent_cases": false,
+    "previous_outcomes_known": true,
+    "online_policy": "price_order",
+    "consideration_horizon": "same five-model frozen pool",
+    "scope": "Process startup through exit for each execution. Original preparation, later audit, HTTP/UI and historical research costs are separate."
+  },
+  "audit": {
+    "source_revision": "af3793dd3a8a34891ea81c8b76a4428c1a7ae790",
+    "source_files_checked": 643,
+    "counters": {
+      "artifact_bindings": 164,
+      "full_rows": 10,
+      "prefix_rows": 4,
+      "cost_decisions": 20,
+      "prefix_decisions": 4,
+      "exact_full_repeats": 7,
+      "exact_prefix_matches": 4
+    },
+    "executions": [
+      {
+        "stem": "o0-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 11840332758,
+        "call_wall_ns": 10030929389,
+        "full_rows": 3,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 6
+        },
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      },
+      {
+        "stem": "o0-staged",
+        "mode": "staged",
+        "process_wall_ns": 11078261884,
+        "call_wall_ns": 9292191011,
+        "full_rows": 2,
+        "prefix_rows": 2,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 32,
+            "known_linear_solve_count": 64,
+            "known_newton_iteration_count": 64,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      },
+      {
+        "stem": "o1-staged",
+        "mode": "staged",
+        "process_wall_ns": 11047367919,
+        "call_wall_ns": 9269992728,
+        "full_rows": 2,
+        "prefix_rows": 2,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 32,
+            "known_linear_solve_count": 64,
+            "known_newton_iteration_count": 64,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 8
+        },
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      },
+      {
+        "stem": "o1-pruned",
+        "mode": "pruned",
+        "process_wall_ns": 11781439755,
+        "call_wall_ns": 9985271155,
+        "full_rows": 3,
+        "prefix_rows": 0,
+        "work": {
+          "known_counters": {
+            "attempted_step_count": 36,
+            "known_linear_solve_count": 72,
+            "known_newton_iteration_count": 72,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false,
+          "api_invocation_count": 6
+        },
+        "selected_candidate_id": "middle",
+        "selected_estimate": 246.34835999999999
+      }
+    ],
+    "process_sums_ns": {
+      "pruned": 23621772513,
+      "staged": 22125629803
+    },
+    "paired_staged_over_pruned": [
+      0.9356377147859208,
+      0.9376925188037003
+    ],
+    "ratio_of_process_sums": 0.9366625553109271,
+    "enclosing_campaign_wall_ns": 45747992795,
+    "audit_wall_ns": 2217164085,
+    "audit_solver_calls": 0,
+    "independent_cases": false,
+    "learned_net_benefit": false
+  },
+  "staged_net_benefit_scope": "two ordered repeats of one previously known five-model pool; no independent generalization or learned benefit"
+}

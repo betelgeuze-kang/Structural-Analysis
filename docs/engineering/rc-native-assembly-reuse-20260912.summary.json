@@ -1,0 +1,194 @@
+{
+  "schema": "rc-native-assembly-reuse-observation.v1",
+  "base_revision": "28be09102158936e6a820c06b3be33fae8b65b04",
+  "executed_source": [
+    {
+      "path": "scripts/diagnose_rc_control_line_search_reuse.py",
+      "sha256": "f41dd2f0b404a1769344b25fefab8e63d6dcaf88eb4ee1671e16bd2af10fee69"
+    },
+    {
+      "path": "src/structural_analysis/solvers/nonlinear/assembly_work.py",
+      "sha256": "7c7e7bfa845c745ce410b72995f91111a22bb8a327afbb713d05cbd0ef81762f"
+    },
+    {
+      "path": "src/structural_analysis/solvers/nonlinear/newton.py",
+      "sha256": "cf67d715509513c01506d01360668743deb702e6fae7c7f49b9a8e13285e4231"
+    },
+    {
+      "path": "src/structural_analysis/assembly/stateful_fiber_frame2d_displacement_control.py",
+      "sha256": "5c372a0592a952076a073cf185ab2a8e71c538c8ce0ae23c7b37f398a77df6f5"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_seed_runtime.py",
+      "sha256": "12a16b3095f558f06d539e9ec52077e14f74e4bfa290e5aa3863d593291ec678"
+    },
+    {
+      "path": "src/structural_analysis/benchmark/rc_control_runtime_selection.py",
+      "sha256": "7c523a55e737122a20352d61b5c61f7e816801f9ac77df9af2803eab2484c37d"
+    },
+    {
+      "path": "tests/test_rc_native_assembly_reuse.py",
+      "sha256": "6606d786797109a65fb6a20761a14423ce172c36d23c07e925164e13f4ba4f7d"
+    },
+    {
+      "path": "tests/test_rc_control_runtime_selection.py",
+      "sha256": "0eb7702090a5e54a866e103db057f674b6c4e7c3d19a86ee97a6cc321184ce5b"
+    },
+    {
+      "path": "tests/test_stateful_fiber_frame2d_displacement_control.py",
+      "sha256": "0768d70b95b7b8d370557c63816e7cd4442d7859dcffb80ff11c62126aa8814a"
+    },
+    {
+      "path": ".github/workflows/python-test-collection.yml",
+      "sha256": "ecd121dd75699281b658625bff5e10214ac18b02197cb91e0b335ecbb38bc5dd"
+    },
+    {
+      "path": "tests/test_repository_python_workflow_contract.py",
+      "sha256": "219b8ea546d55400b6788ec343eb0a9a4b5d0f093b93b45403af97256560be90"
+    }
+  ],
+  "source_note": "Numerical implementation files unchanged after the measured run; historical-wrapper keyword compatibility was added afterward and separately tested.",
+  "native_execution": true,
+  "global_module_patch_used": false,
+  "paired_step_records": 128,
+  "step_executions": 256,
+  "baseline_dispatches": 1576,
+  "reuse_dispatches": 1156,
+  "reuse_hits": 420,
+  "full_history_comparisons_passed": 12,
+  "aggregate_wall_ratio": 0.796188912907208,
+  "rows": [
+    {
+      "retained": true,
+      "constant": false,
+      "repetition": 0,
+      "order": [
+        false,
+        true
+      ],
+      "baseline": {
+        "directory": "retained-True-constant-False-rep-0-False",
+        "wall_ns": 28695534844,
+        "step_count": 64,
+        "actual_newton_dispatches": 788,
+        "reused_dispatches": 0
+      },
+      "reuse": {
+        "directory": "retained-True-constant-False-rep-0-True",
+        "wall_ns": 22852163576,
+        "step_count": 64,
+        "actual_newton_dispatches": 578,
+        "reused_dispatches": 210
+      },
+      "native_step_bytes_exact": true,
+      "whole_benchmark_wall_ratio": 0.7963665322926783
+    },
+    {
+      "retained": true,
+      "constant": false,
+      "repetition": 1,
+      "order": [
+        true,
+        false
+      ],
+      "baseline": {
+        "directory": "retained-True-constant-False-rep-1-False",
+        "wall_ns": 28707899576,
+        "step_count": 64,
+        "actual_newton_dispatches": 788,
+        "reused_dispatches": 0
+      },
+      "reuse": {
+        "directory": "retained-True-constant-False-rep-1-True",
+        "wall_ns": 22851814472,
+        "step_count": 64,
+        "actual_newton_dispatches": 578,
+        "reused_dispatches": 210
+      },
+      "native_step_bytes_exact": true,
+      "whole_benchmark_wall_ratio": 0.7960113700238897
+    }
+  ],
+  "material_observations": [
+    {
+      "path": "runs/retained-True-constant-False-rep-1-False/fresh-reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-1-False/proposal",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-1-False/reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-1-False/secant",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-False/fresh-reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-False/proposal",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-False/reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-False/secant",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-1-True/fresh-reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-1-True/proposal",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-1-True/reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-1-True/secant",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-True/fresh-reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-True/proposal",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-True/reference",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    },
+    {
+      "path": "runs/retained-True-constant-False-rep-0-True/secant",
+      "maximum_committed_steel_plastic_strain": 7.86764100274818e-06
+    }
+  ],
+  "test_groups": {
+    "core_and_boundaries": 189,
+    "selection_warm_start_parent": 113,
+    "ci_contract": 14,
+    "historical_wrapper_rerun": 20,
+    "wrapper_rerun_overlaps_prior_tests": 19
+  },
+  "ai_net_benefit_proved": false,
+  "external_validation": false,
+  "default_reuse_enabled": false,
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-native-reuse-khT0Do7R",
+    "files": 1585,
+    "bytes": 80827643,
+    "inventory_sha256": "ebaf94db8f06df863ed48c001f1dc1d8b98ef31e8cf31a84f16f5834831fd515"
+  }
+}

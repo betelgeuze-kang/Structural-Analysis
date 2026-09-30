@@ -1,0 +1,90 @@
+{
+  "schema_version": "measured-workbook-source-intake-observation.v1",
+  "original_audit": {
+    "schema_version": "complete-measured-workbook-original-audit.v1",
+    "source_revision": "090dfc61ee5fc45f5f439e59c6a955a10fbdc178",
+    "source_files": [
+      {
+        "path": "src/structural_analysis/io/measured_numeric_workbook.py",
+        "sha256": "83ba27bd23539c21e0e2ed50178f146a39df39357a94f2d13e274341ce476fde"
+      },
+      {
+        "path": "src/structural_analysis/io/measured_drift_load.py",
+        "sha256": "0e359441b16a7f4ff2751cb472170716cd3887c386b623eb10574bdcc874c7a9"
+      },
+      {
+        "path": "tests/test_measured_numeric_workbook.py",
+        "sha256": "30e2e3f780fce4e746e4ae1b229d28a03a169ca8a6ab705a94e15f3891b1858e"
+      }
+    ],
+    "original_workbook": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-zenodo-drawing-intake.4urv2oe1/SERA-ARISTA_Unretrofitted_Cyclic_Dataset.xlsx",
+    "original_workbook_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+    "source_sheet": "Sheet1",
+    "source_range": "A5:DL4063",
+    "observation_count": 4059,
+    "channel_count": 116,
+    "original_numeric_tokens_checked": 470844,
+    "original_decimal_tuples_checked": 470844,
+    "prior_A_to_J_numeric_tokens_exact": 40590,
+    "original_header_text_cells_checked": 201,
+    "original_point_ids_consecutive": true,
+    "source_row_order_exact": true,
+    "top_displacement_equal_adjacent_measurements": 0,
+    "top_displacement_nonzero_increment_direction_changes": 47,
+    "measurement_directions_are_not_command_reversals": true,
+    "decoder_wall_ns": 2062041139,
+    "independent_original_audit_wall_ns": 1780352657,
+    "structural_newton_fit_calls": 0,
+    "solver_request_created": false,
+    "training_admitted": false,
+    "sampling_interval_seconds": null,
+    "original_workbook_modified": false,
+    "resampled_or_smoothed": false,
+    "long_solver_history_support_added": false,
+    "limits_still_open": [
+      "255 cumulative solver targets",
+      "254 configured solver reversal limit",
+      "consecutive equal command targets disallowed",
+      "measured history is not original commanded loading",
+      "material/reinforcement and sensor reference reconstruction",
+      "public-data campaign splits and physical qualification"
+    ]
+  },
+  "validation": {
+    "initial_reader_and_csv_selection": {
+      "passed": 56,
+      "seconds": 1.71
+    },
+    "combined_reader_csv_peer_selection": {
+      "passed": 78,
+      "seconds": 1.83
+    },
+    "initial_mypy": {
+      "exit_code": 1,
+      "reason": "The local name values was reused for XML elements and a tuple of measurement tokens."
+    },
+    "final_cleanup": "Rename the XML element list to value_nodes; no numerical or schema changes.",
+    "final_reader_selection": {
+      "passed": 30,
+      "seconds": 1.59,
+      "command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q tests/test_measured_numeric_workbook.py"
+    },
+    "final_mypy": {
+      "exit_code": 0,
+      "source_files_checked": 1,
+      "command": "PYTHONPATH=src python3 -m mypy --follow-imports=silent src/structural_analysis/io/measured_numeric_workbook.py"
+    },
+    "ruff_check_pass": true,
+    "ruff_format_check_pass": true,
+    "git_diff_check_pass": true
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-workbook.3_4wkzdn",
+    "file_count": 7,
+    "total_bytes": 10538153,
+    "inventory_sha256": "3f5e5e0c4d5c92b0c042f61703a04f0cdc6d4ebce72cb6297707bee392d13447",
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T16:18:30.914367+00:00",
+    "seal_wall_ns": 20045594
+  }
+}

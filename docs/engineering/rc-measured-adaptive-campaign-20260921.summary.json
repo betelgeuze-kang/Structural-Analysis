@@ -1,0 +1,61 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-adaptive-breadth-cafwehuh",
+  "audited_inventory_sha256": "24e1bd652a828c559ad694652f5174440090a6e644cea61b2b41b0f9310741be",
+  "files": 4216,
+  "measurement": {
+    "source_revision": "0f713400a0b493b4d9ce117acc0839929e4364f7",
+    "totals": {
+      "paths": 128,
+      "complete_paths": 70,
+      "ordinary_native_calls": 462,
+      "additional_native_calls": 340,
+      "ordinary_newton": 2946,
+      "additional_newton": 1756,
+      "ordinary_linear_solves": 2946,
+      "additional_linear_solves": 1756
+    },
+    "all_128_original_path_payloads_match": true,
+    "comparison_cost": {
+      "summed_comparison_wall_ns": 114501715752,
+      "summed_comparison_process_cpu_ns": 114146825168,
+      "parent_wall_ns_before_final_write": 114573735169,
+      "original_execution_clocks_authenticated": false,
+      "full_user_flow_measured": false
+    },
+    "mode_comparison_cost": {
+      "fixed": {
+        "comparisons": 16,
+        "wall_ns": 49196171749,
+        "process_cpu_ns": 48924923484
+      },
+      "adaptive": {
+        "comparisons": 16,
+        "wall_ns": 65305544003,
+        "process_cpu_ns": 65221901684
+      }
+    },
+    "runner_process_wall_ns": 116338499118,
+    "audit_process_wall_ns": 12116026914,
+    "audit_scoped_timing": {
+      "schema_version": "adaptive-campaign-audit-cost.v1",
+      "audit_hash": "sha256:f00bb53e949dd24464ec47c14965474703b655f3d9ac907a83f56e0774340d66",
+      "wall_ns": 10229858235,
+      "process_cpu_ns": 10229276678,
+      "scope": "audit_call_through_audit_output_close",
+      "excluded": [
+        "interpreter_startup_and_imports",
+        "argument_preflight",
+        "timing_receipt_write",
+        "stdout",
+        "numerical_solves",
+        "transport",
+        "browser_review"
+      ],
+      "cold_cache_controlled": false,
+      "original_execution_clocks_authenticated": false,
+      "full_user_flow_measured": false
+    },
+    "performance_qualified": false,
+    "full_user_flow_measured": false
+  }
+}

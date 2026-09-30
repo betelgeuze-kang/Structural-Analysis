@@ -1,0 +1,32 @@
+# Two-fixed RC portal candidate learning and search, 2026-09-28
+
+This is a bounded software experiment on the repository's synthetic three-member portal. The reference solver retains the result: learning only orders candidates; every selected design is analyzed over the complete prescribed path and freshly verified. A later, separately charged full-pool run supplies the finite-pool comparison. The material prices and permissive performance limits are development inputs, not a quotation or design acceptance criterion.
+
+## Exact producer input and failed first attempt
+
+The producer was run from a `git archive` checkout of `485d6837c6157696cae3619cb410803ac2c2f13f`. It used `candidate-training-baseline-032.json` with widths 0.32, 0.44 and 0.54 m, the explicit two-fixed-endpoint v3 request, and `candidate-training-widths.json`. The 0.44 m training row returned a **blocked** path at the last +10 mm target after completing −10 and −20 mm. Its last attempted solve did not pass the equilibrium and increment gates; rollback was exact. Only two of three training rows freshly verified, so the trainer rejected fitting. The original incomplete label comparison hash is `sha256:2a7ff914fd858e3a47cfa2723f3e94ccf34305eec8ef174647cdc42e087235a6`. This failed attempt remains in the local producer packet; it is not counted as completed training.
+
+The follow-up used a new committed input, `candidate-training-widths-followup.json`, with widths 0.32, 0.46 and 0.54 m. The exploratory width probes used to choose 0.46 m mean this is a **tuned same-family follow-up**, not a predeclared independent split. The exact follow-up source revision is `f8ef8b128f135adfc3cd833cc8c7479422ceb72c`.
+
+The evaluation uses the original 0.40 m portal and two distinct section-width candidates, 0.36 and 0.50 m, from `design-width-comparison.json`. Both stages use the same v3 request: two −25 kN constant roof loads followed by −10, −20 and +10 mm control targets. The training and evaluation models are disjoint by the versioned physical identity, but share the same node geometry, topology, materials and load history; only section widths change. They are not independent projects or physical validation cases.
+
+## Observed run
+
+| Stage | Actual result |
+| --- | --- |
+| Training | 3 full-path labels and 3 fresh verifications; 6 API invocations, 24 attempted steps, 248 known Newton iterations/linear solves; report `sha256:19d9f12c2072d250ac9acd07ba1f92989e2516b90ad79f85d2a46ef67f26ade9`; fitted policy `sha256:fa5e4a163f04a9581789b41f89b52bb2f7c63103c9b3b94c577832350cc2d523` |
+| Price-order online arm | Baseline and 0.36 m analyzed and freshly verified; 4 API invocations, 16 attempted steps, 162 known Newton iterations/linear solves; 10.133 s enclosing wall interval |
+| Learned-order online arm | Same frozen ordering, same two designs, same 4 invocations/16 steps/162 iterations; 10.026 s enclosing wall interval |
+| Separate full-pool comparison | Baseline, 0.36 and 0.50 m analyzed and freshly verified; 6 invocations, 24 attempted steps, 250 iterations |
+
+All 20 follow-up training/search/oracle API invocations have known work, totaling 80 attempted steps and 822 known Newton iterations/linear solves. The training wall interval was 15.479 s; the enclosing online-plus-optional-oracle interval was 35.598 s. These are one execution order on one local machine. The 0.107 s difference between online arms is not a measured learning speedup: their rankings, selected model and solver work are identical.
+
+Under the synthetic common price table, the reference-verified 0.36 m candidate has 2.16 m³ gross concrete and a scoped estimate of 459.036 labeled KRW. The 0.40 m baseline has 2.40 m³ and 483.036; the 0.50 m candidate has 3.00 m³ and 543.036. Both online arms selected the same cheapest verified candidate. The separate full-pool result confirms a zero estimate gap **within these three authored designs**. Both arms omitted the more expensive but feasible 0.50 m candidate under the one-alternative online budget; this is a missed feasible candidate, not a missed cheaper feasible design. These figures are arithmetic under synthetic prices, not real construction costs or savings.
+
+The candidate search report hash is `sha256:9f771411b77b344fa3aa5442c1547c8cd55411de15315ca431dc62735f38a742`. The Python HTTP graph reader admitted 66 exact referenced original artifacts without rerunning the solver. `rc-portal-candidate-search-artifacts.json.gz` preserves **all 75 original search JSON files** (13,686,200 bytes, compressed to 3,304,990 bytes, SHA-256 `1eb8585f280f50e3ad5f59268b585babffa426b3969cfb78b44e7be1c25c6e43`). The other nine are unreferenced request/start/outcome execution records; the Workbench graph validates the 66 referenced files. Contract and desktop/mobile browser checks consume the original report, design and verification bytes. Workbench verifies the submitted original paths and arithmetic; it does not retrain the policy, authenticate the training-project provenance, or independently validate RC physics.
+
+A separate read-only audit matched the initial and follow-up archived source and portal examples against 676 and 677 Git blobs respectively. It matched all 75 compressed JSON files to the producer bytes, the 56 row artifact byte references to their files, and all ten retained training/search/oracle rows to the v3 opt-in, constant loads, six support reactions and fresh replay hashes. The producer's `workbench_search_review_integrated=false` flag remains unchanged: the later Workbench consumer checks do not rewrite a prior execution claim.
+
+Focused Python regression coverage passed 212 tests. Workbench's affected RC contract set passed 102 tests, and its production build and delivery check completed. The pinned Node v24.20.0 Workbench runner served the built files and passed the two portal candidate desktop/mobile checks plus the existing viewer original-byte check (3/3). The compressed fixture's 75/75 byte match was independently audited after the browser fixture was expanded from the 66 graph references.
+
+The complete local producer outputs are under `/tmp/rc-portal-candidate-20260928-UvaGiq/outputs/`. The committed compressed fixture contains the complete search JSON output; the failed attempt and full training label packet remain local and are not part of that Workbench fixture. All claims here are limited to the stated exact source, synthetic inputs and one run.

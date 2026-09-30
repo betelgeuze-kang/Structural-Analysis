@@ -1,0 +1,139 @@
+{
+  "source_revision": "29af2b0f9bcd481058cae1cabb192b91f65c4506",
+  "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-topology-highload-ltygx_ms",
+  "source_files_checked": 461,
+  "api_executions": 1,
+  "api_wall_ns_including_capture_wrapper": 2527578806,
+  "public_result_bytes_identical": true,
+  "probe_assembly_calls": 21,
+  "probe_wall_ns": 1165180476,
+  "linear_equation_relative_error": 1.1269708460687212e-14,
+  "base_reassembly_exact": true,
+  "retained_checkpoints_unchanged": true,
+  "trial_admitted_as_solution": false,
+  "small_trials": [
+    {
+      "alpha": 0.015625,
+      "residual_infinity_norm": 48.46654555355825,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 0.0078125,
+      "residual_infinity_norm": 49.75353714448107,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 0.00390625,
+      "residual_infinity_norm": 50.16977413324811,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 0.001953125,
+      "residual_infinity_norm": 50.32259705821532,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 0.0009765625,
+      "residual_infinity_norm": 50.38537020961016,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 0.00048828125,
+      "residual_infinity_norm": 50.41337014110567,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 0.000244140625,
+      "residual_infinity_norm": 50.42652629625553,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 0.0001220703125,
+      "residual_infinity_norm": 50.432893776362334,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 6.103515625e-05,
+      "residual_infinity_norm": 50.43602491154191,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 3.0517578125e-05,
+      "residual_infinity_norm": 50.437577333460496,
+      "reduces_original_residual": true
+    },
+    {
+      "alpha": 1.52587890625e-05,
+      "residual_infinity_norm": 50.43835025836401,
+      "reduces_original_residual": true
+    }
+  ],
+  "directional_differences": [
+    {
+      "alpha": 0.0001,
+      "method": "forward",
+      "relative_directional_tangent_error": 0.009425912311992005
+    },
+    {
+      "alpha": 0.0001,
+      "method": "backward",
+      "relative_directional_tangent_error": 0.00942222647522245
+    },
+    {
+      "alpha": 0.0001,
+      "method": "central",
+      "relative_directional_tangent_error": 1.8666918460444943e-06
+    },
+    {
+      "alpha": 1e-05,
+      "method": "forward",
+      "relative_directional_tangent_error": 0.0009423801607075866
+    },
+    {
+      "alpha": 1e-05,
+      "method": "backward",
+      "relative_directional_tangent_error": 0.0009417171978387245
+    },
+    {
+      "alpha": 1e-05,
+      "method": "central",
+      "relative_directional_tangent_error": 6.101401227500271e-07
+    },
+    {
+      "alpha": 1e-06,
+      "method": "forward",
+      "relative_directional_tangent_error": 8.774638382344888e-05
+    },
+    {
+      "alpha": 1e-06,
+      "method": "backward",
+      "relative_directional_tangent_error": 9.50280019336664e-05
+    },
+    {
+      "alpha": 1e-06,
+      "method": "central",
+      "relative_directional_tangent_error": 8.793531606806658e-06
+    },
+    {
+      "alpha": 1e-07,
+      "method": "forward",
+      "relative_directional_tangent_error": 0.00022868619243585498
+    },
+    {
+      "alpha": 1e-07,
+      "method": "backward",
+      "relative_directional_tangent_error": 0.0001241219750597506
+    },
+    {
+      "alpha": 1e-07,
+      "method": "central",
+      "relative_directional_tangent_error": 0.00011622577170665856
+    }
+  ],
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-two-story-direction-ryp7hxcf",
+    "payload_files": 4,
+    "payload_bytes": 60811,
+    "inventory_sha256": "61ba415e85b723da22d51fc8966b03da3398554088015a2963dee68ef73a86b9"
+  }
+}

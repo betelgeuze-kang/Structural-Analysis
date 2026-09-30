@@ -1,0 +1,3063 @@
+{
+  "source_revision": "ab9211f0c476b4f08e4f031ebbb8a6f51006525a",
+  "stats": {
+    "calls": {
+      "secant": 64,
+      "proposal": 64,
+      "lower": 0,
+      "equal": 64,
+      "higher": 0
+    },
+    "linear_solves": {
+      "secant": 247,
+      "proposal": 239,
+      "lower": 17,
+      "equal": 37,
+      "higher": 10
+    },
+    "newton_assemblies": {
+      "secant": 409,
+      "proposal": 405,
+      "lower": 4,
+      "equal": 58,
+      "higher": 2
+    },
+    "arm_wall_ns": {
+      "secant": 17303123737,
+      "proposal": 17225825546,
+      "lower": 14,
+      "equal": 0,
+      "higher": 50
+    }
+  },
+  "proposal_used": 64,
+  "secant_abstentions": 0,
+  "core_calls": 256,
+  "inclusive_linear_solves": 1170,
+  "newton_assemblies": 2142,
+  "response_comparisons_passed": 192,
+  "reference_repeats_exact": 64,
+  "new_fits": 0,
+  "campaign_wall_ns": 87332498392,
+  "rows": [
+    {
+      "case": "train-a",
+      "index": 13,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 15,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 483185456,
+          "proposal_wall_ns": 2050,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 303697937,
+          "proposal_wall_ns": 3066755,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 303804441,
+          "proposal_wall_ns": 3371266,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 15,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 478846089,
+          "proposal_wall_ns": 1960,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 25,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 15,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 487123256,
+          "proposal_wall_ns": 1980,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308652431,
+          "proposal_wall_ns": 3070016,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 306310238,
+          "proposal_wall_ns": 3572731,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 15,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 529794130,
+          "proposal_wall_ns": 1970,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 37,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 464173568,
+          "proposal_wall_ns": 1920,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308968351,
+          "proposal_wall_ns": 3021314,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 310175367,
+          "proposal_wall_ns": 3819689,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 463384123,
+          "proposal_wall_ns": 1930,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 49,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 471634770,
+          "proposal_wall_ns": 1890,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 315273566,
+          "proposal_wall_ns": 3025134,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312607964,
+          "proposal_wall_ns": 3961083,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 471883046,
+          "proposal_wall_ns": 1910,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 73,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 445759521,
+          "proposal_wall_ns": 2020,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 315877314,
+          "proposal_wall_ns": 3062745,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 316421571,
+          "proposal_wall_ns": 4496570,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 443442248,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 85,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 367023330,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 316642128,
+          "proposal_wall_ns": 3177260,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 318373412,
+          "proposal_wall_ns": 4700226,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 367005809,
+          "proposal_wall_ns": 1880,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 97,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 452408196,
+          "proposal_wall_ns": 1920,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312493116,
+          "proposal_wall_ns": 3051655,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312029382,
+          "proposal_wall_ns": 4794519,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 477008133,
+          "proposal_wall_ns": 2040,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 109,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 440861273,
+          "proposal_wall_ns": 1910,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 311281198,
+          "proposal_wall_ns": 3036645,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 363446647,
+          "proposal_wall_ns": 4945114,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 438029684,
+          "proposal_wall_ns": 1870,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 133,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 513895122,
+          "proposal_wall_ns": 1971,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 310113851,
+          "proposal_wall_ns": 3036044,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 313312581,
+          "proposal_wall_ns": 5357037,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 465502651,
+          "proposal_wall_ns": 2121,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 145,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 12,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 413484236,
+          "proposal_wall_ns": 1911,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 259184020,
+          "proposal_wall_ns": 3022205,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 261824603,
+          "proposal_wall_ns": 5551473,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 12,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 413460295,
+          "proposal_wall_ns": 2000,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 157,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 253647927,
+          "proposal_wall_ns": 2010,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 204834353,
+          "proposal_wall_ns": 3072905,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 207303450,
+          "proposal_wall_ns": 5759980,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254076850,
+          "proposal_wall_ns": 1880,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 169,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255050530,
+          "proposal_wall_ns": 1890,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205144582,
+          "proposal_wall_ns": 3046145,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 208639971,
+          "proposal_wall_ns": 6042698,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255084761,
+          "proposal_wall_ns": 1940,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 193,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 335870352,
+          "proposal_wall_ns": 1950,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 262723378,
+          "proposal_wall_ns": 3066746,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 261776719,
+          "proposal_wall_ns": 6327198,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 334812268,
+          "proposal_wall_ns": 1900,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 205,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 335020385,
+          "proposal_wall_ns": 1960,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 208563949,
+          "proposal_wall_ns": 3050705,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 210630273,
+          "proposal_wall_ns": 6554974,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 335749275,
+          "proposal_wall_ns": 1960,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 217,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 371731379,
+          "proposal_wall_ns": 1911,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 206517704,
+          "proposal_wall_ns": 3053345,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 212879202,
+          "proposal_wall_ns": 6777172,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 333176605,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-a",
+      "index": 229,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 359188276,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 259544318,
+          "proposal_wall_ns": 3033055,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 263143770,
+          "proposal_wall_ns": 6921076,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 358449393,
+          "proposal_wall_ns": 1810,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 13,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 502171656,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 297576004,
+          "proposal_wall_ns": 3004684,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 298197083,
+          "proposal_wall_ns": 3449287,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 447940974,
+          "proposal_wall_ns": 1890,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 25,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 458842032,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 306501761,
+          "proposal_wall_ns": 3074067,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 305259823,
+          "proposal_wall_ns": 3666694,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 458818742,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 37,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 434008707,
+          "proposal_wall_ns": 1801,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 307602695,
+          "proposal_wall_ns": 3043925,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 309334029,
+          "proposal_wall_ns": 3889361,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 430638592,
+          "proposal_wall_ns": 1890,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 49,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 480959579,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308870953,
+          "proposal_wall_ns": 3035485,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 309075119,
+          "proposal_wall_ns": 4023965,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 462925887,
+          "proposal_wall_ns": 1920,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 73,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 252159554,
+          "proposal_wall_ns": 1880,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 203749954,
+          "proposal_wall_ns": 3053026,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 204655762,
+          "proposal_wall_ns": 4457169,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 252044841,
+          "proposal_wall_ns": 1810,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 85,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 251667698,
+          "proposal_wall_ns": 1770,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 203446175,
+          "proposal_wall_ns": 3031105,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205640412,
+          "proposal_wall_ns": 4629614,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 252314057,
+          "proposal_wall_ns": 1900,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 97,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 287366070,
+          "proposal_wall_ns": 1791,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 203618899,
+          "proposal_wall_ns": 3045676,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 204796797,
+          "proposal_wall_ns": 4881412,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 251922535,
+          "proposal_wall_ns": 1790,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 109,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 16,
+          "primary_rows": 6,
+          "status": "complete",
+          "arm_wall_ns": 548579984,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 361743500,
+          "proposal_wall_ns": 3055444,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 362393129,
+          "proposal_wall_ns": 5035967,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 16,
+          "primary_rows": 6,
+          "status": "complete",
+          "arm_wall_ns": 515878274,
+          "proposal_wall_ns": 1830,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 133,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 435693553,
+          "proposal_wall_ns": 1790,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308798028,
+          "proposal_wall_ns": 3069306,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 311548123,
+          "proposal_wall_ns": 5433019,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 437494389,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 145,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 437738155,
+          "proposal_wall_ns": 1920,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 310925313,
+          "proposal_wall_ns": 3125717,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 313298477,
+          "proposal_wall_ns": 5642386,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 437284361,
+          "proposal_wall_ns": 2040,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 157,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254794103,
+          "proposal_wall_ns": 1780,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205499516,
+          "proposal_wall_ns": 3057805,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 207413746,
+          "proposal_wall_ns": 5801261,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 253111090,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 169,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 253965047,
+          "proposal_wall_ns": 1841,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 279297245,
+          "proposal_wall_ns": 3025275,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 208740657,
+          "proposal_wall_ns": 6069139,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 253993957,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 193,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254489852,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205806374,
+          "proposal_wall_ns": 3045175,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 209478199,
+          "proposal_wall_ns": 6380268,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255144212,
+          "proposal_wall_ns": 1830,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 205,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 256104102,
+          "proposal_wall_ns": 1920,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 258344202,
+          "proposal_wall_ns": 3102167,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 262230323,
+          "proposal_wall_ns": 6693537,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255800112,
+          "proposal_wall_ns": 1800,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 217,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312456497,
+          "proposal_wall_ns": 1810,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 5,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 274409662,
+          "proposal_wall_ns": 3071266,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 263371218,
+          "proposal_wall_ns": 6995828,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 306205811,
+          "proposal_wall_ns": 1750,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-b",
+      "index": 229,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 305445558,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 258617949,
+          "proposal_wall_ns": 3036934,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 267989171,
+          "proposal_wall_ns": 6976287,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 306026565,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 13,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 15,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 484637631,
+          "proposal_wall_ns": 1830,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 305957364,
+          "proposal_wall_ns": 3030774,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 307841882,
+          "proposal_wall_ns": 3529880,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 15,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 485633261,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 25,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 8,
+          "newton_assemblies": 19,
+          "primary_rows": 6,
+          "status": "complete",
+          "arm_wall_ns": 593202661,
+          "proposal_wall_ns": 1870,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 309517443,
+          "proposal_wall_ns": 3084406,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 309182252,
+          "proposal_wall_ns": 3719686,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 8,
+          "newton_assemblies": 19,
+          "primary_rows": 6,
+          "status": "complete",
+          "arm_wall_ns": 591109686,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 37,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 463651944,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 309172162,
+          "proposal_wall_ns": 3035304,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 309088349,
+          "proposal_wall_ns": 3931713,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 459849035,
+          "proposal_wall_ns": 2000,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 49,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 465459959,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 310622796,
+          "proposal_wall_ns": 3085276,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 310673757,
+          "proposal_wall_ns": 4103908,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 467623395,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 73,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 362214853,
+          "proposal_wall_ns": 1831,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312500883,
+          "proposal_wall_ns": 3108746,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312366349,
+          "proposal_wall_ns": 4571192,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 359649922,
+          "proposal_wall_ns": 1841,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 85,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 363237882,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 311487301,
+          "proposal_wall_ns": 3058295,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 313254527,
+          "proposal_wall_ns": 4700117,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 394314630,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 97,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 386292810,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312380999,
+          "proposal_wall_ns": 3058606,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 261805842,
+          "proposal_wall_ns": 4887503,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 388480708,
+          "proposal_wall_ns": 1870,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 109,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 388027223,
+          "proposal_wall_ns": 1890,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312719288,
+          "proposal_wall_ns": 3036344,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 313128380,
+          "proposal_wall_ns": 5083089,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 386759032,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 133,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 12,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 416053864,
+          "proposal_wall_ns": 1830,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 259337555,
+          "proposal_wall_ns": 3026084,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 262843363,
+          "proposal_wall_ns": 5468120,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 12,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 414025121,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 145,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 481620435,
+          "proposal_wall_ns": 1900,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 315247164,
+          "proposal_wall_ns": 3069476,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 263979379,
+          "proposal_wall_ns": 5677426,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 468601318,
+          "proposal_wall_ns": 1811,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 157,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255541436,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 206190269,
+          "proposal_wall_ns": 3047794,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 209597565,
+          "proposal_wall_ns": 5886303,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 256174475,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 169,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308672499,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 260806499,
+          "proposal_wall_ns": 3040375,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 263346848,
+          "proposal_wall_ns": 6097550,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 307824922,
+          "proposal_wall_ns": 1831,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 193,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 335375649,
+          "proposal_wall_ns": 1810,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 207796548,
+          "proposal_wall_ns": 3033594,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 212006978,
+          "proposal_wall_ns": 6456930,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 9,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 335938987,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 205,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 467851562,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 294031742,
+          "proposal_wall_ns": 3049325,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 5,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 237411140,
+          "proposal_wall_ns": 6700018,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 388547773,
+          "proposal_wall_ns": 1870,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 217,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 361761989,
+          "proposal_wall_ns": 1830,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 259859787,
+          "proposal_wall_ns": 3087065,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 211102159,
+          "proposal_wall_ns": 6829053,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 361715397,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-c",
+      "index": 229,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 389468240,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 260740954,
+          "proposal_wall_ns": 3041035,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 265344518,
+          "proposal_wall_ns": 7058340,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 11,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 387891521,
+          "proposal_wall_ns": 1770,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 13,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 447945509,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 300193392,
+          "proposal_wall_ns": 3075156,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 300775989,
+          "proposal_wall_ns": 3649535,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 448562077,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 25,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 455619906,
+          "proposal_wall_ns": 1970,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 304778524,
+          "proposal_wall_ns": 3043604,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 348126803,
+          "proposal_wall_ns": 3846831,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 7,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 457426602,
+          "proposal_wall_ns": 1990,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 37,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 432854797,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 307051883,
+          "proposal_wall_ns": 3035925,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308311002,
+          "proposal_wall_ns": 4081707,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 429842014,
+          "proposal_wall_ns": 1790,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 49,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 434976552,
+          "proposal_wall_ns": 1900,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308326002,
+          "proposal_wall_ns": 3066486,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 309861989,
+          "proposal_wall_ns": 4225301,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 13,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 432223386,
+          "proposal_wall_ns": 1810,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 73,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 253054522,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 203976635,
+          "proposal_wall_ns": 3038184,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205211444,
+          "proposal_wall_ns": 4585713,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 252786983,
+          "proposal_wall_ns": 1870,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 85,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 288052890,
+          "proposal_wall_ns": 1960,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 203803880,
+          "proposal_wall_ns": 3051366,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 206124702,
+          "proposal_wall_ns": 4783639,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 253178865,
+          "proposal_wall_ns": 1891,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 97,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 252855975,
+          "proposal_wall_ns": 1910,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 203450078,
+          "proposal_wall_ns": 3023944,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205641076,
+          "proposal_wall_ns": 4982574,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 252340299,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 109,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 460327397,
+          "proposal_wall_ns": 1880,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 308537516,
+          "proposal_wall_ns": 3067126,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 310276220,
+          "proposal_wall_ns": 5185231,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 14,
+          "primary_rows": 5,
+          "status": "complete",
+          "arm_wall_ns": 460446600,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 133,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 358858301,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 310392183,
+          "proposal_wall_ns": 3048235,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 312052276,
+          "proposal_wall_ns": 5599984,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 6,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 394934871,
+          "proposal_wall_ns": 1830,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 145,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 360190640,
+          "proposal_wall_ns": 1820,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 311063412,
+          "proposal_wall_ns": 3123507,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 8,
+          "primary_rows": 3,
+          "status": "complete",
+          "arm_wall_ns": 313114467,
+          "proposal_wall_ns": 5747148,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 5,
+          "newton_assemblies": 10,
+          "primary_rows": 4,
+          "status": "complete",
+          "arm_wall_ns": 359862110,
+          "proposal_wall_ns": 1840,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 157,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254183424,
+          "proposal_wall_ns": 2150,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205170009,
+          "proposal_wall_ns": 3138917,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 207727799,
+          "proposal_wall_ns": 5953975,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254280607,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 169,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 253796421,
+          "proposal_wall_ns": 1890,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 205081847,
+          "proposal_wall_ns": 3107406,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 208329447,
+          "proposal_wall_ns": 6174531,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254102191,
+          "proposal_wall_ns": 1780,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 193,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 256139153,
+          "proposal_wall_ns": 1860,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 207208853,
+          "proposal_wall_ns": 3070025,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 211629789,
+          "proposal_wall_ns": 6630576,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 257075482,
+          "proposal_wall_ns": 1880,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 205,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254753910,
+          "proposal_wall_ns": 1940,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 258864668,
+          "proposal_wall_ns": 3066145,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 269330253,
+          "proposal_wall_ns": 6869494,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255276597,
+          "proposal_wall_ns": 1980,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 217,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 298456849,
+          "proposal_wall_ns": 1960,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 206409197,
+          "proposal_wall_ns": 3061155,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 209400419,
+          "proposal_wall_ns": 7003707,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 254624276,
+          "proposal_wall_ns": 1940,
+          "proposal_decision": null
+        }
+      }
+    },
+    {
+      "case": "train-d",
+      "index": 229,
+      "proposal_used": true,
+      "arms": {
+        "reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255052309,
+          "proposal_wall_ns": 2010,
+          "proposal_decision": null
+        },
+        "secant": {
+          "calls": 1,
+          "linear_solves": 3,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 206126478,
+          "proposal_wall_ns": 3034914,
+          "proposal_decision": null
+        },
+        "proposal": {
+          "calls": 1,
+          "linear_solves": 2,
+          "newton_assemblies": 4,
+          "primary_rows": 1,
+          "status": "complete",
+          "arm_wall_ns": 210836924,
+          "proposal_wall_ns": 7141423,
+          "proposal_decision": "proposed"
+        },
+        "fresh-reference": {
+          "calls": 1,
+          "linear_solves": 4,
+          "newton_assemblies": 6,
+          "primary_rows": 2,
+          "status": "complete",
+          "arm_wall_ns": 255989678,
+          "proposal_wall_ns": 1850,
+          "proposal_decision": null
+        }
+      }
+    }
+  ],
+  "independent_validation": false,
+  "whole_original_paths": 0,
+  "policy_adopted": false,
+  "audit_validation_wall_ns": 6166405919,
+  "audit_through_inventory_readback_wall_ns": 6571246458,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-grid-4j2otjaz",
+    "inventory_sha256": "81761ff3bc436c6c4707c9a38e93dbfa17cd5e88ab1fb9607c06690a493343d4",
+    "files": 2776,
+    "bytes": 204627312
+  }
+}

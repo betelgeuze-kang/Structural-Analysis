@@ -1,0 +1,145 @@
+{
+  "ai_benefit_proved": false,
+  "api_invocations": 32,
+  "artifact_checks": 128,
+  "attempted_steps": 192,
+  "audit_new_newton_iterations": 0,
+  "audit_new_solver_calls": 0,
+  "audit_wall_ns": 2338104552,
+  "decision_recomputations": 10,
+  "exact_repeated_physical_response_checks": 11,
+  "executions": [
+    {
+      "call_wall_ns": 16648125679,
+      "cost_decision_wall_ns": 0,
+      "execution_work": {
+        "api_invocation_count": 10,
+        "known_counters": {
+          "attempted_step_count": 60,
+          "known_linear_solve_count": 120,
+          "known_newton_iteration_count": 120,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "mode": "full",
+      "order": 0,
+      "parent_wall_ns": 18469023880,
+      "report_hash": "sha256:ca7aa65349b119095e70107dd04e930a2c3ba39aa50e19e81851cb662c55ae29",
+      "request_count": 5,
+      "return_code": 0,
+      "selected_candidate_id": "middle",
+      "selected_estimate": 246.34835999999999,
+      "stem": "o0-full"
+    },
+    {
+      "call_wall_ns": 10229777101,
+      "cost_decision_wall_ns": 5717663,
+      "execution_work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 72,
+          "known_newton_iteration_count": 72,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "mode": "pruned",
+      "order": 0,
+      "parent_wall_ns": 12049219819,
+      "report_hash": "sha256:6b8b60ca342c0a5c86f6561737cf51284b091d5b4756948be97d0423d17ba0f0",
+      "request_count": 3,
+      "return_code": 0,
+      "selected_candidate_id": "middle",
+      "selected_estimate": 246.34835999999999,
+      "stem": "o0-pruned"
+    },
+    {
+      "call_wall_ns": 9962783141,
+      "cost_decision_wall_ns": 5384237,
+      "execution_work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 36,
+          "known_linear_solve_count": 72,
+          "known_newton_iteration_count": 72,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "mode": "pruned",
+      "order": 1,
+      "parent_wall_ns": 11752732547,
+      "report_hash": "sha256:44dbb193c4308c3706bc82afdc9d7eb53227fb50dbe15785a0ea3e994182c8f3",
+      "request_count": 3,
+      "return_code": 0,
+      "selected_candidate_id": "middle",
+      "selected_estimate": 246.34835999999999,
+      "stem": "o1-pruned"
+    },
+    {
+      "call_wall_ns": 16967993681,
+      "cost_decision_wall_ns": 0,
+      "execution_work": {
+        "api_invocation_count": 10,
+        "known_counters": {
+          "attempted_step_count": 60,
+          "known_linear_solve_count": 120,
+          "known_newton_iteration_count": 120,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      },
+      "mode": "full",
+      "order": 1,
+      "parent_wall_ns": 18810235327,
+      "report_hash": "sha256:546426ec11b10e2145b42f78cc8b71f8db4dc007f9fefe1736eb890736cc3448",
+      "request_count": 5,
+      "return_code": 0,
+      "selected_candidate_id": "middle",
+      "selected_estimate": 246.34835999999999,
+      "stem": "o1-full"
+    }
+  ],
+  "full_parent_wall_ns": 37279259207,
+  "global_cost_optimality_proved": false,
+  "host_isolated": false,
+  "independent_generalization": false,
+  "independent_physical_validation": false,
+  "linear_solves": 384,
+  "new_fits": 0,
+  "new_training_labels": 0,
+  "newton_iterations": 384,
+  "pairs": [
+    {
+      "full_parent_wall_ns": 18469023880,
+      "order": 0,
+      "pruned_parent_wall_ns": 12049219819,
+      "ratio": 0.6524015506876912
+    },
+    {
+      "full_parent_wall_ns": 18810235327,
+      "order": 1,
+      "pruned_parent_wall_ns": 11752732547,
+      "ratio": 0.6248051841292097
+    }
+  ],
+  "pruned_parent_wall_ns": 23801952366,
+  "pruned_to_full_ratio": 0.6384770747142599,
+  "reference_rows": 16,
+  "same_known_geometry_history": true,
+  "source_files_checked_against_git": 639,
+  "source_revision": "d11248ce06627c8466ae348a88f91a3b167ce05e",
+  "transport_and_workbench_included": false,
+  "whole_numerical_driver_wall_ns": 61081729207,
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-layout-cost-pruned-pntrrwsy",
+    "files": 874,
+    "bytes": 130645732,
+    "inventory_sha256": "2d3ae9245605e9df04c8c4b79a603ace82b8344a0c18abbf4d2c346c66e9970b",
+    "sealing_wall_ns": 240571339
+  },
+  "audit_first_attempt_elapsed_ns": null,
+  "complete_research_lifetime_cost_known": false
+}

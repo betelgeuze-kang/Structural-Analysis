@@ -1,0 +1,56 @@
+{
+  "schema_version": "rc-cohort-real-http-review.v1",
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-cohort-real-http-e85xm9_e",
+    "source_revision": "8165b9799c0d492f7ef482712d32f385e961d89e",
+    "files": 19,
+    "bytes": 2510435,
+    "inventory_sha256": "460ed4a646024d0a038a630bfd7410f7d78b1ed1146596cd13e20a22fcc403ce"
+  },
+  "browser": {
+    "views": [
+      {
+        "width": 1440,
+        "pairs": 4,
+        "executions": 8,
+        "selected": "w047",
+        "exact_downloads": 2,
+        "page_errors": []
+      },
+      {
+        "width": 390,
+        "pairs": 4,
+        "executions": 8,
+        "selected": "w047",
+        "exact_downloads": 2,
+        "page_errors": []
+      }
+    ],
+    "inventory_matched_reads": 1238,
+    "wall_ms": 7470.0473360000005,
+    "transport": "actual loopback WSGI backend; no request interception",
+    "http_responses": 1234,
+    "server_exit_code": 0,
+    "solver_calls": 0,
+    "fits": 0,
+    "independent_physical_validation": false
+  },
+  "server": {
+    "schema_version": "rc-search-real-http-browser-observation.v1",
+    "pid": 79971,
+    "report_hash": "sha256:868300aadf2b895ce5a67cd5cfe57f83ff42bcdd78d43668b6dd443b3286b616",
+    "snapshot_artifact_count": 577,
+    "snapshot_bytes": 21645732,
+    "snapshot_load_ns": 67165034,
+    "wall_ns": 7301662153,
+    "cpu_ns": 480822389,
+    "peak_rss_kib": 135064,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "independent_physical_validation": false
+  },
+  "local_http_tests": 8,
+  "formal_entrypoint": "trusted_node_identity_mismatch",
+  "independent_physical_validation": false,
+  "net_savings_proved": false
+}

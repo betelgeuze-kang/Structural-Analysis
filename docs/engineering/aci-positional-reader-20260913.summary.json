@@ -1,0 +1,51 @@
+{
+  "schema": "aci-positional-reader-audit.v1",
+  "source_revision": "ce2d539b536c756822398231b4890ee8d3f0629c",
+  "module_sha256": "4dd4bec07813508c1515a3084ccb285d5fe05555a3cf12d85603508ce00485d5",
+  "original_table_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-aci-table-fsumox41",
+  "original_table_sha256": "4498a324673fc02d29ac139949c162d98937b2704734b93a007445846b8354d7",
+  "original_table_bytes": 431262,
+  "record_count": 326,
+  "data_cells_exact": 19234,
+  "header_and_descriptor_cells_exact": 118,
+  "numeric_tokens_checked_without_unit_conversion": 17278,
+  "decode_wall_ns": 4782045,
+  "whole_process_wall_time_recorded": false,
+  "reference_parser": "separate csv.reader pass using the same standard-library CSV implementation; not independent parser qualification",
+  "configuration_raw_token_counts": {
+    "3": 102,
+    "1": 120,
+    "2": 104
+  },
+  "configuration_interpretation_source": "2010 thesis printed pp.20-22; version correspondence beyond these definitions remains open",
+  "descriptor_alignment_verified": false,
+  "training_admission_granted": false,
+  "solver_calls": 0,
+  "fits": 0,
+  "pdf_fetch": {
+    "url": "https://www.dropbox.com/scl/fo/zkqvb1rctq261pktl3pqq/AFzsGaZuKmaNWX0SA5WGINE/SIVARAMAKRISHNAN-THESIS.pdf?rlkey=vooilhz10q29dqpivq360pznv&dl=1",
+    "role": "archive_compilation_thesis",
+    "training_admission": false,
+    "status": 200,
+    "bytes": 8361854,
+    "sha256": "f0d40c7f62680f7fcd2d2f35ea91e0f9069cf1cbacfc5eb4c774195e17e4a821",
+    "elapsed_ns": 5477615967
+  },
+  "pdf_visually_reviewed_pages": [
+    34,
+    35,
+    36
+  ],
+  "pdf_visually_reviewed_printed_pages": [
+    20,
+    21,
+    22
+  ],
+  "thesis_rectangular_case_count_from_text": 319,
+  "archive_rectangular_record_count": 326,
+  "version_difference_resolved": false,
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-aci-thesis-vz0o4kq3",
+  "payload_file_count": 10,
+  "payload_bytes": 9514793,
+  "inventory_sha256": "f8fc84b23a7dc897be732ae538cd51ab6f0030f26a059e432be3fec250aebda5"
+}

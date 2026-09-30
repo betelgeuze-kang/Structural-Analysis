@@ -1,0 +1,243 @@
+{
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "source_files_checked": 461,
+  "artifact_identities_checked": 32,
+  "counts": {
+    "api_entered": 4,
+    "artifact_contract_pass": 4,
+    "declared": 4,
+    "launched": 4,
+    "physical_converged": 0,
+    "resource_eligible": 4
+  },
+  "rows": [
+    {
+      "case_id": "layers_4",
+      "workload_wall_ns": 4558237410,
+      "observed_load_path": {
+        "attempted_step_count": 3,
+        "committed_step_count": 2,
+        "convergence_history_row_count": 19,
+        "newly_attempted_step_count": 3,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 6,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.5,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 8,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 0.75,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      },
+      "speed_ratio": null
+    },
+    {
+      "case_id": "layers_8",
+      "workload_wall_ns": 6145115272,
+      "observed_load_path": {
+        "attempted_step_count": 4,
+        "committed_step_count": 3,
+        "convergence_history_row_count": 24,
+        "newly_attempted_step_count": 4,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 6,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.5,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 11,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.75,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 2,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 1.0,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      },
+      "speed_ratio": null
+    },
+    {
+      "case_id": "layers_16",
+      "workload_wall_ns": 9512873667,
+      "observed_load_path": {
+        "attempted_step_count": 4,
+        "committed_step_count": 3,
+        "convergence_history_row_count": 24,
+        "newly_attempted_step_count": 4,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 6,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.5,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 10,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.75,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 3,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 1.0,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      },
+      "speed_ratio": null
+    },
+    {
+      "case_id": "layers_32",
+      "workload_wall_ns": 16478146178,
+      "observed_load_path": {
+        "attempted_step_count": 4,
+        "committed_step_count": 3,
+        "convergence_history_row_count": 27,
+        "newly_attempted_step_count": 4,
+        "replayed_prefix_step_count": 0,
+        "scope": "returned_load_path_including_replayed_prefix",
+        "steps": [
+          {
+            "committed": true,
+            "convergence_history_row_count": 5,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.25,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 6,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.5,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": true,
+            "convergence_history_row_count": 14,
+            "failed_step_rollback_exact": null,
+            "target_load_factor": 0.75,
+            "terminal_reason": "residual_and_increment_converged"
+          },
+          {
+            "committed": false,
+            "convergence_history_row_count": 2,
+            "failed_step_rollback_exact": true,
+            "target_load_factor": 1.0,
+            "terminal_reason": "line_search_failed_to_reduce_residual"
+          }
+        ],
+        "total_api_work_accounted": false
+      },
+      "speed_ratio": null
+    }
+  ],
+  "section_geometry": [
+    {
+      "concrete_layer_count": 2,
+      "concrete_area_m2": 0.24,
+      "concrete_second_moment_m4": 0.0053999999999999986,
+      "analytic_gross_rectangle_second_moment_m4": 0.007199999999999999,
+      "concrete_second_moment_ratio": 0.7499999999999999,
+      "expected_midpoint_ratio": 0.75,
+      "gross_concrete_plus_lumped_steel_elastic_ei_ratio": 0.7879858657243816
+    },
+    {
+      "concrete_layer_count": 4,
+      "concrete_area_m2": 0.24,
+      "concrete_second_moment_m4": 0.006750000000000001,
+      "analytic_gross_rectangle_second_moment_m4": 0.007199999999999999,
+      "concrete_second_moment_ratio": 0.9375000000000002,
+      "expected_midpoint_ratio": 0.9375,
+      "gross_concrete_plus_lumped_steel_elastic_ei_ratio": 0.9469964664310956
+    },
+    {
+      "concrete_layer_count": 8,
+      "concrete_area_m2": 0.24,
+      "concrete_second_moment_m4": 0.0070875,
+      "analytic_gross_rectangle_second_moment_m4": 0.007199999999999999,
+      "concrete_second_moment_ratio": 0.9843750000000001,
+      "expected_midpoint_ratio": 0.984375,
+      "gross_concrete_plus_lumped_steel_elastic_ei_ratio": 0.986749116607774
+    },
+    {
+      "concrete_layer_count": 16,
+      "concrete_area_m2": 0.2400000000000001,
+      "concrete_second_moment_m4": 0.007171874999999998,
+      "analytic_gross_rectangle_second_moment_m4": 0.007199999999999999,
+      "concrete_second_moment_ratio": 0.9960937499999998,
+      "expected_midpoint_ratio": 0.99609375,
+      "gross_concrete_plus_lumped_steel_elastic_ei_ratio": 0.9966872791519433
+    },
+    {
+      "concrete_layer_count": 32,
+      "concrete_area_m2": 0.24000000000000016,
+      "concrete_second_moment_m4": 0.0071929687500000014,
+      "analytic_gross_rectangle_second_moment_m4": 0.007199999999999999,
+      "concrete_second_moment_ratio": 0.9990234375000003,
+      "expected_midpoint_ratio": 0.9990234375,
+      "gross_concrete_plus_lumped_steel_elastic_ei_ratio": 0.9991718197879861
+    }
+  ],
+  "only_discretization_and_identity_fields_changed": true,
+  "same_materials_bars_loads_topology_and_solver_config": true,
+  "experiment_wall_ns": 45563946022,
+  "nonlinear_mesh_convergence_proved": false,
+  "independent_physical_validation": false,
+  "learning_fits": 0,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-section-refinement-w_v5cyvl",
+    "payload_files": 514,
+    "payload_bytes": 9612224,
+    "inventory_sha256": "e4ba94fdf25aafd20597f712953dd990045623c7cd239b4cab9eab0ac6cbd631"
+  }
+}

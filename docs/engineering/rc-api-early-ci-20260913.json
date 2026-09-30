@@ -1,0 +1,32 @@
+{
+  "base_revision": "8f5075775195b085b518f87de92e22dce4c7e0c3",
+  "selected_modules": 43,
+  "collected_tests": 1160,
+  "collection_seconds": 6.02,
+  "workflow_contract_passes": 18,
+  "workflow_contract_seconds": 0.49,
+  "new_roster_fully_executed": false,
+  "full_repository_gate_changed": false,
+  "files": [
+    {
+      "path": "/tmp/structural-early-api-workflow.log",
+      "bytes": 99,
+      "sha256": "f3f9bea0364adde06c97dae14d6052f7b64a12d273fa7683acd76e57d0f70433"
+    },
+    {
+      "path": "/tmp/structural-early-api-collection.log",
+      "bytes": 127050,
+      "sha256": "0d3fc0dd1f30032e4266853a95984c9adb904bcee8a2353f69b162865853251d"
+    },
+    {
+      "path": ".github/workflows/python-test-collection.yml",
+      "bytes": 11433,
+      "sha256": "7080b04e25607967865d23861937335fea259cb207080be548b8aa9f273d893b"
+    },
+    {
+      "path": "tests/test_repository_python_workflow_contract.py",
+      "bytes": 46121,
+      "sha256": "08eb6b1d69d6e2fb6e89b1899657333a394b29836090beba22fd87deec58acd3"
+    }
+  ]
+}

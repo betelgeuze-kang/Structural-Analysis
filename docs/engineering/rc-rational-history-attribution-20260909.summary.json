@@ -1,0 +1,243 @@
+{
+  "schema_version": "rc-rational-history-observation.v1",
+  "source_revision": "6cd9e1ad10d86e70bec50b7922dbfe443a5f8641",
+  "original_solver_source_revision": "bb95be6ba24f51b419bbee7f667b6b82170f55c9",
+  "cases": {
+    "base": {
+      "target_count": 242,
+      "field_pair_count": 6534,
+      "original_mismatches": {
+        "member": 17,
+        "section": 6
+      },
+      "stress_100_digit_counterfactual_mismatches": {
+        "member": 19,
+        "reaction": 1,
+        "section": 6
+      },
+      "orders": {
+        "reference_parent_then_history": {
+          "largest_absolute_component_at_original_failures": {
+            "finite_coordinate_difference": 23
+          },
+          "max_absolute_components_at_original_failures_si": {
+            "output_projection_rounding": 1.822121520383331e-26,
+            "returned_stress_rounding": 1.9031736935005016e-11,
+            "external_load_difference": 0.0,
+            "finite_coordinate_difference": 1.7121754589208974e-10,
+            "parent_history_difference": 1.5491773686034208e-11
+          }
+        },
+        "history_then_candidate_parent": {
+          "largest_absolute_component_at_original_failures": {
+            "finite_coordinate_difference": 23
+          },
+          "max_absolute_components_at_original_failures_si": {
+            "output_projection_rounding": 1.822121520383331e-26,
+            "returned_stress_rounding": 1.9031736935005016e-11,
+            "external_load_difference": 0.0,
+            "finite_coordinate_difference": 1.7121754589208974e-10,
+            "parent_history_difference": 1.5491773686034208e-11
+          }
+        }
+      }
+    },
+    "long": {
+      "target_count": 242,
+      "field_pair_count": 6534,
+      "original_mismatches": {
+        "member": 4,
+        "section": 1
+      },
+      "stress_100_digit_counterfactual_mismatches": {
+        "member": 6,
+        "reaction": 1,
+        "section": 1
+      },
+      "orders": {
+        "reference_parent_then_history": {
+          "largest_absolute_component_at_original_failures": {
+            "finite_coordinate_difference": 5
+          },
+          "max_absolute_components_at_original_failures_si": {
+            "output_projection_rounding": 1.205667186517368e-26,
+            "returned_stress_rounding": 2.1342328659943255e-13,
+            "external_load_difference": 0.0,
+            "finite_coordinate_difference": 1.7516037548754264e-10,
+            "parent_history_difference": 0.0
+          }
+        },
+        "history_then_candidate_parent": {
+          "largest_absolute_component_at_original_failures": {
+            "finite_coordinate_difference": 5
+          },
+          "max_absolute_components_at_original_failures_si": {
+            "output_projection_rounding": 1.205667186517368e-26,
+            "returned_stress_rounding": 2.1342328659943255e-13,
+            "external_load_difference": 0.0,
+            "finite_coordinate_difference": 1.7516037548754264e-10,
+            "parent_history_difference": 0.0
+          }
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "source_revision": "3216a4b6d8381f8d6df058980e1e322b5aed715d",
+      "evidence": {
+        "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-rational-history.6safo9c2",
+        "file_count": 444,
+        "total_bytes": 24889586,
+        "inventory_sha256": "0e20796cb26c76ef1e341d536777710f8cdbc14a1933f73497da9749f486a094",
+        "all_files_reread_exact": true
+      },
+      "work": {
+        "model_compilations": 2,
+        "section_integrations": 0,
+        "element_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0,
+        "native_parent_checkpoint_loads": 968,
+        "section_replays": 5808,
+        "member_replays": 1936,
+        "original_assembly_verifications": 968,
+        "selected_material_trial_calls": 162624,
+        "nested_original_base_calls": 162624,
+        "concrete_selected_calls": 139392,
+        "original_material_endpoints_verified": 81312,
+        "independent_100_digit_stress_evaluations": 162624,
+        "steel_selected_calls": 23232,
+        "native_reopens": 4,
+        "assembly_verifier_material_integrations": 0,
+        "total_material_integrate_entries": 325248
+      },
+      "function_wall_seconds": {
+        "base": 42.133714356,
+        "long": 42.398574748
+      },
+      "parent_wall_seconds": {
+        "base": 44.136162813,
+        "long": 44.419478053
+      },
+      "whole_parent_seconds_including_source_input_checks": 89.525123844,
+      "all_original_files_reread_before_and_after": 9915,
+      "source_files_verified_against_git": 429
+    },
+    {
+      "source_revision": "6cd9e1ad10d86e70bec50b7922dbfe443a5f8641",
+      "evidence": {
+        "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-rational-history.gq2fgina",
+        "file_count": 447,
+        "total_bytes": 24907792,
+        "inventory_sha256": "5e0586c9af4abb7caa42524afa1e5c1350c23bed4b48f6bad1ef98e3a77fe4a2",
+        "all_files_reread_exact": true
+      },
+      "work": {
+        "model_compilations": 2,
+        "section_integrations": 0,
+        "element_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0,
+        "native_parent_checkpoint_loads": 968,
+        "assembly_verifier_material_integrations": 0,
+        "section_replays": 5808,
+        "member_replays": 1936,
+        "original_assembly_verifications": 968,
+        "selected_material_trial_calls": 162624,
+        "nested_original_base_calls": 162624,
+        "concrete_selected_calls": 139392,
+        "original_material_endpoints_verified": 81312,
+        "independent_100_digit_stress_evaluations": 162624,
+        "steel_selected_calls": 23232,
+        "native_reopens": 4,
+        "total_material_integrate_entries": 325248
+      },
+      "function_wall_seconds": {
+        "base": 42.81271687,
+        "long": 42.534973013
+      },
+      "parent_wall_seconds": {
+        "base": 44.900185232,
+        "long": 44.605688566
+      },
+      "whole_parent_seconds_including_source_input_checks": 90.454391777,
+      "all_original_files_reread_before_and_after": 9915,
+      "source_files_verified_against_git": 429
+    }
+  ],
+  "all_numerical_attribution_rows_repeat_exact": true,
+  "combined_diagnostic_work_including_preclarification_run": {
+    "model_compilations": 4,
+    "section_integrations": 0,
+    "element_integrations": 0,
+    "newton_solves": 0,
+    "state_commits": 0,
+    "native_parent_checkpoint_loads": 1936,
+    "section_replays": 11616,
+    "member_replays": 3872,
+    "original_assembly_verifications": 1936,
+    "selected_material_trial_calls": 325248,
+    "nested_original_base_calls": 325248,
+    "concrete_selected_calls": 278784,
+    "original_material_endpoints_verified": 162624,
+    "independent_100_digit_stress_evaluations": 325248,
+    "steel_selected_calls": 46464,
+    "native_reopens": 8,
+    "assembly_verifier_material_integrations": 0,
+    "total_material_integrate_entries": 650496
+  },
+  "original_solver_new_runs": 0,
+  "all_failed_exact_component_identities_verified": true,
+  "polishing_context": {
+    "base": {
+      "failed_target_indices": [
+        60,
+        146,
+        148,
+        149,
+        150,
+        151,
+        154,
+        159
+      ],
+      "polishing_reasons_at_failed_targets": {
+        "strict_residual_improvement_and_original_gates_passed": 8,
+        "strict_residual_improvement_not_met": 8
+      }
+    },
+    "long": {
+      "failed_target_indices": [
+        187,
+        193
+      ],
+      "polishing_reasons_at_failed_targets": {
+        "strict_residual_improvement_not_met": 3,
+        "strict_residual_improvement_and_original_gates_passed": 1
+      }
+    }
+  },
+  "polishing_context_seconds": 0.143987879,
+  "validation": {
+    "related_tests": 61,
+    "related_seconds": 26.36,
+    "count_clarification_tests": 7,
+    "count_clarification_seconds": 5.32,
+    "initial_harness_failure": {
+      "failed": 5,
+      "passed": 2,
+      "seconds": 4.31,
+      "reason": "wrong compiled-versus-problem argument, corrected before observations"
+    },
+    "corrected_focused_tests": 7,
+    "corrected_focused_seconds": 5.32
+  },
+  "next_scope": "Inspect active Newton coordinate and load-factor resolution and strict terminal-polishing merit at the same original native parents; implement an original-solve precision correction with all costs and fixed comparisons only after identifying that boundary. Do not assume extra polishing iterations alone solve the remaining errors.",
+  "claims": {
+    "solver_repaired": false,
+    "accepted_acceleration": false,
+    "independent_validation": false,
+    "unique_causal_attribution": false,
+    "full_goal_complete": false
+  }
+}

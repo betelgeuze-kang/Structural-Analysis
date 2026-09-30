@@ -1,0 +1,508 @@
+{
+  "schema_version": "rc-svd-ridge-observation.v1",
+  "source_revision": "c4bf0dc4964ef5fba610b4581cf77ea70d5794a9",
+  "numerical_comparison_protocol": {
+    "source_revision": "466a1f5118670da1ff0941fb9ec6ad9084809d01",
+    "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-material-folds-cc9g9069",
+    "original_inventory_sha256": "c9cddfaa140fe71196904da9f3ad4b01500bda733ad687e172c2482e00e545c2",
+    "files": [
+      {
+        "path": "training-samples.json",
+        "bytes": 72036537,
+        "sha256": "0d36868b67eea7c0c523e17cce8d5cb7914c9b88ba1ee45572ee9b70b2f3bf67"
+      },
+      {
+        "path": "policy.json",
+        "bytes": 220819,
+        "sha256": "41adb3ebc9105095ceea73068666501e6625a2301193c12462c1e7c4fea21066"
+      },
+      {
+        "path": "fold-report.json",
+        "bytes": 1165488,
+        "sha256": "a721e84662533418dde148b10806f7182e5459e6b4e7bcd0137543470de78fe8"
+      }
+    ],
+    "purpose": "same-objective numerical diagnosis of retained negative material folds",
+    "ridge": 1e-06,
+    "svd_fit_count": 4,
+    "augmented_lstsq_fit_count": 4,
+    "new_structural_calls": 0,
+    "evaluation_labels_read": false,
+    "hyperparameter_search": false,
+    "automatic_retry": false,
+    "promotion": false
+  },
+  "numerical_comparison": {
+    "schema_version": "rc-fixed-ridge-numerical-diagnosis.v1",
+    "pid": 971665,
+    "fit_count": 8,
+    "structural_solver_calls": 0,
+    "material_integrations": 0,
+    "wall_ns": 1350039347,
+    "cpu_ns": 1349571887,
+    "peak_rss_kib": 271196,
+    "numpy_version": "1.26.4",
+    "python_version": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "no_policy_promoted": true,
+    "no_external_validation": true
+  },
+  "folds": [
+    {
+      "case_id": "train-a",
+      "range_eligible_count": 0,
+      "ridge": 1e-06,
+      "svd_fit_wall_ns": 49906228,
+      "augmented_lstsq_fit_wall_ns": 37544216,
+      "coordinate_rmse": {
+        "normal": [
+          0.001121712368714728,
+          0.00010169661799886658,
+          0.003816414626768401,
+          0.0006351557566539743,
+          1.823779287087697e-36,
+          0.0038164146279737634,
+          0.0018901986158526968
+        ],
+        "svd": [
+          0.0011217110508551233,
+          0.00010169671463208178,
+          0.003816375113589234,
+          0.0006351346542012278,
+          1.823779287087697e-36,
+          0.0038163751135893973,
+          0.001890200427361919
+        ],
+        "augmented_lstsq": [
+          0.0011217110506760762,
+          0.00010169671462393884,
+          0.0038163751125588384,
+          0.0006351346532998247,
+          1.823779287087697e-36,
+          0.003816375112559044,
+          0.0018902004271672357
+        ]
+      },
+      "rmse_ratios_noncontrolled": {
+        "normal": [
+          126.68099300478063,
+          350.0118835799654,
+          185.38484730649807,
+          33.282025924327314,
+          185.38484736504915,
+          187.1991690403502
+        ],
+        "svd": [
+          126.68084417182843,
+          350.0122161650044,
+          185.3829279278658,
+          33.28092016031271,
+          185.38292792787354,
+          187.1993484463757
+        ],
+        "augmented_lstsq": [
+          126.68084415160767,
+          350.0122161369786,
+          185.38292787781367,
+          33.28092011307938,
+          185.38292787782345,
+          187.1993484270949
+        ]
+      },
+      "prediction_difference_vs_normal_rmse": {
+        "svd": [
+          1.4916993908177198e-09,
+          9.766048375443374e-11,
+          3.9840156578206026e-08,
+          2.4149365305993118e-08,
+          0.0,
+          3.9841368493255413e-08,
+          1.8534444611567126e-09
+        ],
+        "augmented_lstsq": [
+          1.4918661905718584e-09,
+          9.765264393957056e-11,
+          3.9841197814138806e-08,
+          2.415040038852455e-08,
+          0.0,
+          3.984240968618759e-08,
+          1.8532600996681363e-09
+        ]
+      },
+      "svd_vs_augmented_prediction_max_abs": 1.977465364849315e-12,
+      "training_numerical_rank": 167,
+      "rank_threshold": 5.261725514617114e-11,
+      "training_feature_residual_max": 1.3522759199270699e-13,
+      "withheld_feature_residual_min": 2.055589710181466,
+      "withheld_feature_residual_max": 2.1164874822988695
+    },
+    {
+      "case_id": "train-b",
+      "range_eligible_count": 241,
+      "ridge": 1e-06,
+      "svd_fit_wall_ns": 46103244,
+      "augmented_lstsq_fit_wall_ns": 34650218,
+      "coordinate_rmse": {
+        "normal": [
+          0.00018068027974067755,
+          2.5871066310670784e-05,
+          0.00372179866196822,
+          0.0014953273070356615,
+          4.803395589973901e-37,
+          0.0037217986618553293,
+          0.00020679911411284558
+        ],
+        "svd": [
+          0.00018067126808773707,
+          2.5870506485288512e-05,
+          0.003721761652722899,
+          0.0014953203580378392,
+          4.803395589973901e-37,
+          0.003721761652722987,
+          0.0002068039117372794
+        ],
+        "augmented_lstsq": [
+          0.00018067126903242042,
+          2.5870506492330086e-05,
+          0.0037217616525521803,
+          0.0014953203566416906,
+          4.803395589973901e-37,
+          0.003721761652552239,
+          0.0002068039116816625
+        ]
+      },
+      "rmse_ratios_noncontrolled": {
+        "normal": [
+          45.39046040145731,
+          130.7917514737812,
+          216.2485602139617,
+          94.7508725788977,
+          216.2485602074024,
+          50.13992113395632
+        ],
+        "svd": [
+          45.38819649597447,
+          130.78892126410264,
+          216.2464098569053,
+          94.75043225817052,
+          216.24640985691042,
+          50.14108435224076
+        ],
+        "augmented_lstsq": [
+          45.38819673329762,
+          130.78892129970149,
+          216.246409846986,
+          94.75043216970407,
+          216.2464098469894,
+          50.141084338756045
+        ]
+      },
+      "prediction_difference_vs_normal_rmse": {
+        "svd": [
+          1.008026558187888e-08,
+          5.632281357022825e-10,
+          3.724260615218317e-08,
+          6.9888184082960026e-09,
+          0.0,
+          3.724249322482153e-08,
+          5.005235043005612e-09
+        ],
+        "augmented_lstsq": [
+          1.0079213069459344e-08,
+          5.632210165021546e-10,
+          3.7242763085102094e-08,
+          6.990198459606098e-09,
+          0.0,
+          3.724265018664939e-08,
+          5.005174957704766e-09
+        ]
+      },
+      "svd_vs_augmented_prediction_max_abs": 1.544407613948695e-12,
+      "training_numerical_rank": 165,
+      "rank_threshold": 5.2627763657616404e-11,
+      "training_feature_residual_max": 2.664287552933588e-13,
+      "withheld_feature_residual_min": 1.280694937733399,
+      "withheld_feature_residual_max": 1.4109369961072198
+    },
+    {
+      "case_id": "train-c",
+      "range_eligible_count": 0,
+      "ridge": 1e-06,
+      "svd_fit_wall_ns": 45283289,
+      "augmented_lstsq_fit_wall_ns": 37989569,
+      "coordinate_rmse": {
+        "normal": [
+          0.0069863163352966206,
+          0.0016247791922244632,
+          0.05590149555083664,
+          0.02364577490923383,
+          1.0938071518974252e-32,
+          0.05590149554931434,
+          0.046912885121878675
+        ],
+        "svd": [
+          0.006986210763538463,
+          0.0016247788202867837,
+          0.055901642959272954,
+          0.0236457043144537,
+          1.0938071518974252e-32,
+          0.055901642959270026,
+          0.04691284966035368
+        ],
+        "augmented_lstsq": [
+          0.0069862107642489745,
+          0.0016247788202752437,
+          0.055901642959493895,
+          0.023645704315436365,
+          1.0938071518974252e-32,
+          0.05590164295949092,
+          0.04691284965977423
+        ]
+      },
+      "rmse_ratios_noncontrolled": {
+        "normal": [
+          766.2185704315202,
+          2453.834076285725,
+          2043.8762823850452,
+          794.8096811851088,
+          2043.876282329384,
+          3397.9104828547415
+        ],
+        "svd": [
+          766.20699193468,
+          2453.8335145642577,
+          2043.8816719475933,
+          794.8073082700785,
+          2043.8816719474835,
+          3397.907914368766
+        ],
+        "augmented_lstsq": [
+          766.2069920126047,
+          2453.8335145468295,
+          2043.8816719556714,
+          794.8073083031089,
+          2043.8816719555598,
+          3397.907914326796
+        ]
+      },
+      "prediction_difference_vs_normal_rmse": {
+        "svd": [
+          1.0576029360797425e-07,
+          3.7203602814885766e-10,
+          1.4743006082283835e-07,
+          7.069032954137208e-08,
+          0.0,
+          1.4743158013571284e-07,
+          3.5462779579977895e-08
+        ],
+        "augmented_lstsq": [
+          1.0575959741901191e-07,
+          3.720478202715509e-10,
+          1.4743027077883313e-07,
+          7.068933723631073e-08,
+          0.0,
+          1.4743179006753357e-07,
+          3.546336173377369e-08
+        ]
+      },
+      "svd_vs_augmented_prediction_max_abs": 1.553347728222576e-12,
+      "training_numerical_rank": 166,
+      "rank_threshold": 5.208790412864444e-11,
+      "training_feature_residual_max": 1.9847915782212153e-13,
+      "withheld_feature_residual_min": 1.2026755886059208,
+      "withheld_feature_residual_max": 1.2596409496269905
+    },
+    {
+      "case_id": "train-d",
+      "range_eligible_count": 0,
+      "ridge": 1e-06,
+      "svd_fit_wall_ns": 45459715,
+      "augmented_lstsq_fit_wall_ns": 36048390,
+      "coordinate_rmse": {
+        "normal": [
+          0.00035672736260326733,
+          1.774594915393238e-05,
+          0.0004296924941949306,
+          0.0009420685693561812,
+          5.9544670445717485e-37,
+          0.0004296924946305648,
+          0.0006536807146479407
+        ],
+        "svd": [
+          0.0003567374416534931,
+          1.7746139471509868e-05,
+          0.00042967609944139743,
+          0.0009421440351339069,
+          5.9544670445717485e-37,
+          0.00042967609944140534,
+          0.0006536815500717463
+        ],
+        "augmented_lstsq": [
+          0.00035673744107053945,
+          1.774613951132895e-05,
+          0.00042967609894455034,
+          0.0009421440320317562,
+          5.9544670445717485e-37,
+          0.00042967609894452644,
+          0.0006536815517392394
+        ]
+      },
+      "rmse_ratios_noncontrolled": {
+        "normal": [
+          102.3089434234728,
+          237.6006615424143,
+          27.431938961576325,
+          118.71469072987455,
+          27.43193898938759,
+          209.8712916254749
+        ],
+        "svd": [
+          102.31183408196276,
+          237.60320970604994,
+          27.430892306388515,
+          118.72420054344312,
+          27.430892306389023,
+          209.87155984735938
+        ],
+        "augmented_lstsq": [
+          102.31183391477241,
+          237.60321023918797,
+          27.430892274669368,
+          118.72420015252587,
+          27.430892274667844,
+          209.87156038272616
+        ]
+      },
+      "prediction_difference_vs_normal_rmse": {
+        "svd": [
+          2.4416995375579237e-08,
+          3.3817924499863077e-10,
+          9.688170177382682e-08,
+          1.0161678046098794e-07,
+          0.0,
+          9.68801481950536e-08,
+          2.5815441153353163e-09
+        ],
+        "augmented_lstsq": [
+          2.441610883154231e-08,
+          3.3823396123583543e-10,
+          9.687905696128593e-08,
+          1.0161317143619356e-07,
+          0.0,
+          9.687750345376029e-08,
+          2.582316208306025e-09
+        ]
+      },
+      "svd_vs_augmented_prediction_max_abs": 4.658433144441587e-12,
+      "training_numerical_rank": 164,
+      "rank_threshold": 5.1961551136298935e-11,
+      "training_feature_residual_max": 2.2637726304212829e-13,
+      "withheld_feature_residual_min": 1.909188309203642,
+      "withheld_feature_residual_max": 4.074601738864921
+    }
+  ],
+  "numerical_process": {
+    "exit_code": 0,
+    "worker_pid": 971665,
+    "parent_pid": 971659,
+    "parent_wall_ns": 1513050846
+  },
+  "integrated_protocol": {
+    "fit_solver_profile": "svd-ridge.v1",
+    "fixed_ridge": 1e-06,
+    "ood_margin": 0.1,
+    "full_training_fit_count": 1,
+    "case_withheld_fit_count": 4,
+    "new_structural_calls": 0,
+    "new_material_integrations": 0,
+    "external_data_admission": false,
+    "candidate_promotion": false,
+    "expected_comparison": "each v5 fold weight and held RMSE exactly equals the preceding independent SVD computation"
+  },
+  "integrated_worker": {
+    "pid": 974001,
+    "status": "completed",
+    "full_fit_wall_ns": 106241841,
+    "fold_wall_ns": 912103918,
+    "wall_ns_through_reports": 1491425737,
+    "cpu_ns": 1491372201,
+    "peak_rss_kib": 341172,
+    "fit_count": 5,
+    "structural_solver_calls": 0,
+    "material_integrations": 0,
+    "all_four_fold_weights_and_rmse_match_independent_svd_exact": true,
+    "policy_promoted": false
+  },
+  "integrated_process": {
+    "worker_pid": 974001,
+    "parent_pid": 973424,
+    "exit_code": 0,
+    "parent_wall_ns": 3335099386
+  },
+  "integrated_fold_costs": [
+    {
+      "case_id": "train-a",
+      "fit_wall_ns": 79177374,
+      "prediction_and_metrics_wall_ns": 3615605
+    },
+    {
+      "case_id": "train-b",
+      "fit_wall_ns": 78603046,
+      "prediction_and_metrics_wall_ns": 3810250
+    },
+    {
+      "case_id": "train-c",
+      "fit_wall_ns": 77681508,
+      "prediction_and_metrics_wall_ns": 3686996
+    },
+    {
+      "case_id": "train-d",
+      "fit_wall_ns": 77651277,
+      "prediction_and_metrics_wall_ns": 3749149
+    }
+  ],
+  "verification": {
+    "source_revision": "c4bf0dc4964ef5fba610b4581cf77ea70d5794a9",
+    "source_files_exact": 439,
+    "original_files_exact": 3,
+    "all_four_v5_fold_coefficients_and_errors_reproduced_exact": true,
+    "verified_absent_pids": [
+      971665,
+      971659,
+      974001,
+      973424
+    ],
+    "eight_comparison_plus_five_integrated_fits": 13,
+    "extra_fits_in_final_audit": 0,
+    "new_structural_calls": 0,
+    "new_material_integrations": 0,
+    "audit_pid": 974286,
+    "audit_wall_ns": 1316367760,
+    "audit_cpu_ns": 220186387,
+    "audit_peak_rss_kib": 2479952,
+    "focused_tests_passed": 106,
+    "focused_tests_seconds": 157.65,
+    "initial_overlapping_tests_passed": 14,
+    "initial_overlapping_tests_seconds": 1.67,
+    "ruff": "passed",
+    "mypy_two_sources": "passed",
+    "diff_check": "passed",
+    "test_numbers_recorded_from_observed_tool_results": true,
+    "independent_physical_validation": false,
+    "candidate_promoted": false
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-ridge-numerics-zck8ugir",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-ridge-numerics-zck8ugir.inventory.json",
+    "inventory_sha256": "51cfc77078aee7dffdc77ed4e7de005427c06769d7fbe7f430b599020e12794a",
+    "file_count": 459,
+    "total_bytes": 84834655,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T22:10:53.288866+00:00",
+    "seal_wall_ns": 180353160,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "maximum_relative_coordinate_rmse_change": 8.010645952993833e-05,
+  "full_roadmap_complete": false,
+  "external_training_admitted": false,
+  "candidate_promoted": false
+}

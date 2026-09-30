@@ -54,6 +54,7 @@ EXTERNAL_CLASSIFICATIONS = {
     "licensed_corpus_validation",
     "repository_admin_policy",
 }
+REPOSITORY_IMPLEMENTATION_CLASSIFICATION = "repository_implementation"
 FALSE_AUTHORITY = {
     "commercial_authority": False,
     "design_authority": False,
@@ -111,6 +112,9 @@ _RESOLVED_ISSUE_KEYS = {
     "resolved_by_pull_request",
     "state",
     "state_reason",
+}
+_RESOLVED_ISSUE_EVENT_KEYS = (_RESOLVED_ISSUE_KEYS - {"normalization_comment_id"}) | {
+    "closure_event_id"
 }
 _SUPERSEDED_PULL_REQUEST_KEYS = {
     "disposition",
@@ -552,9 +556,19 @@ def _validate_open_rows(
             blockers.append(f"open_issue_labels_invalid:{number}")
         elif labels != sorted(set(labels)):
             blockers.append(f"open_issue_labels_invalid:{number}")
-        if row.get("classification") not in EXTERNAL_CLASSIFICATIONS:
+        classification = row.get("classification")
+        repository_implementation = (
+            classification == REPOSITORY_IMPLEMENTATION_CLASSIFICATION
+        )
+        if (
+            classification not in EXTERNAL_CLASSIFICATIONS
+            and not repository_implementation
+        ):
             blockers.append(f"open_issue_classification_invalid:{number}")
-        if row.get("closable_by_repository_code_alone") is not False:
+        if (
+            row.get("closable_by_repository_code_alone")
+            is not repository_implementation
+        ):
             blockers.append(f"open_issue_repository_closure_boundary_invalid:{number}")
         if row.get("current_product_authority") is not False:
             blockers.append(f"open_issue_product_authority_invalid:{number}")
@@ -566,7 +580,8 @@ def _validate_open_rows(
         external_inputs = row.get("required_external_inputs")
         if (
             not isinstance(external_inputs, list)
-            or not external_inputs
+            or (not external_inputs and not repository_implementation)
+            or (bool(external_inputs) and repository_implementation)
             or any(not isinstance(value, str) or not value for value in external_inputs)
         ):
             blockers.append(f"open_issue_external_inputs_invalid:{number}")
@@ -602,7 +617,7 @@ def _validate_historical_rows(
     seen_resolved: set[int] = set()
     for row in resolved:
         number = row.get("number")
-        if set(row) != _RESOLVED_ISSUE_KEYS:
+        if set(row) not in (_RESOLVED_ISSUE_KEYS, _RESOLVED_ISSUE_EVENT_KEYS):
             blockers.append(f"resolved_issue_shape_invalid:{number}")
         if type(number) is not int or number <= 0 or number in seen_resolved:
             blockers.append(f"resolved_issue_number_invalid_or_duplicate:{number}")
@@ -618,9 +633,14 @@ def _validate_historical_rows(
         merge_sha = row.get("merge_commit_sha")
         if not isinstance(merge_sha, str) or _COMMIT_RE.fullmatch(merge_sha) is None:
             blockers.append(f"resolved_issue_merge_sha_invalid:{number}")
-        comment_id = row.get("normalization_comment_id")
-        if type(comment_id) is not int or comment_id <= 0:
-            blockers.append(f"resolved_issue_comment_missing:{number}")
+        if "closure_event_id" in row:
+            event_id = row["closure_event_id"]
+            if type(event_id) is not int or event_id <= 0:
+                blockers.append(f"resolved_issue_closure_event_missing:{number}")
+        else:
+            comment_id = row.get("normalization_comment_id")
+            if type(comment_id) is not int or comment_id <= 0:
+                blockers.append(f"resolved_issue_comment_missing:{number}")
     seen_prs: set[int] = set()
     for row in superseded:
         number = row.get("number")

@@ -172,6 +172,7 @@ jobs:
             tests/test_external_vv_clean_runner_contract.py::test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources \
             tests/test_product_ci_workflow_contract.py \
             tests/test_repository_python_workflow_contract.py \
+            tests/test_legacy_evidence_workflow_contract.py \
             tests/test_workflow_yaml_strict.py \
             tests/test_workflow_ancestry_single_fetch.py \
             tests/test_long_running_workflow_action_pins.py \

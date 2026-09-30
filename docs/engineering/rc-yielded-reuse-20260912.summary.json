@@ -1,0 +1,189 @@
+{
+  "schema": "rc-yielded-line-search-reuse-observation.v1",
+  "base_revision": "3ed360eca013570684bc139357e6d75604c20ed3",
+  "script_sha256": "0e08bfa354da9d500a3532f811e2907a4344ef2f50a170a682916c6ac6f68c33",
+  "retained": {
+    "paired_step_records": 128,
+    "actual_step_executions": 256,
+    "baseline_dispatches": 1576,
+    "reuse_dispatches": 1156,
+    "reused_dispatches": 420,
+    "wall_ratio": 0.7969386146362532,
+    "full_history_passes": 12,
+    "materials": [
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-False/fresh-reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-False/proposal",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-False/reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-False/secant",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-True/fresh-reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-True/proposal",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-True/reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-0-True/secant",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-False/fresh-reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-False/proposal",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-False/reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-False/secant",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-True/fresh-reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-True/proposal",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-True/reference",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      },
+      {
+        "path": "retained-runs/retained-True-constant-False-rep-1-True/secant",
+        "maximum_committed_steel_plastic_strain": 7.86764100274818e-06,
+        "first_positive_step_index": 14
+      }
+    ],
+    "rows": [
+      {
+        "retained": true,
+        "constant": false,
+        "repetition": 0,
+        "order": [
+          false,
+          true
+        ],
+        "baseline": {
+          "directory": "retained-True-constant-False-rep-0-False",
+          "wall_ns": 28541920147,
+          "step_count": 64,
+          "actual_newton_dispatches": 788,
+          "reused_dispatches": 0
+        },
+        "reuse": {
+          "directory": "retained-True-constant-False-rep-0-True",
+          "wall_ns": 22776503556,
+          "step_count": 64,
+          "actual_newton_dispatches": 578,
+          "reused_dispatches": 210
+        },
+        "native_step_bytes_exact": true,
+        "whole_benchmark_wall_ratio": 0.7980017966098194
+      },
+      {
+        "retained": true,
+        "constant": false,
+        "repetition": 1,
+        "order": [
+          true,
+          false
+        ],
+        "baseline": {
+          "directory": "retained-True-constant-False-rep-1-False",
+          "wall_ns": 28526114498,
+          "step_count": 64,
+          "actual_newton_dispatches": 788,
+          "reused_dispatches": 0
+        },
+        "reuse": {
+          "directory": "retained-True-constant-False-rep-1-True",
+          "wall_ns": 22703216914,
+          "step_count": 64,
+          "actual_newton_dispatches": 578,
+          "reused_dispatches": 210
+        },
+        "native_step_bytes_exact": true,
+        "whole_benchmark_wall_ratio": 0.7958748435785655
+      }
+    ]
+  },
+  "binary64": {
+    "status": "baseline_unqualified_before_reuse",
+    "actual_step_executions": 64,
+    "speed_ratio": null,
+    "reference_repeat_exact": true,
+    "comparisons": {
+      "proposal": {
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 6.810296326875687e-09,
+        "mismatches_by_field": {
+          "member_end_forces": 46,
+          "section_results": 16,
+          "support_reactions": 5
+        }
+      },
+      "reference": {
+        "full_history_pass": true,
+        "maximum_absolute_difference_mixed_SI_fields": 0.0,
+        "mismatches_by_field": {}
+      },
+      "secant": {
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 6.810296326875687e-09,
+        "mismatches_by_field": {
+          "member_end_forces": 46,
+          "section_results": 16,
+          "support_reactions": 5
+        }
+      }
+    }
+  },
+  "tests_passed": 19,
+  "default_solver_changed": false,
+  "ai_net_benefit_proved": false,
+  "external_validation": false,
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-yielded-reuse-utBdOeU4",
+    "files": 1962,
+    "bytes": 97800368,
+    "inventory_sha256": "ae72c2955e034411e03780088ffee5c506acae27a41fbec4f8f944078a195111"
+  }
+}

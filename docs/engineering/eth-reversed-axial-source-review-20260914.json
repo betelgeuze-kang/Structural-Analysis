@@ -1,0 +1,69 @@
+{
+  "schema_version": "rc-source-admission-review.v1",
+  "review_date": "2026-09-14",
+  "source_revision": "e97f9e97134f2c18486227d857990b1be8111166",
+  "dataset_doi": "10.3929/ethz-b-000731659",
+  "article_doi": "10.1002/suco.70408",
+  "supplement_doi": "10.3929/ethz-c-000789665",
+  "access": {
+    "article_html": "read",
+    "dataset_metadata": "primary repository search record",
+    "dataset_landing": "timeout",
+    "supplement": "browsing tool non-retryable rejection; not retried",
+    "raw_files_acquired": 0
+  },
+  "license": {
+    "metadata_notice": "CC BY 4.0",
+    "file_scope_verified": false
+  },
+  "campaign_group": "ETH-Karrer-Thoma-Kaufmann-reversed-axial",
+  "roles": [
+    {
+      "role": "RC member response",
+      "admission": "held_model_mechanism_and_raw_data",
+      "specimens": [
+        "T/C-1",
+        "T/C-2",
+        "T/C-3",
+        "T/C-4",
+        "T/C-5"
+      ]
+    },
+    {
+      "role": "cold-worked steel cyclic material response",
+      "admission": "candidate_pending_raw_data",
+      "specimens": [
+        "s-1",
+        "s-2",
+        "s-3",
+        "s-4",
+        "s-5",
+        "s-6",
+        "s-11",
+        "s-12",
+        "s-13",
+        "s-14"
+      ]
+    },
+    {
+      "role": "QST cyclic material response",
+      "admission": "exclude_from_initial_calibration",
+      "specimens": [
+        "s-7",
+        "s-8",
+        "s-9",
+        "s-10"
+      ],
+      "reason": "Paper excludes these tests from subsequent evaluation because of suspected clamping influence"
+    },
+    {
+      "role": "inferred steel stress and bond stress",
+      "admission": "not_direct_measured_stress_labels"
+    }
+  ],
+  "new_training_rows": 0,
+  "independent_validation_completed": false,
+  "raw_file_hashes": null,
+  "new_solver_calls": 0,
+  "new_fits": 0
+}

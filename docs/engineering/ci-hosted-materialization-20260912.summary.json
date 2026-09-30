@@ -1,0 +1,98 @@
+{
+  "run_id": 34695503328,
+  "head_sha": "bccd81143c4fff49edd92bb3b4bda655fa0fcdca",
+  "tested_merge_sha": "170339c2d78d0147b758ba6a3533d44d9e57df80",
+  "observed_shard": 1,
+  "artifact_id": 10297798992,
+  "archive_sha256": "86371d619cba46f3ea2320395f3afcf6f0406b1ce4d89f4e12cde62bbf278a32",
+  "archive_bytes": 37641,
+  "context": {
+    "schema": "ci-materialization-failure-context.v1",
+    "workflow_sha": "170339c2d78d0147b758ba6a3533d44d9e57df80",
+    "run_id": "34695503328",
+    "run_attempt": "1",
+    "job": "full_shards",
+    "diagnostic_only": true,
+    "receipt_generation_attested": false,
+    "may_include_tracked_or_partially_rewritten_receipts": true,
+    "qualification_inferred": false
+  },
+  "code_comparisons_passed": 10,
+  "code_comparisons_total": 12,
+  "failed_metrics": [
+    {
+      "case_id": "bounded_planar_member_feature_load_path",
+      "absolute_error": 4.96424095305589e-07,
+      "absolute_tolerance": 1e-10,
+      "contract_pass": false,
+      "product_value": -1.3753172320614404e-12,
+      "quantity": "support_N1_UX_N",
+      "reference_value": 4.96422719988357e-07,
+      "relative_error": 1.000002770455857,
+      "relative_tolerance": 1e-10
+    },
+    {
+      "case_id": "bounded_planar_prescribed_settlement_load_path",
+      "absolute_error": 3.631256504377234e-07,
+      "absolute_tolerance": 1e-10,
+      "contract_pass": false,
+      "product_value": -1000.0000000000011,
+      "quantity": "support_N1_UX_N",
+      "reference_value": -999.9999996368755,
+      "relative_error": 3.631256505695832e-10,
+      "relative_tolerance": 1e-10
+    }
+  ],
+  "external_execution_reused": true,
+  "external_runtime_executed_in_this_generation": false,
+  "full_suite_passed": false,
+  "other_jobs_terminal_at_capture": false,
+  "evidence_directory": "/tmp/structural-bccd-ci-naq09o2c",
+  "files": [
+    {
+      "path": "artifacts.json",
+      "bytes": 1635,
+      "sha256": "48a35ec03614eeb3220777162fb9ac2d7c47eb589cf9291c306bf51bdc212254"
+    },
+    {
+      "path": "jobs.json",
+      "bytes": 15703,
+      "sha256": "467cfb3bc75b54eff248f78e25c7be1e3be3f0be86a8d4434924365aeb49621d"
+    },
+    {
+      "path": "merge-commit.json",
+      "bytes": 2730,
+      "sha256": "e71ed05442a97e620276ad7320f5e7e76236022d16fb0c57377ae812a061af8a"
+    },
+    {
+      "path": "run.json",
+      "bytes": 14415,
+      "sha256": "2181e248cf5b6989ad2339ad103e2d35071339562a54598b2968f48a3d4ec29d"
+    },
+    {
+      "path": "shard1/artifacts/manifests/internal_license_due_diligence.current.v1.json",
+      "bytes": 11739,
+      "sha256": "87bd377f4ce5176d67a4ed91035c68631eed9eb2280107888be0071cedd9459c"
+    },
+    {
+      "path": "shard1/implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+      "bytes": 82176,
+      "sha256": "2ea6894c6be114fcfe2f496bee02e091a317c9d21fb0d1298427058f6679c38a"
+    },
+    {
+      "path": "shard1/implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+      "bytes": 43126,
+      "sha256": "c8341b1a3ca39319495f67b074b9275a13281cc77154c767b128afe39788c392"
+    },
+    {
+      "path": "shard1/materialization-failure-context.json",
+      "bytes": 356,
+      "sha256": "ed2095ff8777d0c7689c9912613dd2c3ed7699691d20fbf1455e918e935a5296"
+    },
+    {
+      "path": "shard1.zip",
+      "bytes": 37641,
+      "sha256": "86371d619cba46f3ea2320395f3afcf6f0406b1ce4d89f4e12cde62bbf278a32"
+    }
+  ]
+}

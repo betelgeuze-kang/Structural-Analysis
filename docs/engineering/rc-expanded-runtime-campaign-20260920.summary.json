@@ -1,0 +1,2184 @@
+{
+  "abstained_count": 450,
+  "audit_scope": "retained input hashes, grouped policy exclusion, complete fold roster and costs; no solver replay",
+  "candidates": [
+    {
+      "case_repeat_scores": [
+        {
+          "case_id": "train-a-amp050",
+          "fold_indices": [
+            0,
+            1,
+            2
+          ],
+          "maximum_ratio": 0.9989327702033092,
+          "mean_ratio": 0.9934421851944392,
+          "minimum_ratio": 0.9881132602265023,
+          "ratios": [
+            0.9932805251535062,
+            0.9881132602265023,
+            0.9989327702033092
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.005411566271531927,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp100",
+          "fold_indices": [
+            3,
+            4,
+            5
+          ],
+          "maximum_ratio": 1.0054059822488575,
+          "mean_ratio": 0.996875811254835,
+          "minimum_ratio": 0.9922953336536319,
+          "ratios": [
+            0.992926117862016,
+            0.9922953336536319,
+            1.0054059822488575
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.007394074321362471,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp150",
+          "fold_indices": [
+            6,
+            7,
+            8
+          ],
+          "maximum_ratio": 1.0022419589814238,
+          "mean_ratio": 0.9961387155909674,
+          "minimum_ratio": 0.9922184394319067,
+          "ratios": [
+            0.993955748359572,
+            1.0022419589814238,
+            0.9922184394319067
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.005356467631741798,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp050",
+          "fold_indices": [
+            9,
+            10,
+            11
+          ],
+          "maximum_ratio": 1.076233160658641,
+          "mean_ratio": 1.0684528578607588,
+          "minimum_ratio": 1.0595766910089528,
+          "ratios": [
+            1.0595766910089528,
+            1.0695487219146822,
+            1.076233160658641
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.0083821348006494,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp100",
+          "fold_indices": [
+            12,
+            13,
+            14
+          ],
+          "maximum_ratio": 1.0489174980889564,
+          "mean_ratio": 1.0358616614541738,
+          "minimum_ratio": 1.0206231803879524,
+          "ratios": [
+            1.0489174980889564,
+            1.0380443058856124,
+            1.0206231803879524
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.014272878338895224,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp150",
+          "fold_indices": [
+            15,
+            16,
+            17
+          ],
+          "maximum_ratio": 1.0397453416873972,
+          "mean_ratio": 1.0313331738676919,
+          "minimum_ratio": 1.0260489970461601,
+          "ratios": [
+            1.0260489970461601,
+            1.0282051828695185,
+            1.0397453416873972
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.007364489791993491,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp050",
+          "fold_indices": [
+            18,
+            19,
+            20
+          ],
+          "maximum_ratio": 1.019876004902607,
+          "mean_ratio": 1.0160224444450583,
+          "minimum_ratio": 1.0084364784341173,
+          "ratios": [
+            1.0084364784341173,
+            1.019876004902607,
+            1.0197548499984508
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.006569918558632585,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp100",
+          "fold_indices": [
+            21,
+            22,
+            23
+          ],
+          "maximum_ratio": 1.0173475585325162,
+          "mean_ratio": 1.0070621171114071,
+          "minimum_ratio": 0.9875309388221574,
+          "ratios": [
+            1.0173475585325162,
+            1.0163078539795478,
+            0.9875309388221574
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.016922483281546243,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp150",
+          "fold_indices": [
+            24,
+            25,
+            26
+          ],
+          "maximum_ratio": 0.9938973632335713,
+          "mean_ratio": 0.9834579771497977,
+          "minimum_ratio": 0.968472325439718,
+          "ratios": [
+            0.968472325439718,
+            0.988004242776104,
+            0.9938973632335713
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.013308250638736016,
+          "valid_repetitions": 3
+        }
+      ],
+      "fold_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ],
+      "proposed_count": 99,
+      "ridge": 10000.0,
+      "score": 1.0142941048810143
+    },
+    {
+      "case_repeat_scores": [
+        {
+          "case_id": "train-a-amp050",
+          "fold_indices": [
+            27,
+            28,
+            29
+          ],
+          "maximum_ratio": 1.0099467637990331,
+          "mean_ratio": 1.0024259355379457,
+          "minimum_ratio": 0.9970243260949571,
+          "ratios": [
+            0.9970243260949571,
+            1.0003067167198467,
+            1.0099467637990331
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.00671681958617099,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp100",
+          "fold_indices": [
+            30,
+            31,
+            32
+          ],
+          "maximum_ratio": 1.0095198797521108,
+          "mean_ratio": 0.9982330866529568,
+          "minimum_ratio": 0.991130250240636,
+          "ratios": [
+            0.991130250240636,
+            0.9940491299661238,
+            1.0095198797521108
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.009883002507350563,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-a-amp150",
+          "fold_indices": [
+            33,
+            34,
+            35
+          ],
+          "maximum_ratio": 1.0191689103204729,
+          "mean_ratio": 1.0022614972318127,
+          "minimum_ratio": 0.9897612434724544,
+          "ratios": [
+            0.9978543379025111,
+            1.0191689103204729,
+            0.9897612434724544
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.015191116067504678,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp050",
+          "fold_indices": [
+            36,
+            37,
+            38
+          ],
+          "maximum_ratio": 1.0788300204053352,
+          "mean_ratio": 1.0587552445505188,
+          "minimum_ratio": 1.0478144142637182,
+          "ratios": [
+            1.0788300204053352,
+            1.0496212989825027,
+            1.0478144142637182
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.017408724172454045,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp100",
+          "fold_indices": [
+            39,
+            40,
+            41
+          ],
+          "maximum_ratio": 1.0526168364356123,
+          "mean_ratio": 1.0347540871568228,
+          "minimum_ratio": 1.0197768604053876,
+          "ratios": [
+            1.0526168364356123,
+            1.0318685646294685,
+            1.0197768604053876
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.016609054356233985,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-b-amp150",
+          "fold_indices": [
+            42,
+            43,
+            44
+          ],
+          "maximum_ratio": 1.0358339150499618,
+          "mean_ratio": 1.029544021274235,
+          "minimum_ratio": 1.024455368822722,
+          "ratios": [
+            1.024455368822722,
+            1.028342779950021,
+            1.0358339150499618
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.005783603037951986,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp050",
+          "fold_indices": [
+            45,
+            46,
+            47
+          ],
+          "maximum_ratio": 1.013680848681108,
+          "mean_ratio": 1.0040867826361752,
+          "minimum_ratio": 0.9929015225773351,
+          "ratios": [
+            0.9929015225773351,
+            1.013680848681108,
+            1.0056779766500823
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.010480649890352918,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp100",
+          "fold_indices": [
+            48,
+            49,
+            50
+          ],
+          "maximum_ratio": 1.019508227482866,
+          "mean_ratio": 1.0120386307549392,
+          "minimum_ratio": 1.0026449734088019,
+          "ratios": [
+            1.0139626913731494,
+            1.0026449734088019,
+            1.019508227482866
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.008594698449539733,
+          "valid_repetitions": 3
+        },
+        {
+          "case_id": "train-c-amp150",
+          "fold_indices": [
+            51,
+            52,
+            53
+          ],
+          "maximum_ratio": 0.9922574607566733,
+          "mean_ratio": 0.976932853458539,
+          "minimum_ratio": 0.9604389996715793,
+          "ratios": [
+            0.9781020999473644,
+            0.9922574607566733,
+            0.9604389996715793
+          ],
+          "requested_repetitions": 3,
+          "sample_standard_deviation": 0.01594142306915017,
+          "valid_repetitions": 3
+        }
+      ],
+      "fold_indices": [
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "proposed_count": 99,
+      "ridge": 1000000.0,
+      "score": 1.0132257932504385
+    }
+  ],
+  "case_counts": {
+    "train-a-amp050": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-a-amp100": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-a-amp150": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-b-amp050": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-b-amp100": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-b-amp150": {
+      "abstained": 6,
+      "proposed": 66
+    },
+    "train-c-amp050": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-c-amp100": {
+      "abstained": 72,
+      "proposed": 0
+    },
+    "train-c-amp150": {
+      "abstained": 72,
+      "proposed": 0
+    }
+  },
+  "completed_folds": 54,
+  "exclusion_groups": [
+    [
+      "train-a-amp050",
+      "train-a-amp100",
+      "train-a-amp150"
+    ],
+    [
+      "train-b-amp050",
+      "train-b-amp100",
+      "train-b-amp150"
+    ],
+    [
+      "train-c-amp050",
+      "train-c-amp100",
+      "train-c-amp150"
+    ]
+  ],
+  "fit_completed_count": 18,
+  "fold_work": {
+    "core_calls": 2808,
+    "linear_solves": 14679,
+    "newton_iterations": 14679
+  },
+  "independent_evaluation": false,
+  "label_generation_work": {
+    "known_work": {
+      "core_calls": 351,
+      "linear_solves": 1894,
+      "newton_iterations": 1894
+    },
+    "unknown_work": false
+  },
+  "label_inventory_sha256": "f850f7e65670bf4d6254039da2aca35269cbd1840b645d82308c2402017849f0",
+  "label_source_revision": "05e588704cb7bf6d6b919c8541f6b8733593d1ad",
+  "label_study_wall_ns_separate": 134743465748,
+  "net_savings_proved": false,
+  "parent_wall_ns": 1016765035116,
+  "per_fold_arm_work": [
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6289977982
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3998277645
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6290269684
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4027157422
+        }
+      },
+      "case_id": "train-a-amp050",
+      "fold_index": 0,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6294444696
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3989689785
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6332804498
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4039549188
+        }
+      },
+      "case_id": "train-a-amp050",
+      "fold_index": 1,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6350275449
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3984923099
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6335391206
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3991021440
+        }
+      },
+      "case_id": "train-a-amp050",
+      "fold_index": 2,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6838261702
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4411772758
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6836540198
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4445059076
+        }
+      },
+      "case_id": "train-a-amp100",
+      "fold_index": 3,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6842839999
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4407507380
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6899201950
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4443586323
+        }
+      },
+      "case_id": "train-a-amp100",
+      "fold_index": 4,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6937201729
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4456385817
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6952749535
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4434263173
+        }
+      },
+      "case_id": "train-a-amp100",
+      "fold_index": 5,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8674121160
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4857283451
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8622213237
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4888653345
+        }
+      },
+      "case_id": "train-a-amp150",
+      "fold_index": 6,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8674043410
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4858856019
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8692757562
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4849834493
+        }
+      },
+      "case_id": "train-a-amp150",
+      "fold_index": 7,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8638652714
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4903319585
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8692384317
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4943627909
+        }
+      },
+      "case_id": "train-a-amp150",
+      "fold_index": 8,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4014762904
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3553395082
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4012206712
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 51,
+          "newton_iterations": 51,
+          "wall_ns": 3355337425
+        }
+      },
+      "case_id": "train-b-amp050",
+      "fold_index": 9,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3982115123
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3540157023
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4012653618
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 51,
+          "newton_iterations": 51,
+          "wall_ns": 3311676256
+        }
+      },
+      "case_id": "train-b-amp050",
+      "fold_index": 10,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4060547251
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3596672426
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3983641589
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 51,
+          "newton_iterations": 51,
+          "wall_ns": 3343628177
+        }
+      },
+      "case_id": "train-b-amp050",
+      "fold_index": 11,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4900330108
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 4001211920
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4928231501
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 63,
+          "newton_iterations": 63,
+          "wall_ns": 3816414602
+        }
+      },
+      "case_id": "train-b-amp100",
+      "fold_index": 12,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4938778332
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 4060482043
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4910521940
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 63,
+          "newton_iterations": 63,
+          "wall_ns": 3913471531
+        }
+      },
+      "case_id": "train-b-amp100",
+      "fold_index": 13,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4900914591
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3965352019
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4892309779
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 63,
+          "newton_iterations": 63,
+          "wall_ns": 3887088533
+        }
+      },
+      "case_id": "train-b-amp100",
+      "fold_index": 14,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5776828238
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4375038111
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5645490729
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 69,
+          "newton_iterations": 69,
+          "wall_ns": 4265787846
+        }
+      },
+      "case_id": "train-b-amp150",
+      "fold_index": 15,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5632922787
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4366948328
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5750290953
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 69,
+          "newton_iterations": 69,
+          "wall_ns": 4249004325
+        }
+      },
+      "case_id": "train-b-amp150",
+      "fold_index": 16,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5662281318
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4361221078
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5603717523
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 69,
+          "newton_iterations": 69,
+          "wall_ns": 4196316975
+        }
+      },
+      "case_id": "train-b-amp150",
+      "fold_index": 17,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3390806976
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3107469190
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3385148713
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3083340662
+        }
+      },
+      "case_id": "train-c-amp050",
+      "fold_index": 18,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3437047535
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3137494506
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3395788300
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3078203155
+        }
+      },
+      "case_id": "train-c-amp050",
+      "fold_index": 19,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3419202020
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3115370121
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3416486645
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3056877729
+        }
+      },
+      "case_id": "train-c-amp050",
+      "fold_index": 20,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3879032478
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3380101705
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3862750905
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3324316381
+        }
+      },
+      "case_id": "train-c-amp100",
+      "fold_index": 21,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3924026120
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3374083633
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3885687692
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3321790290
+        }
+      },
+      "case_id": "train-c-amp100",
+      "fold_index": 22,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3910044098
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3363062652
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3861233491
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3407442661
+        }
+      },
+      "case_id": "train-c-amp100",
+      "fold_index": 23,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4357564285
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3741168738
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4361859975
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3864906521
+        }
+      },
+      "case_id": "train-c-amp150",
+      "fold_index": 24,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4398392398
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3643774567
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4386756091
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3689934047
+        }
+      },
+      "case_id": "train-c-amp150",
+      "fold_index": 25,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4351014107
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3665982405
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4350670605
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3690436587
+        }
+      },
+      "case_id": "train-c-amp150",
+      "fold_index": 26,
+      "ridge": 10000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6339775162
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3991535974
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6378390579
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4005314218
+        }
+      },
+      "case_id": "train-a-amp050",
+      "fold_index": 27,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6307354913
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3995685628
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6356622081
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3996355336
+        }
+      },
+      "case_id": "train-a-amp050",
+      "fold_index": 28,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6356397585
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4034391482
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 84,
+          "newton_iterations": 84,
+          "wall_ns": 6317176191
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3996537246
+        }
+      },
+      "case_id": "train-a-amp050",
+      "fold_index": 29,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6835018849
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4417620483
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6845615953
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4459047332
+        }
+      },
+      "case_id": "train-a-amp100",
+      "fold_index": 30,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6859068117
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4413834859
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6929365831
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4442224557
+        }
+      },
+      "case_id": "train-a-amp100",
+      "fold_index": 31,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6939542381
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4465754316
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 90,
+          "newton_iterations": 90,
+          "wall_ns": 6849585282
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 73,
+          "newton_iterations": 73,
+          "wall_ns": 4425513357
+        }
+      },
+      "case_id": "train-a-amp100",
+      "fold_index": 32,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8732049406
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4884536362
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8882779361
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4896915974
+        }
+      },
+      "case_id": "train-a-amp150",
+      "fold_index": 33,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8685888856
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4945169472
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8633782485
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4854028343
+        }
+      },
+      "case_id": "train-a-amp150",
+      "fold_index": 34,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8689969203
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4867455392
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 101,
+          "newton_iterations": 101,
+          "wall_ns": 8657929212
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 77,
+          "newton_iterations": 77,
+          "wall_ns": 4919725932
+        }
+      },
+      "case_id": "train-a-amp150",
+      "fold_index": 35,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4024041481
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 53,
+          "newton_iterations": 53,
+          "wall_ns": 3612982262
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4060608580
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 51,
+          "newton_iterations": 51,
+          "wall_ns": 3350722233
+        }
+      },
+      "case_id": "train-b-amp050",
+      "fold_index": 36,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3976527522
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 53,
+          "newton_iterations": 53,
+          "wall_ns": 3528338058
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3980866775
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 51,
+          "newton_iterations": 51,
+          "wall_ns": 3363386659
+        }
+      },
+      "case_id": "train-b-amp050",
+      "fold_index": 37,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 4031332131
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 53,
+          "newton_iterations": 53,
+          "wall_ns": 3526889412
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 61,
+          "newton_iterations": 61,
+          "wall_ns": 3984237235
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 51,
+          "newton_iterations": 51,
+          "wall_ns": 3367756491
+        }
+      },
+      "case_id": "train-b-amp050",
+      "fold_index": 38,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4897193173
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 64,
+          "newton_iterations": 64,
+          "wall_ns": 4033546021
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4868775302
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 63,
+          "newton_iterations": 63,
+          "wall_ns": 3833717925
+        }
+      },
+      "case_id": "train-b-amp100",
+      "fold_index": 39,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4946082987
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 64,
+          "newton_iterations": 64,
+          "wall_ns": 3953667361
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4916458687
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 63,
+          "newton_iterations": 63,
+          "wall_ns": 3833387177
+        }
+      },
+      "case_id": "train-b-amp100",
+      "fold_index": 40,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4865313186
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 64,
+          "newton_iterations": 64,
+          "wall_ns": 3929096573
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 71,
+          "newton_iterations": 71,
+          "wall_ns": 4869602354
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 63,
+          "newton_iterations": 63,
+          "wall_ns": 3854788396
+        }
+      },
+      "case_id": "train-b-amp100",
+      "fold_index": 41,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5651742922
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4325098621
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5588852859
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 69,
+          "newton_iterations": 69,
+          "wall_ns": 4223676721
+        }
+      },
+      "case_id": "train-b-amp150",
+      "fold_index": 42,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5607366811
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4310648076
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5638376370
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 69,
+          "newton_iterations": 69,
+          "wall_ns": 4193677092
+        }
+      },
+      "case_id": "train-b-amp150",
+      "fold_index": 43,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5654283897
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4358115606
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 79,
+          "newton_iterations": 79,
+          "wall_ns": 5617673753
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 69,
+          "newton_iterations": 69,
+          "wall_ns": 4209190031
+        }
+      },
+      "case_id": "train-b-amp150",
+      "fold_index": 44,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3370311499
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3072832688
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3373800598
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3096711406
+        }
+      },
+      "case_id": "train-c-amp050",
+      "fold_index": 45,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3384999532
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3103990982
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3383470258
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3063990910
+        }
+      },
+      "case_id": "train-c-amp050",
+      "fold_index": 46,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3436384815
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3095191835
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 56,
+          "newton_iterations": 56,
+          "wall_ns": 3387051820
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 47,
+          "newton_iterations": 47,
+          "wall_ns": 3079617631
+        }
+      },
+      "case_id": "train-c-amp050",
+      "fold_index": 47,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3960813304
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3375183349
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3862981099
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3330570286
+        }
+      },
+      "case_id": "train-c-amp100",
+      "fold_index": 48,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 4024983686
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3388951861
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3962919669
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3381954605
+        }
+      },
+      "case_id": "train-c-amp100",
+      "fold_index": 49,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3869421423
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3447060229
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 62,
+          "newton_iterations": 62,
+          "wall_ns": 3867672898
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 52,
+          "newton_iterations": 52,
+          "wall_ns": 3383023089
+        }
+      },
+      "case_id": "train-c-amp100",
+      "fold_index": 50,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4362850223
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3648501912
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4360893140
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3732120925
+        }
+      },
+      "case_id": "train-c-amp150",
+      "fold_index": 51,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4362546569
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3653126830
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4407617675
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3683599024
+        }
+      },
+      "case_id": "train-c-amp150",
+      "fold_index": 52,
+      "ridge": 1000000.0
+    },
+    {
+      "arms": {
+        "fresh-reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4382210422
+        },
+        "proposal": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3647253764
+        },
+        "reference": {
+          "core_calls": 13,
+          "linear_solves": 68,
+          "newton_iterations": 68,
+          "wall_ns": 4398530911
+        },
+        "secant": {
+          "core_calls": 13,
+          "linear_solves": 57,
+          "newton_iterations": 57,
+          "wall_ns": 3799522478
+        }
+      },
+      "case_id": "train-c-amp150",
+      "fold_index": 53,
+      "ridge": 1000000.0
+    }
+  ],
+  "proposed_count": 198,
+  "reserved_evaluation_executed": false,
+  "selected_ridge": null,
+  "selected_strategy": "secant",
+  "selection_result_hash": "sha256:eaa6fa2e7851de0820afb16bb629240f22da67fb0b2aa50856b4aa92ff10c8b9",
+  "selection_wall_ns": 1016628100486,
+  "source_revision": "fa2af8cbdd976e84d96d21b4e10e5b77d9f7efac",
+  "static_gate_counts": {
+    "not_rejected": 18,
+    "rejected": 36
+  },
+  "training_sample_count": 99
+}

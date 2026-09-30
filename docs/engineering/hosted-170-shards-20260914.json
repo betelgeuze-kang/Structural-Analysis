@@ -1,0 +1,69 @@
+{
+  "head": "17010d495d651d3d53407db4dfc7b9dcee0867ad",
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-170-shards-8bs7srub",
+  "inventory_sha256": "751658bbcb35f07bc3a151b05bb3c106fdc2e7a3acd4f40f6a1a010ea3970dd5",
+  "files": 9,
+  "bytes": 419246,
+  "jobs": [
+    {
+      "id": 103769241880,
+      "name": "pytest-full-shard-2",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "blocker_lines": [
+        "2026-09-13T18:27:10.1694896Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T18:27:10.1695389Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103769241772,
+      "name": "pytest-full-shard-0",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "blocker_lines": [
+        "2026-09-13T18:30:05.6446382Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T18:30:05.6447086Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103769241754,
+      "name": "pytest-full-shard-3",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "blocker_lines": [
+        "2026-09-13T18:28:42.7078180Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T18:28:42.7079166Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    },
+    {
+      "id": 103769241838,
+      "name": "pytest-full-shard-1",
+      "failed_steps": [
+        "Materialize exact current-source test evidence"
+      ],
+      "skipped_steps": [
+        "Run materialized repository test suite shard",
+        "Post Set up Python"
+      ],
+      "blocker_lines": [
+        "2026-09-13T18:30:22.8739415Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+        "2026-09-13T18:30:22.8740885Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready"
+      ]
+    }
+  ]
+}

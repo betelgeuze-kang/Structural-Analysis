@@ -1,0 +1,50 @@
+{
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "records": [
+    {
+      "layers": 32,
+      "status": "blocked",
+      "contract_pass": false,
+      "committed_steps": 3,
+      "path_wall_ns": 13474571543,
+      "artifact": "layers-32.json",
+      "artifact_sha256": "b3cb2f8533b956abacda789a94f93b2fb2504425d958808896ef048cea4bdb55",
+      "accepted_prefix_exactly_reproduced": true,
+      "rollback_exact": true,
+      "last_accepted_factor": 0.75,
+      "failed_factor": 1.0,
+      "terminal_reason": "line_search_failed_to_reduce_residual",
+      "failed_relative_residual": 0.11063809454090572,
+      "total_convergence_history_rows": 27,
+      "total_line_search_attempts": 37,
+      "failed_speed_ratio": null
+    },
+    {
+      "layers": 64,
+      "status": "blocked",
+      "contract_pass": false,
+      "committed_steps": 3,
+      "path_wall_ns": 23659872486,
+      "artifact": "layers-64.json",
+      "artifact_sha256": "cd118f8e580da06b7da586a526732a28175e4a06dc08add106ac776cdeff2335",
+      "accepted_prefix_exactly_reproduced": true,
+      "rollback_exact": true,
+      "last_accepted_factor": 0.75,
+      "failed_factor": 1.0,
+      "terminal_reason": "line_search_failed_to_reduce_residual",
+      "failed_relative_residual": 0.0892720237577471,
+      "total_convergence_history_rows": 26,
+      "total_line_search_attempts": 39,
+      "failed_speed_ratio": null
+    }
+  ],
+  "scope": "Research-only full four-target load path. Neither discretization completed. No physical capacity conclusion. No public API extension.",
+  "independent_physical_validation": false,
+  "training_fits": 0,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-finer-full-path-hil7hqbq",
+    "payload_files": 7,
+    "payload_bytes": 58747682,
+    "inventory_sha256": "aaf9e70e308bc082e8ee5d331398faf5284a8e4830d65123c47bec56090c44d0"
+  }
+}

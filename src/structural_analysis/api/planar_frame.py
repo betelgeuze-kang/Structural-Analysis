@@ -19,6 +19,7 @@ from structural_analysis.api.nonlinear_frame import (
     COROTATIONAL_GENERAL_PROFILE,
     NonlinearFrameConfig,
     analyze_nonlinear_frame_model_ir,
+    validate_nonlinear_frame_manifest,
     validate_nonlinear_frame_result,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
@@ -249,6 +250,18 @@ def validate_planar_frame_result(
         _result_payload(result, include_hash=False)
     ):
         raise ValueError("result_hash does not match the planar-frame result payload")
+    result_authority = (
+        "exact_bounded_candidate" if result.converged else "not_authoritative"
+    )
+    if dict(result.authority) != {
+        "profile": "public_developer_preview",
+        "numerical_result": result_authority,
+        "engineering_result": result_authority,
+        "external_vv": "not_attached",
+        "engineering_design": "not_authoritative",
+        "release_readiness": "not_authoritative",
+    }:
+        raise ValueError("result authority differs from profile contract")
 
     artifact_contract_pass = True
     execution_contract_pass = True
@@ -288,20 +301,11 @@ def validate_planar_frame_result(
     source = _deep_thaw(result.result_ir)
     if not isinstance(source, dict):
         raise ValueError("result_ir must thaw to an object")
+    validate_nonlinear_frame_manifest(source)
     if source.get("profile") != COROTATIONAL_GENERAL_PROFILE:
         raise ValueError("result_ir is not the connected planar nonlinear result")
     if bool(source.get("contract_pass")) != result.converged:
         raise ValueError("result_ir contract_pass differs from converged")
-    expected_authority = (
-        "exact_bounded_candidate" if result.converged else "not_authoritative"
-    )
-    if (
-        result.authority.get("profile") != "public_developer_preview"
-        or result.authority.get("numerical_result") != expected_authority
-        or result.authority.get("engineering_result") != expected_authority
-        or result.authority.get("release_readiness") != "not_authoritative"
-    ):
-        raise ValueError("result authority differs from profile contract")
     numerical_authority = result.converged is True
     return PlanarFrameValidationReport(
         status=result.status,

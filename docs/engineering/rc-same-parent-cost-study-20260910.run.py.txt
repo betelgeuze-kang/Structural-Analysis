@@ -1,0 +1,108 @@
+"""Full declared parent roster, frozen proposals, no fit or full-path credit."""
+from pathlib import Path
+from collections import Counter
+import hashlib,json,os,resource,subprocess,sys,time,traceback
+
+def read(path):return json.loads(path.read_bytes())
+def sha(raw):return hashlib.sha256(raw).hexdigest()
+def save(root,name,value):
+ p=root/name;p.parent.mkdir(parents=True,exist_ok=True)
+ with p.open('x') as f:json.dump(value,f,indent=2,allow_nan=False);f.write('\n')
+
+if len(sys.argv)==1:
+ root=Path(Path('/tmp/structural-rc-same-parent-cost-root.txt').read_text().strip())
+ assert not (root/'process-started.json').exists()
+ script=Path(__file__).read_bytes();(root/'run.py').write_bytes(script)
+ env=dict(os.environ,PYTHONPATH=str(root/'source/src'),PYTHONDONTWRITEBYTECODE='1',OPENBLAS_NUM_THREADS='1',OPENBLAS_CORETYPE='Haswell',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1')
+ start=time.perf_counter_ns()
+ with (root/'worker.log').open('xb') as out:
+  child=subprocess.Popen([sys.executable,'-B',str(root/'run.py'),'worker'],cwd=root,env=env,stdout=out,stderr=subprocess.STDOUT)
+  save(root,'process-started.json',{'parent_pid':os.getpid(),'worker_pid':child.pid,'runner_sha256':sha(script),'protocol_sha256':sha((root/'protocol.json').read_bytes()),'source_manifest_sha256':sha((root/'source-manifest.json').read_bytes()),'input_bindings_sha256':sha((root/'input-bindings.json').read_bytes()),'automatic_retry':False})
+  print(json.dumps({'root':str(root),'parent_pid':os.getpid(),'worker_pid':child.pid}),flush=True);code=child.wait()
+ save(root,'process-outcome.json',{'parent_pid':os.getpid(),'worker_pid':child.pid,'exit_code':code,'parent_wall_ns':time.perf_counter_ns()-start});print('exit',code,flush=True);raise SystemExit(code)
+
+root=Path(__file__).resolve().parent;start,cpu=time.perf_counter_ns(),time.process_time_ns();outcome={'pid':os.getpid(),'status':'started','completed_comparisons':0};save(root,'worker-started.json',outcome)
+try:
+ from structural_analysis.benchmark import rc_control_learning as learning
+ from structural_analysis.benchmark import rc_control_seed_runtime as runtime
+ from structural_analysis.io.neutral.loader import load_neutral_json
+ from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import load_stateful_fiber_frame2d_checkpoint_bytes as load
+ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+ assert Path(runtime.__file__).resolve()==root/'source/src/structural_analysis/benchmark/rc_control_seed_runtime.py'
+ def prohibited(*args,**kwargs):raise AssertionError('No fitting is authorized in this frozen-policy experiment')
+ learning._fit=prohibited
+ b=runtime._bytes;protocol=read(root/'protocol.json');manifest=read(root/'source-manifest.json')
+ assert sha((root/'protocol.json').read_bytes())==manifest['protocol_sha256']
+ for row in manifest['files']:
+  raw=(root/'source'/row['path']).read_bytes();assert len(raw)==row['bytes'] and sha(raw)==row['sha256']
+ bindings=read(root/'input-bindings.json')['files']
+ for row in bindings:
+  raw=(root/'inputs'/row['path']).read_bytes();assert len(raw)==row['bytes'] and sha(raw)==row['sha256']
+ def original(name):return read(root/'inputs'/name)
+ assert original('audit-attempt-1-outcome.json')['exit_code']==0
+ prior_audit=original('original-audit.json');assert prior_audit['all_training_partitions_preprocessing_and_ridge_stationarity_checked']
+ cases=[]
+ for c in original('original-plan.json')['cases']:
+  model=load_neutral_json(root/'inputs/inputs'/c['model_path']);request=learning.decode_bounded_rc_fiber_direct_control_request((root/'inputs/inputs'/c['request_path']).read_bytes())
+  cases.append(learning.RCControlLearningCase(c['case_id'],c['project_id'],c['geometry_family_id'],c['load_history_id'],c['split'],model,request))
+ prepared=learning._preflight(cases,protocol['arithmetic_profile']);training={c.case_id:c for c in cases if c.split=='train'}
+ origins=[];policies={};original_work=Counter()
+ # Authenticate every full prefix before starting any new numerical comparison.
+ for item in protocol['roster']:
+  case=training[item['case_id']];_,compiled,features,_,_=prepared[case.case_id];problem=compiled.problem
+  policy=learning.RCControlSeedPolicy((root/'inputs'/item['policy_path']).read_text());assert policy.policy_hash==item['policy_hash'];policies[case.case_id]=policy
+  assert any(f['withheld_training_case']==case.case_id and f['policy_hash']==policy.policy_hash for f in prior_audit['fits_checked'])
+  stem=f"study/fold-{item['fold_index']:04d}/secant";path=original(stem+'/path.json');payload=dict(path);assert payload.pop('path_hash')==runtime._sha(b(payload))
+  previous=runtime.initial_stateful_fiber_frame2d_checkpoint(problem);coordinates=[[0.0]*(len(problem.free_global_dofs)+1)];targets=[0.0]
+  for i in item['target_indices']:
+   entry=path['entries'][i];context_data=original(f'{stem}/{i:03d}-context.json');context=runtime.RCControlSeedContext(**context_data)
+   assert b(context_data['accepted_targets_m'])==b(targets) and b(context_data['accepted_augmented_coordinates_m'])==b(coordinates)
+   assert entry['parent_hash']==previous.state_hash and entry['target_m']==case.request.targets_m[i]
+   parent_bytes=b(previous.to_dict());runtime._parent_step_prefix(compiled,case.request,parent_bytes,context)
+   accepted_steps=[]
+   for invocation in entry['invocations']:
+    prefix=f"{stem}/{i:03d}-{invocation['ordinal']}";inv=original(prefix+'-outcome.json');step=original(prefix+'-step.json');payload=dict(step);assert payload.pop('step_hash')==canonical_hash(payload)
+    assert inv==invocation and not inv['unknown_work'] and inv['status']=='returned'
+    assert b(step['parent_checkpoint'])==parent_bytes
+    metrics=step['trial_solution']['metrics'];assert inv['work']=={'core_calls':1,'newton_iterations':metrics['iteration_count'],'linear_solves':metrics['linear_solve_count']};original_work.update(inv['work'])
+    if step['committed']:accepted_steps.append(step)
+    else:assert step['metrics']['rollback_exact'] and b(step['accepted_checkpoint'])==parent_bytes
+   assert len(accepted_steps)==1;accepted=accepted_steps[0]
+   origins.append((case,i,parent_bytes,context,accepted['accepted_checkpoint']))
+   previous=load(b(accepted['accepted_checkpoint']),problem);coordinates.append(accepted['metrics']['absolute_augmented_coordinates_m']);targets.append(entry['target_m'])
+  assert b(previous.to_dict())==b(path['terminal_checkpoint'])
+ assert len(origins)==protocol['comparison_count']==968
+ save(root,'origin-preflight.json',{'input_files_verified':len(bindings),'source_files_verified':len(manifest['files']),'original_core_work':dict(original_work),'original_parents_and_complete_prefixes_verified':len(origins),'original_training_partition_audit_bound':True,'prefix_newton_reexecutions':0,'fits':0,'wall_ns':time.perf_counter_ns()-start})
+ print('preflight verified',len(origins),'origins',flush=True)
+ rows=[];work=Counter();frozen={k:b(v.to_dict()) for k,v in policies.items()}
+ for ordinal,(case,index,parent_bytes,context,original_child) in enumerate(origins):
+  step_start=time.perf_counter_ns();_,compiled,features,_,_=prepared[case.case_id];policy=policies[case.case_id];decisions=[]
+  def proposal(c):
+   result=policy.propose(c,features,compiled.problem.free_global_dofs,case.request.solver_config.contract_hash,arithmetic_profile=protocol['arithmetic_profile'],load_factor_coordinate_scale_m=case.request.solver_config.load_factor_coordinate_scale_m)
+   decisions.append({'policy_proposed':result is not None});return result
+  assert work['core_calls']+6<=protocol['maximum_core_calls']
+  destination=root/'study'/f'comparison-{ordinal:04d}'
+  save(root,f'study/comparison-{ordinal:04d}-started.json',{'ordinal':ordinal,'case_id':case.case_id,'source_target_index':index,'maximum_numerical_core_calls':6,'unknown_work_until_outcome':True})
+  report=runtime.benchmark_rc_control_seed_paths(case.model,case.request,source_revision=manifest['revision'],output_directory=destination,proposal=proposal,proposal_identity=policy.policy_hash,arm_order=tuple(protocol['arm_order_schedule'][ordinal%3]),capture_material_state=True,material_capture_scope='proposal-only',proposal_abstention_strategy='secant',parent_checkpoint_bytes=parent_bytes,accepted_context=context,**learning._arithmetic_kwargs(protocol['arithmetic_profile']))
+  assert report['source_target_index']==index and report['all_execution_work_reported'] and len(decisions)==1
+  arm_work={}
+  for arm,p in [*report['arms'].items(),('fresh-reference',report['fresh_reference'])]:
+   counts=Counter()
+   for entry in p['entries']:
+    assert entry['parent_hash']==report['initial_parent_hash']
+    for invocation in entry['invocations']:
+     assert not invocation['unknown_work'];counts.update(invocation['work'])
+   work.update(counts);arm_work[arm]=dict(counts)
+  assert work['core_calls']<=protocol['maximum_core_calls'] and b(policy.to_dict())==frozen[case.case_id]
+  passed=report['reference_repeat_exact'] and all(c['step_response_pass'] for c in report['comparisons'].values())
+  secant_path=read(destination/'secant/path.json');reproduced=b(secant_path['terminal_checkpoint'])==b(original_child)
+  row={'ordinal':ordinal,'case_id':case.case_id,'source_target_index':index,'source_policy_hash':policy.policy_hash,'native_parent_hash':report['initial_parent_hash'],'report_hash':report['report_hash'],'same_parent_comparison_pass':passed,'original_secant_child_reproduced':reproduced,'policy_proposed':decisions[0]['policy_proposed'],'proposal_decision':report['arms']['proposal']['entries'][0]['proposal_decision'],'arm_work':arm_work,'proposal_minus_secant_newton':arm_work['proposal']['newton_iterations']-arm_work['secant']['newton_iterations'],'parent_comparison_wall_ns':report['whole_study_wall_ns'],'row_wall_ns_before_outcome_write':time.perf_counter_ns()-step_start,'complete_path_credit':False,'training_admitted':False}
+  save(root,f'study/comparison-{ordinal:04d}-outcome.json',row);rows.append(row);outcome['completed_comparisons']=len(rows)
+  if not reproduced and secant_path['status']=='complete':raise ValueError('Original secant result changed; stop before further comparisons')
+  if ordinal%25==0:print('completed',len(rows),case.case_id,index,'work',dict(work),flush=True)
+ save(root,'result.json',{'schema_version':'rc-same-parent-cost-development-result.v1','source_revision':manifest['revision'],'protocol_sha256':manifest['protocol_sha256'],'comparisons':rows,'work':dict(work),'fits':0,'all_original_secant_children_reproduced':all(r['original_secant_child_reproduced'] for r in rows),'all_same_parent_comparisons_pass':all(r['same_parent_comparison_pass'] for r in rows),'causal_training_dataset_admitted':False,'full_path_performance_credit':False,'independent_physical_validation':False,'wall_ns_before_result_write':time.perf_counter_ns()-start})
+ outcome.update(status='completed',work=dict(work),fits=0)
+except BaseException as exc:
+ outcome.update(status='raised',exception_kind=type(exc).__name__);traceback.print_exc();raise
+finally:
+ outcome.update(wall_ns_through_reports=time.perf_counter_ns()-start,cpu_ns=time.process_time_ns()-cpu,peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss);save(root,'worker-outcome.json',outcome);print(json.dumps(outcome),flush=True)

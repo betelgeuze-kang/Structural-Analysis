@@ -1,0 +1,42 @@
+from pathlib import Path
+import hashlib,json,subprocess,tempfile,time
+repo=Path.cwd();base=Path('/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25');old=base/'structural-rc-secant-abstention-fhn1qvyq'
+raw=old.with_name(old.name+'.inventory.json').read_bytes();sha=lambda raw:hashlib.sha256(raw).hexdigest()
+assert sha(raw)=='df41ee6c060fe8dd5e5bb4586c6c801177b5d5d7ec56929ec37bdc1bc08ed064'
+index={r['path']:r for r in json.loads(raw)['files']}
+head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip();assert head=='cbc1952f5066b323f3a9369318c1615a94372122'
+assert not subprocess.check_output(['git','status','--porcelain'])
+root=Path(tempfile.mkdtemp(prefix='structural-rc-same-parent-cost-',dir=base));Path('/tmp/structural-rc-same-parent-cost-root.txt').write_text(str(root));bindings={}
+def save(name,value):
+ p=root/name;p.parent.mkdir(parents=True,exist_ok=True)
+ with p.open('x') as f:json.dump(value,f,indent=2,allow_nan=False);f.write('\n')
+def original(name):
+ raw=(old/name).read_bytes();r=index[name];assert len(raw)==r['bytes'] and sha(raw)==r['sha256'],name
+ dest=root/'inputs'/name;dest.parent.mkdir(parents=True,exist_ok=True)
+ if dest.exists():assert dest.read_bytes()==raw
+ else:dest.write_bytes(raw)
+ bindings[name]=r;return json.loads(raw)
+original('original-audit.json');original('audit-attempt-1-outcome.json')
+original_plan=original('original-plan.json');completion=original('completion-summary.json');original('protocol.json');study=original('study/plan.json')
+for case in original_plan['cases']:
+ for kind in ('model','request'):original('inputs/'+case[kind+'_path'])
+roster=[]
+for fold in range(4):
+ stem=f'study/fold-{fold:04d}';outcome=original(stem+'-outcome.json');comparison=original(stem+'/comparison.json');path=original(stem+'/secant/path.json');policy=original(f"study/fit-{outcome['fit_index']:04d}-policy.json")
+ assert outcome['status']=='completed' and outcome['ridge']==10000.0 and path['status']=='complete'
+ assert len(path['entries'])==len(comparison['request']['targets_m'])==242
+ assert outcome['report_hash']==comparison['report_hash'] and outcome['policy_hash']==comparison['proposal_identity']
+ for i,entry in enumerate(path['entries']):
+  assert entry['target_index']==i
+  original(f'{stem}/secant/{i:03d}-context.json')
+  for inv in entry['invocations']:
+   for suffix in ('started','outcome','step'):original(f"{stem}/secant/{i:03d}-{inv['ordinal']}-{suffix}.json")
+ roster.append({'fold_index':fold,'case_id':outcome['withheld_training_case'],'policy_path':f"study/fit-{outcome['fit_index']:04d}-policy.json",'policy_hash':outcome['policy_hash'],'source_comparison_hash':comparison['report_hash'],'target_indices':list(range(242))})
+assert [r['case_id'] for r in roster]==['train-a','train-b','train-c','train-d']
+manifest=[]
+paths=subprocess.check_output(['git','ls-files','src','implementation/phase1/schemas'],text=True).splitlines()+['tests/test_rc_control_parent_step.py','tests/test_rc_control_warm_start.py','tests/test_rc_control_runtime_selection.py']
+for name in paths:
+ if not name.endswith(('.py','.json')):continue
+ raw=(repo/name).read_bytes();assert raw==subprocess.check_output(['git','show',head+':'+name]);dest=root/'source'/name;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(raw);manifest.append({'path':name,'bytes':len(raw),'sha256':sha(raw)})
+protocol={'schema_version':'rc-same-parent-cost-prospective-protocol.v1','created_unix_ns':time.time_ns(),'source_revision':head,'original_packet':str(old),'original_inventory_sha256':sha(old.with_name(old.name+'.inventory.json').read_bytes()),'arithmetic_profile':'retained-twofold-refinement.v1','origin_arm':'secant','roster':roster,'target_selection':'every original target in every declared training case; no retrospective favorable-step filtering','comparison_count':968,'nominal_core_calls_without_retries':3872,'maximum_core_calls':5808,'maximum_fits':0,'arm_order_schedule':[['reference','secant','proposal'],['secant','proposal','reference'],['proposal','reference','secant']],'order_rule':'global comparison index modulo three; fresh reference always last; not repeated measurements of the same parent','capture_material_state':True,'material_capture_scope':'proposal-only','proposal_abstention_strategy':'secant','static_model_abstention':False,'static_gate_note':'full original policy evaluation and capture are charged, including abstention; this is not the optimized static-gate runtime configuration','repetitions_per_parent':1,'retained_failure_rows':True,'stop_on_unknown_work':True,'automatic_retry':False,'automatic_policy_training':False,'automatic_promotion':False,'causal_training_dataset_admitted':False,'full_path_performance_credit':False,'independent_physical_validation':False,'validation_or_holdout_execution':False,'hardware_isolation':False,'concurrent_original_record_audit_expected':True,'historical_costs_separate':True,'original_study_completion':completion,'preceding_attempt':{'root':'/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-t4_7x8fg','inventory_sha256':'7ff4cdecb664ec104078b047f7b83d7adc04e78150c7373e35b26abc62e42c07','new_solver_calls':0,'new_fits':0,'cause':'preflight checkpoint serialization in the runner; corrected to canonical JSON'},'prefix_authentication':'exact sealed original inputs, native parent chain and full accepted coordinates; no prefix Newton rerun'}
+save('protocol.json',protocol);save('input-bindings.json',{'original_root':str(old),'files':list(bindings.values())});save('source-manifest.json',{'revision':head,'files':manifest,'protocol_sha256':sha((root/'protocol.json').read_bytes())});(root/'prepare.py').write_bytes(Path(__file__).read_bytes());(root/'prior-local-regression.log').write_bytes(Path('/tmp/rc-parent-step-regression.log').read_bytes());print(root);print(json.dumps({'inputs':len(bindings),'source_files':len(manifest),'comparisons':968,'nominal_core_calls':3872,'maximum_core_calls':5808}))

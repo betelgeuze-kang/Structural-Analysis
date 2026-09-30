@@ -1,0 +1,752 @@
+{
+  "checks": 756,
+  "independent_physics": false,
+  "inventory": {
+    "byte_length": 140279329,
+    "file_count": 80,
+    "reread_pass": true,
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reinforcement-linesearch-zf8050in",
+    "sha256": "0891d6d92064bcc28e18e67050b29dde704928c959e50543bc0e8945a4155f8d"
+  },
+  "new_fits": 0,
+  "pilot_diagnostic": {
+    "arms": {
+      "extended": {
+        "rows": [
+          {
+            "accepted": 8,
+            "id": "baseline",
+            "verified": true,
+            "wall_ns": [
+              2922196688,
+              2961836221
+            ],
+            "work": [
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              },
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              }
+            ]
+          },
+          {
+            "accepted": 8,
+            "id": "smaller-bars",
+            "verified": true,
+            "wall_ns": [
+              2916715263,
+              3016204023
+            ],
+            "work": [
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 47,
+                "known_newton_iteration_count": 47,
+                "unknown_solver_work_attempt_count": 0
+              },
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 47,
+                "known_newton_iteration_count": 47,
+                "unknown_solver_work_attempt_count": 0
+              }
+            ]
+          }
+        ],
+        "status": "complete"
+      },
+      "original": {
+        "rows": [
+          {
+            "accepted": 8,
+            "id": "baseline",
+            "verified": true,
+            "wall_ns": [
+              2926896783,
+              2971824427
+            ],
+            "work": [
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              },
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              }
+            ]
+          },
+          {
+            "accepted": 7,
+            "id": "smaller-bars",
+            "verified": false,
+            "wall_ns": [
+              2792627046,
+              2818232485
+            ],
+            "work": [
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 41,
+                "known_newton_iteration_count": 41,
+                "unknown_solver_work_attempt_count": 0
+              },
+              {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 41,
+                "known_newton_iteration_count": 41,
+                "unknown_solver_work_attempt_count": 0
+              }
+            ]
+          }
+        ],
+        "status": "incomplete"
+      }
+    },
+    "checks": 37,
+    "eighth_step_line_search": [
+      {
+        "evaluations": 4,
+        "iteration": 0,
+        "selected_alpha": 0.125
+      },
+      {
+        "evaluations": 5,
+        "iteration": 1,
+        "selected_alpha": 0.0625
+      },
+      {
+        "evaluations": 7,
+        "iteration": 2,
+        "selected_alpha": 0.015625
+      },
+      {
+        "evaluations": 3,
+        "iteration": 3,
+        "selected_alpha": 0.25
+      },
+      {
+        "evaluations": 2,
+        "iteration": 4,
+        "selected_alpha": 0.5
+      },
+      {
+        "evaluations": 1,
+        "iteration": 5,
+        "selected_alpha": 1.0
+      },
+      {
+        "evaluations": 1,
+        "iteration": 6,
+        "selected_alpha": 1.0
+      },
+      {
+        "evaluations": 1,
+        "iteration": 7,
+        "selected_alpha": 1.0
+      }
+    ],
+    "scope": "eight-target diagnostic only"
+  },
+  "repeated_speed_comparison": false,
+  "source": {
+    "current_checkout": "1882c85f96f6b8edf25d6022ea22664a0cd4e6ed",
+    "execution_source_revision": "94302f49a974546efd050e0eb8564e87ef670f86",
+    "numerical_source_matches_current": true,
+    "source_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reinforcement-full-f8hsry7m/source"
+  },
+  "studies": {
+    "extended": {
+      "parent": {
+        "arm": "extended",
+        "exit_code": 0,
+        "parent_wall_ns": 13493340505
+      },
+      "report_hash": "sha256:00bcd608aa474453c63aae93649c1edcb40156b20d5e0849cf70fd0800fd74e7",
+      "rows": [
+        {
+          "candidate_id": "baseline",
+          "full_reference_verification_pass": true,
+          "invocations": [
+            {
+              "phase": "analysis",
+              "process_cpu_ns": 2921941137,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 2922196688,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              }
+            },
+            {
+              "phase": "verification",
+              "process_cpu_ns": 2961586547,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 2961836221,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              }
+            }
+          ],
+          "last_attempt": {
+            "accepted_targets": 8,
+            "committed": true,
+            "last_target_m": -0.0032,
+            "reason": null,
+            "rollback_exact": null
+          },
+          "material_estimate": {
+            "confirmed_currency_savings": false,
+            "currency": "KRW",
+            "excluded_items": [
+              "transverse_reinforcement",
+              "laps_anchorage_hooks",
+              "waste",
+              "formwork",
+              "labor",
+              "fabrication",
+              "transport",
+              "tax"
+            ],
+            "members": [
+              {
+                "concrete": 48.0,
+                "longitudinal_rebar": 48.6072,
+                "member_id": "M1"
+              },
+              {
+                "concrete": 36.0,
+                "longitudinal_rebar": 36.4554,
+                "member_id": "M2"
+              }
+            ],
+            "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+            "quantity_hash": "sha256:4dc3063d22c84519dc0cd06eefbfd9af5e227257990d3590951f654532f717d9",
+            "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+            "total": 169.0626,
+            "verified_quote": false
+          },
+          "performance": {
+            "accepted_epoch_count": 8,
+            "maximum_absolute_fiber_strain": 0.0006755234403371059,
+            "maximum_concrete_compressive_damage": 0.0,
+            "maximum_concrete_tensile_damage": 0.9736658312905448,
+            "maximum_load_factor": 1.0086667000724923,
+            "maximum_steel_accumulated_plastic_strain": 0.0,
+            "maximum_translation_m": 0.004961909442152836,
+            "minimum_load_factor": 0.24867052140737586,
+            "terminal_load_factor": 1.0086667000724923,
+            "terminal_maximum_absolute_fiber_strain": 0.0006755234403371059,
+            "terminal_maximum_translation_m": 0.004961909442152836
+          },
+          "quantity_delta": {
+            "gross_concrete_volume_m3": 0.0,
+            "longitudinal_rebar_mass_kg": 0.0,
+            "longitudinal_rebar_volume_m3": 0.0
+          },
+          "status": "verified"
+        },
+        {
+          "candidate_id": "smaller-bars",
+          "full_reference_verification_pass": true,
+          "invocations": [
+            {
+              "phase": "analysis",
+              "process_cpu_ns": 2916508178,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 2916715263,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 47,
+                "known_newton_iteration_count": 47,
+                "unknown_solver_work_attempt_count": 0
+              }
+            },
+            {
+              "phase": "verification",
+              "process_cpu_ns": 3015979387,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 3016204023,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 47,
+                "known_newton_iteration_count": 47,
+                "unknown_solver_work_attempt_count": 0
+              }
+            }
+          ],
+          "last_attempt": {
+            "accepted_targets": 8,
+            "committed": true,
+            "last_target_m": -0.0032,
+            "reason": null,
+            "rollback_exact": null
+          },
+          "material_estimate": {
+            "confirmed_currency_savings": false,
+            "currency": "KRW",
+            "excluded_items": [
+              "transverse_reinforcement",
+              "laps_anchorage_hooks",
+              "waste",
+              "formwork",
+              "labor",
+              "fabrication",
+              "transport",
+              "tax"
+            ],
+            "members": [
+              {
+                "concrete": 48.0,
+                "longitudinal_rebar": 37.68,
+                "member_id": "M1"
+              },
+              {
+                "concrete": 36.0,
+                "longitudinal_rebar": 28.259999999999998,
+                "member_id": "M2"
+              }
+            ],
+            "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+            "quantity_hash": "sha256:497f67eaa4b898147ff340013ec498776f5dad16fbb21c6a19d42b4aa2532b0c",
+            "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+            "total": 149.94,
+            "verified_quote": false
+          },
+          "performance": {
+            "accepted_epoch_count": 8,
+            "maximum_absolute_fiber_strain": 0.0006784654791095891,
+            "maximum_concrete_compressive_damage": 0.0,
+            "maximum_concrete_tensile_damage": 0.9740104267716789,
+            "maximum_load_factor": 0.9212632381414322,
+            "maximum_steel_accumulated_plastic_strain": 0.0,
+            "maximum_translation_m": 0.004995712595052746,
+            "minimum_load_factor": 0.24019859210668312,
+            "terminal_load_factor": 0.9212632381414322,
+            "terminal_maximum_absolute_fiber_strain": 0.0006784654791095891,
+            "terminal_maximum_translation_m": 0.004995712595052746
+          },
+          "quantity_delta": {
+            "gross_concrete_volume_m3": 0.0,
+            "longitudinal_rebar_mass_kg": -19.122600000000006,
+            "longitudinal_rebar_volume_m3": -0.002435999999999999
+          },
+          "status": "verified"
+        }
+      ],
+      "selected_candidate_id": "smaller-bars",
+      "status": "complete",
+      "total_wall_ns": 11835818255,
+      "verified_count": 2,
+      "work": {
+        "attempted_step_count": 32,
+        "known_linear_solve_count": 186,
+        "known_newton_iteration_count": 186,
+        "unknown_solver_work_attempt_count": 0
+      }
+    },
+    "full": {
+      "parent": {
+        "exit_code": 0,
+        "parent_wall_ns": 291542042174
+      },
+      "report_hash": "sha256:d41f10733ac983e723b122e119e4b00714b85b9a30a27c35ee1d84e400013a12",
+      "rows": [
+        {
+          "candidate_id": "baseline",
+          "full_reference_verification_pass": true,
+          "invocations": [
+            {
+              "phase": "analysis",
+              "process_cpu_ns": 71340281183,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 71353642961,
+              "work": {
+                "attempted_step_count": 242,
+                "known_linear_solve_count": 960,
+                "known_newton_iteration_count": 960,
+                "unknown_solver_work_attempt_count": 0
+              }
+            },
+            {
+              "phase": "verification",
+              "process_cpu_ns": 74125042741,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 74133402071,
+              "work": {
+                "attempted_step_count": 242,
+                "known_linear_solve_count": 960,
+                "known_newton_iteration_count": 960,
+                "unknown_solver_work_attempt_count": 0
+              }
+            }
+          ],
+          "last_attempt": {
+            "accepted_targets": 242,
+            "committed": true,
+            "last_target_m": -0.02,
+            "reason": null,
+            "rollback_exact": null
+          },
+          "material_estimate": {
+            "confirmed_currency_savings": false,
+            "currency": "KRW",
+            "excluded_items": [
+              "transverse_reinforcement",
+              "laps_anchorage_hooks",
+              "waste",
+              "formwork",
+              "labor",
+              "fabrication",
+              "transport",
+              "tax"
+            ],
+            "members": [
+              {
+                "concrete": 48.0,
+                "longitudinal_rebar": 48.6072,
+                "member_id": "M1"
+              },
+              {
+                "concrete": 36.0,
+                "longitudinal_rebar": 36.4554,
+                "member_id": "M2"
+              }
+            ],
+            "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+            "quantity_hash": "sha256:4dc3063d22c84519dc0cd06eefbfd9af5e227257990d3590951f654532f717d9",
+            "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+            "total": 169.0626,
+            "verified_quote": false
+          },
+          "performance": {
+            "accepted_epoch_count": 242,
+            "maximum_absolute_fiber_strain": 0.00673359938409962,
+            "maximum_concrete_compressive_damage": 0.13048993532825948,
+            "maximum_concrete_tensile_damage": 0.9999999999661977,
+            "maximum_load_factor": 1.4559225182750202,
+            "maximum_steel_accumulated_plastic_strain": 0.009756536290480443,
+            "maximum_translation_m": 0.0369080277236107,
+            "minimum_load_factor": -1.4448270517247108,
+            "terminal_load_factor": 1.3828147147200147,
+            "terminal_maximum_absolute_fiber_strain": 0.006248975199707587,
+            "terminal_maximum_translation_m": 0.03502721927961557
+          },
+          "quantity_delta": {
+            "gross_concrete_volume_m3": 0.0,
+            "longitudinal_rebar_mass_kg": 0.0,
+            "longitudinal_rebar_volume_m3": 0.0
+          },
+          "status": "verified"
+        },
+        {
+          "candidate_id": "smaller-bars",
+          "full_reference_verification_pass": true,
+          "invocations": [
+            {
+              "phase": "analysis",
+              "process_cpu_ns": 70681949875,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 70735489092,
+              "work": {
+                "attempted_step_count": 242,
+                "known_linear_solve_count": 961,
+                "known_newton_iteration_count": 961,
+                "unknown_solver_work_attempt_count": 0
+              }
+            },
+            {
+              "phase": "verification",
+              "process_cpu_ns": 73201751793,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 73305629771,
+              "work": {
+                "attempted_step_count": 242,
+                "known_linear_solve_count": 961,
+                "known_newton_iteration_count": 961,
+                "unknown_solver_work_attempt_count": 0
+              }
+            }
+          ],
+          "last_attempt": {
+            "accepted_targets": 242,
+            "committed": true,
+            "last_target_m": -0.02,
+            "reason": null,
+            "rollback_exact": null
+          },
+          "material_estimate": {
+            "confirmed_currency_savings": false,
+            "currency": "KRW",
+            "excluded_items": [
+              "transverse_reinforcement",
+              "laps_anchorage_hooks",
+              "waste",
+              "formwork",
+              "labor",
+              "fabrication",
+              "transport",
+              "tax"
+            ],
+            "members": [
+              {
+                "concrete": 48.0,
+                "longitudinal_rebar": 37.68,
+                "member_id": "M1"
+              },
+              {
+                "concrete": 36.0,
+                "longitudinal_rebar": 28.259999999999998,
+                "member_id": "M2"
+              }
+            ],
+            "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+            "quantity_hash": "sha256:497f67eaa4b898147ff340013ec498776f5dad16fbb21c6a19d42b4aa2532b0c",
+            "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+            "total": 149.94,
+            "verified_quote": false
+          },
+          "performance": {
+            "accepted_epoch_count": 242,
+            "maximum_absolute_fiber_strain": 0.006929580429463856,
+            "maximum_concrete_compressive_damage": 0.0,
+            "maximum_concrete_tensile_damage": 0.9999999999817549,
+            "maximum_load_factor": 1.1505282033821245,
+            "maximum_steel_accumulated_plastic_strain": 0.009689260664541668,
+            "maximum_translation_m": 0.037585453110559074,
+            "minimum_load_factor": -1.1287238738257501,
+            "terminal_load_factor": 1.0733242036103916,
+            "terminal_maximum_absolute_fiber_strain": 0.0063446160152494085,
+            "terminal_maximum_translation_m": 0.03552561987512119
+          },
+          "quantity_delta": {
+            "gross_concrete_volume_m3": 0.0,
+            "longitudinal_rebar_mass_kg": -19.122600000000006,
+            "longitudinal_rebar_volume_m3": -0.002435999999999999
+          },
+          "status": "verified"
+        }
+      ],
+      "selected_candidate_id": "smaller-bars",
+      "status": "complete",
+      "total_wall_ns": 289804829614,
+      "verified_count": 2,
+      "work": {
+        "attempted_step_count": 968,
+        "known_linear_solve_count": 3842,
+        "known_newton_iteration_count": 3842,
+        "unknown_solver_work_attempt_count": 0
+      }
+    },
+    "original": {
+      "parent": {
+        "arm": "original",
+        "exit_code": 2,
+        "parent_wall_ns": 13205384400
+      },
+      "report_hash": "sha256:a5da357d40d321d30c6ad2701cd49ea477c3e6fda05e075a3e850840d41716f9",
+      "rows": [
+        {
+          "candidate_id": "baseline",
+          "full_reference_verification_pass": true,
+          "invocations": [
+            {
+              "phase": "analysis",
+              "process_cpu_ns": 2912202857,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 2926896783,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              }
+            },
+            {
+              "phase": "verification",
+              "process_cpu_ns": 2971602348,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 2971824427,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 46,
+                "known_newton_iteration_count": 46,
+                "unknown_solver_work_attempt_count": 0
+              }
+            }
+          ],
+          "last_attempt": {
+            "accepted_targets": 8,
+            "committed": true,
+            "last_target_m": -0.0032,
+            "reason": null,
+            "rollback_exact": null
+          },
+          "material_estimate": {
+            "confirmed_currency_savings": false,
+            "currency": "KRW",
+            "excluded_items": [
+              "transverse_reinforcement",
+              "laps_anchorage_hooks",
+              "waste",
+              "formwork",
+              "labor",
+              "fabrication",
+              "transport",
+              "tax"
+            ],
+            "members": [
+              {
+                "concrete": 48.0,
+                "longitudinal_rebar": 48.6072,
+                "member_id": "M1"
+              },
+              {
+                "concrete": 36.0,
+                "longitudinal_rebar": 36.4554,
+                "member_id": "M2"
+              }
+            ],
+            "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+            "quantity_hash": "sha256:4dc3063d22c84519dc0cd06eefbfd9af5e227257990d3590951f654532f717d9",
+            "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+            "total": 169.0626,
+            "verified_quote": false
+          },
+          "performance": {
+            "accepted_epoch_count": 8,
+            "maximum_absolute_fiber_strain": 0.0006755234403371059,
+            "maximum_concrete_compressive_damage": 0.0,
+            "maximum_concrete_tensile_damage": 0.9736658312905448,
+            "maximum_load_factor": 1.0086667000724923,
+            "maximum_steel_accumulated_plastic_strain": 0.0,
+            "maximum_translation_m": 0.004961909442152836,
+            "minimum_load_factor": 0.24867052140737586,
+            "terminal_load_factor": 1.0086667000724923,
+            "terminal_maximum_absolute_fiber_strain": 0.0006755234403371059,
+            "terminal_maximum_translation_m": 0.004961909442152836
+          },
+          "quantity_delta": {
+            "gross_concrete_volume_m3": 0.0,
+            "longitudinal_rebar_mass_kg": 0.0,
+            "longitudinal_rebar_volume_m3": 0.0
+          },
+          "status": "verified"
+        },
+        {
+          "candidate_id": "smaller-bars",
+          "full_reference_verification_pass": false,
+          "invocations": [
+            {
+              "phase": "analysis",
+              "process_cpu_ns": 2792375947,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 2792627046,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 41,
+                "known_newton_iteration_count": 41,
+                "unknown_solver_work_attempt_count": 0
+              }
+            },
+            {
+              "phase": "verification",
+              "process_cpu_ns": 2814832307,
+              "status": "returned",
+              "unknown_execution_work": false,
+              "wall_ns": 2818232485,
+              "work": {
+                "attempted_step_count": 8,
+                "known_linear_solve_count": 41,
+                "known_newton_iteration_count": 41,
+                "unknown_solver_work_attempt_count": 0
+              }
+            }
+          ],
+          "last_attempt": {
+            "accepted_targets": 7,
+            "committed": false,
+            "last_target_m": -0.0032,
+            "reason": "line_search_failed_to_reduce_residual",
+            "rollback_exact": true
+          },
+          "material_estimate": {
+            "confirmed_currency_savings": false,
+            "currency": "KRW",
+            "excluded_items": [
+              "transverse_reinforcement",
+              "laps_anchorage_hooks",
+              "waste",
+              "formwork",
+              "labor",
+              "fabrication",
+              "transport",
+              "tax"
+            ],
+            "members": [
+              {
+                "concrete": 48.0,
+                "longitudinal_rebar": 37.68,
+                "member_id": "M1"
+              },
+              {
+                "concrete": 36.0,
+                "longitudinal_rebar": 28.259999999999998,
+                "member_id": "M2"
+              }
+            ],
+            "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+            "quantity_hash": "sha256:497f67eaa4b898147ff340013ec498776f5dad16fbb21c6a19d42b4aa2532b0c",
+            "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+            "total": 149.94,
+            "verified_quote": false
+          },
+          "performance": null,
+          "quantity_delta": {
+            "gross_concrete_volume_m3": 0.0,
+            "longitudinal_rebar_mass_kg": -19.122600000000006,
+            "longitudinal_rebar_volume_m3": -0.002435999999999999
+          },
+          "status": "verification_blocked"
+        }
+      ],
+      "selected_candidate_id": "baseline",
+      "status": "incomplete",
+      "total_wall_ns": 11523286448,
+      "verified_count": 1,
+      "work": {
+        "attempted_step_count": 32,
+        "known_linear_solve_count": 174,
+        "known_newton_iteration_count": 174,
+        "unknown_solver_work_attempt_count": 0
+      }
+    }
+  }
+}

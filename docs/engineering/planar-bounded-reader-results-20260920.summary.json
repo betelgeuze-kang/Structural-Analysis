@@ -1,0 +1,26 @@
+{
+  "index_sha256": "effa668ba984929d1e8e0410146eef39dff438e359a44f6a49b7c4a8749dfbe5",
+  "original_full_sha256": "2f923d7537b4ddf10ce19e0959fd081767466442e9f438ef1265c7461154446b",
+  "verified_steps": 40,
+  "verified_concrete_point_targets": 737280,
+  "features_sha256": "bc7e6b6666bcc6104ceb9fed33af6039db7a53827c2c71c2d9919951359c119a",
+  "read_verify_extract_wall_ns": 237436089144,
+  "feature_output_and_hash_wall_ns": 6563881872,
+  "maximum_rss_kib": 967700,
+  "structural_solves": 0,
+  "training_fits": 0,
+  "retains_compact_full_comparison_features": true,
+  "physical_validation": false,
+  "process": {
+    "exit_code": 0,
+    "wall_ns": 245953808994,
+    "new_solves": 0,
+    "new_fits": 0
+  },
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-1024-bounded-reader-r4deqb3d",
+  "inventory_sha256": "8b2333e4e1c55200425444516d08786cd1550e715c5d4d04b0f754b9960fdce2",
+  "observer_revision": "9c43255e9d523c643f69e624b30a0e003077c105",
+  "verified_payload_files": 771,
+  "verified_payload_bytes": 260312639,
+  "features_bytes": 243995082
+}

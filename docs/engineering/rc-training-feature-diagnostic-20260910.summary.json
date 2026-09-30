@@ -1,0 +1,308 @@
+{
+  "diagnostic": {
+    "claim_boundary": "Training-only feature diagnostic; coordinate prediction error is not Newton iteration or runtime evidence.",
+    "new_structural_solves": 0,
+    "new_training_generation": false,
+    "original_generation_cost_reused_not_zero": true,
+    "plan": {
+      "fit_speed_or_solver_speed_claim": false,
+      "fold_scope": "geometry development folds within one authored training project/history; not independent project validation",
+      "folds": [
+        "all_training_in_sample",
+        "train_a_predict_train_b",
+        "train_b_predict_train_a"
+      ],
+      "methods": [
+        "legacy_linear",
+        "stable_linear",
+        "history_linear"
+      ],
+      "no_validation_or_holdout_files_read": true,
+      "ridge": 1e-06,
+      "training_sample_file": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-learning-precision.ekj7dcak-repeated/r1/slots/r1/study/training-samples.json",
+      "training_sample_sha256": "33d4a19af6c7c6048cb32b2fb8ef36f53c790343a868db75b5ac7d82a949d062"
+    },
+    "results": [
+      {
+        "constant_feature_count": 68,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 92,
+        "fit_and_prediction_wall_ns": 555997,
+        "fold": "all_training_in_sample",
+        "method": "legacy_linear",
+        "normalized_mse": 0.7608931629008999,
+        "predicted_rows": 482,
+        "prediction_to_secant_squared_error_ratio": 0.7525226479968363,
+        "train_rows": 482,
+        "zero_correction_secant_normalized_mse": 1.011123273068718
+      },
+      {
+        "constant_feature_count": 74,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 92,
+        "fit_and_prediction_wall_ns": 228017,
+        "fold": "train_a_predict_train_b",
+        "method": "legacy_linear",
+        "normalized_mse": 0.7941048513210622,
+        "predicted_rows": 241,
+        "prediction_to_secant_squared_error_ratio": 1.8501836672115464,
+        "train_rows": 241,
+        "zero_correction_secant_normalized_mse": 0.4292032544627722
+      },
+      {
+        "constant_feature_count": 74,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 92,
+        "fit_and_prediction_wall_ns": 229597,
+        "fold": "train_b_predict_train_a",
+        "method": "legacy_linear",
+        "normalized_mse": 11.559391413927772,
+        "predicted_rows": 241,
+        "prediction_to_secant_squared_error_ratio": 2.490032794123453,
+        "train_rows": 241,
+        "zero_correction_secant_normalized_mse": 4.6422647288856025
+      },
+      {
+        "constant_feature_count": 68,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 92,
+        "fit_and_prediction_wall_ns": 326930,
+        "fold": "all_training_in_sample",
+        "method": "stable_linear",
+        "normalized_mse": 0.7608931629008999,
+        "predicted_rows": 482,
+        "prediction_to_secant_squared_error_ratio": 0.7525226479968363,
+        "train_rows": 482,
+        "zero_correction_secant_normalized_mse": 1.011123273068718
+      },
+      {
+        "constant_feature_count": 74,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 92,
+        "fit_and_prediction_wall_ns": 221156,
+        "fold": "train_a_predict_train_b",
+        "method": "stable_linear",
+        "normalized_mse": 0.7941048510049608,
+        "predicted_rows": 241,
+        "prediction_to_secant_squared_error_ratio": 1.8501836664750617,
+        "train_rows": 241,
+        "zero_correction_secant_normalized_mse": 0.4292032544627722
+      },
+      {
+        "constant_feature_count": 74,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 92,
+        "fit_and_prediction_wall_ns": 218987,
+        "fold": "train_b_predict_train_a",
+        "method": "stable_linear",
+        "normalized_mse": 11.55939141492189,
+        "predicted_rows": 241,
+        "prediction_to_secant_squared_error_ratio": 2.490032794337598,
+        "train_rows": 241,
+        "zero_correction_secant_normalized_mse": 4.6422647288856025
+      },
+      {
+        "constant_feature_count": 68,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 100,
+        "fit_and_prediction_wall_ns": 370661,
+        "fold": "all_training_in_sample",
+        "method": "history_linear",
+        "normalized_mse": 0.7194941110490177,
+        "predicted_rows": 482,
+        "prediction_to_secant_squared_error_ratio": 0.7115790232632886,
+        "train_rows": 482,
+        "zero_correction_secant_normalized_mse": 1.011123273068718
+      },
+      {
+        "constant_feature_count": 74,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 100,
+        "fit_and_prediction_wall_ns": 241847,
+        "fold": "train_a_predict_train_b",
+        "method": "history_linear",
+        "normalized_mse": 3.591847808994881,
+        "predicted_rows": 241,
+        "prediction_to_secant_squared_error_ratio": 8.368640665343387,
+        "train_rows": 241,
+        "zero_correction_secant_normalized_mse": 0.4292032544627722
+      },
+      {
+        "constant_feature_count": 74,
+        "constant_features_with_spurious_nonzero_std": 48,
+        "feature_count": 100,
+        "fit_and_prediction_wall_ns": 240897,
+        "fold": "train_b_predict_train_a",
+        "method": "history_linear",
+        "normalized_mse": 16.40990767469737,
+        "predicted_rows": 241,
+        "prediction_to_secant_squared_error_ratio": 3.534892694203728,
+        "train_rows": 241,
+        "zero_correction_secant_normalized_mse": 4.6422647288856025
+      }
+    ],
+    "total_wall_ns": 134886150
+  },
+  "files": [
+    {
+      "bytes": 717,
+      "path": "fold-support.json",
+      "sha256": "04ed2730a8851653dedb311d34abb2784a38fb08706380ff2c874591d57295ba"
+    },
+    {
+      "bytes": 387,
+      "path": "kernel-protocol.json",
+      "sha256": "f5685468b45fc1b4a73333aa078f5e38ecfb560eb5de0d800a7719e40d39cf96"
+    },
+    {
+      "bytes": 2962,
+      "path": "kernel-result.json",
+      "sha256": "d786d769cbd729cf2b3842997b246730dd8ed2740025c4d23d0b6ff5e84c8d49"
+    },
+    {
+      "bytes": 2297,
+      "path": "kernel-worker.py",
+      "sha256": "bfc9266395a7e6b70d3b25f9431dcccbf09ac2abe4c78e6a792c3d01e13d7fdf"
+    },
+    {
+      "bytes": 689,
+      "path": "plan.json",
+      "sha256": "cfa28600508e06f902861c17a48f9bd43408a87e7057c7777c92e76c7149dd22"
+    },
+    {
+      "bytes": 5392,
+      "path": "result.json",
+      "sha256": "449fca96b10edb7131c3ed1f6cfcf4fe3ebea86380bab1a5ff7b9d596ea3542b"
+    },
+    {
+      "bytes": 3860,
+      "path": "worker.py",
+      "sha256": "f36f4e06e74bbbe5e53d3758a784ed4e214fe9d07e548404114fa175cbdedfb7"
+    }
+  ],
+  "fold_support": {
+    "interpretation": "All held-geometry rows lie outside each single-geometry fit box. Raw error ratios measure extrapolation, not accepted-policy performance. Existing policy would abstain; no learned transfer or new solver-cost claim.",
+    "policy_ood_margin": 0.1,
+    "rows": [
+      {
+        "outside_original_policy_box": 241,
+        "predicted_case": "train-b",
+        "raw_regression_predictions_are_not_deployed_proposals": true,
+        "sample_count": 241,
+        "train_case": "train-a"
+      },
+      {
+        "outside_original_policy_box": 241,
+        "predicted_case": "train-a",
+        "raw_regression_predictions_are_not_deployed_proposals": true,
+        "sample_count": 241,
+        "train_case": "train-b"
+      }
+    ]
+  },
+  "kernel": {
+    "new_solver_calls": 0,
+    "rows": [
+      {
+        "fold": "all_training_in_sample",
+        "length_scale": 0.25,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 0.02656602946023948
+      },
+      {
+        "fold": "all_training_in_sample",
+        "length_scale": 0.5,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 0.09312326404442167
+      },
+      {
+        "fold": "all_training_in_sample",
+        "length_scale": 1.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 0.22490974569423247
+      },
+      {
+        "fold": "all_training_in_sample",
+        "length_scale": 2.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 0.3614850439827572
+      },
+      {
+        "fold": "all_training_in_sample",
+        "length_scale": 4.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 0.4748226618028034
+      },
+      {
+        "fold": "train_a_predict_train_b",
+        "length_scale": 0.25,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 10.619635722515953
+      },
+      {
+        "fold": "train_a_predict_train_b",
+        "length_scale": 0.5,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 4461.819488673693
+      },
+      {
+        "fold": "train_a_predict_train_b",
+        "length_scale": 1.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 4160.374031565038
+      },
+      {
+        "fold": "train_a_predict_train_b",
+        "length_scale": 2.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 2505.181719878119
+      },
+      {
+        "fold": "train_a_predict_train_b",
+        "length_scale": 4.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 751.9804817993949
+      },
+      {
+        "fold": "train_b_predict_train_a",
+        "length_scale": 0.25,
+        "nonzero_correction_fraction": 0.995850622406639,
+        "prediction_to_secant_squared_error_ratio": 1.0953262754560285
+      },
+      {
+        "fold": "train_b_predict_train_a",
+        "length_scale": 0.5,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 115.56669282899367
+      },
+      {
+        "fold": "train_b_predict_train_a",
+        "length_scale": 1.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 1871.818971470119
+      },
+      {
+        "fold": "train_b_predict_train_a",
+        "length_scale": 2.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 511.6046984025257
+      },
+      {
+        "fold": "train_b_predict_train_a",
+        "length_scale": 4.0,
+        "nonzero_correction_fraction": 1.0,
+        "prediction_to_secant_squared_error_ratio": 480.0184096610552
+      }
+    ],
+    "total_wall_ns": 431178572
+  },
+  "new_regression_fits": 24,
+  "new_structural_solves": 0,
+  "newton_calls": 0,
+  "original_inventory_sha256": "24ec6f76eaa1241c53ee437856e49d67097a7a9887f7652e3624302353a55e8a",
+  "source_sample_sealed_inventory_entry": {
+    "path": "r1/slots/r1/study/training-samples.json",
+    "sha256": "33d4a19af6c7c6048cb32b2fb8ef36f53c790343a868db75b5ac7d82a949d062",
+    "size_bytes": 10633515
+  }
+}

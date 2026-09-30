@@ -1,0 +1,2062 @@
+{
+  "source_revision": "5606dac91151fc193a8f5376d592ee799837d689",
+  "counts": {
+    "api_entered": 12,
+    "artifact_contract_pass": 12,
+    "declared": 12,
+    "launched": 12,
+    "physical_converged": 12,
+    "resource_eligible": 12
+  },
+  "source_files_checked": 461,
+  "artifact_identities_checked": 120,
+  "comparison_count": 6,
+  "comparisons": [
+    {
+      "baseline_slot": 0,
+      "candidate_slot": 1,
+      "case_id": "three_story_two_bay",
+      "comparison": {
+        "checkpoint_bytes_equal": false,
+        "checkpoint_identity_comparison": {
+          "available": true,
+          "chain_hash_equal": false,
+          "root_state_hash_equal": true,
+          "terminal_epoch_equal": true,
+          "terminal_load_factor_equal": true,
+          "terminal_state_hash_equal": false
+        },
+        "comparison_available": true,
+        "full_history_float_comparison_performed": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 3150,
+            "float_leaf_count": 2520,
+            "left_row_count": 630,
+            "match": true,
+            "maximum_absolute_difference": 2.2351741790771484e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 630
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 225,
+            "float_leaf_count": 300,
+            "left_row_count": 15,
+            "match": true,
+            "maximum_absolute_difference": 4.347384674474597e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 15
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 12,
+            "float_leaf_count": 72,
+            "left_row_count": 12,
+            "match": true,
+            "maximum_absolute_difference": 1.214306433183765e-17,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 12
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 90,
+            "float_leaf_count": 270,
+            "left_row_count": 45,
+            "match": true,
+            "maximum_absolute_difference": 4.4292391976341605e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 45
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 27,
+            "float_leaf_count": 9,
+            "left_row_count": 9,
+            "match": true,
+            "maximum_absolute_difference": 1.1641532182693481e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 9
+          }
+        },
+        "independent_external_vv": false,
+        "left_result_json_sha256": "sha256:7017e407bb08cd05a222443f83ad5def0cb7be5b44287778c52ae753210434b1",
+        "physical_si_match": true,
+        "right_result_json_sha256": "sha256:2d0d5f04aee9b8510cdd3360327523bac1ca99dd38636e8bfc3e548a97a44eba",
+        "schema_version": "planar-frame-backend-comparison.v1",
+        "scope": "terminal_public_si_rows_in_order;exact_checkpoint_bytes_and_declared_identity_only;no_independent_replay",
+        "unavailable_reasons": [],
+        "whole_result_json_equal": false
+      },
+      "history_comparison": {
+        "checkpoint_bytes_comparison_performed": false,
+        "comparison_available": true,
+        "full_history_float_comparison_performed": true,
+        "full_history_match": true,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 12600,
+            "float_leaf_count": 10080,
+            "match": true,
+            "maximum_absolute_difference": 2.9802322387695312e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "material_states": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 18900,
+            "float_leaf_count": 15300,
+            "match": true,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 900,
+            "float_leaf_count": 1200,
+            "match": true,
+            "maximum_absolute_difference": 8.546976459911093e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 48,
+            "float_leaf_count": 324,
+            "match": true,
+            "maximum_absolute_difference": 1.7997756063259374e-17,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 360,
+            "float_leaf_count": 1080,
+            "match": true,
+            "maximum_absolute_difference": 8.660663297632709e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 108,
+            "float_leaf_count": 36,
+            "match": true,
+            "maximum_absolute_difference": 1.1641532182693481e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          }
+        },
+        "identity_comparison": {
+          "artifact_hash_equal": false,
+          "chain_hash_equal": false,
+          "history_hash_equal": false,
+          "root_state_hash_equal": true,
+          "source_result_hash_equal": false,
+          "steps": [
+            {
+              "epoch": 1,
+              "parent_state_hash_equal": true,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 2,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 3,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 4,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            }
+          ],
+          "terminal_state_hash_equal": false
+        },
+        "independent_external_vv": false,
+        "numerical_match_requires_hash_equality": false,
+        "release_eligible": false,
+        "root_comparison": {
+          "match": true,
+          "material_states_match": true,
+          "node_displacements_match": true
+        },
+        "schema_version": "planar-frame-history-comparison.v1",
+        "scope": "genesis_displacements_and_material_states_plus_every_accepted_step_si_and_material_state;caller_owns_source_checkpoint_and_transition_replay_validation",
+        "step_comparisons": [
+          {
+            "epoch": 1,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.25,
+            "match": true
+          },
+          {
+            "epoch": 2,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.5,
+            "match": true
+          },
+          {
+            "epoch": 3,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.75,
+            "match": true
+          },
+          {
+            "epoch": 4,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 1.0,
+            "match": true
+          }
+        ],
+        "step_counts": {
+          "compared": 4,
+          "left": 4,
+          "right": 4
+        },
+        "unavailable_reasons": [],
+        "whole_history_json_equal": false
+      },
+      "paired_worker_cpu_difference_ns": 430959650,
+      "paired_workload_wall_difference_ns": 414885257,
+      "phase": "measurement",
+      "repetition": 0,
+      "unavailable_reason": null
+    },
+    {
+      "baseline_slot": 3,
+      "candidate_slot": 2,
+      "case_id": "four_story_three_bay",
+      "comparison": {
+        "checkpoint_bytes_equal": false,
+        "checkpoint_identity_comparison": {
+          "available": true,
+          "chain_hash_equal": false,
+          "root_state_hash_equal": true,
+          "terminal_epoch_equal": true,
+          "terminal_load_factor_equal": true,
+          "terminal_state_hash_equal": false
+        },
+        "comparison_available": true,
+        "full_history_float_comparison_performed": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 5880,
+            "float_leaf_count": 4704,
+            "left_row_count": 1176,
+            "match": false,
+            "maximum_absolute_difference": 5.426816642284393e-06,
+            "mismatch_count": 1,
+            "mismatch_paths": [
+              "/result_ir/fiber_results/526/stress_Pa"
+            ],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 1176
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 420,
+            "float_leaf_count": 560,
+            "left_row_count": 28,
+            "match": true,
+            "maximum_absolute_difference": 6.866321200504899e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 28
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 20,
+            "float_leaf_count": 120,
+            "left_row_count": 20,
+            "match": true,
+            "maximum_absolute_difference": 1.196959198423997e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 20
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 168,
+            "float_leaf_count": 504,
+            "left_row_count": 84,
+            "match": true,
+            "maximum_absolute_difference": 6.867048796266317e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 84
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 36,
+            "float_leaf_count": 12,
+            "left_row_count": 12,
+            "match": true,
+            "maximum_absolute_difference": 8.541974239051342e-09,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 12
+          }
+        },
+        "independent_external_vv": false,
+        "left_result_json_sha256": "sha256:447a888440d0b862744a63be2acd5a90953136edb8aa980c16cb42fb72f71cef",
+        "physical_si_match": false,
+        "right_result_json_sha256": "sha256:53a5ff6176c951029f51362c87e48f2cab3f26727a3217853c9614e83c0626d0",
+        "schema_version": "planar-frame-backend-comparison.v1",
+        "scope": "terminal_public_si_rows_in_order;exact_checkpoint_bytes_and_declared_identity_only;no_independent_replay",
+        "unavailable_reasons": [],
+        "whole_result_json_equal": false
+      },
+      "history_comparison": {
+        "checkpoint_bytes_comparison_performed": false,
+        "comparison_available": true,
+        "full_history_float_comparison_performed": true,
+        "full_history_match": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 23520,
+            "float_leaf_count": 18816,
+            "match": false,
+            "maximum_absolute_difference": 1.718848943710327e-05,
+            "mismatch_count": 1,
+            "mismatch_paths": [
+              "/steps/3/si_rows/fiber_results/526/stress_Pa"
+            ],
+            "mismatch_paths_truncated": false
+          },
+          "material_states": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 35280,
+            "float_leaf_count": 28560,
+            "match": true,
+            "maximum_absolute_difference": 4.807265696626928e-14,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 1680,
+            "float_leaf_count": 2240,
+            "match": true,
+            "maximum_absolute_difference": 1.1236261343583465e-07,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 80,
+            "float_leaf_count": 540,
+            "match": true,
+            "maximum_absolute_difference": 1.196959198423997e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 672,
+            "float_leaf_count": 2016,
+            "match": true,
+            "maximum_absolute_difference": 8.703500498086214e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 144,
+            "float_leaf_count": 48,
+            "match": true,
+            "maximum_absolute_difference": 8.541974239051342e-09,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          }
+        },
+        "identity_comparison": {
+          "artifact_hash_equal": false,
+          "chain_hash_equal": false,
+          "history_hash_equal": false,
+          "root_state_hash_equal": true,
+          "source_result_hash_equal": false,
+          "steps": [
+            {
+              "epoch": 1,
+              "parent_state_hash_equal": true,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 2,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 3,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 4,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            }
+          ],
+          "terminal_state_hash_equal": false
+        },
+        "independent_external_vv": false,
+        "numerical_match_requires_hash_equality": false,
+        "release_eligible": false,
+        "root_comparison": {
+          "match": true,
+          "material_states_match": true,
+          "node_displacements_match": true
+        },
+        "schema_version": "planar-frame-history-comparison.v1",
+        "scope": "genesis_displacements_and_material_states_plus_every_accepted_step_si_and_material_state;caller_owns_source_checkpoint_and_transition_replay_validation",
+        "step_comparisons": [
+          {
+            "epoch": 1,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.25,
+            "match": true
+          },
+          {
+            "epoch": 2,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.5,
+            "match": true
+          },
+          {
+            "epoch": 3,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.75,
+            "match": true
+          },
+          {
+            "epoch": 4,
+            "groups": {
+              "fiber_results": false,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 1.0,
+            "match": false
+          }
+        ],
+        "step_counts": {
+          "compared": 4,
+          "left": 4,
+          "right": 4
+        },
+        "unavailable_reasons": [],
+        "whole_history_json_equal": false
+      },
+      "paired_worker_cpu_difference_ns": null,
+      "paired_workload_wall_difference_ns": null,
+      "phase": "measurement",
+      "repetition": 0,
+      "unavailable_reason": null
+    },
+    {
+      "baseline_slot": 5,
+      "candidate_slot": 4,
+      "case_id": "three_story_two_bay",
+      "comparison": {
+        "checkpoint_bytes_equal": false,
+        "checkpoint_identity_comparison": {
+          "available": true,
+          "chain_hash_equal": false,
+          "root_state_hash_equal": true,
+          "terminal_epoch_equal": true,
+          "terminal_load_factor_equal": true,
+          "terminal_state_hash_equal": false
+        },
+        "comparison_available": true,
+        "full_history_float_comparison_performed": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 3150,
+            "float_leaf_count": 2520,
+            "left_row_count": 630,
+            "match": true,
+            "maximum_absolute_difference": 2.2351741790771484e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 630
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 225,
+            "float_leaf_count": 300,
+            "left_row_count": 15,
+            "match": true,
+            "maximum_absolute_difference": 4.347384674474597e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 15
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 12,
+            "float_leaf_count": 72,
+            "left_row_count": 12,
+            "match": true,
+            "maximum_absolute_difference": 1.214306433183765e-17,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 12
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 90,
+            "float_leaf_count": 270,
+            "left_row_count": 45,
+            "match": true,
+            "maximum_absolute_difference": 4.4292391976341605e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 45
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 27,
+            "float_leaf_count": 9,
+            "left_row_count": 9,
+            "match": true,
+            "maximum_absolute_difference": 1.1641532182693481e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 9
+          }
+        },
+        "independent_external_vv": false,
+        "left_result_json_sha256": "sha256:7017e407bb08cd05a222443f83ad5def0cb7be5b44287778c52ae753210434b1",
+        "physical_si_match": true,
+        "right_result_json_sha256": "sha256:2d0d5f04aee9b8510cdd3360327523bac1ca99dd38636e8bfc3e548a97a44eba",
+        "schema_version": "planar-frame-backend-comparison.v1",
+        "scope": "terminal_public_si_rows_in_order;exact_checkpoint_bytes_and_declared_identity_only;no_independent_replay",
+        "unavailable_reasons": [],
+        "whole_result_json_equal": false
+      },
+      "history_comparison": {
+        "checkpoint_bytes_comparison_performed": false,
+        "comparison_available": true,
+        "full_history_float_comparison_performed": true,
+        "full_history_match": true,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 12600,
+            "float_leaf_count": 10080,
+            "match": true,
+            "maximum_absolute_difference": 2.9802322387695312e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "material_states": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 18900,
+            "float_leaf_count": 15300,
+            "match": true,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 900,
+            "float_leaf_count": 1200,
+            "match": true,
+            "maximum_absolute_difference": 8.546976459911093e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 48,
+            "float_leaf_count": 324,
+            "match": true,
+            "maximum_absolute_difference": 1.7997756063259374e-17,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 360,
+            "float_leaf_count": 1080,
+            "match": true,
+            "maximum_absolute_difference": 8.660663297632709e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 108,
+            "float_leaf_count": 36,
+            "match": true,
+            "maximum_absolute_difference": 1.1641532182693481e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          }
+        },
+        "identity_comparison": {
+          "artifact_hash_equal": false,
+          "chain_hash_equal": false,
+          "history_hash_equal": false,
+          "root_state_hash_equal": true,
+          "source_result_hash_equal": false,
+          "steps": [
+            {
+              "epoch": 1,
+              "parent_state_hash_equal": true,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 2,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 3,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 4,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            }
+          ],
+          "terminal_state_hash_equal": false
+        },
+        "independent_external_vv": false,
+        "numerical_match_requires_hash_equality": false,
+        "release_eligible": false,
+        "root_comparison": {
+          "match": true,
+          "material_states_match": true,
+          "node_displacements_match": true
+        },
+        "schema_version": "planar-frame-history-comparison.v1",
+        "scope": "genesis_displacements_and_material_states_plus_every_accepted_step_si_and_material_state;caller_owns_source_checkpoint_and_transition_replay_validation",
+        "step_comparisons": [
+          {
+            "epoch": 1,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.25,
+            "match": true
+          },
+          {
+            "epoch": 2,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.5,
+            "match": true
+          },
+          {
+            "epoch": 3,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.75,
+            "match": true
+          },
+          {
+            "epoch": 4,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 1.0,
+            "match": true
+          }
+        ],
+        "step_counts": {
+          "compared": 4,
+          "left": 4,
+          "right": 4
+        },
+        "unavailable_reasons": [],
+        "whole_history_json_equal": false
+      },
+      "paired_worker_cpu_difference_ns": 184233300,
+      "paired_workload_wall_difference_ns": 136110219,
+      "phase": "measurement",
+      "repetition": 1,
+      "unavailable_reason": null
+    },
+    {
+      "baseline_slot": 6,
+      "candidate_slot": 7,
+      "case_id": "four_story_three_bay",
+      "comparison": {
+        "checkpoint_bytes_equal": false,
+        "checkpoint_identity_comparison": {
+          "available": true,
+          "chain_hash_equal": false,
+          "root_state_hash_equal": true,
+          "terminal_epoch_equal": true,
+          "terminal_load_factor_equal": true,
+          "terminal_state_hash_equal": false
+        },
+        "comparison_available": true,
+        "full_history_float_comparison_performed": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 5880,
+            "float_leaf_count": 4704,
+            "left_row_count": 1176,
+            "match": false,
+            "maximum_absolute_difference": 5.426816642284393e-06,
+            "mismatch_count": 1,
+            "mismatch_paths": [
+              "/result_ir/fiber_results/526/stress_Pa"
+            ],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 1176
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 420,
+            "float_leaf_count": 560,
+            "left_row_count": 28,
+            "match": true,
+            "maximum_absolute_difference": 6.866321200504899e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 28
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 20,
+            "float_leaf_count": 120,
+            "left_row_count": 20,
+            "match": true,
+            "maximum_absolute_difference": 1.196959198423997e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 20
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 168,
+            "float_leaf_count": 504,
+            "left_row_count": 84,
+            "match": true,
+            "maximum_absolute_difference": 6.867048796266317e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 84
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 36,
+            "float_leaf_count": 12,
+            "left_row_count": 12,
+            "match": true,
+            "maximum_absolute_difference": 8.541974239051342e-09,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 12
+          }
+        },
+        "independent_external_vv": false,
+        "left_result_json_sha256": "sha256:447a888440d0b862744a63be2acd5a90953136edb8aa980c16cb42fb72f71cef",
+        "physical_si_match": false,
+        "right_result_json_sha256": "sha256:53a5ff6176c951029f51362c87e48f2cab3f26727a3217853c9614e83c0626d0",
+        "schema_version": "planar-frame-backend-comparison.v1",
+        "scope": "terminal_public_si_rows_in_order;exact_checkpoint_bytes_and_declared_identity_only;no_independent_replay",
+        "unavailable_reasons": [],
+        "whole_result_json_equal": false
+      },
+      "history_comparison": {
+        "checkpoint_bytes_comparison_performed": false,
+        "comparison_available": true,
+        "full_history_float_comparison_performed": true,
+        "full_history_match": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 23520,
+            "float_leaf_count": 18816,
+            "match": false,
+            "maximum_absolute_difference": 1.718848943710327e-05,
+            "mismatch_count": 1,
+            "mismatch_paths": [
+              "/steps/3/si_rows/fiber_results/526/stress_Pa"
+            ],
+            "mismatch_paths_truncated": false
+          },
+          "material_states": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 35280,
+            "float_leaf_count": 28560,
+            "match": true,
+            "maximum_absolute_difference": 4.807265696626928e-14,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 1680,
+            "float_leaf_count": 2240,
+            "match": true,
+            "maximum_absolute_difference": 1.1236261343583465e-07,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 80,
+            "float_leaf_count": 540,
+            "match": true,
+            "maximum_absolute_difference": 1.196959198423997e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 672,
+            "float_leaf_count": 2016,
+            "match": true,
+            "maximum_absolute_difference": 8.703500498086214e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 144,
+            "float_leaf_count": 48,
+            "match": true,
+            "maximum_absolute_difference": 8.541974239051342e-09,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          }
+        },
+        "identity_comparison": {
+          "artifact_hash_equal": false,
+          "chain_hash_equal": false,
+          "history_hash_equal": false,
+          "root_state_hash_equal": true,
+          "source_result_hash_equal": false,
+          "steps": [
+            {
+              "epoch": 1,
+              "parent_state_hash_equal": true,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 2,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 3,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 4,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            }
+          ],
+          "terminal_state_hash_equal": false
+        },
+        "independent_external_vv": false,
+        "numerical_match_requires_hash_equality": false,
+        "release_eligible": false,
+        "root_comparison": {
+          "match": true,
+          "material_states_match": true,
+          "node_displacements_match": true
+        },
+        "schema_version": "planar-frame-history-comparison.v1",
+        "scope": "genesis_displacements_and_material_states_plus_every_accepted_step_si_and_material_state;caller_owns_source_checkpoint_and_transition_replay_validation",
+        "step_comparisons": [
+          {
+            "epoch": 1,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.25,
+            "match": true
+          },
+          {
+            "epoch": 2,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.5,
+            "match": true
+          },
+          {
+            "epoch": 3,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.75,
+            "match": true
+          },
+          {
+            "epoch": 4,
+            "groups": {
+              "fiber_results": false,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 1.0,
+            "match": false
+          }
+        ],
+        "step_counts": {
+          "compared": 4,
+          "left": 4,
+          "right": 4
+        },
+        "unavailable_reasons": [],
+        "whole_history_json_equal": false
+      },
+      "paired_worker_cpu_difference_ns": null,
+      "paired_workload_wall_difference_ns": null,
+      "phase": "measurement",
+      "repetition": 1,
+      "unavailable_reason": null
+    },
+    {
+      "baseline_slot": 8,
+      "candidate_slot": 9,
+      "case_id": "three_story_two_bay",
+      "comparison": {
+        "checkpoint_bytes_equal": false,
+        "checkpoint_identity_comparison": {
+          "available": true,
+          "chain_hash_equal": false,
+          "root_state_hash_equal": true,
+          "terminal_epoch_equal": true,
+          "terminal_load_factor_equal": true,
+          "terminal_state_hash_equal": false
+        },
+        "comparison_available": true,
+        "full_history_float_comparison_performed": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 3150,
+            "float_leaf_count": 2520,
+            "left_row_count": 630,
+            "match": true,
+            "maximum_absolute_difference": 2.2351741790771484e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 630
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 225,
+            "float_leaf_count": 300,
+            "left_row_count": 15,
+            "match": true,
+            "maximum_absolute_difference": 4.347384674474597e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 15
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 12,
+            "float_leaf_count": 72,
+            "left_row_count": 12,
+            "match": true,
+            "maximum_absolute_difference": 1.214306433183765e-17,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 12
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 90,
+            "float_leaf_count": 270,
+            "left_row_count": 45,
+            "match": true,
+            "maximum_absolute_difference": 4.4292391976341605e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 45
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 27,
+            "float_leaf_count": 9,
+            "left_row_count": 9,
+            "match": true,
+            "maximum_absolute_difference": 1.1641532182693481e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 9
+          }
+        },
+        "independent_external_vv": false,
+        "left_result_json_sha256": "sha256:7017e407bb08cd05a222443f83ad5def0cb7be5b44287778c52ae753210434b1",
+        "physical_si_match": true,
+        "right_result_json_sha256": "sha256:2d0d5f04aee9b8510cdd3360327523bac1ca99dd38636e8bfc3e548a97a44eba",
+        "schema_version": "planar-frame-backend-comparison.v1",
+        "scope": "terminal_public_si_rows_in_order;exact_checkpoint_bytes_and_declared_identity_only;no_independent_replay",
+        "unavailable_reasons": [],
+        "whole_result_json_equal": false
+      },
+      "history_comparison": {
+        "checkpoint_bytes_comparison_performed": false,
+        "comparison_available": true,
+        "full_history_float_comparison_performed": true,
+        "full_history_match": true,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 12600,
+            "float_leaf_count": 10080,
+            "match": true,
+            "maximum_absolute_difference": 2.9802322387695312e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "material_states": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 18900,
+            "float_leaf_count": 15300,
+            "match": true,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 900,
+            "float_leaf_count": 1200,
+            "match": true,
+            "maximum_absolute_difference": 8.546976459911093e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 48,
+            "float_leaf_count": 324,
+            "match": true,
+            "maximum_absolute_difference": 1.7997756063259374e-17,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 360,
+            "float_leaf_count": 1080,
+            "match": true,
+            "maximum_absolute_difference": 8.660663297632709e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 108,
+            "float_leaf_count": 36,
+            "match": true,
+            "maximum_absolute_difference": 1.1641532182693481e-10,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          }
+        },
+        "identity_comparison": {
+          "artifact_hash_equal": false,
+          "chain_hash_equal": false,
+          "history_hash_equal": false,
+          "root_state_hash_equal": true,
+          "source_result_hash_equal": false,
+          "steps": [
+            {
+              "epoch": 1,
+              "parent_state_hash_equal": true,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 2,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 3,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 4,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            }
+          ],
+          "terminal_state_hash_equal": false
+        },
+        "independent_external_vv": false,
+        "numerical_match_requires_hash_equality": false,
+        "release_eligible": false,
+        "root_comparison": {
+          "match": true,
+          "material_states_match": true,
+          "node_displacements_match": true
+        },
+        "schema_version": "planar-frame-history-comparison.v1",
+        "scope": "genesis_displacements_and_material_states_plus_every_accepted_step_si_and_material_state;caller_owns_source_checkpoint_and_transition_replay_validation",
+        "step_comparisons": [
+          {
+            "epoch": 1,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.25,
+            "match": true
+          },
+          {
+            "epoch": 2,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.5,
+            "match": true
+          },
+          {
+            "epoch": 3,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.75,
+            "match": true
+          },
+          {
+            "epoch": 4,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 1.0,
+            "match": true
+          }
+        ],
+        "step_counts": {
+          "compared": 4,
+          "left": 4,
+          "right": 4
+        },
+        "unavailable_reasons": [],
+        "whole_history_json_equal": false
+      },
+      "paired_worker_cpu_difference_ns": 124029288,
+      "paired_workload_wall_difference_ns": 106063818,
+      "phase": "measurement",
+      "repetition": 2,
+      "unavailable_reason": null
+    },
+    {
+      "baseline_slot": 11,
+      "candidate_slot": 10,
+      "case_id": "four_story_three_bay",
+      "comparison": {
+        "checkpoint_bytes_equal": false,
+        "checkpoint_identity_comparison": {
+          "available": true,
+          "chain_hash_equal": false,
+          "root_state_hash_equal": true,
+          "terminal_epoch_equal": true,
+          "terminal_load_factor_equal": true,
+          "terminal_state_hash_equal": false
+        },
+        "comparison_available": true,
+        "full_history_float_comparison_performed": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 5880,
+            "float_leaf_count": 4704,
+            "left_row_count": 1176,
+            "match": false,
+            "maximum_absolute_difference": 5.426816642284393e-06,
+            "mismatch_count": 1,
+            "mismatch_paths": [
+              "/result_ir/fiber_results/526/stress_Pa"
+            ],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 1176
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 420,
+            "float_leaf_count": 560,
+            "left_row_count": 28,
+            "match": true,
+            "maximum_absolute_difference": 6.866321200504899e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 28
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 20,
+            "float_leaf_count": 120,
+            "left_row_count": 20,
+            "match": true,
+            "maximum_absolute_difference": 1.196959198423997e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 20
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 168,
+            "float_leaf_count": 504,
+            "left_row_count": 84,
+            "match": true,
+            "maximum_absolute_difference": 6.867048796266317e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 84
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 36,
+            "float_leaf_count": 12,
+            "left_row_count": 12,
+            "match": true,
+            "maximum_absolute_difference": 8.541974239051342e-09,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false,
+            "right_row_count": 12
+          }
+        },
+        "independent_external_vv": false,
+        "left_result_json_sha256": "sha256:447a888440d0b862744a63be2acd5a90953136edb8aa980c16cb42fb72f71cef",
+        "physical_si_match": false,
+        "right_result_json_sha256": "sha256:53a5ff6176c951029f51362c87e48f2cab3f26727a3217853c9614e83c0626d0",
+        "schema_version": "planar-frame-backend-comparison.v1",
+        "scope": "terminal_public_si_rows_in_order;exact_checkpoint_bytes_and_declared_identity_only;no_independent_replay",
+        "unavailable_reasons": [],
+        "whole_result_json_equal": false
+      },
+      "history_comparison": {
+        "checkpoint_bytes_comparison_performed": false,
+        "comparison_available": true,
+        "full_history_float_comparison_performed": true,
+        "full_history_match": false,
+        "groups": {
+          "fiber_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 23520,
+            "float_leaf_count": 18816,
+            "match": false,
+            "maximum_absolute_difference": 1.718848943710327e-05,
+            "mismatch_count": 1,
+            "mismatch_paths": [
+              "/steps/3/si_rows/fiber_results/526/stress_Pa"
+            ],
+            "mismatch_paths_truncated": false
+          },
+          "material_states": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 35280,
+            "float_leaf_count": 28560,
+            "match": true,
+            "maximum_absolute_difference": 4.807265696626928e-14,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "member_end_forces": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 1680,
+            "float_leaf_count": 2240,
+            "match": true,
+            "maximum_absolute_difference": 1.1236261343583465e-07,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "node_displacements": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 80,
+            "float_leaf_count": 540,
+            "match": true,
+            "maximum_absolute_difference": 1.196959198423997e-16,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "section_results": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 672,
+            "float_leaf_count": 2016,
+            "match": true,
+            "maximum_absolute_difference": 8.703500498086214e-08,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          },
+          "support_reactions": {
+            "absolute_difference_overflow": false,
+            "exact_leaf_count": 144,
+            "float_leaf_count": 48,
+            "match": true,
+            "maximum_absolute_difference": 8.541974239051342e-09,
+            "mismatch_count": 0,
+            "mismatch_paths": [],
+            "mismatch_paths_truncated": false
+          }
+        },
+        "identity_comparison": {
+          "artifact_hash_equal": false,
+          "chain_hash_equal": false,
+          "history_hash_equal": false,
+          "root_state_hash_equal": true,
+          "source_result_hash_equal": false,
+          "steps": [
+            {
+              "epoch": 1,
+              "parent_state_hash_equal": true,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 2,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 3,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            },
+            {
+              "epoch": 4,
+              "parent_state_hash_equal": false,
+              "state_hash_equal": false
+            }
+          ],
+          "terminal_state_hash_equal": false
+        },
+        "independent_external_vv": false,
+        "numerical_match_requires_hash_equality": false,
+        "release_eligible": false,
+        "root_comparison": {
+          "match": true,
+          "material_states_match": true,
+          "node_displacements_match": true
+        },
+        "schema_version": "planar-frame-history-comparison.v1",
+        "scope": "genesis_displacements_and_material_states_plus_every_accepted_step_si_and_material_state;caller_owns_source_checkpoint_and_transition_replay_validation",
+        "step_comparisons": [
+          {
+            "epoch": 1,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.25,
+            "match": true
+          },
+          {
+            "epoch": 2,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.5,
+            "match": true
+          },
+          {
+            "epoch": 3,
+            "groups": {
+              "fiber_results": true,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 0.75,
+            "match": true
+          },
+          {
+            "epoch": 4,
+            "groups": {
+              "fiber_results": false,
+              "material_states": true,
+              "member_end_forces": true,
+              "node_displacements": true,
+              "section_results": true,
+              "support_reactions": true
+            },
+            "load_factor": 1.0,
+            "match": false
+          }
+        ],
+        "step_counts": {
+          "compared": 4,
+          "left": 4,
+          "right": 4
+        },
+        "unavailable_reasons": [],
+        "whole_history_json_equal": false
+      },
+      "paired_worker_cpu_difference_ns": null,
+      "paired_workload_wall_difference_ns": null,
+      "phase": "measurement",
+      "repetition": 2,
+      "unavailable_reason": null
+    }
+  ],
+  "exact_converged_repeat_pairs": 8,
+  "exact_failed_diagnostic_repeat_pairs": 0,
+  "rows": [
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 2520,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.41699246690493297,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 0,
+      "case_id": "three_story_two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00020477835197587024,
+        "dissipated_energy_density_mj_per_m3": 0.00012566299986210063,
+        "tensile_damage": 0.41699246690493297,
+        "tensile_history_strain": 0.0001483603700914161,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 2520,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.41699246690493297,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 1,
+      "case_id": "three_story_two_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00020477835197587024,
+        "dissipated_energy_density_mj_per_m3": 0.00012566299986210068,
+        "tensile_damage": 0.41699246690493297,
+        "tensile_history_strain": 0.0001483603700914161,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 4704,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.08907415596484214,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 2,
+      "case_id": "four_story_three_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.0001634867162336437,
+        "dissipated_energy_density_mj_per_m3": 1.5404831192589536e-05,
+        "tensile_damage": 0.08907415596484214,
+        "tensile_history_strain": 0.00010737594138160984,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 4704,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.08907415596479717,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 3,
+      "case_id": "four_story_three_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00016348671623364898,
+        "dissipated_energy_density_mj_per_m3": 1.5404831192580608e-05,
+        "tensile_damage": 0.08907415596479717,
+        "tensile_history_strain": 0.00010737594138160583,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 2520,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.41699246690493297,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 4,
+      "case_id": "three_story_two_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00020477835197587024,
+        "dissipated_energy_density_mj_per_m3": 0.00012566299986210068,
+        "tensile_damage": 0.41699246690493297,
+        "tensile_history_strain": 0.0001483603700914161,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 2520,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.41699246690493297,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 5,
+      "case_id": "three_story_two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00020477835197587024,
+        "dissipated_energy_density_mj_per_m3": 0.00012566299986210063,
+        "tensile_damage": 0.41699246690493297,
+        "tensile_history_strain": 0.0001483603700914161,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 4704,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.08907415596479717,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 6,
+      "case_id": "four_story_three_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00016348671623364898,
+        "dissipated_energy_density_mj_per_m3": 1.5404831192580608e-05,
+        "tensile_damage": 0.08907415596479717,
+        "tensile_history_strain": 0.00010737594138160583,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 4704,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.08907415596484214,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 7,
+      "case_id": "four_story_three_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.0001634867162336437,
+        "dissipated_energy_density_mj_per_m3": 1.5404831192589536e-05,
+        "tensile_damage": 0.08907415596484214,
+        "tensile_history_strain": 0.00010737594138160984,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 2520,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.41699246690493297,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 8,
+      "case_id": "three_story_two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00020477835197587024,
+        "dissipated_energy_density_mj_per_m3": 0.00012566299986210063,
+        "tensile_damage": 0.41699246690493297,
+        "tensile_history_strain": 0.0001483603700914161,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 2520,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.41699246690493297,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 9,
+      "case_id": "three_story_two_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00020477835197587024,
+        "dissipated_energy_density_mj_per_m3": 0.00012566299986210068,
+        "tensile_damage": 0.41699246690493297,
+        "tensile_history_strain": 0.0001483603700914161,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 4704,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.08907415596484214,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 10,
+      "case_id": "four_story_three_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.0001634867162336437,
+        "dissipated_energy_density_mj_per_m3": 1.5404831192589536e-05,
+        "tensile_damage": 0.08907415596484214,
+        "tensile_history_strain": 0.00010737594138160984,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 4704,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.08907415596479717,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 11,
+      "case_id": "four_story_three_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00016348671623364898,
+        "dissipated_energy_density_mj_per_m3": 1.5404831192580608e-05,
+        "tensile_damage": 0.08907415596479717,
+        "tensile_history_strain": 0.00010737594138160583,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    }
+  ],
+  "summary": [
+    {
+      "case_id": "three_story_two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 18.367199132,
+      "converged_workload_ratio_to_dense": 1.0,
+      "launch_to_exit_plus_parent_validation_median_seconds": 24.482405763,
+      "parent_validation_median_seconds": 4.174132819,
+      "workload_seconds_in_execution_order": [
+        18.307342567,
+        18.402484957,
+        18.367199132
+      ],
+      "launch_plus_validation_seconds_in_execution_order": [
+        24.482405763,
+        24.512726552,
+        24.379486982
+      ],
+      "worker_cpu_median_seconds": 20.087385143,
+      "peak_rss_median_bytes": 136187904
+    },
+    {
+      "case_id": "three_story_two_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 18.538595176,
+      "converged_workload_ratio_to_dense": 1.009331637489648,
+      "launch_to_exit_plus_parent_validation_median_seconds": 24.628568424,
+      "parent_validation_median_seconds": 4.140044594,
+      "workload_seconds_in_execution_order": [
+        18.722227824,
+        18.538595176,
+        18.47326295
+      ],
+      "launch_plus_validation_seconds_in_execution_order": [
+        24.778297533,
+        24.628568424,
+        24.531190433
+      ],
+      "worker_cpu_median_seconds": 20.322584361,
+      "peak_rss_median_bytes": 137740288
+    },
+    {
+      "case_id": "four_story_three_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 31.925218569,
+      "converged_workload_ratio_to_dense": null,
+      "launch_to_exit_plus_parent_validation_median_seconds": 41.429134733,
+      "parent_validation_median_seconds": 7.43231799,
+      "workload_seconds_in_execution_order": [
+        31.91736769,
+        31.925218569,
+        32.28695656
+      ],
+      "launch_plus_validation_seconds_in_execution_order": [
+        41.286930837,
+        41.429134733,
+        41.65649474
+      ],
+      "worker_cpu_median_seconds": 33.698852379,
+      "peak_rss_median_bytes": 158175232
+    },
+    {
+      "case_id": "four_story_three_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 31.928208268,
+      "converged_workload_ratio_to_dense": null,
+      "launch_to_exit_plus_parent_validation_median_seconds": 41.382764379,
+      "parent_validation_median_seconds": 7.444699226,
+      "workload_seconds_in_execution_order": [
+        32.062469493,
+        31.626838086,
+        31.928208268
+      ],
+      "launch_plus_validation_seconds_in_execution_order": [
+        41.499473563,
+        40.967762688,
+        41.382764379
+      ],
+      "worker_cpu_median_seconds": 33.727132028,
+      "peak_rss_median_bytes": 158892032
+    }
+  ],
+  "experiment_wall_seconds": 399.471296893,
+  "scope": "Retained-byte audit and recomputed internal comparisons; generated 3-story/2-bay and 4-story/3-bay topology variants with 12-layer sections and fixed 10x roof loads copied byte-for-byte from the activation packet; three fresh runs per backend per case, not independent projects or external physical validation. Failure timings retained; no speed ratio for nonconverged groups.",
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-active-repeat-izsxcjoo",
+    "payload_files": 796,
+    "payload_bytes": 86482166,
+    "inventory_sha256": "60b57ff5df7057dad625c72266f5621cc8a702d7809f06cc2ad72bcfa223c987"
+  }
+}

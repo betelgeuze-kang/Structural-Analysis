@@ -1,0 +1,780 @@
+{
+  "schema_version": "rc-control-step-work-original-observation.v1",
+  "source_revision": "e2efc9c1269ff71bbded22d663eeb1176e8a97ac",
+  "historical_solver_source_revision": "3d4ecef4b737703717522ef385bdc6004eba56e1",
+  "original_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-secant-abstention-fhn1qvyq",
+  "original_inventory_sha256": "df41ee6c060fe8dd5e5bb4586c6c801177b5d5d7ec56929ec37bdc1bc08ed064",
+  "original_input_files_checked": 11638,
+  "original_outcomes_checked": 7744,
+  "historical_work_recounted_not_executed": {
+    "core_calls": 7744,
+    "newton_iterations": 35194,
+    "linear_solves": 35194
+  },
+  "folds": [
+    {
+      "index": 0,
+      "case_id": "train-a",
+      "ridge": 10000.0,
+      "source_comparison_hash": "sha256:046105bfc49b2c3d0ca2cb66e3020a4b3e5165cb541c922da43be2bd932b4c1f",
+      "observation_hash": "sha256:601d3305cf5cc49d6bee65ab66e4e1c0ec7d49ef7266cf2c527eb32542869f1b",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 242,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 969,
+              "linear_solves": 969
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 969,
+              "linear_solves": 969
+            }
+          },
+          "same_parent_and_prefix_count": 242
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 2,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 9,
+              "linear_solves": 9
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 9,
+              "linear_solves": 9
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 239,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 956,
+              "linear_solves": 956
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 956,
+              "linear_solves": 956
+            }
+          },
+          "same_parent_and_prefix_count": 239
+        }
+      },
+      "observed_proposed_count": 0,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    },
+    {
+      "index": 1,
+      "case_id": "train-b",
+      "ridge": 10000.0,
+      "source_comparison_hash": "sha256:46dc9731d5938d9b9b5cda4cf606427f4c01902e7d62170287d6ebeec9220147",
+      "observation_hash": "sha256:63b43cedb37e4bd22ef600c0175c6a8e6286dc1215f738fd8399f3c6148595a1",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 32,
+          "equal_newton_iterations": 102,
+          "more_newton_iterations": 108,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 870,
+              "linear_solves": 870
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 967,
+              "linear_solves": 967
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 1,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 7,
+              "linear_solves": 7
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 8,
+              "linear_solves": 8
+            }
+          },
+          "same_parent_and_prefix_count": 0
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 32,
+          "equal_newton_iterations": 100,
+          "more_newton_iterations": 107,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 860,
+              "linear_solves": 860
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 956,
+              "linear_solves": 956
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        }
+      },
+      "observed_proposed_count": 241,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    },
+    {
+      "index": 2,
+      "case_id": "train-c",
+      "ridge": 10000.0,
+      "source_comparison_hash": "sha256:a5f0995140e03c0a3722473de3f74bfbfb9ffa729b41e904260cc9cea3f95463",
+      "observation_hash": "sha256:dabc46d47e1372cc99a89230e29aff837127910c3739324721116915b9b15746",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 242,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 990,
+              "linear_solves": 990
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 990,
+              "linear_solves": 990
+            }
+          },
+          "same_parent_and_prefix_count": 242
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 2,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 8,
+              "linear_solves": 8
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 8,
+              "linear_solves": 8
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 239,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 979,
+              "linear_solves": 979
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 979,
+              "linear_solves": 979
+            }
+          },
+          "same_parent_and_prefix_count": 239
+        }
+      },
+      "observed_proposed_count": 0,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    },
+    {
+      "index": 3,
+      "case_id": "train-d",
+      "ridge": 10000.0,
+      "source_comparison_hash": "sha256:7919055acd5516495222fc100d1181b37371c9a02664edf1d9457ad6f9cb9ee8",
+      "observation_hash": "sha256:95247858f8bdc08213434633540b38de2a1206a200adc5ab15e5795cdb82f549",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 242,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 852,
+              "linear_solves": 852
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 852,
+              "linear_solves": 852
+            }
+          },
+          "same_parent_and_prefix_count": 242
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 2,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 7,
+              "linear_solves": 7
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 7,
+              "linear_solves": 7
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 239,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 841,
+              "linear_solves": 841
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 841,
+              "linear_solves": 841
+            }
+          },
+          "same_parent_and_prefix_count": 239
+        }
+      },
+      "observed_proposed_count": 0,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    },
+    {
+      "index": 4,
+      "case_id": "train-a",
+      "ridge": 1000000.0,
+      "source_comparison_hash": "sha256:a54492fd31a55e684a958ba5528e01c7538701fce630931baea614213990ea2e",
+      "observation_hash": "sha256:288c06f917847b8de802c3ff740daaf42db27081aeb153451d74494d5bbcaae9",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 242,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 969,
+              "linear_solves": 969
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 969,
+              "linear_solves": 969
+            }
+          },
+          "same_parent_and_prefix_count": 242
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 2,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 9,
+              "linear_solves": 9
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 9,
+              "linear_solves": 9
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 239,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 956,
+              "linear_solves": 956
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 956,
+              "linear_solves": 956
+            }
+          },
+          "same_parent_and_prefix_count": 239
+        }
+      },
+      "observed_proposed_count": 0,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    },
+    {
+      "index": 5,
+      "case_id": "train-b",
+      "ridge": 1000000.0,
+      "source_comparison_hash": "sha256:686d90e843d0a63156713d6c7f0c7d7ecc2ccd15724e393a05075a4a27204200",
+      "observation_hash": "sha256:9e0f4ddc27a57b3b581c54959f10310399b5ad7bb83927ad1d92e5c103ad9767",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 28,
+          "equal_newton_iterations": 100,
+          "more_newton_iterations": 114,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 870,
+              "linear_solves": 870
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 975,
+              "linear_solves": 975
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 1,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 7,
+              "linear_solves": 7
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 6,
+              "linear_solves": 6
+            }
+          },
+          "same_parent_and_prefix_count": 0
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 27,
+          "equal_newton_iterations": 98,
+          "more_newton_iterations": 114,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 860,
+              "linear_solves": 860
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 966,
+              "linear_solves": 966
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        }
+      },
+      "observed_proposed_count": 241,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    },
+    {
+      "index": 6,
+      "case_id": "train-c",
+      "ridge": 1000000.0,
+      "source_comparison_hash": "sha256:30a95da2f69fe714a536370e5e7a8c0369f6a979745c8ee9ac7218a40c51a920",
+      "observation_hash": "sha256:91edd1db4a97d2dcb111db2054c9810c4a2cbb1c5237d7e61e5dd0025c96c1be",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 242,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 990,
+              "linear_solves": 990
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 990,
+              "linear_solves": 990
+            }
+          },
+          "same_parent_and_prefix_count": 242
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 3,
+              "linear_solves": 3
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 2,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 8,
+              "linear_solves": 8
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 8,
+              "linear_solves": 8
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 239,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 979,
+              "linear_solves": 979
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 979,
+              "linear_solves": 979
+            }
+          },
+          "same_parent_and_prefix_count": 239
+        }
+      },
+      "observed_proposed_count": 0,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    },
+    {
+      "index": 7,
+      "case_id": "train-d",
+      "ridge": 1000000.0,
+      "source_comparison_hash": "sha256:c8e7335b5a72af8f4969b147404fb59ab8113ca168f82ee4ba247a49849c1bee",
+      "observation_hash": "sha256:525b3975a99a3e46dd3b90254a2c79c0ec2b2aaa2bfe781089a0a2aa2b7ca3d7",
+      "groups": {
+        "all": {
+          "count": 242,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 242,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 242,
+              "newton_iterations": 852,
+              "linear_solves": 852
+            },
+            "proposal": {
+              "core_calls": 242,
+              "newton_iterations": 852,
+              "linear_solves": 852
+            }
+          },
+          "same_parent_and_prefix_count": 242
+        },
+        "first_target": {
+          "count": 1,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 1,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            },
+            "proposal": {
+              "core_calls": 1,
+              "newton_iterations": 4,
+              "linear_solves": 4
+            }
+          },
+          "same_parent_and_prefix_count": 1
+        },
+        "reversal": {
+          "count": 2,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 2,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 2,
+              "newton_iterations": 7,
+              "linear_solves": 7
+            },
+            "proposal": {
+              "core_calls": 2,
+              "newton_iterations": 7,
+              "linear_solves": 7
+            }
+          },
+          "same_parent_and_prefix_count": 2
+        },
+        "continuation": {
+          "count": 239,
+          "fewer_newton_iterations": 0,
+          "equal_newton_iterations": 239,
+          "more_newton_iterations": 0,
+          "work": {
+            "secant": {
+              "core_calls": 239,
+              "newton_iterations": 841,
+              "linear_solves": 841
+            },
+            "proposal": {
+              "core_calls": 239,
+              "newton_iterations": 841,
+              "linear_solves": 841
+            }
+          },
+          "same_parent_and_prefix_count": 239
+        }
+      },
+      "observed_proposed_count": 0,
+      "fewer_iterations_with_matching_parent_and_prefix": 0
+    }
+  ],
+  "same_parent_proposed_witnesses": [
+    {
+      "fold": 1,
+      "target_index": 1,
+      "parent_sha256": "1be1a2a7994996223b455da39feb7f35cc885c068b975293545e2d97a55c6fef",
+      "work": {
+        "secant": {
+          "core_calls": 1,
+          "newton_iterations": 2,
+          "linear_solves": 2
+        },
+        "proposal": {
+          "core_calls": 1,
+          "newton_iterations": 4,
+          "linear_solves": 4
+        }
+      },
+      "original_parent_objects_equal": true
+    },
+    {
+      "fold": 5,
+      "target_index": 1,
+      "parent_sha256": "1be1a2a7994996223b455da39feb7f35cc885c068b975293545e2d97a55c6fef",
+      "work": {
+        "secant": {
+          "core_calls": 1,
+          "newton_iterations": 2,
+          "linear_solves": 2
+        },
+        "proposal": {
+          "core_calls": 1,
+          "newton_iterations": 4,
+          "linear_solves": 4
+        }
+      },
+      "original_parent_objects_equal": true
+    }
+  ],
+  "all_fewer_iteration_observations_have_different_origin": true,
+  "new_solver_calls": 0,
+  "new_fits": 0,
+  "causal_training_labels_admitted": false,
+  "new_policy_or_gate_selected": false,
+  "full_path_savings_proved": false,
+  "independent_generalization": false,
+  "independent_physical_validation": false,
+  "source_inventory_binding_is_source_authentication": false,
+  "current_running_repeated_study_modified": false,
+  "exclusive_host_timing": false,
+  "observer_wall_ns_excluding_final_output_and_seal": 4719965741,
+  "verification": {
+    "focused_and_workflow_tests_passed": 35,
+    "final_test_seconds": 1.74,
+    "initial_test_failures": "8 synthetic tests incorrectly indexed the path dictionary instead of entries; fixed fixtures.",
+    "first_original_smoke_rejected": "An observer-only exact accepted-coordinate/command equality check rejected retained coordinates near zero; removed that unsupported equality assumption and retained both values plus an explicit match indicator.",
+    "solver_tolerances_or_recorded_coordinates_changed": false
+  },
+  "sealed_packet": {
+    "sealed_at_utc": "2026-09-10T06:25:50.117160+00:00",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-step-work-v2cr6ir7",
+    "files": 20,
+    "bytes": 4149861,
+    "inventory_sha256": "b7f67287f8ad876654ff034521f7262e610a7a6f1aed6a0da809daefa2e1b186",
+    "inventory_and_seal_excluded_from_payload_totals": true,
+    "originals_remain_in_bound_parent_packet": true,
+    "new_solver_calls": 0,
+    "new_fits": 0
+  }
+}

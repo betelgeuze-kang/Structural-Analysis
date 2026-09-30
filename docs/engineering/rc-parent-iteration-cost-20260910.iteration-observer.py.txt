@@ -1,0 +1,39 @@
+from pathlib import Path
+from collections import Counter
+import hashlib,json,subprocess,time
+from structural_analysis.benchmark.rc_control_iteration_cost import summarize_rc_control_iteration_cost
+source=Path('/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-e_rj5919');root=Path(Path('/tmp/structural-rc-parent-cost-observer-root.txt').read_text().strip());start=time.perf_counter_ns();raw=source.with_name(source.name+'.inventory.json').read_bytes();assert hashlib.sha256(raw).hexdigest()=='7e33f7153577b2be79114abe5ac144a227ff6fd33c258554062675a0d6cb1d2d';inventory={r['path']:r for r in json.loads(raw)['files']};bindings={}
+def original(name):
+ raw=(source/name).read_bytes();entry=inventory[name];assert len(raw)==entry['bytes'] and hashlib.sha256(raw).hexdigest()==entry['sha256'];bindings[name]=entry;return json.loads(raw)
+def save(name,value):
+ with (root/name).open('x') as f:json.dump(value,f,indent=2,allow_nan=False);f.write('\n')
+head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip();code=[]
+for name in ['src/structural_analysis/benchmark/rc_control_iteration_cost.py','tests/test_rc_control_iteration_cost.py','tests/test_repository_python_workflow_contract.py','.github/workflows/python-test-collection.yml']:
+ raw=Path(name).read_bytes();assert raw==subprocess.check_output(['git','show',head+':'+name]);dest=root/'source'/name;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(raw);code.append({'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()})
+result=original('result.json');audit=original('original-audit.json');completion=original('completion-summary.json');assert not audit['partial'] and audit['comparison_count']==968
+# Bind the earlier timing observations to the now sealed original packet.
+for entry in json.loads((root/'input-bindings.json').read_bytes())['files']:
+ assert entry==inventory[entry['path']]
+ original(entry['path'])
+rows=[];groups={};work=Counter()
+fields=['inclusive_convergence_rows','primary_convergence_rows','accepted_terminal_corrections','attempted_terminal_refinements','terminal_assembly_calls','terminal_linear_solves','total_recorded_linear_solves','line_search_steps','line_search_trials']
+for record in result['comparisons']:
+ ordinal=record['ordinal'];report=original(f'study/comparison-{ordinal:04d}/comparison.json');arms={}
+ for arm,path in [*report['arms'].items(),('fresh-reference',report['fresh_reference'])]:
+  parts=Counter()
+  for entry in path['entries']:
+   for inv in entry['invocations']:
+    name=f"study/comparison-{ordinal:04d}/{arm}/000-{inv['ordinal']}-step.json";step=original(name);observed=summarize_rc_control_iteration_cost(step)
+    assert observed['inclusive_convergence_rows']==inv['work']['newton_iterations'] and observed['total_recorded_linear_solves']==inv['work']['linear_solves'];parts.update({k:observed[k] for k in fields});work.update(inv['work'])
+  arms[arm]=dict(parts)
+ difference={k:arms['proposal'][k]-arms['secant'][k] for k in fields};names=[record['case_id']+'/all']
+ if record['policy_proposed']:names.append('all_actual_proposals')
+ if record['policy_proposed'] and difference['inclusive_convergence_rows']<0:names.append('actual_proposals_with_fewer_inclusive_rows')
+ for name in names:
+  group=groups.setdefault(name,{'count':0,'secant':Counter(),'proposal':Counter(),'difference':Counter(),'primary_fewer':0,'primary_equal':0,'primary_more':0,'same_line_search_trials':0,'same_terminal_assembly_calls':0,'same_primary_and_search_and_terminal_assembly_work':0});group['count']+=1
+  for arm in ['secant','proposal']:group[arm].update(arms[arm])
+  group['difference'].update(difference);group['primary_fewer']+=difference['primary_convergence_rows']<0;group['primary_equal']+=difference['primary_convergence_rows']==0;group['primary_more']+=difference['primary_convergence_rows']>0;group['same_line_search_trials']+=difference['line_search_trials']==0;group['same_terminal_assembly_calls']+=difference['terminal_assembly_calls']==0;group['same_primary_and_search_and_terminal_assembly_work']+=all(difference[k]==0 for k in ['primary_convergence_rows','line_search_trials','terminal_assembly_calls'])
+ rows.append({'ordinal':ordinal,'case_id':record['case_id'],'policy_proposed':record['policy_proposed'],'source_report_hash':record['report_hash'],'arms':arms,'difference':difference})
+assert dict(work)==result['work']==completion['work']
+summary={'schema_version':'rc-original-iteration-cost-observation.v1','source_revision':head,'numerical_source_revision':result['source_revision'],'source_packet':str(source),'source_packet_sealed':True,'source_inventory_sha256':'7e33f7153577b2be79114abe5ac144a227ff6fd33c258554062675a0d6cb1d2d','original_audit_completed':True,'comparisons':len(rows),'original_step_records_checked':work['core_calls'],'groups':groups,'all_reported_work_reconciled':True,'total_solver_assembly_calls_inferred':False,'new_solver_calls':0,'fits':0,'policy_adopted':False,'training_admitted':False,'source_and_tests':code,'observer_wall_ns':time.perf_counter_ns()-start}
+save('iteration-cost-summary.json',summary);save('iteration-cost-rows.json',rows);save('iteration-cost-input-bindings.json',{'root':str(source),'files':list(bindings.values())});save('source-audit-completion-binding.json',{'completion':completion,'original_audit_sha256':inventory['original-audit.json']['sha256'],'source_inventory_sha256':summary['source_inventory_sha256']});(root/'iteration-cost-observer.py').write_bytes(Path(__file__).read_bytes());print(json.dumps(summary,indent=2))

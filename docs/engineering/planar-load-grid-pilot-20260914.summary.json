@@ -1,0 +1,137 @@
+{
+  "source_revision": "29af2b0f9bcd481058cae1cabb192b91f65c4506",
+  "rows": [
+    {
+      "case_id": "two_story",
+      "policy": "eight_steps",
+      "status": "blocked",
+      "contract_pass": false,
+      "attempted_steps": 4,
+      "committed_steps": 3,
+      "compile_wall_ns": 429778923,
+      "path_wall_ns": 2887521918,
+      "history_rows": 20,
+      "line_search_trials": 22,
+      "steps": [
+        {
+          "factor": 0.125,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 8.009119293698556e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 5.667288860422559e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.375,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 6.404737481110108e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": false,
+          "terminal_reason": "line_search_failed_to_reduce_residual",
+          "final_relative_residual": 0.033512346728850624,
+          "rollback_exact": true
+        }
+      ],
+      "artifact": "two_story-eight_steps.json",
+      "artifact_sha256": "780186b2eb8df9ea18428f9616c296c19ab3c8ca6d11c837a63286be2ef162bf"
+    },
+    {
+      "case_id": "two_story",
+      "policy": "sixteen_steps",
+      "status": "blocked",
+      "contract_pass": false,
+      "attempted_steps": 8,
+      "committed_steps": 7,
+      "compile_wall_ns": 405811980,
+      "path_wall_ns": 4838877530,
+      "history_rows": 35,
+      "line_search_trials": 34,
+      "steps": [
+        {
+          "factor": 0.0625,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 2.5750135061268036e-11,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.125,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 2.5696690405159948e-11,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.1875,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 2.520668355524928e-11,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.25,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 5.659330781782046e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.3125,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 5.946011090903387e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.375,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 4.980241404458259e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.4375,
+          "committed": true,
+          "terminal_reason": "residual_and_increment_converged",
+          "final_relative_residual": 8.335518941748887e-13,
+          "rollback_exact": null
+        },
+        {
+          "factor": 0.5,
+          "committed": false,
+          "terminal_reason": "line_search_failed_to_reduce_residual",
+          "final_relative_residual": 0.025194567748845202,
+          "rollback_exact": true
+        }
+      ],
+      "artifact": "two_story-sixteen_steps.json",
+      "artifact_sha256": "afdc682f44ebb14614532392465f2d3edb02292f990dee933a8d892a371c1cfe"
+    }
+  ],
+  "experiment_wall_ns": 8916165857,
+  "public_result_authority": false,
+  "repetitions": 1,
+  "speedup_claimed": false,
+  "audit": {
+    "artifact_count": 2,
+    "chain_and_failure_rollback_checked": true,
+    "history_and_line_search_counts_recomputed": true,
+    "cross_grid_equivalence_claimed": false
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-load-grid-pilot-j8lp3crr",
+    "payload_files": 6,
+    "payload_bytes": 12560631,
+    "inventory_sha256": "0f69a5f3132e7fc71216907d00288706a4c64598ab0c60635cd1dd67e7f0018a"
+  }
+}

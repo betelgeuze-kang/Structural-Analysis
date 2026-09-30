@@ -1,0 +1,265 @@
+{
+  "artifact_bindings": {
+    "inventory-builder-first-failure.py": {
+      "byte_length": 1473,
+      "sha256": "d28b3fe798ad0d866da5a914d23f4e718dbf9330b0144317fc467f2a4a7a244b"
+    },
+    "receipt-audit.json": {
+      "byte_length": 89715,
+      "sha256": "0461ea5c300fb2d72ffb563d138a2a38fca2592827e7407e84d4fe75360ed523"
+    },
+    "residual-summary.json": {
+      "byte_length": 504797,
+      "sha256": "2d97ff8f6a9a8d4ae87ae26bc172c52d261fc84a75b3a4157bc2f505f98f15c0"
+    },
+    "source-manifest.json": {
+      "byte_length": 1360726,
+      "sha256": "2530477f7edf1ea9ab982333ff8312904ea6e13d98ff42dc255f825627e99415"
+    }
+  },
+  "audited_summary": {
+    "abstained_count": 486,
+    "audit_fits": 0,
+    "audit_solver_calls": 0,
+    "case_counts": {
+      "train-a-amp050": {
+        "abstained": 72,
+        "proposed": 0
+      },
+      "train-a-amp100": {
+        "abstained": 72,
+        "proposed": 0
+      },
+      "train-a-amp150": {
+        "abstained": 72,
+        "proposed": 0
+      },
+      "train-b-amp050": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-b-amp100": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-b-amp150": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-c-amp050": {
+        "abstained": 72,
+        "proposed": 0
+      },
+      "train-c-amp100": {
+        "abstained": 72,
+        "proposed": 0
+      },
+      "train-c-amp150": {
+        "abstained": 72,
+        "proposed": 0
+      },
+      "train-d-amp050": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-d-amp100": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-d-amp150": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-e-amp050": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-e-amp100": {
+        "abstained": 6,
+        "proposed": 66
+      },
+      "train-e-amp150": {
+        "abstained": 6,
+        "proposed": 66
+      }
+    },
+    "completed_folds": 90,
+    "fold_work": {
+      "core_calls": 4680,
+      "linear_solves": 24147,
+      "newton_iterations": 24147
+    },
+    "groups": [
+      [
+        "train-a-amp050",
+        "train-a-amp100",
+        "train-a-amp150"
+      ],
+      [
+        "train-b-amp050",
+        "train-b-amp100",
+        "train-b-amp150"
+      ],
+      [
+        "train-c-amp050",
+        "train-c-amp100",
+        "train-c-amp150"
+      ],
+      [
+        "train-d-amp050",
+        "train-d-amp100",
+        "train-d-amp150"
+      ],
+      [
+        "train-e-amp050",
+        "train-e-amp100",
+        "train-e-amp150"
+      ]
+    ],
+    "historical_label_costs_separate": [
+      {
+        "generation_work": {
+          "known_work": {
+            "core_calls": 351,
+            "linear_solves": 1894,
+            "newton_iterations": 1894
+          },
+          "unknown_work": false
+        },
+        "learning_wall_ns": 134743465748,
+        "report_hash": "sha256:265b242638660529c2da85c4a741abecd4ad29d9ce8c08c27ff79d89a1f31dcf",
+        "sample_count": 99
+      },
+      {
+        "generation_work": {
+          "known_work": {
+            "core_calls": 234,
+            "linear_solves": 1212,
+            "newton_iterations": 1212
+          },
+          "unknown_work": false
+        },
+        "learning_wall_ns": 86013788545,
+        "report_hash": "sha256:903ecb836c3676f55bbea231c1ffe51ac86238be451cbaf661c5f914a5228b2c",
+        "sample_count": 66
+      }
+    ],
+    "independent_evaluation": false,
+    "net_savings_proved": false,
+    "observation_assembly_attempts": 1188,
+    "observation_wall_ns": 30236794912,
+    "parent_wall_ns": 1558756121481,
+    "pooled_metadata_fit_wall_ns": 26045556,
+    "proposed_count": 594,
+    "reserved_evaluation_executed": false,
+    "sample_count": 165,
+    "selected_ridge": null,
+    "selected_strategy": "secant",
+    "selection_fit_count": 30,
+    "selection_fit_wall_ns_sum": 704467379,
+    "selection_result_hash": "sha256:3e346bc54980f7eea3a28b7dba29de5b336c7077caa44762c1605f82d09f3b63",
+    "selection_wall_ns": 1557989002006,
+    "source_revision": "49924c039af03df28ad208331e2812efe553ad04",
+    "static_gate_counts": {
+      "not_rejected": 54,
+      "rejected": 36
+    }
+  },
+  "candidate_scores": [
+    {
+      "proposed_count": 297,
+      "ridge": 10000.0,
+      "score": 1.1267721122222611
+    },
+    {
+      "proposed_count": 297,
+      "ridge": 1000000.0,
+      "score": 1.1183874981894504
+    }
+  ],
+  "independent_physical_validation": false,
+  "new_online_gate": false,
+  "observed_cases": [
+    "train-b-amp050",
+    "train-b-amp100",
+    "train-b-amp150",
+    "train-d-amp050",
+    "train-d-amp100",
+    "train-d-amp150",
+    "train-e-amp050",
+    "train-e-amp100",
+    "train-e-amp150"
+  ],
+  "observed_target_indices": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-v6-observed-mmiw182u",
+  "packet_verification": {
+    "inventory_sha256": "29a6673c8624042cbcec7fe2cba3c2a5660e5361f033d202c44109de213b3b45",
+    "source_files_verified": 6071,
+    "verified_bytes": 1988252219,
+    "verified_files": 36204,
+    "wall_ns": 3956780686
+  },
+  "process": {
+    "exit_code": 0,
+    "wall_ns": 1560615787640
+  },
+  "reporter_source": {
+    "byte_length": 4690,
+    "sha256": "5267e5ccd6cf33620f20d1cdc964d4047a3d47b866382d82958a899a61fb4b83",
+    "source_path": "scripts/summarize_rc_residual_observations.py",
+    "source_revision": "cda872e377b76dbd0c6a55c692b04b8ea8a572fb"
+  },
+  "residual_by_ridge": {
+    "10000.0": {
+      "equal": 0,
+      "higher": 201,
+      "lower": 96,
+      "observation_assembly_attempts": 594,
+      "observation_wall_ns": 15120883111,
+      "observations": 297,
+      "proposal_pass_secant_fail": 0,
+      "secant_pass_proposal_fail": 36,
+      "unique_case_target_pairs": 99,
+      "unique_case_target_ridge_pairs": 99
+    },
+    "1000000.0": {
+      "equal": 0,
+      "higher": 213,
+      "lower": 84,
+      "observation_assembly_attempts": 594,
+      "observation_wall_ns": 15115911801,
+      "observations": 297,
+      "proposal_pass_secant_fail": 0,
+      "secant_pass_proposal_fail": 36,
+      "unique_case_target_pairs": 99,
+      "unique_case_target_ridge_pairs": 99
+    }
+  },
+  "residual_totals": {
+    "equal": 0,
+    "higher": 414,
+    "lower": 180,
+    "observation_assembly_attempts": 1188,
+    "observation_wall_ns": 30236794912,
+    "observations": 594,
+    "proposal_pass_secant_fail": 0,
+    "secant_pass_proposal_fail": 72,
+    "unique_case_target_pairs": 99,
+    "unique_case_target_ridge_pairs": 198
+  },
+  "selection_result_hash": "sha256:3e346bc54980f7eea3a28b7dba29de5b336c7077caa44762c1605f82d09f3b63",
+  "source_revision": "49924c039af03df28ad208331e2812efe553ad04",
+  "speedup_proved": false
+}

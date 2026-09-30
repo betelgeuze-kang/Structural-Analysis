@@ -19,7 +19,9 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
 
     assert "const LegacyApp = lazy(() => import('./App'))" in main_tsx
     assert "import { WorkbenchPage } from './workbench-v2/WorkbenchPage'" in main_tsx
-    assert "return surface === 'legacy-app' ? (" in main_tsx
+    assert "return surface === 'rc-pin-roller-original' ? (" in main_tsx
+    assert "<RcPinRollerOriginalPanel />" in main_tsx
+    assert ") : surface === 'legacy-app' ? (" in main_tsx
     assert "<LegacyAppSurface />" in main_tsx
     assert "<WorkbenchPage" in main_tsx
     assert "jobStatusUrl={jobStatusUrl}" in main_tsx

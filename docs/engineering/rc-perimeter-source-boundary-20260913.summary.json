@@ -1,0 +1,13 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-soesianawati-mirror-xnh8673y",
+  "files_excluding_inventory": 10,
+  "bytes_excluding_inventory": 11288419,
+  "inventory_sha256": "b9c7b406e4bc5789ff7e447e018db2cdf0b305abb8faa6263ae51cae9a856c5f",
+  "visually_reviewed_pdf_pages": [
+    1,
+    15
+  ],
+  "original_thesis_acquired": false,
+  "training_admitted": false,
+  "structural_solves": 0
+}

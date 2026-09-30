@@ -1,0 +1,76 @@
+{
+  "source_revision": "f8f2f30fab7e6a56b2ff632c7461691c20d89c37",
+  "run_id": 34749337809,
+  "job_id": 103702936457,
+  "artifact_id": 10315417314,
+  "run_outcome": "failure",
+  "diagnostic_generation_step": "success",
+  "diagnostic_upload_step": "success",
+  "exact_allowlisted_member_count": 4,
+  "context": {
+    "schema": "ci-materialization-failure-context.v1",
+    "workflow_sha": "f8f2f30fab7e6a56b2ff632c7461691c20d89c37",
+    "run_id": "34749337809",
+    "run_attempt": "1",
+    "job": "verify",
+    "diagnostic_only": true,
+    "receipt_generation_attested": false,
+    "may_include_tracked_or_partially_rewritten_receipts": true,
+    "qualification_inferred": false
+  },
+  "members": [
+    {
+      "path": "artifacts/manifests/internal_license_due_diligence.current.v1.json",
+      "bytes": 11739,
+      "sha256": "fa903889b2012ba29c16c540cd64d553717830de96415ee4ad328cb1c3c0c11b"
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+      "bytes": 82176,
+      "sha256": "c1372cb6c60851213d8d304bfbd8749e89327ebd23c893c95d4ccae23ed2b0a7"
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+      "bytes": 43126,
+      "sha256": "e476da825fd16578f975ec911d663383b777f40e34b30273c8117da90f4a74c3"
+    },
+    {
+      "path": "materialization-failure-context.json",
+      "bytes": 351,
+      "sha256": "592740da3f8a6f014599403d3cfb28d77c3325a4d2fbc9a483046f3e6a326fd7"
+    }
+  ],
+  "external_comparison_failures": [
+    {
+      "case": "bounded_planar_member_feature_load_path",
+      "metric": "support_N1_UX_N",
+      "absolute_error": 4.96424095305589e-07,
+      "absolute_tolerance": 1e-10,
+      "relative_tolerance": 1e-10
+    },
+    {
+      "case": "bounded_planar_prescribed_settlement_load_path",
+      "metric": "support_N1_UX_N",
+      "absolute_error": 3.631256504377234e-07,
+      "absolute_tolerance": 1e-10,
+      "relative_tolerance": 1e-10
+    }
+  ],
+  "external_failure_resolved": false,
+  "hosted_failure_diagnostic_retention_verified": true,
+  "new_solver_execution_in_this_audit": false,
+  "qualification_credit": false,
+  "startup_failure_observation": {
+    "run_id": 34749339137,
+    "api_conclusion": "startup_failure",
+    "jobs_created": 0,
+    "public_UI_annotation": "An unexpected error has occurred and we have been automatically notified; errors may be temporary.",
+    "global_outage_confirmed": false
+  },
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-failure-download-70rjfk5c",
+    "inventory_sha256": "13d3ce18232253775182bada039913688bb8a5833bd444961d3afb9cf4959608",
+    "files": 6,
+    "bytes": 77587
+  }
+}

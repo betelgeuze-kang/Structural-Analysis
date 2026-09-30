@@ -1,0 +1,501 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-reversal-condensed-zkrwsizo",
+  "inventory_sha256": "1d8da7a05f88ccc493825824a9bed3f9baed0cf9496aca7ad3ad0c131806fc3f",
+  "file_count": 38,
+  "audit": {
+    "max_projection_error_inf": 0.0,
+    "max_control_residual": 0.0,
+    "optimizations": 6,
+    "native_solves": 12,
+    "accepted_seed_count": 0,
+    "optimizer_assembly_attempts": 370,
+    "native_newton_iterations": 12,
+    "optimizer_wall_ns": 724011129,
+    "native_wall_ns": 203540639,
+    "all_parents_unchanged": true,
+    "unknown_work": false,
+    "full_path_qualification": false
+  },
+  "rows": [
+    {
+      "case": "w32-drift40",
+      "candidate": "cheap",
+      "start": "parent",
+      "parent_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6",
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 17219886,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.18783837701603484,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6"
+        },
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 17022249,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.18783837701603484,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6"
+        }
+      ],
+      "optimizer_wall_ns": 108353899,
+      "optimizer_status": 2,
+      "optimizer_success": true,
+      "optimizer_message": "`ftol` termination condition is satisfied.",
+      "nfev": 28,
+      "njev": 18,
+      "seed": [
+        -0.003653204129742957,
+        0.02,
+        -0.11635941795485581,
+        -0.025595810261014346
+      ],
+      "reduced_residual_inf": 0.18783837701603484,
+      "residual_inf": 0.18783837701603484,
+      "projection_error_inf": 0.0,
+      "control_error": 0.0,
+      "control_equilibrium_residual": -2.842170943040401e-14,
+      "assembly_counts": {
+        "fun": 28,
+        "jac": 18,
+        "reconstruct": 1,
+        "direct_check": 1
+      },
+      "assembly_attempts": 48,
+      "parent_unchanged": true,
+      "checkpoint_bytes_equal": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w32-drift40",
+      "candidate": "cheap",
+      "start": "failed_terminal",
+      "parent_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6",
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16944537,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.10905193422915052,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6"
+        },
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16990778,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.10905193422915052,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:9de954ed5495b1d095ef4aa582f1f11f96e4685d39f6398b9cbc9f68f552f2c6"
+        }
+      ],
+      "optimizer_wall_ns": 224607927,
+      "optimizer_status": 2,
+      "optimizer_success": true,
+      "optimizer_message": "`ftol` termination condition is satisfied.",
+      "nfev": 59,
+      "njev": 56,
+      "seed": [
+        -0.04159988340612355,
+        0.02,
+        0.03810536269741255,
+        -7.079595370935703e-05
+      ],
+      "reduced_residual_inf": 0.10905193422915052,
+      "residual_inf": 0.10905193422915052,
+      "projection_error_inf": 0.0,
+      "control_error": 0.0,
+      "control_equilibrium_residual": 0.0,
+      "assembly_counts": {
+        "fun": 59,
+        "jac": 56,
+        "reconstruct": 1,
+        "direct_check": 1
+      },
+      "assembly_attempts": 117,
+      "parent_unchanged": true,
+      "checkpoint_bytes_equal": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w32-drift40",
+      "candidate": "middle",
+      "start": "parent",
+      "parent_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da",
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16756190,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.22140038603730194,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da"
+        },
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 17009930,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.22140038603730194,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da"
+        }
+      ],
+      "optimizer_wall_ns": 97309063,
+      "optimizer_status": 2,
+      "optimizer_success": true,
+      "optimizer_message": "`ftol` termination condition is satisfied.",
+      "nfev": 29,
+      "njev": 20,
+      "seed": [
+        -0.009827910373349862,
+        0.02,
+        -0.15548475256095504,
+        -0.023247088722292808
+      ],
+      "reduced_residual_inf": 0.22140038603730194,
+      "residual_inf": 0.22140038603730194,
+      "projection_error_inf": 0.0,
+      "control_error": 0.0,
+      "control_equilibrium_residual": 0.0,
+      "assembly_counts": {
+        "fun": 29,
+        "jac": 20,
+        "reconstruct": 1,
+        "direct_check": 1
+      },
+      "assembly_attempts": 51,
+      "parent_unchanged": true,
+      "checkpoint_bytes_equal": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w32-drift40",
+      "candidate": "middle",
+      "start": "failed_terminal",
+      "parent_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da",
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 17022369,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.22140038604462214,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da"
+        },
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16998678,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.22140038604462214,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:5b70c596f652da9d2c960d8723ad7dda3ac8e992c965e30503f767dccc1060da"
+        }
+      ],
+      "optimizer_wall_ns": 74417444,
+      "optimizer_status": 2,
+      "optimizer_success": true,
+      "optimizer_message": "`ftol` termination condition is satisfied.",
+      "nfev": 25,
+      "njev": 12,
+      "seed": [
+        -0.009827908890203397,
+        0.02,
+        -0.15548471598118324,
+        -0.023247090263018303
+      ],
+      "reduced_residual_inf": 0.22140038604462214,
+      "residual_inf": 0.22140038604462214,
+      "projection_error_inf": 0.0,
+      "control_error": 0.0,
+      "control_equilibrium_residual": 0.0,
+      "assembly_counts": {
+        "fun": 25,
+        "jac": 12,
+        "reconstruct": 1,
+        "direct_check": 1
+      },
+      "assembly_attempts": 39,
+      "parent_unchanged": true,
+      "checkpoint_bytes_equal": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w48-drift40",
+      "candidate": "cheap",
+      "start": "parent",
+      "parent_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2",
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16842683,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.6145863333338142,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2"
+        },
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16989739,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.6145863333338142,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2"
+        }
+      ],
+      "optimizer_wall_ns": 135426690,
+      "optimizer_status": 3,
+      "optimizer_success": true,
+      "optimizer_message": "`xtol` termination condition is satisfied.",
+      "nfev": 47,
+      "njev": 22,
+      "seed": [
+        0.006700927319961031,
+        0.02,
+        -0.08843172280818778,
+        -0.03226600827796611
+      ],
+      "reduced_residual_inf": 0.6145863333338142,
+      "residual_inf": 0.6145863333338142,
+      "projection_error_inf": 0.0,
+      "control_error": 0.0,
+      "control_equilibrium_residual": 0.0,
+      "assembly_counts": {
+        "fun": 47,
+        "jac": 22,
+        "reconstruct": 1,
+        "direct_check": 1
+      },
+      "assembly_attempts": 71,
+      "parent_unchanged": true,
+      "checkpoint_bytes_equal": true,
+      "locally_accepted": false
+    },
+    {
+      "case": "w48-drift40",
+      "candidate": "cheap",
+      "start": "failed_terminal",
+      "parent_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2",
+      "unknown_work": false,
+      "native": [
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16820963,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.13376980718672787,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2"
+        },
+        {
+          "status": "blocked",
+          "committed": false,
+          "wall_ns": 16922637,
+          "metrics": {
+            "control_error_m": 0.0,
+            "equilibrium_gate_passed": false,
+            "control_gate_passed": true,
+            "solver_contract_pass": false,
+            "parent_checkpoint_immutable": true,
+            "rollback_exact": true,
+            "committed": false
+          },
+          "solver_metrics": {
+            "terminal_reason": "line_search_failed_to_reduce_residual",
+            "relative_residual": 0.13376980718672787,
+            "newton_iteration_count": 1,
+            "linear_solve_count": 1,
+            "contract_pass": false
+          },
+          "checkpoint_hash": "sha256:ab1d56ed7f214e536f85a1f6f58d565e115c27326a32755fcabe6f6bb7f321b2"
+        }
+      ],
+      "optimizer_wall_ns": 83896106,
+      "optimizer_status": 2,
+      "optimizer_success": true,
+      "optimizer_message": "`ftol` termination condition is satisfied.",
+      "nfev": 26,
+      "njev": 16,
+      "seed": [
+        -0.04463877353101636,
+        0.02,
+        0.03792555419132534,
+        -5.819515156134374e-05
+      ],
+      "reduced_residual_inf": 0.13376980718672787,
+      "residual_inf": 0.13376980718672787,
+      "projection_error_inf": 0.0,
+      "control_error": 0.0,
+      "control_equilibrium_residual": 0.0,
+      "assembly_counts": {
+        "fun": 26,
+        "jac": 16,
+        "reconstruct": 1,
+        "direct_check": 1
+      },
+      "assembly_attempts": 44,
+      "parent_unchanged": true,
+      "checkpoint_bytes_equal": true,
+      "locally_accepted": false
+    }
+  ]
+}

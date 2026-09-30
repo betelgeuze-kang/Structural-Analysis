@@ -314,7 +314,7 @@ def _archive_coordinate(
         raise TransitionEvidenceError(f"{role}_archive_invalid") from error
     with archive:
         manifest_names = [
-            name for name in archive.namelist() if name.endswith("/manifest.json")
+            name for name in archive.namelist() if name.count("/") == 1 and name.endswith("/manifest.json")
         ]
         if len(manifest_names) != 1:
             raise TransitionEvidenceError(f"{role}_manifest_count_invalid")

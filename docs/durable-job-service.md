@@ -86,6 +86,7 @@ Principal routes are:
 | `GET` | `/v1/jobs/{job_id}` | Workbench-safe job projection |
 | `GET` | `/v1/jobs/{job_id}/result` | published result bytes |
 | `GET` | `/v1/jobs/{job_id}/evidence` | published completion evidence |
+| `GET` | `/v1/jobs/{job_id}/failure-diagnostics/{attempt}` | immutable diagnostic bytes for one attempt; never a successful result |
 | `POST` | `/v1/jobs/{job_id}/resume` | exact-hash retry of a failed job |
 | `POST` | `/v1/jobs/{job_id}/cancel` | cancel an unleased job |
 | `POST` | `/v1/worker/claims` | acquire a time-bounded lease |
@@ -93,6 +94,22 @@ Principal routes are:
 
 HTTP responses use `no-store` and `nosniff`. Stable errors omit credentials,
 raw platform errors, filesystem paths, and solver internals.
+
+Failure-diagnostic reads first rebuild the diagnostic against the immutable
+request and that attempt's stored checkpoint binding. The authenticated response
+adds `X-Structural-Diagnostic-SHA256` (the exact response bytes' SHA-256, with
+`sha256:` prefix) and `X-Structural-Diagnostic-Checkpoint` (the original checkpoint
+hash, or `none` when that attempt started without a checkpoint). The body remains
+unchanged. These headers let a client distinguish a historical attempt's restart
+state from the job's subsequently advanced checkpoint.
+
+Workbench requires both headers together and checks their values against the
+diagnostic body. Current-attempt diagnostics must still match the current job
+checkpoint. If both headers are absent, the previous strict current-checkpoint
+comparison remains in effect; a historical checkpoint mismatch is not guessed
+away. Partial, malformed or inconsistent bindings reject without changing the
+current accepted result. This is a binding supplied by the authenticated service,
+not an independent signature or numerical/engineering acceptance of a failure.
 
 ## Verification
 

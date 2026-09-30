@@ -1,0 +1,113 @@
+{
+  "source_revision": "3c759fc430f4a90e51bec2bdf42305a0d466032e",
+  "counts": {
+    "api_entered": 2,
+    "artifact_contract_pass": 2,
+    "declared": 2,
+    "launched": 2,
+    "physical_converged": 2,
+    "resource_eligible": 2
+  },
+  "source_files_checked": 461,
+  "artifact_identities_checked": 20,
+  "comparison_count": 0,
+  "comparisons": [],
+  "exact_converged_repeat_pairs": 0,
+  "exact_failed_diagnostic_repeat_pairs": 0,
+  "rows": [
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 2520,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.41699246690493297,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 0,
+      "case_id": "three_story_two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00020477835197587024,
+        "dissipated_energy_density_mj_per_m3": 0.00012566299986210063,
+        "tensile_damage": 0.41699246690493297,
+        "tensile_history_strain": 0.0001483603700914161,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    },
+    {
+      "material_activity": {
+        "accepted_step_count": 4,
+        "available": true,
+        "concrete_damage_observed": true,
+        "material_observation_count": 4704,
+        "maximum_accumulated_steel_plastic_strain": 0.0,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.08907415596479717,
+        "reason": null,
+        "scope": "accepted_history_steps_only;not_geometric_nonlinearity_or_independent_physical_validation",
+        "steel_plasticity_observed": false
+      },
+      "slot": 1,
+      "case_id": "four_story_three_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "status": "converged",
+      "observed_load_path": null,
+      "committed_steps": 4,
+      "material_maxima": {
+        "compressive_damage": 0,
+        "compressive_history_strain": 0.00016348671623364898,
+        "dissipated_energy_density_mj_per_m3": 1.5404831192580608e-05,
+        "tensile_damage": 0.08907415596479717,
+        "tensile_history_strain": 0.00010737594138160583,
+        "accumulated_plastic_strain": 0,
+        "backstress_mpa": 0,
+        "plastic_strain": 0
+      }
+    }
+  ],
+  "summary": [
+    {
+      "case_id": "three_story_two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 1,
+      "converged_count": 1,
+      "workload_median_seconds_including_failures": 18.349053486,
+      "converged_workload_ratio_to_dense": null,
+      "launch_to_exit_plus_parent_validation_median_seconds": 24.468255273,
+      "parent_validation_median_seconds": 4.230949409,
+      "worker_cpu_median_seconds": 20.053963172,
+      "peak_rss_median_bytes": 136765440
+    },
+    {
+      "case_id": "four_story_three_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 1,
+      "converged_count": 1,
+      "workload_median_seconds_including_failures": 31.747820729,
+      "converged_workload_ratio_to_dense": null,
+      "launch_to_exit_plus_parent_validation_median_seconds": 41.095820701,
+      "parent_validation_median_seconds": 7.442022954,
+      "worker_cpu_median_seconds": 33.500743748,
+      "peak_rss_median_bytes": 158310400
+    }
+  ],
+  "experiment_wall_seconds": 66.579217017,
+  "scope": "Retained-byte audit and recomputed internal comparisons; generated 3-story/2-bay and 4-story/3-bay topology variants with 12-layer sections and 10x source roof loads. Single dense run per case for activation screening, not repeated performance evidence, independent projects or external physical validation. Failure timings retained; no speed ratio for nonconverged groups.",
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-larger-activation-10vh3m3p",
+    "payload_files": 686,
+    "payload_bytes": 24902352,
+    "inventory_sha256": "6fc5a3430c46a8f5015cd6720ccd7b9f1699fb37449d4324ec6eae0a6c9dd44e"
+  }
+}

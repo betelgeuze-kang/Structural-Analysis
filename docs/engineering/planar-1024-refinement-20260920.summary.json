@@ -1,0 +1,276 @@
+{
+  "numerical_run": {
+    "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+    "status": "ready",
+    "contract_pass": true,
+    "attempted_steps": 40,
+    "committed_steps": 40,
+    "setup_wall_ns": 596245034,
+    "path_wall_ns": 2305985865193,
+    "artifact_sha256": "2f923d7537b4ddf10ce19e0959fd081767466442e9f438ef1265c7461154446b",
+    "through_artifact_hash_wall_ns": 2465344714483,
+    "timing_excludes": "summary and inventory output, subsequent comparison audit",
+    "physical_validation": false,
+    "public_result_authority": false
+  },
+  "numerical_process": {
+    "exit_code": 0,
+    "outer_wall_ns": 2472637151632,
+    "maximum_child_rss_kib": 25006308,
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-1024-full-refinement-5hu1ozwj"
+  },
+  "controller_failure_and_recovery": {
+    "original_controller": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-1024-controller-g39vo6sw",
+    "original_controller_exit_code": 1,
+    "failure": "AttributeError: hashlib.file_digest is unavailable in Python 3.10",
+    "numerical_exit_code": 0,
+    "new_solves": 0,
+    "new_fits": 0,
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "driver_source_revision": "4d47f89ee670c7a3153fa3129218cd237b6f365d"
+  },
+  "payload_verification": {
+    "fine_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-1024-full-refinement-5hu1ozwj",
+    "fine_inventory_sha256": "73fdebb2170c4ea49bc9a5a73c1645cb2a6247b4af8af2242067441320415307",
+    "payload_files": 466,
+    "payload_bytes": 5517595286,
+    "source_files": 955,
+    "source_manifest_sha256": "b0c3fda2bdbcc8ef196780beb5448f7f9a3265914fb8a92d1f0043f8f99ec34c",
+    "wall_ns": 2898507689,
+    "new_solves": 0
+  },
+  "audit_process": {
+    "exit_code": 0,
+    "wall_ns": 117821149052,
+    "new_solves": 0,
+    "new_fits": 0
+  },
+  "audit_maximum_rss_kib": 17879132,
+  "audit_inventory_sha256": "af37666e6364c48a514af49bc91177349c80daf475cffe88afb55ba1768607ad",
+  "comparison": {
+    "schema": "fixed-planar-512-1024-comparison.v1",
+    "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+    "source_sha256": {
+      "coarse": "2e5974645b6f6fbc81eb8f647a9d6af049007856a466e50bc41b6f685d3fbfd3",
+      "fine": "2f923d7537b4ddf10ce19e0959fd081767466442e9f438ef1265c7461154446b"
+    },
+    "protocol_sha256": {
+      "coarse": "9e1ede09c94df2402765f8980d1c6d514dc71d87c23dc13312c7130c9e787f96",
+      "fine": "e620f118fc72a7af34b8a527649dcddc3d1b78902922aab2860baa92ba73432b"
+    },
+    "comparison_layers": [
+      512,
+      1024
+    ],
+    "matched_targets": 40,
+    "original_group_screen": 0.01,
+    "maxima": {
+      "nodal_steel": {
+        "translations": {
+          "target_m": 0.06,
+          "absolute_difference": 6.455855739578853e-08,
+          "finer_infinity_norm": 0.06,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 1.0759759565964755e-06,
+          "within_exploratory_one_percent": true,
+          "witness_index": 8
+        },
+        "rotations": {
+          "target_m": 0.08,
+          "absolute_difference": 5.964311659140131e-08,
+          "finer_infinity_norm": 0.014286129891886197,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 4.174896703499497e-06,
+          "within_exploratory_one_percent": true,
+          "witness_index": 2
+        },
+        "support_forces": {
+          "target_m": 0.036,
+          "absolute_difference": 0.0034114137258711708,
+          "finer_infinity_norm": 1485.6609040956198,
+          "denominator_floor": 1e-09,
+          "relative_group_difference": 2.2962263572169805e-06,
+          "within_exploratory_one_percent": true,
+          "witness_index": 3
+        },
+        "support_moments": {
+          "target_m": 0.01,
+          "absolute_difference": 0.0008910737700489335,
+          "finer_infinity_norm": 372.0974185814322,
+          "denominator_floor": 1e-09,
+          "relative_group_difference": 2.394732469378648e-06,
+          "within_exploratory_one_percent": true,
+          "witness_index": 1
+        },
+        "load_factor": {
+          "target_m": 0.036,
+          "absolute_difference": 1.6231580868275586e-06,
+          "finer_infinity_norm": 0.7239764782376574,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 2.242003898771321e-06,
+          "within_exploratory_one_percent": true,
+          "witness_index": 0
+        },
+        "plastic_strain": {
+          "target_m": 0.024,
+          "absolute_difference": 3.092505350466067e-09,
+          "finer_infinity_norm": 8.522290456290039e-05,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 3.628725594753209e-05,
+          "within_exploratory_one_percent": true,
+          "witness_index": 1
+        },
+        "accumulated_plastic_strain": {
+          "target_m": 0.024,
+          "absolute_difference": 3.092505350466067e-09,
+          "finer_infinity_norm": 8.522290456290039e-05,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 3.628725594753209e-05,
+          "within_exploratory_one_percent": true,
+          "witness_index": 1
+        },
+        "backstress_mpa": {
+          "target_m": 0.024,
+          "absolute_difference": 1.5462526752333533e-05,
+          "finer_infinity_norm": 0.42611452281450196,
+          "denominator_floor": 1e-09,
+          "relative_group_difference": 3.62872559475396e-05,
+          "within_exploratory_one_percent": true,
+          "witness_index": 1
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "target_m": 0.024,
+          "absolute_difference": 7.731263376165032e-07,
+          "finer_infinity_norm": 0.0213057261407251,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 3.628725594753145e-05,
+          "within_exploratory_one_percent": true,
+          "witness_index": 1
+        },
+        "steel_stress_mpa": {
+          "target_m": 0.08,
+          "absolute_difference": 0.004003241096768306,
+          "finer_infinity_norm": 283.7216070604661,
+          "denominator_floor": 1e-09,
+          "relative_group_difference": 1.410975053413942e-05,
+          "within_exploratory_one_percent": true,
+          "witness_index": 5
+        }
+      },
+      "concrete": {
+        "tensile_history_strain": {
+          "target_m": 0.004,
+          "absolute_difference": 8.236994770541474e-08,
+          "finer_infinity_norm": 0.000198723763101395,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 0.0004144947057156272,
+          "within_exploratory_one_percent": true,
+          "witness_index": 221,
+          "witness_section": "E1:gauss-0",
+          "witness_cell": 221,
+          "cells_above_original_one_percent_norm": 0,
+          "cells": 9216
+        },
+        "compressive_history_strain": {
+          "target_m": 0.056,
+          "absolute_difference": 7.33433322301592e-07,
+          "finer_infinity_norm": 0.002388140140254837,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 0.0003071148589392781,
+          "within_exploratory_one_percent": true,
+          "witness_index": 4199,
+          "witness_section": "E3:gauss-2",
+          "witness_cell": 103,
+          "cells_above_original_one_percent_norm": 0,
+          "cells": 9216
+        },
+        "tensile_damage": {
+          "target_m": 0.078,
+          "absolute_difference": 0.02147216019332221,
+          "finer_infinity_norm": 0.9999999997233112,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 0.021472160199263315,
+          "within_exploratory_one_percent": false,
+          "witness_index": 4228,
+          "witness_section": "E3:gauss-2",
+          "witness_cell": 132,
+          "cells_above_original_one_percent_norm": 2,
+          "cells": 9216
+        },
+        "compressive_damage": {
+          "target_m": 0.022,
+          "absolute_difference": 0.00039821215679586297,
+          "finer_infinity_norm": 0.03314499816067151,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 0.012014245855906098,
+          "within_exploratory_one_percent": false,
+          "witness_index": 1543,
+          "witness_section": "E2:gauss-0",
+          "witness_cell": 7,
+          "cells_above_original_one_percent_norm": 1,
+          "cells": 9216
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "target_m": 0.022,
+          "absolute_difference": 5.979984359213901e-06,
+          "finer_infinity_norm": 0.0015610467352776237,
+          "denominator_floor": 1e-12,
+          "relative_group_difference": 0.003830752932679106,
+          "within_exploratory_one_percent": true,
+          "witness_index": 1543,
+          "witness_section": "E2:gauss-0",
+          "witness_cell": 7,
+          "cells_above_original_one_percent_norm": 0,
+          "cells": 9216
+        },
+        "stress_mpa": {
+          "target_m": 0.078,
+          "absolute_difference": 0.06731836217446352,
+          "finer_infinity_norm": 29.982371479534127,
+          "denominator_floor": 1e-09,
+          "relative_group_difference": 0.0022452647623425926,
+          "within_exploratory_one_percent": true,
+          "witness_index": 4228,
+          "witness_section": "E3:gauss-2",
+          "witness_cell": 132,
+          "cells_above_original_one_percent_norm": 0,
+          "cells": 9216
+        }
+      }
+    },
+    "failed_group_counts": {
+      "nodal_steel": 0,
+      "concrete": 14
+    },
+    "composite_view_not_solver_artifact": true,
+    "structural_solves": 0,
+    "training_fits": 0,
+    "independent_physical_validation": false,
+    "public_api_extended": false
+  },
+  "failed_targets_by_concrete_field": {
+    "tensile_history_strain": [],
+    "compressive_history_strain": [],
+    "tensile_damage": [
+      0.046,
+      0.058,
+      0.06,
+      0.062,
+      0.064,
+      0.066,
+      0.068,
+      0.07,
+      0.072,
+      0.074,
+      0.076,
+      0.078,
+      0.08
+    ],
+    "compressive_damage": [
+      0.022
+    ],
+    "dissipated_energy_density_mj_per_m3": [],
+    "stress_mpa": []
+  },
+  "comparison_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-512-1024-audit-s7ze8hxd"
+}

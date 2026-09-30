@@ -1,0 +1,12 @@
+{
+  "description": "Actual three-target development study, two original and two fresh verification API invocations; invalid alternative retained. Frontend source edits were present; Python source unchanged from declared revision. Not independent physical evidence.",
+  "source_revision": "687754ae9d969e567c1d8498fe4c05ad1bc47f5d",
+  "verified_count": 2,
+  "candidate_denominator": 3,
+  "report_hash": "sha256:712377d70b25266774695f72ddf85bff77bee90e4336ab3be1763ead7f4cfeb2",
+  "decision_only_derivations": {
+    "unpriced.json": "Same retained physical evidence with prices removed. No new numerical execution.",
+    "strict.json": "Same retained physical evidence with stricter terminal translation screen. No new numerical execution.",
+    "failed.json": "Synthetic raised-verification outcome over retained original analysis bytes; no failure was numerically executed. Only failure-decision plumbing is tested."
+  }
+}

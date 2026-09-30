@@ -1,0 +1,236 @@
+{
+  "source_review": {
+    "schema_version": "peer-u3-primary-source-review.v1",
+    "observer_pid": 1001625,
+    "review_date": "2026-09-10",
+    "source": {
+      "author": "Murat Saatcioglu",
+      "year": 1984,
+      "title": "Reinforced Concrete Columns Subjected to Uniaxial and Biaxial Load Reversals",
+      "pages_printed": [
+        585,
+        592
+      ],
+      "pdf_pages": 8,
+      "url": "https://www.iitk.ac.in/nicee/wcee/article/8_vol6_585.pdf",
+      "sha256": "320cfbc55c073f2e173448ef5f6f839d53a37bc45dc298709edad128c86613c4"
+    },
+    "visual_pages_reviewed_zero_based": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "drawing_detail_reviewed_dpi": 220,
+    "text_extraction": "pdftotext exited zero but produced only eight form feeds; no machine-extracted article text",
+    "primary_source_observations": [
+      {
+        "pages": [
+          585,
+          586
+        ],
+        "finding": "350 mm square, 1.0 m shear span, eight 25 mm bars equally spaced along four faces"
+      },
+      {
+        "pages": [
+          586,
+          587
+        ],
+        "finding": "U3 has 600 kN constant compression and 10 mm ties at 75 mm spacing; footing restrained against rotation"
+      },
+      {
+        "pages": [
+          589
+        ],
+        "finding": "Figure 1 shows 900 mm concrete shaft, 350 mm section and 45 mm face-to-bar-center dimension"
+      },
+      {
+        "pages": [
+          586,
+          590
+        ],
+        "finding": "Figure 3 provides staged multiples of whole-section yield displacement, not the 1010 digital measurement samples or an identified U3 yield displacement in millimetres"
+      },
+      {
+        "pages": [
+          586,
+          587,
+          591
+        ],
+        "finding": "Author describes predominantly shear behavior except D4, substantial U3 degradation, and shows the U3 cracking photograph"
+      },
+      {
+        "pages": [
+          591,
+          592
+        ],
+        "finding": "Figure 6 force axis is labelled net horizontal force; its numerical relationship to the PEER shear channel is not established"
+      }
+    ],
+    "peer_original_inventory_sha256": "737c5d08e6f7630a3a699e70b7c6e31bb0119a86d969cf09f811408672e58428",
+    "peer_xml_sha256": "43b94868851d8594d92614b9bb750b3871070914ff3dbdea35c928370ff3b9fa",
+    "peer_fields": {
+      "geometry/width": {
+        "token": "350",
+        "units": "mm"
+      },
+      "geometry/depth": {
+        "token": "350",
+        "units": "mm"
+      },
+      "geometry/lInflection": {
+        "token": "1,000",
+        "units": "mm"
+      },
+      "geometry/lMeasured": {
+        "token": "1,000",
+        "units": "mm"
+      },
+      "loading/axialLoad": {
+        "token": "600",
+        "units": "kN"
+      },
+      "loading/PDCode": {
+        "token": "Shear provided",
+        "units": null
+      },
+      "longitudinalReinforcement/diameter": {
+        "token": "25",
+        "units": "mm"
+      },
+      "longitudinalReinforcement/numberOfBars": {
+        "token": "8",
+        "units": null
+      },
+      "longitudinalReinforcement/perpendicularToLoad/clearCover": {
+        "token": "22.5",
+        "units": "mm"
+      },
+      "transverseReinforcement/closeSpacing/barDiameter": {
+        "token": "10",
+        "units": "mm"
+      },
+      "transverseReinforcement/closeSpacing/hoopSpacing": {
+        "token": "75",
+        "units": "mm"
+      }
+    },
+    "conditional_geometry_derivation": {
+      "assumption": "PEER clear cover 22.5 mm refers to outside of 10 mm ties; drawing face-to-longitudinal-center dimension is 45 mm",
+      "inset_mm_exact": "45",
+      "bar_center_offset_from_section_center_mm_exact": "130",
+      "eight_candidate_bar_centers_mm": [
+        [
+          -130,
+          -130
+        ],
+        [
+          0,
+          -130
+        ],
+        [
+          130,
+          -130
+        ],
+        [
+          -130,
+          0
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          -130,
+          130
+        ],
+        [
+          0,
+          130
+        ],
+        [
+          130,
+          130
+        ]
+      ],
+      "center_to_center_span_mm": 260,
+      "cross_source_geometry_numerically_consistent": true,
+      "source_identity_proved": false
+    },
+    "correspondence_limits": {
+      "1984_U3_to_1989_PEER_U3_original_history_lineage": "not established; shared name, author and geometry/loading are supporting matches, not unique source authentication",
+      "new_independent_campaign": false,
+      "longitudinal_nominal_area_convention_resolved": false,
+      "physical_actuator_vs_reported_shear_mapping_resolved": false,
+      "commanded_history_reconstructed": false,
+      "material_cyclic_laws_calibrated": false,
+      "reuse_terms_established": false,
+      "physical_model_created": false,
+      "training_admitted": false,
+      "independent_validation": false
+    },
+    "current_solver": {
+      "source_revision": "461b536f2b7c549a69fba0dc1e7a979b60a2aa8e",
+      "files": [
+        {
+          "path": "src/structural_analysis/elements/stateful_fiber_beam2d.py",
+          "sha256": "ad5b4594189b54f0d186a856a41ad2a681bd6392aeba1d7c9fd4a20841189dc2",
+          "bytes": 19240
+        },
+        {
+          "path": "src/structural_analysis/api/nonlinear_fiber_frame.py",
+          "sha256": "13593622958e98dc78cc972ab20bc4a045fdc158847b9ffec6a0fe36c5398702",
+          "bytes": 69942
+        }
+      ],
+      "public_planar_element": "Euler-Bernoulli axial-curvature fiber formulation",
+      "shear_deformation_supported": false,
+      "implication": "A full-history U3 comparison requires resolving shear behavior/model adequacy, rather than fitting flexural parameters to absorb an omitted mechanism"
+    },
+    "fits": 0,
+    "newton_solves": 0,
+    "material_integrations": 0,
+    "review_script_wall_ns": 8685054,
+    "earlier_scope_failure": "Initial inventory lookup assumed sibling inventory filename; no old packet was modified. A first saved script also assumed an object wrapper instead of the original list. Both failures precede XML copying or geometry computation. The original list inventory is now decoded directly and checked against the published SHA-256.",
+    "cost_limit": "Network fetch timing is retained separately. Human/model visual review, rendering and outer orchestration are not covered by this script timer."
+  },
+  "fetch": {
+    "url": "https://www.iitk.ac.in/nicee/wcee/article/8_vol6_585.pdf",
+    "browser_fetch": "timeout",
+    "automatic_retry": false,
+    "status": 200,
+    "final_url": "https://www.iitk.ac.in/nicee/wcee/article/8_vol6_585.pdf",
+    "content_type": "application/pdf",
+    "bytes": 1638325,
+    "sha256": "320cfbc55c073f2e173448ef5f6f839d53a37bc45dc298709edad128c86613c4",
+    "wall_ns": 1887595955
+  },
+  "completion_check": {
+    "source_review_observer_absent": true,
+    "local_fetch_exec_exit_code": 0,
+    "pdftotext_exit_code": 0,
+    "text_layer_unavailable": true,
+    "render_commands_exit_code": 0,
+    "visual_review_completed_pages": 8,
+    "source_review_corrected_exec_exit_code": 0,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "full_review_wall_time_unavailable": true,
+    "original_runtime_worker_concurrent": true
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-u3-primary-i4fh3bdp",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-u3-primary-i4fh3bdp.inventory.json",
+    "inventory_sha256": "3fb40be55427c8a5b8cfcb5523c98ca853ac9c69e605dac3b327d791acfee15f",
+    "file_count": 21,
+    "total_bytes": 3632121,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T00:09:44.974020+00:00",
+    "seal_wall_ns": 7278337,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

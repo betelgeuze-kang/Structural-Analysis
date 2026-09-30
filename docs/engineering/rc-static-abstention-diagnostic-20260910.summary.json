@@ -1,0 +1,376 @@
+{
+  "schema_version": "rc-static-abstention-diagnostic.v1",
+  "numerical_source_revision": "3d4ecef4b737703717522ef385bdc6004eba56e1",
+  "runtime_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-secant-abstention-fhn1qvyq",
+  "runtime_original_audit_complete": false,
+  "model_declarations_compiled": 4,
+  "model_compile_and_static_features_wall_ns": 8869691,
+  "static_prefix_matches_all_964_training_rows": true,
+  "rows": [
+    {
+      "fold": 0,
+      "case_id": "train-a",
+      "ridge": 10000.0,
+      "policy_hash": "sha256:89aa0abca67267a9b625491227847e6c01c9d26ac15e1b565d14c32e3ae9491b",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [
+        {
+          "index": 15,
+          "name": "rotation_coordinate_scale_m",
+          "value": 2.0,
+          "low": 2.5,
+          "high": 3.25,
+          "slack": 0.07500000000000001
+        }
+      ],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "abstained_to_secant": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1272195440,
+      "proposal_callback_wall_ns": 1354151431,
+      "proposal_path_wall_ns": 73526478652,
+      "proposal_over_secant_path_wall_ratio": 1.0219789045931427,
+      "full_comparison_pass": true
+    },
+    {
+      "fold": 1,
+      "case_id": "train-b",
+      "ridge": 10000.0,
+      "policy_hash": "sha256:2a924b90d6347379185a1ef1f4cbe689e794213ec73f0510abaa5e2cdedc9778",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "proposed": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1272346549,
+      "proposal_callback_wall_ns": 1401974660,
+      "proposal_path_wall_ns": 74212049541,
+      "proposal_over_secant_path_wall_ratio": 1.1225279057646016,
+      "full_comparison_pass": true
+    },
+    {
+      "fold": 2,
+      "case_id": "train-c",
+      "ridge": 10000.0,
+      "policy_hash": "sha256:cdaa45b73509925d5dd030c6b5475e9c50e14706832d9db820642d2ab1e2b2e0",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [
+        {
+          "index": 2,
+          "name": "node_1_x_m",
+          "value": 1.75,
+          "low": 2.0,
+          "high": 3.25,
+          "slack": 0.125
+        },
+        {
+          "index": 4,
+          "name": "node_2_x_m",
+          "value": 1.75,
+          "low": 2.0,
+          "high": 3.25,
+          "slack": 0.125
+        },
+        {
+          "index": 16,
+          "name": "member_0_length_m",
+          "value": 1.75,
+          "low": 2.0,
+          "high": 3.25,
+          "slack": 0.125
+        }
+      ],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "abstained_to_secant": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1273123629,
+      "proposal_callback_wall_ns": 1359548897,
+      "proposal_path_wall_ns": 75826132199,
+      "proposal_over_secant_path_wall_ratio": 1.0222188648758475,
+      "full_comparison_pass": true
+    },
+    {
+      "fold": 3,
+      "case_id": "train-d",
+      "ridge": 10000.0,
+      "policy_hash": "sha256:0098df92f669412d0bd2598e09cb9cf0f30e857d7962016d4172bd5806af4642",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [
+        {
+          "index": 2,
+          "name": "node_1_x_m",
+          "value": 3.25,
+          "low": 1.75,
+          "high": 3.0,
+          "slack": 0.125
+        },
+        {
+          "index": 4,
+          "name": "node_2_x_m",
+          "value": 3.25,
+          "low": 1.75,
+          "high": 3.0,
+          "slack": 0.125
+        },
+        {
+          "index": 5,
+          "name": "node_2_y_m",
+          "value": 1.25,
+          "low": 1.5,
+          "high": 2.5,
+          "slack": 0.1
+        },
+        {
+          "index": 15,
+          "name": "rotation_coordinate_scale_m",
+          "value": 3.25,
+          "low": 2.0,
+          "high": 3.0,
+          "slack": 0.1
+        },
+        {
+          "index": 16,
+          "name": "member_0_length_m",
+          "value": 3.25,
+          "low": 1.75,
+          "high": 3.0,
+          "slack": 0.125
+        },
+        {
+          "index": 45,
+          "name": "member_1_length_m",
+          "value": 1.25,
+          "low": 1.5,
+          "high": 2.5,
+          "slack": 0.1
+        }
+      ],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "abstained_to_secant": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1271942814,
+      "proposal_callback_wall_ns": 1355442349,
+      "proposal_path_wall_ns": 66972589670,
+      "proposal_over_secant_path_wall_ratio": 1.0249679997655814,
+      "full_comparison_pass": true
+    },
+    {
+      "fold": 4,
+      "case_id": "train-a",
+      "ridge": 1000000.0,
+      "policy_hash": "sha256:9c14f4f9760e316a0762ea3f0a7670f5816b2ed0e1cc75a0b08b721ef89bc6d2",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [
+        {
+          "index": 15,
+          "name": "rotation_coordinate_scale_m",
+          "value": 2.0,
+          "low": 2.5,
+          "high": 3.25,
+          "slack": 0.07500000000000001
+        }
+      ],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "abstained_to_secant": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1271289599,
+      "proposal_callback_wall_ns": 1362873669,
+      "proposal_path_wall_ns": 73669286758,
+      "proposal_over_secant_path_wall_ratio": 1.0264324307169652,
+      "full_comparison_pass": true
+    },
+    {
+      "fold": 5,
+      "case_id": "train-b",
+      "ridge": 1000000.0,
+      "policy_hash": "sha256:52b9799a827bf1fb234918b7c7593f70d1708217429686c8b1f1634dddf24fdf",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "proposed": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1267708706,
+      "proposal_callback_wall_ns": 1398535821,
+      "proposal_path_wall_ns": 73879907675,
+      "proposal_over_secant_path_wall_ratio": 1.1247270432390961,
+      "full_comparison_pass": true
+    },
+    {
+      "fold": 6,
+      "case_id": "train-c",
+      "ridge": 1000000.0,
+      "policy_hash": "sha256:032fd395e2d97f4158ef5383b1e8d6465ac8c73ad66b1789b63e6fdc28e357f5",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [
+        {
+          "index": 2,
+          "name": "node_1_x_m",
+          "value": 1.75,
+          "low": 2.0,
+          "high": 3.25,
+          "slack": 0.125
+        },
+        {
+          "index": 4,
+          "name": "node_2_x_m",
+          "value": 1.75,
+          "low": 2.0,
+          "high": 3.25,
+          "slack": 0.125
+        },
+        {
+          "index": 16,
+          "name": "member_0_length_m",
+          "value": 1.75,
+          "low": 2.0,
+          "high": 3.25,
+          "slack": 0.125
+        }
+      ],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "abstained_to_secant": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1274447396,
+      "proposal_callback_wall_ns": 1368856902,
+      "proposal_path_wall_ns": 76010254715,
+      "proposal_over_secant_path_wall_ratio": 1.0209787099758,
+      "full_comparison_pass": true
+    },
+    {
+      "fold": 7,
+      "case_id": "train-d",
+      "ridge": 1000000.0,
+      "policy_hash": "sha256:1b41e3c0447ecb8d3be37a0bd38a2222a0a01bfe0274824fb223705dc861b57b",
+      "static_feature_count": 74,
+      "full_feature_count": 500,
+      "static_violations": [
+        {
+          "index": 2,
+          "name": "node_1_x_m",
+          "value": 3.25,
+          "low": 1.75,
+          "high": 3.0,
+          "slack": 0.125
+        },
+        {
+          "index": 4,
+          "name": "node_2_x_m",
+          "value": 3.25,
+          "low": 1.75,
+          "high": 3.0,
+          "slack": 0.125
+        },
+        {
+          "index": 5,
+          "name": "node_2_y_m",
+          "value": 1.25,
+          "low": 1.5,
+          "high": 2.5,
+          "slack": 0.1
+        },
+        {
+          "index": 15,
+          "name": "rotation_coordinate_scale_m",
+          "value": 3.25,
+          "low": 2.0,
+          "high": 3.0,
+          "slack": 0.1
+        },
+        {
+          "index": 16,
+          "name": "member_0_length_m",
+          "value": 3.25,
+          "low": 1.75,
+          "high": 3.0,
+          "slack": 0.125
+        },
+        {
+          "index": 45,
+          "name": "member_1_length_m",
+          "value": 1.25,
+          "low": 1.5,
+          "high": 2.5,
+          "slack": 0.1
+        }
+      ],
+      "decision_counts": {
+        "abstained_to_reference": 1,
+        "abstained_to_secant": 241
+      },
+      "capture_count": 242,
+      "capture_wall_ns": 1266104436,
+      "proposal_callback_wall_ns": 1353624849,
+      "proposal_path_wall_ns": 66838290510,
+      "proposal_over_secant_path_wall_ratio": 1.0242392271202096,
+      "full_comparison_pass": true
+    }
+  ],
+  "static_rejecting_folds": 6,
+  "capture_count_in_static_rejecting_folds": 1452,
+  "capture_wall_ns_in_static_rejecting_folds": 7629103314,
+  "proposal_callback_wall_ns_in_static_rejecting_folds": 8154498097,
+  "optimization_implemented": false,
+  "avoided_runtime_measured": false,
+  "structural_calls": 0,
+  "training_fits": 0,
+  "new_training_labels": 0,
+  "independent_validation": false,
+  "audit_wall_ns": 4501501191,
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-static-abstention-fxasw468",
+  "seal": {
+    "inventory_sha256": "987ed7249a04d6c9ff18a813d972788f97b4de6bdca3f04b0cab1d3592199fc5",
+    "files": 252,
+    "bytes": 190206523
+  },
+  "reported_runtime_candidates": [
+    {
+      "fold_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "proposed_count": 241,
+      "ridge": 10000.0,
+      "score": 1.0479234187497932
+    },
+    {
+      "fold_indices": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "proposed_count": 241,
+      "ridge": 1000000.0,
+      "score": 1.0490943527630177
+    }
+  ],
+  "reported_runtime_selected_strategy": "secant",
+  "reported_runtime_work": {
+    "core_calls": 7744,
+    "linear_solves": 35194,
+    "newton_iterations": 35194
+  }
+}

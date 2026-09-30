@@ -45,9 +45,13 @@ NODE_IDS = ("N1", "N2", "N3")
 LOAD_FACTORS = (0.25, 0.5, 0.75, 1.0)
 
 
-def _artifacts(*, initial_free_coordinates_by_step=None):
+def _artifacts(*, initial_free_coordinates_by_step=None, terminal_polishing=False):
     problem = make_two_member_stateful_fiber_l_frame()
-    path_kwargs = {"config": NewtonRaphsonConfig(max_iterations=40)}
+    path_kwargs = {
+        "config": NewtonRaphsonConfig(
+            max_iterations=40, terminal_polishing=terminal_polishing
+        )
+    }
     if initial_free_coordinates_by_step is not None:
         path_kwargs["initial_free_coordinates_by_step"] = (
             initial_free_coordinates_by_step
@@ -618,3 +622,249 @@ def test_manifest_rejects_nonconverged_terminal_even_after_rehash(artifacts) -> 
     assert (
         error.value.code == "fiber_frame_nonlinear_terminal_receipt_convergence_invalid"
     )
+
+
+@pytest.fixture(scope="module")
+def polishing_artifacts():
+    # One additional source path; public validators deliberately replay it.
+    return _artifacts(terminal_polishing=True)
+
+
+def test_polishing_receipt_replays_and_retains_attempted_diagnostics(
+    polishing_artifacts,
+):
+    problem, path, chain, plan, scaling, kine, material, binding, receipt = (
+        polishing_artifacts
+    )
+    assert receipt.terminal_polishing is True
+    manifest = receipt.to_manifest()
+    assert (
+        manifest["solver"]["profile"]
+        == "stateful_fiber_frame2d_dense_or_sparse_cpu_newton.v2"
+    )
+    assert manifest["solver"]["terminal_polishing"] is True
+    assert (
+        validate_fiber_frame_nonlinear_terminal_receipt_manifest(manifest) == manifest
+    )
+    assert (
+        validate_fiber_frame_nonlinear_terminal_receipt(
+            problem, plan, scaling, chain, kine, material, binding, path, receipt
+        )
+        is receipt
+    )
+    for step, row in zip(path.steps, receipt.step_receipts, strict=True):
+        diagnostic = step.trial_solution.metrics["terminal_polishing"]
+        assert row.to_manifest()["solver"]["terminal_polishing"] == diagnostic
+        assert row.linear_solve_count == row.iteration_count + diagnostic[
+            "linear_solve_count"
+        ] - int(diagnostic["accepted"])
+    assert receipt.total_linear_solve_count == sum(
+        step.trial_solution.metrics["linear_solve_count"] for step in path.steps
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation", ["missing_profile", "wrong_profile", "false", "integer_true"]
+)
+def test_polishing_manifest_requires_explicit_enabled_profile(
+    polishing_artifacts, mutation
+):
+    manifest = polishing_artifacts[-1].to_manifest()
+    if mutation == "missing_profile":
+        del manifest["solver"]["profile"]
+    elif mutation == "wrong_profile":
+        manifest["solver"]["profile"] = (
+            "stateful_fiber_frame2d_dense_or_sparse_cpu_newton.v1"
+        )
+    else:
+        manifest["solver"]["terminal_polishing"] = False if mutation == "false" else 1
+    with pytest.raises(FiberFrameNonlinearTerminalReceiptError):
+        validate_fiber_frame_nonlinear_terminal_receipt_manifest(manifest)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("enabled", 1),
+        ("attempted", 1),
+        ("source_iteration", True),
+        ("linear_solve_count", 2),
+        ("assembly_exception_count", 2),
+        ("original_relative_residual", float("nan")),
+        ("original_free_displacements_m", []),
+        ("candidate_newton_increment_m", [float("inf")]),
+        ("candidate_iteration", 999),
+        ("original_residual_linf", 1.0),
+    ],
+)
+def test_polishing_diagnostics_reject_detached_counts_and_arrays(
+    polishing_artifacts, field, value
+):
+    from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_terminal_receipt import (
+        validate_fiber_frame_nonlinear_terminal_step_receipt,
+    )
+
+    row = polishing_artifacts[-1].step_receipts[0]
+    diagnostic = deepcopy(dict(row.terminal_polishing))
+    diagnostic[field] = value
+    with pytest.raises(FiberFrameNonlinearTerminalReceiptError):
+        validate_fiber_frame_nonlinear_terminal_step_receipt(
+            replace(row, terminal_polishing=diagnostic)
+        )
+
+
+def test_polishing_flag_strip_and_rehash_cannot_gain_source_authority(
+    polishing_artifacts,
+):
+    from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_terminal_receipt import (
+        _solver_config_payload,
+    )
+
+    problem, path, chain, plan, scaling, kine, material, binding, receipt = (
+        polishing_artifacts
+    )
+    legacy_config_hash = canonical_hash(
+        _solver_config_payload(replace(receipt, terminal_polishing=False))
+    )
+    rows = tuple(
+        _rehash_step(
+            replace(
+                row,
+                terminal_polishing=None,
+                solver_config_hash=legacy_config_hash,
+                linear_solve_count=row.iteration_count,
+            )
+        )
+        for row in receipt.step_receipts
+    )
+    stripped = _rehash_terminal(
+        replace(
+            receipt,
+            terminal_polishing=False,
+            solver_config_hash=legacy_config_hash,
+            step_receipts=rows,
+            total_linear_solve_count=sum(row.linear_solve_count for row in rows),
+        )
+    )
+    validate_fiber_frame_nonlinear_terminal_receipt_shape(stripped)
+    with pytest.raises(
+        FiberFrameNonlinearTerminalReceiptError, match="source_replay_mismatch"
+    ):
+        validate_fiber_frame_nonlinear_terminal_receipt(
+            problem, plan, scaling, chain, kine, material, binding, path, stripped
+        )
+
+
+def test_polishing_rejected_extra_backend_work_is_locally_retained(artifacts):
+    from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_terminal_receipt import (
+        validate_fiber_frame_nonlinear_terminal_step_receipt,
+    )
+
+    row = artifacts[-1].step_receipts[0]
+    # A synthetic attempted-work record only: it has no source replay authority.
+    zeros = [0.0, 0.0]
+    diagnostic = {
+        "schema_version": "newton-vector-terminal-polishing.v1",
+        "enabled": True,
+        "status": "rejected",
+        "attempted": True,
+        "accepted": False,
+        "reason": "numerical_error",
+        "source_iteration": row.iteration_count - 1,
+        "candidate_iteration": row.iteration_count,
+        "original_residual_linf": 1e-12,
+        "candidate_residual_linf": 1e-13,
+        "original_relative_residual": 1e-12,
+        "candidate_relative_residual": 1e-13,
+        "candidate_increment_abs_m": None,
+        "original_free_displacements_m": zeros,
+        "candidate_free_displacements_m": [1e-14, 0.0],
+        "original_residual_kn": [1e-12, 0.0],
+        "candidate_residual_kn": [1e-13, 0.0],
+        "proposed_correction_m": [1e-14, 0.0],
+        "candidate_newton_increment_m": None,
+        "assembly_call_count": 1,
+        "assembly_exception_count": 0,
+        "linear_solve_count": 1,
+        "linear_solve_exception_count": 1,
+        "sparse_factorization_diagnostic": {"contract_pass": False},
+        "error_type": "SparseFactorizationError",
+        "error_message": "test rejected solve",
+    }
+    attempted = _rehash_step(
+        replace(
+            row,
+            terminal_polishing=diagnostic,
+            linear_solve_count=row.iteration_count + 1,
+        )
+    )
+    assert validate_fiber_frame_nonlinear_terminal_step_receipt(attempted) is attempted
+    assert (
+        attempted.to_manifest()["solver"]["terminal_polishing"][
+            "sparse_factorization_diagnostic"
+        ]["contract_pass"]
+        is False
+    )
+    with pytest.raises(
+        FiberFrameNonlinearTerminalReceiptError, match="iteration_count_invalid"
+    ):
+        validate_fiber_frame_nonlinear_terminal_step_receipt(
+            replace(attempted, linear_solve_count=row.iteration_count)
+        )
+
+
+def test_polishing_reference_episode_binds_enabled_source_configuration(
+    polishing_artifacts,
+):
+    from structural_analysis.ai.fiber_frame_solver_episode_adapter import (
+        _config_payload,
+        create_fiber_frame_solver_episode_adapter,
+        validate_fiber_frame_solver_episode_adapter_manifest,
+    )
+
+    problem, path, chain, plan, scaling, kine, material, binding, receipt = (
+        polishing_artifacts
+    )
+    episode = create_fiber_frame_solver_episode_adapter(
+        problem,
+        plan,
+        scaling,
+        chain,
+        kine,
+        material,
+        binding,
+        path,
+        terminal_receipt=receipt,
+        episode_mode="baseline",
+    )
+    assert episode.solver_config_hash == canonical_hash(
+        _config_payload(path.steps[0].trial_solution.config)
+    )
+    assert episode.solver_config_hash != canonical_hash(
+        _config_payload(
+            replace(path.steps[0].trial_solution.config, terminal_polishing=False)
+        )
+    )
+    manifest = episode.to_manifest()
+    assert validate_fiber_frame_solver_episode_adapter_manifest(manifest) == manifest
+
+
+def test_default_receipt_has_no_polishing_serialization(artifacts):
+    from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_terminal_receipt import (
+        _config_payload_from_config,
+    )
+
+    manifest = artifacts[-1].to_manifest()
+    assert "terminal_polishing" not in manifest["solver"]
+    assert "profile" not in manifest["solver"]
+    assert all(
+        "terminal_polishing" not in row["solver"] for row in manifest["step_receipts"]
+    )
+    assert _config_payload_from_config(NewtonRaphsonConfig(max_iterations=40)) == {
+        "profile": "stateful_fiber_frame2d_dense_or_sparse_cpu_newton.v1",
+        "residual_tolerance": 1e-10,
+        "increment_tolerance_m": 1e-12,
+        "max_iterations": 40,
+        "line_search_alphas": [1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125],
+        "matrix_backend": "numpy_linalg_solve_dense",
+    }

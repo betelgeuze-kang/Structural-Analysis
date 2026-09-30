@@ -1,0 +1,28 @@
+{
+  "source_head": "17010d495d651d3d53407db4dfc7b9dcee0867ad",
+  "command": [
+    "/tmp/structural-history-node-y43_kt7k/bin/node",
+    "--loader",
+    "./scripts/json-module-loader.mjs",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "tests/frontend/workbench-v2-successful-retry-history-browser.spec.ts",
+    "tests/frontend/workbench-v2-failure-history-browser.spec.ts",
+    "--workers=1",
+    "--reporter=line",
+    "--output=/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-successful-retry-7_rtyj91/final-browser-results"
+  ],
+  "exit_code": 0,
+  "runner_wall_ns": 61948952948,
+  "fault_injection": "first attempt linear backend raises LinAlgError exactly once; unpatched retry",
+  "request_bytes_identical": true,
+  "production_code_changed": false,
+  "independent_physical_validation": false,
+  "fresh_frontend_build": false,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-successful-retry-7_rtyj91",
+    "files": 19,
+    "bytes": 738012,
+    "inventory_sha256": "6b3d1dffe87a3036b83282ff141d29f106aa03b1db029a5263f2a295229e4833"
+  }
+}

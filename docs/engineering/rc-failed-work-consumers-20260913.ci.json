@@ -1,0 +1,31 @@
+{
+  "source_revision": "84a3475faa8bab335b6ee88d15bc353cee1e4ebd",
+  "frontend": {
+    "run_id": 34748247489,
+    "job_id": 103700025018,
+    "conclusion": "success",
+    "e2e_passed": 693,
+    "reported_e2e_minutes": 17.1,
+    "log_sha256": "cef599cc3a24843ffb9aa6644cf00a15578484dd959524fab4d303b93cec8006"
+  },
+  "development": {
+    "run_id": 34748247540,
+    "job_id": 103700025222,
+    "conclusion": "failure",
+    "passed": 1060,
+    "failed": 3,
+    "seconds": 1090.24,
+    "failure_scope": "stale unknown-work expectations on rejected seed and actual failed preload",
+    "log_sha256": "2202531d7c318df0fa8b4adb074e0bf26a15c5417a107e7012ed765e7ad59001"
+  },
+  "local_updated_consumers": {
+    "passed": 60,
+    "seconds": 18.88,
+    "modules": [
+      "tests/test_rc_control_warm_start.py",
+      "tests/test_rc_constant_load_durable.py"
+    ],
+    "log_sha256": "9f9b48776da9d91393720a5dd6a9b7205f49fbcca154b7072bf8c88293d0cc6c"
+  },
+  "new_head_hosted_qualification": false
+}

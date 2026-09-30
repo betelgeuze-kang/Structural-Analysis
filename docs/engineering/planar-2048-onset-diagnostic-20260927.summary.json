@@ -1,0 +1,52 @@
+{
+  "schema": "posthoc-1024-2048-tensile-onset-diagnostic.v1",
+  "source_sha256": {
+    "witness": "6972ca9a60e710bb5e7fe51875a21d2c1482bc09642ad357ed005c020c3c2208",
+    "input": "34822feaee8f569712b46e5842f5fcc3253a9a851bb9a13c92624be238b4c23e",
+    "comparison": "68983726cf740f32cb6e20b47148cb2a1b4079206659a93c7ceb7b602c4be7e4"
+  },
+  "target_count_checked": 40,
+  "tensile_threshold_strain": 0.0001,
+  "first_positive_damage_target_m": {
+    "coarse_accepted": 0.076,
+    "derived_fine_midpoint": 0.076,
+    "fine_left_accepted": 0.076,
+    "fine_right_accepted": 0.074
+  },
+  "at_72_mm": {
+    "target_m": 0.072,
+    "threshold_margins": {
+      "coarse_accepted": -1.9987677679879576e-05,
+      "derived_fine_midpoint": -1.998579678265146e-05,
+      "fine_left_accepted": -2.1742496721425828e-05,
+      "fine_right_accepted": -1.8229096843877093e-05
+    },
+    "accepted_damage_difference": 0.0
+  },
+  "at_74_mm": {
+    "target_m": 0.074,
+    "threshold_margins": {
+      "coarse_accepted": -1.0984504905747164e-07,
+      "derived_fine_midpoint": -1.1097738920836959e-07,
+      "fine_left_accepted": -1.9205674901822827e-06,
+      "fine_right_accepted": 1.6986127117653266e-06
+    },
+    "accepted_damage_difference": -0.01085019889046962
+  },
+  "at_76_mm": {
+    "target_m": 0.076,
+    "threshold_margins": {
+      "coarse_accepted": 1.8949260858619127e-05,
+      "derived_fine_midpoint": 1.894830481359473e-05,
+      "fine_left_accepted": 1.7085707644902802e-05,
+      "fine_right_accepted": 2.0810901982286657e-05
+    },
+    "accepted_damage_difference": 0.0002853738713556875
+  },
+  "original_relative_group_difference": 0.010850198900226139,
+  "original_group_screen": 0.01,
+  "original_screen_pass": false,
+  "structural_solves": 0,
+  "material_integrations": 0,
+  "physical_validation": false
+}

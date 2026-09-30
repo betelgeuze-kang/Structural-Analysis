@@ -1,0 +1,113 @@
+{
+  "source_revision": "29af2b0f9bcd481058cae1cabb192b91f65c4506",
+  "records": [
+    {
+      "repeat": 0,
+      "status": "blocked",
+      "contract_pass": false,
+      "attempted_steps": 11,
+      "committed_steps": 10,
+      "compile_wall_ns": 434622415,
+      "path_wall_ns": 7257646866,
+      "artifact": "repeat-0.json",
+      "artifact_sha256": "35820708c82d02cfdc325f288cca1aa9c3c77c87dc9e6c4d66dd4ad5df6a3a34"
+    },
+    {
+      "repeat": 1,
+      "status": "blocked",
+      "contract_pass": false,
+      "attempted_steps": 11,
+      "committed_steps": 10,
+      "compile_wall_ns": 413291547,
+      "path_wall_ns": 7159519691,
+      "artifact": "repeat-1.json",
+      "artifact_sha256": "35820708c82d02cfdc325f288cca1aa9c3c77c87dc9e6c4d66dd4ad5df6a3a34"
+    }
+  ],
+  "experiment_wall_ns": 15946554530,
+  "repeat_full_path_bytes_equal": true,
+  "physical_validation": false,
+  "public_result_authority": false,
+  "load_control_equivalence_proved": false,
+  "accepted_curve": [
+    {
+      "control_displacement_m": 0.002,
+      "load_factor": 0.11369882007606982
+    },
+    {
+      "control_displacement_m": 0.004,
+      "load_factor": 0.2259101257824215
+    },
+    {
+      "control_displacement_m": 0.006,
+      "load_factor": 0.30004137536222736
+    },
+    {
+      "control_displacement_m": 0.008,
+      "load_factor": 0.34744908850166073
+    },
+    {
+      "control_displacement_m": 0.01,
+      "load_factor": 0.3878477288317235
+    },
+    {
+      "control_displacement_m": 0.012,
+      "load_factor": 0.42494424704410866
+    },
+    {
+      "control_displacement_m": 0.014,
+      "load_factor": 0.4598918113923953
+    },
+    {
+      "control_displacement_m": 0.016,
+      "load_factor": 0.4731476639373157
+    },
+    {
+      "control_displacement_m": 0.018,
+      "load_factor": 0.4901080620419619
+    },
+    {
+      "control_displacement_m": 0.02,
+      "load_factor": 0.5145102207277285
+    }
+  ],
+  "observed_counts_by_repeat": [
+    {
+      "history_rows": 54,
+      "line_search_trials": 49
+    },
+    {
+      "history_rows": 54,
+      "line_search_trials": 49
+    }
+  ],
+  "failed_target_m": 0.022,
+  "failed_terminal_reason": "line_search_failed_to_reduce_augmented_merit",
+  "failed_last_history": {
+    "iteration": 1,
+    "load_factor": 0.565505065652039,
+    "relative_equilibrium_residual": 0.030328528741139223,
+    "control_error_m": 0.0,
+    "free_increment_abs_m": 0.0,
+    "load_factor_increment_abs": 0.0,
+    "line_search_alpha": 0.0,
+    "residual_gate_passed": false,
+    "control_gate_passed": true,
+    "increment_gate_passed": false,
+    "accepted": false
+  },
+  "audit": {
+    "checkpoint_chains_checked": true,
+    "committed_step_gates_checked": true,
+    "failed_rollback_exact": true,
+    "whole_path_repeat_bytes_equal": true,
+    "target_40mm_reached": false,
+    "independent_material_path_equivalence": false
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-two-story-displacement-y4qvs71c",
+    "payload_files": 6,
+    "payload_bytes": 22580834,
+    "inventory_sha256": "5471e429f6a5db0948bac94d6d3debf5811adc2a121c493eda3f300f53406189"
+  }
+}

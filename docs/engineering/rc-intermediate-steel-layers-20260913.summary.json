@@ -1,0 +1,86 @@
+{
+  "source_revision": "7a55b7f306dd1a1d4f838550cbbc0f08609a48af",
+  "elapsed_ns": 8324703329,
+  "rows": 2,
+  "report_sha256": "163efa5b8f6fcce980b60a25f1c932803c8c439f75a04cfa1775fb08272aef7a",
+  "fixture_sha256": "66354a292673dc2c182e5d0a350017591b85c74300c14305fb3fe376fb9a4652",
+  "quantities": [
+    {
+      "gross_concrete_volume_m3": 0.72,
+      "longitudinal_rebar_volume_m3": 0.013932,
+      "longitudinal_rebar_mass_kg": 109.3662
+    },
+    {
+      "gross_concrete_volume_m3": 0.63,
+      "longitudinal_rebar_volume_m3": 0.013932,
+      "longitudinal_rebar_mass_kg": 109.3662
+    }
+  ],
+  "costs": [
+    {
+      "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+      "currency": "USD",
+      "price_table_hash": "sha256:ae003c5c0e4a8e8e588eda73926d97c30af5ac42f7f15e057972d498ba2e3798",
+      "quantity_hash": "sha256:7a959cd4824a199e44445756da1d1624abdf5ae1a1a515ecdb5de205b8108ff8",
+      "members": [
+        {
+          "member_id": "M1",
+          "concrete": 72.0,
+          "longitudinal_rebar": 218.7324
+        }
+      ],
+      "total": 290.7324,
+      "excluded_items": [
+        "transverse_reinforcement",
+        "laps_anchorage_hooks",
+        "waste",
+        "formwork",
+        "labor",
+        "fabrication",
+        "transport",
+        "tax"
+      ],
+      "verified_quote": false,
+      "confirmed_currency_savings": false
+    },
+    {
+      "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+      "currency": "USD",
+      "price_table_hash": "sha256:ae003c5c0e4a8e8e588eda73926d97c30af5ac42f7f15e057972d498ba2e3798",
+      "quantity_hash": "sha256:fbdb1bfc414b3d95cc7db12b135d228ac808389b9a8c90ecda53fc4da8053dc1",
+      "members": [
+        {
+          "member_id": "M1",
+          "concrete": 63.0,
+          "longitudinal_rebar": 218.7324
+        }
+      ],
+      "total": 281.7324,
+      "excluded_items": [
+        "transverse_reinforcement",
+        "laps_anchorage_hooks",
+        "waste",
+        "formwork",
+        "labor",
+        "fabrication",
+        "transport",
+        "tax"
+      ],
+      "verified_quote": false,
+      "confirmed_currency_savings": false
+    }
+  ],
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-intermediate-steel-gpuft_aq",
+    "files_excluding_inventory": 7,
+    "bytes_excluding_inventory": 61589,
+    "inventory_sha256": "6e728b1bccbbc2e3c7813054fdd2ca4adf0c69249cc8af83963cad4d5abd3d4a"
+  },
+  "python_unique_tests_passed": 119,
+  "frontend_unique_tests_passed": 10,
+  "mypy_diagnostics": {
+    "errors_before": 24,
+    "errors_after": 24,
+    "same_messages_excluding_paths_and_line_numbers": true
+  }
+}

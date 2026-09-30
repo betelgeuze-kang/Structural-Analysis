@@ -1,0 +1,20 @@
+from pathlib import Path
+from collections import Counter
+import hashlib,json,statistics,time
+source=Path('/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-same-parent-cost-e_rj5919');root=Path(Path('/tmp/structural-rc-parent-cost-observer-root.txt').read_text().strip());bindings={r['path']:r for r in json.loads((root/'input-bindings.json').read_bytes())['files']};rows=json.loads((root/'rows.json').read_bytes());groups={};started=time.perf_counter_ns()
+def original(name):
+ raw=(source/name).read_bytes();r=bindings[name];assert len(raw)==r['bytes'] and hashlib.sha256(raw).hexdigest()==r['sha256'];return json.loads(raw)
+for row in rows:
+ if not row['policy_proposed']:continue
+ report=original(f"study/comparison-{row['ordinal']:04d}/comparison.json");delta=row['proposal_minus_secant_newton'];names=['all_actual_proposals','fewer_newton' if delta<0 else 'more_newton' if delta>0 else 'equal_newton']
+ if row['proposal_minus_secant_wall_ns']<0:names.append('lower_wall')
+ for name in names:
+  group=groups.setdefault(name,{'count':0,'secant':Counter(),'proposal':Counter(),'reference_repeat_absolute_wall_difference_ns':[],'ordinals':[]});group['count']+=1;group['ordinals'].append(row['ordinal'])
+  for arm in ['secant','proposal']:
+   path=report['arms'][arm];e=path['entries'][0];phases={'numerical':sum(inv['wall_ns'] for inv in e['invocations']),'capture':e.get('committed_material_capture',{}).get('wall_ns',0),'proposal':e['proposal_wall_ns'],'recovery':e.get('recovery_wall_ns',0)};phases['other_path_io_and_bookkeeping']=path['wall_ns']-sum(phases.values());assert phases['other_path_io_and_bookkeeping']>=0;phases['total']=path['wall_ns'];group[arm].update(phases)
+  group['reference_repeat_absolute_wall_difference_ns'].append(abs(report['arms']['reference']['wall_ns']-report['fresh_reference']['wall_ns']))
+for group in groups.values():
+ group['proposal_minus_secant_seconds']={k:(group['proposal'][k]-group['secant'][k])/1e9 for k in group['secant']};group['secant_seconds']={k:v/1e9 for k,v in group['secant'].items()};group['proposal_seconds']={k:v/1e9 for k,v in group['proposal'].items()};noise=group['reference_repeat_absolute_wall_difference_ns'];group['reference_repeat_absolute_wall_difference_median_seconds']=statistics.median(noise)/1e9;group['reference_repeat_absolute_wall_difference_max_seconds']=max(noise)/1e9
+summary={'schema_version':'rc-parent-cost-phase-observer.v1','source_packet':str(source),'groups':groups,'audit_completed_at_observation':False,'source_numeric_records_checked_against_previous_bindings':True,'new_solver_calls':0,'fits':0,'phase_differences_prove_general_speedup':False,'reference_pair_difference_is_a_confidence_interval':False,'observer_wall_ns':time.perf_counter_ns()-started}
+(root/'phase-observer.py').write_bytes(Path(__file__).read_bytes());(root/'phases.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
+print(json.dumps({k:{'count':v['count'],'delta_seconds':v['proposal_minus_secant_seconds'],'secant_seconds':v['secant_seconds'],'proposal_seconds':v['proposal_seconds'],'reference_pair_median':v['reference_repeat_absolute_wall_difference_median_seconds']} for k,v in groups.items()},indent=2))

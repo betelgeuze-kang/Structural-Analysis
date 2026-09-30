@@ -1,0 +1,128 @@
+{
+  "schema_version": "experimental-rc-control-search-accounting.v1",
+  "executions": [
+    {
+      "search_report_hash": "sha256:fc679d502dc9e4f0918b58bac5fcd6fea6e65c1facd4dd576c54c55bd0dc6157",
+      "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f",
+      "search_wall_ns": 3615718132,
+      "price_arm_wall_ns": 1795272821,
+      "learned_arm_wall_ns": 1786139707,
+      "learned_ranking_wall_ns": 9530056,
+      "oracle_executed": false,
+      "oracle_wall_ns": 0,
+      "unallocated_search_wall_ns": 24775548
+    },
+    {
+      "search_report_hash": "sha256:a6266a33a0f9274b72777952def3c5d20c533da4406654431d9608d7422527a5",
+      "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f",
+      "search_wall_ns": 5409808908,
+      "price_arm_wall_ns": 2690245292,
+      "learned_arm_wall_ns": 2680458711,
+      "learned_ranking_wall_ns": 9472727,
+      "oracle_executed": false,
+      "oracle_wall_ns": 0,
+      "unallocated_search_wall_ns": 29632178
+    },
+    {
+      "search_report_hash": "sha256:b65fc043b36dff48e98f08b92d880cf39701595cc334e89af8e88ea4f3e33f80",
+      "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f",
+      "search_wall_ns": 20745198398,
+      "price_arm_wall_ns": 5385147741,
+      "learned_arm_wall_ns": 5400977600,
+      "learned_ranking_wall_ns": 9448822,
+      "oracle_executed": true,
+      "oracle_wall_ns": 9924742476,
+      "unallocated_search_wall_ns": 24881759
+    },
+    {
+      "search_report_hash": "sha256:535675e673352d28bfea016331e802b884ec56532e4de7851b6e57a714e65420",
+      "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f",
+      "search_wall_ns": 3613762219,
+      "price_arm_wall_ns": 1795893144,
+      "learned_arm_wall_ns": 1784010236,
+      "learned_ranking_wall_ns": 9388072,
+      "oracle_executed": false,
+      "oracle_wall_ns": 0,
+      "unallocated_search_wall_ns": 24470767
+    },
+    {
+      "search_report_hash": "sha256:d73c29914500251ba56956cd0b3c9907ac98e705ad700b44553603ef9dbf36f8",
+      "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f",
+      "search_wall_ns": 5458255194,
+      "price_arm_wall_ns": 2717810120,
+      "learned_arm_wall_ns": 2705875041,
+      "learned_ranking_wall_ns": 9487075,
+      "oracle_executed": false,
+      "oracle_wall_ns": 0,
+      "unallocated_search_wall_ns": 25082958
+    },
+    {
+      "search_report_hash": "sha256:04abd76b909cf2c51e156a501101f10a572bb18f1265fd75f35c964898258f84",
+      "training_report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f",
+      "search_wall_ns": 10795928032,
+      "price_arm_wall_ns": 5349399636,
+      "learned_arm_wall_ns": 5412513751,
+      "learned_ranking_wall_ns": 9335226,
+      "oracle_executed": false,
+      "oracle_wall_ns": 0,
+      "unallocated_search_wall_ns": 24679419
+    }
+  ],
+  "distinct_historical_training": {
+    "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f": {
+      "wall_ns": 2761753795,
+      "label_generation_wall_ns": 2752124719,
+      "fit_wall_ns": 1552685,
+      "other_training_wall_ns": 8076391
+    }
+  },
+  "observed_search_wall_ns": 49638670883,
+  "historical_training_wall_ns_counted_once": 2761753795,
+  "combined_recorded_interval_sum_ns": 52400424678,
+  "scope": "sum_of_recorded_intervals_not_campaign_elapsed_or_deployed_strategy_cost",
+  "excluded_or_unmeasured": [
+    "final_search_report_write",
+    "source_snapshot_preparation",
+    "external_audit",
+    "transport_and_workbench_review"
+  ],
+  "strategy_complete_costs_separately_measured": false,
+  "net_savings_proved": false,
+  "original_artifacts_replayed": false,
+  "independent_physical_validation": false,
+  "input_inventory_sha256": "7c1093a24ca556df50f0bc2a9623a547ea1b1b5e030c1cf26f5c6944aaebe826",
+  "input_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-cheaper-boundary-hnkltr1_",
+  "input_files_verified": [
+    {
+      "path": "boundary-budget-2/result.json",
+      "bytes": 8385,
+      "sha256": "0e8321bd4978f209eacc72f3b30e7d60c5da4526641b1e00f25aa826d72fd56d"
+    },
+    {
+      "path": "boundary-budget-3/result.json",
+      "bytes": 8417,
+      "sha256": "b9898a50a23f0c6eae05f3d7ceafca2d5895a151e9aa90e420a3f8e03a443aec"
+    },
+    {
+      "path": "boundary-budget-6-with-oracle/result.json",
+      "bytes": 9282,
+      "sha256": "deb55e50fe915990a51a1e9c264a55c4962c70ecfebc90a042e78289efd83c35"
+    },
+    {
+      "path": "legacy-budget-2/result.json",
+      "bytes": 8385,
+      "sha256": "57206e30f05bcc24e4ddce22c33292dcd2496691c9a76ebe911ef8c2cc1d3e2f"
+    },
+    {
+      "path": "legacy-budget-3/result.json",
+      "bytes": 8417,
+      "sha256": "76787dddd7e8b713bdc403d78775f7a9472027905ec57cd69ce2d46798215afb"
+    },
+    {
+      "path": "legacy-budget-6/result.json",
+      "bytes": 8507,
+      "sha256": "af3f1eac6c4eb326d2db3e478f3be73d99855f21ef817daa77ef89ce22d4ad59"
+    }
+  ],
+  "accounting_source_sha256": "7c8538f0f30cce793d32202cc11e3f08bce1df5e875e636a60e266951be4ffbc"
+}

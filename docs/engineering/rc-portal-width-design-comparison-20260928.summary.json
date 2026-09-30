@@ -1,0 +1,42 @@
+{
+  "schema": "rc-portal-width-design-observation.v1",
+  "predeclaration_revision": "f6c5f83ad391b6bb0b00bb91f56fa322b88fcea2",
+  "initial_failure": {
+    "reason": "rc_fiber_frame_support_count_unsupported during quantity preparation",
+    "invalid_candidate_count": 3,
+    "solver_calls": 0,
+    "report_hash": "sha256:96f691dbe300e5d3f576fe0459d93c76ee8cc97d971fa6e2e0af1981b6c59110"
+  },
+  "numerical_source_revision": "ff110da47ea3014e7bc244cbb032920d95d46bf2",
+  "source_file_count": 674,
+  "original_report_hash": "sha256:3bb38a0f7f30eddd2440ec99e7960863cdc54d603a5f741fb0d4fafb15b317a5",
+  "candidate_count": 3,
+  "full_analysis_and_fresh_verification_paths": 6,
+  "attempted_steps": 24,
+  "known_newton_iterations": 250,
+  "known_linear_solves": 250,
+  "unknown_solver_work_attempts": 0,
+  "study_wall_ns": 15430504593,
+  "study_process_cpu_ns": 15429402273,
+  "selected_candidate_id": "narrower-036",
+  "synthetic_estimates": {
+    "baseline": 483.036,
+    "narrower-036": 459.036,
+    "wider-050": 543.0360000000001
+  },
+  "readonly_audit_artifact_hash_length_checks": 24,
+  "readonly_audit_solver_calls": 0,
+  "workbench_original_json_file_count": 26,
+  "workbench_original_json_bytes": 5856843,
+  "workbench_fixture_gzip_sha256": "ff2b904449b1e4304946c1daff8d367456eb547b2bfeaa59550d6c53243a2579",
+  "workbench_contract_tests_passed": 33,
+  "workbench_browser_regressions_passed": 27,
+  "packet_root": "/tmp/rc-portal-design-20260928-rerun-XtXfdz",
+  "packet_inventory_file_count": 703,
+  "packet_inventory_bytes": 57634232,
+  "packet_inventory_sha256": "2094da7245a761fbb6744c3e2e9cc6c7cf116984cdf174fc3985fe900bfa9dac",
+  "independent_physical_validation": false,
+  "confirmed_currency_savings": false,
+  "design_authority": false,
+  "learned_policy_used": false
+}

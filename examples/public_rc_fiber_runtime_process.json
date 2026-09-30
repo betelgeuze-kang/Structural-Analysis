@@ -1,0 +1,29 @@
+{
+  "schema_version": "rc-fiber-runtime-process-request.v1",
+  "cases": [
+    {
+      "case_id": "cantilever",
+      "model_file": "public_rc_fiber_frame_cantilever.json",
+      "configuration": {
+        "load_steps": 2,
+        "residual_tolerance": 1e-10,
+        "increment_tolerance_m": 1e-12,
+        "maximum_iterations": 40
+      }
+    }
+  ],
+  "benchmark_configuration": {
+    "repetitions": 2,
+    "warmup_repetitions": 0,
+    "guard_max_relative_residual_ratio": 1.0,
+    "maximum_ai_uncertainty": 1.0,
+    "damping_factors": [
+      1.0,
+      0.5,
+      0.25
+    ],
+    "response_absolute_tolerance": 1e-10,
+    "response_relative_tolerance": 1e-08
+  },
+  "policy_file": null
+}

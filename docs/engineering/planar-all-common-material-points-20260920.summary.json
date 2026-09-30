@@ -1,0 +1,2638 @@
+{
+  "all_point_summary": {
+    "coarse_replay_exact": true,
+    "mean_scope": "Equal point weights across sections; not a volume or energy integral.",
+    "point_count": 2304,
+    "point_target_count": 92160,
+    "target_count": 40,
+    "targets": [
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.5680349051190741e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 4.1783279682731744e-10
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 4.704104715358426e-05,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 1.633484619667377e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.5203717713304352e-09,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 1.2666207639512943e-10
+          }
+        },
+        "target_m": 0.002
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.9027699647991064e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 5.863313638696612e-10
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 9.300999802115619e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.5162035961714996e-10
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 8.708309894400745e-05,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.9013635135735195e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 3.146029888478896e-05,
+            "maximum_location": {
+              "coarse_cell": 15,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": -0.22734375
+            },
+            "mean_absolute_difference": 6.200035067214655e-07
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 3.01170724291552e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 4.366593404052458e-10
+          }
+        },
+        "target_m": 0.004
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 3.9459800312127485e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 8.307765415289521e-10
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.423248923527803e-08,
+            "maximum_location": {
+              "coarse_cell": 124,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": 0.28359375000000003
+            },
+            "mean_absolute_difference": 3.66117864191733e-10
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.00011837940093639698,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.701518672343898e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 4.128797327795919e-05,
+            "maximum_location": {
+              "coarse_cell": 110,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": 0.21796875
+            },
+            "mean_absolute_difference": 8.625370544503019e-07
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 3.532843586927627e-09,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 4.943914596673059e-10
+          }
+        },
+        "target_m": 0.006
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 3.9459800312127485e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 7.742886955782592e-10
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.1911183539926179e-08,
+            "maximum_location": {
+              "coarse_cell": 15,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": -0.22734375
+            },
+            "mean_absolute_difference": 7.269762869036124e-10
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.00014053523019663672,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.340043449764773e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 1.7900366230394482e-05,
+            "maximum_location": {
+              "coarse_cell": 87,
+              "gauss": 1,
+              "member": "E1",
+              "y_m": 0.11015625000000001
+            },
+            "mean_absolute_difference": 9.755744632572893e-07
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 4.684507673221737e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 5.55049278090769e-10
+          }
+        },
+        "target_m": 0.008
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 4.438540348683604e-09,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 9.155374363735939e-10
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.9739093187987255e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.4910145348150392e-09
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.00019106420191494777,
+            "maximum_location": {
+              "coarse_cell": 5,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.27421875
+            },
+            "mean_absolute_difference": 5.0215418682897765e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 7.954182811431565e-05,
+            "maximum_location": {
+              "coarse_cell": 4,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.27890624999999997
+            },
+            "mean_absolute_difference": 2.971769005373656e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 9.021473823186965e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 1.428437837421816e-09
+          }
+        },
+        "target_m": 0.01
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 5.380756097980591e-09,
+            "maximum_location": {
+              "coarse_cell": 34,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.13828125
+            },
+            "mean_absolute_difference": 1.2817035500213333e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.903504702736915e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.8273882270944767e-09
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.00022541364637163053,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 1,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 6.86069665550198e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 7.99429916984451e-05,
+            "maximum_location": {
+              "coarse_cell": 51,
+              "gauss": 1,
+              "member": "E1",
+              "y_m": -0.05859375
+            },
+            "mean_absolute_difference": 3.2258342249839674e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.0582475039062206e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 1.933821710185895e-09
+          }
+        },
+        "target_m": 0.012
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 8.829431325614243e-09,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 1,
+              "member": "E5",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 1.516582748246964e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 3.7892542837543995e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 1,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 4.1652882484408916e-09
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.00032585825104769484,
+            "maximum_location": {
+              "coarse_cell": 11,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.24609375
+            },
+            "mean_absolute_difference": 8.766799442777365e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.00013498891968155569,
+            "maximum_location": {
+              "coarse_cell": 10,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.25078125
+            },
+            "mean_absolute_difference": 7.144818475886764e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.6830087392737808e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 2.906629910035091e-09
+          }
+        },
+        "target_m": 0.014
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 8.747623536989324e-09,
+            "maximum_location": {
+              "coarse_cell": 87,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.11015625000000001
+            },
+            "mean_absolute_difference": 1.628781364132171e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 3.136111626595925e-08,
+            "maximum_location": {
+              "coarse_cell": 78,
+              "gauss": 1,
+              "member": "E6",
+              "y_m": 0.06796875000000002
+            },
+            "mean_absolute_difference": 4.076904725036719e-09
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.000273671226886929,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E5",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 7.50620836754825e-05
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.00013498891968155569,
+            "maximum_location": {
+              "coarse_cell": 10,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.25078125
+            },
+            "mean_absolute_difference": 4.866671323381939e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.2401401810633803e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E5",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.033750548863932e-09
+          }
+        },
+        "target_m": 0.016
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.315622406583867e-08,
+            "maximum_location": {
+              "coarse_cell": 13,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.23671874999999998
+            },
+            "mean_absolute_difference": 2.239122323876957e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.4026365243222485e-07,
+            "maximum_location": {
+              "coarse_cell": 74,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.04921874999999998
+            },
+            "mean_absolute_difference": 1.5659632441766048e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0008631846569824297,
+            "maximum_location": {
+              "coarse_cell": 47,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.07734374999999999
+            },
+            "mean_absolute_difference": 0.00014303003942992313
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.00036443872635016916,
+            "maximum_location": {
+              "coarse_cell": 48,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.07265625
+            },
+            "mean_absolute_difference": 1.450452720647014e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 4.198834621356798e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 8.405843564202888e-09
+          }
+        },
+        "target_m": 0.018
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 4.4613769641056386e-08,
+            "maximum_location": {
+              "coarse_cell": 116,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.24609374999999994
+            },
+            "mean_absolute_difference": 2.6381326704139563e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.9663742537932133e-07,
+            "maximum_location": {
+              "coarse_cell": 81,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.08203125
+            },
+            "mean_absolute_difference": 2.4003836791330428e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0015130747293130575,
+            "maximum_location": {
+              "coarse_cell": 86,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.10546875
+            },
+            "mean_absolute_difference": 0.0001763146277667159
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0006491638104157982,
+            "maximum_location": {
+              "coarse_cell": 85,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.10078124999999999
+            },
+            "mean_absolute_difference": 1.5813139616875243e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 7.675261540435532e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 1.3992470411733037e-08
+          }
+        },
+        "target_m": 0.02
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 4.332847440613463e-06,
+            "maximum_location": {
+              "coarse_cell": 1,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.29296875
+            },
+            "mean_absolute_difference": 3.6835421828877877e-09
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 5.8944836825902854e-08,
+            "maximum_location": {
+              "coarse_cell": 6,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.26953125
+            },
+            "mean_absolute_difference": 2.8410170021441874e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 3.716016144903627e-07,
+            "maximum_location": {
+              "coarse_cell": 5,
+              "gauss": 1,
+              "member": "E1",
+              "y_m": -0.27421875
+            },
+            "mean_absolute_difference": 6.326371487329581e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0022012275046261465,
+            "maximum_location": {
+              "coarse_cell": 42,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.10078124999999999
+            },
+            "mean_absolute_difference": 0.00028035429967360415
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0009435901551512194,
+            "maximum_location": {
+              "coarse_cell": 43,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.09609375
+            },
+            "mean_absolute_difference": 3.468809984896968e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.2360969693636908e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.2731004713729316e-08
+          }
+        },
+        "target_m": 0.022
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 8.723042435043737e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.04575141578058e-09
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 4.4613769641056386e-08,
+            "maximum_location": {
+              "coarse_cell": 116,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.24609374999999994
+            },
+            "mean_absolute_difference": 2.2837272861950528e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.7995027520260193e-07,
+            "maximum_location": {
+              "coarse_cell": 54,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": -0.04453125000000002
+            },
+            "mean_absolute_difference": 1.2048748392033936e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0006482735947517249,
+            "maximum_location": {
+              "coarse_cell": 79,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.07265624999999998
+            },
+            "mean_absolute_difference": 0.00011192905639219025
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0002786202926440273,
+            "maximum_location": {
+              "coarse_cell": 78,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.06796875000000002
+            },
+            "mean_absolute_difference": 7.179874043162645e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.9129151775126455e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 7.567593775093286e-09
+          }
+        },
+        "target_m": 0.024
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 1.4082329524489623e-05,
+            "maximum_location": {
+              "coarse_cell": 9,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.25546874999999997
+            },
+            "mean_absolute_difference": 5.560033728770488e-08
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 4.4613769641056386e-08,
+            "maximum_location": {
+              "coarse_cell": 116,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.24609374999999994
+            },
+            "mean_absolute_difference": 2.3690481954660238e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.518416235839163e-07,
+            "maximum_location": {
+              "coarse_cell": 2,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.28828125
+            },
+            "mean_absolute_difference": 1.9266013903128087e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0009574172429083205,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.00012045123238878183
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.00024076801178885,
+            "maximum_location": {
+              "coarse_cell": 38,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.11953125
+            },
+            "mean_absolute_difference": 7.2741163661287946e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 6.542867489283104e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 1.1127659410649626e-08
+          }
+        },
+        "target_m": 0.026
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 4.6994957484391975e-06,
+            "maximum_location": {
+              "coarse_cell": 12,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.24140625
+            },
+            "mean_absolute_difference": 2.102884415924723e-08
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 4.4613769641056386e-08,
+            "maximum_location": {
+              "coarse_cell": 116,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.24609374999999994
+            },
+            "mean_absolute_difference": 2.5184283052908365e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.572586296134473e-07,
+            "maximum_location": {
+              "coarse_cell": 54,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": -0.04453125000000002
+            },
+            "mean_absolute_difference": 2.1638081056464822e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0015471111469320675,
+            "maximum_location": {
+              "coarse_cell": 48,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": -0.07265625
+            },
+            "mean_absolute_difference": 0.0001514985596019859
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0005300817102042998,
+            "maximum_location": {
+              "coarse_cell": 81,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": 0.08203125
+            },
+            "mean_absolute_difference": 1.1962707711790943e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.2568708706727112e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.0019948845844262e-08
+          }
+        },
+        "target_m": 0.028
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 5.826162749134056e-06,
+            "maximum_location": {
+              "coarse_cell": 15,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.22734375
+            },
+            "mean_absolute_difference": 3.056904703577994e-08
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 4.4613769641056386e-08,
+            "maximum_location": {
+              "coarse_cell": 116,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.24609374999999994
+            },
+            "mean_absolute_difference": 2.7941272144985845e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.8646310521238264e-07,
+            "maximum_location": {
+              "coarse_cell": 5,
+              "gauss": 1,
+              "member": "E1",
+              "y_m": -0.27421875
+            },
+            "mean_absolute_difference": 2.438478548062115e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.00133680913340406,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.0001477016018201842
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.00036480682824668875,
+            "maximum_location": {
+              "coarse_cell": 96,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.15234375
+            },
+            "mean_absolute_difference": 8.526783726997672e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 8.2373722115202e-08,
+            "maximum_location": {
+              "coarse_cell": 20,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.20390625
+            },
+            "mean_absolute_difference": 1.817419115676933e-08
+          }
+        },
+        "target_m": 0.03
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 3.2807282600577636e-05,
+            "maximum_location": {
+              "coarse_cell": 17,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.21796875
+            },
+            "mean_absolute_difference": 2.031276674894554e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 6.125415545751509e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 3.422012647475993e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 6.270101974934633e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.2080871741946595e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.001837624663725279,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.0002153141136286305
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0005920164878221446,
+            "maximum_location": {
+              "coarse_cell": 46,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": -0.08203125
+            },
+            "mean_absolute_difference": 1.2163978426957537e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.2999754280603338e-07,
+            "maximum_location": {
+              "coarse_cell": 6,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.26953125
+            },
+            "mean_absolute_difference": 2.524793038887422e-08
+          }
+        },
+        "target_m": 0.032
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 8.327329943047523e-06,
+            "maximum_location": {
+              "coarse_cell": 20,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.20390625
+            },
+            "mean_absolute_difference": 6.148936422413757e-08
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 5.723182641432373e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.751267274565664e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.5365254592948135e-07,
+            "maximum_location": {
+              "coarse_cell": 5,
+              "gauss": 1,
+              "member": "E1",
+              "y_m": -0.27421875
+            },
+            "mean_absolute_difference": 2.6142403913826878e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0017169547924318351,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.00015234653838883312
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.00044512645576122445,
+            "maximum_location": {
+              "coarse_cell": 36,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.12890625
+            },
+            "mean_absolute_difference": 7.360388461825926e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.2243521644802764e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.0478232916013078e-08
+          }
+        },
+        "target_m": 0.034
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 5.570336911642215e-05,
+            "maximum_location": {
+              "coarse_cell": 2,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.28828125
+            },
+            "mean_absolute_difference": 3.963794381191574e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 6.509564650335198e-08,
+            "maximum_location": {
+              "coarse_cell": 4,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.27890624999999997
+            },
+            "mean_absolute_difference": 3.95183293064322e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 9.777783147122548e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.468317147979777e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0025359359818510896,
+            "maximum_location": {
+              "coarse_cell": 33,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.14296875
+            },
+            "mean_absolute_difference": 0.00023431675361090283
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0010956147089149493,
+            "maximum_location": {
+              "coarse_cell": 34,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.13828125
+            },
+            "mean_absolute_difference": 1.1549513026350782e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.5900243005378088e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.2700520245808004e-08
+          }
+        },
+        "target_m": 0.036
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 6.204177314106385e-05,
+            "maximum_location": {
+              "coarse_cell": 3,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.28359375
+            },
+            "mean_absolute_difference": 3.0091089216628714e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 6.850572278720157e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 4.154388186947115e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.0793544754847395e-06,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.194885261711843e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.002342266753937672,
+            "maximum_location": {
+              "coarse_cell": 33,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.14296875
+            },
+            "mean_absolute_difference": 0.0002327845347553979
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0007020405389016604,
+            "maximum_location": {
+              "coarse_cell": 34,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.13828125
+            },
+            "mean_absolute_difference": 9.364615275573773e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.4570310078051117e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.512262801518128e-08
+          }
+        },
+        "target_m": 0.038
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0001089581880189261,
+            "maximum_location": {
+              "coarse_cell": 4,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.27890624999999997
+            },
+            "mean_absolute_difference": 2.434000879299759e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 8.627354998133087e-08,
+            "maximum_location": {
+              "coarse_cell": 22,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19453125
+            },
+            "mean_absolute_difference": 4.332954068053255e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.7799083941922623e-06,
+            "maximum_location": {
+              "coarse_cell": 1,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.29296875
+            },
+            "mean_absolute_difference": 2.393822348467005e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0027355396606418836,
+            "maximum_location": {
+              "coarse_cell": 39,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.11484375
+            },
+            "mean_absolute_difference": 0.00019127067527937672
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0007000216692613082,
+            "maximum_location": {
+              "coarse_cell": 92,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.13359375
+            },
+            "mean_absolute_difference": 6.100424821938343e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.219096685224283e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.423706120237946e-08
+          }
+        },
+        "target_m": 0.04
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 1.3067611571382365e-05,
+            "maximum_location": {
+              "coarse_cell": 5,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.27421875
+            },
+            "mean_absolute_difference": 1.0490973769446403e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 6.850572278720157e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 3.135707494554746e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.677479476707878e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.819234676047704e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0017369109982192654,
+            "maximum_location": {
+              "coarse_cell": 31,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.15234375
+            },
+            "mean_absolute_difference": 0.00011775809285580138
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0007188688781091246,
+            "maximum_location": {
+              "coarse_cell": 32,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.14765625
+            },
+            "mean_absolute_difference": 4.946465371128816e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.029862911018295e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.1038704814039524e-08
+          }
+        },
+        "target_m": 0.042
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 8.951216374242232e-05,
+            "maximum_location": {
+              "coarse_cell": 6,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.26953125
+            },
+            "mean_absolute_difference": 5.693794619794249e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 7.162930337734595e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 5.012527006930744e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.4937584833472906e-06,
+            "maximum_location": {
+              "coarse_cell": 5,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.27421875
+            },
+            "mean_absolute_difference": 3.3127363535422466e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.002148879101323331,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.00025538658125606457
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0008309984678086524,
+            "maximum_location": {
+              "coarse_cell": 38,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.11953125
+            },
+            "mean_absolute_difference": 8.53060885482823e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.6732049832593118e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 4.189731282391194e-08
+          }
+        },
+        "target_m": 0.044
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 4.021684518829005e-05,
+            "maximum_location": {
+              "coarse_cell": 7,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.26484375
+            },
+            "mean_absolute_difference": 2.711237132431991e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 7.084870856893626e-08,
+            "maximum_location": {
+              "coarse_cell": 8,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.26015625
+            },
+            "mean_absolute_difference": 3.308867335344701e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 7.169931276690758e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.329846347850884e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0014180890970862947,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.00010421457988421264
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.00036040923955915627,
+            "maximum_location": {
+              "coarse_cell": 30,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.15703124999999998
+            },
+            "mean_absolute_difference": 3.565711651928871e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 8.970597663326453e-08,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 1.6454825358591677e-08
+          }
+        },
+        "target_m": 0.046
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 1.4307631065579862e-05,
+            "maximum_location": {
+              "coarse_cell": 32,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.14765625
+            },
+            "mean_absolute_difference": 1.7682595970627747e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0858850038120496e-07,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 4.190885103000646e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 5.703027815273654e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.74428557311712e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0032576550114349345,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.0002074199617278091
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0013378454149322039,
+            "maximum_location": {
+              "coarse_cell": 103,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.18515624999999997
+            },
+            "mean_absolute_difference": 1.1300865116364365e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.6946674680695314e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 4.735095426764584e-08
+          }
+        },
+        "target_m": 0.048
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 3.6773973519754755e-05,
+            "maximum_location": {
+              "coarse_cell": 34,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.13828125
+            },
+            "mean_absolute_difference": 3.4371915735424657e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0439290209465941e-07,
+            "maximum_location": {
+              "coarse_cell": 19,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.20859375
+            },
+            "mean_absolute_difference": 4.2452217841602065e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 8.591542641697703e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.936845899871653e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0018951055193996424,
+            "maximum_location": {
+              "coarse_cell": 97,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": 0.15703125
+            },
+            "mean_absolute_difference": 0.0001599033900235795
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.000571806202359193,
+            "maximum_location": {
+              "coarse_cell": 96,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": 0.15234375
+            },
+            "mean_absolute_difference": 6.733994969223995e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.8418274303736056e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 4.504259495036827e-08
+          }
+        },
+        "target_m": 0.05
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 1.8523033732509298e-05,
+            "maximum_location": {
+              "coarse_cell": 35,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.13359374999999998
+            },
+            "mean_absolute_difference": 1.5487685069982402e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0439290209465941e-07,
+            "maximum_location": {
+              "coarse_cell": 19,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.20859375
+            },
+            "mean_absolute_difference": 3.880595475463853e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 3.4026212392731375e-07,
+            "maximum_location": {
+              "coarse_cell": 34,
+              "gauss": 0,
+              "member": "E2",
+              "y_m": -0.13828125
+            },
+            "mean_absolute_difference": 2.6295307795326298e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0023094454235597084,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.00016587719399398137
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0008803587305112881,
+            "maximum_location": {
+              "coarse_cell": 104,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.18984374999999998
+            },
+            "mean_absolute_difference": 6.962897264581999e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 9.720855783778432e-08,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 2.5086910493376478e-08
+          }
+        },
+        "target_m": 0.052
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 3.5423405871148894e-05,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 1,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.4512030826358317e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0439290209465941e-07,
+            "maximum_location": {
+              "coarse_cell": 19,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.20859375
+            },
+            "mean_absolute_difference": 4.428438581510106e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 5.315455597338515e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 1,
+              "member": "E2",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.5905609899080857e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.002420249784497841,
+            "maximum_location": {
+              "coarse_cell": 28,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.16640625
+            },
+            "mean_absolute_difference": 0.00019297856738109822
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0008719213160701678,
+            "maximum_location": {
+              "coarse_cell": 29,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.16171875
+            },
+            "mean_absolute_difference": 8.820818740854241e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.2529087290878357e-07,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 3.485198682617229e-08
+          }
+        },
+        "target_m": 0.054
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.00012547431820586485,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 6.213474412528353e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0439290209465941e-07,
+            "maximum_location": {
+              "coarse_cell": 19,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.20859375
+            },
+            "mean_absolute_difference": 5.520802510870729e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.994259111183581e-06,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 4.579654216307757e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.002963772932027098,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.00026066258886930726
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0006749209234242493,
+            "maximum_location": {
+              "coarse_cell": 26,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.17578125
+            },
+            "mean_absolute_difference": 8.961193698116468e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.712969454751919e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 5.850422710344351e-08
+          }
+        },
+        "target_m": 0.056
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.00012760325726335342,
+            "maximum_location": {
+              "coarse_cell": 11,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.24609375
+            },
+            "mean_absolute_difference": 9.856292424042085e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0439290209465941e-07,
+            "maximum_location": {
+              "coarse_cell": 19,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.20859375
+            },
+            "mean_absolute_difference": 6.847474543275387e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.1740127267235072e-06,
+            "maximum_location": {
+              "coarse_cell": 11,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.24609375
+            },
+            "mean_absolute_difference": 4.717090739974453e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0031106472506801097,
+            "maximum_location": {
+              "coarse_cell": 36,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.12890625
+            },
+            "mean_absolute_difference": 0.00023415309000256515
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0007317077406903127,
+            "maximum_location": {
+              "coarse_cell": 97,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.15703125
+            },
+            "mean_absolute_difference": 6.144565170050255e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.6769985521384798e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.896531095528686e-08
+          }
+        },
+        "target_m": 0.058
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 7.38916145819335e-05,
+            "maximum_location": {
+              "coarse_cell": 12,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.24140625
+            },
+            "mean_absolute_difference": 4.1845551665969694e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0439290209465941e-07,
+            "maximum_location": {
+              "coarse_cell": 19,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.20859375
+            },
+            "mean_absolute_difference": 4.04594018629737e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.1432962768662125e-06,
+            "maximum_location": {
+              "coarse_cell": 10,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.25078125
+            },
+            "mean_absolute_difference": 3.310704337664323e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.001802157376339153,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.00014673281786059747
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0006011312457793183,
+            "maximum_location": {
+              "coarse_cell": 36,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.12890625
+            },
+            "mean_absolute_difference": 6.59261045800889e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.501856946844321e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 3.0353695973696865e-08
+          }
+        },
+        "target_m": 0.06
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 7.495538243096345e-05,
+            "maximum_location": {
+              "coarse_cell": 1,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.29296875
+            },
+            "mean_absolute_difference": 2.1924565497489246e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 1.0439290209465941e-07,
+            "maximum_location": {
+              "coarse_cell": 19,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.20859375
+            },
+            "mean_absolute_difference": 4.328712237588976e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 1.2346086445114406e-06,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 2.6604774456885283e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.003227961754552755,
+            "maximum_location": {
+              "coarse_cell": 24,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.18515625
+            },
+            "mean_absolute_difference": 0.00020044651758707643
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0013177723010928677,
+            "maximum_location": {
+              "coarse_cell": 25,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.18046875
+            },
+            "mean_absolute_difference": 9.779657517289871e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.718062961800348e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 6.041702536681212e-08
+          }
+        },
+        "target_m": 0.062
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0002985136721342929,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 1.7127849908213038e-06
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.296481975759372e-07,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 9.660477729123637e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 5.0239461784654885e-06,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 7.035172691807723e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.006860992676717359,
+            "maximum_location": {
+              "coarse_cell": 126,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.29296874999999994
+            },
+            "mean_absolute_difference": 0.0003798515511265667
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0017418213476678712,
+            "maximum_location": {
+              "coarse_cell": 98,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.16171874999999997
+            },
+            "mean_absolute_difference": 1.4534654501074602e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.0498871374668472e-07,
+            "maximum_location": {
+              "coarse_cell": 101,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.17578125
+            },
+            "mean_absolute_difference": 3.988970735536347e-08
+          }
+        },
+        "target_m": 0.064
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0001812119991200234,
+            "maximum_location": {
+              "coarse_cell": 13,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23671874999999998
+            },
+            "mean_absolute_difference": 9.326847623265356e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.0506274295414503e-07,
+            "maximum_location": {
+              "coarse_cell": 22,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19453125
+            },
+            "mean_absolute_difference": 6.378121991462091e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.9941324480222548e-06,
+            "maximum_location": {
+              "coarse_cell": 13,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23671874999999998
+            },
+            "mean_absolute_difference": 4.054611567441641e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.004203375680777777,
+            "maximum_location": {
+              "coarse_cell": 34,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.13828125
+            },
+            "mean_absolute_difference": 0.00023889158667116868
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0014861241815163906,
+            "maximum_location": {
+              "coarse_cell": 35,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.13359374999999998
+            },
+            "mean_absolute_difference": 9.206128607198993e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.7562069755508734e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E4",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 6.319726024533127e-08
+          }
+        },
+        "target_m": 0.066
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0002475873929284056,
+            "maximum_location": {
+              "coarse_cell": 2,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.28828125
+            },
+            "mean_absolute_difference": 1.2150100509565107e-06
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.0506274295414503e-07,
+            "maximum_location": {
+              "coarse_cell": 22,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19453125
+            },
+            "mean_absolute_difference": 8.409515270131315e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 4.054990563495458e-06,
+            "maximum_location": {
+              "coarse_cell": 2,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.28828125
+            },
+            "mean_absolute_difference": 5.962278642459073e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.006181094932315112,
+            "maximum_location": {
+              "coarse_cell": 109,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.21328125000000003
+            },
+            "mean_absolute_difference": 0.000339195244328939
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.002593285896862918,
+            "maximum_location": {
+              "coarse_cell": 25,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.18046875
+            },
+            "mean_absolute_difference": 1.01551894778062e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 4.028789480185757e-07,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E4",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 7.360170198317631e-08
+          }
+        },
+        "target_m": 0.068
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0002062376981351033,
+            "maximum_location": {
+              "coarse_cell": 13,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23671874999999998
+            },
+            "mean_absolute_difference": 1.225651357871624e-06
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.0506274295414503e-07,
+            "maximum_location": {
+              "coarse_cell": 22,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19453125
+            },
+            "mean_absolute_difference": 7.554175952295841e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 3.56582127788432e-06,
+            "maximum_location": {
+              "coarse_cell": 13,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23671874999999998
+            },
+            "mean_absolute_difference": 5.180068485826373e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.005117680216167209,
+            "maximum_location": {
+              "coarse_cell": 33,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.14296875
+            },
+            "mean_absolute_difference": 0.0002674663546578073
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.002051165135290134,
+            "maximum_location": {
+              "coarse_cell": 34,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.13828125
+            },
+            "mean_absolute_difference": 9.272293672522481e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.783846191943898e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 6.944234828599488e-08
+          }
+        },
+        "target_m": 0.07
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0003325515296057624,
+            "maximum_location": {
+              "coarse_cell": 13,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23671874999999998
+            },
+            "mean_absolute_difference": 1.8778555581361555e-06
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.6917375076313324e-07,
+            "maximum_location": {
+              "coarse_cell": 20,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.20390625
+            },
+            "mean_absolute_difference": 9.508248658981589e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 5.676236699035837e-06,
+            "maximum_location": {
+              "coarse_cell": 12,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.24140625
+            },
+            "mean_absolute_difference": 8.367902652523009e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.008256767889910588,
+            "maximum_location": {
+              "coarse_cell": 33,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.14296875
+            },
+            "mean_absolute_difference": 0.00034153427936365173
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.002616623885693725,
+            "maximum_location": {
+              "coarse_cell": 100,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.17109375
+            },
+            "mean_absolute_difference": 1.1886902347943632e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 3.833097775799571e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 7.476046716658334e-08
+          }
+        },
+        "target_m": 0.072
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0001810526361115672,
+            "maximum_location": {
+              "coarse_cell": 3,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.28359375
+            },
+            "mean_absolute_difference": 6.610246490783867e-07
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.0506274295414503e-07,
+            "maximum_location": {
+              "coarse_cell": 22,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19453125
+            },
+            "mean_absolute_difference": 5.861129700013899e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.9363389882484285e-06,
+            "maximum_location": {
+              "coarse_cell": 3,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.28359375
+            },
+            "mean_absolute_difference": 3.89525073715097e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.0046100487082973984,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 0.00023163082132179706
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0017093987936104282,
+            "maximum_location": {
+              "coarse_cell": 109,
+              "gauss": 0,
+              "member": "E6",
+              "y_m": 0.21328125000000003
+            },
+            "mean_absolute_difference": 8.682292469937946e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.013497081231573e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 5.746240666473933e-08
+          }
+        },
+        "target_m": 0.074
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.00018400514748784236,
+            "maximum_location": {
+              "coarse_cell": 14,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23203125
+            },
+            "mean_absolute_difference": 1.1978006376285754e-06
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.0506274295414503e-07,
+            "maximum_location": {
+              "coarse_cell": 22,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19453125
+            },
+            "mean_absolute_difference": 7.92139585116456e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 3.0991858559678825e-06,
+            "maximum_location": {
+              "coarse_cell": 13,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23671874999999998
+            },
+            "mean_absolute_difference": 5.750769194711393e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.006058170469572133,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.00023811839282685403
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0014786410456051335,
+            "maximum_location": {
+              "coarse_cell": 33,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.14296875
+            },
+            "mean_absolute_difference": 5.467545958632162e-06
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 2.463519494584794e-07,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 4.272008132759813e-08
+          }
+        },
+        "target_m": 0.076
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.0001741974385660594,
+            "maximum_location": {
+              "coarse_cell": 3,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.28359375
+            },
+            "mean_absolute_difference": 1.895900120515809e-06
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.0506274295414503e-07,
+            "maximum_location": {
+              "coarse_cell": 22,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19453125
+            },
+            "mean_absolute_difference": 1.0710897133386332e-08
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 2.9996480924712396e-06,
+            "maximum_location": {
+              "coarse_cell": 1,
+              "gauss": 2,
+              "member": "E6",
+              "y_m": -0.29296875
+            },
+            "mean_absolute_difference": 7.774888031085298e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.004418000000825373,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 0.0003998702892380274
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0015026541492390022,
+            "maximum_location": {
+              "coarse_cell": 24,
+              "gauss": 0,
+              "member": "E1",
+              "y_m": -0.18515625
+            },
+            "mean_absolute_difference": 1.3619387737047201e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 1.761656955097824e-07,
+            "maximum_location": {
+              "coarse_cell": 127,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": 0.29765625
+            },
+            "mean_absolute_difference": 5.4590923886928657e-08
+          }
+        },
+        "target_m": 0.078
+      },
+      {
+        "fields": {
+          "compressive_damage": {
+            "maximum_absolute_difference": 0.00029174202852055853,
+            "maximum_location": {
+              "coarse_cell": 14,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23203125
+            },
+            "mean_absolute_difference": 1.94406563585575e-06
+          },
+          "compressive_history_strain": {
+            "maximum_absolute_difference": 2.4414332369790057e-07,
+            "maximum_location": {
+              "coarse_cell": 21,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.19921875
+            },
+            "mean_absolute_difference": 9.342387717313411e-09
+          },
+          "dissipated_energy_density_mj_per_m3": {
+            "maximum_absolute_difference": 5.082573062258457e-06,
+            "maximum_location": {
+              "coarse_cell": 14,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.23203125
+            },
+            "mean_absolute_difference": 8.367037579642224e-08
+          },
+          "stress_mpa": {
+            "maximum_absolute_difference": 0.007749422926473848,
+            "maximum_location": {
+              "coarse_cell": 32,
+              "gauss": 2,
+              "member": "E3",
+              "y_m": -0.14765625
+            },
+            "mean_absolute_difference": 0.0003515079040410003
+          },
+          "tensile_damage": {
+            "maximum_absolute_difference": 0.0021059957244330407,
+            "maximum_location": {
+              "coarse_cell": 101,
+              "gauss": 0,
+              "member": "E3",
+              "y_m": 0.17578125
+            },
+            "mean_absolute_difference": 1.1593956854941144e-05
+          },
+          "tensile_history_strain": {
+            "maximum_absolute_difference": 5.111593595636538e-07,
+            "maximum_location": {
+              "coarse_cell": 0,
+              "gauss": 2,
+              "member": "E1",
+              "y_m": -0.29765625
+            },
+            "mean_absolute_difference": 1.1623665348882787e-07
+          }
+        },
+        "target_m": 0.08
+      }
+    ]
+  },
+  "derived_fine_values_are_solver_accepted_fibers": false,
+  "fine_sha256": "ae168bdad5cc4d23f0b246df39b84b1b800458033fe4ba0c9f4acaed7d98b695",
+  "inventory_sha256": "48a9f4d2fafada99a732599e24212e2ba734c6e9f23a0fa59db60f663903ac8d",
+  "material_integrations": 184320,
+  "material_sha256": "dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+  "observer_revision": "e4c82c5b9fd734c390282e74d3dde4a157f2be6a",
+  "original_projection_screen_replaced": false,
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-all-common-points-x71ahi_4",
+  "physical_validation": false,
+  "prior_two_witness_objects_exact": true,
+  "process": {
+    "arguments": [
+      "/usr/bin/python3",
+      "scripts/probe_planar_common_material_points.py",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-256-full-refinement-vfqmfsjd",
+      "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-all-common-points-x71ahi_4/report.json",
+      "--all-points"
+    ],
+    "return_code": 0,
+    "wall_ns": 36120687030
+  },
+  "report_sha256": "fdac9745848c0a4d82c2011e1a0534635f84fc4ba9775e43eeebe249dff138bc",
+  "schema": "posthoc-all-common-material-points.v1",
+  "selection": "All 128 coarse concrete midpoints in each of 18 sections, through forty targets; post-hoc derived fine responses, not independent validation or continuum convergence.",
+  "source_revision": "3e2cc1dba5c6dac1b12eb1badc9b6df09337b847",
+  "structural_solves": 0
+}

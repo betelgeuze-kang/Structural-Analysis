@@ -1,0 +1,92 @@
+{
+  "claims": {
+    "global_optimality": false,
+    "independent_generalization": false,
+    "independent_physical_validation": false,
+    "learned_speedup_proved": false,
+    "real_currency_savings": false
+  },
+  "first_training_attempt": {
+    "blocked_candidate_id": "training-044",
+    "input": "examples/research/rc_internal_portal_20mm/candidate-training-widths.json",
+    "label_report_hash": "sha256:2a7ff914fd858e3a47cfa2723f3e94ccf34305eec8ef174647cdc42e087235a6",
+    "source_revision": "485d6837c6157696cae3619cb410803ac2c2f13f",
+    "status": "incomplete",
+    "verified_count": 2
+  },
+  "followup": {
+    "arms": {
+      "learned_order": {
+        "selected_candidate_id": "narrower-036",
+        "wall_ns": 10025808802,
+        "work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 16,
+            "known_linear_solve_count": 162,
+            "known_newton_iteration_count": 162,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        }
+      },
+      "price_order": {
+        "selected_candidate_id": "narrower-036",
+        "wall_ns": 10132885813,
+        "work": {
+          "api_invocation_count": 4,
+          "known_counters": {
+            "attempted_step_count": 16,
+            "known_linear_solve_count": 162,
+            "known_newton_iteration_count": 162,
+            "unknown_solver_work_attempt_count": 0
+          },
+          "unknown_work": false
+        }
+      }
+    },
+    "evaluation_input": "examples/research/rc_internal_portal_20mm/design-width-comparison.json",
+    "missed_feasible_candidate_ids": [
+      "wider-050"
+    ],
+    "online_and_oracle_wall_ns": 35597878351,
+    "oracle": {
+      "selected_candidate_id": "narrower-036",
+      "work": {
+        "api_invocation_count": 6,
+        "known_counters": {
+          "attempted_step_count": 24,
+          "known_linear_solve_count": 250,
+          "known_newton_iteration_count": 250,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "unknown_work": false
+      }
+    },
+    "policy_hash": "sha256:fa5e4a163f04a9581789b41f89b52bb2f7c63103c9b3b94c577832350cc2d523",
+    "pool_minimum_feasible_candidate_ids": [
+      "narrower-036"
+    ],
+    "pool_minimum_feasible_estimate": 459.036,
+    "ranking_same_as_price": true,
+    "sample_count": 3,
+    "search_plan_hash": "sha256:a7ae6be6c73b9d8babf054069c1e33ed682718f54f78f224bfc9183688fc17b5",
+    "search_report_hash": "sha256:9f771411b77b344fa3aa5442c1547c8cd55411de15315ca431dc62735f38a742",
+    "source_revision": "f8ef8b128f135adfc3cd833cc8c7479422ceb72c",
+    "training_api_invocations": 6,
+    "training_attempted_steps": 24,
+    "training_input": "examples/research/rc_internal_portal_20mm/candidate-training-widths-followup.json",
+    "training_known_newton_iterations": 248,
+    "training_report_hash": "sha256:19d9f12c2072d250ac9acd07ba1f92989e2516b90ad79f85d2a46ef67f26ade9",
+    "training_wall_ns": 15478747819
+  },
+  "schema_version": "rc-portal-candidate-search-observation.v1",
+  "workbench_fixture": {
+    "byte_length": 3304990,
+    "original_json_byte_total": 13686200,
+    "original_json_file_count": 75,
+    "path": "tests/frontend/fixtures/rc-portal-candidate-search-artifacts.json.gz",
+    "referenced_original_count": 66,
+    "sha256": "sha256:1eb8585f280f50e3ad5f59268b585babffa426b3969cfb78b44e7be1c25c6e43"
+  }
+}

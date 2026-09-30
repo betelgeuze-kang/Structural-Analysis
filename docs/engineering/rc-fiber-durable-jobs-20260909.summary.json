@@ -1,0 +1,264 @@
+{
+  "schema_version": "rc-fiber-durable-job-development-summary.v1",
+  "status": "focused_development_validation_pass",
+  "parent_commit": "e56a00502aa1d5d2cc35bbc0ad700e4eb1d0f810",
+  "python": "3.10.12",
+  "source_snapshot_scope": "Final file hashes after development tests; not a clean-source predeclared performance observation",
+  "source_files": [
+    {
+      "path": "src/structural_analysis/execution/job_service.py",
+      "byte_length": 111110,
+      "sha256": "sha256:599252f200461cd97be25fa402694e46f33179490797177a478edcc79233d5b6"
+    },
+    {
+      "path": "src/structural_analysis/execution/job_http_api.py",
+      "byte_length": 19386,
+      "sha256": "sha256:5dbe740791718ece5b4e4a0e821ae64abbe6230bc40c0232a565311bccba7ad3"
+    },
+    {
+      "path": "src/structural_analysis/execution/job_worker.py",
+      "byte_length": 2896,
+      "sha256": "sha256:9e0da280e059df69a59b5e9fe37e91359cd2e599978b8599823dee6a08964565"
+    },
+    {
+      "path": "src/structural_analysis/execution/__init__.py",
+      "byte_length": 1437,
+      "sha256": "sha256:87a44767620da4a267bc68a3dfdb84075909e743ceb6fe46975e3d63b5e7422d"
+    },
+    {
+      "path": "src/structural_analysis/execution/rc_fiber_job_contract.py",
+      "byte_length": 35232,
+      "sha256": "sha256:ba171b790ba12ed89f7e10fae6e6c8f98fda79b245725110ef4f03dd059dfb9a"
+    },
+    {
+      "path": "src/structural_analysis/execution/rc_fiber_direct_control_worker.py",
+      "byte_length": 17226,
+      "sha256": "sha256:77b6eff09fbc041bfc7d6f40539ccc52a6c0bc40368859887f34830d38d2d6db"
+    },
+    {
+      "path": "src/structural_analysis/schemas/job_request_v3.schema.json",
+      "byte_length": 3670,
+      "sha256": "sha256:d9e1da624dba12f18a9e1831331c7e4567c30011bc1bb7d65130583de3c3833d"
+    },
+    {
+      "path": "tests/test_rc_fiber_job_contract.py",
+      "byte_length": 21531,
+      "sha256": "sha256:27bef546fb0cb5197353b0c771ba2f39c7234a315c3371e5acdb999551a6bbef"
+    },
+    {
+      "path": "tests/test_rc_fiber_job_service.py",
+      "byte_length": 29824,
+      "sha256": "sha256:2901f9a6967640cd4d272845793d6b71311e7fe8efaffdc606bde1d57b5aac17"
+    },
+    {
+      "path": "tests/test_rc_fiber_durable_worker.py",
+      "byte_length": 36968,
+      "sha256": "sha256:54a72665ab2a37e7877ac48cf8c48a60167201f87a71042b065b2584bc3b0cb1"
+    }
+  ],
+  "actual_rc_observation": {
+    "root": "/tmp/structural-rc-durable-worker-m82neh3y",
+    "targets_m": [
+      -1e-06,
+      -2e-06,
+      -1.5e-06
+    ],
+    "original_api_invocations": 4,
+    "mandatory_verification_invocations": 4,
+    "total_core_work": {
+      "attempted_step_count": 18,
+      "known_linear_solve_count": 36,
+      "known_newton_iteration_count": 36,
+      "unknown_solver_work_attempt_count": 0
+    },
+    "verified_response_reassemblies": 18,
+    "full_and_split_response_history_equal": true,
+    "full_and_split_native_restart_bytes_equal": true,
+    "response_history_sha256": "sha256:d097ee3119ab4335d58c1ef889d39500b9b59d6c699baa5040702ce1a6de288c",
+    "full_job_result_sha256": "sha256:86ad1690520a1865b72a0e34d995afd8b7d1135a19e111ecf0954355a5196cb6",
+    "split_job_result_sha256": "sha256:15b32f857af632b8c643826b7cb3c6135412c06f005029137bb5a4ec24c8c5b9",
+    "full_job_result_bytes": 922285,
+    "inventory": {
+      "file_count": 68,
+      "byte_length": 10864359,
+      "inventory_sha256": "sha256:ed989a4c210bfa495b12f16ae462ef364f933c5ece66c83c021aee8c182f6016"
+    },
+    "source_copies_taken_after_tests": true,
+    "independent_physical_validation": false,
+    "performance_comparison": false
+  },
+  "final_verification": {
+    "combined": {
+      "passed": 149,
+      "seconds": 18.37,
+      "command": "PYTHONPATH=\"$PWD/src\" STRUCTURAL_RC_DURABLE_WORKER_RETAINED=/tmp/structural-rc-durable-worker-m82neh3y python3 -B -m pytest -q tests/test_rc_fiber_job_contract.py tests/test_rc_fiber_job_service.py tests/test_rc_fiber_durable_worker.py",
+      "new_numerical_calls": 0,
+      "scope": "Retained fixture copied before SQLite access; pure contracts and controlled negative boundaries",
+      "log": "/tmp/structural-rc-durable-combined-final.log"
+    },
+    "initial_actual_worker": {
+      "passed": 24,
+      "seconds": 14.18
+    },
+    "final_cached_worker": {
+      "passed": 31,
+      "seconds": 7.8,
+      "additional_numerical_calls": 0
+    },
+    "service": {
+      "passed": 65,
+      "seconds": 7.77,
+      "numerical_calls": 0,
+      "initial_alias_mutants_failed": 9
+    },
+    "legacy_durable_frame3d": {
+      "passed": 88,
+      "seconds": 212.37,
+      "scope": "Existing neighboring regression suite; not included in RC observation call counts",
+      "log": "/tmp/structural-rc-durable-legacy-neighborhood.log"
+    },
+    "ci_registration": {
+      "passed": 49,
+      "seconds": 0.55
+    },
+    "counts_overlap": true
+  },
+  "retained_service": {
+    "root": "/tmp/structural-rc-service-hl3ehh3u",
+    "file_count": 10,
+    "byte_length": 78396,
+    "inventory_sha256": "sha256:5ff2cbeca61f998dbb220ea7456b6c943b55e7709602a64a518becd359edc4af"
+  },
+  "authority": {
+    "trusted_worker_execution_only": true,
+    "independent_physical_validation": false,
+    "general_cyclic_validation": false,
+    "performance_improvement": false,
+    "public_j1_j5_authority": false,
+    "design_authority": false,
+    "production_promotion": false,
+    "release_approved": false
+  },
+  "open_scope": [
+    "clean-source 242-target durable path including actual large result publication",
+    "verified RC Workbench review",
+    "M1-M4 study integration",
+    "broader families and independent validation",
+    "existing licensing, hardware and owner dependencies"
+  ],
+  "claim_boundary": "Single-host bounded development correctness and exact evidence bookkeeping; unchanged APIs preserve prefix replay and separate fresh validation costs. No constant-storage, zero-work, performance, independent or release claim.",
+  "ci_followup": {
+    "preceding_exact_head": "e56a00502aa1d5d2cc35bbc0ad700e4eb1d0f810",
+    "hosted_check_snapshot": {
+      "total": 77,
+      "success": 59,
+      "failure": 13,
+      "skipped": 5,
+      "includes_aggregate_failures": true
+    },
+    "frontend": {
+      "pr_job": 102285719169,
+      "push_job": 102285709020,
+      "browser_tests_passed_per_job": 407
+    },
+    "topology": {
+      "job": 102285718918,
+      "focused_tests_passed": 412,
+      "focused_seconds": 1050.78,
+      "subsequent_failure": "engineering recovery coverage 85% below unchanged90 threshold"
+    },
+    "full_pytest": {
+      "shards": [
+        102285719379,
+        102285719286,
+        102285719366,
+        102285719386
+      ],
+      "failure": "matrix_status_evidence_authority_invalid during artifact preparation",
+      "repository_test_bodies_executed": false,
+      "affected_requirement_identity": "not named by retained hosted log"
+    },
+    "matrix_followup": {
+      "tests_passed": 88,
+      "tests_deselected": 141,
+      "seconds": 2.1,
+      "scope": "Pure synthetic binding/status/schema/consumer selection; no local protected evidence read, materialization, numerical replay repair or full source/signature validation",
+      "independent_source_review": "no remaining concrete defect found"
+    },
+    "coverage_selection": {
+      "head": "e56a00502aa1d5d2cc35bbc0ad700e4eb1d0f810",
+      "production_source_sha256": "5bbc4d51ee3d59a397403328bfae2fd2d2a667bc1c4e4f47199f3c63e63a7854",
+      "owned_repository_edits": [],
+      "initial_tool_failure": "python3 coverage unavailable; no tests or numerical execution",
+      "tool_install": "coverage 7.16.0 and tomli 2.4.1 in isolated /tmp tooling; one download timeout retry retained in tool-install.log",
+      "baseline": {
+        "tests_passed": 19,
+        "elapsed_seconds": 57.19,
+        "coverage": {
+          "covered_lines": 383,
+          "num_statements": 433,
+          "percent_covered": 85.00948766603416,
+          "percent_covered_display": "85",
+          "missing_lines": 50,
+          "excluded_lines": 0,
+          "percent_statements_covered": 88.45265588914549,
+          "percent_statements_covered_display": "88",
+          "num_branches": 94,
+          "num_partial_branches": 17,
+          "covered_branches": 65,
+          "missing_branches": 29,
+          "percent_branches_covered": 69.14893617021276,
+          "percent_branches_covered_display": "69"
+        },
+        "solver_invocations": "not instrumented; unavailable"
+      },
+      "updated": {
+        "tests_passed": 86,
+        "elapsed_seconds": 64.69,
+        "coverage": {
+          "covered_lines": 417,
+          "num_statements": 433,
+          "percent_covered": 94.30740037950665,
+          "percent_covered_display": "94",
+          "missing_lines": 16,
+          "excluded_lines": 0,
+          "percent_statements_covered": 96.30484988452656,
+          "percent_statements_covered_display": "96",
+          "num_branches": 94,
+          "num_partial_branches": 14,
+          "covered_branches": 80,
+          "missing_branches": 14,
+          "percent_branches_covered": 85.1063829787234,
+          "percent_branches_covered_display": "85"
+        },
+        "original_threshold": 90,
+        "observed_work": {
+          "pytest_exit": 0,
+          "solver_entry": "stateful_corotational_fiber_frame2d_solver.newton_raphson_vector",
+          "calls_by_test_module": {
+            "tests/test_corotational_fiber_frame_engineering_recovery.py": {
+              "invoked": 44,
+              "returned": 44,
+              "raised": 0
+            },
+            "tests/test_corotational_fiber_frame_general.py": {
+              "invoked": 12,
+              "returned": 12,
+              "raised": 0
+            }
+          },
+          "checkpoint_transition_newton_invocations": 0,
+          "scope": "Observed Newton invocations, not linear solves or independent physical validation"
+        }
+      },
+      "claim_boundary": "Existing CI contract and synthetic checkpoint reassembly tests; no independent physical validation or readiness claim. Updated test observation counts Newton entry invocations only, not linear solves."
+    },
+    "new_exact_head_hosted_acceptance": "pending",
+    "retained": {
+      "root": "/tmp/structural-cie56-final.rjtWCrYy",
+      "file_count": 26,
+      "byte_length": 1908066,
+      "inventory_sha256": "sha256:b77f398b6de42eb82e61a3afcc9f809fec660520b034486159e1e2a63fa283d1"
+    }
+  }
+}

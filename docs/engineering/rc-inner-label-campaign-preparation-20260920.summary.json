@@ -1,0 +1,38 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-inner-label-campaign-b003_gd4",
+  "source_revision": "d89cffa9585ba945d4b7d7a630f0712876d7a919",
+  "launcher_sha256": "9acb29125203d22970c431222d2007bcc79935b09a05cacfa6923305ce3f9b68",
+  "status": "prepared_not_started",
+  "source_files_verified": 968,
+  "source_manifest_sha256": "b945f7ef43c06f7dbcf66ad53a0f434f7b54c870db225c9e4f9505705b0a1782",
+  "protocol": {
+    "source_revision": "d89cffa9585ba945d4b7d7a630f0712876d7a919",
+    "status": "prepared_not_started",
+    "planned_pairs": 990,
+    "repetitions": 3,
+    "planned_comparisons": 2970,
+    "planned_single_target_paths": 11880,
+    "maximum_core_calls": 17820,
+    "new_fits": 0,
+    "reserved_evaluation": false,
+    "parallel_timing_runs": false,
+    "source_manifest_sha256": "b945f7ef43c06f7dbcf66ad53a0f434f7b54c870db225c9e4f9505705b0a1782",
+    "seed_inventory_sha256": "ae32514ecc6154d558b2fd34caf68182523b21e60717362a0559ed376a8e1994",
+    "wait_for_controller": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-2048-controller-mvrv59ta",
+    "wait_for_pids": [
+      347865,
+      348838
+    ],
+    "complete_path_speedup_claim": false
+  },
+  "admission_probe": {
+    "exit_code": 1,
+    "expected_refusal": true,
+    "new_fits": 0,
+    "new_solves": 0,
+    "execution_started": false,
+    "reason": "RuntimeError: Prior numerical process 347865 is still live; campaign not started"
+  },
+  "new_fits": 0,
+  "new_solves": 0
+}

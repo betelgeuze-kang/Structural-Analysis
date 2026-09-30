@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import math
 from types import MappingProxyType
-from typing import Any, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping
 
 import numpy as np
 from scipy.sparse import bmat, csr_matrix, diags
@@ -1370,6 +1370,7 @@ def _solve_target_with_adaptive_target_cutback(
         StatefulCorotationalFrame3DDisplacementControlTargetCutbackAttempt
     ],
     solve_attempt_counter: list[int],
+    before_solve_attempt: Callable[[], None] | None = None,
 ) -> tuple[
     tuple[StatefulCorotationalFrame3DDisplacementControlStepResult, ...],
     StatefulCorotationalFrame3DDisplacementControlStepResult | None,
@@ -1403,6 +1404,8 @@ def _solve_target_with_adaptive_target_cutback(
                 None,
                 "direct_control_path_solve_attempt_limit_exceeded",
             )
+        if before_solve_attempt is not None:
+            before_solve_attempt()
         solve_attempt_counter[0] += 1
         try:
             step = solve_stateful_corotational_frame3d_displacement_control_step(
@@ -1575,28 +1578,51 @@ def _advance_target_chain_hash(
     ],
 ) -> str:
     return canonical_hash(
-        {
-            "schema_version": (
-                STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_TARGET_CHAIN_SCHEMA_VERSION
-            ),
-            "entry_kind": "completed_authored_target",
-            "previous_chain_hash": previous_chain_hash,
-            "cumulative_target_index": cumulative_target_index,
-            "authored_target": authored_target,
-            "leg_direction_sign": leg_direction_sign,
-            "reversal_from_previous_leg": reversal_from_previous_leg,
-            "requested_boundary_checkpoint_hash": (
-                requested_boundary_checkpoint_hash
-            ),
-            "accepted_step_hashes": [row.result_hash for row in accepted_steps],
-            "cutback_history_hash": canonical_hash(
-                [
-                    _target_chain_cutback_payload(row)
-                    for row in cutback_attempts
-                ]
-            ),
-        }
+        _target_chain_advance_payload(
+            previous_chain_hash=previous_chain_hash,
+            cumulative_target_index=cumulative_target_index,
+            authored_target=authored_target,
+            leg_direction_sign=leg_direction_sign,
+            reversal_from_previous_leg=reversal_from_previous_leg,
+            requested_boundary_checkpoint_hash=requested_boundary_checkpoint_hash,
+            accepted_steps=accepted_steps,
+            cutback_attempts=cutback_attempts,
+        )
     )
+
+
+def _target_chain_advance_payload(
+    *,
+    previous_chain_hash: str,
+    cumulative_target_index: int,
+    authored_target: float,
+    leg_direction_sign: int,
+    reversal_from_previous_leg: bool,
+    requested_boundary_checkpoint_hash: str,
+    accepted_steps: tuple[
+        StatefulCorotationalFrame3DDisplacementControlStepResult, ...
+    ],
+    cutback_attempts: tuple[
+        StatefulCorotationalFrame3DDisplacementControlTargetCutbackAttempt, ...
+    ],
+) -> dict[str, Any]:
+    """The existing rolling-chain preimage, also retained by opt-in job callers."""
+    return {
+        "schema_version": (
+            STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_TARGET_CHAIN_SCHEMA_VERSION
+        ),
+        "entry_kind": "completed_authored_target",
+        "previous_chain_hash": previous_chain_hash,
+        "cumulative_target_index": cumulative_target_index,
+        "authored_target": authored_target,
+        "leg_direction_sign": leg_direction_sign,
+        "reversal_from_previous_leg": reversal_from_previous_leg,
+        "requested_boundary_checkpoint_hash": (requested_boundary_checkpoint_hash),
+        "accepted_step_hashes": [row.result_hash for row in accepted_steps],
+        "cutback_history_hash": canonical_hash(
+            [_target_chain_cutback_payload(row) for row in cutback_attempts]
+        ),
+    }
 
 
 def _target_chain_cutback_payload(
@@ -1700,7 +1726,10 @@ def run_stateful_corotational_frame3d_displacement_control_path(
         | StatefulCorotationalFrame3DDisplacementControlCyclicResumeBinding
         | None
     ) = None,
+    before_solve_attempt: Callable[[], None] | None = None,
 ) -> StatefulCorotationalFrame3DDisplacementControlPathResult:
+    if before_solve_attempt is not None and not callable(before_solve_attempt):
+        raise ValueError("before_solve_attempt must be callable or None")
     solver_config = config or (
         StatefulCorotationalFrame3DDisplacementControlConfig()
     )
@@ -1879,6 +1908,7 @@ def run_stateful_corotational_frame3d_displacement_control_path(
             parent=checkpoints[-1],
             history=target_cutback_history,
             solve_attempt_counter=solve_attempt_counter,
+            before_solve_attempt=before_solve_attempt,
             )
         )
         steps.extend(accepted_steps)

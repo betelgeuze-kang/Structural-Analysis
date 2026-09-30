@@ -792,7 +792,7 @@ def _preflight_archive_manifest(
         if any(info.flag_bits & 0x1 for info in infos):
             raise PortableInstallError("archive_preflight_encrypted_entry_forbidden")
         manifest_infos = [
-            info for info in infos if info.filename.endswith("/manifest.json")
+            info for info in infos if info.filename.count("/") == 1 and info.filename.endswith("/manifest.json")
         ]
         if len(manifest_infos) != 1:
             raise PortableInstallError("archive_preflight_manifest_count_invalid")
@@ -913,7 +913,7 @@ def _verified_archive_to_staging(
         names = [info.filename for info in infos]
         if len(names) != len(set(names)):
             raise PortableInstallError("archive_duplicate_path")
-        manifest_names = [name for name in names if name.endswith("/manifest.json")]
+        manifest_names = [name for name in names if name.count("/") == 1 and name.endswith("/manifest.json")]
         if len(manifest_names) != 1:
             raise PortableInstallError("archive_manifest_count_invalid")
         manifest_name = manifest_names[0]

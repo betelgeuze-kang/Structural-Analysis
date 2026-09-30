@@ -1,0 +1,1491 @@
+{
+  "schema_version": "rc-cheaper-boundary-observation.v1",
+  "source_revision": "387478e923a04f88bd6e0164170099899e078eec",
+  "source_files_checked": 442,
+  "protocol": {
+    "schema_version": "rc-cheaper-boundary-prospective-protocol.v1",
+    "planning_revision": "16ede158789c95bd87289fa5899bda18733f4198",
+    "known_prior_pool_is_development_data": true,
+    "candidate_pool": [
+      [
+        "w035",
+        0.35
+      ],
+      [
+        "w037",
+        0.37
+      ],
+      [
+        "w039",
+        0.39
+      ],
+      [
+        "w041",
+        0.41
+      ],
+      [
+        "w044",
+        0.44
+      ],
+      [
+        "w045",
+        0.45
+      ],
+      [
+        "w047",
+        0.47
+      ],
+      [
+        "w049",
+        0.49
+      ],
+      [
+        "w051",
+        0.51
+      ],
+      [
+        "w053",
+        0.53
+      ]
+    ],
+    "unchanged_baseline_width_m": 0.43,
+    "unchanged_strain_limit": 0.0003302745924965656,
+    "fixed_before_new_pool_predictions_or_solves": true,
+    "strategies": [
+      "feasibility_then_price.v1",
+      "feasibility_then_cheaper_boundary.v1"
+    ],
+    "rule": "cheapest predicted-feasible seed first; strictly cheaper abstentions in price order, then strictly cheaper predicted failures by max normalized positive exceedance (value-limit)/value, price, ID; remainder in legacy tier/price/ID order; without a predicted feasible seed retain legacy ordering",
+    "no_calibrated_uncertainty_claim": true,
+    "budgets_including_baseline": [
+      2,
+      3,
+      6
+    ],
+    "phase_order": [
+      "legacy-budget-2",
+      "boundary-budget-2",
+      "legacy-budget-3",
+      "boundary-budget-3",
+      "legacy-budget-6",
+      "boundary-budget-6-with-oracle"
+    ],
+    "oracle_after_all_twelve_online_arms": true,
+    "anticipated_completed_core_calls": 880,
+    "online_core_calls": 704,
+    "oracle_core_calls": 176,
+    "new_fit_count": 0,
+    "historical_training_cost_retained_once": true,
+    "same_authored_family": true,
+    "independent_generalization": false,
+    "automatic_retry": false,
+    "automatic_threshold_pool_budget_adjustment": false,
+    "single_fixed_order_shared_host_observation": true,
+    "net_runtime_savings_claim_allowed": false,
+    "real_material_cost_savings_claim_allowed": false
+  },
+  "process": {
+    "exit_code": 0,
+    "phases": [
+      {
+        "phase": "legacy-budget-2",
+        "exit_code": 0,
+        "parent_wall_ns": 5347587148
+      },
+      {
+        "phase": "boundary-budget-2",
+        "exit_code": 0,
+        "parent_wall_ns": 5341062829
+      },
+      {
+        "phase": "legacy-budget-3",
+        "exit_code": 0,
+        "parent_wall_ns": 7274876948
+      },
+      {
+        "phase": "boundary-budget-3",
+        "exit_code": 0,
+        "parent_wall_ns": 7193146628
+      },
+      {
+        "phase": "legacy-budget-6",
+        "exit_code": 0,
+        "parent_wall_ns": 12623526777
+      },
+      {
+        "phase": "boundary-budget-6-with-oracle",
+        "exit_code": 0,
+        "parent_wall_ns": 22486706943
+      }
+    ],
+    "parent_wall_ns": 60268051507,
+    "all_six_phases_completed": true
+  },
+  "comparison_rows": 55,
+  "full_path_invocations": 110,
+  "original_fresh_full_path_verifications": 55,
+  "recorded_response_reassemblies": 440,
+  "artifact_references_checked": 440,
+  "work": {
+    "attempted_step_count": 880,
+    "known_linear_solve_count": 2204,
+    "known_newton_iteration_count": 2204,
+    "unknown_solver_work_attempt_count": 0
+  },
+  "maximum_observed_material_history": {
+    "maximum_steel_accumulated_plastic_strain": 0.0,
+    "maximum_concrete_compressive_damage": 0.0,
+    "maximum_concrete_tensile_damage": 0.0
+  },
+  "new_fit_count": 0,
+  "identical_predictions_and_pool_across_six_searches": true,
+  "oracle_rows": [
+    {
+      "candidate_id": "baseline",
+      "strain": 0.00033466891509175355,
+      "selection_eligible": false,
+      "estimate": 150.3108
+    },
+    {
+      "candidate_id": "w035",
+      "strain": 0.0003496069387254995,
+      "selection_eligible": false,
+      "estimate": 135.9108
+    },
+    {
+      "candidate_id": "w037",
+      "strain": 0.00034531835182174606,
+      "selection_eligible": false,
+      "estimate": 139.51080000000002
+    },
+    {
+      "candidate_id": "w039",
+      "strain": 0.00034143396726518893,
+      "selection_eligible": false,
+      "estimate": 143.11079999999998
+    },
+    {
+      "candidate_id": "w041",
+      "strain": 0.0003378992122816793,
+      "selection_eligible": false,
+      "estimate": 146.71079999999998
+    },
+    {
+      "candidate_id": "w044",
+      "strain": 0.00033315590489866443,
+      "selection_eligible": false,
+      "estimate": 152.11079999999998
+    },
+    {
+      "candidate_id": "w045",
+      "strain": 0.0003317053641602858,
+      "selection_eligible": false,
+      "estimate": 153.9108
+    },
+    {
+      "candidate_id": "w047",
+      "strain": 0.00032897682916311363,
+      "selection_eligible": true,
+      "estimate": 157.51079999999996
+    },
+    {
+      "candidate_id": "w049",
+      "strain": 0.0003264564204052377,
+      "selection_eligible": true,
+      "estimate": 161.11079999999998
+    },
+    {
+      "candidate_id": "w051",
+      "strain": 0.0003241211996530836,
+      "selection_eligible": true,
+      "estimate": 164.7108
+    },
+    {
+      "candidate_id": "w053",
+      "strain": 0.0003219514800173118,
+      "selection_eligible": true,
+      "estimate": 168.31079999999997
+    }
+  ],
+  "no_new_solver_or_fit_in_audit": true,
+  "independent_generalization": false,
+  "net_runtime_savings_proved": false,
+  "real_material_cost_savings_proved": false,
+  "audit_wall_ns": 2874741524,
+  "historical_training": {
+    "report_hash": "sha256:58fe887490952a9d3add4f9e9cc93e6a4ec05765b36e21cb215823a73b32cf4f",
+    "policy_hash": "sha256:032c4601a78023ed36629d84fa259b9fbd86b5daf12b1a1f973f7c65feed7c17",
+    "sample_count": 3,
+    "wall_ns": 2761753795,
+    "cpu_ns": 2756840052,
+    "label_generation_wall_ns": 2752124719,
+    "fit": {
+      "cpu_ns": 1552961,
+      "method": "svd-ridge-unpenalized-intercept.v2",
+      "status": "completed",
+      "unknown_fit_work_until_outcome": false,
+      "wall_ns": 1552685
+    },
+    "label_core_calls": 48
+  },
+  "studies": {
+    "legacy-budget-2": {
+      "plans": {
+        "learned_order": {
+          "ordering": [
+            "w049",
+            "w051",
+            "w053",
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047"
+          ],
+          "shortlist": [
+            "w049"
+          ]
+        },
+        "price_order": {
+          "ordering": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w035"
+          ]
+        }
+      },
+      "ranking": null,
+      "arms": {
+        "learned_order": {
+          "selection": "w049",
+          "estimate": 161.11079999999998,
+          "wall_ns": 1784010236,
+          "cpu_ns": 1779093219,
+          "work": {
+            "api_invocation_count": 4,
+            "known_counters": {
+              "attempted_step_count": 32,
+              "known_linear_solve_count": 82,
+              "known_newton_iteration_count": 82,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        },
+        "price_order": {
+          "selection": null,
+          "estimate": null,
+          "wall_ns": 1795893144,
+          "cpu_ns": 1795813996,
+          "work": {
+            "api_invocation_count": 4,
+            "known_counters": {
+              "attempted_step_count": 32,
+              "known_linear_solve_count": 80,
+              "known_newton_iteration_count": 80,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        }
+      },
+      "cost_audit": {
+        "schema_version": "rc-control-candidate-cost-optimality.v1",
+        "status": "complete",
+        "candidate_denominator": 11,
+        "baseline_included": true,
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "currency": "KRW",
+        "quantity_scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "oracle_comparison_hash": "sha256:2427dc53dbc4753b6e01849f1d0da1dba361b73813613051c51b2f61d014ca35",
+        "oracle_unverifiable_candidate_ids": [],
+        "pool_minimum_feasible_estimate": 157.51079999999996,
+        "pool_minimum_feasible_candidate_ids": [
+          "w047"
+        ],
+        "arms": {
+          "learned_order": {
+            "status": "compared",
+            "selected_candidate_id": "w049",
+            "selected_estimate": 161.11079999999998,
+            "selected_minus_pool_minimum_estimate": 3.6000000000000227,
+            "matches_pool_minimum": false,
+            "missed_cheaper_feasible_count": 1,
+            "missed_cheaper_feasible_candidate_ids": [
+              "w047"
+            ]
+          },
+          "price_order": {
+            "status": "no_verified_selection",
+            "selected_candidate_id": null,
+            "selected_estimate": null,
+            "selected_minus_pool_minimum_estimate": null,
+            "matches_pool_minimum": null,
+            "missed_cheaper_feasible_count": null,
+            "missed_cheaper_feasible_candidate_ids": null
+          }
+        },
+        "global_design_optimality_proved": false,
+        "confirmed_currency_savings": false,
+        "independent_physical_validation": false
+      },
+      "error_counts": {
+        "learned_order": {
+          "missed_feasible_count": 3,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": 0,
+          "false_safe_candidate_ids": [],
+          "predicted_safe_unverifiable_count": 0,
+          "predicted_safe_unverifiable_candidate_ids": [],
+          "false_negative_count": 1,
+          "false_negative_candidate_ids": [
+            "w047"
+          ]
+        },
+        "price_order": {
+          "missed_feasible_count": 4,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": null,
+          "false_safe_candidate_ids": null,
+          "predicted_safe_unverifiable_count": null,
+          "predicted_safe_unverifiable_candidate_ids": null,
+          "false_negative_count": null,
+          "false_negative_candidate_ids": null
+        }
+      },
+      "original_oracle_available": false,
+      "ranking_wall_ns": 9388072,
+      "search_wall_ns": 3613762219
+    },
+    "boundary-budget-2": {
+      "plans": {
+        "learned_order": {
+          "ordering": [
+            "w049",
+            "w047",
+            "w045",
+            "w044",
+            "w041",
+            "w039",
+            "w037",
+            "w035",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w049"
+          ]
+        },
+        "price_order": {
+          "ordering": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w035"
+          ]
+        }
+      },
+      "ranking": {
+        "strategy": "feasibility_then_cheaper_boundary.v1",
+        "predicted_feasible_seed_id": "w049",
+        "fallback_reason": null,
+        "uncertainty_calibrated": false,
+        "physical_result_authority": false,
+        "rows": [
+          {
+            "candidate_id": "w035",
+            "relative_exceedance": 0.05507871922195105,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w037",
+            "relative_exceedance": 0.047007799336969816,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w039",
+            "relative_exceedance": 0.038797818294499804,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w041",
+            "relative_exceedance": 0.030445150848077956,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w044",
+            "relative_exceedance": 0.017640368244035077,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w045",
+            "relative_exceedance": 0.013296614559447683,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w047",
+            "relative_exceedance": 0.0044928368631284455,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w049",
+            "relative_exceedance": 0.0,
+            "role": "predicted_feasible_seed"
+          },
+          {
+            "candidate_id": "w051",
+            "relative_exceedance": 0.0,
+            "role": "remaining_legacy_order"
+          },
+          {
+            "candidate_id": "w053",
+            "relative_exceedance": 0.0,
+            "role": "remaining_legacy_order"
+          }
+        ]
+      },
+      "arms": {
+        "learned_order": {
+          "selection": "w049",
+          "estimate": 161.11079999999998,
+          "wall_ns": 1786139707,
+          "cpu_ns": 1786036002,
+          "work": {
+            "api_invocation_count": 4,
+            "known_counters": {
+              "attempted_step_count": 32,
+              "known_linear_solve_count": 82,
+              "known_newton_iteration_count": 82,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        },
+        "price_order": {
+          "selection": null,
+          "estimate": null,
+          "wall_ns": 1795272821,
+          "cpu_ns": 1795207396,
+          "work": {
+            "api_invocation_count": 4,
+            "known_counters": {
+              "attempted_step_count": 32,
+              "known_linear_solve_count": 80,
+              "known_newton_iteration_count": 80,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        }
+      },
+      "cost_audit": {
+        "schema_version": "rc-control-candidate-cost-optimality.v1",
+        "status": "complete",
+        "candidate_denominator": 11,
+        "baseline_included": true,
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "currency": "KRW",
+        "quantity_scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "oracle_comparison_hash": "sha256:2427dc53dbc4753b6e01849f1d0da1dba361b73813613051c51b2f61d014ca35",
+        "oracle_unverifiable_candidate_ids": [],
+        "pool_minimum_feasible_estimate": 157.51079999999996,
+        "pool_minimum_feasible_candidate_ids": [
+          "w047"
+        ],
+        "arms": {
+          "learned_order": {
+            "status": "compared",
+            "selected_candidate_id": "w049",
+            "selected_estimate": 161.11079999999998,
+            "selected_minus_pool_minimum_estimate": 3.6000000000000227,
+            "matches_pool_minimum": false,
+            "missed_cheaper_feasible_count": 1,
+            "missed_cheaper_feasible_candidate_ids": [
+              "w047"
+            ]
+          },
+          "price_order": {
+            "status": "no_verified_selection",
+            "selected_candidate_id": null,
+            "selected_estimate": null,
+            "selected_minus_pool_minimum_estimate": null,
+            "matches_pool_minimum": null,
+            "missed_cheaper_feasible_count": null,
+            "missed_cheaper_feasible_candidate_ids": null
+          }
+        },
+        "global_design_optimality_proved": false,
+        "confirmed_currency_savings": false,
+        "independent_physical_validation": false
+      },
+      "error_counts": {
+        "learned_order": {
+          "missed_feasible_count": 3,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": 0,
+          "false_safe_candidate_ids": [],
+          "predicted_safe_unverifiable_count": 0,
+          "predicted_safe_unverifiable_candidate_ids": [],
+          "false_negative_count": 1,
+          "false_negative_candidate_ids": [
+            "w047"
+          ]
+        },
+        "price_order": {
+          "missed_feasible_count": 4,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": null,
+          "false_safe_candidate_ids": null,
+          "predicted_safe_unverifiable_count": null,
+          "predicted_safe_unverifiable_candidate_ids": null,
+          "false_negative_count": null,
+          "false_negative_candidate_ids": null
+        }
+      },
+      "original_oracle_available": false,
+      "ranking_wall_ns": 9530056,
+      "search_wall_ns": 3615718132
+    },
+    "legacy-budget-3": {
+      "plans": {
+        "learned_order": {
+          "ordering": [
+            "w049",
+            "w051",
+            "w053",
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047"
+          ],
+          "shortlist": [
+            "w049",
+            "w051"
+          ]
+        },
+        "price_order": {
+          "ordering": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w035",
+            "w037"
+          ]
+        }
+      },
+      "ranking": null,
+      "arms": {
+        "learned_order": {
+          "selection": "w049",
+          "estimate": 161.11079999999998,
+          "wall_ns": 2705875041,
+          "cpu_ns": 2705701539,
+          "work": {
+            "api_invocation_count": 6,
+            "known_counters": {
+              "attempted_step_count": 48,
+              "known_linear_solve_count": 124,
+              "known_newton_iteration_count": 124,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        },
+        "price_order": {
+          "selection": null,
+          "estimate": null,
+          "wall_ns": 2717810120,
+          "cpu_ns": 2712932433,
+          "work": {
+            "api_invocation_count": 6,
+            "known_counters": {
+              "attempted_step_count": 48,
+              "known_linear_solve_count": 116,
+              "known_newton_iteration_count": 116,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        }
+      },
+      "cost_audit": {
+        "schema_version": "rc-control-candidate-cost-optimality.v1",
+        "status": "complete",
+        "candidate_denominator": 11,
+        "baseline_included": true,
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "currency": "KRW",
+        "quantity_scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "oracle_comparison_hash": "sha256:2427dc53dbc4753b6e01849f1d0da1dba361b73813613051c51b2f61d014ca35",
+        "oracle_unverifiable_candidate_ids": [],
+        "pool_minimum_feasible_estimate": 157.51079999999996,
+        "pool_minimum_feasible_candidate_ids": [
+          "w047"
+        ],
+        "arms": {
+          "learned_order": {
+            "status": "compared",
+            "selected_candidate_id": "w049",
+            "selected_estimate": 161.11079999999998,
+            "selected_minus_pool_minimum_estimate": 3.6000000000000227,
+            "matches_pool_minimum": false,
+            "missed_cheaper_feasible_count": 1,
+            "missed_cheaper_feasible_candidate_ids": [
+              "w047"
+            ]
+          },
+          "price_order": {
+            "status": "no_verified_selection",
+            "selected_candidate_id": null,
+            "selected_estimate": null,
+            "selected_minus_pool_minimum_estimate": null,
+            "matches_pool_minimum": null,
+            "missed_cheaper_feasible_count": null,
+            "missed_cheaper_feasible_candidate_ids": null
+          }
+        },
+        "global_design_optimality_proved": false,
+        "confirmed_currency_savings": false,
+        "independent_physical_validation": false
+      },
+      "error_counts": {
+        "learned_order": {
+          "missed_feasible_count": 2,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": 0,
+          "false_safe_candidate_ids": [],
+          "predicted_safe_unverifiable_count": 0,
+          "predicted_safe_unverifiable_candidate_ids": [],
+          "false_negative_count": 1,
+          "false_negative_candidate_ids": [
+            "w047"
+          ]
+        },
+        "price_order": {
+          "missed_feasible_count": 4,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": null,
+          "false_safe_candidate_ids": null,
+          "predicted_safe_unverifiable_count": null,
+          "predicted_safe_unverifiable_candidate_ids": null,
+          "false_negative_count": null,
+          "false_negative_candidate_ids": null
+        }
+      },
+      "original_oracle_available": false,
+      "ranking_wall_ns": 9487075,
+      "search_wall_ns": 5458255194
+    },
+    "boundary-budget-3": {
+      "plans": {
+        "learned_order": {
+          "ordering": [
+            "w049",
+            "w047",
+            "w045",
+            "w044",
+            "w041",
+            "w039",
+            "w037",
+            "w035",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w049",
+            "w047"
+          ]
+        },
+        "price_order": {
+          "ordering": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w035",
+            "w037"
+          ]
+        }
+      },
+      "ranking": {
+        "strategy": "feasibility_then_cheaper_boundary.v1",
+        "predicted_feasible_seed_id": "w049",
+        "fallback_reason": null,
+        "uncertainty_calibrated": false,
+        "physical_result_authority": false,
+        "rows": [
+          {
+            "candidate_id": "w035",
+            "relative_exceedance": 0.05507871922195105,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w037",
+            "relative_exceedance": 0.047007799336969816,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w039",
+            "relative_exceedance": 0.038797818294499804,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w041",
+            "relative_exceedance": 0.030445150848077956,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w044",
+            "relative_exceedance": 0.017640368244035077,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w045",
+            "relative_exceedance": 0.013296614559447683,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w047",
+            "relative_exceedance": 0.0044928368631284455,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w049",
+            "relative_exceedance": 0.0,
+            "role": "predicted_feasible_seed"
+          },
+          {
+            "candidate_id": "w051",
+            "relative_exceedance": 0.0,
+            "role": "remaining_legacy_order"
+          },
+          {
+            "candidate_id": "w053",
+            "relative_exceedance": 0.0,
+            "role": "remaining_legacy_order"
+          }
+        ]
+      },
+      "arms": {
+        "learned_order": {
+          "selection": "w047",
+          "estimate": 157.51079999999996,
+          "wall_ns": 2680458711,
+          "cpu_ns": 2680361208,
+          "work": {
+            "api_invocation_count": 6,
+            "known_counters": {
+              "attempted_step_count": 48,
+              "known_linear_solve_count": 122,
+              "known_newton_iteration_count": 122,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        },
+        "price_order": {
+          "selection": null,
+          "estimate": null,
+          "wall_ns": 2690245292,
+          "cpu_ns": 2690134973,
+          "work": {
+            "api_invocation_count": 6,
+            "known_counters": {
+              "attempted_step_count": 48,
+              "known_linear_solve_count": 116,
+              "known_newton_iteration_count": 116,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        }
+      },
+      "cost_audit": {
+        "schema_version": "rc-control-candidate-cost-optimality.v1",
+        "status": "complete",
+        "candidate_denominator": 11,
+        "baseline_included": true,
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "currency": "KRW",
+        "quantity_scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "oracle_comparison_hash": "sha256:2427dc53dbc4753b6e01849f1d0da1dba361b73813613051c51b2f61d014ca35",
+        "oracle_unverifiable_candidate_ids": [],
+        "pool_minimum_feasible_estimate": 157.51079999999996,
+        "pool_minimum_feasible_candidate_ids": [
+          "w047"
+        ],
+        "arms": {
+          "learned_order": {
+            "status": "compared",
+            "selected_candidate_id": "w047",
+            "selected_estimate": 157.51079999999996,
+            "selected_minus_pool_minimum_estimate": 0.0,
+            "matches_pool_minimum": true,
+            "missed_cheaper_feasible_count": 0,
+            "missed_cheaper_feasible_candidate_ids": []
+          },
+          "price_order": {
+            "status": "no_verified_selection",
+            "selected_candidate_id": null,
+            "selected_estimate": null,
+            "selected_minus_pool_minimum_estimate": null,
+            "matches_pool_minimum": null,
+            "missed_cheaper_feasible_count": null,
+            "missed_cheaper_feasible_candidate_ids": null
+          }
+        },
+        "global_design_optimality_proved": false,
+        "confirmed_currency_savings": false,
+        "independent_physical_validation": false
+      },
+      "error_counts": {
+        "learned_order": {
+          "missed_feasible_count": 2,
+          "missed_feasible_candidate_ids": [
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": 0,
+          "false_safe_candidate_ids": [],
+          "predicted_safe_unverifiable_count": 0,
+          "predicted_safe_unverifiable_candidate_ids": [],
+          "false_negative_count": 1,
+          "false_negative_candidate_ids": [
+            "w047"
+          ]
+        },
+        "price_order": {
+          "missed_feasible_count": 4,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": null,
+          "false_safe_candidate_ids": null,
+          "predicted_safe_unverifiable_count": null,
+          "predicted_safe_unverifiable_candidate_ids": null,
+          "false_negative_count": null,
+          "false_negative_candidate_ids": null
+        }
+      },
+      "original_oracle_available": false,
+      "ranking_wall_ns": 9472727,
+      "search_wall_ns": 5409808908
+    },
+    "legacy-budget-6": {
+      "plans": {
+        "learned_order": {
+          "ordering": [
+            "w049",
+            "w051",
+            "w053",
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047"
+          ],
+          "shortlist": [
+            "w049",
+            "w051",
+            "w053",
+            "w035",
+            "w037"
+          ]
+        },
+        "price_order": {
+          "ordering": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044"
+          ]
+        }
+      },
+      "ranking": null,
+      "arms": {
+        "learned_order": {
+          "selection": "w049",
+          "estimate": 161.11079999999998,
+          "wall_ns": 5412513751,
+          "cpu_ns": 5407553766,
+          "work": {
+            "api_invocation_count": 12,
+            "known_counters": {
+              "attempted_step_count": 96,
+              "known_linear_solve_count": 234,
+              "known_newton_iteration_count": 234,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        },
+        "price_order": {
+          "selection": null,
+          "estimate": null,
+          "wall_ns": 5349399636,
+          "cpu_ns": 5349185711,
+          "work": {
+            "api_invocation_count": 12,
+            "known_counters": {
+              "attempted_step_count": 96,
+              "known_linear_solve_count": 240,
+              "known_newton_iteration_count": 240,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        }
+      },
+      "cost_audit": {
+        "schema_version": "rc-control-candidate-cost-optimality.v1",
+        "status": "complete",
+        "candidate_denominator": 11,
+        "baseline_included": true,
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "currency": "KRW",
+        "quantity_scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "oracle_comparison_hash": "sha256:2427dc53dbc4753b6e01849f1d0da1dba361b73813613051c51b2f61d014ca35",
+        "oracle_unverifiable_candidate_ids": [],
+        "pool_minimum_feasible_estimate": 157.51079999999996,
+        "pool_minimum_feasible_candidate_ids": [
+          "w047"
+        ],
+        "arms": {
+          "learned_order": {
+            "status": "compared",
+            "selected_candidate_id": "w049",
+            "selected_estimate": 161.11079999999998,
+            "selected_minus_pool_minimum_estimate": 3.6000000000000227,
+            "matches_pool_minimum": false,
+            "missed_cheaper_feasible_count": 1,
+            "missed_cheaper_feasible_candidate_ids": [
+              "w047"
+            ]
+          },
+          "price_order": {
+            "status": "no_verified_selection",
+            "selected_candidate_id": null,
+            "selected_estimate": null,
+            "selected_minus_pool_minimum_estimate": null,
+            "matches_pool_minimum": null,
+            "missed_cheaper_feasible_count": null,
+            "missed_cheaper_feasible_candidate_ids": null
+          }
+        },
+        "global_design_optimality_proved": false,
+        "confirmed_currency_savings": false,
+        "independent_physical_validation": false
+      },
+      "error_counts": {
+        "learned_order": {
+          "missed_feasible_count": 1,
+          "missed_feasible_candidate_ids": [
+            "w047"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": 0,
+          "false_safe_candidate_ids": [],
+          "predicted_safe_unverifiable_count": 0,
+          "predicted_safe_unverifiable_candidate_ids": [],
+          "false_negative_count": 1,
+          "false_negative_candidate_ids": [
+            "w047"
+          ]
+        },
+        "price_order": {
+          "missed_feasible_count": 4,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": null,
+          "false_safe_candidate_ids": null,
+          "predicted_safe_unverifiable_count": null,
+          "predicted_safe_unverifiable_candidate_ids": null,
+          "false_negative_count": null,
+          "false_negative_candidate_ids": null
+        }
+      },
+      "original_oracle_available": false,
+      "ranking_wall_ns": 9335226,
+      "search_wall_ns": 10795928032
+    },
+    "boundary-budget-6-with-oracle": {
+      "plans": {
+        "learned_order": {
+          "ordering": [
+            "w049",
+            "w047",
+            "w045",
+            "w044",
+            "w041",
+            "w039",
+            "w037",
+            "w035",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w049",
+            "w047",
+            "w045",
+            "w044",
+            "w041"
+          ]
+        },
+        "price_order": {
+          "ordering": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044",
+            "w045",
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "shortlist": [
+            "w035",
+            "w037",
+            "w039",
+            "w041",
+            "w044"
+          ]
+        }
+      },
+      "ranking": {
+        "strategy": "feasibility_then_cheaper_boundary.v1",
+        "predicted_feasible_seed_id": "w049",
+        "fallback_reason": null,
+        "uncertainty_calibrated": false,
+        "physical_result_authority": false,
+        "rows": [
+          {
+            "candidate_id": "w035",
+            "relative_exceedance": 0.05507871922195105,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w037",
+            "relative_exceedance": 0.047007799336969816,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w039",
+            "relative_exceedance": 0.038797818294499804,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w041",
+            "relative_exceedance": 0.030445150848077956,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w044",
+            "relative_exceedance": 0.017640368244035077,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w045",
+            "relative_exceedance": 0.013296614559447683,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w047",
+            "relative_exceedance": 0.0044928368631284455,
+            "role": "cheaper_predicted_boundary"
+          },
+          {
+            "candidate_id": "w049",
+            "relative_exceedance": 0.0,
+            "role": "predicted_feasible_seed"
+          },
+          {
+            "candidate_id": "w051",
+            "relative_exceedance": 0.0,
+            "role": "remaining_legacy_order"
+          },
+          {
+            "candidate_id": "w053",
+            "relative_exceedance": 0.0,
+            "role": "remaining_legacy_order"
+          }
+        ]
+      },
+      "arms": {
+        "learned_order": {
+          "selection": "w047",
+          "estimate": 157.51079999999996,
+          "wall_ns": 5400977600,
+          "cpu_ns": 5400647244,
+          "work": {
+            "api_invocation_count": 12,
+            "known_counters": {
+              "attempted_step_count": 96,
+              "known_linear_solve_count": 248,
+              "known_newton_iteration_count": 248,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        },
+        "price_order": {
+          "selection": null,
+          "estimate": null,
+          "wall_ns": 5385147741,
+          "cpu_ns": 5380147105,
+          "work": {
+            "api_invocation_count": 12,
+            "known_counters": {
+              "attempted_step_count": 96,
+              "known_linear_solve_count": 240,
+              "known_newton_iteration_count": 240,
+              "unknown_solver_work_attempt_count": 0
+            },
+            "unknown_work": false
+          }
+        }
+      },
+      "cost_audit": {
+        "schema_version": "rc-control-candidate-cost-optimality.v1",
+        "status": "complete",
+        "candidate_denominator": 11,
+        "baseline_included": true,
+        "price_table_hash": "sha256:749ee2b98a09bda71370c30135808eea2168e3cf0ea26c7ddf7f8b49d0b9ecc2",
+        "currency": "KRW",
+        "quantity_scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "oracle_comparison_hash": "sha256:2427dc53dbc4753b6e01849f1d0da1dba361b73813613051c51b2f61d014ca35",
+        "oracle_unverifiable_candidate_ids": [],
+        "pool_minimum_feasible_estimate": 157.51079999999996,
+        "pool_minimum_feasible_candidate_ids": [
+          "w047"
+        ],
+        "arms": {
+          "learned_order": {
+            "status": "compared",
+            "selected_candidate_id": "w047",
+            "selected_estimate": 157.51079999999996,
+            "selected_minus_pool_minimum_estimate": 0.0,
+            "matches_pool_minimum": true,
+            "missed_cheaper_feasible_count": 0,
+            "missed_cheaper_feasible_candidate_ids": []
+          },
+          "price_order": {
+            "status": "no_verified_selection",
+            "selected_candidate_id": null,
+            "selected_estimate": null,
+            "selected_minus_pool_minimum_estimate": null,
+            "matches_pool_minimum": null,
+            "missed_cheaper_feasible_count": null,
+            "missed_cheaper_feasible_candidate_ids": null
+          }
+        },
+        "global_design_optimality_proved": false,
+        "confirmed_currency_savings": false,
+        "independent_physical_validation": false
+      },
+      "error_counts": {
+        "learned_order": {
+          "missed_feasible_count": 2,
+          "missed_feasible_candidate_ids": [
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": 0,
+          "false_safe_candidate_ids": [],
+          "predicted_safe_unverifiable_count": 0,
+          "predicted_safe_unverifiable_candidate_ids": [],
+          "false_negative_count": 1,
+          "false_negative_candidate_ids": [
+            "w047"
+          ]
+        },
+        "price_order": {
+          "missed_feasible_count": 4,
+          "missed_feasible_candidate_ids": [
+            "w047",
+            "w049",
+            "w051",
+            "w053"
+          ],
+          "oracle_unverifiable_count": 0,
+          "oracle_unverifiable_candidate_ids": [],
+          "false_safe_count": null,
+          "false_safe_candidate_ids": null,
+          "predicted_safe_unverifiable_count": null,
+          "predicted_safe_unverifiable_candidate_ids": null,
+          "false_negative_count": null,
+          "false_negative_candidate_ids": null
+        }
+      },
+      "original_oracle_available": true,
+      "ranking_wall_ns": 9448822,
+      "search_wall_ns": 20745198398
+    }
+  },
+  "browser": {
+    "status": "passed",
+    "source_revision": "387478e923a04f88bd6e0164170099899e078eec",
+    "ready": {
+      "origin": "http://127.0.0.1:44187",
+      "pid": 1106048,
+      "report_hash": "sha256:b65fc043b36dff48e98f08b92d880cf39701595cc334e89af8e88ea4f3e33f80",
+      "artifact_count": 202,
+      "snapshot_bytes": 8773045
+    },
+    "views": [
+      {
+        "width": 1440,
+        "selected": "w047",
+        "ranking": "Learned priority starts with predicted feasible candidate w049, then checks cheaper alternatives. Cheaper abstentions come first; other cheaper alternatives are ordered by their predicted relative limit exceedance. This distance is not a probability or a verified performance margin. Evaluation order: w049 \u2192 w047 \u2192 w045 \u2192 w044 \u2192 w041 \u2192 w039 \u2192 w037 \u2192 w035 \u2192 w051 \u2192 w053. The schedule is fixed before any candidate analysis.",
+        "cost": "Learned order\t0\tYes\t0",
+        "downloaded": [
+          {
+            "role": "model",
+            "bytes": 1323,
+            "sha256": "790bce50768ba59afe539081a782298648e2617b279be6879f1adf0db74c1866"
+          },
+          {
+            "role": "result",
+            "bytes": 358915,
+            "sha256": "703be5586336bae57779dd38ba995d64eae903690f8ef94e1433152effa82ddd"
+          },
+          {
+            "role": "checkpoint",
+            "bytes": 12424,
+            "sha256": "cbfe2cef27a031947871c084726e973f7e89adfe26cebaf9c11d1c882786b5bd"
+          },
+          {
+            "role": "verification",
+            "bytes": 1047,
+            "sha256": "33ceaf5ba9c6f6e353896f9f5b7b8cb523ff9ed7176adf5bde04406f85e0c68a"
+          }
+        ],
+        "load_review_download_wall_ms": 2605.2603500000005,
+        "panel_bounds": {
+          "x": 252,
+          "y": -929.1875,
+          "width": 1166,
+          "height": 3814.40625
+        }
+      },
+      {
+        "width": 390,
+        "selected": "w047",
+        "ranking": "Learned priority starts with predicted feasible candidate w049, then checks cheaper alternatives. Cheaper abstentions come first; other cheaper alternatives are ordered by their predicted relative limit exceedance. This distance is not a probability or a verified performance margin. Evaluation order: w049 \u2192 w047 \u2192 w045 \u2192 w044 \u2192 w041 \u2192 w039 \u2192 w037 \u2192 w035 \u2192 w051 \u2192 w053. The schedule is fixed before any candidate analysis.",
+        "cost": "Learned order\t0\tYes\t0",
+        "downloaded": [
+          {
+            "role": "model",
+            "bytes": 1323,
+            "sha256": "790bce50768ba59afe539081a782298648e2617b279be6879f1adf0db74c1866"
+          },
+          {
+            "role": "result",
+            "bytes": 358915,
+            "sha256": "703be5586336bae57779dd38ba995d64eae903690f8ef94e1433152effa82ddd"
+          },
+          {
+            "role": "checkpoint",
+            "bytes": 12424,
+            "sha256": "cbfe2cef27a031947871c084726e973f7e89adfe26cebaf9c11d1c882786b5bd"
+          },
+          {
+            "role": "verification",
+            "bytes": 1047,
+            "sha256": "33ceaf5ba9c6f6e353896f9f5b7b8cb523ff9ed7176adf5bde04406f85e0c68a"
+          }
+        ],
+        "load_review_download_wall_ms": 2367.254073,
+        "panel_bounds": {
+          "x": 14,
+          "y": -1843.046875,
+          "width": 362,
+          "height": 6376.40625
+        }
+      }
+    ],
+    "denied": [
+      {
+        "method": "GET",
+        "path": "result.json",
+        "status": 401
+      },
+      {
+        "method": "POST",
+        "path": "result.json",
+        "status": 405
+      },
+      {
+        "method": "GET",
+        "path": "unknown.json",
+        "status": 404
+      }
+    ],
+    "exact_200_responses": 412,
+    "parent_wall_ms": 6988.313118,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "independent_physical_validation": false
+  },
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-cheaper-boundary-hnkltr1_",
+    "files": 1111,
+    "bytes": 36217440,
+    "inventory_sha256": "7c1093a24ca556df50f0bc2a9623a547ea1b1b5e030c1cf26f5c6944aaebe826",
+    "inventory_and_reread_wall_ns": 100698378,
+    "original_numerical_and_browser_server_processes_absent": true
+  },
+  "protocol_checks": {
+    "original_pool_widths_exactly_match_protocol": true,
+    "all_six_request_limit_budget_policy_bindings_checked": true,
+    "ten_original_predictions_recomputed_exactly": true,
+    "new_solver_calls": 0,
+    "new_fits": 0,
+    "wall_ns": 1660471227
+  },
+  "preceding_ci": {
+    "run": 34440016297,
+    "head": "16ede158789c95bd87289fa5899bda18733f4198",
+    "tested_merge": "fbcc730c99c837e843c5d71bfb343707fd934423",
+    "passed": 362,
+    "suite_time_seconds": 328.515,
+    "job_id": 102752899510,
+    "artifact_id": 10137763440,
+    "zip_sha256": "sha256:15ea90aa993d6ee3b9b405a79bc43ccd17bb843c8ae1a8f0ef735ab820d63de4",
+    "new_ranking_source_included": false,
+    "full_run_status_at_observation": "completed",
+    "full_run_conclusion_at_observation": "failure"
+  },
+  "verification": {
+    "python_search_cost": {
+      "passed": 69,
+      "seconds": 16.83
+    },
+    "python_http": {
+      "passed": 34,
+      "seconds": 1.76
+    },
+    "frontend_contracts": {
+      "passed": 35,
+      "seconds": 5.0
+    },
+    "existing_fixture_browser_regression": {
+      "passed": 4,
+      "seconds": 11.4
+    },
+    "ruff": true,
+    "scoped_mypy": true,
+    "typescript_build_and_delivery_contract": true
+  }
+}

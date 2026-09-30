@@ -1,0 +1,1192 @@
+{
+  "sources": [
+    {
+      "layers": 32,
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-refined-displacement-61gurys3/repeat-0.json",
+      "sha256": "6d685a2e3d7e2b56bf21714705c2e543e94088c9da6c9e209e337cf34f81de65"
+    },
+    {
+      "layers": 64,
+      "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-displacement-refinement-stpdjmzx/repeat-0.json",
+      "sha256": "e552852440e2ff8d98cc23a1283550c3d2dacf09de528e87794fbef22cc48932"
+    }
+  ],
+  "witness": "E1:gauss-0:top",
+  "witness_selection": "Largest absolute plastic-strain difference among all matched steel points at retained 24 mm screen failure",
+  "first_nonzero_witness_plastic_target_m": {
+    "32": 0.024,
+    "64": 0.024
+  },
+  "rows": [
+    {
+      "target_m": 0.002,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 8.352226477905615e-05,
+        "stress_mpa": 16.70445295581123,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 1.0608969751875936e-05,
+          "curvature_z_per_m": -0.00029165318010872086
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 8.352543969725304e-05,
+        "stress_mpa": 16.705087939450607,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 1.0614798501951128e-05,
+          "curvature_z_per_m": -0.00029164256478120764
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.004,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.00016976930457630779,
+        "stress_mpa": 33.95386091526156,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 2.3628808816974118e-05,
+          "curvature_z_per_m": -0.0005845619830373346
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.00016975854985536761,
+        "stress_mpa": 33.95170997107352,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 2.3635251839978128e-05,
+          "curvature_z_per_m": -0.0005844931920615579
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.006,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0002478936792096771,
+        "stress_mpa": 49.578735841935426,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 3.707020510335113e-05,
+          "curvature_z_per_m": -0.000843293896425304
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.00024792922100924533,
+        "stress_mpa": 49.58584420184906,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 3.708710501134267e-05,
+          "curvature_z_per_m": -0.0008433684639916106
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.008,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.00033711857130120553,
+        "stress_mpa": 67.42371426024111,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 5.8228885237691465e-05,
+          "curvature_z_per_m": -0.0011155587442540562
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.00033712942756762326,
+        "stress_mpa": 67.42588551352465,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 5.824969919580406e-05,
+          "curvature_z_per_m": -0.0011155189134872767
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.01,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0004456660196245287,
+        "stress_mpa": 89.13320392490574,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 9.064243665705499e-05,
+          "curvature_z_per_m": -0.001420094331869895
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.00044568979662383426,
+        "stress_mpa": 89.13795932476685,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 9.068722546453263e-05,
+          "curvature_z_per_m": -0.0014200102846372066
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.012,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0005701726738244596,
+        "stress_mpa": 114.03453476489193,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.000134308689524687,
+          "curvature_z_per_m": -0.0017434559371990906
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.000570252744759687,
+        "stress_mpa": 114.0505489519374,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.00013437913636712057,
+          "curvature_z_per_m": -0.0017434944335702658
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.014,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.000702691617562332,
+        "stress_mpa": 140.5383235124664,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.00018643294891799536,
+          "curvature_z_per_m": -0.0020650346745773466
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0007029755714758513,
+        "stress_mpa": 140.59511429517028,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.00018665586627812183,
+          "curvature_z_per_m": -0.002065278820790918
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.016,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0008102432345989001,
+        "stress_mpa": 162.04864691978003,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.00023094254451875665,
+          "curvature_z_per_m": -0.002317202760320574
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0008100675452081976,
+        "stress_mpa": 162.01350904163954,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.00023089661243262208,
+          "curvature_z_per_m": -0.0023166837311023023
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.018,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0009071371064489218,
+        "stress_mpa": 181.42742128978435,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.00027267272054546743,
+          "curvature_z_per_m": -0.0025378575436138173
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0009079129479943444,
+        "stress_mpa": 181.58258959886888,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.0002732295551135522,
+          "curvature_z_per_m": -0.0025387335715231687
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.02,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0010073114781811096,
+        "stress_mpa": 201.4622956362219,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.0003191697711807014,
+          "curvature_z_per_m": -0.002752566828001633
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0010082257667617586,
+        "stress_mpa": 201.64515335235174,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.00031981264266385995,
+          "curvature_z_per_m": -0.0027536524963915946
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.022,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0011456049868501712,
+        "stress_mpa": 229.12099737003425,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.0003906441460871749,
+          "curvature_z_per_m": -0.0030198433630519855
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0,
+        "accumulated_plastic_strain": 0.0,
+        "total_strain": 0.0011457429116136495,
+        "stress_mpa": 229.1485823227299,
+        "yielded": false,
+        "section_generalized_strain": {
+          "axial_strain": 0.0003908152742197283,
+          "curvature_z_per_m": -0.0030197105495756854
+        }
+      },
+      "coarse_yielded_points": 0,
+      "fine_yielded_points": 0
+    },
+    {
+      "target_m": 0.024,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 3.3769139705049484e-06,
+        "accumulated_plastic_strain": 3.3769139705049484e-06,
+        "total_strain": 0.0012535119905293251,
+        "stress_mpa": 250.02701531176405,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0004438699348813616,
+          "curvature_z_per_m": -0.003238568222591854
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 4.669071659927445e-06,
+        "accumulated_plastic_strain": 4.669071659927445e-06,
+        "total_strain": 0.0012548558345263246,
+        "stress_mpa": 250.0373525732794,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.000444807375851249,
+          "curvature_z_per_m": -0.0032401938347003025
+        }
+      },
+      "coarse_yielded_points": 3,
+      "fine_yielded_points": 3
+    },
+    {
+      "target_m": 0.026,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 8.456908278476091e-05,
+        "accumulated_plastic_strain": 8.456908278476091e-05,
+        "total_strain": 0.0013379518460961517,
+        "stress_mpa": 250.6765526622781,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.00048490719731460646,
+          "curvature_z_per_m": -0.003412178595126181
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 8.346363774959911e-05,
+        "accumulated_plastic_strain": 8.346363774959911e-05,
+        "total_strain": 0.0013368021832595833,
+        "stress_mpa": 250.66770910199682,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.00048427611073043053,
+          "curvature_z_per_m": -0.003410104290116611
+        }
+      },
+      "coarse_yielded_points": 4,
+      "fine_yielded_points": 4
+    },
+    {
+      "target_m": 0.028,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.00012651949823629848,
+        "accumulated_plastic_strain": 0.00012651949823629848,
+        "total_strain": 0.0013815802781657505,
+        "stress_mpa": 251.01215598589042,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0005054901882994104,
+          "curvature_z_per_m": -0.0035043603594653605
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.00012679199916171754,
+        "accumulated_plastic_strain": 0.00012679199916171754,
+        "total_strain": 0.001381863679128186,
+        "stress_mpa": 251.0143359932937,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0005055590920009696,
+          "curvature_z_per_m": -0.003505218348508866
+        }
+      },
+      "coarse_yielded_points": 5,
+      "fine_yielded_points": 5
+    },
+    {
+      "target_m": 0.03,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.00017776325624936922,
+        "accumulated_plastic_strain": 0.00017776325624936922,
+        "total_strain": 0.001434873786499344,
+        "stress_mpa": 251.422106049995,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.000535298366931484,
+          "curvature_z_per_m": -0.0035983016782714407
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.00017888522136918881,
+        "accumulated_plastic_strain": 0.00017888522136918881,
+        "total_strain": 0.0014360406302239563,
+        "stress_mpa": 251.4310817709535,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0005362287928039795,
+          "curvature_z_per_m": -0.003599247349679907
+        }
+      },
+      "coarse_yielded_points": 5,
+      "fine_yielded_points": 5
+    },
+    {
+      "target_m": 0.032,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.00024546317085091503,
+        "accumulated_plastic_strain": 0.00024546317085091503,
+        "total_strain": 0.0015052816976849515,
+        "stress_mpa": 251.9637053668073,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0005728504822853548,
+          "curvature_z_per_m": -0.0037297248615983866
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.00024640018888871465,
+        "accumulated_plastic_strain": 0.00024640018888871465,
+        "total_strain": 0.0015062561964442633,
+        "stress_mpa": 251.97120151110974,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0005733300082300847,
+          "curvature_z_per_m": -0.0037317047528567142
+        }
+      },
+      "coarse_yielded_points": 5,
+      "fine_yielded_points": 5
+    },
+    {
+      "target_m": 0.034,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.00032924724982719155,
+        "accumulated_plastic_strain": 0.00032924724982719155,
+        "total_strain": 0.001592417139820279,
+        "stress_mpa": 252.63397799861752,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0006181335726274106,
+          "curvature_z_per_m": -0.003897134268771474
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0003282958492352371,
+        "accumulated_plastic_strain": 0.0003282958492352371,
+        "total_strain": 0.0015914276832046468,
+        "stress_mpa": 252.6263667938819,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0006176855807572915,
+          "curvature_z_per_m": -0.0038949684097894215
+        }
+      },
+      "coarse_yielded_points": 5,
+      "fine_yielded_points": 5
+    },
+    {
+      "target_m": 0.036,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0004163666507527054,
+        "accumulated_plastic_strain": 0.0004163666507527054,
+        "total_strain": 0.0016830213167828133,
+        "stress_mpa": 253.33093320602163,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0006634529968573647,
+          "curvature_z_per_m": -0.004078273279701795
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0004183149336889071,
+        "accumulated_plastic_strain": 0.0004183149336889071,
+        "total_strain": 0.0016850475310364636,
+        "stress_mpa": 253.34651946951124,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0006647983843624712,
+          "curvature_z_per_m": -0.0040809965866959695
+        }
+      },
+      "coarse_yielded_points": 6,
+      "fine_yielded_points": 6
+    },
+    {
+      "target_m": 0.038,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0005130723596743601,
+        "accumulated_plastic_strain": 0.0005130723596743601,
+        "total_strain": 0.0017835952540613347,
+        "stress_mpa": 254.10457887739489,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0007114890786163267,
+          "curvature_z_per_m": -0.004288424701780032
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0005151870224891587,
+        "accumulated_plastic_strain": 0.0005151870224891587,
+        "total_strain": 0.001785794503388725,
+        "stress_mpa": 254.12149617991327,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0007129661487940512,
+          "curvature_z_per_m": -0.004291313418378696
+        }
+      },
+      "coarse_yielded_points": 7,
+      "fine_yielded_points": 7
+    },
+    {
+      "target_m": 0.04,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0006106300791291925,
+        "accumulated_plastic_strain": 0.0006106300791291925,
+        "total_strain": 0.00188505528229436,
+        "stress_mpa": 254.88504063303353,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0007568602429293136,
+          "curvature_z_per_m": -0.004512780157460186
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0006113342934895034,
+        "accumulated_plastic_strain": 0.0006113342934895034,
+        "total_strain": 0.0018857876652290833,
+        "stress_mpa": 254.89067434791602,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0007572792048343342,
+          "curvature_z_per_m": -0.004514033841578996
+        }
+      },
+      "coarse_yielded_points": 8,
+      "fine_yielded_points": 8
+    },
+    {
+      "target_m": 0.042,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0007079683310331374,
+        "accumulated_plastic_strain": 0.0007079683310331374,
+        "total_strain": 0.0019862870642744627,
+        "stress_mpa": 255.6637466482651,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0008019886220430964,
+          "curvature_z_per_m": -0.004737193768925465
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0007088418274297712,
+        "accumulated_plastic_strain": 0.0007088418274297712,
+        "total_strain": 0.001987195500526962,
+        "stress_mpa": 255.67073461943818,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0008023039039944575,
+          "curvature_z_per_m": -0.004739566386130018
+        }
+      },
+      "coarse_yielded_points": 9,
+      "fine_yielded_points": 9
+    },
+    {
+      "target_m": 0.044,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0008134709157389744,
+        "accumulated_plastic_strain": 0.0008134709157389744,
+        "total_strain": 0.002096009752368533,
+        "stress_mpa": 256.5077673259118,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0008541177822962709,
+          "curvature_z_per_m": -0.00496756788028905
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0008137137817957018,
+        "accumulated_plastic_strain": 0.0008137137817957018,
+        "total_strain": 0.00209626233306753,
+        "stress_mpa": 256.50971025436564,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0008543452478839697,
+          "curvature_z_per_m": -0.00496766834073424
+        }
+      },
+      "coarse_yielded_points": 11,
+      "fine_yielded_points": 11
+    },
+    {
+      "target_m": 0.046,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.000958318759071915,
+        "accumulated_plastic_strain": 0.000958318759071915,
+        "total_strain": 0.0022466515094347913,
+        "stress_mpa": 257.6665500725753,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0009307727785784851,
+          "curvature_z_per_m": -0.005263514923425225
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0009602622036725401,
+        "accumulated_plastic_strain": 0.0009602622036725401,
+        "total_strain": 0.0022486726918194417,
+        "stress_mpa": 257.68209762938034,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0009325343782632759,
+          "curvature_z_per_m": -0.005264553254224663
+        }
+      },
+      "coarse_yielded_points": 12,
+      "fine_yielded_points": 12
+    },
+    {
+      "target_m": 0.048,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0011220360381050836,
+        "accumulated_plastic_strain": 0.0011220360381050836,
+        "total_strain": 0.002416917479629287,
+        "stress_mpa": 258.97628830484064,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.001018012543854733,
+          "curvature_z_per_m": -0.005595619743098215
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.001121112883200977,
+        "accumulated_plastic_strain": 0.001121112883200977,
+        "total_strain": 0.002415957398529016,
+        "stress_mpa": 258.96890306560783,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0010176096011476805,
+          "curvature_z_per_m": -0.005593391189525341
+        }
+      },
+      "coarse_yielded_points": 13,
+      "fine_yielded_points": 13
+    },
+    {
+      "target_m": 0.05,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0012669783790840662,
+        "accumulated_plastic_strain": 0.0012669783790840662,
+        "total_strain": 0.0025676575142474286,
+        "stress_mpa": 260.1358270326725,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0010930348906678469,
+          "curvature_z_per_m": -0.005898490494318326
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0012668365416240368,
+        "accumulated_plastic_strain": 0.0012668365416240368,
+        "total_strain": 0.0025675100032889983,
+        "stress_mpa": 260.1346923329923,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0010929166346334007,
+          "curvature_z_per_m": -0.00589837347462239
+        }
+      },
+      "coarse_yielded_points": 13,
+      "fine_yielded_points": 13
+    },
+    {
+      "target_m": 0.052,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.001411025552158575,
+        "accumulated_plastic_strain": 0.001411025552158575,
+        "total_strain": 0.002717466574244918,
+        "stress_mpa": 261.2882044172686,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0011660133090668858,
+          "curvature_z_per_m": -0.00620581306071213
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.001411883203794269,
+        "accumulated_plastic_strain": 0.001411883203794269,
+        "total_strain": 0.00271835853194604,
+        "stress_mpa": 261.29506563035415,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0011664395749931462,
+          "curvature_z_per_m": -0.0062076758278115755
+        }
+      },
+      "coarse_yielded_points": 13,
+      "fine_yielded_points": 13
+    },
+    {
+      "target_m": 0.054,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0015510536085184506,
+        "accumulated_plastic_strain": 0.0015510536085184506,
+        "total_strain": 0.0028630957528591886,
+        "stress_mpa": 262.4084288681476,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.001235647308741298,
+          "curvature_z_per_m": -0.006509793776471562
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0015524805534024146,
+        "accumulated_plastic_strain": 0.0015524805534024146,
+        "total_strain": 0.002864579775538511,
+        "stress_mpa": 262.4198444272193,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0012367003559707137,
+          "curvature_z_per_m": -0.006511517678271189
+        }
+      },
+      "coarse_yielded_points": 14,
+      "fine_yielded_points": 14
+    },
+    {
+      "target_m": 0.056,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0016766299986876974,
+        "accumulated_plastic_strain": 0.0016766299986876974,
+        "total_strain": 0.0029936951986352053,
+        "stress_mpa": 263.4130399895016,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0012966783438123444,
+          "curvature_z_per_m": -0.006788067419291444
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0016789187244783484,
+        "accumulated_plastic_strain": 0.0016789187244783484,
+        "total_strain": 0.0029960754734574824,
+        "stress_mpa": 263.4313497958268,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.001298567916879545,
+          "curvature_z_per_m": -0.00679003022631175
+        }
+      },
+      "coarse_yielded_points": 14,
+      "fine_yielded_points": 14
+    },
+    {
+      "target_m": 0.058,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0018018139910226103,
+        "accumulated_plastic_strain": 0.0018018139910226103,
+        "total_strain": 0.003123886550663515,
+        "stress_mpa": 264.4145119281809,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0013570920413791634,
+          "curvature_z_per_m": -0.0070671780371374055
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0018043351295854012,
+        "accumulated_plastic_strain": 0.0018043351295854012,
+        "total_strain": 0.0031265085347688174,
+        "stress_mpa": 264.43468103668323,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0013594676189814987,
+          "curvature_z_per_m": -0.007068163663149275
+        }
+      },
+      "coarse_yielded_points": 14,
+      "fine_yielded_points": 14
+    },
+    {
+      "target_m": 0.06,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0019274561027560152,
+        "accumulated_plastic_strain": 0.0019274561027560152,
+        "total_strain": 0.003254554346866256,
+        "stress_mpa": 265.4196488220481,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0014179572789001504,
+          "curvature_z_per_m": -0.007346388271864422
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.001929609484425661,
+        "accumulated_plastic_strain": 0.001929609484425661,
+        "total_strain": 0.0032567938638026874,
+        "stress_mpa": 265.4368758754053,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0014199378247149081,
+          "curvature_z_per_m": -0.007347424156351118
+        }
+      },
+      "coarse_yielded_points": 14,
+      "fine_yielded_points": 14
+    },
+    {
+      "target_m": 0.062,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002052664704433851,
+        "accumulated_plastic_strain": 0.002052664704433851,
+        "total_strain": 0.003384771292611205,
+        "stress_mpa": 266.4213176354708,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0014784339719473572,
+          "curvature_z_per_m": -0.007625349282655391
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002054159973848175,
+        "accumulated_plastic_strain": 0.002054159973848175,
+        "total_strain": 0.003386326372802102,
+        "stress_mpa": 266.4332797907854,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0014797348667380619,
+          "curvature_z_per_m": -0.00762636602425616
+        }
+      },
+      "coarse_yielded_points": 14,
+      "fine_yielded_points": 14
+    },
+    {
+      "target_m": 0.064,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0021757853784434926,
+        "accumulated_plastic_strain": 0.0021757853784434926,
+        "total_strain": 0.003512816793581232,
+        "stress_mpa": 267.4062830275479,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0015376140045867772,
+          "curvature_z_per_m": -0.00790081115597782
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0021771734084962075,
+        "accumulated_plastic_strain": 0.0021771734084962075,
+        "total_strain": 0.0035142603448360555,
+        "stress_mpa": 267.4173872679696,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0015384303134468405,
+          "curvature_z_per_m": -0.00790332012555686
+        }
+      },
+      "coarse_yielded_points": 14,
+      "fine_yielded_points": 14
+    },
+    {
+      "target_m": 0.066,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0022724699573198953,
+        "accumulated_plastic_strain": 0.0022724699573198953,
+        "total_strain": 0.003613368755612691,
+        "stress_mpa": 268.1797596585592,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0015832998170378272,
+          "curvature_z_per_m": -0.008120275754299454
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002274864048905676,
+        "accumulated_plastic_strain": 0.002274864048905676,
+        "total_strain": 0.003615858610861903,
+        "stress_mpa": 268.1989123912454,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0015843338670976277,
+          "curvature_z_per_m": -0.008126098975057101
+        }
+      },
+      "coarse_yielded_points": 15,
+      "fine_yielded_points": 15
+    },
+    {
+      "target_m": 0.068,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0023653766578252584,
+        "accumulated_plastic_strain": 0.0023653766578252584,
+        "total_strain": 0.0037099917241382686,
+        "stress_mpa": 268.923013262602,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0016268791402878808,
+          "curvature_z_per_m": -0.00833245033540155
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0023682108520150197,
+        "accumulated_plastic_strain": 0.0023682108520150197,
+        "total_strain": 0.0037129392860956205,
+        "stress_mpa": 268.94568681612014,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0016281160521436355,
+          "curvature_z_per_m": -0.00833929293580794
+        }
+      },
+      "coarse_yielded_points": 15,
+      "fine_yielded_points": 15
+    },
+    {
+      "target_m": 0.07,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002458888043019752,
+        "accumulated_plastic_strain": 0.002458888043019752,
+        "total_strain": 0.003807243564740542,
+        "stress_mpa": 269.67110434415804,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0016706043184608887,
+          "curvature_z_per_m": -0.008546556985118614
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002460223151015384,
+        "accumulated_plastic_strain": 0.002460223151015384,
+        "total_strain": 0.0038086320770559993,
+        "stress_mpa": 269.6817852081231,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0016712147054360749,
+          "curvature_z_per_m": -0.008549669486479698
+        }
+      },
+      "coarse_yielded_points": 15,
+      "fine_yielded_points": 15
+    },
+    {
+      "target_m": 0.072,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0025528054756508486,
+        "accumulated_plastic_strain": 0.0025528054756508486,
+        "total_strain": 0.0039049176946768824,
+        "stress_mpa": 270.42244380520674,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0017144503908520883,
+          "curvature_z_per_m": -0.008761869215299176
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0025512246756493953,
+        "accumulated_plastic_strain": 0.0025512246756493953,
+        "total_strain": 0.0039032736626753712,
+        "stress_mpa": 270.40979740519515,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0017137033672662838,
+          "curvature_z_per_m": -0.00875828118163635
+        }
+      },
+      "coarse_yielded_points": 15,
+      "fine_yielded_points": 15
+    },
+    {
+      "target_m": 0.074,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002644038760738318,
+        "accumulated_plastic_strain": 0.002644038760738318,
+        "total_strain": 0.003999800311167851,
+        "stress_mpa": 271.15231008590655,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0017569433519420603,
+          "curvature_z_per_m": -0.00897142783690316
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0026425799673335903,
+        "accumulated_plastic_strain": 0.0026425799673335903,
+        "total_strain": 0.0039982831660269336,
+        "stress_mpa": 271.1406397386687,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.001756283671751735,
+          "curvature_z_per_m": -0.008967997977100796
+        }
+      },
+      "coarse_yielded_points": 15,
+      "fine_yielded_points": 15
+    },
+    {
+      "target_m": 0.076,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002735361496349457,
+        "accumulated_plastic_strain": 0.002735361496349457,
+        "total_strain": 0.004094775956203435,
+        "stress_mpa": 271.88289197079564,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0017993996192092372,
+          "curvature_z_per_m": -0.009181505347976793
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0027333761698380564,
+        "accumulated_plastic_strain": 0.0027333761698380564,
+        "total_strain": 0.004092711216631579,
+        "stress_mpa": 271.8670093587044,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0017985334621267353,
+          "curvature_z_per_m": -0.009176711018019373
+        }
+      },
+      "coarse_yielded_points": 16,
+      "fine_yielded_points": 16
+    },
+    {
+      "target_m": 0.078,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002827901466375121,
+        "accumulated_plastic_strain": 0.002827901466375121,
+        "total_strain": 0.004191017525030126,
+        "stress_mpa": 272.62321173100094,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0018422741787452364,
+          "curvature_z_per_m": -0.00939497338513956
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.0028268759252588426,
+        "accumulated_plastic_strain": 0.0028268759252588426,
+        "total_strain": 0.004189950962269196,
+        "stress_mpa": 272.6150074020708,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.001841871723924804,
+          "curvature_z_per_m": -0.009392316953377569
+        }
+      },
+      "coarse_yielded_points": 16,
+      "fine_yielded_points": 16
+    },
+    {
+      "target_m": 0.08,
+      "coarse_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002920858325320877,
+        "accumulated_plastic_strain": 0.002920858325320877,
+        "total_strain": 0.004287692658333712,
+        "stress_mpa": 273.36686660256703,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.0018852733211748665,
+          "curvature_z_per_m": -0.009609677348635383
+        }
+      },
+      "fine_witness": {
+        "integration_xi": -0.7745966692414834,
+        "plastic_strain": 0.002920068761052359,
+        "accumulated_plastic_strain": 0.002920068761052359,
+        "total_strain": 0.004286871511494454,
+        "stress_mpa": 273.3605500884189,
+        "yielded": true,
+        "section_generalized_strain": {
+          "axial_strain": 0.001884986603644704,
+          "curvature_z_per_m": -0.009607539631398999
+        }
+      },
+      "coarse_yielded_points": 17,
+      "fine_yielded_points": 17
+    }
+  ],
+  "accepted_state_binding_checked": true,
+  "structural_solves": 0,
+  "training_fits": 0,
+  "independent_physical_validation": false,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-refinement-steel-witness-51u_bxxg",
+    "payload_files": 2,
+    "payload_bytes": 44193,
+    "inventory_sha256": "e2e4f48a83d616ee6bdeb5991eaabda73a3da7818d4adff663e154a23c45768c"
+  }
+}

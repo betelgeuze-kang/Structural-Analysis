@@ -1,0 +1,37 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-pinned-cohort-e2e-10mizkmi",
+    "source_revision": "200111e4a1c837f03d434686a5ede6cb3cc7dd54",
+    "files": 10,
+    "bytes": 2475018,
+    "inventory_sha256": "627a8bf3afcd0360af6b000f6b7e3f7a48735d3c1619ec88e9a8aed23ce5f97b"
+  },
+  "observation": {
+    "source_revision": "200111e4a1c837f03d434686a5ede6cb3cc7dd54",
+    "node_path": "/tmp/structural-pinned-node-mj7hjybs/bin/node",
+    "node_version": "v24.20.0",
+    "node_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+    "archive_sha256": "2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2",
+    "command": [
+      "/tmp/structural-pinned-node-mj7hjybs/bin/node",
+      "scripts/verify-workbench-v2-e2e.mjs",
+      "--with-job-api",
+      "--grep",
+      "cohort",
+      "--workers=1"
+    ],
+    "initial_run": {
+      "passed": 15,
+      "failed": 2
+    },
+    "corrected_run": {
+      "passed": 18,
+      "failed": 0
+    },
+    "python_contract_tests": 9,
+    "new_fits": 0,
+    "new_solves": 0,
+    "independent_physical_validation": false,
+    "full_repository_suite": false
+  }
+}

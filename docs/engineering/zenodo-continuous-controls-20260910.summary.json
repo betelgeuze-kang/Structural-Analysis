@@ -1,0 +1,127 @@
+{
+  "schema_version": "rc-continuous-controls-source-review.v1",
+  "observed_at_utc": "2026-09-10T06:03:16.805780+00:00",
+  "source_head": "bae1434e380164a552c440c89fd99dd7bec279cd",
+  "dataset_doi": "10.5281/zenodo.1205887",
+  "data_license_registration": {
+    "identifier": "CC-BY-4.0",
+    "authority": "DataCite DOI metadata",
+    "scope": "Registered dataset declaration; original archive and file-level notices not inspected. Does not license the separate thesis."
+  },
+  "source_files": {
+    "datacite.json": {
+      "url": "https://api.datacite.org/dois/10.5281/zenodo.1205887",
+      "status": 200,
+      "content_type": "application/json; charset=utf-8",
+      "bytes": 11743,
+      "sha256": "5de00bcf433c7a98e8c66fe0ef6d4d73f0bb38e84d244cc33f8750035d449dce",
+      "file": "datacite.json",
+      "elapsed_seconds": 1.2054924069961999
+    },
+    "epfl-lap-splice-paper.pdf": {
+      "url": "https://infoscience.epfl.ch/server/api/core/bitstreams/60b21868-9a38-4c19-a8f7-85d078f108a5/content",
+      "status": 200,
+      "content_type": "application/pdf;charset=UTF-8",
+      "bytes": 15270726,
+      "sha256": "eb34736a19d27711da918958231da26726bda11597c15b54fe3e88b6892ed8e7",
+      "file": "epfl-lap-splice-paper.pdf",
+      "elapsed_seconds": 2.876873934001196
+    }
+  },
+  "thesis": {
+    "author": "Danilo Tarquini",
+    "year": 2019,
+    "number": 9432,
+    "pdf_pages": 160,
+    "visually_reviewed_pdf_pages": [
+      90,
+      91,
+      92,
+      93,
+      94,
+      98,
+      101,
+      132,
+      154
+    ]
+  },
+  "specimens": [
+    {
+      "source_label": "LAP-C1",
+      "pdf_page": 90,
+      "raw_extracted_row": "   LAP-C1           1260          200             [-]            4uØ14 (a1.5%)            Ø6@200 (a0.15%)            C1",
+      "reported_height_mm": 1260,
+      "reported_square_side_mm": 200,
+      "longitudinal_bar_count": 4,
+      "longitudinal_bar_diameter_mm": 14,
+      "reported_hoop_diameter_mm": 6,
+      "reported_hoop_spacing_mm": 200,
+      "reported_approximate_confinement_percent": "0.15",
+      "protocol_label": "C1",
+      "lap_splice_present": false,
+      "archive_filename_identity_verified": false
+    },
+    {
+      "source_label": "LAP-C2",
+      "pdf_page": 90,
+      "raw_extracted_row": "   LAP-C2           1260          200             [-]            4uØ14 (a1.5%)            Ø6@100 (a0.3%)             C1",
+      "reported_height_mm": 1260,
+      "reported_square_side_mm": 200,
+      "longitudinal_bar_count": 4,
+      "longitudinal_bar_diameter_mm": 14,
+      "reported_hoop_diameter_mm": 6,
+      "reported_hoop_spacing_mm": 100,
+      "reported_approximate_confinement_percent": "0.3",
+      "protocol_label": "C1",
+      "lap_splice_present": false,
+      "archive_filename_identity_verified": false
+    }
+  ],
+  "conflicts": [
+    {
+      "field": "LAP-C1 confinement ratio",
+      "table_5_1_page_90_percent": "approximately 0.15",
+      "section_7_4_1_page_132_percent": "approximately 0.3",
+      "resolution": null,
+      "must_not_merge_chapter_7_model_parameters_into_specimen_record": true
+    }
+  ],
+  "campaign_group": "EPFL-Tarquini-RC-boundary-elements-2018",
+  "partition": null,
+  "all_24_source_specimens_share_one_conservative_campaign_group": true,
+  "classification": "source_review_only_complete_histories_not_admitted",
+  "reasons": [
+    "Axial tension-compression controls, not lateral flexural column tests.",
+    "Complete histories include concrete crushing, spalling, bar buckling and later rupture.",
+    "Pre-failure interface deformation includes anchorage strain penetration and steel-concrete slip.",
+    "Original per-specimen actual history and channel definitions not acquired.",
+    "Nominal protocol differs from manually stopped actual loading.",
+    "LAP-C1 confinement identity conflict remains unresolved."
+  ],
+  "next_source_requirements": [
+    "Per-specimen description and lab book, archive identity and file-specific notices.",
+    "Material coupon originals, actual loading, channel definitions and interface deformation measurements.",
+    "Resolve specimen identity before reconstructing a model.",
+    "A proposed pre-failure subset needs a declared physical scope and original row indices; no subset is approved here."
+  ],
+  "original_experimental_numeric_rows_acquired": 0,
+  "solver_calls": 0,
+  "fits": 0,
+  "external_training_admitted": false,
+  "independent_physical_validation": false,
+  "release_approved": false,
+  "numerical_runtime_study_inputs_modified": false,
+  "exclusive_host_timing": false,
+  "audit_ns_excluding_fetch_render_review_and_seal": 931243338,
+  "sealed_packet": {
+    "sealed_at_utc": "2026-09-10T06:03:50.898649+00:00",
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-zenodo-continuous-controls-38akyx74",
+    "files": 27,
+    "bytes": 19893889,
+    "inventory_sha256": "c37384794ed4a85e13bafd191dbb60cc298b44d2f29f5396299ba771d1048f12",
+    "inventory_and_seal_excluded_from_payload_totals": true,
+    "source_review_only": true,
+    "external_training_admitted": false,
+    "independent_physical_validation": false
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "head": "58f6f2eb75dfa25ba98e4f8072b52c6a8319a029",
+  "jobs": [
+    {
+      "id": 103748509291,
+      "name": "pytest-development-contracts",
+      "run_id": 34766580190,
+      "conclusion": "success",
+      "test_summary_lines": [
+        "2026-09-13T16:09:54.1321489Z 1176 passed in 1166.13s (0:19:26)"
+      ],
+      "failed_steps": [],
+      "skipped_steps": []
+    },
+    {
+      "id": 103748509035,
+      "name": "frontend-contracts",
+      "run_id": 34766580158,
+      "conclusion": "success",
+      "test_summary_lines": [
+        "2026-09-13T15:59:18.4807137Z   704 passed (11.9m)",
+        "2026-09-13T16:01:34.3133811Z   24 passed (2.3m)"
+      ],
+      "failed_steps": [],
+      "skipped_steps": []
+    },
+    {
+      "id": 103748509270,
+      "name": "python-contracts",
+      "run_id": 34766580158,
+      "conclusion": "success",
+      "test_summary_lines": [
+        "2026-09-13T15:48:28.1546198Z 96 passed in 12.34s"
+      ],
+      "failed_steps": [],
+      "skipped_steps": []
+    }
+  ],
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-58f-completed-jobs-uco1_15b",
+    "inventory_sha256": "1704433cd3a9fb74385f1a4de415a4c2bf6f352d09b995b55f66990fb7caaf0e",
+    "files": 8,
+    "bytes": 280224
+  }
+}

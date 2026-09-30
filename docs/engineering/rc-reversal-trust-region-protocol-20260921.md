@@ -1,0 +1,9 @@
+# Bounded noncommitting trust-region seed probe
+
+Use the three original failed reversal parents from sealed large-drift packet `dc9cee74b0cefb318f6b6f846b925f091af116b994a8542ed4a2522cc4e748ca` and its frozen `ca07bb1ea` solver. For each, try exactly two initial coordinates: the original accepted-parent start and the recorded terminal failed Newton coordinates. The latter uses already observed failure information and is diagnostic, not an available cheap pre-solve predictor.
+
+Generate a candidate with installed SciPy 1.12.0 `least_squares`, method `trf`, linear loss, analytic augmented Jacobian, `x_scale='jac'`, `max_nfev=100`, and ftol/xtol/gtol=1e-12. Residuals use the existing reference-force normalization. Count every actual full residual/tangent assembly, including duplicate function/Jacobian callbacks, and record clocks, termination and parent immutability. Optimizer termination does not confer structural acceptance.
+
+Pass each generated coordinate vector to the original displacement-control Newton solve with original configuration and tolerances. Repeat that seeded solve from the identical accepted parent and require exact accepted-checkpoint agreement before reporting local reproducibility. Keep all unsuccessful candidates and their work. Six candidate-generation attempts and twelve subsequent original-solver attempts are planned. No material state is committed by the optimizer, no target subdivision is introduced and no production default changes.
+
+This is a single-target diagnostic on an authenticated retained parent, not a new whole-path policy or independent physical validation. Its extra nonlinear optimization cost is not learned inference. Any promising result would still require full original-history reconstruction, cost comparison, robust fresh verification and broader validation before integration.

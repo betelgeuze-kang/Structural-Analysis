@@ -1,0 +1,65 @@
+{
+  "source_revision": "543f8a00ce1a69361fbd6a01c1131f72e04826cd",
+  "numerical_source_revision": "ab9211f0c476b4f08e4f031ebbb8a6f51006525a",
+  "source_packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-grid-4j2otjaz",
+  "source_inventory_sha256": "81761ff3bc436c6c4707c9a38e93dbfa17cd5e88ab1fb9607c06690a493343d4",
+  "lower_inclusive_linear_rows": 17,
+  "lower_linear_with_unchanged_primary_rows": 14,
+  "lower_linear_with_lower_wall_time_rows": 6,
+  "primary_reduction_rows": [
+    [
+      "train-c",
+      97
+    ],
+    [
+      "train-c",
+      145
+    ],
+    [
+      "train-c",
+      217
+    ]
+  ],
+  "case_exclusion_counts": [
+    {
+      "excluded_case": "train-a",
+      "training_rows": 48,
+      "excluded_rows": 16,
+      "training_primary_reduction_rows": 3,
+      "excluded_primary_reduction_rows": 0
+    },
+    {
+      "excluded_case": "train-b",
+      "training_rows": 48,
+      "excluded_rows": 16,
+      "training_primary_reduction_rows": 3,
+      "excluded_primary_reduction_rows": 0
+    },
+    {
+      "excluded_case": "train-c",
+      "training_rows": 48,
+      "excluded_rows": 16,
+      "training_primary_reduction_rows": 0,
+      "excluded_primary_reduction_rows": 3
+    },
+    {
+      "excluded_case": "train-d",
+      "training_rows": 48,
+      "excluded_rows": 16,
+      "training_primary_reduction_rows": 3,
+      "excluded_primary_reduction_rows": 0
+    }
+  ],
+  "new_solver_calls": 0,
+  "new_fits": 0,
+  "training_admitted": false,
+  "independent_validation": false,
+  "phase_specific_runtime_measured": false,
+  "aggregation_wall_ns": 2697592539,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-quadratic-targets-a0nqn869",
+    "files": 2,
+    "bytes": 114264,
+    "inventory_sha256": "7e94212e3ab44e030500c88c1209e94c9a2c469237aced58d3ea73372670fa84"
+  }
+}

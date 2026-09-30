@@ -1,0 +1,27 @@
+[
+  {
+    "role": "job",
+    "bytes": 1714,
+    "sha256": "5a2dcf5752771777bd89109a8f2a72d697091d6899290ad8ca17ab9538eac2ef"
+  },
+  {
+    "role": "request",
+    "bytes": 2236,
+    "sha256": "ae5c3655b1665145e3090ee3857b4f462c9520146f2660702bca861bdead0ed0"
+  },
+  {
+    "role": "checkpoint",
+    "bytes": 24349,
+    "sha256": "d9dfad25b89ec6b7bd1a011361e0ca98158e910887d8f335882426ec8ed273a4"
+  },
+  {
+    "role": "result",
+    "bytes": 206910,
+    "sha256": "50b38d146c56e4219fbd2ba05d9073542088f3819bbeb0541f2cea88ea7eab73"
+  },
+  {
+    "role": "evidence",
+    "bytes": 2385,
+    "sha256": "d371aa53d64102bb22d3bf62e3be051dc3b66db6776ed8c3600e0625bc8edaf8"
+  }
+]

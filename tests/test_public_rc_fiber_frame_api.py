@@ -483,3 +483,98 @@ def test_model_snapshot_is_not_mutated_by_compile(solved) -> None:
         restart_checkpoint_chain=b"not-json",
     )
     assert model.canonical_payload() == before
+
+
+def test_compiler_keeps_each_member_bound_to_its_own_section(tmp_path):
+    payload = _payload()
+    payload["nodes"].append({"id": "N3", "coordinates": [6.0, 0.0, 0.0]})
+    payload["sections"].append({**payload["sections"][0], "id": "RC2", "width_m": 0.5})
+    payload["elements"].append(
+        {**payload["elements"][0], "id": "M2", "nodes": ["N2", "N3"], "section": "RC2"}
+    )
+    model = _write_model(tmp_path / "mixed-sections.json", payload)
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(model)
+    assert compiled is not None, blockers
+    assert [section.section_id for section in compiled.section_by_member] == [
+        "RC1",
+        "RC2",
+    ]
+    for member, section in zip(
+        compiled.problem.members, compiled.section_by_member, strict=True
+    ):
+        assert member.element.section is section
+    assert (
+        compiled.section_by_member[0].contract_hash
+        != compiled.section_by_member[1].contract_hash
+    )
+
+
+def test_public_compiler_retains_unequal_outer_bar_areas(tmp_path):
+    payload = _payload()
+    row = payload["sections"][0]
+    row.update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(
+        _write_model(tmp_path / "unequal.json", payload)
+    )
+    assert compiled is not None, blockers
+    steel = {
+        f.fiber_id: f.area_m2
+        for f in compiled.section_by_member[0].fibers
+        if f.material_kind == "steel"
+    }
+    assert steel["steel-top-layer"] == pytest.approx(row["top_bar_count"] * 0.00005)
+    assert steel["steel-bottom-layer"] == pytest.approx(
+        row["bottom_bar_count"] * 0.0002
+    )
+
+
+@pytest.mark.parametrize("name", ["top_bar_area_m2", "bottom_bar_area_m2"])
+@pytest.mark.parametrize("value", [None, True, 0, -1, "0.0002"])
+def test_public_compiler_rejects_invalid_outer_area(tmp_path, name, value):
+    payload = _payload()
+    payload["sections"][0][name] = value
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(
+        _write_model(tmp_path / "invalid.json", payload)
+    )
+    assert compiled is None
+    assert any(name in row["path"] for row in blockers)
+
+
+def test_unequal_outer_areas_complete_public_path_and_result_validation(tmp_path):
+    payload = _payload()
+    payload["sections"][0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.0004)
+    model = _write_model(tmp_path / "unequal-solve.json", payload)
+    result = analyze_public_rc_fiber_frame(
+        model, PublicRCFiberFrameConfig(load_steps=2)
+    )
+    assert result.status == "ready"
+    assert validate_public_rc_fiber_frame_result(result).contract_pass is True
+
+
+def test_distinct_centroid_distances_complete_public_solve(tmp_path):
+    payload = _payload()
+    row = payload["sections"][0]
+    row.update(top_cover_m=0.04, bottom_cover_m=0.06)
+    model = _write_model(tmp_path / "distinct-centroids.json", payload)
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(model)
+    assert compiled is not None, blockers
+    positions = {f.fiber_id: f.y_m for f in compiled.section_by_member[0].fibers}
+    assert positions["steel-top-layer"] == pytest.approx(row["depth_m"] / 2 - 0.04)
+    assert positions["steel-bottom-layer"] == pytest.approx(-row["depth_m"] / 2 + 0.06)
+    result = analyze_public_rc_fiber_frame(
+        model, PublicRCFiberFrameConfig(load_steps=2)
+    )
+    assert result.status == "ready"
+    assert validate_public_rc_fiber_frame_result(result).contract_pass is True
+
+
+@pytest.mark.parametrize("name", ["top_cover_m", "bottom_cover_m"])
+@pytest.mark.parametrize("value", [None, True, 0, -1, "0.04", 0.3, 0.31])
+def test_public_compiler_rejects_invalid_centroid_distance(tmp_path, name, value):
+    payload = _payload()
+    payload["sections"][0][name] = value
+    compiled, blockers, _ = nonlinear_fiber_frame._compile(
+        _write_model(tmp_path / "invalid-centroid.json", payload)
+    )
+    assert compiled is None
+    assert blockers

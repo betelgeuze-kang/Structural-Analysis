@@ -1,0 +1,18 @@
+{
+  "base_head": "bd9ccdaa4f3bcbdd3cdaa1b4905e5e1840aecf00",
+  "before": {
+    "regression_tests_failed": 5,
+    "reason": "mutated and rehashed training records were accepted"
+  },
+  "after": {
+    "contract_tests_passed": 141,
+    "reported_seconds": 24.8,
+    "typescript_pass": true,
+    "actual_ui_browser_test": false,
+    "new_solver_calls": 0,
+    "new_fits": 0
+  },
+  "packet": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-workbench-training-cost-zhtb3ldw",
+  "external_validation": false,
+  "speedup_claim": false
+}

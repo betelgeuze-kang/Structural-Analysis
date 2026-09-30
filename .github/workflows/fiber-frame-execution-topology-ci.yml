@@ -35,12 +35,30 @@ on:
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_displacement_control.py"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_control_path.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_execution_state_binding.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py"
+      - "src/structural_analysis/elements/fiber_beam2d_strain.py"
+      - "src/structural_analysis/solvers/nonlinear/twofold_coordinates.py"
+      - "src/structural_analysis/materials/stable_stress.py"
+      - "src/structural_analysis/materials/direct_fiber_strain.py"
+      - "src/structural_analysis/materials/retained_fiber_strain.py"
+      - "src/structural_analysis/materials/rational_force_section.py"
+      - "src/structural_analysis/solvers/nonlinear/rational_accumulation.py"
+      - "scripts/verify_rc_rational_assembly.py"
+      - "scripts/diagnose_rc_rational_history.py"
+      - "src/structural_analysis/schemas/stateful_fiber_frame2d_twofold_checkpoint_v1.schema.json"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d.py"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_state.py"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_checkpoint_io.py"
+      - "src/structural_analysis/elements/stateful_fiber_beam2d_state.py"
+      - "src/structural_analysis/elements/stateful_fiber_beam2d.py"
+      - "src/structural_analysis/elements/stateful_fiber_beam2d_response.py"
       - "src/structural_analysis/elements/stateful_corotational_fiber_beam2d.py"
       - "src/structural_analysis/elements/stateful_corotational_fiber_beam2d_contract.py"
       - "src/structural_analysis/elements/stateful_corotational_fiber_beam2d_response.py"
@@ -49,6 +67,23 @@ on:
       - "src/structural_analysis/api/__init__.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame_cli.py"
+      - "src/structural_analysis/api/rc_fiber_frame_direct_control.py"
+      - "src/structural_analysis/api/rc_fiber_frame_direct_control_request.py"
+      - "src/structural_analysis/api/rc_fiber_frame_direct_control_cli.py"
+      - "src/structural_analysis/benchmark/rc_control_design.py"
+      - "src/structural_analysis/benchmark/rc_control_seed_runtime.py"
+      - "src/structural_analysis/benchmark/rc_control_learning.py"
+      - "src/structural_analysis/benchmark/rc_control_learning_split.py"
+      - "scripts/diagnose_rc_control_section_error.py"
+      - "scripts/diagnose_rc_control_force_error.py"
+      - "scripts/diagnose_rc_control_fiber_history.py"
+      - "src/structural_analysis/benchmark/rc_control_design_cli.py"
+      - "src/structural_analysis/execution/rc_fiber_direct_control_worker.py"
+      - "src/structural_analysis/execution/rc_fiber_job_contract.py"
+      - "src/structural_analysis/execution/job_service.py"
+      - "src/structural_analysis/execution/job_http_api.py"
+      - "src/structural_analysis/execution/job_worker.py"
+      - "src/structural_analysis/schemas/job_request_v3.schema.json"
       - "src/structural_analysis/api/nonlinear_frame.py"
       - "src/structural_analysis/api/nonlinear_frame_cli.py"
       - "src/structural_analysis/solvers/nonlinear/newton.py"
@@ -80,6 +115,7 @@ on:
       - "tests/test_corotational_fiber_frame_j1_j5.py"
       - "tests/test_corotational_fiber_frame_general.py"
       - "tests/test_corotational_fiber_frame_engineering_recovery.py"
+      - "tests/test_corotational_checkpoint_transition_recovery.py"
       - "tests/test_unified_nonlinear_frame_api.py"
       - "tests/test_corotational_fiber_frame_sparse.py"
       - "tests/test_sparse_factorization_diagnostics.py"
@@ -98,6 +134,29 @@ on:
       - "tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_fiber_frame2d_solver.py"
       - "tests/test_public_rc_fiber_frame_api.py"
+      - "tests/test_stateful_fiber_frame2d_displacement_control.py"
+      - "tests/test_stateful_fiber_frame2d_control_path.py"
+      - "tests/test_bounded_rc_fiber_direct_control_api.py"
+      - "tests/test_rc_fiber_frame_direct_control_request.py"
+      - "tests/test_rc_fiber_frame_direct_control_cli.py"
+      - "tests/test_rc_control_design.py"
+      - "tests/test_rc_control_warm_start.py"
+      - "tests/test_rc_control_learning.py"
+      - "tests/test_rc_control_learning_split.py"
+      - "tests/test_rc_control_section_error.py"
+      - "tests/test_rc_control_force_error.py"
+      - "tests/test_rc_control_fiber_history.py"
+      - "tests/test_fiber_beam2d_exact_strain.py"
+      - "tests/test_rc_control_twofold_coordinates.py"
+      - "tests/test_rc_control_stable_stress.py"
+      - "tests/test_rc_control_direct_fiber.py"
+      - "tests/test_rc_control_retained_strain.py"
+      - "tests/test_rc_control_rational_accumulation.py"
+      - "tests/test_rc_rational_history.py"
+      - "tests/test_rc_terminal_twofold.py"
+      - "tests/test_rc_fiber_job_contract.py"
+      - "tests/test_rc_fiber_job_service.py"
+      - "tests/test_rc_fiber_durable_worker.py"
       - "tests/test_verify_quality_gate_contract.py"
       - "tests/test_engine_v2_nonlinear_result_recovery_v1.py"
       - "tests/test_engine_v2_nonlinear_recovery_source_binding.py"
@@ -429,7 +488,8 @@ jobs:
             --include="src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py" \
             -m pytest -q \
               tests/test_corotational_fiber_frame_engineering_recovery.py \
-              tests/test_corotational_fiber_frame_general.py
+              tests/test_corotational_fiber_frame_general.py \
+              tests/test_corotational_checkpoint_transition_recovery.py
           python -m coverage report --rcfile=/dev/null --fail-under=90
       - name: Corotational direct displacement control branch coverage
         run: |
@@ -538,5 +598,29 @@ jobs:
             tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d.py \
+            tests/test_stateful_fiber_frame2d_displacement_control.py \
+            tests/test_stateful_fiber_frame2d_control_path.py \
+            tests/test_bounded_rc_fiber_direct_control_api.py \
+            tests/test_rc_fiber_frame_direct_control_request.py \
+            tests/test_rc_fiber_frame_direct_control_cli.py \
+            tests/test_rc_control_design.py \
+            tests/test_rc_control_warm_start.py \
+            tests/test_rc_control_learning.py \
+            tests/test_rc_control_learning_split.py \
+            tests/test_rc_control_section_error.py \
+            tests/test_rc_control_force_error.py \
+            tests/test_rc_control_fiber_history.py \
+            tests/test_fiber_beam2d_exact_strain.py \
+            tests/test_rc_control_twofold_coordinates.py \
+            tests/test_rc_control_stable_stress.py \
+            tests/test_rc_control_direct_fiber.py \
+            tests/test_rc_control_retained_strain.py \
+            tests/test_rc_control_rational_accumulation.py \
+            tests/test_rc_rational_history.py \
+            tests/test_rc_terminal_twofold.py \
+            tests/test_rc_fiber_job_contract.py \
+            tests/test_rc_fiber_job_service.py \
+            tests/test_rc_fiber_durable_worker.py \
+            tests/test_material_trial_runtime.py \
             tests/test_stateful_fiber_frame2d_material_state_bundle.py \
             tests/test_stateful_fiber_frame2d_material_state_projection_chain.py

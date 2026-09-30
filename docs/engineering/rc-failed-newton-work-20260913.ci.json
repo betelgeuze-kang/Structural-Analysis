@@ -1,0 +1,38 @@
+{
+  "source_revision": "414098e3f7fb8482d0937caeee8a8be96cd0f4d6",
+  "development": {
+    "run_id": 34747225874,
+    "job_id": 103697256066,
+    "status": "completed",
+    "conclusion": "success",
+    "passed": 1063,
+    "seconds": 1015.45,
+    "completed_at": "2026-09-13T08:37:50Z",
+    "log_sha256": "b825451710bae57a9f9b5c2bfe98c91c6f0758302ae28c50a878379f43ebc102"
+  },
+  "frontend": {
+    "run_id": 34747225807,
+    "job_id": 103697253666,
+    "conclusion": "failure",
+    "passed": 691,
+    "failed": 2,
+    "failure_scope": "Legacy no-controls assertion rejects added explicit history input and button",
+    "log_sha256": "7910fbb0617f3357996fe6642acc5a5f5bf15627e4bfaa4c480e1ea0d969130f"
+  },
+  "full_python": {
+    "preparation": "failed",
+    "repository_pytest_shards": "skipped",
+    "closure": false
+  },
+  "native_pr_fast": {
+    "run_id": 34747225881,
+    "conclusion": "success"
+  },
+  "topology": {
+    "run_id": 34747225896,
+    "job_id": 103697253431,
+    "observed_status": "in_progress",
+    "not_cancelled": true
+  },
+  "new_head_qualification": false
+}

@@ -1,0 +1,132 @@
+{
+  "source_revision": "e534793e09c8ca7adae19212e1e687cb44c0ffaf",
+  "counts": {
+    "api_entered": 18,
+    "artifact_contract_pass": 18,
+    "declared": 18,
+    "launched": 18,
+    "physical_converged": 18,
+    "resource_eligible": 18
+  },
+  "source_files_checked": 461,
+  "artifact_identities_checked": 180,
+  "comparison_count": 12,
+  "exact_converged_repeat_pairs": 12,
+  "exact_failed_diagnostic_repeat_pairs": 0,
+  "summary": [
+    {
+      "case_id": "two_story",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 4.117450622,
+      "converged_workload_ratio_to_dense": 1.0,
+      "workload_seconds_by_repeat": [
+        4.060915432,
+        4.163843198,
+        4.117450622
+      ],
+      "workload_population_std_seconds": 0.042088034496494224
+    },
+    {
+      "case_id": "two_story",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 4.134062479,
+      "converged_workload_ratio_to_dense": 1.0040345005988027,
+      "workload_seconds_by_repeat": [
+        4.152190698,
+        4.116880401,
+        4.134062479
+      ],
+      "workload_population_std_seconds": 0.01441709326050242
+    },
+    {
+      "case_id": "two_story",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 11.628920833,
+      "converged_workload_ratio_to_dense": 2.8243012243705783,
+      "workload_seconds_by_repeat": [
+        11.493009342,
+        11.643823261,
+        11.628920833
+      ],
+      "workload_population_std_seconds": 0.06785511845941934
+    },
+    {
+      "case_id": "two_bay",
+      "backend": "numpy_linalg_solve_dense",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 3.524740813,
+      "converged_workload_ratio_to_dense": 1.0,
+      "workload_seconds_by_repeat": [
+        3.512590254,
+        3.60203918,
+        3.524740813
+      ],
+      "workload_population_std_seconds": 0.03961450910887259
+    },
+    {
+      "case_id": "two_bay",
+      "backend": "scipy_sparse_spsolve_cpu",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 3.537464139,
+      "converged_workload_ratio_to_dense": 1.0036097196006792,
+      "workload_seconds_by_repeat": [
+        3.537464139,
+        3.508082058,
+        3.564575283
+      ],
+      "workload_population_std_seconds": 0.023069473056111612
+    },
+    {
+      "case_id": "two_bay",
+      "backend": "scipy_sparse_splu_cpu_exact_1536",
+      "repetitions": 3,
+      "converged_count": 3,
+      "workload_median_seconds_including_failures": 9.813526177,
+      "converged_workload_ratio_to_dense": 2.7841837734013266,
+      "workload_seconds_by_repeat": [
+        9.808650441,
+        9.813526177,
+        9.962829651
+      ],
+      "workload_population_std_seconds": 0.07155924425586475
+    }
+  ],
+  "experiment_wall_seconds": 167.737700472,
+  "scope": "Retained-byte audit and recomputed internal comparisons; generated two-story and two-bay topology variants, not independent projects or external physical validation. Failure timings retained; no speed ratio for nonconverged groups.",
+  "material_maxima_by_case": {
+    "two_story": {
+      "compressive_damage": 0,
+      "compressive_history_strain": 0.00010928670697675391,
+      "dissipated_energy_density_mj_per_m3": 0,
+      "tensile_damage": 0,
+      "tensile_history_strain": 7.753889965086177e-05,
+      "accumulated_plastic_strain": 0,
+      "backstress_mpa": 0,
+      "plastic_strain": 0
+    },
+    "two_bay": {
+      "compressive_damage": 0,
+      "compressive_history_strain": 6.884518163352298e-05,
+      "dissipated_energy_density_mj_per_m3": 0,
+      "tensile_damage": 0,
+      "tensile_history_strain": 3.8157790558057976e-05,
+      "accumulated_plastic_strain": 0,
+      "backstress_mpa": 0,
+      "plastic_strain": 0
+    }
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-planar-topology-cohort-hvbomp7h",
+    "payload_files": 863,
+    "payload_bytes": 24827373,
+    "inventory_sha256": "16240c268463e8fae4541d7f16c1811c072c7d6c10ea6f5024dbb55830551ecb"
+  }
+}

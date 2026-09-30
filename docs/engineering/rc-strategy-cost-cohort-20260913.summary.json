@@ -1,0 +1,38 @@
+{
+  "accounting_source_revision": "f789805970653b6913112767b83daed22d404428",
+  "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-standalone-strategy-hmxpb46v",
+  "original_inventory_sha256": "9d99cdce0f6115905c729696b742af59b004412fce7a29de750cc7b0920b95aa",
+  "input_file_count": 24,
+  "groups": {
+    "all_pairs": {
+      "return_code": 0,
+      "parent_wall_ns": 1412841647,
+      "pair_count": 4,
+      "uncomparable_pair_count": 2,
+      "historical_training_wall_ns_counted_once": 2761753795,
+      "price_cli_interval_sum_ns": 24495854346,
+      "learned_cli_interval_sum_ns": 24592134089,
+      "learned_plus_historical_over_price_ratio": null
+    },
+    "full_pool_budget": {
+      "return_code": 0,
+      "parent_wall_ns": 1374800742,
+      "pair_count": 2,
+      "uncomparable_pair_count": 0,
+      "historical_training_wall_ns_counted_once": 2761753795,
+      "price_cli_interval_sum_ns": 19215370148,
+      "learned_cli_interval_sum_ns": 19238868966,
+      "learned_plus_historical_over_price_ratio": 1.1449492042852945
+    }
+  },
+  "new_fits": 0,
+  "new_solver_calls": 0,
+  "metadata_accounting_only": true,
+  "source_bytes_verified_before_and_after": true,
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-strategy-cost-cohort-u6cd7v_h",
+    "file_count": 10,
+    "byte_count": 59673,
+    "inventory_sha256": "fbeff7dbe78ea7b34ea67796933f8843091a985a589330e78a7db8f0ebf07fd3"
+  }
+}

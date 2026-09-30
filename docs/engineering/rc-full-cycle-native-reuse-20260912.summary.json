@@ -1,0 +1,1039 @@
+{
+  "schema": "rc-multicase-native-reuse-full-cycle-observation.v1",
+  "base_revision": "e94cb85dde468085f05bb42cd4bac40070f9a65a",
+  "packet_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-full-cycle-reuse-3t8qdeb7",
+  "case_count": 4,
+  "benchmark_count": 16,
+  "path_count": 64,
+  "targets_per_path": 242,
+  "native_step_pairs_exact": 7744,
+  "core_calls": 15488,
+  "inclusive_newton_iterations": 69984,
+  "linear_solves": 69984,
+  "full_history_comparisons_passed": 48,
+  "baseline_assembly_dispatches": 64476,
+  "reuse_assembly_dispatches": 49412,
+  "reuse_hits": 15064,
+  "dispatch_reduction_fraction": 0.23363732241454185,
+  "rows": [
+    {
+      "case_id": "train-a",
+      "lengths_m": [
+        2.0,
+        1.5
+      ],
+      "target_count": 242,
+      "last_target_m": -0.02,
+      "max_accumulated_plastic_strain": 0.009756536290479813,
+      "max_tensile_damage": 0.9999999999661977,
+      "max_compressive_damage": 0.13048993532791497,
+      "baseline_dispatches": 17248,
+      "reuse_dispatches": 13032,
+      "reuse_hits": 4216,
+      "dispatch_reduction_fraction": 0.24443413729128013,
+      "wall_ratios": [
+        0.8343831619224789,
+        0.829255618663792
+      ],
+      "per_strategy_pairs": [
+        {
+          "order": [
+            false,
+            true
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 72644615402,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 55911545303,
+                "proposal_wall_ns": 865861809,
+                "recovery_wall_ns": 12367306366,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1640,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 100775060493,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 84895733481,
+                "proposal_wall_ns": 466683,
+                "recovery_wall_ns": 12317797104,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 2672,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 72561134783,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 55877741059,
+                "proposal_wall_ns": 863014462,
+                "recovery_wall_ns": 12318614650,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1640,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 101554256539,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 85513701001,
+                "proposal_wall_ns": 475567,
+                "recovery_wall_ns": 12456026031,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 2672,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 63375973970,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 46437414746,
+                "proposal_wall_ns": 864246687,
+                "recovery_wall_ns": 12453782462,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1304,
+                "reuse_hits": 336
+              },
+              "reference": {
+                "path_wall_ns": 81417325578,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 65129815197,
+                "proposal_wall_ns": 492031,
+                "recovery_wall_ns": 12645939476,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 1954,
+                "reuse_hits": 718
+              },
+              "secant": {
+                "path_wall_ns": 63267714326,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 46351792512,
+                "proposal_wall_ns": 864008097,
+                "recovery_wall_ns": 12508003759,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1304,
+                "reuse_hits": 336
+              },
+              "fresh-reference": {
+                "path_wall_ns": 81099068152,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 65146400448,
+                "proposal_wall_ns": 470990,
+                "recovery_wall_ns": 12417387917,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 1954,
+                "reuse_hits": 718
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.8079114532871492,
+            "secant": 0.8719228897840045,
+            "proposal": 0.8724111707287692,
+            "fresh-reference": 0.798578719552296
+          }
+        },
+        {
+          "order": [
+            true,
+            false
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 73275258277,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 56312229177,
+                "proposal_wall_ns": 868131420,
+                "recovery_wall_ns": 12578785705,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1640,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 101411080084,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 85278229175,
+                "proposal_wall_ns": 476421,
+                "recovery_wall_ns": 12480332905,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 2672,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 73286425858,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 56301089797,
+                "proposal_wall_ns": 867959352,
+                "recovery_wall_ns": 12424480408,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1640,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 101517762602,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 85432581935,
+                "proposal_wall_ns": 468293,
+                "recovery_wall_ns": 12477494316,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 2672,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 63391493377,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 46414569586,
+                "proposal_wall_ns": 864350519,
+                "recovery_wall_ns": 12550083213,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1304,
+                "reuse_hits": 336
+              },
+              "reference": {
+                "path_wall_ns": 80790726766,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 64634424023,
+                "proposal_wall_ns": 467173,
+                "recovery_wall_ns": 12600983078,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 1954,
+                "reuse_hits": 718
+              },
+              "secant": {
+                "path_wall_ns": 63521169881,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 46461159508,
+                "proposal_wall_ns": 867755442,
+                "recovery_wall_ns": 12542354339,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 969,
+                "assembly_dispatches": 1304,
+                "reuse_hits": 336
+              },
+              "fresh-reference": {
+                "path_wall_ns": 81139175449,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 64816523601,
+                "proposal_wall_ns": 470953,
+                "recovery_wall_ns": 12688807790,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1355,
+                "assembly_dispatches": 1954,
+                "reuse_hits": 718
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.7966656769564044,
+            "secant": 0.8667521868794477,
+            "proposal": 0.8651145675578961,
+            "fresh-reference": 0.7992608718841236
+          }
+        }
+      ],
+      "pooled_case_wall_ratio": 0.8318128325921826,
+      "timing_limitation": "two pairs on nonisolated host; preliminary observation only",
+      "pooled_strategy_path_wall_ratios": {
+        "reference": 0.8022708771288166,
+        "secant": 0.8693246815357273,
+        "proposal": 0.8687471017544041,
+        "fresh-reference": 0.7989197344236397
+      }
+    },
+    {
+      "case_id": "train-b",
+      "lengths_m": [
+        3.0,
+        2.5
+      ],
+      "target_count": 242,
+      "last_target_m": -0.02,
+      "max_accumulated_plastic_strain": 0.0010674072829973866,
+      "max_tensile_damage": 0.9999452753078079,
+      "max_compressive_damage": 0.0,
+      "baseline_dispatches": 14656,
+      "reuse_dispatches": 11468,
+      "reuse_hits": 3188,
+      "dispatch_reduction_fraction": 0.21752183406113537,
+      "wall_ratios": [
+        0.8576886727119161,
+        0.8577622414301005
+      ],
+      "per_strategy_pairs": [
+        {
+          "order": [
+            false,
+            true
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 66490120813,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49798827775,
+                "proposal_wall_ns": 864630126,
+                "recovery_wall_ns": 12351594043,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1436,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 87689038456,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 72019803684,
+                "proposal_wall_ns": 470561,
+                "recovery_wall_ns": 12223811211,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 2228,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 66217064289,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49671822347,
+                "proposal_wall_ns": 860228756,
+                "recovery_wall_ns": 12294166838,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1436,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 87930176758,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 72129433845,
+                "proposal_wall_ns": 465387,
+                "recovery_wall_ns": 12284452881,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 2228,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 59746926423,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 43091206772,
+                "proposal_wall_ns": 862873033,
+                "recovery_wall_ns": 12357502232,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1200,
+                "reuse_hits": 236
+              },
+              "reference": {
+                "path_wall_ns": 72024710610,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 56272125120,
+                "proposal_wall_ns": 457705,
+                "recovery_wall_ns": 12234326231,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 1667,
+                "reuse_hits": 561
+              },
+              "secant": {
+                "path_wall_ns": 59739847296,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 43133872605,
+                "proposal_wall_ns": 861870519,
+                "recovery_wall_ns": 12255448444,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1200,
+                "reuse_hits": 236
+              },
+              "fresh-reference": {
+                "path_wall_ns": 72184558585,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 56243270827,
+                "proposal_wall_ns": 460554,
+                "recovery_wall_ns": 12418935127,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 1667,
+                "reuse_hits": 561
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.8213650403538187,
+            "secant": 0.9021820574115063,
+            "proposal": 0.8985835142492088,
+            "fresh-reference": 0.8209304387464745
+          }
+        },
+        {
+          "order": [
+            true,
+            false
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 66441639604,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49723785470,
+                "proposal_wall_ns": 861783390,
+                "recovery_wall_ns": 12225255253,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1436,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 88002090956,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 72038590597,
+                "proposal_wall_ns": 477982,
+                "recovery_wall_ns": 12381802418,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 2228,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 66564851214,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49798652480,
+                "proposal_wall_ns": 862497203,
+                "recovery_wall_ns": 12296169437,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1436,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 87875167290,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 71934954878,
+                "proposal_wall_ns": 454564,
+                "recovery_wall_ns": 12314755207,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 2228,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 59666112712,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 43059364546,
+                "proposal_wall_ns": 860295534,
+                "recovery_wall_ns": 12256504500,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1200,
+                "reuse_hits": 236
+              },
+              "reference": {
+                "path_wall_ns": 72093999734,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 56166753649,
+                "proposal_wall_ns": 458575,
+                "recovery_wall_ns": 12305283713,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 1667,
+                "reuse_hits": 561
+              },
+              "secant": {
+                "path_wall_ns": 59729062456,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 43157443079,
+                "proposal_wall_ns": 862971463,
+                "recovery_wall_ns": 12221165319,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 870,
+                "assembly_dispatches": 1200,
+                "reuse_hits": 236
+              },
+              "fresh-reference": {
+                "path_wall_ns": 72663169369,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 56656003858,
+                "proposal_wall_ns": 476910,
+                "recovery_wall_ns": 12433704283,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1165,
+                "assembly_dispatches": 1667,
+                "reuse_hits": 561
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.8192305313523305,
+            "secant": 0.8973063315949802,
+            "proposal": 0.8980228824516834,
+            "fresh-reference": 0.8268908226279862
+          }
+        }
+      ],
+      "pooled_case_wall_ratio": 0.8577254871931523,
+      "timing_limitation": "two pairs on nonisolated host; preliminary observation only",
+      "pooled_strategy_path_wall_ratios": {
+        "reference": 0.8202958841822805,
+        "secant": 0.8997378091695084,
+        "proposal": 0.8983033005837546,
+        "fresh-reference": 0.8239096981855815
+      }
+    },
+    {
+      "case_id": "train-c",
+      "lengths_m": [
+        1.75,
+        2.5
+      ],
+      "target_count": 242,
+      "last_target_m": -0.018000000000000002,
+      "max_accumulated_plastic_strain": 0.01356078154233022,
+      "max_tensile_damage": 0.9999999999999879,
+      "max_compressive_damage": 0.3383311732274633,
+      "baseline_dispatches": 18260,
+      "reuse_dispatches": 13652,
+      "reuse_hits": 4608,
+      "dispatch_reduction_fraction": 0.25235487404162105,
+      "wall_ratios": [
+        0.8189814051352811,
+        0.821468270486243
+      ],
+      "per_strategy_pairs": [
+        {
+          "order": [
+            false,
+            true
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 74610078481,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 57854482407,
+                "proposal_wall_ns": 857803141,
+                "recovery_wall_ns": 12297085362,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1711,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 105067589233,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 89294144567,
+                "proposal_wall_ns": 458068,
+                "recovery_wall_ns": 12320583082,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2854,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 74649054114,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 57897930549,
+                "proposal_wall_ns": 858181001,
+                "recovery_wall_ns": 12457559138,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1711,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 106274203991,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 90460840709,
+                "proposal_wall_ns": 509241,
+                "recovery_wall_ns": 12326558150,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2854,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 63586996242,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 46908831690,
+                "proposal_wall_ns": 850324744,
+                "recovery_wall_ns": 12400691675,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1337,
+                "reuse_hits": 374
+              },
+              "reference": {
+                "path_wall_ns": 83909583821,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 67888239428,
+                "proposal_wall_ns": 463905,
+                "recovery_wall_ns": 12462160561,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2076,
+                "reuse_hits": 778
+              },
+              "secant": {
+                "path_wall_ns": 63384308248,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 46818065039,
+                "proposal_wall_ns": 848641688,
+                "recovery_wall_ns": 12150243935,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1337,
+                "reuse_hits": 374
+              },
+              "fresh-reference": {
+                "path_wall_ns": 83556585583,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 67642533827,
+                "proposal_wall_ns": 476326,
+                "recovery_wall_ns": 12359123095,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2076,
+                "reuse_hits": 778
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.7986248131659366,
+            "secant": 0.8490972725682888,
+            "proposal": 0.8522574635569227,
+            "fresh-reference": 0.7862358168316755
+          }
+        },
+        {
+          "order": [
+            true,
+            false
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 74229150229,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 57588773149,
+                "proposal_wall_ns": 850319654,
+                "recovery_wall_ns": 12249899989,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1711,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 105636706788,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 89583443085,
+                "proposal_wall_ns": 465330,
+                "recovery_wall_ns": 12407348043,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2854,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 73940199833,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 57380246469,
+                "proposal_wall_ns": 846833293,
+                "recovery_wall_ns": 12218828406,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1711,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 106152644796,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 90235303764,
+                "proposal_wall_ns": 468679,
+                "recovery_wall_ns": 12333473018,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2854,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 63617857930,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 46895599915,
+                "proposal_wall_ns": 849253322,
+                "recovery_wall_ns": 12433029468,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1337,
+                "reuse_hits": 374
+              },
+              "reference": {
+                "path_wall_ns": 83356329917,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 67513680883,
+                "proposal_wall_ns": 460275,
+                "recovery_wall_ns": 12336383285,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2076,
+                "reuse_hits": 778
+              },
+              "secant": {
+                "path_wall_ns": 63916907565,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 47141423832,
+                "proposal_wall_ns": 855274012,
+                "recovery_wall_ns": 12382226885,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 990,
+                "assembly_dispatches": 1337,
+                "reuse_hits": 374
+              },
+              "fresh-reference": {
+                "path_wall_ns": 83813526432,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 67759272197,
+                "proposal_wall_ns": 456770,
+                "recovery_wall_ns": 12583874423,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1376,
+                "assembly_dispatches": 2076,
+                "reuse_hits": 778
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.7890848972061009,
+            "secant": 0.8644405574959436,
+            "proposal": 0.8570468304397434,
+            "fresh-reference": 0.7895566482876574
+          }
+        }
+      ],
+      "pooled_case_wall_ratio": 0.8202235128649078,
+      "timing_limitation": "two pairs on nonisolated host; preliminary observation only",
+      "pooled_strategy_path_wall_ratios": {
+        "reference": 0.7938419714106318,
+        "secant": 0.8567323169844221,
+        "proposal": 0.8546460182204205,
+        "fresh-reference": 0.78789528240294
+      }
+    },
+    {
+      "case_id": "train-d",
+      "lengths_m": [
+        3.25,
+        1.25
+      ],
+      "target_count": 242,
+      "last_target_m": -0.022000000000000002,
+      "max_accumulated_plastic_strain": 0.0006776083033321488,
+      "max_tensile_damage": 0.9998745813150062,
+      "max_compressive_damage": 0.0,
+      "baseline_dispatches": 14312,
+      "reuse_dispatches": 11260,
+      "reuse_hits": 3052,
+      "dispatch_reduction_fraction": 0.21324762437115707,
+      "wall_ratios": [
+        0.8621008212202561,
+        0.8613871922670959
+      ],
+      "per_strategy_pairs": [
+        {
+          "order": [
+            false,
+            true
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 65872901394,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49399847250,
+                "proposal_wall_ns": 856801891,
+                "recovery_wall_ns": 12161466222,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1424,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 85747356868,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 69974427264,
+                "proposal_wall_ns": 468753,
+                "recovery_wall_ns": 12298734760,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 2154,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 65843171713,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49289180954,
+                "proposal_wall_ns": 857078956,
+                "recovery_wall_ns": 12307246696,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1424,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 85433724278,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 69663047635,
+                "proposal_wall_ns": 461451,
+                "recovery_wall_ns": 12270925892,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 2154,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 59530965899,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 42822408435,
+                "proposal_wall_ns": 858601833,
+                "recovery_wall_ns": 12348277433,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1195,
+                "reuse_hits": 229
+              },
+              "reference": {
+                "path_wall_ns": 70298682240,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 54515156727,
+                "proposal_wall_ns": 462614,
+                "recovery_wall_ns": 12244955090,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 1620,
+                "reuse_hits": 534
+              },
+              "secant": {
+                "path_wall_ns": 59900198146,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 43166846253,
+                "proposal_wall_ns": 864581100,
+                "recovery_wall_ns": 12395358681,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1195,
+                "reuse_hits": 229
+              },
+              "fresh-reference": {
+                "path_wall_ns": 70704343607,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 54793170721,
+                "proposal_wall_ns": 467146,
+                "recovery_wall_ns": 12393683602,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 1620,
+                "reuse_hits": 534
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.8198349757674539,
+            "secant": 0.9097404725139232,
+            "proposal": 0.9037246673397985,
+            "fresh-reference": 0.8275928996953144
+          }
+        },
+        {
+          "order": [
+            true,
+            false
+          ],
+          "observations": {
+            "baseline": {
+              "proposal": {
+                "path_wall_ns": 66076589718,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49395789055,
+                "proposal_wall_ns": 859486710,
+                "recovery_wall_ns": 12316940521,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1424,
+                "reuse_hits": 0
+              },
+              "reference": {
+                "path_wall_ns": 85662104861,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 69749071383,
+                "proposal_wall_ns": 469595,
+                "recovery_wall_ns": 12367193027,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 2154,
+                "reuse_hits": 0
+              },
+              "secant": {
+                "path_wall_ns": 65807063159,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 49078237418,
+                "proposal_wall_ns": 857614825,
+                "recovery_wall_ns": 12328701234,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1424,
+                "reuse_hits": 0
+              },
+              "fresh-reference": {
+                "path_wall_ns": 86035352976,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 70002771226,
+                "proposal_wall_ns": 468201,
+                "recovery_wall_ns": 12590161838,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 2154,
+                "reuse_hits": 0
+              }
+            },
+            "reuse": {
+              "proposal": {
+                "path_wall_ns": 59552244003,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 42938741131,
+                "proposal_wall_ns": 859110008,
+                "recovery_wall_ns": 12347318536,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1195,
+                "reuse_hits": 229
+              },
+              "reference": {
+                "path_wall_ns": 70566333072,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 54871213472,
+                "proposal_wall_ns": 468019,
+                "recovery_wall_ns": 12224414245,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 1620,
+                "reuse_hits": 534
+              },
+              "secant": {
+                "path_wall_ns": 59822303221,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 43117575934,
+                "proposal_wall_ns": 863583101,
+                "recovery_wall_ns": 12399452823,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 852,
+                "assembly_dispatches": 1195,
+                "reuse_hits": 229
+              },
+              "fresh-reference": {
+                "path_wall_ns": 70802987350,
+                "timing_scope": "whole_path_including_proposal_numerical_attempts_recovery_and_step_io_excluding_final_path_write",
+                "numerical_attempt_wall_ns": 54849191258,
+                "proposal_wall_ns": 467364,
+                "recovery_wall_ns": 12331750921,
+                "core_calls": 242,
+                "inclusive_newton_iterations": 1171,
+                "assembly_dispatches": 1620,
+                "reuse_hits": 534
+              }
+            }
+          },
+          "path_wall_ratios": {
+            "reference": 0.8237753810334777,
+            "secant": 0.9090559637414619,
+            "proposal": 0.9012608589086628,
+            "fresh-reference": 0.8229522504516353
+          }
+        }
+      ],
+      "pooled_case_wall_ratio": 0.861743632662984,
+      "timing_limitation": "two pairs on nonisolated host; preliminary observation only",
+      "pooled_strategy_path_wall_ratios": {
+        "reference": 0.8218041985028163,
+        "secant": 0.9093983119999974,
+        "proposal": 0.9024908614533498,
+        "fresh-reference": 0.82526443381615
+      }
+    }
+  ],
+  "source_and_record_audit_seconds": 12.505139769,
+  "audit_fits": 0,
+  "audit_newton_solves": 0,
+  "learned_policy": false,
+  "new_measured_training_rows": 0,
+  "independent_physical_validation": false,
+  "full_242_target_validation": true,
+  "new_structure_family": false,
+  "all_cases_completed": true,
+  "owned_tests_overlap_planned": false,
+  "pooled_cohort_speedup_claim": false,
+  "postlaunch_source_edit": false,
+  "postlaunch_analysis_extension": "per-strategy cost breakdown added after train-a completed; no case, request, solver or pass criteria changed",
+  "parent_wall_seconds": 4958.76889428,
+  "evidence_inventory": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-full-cycle-reuse-3t8qdeb7.inventory.json",
+    "sha256": "624a88a87b87ccc1510b56919e31a2fa1c767830181e5a52ec9d50fc9dfd2bcd",
+    "files": 93573,
+    "bytes": 5228538860
+  },
+  "hosted_numerical_base_ci": {
+    "head_sha": "e94cb85dde468085f05bb42cd4bac40070f9a65a",
+    "tested_merge_sha": "cb69a802f58e2d1ab17ec066aec5b93eec1c001b",
+    "run_id": 34691397679,
+    "artifact_id": 10296819918,
+    "artifact_bytes": 9171,
+    "artifact_sha256": "4be2fe22d67c0cf728bf8a3301af605a00830184cda635e46c2896a62cddccd0",
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "522",
+        "time": "401.492",
+        "timestamp": "2026-09-12T11:35:32.383726+00:00",
+        "hostname": "runnervmlun5p"
+      }
+    ],
+    "module_count": 24,
+    "runner_experiment_module_in_hosted_artifact": false,
+    "shard0_preparation_blockers": [
+      "external_code_to_code_product_replay_not_passed",
+      "external_code_to_code_technical_receipt_not_ready"
+    ],
+    "raw_log_used": "shard0.log",
+    "latest_specific_metric_mismatches_confirmed": false,
+    "full_shards_preparation_failed": 4,
+    "full_shards_actual_tests_skipped": 4,
+    "full_aggregate_conclusion": "failure"
+  }
+}

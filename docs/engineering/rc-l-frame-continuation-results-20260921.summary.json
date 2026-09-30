@@ -1,0 +1,1174 @@
+{
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-l-frame-continuation-51s9xsuj",
+  "inventory_sha256": "f31af49736e847b4c51b62bdbb00c77f0b6d59fb3d4e7e72899f49ee82064921",
+  "file_count": 3620,
+  "audit": {
+    "source_revision": "ce7a8615d0e8ea1a01a03f7f0affb722fa207f6e",
+    "totals": {
+      "paths": 96,
+      "completed_paths": 56,
+      "ordinary_native_calls": 326,
+      "additional_native_calls": 160,
+      "ordinary_newton_iterations": 1566,
+      "additional_newton_iterations": 494,
+      "all_native_calls": 486,
+      "all_newton_iterations": 2060
+    },
+    "pairs": [
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23118075,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13059120
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23123922,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 232516328,
+                  "newton_assembly_work": {
+                    "call_count": 34,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 34,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 221208557
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 232530099,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 11,
+                    "newton_iterations": 11
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 24447965,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13800235
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 24448276,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 233110268,
+                  "newton_assembly_work": {
+                    "call_count": 34,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 34,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 221837315
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 233117519,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 11,
+                    "newton_iterations": 11
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "short-2mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 2958462289,
+          "on-failure": 1419446985
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": true
+          },
+          {
+            "upfront": false,
+            "on-failure": true
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 164388763,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 155115679
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 164393595,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 165749983,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 156475746
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 165761541,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 163863454,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 154602324
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 163868419,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 166137032,
+                  "newton_assembly_work": {
+                    "call_count": 24,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 24,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 156804544
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 166141963,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 4,
+                    "newton_iterations": 4
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "short-20mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 556420089,
+          "on-failure": 500384894
+        },
+        "additional_native_calls": {
+          "upfront": 0,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 131268301,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 122180718
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 131277545,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 131597650,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 122553585
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 131607325,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 133529500,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 124375328
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 133542850,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "incomplete",
+              "accepted_target_count": 0,
+              "failure": {
+                "kind": "all_attempts_blocked",
+                "phase": "numerical",
+                "target_index": 0
+              },
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 132149370,
+                  "newton_assembly_work": {
+                    "call_count": 19,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 19,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 123021854
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 132169494,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "short-40mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 433160209,
+          "on-failure": 438488246
+        },
+        "additional_native_calls": {
+          "upfront": 0,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23247724,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13143293
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23248056,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 49787259,
+                  "newton_assembly_work": {
+                    "call_count": 6,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 6,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 39426419
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 49788470,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23008535,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13003780
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23018099,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 49167559,
+                  "newton_assembly_work": {
+                    "call_count": 6,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 6,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 39014787
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 49177370,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 3,
+                    "newton_iterations": 3
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "long-2mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 2180039741,
+          "on-failure": 788906701
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": 0.36187721084301094,
+        "fresh_reference_gates": [
+          {
+            "upfront": true,
+            "on-failure": true
+          },
+          {
+            "upfront": true,
+            "on-failure": true
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23472705,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13294267
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23473023,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 214136152,
+                  "newton_assembly_work": {
+                    "call_count": 31,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 31,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 204400156
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 214142596,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 6,
+                    "newton_iterations": 6
+                  }
+                },
+                {
+                  "committed": true,
+                  "cpu_ns": 23346554,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13220985
+                  },
+                  "ordinal": 2,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23346799,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23147515,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13093490
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23147973,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": false,
+                  "cpu_ns": 212830062,
+                  "newton_assembly_work": {
+                    "call_count": 31,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 31,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 203163952
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": true,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 212842212,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 6,
+                    "newton_iterations": 6
+                  }
+                },
+                {
+                  "committed": true,
+                  "cpu_ns": 23326065,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13232496
+                  },
+                  "ordinal": 2,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23336120,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "long-20mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          true,
+          true
+        ],
+        "proposal_wall_ns": {
+          "upfront": 2970348028,
+          "on-failure": 3424250223
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 32
+        },
+        "on_failure_over_upfront_ratio": 1.1528111153040952,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": false
+          },
+          {
+            "upfront": false,
+            "on-failure": false
+          }
+        ]
+      },
+      {
+        "outcomes": [
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23276645,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13164153
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23277036,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 120738493,
+                  "newton_assembly_work": {
+                    "call_count": 17,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 17,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 110250683
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 120748169,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 8,
+                    "newton_iterations": 8
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "upfront": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 23598025,
+                  "newton_assembly_work": {
+                    "call_count": 2,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 2,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 13348800
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": true,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 23598409,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 1,
+                    "newton_iterations": 1
+                  }
+                }
+              ]
+            },
+            "on-failure": {
+              "status": "complete",
+              "accepted_target_count": 3,
+              "failure": null,
+              "last_invocations": [
+                {
+                  "committed": true,
+                  "cpu_ns": 122410552,
+                  "newton_assembly_work": {
+                    "call_count": 17,
+                    "element_material_evaluations": null,
+                    "exception_count": 0,
+                    "in_flight_count": 0,
+                    "outside_newton_assembly_calls": null,
+                    "physical_validation": false,
+                    "returned_count": 17,
+                    "schema_version": "vector-newton-assembly-dispatch-work.v1",
+                    "scope": "vector_newton_problem_assembly_dispatches_only",
+                    "solver_completion_inferred": false,
+                    "timing_scope": "problem_dispatch_and_status_bookkeeping;excludes_recorder_snapshot_and_nonassembly_work",
+                    "wall_ns": 111770673
+                  },
+                  "ordinal": 1,
+                  "rollback_exact": null,
+                  "seed_used": false,
+                  "status": "returned",
+                  "unknown_work": false,
+                  "wall_ns": 122414115,
+                  "work": {
+                    "core_calls": 1,
+                    "linear_solves": 8,
+                    "newton_iterations": 8
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "case": "long-40mm",
+        "candidate": "l-frame",
+        "paired_complete_history_matches": [
+          false,
+          false
+        ],
+        "proposal_wall_ns": {
+          "upfront": 3689541921,
+          "on-failure": 1300016859
+        },
+        "additional_native_calls": {
+          "upfront": 32,
+          "on-failure": 0
+        },
+        "on_failure_over_upfront_ratio": null,
+        "fresh_reference_gates": [
+          {
+            "upfront": false,
+            "on-failure": true
+          },
+          {
+            "upfront": false,
+            "on-failure": true
+          }
+        ]
+      }
+    ],
+    "all_paired_histories_match": false,
+    "policy_promoted": false
+  }
+}

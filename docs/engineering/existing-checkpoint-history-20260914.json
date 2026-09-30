@@ -1,0 +1,29 @@
+{
+  "source_head": "52f9d193f7bd636c5dcde1e7fe3915b534c5d8b5",
+  "command": [
+    "/tmp/structural-history-node-y43_kt7k/bin/node",
+    "--loader",
+    "./scripts/json-module-loader.mjs",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "tests/frontend/workbench-v2-existing-checkpoint-history-browser.spec.ts",
+    "tests/frontend/workbench-v2-checkpoint-retry-history-browser.spec.ts",
+    "tests/frontend/workbench-v2-successful-retry-history-browser.spec.ts",
+    "tests/frontend/workbench-v2-failure-history-browser.spec.ts",
+    "--workers=1",
+    "--reporter=line",
+    "--output=/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-existing-history-selgn9na/final-browser-results"
+  ],
+  "exit_code": 0,
+  "runner_wall_ns": 81833442396,
+  "fault_injection": "real first checkpoint, injected second-attempt replay failure, advanced checkpoint and successful fourth attempt",
+  "request_bytes_identical": true,
+  "independent_physical_validation": false,
+  "fresh_frontend_build": false,
+  "packet": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-existing-history-selgn9na",
+    "files": 28,
+    "bytes": 52753182,
+    "inventory_sha256": "87ec91bf28698af138776b49e8f236382bc0586cc9deecdd3878a43426580595"
+  }
+}

@@ -1,0 +1,554 @@
+{
+  "schema": "peer-multi-campaign-source-audit.v1",
+  "source_revision": "9a9c26833f043f9338ef41017b9b14139270dd47",
+  "source_module_sha256": "368221bc2fe50744273a16be03e92f74e8a0ef68c9e8fa2bec2590437366434b",
+  "original_pair_count": 5650,
+  "selected_table_xml_property_pairs": 40,
+  "all_original_numeric_tokens_and_decimal_values_exact": true,
+  "specimens": [
+    {
+      "record_id": "PEER-SPD-64",
+      "source_version": "1",
+      "specimen_name": "Ono et al. 1989, CA025C",
+      "original_history_title": "Ono et al. 1989, Specimen CA025C",
+      "original_reference": "Ono, Arata; Shirai, Nobuaki; Adachi, Hiromi; and Sakamaki, Yoshio, \"Elasto-Plastic Behavior of Reinforced Concrete Column With Fluctuating Axial Force,\" Transactions of the Japan Concrete Institute, Vol. 11, 1989, pp. 239-246.",
+      "history_sha256": "635df5895e6926e0da95173913fad97a4adcb56f3bd70b0fc3f00178784215f2",
+      "xml_sha256": "80151d59a38e81f3b3c74f8a3911c3f20ec81bd1c2f912950e85f5dcffc7da01",
+      "history_url": "http://depts.washington.edu/columdat/rectcol/txfiles/ono025c.txt",
+      "pair_count": 1083,
+      "initial_pair": [
+        "0",
+        "0"
+      ],
+      "displacement_range_mm": [
+        "-9.0703",
+        "9.0576"
+      ],
+      "lateral_range_kn": [
+        "-130.22",
+        "129.98"
+      ],
+      "axial_channel_present": false,
+      "selected_properties": [
+        {
+          "key": "concrete_strength_mpa",
+          "table_token": "25.8",
+          "xml_token": "25.8",
+          "xml_path": "materialProperties/concreteStrength",
+          "unit": "MPa"
+        },
+        {
+          "key": "corner_yield_stress_mpa",
+          "table_token": "361",
+          "xml_token": "361",
+          "xml_path": "materialProperties/longitudinalSteel/corner/yieldStress",
+          "unit": "MPa"
+        },
+        {
+          "key": "width_mm",
+          "table_token": "200",
+          "xml_token": "200",
+          "xml_path": "geometry/width",
+          "unit": "mm"
+        },
+        {
+          "key": "depth_mm",
+          "table_token": "200",
+          "xml_token": "200",
+          "xml_path": "geometry/depth",
+          "unit": "mm"
+        },
+        {
+          "key": "equivalent_cantilever_length_mm",
+          "table_token": "300",
+          "xml_token": "300",
+          "xml_path": "geometry/lInflection",
+          "unit": "mm"
+        },
+        {
+          "key": "axial_load_kn",
+          "table_token": "265",
+          "xml_token": "265",
+          "xml_path": "loading/axialLoad",
+          "unit": "kN"
+        },
+        {
+          "key": "corner_bar_diameter_mm",
+          "table_token": "9.5",
+          "xml_token": "9.5",
+          "xml_path": "longitudinalReinforcement/diameter",
+          "unit": "mm"
+        },
+        {
+          "key": "close_hoop_spacing_mm",
+          "table_token": "70",
+          "xml_token": "70",
+          "xml_path": "transverseReinforcement/closeSpacing/hoopSpacing",
+          "unit": "mm"
+        }
+      ],
+      "local_campaign_group": "ono-shirai-adachi-sakamaki-1989-jci11-239-246",
+      "partition": "unassigned",
+      "reuse_basis": "",
+      "source_authentication_claimed": false,
+      "training_admitted": false
+    },
+    {
+      "record_id": "PEER-SPD-65",
+      "source_version": "1",
+      "specimen_name": "Ono et al. 1989, CA060C",
+      "original_history_title": "Ono et al. 1989, Specimen CA060C",
+      "original_reference": "Ono, Arata; Shirai, Nobuaki; Adachi, Hiromi; and Sakamaki, Yoshio, \"Elasto-Plastic Behavior of Reinforced Concrete Column With Fluctuating Axial Force,\" Transactions of the Japan Concrete Institute, Vol. 11, 1989, pp. 239-246.",
+      "history_sha256": "4441004a0bb116b009285903af6eda9641f39b450f86b006f8b5f017207c3a9a",
+      "xml_sha256": "c5f3a0fabf93dc26a3f728170d1a55d124b27518e1efa6cf975a49909675af97",
+      "history_url": "http://depts.washington.edu/columdat/rectcol/txfiles/ono060c.txt",
+      "pair_count": 736,
+      "initial_pair": [
+        "0",
+        "0"
+      ],
+      "displacement_range_mm": [
+        "-4.6083",
+        "4.5905"
+      ],
+      "lateral_range_kn": [
+        "-136.71",
+        "133.78"
+      ],
+      "axial_channel_present": false,
+      "selected_properties": [
+        {
+          "key": "concrete_strength_mpa",
+          "table_token": "25.8",
+          "xml_token": "25.8",
+          "xml_path": "materialProperties/concreteStrength",
+          "unit": "MPa"
+        },
+        {
+          "key": "corner_yield_stress_mpa",
+          "table_token": "361",
+          "xml_token": "361",
+          "xml_path": "materialProperties/longitudinalSteel/corner/yieldStress",
+          "unit": "MPa"
+        },
+        {
+          "key": "width_mm",
+          "table_token": "200",
+          "xml_token": "200",
+          "xml_path": "geometry/width",
+          "unit": "mm"
+        },
+        {
+          "key": "depth_mm",
+          "table_token": "200",
+          "xml_token": "200",
+          "xml_path": "geometry/depth",
+          "unit": "mm"
+        },
+        {
+          "key": "equivalent_cantilever_length_mm",
+          "table_token": "300",
+          "xml_token": "300",
+          "xml_path": "geometry/lInflection",
+          "unit": "mm"
+        },
+        {
+          "key": "axial_load_kn",
+          "table_token": "636",
+          "xml_token": "636",
+          "xml_path": "loading/axialLoad",
+          "unit": "kN"
+        },
+        {
+          "key": "corner_bar_diameter_mm",
+          "table_token": "9.5",
+          "xml_token": "9.5",
+          "xml_path": "longitudinalReinforcement/diameter",
+          "unit": "mm"
+        },
+        {
+          "key": "close_hoop_spacing_mm",
+          "table_token": "70",
+          "xml_token": "70",
+          "xml_path": "transverseReinforcement/closeSpacing/hoopSpacing",
+          "unit": "mm"
+        }
+      ],
+      "local_campaign_group": "ono-shirai-adachi-sakamaki-1989-jci11-239-246",
+      "partition": "unassigned",
+      "reuse_basis": "",
+      "source_authentication_claimed": false,
+      "training_admitted": false
+    },
+    {
+      "record_id": "PEER-SPD-105",
+      "source_version": "1",
+      "specimen_name": "Saatcioglu and Ozcebe 1989, U3",
+      "original_history_title": "Saatcioglu and Ozcebe 1989, Spec. U3",
+      "original_reference": "Saatcioglu, Murat; and Ozcebe, Guney, \"Response of Reinforced Concrete Columns to Simulated Seismic Loading,\" American Concrete Institute, ACI Structural Journal, January - February, 1989, pp. 3-12.",
+      "history_sha256": "1956f9dd1c542277261bdda5effa30a638b340f8bf71f2da3c51496d6eb2fa59",
+      "xml_sha256": "43b94868851d8594d92614b9bb750b3871070914ff3dbdea35c928370ff3b9fa",
+      "history_url": "http://depts.washington.edu/columdat/rectcol/txfiles/saatu3.txt",
+      "pair_count": 1010,
+      "initial_pair": [
+        "0",
+        "-12.17"
+      ],
+      "displacement_range_mm": [
+        "-66.4",
+        "72"
+      ],
+      "lateral_range_kn": [
+        "-271",
+        "267"
+      ],
+      "axial_channel_present": false,
+      "selected_properties": [
+        {
+          "key": "concrete_strength_mpa",
+          "table_token": "34.8",
+          "xml_token": "34.8",
+          "xml_path": "materialProperties/concreteStrength",
+          "unit": "MPa"
+        },
+        {
+          "key": "corner_yield_stress_mpa",
+          "table_token": "430",
+          "xml_token": "430",
+          "xml_path": "materialProperties/longitudinalSteel/corner/yieldStress",
+          "unit": "MPa"
+        },
+        {
+          "key": "width_mm",
+          "table_token": "350",
+          "xml_token": "350",
+          "xml_path": "geometry/width",
+          "unit": "mm"
+        },
+        {
+          "key": "depth_mm",
+          "table_token": "350",
+          "xml_token": "350",
+          "xml_path": "geometry/depth",
+          "unit": "mm"
+        },
+        {
+          "key": "equivalent_cantilever_length_mm",
+          "table_token": "1,000",
+          "xml_token": "1,000",
+          "xml_path": "geometry/lInflection",
+          "unit": "mm"
+        },
+        {
+          "key": "axial_load_kn",
+          "table_token": "600",
+          "xml_token": "600",
+          "xml_path": "loading/axialLoad",
+          "unit": "kN"
+        },
+        {
+          "key": "corner_bar_diameter_mm",
+          "table_token": "25",
+          "xml_token": "25",
+          "xml_path": "longitudinalReinforcement/diameter",
+          "unit": "mm"
+        },
+        {
+          "key": "close_hoop_spacing_mm",
+          "table_token": "75",
+          "xml_token": "75",
+          "xml_path": "transverseReinforcement/closeSpacing/hoopSpacing",
+          "unit": "mm"
+        }
+      ],
+      "local_campaign_group": "saatcioglu-ozcebe-1989-aci86-3-12",
+      "partition": "unassigned",
+      "reuse_basis": "",
+      "source_authentication_claimed": false,
+      "training_admitted": false
+    },
+    {
+      "record_id": "PEER-SPD-181",
+      "source_version": "1",
+      "specimen_name": "Matamoros et al. 1999,C5-00N",
+      "original_history_title": "\"Matamoros et. al 1999 Specimen c5-00 North\"",
+      "original_reference": "Matamoros, A.B.; \"Study of Drift Limits for High-Strength Concrete Columns,\" Department of Civil Engineering, University of Illinois at Urbana-Champaign, Urbana, Illinois, Oct 1999.",
+      "history_sha256": "68eb06ab5c881c7d8ccd5a44d0927a5798d6113d6c27d6711badc97a5caece6d",
+      "xml_sha256": "fc5d88439fa04abe9b2f316366b0ae0c83230defd7361fdccd1994463ffd81c9",
+      "history_url": "http://depts.washington.edu/columdat/rectcol/txfiles/mat500n.txt",
+      "pair_count": 1955,
+      "initial_pair": [
+        "-0.027686",
+        "0.023753503"
+      ],
+      "displacement_range_mm": [
+        "-46.228",
+        "50.8"
+      ],
+      "lateral_range_kn": [
+        "-57.38205864",
+        "59.16134728"
+      ],
+      "axial_channel_present": false,
+      "selected_properties": [
+        {
+          "key": "concrete_strength_mpa",
+          "table_token": "37.9",
+          "xml_token": "37.9",
+          "xml_path": "materialProperties/concreteStrength",
+          "unit": "MPa"
+        },
+        {
+          "key": "corner_yield_stress_mpa",
+          "table_token": "572.3",
+          "xml_token": "572.3",
+          "xml_path": "materialProperties/longitudinalSteel/corner/yieldStress",
+          "unit": "MPa"
+        },
+        {
+          "key": "width_mm",
+          "table_token": "203",
+          "xml_token": "203",
+          "xml_path": "geometry/width",
+          "unit": "mm"
+        },
+        {
+          "key": "depth_mm",
+          "table_token": "203",
+          "xml_token": "203",
+          "xml_path": "geometry/depth",
+          "unit": "mm"
+        },
+        {
+          "key": "equivalent_cantilever_length_mm",
+          "table_token": "610",
+          "xml_token": "610",
+          "xml_path": "geometry/lInflection",
+          "unit": "mm"
+        },
+        {
+          "key": "axial_load_kn",
+          "table_token": "0",
+          "xml_token": "0",
+          "xml_path": "loading/axialLoad",
+          "unit": "kN"
+        },
+        {
+          "key": "corner_bar_diameter_mm",
+          "table_token": "15.9",
+          "xml_token": "15.9",
+          "xml_path": "longitudinalReinforcement/diameter",
+          "unit": "mm"
+        },
+        {
+          "key": "close_hoop_spacing_mm",
+          "table_token": "76.2",
+          "xml_token": "76.2",
+          "xml_path": "transverseReinforcement/closeSpacing/hoopSpacing",
+          "unit": "mm"
+        }
+      ],
+      "local_campaign_group": "matamoros-1999-uiuc-dissertation",
+      "partition": "unassigned",
+      "reuse_basis": "",
+      "source_authentication_claimed": false,
+      "training_admitted": false
+    },
+    {
+      "record_id": "PEER-SPD-201",
+      "source_version": "1",
+      "specimen_name": "Thomsen and Wallace 1994, A1",
+      "original_history_title": "\"Thompson and Wallace, 1994, A1\"  ",
+      "original_reference": "Thomsen, John; and Wallace, John, \"Lateral Load Behavior of Reinforced Concrete Columns Constructed Using High-Strength Materials,\" American Concrete Institute, ACI Structural Journal, Vol. 91, No. 5, September-October 1994, pp. 605-615.",
+      "history_sha256": "49a5ae183c4bf70446fa09cf926cdd03393d72c86fc44dc80982b3c35e55c7a6",
+      "xml_sha256": "78a9eb758f78b755916b0a97a1e4b10f82766de494f4ae8a32fcf52d1ec141fe",
+      "history_url": "http://depts.washington.edu/columdat/rectcol/txfiles/thom94a1.txt",
+      "pair_count": 866,
+      "initial_pair": [
+        "0.53848",
+        "2.620002169"
+      ],
+      "displacement_range_mm": [
+        "-28.75026",
+        "31.58236"
+      ],
+      "lateral_range_kn": [
+        "-46.44031688",
+        "44.29538472"
+      ],
+      "axial_channel_present": false,
+      "selected_properties": [
+        {
+          "key": "concrete_strength_mpa",
+          "table_token": "102.7",
+          "xml_token": "102.7",
+          "xml_path": "materialProperties/concreteStrength",
+          "unit": "MPa"
+        },
+        {
+          "key": "corner_yield_stress_mpa",
+          "table_token": "517.1",
+          "xml_token": "517.1",
+          "xml_path": "materialProperties/longitudinalSteel/corner/yieldStress",
+          "unit": "MPa"
+        },
+        {
+          "key": "width_mm",
+          "table_token": "152.4",
+          "xml_token": "152.4",
+          "xml_path": "geometry/width",
+          "unit": "mm"
+        },
+        {
+          "key": "depth_mm",
+          "table_token": "152.4",
+          "xml_token": "152.4",
+          "xml_path": "geometry/depth",
+          "unit": "mm"
+        },
+        {
+          "key": "equivalent_cantilever_length_mm",
+          "table_token": "596.9",
+          "xml_token": "596.9",
+          "xml_path": "geometry/lInflection",
+          "unit": "mm"
+        },
+        {
+          "key": "axial_load_kn",
+          "table_token": "0",
+          "xml_token": "0",
+          "xml_path": "loading/axialLoad",
+          "unit": "kN"
+        },
+        {
+          "key": "corner_bar_diameter_mm",
+          "table_token": "9.5",
+          "xml_token": "9.5",
+          "xml_path": "longitudinalReinforcement/diameter",
+          "unit": "mm"
+        },
+        {
+          "key": "close_hoop_spacing_mm",
+          "table_token": "25.4",
+          "xml_token": "25.4",
+          "xml_path": "transverseReinforcement/closeSpacing/hoopSpacing",
+          "unit": "mm"
+        }
+      ],
+      "local_campaign_group": "thomson-wallace-1994-aci91-605-615",
+      "partition": "unassigned",
+      "reuse_basis": "",
+      "source_authentication_claimed": false,
+      "training_admitted": false
+    }
+  ],
+  "existing_u1_campaign_link": {
+    "record_id": "PEER-SPD-104",
+    "local_campaign_group": "saatcioglu-ozcebe-1989-aci86-3-12",
+    "partition": "unassigned",
+    "must_share_partition_with": [
+      "PEER-SPD-105"
+    ]
+  },
+  "nist_source_review": {
+    "source": "nistir-5984.pdf",
+    "source_sha256": "2dbd0b88a3e8578c30f3de5e4b2728eb157b389d2d495be8f153109d8a951f0c",
+    "source_kind": "NIST curated summary of original experiments; not original experiment report",
+    "visually_reviewed_pdf_pages_zero_based": [
+      33,
+      45,
+      46
+    ],
+    "source_observations": [
+      {
+        "specimens": [
+          "PEER-SPD-64",
+          "PEER-SPD-65"
+        ],
+        "printed_page": 26,
+        "axial_loading": "constant compression in these two selected specimens; variable-load and tension specimens of the paper are excluded"
+      },
+      {
+        "specimen": "PEER-SPD-105",
+        "printed_pages": [
+          38,
+          39
+        ],
+        "geometry_mm": {
+          "width": "350",
+          "depth": "350",
+          "length": "1000"
+        },
+        "longitudinal_bar_count": "8",
+        "bar_diameter_mm": "25",
+        "close_hoop_diameter_mm": "10",
+        "close_hoop_spacing_mm": "75",
+        "concrete_strength_mpa": "34.8",
+        "axial_load_kn": "600",
+        "longitudinal_yield_mpa": "430",
+        "transverse_yield_mpa": "470",
+        "history_provenance_statement": "NIST states this reported U-series data came directly from original researchers; current TXT byte lineage to WK1 remains unverified"
+      },
+      {
+        "specimen": "PEER-SPD-104",
+        "printed_page": 38,
+        "status": "U1 excluded from NIST reported series; U3 drawing must not be attributed to U1"
+      }
+    ],
+    "unresolved_conflicts": [
+      {
+        "specimen": "PEER-SPD-105",
+        "field": "longitudinal_reinforcement_ratio",
+        "nist_printed": "0.0327",
+        "peer_table": "0.0321",
+        "resolution": "none; preserve both source values"
+      },
+      {
+        "specimen": "PEER-SPD-105",
+        "field": "transverse_reinforcement_ratio",
+        "nist_printed": "1.69",
+        "peer_table": "0.017",
+        "resolution": "unit/definition reconciliation required; no automatic rescaling"
+      }
+    ]
+  },
+  "remaining_requirements": [
+    "original experiment report/drawings and source-specific reuse basis",
+    "resolve source value/ratio differences without silently replacing originals",
+    "bind recorded load conventions and compatible model geometry",
+    "identify model calibration assumptions separately from measured material properties",
+    "freeze campaign/project partitions before calibration, fitting, or preprocessing",
+    "separate untouched external tests from calibration and all campaign mirrors"
+  ],
+  "newton_fit_material_compile_or_commit_calls": 0,
+  "training_admitted": false,
+  "independent_physics_validation": false,
+  "shared_host_with_learning_repetitions": true,
+  "audit_internal_wall_ns": 39978212,
+  "access_review": {
+    "original_sources_audited": true,
+    "matamoros_original_thesis_access": "IDEALS primary search record says Illinois-community access only; direct local metadata fetch returned HTTP 403; no full original thesis retrieved",
+    "matamoros_metadata_url": "https://www.ideals.illinois.edu/items/84770",
+    "refined_dataset_article_doi": "10.1061/JSENDH.STENG-14725",
+    "refined_dataset_article_source": "https://ascelibrary.org/doi/10.1061/JSENDH.STENG-14725",
+    "refined_dataset_author_link": "https://figshare.com/s/341e5941ace7b2f0c9ad",
+    "refined_dataset_file_status": "browser fetch 403; local fetch HTTP 202 with zero bytes; no dataset file or license inspected",
+    "previous_audit_failure": "attempt 1 incorrectly required optional thesis metadata fetch to succeed along with original data; attempt 2 enforces HTTP 200 and byte hashes for every required XML/history/reference source, preserves optional fetch failure separately"
+  },
+  "audit_process": {
+    "pid": 822013,
+    "exit_code": 0,
+    "parent_wall_ns": 1464858217
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-cohort.cz2yewo9",
+    "file_count": 31,
+    "bytes": 4095218,
+    "inventory_sha256": "737c5d08e6f7630a3a699e70b7c6e31bb0119a86d969cf09f811408672e58428",
+    "all_files_reread_exact": true,
+    "inventory_excludes": [
+      "inventory.json",
+      "seal.json"
+    ]
+  }
+}

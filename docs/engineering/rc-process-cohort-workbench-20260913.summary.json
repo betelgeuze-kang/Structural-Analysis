@@ -1,0 +1,41 @@
+{
+  "packet": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-process-cohort-workbench-c_p8b9zs",
+    "source_revision": "1669647a1c4cece2f3a8635f4eb762a727c5a49e",
+    "files": 10,
+    "bytes": 2071903,
+    "inventory_sha256": "6ebde8c6c9243dd2b68c1982fd1d945afab27d4c8dd3d4586bbe5251cd1fdc74"
+  },
+  "observation": {
+    "views": [
+      {
+        "width": 1440,
+        "pairs": 4,
+        "executions": 8,
+        "selected": "w047",
+        "exact_downloads": 3,
+        "page_errors": []
+      },
+      {
+        "width": 390,
+        "pairs": 4,
+        "executions": 8,
+        "selected": "w047",
+        "exact_downloads": 3,
+        "page_errors": []
+      }
+    ],
+    "inventory_matched_reads": 1242,
+    "wall_ms": 8051.87148,
+    "transport": "actual loopback WSGI backend; no request interception",
+    "http_responses": 1236,
+    "server_exit_code": 0,
+    "solver_calls": 0,
+    "fits": 0,
+    "independent_physical_validation": false
+  },
+  "formal_filtered_tests": 29,
+  "separate_contract_tests_overlapping_formal_run": 19,
+  "independent_physical_validation": false,
+  "net_savings_proved": false
+}
