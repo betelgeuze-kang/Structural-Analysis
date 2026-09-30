@@ -10,7 +10,7 @@ from run_rc_pooled_runtime_campaign import (
     ASSEMBLY_REUSE_PROFILE, NEW_INVENTORY, PINS, inputs,
 )
 from structural_analysis.benchmark import rc_control_learning as learning
-from structural_analysis.benchmark.rc_control_design import _bytes
+from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 from structural_analysis.benchmark.rc_control_training_diagnostics import _validated_training_data
 
 
@@ -20,10 +20,36 @@ def require_report_binding(plan, case_id, report):
     case = cases[0]
     require(report['source_revision'] == plan['source_revision'] and
             report['model_checksum'] == case['model_hash'] and
-            report['request'] == case['request'], 'comparison model/request/source binding')
+            _bytes(report['request']) == _bytes(case['request']),
+            'comparison model/request/source binding')
     key = 'line_search_assembly_reuse'
     require((key in report) == (key in plan) and report.get(key) == plan.get(key),
             'comparison assembly reuse profile binding')
+
+
+def require_original_fold_binding(folder, plan, case_id, report):
+    require_report_binding(plan, case_id, report)
+    case = next(c for c in plan['cases']
+                if c['case_id'] == case_id and c['split'] == 'train')
+    request_identity = read(folder / 'request.json')
+    # The producer writes this entire identity before executing any arm.
+    # Only these producer result fields are appended to comparison.json.
+    report_identity = {
+        key: value for key, value in report.items()
+        if key not in {
+            'arms', 'fresh_reference', 'comparisons', 'reference_repeat_exact',
+            'whole_study_wall_ns', 'whole_study_cpu_ns', 'whole_study_timing_scope',
+            'all_execution_work_reported', 'claims', 'numerical_proposal_work',
+            'assembly_phase_work', 'assembly_phase_summary_wall_ns', 'report_hash',
+        }
+    }
+    require(type(request_identity) is dict and
+            _bytes(request_identity) == _bytes(report_identity),
+            'original benchmark request differs from comparison identity')
+    original_model = read(folder / 'model.json')
+    require(type(original_model) is dict and
+            _sha(_bytes(original_model)) == case['model_hash'],
+            'original benchmark model differs from declared case')
 
 
 def require_fit_method(source, plan, policy):
@@ -146,7 +172,8 @@ def audit(study, old_labels, new_labels):
         require(f['status'] == 'completed' and score['full_comparison_pass'] and
                 not score['execution_work']['unknown_work'], 'incomplete fold')
         report = checked(root / stem / 'comparison.json', 'report_hash')
-        require_report_binding(plan, f['withheld_training_case'], report)
+        require_original_fold_binding(root / stem, plan,
+                                      f['withheld_training_case'], report)
         count, duration = require_observations(report, source.get('observe_initial_residuals', False))
         observation_assemblies += count
         observation_wall_ns += duration
