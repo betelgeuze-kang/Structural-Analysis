@@ -19,7 +19,12 @@ import stat
 from time import monotonic, sleep
 from typing import Iterator
 
-from structural_analysis.execution.job_service import DurableJobService
+from structural_analysis.execution.job_service import (
+    DurableJobService,
+    JobServiceError,
+    _bounded,
+    _media_type,
+)
 
 
 _MAX_MANIFEST = 1024 * 1024
@@ -238,6 +243,20 @@ class RCResultRepository:
         self._paths_safe()
         entry.check()
         _identifier(entry.key)
+        roles = tuple(name for name, _ in entry.artifacts)
+        if (
+            not 1 <= len(roles) <= 16
+            or any(
+                type(name) is not str or not name or not name.replace("_", "").isalnum()
+                for name in roles
+            )
+            or len(set(roles)) != len(roles)
+        ):
+            raise ValueError("invalid persistent artifact roles")
+        _media_type("application/json", "/evidence/media_type")
+        _bounded(entry.row_bytes, _MAX_MANIFEST, "/evidence")
+        for _, raw in entry.artifacts:
+            _bounded(raw, _MAX_SNAPSHOT, "/evidence")
         if entry.byte_length > min(self._max_bytes, _MAX_SNAPSHOT):
             return False
         with self._service._transaction() as connection:
@@ -261,29 +280,49 @@ class RCResultRepository:
             ):
                 return False
 
-            def put(raw: bytes) -> dict:
-                reference = self._service._put_blob(
-                    raw,
-                    role="evidence",
-                    media_type="application/json",
-                    maximum_bytes=_MAX_SNAPSHOT,
-                )
-                return {"hash": reference.content_hash, "size": reference.byte_length}
+            # Construct the full group before storage. The root policy counts
+            # the manifest as well as the distinct row and artifact payloads.
+            def planned_reference(raw: bytes) -> dict:
+                return {"hash": _digest(raw), "size": len(raw)}
 
             value = {
                 "schema": "persistent-rc-original.v1",
                 "key": entry.key,
                 "tenant": self._tenant,
                 "scope": scope_id,
-                "row": put(entry.row_bytes),
-                "artifacts": {name: put(raw) for name, raw in entry.artifacts},
+                "row": planned_reference(entry.row_bytes),
+                "artifacts": {
+                    name: planned_reference(raw) for name, raw in entry.artifacts
+                },
                 "seal": entry.seal,
                 "size": entry.byte_length,
             }
             manifest = _encode(value)
             if len(manifest) > _MAX_MANIFEST:
                 raise ValueError("persistent manifest exceeds limit")
-            reference = put(manifest)
+            _bounded(manifest, _MAX_MANIFEST, "/evidence")
+            payloads = (entry.row_bytes, *(raw for _, raw in entry.artifacts), manifest)
+            try:
+                admission = self._service._admit_blob_payloads(connection, payloads)
+            except JobServiceError as exc:
+                if exc.code == "blob_payload_budget_exceeded":
+                    return False
+                raise
+
+            def put(raw: bytes, maximum: int) -> dict:
+                reference = self._service._put_blob(
+                    raw,
+                    role="evidence",
+                    media_type="application/json",
+                    maximum_bytes=maximum,
+                    admission=admission,
+                )
+                return {"hash": reference.content_hash, "size": reference.byte_length}
+
+            put(entry.row_bytes, _MAX_MANIFEST)
+            for _, raw in entry.artifacts:
+                put(raw, _MAX_SNAPSHOT)
+            reference = put(manifest, _MAX_MANIFEST)
             connection.execute(
                 "INSERT INTO rc_verified_result_index_v1 VALUES (?, ?, ?, ?, ?, ?)",
                 (

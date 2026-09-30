@@ -1656,9 +1656,9 @@ def test_prewrite_admitted_existing_blob_corruption_is_not_repaired(
     assert s.read_checkpoint(c.job.job_id, **tenant()) == prefix
     assert path.read_bytes() == b"corrupted unreferenced synthetic artifact"
     after = request_blob_inventory(tmp_path)
-    assert [value for key, value in after.items() if key not in blobs] == (
-        [raw] if corrupt_role == "evidence" else []
-    )
+    # The complete result/evidence union is checked before either write. A
+    # known corrupt evidence target therefore cannot leave a new result orphan.
+    assert after == blobs
 
 
 @pytest.mark.parametrize("release", [False, True])
