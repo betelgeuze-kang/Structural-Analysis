@@ -87,8 +87,11 @@ def _assemble_linear_static(
     if not node_ids:
         unsupported.append({"kind": "linear_static_nodes_missing"})
         return None, unsupported
-    if len(set(node_ids)) != len(node_ids):
-        unsupported.append({"kind": "linear_static_duplicate_nodes"})
+    # Check the same effective string keys used by assembly before dictionaries
+    # can overwrite rows or any global stiffness storage is allocated.
+    duplicate_ids = _duplicate_model_ids(model)
+    if duplicate_ids:
+        unsupported.extend(duplicate_ids)
         return None, unsupported
 
     node_index = {node_id: index for index, node_id in enumerate(node_ids)}
@@ -96,7 +99,9 @@ def _assemble_linear_static(
     materials = {str(row.get("id", "")): row for row in model.materials}
     sections = {str(row.get("id", "")): row for row in model.sections}
     dof_count = len(node_ids) * DOF_PER_NODE
-    dense_stiffness = np.zeros((dof_count, dof_count), dtype=float) if not sparse else None
+    dense_stiffness = (
+        np.zeros((dof_count, dof_count), dtype=float) if not sparse else None
+    )
     rows: list[int] = []
     cols: list[int] = []
     data: list[float] = []
@@ -118,7 +123,10 @@ def _assemble_linear_static(
         records.append(record)
         row_scale = max(float(np.max(np.abs(element_stiffness))), 1.0)
         for local_row, global_row in enumerate(record.dofs):
-            if float(np.max(np.abs(element_stiffness[local_row, :]))) > 1.0e-14 * row_scale:
+            if (
+                float(np.max(np.abs(element_stiffness[local_row, :])))
+                > 1.0e-14 * row_scale
+            ):
                 active_dofs.add(global_row)
             for local_column, global_column in enumerate(record.dofs):
                 value = float(element_stiffness[local_row, local_column])
@@ -164,7 +172,9 @@ def _assemble_linear_static(
     stiffness: np.ndarray | csr_matrix
     storage: str
     if sparse:
-        stiffness = coo_matrix((data, (rows, cols)), shape=(dof_count, dof_count)).tocsr()
+        stiffness = coo_matrix(
+            (data, (rows, cols)), shape=(dof_count, dof_count)
+        ).tocsr()
         storage = SPARSE_STIFFNESS_STORAGE
     else:
         assert dense_stiffness is not None
@@ -187,6 +197,34 @@ def _assemble_linear_static(
     )
 
 
+def _duplicate_model_ids(model: CanonicalModel) -> list[dict[str, Any]]:
+    """Reject ambiguous definitions within each independent entity namespace."""
+
+    issues: list[dict[str, Any]] = []
+    for collection in ("nodes", "elements", "materials", "sections"):
+        first_indices: dict[str, int] = {}
+        for index, row in enumerate(getattr(model, collection)):
+            identifier = str(row.get("id", ""))
+            if identifier in first_indices:
+                first_index = first_indices[identifier]
+                issues.append(
+                    {
+                        "kind": f"linear_static_duplicate_{collection}",
+                        "id": identifier,
+                        "first_index": first_index,
+                        "duplicate_index": index,
+                        "detail": (
+                            f"{collection}[{index}].id duplicates "
+                            f"{collection}[{first_index}].id; "
+                            "implicit identifier overwrite is disabled."
+                        ),
+                    }
+                )
+            else:
+                first_indices[identifier] = index
+    return issues
+
+
 def recover_element_results(
     assembly: LinearStaticAssembly,
     displacements: np.ndarray,
@@ -195,7 +233,9 @@ def recover_element_results(
     for record in assembly.element_records:
         element_displacement = np.asarray(displacements[list(record.dofs)], dtype=float)
         if isinstance(record.properties, Frame3DProperties):
-            local_forces = frame3d_local_end_forces(record.properties, element_displacement)
+            local_forces = frame3d_local_end_forces(
+                record.properties, element_displacement
+            )
             results.append(
                 {
                     "id": record.element_id,
@@ -214,7 +254,10 @@ def recover_element_results(
         translation = element_displacement[list(translation_indices)]
         elongation = float(np.dot(direction, translation[3:6] - translation[0:3]))
         axial_force = (
-            properties.elastic_modulus * properties.area / properties.length * elongation
+            properties.elastic_modulus
+            * properties.area
+            / properties.length
+            * elongation
         )
         results.append(
             {
@@ -223,7 +266,10 @@ def recover_element_results(
                 "nodes": list(record.node_ids),
                 "axial_force": float(axial_force),
                 "elongation": elongation,
-                "local_end_forces": {"FX_I": -float(axial_force), "FX_J": float(axial_force)},
+                "local_end_forces": {
+                    "FX_I": -float(axial_force),
+                    "FX_J": float(axial_force),
+                },
             }
         )
     return results
@@ -252,12 +298,19 @@ def _element_matrix(
     raw_nodes = element.get("nodes")
     if not isinstance(raw_nodes, list) or len(raw_nodes) != 2:
         unsupported.append(
-            {"kind": "linear_static_element_connectivity_invalid", "element": element_id}
+            {
+                "kind": "linear_static_element_connectivity_invalid",
+                "element": element_id,
+            }
         )
         return None
     node_pair = (str(raw_nodes[0]), str(raw_nodes[1]))
-    if any(node_id not in node_index or node_id not in coordinates for node_id in node_pair):
-        unsupported.append({"kind": "linear_static_element_node_missing", "element": element_id})
+    if any(
+        node_id not in node_index or node_id not in coordinates for node_id in node_pair
+    ):
+        unsupported.append(
+            {"kind": "linear_static_element_node_missing", "element": element_id}
+        )
         return None
     material = materials.get(str(element.get("material", "")))
     section = sections.get(str(element.get("section", "")))
@@ -286,26 +339,32 @@ def _element_matrix(
     )
     try:
         if element_type in {"truss", "axial"}:
-            elastic_modulus = _positive_float(material, ("elastic_modulus", "E_kN_per_m2"))
+            elastic_modulus = _positive_float(
+                material, ("elastic_modulus", "E_kN_per_m2")
+            )
             area = _positive_float(section, ("area", "A_m2"))
             if elastic_modulus is None:
                 raise ValueError("explicit positive elastic_modulus is required")
             if area is None:
                 raise ValueError("explicit positive section area is required")
-            properties: AxialElementProperties | Frame3DProperties = axial_element_properties(
-                element_id=element_id,
-                node_ids=node_pair,
-                start_coordinates=coordinates[node_pair[0]],
-                end_coordinates=coordinates[node_pair[1]],
-                elastic_modulus=elastic_modulus,
-                area=area,
+            properties: AxialElementProperties | Frame3DProperties = (
+                axial_element_properties(
+                    element_id=element_id,
+                    node_ids=node_pair,
+                    start_coordinates=coordinates[node_pair[0]],
+                    end_coordinates=coordinates[node_pair[1]],
+                    elastic_modulus=elastic_modulus,
+                    area=area,
+                )
             )
             translational = axial_global_stiffness(properties)
             element_stiffness = np.zeros((12, 12), dtype=float)
             translation_dofs = (0, 1, 2, 6, 7, 8)
             for row, target_row in enumerate(translation_dofs):
                 for column, target_column in enumerate(translation_dofs):
-                    element_stiffness[target_row, target_column] = translational[row, column]
+                    element_stiffness[target_row, target_column] = translational[
+                        row, column
+                    ]
         else:
             properties = frame3d_properties_from_canonical(
                 element=element,
@@ -379,7 +438,9 @@ def _select_load_case(
         if str(load.get("load_case", load.get("case", ""))) == load_case
     ]
     if not selected:
-        unsupported.append({"kind": "linear_static_load_case_not_found", "load_case": load_case})
+        unsupported.append(
+            {"kind": "linear_static_load_case_not_found", "load_case": load_case}
+        )
     return selected
 
 
@@ -392,7 +453,9 @@ def _load_vector(
     for load in loads:
         node_id = str(load.get("node", load.get("node_id", "")))
         if node_id not in node_index:
-            unsupported.append({"kind": "linear_static_load_node_missing", "node": node_id})
+            unsupported.append(
+                {"kind": "linear_static_load_node_missing", "node": node_id}
+            )
             continue
         components = _six_components(load, unsupported)
         base = DOF_PER_NODE * node_index[node_id]
@@ -435,7 +498,9 @@ def _constrained_dofs(
     for support in supports:
         node_id = str(support.get("node", support.get("node_id", "")))
         if node_id not in node_index:
-            unsupported.append({"kind": "linear_static_support_node_missing", "node": node_id})
+            unsupported.append(
+                {"kind": "linear_static_support_node_missing", "node": node_id}
+            )
             continue
         raw_dofs = support.get("dofs", support.get("restrained_dofs", []))
         if raw_dofs == "all":
@@ -456,7 +521,9 @@ def _constrained_dofs(
                     }
                 )
                 continue
-            constrained.append(DOF_PER_NODE * node_index[node_id] + DOF_LABELS.index(label))
+            constrained.append(
+                DOF_PER_NODE * node_index[node_id] + DOF_LABELS.index(label)
+            )
     return constrained
 
 
