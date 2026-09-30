@@ -502,7 +502,7 @@ def _check_reply(metadata, segments, expected, started_ns, received_ns):
             ).to_dict()
         except (ValueError, TypeError, KeyError, RecursionError) as error:
             raise ValueError("typed phase artifact-error report invalid") from error
-        if restored != report:
+        if _json(restored) != _json(report):
             raise ValueError(
                 "typed phase artifact-error report differs from its public contract"
             )
@@ -624,7 +624,7 @@ def _supervise(phase, parts, expected, started_ns, deadline_ns, grace_ms, lease_
     receiver = _FrameReceiver("output", phase)
     stderr_tail = bytearray()
     stderr_total = 0
-    selector = selectors.DefaultSelector()
+    selector = None
     endpoints = []
     closed = set()
     part_index = part_offset = 0
@@ -640,6 +640,7 @@ def _supervise(phase, parts, expected, started_ns, deadline_ns, grace_ms, lease_
             raise
 
     try:
+        selector = selectors.DefaultSelector()
         check_lease()
         if time.perf_counter_ns() >= deadline_ns:
             raise RCFiberPhaseError(
@@ -825,7 +826,8 @@ def _supervise(phase, parts, expected, started_ns, deadline_ns, grace_ms, lease_
             code + "transport_invalid", "phase transport/launch failed", cleanup=cleanup
         ) from error
     finally:
-        selector.close()
+        if selector is not None:
+            selector.close()
         for stream in endpoints:
             if not stream.closed:
                 stream.close()

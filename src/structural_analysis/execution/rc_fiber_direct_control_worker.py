@@ -301,7 +301,9 @@ def execute_rc_fiber_direct_control_claim(
                                         },
                                     )
                                 )
-                                if artifact_error.to_dict() != report:
+                                if rc_fiber_job_canonical_bytes(
+                                    artifact_error.to_dict()
+                                ) != rc_fiber_job_canonical_bytes(report):
                                     raise ValueError(
                                         "child artifact-error reconstruction changed"
                                     )

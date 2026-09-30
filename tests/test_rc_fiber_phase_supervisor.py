@@ -713,6 +713,8 @@ def test_successful_reply_cannot_hide_group_cleanup_error(tmp_path, monkeypatch)
     (
         "missing_typed_report",
         "typed_report_wrong_claims",
+        "typed_report_integer_contract",
+        "typed_report_integer_claim",
         "report_on_ordinary_exception",
     ),
 )
@@ -725,6 +727,10 @@ def test_structured_exception_contract_corruption_rejected_before_measured_reply
     ).to_dict()
     if kind == "typed_report_wrong_claims":
         report["claims"]["release_approved"] = True
+    elif kind == "typed_report_integer_contract":
+        report["contract_pass"] = 0
+    elif kind == "typed_report_integer_claim":
+        report["claims"]["release_approved"] = 0
     body = _reply_code(
         error_type="ValueError"
         if kind == "report_on_ordinary_exception"
@@ -820,6 +826,26 @@ def test_actual_competing_reaper_echild_refuses_numeric_group_signals(
     assert captured.value.cleanup["direct_child_reaped"] is False
     assert signals == [] and len(reaped) == 1
     _assert_reaped(reaped[0]["pid"])
+
+
+@pytest.mark.parametrize("phase", ("analysis", "verification"))
+def test_selector_creation_failure_keeps_phase_code_and_never_launches(
+    monkeypatch, phase
+):
+    launches = []
+
+    def fail_selector():
+        raise OSError(errno.EMFILE, "synthetic selector descriptor exhaustion")
+
+    monkeypatch.setattr(supervisor.selectors, "DefaultSelector", fail_selector)
+    monkeypatch.setattr(
+        supervisor.subprocess, "Popen", lambda *args, **kwargs: launches.append(args)
+    )
+    with pytest.raises(supervisor.RCFiberPhaseError) as captured:
+        _run(RCFiberPhasePolicy(5000, 5000, 100), phase=phase)
+    assert captured.value.code == f"rc_fiber_worker_{phase}_transport_invalid"
+    assert captured.value.cleanup == {}
+    assert launches == []
 
 
 @pytest.mark.parametrize("stage", ("set_blocking", "selector_registration"))

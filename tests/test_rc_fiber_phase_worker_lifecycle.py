@@ -423,7 +423,7 @@ def test_nondefault_sigchld_rejected_before_reservation(tmp_path, monkeypatch, h
 
 
 @pytest.mark.parametrize("phase,ordinal", [("analysis", 3), ("verification", 4)])
-@pytest.mark.parametrize("raised", [False, True])
+@pytest.mark.parametrize("raised", [False, True, "integer_contract", "integer_claim"])
 def test_malformed_business_reply_stays_unknown_and_phase_specific(
     isolated_prefix, tmp_path, monkeypatch, phase, ordinal, raised
 ):
@@ -435,6 +435,17 @@ def test_malformed_business_reply_stays_unknown_and_phase_specific(
             return original(**kwargs)
         # Deliberately bypass validated IPC to test the worker reconstruction
         # boundary. This forged reply is not a real child measurement.
+        artifact_error_bytes = b"{}" if raised else None
+        if type(raised) is str:
+            report = worker.api.BoundedRCFiberDirectControlArtifactError(
+                "synthetic export failure",
+                {"model": {}, "request": {}, "status": "ready", "metrics": {}},
+            ).to_dict()
+            if raised == "integer_contract":
+                report["contract_pass"] = 0
+            else:
+                report["claims"]["release_approved"] = 0
+            artifact_error_bytes = supervisor._json(report)
         return supervisor.RCFiberPhaseReply(
             status="raised" if raised else "returned",
             _timing_bytes=b'{"wall_ns":1,"process_cpu_ns":1}',
@@ -443,7 +454,7 @@ def test_malformed_business_reply_stays_unknown_and_phase_specific(
             if phase == "verification" and not raised
             else None,
             error_type="BoundedRCFiberDirectControlArtifactError" if raised else None,
-            _artifact_error_bytes=b"{}" if raised else None,
+            _artifact_error_bytes=artifact_error_bytes,
             native_checkpoint=None,
             _supervisor_bytes=b"{}",
         )
