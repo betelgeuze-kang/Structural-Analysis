@@ -40,7 +40,8 @@ def test_exact_reviewed_action_pins_are_retained() -> None:
 
     assert sources["repository_python"].count(checkout) == 2
     assert sources["repository_python"].count(setup_python) == 2
-    assert upload not in sources["repository_python"]
+    # Full Python shards retain diagnostics with the same reviewed upload pin.
+    assert sources["repository_python"].count(upload) == 1
 
     assert sources["legacy_evidence"].count(checkout) == 2
     assert sources["legacy_evidence"].count(setup_python) == 2
