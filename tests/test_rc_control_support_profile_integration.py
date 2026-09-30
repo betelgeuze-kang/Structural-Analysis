@@ -128,8 +128,11 @@ def _tolerances():
     )
 
 
-def test_pin_roller_durable_reopen_reprice_rescreen_preserves_full_path(tmp_path):
-    model, request, length = _profile("pin_roller", preload=False)
+@pytest.mark.parametrize("preload", [False, True])
+def test_pin_roller_durable_reopen_reprice_rescreen_preserves_full_path(
+    tmp_path, preload
+):
+    model, request, length = _profile("pin_roller", preload=preload)
     original_model = model.canonical_payload()
     options = _options()
     store = tmp_path / "store"
@@ -147,6 +150,9 @@ def test_pin_roller_durable_reopen_reprice_rescreen_preserves_full_path(tmp_path
     assert not prefix["row"]["full_reference_verification_pass"]
     assert "result" not in prefix["row"]["artifacts"]
     assert prefix["new_work"]["api_invocation_count"] == 2
+    assert prefix["new_work"]["known_counters"]["attempted_step_count"] == (
+        4 if preload else 2
+    )
     prefix_service = prefix_session._store(prefix["physics_key"])
     saved_bytes = prefix_service.read_checkpoint(
         prefix["job"]["job_id"], tenant_id="lab", authorization_token=TENANT
@@ -160,10 +166,27 @@ def test_pin_roller_durable_reopen_reprice_rescreen_preserves_full_path(tmp_path
     assert final["job"]["status"] == "succeeded"
     assert final["row"]["full_reference_verification_pass"] is True
     assert final["new_work"]["api_invocation_count"] == 2
+    assert final["new_work"]["known_counters"]["attempted_step_count"] == (
+        6 if preload else 4
+    )
     assert final["original_work_not_recharged"]["api_invocation_count"] == 2
     assert not final["historical_unknown_work"]
     _assert_quantity(final["row"]["quantities"], length)
     result = json.loads(_original(final, final_dir))
+    assert result["schema_version"] == (
+        "bounded-rc-fiber-job-result.v2"
+        if preload
+        else "bounded-rc-fiber-job-result.v1"
+    )
+    if preload:
+        assert (
+            result["api_result"]["request"]["constant_nodal_loads"]
+            == (request.to_dict()["constant_nodal_loads"])
+        )
+        assert result["api_result"]["preload_response"]["epoch"] == 1
+    assert [r["epoch"] for r in result["api_result"]["response_history"]] == (
+        [2, 3] if preload else [1, 2]
+    )
     assert result["receipts"][0] == saved["receipts"][0]
     assert (
         result["receipts"][1]["api_request"]["restart_input_sha256"]
@@ -179,6 +202,11 @@ def test_pin_roller_durable_reopen_reprice_rescreen_preserves_full_path(tmp_path
     )
     _assert_direct_original(fresh, fresh_dir, "pin_roller", request, length)
     fresh_payload = json.loads(_original(fresh, fresh_dir))
+    if preload:
+        assert (
+            result["api_result"]["preload_response"]
+            == (fresh_payload["preload_response"])
+        )
     assert result["api_result"]["response_history"] == fresh_payload["response_history"]
     assert (
         result["api_result"]["terminal_response"] == fresh_payload["terminal_response"]
@@ -299,7 +327,7 @@ def test_refined_cost_search_verifies_each_profile_before_finite_pool_selection(
             _assert_direct_original(evaluation, root, profile, request, length, width)
 
 
-@pytest.mark.parametrize("profile", ["pin_roller", "two_fixed"])
+@pytest.mark.parametrize("profile", ["two_fixed"])
 def test_unsupported_durable_loading_profiles_reject_before_job_output(
     tmp_path, profile
 ):

@@ -33,7 +33,11 @@ API combination is available through the durable transport.
 The regression file `tests/test_rc_control_support_profile_integration.py`
 exercises authored small models through actual analysis, fresh reference checks,
 reopening and price/screen reevaluation, as well as direct price/refinement
-paths. Reused original results carry zero new numerical work and do not receive
+paths. Durable pin/roller cases with and without preload retain identical saved
+originals during repricing and stricter screening. The loaded case preserves the
+preload response and target epochs against a fresh full path; both retain physical
+member quantities, the common synthetic-price basis and charged prefix-replay work.
+Reused original results carry zero new numerical work and do not receive
 new reference-verification credit. The existing full persistence, failure,
 authorization, workflow, pin/roller and Workbench suites remain in the validation
 scope. The new file is registered in the existing CPU integration job for pytest,
