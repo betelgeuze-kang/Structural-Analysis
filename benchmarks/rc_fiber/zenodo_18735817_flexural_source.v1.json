@@ -1,0 +1,112 @@
+{
+  "schema_version": "rc-flexural-public-source-qualification.v1",
+  "source_id": "zenodo-18735817-flexural-specimen",
+  "qualification_date": "2026-09-28",
+  "source_status": "original_measurement_source_qualified",
+  "specimen_label_in_source": "Flexural Specimen",
+  "source_role": "source_only_retrospective_lead",
+  "training_row_count": 0,
+  "measured_rows_ingested": false,
+  "comparison_executed": false,
+  "physical_validation_claim": false,
+  "response_exposure": {
+    "published_history_and_peak_inspected": true,
+    "blind_or_independent_locked_credit": false,
+    "reason": "The published response and peak were inspected before a parameter, metric, or prediction freeze."
+  },
+  "dataset": {
+    "title": "CREATE Year1 Dataset for Combining Structural and Cathodic Protection with Titanium Alloy Bars",
+    "doi": "10.5281/zenodo.18735817",
+    "record_url": "https://zenodo.org/records/18735817",
+    "metadata_url": "https://zenodo.org/api/records/18735817",
+    "creators": ["O. Burkan Isgor", "Amanda Slawinski", "Christopher Higgins"],
+    "license_id_from_dataset_metadata": "cc-by-4.0",
+    "license_scope": "Zenodo dataset record, not inferred from article access",
+    "attribution_required": true
+  },
+  "primary_report": {
+    "title": "Dual-Function Near-Surface Mounted Titanium Alloy Bars for Structural Strengthening and Cathodic Protection of Reinforced Concrete Infrastructure",
+    "url": "https://rosap.ntl.bts.gov/view/dot/92492/dot_92492_DS1.pdf",
+    "drawing_file_url": "https://zenodo.org/records/18735817/files/All%20Drawings%20TiAB%20Report%20Year1%20DMP.pdf?download=1",
+    "relevant_locations": [
+      "Table 1: steel and titanium properties",
+      "Figure 7: flexural beam span, cross section and bar layout",
+      "Experimental Methods / Large-Scale Beams: concrete and reinforcement",
+      "Structural Performance / Instrumentation and Testing Protocols",
+      "Figure 28 and Flexural Strength and Behavior: measured response and failure",
+      "Data Availability Statement: links structural data to Zenodo archive"
+    ]
+  },
+  "original_measurement_file": {
+    "name": "Overall Flexural specimen.csv",
+    "url": "https://zenodo.org/records/18735817/files/Overall%20Flexural%20specimen.csv?download=1",
+    "byte_count": 893173,
+    "sha256": "2b4564e6623ac0c693e72340eff618822ca70be0365b0d47a5d8b337c996a509",
+    "zenodo_md5": "13c28af01bc9075fa87547ec242d4e07",
+    "data_row_count": 76114,
+    "all_rows_have_two_finite_numeric_values": true,
+    "column_order": ["Centerline Displacement (in)", "Applied Load (kips)"],
+    "order_semantics": "Preserve CSV row order as the observed load-displacement path; do not sort by displacement or load.",
+    "time_column_present": false,
+    "sample_time_reconstruction_allowed": false,
+    "raw_acquisition_file_provenance": "not established; this is the investigators' published response CSV, and no raw DAQ timestamp file was identified",
+    "observed_peak": {
+      "load_kip": 178.0,
+      "centerline_displacement_in": 1.59,
+      "first_matching_data_row_1_based": 70315
+    },
+    "measurement_uncertainty": "not reported for the CSV channels"
+  },
+  "specimen_observations": {
+    "intended_and_reported_failure_mode": "flexure-dominated, ductile compression-zone crushing",
+    "overall_length_in_from_figure_7": 160,
+    "support_center_span_in_from_figure_7": 148,
+    "load_point_spacing_in_from_figure_7": 8,
+    "section_width_in_from_figure_7": 10,
+    "section_depth_in_from_figure_7": 24,
+    "reinforcement_from_figure_7": [
+      "two continuous top #9 Grade 60 steel bars",
+      "four continuous bottom #9 Grade 60 steel bars in two rows",
+      "two continuous near-surface #5 titanium alloy bars at lower side grooves",
+      "#4 Grade 40 stirrups: drawing shows 6 in and 4 in on-center regions"
+    ],
+    "material_properties_from_report": {
+      "concrete_compressive_strength_at_test_mpa": 26.5,
+      "steel_9_actual_yield_mpa": 476,
+      "steel_4_actual_yield_mpa": 359,
+      "titanium_5_actual_yield_mpa": 984,
+      "steel_nominal_elastic_modulus_gpa": 200,
+      "titanium_5_nominal_elastic_modulus_gpa": 107,
+      "grout_28_day_compressive_strength_mpa": 59.3
+    },
+    "loading": "four-point bending under actuator displacement control; approximately 25 kip loading increments with approximately 5 kip partial unloads",
+    "channels": "actuator load cell and midspan/support displacement transducers; CSV identifies centerline displacement and applied load",
+    "reported_sampling_rate_hz": 100,
+    "observed_damage": "limited diagonal cracking; most instrumented stirrups remained elastic; near peak, spalling and localized TiAB debonding appeared"
+  },
+  "crosswalk_and_model_boundary": {
+    "geometry_values_are_manual_transcriptions": true,
+    "si_model_file_created": false,
+    "current_public_compiler_compatible": false,
+    "model_blockers": [
+      "The public RC compiler accepts a serial chain with one fully restrained endpoint, while this specimen is simply supported with two four-point load locations.",
+      "The public rectangular RC section has one steel material and lumped top/bottom bar areas; this beam has separate embedded steel and near-surface titanium bars with conductive grout.",
+      "The Euler-Bernoulli fiber element has no shear deformation or bond-slip/grout-interface law; the report observes diagonal cracking and late localized debonding.",
+      "Concrete tensile law, support compliance, centerline-displacement reference, and CSV sample-time mapping remain unresolved."
+    ],
+    "post_inspection_predebonding_window": {
+      "status": "exploratory_proposal_no_comparison_authority",
+      "rule": "Stop before the first original CSV data row with applied load >= 160 kip; retain original row order and partial unloads.",
+      "first_excluded_data_row_1_based": 62105,
+      "rationale": "The report attributes abrupt steel/TiAB strain changes to spalling and localized debonding at about 2 kip below the 178 kip ultimate load. The 160 kip ceiling was proposed after source inspection; it is not an independent or blind threshold and does not prove earlier bond or shear effects negligible.",
+      "further_condition": "A retrospective development comparison would first need resolved topology, distinct materials, support motion and source-channel semantics with fixed parameters and metrics. Independent blind credit requires a separate response-unseen specimen and prediction lock."
+    }
+  },
+  "admission_gates": {
+    "source_rights_and_original_bytes": "qualified",
+    "specimen_to_supported_physics": "blocked",
+    "independent_held_out_comparison": "not_run",
+    "measured_evaluation_rows": "not_admitted",
+    "measured_training_rows": "not_admitted"
+  }
+}

@@ -1,0 +1,94 @@
+# He 2023 RC reference: numerical experimental asset, admission held
+
+The conventional `Ref` beam in He et al., *Ultra-thin Strain Hardening Cementitious Composite (SHCC) layer in reinforced concrete cover zone for crack width control*, Engineering Structures 292 (2023), 116584, supplies a promising numerical load-deflection history for the RC flexure roadmap. This source-only audit was performed on 2026-09-29. It does not reuse the Torres-Acosta V01/V02 controls or admit the hybrid SHCC specimens.
+
+| Candidate | Verified experimental asset | Rights and physical screen | Admission recommendation | Next concrete action |
+| --- | --- | --- | --- | --- |
+| He 2023 conventional `Ref` beam; [Zenodo 10082010](https://zenodo.org/records/10082010), DOI `10.5281/zenodo.10082010`, displayed version v1 | **One specimen**, with **2,632 ordered LVDT deflection/load pairs**, `Data summary.xlsx`, `Ref beam!B5:C2636`; explicit mm/kN units and support-referenced midpoint LVDT description | Dataset and paper CC BY 4.0; 1,500 mm support span; four-point loading; reported flexural cracking followed by compression-zone concrete failure | **HOLD** for training and locked physical validation. Count: experimental assets **1 specimen / 2,632 points**; newly admitted training **0**; locked validation **0**; solver runs **0** | Resolve the load-channel total-versus-per-nose convention, concrete strength discrepancy and batch/coupon linkage, and cover/bar-coordinate datum in a source crosswalk before constructing a solver case |
+
+## Primary sources and original-file identity
+
+- [Version record and original workbook](https://zenodo.org/records/10082010); [record API](https://zenodo.org/api/records/10082010). The API names Shan He (ORCID `0000-0003-4175-2877`) as creator, declares `cc-by-4.0`, and links the paper DOI as `isPublishedIn`. The record is an open dataset, not a numerical-model output record.
+- [Published paper DOI](https://doi.org/10.1016/j.engstruct.2023.116584); [TU Delft publication record](https://research.tudelft.nl/en/publications/ultra-thin-strain-hardening-cementitious-composite-shcc-layer-in-/); [university-hosted final PDF](https://pure.tudelft.nl/ws/portalfiles/portal/155973438/1_s2.0_S0141029623009999_main.pdf). The PDF includes one repository cover page; printed page numbers below exclude that cover. The final paper's first page declares CC BY 4.0.
+
+The source-audit downloads were kept outside this repository. No workbook values, original workbook/PDF, or training rows were added to it.
+
+| Original file | Bytes | MD5 | SHA-256 |
+| --- | ---: | --- | --- |
+| `Data summary.xlsx` | 276,386 | `738cf9caa83da2f6f41f1a6c714f4c14` | `96503244fcb5bdebd461a572e8252ce3f39d8b6f9888829fe877e2efcf09c89a` |
+| One retrieval of the TU Delft final PDF, including repository cover | 25,742,495 | `fb2b7e63d6f6313ca1e3c79664f144e3` | `f6cda821796fd755b5518d92ad996fc72736f946dd3b8242ffa256d8944912e2` |
+
+The workbook size and MD5 match the live Zenodo API's `files` entry; a fresh read of that official file also matched the SHA-256 above. The PDF hashes identify **one retrieval**, not a publisher-supplied checksum or a stable byte-level version pin. On 2026-09-29, repeat GETs from the same official TU Delft PDF URL returned the same 25,742,495-byte length but different MD5 and SHA-256 values. Two responses had SHA-256 `09705169e452299c3cc5c90bc042cc60b024ff7273c0d10c9d559c8acf284f7e` and `288141ffa82c1c2c8545463596941b475f283af41ee26f1f8678d209b2f44548`. Comparing those responses found 80 differing bytes in the final 25,249 bytes, including generated `ArialUnicodeMS` font subset names and PDF trailer identifiers. A future hash mismatch at this URL alone therefore does not establish a different article or experiment. Use the paper DOI and TU Delft publication/PDF links above as locators, and retain each observed PDF hash only with its own retrieval. This byte check does not resolve any experimental input convention.
+
+The [CC BY 4.0 terms](https://creativecommons.org/licenses/by/4.0/) support reuse and adaptation with attribution, license linkage and indication of changes. Any later derived measurement asset must preserve creator, versioned DOI, original workbook hash, sheet/cell coordinates, measurement role and transformation provenance. This rights screen does not resolve physical-input gaps or constitute dataset admission.
+
+## Offline source-only extraction, 2026-09-29
+
+[`extract_he_2023_ref_measurements.py`](../../scripts/extract_he_2023_ref_measurements.py)
+now checks the versioned Zenodo record, creator, CC BY 4.0 metadata, article
+link, original workbook length/MD5/SHA-256, worksheet binding, channel labels,
+units, formulas, and complete `B5:C2636` pair roster before writing a derived
+file. It preserves worksheet row order and each numeric cell's original Excel
+XML decimal text; it does not zero-shift, sort, interpolate or select solver
+targets. The original workbook and API record were fetched on 2026-09-29 into
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/he-2023-reference-original-20260929`.
+The offline derived packet is
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/he-2023-reference-source-only-rows-20260929`.
+Its `measurements.jsonl` has 2,632 rows and SHA-256
+`f7dc12eb93be7bb22812e502cf6fb1802f9105c657ab2032c8cc1ce4e7673126`;
+`source-receipt.json` has SHA-256
+`86b92cb7309003c8fc5b7870dc8423bcb49e95d6081962af3017002e12d0cdac`.
+The downloaded API response has SHA-256
+`707e088b1e1e23633343dec6272ed6dfadab7d437b8074fa4541c765c7f90c94`;
+this is one retrieval receipt, not a claim that dynamic API bytes are immutable.
+
+An independent `openpyxl` read of the original workbook matched all 2,632
+derived row numbers and both numeric values. The peak remains worksheet row
+2153, and 74 adjacent deflection decreases remain present. Of those, 59 are
+before the peak and 15 after it; 1,095 pre-peak adjacent load readings also
+decrease, and one recorded load is slightly negative. These are retained
+measurement observations, not deleted as noise. Six focused parser
+tests pass, including rejection of missing pairs, formulas, numeric-looking
+text, extra unreviewed rows, wrong license, and wrong workbook bytes. No
+original workbook or measured row was added to Git. The receipt explicitly
+records **one experimental specimen, zero admitted training rows, zero locked
+evaluation rows, and zero fixed-parameter solver comparisons**.
+
+This source-only extraction supplies a stable measurement input for later
+crosswalk work. It does not resolve total actuator versus per-nose load,
+specimen-specific concrete/steel properties, bar/cover datum, or whether shear,
+bond, and support motion materially affect the measured LVDT response. The
+current direct-control request also cannot accept the entire noisy 2,632-row
+history as one path: it defaults to at most 255 displacement targets and zero
+reversals. Any reduced comparison window, row-selection/transformation rule,
+force convention, uncertainty metric, and locked independent specimen must be
+specified before a solver result is compared with this curve. This one specimen
+cannot simultaneously supply tuning labels and an independent generalization
+test.
+
+## Numerical channel and specimen correspondence
+
+The workbook was inspected read-only without export, recalculation or editing. `Ref beam!B2` labels the block `LVDT results`; `B3:C3` are `Deflection` and `Load`; `B4:C4` are `mm` and `kN`. `B5:C2636` contains 2,632 finite numeric pairs, with no formulas, blank pair, or one-sided missing value in that range. The first pair is `(0.003476 mm, 0 kN)`; the last is approximately `(28.981449 mm, 48.011187 kN)`. These are **successive observations of one experiment**, not independent cases and not evidence of 2,632 specimens.
+
+The maximum recorded load is `58.943365 kN` at `23.086159 mm` in row 2153, consistent with the paper's rounded `58.9 kN / 23.1 mm` Ref maximum in Fig. 6 (printed p. 6). This supports the workbook-to-figure correspondence only; it is not a solver prediction or calibration result. There are 74 adjacent decreases in recorded deflection. Preserve source row order and the original nonzero initial deflection; do not sort, deduplicate, zero-shift, impose monotonicity, interpolate or infer time from the row count without an explicit transformation policy.
+
+The front/back DIC blocks in the same sheet (`E:N`) include picture indices, deflection/load, crack counts and crack widths. They are separate processed observations of this same specimen and must not be treated as extra load-deflection experiments. The other three sheets describe smooth, profiled and Vaseline-treated hybrid beams. Their SHCC/interface mechanisms are outside this conventional-reference intake. This workbook has four experimental-beam sheets and does not provide the lattice simulation histories discussed in the article.
+
+## Geometry, measurement and mechanism
+
+The paper's Section 2.1 and Fig. 2 (printed pp. 2-3; drawing visually checked) identify one ordinary RC `Ref` specimen among four beams. It is `1900 x 150 x 200 mm`, with three bottom and two top ribbed bars of nominal diameter 8 mm. Stirrup diameter is 8 mm at 150 mm spacing in the shear spans. The dimension chain is `200 + 500 + 500 + 500 + 200 mm`: support stations are interpreted as 200 and 1700 mm from the left end, and loading stations as 700 and 1200 mm. Thus support span is 1500 mm with two 200 mm end overhangs and a 500 mm constant-moment region. These station coordinates are derived from the dimensioned drawing; horizontal support restraint and friction are not separately specified by the two support symbols.
+
+Section 2.3 (printed p. 4) states four-point bending under displacement control at `0.01 mm/s`, with an LVDT measuring relative vertical midpoint deflection **with reference to the supports**. Coupled to the workbook's `LVDT results` label, this supports a specimen-response channel rather than actuator travel. The actuator control rate must not become the LVDT history's sampling interval. Calibration uncertainty, support-frame details, and a row-to-time mapping remain unreported in the inspected workbook.
+
+Section 3.2 and Fig. 6 (printed pp. 5-6) report reinforcement yielding, flexural cracking followed by crack opening, and final concrete failure in the compression zone for all four tested beams. This is stronger mechanism evidence than a design intention alone. Nevertheless, the terminal recorded load remains about 48 kN; the numerical history must not be extended to zero or called a complete collapse trace.
+
+## Unresolved inputs and solver boundary
+
+1. **Force convention.** The workbook says `Load [kN]`; the paper drawing shows two loading noses. The inspected text and workbook do not explicitly state whether this channel is total actuator force or force at each nose. The total-force interpretation is plausible from the apparatus, but it is not assigned to the solver here. No factor-of-two conversion is performed.
+2. **Concrete measurement and batch linkage.** Section 2.2 says the Ref beam was cast with the second, concrete-casting phase and describes 150 mm cube testing. Section 3.1 (printed p. 4) gives average concrete compressive strength `47.5 MPa`, while Table 3 (printed p. 6; visually checked) says `47.9 +/- 2.0 MPa`. Section 4.2 (printed p. 11) then uses simulated concrete strength `47.5 MPa`. Preserve the conflicting values and the distinction between measured program statistics and lattice input. There are no cube records or specimen-specific concrete properties in this workbook. Do not silently select one number, convert cube strength to a cylinder/fiber-law value, or label it a specimen measurement.
+3. **Measured steel and elastic properties.** Section 4.2 gives B500-steel simulation strengths `500/550 MPa` and an assumed ultimate strain of `4.5%`; it states concrete tensile strength and elastic modulus were not directly measured but estimated from Eurocode expressions. These are model/nominal values, not measured steel coupons or direct concrete-property measurements. They cannot be promoted to experimental labels.
+4. **Cover datum.** Section 2.1 calls the cover `31 mm` clear cover, while Fig. 2's 31 mm dimension appears to terminate at the longitudinal-bar line/centre. This drawing interpretation is flagged for confirmation. Do not resolve it by assumption when assigning fiber coordinates, effective depth or bar lever arms.
+
+The repository's [corotational fiber beam](../../src/structural_analysis/elements/stateful_corotational_fiber_beam2d.py) uses the axial-curvature section integrator and finite-chord kinematics. The current Euler-Bernoulli beam idealization does not establish shear deformation/failure, bond-slip, local bearing or SHCC-concrete interface behavior. The source paper's lattice model explicitly includes rebar-concrete interface behavior (Section 4.2), which must remain separate from the current fiber model. Reported flexure dominance makes Ref a useful candidate but does not prove that omitted effects are negligible over its whole curve.
+
+The next source-only action is a channel/material/geometry crosswalk grounded in original test setup or data-acquisition documentation and any published correction. If those records are unavailable, a clearly identified author clarification would be required before dependent work; no message has been sent. After the listed inputs are resolved, a separate decision can authorize a quarantined parser and define an admissible load range, uncertainty and held-out specimen split. No solve, fit, training admission or locked physical-validation comparison is performed by this audit.
