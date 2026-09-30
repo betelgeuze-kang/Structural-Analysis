@@ -64,6 +64,16 @@ export function extractStableDiagnosticCode(value) {
     : null
 }
 
+export function extractNativeFrameHttpFailure(value) {
+  const match = String(value ?? '').match(
+    /^native_workstation_http_error:([45][0-9]{2}):(workstation_job_not_found|workstation_run_failed|workstation_submit_failed|workstation_cancel_failed|workstation_view_serialize_failed|unavailable)$/,
+  )
+  return {
+    http_status: match ? Number(match[1]) : null,
+    http_error_code: match && match[2] !== 'unavailable' ? match[2] : null,
+  }
+}
+
 export function classifyNativeFramePanelState(status, { timedOut = false } = {}) {
   if (status === 'succeeded' || status === 'failed' || status === 'cancelled') return status
   return timedOut ? 'timeout' : 'pending'
@@ -124,6 +134,7 @@ export function buildBrowserFailureDiagnostic({
       ].includes(panel?.status) ? panel.status : 'unavailable',
       job_id: jobIdPattern.test(submittedJobId ?? '') ? submittedJobId : null,
       error_code: extractStableDiagnosticCode(panel?.errorText),
+      ...extractNativeFrameHttpFailure(panel?.errorText),
       job_text_bytes: diagnosticByteLength(panel?.jobText),
       error_text_bytes: diagnosticByteLength(panel?.errorText),
     },
