@@ -208,8 +208,28 @@ jobs:
         run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-prototype-dom-contract.mjs"
 
       - name: Install Playwright browser
+        id: playwright_install
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/playwright/cli.js" install --with-deps chromium
+        shell: bash
+        timeout-minutes: 17
+        run: |
+          /usr/bin/env -i PATH=/usr/bin:/bin \
+            HOME="$RUNNER_TEMP/frontend-web-repository-home" \
+            TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+            GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" RUNNER_OS="$RUNNER_OS" \
+            /bin/bash "$GITHUB_WORKSPACE/scripts/install-playwright-chromium-ci.sh" \
+            "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/playwright/cli.js" \
+            "$RUNNER_TEMP/frontend-web-repository-home" "$RUNNER_TEMP/frontend-web-repository-tmp" \
+            "$RUNNER_TEMP/frontend-browser-install/install.log"
+
+      - name: Preserve browser install diagnostics
+        if: failure() && steps.playwright_install.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-install-failure-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/frontend-browser-install/install.log
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Workbench prototype browser smoke
         env: *trusted-node-env
