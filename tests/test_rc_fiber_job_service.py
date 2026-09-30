@@ -890,3 +890,103 @@ def test_posted_complete_envelope_limit_is_authenticated_and_operation_bound(
         s, "worker_result_byte_limit", lambda *args, **kwargs: 64 * 1024 * 1024
     )
     assert app.handle("POST", path, headers=headers, body=raw).status == 413
+
+
+def request_blob_inventory(root):
+    return {
+        str(path.relative_to(root)): path.read_bytes()
+        for path in sorted((root / "blobs" / "sha256").rglob("*"))
+        if path.is_file()
+    }
+
+
+@pytest.mark.parametrize("reopen", [False, True])
+def test_http_conflicting_submission_does_not_store_unreferenced_requests(
+    tmp_path, reopen
+):
+    s = service(tmp_path)
+    payload = request()
+    j = submit(s, payload)
+    original_blobs = request_blob_inventory(tmp_path)
+    if reopen:
+        s = service(tmp_path)
+    transport = http.DurableJobHttpApi(s)
+    headers = {
+        "Authorization": "Bearer " + TENANT,
+        "X-Structural-Tenant": "a",
+        "Idempotency-Key": "case",
+    }
+    for index in range(3):
+        changed = deepcopy(payload)
+        changed["case_id"] = "rejected-request-" + str(index)
+        response = transport.handle(
+            "POST", "/v1/jobs", headers=headers, body=canonical(changed)
+        )
+        assert response.status == 409
+        assert json.loads(response.body)["error"]["code"] == "idempotency_conflict"
+        assert request_blob_inventory(tmp_path) == original_blobs
+    assert s.get_job(j.job_id, **tenant()) == j
+    assert s.read_request(j.job_id, **tenant()) == canonical(payload)
+    report = s.validate_integrity(j.job_id, **tenant())
+    assert report["contract_pass"]
+    assert report["event_count"] == 1
+
+
+def test_concurrent_different_requests_publish_only_the_bound_request(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    barrier = Barrier(2, timeout=10)
+    services = [service(tmp_path), service(tmp_path)]
+
+    def competing_submit(index):
+        payload = request()
+        payload["case_id"] = "competing-request-" + str(index)
+        barrier.wait()
+        try:
+            return submit(services[index], payload), canonical(payload)
+        except JobServiceError as exc:
+            return exc.code, canonical(payload)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(competing_submit, range(2)))
+    winners = [(job, raw) for job, raw in results if type(job) is not str]
+    assert len(winners) == 1
+    assert [job for job, _ in results if type(job) is str] == ["idempotency_conflict"]
+    j, original = winners[0]
+    reopened = service(tmp_path)
+    assert list(request_blob_inventory(tmp_path).values()) == [original]
+    assert reopened.read_request(j.job_id, **tenant()) == original
+    report = reopened.validate_integrity(j.job_id, **tenant())
+    assert report["contract_pass"]
+    assert report["event_count"] == 1
+    with sqlite3.connect(tmp_path / "jobs.sqlite3") as connection:
+        assert connection.execute("SELECT count(*) FROM jobs").fetchone()[0] == 1
+
+
+@pytest.mark.parametrize("reopen", [False, True])
+@pytest.mark.parametrize("mutation", ["missing", "corrupt"])
+def test_identical_submission_retains_request_blob_recovery_and_integrity(
+    tmp_path, reopen, mutation
+):
+    s = service(tmp_path)
+    payload = request()
+    original = canonical(payload)
+    j = submit(s, payload)
+    path = s._blob_path(sha(original))
+    if mutation == "missing":
+        path.unlink()
+    else:
+        path.write_bytes(b"corrupted synthetic request")
+    if reopen:
+        s = service(tmp_path)
+    if mutation == "corrupt":
+        with pytest.raises(JobServiceError, match="artifact_integrity_failed"):
+            submit(s, deepcopy(payload))
+        assert path.read_bytes() == b"corrupted synthetic request"
+    else:
+        assert submit(s, deepcopy(payload)) == j
+        assert path.read_bytes() == original
+        assert list(request_blob_inventory(tmp_path).values()) == [original]
+        assert s.validate_integrity(j.job_id, **tenant())["contract_pass"]
+    assert s.get_job(j.job_id, **tenant()) == j

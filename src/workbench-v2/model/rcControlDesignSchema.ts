@@ -10,6 +10,7 @@ const EXCLUDED = ['transverse_reinforcement', 'laps_anchorage_hooks', 'waste', '
 const QUANTITIES = ['gross_concrete_volume_m3', 'longitudinal_rebar_volume_m3', 'longitudinal_rebar_mass_kg']
 const SINGLE_FIXED_PROFILE = 'planar_serial_cantilever_explicit_rectangular_rc.v1'
 const TWO_FIXED_PROFILE = 'planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1'
+const PIN_ROLLER_PROFILE = 'planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1'
 const FIXED_DOFS = ['RZ', 'UX', 'UY']
 const ROLES = ['cost_skip', 'model', 'result', 'checkpoint', 'verification', 'analysis_started', 'analysis_outcome', 'verification_started', 'verification_outcome']
 export const artifactMaximum = (role: string): number => role === 'result' ? 64 * 1024 ** 2 : role === 'checkpoint' ? 128 * 1024 ** 2 : 16 * 1024 ** 2
@@ -125,6 +126,60 @@ function twoFixedSupportIds(model: RcObject, constantLoads?: RcObject[]): string
   return supports
 }
 
+/** Preserve the direct API profile in section, layout and prefix reviews. */
+export function rcStudyCompilerProfile(config: RcObject): string {
+  return config.schema_version === 'bounded-rc-fiber-direct-control-request.v4' ? PIN_ROLLER_PROFILE
+    : config.schema_version === 'bounded-rc-fiber-direct-control-request.v3' ? TWO_FIXED_PROFILE : SINGLE_FIXED_PROFILE
+}
+
+/** The public horizontal beam permits overhangs and either support ordering. */
+export function validateRcPinRollerStudyModel(model: RcObject, config: RcObject): void {
+  check(model.schema_version === 'structural-analysis-canonical-model.v1'
+    && Array.isArray(model.nodes) && model.nodes.length >= 2 && model.nodes.length <= 16
+    && Array.isArray(model.elements) && model.elements.length === model.nodes.length - 1
+    && Array.isArray(model.supports) && model.supports.length === 2, 'study_pin_roller_topology_invalid')
+  const ids = model.nodes.map((node: RcObject) => node.id)
+  check(ids.every((id: unknown) => typeof id === 'string' && id.length > 0)
+    && new Set(ids).size === ids.length, 'study_pin_roller_nodes_invalid')
+  check(model.nodes.every((node: RcObject) => same(Object.keys(node).sort(), ['coordinates', 'id'])
+    && Array.isArray(node.coordinates) && node.coordinates.length === 3 && node.coordinates.every(num)
+    && node.coordinates[2] === 0), 'study_pin_roller_geometry_invalid')
+  const xs = model.nodes.map((node: RcObject) => node.coordinates[0])
+  check(new Set(xs).size === ids.length && new Set(model.nodes.map((node: RcObject) => node.coordinates[1])).size === 1,
+    'study_pin_roller_geometry_invalid')
+  const adjacent = new Map<string, Set<string>>(ids.map((id: string) => [id, new Set<string>()]))
+  for (const member of model.elements) {
+    check(member.type === 'stateful_rc_fiber_frame2d' && Array.isArray(member.nodes) && member.nodes.length === 2
+      && adjacent.has(member.nodes[0]) && adjacent.has(member.nodes[1]) && member.nodes[0] !== member.nodes[1]
+      && !adjacent.get(member.nodes[0])!.has(member.nodes[1]), 'study_pin_roller_member_invalid')
+    adjacent.get(member.nodes[0])!.add(member.nodes[1]); adjacent.get(member.nodes[1])!.add(member.nodes[0])
+  }
+  const ordered = [...model.nodes].sort((a: RcObject, b: RcObject) => a.coordinates[0] - b.coordinates[0])
+  check(ordered.slice(1).every((node: RcObject, index: number) => adjacent.get(ordered[index].id)!.has(node.id)),
+    'study_pin_roller_geometry_invalid')
+  const supported = new Map<string, string[]>()
+  for (const support of model.supports) {
+    check(same(Object.keys(support).sort(), ['dofs', 'node']) && ids.includes(support.node)
+      && !supported.has(support.node) && Array.isArray(support.dofs)
+      && (same([...support.dofs].sort(), ['UX', 'UY']) || same(support.dofs, ['UY'])), 'study_pin_roller_support_invalid')
+    supported.set(support.node, support.dofs)
+  }
+  check([...supported.values()].filter(dofs => dofs.length === 2).length === 1
+    && [...supported.values()].filter(dofs => dofs.length === 1).length === 1, 'study_pin_roller_support_invalid')
+  const offset = config.control_global_dof % 3, control = model.nodes[Math.floor(config.control_global_dof / 3)]
+  check(nat(config.control_global_dof) && control && (offset === 0 || offset === 1)
+    && !supported.get(control.id)?.includes(offset === 0 ? 'UX' : 'UY'), 'study_pin_roller_control_invalid')
+  check(Array.isArray(model.loads) && model.loads.length >= 1 && model.loads.length <= 16
+    && new Set(model.loads.map((load: RcObject) => load.node)).size === model.loads.length
+    && model.loads.every((load: RcObject) => same(Object.keys(load).sort(), ['components', 'node'])
+      && ids.includes(load.node) && !supported.has(load.node) && load.components
+      && same(Object.keys(load.components).sort(), ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ'])
+      && Object.values(load.components).every(num) && ['FZ', 'MX', 'MY'].every(k => load.components[k] === 0)
+      && ['FX', 'FY', 'MZ'].some(k => load.components[k] !== 0)), 'study_pin_roller_load_invalid')
+  if (rcControlHasPreload(config)) check(config.constant_nodal_loads.every((load: RcObject) => ids.includes(load.node_id)
+    && !supported.has(load.node_id)), 'study_pin_roller_preload_support_invalid')
+}
+
 /** Check the public two-endpoint input and its complete retained reaction rows. */
 export function validateRcTwoFixedStudyProfile(model: RcObject, history: RcObject[], constantLoads?: RcObject[]): void {
   const supports = twoFixedSupportIds(model, constantLoads)
@@ -207,6 +262,9 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
   const api = apiDoc.value, native = nativeDoc.value, config = report.control_request, targets = config.targets_m
   check(api.request.line_search_assembly_reuse === report.line_search_assembly_reuse
     && native.scope.line_search_assembly_reuse === report.line_search_assembly_reuse, 'study_reuse_binding_invalid')
+  // Failed producer rows retain their original diagnostics; only verified rows
+  // must satisfy the supported execution model before any acceptance checks.
+  if (config.schema_version === 'bounded-rc-fiber-direct-control-request.v4') validateRcPinRollerStudyModel(artifacts.model.value, config)
   const hasPreload = rcControlHasPreload(config)
   const twoFixed = config.schema_version === 'bounded-rc-fiber-direct-control-request.v3'
   const version = hasPreload ? 'v2' : 'v1'
@@ -214,7 +272,7 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
   check(api.schema_version === `bounded-rc-fiber-direct-control-result.${version}` && api.status === 'ready' && api.contract_pass === true && api.failure === null
     && same(api.claims, CLAIMS) && same(api.unsupported_features, []) && same(api.path.claims, PATH_CLAIMS) && same(native.claims, PATH_CLAIMS), 'study_api_invalid')
   check(api.model.canonical_model_checksum === row.quantities.model_checksum
-    && api.model.compiler_profile === (twoFixed ? TWO_FIXED_PROFILE : SINGLE_FIXED_PROFILE)
+    && api.model.compiler_profile === rcStudyCompilerProfile(config)
     && api.control.global_dof === config.control_global_dof && api.control.unit === 'm' && ['UX', 'UY'].includes(api.control.component)
     && api.request.restart_input_sha256 === null && api.path.initial_checkpoint.epoch === (hasPreload ? 1 : 0)
     && (hasPreload ? same(api.request.constant_nodal_loads, config.constant_nodal_loads) : api.request.constant_nodal_loads === undefined)
@@ -223,6 +281,12 @@ export async function verifyRcDesignCandidate(row: RcObject, rowRaw: string, rep
     && same(api.request.configuration, { ...config.solver_config, augmented_coordinates: '[q_free_m,load_factor_coordinate_scale_m*lambda]', control_row_weight: 'F_reference*residual_tolerance/control_tolerance_m', profile: 'small-displacement-rc-fiber-direct-control.v1' }), 'study_request_binding_invalid')
   check(twoFixed ? api.request.experimental_two_fixed_endpoints === true
     : api.request.experimental_two_fixed_endpoints === undefined, 'study_two_fixed_request_invalid')
+  check(config.schema_version === 'bounded-rc-fiber-direct-control-request.v4' ? api.request.experimental_pin_roller_beam === true
+    : api.request.experimental_pin_roller_beam === undefined, 'study_pin_roller_request_invalid')
+  if (config.schema_version === 'bounded-rc-fiber-direct-control-request.v4') {
+    const node = artifacts.model.value.nodes[Math.floor(config.control_global_dof / 3)]
+    check(api.control.node_id === node.id && api.control.component === (config.control_global_dof % 3 === 0 ? 'UX' : 'UY'), 'study_pin_roller_control_binding_invalid')
+  }
   check(validation.schema_version === 'bounded-rc-fiber-direct-control-validation.v1' && validation.verified_result_hash === api.result_hash
     && ['artifact_contract_pass', 'contract_pass', 'physical_path_complete', 'fresh_source_execution_invoked', 'solver_replay_performed'].every(k => validation[k] === true)
     && validation.unavailable_execution_work === false && same(validation.errors, []) && same(validation.claims, CLAIMS)
@@ -369,12 +433,15 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
 }
 
 export function validateRcStudyControl(config: RcObject): void {
-  check(['bounded-rc-fiber-direct-control-request.v1', 'bounded-rc-fiber-direct-control-request.v2', 'bounded-rc-fiber-direct-control-request.v3'].includes(config?.schema_version) && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
+  check(['bounded-rc-fiber-direct-control-request.v1', 'bounded-rc-fiber-direct-control-request.v2', 'bounded-rc-fiber-direct-control-request.v3', 'bounded-rc-fiber-direct-control-request.v4'].includes(config?.schema_version) && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
     && config.targets_m.every(num) && nat(config.control_global_dof) && num(config.solver_config?.control_tolerance_m) && config.solver_config.control_tolerance_m > 0, 'study_control_invalid')
   const twoFixed = config.schema_version.endsWith('.v3')
   check(twoFixed ? config.experimental_two_fixed_endpoints === true
     : config.experimental_two_fixed_endpoints === undefined, 'study_two_fixed_opt_in_invalid')
-  if (config.schema_version.endsWith('.v2') || (twoFixed && config.constant_nodal_loads !== undefined)) {
+  const pinRoller = config.schema_version.endsWith('.v4')
+  check(pinRoller ? config.experimental_pin_roller_beam === true
+    : config.experimental_pin_roller_beam === undefined, 'study_pin_roller_opt_in_invalid')
+  if (config.schema_version.endsWith('.v2') || ((twoFixed || pinRoller) && config.constant_nodal_loads !== undefined)) {
     check(Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0 && config.constant_nodal_loads.length <= 16
       && new Set(config.constant_nodal_loads.map((r: RcObject) => r?.node_id)).size === config.constant_nodal_loads.length
       && config.constant_nodal_loads.every((r: RcObject) => r && same(Object.keys(r).sort(), ['FX_kN', 'FY_kN', 'MZ_kNm', 'node_id']) && typeof r.node_id === 'string'

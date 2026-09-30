@@ -55,3 +55,54 @@ Deterministic deadline/error/close checks accompany actual reader-lock and
 concurrent constructor/submission/single-claim regressions. This correction is
 validated with the full affected durable-service and RC suites, not by discarding
 the failed observation or loosening the existing concurrency assertion.
+
+
+## Direct pin/roller design originals in Workbench
+
+A subsequent source-bound review found that the Python v4 section comparison
+completed while Workbench rejected its control schema. The design reader now
+recognizes the explicit pin/roller profile, binds its API opt-in and authored
+control node/component, and checks the horizontal chain, support roles, free
+control coordinate and load placement before accepting a verified row. The
+shared preload classifier recognizes direct v4 constant loads; durable v4
+submission still rejects constant preload. Shared layout/prefix readers preserve
+the profile, but the layout-search producer does not yet implement v4 and this
+change does not grant that capability.
+
+A single gzip fixture preserves 52 exact Python producer originals (2,513,297
+uncompressed artifact bytes; 550,193 packet bytes), with per-file lengths and
+SHA256 digests. It includes baseline/narrower comparisons with no preload and
+with direct preload, plus actual invalid restrained-control and support-preload
+failures. Existing fixtures are unchanged. Both valid comparisons keep fresh
+full-reference results, 1.9 m physical member length including overhangs,
+46.17684 kg of authored longitudinal steel and the same synthetic common-price
+basis. The 4.56 estimate difference is regression arithmetic only.
+
+Failed producer rows retain their quantities, invocation outcomes and original
+errors, with unknown work still visible and selection disabled. A model check
+applies to verified rows, so an invalid model cannot become a positive accepted
+result, and its original failure remains reviewable. Desktop/mobile tests import
+these originals and compare downloaded bytes; rehashed profile, opt-in, control,
+reaction, load, quantity and member-price contradictions remain rejected. These
+browser routes serve saved originals. A live HTTP pin/roller worker-to-Workbench
+execution and actual device response-time budgets remain open.
+
+## Rejected idempotency conflicts create no request blobs
+
+The authenticated HTTP submission path previously published a content-addressed
+request blob before deciding whether its tenant/key already identified another
+request. One valid request, one exact retry and three distinct conflicting
+requests returned 202, 202, 409, 409, 409 but left four request blobs after service
+reopening. Only one job/event/budget row existed and no solver was invoked;
+6,873 logical bytes (12,288 allocated bytes) were unreferenced conflict output.
+
+The existing SQLite immediate transaction now decides the immutable key binding
+before publishing a request blob. Concurrent different requests for one key have
+one winner and one rejected conflict. Exact retries still check stored-blob
+integrity and repair a missing blob; corrupt blobs remain rejected. The same
+HTTP sequence now leaves one blob before and after reopening, with zero new
+conflict bytes and no solver invocation. Publication runs under the existing
+writer lock; authentication, immutable request hashing and job authority remain
+unchanged. This fixes this rejection path. It neither deletes historical orphan
+files nor establishes complete filesystem/SQLite atomicity or a production disk
+quota. Those storage and operating-budget obligations remain separate.

@@ -356,11 +356,12 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   } }
 }
 
-// Transport v4 pin/roller jobs have no preload and retain the v1 result and
-// restart schemas. The two-fixed v3 request is not admitted to durable jobs.
+// Direct studies can carry v3/v4 preload. Durable v4 jobs reject preload
+// separately at submission; this shared reader does not grant transport support.
 export function rcControlHasPreload(config: RcObject): boolean {
   return (config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
-    || config.schema_version === 'bounded-rc-fiber-direct-control-request.v3')
+    || config.schema_version === 'bounded-rc-fiber-direct-control-request.v3'
+    || config.schema_version === 'bounded-rc-fiber-direct-control-request.v4')
     && Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0
 }
 
