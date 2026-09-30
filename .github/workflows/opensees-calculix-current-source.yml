@@ -8,6 +8,9 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  schedule:
+    # Refresh exact-main receipts before the public-repository 90-day artifact limit.
+    - cron: "23 5 1,15 * *"
 
 permissions:
   contents: read
@@ -129,7 +132,7 @@ jobs:
           path: ${{ env.RECEIPT_DIR }}
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 90
 
   attest:
     needs: produce
