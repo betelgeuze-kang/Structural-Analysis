@@ -28,17 +28,25 @@ def test_opted_in_full_and_reopened_chunks_preserve_fresh_verified_state(
     tmp_path, monkeypatch
 ):
     cap = 64 * 1024 * 1024
-    calls = {"analysis": 0, "verification": 0}
+    calls = {"analysis": 0, "verification": 0, "verification_reanalysis": 0}
+    phase = "analysis"
     analyze = api.analyze_bounded_rc_fiber_direct_control
     verify = api.validate_bounded_rc_fiber_direct_control_artifacts
 
     def observed_analysis(*args, **kwargs):
-        calls["analysis"] += 1
+        # The mandatory verifier calls this API again for its fresh replay.
+        calls["analysis" if phase == "analysis" else "verification_reanalysis"] += 1
         return analyze(*args, **kwargs)
 
     def observed_verification(*args, **kwargs):
+        nonlocal phase
         calls["verification"] += 1
-        return verify(*args, **kwargs)
+        previous_phase = phase
+        phase = "verification"
+        try:
+            return verify(*args, **kwargs)
+        finally:
+            phase = previous_phase
 
     monkeypatch.setattr(
         api, "analyze_bounded_rc_fiber_direct_control", observed_analysis
@@ -108,7 +116,11 @@ def test_opted_in_full_and_reopened_chunks_preserve_fresh_verified_state(
         (tmp_path / f"{name}-result.json").write_bytes(_bytes(result))
         (tmp_path / f"{name}-evidence.json").write_bytes(_bytes(evidence))
 
-    assert calls == {"analysis": 4, "verification": 4}
+    assert calls == {
+        "analysis": 4,
+        "verification": 4,
+        "verification_reanalysis": 4,
+    }
     assert attempted_targets == 18
     assert _native(arms["full"]) == _native(arms["split"])
     for field in (
