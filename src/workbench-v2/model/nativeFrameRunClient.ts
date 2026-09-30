@@ -1,4 +1,4 @@
-import { parseNativeJsonStrict, validateNativeFrameJobView } from './nativeFrameProvider'
+import { canonicalNativeJson, parseNativeJsonStrict, validateNativeFrameJobView } from './nativeFrameProvider'
 
 const MODEL_MAX_BYTES = 2 * 1024 * 1024
 const RESPONSE_MAX_BYTES = 64 * 1024
@@ -6,6 +6,42 @@ const POLL_INTERVAL_MS = 100
 const STABLE_ID = /^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/
 const JOB_ID = /^job_[0-9a-f]{32}$/
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
+
+const HTTP_ERROR_CODES = new Set([
+  'workstation_job_not_found', 'workstation_run_failed', 'workstation_submit_failed',
+  'workstation_cancel_failed', 'workstation_view_serialize_failed',
+])
+
+class NativeFrameHttpError extends Error {
+  readonly publicationWindow: boolean
+
+  constructor(status: number, text: string) {
+    let code = 'unavailable'
+    let publicationWindow = false
+    try {
+      const body = parseNativeJsonStrict(text) as Record<string, unknown>
+      const issues = body?.issues
+      if (body?.schema_version === 'structural-native-workstation-http-error.v1'
+        && body.success === false
+        && body.claim_boundary === 'http_operation_failed_closed_without_job_result_design_or_release_authority'
+        && Array.isArray(issues) && issues.length === 1) {
+        const issue = issues[0] as Record<string, unknown> | null
+        if (typeof issue?.code === 'string' && HTTP_ERROR_CODES.has(issue.code)) {
+          code = issue.code
+          publicationWindow = status === 404 && code === 'workstation_job_not_found'
+            && issue.detail === 'native_job_event_file_set_invalid'
+            && Object.keys(body).sort().join(',') === 'claim_boundary,issues,schema_version,success'
+            && Object.keys(issue).sort().join(',') === 'code,detail'
+        }
+      }
+    } catch {
+      // Invalid error bodies stay failures without exposing raw response contents.
+    }
+    super(`native_workstation_http_error:${status}:${code}`)
+    this.name = 'NativeFrameHttpError'
+    this.publicationWindow = publicationWindow
+  }
+}
 
 export type NativeFrameRunStatus = 'succeeded' | 'failed' | 'cancelled'
 
@@ -93,10 +129,20 @@ export async function submitAndRunNativeFrameJob(
       return { view: null, error }
     },
   )
+  let reconcilePublicationWindow = false
   while (!runSettled) {
     await waitForPoll(signal)
     if (runSettled) break
-    const polled = await getJson(new URL(jobViewUrl), signal)
+    let polled: Awaited<ReturnType<typeof getJson>>
+    try {
+      polled = await getJson(new URL(jobViewUrl), signal)
+    } catch (error) {
+      if (!(error instanceof NativeFrameHttpError) || !error.publicationWindow) throw error
+      // A lifecycle event can become visible before its materialized view. Wait for
+      // this existing run, then require one strict, identical terminal snapshot.
+      reconcilePublicationWindow = true
+      break
+    }
     if (polled.job_id !== request.jobId) {
       throw new Error('Native workstation polled a different job identity')
     }
@@ -109,6 +155,12 @@ export async function submitAndRunNativeFrameJob(
   if (terminal.job_id !== request.jobId
     || (terminal.status !== 'succeeded' && terminal.status !== 'failed' && terminal.status !== 'cancelled')) {
     throw new Error('Native workstation did not return a terminal view for the submitted job')
+  }
+  if (reconcilePublicationWindow) {
+    const settled = await getJson(new URL(jobViewUrl), signal)
+    if (settled.strictView !== terminal.strictView) {
+      throw new Error('native_workstation_terminal_view_mismatch')
+    }
   }
   if (terminal.status === 'succeeded') {
     return { status: 'succeeded', jobId: request.jobId, jobViewUrl, error: null }
@@ -184,9 +236,10 @@ async function requestJobView(url: URL, init: RequestInit, signal?: AbortSignal)
     throw new Error('Native workstation response is not valid UTF-8')
   }
   if (!response.ok) {
-    throw new Error(`Native workstation returned HTTP ${response.status}`)
+    throw new NativeFrameHttpError(response.status, text)
   }
-  return validateNativeFrameJobView(parseNativeJsonStrict(text))
+  const parsed = parseNativeJsonStrict(text)
+  return { ...validateNativeFrameJobView(parsed), strictView: canonicalNativeJson(parsed) }
 }
 
 function waitForPoll(signal?: AbortSignal): Promise<void> {

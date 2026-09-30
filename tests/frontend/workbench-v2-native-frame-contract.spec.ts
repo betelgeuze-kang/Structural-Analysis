@@ -194,6 +194,110 @@ test('Workbench polls the strict job view while the synchronous run request is i
   }
 })
 
+const pollingFailureScenarios: Array<{
+  name: string; httpStatus?: number; code?: string; detail?: string; extra?: boolean;
+  terminal?: 'succeeded' | 'failed' | 'cancelled'; runError?: boolean;
+  final?: 'identity' | 'manifest' | 'request' | 'http' | 'invalid';
+  error?: RegExp; polls?: number;
+}> = [
+  { name: 'same run and exact terminal result remain authoritative' },
+  { name: 'native terminal failure remains failed', terminal: 'failed' },
+  { name: 'native cancellation remains cancelled', terminal: 'cancelled' },
+  { name: 'HTTP 500 is not reconciled', httpStatus: 500, error: /native_workstation_http_error:500:workstation_job_not_found/, polls: 1 },
+  { name: 'missing job is not a publication window', detail: 'native_job_request_read_failed', error: /native_workstation_http_error:404:workstation_job_not_found/, polls: 1 },
+  { name: 'unknown response code is bounded and rejected', code: 'secret_raw_response', error: /native_workstation_http_error:404:unavailable/, polls: 1 },
+  { name: 'extra error fields do not authorize reconciliation', extra: true, error: /native_workstation_http_error/, polls: 1 },
+  { name: 'run HTTP failure stays failed', runError: true, error: /native_workstation_http_error:502:unavailable/, polls: 1 },
+  { name: 'persistent poll failure is not retried', final: 'http', error: /native_workstation_http_error:404:unavailable/ },
+  { name: 'different final job is rejected', final: 'identity', error: /native_workstation_terminal_view_mismatch/ },
+  { name: 'different result manifest is rejected', final: 'manifest', error: /native_workstation_terminal_view_mismatch/ },
+  { name: 'different immutable request is rejected', final: 'request', error: /native_workstation_terminal_view_mismatch/ },
+  { name: 'invalid final view is rejected', final: 'invalid', error: /native job schema is invalid/ },
+  { name: 'invalid successful poll is not retried', httpStatus: 200, error: /native job schema is invalid/, polls: 1 },
+]
+
+for (const scenario of pollingFailureScenarios) {
+  test(`Workbench reconciles a publication-window poll failure: ${scenario.name}`, async () => {
+    const jobId = 'job_0123456789abcdef0123456789abcdef'
+    const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+    const originalFetch = Object.getOwnPropertyDescriptor(globalThis, 'fetch')
+    const terminal = scenario.terminal === 'cancelled' ? jobViewV2('cancelled')
+      : jobView(scenario.terminal ?? 'succeeded', { content_hash: fixedHash('a'), byte_length: 123 })
+    const finalView: Record<string, unknown> = structuredClone(terminal)
+    if (scenario.final === 'identity') finalView.job_id = `job_${'f'.repeat(32)}`
+    if (scenario.final === 'manifest') finalView.bundle_manifest = { path: 'bundle/manifest.json', content_hash: fixedHash('b'), byte_length: 123 }
+    if (scenario.final === 'request') finalView.request_hash = fixedHash('f')
+    let finishRun: ((response: Response) => void) | undefined
+    let polls = 0
+    let runRequests = 0
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: {
+        location: { href: 'http://127.0.0.1:8787/', origin: 'http://127.0.0.1:8787' },
+        setTimeout,
+        clearTimeout,
+      },
+    })
+    Object.defineProperty(globalThis, 'fetch', {
+      configurable: true,
+      value: async (input: URL | RequestInfo, init?: RequestInit) => {
+        const url = new URL(String(input))
+        if (init?.method === 'POST' && url.pathname === '/api/v1/frame3d/jobs') {
+          return Response.json(jobView('queued'))
+        }
+        if (init?.method === 'POST' && url.pathname.endsWith(`/${jobId}/run`)) {
+          runRequests += 1
+          return new Promise<Response>((resolve) => { finishRun = resolve })
+        }
+        if (init?.method === 'GET' && url.pathname.endsWith(`/${jobId}/view.json`)) {
+          polls += 1
+          if (polls === 1) {
+            // Publish the terminal POST only once polling has observed the write window.
+            expect(finishRun).toBeDefined()
+            finishRun?.(Response.json(scenario.runError ? { secret: 'server-secret' } : terminal, { status: scenario.runError ? 502 : 200 }))
+            return Response.json({
+              schema_version: 'structural-native-workstation-http-error.v1',
+              success: false,
+              issues: [{ code: scenario.code ?? 'workstation_job_not_found', detail: scenario.detail ?? 'native_job_event_file_set_invalid' }],
+              ...(scenario.extra ? { unexpected: 'server-secret' } : {}),
+              claim_boundary: 'http_operation_failed_closed_without_job_result_design_or_release_authority',
+            }, { status: scenario.httpStatus ?? 404 })
+          }
+          if (scenario.final === 'http') return Response.json({ secret: 'server-secret' }, { status: 404 })
+          return Response.json(scenario.final === 'invalid' ? { status: 'succeeded' } : finalView)
+        }
+        throw new Error('unexpected test request')
+      },
+    })
+    try {
+      const outcome = submitAndRunNativeFrameJob({
+        submissionUrl: '/api/v1/frame3d/jobs',
+        jobId,
+        modelIrJson: '{"schema_version":"structural-model-ir.v2"}',
+        loadSource: { kind: 'pattern', id: 'LC1' },
+        resultId: 'result.poll.LC1',
+        reportId: 'report.poll.LC1',
+      })
+      if (scenario.error) {
+        await expect(outcome).rejects.toThrow(scenario.error)
+      } else {
+        await expect(outcome).resolves.toMatchObject({
+          status: scenario.terminal ?? 'succeeded', jobId,
+          jobViewUrl: `http://127.0.0.1:8787/api/v1/frame3d/jobs/${jobId}/view.json`,
+        })
+      }
+      expect(runRequests).toBe(1)
+      expect(polls).toBe(scenario.polls ?? 2)
+    } finally {
+      finishRun?.(Response.json(terminal))
+      if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow)
+      else Reflect.deleteProperty(globalThis, 'window')
+      if (originalFetch) Object.defineProperty(globalThis, 'fetch', originalFetch)
+      else Reflect.deleteProperty(globalThis, 'fetch')
+    }
+  })
+}
+
 test('Workbench cancellation posts to the same-origin worker endpoint and preserves Cancelled', async () => {
   const jobId = 'job_0123456789abcdef0123456789abcdef'
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
