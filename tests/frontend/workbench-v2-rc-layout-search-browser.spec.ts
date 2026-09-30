@@ -1,7 +1,58 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
+import { gunzipSync } from 'node:zlib'
+import { createHash } from 'node:crypto'
 import { layoutFiles } from './layoutSearchFixture'
 const base = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
+
+const pinLayoutPacket = JSON.parse(gunzipSync(readFileSync('tests/frontend/fixtures/rc-pin-roller-layout-originals.json.gz')).toString('utf8'))
+for (const entry of pinLayoutPacket.cases) {
+  test(`actual v4 pin/roller ${entry.case_id} layout originals remain reviewable`, async ({ page }) => {
+    const files: Record<string, Buffer> = Object.fromEntries(Object.entries(entry.originals as Record<string, string>).map(([path, raw]) => [path, Buffer.from(raw)]))
+    for (const [path, body] of Object.entries(files)) {
+      expect(body.length).toBe(entry.inventory[path].byte_length)
+      expect(createHash('sha256').update(body).digest('hex')).toBe(entry.inventory[path].sha256)
+    }
+    const result = JSON.parse(files['result.json'].toString()), arm = result.arms.price_order
+    const comparison = JSON.parse(files[arm.comparison_path].toString())
+    const selected = comparison.rows.find((row: any) => row.candidate_id === comparison.selected_candidate_id)
+    expect(result.strategy).toBe('price_order')
+    expect(result.claims.independent_generalization).toBe(false)
+    expect(result.claims.net_savings_proved).toBe(false)
+    expect(selected.full_reference_verification_pass).toBe(true)
+    const plan = JSON.parse(files['plan.json'].toString())
+    expect(plan.control_request.experimental_pin_roller_beam).toBe(true)
+    expect(Boolean(plan.control_request.constant_nodal_loads)).toBe(entry.has_preload)
+    await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/actual-pin-layout/result.json' } })
+    await page.route('**/actual-pin-layout/**', async route => {
+      const path = new URL(route.request().url()).pathname.replace('/actual-pin-layout/', '')
+      expect(files[path]).toBeDefined()
+      await route.fulfill({ contentType: 'application/json', body: files[path] })
+    })
+    await page.goto(`${base}/#/workbench-v2`)
+    const panel = page.locator('[data-rc-search]')
+    await expect(panel).toHaveAttribute('data-rc-search', 'verified', { timeout: 60000 })
+    await expect(panel.locator('[data-rc-search-arm]')).toHaveCount(1)
+    await expect(panel.locator('[data-rc-search-training]')).toContainText('No learned policy')
+    await expect(panel.locator('[data-rc-search-authority]')).toContainText('does not establish independent physical validation')
+    await expect(panel.locator('[data-rc-search-layout]')).toContainText('do not establish equivalent building function')
+    await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', comparison.selected_candidate_id)
+    await expect(panel.locator(`[data-rc-design-members="${comparison.selected_candidate_id}"] tbody tr`)).toHaveCount(selected.quantities.members.length)
+    if (entry.mode === 'staged') await expect(panel.locator('[data-rc-search-staging]')).toBeVisible()
+    if (entry.mode !== 'full') await expect(panel.locator('[data-rc-search-pruning]')).toContainText('physical feasibility remains unknown')
+    for (const role of ['model', 'result', 'checkpoint', 'verification']) {
+      const pending = page.waitForEvent('download')
+      await panel.getByRole('button', { name: `Download ${comparison.selected_candidate_id} ${role}`, exact: true }).click()
+      expect(await readFile((await (await pending).path())!)).toEqual(files[`price_order/${selected.artifacts[role].path}`])
+    }
+    for (const role of ['result', 'plan', 'price-table']) {
+      const pending = page.waitForEvent('download')
+      await panel.getByRole('button', { name: `Download search ${role}`, exact: true }).click()
+      expect(await readFile((await (await pending).path())!)).toEqual(files[`${role}.json`])
+    }
+  })
+}
 
 test('viewer runtime assets preserve originals and load configured preset', async ({ page, request }) => {
   const manifest: string[] = JSON.parse(await readFile('src/structure-viewer/viewer-runtime-assets.json', 'utf8'))

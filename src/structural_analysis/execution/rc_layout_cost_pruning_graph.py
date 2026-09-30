@@ -69,6 +69,8 @@ def _original_row(read, name, row, model, request, *, allow_unverified=False):
         ]
     if request.experimental_two_fixed_endpoints:
         expected_request["experimental_two_fixed_endpoints"] = True
+    if request.experimental_pin_roller_beam:
+        expected_request["experimental_pin_roller_beam"] = True
     _same(result.get("request"), expected_request, "pruning original request differs")
     if (
         result.get("model", {}).get("canonical_model_checksum")
@@ -80,6 +82,22 @@ def _original_row(read, name, row, model, request, *, allow_unverified=False):
         or len(result.get("response_history", [])) != len(request.targets_m)
     ):
         raise ValueError("pruning original path incomplete")
+    if request.experimental_pin_roller_beam:
+        if result.get("model", {}).get("compiler_profile") != (
+            "planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1"
+        ):
+            raise ValueError("pin-roller original compiler profile differs")
+        index, component = divmod(request.control_global_dof, 3)
+        _same(
+            result.get("control"),
+            {
+                "global_dof": request.control_global_dof,
+                "node_id": model.nodes[index]["id"],
+                "component": ("UX", "UY", "RZ")[component],
+                "unit": "m",
+            },
+            "pin-roller original control node differs",
+        )
     if (
         verified
         and any(
@@ -135,6 +153,33 @@ def _original_row(read, name, row, model, request, *, allow_unverified=False):
     history = result["response_history"]
     if request.constant_nodal_loads:
         history = [result["preload_response"], *history]
+    if request.experimental_pin_roller_beam:
+        # The API serializer visits authored support nodes, then UX/UY, in this
+        # order. Coordinate-sorted topology does not change declaration order.
+        restrained = {row["node"]: set(row["dofs"]) for row in model.supports}
+        expected_reactions = [
+            (node["id"], dof, "N")
+            for node in model.nodes
+            for dof in ("UX", "UY")
+            if dof in restrained.get(node["id"], set())
+        ]
+        for response in history:
+            _same(
+                [
+                    (row["node_id"], row["dof"], row["unit"])
+                    for row in response["support_reactions"]
+                ],
+                expected_reactions,
+                "pin-roller original support reactions differ",
+            )
+            displacement = {
+                row["node_id"]: row for row in response["node_displacements"]
+            }
+            if any(
+                displacement[node][f"{dof}_m"] != 0
+                for node, dof, _ in expected_reactions
+            ):
+                raise ValueError("pin-roller original restrained displacement differs")
     _same(
         row.get("performance"),
         study._performance(history),

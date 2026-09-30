@@ -26,6 +26,10 @@ def prepare_control_layout_dataset(cases):
         or any(type(c) is not RCControlLearningCase for c in cases)
     ):
         raise ValueError("four to 32 typed layout cases required")
+    if any(case.request.experimental_pin_roller_beam for case in cases):
+        raise ValueError(
+            "pin-roller RC layout learning compiler profile is not supported"
+        )
     ordered = sorted(cases, key=lambda c: c.case_id)
     if len({c.case_id for c in ordered}) != len(ordered):
         raise ValueError("unique layout case identities required")

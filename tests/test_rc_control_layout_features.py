@@ -136,12 +136,14 @@ def test_geometry_derived_rotation_scale_is_explicitly_encoded():
 def test_outer_area_overrides_remain_bound_in_layout_context():
     payload = raw_model()
     before = describe(payload)
-    payload['sections'][0].update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
+    payload["sections"][0].update(top_bar_area_m2=0.00005, bottom_bar_area_m2=0.0002)
     unequal = describe(payload)
-    payload['sections'][0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
+    payload["sections"][0].update(top_bar_area_m2=0.0002, bottom_bar_area_m2=0.00005)
     swapped = describe(payload)
-    assert len({row['context_hash'] for row in (before, unequal, swapped)}) == 3
-    assert len({row['physical_model_identity'] for row in (before, unequal, swapped)}) == 3
+    assert len({row["context_hash"] for row in (before, unequal, swapped)}) == 3
+    assert (
+        len({row["physical_model_identity"] for row in (before, unequal, swapped)}) == 3
+    )
 
 
 def test_two_fixed_portal_layout_features_keep_explicit_request_context():
@@ -159,3 +161,63 @@ def test_two_fixed_portal_layout_features_keep_explicit_request_context():
     assert baseline["physical_model_identity"] != changed["physical_model_identity"]
     with pytest.raises(ValueError, match="supported public RC profile"):
         describe(original, replace(request, experimental_two_fixed_endpoints=False))
+
+
+def test_pin_roller_layout_features_bind_full_request_and_declared_control_node():
+    from tests.test_rc_fiber_pin_roller_beam_public import _model, _request
+
+    original = _model().canonical_payload()
+    request = _request()
+    first = describe(original, request)
+    shorter = deepcopy(original)
+    for node in shorter["nodes"]:
+        node["coordinates"][0] *= 0.9
+    second = describe(shorter, request)
+    assert first["context_hash"] == second["context_hash"]
+    assert first["values"] != second["values"]
+    assert first["physical_model_identity"] != second["physical_model_identity"]
+    assert first["geometry_shape_screen"]["restraint_count"] == 3
+    assert first["physical_result_authority"] is False
+    assert first["existing_candidate_policy_compatible"] is False
+    # Canonical physical topology stays fixed, but DOF 10 now names N3, not N4.
+    shorter["nodes"][2], shorter["nodes"][3] = shorter["nodes"][3], shorter["nodes"][2]
+    reordered = describe(shorter, request)
+    assert reordered["values"] == second["values"]
+    assert reordered["physical_model_identity"] == second["physical_model_identity"]
+    assert reordered["context_hash"] != second["context_hash"]
+    preload = replace(request, constant_nodal_loads=(("N4", 0.0, -0.01, 0.0),))
+    assert describe(original, preload)["context_hash"] != first["context_hash"]
+    with pytest.raises(ValueError, match="preload node is outside"):
+        describe(
+            original,
+            replace(request, constant_nodal_loads=(("missing", 0.0, -0.01, 0.0),)),
+        )
+    with pytest.raises(ValueError, match="control node is outside"):
+        describe(original, replace(request, control_global_dof=21))
+
+
+@pytest.mark.parametrize(
+    "version,expected",
+    [
+        ("v1", "7cd86af1d9be201da90fa29e56cebac0ab624a0215e74d2b35e3fe2323f9f749"),
+        ("v2", "4cdadc06e3597db41c3ddd17cdea0502447995930943afd8b9ca52e3f56278be"),
+        ("v3", "241046aebed7847a36522c6fcc1ad4dd7f1a3412837ce60a3919f1d54e77df91"),
+    ],
+)
+def test_legacy_layout_descriptor_original_bytes_stay_exact(version, expected):
+    import hashlib
+    from structural_analysis.benchmark.rc_control_design import _bytes
+
+    request = BoundedRCFiberDirectControlRequest(
+        7, (-1e-5, -2e-5, 1e-5), allow_reversals=True, maximum_reversals=1
+    )
+    raw = raw_model()
+    if version == "v2":
+        request = replace(request, constant_nodal_loads=(("N2", 0.0, -0.01, 0.0),))
+    elif version == "v3":
+        root = Path("examples/research/rc_internal_portal_20mm")
+        raw = json.loads((root / "original-model.json").read_bytes())
+        request = decode_bounded_rc_fiber_direct_control_request(
+            (root / "experimental-two-fixed-endpoints-request.json").read_bytes()
+        )
+    assert hashlib.sha256(_bytes(describe(raw, request))).hexdigest() == expected

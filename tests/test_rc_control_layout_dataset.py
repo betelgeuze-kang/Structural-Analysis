@@ -97,3 +97,65 @@ def test_scaled_training_aliases_do_not_supply_two_geometry_groups(tmp_path):
     )
     with pytest.raises(ValueError, match="two distinct training geometry groups"):
         prepare_control_layout_dataset((cases[0], scaled, *cases[2:]))
+
+
+@pytest.mark.parametrize("entry", ["dataset", "labels", "fit"])
+def test_pin_roller_layout_learning_stays_explicitly_unsupported_before_any_work(
+    tmp_path, monkeypatch, entry
+):
+    from tests.test_rc_fiber_pin_roller_beam_public import _model, _request
+    from structural_analysis.benchmark.rc_control_learning import RCControlLearningCase
+    from structural_analysis.benchmark.rc_control_layout_labels import (
+        generate_control_layout_training_labels,
+    )
+    from structural_analysis.benchmark.rc_control_layout_learning import (
+        train_control_layout_policy,
+    )
+    from structural_analysis.benchmark import rc_control_layout_dataset as dataset
+    from structural_analysis.benchmark import rc_control_design as study
+    from structural_analysis.benchmark.fiber_frame_design import (
+        FiberFrameHistoryLimits,
+        FiberFrameMaterialHistoryLimits,
+    )
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError(
+            "v4 learning must stop before descriptors, numerical labels or fit"
+        )
+
+    monkeypatch.setattr(dataset, "control_layout_candidate_features", forbidden)
+    monkeypatch.setattr(study, "_reference_design_row", forbidden)
+    cases = tuple(
+        RCControlLearningCase(
+            f"case-{i}",
+            f"project-{i}",
+            f"geometry-{i}",
+            "fixed",
+            split,
+            _model(),
+            _request(),
+        )
+        for i, split in enumerate(("train", "train", "validation", "holdout"))
+    )
+    root = tmp_path / entry
+    kwargs = dict(
+        source_revision="a" * 40,
+        output_directory=root,
+        history_limits=FiberFrameHistoryLimits(1, 1),
+        material_limits=FiberFrameMaterialHistoryLimits(1, 1, 1),
+    )
+    with pytest.raises(
+        ValueError,
+        match="pin-roller RC layout learning compiler profile is not supported",
+    ):
+        if entry == "dataset":
+            prepare_control_layout_dataset(cases)
+        elif entry == "labels":
+            generate_control_layout_training_labels(cases, **kwargs)
+        else:
+            train_control_layout_policy(cases, **kwargs)
+    assert not root.exists()
+    with pytest.raises(
+        ValueError, match="pin-roller RC learning compiler profile is not supported"
+    ):
+        validate_control_learning_split_shapes(cases)

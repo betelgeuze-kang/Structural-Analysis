@@ -901,3 +901,388 @@ def test_actual_prefix_preserves_constant_preload_and_full_history_prefix(
     b = json.loads((full_root / full["artifacts"]["result"]["path"]).read_bytes())
     assert a["preload_response"] == b["preload_response"]
     assert a["response_history"] == b["response_history"][:2]
+
+
+def _pin_layout_inputs(preload=False):
+    from tests.test_rc_fiber_pin_roller_beam_public import _model, _request
+    from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+
+    baseline = _model()
+    request = replace(
+        _request(),
+        targets_m=(-1e-6, -2e-6),
+        constant_nodal_loads=(("N4", 0.0, -0.01, 0.0),) if preload else (),
+    )
+    candidates = []
+    for key, scale in (("shorter", 0.9), ("longer", 1.1)):
+        raw = deepcopy(baseline.canonical_payload())
+        for node in raw["nodes"]:
+            node["coordinates"][0] *= scale
+        candidates.append(
+            search.RCControlLayoutCandidate(
+                key, load_neutral_json_bytes(study._bytes(raw))
+            )
+        )
+    return dict(
+        baseline=baseline,
+        candidates=tuple(candidates),
+        request=request,
+        prices=design.FiberFrameMaterialPrices(
+            100, 1, "KRW", "2026-09-30", "synthetic regression; not a quote"
+        ),
+        history_limits=design.FiberFrameHistoryLimits(1, 1),
+        material_limits=design.FiberFrameMaterialHistoryLimits(1, 1, 1),
+        source_revision="a" * 40,
+        full_analysis_budget=3,
+    )
+
+
+def _pin_layout_runner(mode):
+    return {
+        "full": search.run_control_layout_strategy,
+        "pruned": search.run_control_layout_cost_pruned_strategy,
+        "staged": search.run_control_layout_staged_strategy,
+    }[mode]
+
+
+@pytest.fixture(
+    scope="module",
+    params=[
+        (mode, preload)
+        for mode in ("full", "pruned", "staged")
+        for preload in (False, True)
+    ],
+)
+def actual_pin_layout(tmp_path_factory, request):
+    mode, preload = request.param
+    root = tmp_path_factory.mktemp(f"pin-layout-{mode}-{preload}") / "producer"
+    inputs = _pin_layout_inputs(preload)
+    result = _pin_layout_runner(mode)(
+        **inputs,
+        strategy="price_order",
+        output_directory=root,
+        **({"prefix_target_count": 1} if mode == "staged" else {}),
+    )
+    return root, inputs, result, mode, preload
+
+
+def test_actual_pin_roller_layout_keeps_full_reference_input_control_quantity_and_price(
+    actual_pin_layout, monkeypatch
+):
+    root, inputs, result, mode, preload = actual_pin_layout
+    plan = json.loads((root / "plan.json").read_bytes())
+    assert plan["control_request"] == inputs["request"].to_dict()
+    assert plan["control_request"]["experimental_pin_roller_beam"] is True
+    assert plan["control_request"]["control_global_dof"] == 10
+    assert plan["predictions"] == [] and plan["policy_hash"] is None
+    assert result["historical_training_cost"] is None
+    assert result["arms"]["price_order"]["selected_candidate_id"] == "shorter"
+    assert result["claims"]["net_savings_proved"] is False
+    assert result["claims"]["confirmed_currency_savings"] is False
+    for row in plan["pool"]:
+        model = (
+            inputs["baseline"]
+            if row["candidate_id"] == "baseline"
+            else next(
+                c.model
+                for c in inputs["candidates"]
+                if c.candidate_id == row["candidate_id"]
+            )
+        )
+        assert row["quantities"] == design.calculate_fiber_frame_member_quantities(
+            model, experimental_pin_roller_beam=True
+        )
+        assert row["material_estimate"] == design._estimate(
+            row["quantities"], inputs["prices"]
+        )
+    comparison = json.loads((root / "price_order/comparison.json").read_bytes())
+    assert [r["candidate_id"] for r in comparison["rows"]] == [
+        "baseline",
+        "shorter",
+        *(["longer"] if mode == "full" else []),
+    ]
+    for row in comparison["rows"]:
+        assert row["full_reference_verification_pass"] is True
+        assert [i["status"] for i in row["invocations"]] == ["returned", "returned"]
+        assert all(not i["unknown_execution_work"] for i in row["invocations"])
+        api = json.loads(
+            (root / "price_order" / row["artifacts"]["result"]["path"]).read_bytes()
+        )
+        assert api["request"]["experimental_pin_roller_beam"] is True
+        assert api["request"]["targets_m"] == list(inputs["request"].targets_m)
+        assert api["control"] == dict(
+            global_dof=10, node_id="N4", component="UY", unit="m"
+        )
+        assert (
+            api["model"]["compiler_profile"]
+            == "planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1"
+        )
+        history = (
+            [api["preload_response"], *api["response_history"]]
+            if preload
+            else api["response_history"]
+        )
+        assert row["performance"]["accepted_epoch_count"] == len(history) == 2 + preload
+        for response in history:
+            assert [
+                (r["node_id"], r["dof"], r["unit"])
+                for r in response["support_reactions"]
+            ] == [("N2", "UX", "N"), ("N2", "UY", "N"), ("N6", "UY", "N")]
+    if mode != "full":
+        assert comparison["cost_pruning"]["skipped_cost_dominated_candidate_ids"] == [
+            "longer"
+        ]
+        assert (
+            comparison["cost_pruning"]["unevaluated_physical_feasibility"] == "unknown"
+        )
+    if mode == "staged":
+        prefix = json.loads(
+            (root / "price_order/prefix/shorter/request.json").read_bytes()
+        )
+        assert prefix == replace(inputs["request"], targets_m=(-1e-6,)).to_dict()
+        assert (
+            comparison["prefix_screening"]["full_history_acceptance_from_prefix"]
+            is False
+        )
+        assert comparison["prefix_screening"]["prefix_request_count"] == 1
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("graph review must not execute another reference or fit")
+
+    monkeypatch.setattr(study, "_reference_design_row", forbidden)
+
+    def read(path, maximum, reference=None):
+        raw = (root / path).read_bytes()
+        assert len(raw) <= maximum
+        if reference is not None:
+            assert (
+                len(raw) == reference["byte_length"]
+                and study._sha(raw) == reference["sha256"]
+            )
+        return raw
+
+    read_layout_search_graph(read, result)
+
+
+def _pin_rehashed_original_graph(actual, mutation):
+    root, inputs, result, mode, preload = actual
+    result = deepcopy(result)
+    comparison = json.loads((root / "price_order/comparison.json").read_bytes())
+    row = comparison["rows"][0]
+    role_path = {
+        role: "price_order/" + ref["path"] for role, ref in row["artifacts"].items()
+    }
+    api = json.loads((root / role_path["result"]).read_bytes())
+    if mutation == "opt-in":
+        api["request"]["experimental_pin_roller_beam"] = False
+    if mutation == "profile":
+        api["model"]["compiler_profile"] = (
+            "planar_serial_cantilever_explicit_rectangular_rc.v1"
+        )
+    if mutation == "control":
+        api["control"]["node_id"] = "N3"
+    if mutation == "reaction":
+        response = api["preload_response"] if preload else api["response_history"][0]
+        response["support_reactions"].reverse()
+    api["result_hash"] = study._sha(
+        study._bytes({k: v for k, v in api.items() if k != "result_hash"})
+    )
+    verification = json.loads((root / role_path["verification"]).read_bytes())
+    verification["verified_result_hash"] = api["result_hash"]
+    changed = {
+        role_path["result"]: study._bytes(api),
+        role_path["verification"]: study._bytes(verification),
+    }
+    for role in ("result", "verification"):
+        raw = changed[role_path[role]]
+        row["artifacts"][role]["sha256"] = study._sha(raw)
+        row["artifacts"][role]["byte_length"] = len(raw)
+    comparison["report_hash"] = study._sha(
+        study._bytes({k: v for k, v in comparison.items() if k != "report_hash"})
+    )
+    changed["price_order/comparison.json"] = study._bytes(comparison)
+    outcome = json.loads((root / "price_order/outcome.json").read_bytes())
+    outcome["comparison_hash"] = comparison["report_hash"]
+    result["arms"]["price_order"] = outcome
+    changed["price_order/outcome.json"] = study._bytes(outcome)
+    result["report_hash"] = study._sha(
+        study._bytes({k: v for k, v in result.items() if k != "report_hash"})
+    )
+
+    def read(path, maximum, reference=None):
+        raw = changed.get(path, (root / path).read_bytes())
+        assert len(raw) <= maximum
+        if reference is not None:
+            assert (
+                len(raw) == reference["byte_length"]
+                and study._sha(raw) == reference["sha256"]
+            )
+        return raw
+
+    return read, result
+
+
+@pytest.mark.parametrize(
+    "mutation,reason",
+    [
+        ("opt-in", "pruning original request differs"),
+        ("profile", "compiler profile differs"),
+        ("control", "control node differs"),
+        ("reaction", "support reactions differ"),
+    ],
+)
+def test_actual_pin_roller_graph_rejects_self_hashed_original_semantic_tampering(
+    actual_pin_layout, mutation, reason
+):
+    read, result = _pin_rehashed_original_graph(actual_pin_layout, mutation)
+    with pytest.raises(ValueError, match=reason):
+        read_layout_search_graph(read, result)
+
+
+@pytest.mark.parametrize("mode", ["full", "pruned", "staged"])
+def test_pin_roller_layout_learning_modes_are_explicitly_rejected_before_outputs(
+    tmp_path, monkeypatch, mode
+):
+    inputs = _pin_layout_inputs()
+    root = tmp_path / "must-not-exist"
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("unsupported v4 policy must not be read or applied")
+
+    monkeypatch.setattr(search, "_training_cost", forbidden)
+    with pytest.raises(
+        ValueError, match="pin-roller RC layout learned policy is not supported"
+    ):
+        _pin_layout_runner(mode)(
+            **inputs,
+            strategy="learned_order",
+            output_directory=root,
+            **({"prefix_target_count": 1} if mode == "staged" else {}),
+        )
+    assert not root.exists()
+
+
+def test_pin_roller_layout_declaration_permutation_cannot_change_control_inside_one_context(
+    tmp_path,
+):
+    from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+
+    inputs = _pin_layout_inputs()
+    raw = deepcopy(inputs["candidates"][0].model.canonical_payload())
+    raw["nodes"][2], raw["nodes"][3] = raw["nodes"][3], raw["nodes"][2]
+    inputs["candidates"] = (
+        search.RCControlLayoutCandidate(
+            "reordered", load_neutral_json_bytes(study._bytes(raw))
+        ),
+    )
+    root = tmp_path / "must-not-exist"
+    with pytest.raises(ValueError, match="fixed context mismatch"):
+        search.run_control_layout_strategy(
+            **inputs, strategy="price_order", output_directory=root
+        )
+    assert not root.exists()
+
+
+def test_pin_roller_layout_raised_execution_preserves_original_failed_row_and_stops(
+    tmp_path, monkeypatch
+):
+    inputs = _pin_layout_inputs()
+    root = tmp_path / "raised"
+    calls = []
+
+    def raised(*args, **kwargs):
+        calls.append(1)
+        raise RuntimeError("authored failure-control; no numerical execution")
+
+    monkeypatch.setattr(study.api, "analyze_bounded_rc_fiber_direct_control", raised)
+    with pytest.raises(ValueError, match="unknown numerical work"):
+        search.run_control_layout_strategy(
+            **inputs, strategy="price_order", output_directory=root
+        )
+    assert calls == [1]
+    outcome = json.loads((root / "price_order/outcome.json").read_bytes())
+    assert outcome["unknown_work_until_outcome"] is True
+    assert len(outcome["rows"]) == 1
+    row = outcome["rows"][0]
+    assert row["status"] == "execution_error" and row["selection_eligible"] is False
+    assert (
+        row["full_reference_verification_pass"] is False and row["performance"] is None
+    )
+    assert (
+        row["invocations"][0]["status"] == "raised"
+        and row["invocations"][0]["work"] is None
+    )
+    for ref in row["artifacts"].values():
+        raw = (root / "price_order" / ref["path"]).read_bytes()
+        assert len(raw) == ref["byte_length"] and study._sha(raw) == ref["sha256"]
+    assert not (root / "result.json").exists()
+
+
+@pytest.mark.parametrize("mode", ["full", "pruned", "staged"])
+def test_actual_pin_roller_layout_graph_keeps_authored_support_declaration_order(
+    tmp_path, monkeypatch, mode
+):
+    from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+    from structural_analysis.benchmark.rc_control_layout_features import (
+        control_layout_candidate_features,
+    )
+
+    inputs = _pin_layout_inputs()
+
+    def swapped(model):
+        raw = deepcopy(model.canonical_payload())
+        ids = [node["id"] for node in raw["nodes"]]
+        left, right = ids.index("N2"), ids.index("N6")
+        raw["nodes"][left], raw["nodes"][right] = (
+            raw["nodes"][right],
+            raw["nodes"][left],
+        )
+        reordered = load_neutral_json_bytes(study._bytes(raw))
+        assert control_layout_candidate_features(
+            model, inputs["request"]
+        ) == control_layout_candidate_features(reordered, inputs["request"])
+        assert reordered.nodes[inputs["request"].control_global_dof // 3]["id"] == "N4"
+        return reordered
+
+    inputs["baseline"] = swapped(inputs["baseline"])
+    inputs["candidates"] = tuple(
+        search.RCControlLayoutCandidate(
+            candidate.candidate_id, swapped(candidate.model)
+        )
+        for candidate in inputs["candidates"]
+    )
+    root = tmp_path / "reordered-supports"
+    result = _pin_layout_runner(mode)(
+        **inputs,
+        strategy="price_order",
+        output_directory=root,
+        **({"prefix_target_count": 1} if mode == "staged" else {}),
+    )
+    comparison = json.loads((root / "price_order/comparison.json").read_bytes())
+    assert result["arms"]["price_order"]["selected_candidate_id"] == "shorter"
+    for row in comparison["rows"]:
+        assert row["full_reference_verification_pass"] is True
+        assert all(not i["unknown_execution_work"] for i in row["invocations"])
+        api = json.loads(
+            (root / "price_order" / row["artifacts"]["result"]["path"]).read_bytes()
+        )
+        for response in api["response_history"]:
+            assert [
+                (r["node_id"], r["dof"], r["unit"])
+                for r in response["support_reactions"]
+            ] == [("N6", "UY", "N"), ("N2", "UX", "N"), ("N2", "UY", "N")]
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("reading original support order must not solve or fit")
+
+    monkeypatch.setattr(study, "_reference_design_row", forbidden)
+
+    def read(path, maximum, reference=None):
+        raw = (root / path).read_bytes()
+        assert len(raw) <= maximum
+        if reference is not None:
+            assert len(raw) == reference["byte_length"]
+            assert study._sha(raw) == reference["sha256"]
+        return raw
+
+    read_layout_search_graph(read, result)

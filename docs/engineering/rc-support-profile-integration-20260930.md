@@ -66,8 +66,8 @@ control node/component, and checks the horizontal chain, support roles, free
 control coordinate and load placement before accepting a verified row. The
 shared preload classifier recognizes direct v4 constant loads; durable v4
 submission still rejects constant preload. Shared layout/prefix readers preserve
-the profile, but the layout-search producer does not yet implement v4 and this
-change does not grant that capability.
+the profile. The subsequent price-order layout producer integration described
+below completes this direct, local path; v4 layout learning remains unsupported.
 
 A single gzip fixture preserves 52 exact Python producer originals (2,513,297
 uncompressed artifact bytes; 550,193 packet bytes), with per-file lengths and
@@ -84,8 +84,9 @@ applies to verified rows, so an invalid model cannot become a positive accepted
 result, and its original failure remains reviewable. Desktop/mobile tests import
 these originals and compare downloaded bytes; rehashed profile, opt-in, control,
 reaction, load, quantity and member-price contradictions remain rejected. These
-browser routes serve saved originals. A live HTTP pin/roller worker-to-Workbench
-execution and actual device response-time budgets remain open.
+browser routes serve saved originals. The subsequent live HTTP regression below
+checks the admitted no-preload path. Actual device response-time budgets remain
+open.
 
 ## Rejected idempotency conflicts create no request blobs
 
@@ -106,3 +107,70 @@ writer lock; authentication, immutable request hashing and job authority remain
 unchanged. This fixes this rejection path. It neither deletes historical orphan
 files nor establishes complete filesystem/SQLite atomicity or a production disk
 quota. Those storage and operating-budget obligations remain separate.
+
+## Actual HTTP submission, worker continuation and browser review
+
+The registered actual-HTTP browser suite now submits a complete canonical v4
+pin/roller request to the production WSGI application and dispatches the actual
+production worker in a separate Python interpreter. Its explicit execution mode
+admits only the two prepared small no-preload request byte strings. The default
+transport fixture and the new HTTP server still forbid numerical execution.
+Credentials are synthetic and listeners/stores are isolated to loopback and
+fresh temporary directories.
+
+After the first target is durably committed, the server process exits and a new
+interpreter reopens the same store. Original request, checkpoint and invocation
+bytes remain identical. A second fresh worker completes the second target.
+Checkpoint and result downloads in desktop/mobile review match the original
+worker bytes. A separately submitted full-path request runs through another
+production worker; its native terminal checkpoint, response history, material
+history and accepted claims match the split result. Call-through counters record
+four charged analysis/verification invocations and six kernel target calls for
+the split path, versus two invocations and four kernel target calls for the full
+path. These counters describe this authored two-target regression, not a speedup.
+
+The public HTTP schema rejects v4 preload and two-fixed-endpoint requests before
+execution. The pure preload contract regression separately checks rejection
+before model compilation. Exact retries, conflicting keys and cross-tenant
+reads retain their existing authentication and immutable-byte semantics.
+
+Worker children have a bounded execution wait, tracked termination and actual
+close confirmation. Failed or unreaped runs retain their durable store, including
+pending invocations, and attach stdout/stderr and original-file receipts.
+Successful runs remove only their own temporary store after all children close
+and receipt files are written. This verifies local software continuation and
+byte preservation; it does not establish deployment, hardware attestation,
+independent physical accuracy or real-device latency.
+
+## Direct price-order pin/roller layout producers
+
+Full, cost-pruned and prefix-staged price-order layout execution now forward the
+explicit pin/roller flag to feature extraction, physical identity, shape
+screening and quantity calculation. Direct constant preload is preserved in
+these local study paths. Accepted results still require the actual original
+analysis, fresh full reference and requested screens; a prefix result cannot
+become final acceptance or be reused silently as its full checkpoint.
+
+The v4 context also binds the authored global control DOF and preload node names
+to canonical physical node coordinates. Reordering declarations cannot silently
+change which physical point is controlled inside an otherwise equal context.
+The graph rereads each accepted v4 original and binds its declared request,
+compiler profile, control node, restrained-coordinate reactions and quantities.
+Reaction rows follow the compiler's authored node order. Legacy v1/v2/v3
+descriptor bytes and their existing context semantics are preserved; this change
+does not repair the separately observed legacy declaration-order ambiguity.
+
+Nine actual authored producer outputs (three execution modes, with and without
+direct preload, plus three reordered-support declarations) are retained as one
+compressed, per-file hashed fixture. Their
+source-revision field is an authored placeholder, not producer attestation;
+source manifests and executed test receipts separately identify the code used.
+Desktop/mobile tests import the exact originals through the shared layout reader
+and compare downloaded models, results, checkpoints, verification reports and
+search inputs. Rehashed contradictions in original requests, profiles, control
+nodes and reactions are rejected by the Python graph regression.
+
+V4 layout datasets and learned-order execution reject the unsupported compiler
+profile before writing outputs or fitting. The price-order integration neither
+adopts a cantilever policy nor claims AI benefit, equivalent building function,
+independent generalization, minimum real construction cost or release closure.
