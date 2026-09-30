@@ -101,6 +101,32 @@ export function fields(raw: string): Map<string, { member: string; value: string
     return [JSON.parse(key[1]), { member, value: member.slice(key[0].length).trim() }]
   }))
 }
+export interface RcFiberPhasePolicy {
+  readonly analysis_timeout_ms: number
+  readonly verification_timeout_ms: number
+  readonly termination_grace_ms: number
+}
+/** Validate the original authored policy tokens; JS numbers alone lose 1.0/1e0. */
+export function decodeRcFiberPhasePolicy(raw: string): RcFiberPhasePolicy {
+  const policy = document(new TextEncoder().encode(raw)).value
+  check(same(Object.keys(policy).sort(), [
+    'analysis_timeout_ms', 'schema_version', 'termination_grace_ms', 'verification_timeout_ms',
+  ]) && policy.schema_version === 'bounded-rc-fiber-phase-execution-policy.v1', 'phase_execution_policy_invalid')
+  const members = fields(raw)
+  for (const [key, maximum] of [
+    ['analysis_timeout_ms', 3600000], ['verification_timeout_ms', 3600000], ['termination_grace_ms', 5000],
+  ] as const) {
+    const value = policy[key], token = members.get(key)!.value
+    check(Number.isSafeInteger(value) && value >= 1 && value <= maximum
+      && /^(?:0|[1-9]\d*)$/.test(token), 'phase_execution_policy_invalid')
+  }
+  return Object.freeze({
+    analysis_timeout_ms: policy.analysis_timeout_ms,
+    verification_timeout_ms: policy.verification_timeout_ms,
+    termination_grace_ms: policy.termination_grace_ms,
+  })
+}
+
 export async function selfHash(raw: string, value: RcObject, key: string): Promise<void> {
   const members = fields(raw)
   check(members.has(key), 'hash_missing')
@@ -185,6 +211,10 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     }
   } else check(config.constant_nodal_loads === undefined, 'constant_loads_invalid')
   const execution = object(request.execution_config)
+  if (Object.prototype.hasOwnProperty.call(execution, 'phase_execution_policy')) {
+    const executionRaw = fields(requestDoc.raw).get('execution_config')!.value
+    decodeRcFiberPhasePolicy(fields(executionRaw).get('phase_execution_policy')!.value)
+  }
   check(execution.reuse_line_search_assembly === undefined || typeof execution.reuse_line_search_assembly === 'boolean', 'execution_reuse_invalid')
   const reuseProfile = execution.reuse_line_search_assembly === true ? 'rc-control-immediate-line-search-reuse.v1' : undefined
   check((pinRoller || config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`)

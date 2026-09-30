@@ -54,6 +54,9 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
     StatefulFiberFrame2DDisplacementControlStepAdapter,
     validate_stateful_fiber_frame2d_control_problem,
 )
+from structural_analysis.execution.rc_fiber_phase_policy import (
+    decode_rc_fiber_phase_policy,
+)
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.model.schema import CanonicalModel
 
@@ -293,6 +296,7 @@ def validate_rc_fiber_job_request(
             "chunk_target_count",
             "maximum_api_invocations",
             "reuse_line_search_assembly",
+            "phase_execution_policy",
         }
         or (
             "reuse_line_search_assembly" in execution
@@ -304,6 +308,8 @@ def validate_rc_fiber_job_request(
         or not 2 <= execution["maximum_api_invocations"] <= 4096
     ):
         raise ValueError("invalid RC durable execution configuration")
+    if "phase_execution_policy" in execution:
+        decode_rc_fiber_phase_policy(execution["phase_execution_policy"])
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
     if config.experimental_two_fixed_endpoints:
         raise ValueError("RC durable support/loading profile is unsupported")

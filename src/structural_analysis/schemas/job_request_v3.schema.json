@@ -60,6 +60,37 @@
         },
         "reuse_line_search_assembly": {
           "type": "boolean"
+        },
+        "phase_execution_policy": {
+          "description": "Optional explicitly authored RC phase isolation bounds. Semantic readers also require exact integer input types and reject float or exponent tokens; no defaults are supplied.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "analysis_timeout_ms",
+            "verification_timeout_ms",
+            "termination_grace_ms"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "bounded-rc-fiber-phase-execution-policy.v1"
+            },
+            "analysis_timeout_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600000
+            },
+            "verification_timeout_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600000
+            },
+            "termination_grace_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5000
+            }
+          }
         }
       }
     },

@@ -11,12 +11,17 @@ from __future__ import annotations
 import base64
 from dataclasses import replace
 import hashlib
+import signal
+import sys
 from threading import Event, Thread
 import time
 
 from structural_analysis.api import rc_fiber_frame_direct_control as api
 from structural_analysis.api.frame3d_direct_control_request import (
     strict_json_object_bytes,
+)
+from structural_analysis.execution.rc_fiber_phase_policy import (
+    decode_rc_fiber_phase_policy,
 )
 from structural_analysis.execution.job_service import (
     DurableJobService,
@@ -109,10 +114,12 @@ def execute_rc_fiber_direct_control_claim(
     """Run one immutable chunk per lease, then release or publish completion.
 
     The optional dispatcher budget must equal the authored chunk size. Cancellation
-    is between chunks. A lost lease cannot interrupt an in-flight solver, but it
-    prevents publishing into a replacement lease. Each outcome records API plus
-    artifact-extraction wall/process time; durable storage/transport costs are
-    separate and are not represented as solver time.
+    is between chunks. Requests without a phase policy retain in-process calls.
+    An authored Linux phase policy runs each API and its artifact export in a
+    fresh child, interrupting on its deadline or observed lease-keeper failure.
+    A lost lease never publishes into a replacement lease. Returned child wall
+    and CPU cover its API plus export; process launch, IPC and durable storage
+    are separate scopes. Interrupted or unmeasured work stays pending unknown.
     """
     if type(service) is not DurableJobService or type(claim) is not JobClaim:
         raise RCFiberDirectControlWorkerError(
@@ -171,7 +178,27 @@ def execute_rc_fiber_direct_control_claim(
             if rc_fiber_job_canonical_bytes(request) != claim.request_bytes:
                 raise ValueError("immutable request is not canonical JSON")
             model, config = validate_rc_fiber_job_request(request)
-            chunk_size = request["execution_config"]["chunk_target_count"]
+            execution = request["execution_config"]
+            phase_policy = (
+                decode_rc_fiber_phase_policy(execution["phase_execution_policy"])
+                if "phase_execution_policy" in execution
+                else None
+            )
+            if phase_policy is not None:
+                if sys.platform != "linux":
+                    raise RCFiberDirectControlWorkerError(
+                        "rc_fiber_worker_phase_platform_unsupported",
+                        "The authored phase execution policy requires a Linux worker.",
+                    )
+                if signal.getsignal(signal.SIGCHLD) != signal.SIG_DFL:
+                    raise RCFiberDirectControlWorkerError(
+                        "rc_fiber_worker_phase_reaping_unsupported",
+                        "Phase execution requires default SIGCHLD and exclusive child reaping.",
+                    )
+                from structural_analysis.execution import (
+                    rc_fiber_phase_supervisor as phase_runner,
+                )
+            chunk_size = execution["chunk_target_count"]
             if checkpoint_target_budget not in (None, chunk_size):
                 raise ValueError("dispatcher target budget changes the authored chunks")
             total, completed = len(config.targets_m), current.progress_completed
@@ -238,6 +265,140 @@ def execute_rc_fiber_direct_control_claim(
                     "error": None,
                     "unavailable_execution_work": True,
                 }
+                if phase_policy is not None:
+                    try:
+                        reply = phase_runner.run_rc_fiber_phase(
+                            phase=phase,
+                            request_bytes=claim.request_bytes,
+                            completed_before=completed,
+                            completed_after=stop,
+                            restart=restart,
+                            result=raw if phase == "verification" else None,
+                            checkpoint=checkpoint if phase == "verification" else None,
+                            policy=phase_policy,
+                            lease_check=lease.check,
+                        )
+                    except phase_runner.RCFiberPhaseError as error:
+                        # A killed, missing, malformed or late reply has no
+                        # measured child outcome. Its spent ordinal stays unknown.
+                        raise RCFiberDirectControlWorkerError(
+                            error.code, error.detail
+                        ) from error
+                    if reply.status == "raised":
+                        try:
+                            outcome["timing"] = reply.timing
+                            outcome["error"] = {"type": reply.error_type}
+                            report = reply.artifact_error_report
+                            if report is not None:
+                                artifact_error = (
+                                    api.BoundedRCFiberDirectControlArtifactError(
+                                        report["failure"],
+                                        {
+                                            "model": report["model"],
+                                            "request": report["request"],
+                                            "status": report["computed_path_status"],
+                                            "metrics": report["execution_metrics"],
+                                        },
+                                    )
+                                )
+                                if artifact_error.to_dict() != report:
+                                    raise ValueError(
+                                        "child artifact-error reconstruction changed"
+                                    )
+                                outcome["error"]["report"] = report
+                        except (
+                            KeyError,
+                            TypeError,
+                            ValueError,
+                            AttributeError,
+                            RecursionError,
+                        ) as error:
+                            raise RCFiberDirectControlWorkerError(
+                                f"rc_fiber_worker_{phase}_transport_invalid",
+                                "Child exception report could not be reconstructed exactly.",
+                            ) from error
+                        service.record_rc_invocation_outcome(
+                            job_id, **credentials, ordinal=ordinal, outcome=outcome
+                        )
+                        if report is not None:
+                            raise artifact_error
+                        error_types = {
+                            "ValueError": ValueError,
+                            "TypeError": TypeError,
+                            "KeyError": KeyError,
+                            "RecursionError": RecursionError,
+                            "RuntimeError": RuntimeError,
+                            "OverflowError": OverflowError,
+                            "MemoryError": MemoryError,
+                        }
+                        error_type = error_types.get(reply.error_type, RuntimeError)
+                        raise error_type(f"RC {phase} child raised {reply.error_type}.")
+                    try:
+                        if phase == "analysis":
+                            child_result = api.BoundedRCFiberDirectControlResult(
+                                reply.raw_result, reply.native_checkpoint
+                            )
+                            child_payload = child_result.to_dict()
+                            value = (
+                                child_result,
+                                child_payload,
+                                reply.raw_result,
+                                reply.native_checkpoint,
+                            )
+                            fields = {
+                                "api_result": child_payload,
+                                "checkpoint_artifact_base64": (
+                                    base64.b64encode(reply.native_checkpoint).decode(
+                                        "ascii"
+                                    )
+                                    if reply.native_checkpoint is not None
+                                    else None
+                                ),
+                                "unavailable_execution_work": (
+                                    child_payload["metrics"].get(
+                                        "unavailable_execution_work", False
+                                    )
+                                    or child_payload["metrics"].get("control_work")
+                                    is None
+                                    or (
+                                        child_payload["metrics"].get("control_work")
+                                        or {}
+                                    ).get("unknown_solver_work_attempt_count", 0)
+                                    > 0
+                                ),
+                            }
+                        else:
+                            value = reply.verification_report
+                            fields = {
+                                "verification_report": value,
+                                "unavailable_execution_work": (
+                                    value["unavailable_execution_work"]
+                                    or (value.get("replay_control_work") or {}).get(
+                                        "unknown_solver_work_attempt_count", 0
+                                    )
+                                    > 0
+                                ),
+                            }
+                        child_timing = reply.timing
+                    except (
+                        KeyError,
+                        TypeError,
+                        ValueError,
+                        AttributeError,
+                        RecursionError,
+                    ) as error:
+                        raise RCFiberDirectControlWorkerError(
+                            f"rc_fiber_worker_{phase}_transport_invalid",
+                            "Child result or verification report could not be reconstructed.",
+                        ) from error
+                    outcome.update(fields)
+                    outcome["status"] = "returned"
+                    outcome["timing"] = child_timing
+                    service.record_rc_invocation_outcome(
+                        job_id, **credentials, ordinal=ordinal, outcome=outcome
+                    )
+                    lease.check()
+                    return value, outcome, ordinal
                 wall, cpu = time.perf_counter_ns(), time.process_time_ns()
                 try:
                     value, fields = call()
