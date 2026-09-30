@@ -1,0 +1,725 @@
+"""Small synthetic contracts; no historical data, structural solve or campaign."""
+
+from copy import deepcopy
+from dataclasses import FrozenInstanceError, replace
+import importlib
+import json
+from pathlib import Path
+
+import pytest
+
+from structural_analysis.ai.fiber_frame_warm_start_features import (
+    FiberFrameWarmStartModelFeatures,
+)
+from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+from structural_analysis.benchmark.rc_control_learning import RCControlSeedPolicy
+from structural_analysis.benchmark.rc_control_seed_runtime import RCControlSeedContext
+
+
+def _hash(index):
+    return f"sha256:{index:064x}"
+
+
+@pytest.fixture
+def gate_module(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    return importlib.import_module("rc_prior_work_cost_margin_gate")
+
+
+def _model():
+    return FiberFrameWarmStartModelFeatures(_hash(1), _hash(2), ("width",), (0.4,))
+
+
+def _context():
+    return RCControlSeedContext(
+        _hash(1), 7, 0, 0.003, (0.001, 0.002), ((0.001, 1.0), (0.002, 2.0))
+    )
+
+
+def _seed_policy():
+    """Declared tiny zero-correction policy; no fit or numerical replay."""
+    payload = dict(
+        schema_version="experimental-rc-control-secant-correction-policy.v1",
+        model_context_hash=_hash(2),
+        model_feature_names=["width"],
+        free_global_dofs=[7],
+        control_free_index=0,
+        solver_config_hash=_hash(6),
+        feature_mean=[0.0] * 9,
+        feature_scale=[1.0] * 9,
+        feature_min=[-10.0] * 9,
+        feature_max=[10.0] * 9,
+        target_scale=[1.0, 1.0],
+        weights=[[0.0, 0.0] for _ in range(10)],
+        training_sample_hashes=[_hash(30), _hash(31)],
+        ridge=10000.0,
+        ood_margin=0.1,
+    )
+    payload["policy_hash"] = _sha(_bytes(payload))
+    return RCControlSeedPolicy(_bytes(payload).decode())
+
+
+def _gate(gate_module):
+    """Synthetic constant cost score with the exact new profile layout."""
+    prefix = importlib.import_module("rc_switch_prefix_features")
+    features = prefix.prefix_features(_context(), _model())
+    names = features["feature_names"] + [
+        "prior_work." + name for name in prefix.PRIOR_WORK_COUNTERS
+    ]
+    values = features["values"] + [1.0, 4.0, 4.0, 9.0, 2.0, 0.0]
+    payload = dict(
+        schema_version=gate_module.SCHEMA,
+        feature_profile=prefix.PRIOR_WORK_PROFILE,
+        feature_names=names,
+        mean=values,
+        scale=[1.0] * len(values),
+        minimum=values,
+        maximum=values,
+        weights=[0.0] * len(values) + [0.02],
+        ridge=1.0,
+        threshold=0.01,
+        outer_group_index=0,
+        excluded_case_ids=["outer", "validation"],
+        training_sample_hashes=[_hash(11)],
+        positive_count=1,
+        negative_count=0,
+        training_rows_hash=_hash(12),
+        seed_policy_hash=_seed_policy().policy_hash,
+    )
+    payload["policy_hash"] = _sha(_bytes(payload))
+    return gate_module.PriorWorkCostMarginGate(_bytes(payload).decode())
+
+
+def test_legacy_prefix_function_has_exact_original_values_and_profile(gate_module):
+    prefix = importlib.import_module("rc_switch_prefix_features")
+    expected = dict(
+        profile="rc-switch-accepted-prefix-features.v1",
+        feature_names=[
+            "model.width",
+            "target_m",
+            "target_increment_m",
+            "previous_target_increment_m",
+            "last_coordinate_0",
+            "last_coordinate_1",
+            "coordinate_increment_0",
+            "coordinate_increment_1",
+        ],
+        values=[0.4, 0.003, 0.001, 0.001, 0.002, 2.0, 0.001, 1.0],
+    )
+    assert _bytes(prefix.prefix_features(_context(), _model())) == _bytes(expected)
+    material = replace(
+        _context(), committed_material_state_json="ignored material payload"
+    )
+    assert _bytes(prefix.prefix_features(material, _model())) == _bytes(expected)
+
+
+def test_bound_policy_retains_fixed_cost_profile_and_immutable_actual_bindings(
+    gate_module,
+):
+    gate = _gate(gate_module)
+    assert gate._payload["ridge"] == 1.0
+    assert gate._payload["threshold"] == 0.01
+    assert gate.seed_policy_hash == _seed_policy().policy_hash
+    assert gate.excluded_case_ids == ("outer", "validation")
+    assert (
+        gate.decision(
+            dict(
+                profile=gate._feature_profile,
+                feature_names=list(gate._payload["feature_names"]),
+                values=list(gate._payload["mean"]),
+            )
+        )
+        is True
+    )
+    with pytest.raises(TypeError):
+        gate._payload["seed_policy_hash"] = _hash(99)
+    with pytest.raises(TypeError):
+        gate._payload["weights"][-1] = 0.0
+    with pytest.raises(FrozenInstanceError):
+        gate._json = "{}"
+    with pytest.raises(ValueError):
+        importlib.import_module("rc_cost_margin_gate").CostMarginGate(gate._json)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "seed",
+        "weights",
+        "unknown_field",
+        "missing_field",
+        "duplicate",
+        "counter_layout",
+        "identity_feature",
+        "threshold",
+        "ridge",
+        "boolean",
+    ],
+)
+def test_bound_policy_rejects_hash_tampering_ambiguous_or_foreign_contract(
+    gate_module, mutation
+):
+    gate = _gate(gate_module)
+    payload = json.loads(gate._json)
+    if mutation == "seed":
+        payload["seed_policy_hash"] = _hash(99)
+    elif mutation == "weights":
+        payload["weights"][-1] += 1
+    elif mutation == "unknown_field":
+        payload["target_outcome"] = "future"
+    elif mutation == "missing_field":
+        payload.pop("seed_policy_hash")
+    elif mutation == "duplicate":
+        with pytest.raises(ValueError):
+            gate_module.PriorWorkCostMarginGate(
+                '{"seed_policy_hash":"foreign",' + gate._json[1:]
+            )
+        return
+    elif mutation == "counter_layout":
+        payload["feature_names"][-1] = "prior_work.wall_ns"
+    elif mutation == "identity_feature":
+        payload["feature_names"][1] = "arm_identity"
+    elif mutation == "threshold":
+        payload["threshold"] = 0.001
+    elif mutation == "ridge":
+        payload["ridge"] = 0.1
+    else:
+        payload["mean"][0] = True
+    if mutation not in ("seed", "weights"):
+        payload.pop("policy_hash")
+        payload["policy_hash"] = _sha(_bytes(payload))
+    with pytest.raises(ValueError):
+        gate_module.PriorWorkCostMarginGate(_bytes(payload).decode())
+
+
+def test_guard_missing_checked_predecessor_abstains_exactly(gate_module):
+    gate = _gate(gate_module)
+    assert gate.guard(_model())(_context()) is False
+    assert gate.guard(_model())(None) is False
+
+
+def test_factory_returns_only_exact_seed_and_exclusion_bound_guard(gate_module):
+    gate = _gate(gate_module)
+    result = gate_module.prior_work_guard_binding(
+        gate,
+        policy=_seed_policy(),
+        model_features=_model(),
+        excluded_case_ids=("outer", "validation"),
+    )
+    assert set(result) == {
+        "guard",
+        "guard_identity",
+        "seed_policy_hash",
+        "excluded_case_ids",
+    }
+    assert result["guard_identity"] == gate.policy_hash
+    assert result["seed_policy_hash"] == gate.seed_policy_hash
+    assert type(result["excluded_case_ids"]) is tuple
+    assert callable(result["guard"])
+    assert result["guard"](_context()) is False
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["seed", "exclusions", "order", "tuple", "model", "names", "opaque_policy"],
+)
+def test_factory_rejects_foreign_fold_or_mutable_exclusion_claim(gate_module, mutation):
+    gate, policy, model, excluded = (
+        _gate(gate_module),
+        _seed_policy(),
+        _model(),
+        ("outer", "validation"),
+    )
+    if mutation == "seed":
+        payload = policy.to_dict()
+        payload["weights"][0][0] = 1.0
+        payload.pop("policy_hash")
+        payload["policy_hash"] = _sha(_bytes(payload))
+        policy = RCControlSeedPolicy(_bytes(payload).decode())
+    elif mutation == "exclusions":
+        excluded = ("outer",)
+    elif mutation == "order":
+        excluded = ("validation", "outer")
+    elif mutation == "tuple":
+        excluded = ["outer", "validation"]
+    elif mutation == "model":
+        model = replace(model, context_hash=_hash(99))
+    elif mutation == "names":
+        model = replace(model, feature_names=("height",))
+    else:
+        from types import SimpleNamespace
+
+        policy = SimpleNamespace(policy_hash=gate.seed_policy_hash)
+    with pytest.raises(ValueError):
+        gate_module.prior_work_guard_binding(
+            gate, policy=policy, model_features=model, excluded_case_ids=excluded
+        )
+
+
+def test_online_individual_bounds_decline_without_threshold_changes(gate_module):
+    gate = _gate(gate_module)
+    feature = dict(
+        profile=gate._feature_profile,
+        feature_names=list(gate._payload["feature_names"]),
+        values=list(gate._payload["mean"]),
+    )
+    feature["values"][-6] += 1.0
+    assert gate.decision(feature) is False
+
+
+@pytest.mark.parametrize(
+    "value", [True, "1", None, -1, 1.5, float("nan"), float("inf"), 2**53]
+)
+def test_direct_decision_requires_known_exact_counter_values(gate_module, value):
+    gate = _gate(gate_module)
+    feature = dict(
+        profile=gate._feature_profile,
+        feature_names=list(gate._payload["feature_names"]),
+        values=list(gate._payload["mean"]),
+    )
+    feature["values"][-6] = value
+    with pytest.raises(ValueError):
+        gate.decision(feature)
+
+
+def test_direct_decision_rejects_identity_or_outcome_as_an_extra_feature_field(
+    gate_module,
+):
+    gate = _gate(gate_module)
+    feature = dict(
+        profile=gate._feature_profile,
+        feature_names=list(gate._payload["feature_names"]),
+        values=list(gate._payload["mean"]),
+        arm_identity=_hash(90),
+    )
+    with pytest.raises(ValueError):
+        gate.decision(feature)
+
+
+def _codec_context(**kwargs):
+    from tests.test_rc_control_prior_work import synthetic_prior_context
+
+    return synthetic_prior_context(**kwargs)
+
+
+def _codec_model(context, width=0.4):
+    return replace(
+        _model(), problem_contract_hash=context.problem_contract_hash, values=(width,)
+    )
+
+
+def _change_original(context, name, mutation):
+    from tests.test_rc_control_prior_work import _change_original as change
+
+    return change(context, name, mutation)
+
+
+def _tables_and_inputs(gate_module, *, ratios=(0.98, 0.98), widths=(0.4, 0.4)):
+    """Only tiny schema-shaped codec records; never observed solver work."""
+    prefix = importlib.import_module("rc_switch_prefix_features")
+    labels = importlib.import_module("audit_rc_nested_switch_labels")
+    cost = importlib.import_module("rc_cost_margin_gate")
+    context = _codec_context()
+    cases = ("train-a", "train-b", "validation")
+    rows, sources, names = [], [], None
+    for index, case in enumerate(cases):
+        model = _codec_model(context, widths[index] if index < 2 else 0.4)
+        feature = prefix.prefix_features(context, model)
+        names = feature["feature_names"]
+        ratio = ratios[index] if index < 2 else 0.98
+        repetitions = [
+            dict(
+                repetition=i,
+                comparison_pass=True,
+                decision="proposed",
+                path_time_ratio=ratio,
+                report_hash=_hash(40 + index * 3 + i),
+            )
+            for i in range(3)
+        ]
+        row = dict(
+            case_id=case,
+            source_sample_hash=_hash(11 + index),
+            parent_hash=context.prior_work_binding["current_parent_hash"],
+            seed_fit_index=index,
+            policy_hash=_hash(21 + index),
+            values=feature["values"],
+            label=labels.label_from_repetitions(repetitions)["label"],
+            cost_repetitions=repetitions,
+            cost_target=cost.cost_target(repetitions),
+        )
+        rows.append(row)
+        sources.append(
+            {
+                **{
+                    key: row[key]
+                    for key in (
+                        "case_id",
+                        "source_sample_hash",
+                        "parent_hash",
+                        "seed_fit_index",
+                        "policy_hash",
+                    )
+                },
+                "prior_work_context": json.loads(_bytes(context.to_dict())),
+                "model_features": model.to_dict(),
+            }
+        )
+    training = dict(
+        outer_group_index=0,
+        validation_group_index=1,
+        excluded_case_ids=["outer", "validation"],
+        feature_profile=prefix.PROFILE,
+        feature_names=list(names),
+        cost_target_profile=cost.TARGET_PROFILE,
+        training_rows=rows[:2],
+        unverified_rows=[],
+        verified_positive_count=sum(row["label"] is True for row in rows[:2]),
+        verified_negative_count=sum(row["label"] is False for row in rows[:2]),
+        normalization_scope="verified training rows only; no validation statistics",
+        gate_fitted=False,
+        independent_evaluation=False,
+    )
+    validation = dict(
+        outer_group_index=0,
+        validation_group_index=1,
+        feature_profile=prefix.PROFILE,
+        feature_names=list(names),
+        rows=rows[2:],
+        unverified_count=0,
+        declared_row_count=1,
+        independent_evaluation=False,
+    )
+    return dict(training=training, validation=validation), dict(
+        schema_version=gate_module.JOIN_PROFILE, rows=sources
+    )
+
+
+def _fitted_codec_gate(gate_module):
+    tables, inputs = _tables_and_inputs(gate_module)
+    joined = gate_module.append_prior_work_inputs(
+        tables, inputs, seed_policy_hash=_seed_policy().policy_hash
+    )
+    gate, receipt = gate_module.fit_prior_work_cost_gate(joined["training"])
+    return gate, receipt, joined
+
+
+def test_new_feature_profile_uses_all_retried_previous_work_and_no_identity_scalars(
+    gate_module,
+):
+    prefix = importlib.import_module("rc_switch_prefix_features")
+    context = _codec_context(retries=2)
+    model = _codec_model(context)
+    legacy = prefix.prefix_features(context, model)
+    features = prefix.prefix_prior_work_features(context, model)
+    assert features["profile"] == prefix.PRIOR_WORK_PROFILE
+    assert features["feature_names"] == legacy["feature_names"] + [
+        "prior_work." + name for name in prefix.PRIOR_WORK_COUNTERS
+    ]
+    assert features["values"] == legacy["values"] + [3.0, 9.0, 6.0, 9.0, 3.0, 3.0]
+    assert all(type(value) is float for value in features["values"])
+    assert not any(
+        "identity" in name
+        or "hash" in name
+        or "epoch" in name
+        or "wall" in name
+        or "outcome" in name
+        for name in features["feature_names"]
+    )
+
+
+def test_consistent_identity_changes_do_not_change_numeric_features_or_authenticate_data(
+    gate_module,
+):
+    prefix = importlib.import_module("rc_switch_prefix_features")
+    context = _codec_context()
+    model = _codec_model(context)
+    expected = prefix.prefix_prior_work_features(context, model)
+    binding = dict(context.prior_work_binding)
+    for index, key in enumerate(
+        ("arm_identity", "request_hash", "source_binding_hash")
+    ):
+        binding[key] = _hash(80 + index)
+    record = deepcopy(context.prior_accepted_transition_work)
+    record["binding"] = binding
+    consistent = replace(
+        context, prior_work_binding=binding, prior_accepted_transition_work=record
+    )
+    # Internal consistency permits this authored transport change. This is why
+    # an external source auditor, not this feature vector, authenticates inputs.
+    assert prefix.prefix_prior_work_features(consistent, model) == expected
+
+
+def test_valid_online_callback_uses_new_profile_while_unrecorded_dispatches_abstain(
+    gate_module,
+):
+    gate, receipt, _ = _fitted_codec_gate(gate_module)
+    context = _codec_context()
+    guard = gate.guard(_codec_model(context))
+    assert guard(context) is True
+    assert guard(_codec_context(assembly=False)) is False
+    assert receipt["predecessor_counter_authenticity_established"] is False
+    assert receipt["historical_training_admitted"] is False
+    assert receipt["online_extraction_cost_in_target"] is False
+    assert receipt["independent_evaluation"] is False
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing",
+        "first",
+        "foreign",
+        "future",
+        "unknown",
+        "missing_metric",
+        "inexact_counter",
+        "counter_mismatch",
+        "partial_dispatch",
+        "current_outcome",
+        "bool_target",
+        "string_target",
+    ],
+)
+def test_new_callback_strictly_abstains_on_unchecked_foreign_future_unknown_or_inexact_work(
+    gate_module, mutation
+):
+    gate, _, _ = _fitted_codec_gate(gate_module)
+    context = _codec_context()
+    model = _codec_model(context)
+    if mutation == "missing":
+        context = replace(context, prior_accepted_transition_work=None)
+    elif mutation == "first":
+        context = replace(
+            context,
+            accepted_targets_m=(0.0,),
+            accepted_augmented_coordinates_m=((0.0, 0.0),),
+        )
+    elif mutation == "foreign":
+        record = deepcopy(context.prior_accepted_transition_work)
+        record["binding"]["arm_identity"] = _hash(99)
+        context = replace(context, prior_accepted_transition_work=record)
+    elif mutation == "future":
+        binding = dict(context.prior_work_binding, current_parent_epoch=2)
+        record = deepcopy(context.prior_accepted_transition_work)
+        record["binding"] = binding
+        context = replace(
+            context, prior_work_binding=binding, prior_accepted_transition_work=record
+        )
+    elif mutation == "unknown":
+        context = _change_original(
+            context, "outcome", lambda v: v.update(unknown_work=True)
+        )
+    elif mutation == "missing_metric":
+        context = _change_original(
+            context,
+            "step",
+            lambda v: v["trial_solution"]["metrics"].pop("linear_solve_count"),
+        )
+    elif mutation == "inexact_counter":
+        context = _change_original(
+            context, "outcome", lambda v: v["work"].update(core_calls=True)
+        )
+    elif mutation == "counter_mismatch":
+        context = _change_original(
+            context, "outcome", lambda v: v["work"].update(newton_iterations=99)
+        )
+    elif mutation == "partial_dispatch":
+        context = _change_original(
+            context,
+            "outcome",
+            lambda v: v["newton_assembly_work"]["calls"][0].update(status="started"),
+        )
+    elif mutation == "current_outcome":
+        record = deepcopy(context.prior_accepted_transition_work)
+        record["current_target_outcome"] = {"newton_iterations": 1}
+        context = replace(context, prior_accepted_transition_work=record)
+    elif mutation == "bool_target":
+        context = replace(context, target_m=True)
+    else:
+        context = replace(context, target_m="0.2")
+    assert gate.guard(model)(context) is False
+
+
+def test_pure_fit_keeps_known_ridge_solution_and_train_only_normalization(gate_module):
+    tables, inputs = _tables_and_inputs(
+        gate_module, ratios=(1.25, 0.5), widths=(0.2, 0.6)
+    )
+    joined = gate_module.append_prior_work_inputs(
+        tables, inputs, seed_policy_hash=_seed_policy().policy_hash
+    )
+    gate, receipt = gate_module.fit_prior_work_cost_gate(joined["training"])
+    assert gate._payload["mean"][0] == pytest.approx(0.4)
+    assert gate._payload["scale"][0] == pytest.approx(0.2)
+    assert gate._payload["weights"][0] == pytest.approx(0.25)
+    assert gate._payload["weights"][-1] == pytest.approx(0.125)
+    assert gate._payload["weights"][1:-1] == pytest.approx(
+        [0.0] * (len(gate._payload["feature_names"]) - 1), abs=1e-14
+    )
+    assert gate._payload["excluded_case_ids"] == ("outer", "validation")
+    assert gate._payload["training_sample_hashes"] == (_hash(11), _hash(12))
+    assert receipt["target_profile"] == "minimum-three-repeat-relative-time-margin.v1"
+    assert receipt["gate_cost_in_training_target"] is False
+
+
+def test_excluded_validation_perturbation_cannot_change_training_bytes_stats_weights_or_policy_hash(
+    gate_module,
+):
+    tables, inputs = _tables_and_inputs(gate_module)
+    joined = gate_module.append_prior_work_inputs(
+        tables, inputs, seed_policy_hash=_seed_policy().policy_hash
+    )
+    gate, _ = gate_module.fit_prior_work_cost_gate(joined["training"])
+    changed_tables, changed_inputs = deepcopy(tables), deepcopy(inputs)
+    context = replace(_codec_context(), target_m=0.8)
+    model = _codec_model(context, 100.0)
+    feature = importlib.import_module("rc_switch_prefix_features").prefix_features(
+        context, model
+    )
+    changed_tables["validation"]["rows"][0]["values"] = feature["values"]
+    changed_tables["validation"]["rows"][0]["label"] = False
+    changed_tables["validation"]["rows"][0]["cost_target"] = -1.0
+    for repeat in changed_tables["validation"]["rows"][0]["cost_repetitions"]:
+        repeat["path_time_ratio"] = 2.0
+    changed_inputs["rows"][-1]["prior_work_context"] = json.loads(
+        _bytes(context.to_dict())
+    )
+    changed_inputs["rows"][-1]["model_features"] = model.to_dict()
+    changed = gate_module.append_prior_work_inputs(
+        changed_tables, changed_inputs, seed_policy_hash=_seed_policy().policy_hash
+    )
+    changed_gate, _ = gate_module.fit_prior_work_cost_gate(changed["training"])
+    assert changed["validation"] != joined["validation"]
+    assert _bytes(changed["training"]) == _bytes(joined["training"])
+    assert changed_gate._json == gate._json
+    assert changed_gate.policy_hash == gate.policy_hash
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing",
+        "duplicate",
+        "foreign_sample",
+        "foreign_policy",
+        "foreign_seed",
+        "case",
+        "parent",
+        "prefix",
+        "context_hash",
+        "unrecorded",
+        "future_field",
+    ],
+)
+def test_complete_pure_join_rejects_missing_foreign_parent_or_unchecked_inputs(
+    gate_module, mutation
+):
+    tables, inputs = _tables_and_inputs(gate_module)
+    row = inputs["rows"][0]
+    if mutation == "missing":
+        inputs["rows"].pop()
+    elif mutation == "duplicate":
+        inputs["rows"][-1] = deepcopy(row)
+    elif mutation == "foreign_sample":
+        row["source_sample_hash"] = _hash(99)
+    elif mutation == "foreign_policy":
+        row["policy_hash"] = _hash(99)
+    elif mutation == "foreign_seed":
+        row["seed_fit_index"] = True
+    elif mutation == "case":
+        row["case_id"] = "foreign"
+    elif mutation == "parent":
+        row["parent_hash"] = tables["training"]["training_rows"][0]["parent_hash"] = (
+            _hash(99)
+        )
+    elif mutation == "prefix":
+        tables["training"]["training_rows"][0]["values"][1] += 1
+    elif mutation == "context_hash":
+        row["model_features"]["feature_hash"] = _hash(99)
+    elif mutation == "unrecorded":
+        row["prior_work_context"] = json.loads(
+            _bytes(_codec_context(assembly=False).to_dict())
+        )
+    else:
+        row["current_target_work"] = {"linear_solves": 1}
+    with pytest.raises(ValueError):
+        gate_module.append_prior_work_inputs(
+            tables, inputs, seed_policy_hash=_seed_policy().policy_hash
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "excluded",
+        "values",
+        "boolean",
+        "target",
+        "label",
+        "profile",
+        "future_row_field",
+        "whole_packet_field",
+        "seed_hash",
+        "counts",
+        "promoted",
+    ],
+)
+def test_pure_fit_rechecks_causal_inputs_exclusions_original_targets_and_no_global_packet(
+    gate_module, mutation
+):
+    _, _, tables = _fitted_codec_gate(gate_module)
+    training = deepcopy(tables["training"])
+    row = training["training_rows"][0]
+    if mutation == "excluded":
+        row["case_id"] = "validation"
+    elif mutation == "values":
+        row["values"][-6] += 1.0
+    elif mutation == "boolean":
+        row["values"][-6] = True
+    elif mutation == "target":
+        row["cost_target"] = 0.5
+    elif mutation == "label":
+        row["label"] = False
+    elif mutation == "profile":
+        training["cost_target_profile"] = "tuned"
+    elif mutation == "future_row_field":
+        row["current_target_work"] = {"newton_iterations": 1}
+    elif mutation == "whole_packet_field":
+        training["source_packet_with_validation"] = {"values": [999.0]}
+    elif mutation == "seed_hash":
+        training["seed_policy_hash"] = "foreign"
+    elif mutation == "counts":
+        training["verified_positive_count"] = True
+    else:
+        training["gate_fitted"] = True
+    with pytest.raises(ValueError):
+        gate_module.fit_prior_work_cost_gate(training)
+
+
+def test_unknown_current_target_label_stays_in_denominator_and_out_of_normalization(
+    gate_module,
+):
+    tables, inputs = _tables_and_inputs(gate_module)
+    row = tables["training"]["training_rows"].pop()
+    row["label"], row["cost_target"] = None, None
+    row["cost_repetitions"][0].update(comparison_pass=False, path_time_ratio=None)
+    model = _codec_model(_codec_context(), 100.0)
+    row["values"] = importlib.import_module(
+        "rc_switch_prefix_features"
+    ).prefix_features(_codec_context(), model)["values"]
+    inputs["rows"][1]["model_features"] = model.to_dict()
+    tables["training"]["unverified_rows"] = [row]
+    tables["training"]["verified_positive_count"] = 1
+    joined = gate_module.append_prior_work_inputs(
+        tables, inputs, seed_policy_hash=_seed_policy().policy_hash
+    )
+    gate, receipt = gate_module.fit_prior_work_cost_gate(joined["training"])
+    assert receipt["verified_rows"] == 1
+    assert receipt["unverified_rows_excluded"] == 1
+    assert len(joined["training"]["unverified_rows"]) == 1
+    assert gate._payload["mean"][0] == 0.4
+    assert gate._payload["minimum"][0] == gate._payload["maximum"][0] == 0.4
+    assert gate._payload["training_sample_hashes"] == (_hash(11),)
+    joined["training"]["unverified_rows"][0]["cost_target"] = 0.0
+    with pytest.raises(ValueError, match="unknown cost denominator"):
+        gate_module.fit_prior_work_cost_gate(joined["training"])

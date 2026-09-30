@@ -991,8 +991,10 @@ def test_connected_runtime_fits_exclude_every_related_case(original, tmp_path):
         defer_evaluation=True,
     )
     assert labels["evaluation_deferred"] is True
-    assert all(row["reason"] == "evaluation_explicitly_deferred"
-               for row in labels["evaluation"])
+    assert all(
+        row["reason"] == "evaluation_explicitly_deferred"
+        for row in labels["evaluation"]
+    )
     assert labels["evaluation_work"]["known_work"]["core_calls"] == 0
     policy = learning.RCControlSeedPolicy(json.dumps(labels["policy"]))
     samples = json.loads((tmp_path / "labels/training-samples.json").read_bytes())
@@ -1051,23 +1053,369 @@ def test_constant_safe_runtime_selection_refits_preserve_opt_in_profile(
 
 
 @pytest.mark.parametrize("enabled", [False, True])
-def test_initial_observation_option_reaches_every_fold(tmp_path, original, monkeypatch, enabled):
+def test_initial_observation_option_reaches_every_fold(
+    tmp_path, original, monkeypatch, enabled
+):
     seen = []
     real = learning.benchmark_rc_control_seed_paths
+
     def observe(*args, **kwargs):
-        seen.append(kwargs.get('observe_initial_residuals', False))
+        seen.append(kwargs.get("observe_initial_residuals", False))
         return real(*args, **kwargs)
-    monkeypatch.setattr(learning, 'benchmark_rc_control_seed_paths', observe)
-    result = run(tmp_path / 'observed', original, ridge_grid=(1e4,),
-                 observe_initial_residuals=enabled)
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", observe)
+    result = run(
+        tmp_path / "observed",
+        original,
+        ridge_grid=(1e4,),
+        observe_initial_residuals=enabled,
+    )
     assert seen == [enabled, enabled]
-    assert result.get('observe_initial_residuals', False) is enabled
+    assert result.get("observe_initial_residuals", False) is enabled
 
 
-@pytest.mark.parametrize("enabled", [None, 1, 'true'])
+@pytest.mark.parametrize("enabled", [None, 1, "true"])
 def test_initial_observation_option_rejects_before_fit(tmp_path, enabled):
-    with pytest.raises(ValueError, match='boolean initial residual'):
-        selection.run_rc_control_runtime_selection(None, None, None,
-            source_revision='a'*40, output_directory=tmp_path/'invalid',
-            ridge_grid=(1e4,), observe_initial_residuals=enabled)
-    assert not (tmp_path/'invalid').exists()
+    with pytest.raises(ValueError, match="boolean initial residual"):
+        selection.run_rc_control_runtime_selection(
+            None,
+            None,
+            None,
+            source_revision="a" * 40,
+            output_directory=tmp_path / "invalid",
+            ridge_grid=(1e4,),
+            observe_initial_residuals=enabled,
+        )
+    assert not (tmp_path / "invalid").exists()
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"proposal_guard_factory": lambda **kwargs: None},
+        {"proposal_guard_factory_identity": "sha256:" + "b" * 64},
+        {
+            "proposal_guard_factory": 1,
+            "proposal_guard_factory_identity": "sha256:" + "b" * 64,
+        },
+        {
+            "proposal_guard_factory": lambda **kwargs: None,
+            "proposal_guard_factory_identity": "b" * 64,
+        },
+        {
+            "proposal_guard_factory": lambda **kwargs: None,
+            "proposal_guard_factory_identity": "sha256:" + "b" * 64,
+        },
+        {"record_prior_accepted_transition_work": 1},
+        {"record_prior_accepted_transition_work": None},
+        {"record_prior_accepted_transition_work": True},
+    ],
+)
+def test_guard_and_prior_work_options_reject_before_inputs_or_output(tmp_path, options):
+    root = tmp_path / "invalid"
+    with pytest.raises(ValueError):
+        selection.run_rc_control_runtime_selection(
+            None,
+            None,
+            None,
+            source_revision="a" * 40,
+            output_directory=root,
+            ridge_grid=(1e4,),
+            **options,
+        )
+    assert not root.exists()
+
+
+def _guard_factory(*, policy, model_features, excluded_case_ids):
+    return {
+        "guard": lambda context: True,
+        "guard_identity": "sha256:" + "b" * 64,
+        "seed_policy_hash": policy.policy_hash,
+        "excluded_case_ids": excluded_case_ids,
+    }
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"seed_policy_hash": "sha256:" + "c" * 64},
+        {"excluded_case_ids": ("foreign-case",)},
+        {"excluded_case_ids": ["train-a"]},
+        {"guard_identity": True},
+        {"guard": None},
+        {"unexpected": True},
+    ],
+)
+def test_foreign_guard_binding_stops_before_held_path(
+    tmp_path, original, monkeypatch, change
+):
+    def forbidden(*args, **kwargs):
+        pytest.fail("a foreign guard must not execute the withheld path")
+
+    def factory(**kwargs):
+        return _guard_factory(**kwargs) | change
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", forbidden)
+    root = tmp_path / "foreign-guard"
+    with pytest.raises(ValueError, match="guard binding"):
+        run(
+            root,
+            original,
+            ridge_grid=(1e4,),
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+        )
+    failure = json.loads((root / "fold-0000-outcome.json").read_text())
+    assert failure["status"] == "raised" and failure["unknown_work_until_outcome"]
+    assert not (root / "fold-0000").exists()
+
+
+def test_guarded_selector_charges_setup_and_withholds_bare_policy_refit(
+    tmp_path, original, monkeypatch
+):
+    cases, samples, _, source_report = original
+    template = deepcopy(source_report["evaluation"][0]["report"])
+    by_hash = {c.model.canonical_model_checksum: c.case_id for c in cases}
+    calls = []
+    factories = []
+    monkeypatch.setattr(
+        learning.RCControlSeedPolicy,
+        "propose",
+        lambda self, context, *args, **kwargs: learning.secant_seed(context),
+    )
+
+    def factory(**kwargs):
+        factories.append(kwargs["excluded_case_ids"])
+        return _guard_factory(**kwargs)
+
+    def benchmark(model, request, **kwargs):
+        held = by_hash[model.canonical_model_checksum]
+        calls.append(held)
+        assert kwargs["record_prior_accepted_transition_work"] is True
+        observed = {}
+        for row in samples:
+            if row["case_id"] == held:
+                context = learning.RCControlSeedContext(**row["context"])
+                if kwargs["proposal_guard"](context):
+                    seed = kwargs["proposal"](context)
+                    observed[row["target_index"]] = (
+                        "proposed" if seed is not None else "abstained_to_reference"
+                    )
+        report = deepcopy(template)
+        entries = report["arms"]["proposal"]["entries"]
+        # Training rows omit the initial target; preserve that actual abstention.
+        assert entries[0]["target_index"] == 0 and 0 not in observed
+        assert entries[0]["proposal_decision"] == "abstained_to_reference"
+        assert set(observed) == {entry["target_index"] for entry in entries[1:]}
+        for entry in entries[1:]:
+            entry["proposal_decision"] = observed[entry["target_index"]]
+        # These are software contract timings, not measured speed evidence.
+        report["arms"]["secant"]["wall_ns"] = 10**9
+        report["arms"]["proposal"]["wall_ns"] = 2 * 10**8
+        report["prior_work_source_setup_cost"] = {
+            "wall_ns": 77,
+            "cpu_ns": 33,
+            "scope": "once_per_benchmark_prior_source_binding_setup_inside_whole_study",
+        }
+        return report
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", benchmark)
+    root = tmp_path / "guarded"
+    result = run(
+        root,
+        original,
+        ridge_grid=(1e4,),
+        proposal_abstention_strategy="secant",
+        proposal_guard_factory=factory,
+        proposal_guard_factory_identity="sha256:" + "d" * 64,
+        record_prior_accepted_transition_work=True,
+    )
+    assert calls == ["train-a", "train-b"]
+    assert factories == [("train-a",), ("train-b",)]
+    assert result["guarded_fold_winner"] is not None
+    assert result["selected_strategy"] == "secant" and result["selected_policy"] is None
+    assert (
+        not result["guarded_policy_refit_performed"]
+        and not result["candidate_promoted"]
+    )
+    assert result["fit_attempt_count"] == 2
+    for fold in result["folds"]:
+        setup = fold["proposal_guard_setup_wall_ns"]
+        assert type(setup) is int and setup > 0
+        assert fold["score"]["proposal_scored_wall_ns"] == 2 * 10**8 + setup + 77
+        assert (
+            fold["score"]["proposal_over_secant_path_wall_ratio"]
+            == (2 * 10**8 + setup + 77) / 10**9
+        )
+        assert (
+            fold["score"]["whole_scored_benchmark_wall_ns"]
+            == template["whole_study_wall_ns"] + setup
+        )
+        assert fold["proposal_guard_binding"]["seed_policy_hash"] == fold["policy_hash"]
+    assert json.loads((root / "plan.json").read_text())["maximum_required_fits"] == 2
+
+
+def test_guard_factory_cannot_change_static_model_inputs(
+    tmp_path, original, monkeypatch
+):
+    def factory(**kwargs):
+        features = kwargs["model_features"]
+        object.__setattr__(features, "values", tuple(v + 1 for v in features.values))
+        return _guard_factory(**kwargs)
+
+    monkeypatch.setattr(
+        learning,
+        "benchmark_rc_control_seed_paths",
+        lambda *args, **kwargs: pytest.fail("mutated inputs cannot execute"),
+    )
+    with pytest.raises(ValueError, match="frozen fold inputs"):
+        run(
+            tmp_path / "mutated",
+            original,
+            ridge_grid=(1e4,),
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+        )
+
+
+def test_actual_pre_capture_guard_decline_is_accounted_as_secant(tmp_path, original):
+    def factory(**kwargs):
+        return _guard_factory(**kwargs) | {"guard": lambda context: False}
+
+    root = tmp_path / "decline"
+    result = run(
+        root,
+        original,
+        ridge_grid=(1e4,),
+        proposal_abstention_strategy="secant",
+        proposal_guard_factory=factory,
+        proposal_guard_factory_identity="sha256:" + "d" * 64,
+        record_prior_accepted_transition_work=True,
+        record_assembly_work=True,
+    )
+    assert result["selected_strategy"] == "secant"
+    assert result["guarded_fold_winner"] is None
+    for fold in result["folds"]:
+        assert fold["score"]["full_comparison_pass"]
+        assert fold["score"]["proposed_count"] == 0
+        assert fold["score"]["abstained_count"] == 4
+        report = json.loads(
+            (root / f"fold-{fold['index']:04d}" / "comparison.json").read_text()
+        )
+        entries = report["arms"]["proposal"]["entries"]
+        assert len(entries) == 4
+        assert all(e["proposal_guard"]["allow_proposal"] is False for e in entries)
+        assert all("committed_material_capture" not in e for e in entries)
+
+
+def test_guard_identity_is_frozen_across_repeated_fold_paths(
+    tmp_path, original, monkeypatch
+):
+    calls = []
+    factory_calls = []
+    template = original[3]["evaluation"][0]["report"]
+
+    def benchmark(*args, **kwargs):
+        calls.append(True)
+        return deepcopy(template)
+
+    def factory(**kwargs):
+        factory_calls.append(True)
+        return _guard_factory(**kwargs) | {
+            "guard_identity": "sha256:"
+            + ("b" if len(factory_calls) == 1 else "c") * 64,
+        }
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", benchmark)
+    with pytest.raises(ValueError, match="guard changed across repetitions"):
+        run(
+            tmp_path / "changed-repeat",
+            original,
+            ridge_grid=(1e4,),
+            repetitions=3,
+            maximum_core_calls=336,
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+        )
+    assert len(factory_calls) == 2 and len(calls) == 1
+
+
+def _prior_source_cost(**changes):
+    return {
+        "wall_ns": 10,
+        "cpu_ns": 12,
+        "scope": "once_per_benchmark_prior_source_binding_setup_inside_whole_study",
+    } | changes
+
+
+def test_prior_source_setup_counts_once_in_proposal_not_whole(original):
+    report = deepcopy(original[3]["evaluation"][0]["report"])
+    report["arms"]["secant"]["wall_ns"] = 100
+    report["arms"]["proposal"]["wall_ns"] = 80
+    report["whole_study_wall_ns"] = 1000
+    report["prior_work_source_setup_cost"] = _prior_source_cost()
+    frozen = deepcopy(report)
+    score = selection._runtime_score(
+        report,
+        [],
+        proposal_setup_wall_ns=5,
+        include_prior_work_source_setup=True,
+    )
+    assert score["proposal_scored_wall_ns"] == 95
+    assert score["proposal_over_secant_path_wall_ratio"] == 0.95
+    assert score["whole_scored_benchmark_wall_ns"] == 1005
+    assert report == frozen
+    legacy = selection._runtime_score(report, [], proposal_setup_wall_ns=5)
+    del report["prior_work_source_setup_cost"]
+    assert legacy == selection._runtime_score(report, [], proposal_setup_wall_ns=5)
+
+
+@pytest.mark.parametrize(
+    "cost",
+    [
+        None,
+        {},
+        _prior_source_cost(wall_ns=True),
+        _prior_source_cost(wall_ns=-1),
+        _prior_source_cost(wall_ns=1.0),
+        _prior_source_cost(wall_ns="10"),
+        _prior_source_cost(cpu_ns=True),
+        _prior_source_cost(cpu_ns=-1),
+        _prior_source_cost(cpu_ns=1.0),
+        _prior_source_cost(scope="foreign"),
+        _prior_source_cost(extra=0),
+    ],
+)
+def test_enabled_prior_source_cost_refuses_missing_or_malformed(original, cost):
+    report = deepcopy(original[3]["evaluation"][0]["report"])
+    report["prior_work_source_setup_cost"] = cost
+    with pytest.raises(ValueError, match="measured prior source setup"):
+        selection._runtime_score(report, [], include_prior_work_source_setup=True)
+
+
+def test_selector_preserves_unknown_cost_when_prior_source_measurement_missing(
+    tmp_path, original, monkeypatch
+):
+    template = deepcopy(original[3]["evaluation"][0]["report"])
+    assert "prior_work_source_setup_cost" not in template
+    monkeypatch.setattr(
+        learning,
+        "benchmark_rc_control_seed_paths",
+        lambda *args, **kwargs: deepcopy(template),
+    )
+    root = tmp_path / "missing-source-cost"
+    with pytest.raises(ValueError, match="measured prior source setup"):
+        run(
+            root,
+            original,
+            ridge_grid=(1e4,),
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=_guard_factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+            record_prior_accepted_transition_work=True,
+        )
+    failure = json.loads((root / "fold-0000-outcome.json").read_text())
+    assert failure["status"] == "raised" and failure["unknown_work_until_outcome"]

@@ -176,7 +176,13 @@ def _validate_case_rows(cases, prepared, grouped, source, arithmetic_profile):
     return training
 
 
-def _runtime_score(report, decisions, *, proposal_setup_wall_ns=None):
+def _runtime_score(
+    report,
+    decisions,
+    *,
+    proposal_setup_wall_ns=None,
+    include_prior_work_source_setup=False,
+):
     """Keep failed or unaccounted paths ineligible, including the fresh reference."""
     if (
         report.get("schema_version")
@@ -190,6 +196,25 @@ def _runtime_score(report, decisions, *, proposal_setup_wall_ns=None):
     ):
         raise ValueError("nonnegative measured proposal setup time required")
     setup = proposal_setup_wall_ns or 0
+    if type(include_prior_work_source_setup) is not bool:
+        raise ValueError("explicit prior source setup accounting required")
+    source_setup = None
+    if include_prior_work_source_setup:
+        source_setup = report.get("prior_work_source_setup_cost")
+        if (
+            type(source_setup) is not dict
+            or set(source_setup) != {"wall_ns", "cpu_ns", "scope"}
+            or any(
+                type(source_setup.get(key)) is not int or source_setup[key] < 0
+                for key in ("wall_ns", "cpu_ns")
+            )
+            or type(source_setup.get("scope")) is not str
+            or source_setup["scope"]
+            != "once_per_benchmark_prior_source_binding_setup_inside_whole_study"
+        ):
+            raise ValueError("measured prior source setup cost required")
+        source_setup = dict(source_setup)
+    source_wall = 0 if source_setup is None else source_setup["wall_ns"]
     paths = (*report["arms"].values(), report["fresh_reference"])
     physical = (
         report["reference_repeat_exact"]
@@ -208,7 +233,8 @@ def _runtime_score(report, decisions, *, proposal_setup_wall_ns=None):
         raise ValueError("positive measured path timings required")
     score = {
         "full_comparison_pass": bool(physical),
-        "proposal_over_secant_path_wall_ratio": (proposed + setup) / baseline
+        "proposal_over_secant_path_wall_ratio": (proposed + setup + source_wall)
+        / baseline
         if physical
         else None,
         "secant_path_wall_ns": baseline,
@@ -225,13 +251,51 @@ def _runtime_score(report, decisions, *, proposal_setup_wall_ns=None):
     if proposal_setup_wall_ns is not None:
         score.update(
             proposal_setup_wall_ns=setup,
-            proposal_scored_wall_ns=proposed + setup,
+            proposal_scored_wall_ns=proposed + setup + source_wall,
             whole_scored_benchmark_wall_ns=report["whole_study_wall_ns"] + setup,
         )
         score["score_scope"] += (
             "; static model gate computation and record write added to proposal time"
         )
+    if source_setup is not None:
+        score.update(
+            prior_work_source_setup_cost=source_setup,
+            proposal_scored_wall_ns=proposed + setup + source_wall,
+            # Source setup is already nested in whole_study_wall_ns.
+            whole_scored_benchmark_wall_ns=report["whole_study_wall_ns"] + setup,
+        )
+        score["score_scope"] += (
+            "; prior source binding setup added once to proposal time and already included in whole study"
+        )
     return score
+
+
+def _validated_proposal_guard_binding(binding, policy_hash, excluded_case_ids):
+    """Bind a caller's guard to this frozen fit and its actual exclusions.
+
+    The supplied identities do not authenticate external training data or code.
+    A guarded fold cannot qualify a subsequently refitted bare seed policy.
+    """
+    if (
+        type(binding) is not dict
+        or set(binding)
+        != {"guard", "guard_identity", "seed_policy_hash", "excluded_case_ids"}
+        or not callable(binding.get("guard"))
+        or type(binding.get("guard_identity")) is not str
+        or not re.fullmatch(r"sha256:[0-9a-f]{64}", binding["guard_identity"])
+        or type(binding.get("seed_policy_hash")) is not str
+        or binding["seed_policy_hash"] != policy_hash
+        or type(binding.get("excluded_case_ids")) is not tuple
+        or any(type(case_id) is not str for case_id in binding["excluded_case_ids"])
+        or binding["excluded_case_ids"] != excluded_case_ids
+    ):
+        raise ValueError("guard binding must match the frozen seed and exclusions")
+    return binding["guard"], {
+        "guard_identity": binding["guard_identity"],
+        "seed_policy_hash": policy_hash,
+        "excluded_case_ids": list(excluded_case_ids),
+        "caller_identity_is_external_attestation": False,
+    }
 
 
 def run_rc_control_runtime_selection(
@@ -254,6 +318,9 @@ def run_rc_control_runtime_selection(
     record_assembly_timing=False,
     withholding_strategy="case",
     observe_initial_residuals=False,
+    proposal_guard_factory=None,
+    proposal_guard_factory_identity=None,
+    record_prior_accepted_transition_work=False,
 ):
     """Fit each ridge with declared exclusions, then execute each case's full path.
 
@@ -264,11 +331,39 @@ def run_rc_control_runtime_selection(
     modes remain internal tuning, not authenticated independent evaluation.
     No structural labels are regenerated. Bounds cover every path and possible
     proposal retry before the first fit or output is created.
+
+    An optional guard factory receives only this fit, the held model's static
+    features and its exact exclusions. Its identified binding runs before
+    material capture, and setup/persistence costs enter the proposal score.
+    Guarded fold winners remain tuning records: this function does not refit or
+    promote an unguarded seed from guarded scores. A jointly bound full-training
+    seed-plus-guard artifact and authenticated causal training joins remain
+    separate requirements. All optional fields are absent from legacy output.
     """
     if withholding_strategy not in ("case", "connected_training_groups"):
         raise ValueError("supported runtime withholding strategy required")
     if type(observe_initial_residuals) is not bool:
         raise ValueError("explicit boolean initial residual observation required")
+    if type(record_prior_accepted_transition_work) is not bool:
+        raise ValueError(
+            "explicit boolean prior accepted-transition recording required"
+        )
+    if record_prior_accepted_transition_work and proposal_guard_factory is None:
+        raise ValueError(
+            "prior accepted-transition recording requires an identified guard factory"
+        )
+    if (proposal_guard_factory is None) != (
+        proposal_guard_factory_identity is None
+    ) or (
+        proposal_guard_factory is not None
+        and (
+            not callable(proposal_guard_factory)
+            or type(proposal_guard_factory_identity) is not str
+            or not re.fullmatch(r"sha256:[0-9a-f]{64}", proposal_guard_factory_identity)
+            or proposal_abstention_strategy != "secant"
+        )
+    ):
+        raise ValueError("identified proposal guard factory requires secant abstention")
     wall, cpu = perf_counter_ns(), process_time_ns()
     if type(record_assembly_timing) is not bool or (
         record_assembly_timing and not record_assembly_work
@@ -346,7 +441,9 @@ def run_rc_control_runtime_selection(
         withheld = {
             case_id: group for group in exclusion_groups["groups"] for case_id in group
         }
-    fit_bound = len(case_ids) * len(ridge_grid) + 1
+    fit_bound = len(case_ids) * len(ridge_grid) + (
+        1 if proposal_guard_factory is None else 0
+    )
     # Reference and fresh reference use one call per target. Both secant and
     # proposer can retry once; constant preload runs once per path.
     core_bound = (
@@ -448,6 +545,20 @@ def run_rc_control_runtime_selection(
     if observe_initial_residuals:
         plan["observe_initial_residuals"] = True
         plan["selection_score"] += "; full residual/tangent observation costs included"
+    if record_prior_accepted_transition_work:
+        plan["record_prior_accepted_transition_work"] = True
+        plan["selection_score"] += "; prior transition recording costs included"
+    if proposal_guard_factory is not None:
+        plan["proposal_guard_factory"] = {
+            "identity": proposal_guard_factory_identity,
+            "binding": "frozen_fold_seed_policy_and_exact_withheld_case_ids",
+            "input_scope": "this_arm_accepted_parent_before_material_capture",
+            "caller_identity_is_external_attestation": False,
+            "bare_seed_refit_from_guarded_scores": False,
+        }
+        plan["selection_score"] += (
+            "; caller guard setup and binding persistence charged to proposal time"
+        )
     if record_assembly_work:
         plan["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
         plan["selection_score"] += "; opted-in assembly recording costs included"
@@ -519,6 +630,7 @@ def run_rc_control_runtime_selection(
             policy, fit_index = fit(rows, ridge, purpose)
             frozen = _bytes(policy.to_dict())
             _, compiled, features, _, _ = prepared[held]
+            frozen_guard_record = None
             for repetition in range(repetitions):
                 decisions = []
                 arm_order = tuple(
@@ -589,6 +701,53 @@ def run_rc_control_runtime_selection(
                         )
                         static_abstain = gate["status"] == "rejected"
                     effective_capture = capture and not static_abstain
+                    guard_kwargs = {}
+                    if proposal_guard_factory is not None:
+                        gw, gc = perf_counter_ns(), process_time_ns()
+                        frozen_features = _bytes(features.to_dict())
+                        excluded = tuple(withheld[held])
+                        binding = proposal_guard_factory(
+                            policy=policy,
+                            model_features=features,
+                            excluded_case_ids=excluded,
+                        )
+                        guard, guard_record = _validated_proposal_guard_binding(
+                            binding, policy.policy_hash, excluded
+                        )
+                        if (
+                            _bytes(policy.to_dict()) != frozen
+                            or _bytes(features.to_dict()) != frozen_features
+                        ):
+                            raise ValueError(
+                                "frozen fold inputs changed during guard setup"
+                            )
+                        guard_record["model_features_hash"] = _sha(frozen_features)
+                        guard_bytes = _bytes(guard_record)
+                        if frozen_guard_record is None:
+                            frozen_guard_record = guard_bytes
+                        elif guard_bytes != frozen_guard_record:
+                            raise ValueError(
+                                "frozen fold guard changed across repetitions"
+                            )
+                        _save(
+                            root,
+                            stem + "-proposal-guard-binding.json",
+                            _bytes(guard_record),
+                        )
+                        guard_setup_wall = perf_counter_ns() - gw
+                        record.update(
+                            proposal_guard_binding=guard_record,
+                            proposal_guard_setup_wall_ns=guard_setup_wall,
+                            proposal_guard_setup_cpu_ns=process_time_ns() - gc,
+                        )
+                        setup_wall = (setup_wall or 0) + guard_setup_wall
+
+                        guard_kwargs = {
+                            "proposal_guard": guard,
+                            "proposal_guard_identity": guard_record["guard_identity"],
+                        }
+                    if record_prior_accepted_transition_work:
+                        guard_kwargs["record_prior_accepted_transition_work"] = True
                     report = learning.benchmark_rc_control_seed_paths(
                         case.model,
                         case.request,
@@ -607,14 +766,55 @@ def run_rc_control_runtime_selection(
                         record_assembly_work=record_assembly_work,
                         record_assembly_timing=record_assembly_timing,
                         reuse_line_search_assembly=reuse_line_search_assembly,
-                        **({"observe_initial_residuals": True} if observe_initial_residuals else {}),
+                        **guard_kwargs,
+                        **(
+                            {"observe_initial_residuals": True}
+                            if observe_initial_residuals
+                            else {}
+                        ),
                         **learning._arithmetic_kwargs(arithmetic_profile),
                     )
                     if _bytes(policy.to_dict()) != frozen:
                         raise ValueError("frozen fold policy changed during execution")
+                    if (
+                        proposal_guard_factory is not None
+                        and _bytes(features.to_dict()) != frozen_features
+                    ):
+                        raise ValueError(
+                            "frozen fold model features changed during execution"
+                        )
+                    if proposal_guard_factory is not None:
+                        # Runtime may decline an unavailable prior record before
+                        # calling the guard. Count the actual arm ledger, including
+                        # that decline, rather than only callback invocations.
+                        decisions[:] = [
+                            {
+                                "accepted_prefix_count": entry["target_index"] + 1,
+                                "target_m": entry["target_m"],
+                                "decision": entry.get(
+                                    "proposal_decision", "unresolved"
+                                ),
+                            }
+                            for entry in report["arms"]["proposal"]["entries"]
+                        ]
+                        record["proposal_decision_source"] = (
+                            "original_proposal_arm_entries"
+                        )
                     score = _runtime_score(
-                        report, decisions, proposal_setup_wall_ns=setup_wall
+                        report,
+                        decisions,
+                        proposal_setup_wall_ns=setup_wall,
+                        **(
+                            {"include_prior_work_source_setup": True}
+                            if record_prior_accepted_transition_work
+                            else {}
+                        ),
                     )
+                    if proposal_guard_factory is not None:
+                        score["score_scope"] = score["score_scope"].replace(
+                            "static model gate computation and record write added to proposal time",
+                            "guard setup and binding write, plus enabled static gate setup, added to proposal time",
+                        )
                 except Exception as exc:
                     record.update(
                         status="raised",
@@ -706,7 +906,7 @@ def run_rc_control_runtime_selection(
         min(eligible, key=lambda c: (c["score"], -c["ridge"])) if eligible else None
     )
     selected = None
-    if winner is not None:
+    if winner is not None and proposal_guard_factory is None:
         selected, _ = fit(
             samples, winner["ridge"], {"selected_full_training_refit": True}
         )
@@ -719,9 +919,9 @@ def run_rc_control_runtime_selection(
         "fit_records": fits,
         "fit_attempt_count": len(fits),
         "fit_completed_count": sum(f["status"] == "completed" for f in fits),
-        "selected_strategy": "secant" if winner is None else "learned_svd",
-        "selected_ridge": None if winner is None else winner["ridge"],
-        "selected_score": 1.0 if winner is None else winner["score"],
+        "selected_strategy": "secant" if selected is None else "learned_svd",
+        "selected_ridge": None if selected is None else winner["ridge"],
+        "selected_score": 1.0 if selected is None else winner["score"],
         "selected_policy": None if selected is None else selected.to_dict(),
         "proposal_abstention_strategy": proposal_abstention_strategy,
         "wall_ns": perf_counter_ns() - wall,
@@ -735,6 +935,15 @@ def run_rc_control_runtime_selection(
     }
     if observe_initial_residuals:
         result["observe_initial_residuals"] = True
+    if record_prior_accepted_transition_work:
+        result["record_prior_accepted_transition_work"] = True
+    if proposal_guard_factory is not None:
+        result["proposal_guard_factory"] = plan["proposal_guard_factory"]
+        result["guarded_fold_winner"] = winner
+        result["guarded_policy_refit_performed"] = False
+        result["guarded_deployment_artifact_required"] = (
+            "a separately bound full-training seed-plus-guard policy; fold scores do not qualify the bare seed"
+        )
     if reuse_line_search_assembly:
         result["line_search_assembly_reuse"] = plan["line_search_assembly_reuse"]
     if record_assembly_timing:
