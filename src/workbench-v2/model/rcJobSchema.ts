@@ -161,7 +161,9 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     },
   } as RcObject
   const pinRoller = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
+  // Preserve v2 invalid-load checks while v4 binds the actual constant-load field.
   const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+    || (pinRoller && rcControlHasPreload(config))
   const version = hasPreload ? 'v2' : 'v1', offset = hasPreload ? 1 : 0
   check(request.result_contract === `bounded-rc-fiber-job-result.${version}`, 'loading_profile_invalid')
   check(pinRoller ? config.experimental_pin_roller_beam === true
@@ -263,7 +265,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   check(Array.isArray(receipts) && receipts.length > 0 && receipts.length <= targets.length
     && same(report.receipt_hashes, receipts.map((r: RcObject) => r.receipt_hash)), 'receipts_invalid')
   const receiptRaws = rawValues(fields(resultDoc.raw).get('receipts')!.value)
-  let completed = 0, previousOrdinal = 0, restart: string | null = null, core = 0, iterations = 0, unknown = false
+  let completed = 0, previousOrdinal = 0, restart: string | null = null, core = 0, iterations = 0
   for (const [index, item] of receipts.entries()) {
     const receipt = object(item)
     await selfHash(receiptRaws[index], receipt, 'receipt_hash')
@@ -301,12 +303,11 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     for (const metrics of [receipt.analysis_metrics, receipt.verification_metrics]) {
       const work = object(metrics.control_work ?? metrics.replay_control_work)
       check(Object.values(work).every(nat) && nat(work.attempted_step_count)
-        && nat(work.known_newton_iteration_count) && nat(work.unknown_solver_work_attempt_count)
+        && nat(work.known_newton_iteration_count) && work.unknown_solver_work_attempt_count === 0
         && work.attempted_step_count === after + offset
         && metrics.response_reassembly_attempts === after + offset
         && metrics.response_reassembly_verified_count === after + offset, 'work_invalid')
       core += work.attempted_step_count; iterations += work.known_newton_iteration_count
-      unknown ||= work.unknown_solver_work_attempt_count > 0
     }
     completed = after; previousOrdinal = receipt.verification_ordinal; restart = receipt.checkpoint_sha256
   }
@@ -351,13 +352,13 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
     control: api.control, reservedInvocations: budget.reserved_attempts,
     confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
-    unknownWork: unknown || budget.reserved_attempts !== receipts.length * 2,
+    unknownWork: budget.reserved_attempts !== receipts.length * 2,
     artifactRoles: [...Object.keys(artifacts), 'terminal'],
   } }
 }
 
-// Direct studies can carry v3/v4 preload. Durable v4 jobs reject preload
-// separately at submission; this shared reader does not grant transport support.
+// Direct studies can carry v3/v4 preload; durable v4 binds optional loads to v2
+// results. Admission still requires its declared support/loading profile.
 export function rcControlHasPreload(config: RcObject): boolean {
   return (config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
     || config.schema_version === 'bounded-rc-fiber-direct-control-request.v3'

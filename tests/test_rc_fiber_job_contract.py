@@ -117,7 +117,7 @@ def test_unavailable_durable_profile_or_incompatible_geometry_is_rejected(
         contract.validate_rc_fiber_job_request(request)
 
 
-def test_canonical_pin_roller_preload_is_rejected_before_model_compile(monkeypatch):
+def test_canonical_pin_roller_preload_binds_original_model_without_solving():
     request = _request()
     request["model"] = pin_roller_payload()
     request["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
@@ -127,13 +127,37 @@ def test_canonical_pin_roller_preload_is_rejected_before_model_compile(monkeypat
         experimental_pin_roller_beam=True,
         constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),),
     ).to_dict()
-
-    def unexpected_compile(*args, **kwargs):
-        raise AssertionError("unsupported durable profile reached model compilation")
-
-    monkeypatch.setattr(contract, "_compile", unexpected_compile)
-    with pytest.raises(ValueError, match="support/loading profile is unsupported"):
-        contract.validate_rc_fiber_job_request(request)
+    schema = json.loads(
+        (
+            ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+        ).read_bytes()
+    )
+    jsonschema.validate(request, schema)
+    model, config = contract.validate_rc_fiber_job_request(request)
+    assert model.source_path == "<durable-rc-model>"
+    assert config.experimental_pin_roller_beam is True
+    assert config.constant_nodal_loads == (("N4", 0.0, -1.0, 0.0),)
+    _, compiled, scope, binding, control = contract._context(request)
+    assert compiled.problem.constant_external_loads == ((10, -1.0),)
+    assert scope["problem_contract_hash"] == compiled.problem.contract_hash
+    assert binding["compiler_profile"] == (
+        contract.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+    )
+    assert control == {
+        "global_dof": 10,
+        "node_id": "N4",
+        "component": "UY",
+        "unit": "m",
+    }
+    assert (
+        contract._api_request(config, None)["constant_nodal_loads"]
+        == (request["config"]["constant_nodal_loads"])
+    )
+    changed = deepcopy(request)
+    changed["config"]["constant_nodal_loads"][0]["FY_kN"] = -2.0
+    assert contract.rc_fiber_job_resume_contract_hash(changed) != (
+        contract.rc_fiber_job_resume_contract_hash(request)
+    )
 
 
 def test_constant_load_request_requires_matching_v2_durable_result():
@@ -638,3 +662,70 @@ def test_real_native_decoder_rejects_unbound_artifact_without_solving():
     config, compiled, scope, _, _ = contract._context(request)
     with pytest.raises(ValueError):
         contract._native(b"{}", compiled, scope, config.targets_m[:2])
+
+
+@pytest.mark.parametrize("node", ["N2", "N6", "missing"])
+def test_pin_roller_preload_unsupported_nodes_rejected_without_solving(node):
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        10,
+        (-1e-6,),
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=((node, 0.0, -1.0, 0.0),),
+    ).to_dict()
+    reason = "undeclared node" if node == "missing" else "pin or roller support node"
+    with pytest.raises(ValueError, match=reason):
+        contract.validate_rc_fiber_job_request(request)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "empty",
+        "zero",
+        "duplicate",
+        "boolean",
+        "integer",
+        "result",
+        "restrained",
+        "twofixed",
+    ],
+)
+def test_v4_preload_rejects_noncanonical_or_incompatible_input_before_solving(mutation):
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        10,
+        (0.0, -1e-6),
+        allow_reversals=True,
+        maximum_reversals=1,
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),),
+    ).to_dict()
+    loads = request["config"]["constant_nodal_loads"]
+    if mutation == "empty":
+        loads.clear()
+    elif mutation == "zero":
+        loads[0]["FY_kN"] = 0.0
+    elif mutation == "duplicate":
+        loads.append(deepcopy(loads[0]))
+    elif mutation == "boolean":
+        loads[0]["FY_kN"] = True
+    elif mutation == "integer":
+        loads[0]["FY_kN"] = -1
+    elif mutation == "result":
+        request["result_contract"] = contract.RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    elif mutation == "restrained":
+        request["config"]["control_global_dof"] = 4
+    elif mutation == "twofixed":
+        request["config"] = BoundedRCFiberDirectControlRequest(
+            10,
+            (-1e-6,),
+            experimental_two_fixed_endpoints=True,
+            constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),),
+        ).to_dict()
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_request(request)

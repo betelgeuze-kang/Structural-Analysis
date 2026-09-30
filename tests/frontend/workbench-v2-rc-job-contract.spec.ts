@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { validateRcJobArtifacts } from '../../src/workbench-v2/model/rcJobSchema'
+import { fields, rawValues, validateRcJobArtifacts } from '../../src/workbench-v2/model/rcJobSchema'
 
 const directory = 'tests/frontend/fixtures/rc-fiber-durable-job/'
 function fixture() {
@@ -95,3 +95,40 @@ for (const value of [1, null, 'true']) {
     await expect(validateRcJobArtifacts(input.job, input.artifacts)).rejects.toThrow('execution_reuse_invalid')
   })
 }
+
+
+function originalWorkRaw(raw: string, path: (string | number)[]): string {
+  if (!path.length) return raw
+  const [key, ...rest] = path
+  return originalWorkRaw(typeof key === 'number' ? rawValues(raw)[key] : fields(raw).get(key)!.value, rest)
+}
+// Preserve every unrelated producer numeric token while forging one work count.
+function replaceWorkRaw(raw: string, path: (string | number)[], value: string): string {
+  if (!path.length) return value
+  const [key, ...rest] = path
+  if (typeof key === 'number') {
+    const rows = rawValues(raw); rows[key] = replaceWorkRaw(rows[key], rest, value); return `[${rows.join(',')}]`
+  }
+  const members = fields(raw)
+  members.get(key)!.member = `${JSON.stringify(key)}:${replaceWorkRaw(members.get(key)!.value, rest, value)}`
+  return `{${[...members.values()].map(row => row.member).join(',')}}`
+}
+test('v1 rejects rehashed unknown work in a successful last verification receipt', async () => {
+  const source = fixture()
+  const original = new TextDecoder().decode(source.artifacts.result)
+  const tail = JSON.parse(original).receipts.length - 1
+  let raw = replaceWorkRaw(original, ['receipts', tail, 'verification_metrics', 'replay_control_work', 'unknown_solver_work_attempt_count'], '1')
+  const receipt = fields(originalWorkRaw(raw, ['receipts', tail])); receipt.delete('receipt_hash')
+  raw = replaceWorkRaw(raw, ['receipts', tail, 'receipt_hash'], JSON.stringify(digest(`{${[...receipt.values()].map(row => row.member).join(',')}}`)))
+  const checkpoint = source.artifacts.checkpoint.slice(), request = source.artifacts.request.slice()
+  rebind(source, rehashWrapper(raw))
+  const evidence = JSON.parse(new TextDecoder().decode(source.artifacts.evidence))
+  evidence.validation_report.receipt_hashes = JSON.parse(raw).receipts.map((row: any) => row.receipt_hash)
+  source.artifacts.evidence = new TextEncoder().encode(JSON.stringify(evidence))
+  source.job.evidence.content_hash = digest(source.artifacts.evidence)
+  source.job.evidence.byte_length = source.artifacts.evidence.byteLength
+  expect(source.artifacts.checkpoint).toEqual(checkpoint)
+  expect(source.artifacts.request).toEqual(request)
+  expect(originalWorkRaw(new TextDecoder().decode(source.artifacts.result), ['api_result'])).toBe(originalWorkRaw(original, ['api_result']))
+  await expect(validateRcJobArtifacts(source.job, source.artifacts).then(review => review.summary)).rejects.toThrow('rc_review_work_invalid')
+})

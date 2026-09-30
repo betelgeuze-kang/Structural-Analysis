@@ -305,9 +305,7 @@ def validate_rc_fiber_job_request(
     ):
         raise ValueError("invalid RC durable execution configuration")
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
-    if config.experimental_two_fixed_endpoints or (
-        config.experimental_pin_roller_beam and config.constant_nodal_loads
-    ):
+    if config.experimental_two_fixed_endpoints:
         raise ValueError("RC durable support/loading profile is unsupported")
     expected_result = (
         CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION

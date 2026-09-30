@@ -1,6 +1,7 @@
 """Disposable real HTTP/RC fixture; serve never executes a numerical routine.
 
-Only the explicit worker mode may dispatch one actual no-preload RC chunk.
+Only the explicit worker mode may dispatch one prepared actual RC chunk,
+with or without authored constant preload.
 All credentials are synthetic, listeners are loopback, and stores are fresh /tmp
 test directories. This harness is software evidence, not a service launcher.
 """
@@ -88,13 +89,22 @@ def prepared_requests(root, store):
     conflict = deepcopy(request)
     conflict["case_id"] = "different-immutable-request"
     preload = deepcopy(request)
+    preload["case_id"] = "actual-http-pin-roller-preload-two-chunks"
     preload["config"] = BoundedRCFiberDirectControlRequest(
         10,
-        (-1e-6, -2e-6),
+        (-1e-5, -2e-5),
         experimental_pin_roller_beam=True,
         constant_nodal_loads=(("N4", 0.0, -0.01, 0.0),),
     ).to_dict()
     preload["result_contract"] = "bounded-rc-fiber-job-result.v2"
+    preload_full = deepcopy(preload)
+    preload_full["case_id"] = "actual-http-pin-roller-preload-full-reference"
+    preload_full["execution_config"] = {
+        "chunk_target_count": 2,
+        "maximum_api_invocations": 2,
+    }
+    bad_preload = deepcopy(preload)
+    bad_preload["config"]["constant_nodal_loads"][0]["node_id"] = "N2"
     wrong_profile = deepcopy(request)
     wrong_profile["config"] = BoundedRCFiberDirectControlRequest(
         10, (-1e-6, -2e-6), experimental_two_fixed_endpoints=True
@@ -105,6 +115,8 @@ def prepared_requests(root, store):
         "full": full,
         "conflict": conflict,
         "preload": preload,
+        "preload-full": preload_full,
+        "bad-preload": bad_preload,
         "wrong-profile": wrong_profile,
     }.items():
         path = store / f"{name}.json"
@@ -176,13 +188,16 @@ def serve(root, store):
 def run_worker(root, store):
     prepared = prepared_requests(root, store)
     admitted = {
-        Path(prepared[name]["path"]).read_bytes() for name in ("request", "full")
+        Path(prepared[name]["path"]).read_bytes()
+        for name in ("request", "full", "preload", "preload-full")
     }
     # Observational call-throughs preserve the production functions and all args.
     counts = {
         "analysis": 0,
         "verification": 0,
         "core_targets": 0,
+        "core_preloads": 0,
+        "preload_by_phase": {"analysis": 0, "verification": 0},
         "core_by_phase": {"analysis": 0, "verification": 0},
     }
     phase = ["analysis"]
@@ -190,6 +205,7 @@ def run_worker(root, store):
         "analysis": rc_api.analyze_bounded_rc_fiber_direct_control,
         "verification": rc_api.validate_bounded_rc_fiber_direct_control_artifacts,
         "core": paths.solve_stateful_fiber_frame2d_displacement_control_step,
+        "preload": paths.solve_stateful_fiber_frame2d_constant_load_preload,
     }
 
     def analyze(*args, **kwargs):
@@ -211,6 +227,11 @@ def run_worker(root, store):
         counts["core_by_phase"][phase[0]] += 1
         return originals["core"](*args, **kwargs)
 
+    def preload_core(*args, **kwargs):
+        counts["core_preloads"] += 1
+        counts["preload_by_phase"][phase[0]] += 1
+        return originals["preload"](*args, **kwargs)
+
     actual_service = service(store)
     claim = actual_service.claim_next(
         worker_id=WORKER, authorization_token=WORKER_TOKEN, lease_seconds=300
@@ -226,6 +247,9 @@ def run_worker(root, store):
         ),
         patch.object(
             paths, "solve_stateful_fiber_frame2d_displacement_control_step", core
+        ),
+        patch.object(
+            paths, "solve_stateful_fiber_frame2d_constant_load_preload", preload_core
         ),
     ):
         job = execute_job_claim(

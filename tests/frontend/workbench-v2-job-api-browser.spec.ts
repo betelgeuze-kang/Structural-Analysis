@@ -170,19 +170,22 @@ async function blobNames(directory: string): Promise<string[]> {
   return names.sort()
 }
 
-test('actual pin/roller HTTP chunks survive a new server process and match a full fresh worker path', async ({ page }, testInfo) => {
+for (const hasPreload of [false, true]) {
+test(`actual pin/roller HTTP ${hasPreload ? 'with constant preload' : 'without preload'} chunks survive a new server process and match a full fresh worker path`, async ({ page }, testInfo) => {
   test.setTimeout(180000)
   const store = await mkdtemp(join(tmpdir(), 'structural-rc-live-http-'))
   const originals: Record<string, Buffer> = {}
   const processes: LiveProcess[] = []
-  const observations: any = { source_role: 'authored software regression', independent_physical_validation: false, hardware_attestation: false, browser_reruns_solver: false }
+  const requestName = hasPreload ? 'preload' : 'request'
+  const fullName = hasPreload ? 'preload-full' : 'full'
+  const observations: any = { has_preload: hasPreload, source_role: 'authored software regression', independent_physical_validation: false, hardware_attestation: false, browser_reruns_solver: false }
   let mounted: Awaited<ReturnType<typeof startLiveServer>> | undefined
   try {
     mounted = await startLiveServer(store, processes)
     let origin = mounted.ready.origin
-    const request = await readFile(mounted.ready.originals.request.path)
-    expect(digest(request)).toBe(mounted.ready.originals.request.sha256)
-    expect(request.length).toBe(mounted.ready.originals.request.bytes)
+    const request = await readFile(mounted.ready.originals[requestName].path)
+    expect(digest(request)).toBe(mounted.ready.originals[requestName].sha256)
+    expect(request.length).toBe(mounted.ready.originals[requestName].bytes)
     originals['submitted-request.json'] = request
     const input = JSON.parse(request.toString())
     observations.source_revision_caller_declaration = input.source_revision
@@ -190,24 +193,24 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
       headers: { ...headers, 'Idempotency-Key': key }, data: await readFile(mounted!.ready.originals[name].path),
     })
     expect((await page.request.post(`${origin}/v1/jobs`, { data: request, headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'unauthorized' } })).status()).toBe(401)
-    expect((await submit('request', 'wrong-auth', { ...liveHeaders, Authorization: 'Bearer wrong-synthetic-token' })).status()).toBe(401)
-    const posted = await submit('request', 'actual-pin-roller')
+    expect((await submit(requestName, 'wrong-auth', { ...liveHeaders, Authorization: 'Bearer wrong-synthetic-token' })).status()).toBe(401)
+    const posted = await submit(requestName, 'actual-pin-roller')
     expect(posted.status()).toBe(202)
     const job = await posted.json()
     observations.submitted_job_id = job.job_id
     const path = `/v1/jobs/${job.job_id}`
     const initialBlobs = await blobNames(join(store, 'blobs'))
-    const retry = await submit('request', 'actual-pin-roller')
+    const retry = await submit(requestName, 'actual-pin-roller')
     expect(retry.status()).toBe(202)
     expect((await retry.json()).job_id).toBe(job.job_id)
     expect((await submit('conflict', 'actual-pin-roller')).status()).toBe(409)
-    for (const name of ['preload', 'wrong-profile']) {
+    for (const [name, code] of [['bad-preload', 'rc_fiber_job_request_invalid'], ['wrong-profile', 'job_schema_invalid']]) {
       const rejected = await submit(name, `unsupported-${name}`)
       expect(rejected.status()).toBe(400)
       const exclusion = (await rejected.json()).error
-      // v4 preload and two-fixed-endpoint configurations are excluded by the
-      // public HTTP schema before the pure support/loading-profile validator.
-      expect(exclusion.code).toBe('job_schema_invalid')
+      // Constant loads on supports fail pure validation; two fixed endpoints
+      // remain excluded by the public schema. Neither reaches a numerical call.
+      expect(exclusion.code).toBe(code)
       observations[`${name}_http_exclusion`] = exclusion
     }
     expect(await blobNames(join(store, 'blobs'))).toEqual(initialBlobs)
@@ -226,7 +229,7 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
     expect(first.job.progress).toEqual({ completed_steps: 1, total_steps: 2 })
     expect(first.job.result).toBeNull()
     expect(first.job.evidence).toBeNull()
-    expect(first.actual_calls).toMatchObject({ analysis: 1, verification: 1, core_targets: 2 })
+    expect(first.actual_calls).toMatchObject({ analysis: 1, verification: 1, core_targets: 2, core_preloads: hasPreload ? 2 : 0, preload_by_phase: { analysis: hasPreload ? 1 : 0, verification: hasPreload ? 1 : 0 } })
     observations.first_worker = first
     originals['first-checkpoint.json'] = await get('checkpoint')
     expect(digest(originals['first-checkpoint.json'])).toBe(first.job.checkpoint.content_hash)
@@ -262,7 +265,7 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
     expect(second.job.status).toBe('succeeded')
     expect(second.job.attempt).toBe(2)
     expect(second.job.progress).toEqual({ completed_steps: 2, total_steps: 2 })
-    expect(second.actual_calls).toMatchObject({ analysis: 1, verification: 1, core_targets: 4 })
+    expect(second.actual_calls).toMatchObject({ analysis: 1, verification: 1, core_targets: 4, core_preloads: hasPreload ? 2 : 0, preload_by_phase: { analysis: hasPreload ? 1 : 0, verification: hasPreload ? 1 : 0 } })
     observations.second_worker = second
     for (const role of ['request', 'checkpoint', 'result', 'evidence']) {
       const body = await get(role)
@@ -290,13 +293,13 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
       expect(outcome.unavailable_execution_work).toBe(false)
       if (outcome.phase === 'verification') for (const key of ['artifact_contract_pass', 'contract_pass', 'physical_path_complete', 'fresh_source_execution_invoked', 'solver_replay_performed']) expect(outcome.verification_report[key]).toBe(true)
     }
-    const fullPosted = await submit('full', 'full-reference')
+    const fullPosted = await submit(fullName, 'full-reference')
     expect(fullPosted.status()).toBe(202)
     const fullJob = await fullPosted.json()
     const full = await runLiveWorker(store, processes)
     expect(full.job.job_id).toBe(fullJob.job_id)
     expect(full.job.status).toBe('succeeded')
-    expect(full.actual_calls).toMatchObject({ analysis: 1, verification: 1, core_targets: 4 })
+    expect(full.actual_calls).toMatchObject({ analysis: 1, verification: 1, core_targets: 4, core_preloads: hasPreload ? 2 : 0, preload_by_phase: { analysis: hasPreload ? 1 : 0, verification: hasPreload ? 1 : 0 } })
     observations.full_reference_worker = full
     const fullResponse = await page.request.get(`${origin}/v1/jobs/${full.job.job_id}/result`, { headers: liveHeaders })
     expect(fullResponse.status()).toBe(200)
@@ -304,7 +307,7 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
     expect(digest(originals['full-result.json'])).toBe(full.job.result.content_hash)
     const reference = JSON.parse(originals['full-result.json'].toString())
     expect(Buffer.from(result.terminal_checkpoint_artifact_base64, 'base64')).toEqual(Buffer.from(reference.terminal_checkpoint_artifact_base64, 'base64'))
-    for (const key of ['response_history', 'terminal_response', 'checkpoint', 'model', 'claims']) expect(result.api_result[key]).toEqual(reference.api_result[key])
+    for (const key of ['preload_response', 'response_history', 'terminal_response', 'checkpoint', 'model', 'claims']) expect(result.api_result[key]).toEqual(reference.api_result[key])
     expect(result.api_result.request).not.toEqual(reference.api_result.request)
     await page.goto(`${origin}/#/workbench-v2`)
     await waitForJobService(page)
@@ -317,12 +320,19 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
     await expect(panel.locator('[data-rc-reserved]')).toHaveText('4')
     await expect(panel.locator('[data-rc-unknown]')).toContainText('No reservation gap or unknown work')
     const selector = panel.getByRole('combobox', { name: 'RC target to inspect', exact: true })
-    await expect(selector.locator('option')).toHaveCount(2)
-    for (const index of [0, 1]) {
+    await expect(selector.locator('option')).toHaveCount(hasPreload ? 3 : 2)
+    if (hasPreload) {
+      expect(result.api_result.preload_response.epoch).toBe(1)
+      expect(result.api_result.response_history.map((row: any) => row.epoch)).toEqual([2, 3])
+      expect(result.api_result.request.constant_nodal_loads).toEqual(input.config.constant_nodal_loads)
+      await expect(panel.locator('[data-rc-preload-note]')).toContainText('included in the stored material history and core-call totals')
+      await expect(panel.locator('[data-rc-table="constant-loads"]')).toContainText('N4')
+    }
+    for (const index of hasPreload ? [0, 1, 2] : [0, 1]) {
       await selector.selectOption(String(index))
       await expect(panel.locator('[data-rc-table="reactions"] tbody tr')).toHaveCount(3)
     }
-    await expect(panel.locator('[data-rc-material-count]')).toContainText('2 stored material steps')
+    await expect(panel.locator('[data-rc-material-count]')).toContainText(`${hasPreload ? 3 : 2} stored material steps`)
     for (const role of ['checkpoint', 'result']) {
       const pending = page.waitForEvent('download')
       await panel.getByRole('button', { name: role === 'checkpoint' ? 'Download RC saved job checkpoint' : 'Download RC result', exact: true }).click()
@@ -332,6 +342,10 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
     observations.full_reference_reserved_invocations = 2
     observations.split_core_targets = first.actual_calls.core_targets + second.actual_calls.core_targets
     observations.full_reference_core_targets = full.actual_calls.core_targets
+    observations.split_core_preloads = first.actual_calls.core_preloads + second.actual_calls.core_preloads
+    observations.full_reference_core_preloads = full.actual_calls.core_preloads
+    observations.split_total_native_calls = observations.split_core_targets + observations.split_core_preloads
+    observations.full_reference_total_native_calls = full.actual_calls.core_targets + full.actual_calls.core_preloads
     observations.completed = true
   } finally {
     const cleanupErrors: string[] = []
@@ -357,3 +371,4 @@ test('actual pin/roller HTTP chunks survive a new server process and match a ful
     if (cleanupErrors.length) throw new Error(cleanupErrors.join('\n'))
   }
 })
+}

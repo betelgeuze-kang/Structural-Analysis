@@ -990,3 +990,96 @@ def test_identical_submission_retains_request_blob_recovery_and_integrity(
         assert list(request_blob_inventory(tmp_path).values()) == [original]
         assert s.validate_integrity(j.job_id, **tenant())["contract_pass"]
     assert s.get_job(j.job_id, **tenant()) == j
+
+
+def pin_roller_preload_request():
+    from tests.test_rc_fiber_pin_roller_beam_public import _payload
+
+    value = request()
+    value["model"] = _payload()
+    value["config"] = BoundedRCFiberDirectControlRequest(
+        10,
+        (-1e-6, -2e-6),
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -0.1, 0.0),),
+    ).to_dict()
+    value["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    return value
+
+
+def test_v4_preload_http_submission_reopen_binds_exact_request_and_api_budget(tmp_path):
+    payload = pin_roller_preload_request()
+    s = service(tmp_path)
+    app = http.DurableJobHttpApi(s)
+    headers = {
+        "Authorization": "Bearer " + TENANT,
+        "X-Structural-Tenant": "a",
+        "Idempotency-Key": "v4-preload",
+    }
+    response = app.handle("POST", "/v1/jobs", headers=headers, body=canonical(payload))
+    assert response.status == 202
+    posted = json.loads(response.body)
+    job = s.get_job(posted["job_id"], **tenant())
+    assert (
+        app.handle("POST", "/v1/jobs", headers=headers, body=canonical(payload)).status
+        == 202
+    )
+    reopened = service(tmp_path)
+    assert reopened.read_request(job.job_id, **tenant()) == canonical(payload)
+    claimed = claim(reopened)
+    assert claimed.request_bytes == canonical(payload)
+    assert claimed.job.progress_total == 2
+    assert reopened.read_execution_budget(job.job_id, **lease(claimed)) == {
+        "maximum_attempts": 6,
+        "reserved_attempts": 0,
+        "remaining_attempts": 6,
+    }
+    changed = deepcopy(payload)
+    changed["config"]["constant_nodal_loads"][0]["FY_kN"] = -0.2
+    with pytest.raises(JobServiceError, match="idempotency_conflict"):
+        submit(reopened, changed, key="v4-preload")
+    assert list(request_blob_inventory(tmp_path).values()) == [canonical(payload)]
+    assert reopened.validate_integrity(job.job_id, **tenant())["contract_pass"]
+
+
+@pytest.mark.parametrize(
+    "mutation", ["N2", "N6", "missing", "noncanonical", "result", "v3", "opt_in"]
+)
+def test_v4_preload_http_rejection_never_stores_or_claims_invalid_request(
+    tmp_path, mutation
+):
+    payload = pin_roller_preload_request()
+    if mutation in {"N2", "N6", "missing"}:
+        payload["config"]["constant_nodal_loads"][0]["node_id"] = mutation
+    elif mutation == "noncanonical":
+        payload["config"]["constant_nodal_loads"][0]["FX_kN"] = 0
+    elif mutation == "result":
+        payload["result_contract"] = contract.RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    elif mutation == "v3":
+        payload["config"]["schema_version"] = (
+            "bounded-rc-fiber-direct-control-request.v3"
+        )
+        payload["config"].pop("experimental_pin_roller_beam")
+        payload["config"]["experimental_two_fixed_endpoints"] = True
+    elif mutation == "opt_in":
+        payload["config"].pop("experimental_pin_roller_beam")
+    s = service(tmp_path)
+    response = http.DurableJobHttpApi(s).handle(
+        "POST",
+        "/v1/jobs",
+        headers={
+            "Authorization": "Bearer " + TENANT,
+            "X-Structural-Tenant": "a",
+            "Idempotency-Key": "invalid",
+        },
+        body=canonical(payload),
+    )
+    assert response.status == 400
+    expected = (
+        "rc_fiber_job_request_invalid"
+        if mutation in {"N2", "N6", "missing", "noncanonical"}
+        else "job_schema_invalid"
+    )
+    assert json.loads(response.body)["error"]["code"] == expected
+    assert request_blob_inventory(tmp_path) == {}
+    assert s.claim_next(worker_id="worker-a", authorization_token=WORKER) is None

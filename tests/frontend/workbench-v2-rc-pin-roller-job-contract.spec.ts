@@ -115,3 +115,46 @@ test('v4 history rejects altered support roles, reaction rows, and restrained di
   displaced.response_history[0].node_displacements.find((node: any) => node.node_id === 'N6').UY_m = 1e-9
   expect(() => check(displaced, request.model)).toThrow('rc_review_pin_roller_restrained_displacement_invalid')
 })
+
+
+test('v4 rejects rehashed unknown work in a successful last verification receipt', async () => {
+  const source = fixture()
+  const original = new TextDecoder().decode(source.artifacts.result)
+  const tail = JSON.parse(original).receipts.length - 1
+  const checkpoint = source.artifacts.checkpoint.slice(), request = source.artifacts.request.slice()
+  let raw = replace(original, ['receipts', tail, 'verification_metrics', 'replay_control_work', 'unknown_solver_work_attempt_count'], '1')
+  raw = rehash(raw, ['receipts', tail], 'receipt_hash')
+  bind(source, raw)
+  expect(source.artifacts.checkpoint).toEqual(checkpoint)
+  expect(source.artifacts.request).toEqual(request)
+  expect(at(new TextDecoder().decode(source.artifacts.result), ['api_result'])).toBe(at(original, ['api_result']))
+  await expect(validateRcJobArtifacts(source.job, source.artifacts).then(review => review.summary)).rejects.toThrow('rc_review_work_invalid')
+})
+
+test('v4 keeps an extra unconfirmed reservation unknown without adding confirmed work', async () => {
+  const source = fixture()
+  const original = new TextDecoder().decode(source.artifacts.result)
+  const baseline = (await validateRcJobArtifacts(source.job, source.artifacts)).summary
+  const budget = JSON.parse(original).execution_budget
+  expect(budget.remaining_attempts).toBeGreaterThan(0)
+  let raw = replace(original, ['execution_budget', 'reserved_attempts'], String(budget.reserved_attempts + 1))
+  raw = replace(raw, ['execution_budget', 'remaining_attempts'], String(budget.remaining_attempts - 1))
+  const checkpoint = source.artifacts.checkpoint.slice(), request = source.artifacts.request.slice()
+  bind(source, raw)
+  const evidence = JSON.parse(new TextDecoder().decode(source.artifacts.evidence))
+  evidence.validation_report.execution_budget = JSON.parse(raw).execution_budget
+  source.artifacts.evidence = new TextEncoder().encode(JSON.stringify(evidence))
+  source.job.evidence.content_hash = digest(source.artifacts.evidence)
+  source.job.evidence.byte_length = source.artifacts.evidence.byteLength
+  expect(source.artifacts.checkpoint).toEqual(checkpoint)
+  expect(source.artifacts.request).toEqual(request)
+  expect(at(new TextDecoder().decode(source.artifacts.result), ['api_result'])).toBe(at(original, ['api_result']))
+  const { summary } = await validateRcJobArtifacts(source.job, source.artifacts)
+  expect(summary).toMatchObject({
+    reservedInvocations: baseline.reservedInvocations + 1,
+    confirmedInvocations: baseline.confirmedInvocations,
+    knownCoreCalls: baseline.knownCoreCalls,
+    knownNewtonIterations: baseline.knownNewtonIterations,
+    unknownWork: true,
+  })
+})

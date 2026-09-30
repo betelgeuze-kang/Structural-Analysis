@@ -997,3 +997,563 @@ def test_abandoned_reservation_survives_successful_retry_as_unknown_gap(
     assert checkpoint["receipts"][-1]["analysis_ordinal"] == 4
     assert checkpoint["receipts"][-1]["verification_ordinal"] == 5
     assert service.validate_integrity(resumed.job_id, **TENANT_AUTH)["contract_pass"]
+
+
+@pytest.fixture(scope="module", params=["normal", "reordered", "zero-first"])
+def actual_pin_roller_preload(request, tmp_path_factory):
+    """Original production split/full executions, each with fresh verification."""
+    case = request.param
+    directory = tmp_path_factory.mktemp("pin-roller-preload-" + case)
+    model = pin_roller_payload()
+    if case == "reordered":
+        model["nodes"][1], model["nodes"][5] = model["nodes"][5], model["nodes"][1]
+    targets = (0.0, -1e-6, -2e-6) if case == "zero-first" else TARGETS
+    typed = BoundedRCFiberDirectControlRequest(
+        10,
+        targets,
+        allow_reversals=True,
+        maximum_reversals=2,
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -0.1, 0.0),),
+    )
+    arms = {}
+    for label, size in (("split", 1), ("full", 3)):
+        authored = _request(chunk_size=size)
+        authored.update(
+            case_id="v4-preload-" + case,
+            model=model,
+            config=typed.to_dict(),
+            result_contract="bounded-rc-fiber-job-result.v2",
+        )
+        store = directory / label
+        service = _service(store)
+        job = _submit(service, authored)
+        observed = {"preload": 0, "control": 0}
+        original_preload = paths.solve_stateful_fiber_frame2d_constant_load_preload
+        original_control = paths.solve_stateful_fiber_frame2d_displacement_control_step
+
+        def preload(*args, **kwargs):
+            observed["preload"] += 1
+            return original_preload(*args, **kwargs)
+
+        def control(*args, **kwargs):
+            observed["control"] += 1
+            return original_control(*args, **kwargs)
+
+        checkpoints = []
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(
+                paths, "solve_stateful_fiber_frame2d_constant_load_preload", preload
+            )
+            patch.setattr(
+                paths, "solve_stateful_fiber_frame2d_displacement_control_step", control
+            )
+            for index in range(3 // size):
+                service = _service(store)
+                claim = _claim(service)
+                if claim.checkpoint_bytes is not None:
+                    checkpoints.append(claim.checkpoint_bytes)
+                    assert (
+                        service.read_checkpoint(job.job_id, **TENANT_AUTH)
+                        == claim.checkpoint_bytes
+                    )
+                job = dispatcher.execute_job_claim(service, claim, **WORKER_AUTH)
+                assert job.progress_completed == (index + 1) * size
+                assert job.status == (
+                    "succeeded" if job.progress_completed == 3 else "checkpointed"
+                )
+                assert service.validate_integrity(job.job_id, **TENANT_AUTH)[
+                    "contract_pass"
+                ]
+        raw = service.read_result(job.job_id, **TENANT_AUTH)
+        evidence = _evidence(service, job.job_id, **TENANT_AUTH)
+        export = directory / (label + "-originals")
+        export.mkdir()
+        for role in ("request", "checkpoint", "result", "evidence"):
+            if getattr(job, role) is not None:
+                (export / (role + ".json")).write_bytes(
+                    getattr(service, "read_" + role)(job.job_id, **TENANT_AUTH)
+                )
+        for reference in evidence["invocations"]:
+            (
+                export / ("invocation-" + str(reference["ordinal"]) + ".json")
+            ).write_bytes(
+                service.read_rc_invocation_artifact(
+                    job.job_id, **TENANT_AUTH, ordinal=reference["ordinal"]
+                )
+            )
+        arms[label] = {
+            "request": authored,
+            "result": json.loads(raw),
+            "raw": raw,
+            "checkpoints": checkpoints,
+            "observed": observed,
+            "evidence": evidence,
+        }
+    summary = {
+        "case": case,
+        "targets": list(targets),
+        "observed": {label: arm["observed"] for label, arm in arms.items()},
+        "result_hashes": {label: _sha(arm["raw"]) for label, arm in arms.items()},
+        "scope": "production numerical software regression; no independent physical or performance qualification",
+    }
+    (directory / "summary.json").write_bytes(_bytes(summary))
+    print("Original v4 preload split/full artifacts:", directory, flush=True)
+    return directory, arms
+
+
+def test_actual_v4_preload_full_and_reopened_chunks_have_identical_original_state(
+    actual_pin_roller_preload,
+):
+    _, arms = actual_pin_roller_preload
+    split, full = arms["split"], arms["full"]
+    a, b = split["result"]["api_result"], full["result"]["api_result"]
+    assert _native(split["result"]) == _native(full["result"])
+    for key in (
+        "preload_response",
+        "response_history",
+        "terminal_response",
+        "checkpoint",
+        "model",
+        "control",
+        "claims",
+    ):
+        assert _bytes(a[key]) == _bytes(b[key])
+    assert (
+        a["model"]["compiler_profile"]
+        == "planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1"
+    )
+    assert a["request"]["experimental_pin_roller_beam"] is True
+    assert (
+        a["request"]["constant_nodal_loads"]
+        == split["request"]["config"]["constant_nodal_loads"]
+    )
+    assert [row["epoch"] for row in a["response_history"]] == [2, 3, 4]
+    assert a["preload_response"]["epoch"] == 1
+    expected = [
+        (node["id"], component)
+        for node in split["request"]["model"]["nodes"]
+        for component in ("UX", "UY")
+        if node["id"] == "N2" or (node["id"] == "N6" and component == "UY")
+    ]
+    for row in [a["preload_response"], *a["response_history"]]:
+        assert [(r["node_id"], r["dof"]) for r in row["support_reactions"]] == expected
+        assert (
+            row["member_end_forces"] and row["section_results"] and row["fiber_results"]
+        )
+    if split["request"]["config"]["targets_m"][0] == 0.0:
+        assert a["preload_response"]["node_displacements"][3]["UY_m"] < 0.0
+        assert abs(a["response_history"][0]["node_displacements"][3]["UY_m"]) <= 1e-12
+        assert a["path"]["requested_directions"] == [1, -1, -1]
+    for index, raw in enumerate(split["checkpoints"], 1):
+        saved = json.loads(raw)
+        assert saved["schema_version"] == "bounded-rc-fiber-job-checkpoint.v2"
+        assert saved["receipts"] == split["result"]["receipts"][:index]
+        native = json.loads(_native(saved))
+        assert native["preload_checkpoint"]["epoch"] == 1
+        assert native["terminal_checkpoint"]["epoch"] == index + 1
+
+
+def test_actual_v4_preload_and_prefix_are_charged_in_each_analysis_and_verification(
+    actual_pin_roller_preload,
+):
+    _, arms = actual_pin_roller_preload
+    for label, expected_calls, expected_invocations in (
+        ("split", {"preload": 6, "control": 12}, 6),
+        ("full", {"preload": 2, "control": 6}, 2),
+    ):
+        arm = arms[label]
+        assert arm["observed"] == expected_calls
+        result = arm["result"]
+        assert result["execution_budget"]["reserved_attempts"] == expected_invocations
+        evidence = arm["evidence"]
+        assert evidence["pending_ordinals"] == []
+        total = 0
+        for receipt in result["receipts"]:
+            count = receipt["completed_after"] + 1
+            assert (
+                receipt["analysis_metrics"]["control_work"]["attempted_step_count"]
+                == count
+            )
+            assert (
+                receipt["verification_metrics"]["replay_control_work"][
+                    "attempted_step_count"
+                ]
+                == count
+            )
+            assert (
+                receipt["validation_report"]["fresh_source_execution_invoked"] is True
+            )
+            assert receipt["validation_report"]["physical_path_complete"] is True
+        assert len({row["preload_step_hash"] for row in result["receipts"]}) == 1
+        for record in evidence["records"]:
+            outcome = record["outcome"]
+            assert (
+                outcome["status"] == "returned"
+                and not outcome["unavailable_execution_work"]
+            )
+            work = (
+                outcome["api_result"]["metrics"]["control_work"]
+                if outcome["phase"] == "analysis"
+                else outcome["verification_report"]["replay_control_work"]
+            )
+            assert work["unknown_solver_work_attempt_count"] == 0
+            total += work["attempted_step_count"]
+        assert total == sum(expected_calls.values())
+
+
+def test_v4_preload_rehashed_earlier_receipt_load_tamper_is_rejected_without_solving(
+    actual_pin_roller_preload, monkeypatch
+):
+    from copy import deepcopy
+    from structural_analysis.execution import rc_fiber_job_contract as contract
+
+    _forbid_numerics(monkeypatch)
+    monkeypatch.setattr(
+        paths,
+        "solve_stateful_fiber_frame2d_constant_load_preload",
+        lambda *args, **kwargs: pytest.fail("pure validation entered preload"),
+    )
+    _, arms = actual_pin_roller_preload
+    arm = arms["split"]
+    changed = deepcopy(arm["result"])
+    receipt = changed["receipts"][0]
+    receipt["api_request"]["constant_nodal_loads"][0]["FY_kN"] = -0.2
+    receipt["receipt_hash"] = contract._hash(
+        {key: value for key, value in receipt.items() if key != "receipt_hash"}
+    )
+    changed["result_hash"] = contract._hash(
+        {key: value for key, value in changed.items() if key != "result_hash"}
+    )
+    with pytest.raises(ValueError, match="request/source/restart mismatch"):
+        contract.validate_rc_fiber_job_result(
+            changed,
+            request=arm["request"],
+            execution_budget=changed["execution_budget"],
+        )
+
+
+def test_actual_v4_failed_preload_retains_both_invocations_without_lateral_calls(
+    tmp_path, monkeypatch
+):
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        10,
+        (-1e-6,),
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -1000.0, 0.0),),
+    ).to_dict()
+    request["config"]["solver_config"]["newton"]["max_iterations"] = 0
+    request["result_contract"] = "bounded-rc-fiber-job-result.v2"
+    service = _service(tmp_path / "failed-preload")
+    job = _submit(service, request)
+    _forbid_numerics(monkeypatch)
+    with pytest.raises(
+        worker.RCFiberDirectControlWorkerError, match="rc_fiber_worker_chunk_blocked"
+    ):
+        _run(service, _claim(service))
+    failed = service.get_job(job.job_id, **TENANT_AUTH)
+    assert failed.status == "failed" and failed.progress_completed == 0
+    assert failed.checkpoint is failed.result is failed.evidence is None
+    evidence = _evidence(service, job.job_id, **TENANT_AUTH)
+    assert evidence["pending_ordinals"] == []
+    assert evidence["execution_budget"]["reserved_attempts"] == 2
+    assert [row["outcome"]["phase"] for row in evidence["records"]] == [
+        "analysis",
+        "verification",
+    ]
+    for record in evidence["records"]:
+        outcome = record["outcome"]
+        assert (
+            outcome["status"] == "returned"
+            and not outcome["unavailable_execution_work"]
+        )
+        work = (
+            outcome["api_result"]["metrics"]["control_work"]
+            if outcome["phase"] == "analysis"
+            else outcome["verification_report"]["replay_control_work"]
+        )
+        assert (
+            work["attempted_step_count"] == 1
+            and work["unknown_solver_work_attempt_count"] == 0
+        )
+
+
+def _stub_v4_preload_chunk(arm, monkeypatch, before, *, unknown_phase=None):
+    """Reuse original API boundary values; these calls add no numerical evidence."""
+    from copy import deepcopy
+    from structural_analysis.execution import rc_fiber_job_contract as contract
+
+    analysis = deepcopy(arm["evidence"]["records"][2 * before]["outcome"])
+    verification = deepcopy(
+        arm["evidence"]["records"][2 * before + 1]["outcome"]["verification_report"]
+    )
+    payload = analysis["api_result"]
+    if unknown_phase == "analysis":
+        payload["metrics"]["control_work"]["unknown_solver_work_attempt_count"] = 1
+        payload["result_hash"] = contract._hash(
+            {key: value for key, value in payload.items() if key != "result_hash"}
+        )
+        verification["verified_result_hash"] = payload["result_hash"]
+    elif unknown_phase == "verification":
+        verification["replay_control_work"]["unknown_solver_work_attempt_count"] = 1
+    result = api.BoundedRCFiberDirectControlResult(
+        _bytes(payload),
+        base64.b64decode(analysis["checkpoint_artifact_base64"], validate=True),
+    )
+
+    def analyze(_model, targets, **kwargs):
+        assert (
+            list(targets) == arm["request"]["config"]["targets_m"][before : before + 1]
+        )
+        assert kwargs["experimental_pin_roller_beam"] is True
+        assert kwargs["constant_nodal_loads"] == (("N4", 0.0, -0.1, 0.0),)
+        assert (
+            None if kwargs["restart"] is None else _sha(kwargs["restart"])
+        ) == payload["request"]["restart_input_sha256"]
+        return result
+
+    def verify(_model, targets, **kwargs):
+        assert kwargs["result"] == result.result_artifact_bytes()
+        assert kwargs["checkpoint"] == result.checkpoint_artifact_bytes()
+        return api.BoundedRCFiberDirectControlValidationReport(_bytes(verification))
+
+    monkeypatch.setattr(api, "analyze_bounded_rc_fiber_direct_control", analyze)
+    monkeypatch.setattr(
+        api, "validate_bounded_rc_fiber_direct_control_artifacts", verify
+    )
+    _forbid_numerics(monkeypatch)
+    monkeypatch.setattr(
+        paths,
+        "solve_stateful_fiber_frame2d_constant_load_preload",
+        lambda *args, **kwargs: pytest.fail(
+            "saved transport regression entered preload"
+        ),
+    )
+
+
+def test_v4_preload_crash_reservation_and_last_verified_prefix_survive_reopen(
+    actual_pin_roller_preload, tmp_path, monkeypatch
+):
+    """Synthetic death after reservation; retain its unknown work beside real bytes."""
+    _, arms = actual_pin_roller_preload
+    arm = arms["split"]
+    clock = Clock()
+    store = tmp_path / "crash-preload"
+    service = _service(store, clock)
+    job = _submit(service, arm["request"])
+    _stub_v4_preload_chunk(arm, monkeypatch, 0)
+    first = _run(service, _claim(service))
+    old_raw = service.read_checkpoint(job.job_id, **TENANT_AUTH)
+    old_receipts = json.loads(old_raw)["receipts"]
+    current = _claim(service)
+
+    def crash(*_args, **_kwargs):
+        raise KeyboardInterrupt("synthetic v4 preload crash after reservation")
+
+    monkeypatch.setattr(api, "analyze_bounded_rc_fiber_direct_control", crash)
+    with pytest.raises(KeyboardInterrupt):
+        _run(service, current)
+    clock.advance(301)
+    reopened = _service(store, clock)
+    replacement = _claim(reopened)
+    assert replacement.checkpoint_bytes == old_raw
+    assert replacement.job.checkpoint == first.checkpoint
+    _stub_v4_preload_chunk(arm, monkeypatch, 1)
+    advanced = _run(reopened, replacement)
+    assert advanced.status == "checkpointed" and advanced.progress_completed == 2
+    evidence = _evidence(reopened, job.job_id, **TENANT_AUTH)
+    assert (
+        evidence["pending_ordinals"] == [3]
+        and evidence["pending_execution_work"] == "unknown"
+    )
+    assert evidence["execution_budget"]["reserved_attempts"] == 5
+    assert [record["ordinal"] for record in evidence["records"]] == [1, 2, 4, 5]
+    saved = json.loads(reopened.read_checkpoint(job.job_id, **TENANT_AUTH))
+    assert saved["receipts"][:1] == old_receipts
+    assert saved["receipts"][-1]["analysis_ordinal"] == 4
+    assert saved["receipts"][-1]["verification_ordinal"] == 5
+    assert reopened.validate_integrity(job.job_id, **TENANT_AUTH)["contract_pass"]
+
+
+@pytest.mark.parametrize("phase", ["analysis", "verification"])
+def test_v4_preload_returned_unknown_work_cannot_advance_verified_prefix(
+    actual_pin_roller_preload, tmp_path, monkeypatch, phase
+):
+    """Rehashed saved boundary mutation; no new physical execution is claimed."""
+    _, arms = actual_pin_roller_preload
+    arm = arms["split"]
+    service = _service(tmp_path / "unknown-preload")
+    job = _submit(service, arm["request"])
+    _stub_v4_preload_chunk(arm, monkeypatch, 0)
+    first = _run(service, _claim(service))
+    old_raw = service.read_checkpoint(job.job_id, **TENANT_AUTH)
+    _stub_v4_preload_chunk(arm, monkeypatch, 1, unknown_phase=phase)
+    with pytest.raises(
+        worker.RCFiberDirectControlWorkerError, match="rc_fiber_worker_contract_invalid"
+    ):
+        _run(service, _claim(service))
+    failed = service.get_job(job.job_id, **TENANT_AUTH)
+    assert failed.status == "failed" and failed.progress_completed == 1
+    assert (
+        failed.checkpoint == first.checkpoint
+        and failed.result is failed.evidence is None
+    )
+    assert service.read_checkpoint(job.job_id, **TENANT_AUTH) == old_raw
+    evidence = _evidence(service, job.job_id, **TENANT_AUTH)
+    assert evidence["pending_ordinals"] == []
+    assert evidence["execution_budget"]["reserved_attempts"] == 4
+    record = evidence["records"][-2 if phase == "analysis" else -1]
+    assert record["outcome"]["unavailable_execution_work"] is True
+
+
+def test_actual_v4_loaded_suffix_nonconvergence_preserves_verified_prefix(tmp_path):
+    """Actual numerical failure and fresh replay; no independent physics claim."""
+    store = tmp_path / "actual-loaded-suffix"
+    request = _request(chunk_size=1)
+    request.update(
+        case_id="actual-v4-preload-suffix-nonconvergence",
+        model=pin_roller_payload(),
+        result_contract="bounded-rc-fiber-job-result.v2",
+    )
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        10,
+        (-1e-6, -0.02),
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -0.1, 0.0),),
+    ).to_dict()
+    request["config"]["solver_config"]["newton"]["max_iterations"] = 2
+    service = _service(store)
+    job = _submit(service, request)
+    request_raw = service.read_request(job.job_id, **TENANT_AUTH)
+    assert json.loads(request_raw) == request
+
+    first = _run(service, _claim(service))
+    assert first.status == "checkpointed" and first.progress_completed == 1
+    assert first.result is first.evidence is None
+    old_raw = service.read_checkpoint(job.job_id, **TENANT_AUTH)
+    old_payload = json.loads(old_raw)
+    old_native = _native(old_payload)
+    native = json.loads(old_native)
+    assert old_payload["schema_version"] == "bounded-rc-fiber-job-checkpoint.v2"
+    assert native["preload_checkpoint"]["epoch"] == 1
+    assert native["terminal_checkpoint"]["epoch"] == 2
+    assert native["accepted_targets_m"] == [-1e-6]
+    old_receipts = _bytes(old_payload["receipts"])
+    old_verification = old_payload["receipts"][0]["validation_report"]
+    assert old_verification["contract_pass"] is True
+    assert old_verification["physical_path_complete"] is True
+    assert old_verification["fresh_source_execution_invoked"] is True
+    old_outcomes = {
+        ordinal: service.read_rc_invocation_artifact(
+            job.job_id, **TENANT_AUTH, ordinal=ordinal
+        )
+        for ordinal in (1, 2)
+    }
+
+    reopened = _service(store)
+    next_claim = _claim(reopened)
+    assert next_claim.checkpoint_bytes == old_raw
+    assert next_claim.job.checkpoint == first.checkpoint
+    assert reopened.read_request(job.job_id, **TENANT_AUTH) == request_raw
+    with pytest.raises(
+        worker.RCFiberDirectControlWorkerError, match="rc_fiber_worker_chunk_blocked"
+    ):
+        _run(reopened, next_claim)
+    failed = reopened.get_job(job.job_id, **TENANT_AUTH)
+    assert failed.status == "failed" and failed.progress_completed == 1
+    assert failed.checkpoint == first.checkpoint
+    assert failed.result is failed.evidence is None
+    assert reopened.read_request(job.job_id, **TENANT_AUTH) == request_raw
+    retained = reopened.read_checkpoint(job.job_id, **TENANT_AUTH)
+    assert retained == old_raw
+    assert _native(json.loads(retained)) == old_native
+    assert _bytes(json.loads(retained)["receipts"]) == old_receipts
+    for ordinal, original in old_outcomes.items():
+        assert (
+            reopened.read_rc_invocation_artifact(
+                job.job_id, **TENANT_AUTH, ordinal=ordinal
+            )
+            == original
+        )
+
+    evidence = _evidence(reopened, job.job_id, **TENANT_AUTH)
+    assert evidence["execution_budget"]["reserved_attempts"] == 4
+    assert evidence["execution_budget"]["remaining_attempts"] == 12
+    assert evidence["pending_ordinals"] == []
+    outcomes = [record["outcome"] for record in evidence["records"]]
+    assert [outcome["phase"] for outcome in outcomes] == [
+        "analysis",
+        "verification",
+        "analysis",
+        "verification",
+    ]
+    work_rows = []
+    for outcome in outcomes:
+        assert outcome["status"] == "returned"
+        assert outcome["unavailable_execution_work"] is False
+        assert outcome["timing"]["wall_ns"] > 0
+        assert outcome["timing"]["process_cpu_ns"] > 0
+        work = (
+            outcome["api_result"]["metrics"]["control_work"]
+            if outcome["phase"] == "analysis"
+            else outcome["verification_report"]["replay_control_work"]
+        )
+        assert work["unknown_solver_work_attempt_count"] == 0
+        assert work["known_newton_iteration_count"] > 0
+        assert work["known_linear_solve_count"] > 0
+        work_rows.append(work)
+    # Both suffix invocations charge preload, accepted-prefix replay and failure.
+    assert [work["attempted_step_count"] for work in work_rows] == [2, 2, 3, 3]
+
+    suffix = outcomes[2]["api_result"]
+    assert suffix["status"] == "blocked" and suffix["contract_pass"] is False
+    assert _bytes(suffix["request"]["configuration"]) == _bytes(
+        outcomes[0]["api_result"]["request"]["configuration"]
+    )
+    assert (
+        suffix["request"]["constant_nodal_loads"]
+        == request["config"]["constant_nodal_loads"]
+    )
+    assert suffix["request"]["restart_input_sha256"] == _sha(old_native)
+    assert (
+        base64.b64decode(outcomes[2]["checkpoint_artifact_base64"], validate=True)
+        == old_native
+    )
+    path = suffix["path"]
+    assert path["accepted_target_prefix_m"] == [-1e-6]
+    assert path["targets_m"] == [-0.02]
+    assert path["unattempted_targets_m"] == []
+    assert len(path["preload_attempts"]) == len(path["replay_attempts"]) == 1
+    assert path["replay_attempts"][0]["committed"] is True
+    assert len(path["attempts"]) == 1
+    attempt = path["attempts"][0]
+    assert attempt["committed"] is False and attempt["failure"] is None
+    assert attempt["parent_checkpoint_immutable"] is True
+    assert attempt["rollback_exact"] is True
+    assert (
+        attempt["parent_checkpoint_hash"] == native["terminal_checkpoint"]["state_hash"]
+    )
+    assert attempt["accepted_checkpoint_hash"] == attempt["parent_checkpoint_hash"]
+    solver_work = attempt["solver_work"]
+    assert solver_work["solver_executed"] is True
+    assert solver_work["convergence_claim"] is False
+    assert solver_work["residual_gate_passed"] is False
+    assert solver_work["increment_gate_passed"] is False
+    assert solver_work["fallback_used"] is False
+    assert 0 < solver_work["newton_iteration_count"] <= 2
+    assert solver_work["linear_solve_count"] > 0
+    assert solver_work["terminal_reason"] == "line_search_failed_to_reduce_residual"
+
+    verification = outcomes[3]["verification_report"]
+    assert verification["artifact_contract_pass"] is True
+    assert verification["contract_pass"] is False
+    assert verification["physical_path_complete"] is False
+    assert verification["fresh_source_execution_invoked"] is True
+    assert verification["solver_replay_performed"] is True
+    assert verification["verified_result_hash"] == suffix["result_hash"]
+    assert verification["response_reassembly_verified_count"] == 2
+    assert verification["response_reassembly_attempts"] == 2
+    assert verification["errors"] == []
+    assert reopened.validate_integrity(job.job_id, **TENANT_AUTH)["contract_pass"]

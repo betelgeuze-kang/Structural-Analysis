@@ -22,11 +22,13 @@ Physical member lengths include overhangs; a support span cannot replace member
 length in the quantity or common-price calculation. Quadrature changes must
 still preserve the physical quantity basis.
 
-The durable job contract continues to admit the explicit pin/roller profile only
-without constant preload. Two fixed endpoints and pin/roller with constant
-preload remain rejected before durable execution. Direct local search and
-refinement preserve their existing explicit profiles. This integration does not
-claim that the durable transport supports every direct API combination.
+The initial integration admitted the explicit pin/roller durable profile only
+without constant preload. The subsequent durable integration described below now
+admits optional constant loads under the same opted-in v4 compiler profile and
+uses the v2 durable result contract when loads are present. Two fixed endpoints
+remain rejected before durable execution. Direct local search and refinement
+preserve their existing explicit profiles; this does not imply that every direct
+API combination is available through the durable transport.
 
 The regression file `tests/test_rc_control_support_profile_integration.py`
 exercises authored small models through actual analysis, fresh reference checks,
@@ -41,8 +43,8 @@ Validation receipts retain the exact tested commit, executed commands and failed
 pre-fix observation. The authored fixtures and synthetic prices establish software
 behavior only. They do not demonstrate physical accuracy, learned acceleration,
 independent validation, actual hardware latency, commercial price savings or
-release approval. The original broader roadmap and constant-preload support work
-remain open.
+release approval. The broader roadmap, operating limits and independent
+qualification remain open.
 
 The first complete integration run passed 505 of 506 tests but exposed a real
 SQLite WAL-initialization collision in the unchanged simultaneous-same-physics
@@ -64,9 +66,9 @@ completed while Workbench rejected its control schema. The design reader now
 recognizes the explicit pin/roller profile, binds its API opt-in and authored
 control node/component, and checks the horizontal chain, support roles, free
 control coordinate and load placement before accepting a verified row. The
-shared preload classifier recognizes direct v4 constant loads; durable v4
-submission still rejects constant preload. Shared layout/prefix readers preserve
-the profile. The subsequent price-order layout producer integration described
+shared preload classifier recognizes direct v4 constant loads. The subsequent
+durable integration uses that same loading classification for saved-job review.
+Shared layout/prefix readers preserve the profile. The subsequent price-order layout producer integration described
 below completes this direct, local path; v4 layout learning remains unsupported.
 
 A single gzip fixture preserves 52 exact Python producer originals (2,513,297
@@ -85,8 +87,8 @@ result, and its original failure remains reviewable. Desktop/mobile tests import
 these originals and compare downloaded bytes; rehashed profile, opt-in, control,
 reaction, load, quantity and member-price contradictions remain rejected. These
 browser routes serve saved originals. The subsequent live HTTP regression below
-checks the admitted no-preload path. Actual device response-time budgets remain
-open.
+checks actual durable paths with and without constant preload. Actual device
+response-time budgets remain open.
 
 ## Rejected idempotency conflicts create no request blobs
 
@@ -113,8 +115,8 @@ quota. Those storage and operating-budget obligations remain separate.
 The registered actual-HTTP browser suite now submits a complete canonical v4
 pin/roller request to the production WSGI application and dispatches the actual
 production worker in a separate Python interpreter. Its explicit execution mode
-admits only the two prepared small no-preload request byte strings. The default
-transport fixture and the new HTTP server still forbid numerical execution.
+admits only four prepared request byte strings: split and full paths with or
+without constant preload. The default transport fixture and the new HTTP server still forbid numerical execution.
 Credentials are synthetic and listeners/stores are isolated to loopback and
 fresh temporary directories.
 
@@ -127,12 +129,18 @@ production worker; its native terminal checkpoint, response history, material
 history and accepted claims match the split result. Call-through counters record
 four charged analysis/verification invocations and six kernel target calls for
 the split path, versus two invocations and four kernel target calls for the full
-path. These counters describe this authored two-target regression, not a speedup.
+path without preload. With preload, every fresh analysis and verification also
+executes the initial constant-load step: four preload calls across the two split
+chunks versus two in the full path. Thus this two-target fixture records ten and
+six total kernel calls respectively. These counts establish charged work for an
+authored regression; they are not a performance or speedup measurement.
 
-The public HTTP schema rejects v4 preload and two-fixed-endpoint requests before
-execution. The pure preload contract regression separately checks rejection
-before model compilation. Exact retries, conflicting keys and cross-tenant
-reads retain their existing authentication and immutable-byte semantics.
+The public HTTP schema and pure contract now agree on optional v4 constant loads
+and the corresponding v2 durable result. Loads on either support, undeclared
+nodes, restrained control coordinates and noncanonical load values remain
+rejected before numerical execution; two-fixed-endpoint requests remain outside
+the public durable schema. Exact retries, conflicting keys and cross-tenant reads
+retain their existing authentication and immutable-byte semantics.
 
 Worker children have a bounded execution wait, tracked termination and actual
 close confirmation. Failed or unreaped runs retain their durable store, including
@@ -141,6 +149,59 @@ Successful runs remove only their own temporary store after all children close
 and receipt files are written. This verifies local software continuation and
 byte preservation; it does not establish deployment, hardware attestation,
 independent physical accuracy or real-device latency.
+
+## Durable pin/roller preload and the loaded origin
+
+The v4 durable contract preserves the original constant nodal loads, compiler
+profile, resolved physical identity and control coordinate in the existing
+resume contract. It uses the existing constant-load preload engine and v2 native
+checkpoint decoder. The worker, service, native solver and API implementation
+remain unchanged. Workbench classifies v4 loading from the authored constant-load
+field and checks the stored preload epoch before accepting subsequent targets.
+V1 and no-preload v4 retain the v1 result contract; the existing v2 checks remain.
+
+Three actual production fixtures compare three one-target chunks with a fresh
+three-target full path: normal declarations, reordered support declarations and
+an absolute first displacement target of zero after a nonzero loaded origin.
+Every chunk reopens the same store and retains the original prefix checkpoint.
+Terminal native bytes, preload response, complete target history, member forces,
+section/fiber results and authored-order support reactions match the full path.
+The zero target is a displacement coordinate, not an instruction to omit preload:
+the first requested direction is checked against the loaded origin.
+
+Each analysis and fresh verification recomputes preload and the full prefix.
+The three-chunk path has six API invocations, six preload calls and twelve target
+calls; the full path has two API invocations, two preload calls and six target
+calls. Stored receipts and observational call-through counters must agree.
+Rehashed changes to an earlier receipt's constant load are rejected without
+solving. A failed preload retains both analysis/verification outcomes, produces
+no accepted checkpoint/result and never enters lateral control. Additional
+saved-original regressions preserve a committed prefix after a reserved-call
+crash, reopen the pending ordinal as unknown work, and reject returned unknown
+work without promoting a result. Workbench now also rejects unknown solver work
+inside any successful analysis/verification receipt, matching the backend
+contract. Rehashed last-receipt verification counterexamples reproduced the old
+acceptance for v1, v2 and v4. An extra unconfirmed reservation still appears as
+unknown work while preserving known confirmed totals. These transport regressions
+do not constitute new numerical or independent physical measurements.
+
+A separate actual two-target regression uses one immutable loaded request with
+Newton max_iterations=2. Its first target is verified and saved; after reopening,
+the second target genuinely fails line search to reduce the residual. Fresh
+verification repeats the failed path, both outcomes remain recorded, and the
+original request, native checkpoint, receipt prefix and earlier invocation bytes
+remain unchanged at progress one. It produces no accepted terminal result.
+Analysis/verification attempted-step counts are 2, 2, 3 and 3, including preload,
+prefix replay and the failed target. The observed terminal reason is line-search
+failure, not an asserted iteration-limit exit.
+
+The actual HTTP browser cases additionally reopen the service in a new Python
+interpreter, show the preload and all target material steps in desktop/mobile
+review, and compare downloaded checkpoint/result bytes with their worker
+originals. Mobile Chromium emulation does not establish real-device latency.
+A bounded test-child wait does not implement a production time, memory or disk
+quota. Independent experimental agreement, operational limits and release
+approval remain separate obligations.
 
 ## Direct price-order pin/roller layout producers
 
