@@ -1149,12 +1149,8 @@ class DurableJobService:
             )
         _hash(resume_contract_hash, "/resume_contract_hash")
         normalized_checkpoint = bytes(checkpoint_bytes)
-        checkpoint_ref = self._put_blob(
-            normalized_checkpoint,
-            role="checkpoint",
-            media_type=checkpoint_media_type,
-            maximum_bytes=_MAX_CHECKPOINT_BYTES,
-        )
+        _media_type(checkpoint_media_type, "/checkpoint/media_type")
+        _bounded(normalized_checkpoint, _MAX_CHECKPOINT_BYTES, "/checkpoint")
         with self._transaction() as connection:
             now, now_us = self._now()
             row = self._job_row(connection, job_id)
@@ -1244,6 +1240,14 @@ class DurableJobService:
                     )
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
+            checkpoint_ref = self._put_blob(
+                normalized_checkpoint,
+                role="checkpoint",
+                media_type=checkpoint_media_type,
+                maximum_bytes=_MAX_CHECKPOINT_BYTES,
+            )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
             row = self._transition(
                 connection,
                 row,
@@ -1301,18 +1305,7 @@ class DurableJobService:
         _bounded(evidence_bytes, _MAX_EVIDENCE_BYTES, "/evidence")
         result_hash = _sha256(normalized_result)
         evidence_hash = _sha256(evidence_bytes)
-        result_ref = self._put_blob(
-            normalized_result,
-            role="result",
-            media_type=result_media_type,
-            maximum_bytes=maximum_result_bytes,
-        )
-        evidence_ref = self._put_blob(
-            evidence_bytes,
-            role="evidence",
-            media_type="application/json",
-            maximum_bytes=_MAX_EVIDENCE_BYTES,
-        )
+        _media_type(result_media_type, "/result/media_type")
         with self._transaction() as connection:
             now, now_us = self._now()
             row = self._job_row(connection, job_id)
@@ -1425,6 +1418,22 @@ class DurableJobService:
                         "/evidence/validation_report",
                         "The evidence must retain the exact pure RC job validation report.",
                     )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            result_ref = self._put_blob(
+                normalized_result,
+                role="result",
+                media_type=result_media_type,
+                maximum_bytes=maximum_result_bytes,
+            )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            evidence_ref = self._put_blob(
+                evidence_bytes,
+                role="evidence",
+                media_type="application/json",
+                maximum_bytes=_MAX_EVIDENCE_BYTES,
+            )
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
             row = self._transition(

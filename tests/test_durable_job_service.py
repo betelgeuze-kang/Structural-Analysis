@@ -1212,3 +1212,297 @@ def test_connection_unexpected_setup_exception_closes_without_retry(
     with pytest.raises(RuntimeError, match="setup interrupted"):
         _bare_connection_service(tmp_path)._connect()
     assert probe.closed
+
+
+def _prewrite_legacy_inventory(service):
+    return {
+        str(path.relative_to(service.root)): path.read_bytes()
+        for path in sorted((service.root / "blobs" / "sha256").rglob("*"))
+        if path.is_file()
+    }
+
+
+def _prewrite_legacy_state(service, job_id):
+    view = service.get_job(
+        job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+    )
+    with sqlite3.connect(service.root / "jobs.sqlite3") as connection:
+        events = connection.execute(
+            "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision", (job_id,)
+        ).fetchall()
+    return view, events
+
+
+@pytest.mark.parametrize("rejected", ["stale", "expired", "progress", "resume"])
+def test_prewrite_legacy_checkpoint_rejection_preserves_blob_inventory(
+    original_artifact_job, monkeypatch, rejected
+):
+    # The existing fixture forbids solvers; these are opaque service bytes.
+    service, job = original_artifact_job
+    clock = MutableClock()
+    clock.value = datetime.fromisoformat(job.created_at.replace("Z", "+00:00"))
+    monkeypatch.setattr(service, "_clock", clock)
+    claim = _claim(service)
+    raw, prefix = _original_checkpoint(service, claim, release=False)
+    arguments = {
+        "worker_id": "worker-a",
+        "authorization_token": WORKER_TOKEN,
+        "lease_token": claim.lease_token,
+        "checkpoint_bytes": b"rejected opaque checkpoint " + rejected.encode(),
+        "checkpoint_media_type": "application/octet-stream",
+        "progress_completed": 2,
+        "progress_total": 4,
+        "resume_contract_hash": "sha256:" + "c" * 64,
+        "release_lease": False,
+    }
+    if rejected == "stale":
+        arguments["lease_token"] = "stale-lease-token-0123456789"
+        code = "lease_unauthorized"
+    elif rejected == "expired":
+        clock.advance(61)
+        code = "lease_expired"
+    elif rejected == "progress":
+        arguments["progress_completed"] = 1
+        code = "checkpoint_progress_invalid"
+    else:
+        arguments["resume_contract_hash"] = "sha256:" + "d" * 64
+        code = "resume_contract_mismatch"
+    before_state = _prewrite_legacy_state(service, job.job_id)
+    before_blobs = _prewrite_legacy_inventory(service)
+    with pytest.raises(JobServiceError, match=code):
+        service.save_checkpoint(job.job_id, **arguments)
+    assert _prewrite_legacy_state(service, job.job_id) == before_state
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == raw
+    )
+    assert before_state[0].checkpoint == prefix.checkpoint
+    assert _prewrite_legacy_inventory(service) == before_blobs
+
+
+def _prewrite_legacy_timed(original_artifact_job, monkeypatch):
+    service, job = original_artifact_job
+    clock = MutableClock()
+    clock.value = datetime.fromisoformat(job.created_at.replace("Z", "+00:00"))
+    monkeypatch.setattr(service, "_clock", clock)
+    claim = _claim(service)
+    raw, prefix = _original_checkpoint(service, claim, release=False)
+    return service, job, claim, raw, prefix, clock
+
+
+def _prewrite_legacy_completion(
+    job, prefix, *, family="unified-nonlinear-frame-result.v1"
+):
+    raw = _canonical_bytes(
+        {
+            "schema_version": family,
+            "synthetic_orchestration_only": True,
+            "result_hash": "sha256:" + "1" * 64,
+        }
+    )
+    proof = build_job_completion_evidence(
+        job_id=job.job_id,
+        request_hash=job.request.content_hash,
+        checkpoint_hash=prefix.checkpoint.content_hash,
+        result_bytes=raw,
+        validation_report={"contract_pass": True, "synthetic_orchestration_only": True},
+        validator_id="test.synthetic.service.boundary",
+    )
+    return raw, proof
+
+
+@pytest.mark.parametrize("rejected", ["family", "request", "checkpoint", "result"])
+def test_prewrite_legacy_completion_rejection_preserves_blob_inventory(
+    original_artifact_job, monkeypatch, rejected
+):
+    service, job, claim, checkpoint, prefix, _clock = _prewrite_legacy_timed(
+        original_artifact_job, monkeypatch
+    )
+    family = (
+        "synthetic-invalid-result.v1"
+        if rejected == "family"
+        else "unified-nonlinear-frame-result.v1"
+    )
+    raw, proof = _prewrite_legacy_completion(job, prefix, family=family)
+    if rejected != "family":
+        key = {
+            "request": "request_hash",
+            "checkpoint": "checkpoint_hash",
+            "result": "result_artifact_hash",
+        }[rejected]
+        proof[key] = "sha256:" + "e" * 64
+    before_state = _prewrite_legacy_state(service, job.job_id)
+    before_blobs = _prewrite_legacy_inventory(service)
+    code = (
+        "result_contract_mismatch"
+        if rejected == "family"
+        else "completion_evidence_binding_mismatch"
+    )
+    with pytest.raises(JobServiceError, match=code):
+        service.complete_job(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert _prewrite_legacy_state(service, job.job_id) == before_state
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == checkpoint
+    )
+    assert _prewrite_legacy_inventory(service) == before_blobs
+
+
+def test_prewrite_legacy_completion_takeover_after_early_gate_stores_nothing(
+    original_artifact_job, monkeypatch
+):
+    service, job, claim, checkpoint, prefix, clock = _prewrite_legacy_timed(
+        original_artifact_job, monkeypatch
+    )
+    raw, proof = _prewrite_legacy_completion(job, prefix)
+    passed, resume = Event(), Event()
+    limit = service.worker_result_byte_limit
+
+    def pause_after_gate(*args, **kwargs):
+        value = limit(*args, **kwargs)
+        passed.set()
+        assert resume.wait(5), "test completion gate did not resume"
+        return value
+
+    monkeypatch.setattr(service, "worker_result_byte_limit", pause_after_gate)
+    before_blobs = _prewrite_legacy_inventory(service)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(
+            service.complete_job,
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+        try:
+            assert passed.wait(5), "test never passed the authenticated early gate"
+            clock.advance(61)
+            successor_service = _service(service.root, clock=clock)
+            successor = _claim(successor_service)
+            assert successor.checkpoint_bytes == checkpoint
+            before_state = _prewrite_legacy_state(successor_service, job.job_id)
+        finally:
+            resume.set()
+        with pytest.raises(JobServiceError, match="lease_unauthorized"):
+            future.result(timeout=5)
+    assert _prewrite_legacy_state(successor_service, job.job_id) == before_state
+    assert _prewrite_legacy_inventory(service) == before_blobs
+
+
+def test_prewrite_legacy_result_fsync_expiry_skips_evidence_and_keeps_prefix(
+    original_artifact_job, monkeypatch
+):
+    service, job, claim, checkpoint, prefix, clock = _prewrite_legacy_timed(
+        original_artifact_job, monkeypatch
+    )
+    raw, proof = _prewrite_legacy_completion(job, prefix)
+    before_state = _prewrite_legacy_state(service, job.job_id)
+    before_blobs = _prewrite_legacy_inventory(service)
+    put = service._put_blob
+    writes = []
+
+    def expires_after_result(payload, **kwargs):
+        reference = put(payload, **kwargs)
+        writes.append(kwargs["role"])
+        if kwargs["role"] == "result":
+            clock.advance(61)
+        return reference
+
+    monkeypatch.setattr(service, "_put_blob", expires_after_result)
+    with pytest.raises(JobServiceError, match="lease_expired"):
+        service.complete_job(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert writes == ["result"]
+    assert _prewrite_legacy_state(service, job.job_id) == before_state
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == checkpoint
+    )
+    remaining = _prewrite_legacy_inventory(service)
+    # A late-I/O result orphan is retained; no evidence or metadata is published.
+    assert set(remaining) - set(before_blobs) == {
+        str(
+            service._blob_path("sha256:" + hashlib.sha256(raw).hexdigest()).relative_to(
+                service.root
+            )
+        )
+    }
+    assert raw in remaining.values()
+    assert _canonical_bytes(proof) not in remaining.values()
+
+
+def test_prewrite_legacy_accepted_snapshots_dedup_and_completion_reopen(
+    original_artifact_job, monkeypatch
+):
+    service, job = original_artifact_job
+    assert _submit(service) == job
+    claim = _claim(service)
+    checkpoint, _first = _original_checkpoint(service, claim, release=False)
+    before_blobs = _prewrite_legacy_inventory(service)
+    prefix = service.save_checkpoint(
+        job.job_id,
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+        lease_token=claim.lease_token,
+        checkpoint_bytes=checkpoint,
+        checkpoint_media_type="application/octet-stream",
+        progress_completed=2,
+        progress_total=4,
+        resume_contract_hash="sha256:" + "c" * 64,
+        release_lease=False,
+    )
+    assert _prewrite_legacy_inventory(service) == before_blobs
+    assert _submit(service) == prefix
+    raw, proof = _prewrite_legacy_completion(job, prefix)
+    frozen_evidence = _canonical_bytes(proof)
+    buffer = bytearray(raw)
+    put = service._put_blob
+
+    def mutate_caller_after_result(payload, **kwargs):
+        reference = put(payload, **kwargs)
+        if kwargs["role"] == "result":
+            buffer[:] = b"caller changed after snapshot"
+            proof["validation_report"]["contract_pass"] = False
+        return reference
+
+    monkeypatch.setattr(service, "_put_blob", mutate_caller_after_result)
+    final = service.complete_job(
+        job.job_id,
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+        lease_token=claim.lease_token,
+        result_bytes=buffer,
+        result_media_type="application/json",
+        evidence=proof,
+    )
+    assert final.status == "succeeded" and bytes(buffer) != raw
+    reopened = _service(service.root)
+    auth = {"tenant_id": "tenant-a", "authorization_token": TENANT_A_TOKEN}
+    assert reopened.read_result(job.job_id, **auth) == raw
+    assert reopened.read_evidence(job.job_id, **auth) == frozen_evidence
+    assert reopened.read_checkpoint(job.job_id, **auth) == checkpoint
+    assert reopened.validate_integrity(job.job_id, **auth)["contract_pass"]
