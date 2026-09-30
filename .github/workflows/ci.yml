@@ -133,6 +133,11 @@ jobs:
         id: materialize
         shell: bash
         run: |
+          # Recompute bounded internal Level 1 evidence only in this ephemeral checkout.
+          python scripts/build_analytic_frame_verification_artifact.py
+          python scripts/build_analytic_frame_verification_artifact.py --check
+          python scripts/build_verification_hierarchy_status.py
+          python scripts/build_verification_hierarchy_status.py --check
           # Refresh source-bound Phase 2 receipts only in this ephemeral runner.
           python scripts/build_phase2_state_updated_steel_material_artifacts.py
           python scripts/build_phase2_state_updated_bilinear_link_artifacts.py

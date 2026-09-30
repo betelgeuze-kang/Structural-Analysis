@@ -159,11 +159,14 @@ for (const width of [1440, 390]) for (const id of ['price', 'learned', 'horizon'
         const row = panel.locator(`[data-rc-pruning-candidate="${key}"]`)
         await expect(row).toContainText('Unknown')
         await expect(row).toContainText(id === 'horizon' ? 'Outside consideration horizon' : 'Skipped: higher cost')
+        // Pace user downloads below Chromium's ten-download burst limit.
+        await page.waitForTimeout(250)
         const pending = page.waitForEvent('download')
         await row.getByRole('button', { name: `Download pool ${key} model`, exact: true }).click()
         expect((await readFile((await (await pending).path())!)).equals(files[`pool/${key}.json`])).toBe(true)
       }
       for (const decision of pruning.decisions) {
+        await page.waitForTimeout(250)
         const pending = page.waitForEvent('download')
         await panel.getByRole('button', { name: `Download ${decision.candidate_id} decision`, exact: true }).click()
         expect((await readFile((await (await pending).path())!)).equals(files[`${strategy}/${decision.artifact.path}`])).toBe(true)
@@ -171,6 +174,7 @@ for (const width of [1440, 390]) for (const id of ['price', 'learned', 'horizon'
       if (id !== 'horizon') {
         await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'middle')
         for (const role of ['model', 'result', 'checkpoint', 'verification']) {
+          await page.waitForTimeout(250)
           const pending = page.waitForEvent('download')
           await panel.getByRole('button', { name: `Download middle ${role}`, exact: true }).click()
           expect((await readFile((await (await pending).path())!)).equals(files[`${strategy}/middle/baseline/${role}.json`])).toBe(true)

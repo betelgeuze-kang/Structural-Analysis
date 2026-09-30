@@ -21,6 +21,12 @@ PHASE2_REFRESH_COMMANDS = (
     "python scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
     "python scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
 )
+ANALYTIC_FRAME_REFRESH_COMMANDS = (
+    "python scripts/build_analytic_frame_verification_artifact.py",
+    "python scripts/build_analytic_frame_verification_artifact.py --check",
+    "python scripts/build_verification_hierarchy_status.py",
+    "python scripts/build_verification_hierarchy_status.py --check",
+)
 
 
 @pytest.mark.parametrize(
@@ -77,6 +83,89 @@ def test_phase2_source_receipts_materialize_before_consumers(
         assert (
             names.index("Validate pristine commercial gap ledger") < materialize_index
         )
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name", "preparer_name", "consumer_steps"),
+    [
+        (
+            "ci.yml",
+            "verify",
+            "Materialize exact current-source test evidence",
+            ("Build current-HEAD readiness snapshot", "PR quality gate"),
+        ),
+        (
+            "python-test-collection.yml",
+            "full_shards",
+            "Materialize exact current-source test evidence",
+            ("Run materialized repository test suite shard",),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "python_full_shards",
+            "Materialize exact current-source test evidence",
+            ("Run materialized repository test suite shard",),
+        ),
+        (
+            "nightly-full-quality.yml",
+            "deterministic_quality",
+            "Materialize exact current-source test evidence",
+            ("Deterministic repository quality gate",),
+        ),
+        (
+            "nightly-heavy-solver.yml",
+            "heavy-full-quality",
+            "Materialize exact current-source test evidence",
+            (
+                "Run materialized repository Python suite",
+                "Full workstation/release quality gate",
+            ),
+        ),
+        (
+            "release-publish-current.yml",
+            "publish",
+            "Regenerate release viewer artifacts",
+            ("Build fresh publication candidate", "Strict release quality gate"),
+        ),
+    ],
+    ids=(
+        "ci-verify",
+        "python-full-shards",
+        "nightly-full-shards",
+        "nightly-deterministic-quality",
+        "heavy-full-quality",
+        "release-publish",
+    ),
+)
+def test_analytic_frame_and_hierarchy_replay_before_consumers(
+    workflow_name: str,
+    job_name: str,
+    preparer_name: str,
+    consumer_steps: tuple[str, ...],
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows" / workflow_name).read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"][job_name]["steps"]
+    names = [step["name"] for step in steps]
+    preparer_index = names.index(preparer_name)
+    preparer = steps[preparer_index]
+    run_lines = [line.strip() for line in preparer["run"].splitlines()]
+    indices = [run_lines.index(command) for command in ANALYTIC_FRAME_REFRESH_COMMANDS]
+
+    assert indices == sorted(indices)
+    assert all(
+        run_lines.count(command) == 1 for command in ANALYTIC_FRAME_REFRESH_COMMANDS
+    )
+    assert all(preparer_index < names.index(name) for name in consumer_steps)
+    assert "continue-on-error" not in preparer
+    if "Validate pristine commercial gap ledger" in names:
+        assert names.index("Validate pristine commercial gap ledger") < preparer_index
+    if workflow_name == "release-publish-current.yml":
+        assert names.index("Verify cryptographic legal and release authority") < (
+            preparer_index
+        )
+        assert indices[-1] < run_lines.index("set +e")
 
 
 @pytest.mark.parametrize(
