@@ -2,11 +2,17 @@
 from copy import deepcopy
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
+import time
 
 import pytest
 
 from scripts import run_rc_reuse_campaign as campaign
+from scripts import audit_rc_reuse_campaign_packet as packet_audit
+from scripts import rc_reuse_campaign_source as source_identity
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -137,9 +143,11 @@ def test_complete_source_bound_two_repetition_receipt_is_accepted(tmp_path, monk
     output = tmp_path / 'output'
     assert campaign.run(path, output) is True
     receipt = json.loads((output / 'campaign.json').read_text())
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
     assert receipt['campaign_complete'] and receipt['all_cases_completed']
     assert receipt['aggregate_speed_ratio'] is None
     assert receipt['cases'][0]['status'] == 'completed'
+    assert receipt['cases'][0]['unknown_native_work'] is False
 
 
 @pytest.mark.parametrize('profile', ('two-fixed', 'pin-roller'))
@@ -215,6 +223,7 @@ def test_failed_case_retained_later_case_runs_on_frozen_inputs(tmp_path, monkeyp
     assert receipt['campaign_complete'] and not receipt['all_cases_completed']
     assert receipt['aggregate_speed_ratio'] is None
     assert receipt['cases'][0]['error']['message'] == 'original full-history failure'
+    assert all(row['unknown_native_work'] for row in receipt['cases'])
     assert receipt['cases'][1]['status'] == 'failed'
     assert 'repetition count mismatch' in receipt['cases'][1]['error']['message']
     assert all(r['case_wall_ns'] >= 0 for r in receipt['cases'])
@@ -332,13 +341,126 @@ def test_duplicate_json_key_and_interrupt_are_not_silently_accepted(tmp_path, mo
         campaign.run(path, tmp_path / 'output')
     path.write_text(json.dumps(payload))
 
-    def interrupted(*a, **k):
+    def interrupted(output, *a, **k):
+        output.mkdir()
+        (output / 'failure.json').write_text('{"attempted":true}\n')
         raise KeyboardInterrupt
 
     monkeypatch.setattr(campaign.experiment, 'run', interrupted)
     with pytest.raises(KeyboardInterrupt):
         campaign.run(path, tmp_path / 'output')
-    assert not (tmp_path / 'output/campaign.json').exists()
+    receipt = campaign.load_json_object_strict(tmp_path / 'output/campaign.json')
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
+    assert receipt['recorded_case_count'] == 1
+    assert receipt['planned_case_count'] == 2
+    assert receipt['campaign_complete'] is False
+    assert receipt['all_cases_completed'] is False
+    assert receipt['aggregate_speed_ratio'] is None
+    row = receipt['cases'][0]
+    assert row['status'] == 'interrupted'
+    assert row['error']['type'] == 'KeyboardInterrupt'
+    assert row['unknown_native_work'] is True
+    assert type(row['case_wall_ns']) is int and row['case_wall_ns'] >= 0
+    raw = (tmp_path / 'output/failed/results/failure.json').read_bytes()
+    assert row['receipts']['failure.json']['bytes'] == len(raw)
+    assert row['receipts']['failure.json']['sha256'] == hashlib.sha256(raw).hexdigest()
+    assert not (tmp_path / 'output/campaign.json.tmp').exists()
+
+
+@pytest.mark.parametrize('crash_case', ('first', 'last'))
+def test_unhandled_exit_leaves_an_atomic_running_row_and_unknown_cost(
+    tmp_path, monkeypatch, crash_case
+):
+    path, _ = plan(tmp_path, names=('first', 'last'))
+    source = campaign.subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+
+    def execute(output, repetitions, **kwargs):
+        active = campaign.load_json_object_strict(output.parents[1] / 'campaign.json')
+        assert active['cases'][-1]['id'] == output.parent.name
+        assert active['cases'][-1]['status'] == 'running'
+        assert active['cases'][-1]['case_wall_ns'] is None
+        assert active['cases'][-1]['unknown_native_work'] is True
+        if output.parent.name == crash_case:
+            raise SystemExit(77)
+        write_success(
+            output, source=source, model_raw=kwargs['model_path'].read_bytes(),
+            request_raw=kwargs['request_path'].read_bytes(),
+        )
+
+    monkeypatch.setattr(campaign.experiment, 'run', execute)
+    output = tmp_path / 'output'
+    with pytest.raises(SystemExit) as exit_result:
+        campaign.run(path, output)
+    assert exit_result.value.code == 77
+    # Read the persisted receipt after the runner has stopped. No restart is
+    # needed or allowed to infer the missing numerical work.
+    receipt = campaign.load_json_object_strict(output / 'campaign.json')
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
+    assert receipt['planned_case_count'] == 2
+    assert receipt['recorded_case_count'] == (1 if crash_case == 'first' else 2)
+    assert receipt['campaign_complete'] is False
+    assert receipt['all_cases_completed'] is False
+    assert receipt['aggregate_speed_ratio'] is None
+    assert receipt['cases'][-1]['id'] == crash_case
+    assert receipt['cases'][-1]['status'] == 'running'
+    assert receipt['cases'][-1]['case_wall_ns'] is None
+    assert receipt['cases'][-1]['unknown_native_work'] is True
+    assert receipt['cases'][-1]['receipts'] == {}
+    if crash_case == 'last':
+        assert receipt['cases'][0]['status'] == 'completed'
+        assert receipt['cases'][0]['unknown_native_work'] is False
+    assert not (output / 'campaign.json.tmp').exists()
+    with pytest.raises(FileExistsError):
+        campaign.run(path, output)
+
+
+def test_killed_process_preserves_running_case_and_unknown_cost(tmp_path):
+    path, _ = plan(tmp_path, names=('killed', 'later'))
+    output = tmp_path / 'output'
+    entered = tmp_path / 'entered'
+    code = '''
+from pathlib import Path
+import sys
+import time
+from scripts import run_rc_reuse_campaign as campaign
+
+def block(output, repetitions, **kwargs):
+    Path(sys.argv[3]).write_text('entered')
+    time.sleep(60)
+
+campaign.experiment.run = block
+campaign.run(Path(sys.argv[1]), Path(sys.argv[2]))
+'''
+    environment = dict(os.environ)
+    environment['PYTHONPATH'] = os.pathsep.join((str(ROOT), str(ROOT / 'src')))
+    child = subprocess.Popen(
+        [sys.executable, '-c', code, str(path), str(output), str(entered)],
+        cwd=ROOT, env=environment,
+    )
+    try:
+        deadline = time.monotonic() + 10
+        while not entered.is_file() and child.poll() is None and time.monotonic() < deadline:
+            time.sleep(0.02)
+        assert entered.is_file() and child.poll() is None
+        child.kill()
+        assert child.wait(timeout=5) != 0
+    finally:
+        if child.poll() is None:
+            child.kill()
+            child.wait(timeout=5)
+
+    receipt = campaign.load_json_object_strict(output / 'campaign.json')
+    assert receipt['schema'] == 'rc-reuse-campaign.v2'
+    assert receipt['planned_case_count'] == 2
+    assert receipt['recorded_case_count'] == 1
+    assert receipt['campaign_complete'] is False
+    assert receipt['all_cases_completed'] is False
+    assert receipt['aggregate_speed_ratio'] is None
+    assert receipt['cases'][0]['id'] == 'killed'
+    assert receipt['cases'][0]['status'] == 'running'
+    assert receipt['cases'][0]['case_wall_ns'] is None
+    assert receipt['cases'][0]['unknown_native_work'] is True
+    assert not (output / 'campaign.json.tmp').exists()
 
 
 def test_return_without_success_receipt_is_not_completion(tmp_path, monkeypatch):
@@ -349,3 +471,134 @@ def test_return_without_success_receipt_is_not_completion(tmp_path, monkeypatch)
     assert receipt['recorded_case_count'] == 2
     assert all(r['status'] == 'failed' for r in receipt['cases'])
     assert all('without its success receipt' in r['error']['message'] for r in receipt['cases'])
+
+
+@pytest.mark.parametrize('tamper', (None, 'changed_input', 'changed_source_original',
+                                    'missing_comparison', 'wrong_declared_plan',
+                                    'missing_source', 'extra_link'))
+def test_separate_campaign_packet_audit_rechecks_originals(
+    tmp_path, monkeypatch, tamper
+):
+    path, _ = plan(tmp_path, names=('one', 'two'))
+    examples = tmp_path / 'examples'
+    examples.mkdir()
+    for filename in ('model.json', 'request.json', 'plan.json'):
+        (examples / filename).write_bytes((tmp_path / filename).read_bytes())
+    path = examples / 'plan.json'
+    revision = campaign.subprocess.check_output(
+        ['git', 'rev-parse', 'HEAD'], text=True
+    ).strip()
+
+    def execute(output, repetitions, **kwargs):
+        assert repetitions == 2
+        write_success(
+            output, source=revision, model_raw=kwargs['model_path'].read_bytes(),
+            request_raw=kwargs['request_path'].read_bytes(),
+        )
+
+    monkeypatch.setattr(campaign.experiment, 'run', execute)
+    packet = tmp_path / 'packet'
+    assert campaign.run(path, packet)
+    (packet / 'execution-source.json').write_text(json.dumps({'synthetic': True}))
+    monkeypatch.setattr(source_identity, 'ROOT', tmp_path)
+    monkeypatch.setattr(source_identity, 'verify_saved_source', lambda _: revision)
+    monkeypatch.setattr(source_identity, 'require_public_fixture', lambda _: None)
+    if tamper == 'changed_input':
+        (packet / 'one/model.json').write_text('{"changed": true}')
+    elif tamper == 'changed_source_original':
+        (examples / 'model.json').write_text('{"changed": true}')
+    elif tamper == 'missing_comparison':
+        (packet / 'one/results/retained-True-constant-False-rep-0-False/'
+         'comparison.json').unlink()
+    elif tamper == 'wrong_declared_plan':
+        declared = json.loads(path.read_text())
+        declared['cases'].reverse()
+        path.write_text(json.dumps(declared))
+    elif tamper == 'missing_source':
+        (packet / 'execution-source.json').unlink()
+    elif tamper == 'extra_link':
+        (packet / 'extra-link').symlink_to(packet / 'plan.json')
+
+    def audit():
+        return packet_audit.audit_packet(packet, expected_plan=path)
+
+    if tamper is None:
+        report = audit()
+        assert report['source_revision'] == revision
+        assert report['all_cases_completed'] is True
+        assert report['aggregate_speed_ratio'] is None
+        assert [case['paired_repetitions'] for case in report['cases']] == [2, 2]
+        assert [case['median_reuse_to_baseline_ratio'] for case in report['cases']] == [0.9, 0.9]
+        assert report['file_count'] > 2
+        assert len(report['files']) == report['file_count']
+        assert all(set(item) == {'path', 'bytes', 'sha256'} for item in report['files'])
+    else:
+        with pytest.raises((ValueError, FileNotFoundError)):
+            audit()
+
+
+def test_strict_campaign_rejects_output_inside_checkout_before_writing(tmp_path, monkeypatch):
+    path, _ = plan(tmp_path, names=('one',))
+    monkeypatch.setattr(source_identity, 'ROOT', tmp_path)
+    output = tmp_path / 'packet'
+    with pytest.raises(ValueError, match='outside checkout'):
+        campaign.run(path, output, require_clean_source=True)
+    assert not output.exists()
+
+
+def test_strict_campaign_saves_before_and_after_source_identity(tmp_path, monkeypatch):
+    path, _ = plan(tmp_path, names=('one',))
+    revision = campaign.subprocess.check_output(
+        ['git', 'rev-parse', 'HEAD'], text=True
+    ).strip()
+
+    def execute(output, repetitions, **kwargs):
+        write_success(
+            output, source=revision, model_raw=kwargs['model_path'].read_bytes(),
+            request_raw=kwargs['request_path'].read_bytes(),
+        )
+
+    before = {'source_revision': revision, 'observation': 1}
+    after = {'source_revision': revision, 'observation': 2}
+    snapshots = iter((before, after))
+    monkeypatch.setattr(campaign.experiment, 'run', execute)
+    monkeypatch.setattr(source_identity, 'require_public_fixture', lambda _: None)
+    monkeypatch.setattr(source_identity, 'snapshot_clean_source', lambda: next(snapshots))
+    monkeypatch.setattr(source_identity, 'verify_saved_source', lambda value: revision)
+    packet = tmp_path / 'packet'
+    assert campaign.run(path, packet, require_clean_source=True)
+    identity = json.loads((packet / 'execution-source.json').read_text())
+    assert identity == {'schema': 'rc-reuse-execution-source.v1',
+                        'before': before, 'after': after}
+
+
+def test_clean_source_accepts_only_tracked_public_examples(tmp_path):
+    source_identity.require_public_fixture(
+        ROOT / 'examples/research/rc_reuse_campaign/three-topology-plan.json'
+    )
+    outside = tmp_path / 'outside.json'
+    outside.write_text('{}')
+    with pytest.raises(ValueError, match='public example inputs'):
+        source_identity.require_public_fixture(outside)
+
+
+def test_clean_source_rejects_assume_unchanged_modified_fixture(tmp_path, monkeypatch):
+    repo = tmp_path / 'repo'
+    fixture = repo / 'examples' / 'case.json'
+    fixture.parent.mkdir(parents=True)
+    subprocess.run(['git', 'init', '-q', str(repo)], check=True)
+    subprocess.run(['git', 'config', 'user.name', 'Test'], cwd=repo, check=True)
+    subprocess.run(['git', 'config', 'user.email', 'test@example.invalid'],
+                   cwd=repo, check=True)
+    fixture.write_text('{"original":true}')
+    subprocess.run(['git', 'add', 'examples/case.json'], cwd=repo, check=True)
+    subprocess.run(['git', 'commit', '-qm', 'Add fixture'], cwd=repo, check=True)
+    fixture.write_text('{"changed":true}')
+    subprocess.run(['git', 'update-index', '--assume-unchanged',
+                    'examples/case.json'], cwd=repo, check=True)
+    assert not subprocess.check_output(
+        ['git', 'status', '--porcelain'], cwd=repo, text=True
+    ).strip()
+    monkeypatch.setattr(source_identity, 'ROOT', repo)
+    with pytest.raises(ValueError, match='differs from HEAD'):
+        source_identity.require_public_fixture(fixture)

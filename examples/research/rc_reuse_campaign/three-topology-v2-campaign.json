@@ -1,0 +1,56 @@
+{
+  "schema": "rc-reuse-campaign.v2",
+  "source_revision": "df20a8ac6717126ca1cbf765d25774e01f681de5",
+  "planned_case_count": 3,
+  "recorded_case_count": 3,
+  "campaign_complete": true,
+  "all_cases_completed": true,
+  "cases": [
+    {
+      "id": "cantilever-concrete-damage",
+      "status": "completed",
+      "error": null,
+      "case_wall_ns": 20548066251,
+      "unknown_native_work": false,
+      "receipts": {
+        "summary.json": {
+          "path": "cantilever-concrete-damage/results/summary.json",
+          "bytes": 3609,
+          "sha256": "59ac0242acdcb446d71ee23ed94184995a594b1de820083b16bba82ff024952a"
+        }
+      }
+    },
+    {
+      "id": "two-fixed-endpoint-portal-20mm",
+      "status": "completed",
+      "error": null,
+      "case_wall_ns": 142486612620,
+      "unknown_native_work": false,
+      "receipts": {
+        "summary.json": {
+          "path": "two-fixed-endpoint-portal-20mm/results/summary.json",
+          "bytes": 3621,
+          "sha256": "1d032b1825ba145fbc68b16d39ad3e937de9ca13b5521ce1a60884ed95024365"
+        }
+      }
+    },
+    {
+      "id": "pin-roller-steel-plastic-reversal",
+      "status": "completed",
+      "error": null,
+      "case_wall_ns": 64612286372,
+      "unknown_native_work": false,
+      "receipts": {
+        "summary.json": {
+          "path": "pin-roller-steel-plastic-reversal/results/summary.json",
+          "bytes": 3614,
+          "sha256": "da308328738b8ac1b65fca14a58941e5916faf0e4b945111d519abc34654a637"
+        }
+      }
+    }
+  ],
+  "campaign_wall_ns_through_receipt": 227663089302,
+  "timing_scope": "manifest/input reads, setup, all recorded activity and post-run receipt verification through this receipt; excludes this receipt write",
+  "aggregate_speed_ratio": null,
+  "independent_physical_validation": false
+}

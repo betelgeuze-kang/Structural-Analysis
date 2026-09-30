@@ -14,6 +14,7 @@ import subprocess
 from time import perf_counter_ns
 
 from scripts import diagnose_rc_control_line_search_reuse as experiment
+from scripts import rc_reuse_campaign_source as source_identity
 from structural_analysis.api import nonlinear_fiber_frame as public
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     decode_bounded_rc_fiber_direct_control_request,
@@ -24,7 +25,9 @@ from structural_analysis.model_ir.validation import load_json_object_strict
 
 
 def _write(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary.replace(path)
 
 
 def _require(condition, message):
@@ -327,8 +330,14 @@ def _validate_case_receipt(directory, values, *, source, repetitions, arithmetic
         )
 
 
-def run(manifest: Path, output: Path):
+def run(manifest: Path, output: Path, *, require_clean_source=False):
     started = perf_counter_ns()
+    source_before = None
+    if require_clean_source:
+        if output.resolve().is_relative_to(source_identity.ROOT):
+            raise ValueError("clean-source campaign output must be outside checkout")
+        source_identity.require_public_fixture(manifest)
+        source_before = source_identity.snapshot_clean_source()
     plan = load_json_object_strict(manifest)
     if set(plan) != {"schema", "repetitions", "arithmetic", "record_assembly_timing", "cases"}:
         raise ValueError("unexpected or missing campaign fields")
@@ -358,12 +367,16 @@ def run(manifest: Path, output: Path):
             if not isinstance(case[role], str) or not case[role]:
                 raise ValueError("input path must be a nonempty string")
             source = (manifest.parent / case[role]).resolve()
+            if require_clean_source:
+                source_identity.require_public_fixture(source)
             # Read every input before executing any case, so later external edits
             # cannot silently change a case after the campaign has started.
             values[role] = source.read_bytes()
         frozen.append((name, values))
     output.mkdir(parents=True, exist_ok=False)
     source = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    if source_before is not None and source_before["source_revision"] != source:
+        raise ValueError("campaign source changed before execution")
     bindings = []
     for name, values in frozen:
         directory = output / name
@@ -379,10 +392,50 @@ def run(manifest: Path, output: Path):
         "experiment_script_sha256": hashlib.sha256(Path(experiment.__file__).read_bytes()).hexdigest(),
     })
     rows = []
+
+    def persist():
+        all_terminal = len(rows) == len(frozen) and all(
+            row["status"] in ("completed", "failed") for row in rows
+        )
+        _write(output / "campaign.json", {
+            "schema": "rc-reuse-campaign.v2", "source_revision": source,
+            "planned_case_count": len(frozen), "recorded_case_count": len(rows),
+            "campaign_complete": all_terminal,
+            "all_cases_completed": all_terminal and all(
+                row["status"] == "completed" for row in rows
+            ),
+            "cases": rows, "campaign_wall_ns_through_receipt": perf_counter_ns() - started,
+            "timing_scope": "manifest/input reads, setup, all recorded activity and post-run receipt verification through this receipt; excludes this receipt write",
+            "aggregate_speed_ratio": None, "independent_physical_validation": False,
+        })
+
     for name, values in frozen:
         directory = output / name
+        row = {
+            "id": name, "status": "running", "error": None,
+            "case_wall_ns": None, "unknown_native_work": True, "receipts": {},
+        }
+        rows.append(row)
+        # This atomic pre-solve receipt keeps the case in the denominator even
+        # if the process terminates without running Python exception handlers.
+        persist()
         case_started = perf_counter_ns()
-        error = None
+
+        def finish(status, error):
+            row["status"] = status
+            row["error"] = error
+            row["case_wall_ns"] = perf_counter_ns() - case_started
+            row["unknown_native_work"] = status != "completed"
+            for filename in ("summary.json", "failure.json"):
+                path = directory / "results" / filename
+                if path.is_file():
+                    raw = path.read_bytes()
+                    row["receipts"][filename] = {
+                        "path": str(path.relative_to(output)), "bytes": len(raw),
+                        "sha256": hashlib.sha256(raw).hexdigest(),
+                    }
+            persist()
+
         try:
             experiment.run(
                 directory / "results", repetitions, case="supplied",
@@ -395,32 +448,24 @@ def run(manifest: Path, output: Path):
                 arithmetic=plan["arithmetic"],
                 record_assembly_timing=plan["record_assembly_timing"],
             )
+        except KeyboardInterrupt as exc:
+            finish("interrupted", {"type": type(exc).__name__, "message": str(exc)})
+            raise
         except Exception as exc:
-            # Continue independent declared cases, but retain failure and return
-            # nonzero from the CLI. Interrupts and process termination propagate.
-            error = {"type": type(exc).__name__, "message": str(exc)}
-        row = {"id": name, "status": "failed" if error else "completed",
-               "error": error, "case_wall_ns": perf_counter_ns() - case_started,
-               "receipts": {}}
-        for filename in ("summary.json", "failure.json"):
-            path = directory / "results" / filename
-            if path.is_file():
-                raw = path.read_bytes()
-                row["receipts"][filename] = {
-                    "path": str(path.relative_to(output)), "bytes": len(raw),
-                    "sha256": hashlib.sha256(raw).hexdigest(),
-                }
-        rows.append(row)
-        # Persist after every case; a partial campaign is explicitly incomplete.
-        _write(output / "campaign.json", {
-            "schema": "rc-reuse-campaign.v1", "source_revision": source,
-            "planned_case_count": len(frozen), "recorded_case_count": len(rows),
-            "campaign_complete": len(rows) == len(frozen),
-            "all_cases_completed": len(rows) == len(frozen) and all(r["status"] == "completed" for r in rows),
-            "cases": rows, "campaign_wall_ns_through_receipt": perf_counter_ns() - started,
-            "timing_scope": "manifest/input reads, setup, all attempted cases, post-run saved receipt verification, and preceding receipt writes; excludes this final receipt write",
-            "aggregate_speed_ratio": None, "independent_physical_validation": False,
-        })
+            # Continue independent declared cases; unknown native work remains
+            # unknown even if a partial original receipt reports some attempts.
+            finish("failed", {"type": type(exc).__name__, "message": str(exc)})
+        else:
+            finish("completed", None)
+    if source_before is not None:
+        source_after = source_identity.snapshot_clean_source()
+        provenance = {
+            "schema": "rc-reuse-execution-source.v1",
+            "before": source_before,
+            "after": source_after,
+        }
+        source_identity.verify_saved_source(provenance)
+        _write(output / "execution-source.json", provenance)
     return all(row["status"] == "completed" for row in rows)
 
 
@@ -428,5 +473,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--require-clean-source", action="store_true")
     args = parser.parse_args()
-    raise SystemExit(0 if run(args.manifest, args.output) else 1)
+    raise SystemExit(0 if run(
+        args.manifest, args.output,
+        require_clean_source=args.require_clean_source,
+    ) else 1)
