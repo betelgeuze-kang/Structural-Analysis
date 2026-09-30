@@ -1,4 +1,5 @@
 """Keep current-source analytic evidence in every full Python test shard."""
+
 from __future__ import annotations
 
 import hashlib
@@ -28,7 +29,11 @@ def test_each_full_shard_rebuilds_and_checks_analytic_receipt():
     workflow = _workflow()
     job = workflow["jobs"]["full_shards"]
     assert job["strategy"]["matrix"]["shard"] == ["0", "1", "2", "3"]
-    step = next(s for s in job["steps"] if s["name"] == "Materialize exact current-source test evidence")
+    step = next(
+        s
+        for s in job["steps"]
+        if s["name"] == "Materialize exact current-source test evidence"
+    )
     commands = [line.strip() for line in step["run"].splitlines()]
     assert commands.count(BUILD) == 1
     assert commands.count(BUILD + " --check") == 1
@@ -39,9 +44,17 @@ def test_each_full_shard_rebuilds_and_checks_analytic_receipt():
 def test_snapshot_precedes_materialization_and_complete_test_execution():
     steps = _workflow()["jobs"]["full_shards"]["steps"]
     names = [s["name"] for s in steps]
-    assert names.index("Validate pristine commercial gap ledger") < names.index("Materialize exact current-source test evidence")
-    assert names.index("Materialize exact current-source test evidence") < names.index("Run materialized repository test suite shard")
-    run = next(s["run"] for s in steps if s["name"] == "Run materialized repository test suite shard")
+    assert names.index("Validate pristine commercial gap ledger") < names.index(
+        "Materialize exact current-source test evidence"
+    )
+    assert names.index("Materialize exact current-source test evidence") < names.index(
+        "Run materialized repository test suite shard"
+    )
+    run = next(
+        s["run"]
+        for s in steps
+        if s["name"] == "Run materialized repository test suite shard"
+    )
     assert "scripts/run_pytest_shard.py" in run
     assert "--shard-count 4" in run
     # Retain the two existing deselections; this fix must not add exclusions.
@@ -65,7 +78,9 @@ BASH = shutil.which("bash")
 
 
 def _step(name):
-    return next(s for s in _workflow()["jobs"]["full_shards"]["steps"] if s["name"] == name)
+    return next(
+        s for s in _workflow()["jobs"]["full_shards"]["steps"] if s["name"] == name
+    )
 
 
 def test_diagnostics_upload_is_always_scoped_and_unique():
@@ -75,13 +90,18 @@ def test_diagnostics_upload_is_always_scoped_and_unique():
     assert names.index("Audit analytic evidence after tests") < names.index(UPLOAD_STEP)
     assert upload["if"] == "${{ always() }}"
     assert upload.get("continue-on-error", "false") == "false"
-    assert upload["uses"] == "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+    assert (
+        upload["uses"]
+        == "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+    )
     options = upload["with"]
     for token in ("github.sha", "github.run_id", "github.run_attempt", "matrix.shard"):
         assert "${{ " + token + " }}" in options["name"]
     assert set(options["path"].splitlines()) == {
-        "artifacts/ci/analytic-before.json", "artifacts/ci/analytic-after.json",
-        "artifacts/ci/pytest-shard.xml", "artifacts/ci/pytest-shard.log",
+        "artifacts/ci/analytic-before.json",
+        "artifacts/ci/analytic-after.json",
+        "artifacts/ci/pytest-shard.xml",
+        "artifacts/ci/pytest-shard.log",
     }
     assert options["retention-days"] == "14"
     # Setup may fail before any report exists. This cannot clear earlier failures.
@@ -126,10 +146,17 @@ def _run_wrapper(tmp_path, exit_code, *, fail_tee=False):
         tee.chmod(0o755)
         env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
     script = _step(TEST_STEP)["run"].replace("${{ matrix.shard }}", "3")
-    script = script.replace("python scripts/", shlex.quote(sys.executable) + " scripts/")
+    script = script.replace(
+        "python scripts/", shlex.quote(sys.executable) + " scripts/"
+    )
     return subprocess.run(
         [BASH, "--noprofile", "--norc", "-e", "-o", "pipefail", "-c", script],
-        cwd=tmp_path, env=env, capture_output=True, text=True, timeout=30, check=False,
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
     )
 
 
@@ -144,8 +171,15 @@ def test_logged_shard_retains_exit_code_arguments_and_both_streams(tmp_path, exi
     assert (tmp_path / "artifacts/ci/pytest-shard.xml").read_text() == "<testsuites/>"
     arguments = json.loads((tmp_path / "args.json").read_text())
     assert arguments == [
-        "--shard-index", "3", "--shard-count", "4", "--", "-q", "--tb=long",
-        "--junitxml", "artifacts/ci/pytest-shard.xml",
+        "--shard-index",
+        "3",
+        "--shard-count",
+        "4",
+        "--",
+        "-q",
+        "--tb=long",
+        "--junitxml",
+        "artifacts/ci/pytest-shard.xml",
         "--deselect",
         "tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers",
         "--deselect",
@@ -164,20 +198,31 @@ def test_log_writer_failure_also_fails_the_step(tmp_path):
 def test_real_pytest_shard_preserves_result_and_junit(tmp_path, passes):
     scripts = tmp_path / "scripts"
     scripts.mkdir()
-    shutil.copyfile(ROOT / "scripts/run_pytest_shard.py", scripts / "run_pytest_shard.py")
+    shutil.copyfile(
+        ROOT / "scripts/run_pytest_shard.py", scripts / "run_pytest_shard.py"
+    )
     tests = tmp_path / "tests"
     tests.mkdir()
     relative = "tests/test_wrapper_sentinel.py"
-    (tmp_path / relative).write_text(f"def test_sentinel():\n    assert {passes!r}\n", encoding="utf-8")
+    (tmp_path / relative).write_text(
+        f"def test_sentinel():\n    assert {passes!r}\n", encoding="utf-8"
+    )
     digest = hashlib.sha256(relative.encode("utf-8")).digest()
     index = int.from_bytes(digest[:8], byteorder="big") % 4
     script = _step(TEST_STEP)["run"].replace("${{ matrix.shard }}", str(index))
-    script = script.replace("python scripts/", shlex.quote(sys.executable) + " scripts/")
+    script = script.replace(
+        "python scripts/", shlex.quote(sys.executable) + " scripts/"
+    )
     env = dict(os.environ, PYTEST_DISABLE_PLUGIN_AUTOLOAD="1")
     env.pop("PYTEST_ADDOPTS", None)
     result = subprocess.run(
         [BASH, "--noprofile", "--norc", "-e", "-o", "pipefail", "-c", script],
-        cwd=tmp_path, env=env, capture_output=True, text=True, timeout=30, check=False,
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
     )
     assert result.returncode == (0 if passes else 1), result.stdout + result.stderr
     diagnostics = tmp_path / "artifacts/ci"

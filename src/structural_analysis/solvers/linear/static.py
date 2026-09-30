@@ -173,9 +173,7 @@ def _solve_linear_static(
                 equation_scaling,
             )
         )
-        scaled_condition_number = exact_scaled_condition_number_1(
-            scaled_stiffness
-        )
+        scaled_condition_number = exact_scaled_condition_number_1(scaled_stiffness)
         try:
             if sparse_backend_used:
                 scaled_sparse_stiffness = cast(csr_matrix, scaled_stiffness)
@@ -235,9 +233,7 @@ def _solve_linear_static(
         reactions[sorted(constrained)] if constrained else np.array([])
     )
     residual_norm = (
-        float(np.linalg.norm(residual_free, ord=np.inf))
-        if residual_free.size
-        else 0.0
+        float(np.linalg.norm(residual_free, ord=np.inf)) if residual_free.size else 0.0
     )
     constrained_reaction_norm = (
         float(np.linalg.norm(reaction_constrained, ord=np.inf))
@@ -245,9 +241,7 @@ def _solve_linear_static(
         else 0.0
     )
     displacement_norm = (
-        float(np.linalg.norm(displacements, ord=np.inf))
-        if displacements.size
-        else 0.0
+        float(np.linalg.norm(displacements, ord=np.inf)) if displacements.size else 0.0
     )
     if equation_scaling is not None:
         residual_scaling = scaled_residual_metrics_6dof(
@@ -269,11 +263,7 @@ def _solve_linear_static(
     linear_ramp_external_work = float(0.5 * displacements @ external_forces)
     energy_balance_error = abs(strain_energy - linear_ramp_external_work)
     stiffness_symmetry_error = _stiffness_symmetry_error(assembly.stiffness)
-    status = (
-        "ready"
-        if relative_residual <= tolerance
-        else "degraded"
-    )
+    status = "ready" if relative_residual <= tolerance else "degraded"
     warnings = list(assembly.warnings)
     if status == "degraded":
         warnings.append("Linear static residual exceeded configured tolerance.")
@@ -289,9 +279,7 @@ def _solve_linear_static(
         member_forces=member_forces,
         solver_path_id=AUTHORITATIVE_CPU_SOLVER_ID,
     )
-    element_types = {
-        str(element.get("type", "")).lower() for element in model.elements
-    }
+    element_types = {str(element.get("type", "")).lower() for element in model.elements}
     claim_boundary = (
         "linear_static_axial_truss_preview_only"
         if element_types <= {"truss", "axial"}
@@ -344,9 +332,7 @@ def _solve_linear_static(
             "active_dof_count": len(active),
             "constrained_dof_count": len(constrained),
             "residual_formula": RESIDUAL_FORMULA,
-            "reaction_definition": (
-                "constrained_dof_internal_minus_external_force"
-            ),
+            "reaction_definition": ("constrained_dof_internal_minus_external_force"),
             "equilibrium_residual_definition": (
                 "free_dof_internal_minus_external_force"
             ),

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Diagnose strict analytic replay and evidence changes without rewriting inputs."""
+
 from __future__ import annotations
 
 import argparse
@@ -81,15 +82,19 @@ def audit(repo_root: Path, baseline: dict[str, Any] | None = None) -> dict[str, 
             or baseline.get("audit_passed") is not True
             or not isinstance(baseline.get("files"), dict)
             or not baseline["files"]
-            or not all(isinstance(k, str) and isinstance(v, str)
-                       for k, v in baseline["files"].items())
+            or not all(
+                isinstance(k, str) and isinstance(v, str)
+                for k, v in baseline["files"].items()
+            )
         ):
             baseline_error = "invalid_or_failed_baseline"
         else:
             baseline_changes = _changes(baseline["files"], before)
     return {
         "schema_version": REPORT_VERSION,
-        "audit_passed": not (error or replay_changes or baseline_error or baseline_changes),
+        "audit_passed": not (
+            error or replay_changes or baseline_error or baseline_changes
+        ),
         "validation_error": error,
         "changes_during_replay": replay_changes,
         "baseline_error": baseline_error,
@@ -115,13 +120,21 @@ def main(argv: list[str] | None = None) -> int:
             baseline = {}
     report = audit(args.repo_root, baseline)
     head = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=args.repo_root,
-        capture_output=True, text=True, check=False,
+        ["git", "rev-parse", "HEAD"],
+        cwd=args.repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     report["checkout_sha"] = head.stdout.strip() if head.returncode == 0 else None
     report["github_sha"] = os.environ.get("GITHUB_SHA")
     report["python_version"] = sys.version
-    text = json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2, sort_keys=True) + "\n"
+    text = (
+        json.dumps(
+            report, ensure_ascii=False, allow_nan=False, indent=2, sort_keys=True
+        )
+        + "\n"
+    )
     print(text, end="")
     if args.out is not None:
         output = args.out.resolve()

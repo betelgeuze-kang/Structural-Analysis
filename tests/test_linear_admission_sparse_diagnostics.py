@@ -2,6 +2,7 @@
 
 No receipt, tolerance, fallback, or physics changes are needed by these tests.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -47,20 +48,32 @@ def _rod() -> CanonicalModel:
             {"id": "N2", "coordinates": [2.0, 0.0, 0.0]},
         ],
         materials=[{"id": "M1", "elastic_modulus": 2.0e8, "poisson_ratio": 0.3}],
-        sections=[{
-            "id": "S1", "area": 0.01, "iy": 1.0e-5,
-            "iz": 1.0e-5, "torsional_constant": 2.0e-5,
-        }],
-        elements=[{
-            "id": "E1", "type": "truss", "nodes": ["N1", "N2"],
-            "material": "M1", "section": "S1",
-        }],
+        sections=[
+            {
+                "id": "S1",
+                "area": 0.01,
+                "iy": 1.0e-5,
+                "iz": 1.0e-5,
+                "torsional_constant": 2.0e-5,
+            }
+        ],
+        elements=[
+            {
+                "id": "E1",
+                "type": "truss",
+                "nodes": ["N1", "N2"],
+                "material": "M1",
+                "section": "S1",
+            }
+        ],
         loads=[{"node": "N2", "components": {"FX": 10.0}}],
         supports=[{"node": "N1", "dofs": "all"}],
     )
 
 
-def _duplicate(model: CanonicalModel, collection: str, *, changed: bool = False) -> None:
+def _duplicate(
+    model: CanonicalModel, collection: str, *, changed: bool = False
+) -> None:
     rows = getattr(model, collection)
     row = deepcopy(rows[0])
     if changed and collection == "materials":
@@ -85,7 +98,11 @@ def test_duplicate_ids_block_before_element_work(assemble, collection, monkeypat
     monkeypatch.setattr(assembly_module, "_element_matrix", forbidden)
     result, issues = assemble(model)
     assert result is None
-    issue = next(item for item in issues if item["kind"] == f"linear_static_duplicate_{collection}")
+    issue = next(
+        item
+        for item in issues
+        if item["kind"] == f"linear_static_duplicate_{collection}"
+    )
     assert issue["id"] == getattr(model, collection)[0]["id"]
     assert issue["first_index"] == 0
     assert issue["duplicate_index"] == len(getattr(model, collection)) - 1
@@ -95,13 +112,17 @@ def test_duplicate_ids_block_before_element_work(assemble, collection, monkeypat
 @pytest.mark.parametrize("solve", SOLVERS)
 @pytest.mark.parametrize("collection", ("elements", "materials", "sections"))
 @pytest.mark.parametrize("changed", (False, True))
-def test_solvers_return_blocked_for_identical_or_conflicting_ids(solve, collection, changed):
+def test_solvers_return_blocked_for_identical_or_conflicting_ids(
+    solve, collection, changed
+):
     model = _rod()
     _duplicate(model, collection, changed=changed)
     result = solve(model, tolerance=1.0e-8)
     assert result.status == "blocked"
-    assert any(item["kind"] == f"linear_static_duplicate_{collection}"
-               for item in result.unsupported_features)
+    assert any(
+        item["kind"] == f"linear_static_duplicate_{collection}"
+        for item in result.unsupported_features
+    )
     assert "displacements" not in result.metrics
 
 
@@ -110,10 +131,14 @@ def test_solvers_return_blocked_for_identical_or_conflicting_ids(solve, collecti
 def test_public_analysis_returns_blocked_not_late_viewer_error(backend, collection):
     model = _rod()
     _duplicate(model, collection, changed=True)
-    result = run_authoritative_linear_static(model, tolerance=1.0e-8, matrix_backend=backend)
+    result = run_authoritative_linear_static(
+        model, tolerance=1.0e-8, matrix_backend=backend
+    )
     assert result.status == "blocked"
-    assert any(item["kind"] == f"linear_static_duplicate_{collection}"
-               for item in result.unsupported_features)
+    assert any(
+        item["kind"] == f"linear_static_duplicate_{collection}"
+        for item in result.unsupported_features
+    )
 
 
 @pytest.mark.parametrize("assemble", ASSEMBLERS)
@@ -144,7 +169,9 @@ def test_repeated_loads_sum_without_becoming_duplicate_entities(solve):
     model.loads.append(deepcopy(model.loads[0]))
     result = solve(model, tolerance=1.0e-8)
     assert result.status == "ready"
-    assert result.metrics["displacements"]["N2"]["UX"] == pytest.approx(2.0e-5, rel=1.0e-11)
+    assert result.metrics["displacements"]["N2"]["UX"] == pytest.approx(
+        2.0e-5, rel=1.0e-11
+    )
     assert result.metrics["reactions"]["N1"]["UX"] == pytest.approx(-20.0, rel=1.0e-11)
 
 
@@ -160,26 +187,48 @@ def test_valid_physical_baselines(solve, frame):
     assert result.metrics["regularization_used"] is False
     assert result.metrics["fallback_used"] is False
     if frame:
-        assert result.metrics["displacements"]["N2"]["UY"] == pytest.approx(10 * 2**3 / (3 * 2.0e8 * 1.0e-5), rel=1.0e-10)
-        assert result.metrics["displacements"]["N2"]["RZ"] == pytest.approx(10 * 2**2 / (2 * 2.0e8 * 1.0e-5), rel=1.0e-10)
+        assert result.metrics["displacements"]["N2"]["UY"] == pytest.approx(
+            10 * 2**3 / (3 * 2.0e8 * 1.0e-5), rel=1.0e-10
+        )
+        assert result.metrics["displacements"]["N2"]["RZ"] == pytest.approx(
+            10 * 2**2 / (2 * 2.0e8 * 1.0e-5), rel=1.0e-10
+        )
     else:
-        assert result.metrics["displacements"]["N2"]["UX"] == pytest.approx(1.0e-5, rel=1.0e-11)
-        assert result.metrics["reactions"]["N1"]["UX"] == pytest.approx(-10.0, rel=1.0e-11)
+        assert result.metrics["displacements"]["N2"]["UX"] == pytest.approx(
+            1.0e-5, rel=1.0e-11
+        )
+        assert result.metrics["reactions"]["N1"]["UX"] == pytest.approx(
+            -10.0, rel=1.0e-11
+        )
     assert result.metrics["energy_balance_error"] == pytest.approx(0.0, abs=1.0e-10)
 
 
 @pytest.mark.parametrize("solve", SOLVERS)
 def test_disconnected_singular_system_still_blocks_without_fallback(solve):
     model = _rod()
-    model.nodes.extend([
-        {"id": "N3", "coordinates": [3.0, 0.0, 0.0]},
-        {"id": "N4", "coordinates": [5.0, 0.0, 0.0]},
-    ])
-    model.elements.append({"id": "E2", "type": "truss", "nodes": ["N3", "N4"], "material": "M1", "section": "S1"})
+    model.nodes.extend(
+        [
+            {"id": "N3", "coordinates": [3.0, 0.0, 0.0]},
+            {"id": "N4", "coordinates": [5.0, 0.0, 0.0]},
+        ]
+    )
+    model.elements.append(
+        {
+            "id": "E2",
+            "type": "truss",
+            "nodes": ["N3", "N4"],
+            "material": "M1",
+            "section": "S1",
+        }
+    )
     model.loads.append({"node": "N4", "components": {"FX": 10.0}})
     result = solve(model, tolerance=1.0e-8)
     assert result.status == "blocked"
-    issue = next(item for item in result.unsupported_features if item["kind"] == "linear_static_singular_stiffness")
+    issue = next(
+        item
+        for item in result.unsupported_features
+        if item["kind"] == "linear_static_singular_stiffness"
+    )
     assert issue["regularization_used"] is False
     assert issue["fallback_used"] is False
 
@@ -193,7 +242,9 @@ def test_sparse_symmetry_matches_dense_definition(order, symmetric):
     if symmetric:
         dense = dense + dense.T
     expected = float(np.linalg.norm(dense - dense.T, ord=np.inf))
-    assert _stiffness_symmetry_error(csr_matrix(dense)) == pytest.approx(expected, rel=1.0e-14, abs=1.0e-14)
+    assert _stiffness_symmetry_error(csr_matrix(dense)) == pytest.approx(
+        expected, rel=1.0e-14, abs=1.0e-14
+    )
     assert _stiffness_symmetry_error(dense) == expected
 
 
@@ -203,9 +254,14 @@ def test_sparse_symmetry_is_row_sum_not_largest_coefficient():
 
 
 def test_noncanonical_sparse_storage_matches_dense_symmetry():
-    matrix = csr_matrix((np.array([2.0, 3.0, 0.0]), np.array([1, 1, 2]), np.array([0, 3, 3, 3])), shape=(3, 3))
+    matrix = csr_matrix(
+        (np.array([2.0, 3.0, 0.0]), np.array([1, 1, 2]), np.array([0, 3, 3, 3])),
+        shape=(3, 3),
+    )
     dense = matrix.toarray()
-    assert _stiffness_symmetry_error(matrix) == np.linalg.norm(dense - dense.T, ord=np.inf)
+    assert _stiffness_symmetry_error(matrix) == np.linalg.norm(
+        dense - dense.T, ord=np.inf
+    )
 
 
 @pytest.mark.parametrize("nonzero", (False, True))
@@ -227,8 +283,20 @@ def test_public_sparse_chain_does_not_densify_global_matrix(monkeypatch):
     count = 300
     model = replace(
         model,
-        nodes=[{"id": f"N{i}", "coordinates": [float(i), 0.0, 0.0]} for i in range(count + 1)],
-        elements=[{"id": f"E{i}", "type": "truss", "nodes": [f"N{i}", f"N{i + 1}"], "material": "M1", "section": "S1"} for i in range(count)],
+        nodes=[
+            {"id": f"N{i}", "coordinates": [float(i), 0.0, 0.0]}
+            for i in range(count + 1)
+        ],
+        elements=[
+            {
+                "id": f"E{i}",
+                "type": "truss",
+                "nodes": [f"N{i}", f"N{i + 1}"],
+                "material": "M1",
+                "section": "S1",
+            }
+            for i in range(count)
+        ],
         loads=[{"node": f"N{count}", "components": {"FX": 10.0}}],
         supports=[{"node": "N0", "dofs": "all"}],
     )
@@ -238,8 +306,12 @@ def test_public_sparse_chain_does_not_densify_global_matrix(monkeypatch):
 
     monkeypatch.setattr(csr_matrix, "toarray", forbidden)
     monkeypatch.setattr(csc_matrix, "toarray", forbidden)
-    result = run_authoritative_linear_static(model, tolerance=1.0e-8, matrix_backend=BACKENDS[1])
+    result = run_authoritative_linear_static(
+        model, tolerance=1.0e-8, matrix_backend=BACKENDS[1]
+    )
     assert result.status == "ready"
     assert result.metrics["free_dof_count"] == count
-    assert result.metrics["displacements"][f"N{count}"]["UX"] == pytest.approx(10 * count / (2.0e8 * 0.01), rel=1.0e-10)
+    assert result.metrics["displacements"][f"N{count}"]["UX"] == pytest.approx(
+        10 * count / (2.0e8 * 0.01), rel=1.0e-10
+    )
     assert result.metrics["reactions"]["N0"]["UX"] == pytest.approx(-10.0, rel=1.0e-10)
