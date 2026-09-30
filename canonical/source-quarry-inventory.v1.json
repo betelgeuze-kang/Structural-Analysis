@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:c3905728608536845c10e95895f79dc575dff2e37ccc0852b161e1d380639087",
+  "inventory_digest": "sha256:4317028396be942058bc85ea8a4b88f2dc42fd5cfe43140456faa8ad0584de12",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -2508,7 +2508,7 @@
           "blob_sha": "0af352f9d1cc641268388beb9f838b820084b1ae",
           "change_status": "modified",
           "changes": 526,
-          "current_blob_sha": "caac14f724450db03f6fa54ca95bf518c5ae7435",
+          "current_blob_sha": "a50c28919f1d92bc1e429142028fca7c3e8f40a8",
           "current_relation": "different",
           "deletions": 211,
           "path": "src/structural_analysis/assembly/linear_static.py",
@@ -5580,7 +5580,7 @@
           "blob_sha": "61c382506d563bd5866c40d007bc31e816eafae3",
           "change_status": "modified",
           "changes": 265,
-          "current_blob_sha": "8caa153bf75b594cc92f3af6fe96c2827a3b1aa6",
+          "current_blob_sha": "58b73e6f5d1929a02973008c5349dd091ac0aa01",
           "current_relation": "different",
           "deletions": 74,
           "path": "src/structural_analysis/solvers/linear/static.py",
