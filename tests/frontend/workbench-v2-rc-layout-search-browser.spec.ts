@@ -44,12 +44,12 @@ for (const entry of pinLayoutPacket.cases) {
     for (const role of ['model', 'result', 'checkpoint', 'verification']) {
       const pending = page.waitForEvent('download')
       await panel.getByRole('button', { name: `Download ${comparison.selected_candidate_id} ${role}`, exact: true }).click()
-      expect(await readFile((await (await pending).path())!)).toEqual(files[`price_order/${selected.artifacts[role].path}`])
+      expect((await readFile((await (await pending).path())!)).equals(files[`price_order/${selected.artifacts[role].path}`])).toBe(true)
     }
     for (const role of ['result', 'plan', 'price-table']) {
       const pending = page.waitForEvent('download')
       await panel.getByRole('button', { name: `Download search ${role}`, exact: true }).click()
-      expect(await readFile((await (await pending).path())!)).toEqual(files[`${role}.json`])
+      expect((await readFile((await (await pending).path())!)).equals(files[`${role}.json`])).toBe(true)
     }
   })
 }
@@ -100,12 +100,12 @@ for (const width of [1440,390]) {
       for (const role of ['model','result','checkpoint','verification']) {
         const pending=page.waitForEvent('download')
         await panel.getByRole('button',{name:`Download large ${role}`,exact:true}).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(layoutFiles[`learned_order/large/baseline/${role}.json`])
+        expect((await readFile((await (await pending).path())!)).equals(layoutFiles[`learned_order/large/baseline/${role}.json`])).toBe(true)
       }
       for (const role of ['result','plan','policy','historical-training','price-table']) {
         const pending=page.waitForEvent('download')
         await panel.getByRole('button',{name:`Download search ${role}`,exact:true}).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(layoutFiles[`${role}.json`])
+        expect((await readFile((await (await pending).path())!)).equals(layoutFiles[`${role}.json`])).toBe(true)
       }
       await panel.getByRole('button',{name:'Review Later exhaustive check',exact:true}).click()
       await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected','middle')
@@ -139,6 +139,8 @@ for (const width of [1440, 390]) for (const id of ['price', 'learned', 'horizon'
   test.describe(`RC layout pruned browser ${width} ${id}`, () => {
     test.use({ viewport: { width, height: 1000 } })
     test('shows verified decisions, unknown feasibility and original downloads', async ({ page }) => {
+      // Include verification and every original download in the bounded test budget.
+      test.setTimeout(60000)
       const files = prunedLayouts[id], result = JSON.parse(files['result.json'].toString()), strategy = result.strategy
       const pruning = result.arms[strategy].cost_pruning
       await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlSearchUrl: '/layout-pruned/result.json', jobAuthorization: () => ({ tenantId: 'synthetic-layout', bearerToken: 'synthetic-layout-token' }) } })
@@ -159,19 +161,19 @@ for (const width of [1440, 390]) for (const id of ['price', 'learned', 'horizon'
         await expect(row).toContainText(id === 'horizon' ? 'Outside consideration horizon' : 'Skipped: higher cost')
         const pending = page.waitForEvent('download')
         await row.getByRole('button', { name: `Download pool ${key} model`, exact: true }).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(files[`pool/${key}.json`])
+        expect((await readFile((await (await pending).path())!)).equals(files[`pool/${key}.json`])).toBe(true)
       }
       for (const decision of pruning.decisions) {
         const pending = page.waitForEvent('download')
         await panel.getByRole('button', { name: `Download ${decision.candidate_id} decision`, exact: true }).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(files[`${strategy}/${decision.artifact.path}`])
+        expect((await readFile((await (await pending).path())!)).equals(files[`${strategy}/${decision.artifact.path}`])).toBe(true)
       }
       if (id !== 'horizon') {
         await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'middle')
         for (const role of ['model', 'result', 'checkpoint', 'verification']) {
           const pending = page.waitForEvent('download')
           await panel.getByRole('button', { name: `Download middle ${role}`, exact: true }).click()
-          expect(await readFile((await (await pending).path())!)).toEqual(files[`${strategy}/middle/baseline/${role}.json`])
+          expect((await readFile((await (await pending).path())!)).equals(files[`${strategy}/middle/baseline/${role}.json`])).toBe(true)
         }
       }
       const box = await panel.boundingBox(); expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1)
@@ -200,11 +202,11 @@ for (const width of [1440,390]) for (const strategy of ['price_order','learned_o
       if(strategy==='price_order') await expect(panel.getByRole('button',{name:'Download search policy',exact:true})).toHaveCount(0)
       for(const role of metadata){
         const pending=page.waitForEvent('download');await panel.getByRole('button',{name:`Download search ${role}`,exact:true}).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(files[`${role}.json`])
+        expect((await readFile((await (await pending).path())!)).equals(files[`${role}.json`])).toBe(true)
       }
       for(const role of ['model','result','checkpoint','verification']){
         const pending=page.waitForEvent('download');await panel.getByRole('button',{name:`Download middle ${role}`,exact:true}).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(files[`${strategy}/middle/baseline/${role}.json`])
+        expect((await readFile((await (await pending).path())!)).equals(files[`${strategy}/middle/baseline/${role}.json`])).toBe(true)
       }
       const box=await panel.boundingBox();expect(box!.x+box!.width).toBeLessThanOrEqual(width+1)
     })
