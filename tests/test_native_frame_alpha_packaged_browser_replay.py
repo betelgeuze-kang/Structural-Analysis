@@ -125,8 +125,8 @@ def test_packaged_browser_schema_rejects_missing_execution_proof(check: str) -> 
 
 def test_packaged_browser_result_contract_rejects_binding_substitution() -> None:
     module_uri = (
-        ROOT / "scripts/verify-native-frame-packaged-browser.mjs"
-    ).resolve().as_uri()
+        (ROOT / "scripts/verify-native-frame-packaged-browser.mjs").resolve().as_uri()
+    )
     script = f"""
       import {{ validateBrowserResultContract }} from {json.dumps(module_uri)};
       const sha = (digit) => `sha256:${{digit.repeat(64)}}`;
@@ -199,8 +199,8 @@ def test_packaged_browser_result_contract_rejects_binding_substitution() -> None
 
 def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() -> None:
     module_uri = (
-        ROOT / "scripts/verify-native-frame-packaged-browser.mjs"
-    ).resolve().as_uri()
+        (ROOT / "scripts/verify-native-frame-packaged-browser.mjs").resolve().as_uri()
+    )
     script = f"""
       import {{ createServer }} from 'node:http';
       import {{ spawn }} from 'node:child_process';
@@ -417,6 +417,34 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       if (diagnostic.workstation.stderr_bytes > 2048 || diagnostic.verifier.error_bytes > 2048) {{
         throw new Error('diagnostic_text_limit_invalid');
       }}
+      const httpDiagnostic = buildBrowserFailureDiagnostic({{
+        sourceCommit: 'a'.repeat(40), platformTag: 'linux-x86_64-gnu',
+        phase: 'native_job_terminal_wait',
+        panel: {{ status: 'failed', errorText: 'native_workstation_http_error:404:workstation_job_not_found' }},
+        submittedJobId: `job_${{'b'.repeat(32)}}`, jobView: {{ status: 'succeeded' }},
+        pageErrors: [], elapsedMs: 1,
+      }});
+      if (httpDiagnostic.panel.http_status !== 404
+        || httpDiagnostic.panel.http_error_code !== 'workstation_job_not_found'
+        || httpDiagnostic.panel.error_code !== 'native_workstation_http_error') {{
+        throw new Error('bounded_http_error_identity_missing');
+      }}
+      for (const message of [
+        `native_workstation_http_error:404:${{secret}}`,
+        'native_workstation_http_error:999:workstation_job_not_found',
+        'native_workstation_http_error:404:workstation_job_not_found raw-secret',
+        'Authorization: Bearer raw-secret',
+      ]) {{
+        const rejected = buildBrowserFailureDiagnostic({{
+          sourceCommit: 'a'.repeat(40), platformTag: 'linux-x86_64-gnu',
+          phase: 'native_job_terminal_wait', panel: {{ errorText: message }},
+          jobView: {{}}, pageErrors: [], elapsedMs: 1,
+        }});
+        if (rejected.panel.http_status !== null || rejected.panel.http_error_code !== null
+          || JSON.stringify(rejected).includes(secret) || JSON.stringify(rejected).includes('raw-secret')) {{
+          throw new Error('unbounded_http_error_retained');
+        }}
+      }}
       if (diagnostic.authority.release_readiness !== 'not_authoritative') {{
         throw new Error('diagnostic_authority_promoted');
       }}
@@ -573,7 +601,9 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
 def test_packaged_browser_failure_writes_only_bounded_non_authoritative_diagnostic(
     tmp_path: Path,
 ) -> None:
-    package_root = tmp_path / "structural-frame-alpha-workstation-0.1.0-linux-x86_64-gnu"
+    package_root = (
+        tmp_path / "structural-frame-alpha-workstation-0.1.0-linux-x86_64-gnu"
+    )
     binary = package_root / "bin" / "structural-cli"
     binary.parent.mkdir(parents=True)
     binary.write_text(
