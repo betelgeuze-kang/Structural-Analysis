@@ -92,6 +92,12 @@ jobs:
       - name: Materialize exact current-source test evidence
         shell: bash
         run: |
+          # Recompute source-bound evidence in this ephemeral checkout, then
+          # retain strict current-source validation and numerical replay.
+          python scripts/build_analytic_frame_verification_artifact.py
+          python scripts/build_analytic_frame_verification_artifact.py --check
+          python scripts/build_phase2_whole_model_buckling_artifacts.py
+          python scripts/build_phase2_whole_model_buckling_artifacts.py --check
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
@@ -116,17 +122,49 @@ jobs:
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
 
+      - name: Audit analytic evidence before tests
+        id: analytic_preflight
+        run: python scripts/check_ci_analytic_evidence.py --out artifacts/ci/analytic-before.json
+
       - name: Run materialized repository test suite shard
+        shell: bash
+        run: |
+          # tee must not turn a failed test shard into a successful CI step.
+          set -o pipefail
+          mkdir -p artifacts/ci
+          python scripts/run_pytest_shard.py \
+            --shard-index "${{ matrix.shard }}" \
+            --shard-count 4 \
+            -- \
+            -q \
+            --tb=long \
+            --junitxml artifacts/ci/pytest-shard.xml \
+            --deselect \
+            tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers \
+            --deselect \
+            tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::test_committed_receipt_is_reproducible \
+            2>&1 | tee artifacts/ci/pytest-shard.log
+
+      - name: Audit analytic evidence after tests
+        if: ${{ always() && steps.analytic_preflight.outcome == 'success' }}
         run: >-
-          python scripts/run_pytest_shard.py
-          --shard-index "${{ matrix.shard }}"
-          --shard-count 4
-          --
-          -q
-          --deselect
-          tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
-          --deselect
-          tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::test_committed_receipt_is_reproducible
+          python scripts/check_ci_analytic_evidence.py
+          --baseline artifacts/ci/analytic-before.json
+          --out artifacts/ci/analytic-after.json
+
+      - name: Upload repository Python shard diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: python-shard-diagnostics-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: |
+            artifacts/ci/analytic-before.json
+            artifacts/ci/analytic-after.json
+            artifacts/ci/pytest-shard.xml
+            artifacts/ci/pytest-shard.log
+          # A setup failure can precede all diagnostic files; never hide it.
+          if-no-files-found: warn
+          retention-days: 14
 
   full:
     name: pytest-full

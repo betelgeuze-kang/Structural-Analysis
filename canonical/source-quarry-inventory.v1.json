@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:3e95f7e184e8d61de76b226ce30403142a01d1038839613a2e1076ea45dc556c",
+  "inventory_digest": "sha256:4317028396be942058bc85ea8a4b88f2dc42fd5cfe43140456faa8ad0584de12",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -471,7 +471,7 @@
           "blob_sha": "774c0dc9dda94658de61ed500b3c16548cf3331d",
           "change_status": "modified",
           "changes": 66,
-          "current_blob_sha": "ba4037a7af5f028f47ec258b9fd906c244e6d748",
+          "current_blob_sha": "f3f43d9279123f264c75f1477cf0d422998e33a4",
           "current_relation": "different",
           "deletions": 7,
           "path": ".github/workflows/ci.yml",
@@ -2508,15 +2508,17 @@
           "blob_sha": "0af352f9d1cc641268388beb9f838b820084b1ae",
           "change_status": "modified",
           "changes": 526,
-          "current_blob_sha": "0af352f9d1cc641268388beb9f838b820084b1ae",
-          "current_relation": "identical",
+          "current_blob_sha": "a50c28919f1d92bc1e429142028fca7c3e8f40a8",
+          "current_relation": "different",
           "deletions": 211,
           "path": "src/structural_analysis/assembly/linear_static.py",
-          "reason": "exact_blob_present",
+          "reason": "owner_scope_retirement",
           "replacement_paths": [
-            "src/structural_analysis/assembly/linear_static.py"
+            "docs/adr/010-retire-source-quarry-retained-device-fgmres.md",
+            "README.md",
+            "artifacts/manifests/capabilities.yaml"
           ],
-          "status": "present"
+          "status": "superseded"
         },
         {
           "additions": 305,
@@ -5578,7 +5580,7 @@
           "blob_sha": "61c382506d563bd5866c40d007bc31e816eafae3",
           "change_status": "modified",
           "changes": 265,
-          "current_blob_sha": "b9d006acbaabf46d17557b22bb7f609668b3e9d5",
+          "current_blob_sha": "58b73e6f5d1929a02973008c5349dd091ac0aa01",
           "current_relation": "different",
           "deletions": 74,
           "path": "src/structural_analysis/solvers/linear/static.py",
@@ -8071,8 +8073,8 @@
       "source_issue": 144,
       "state": "closed",
       "status_counts": {
-        "present": 71,
-        "superseded": 386
+        "present": 70,
+        "superseded": 387
       }
     }
   ],
