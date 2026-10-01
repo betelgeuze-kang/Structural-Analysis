@@ -52,6 +52,32 @@ def _json(path: Path) -> dict:
     return payload
 
 
+def _first_code_replay_mismatch(stored, current, path: str = "comparisons") -> str | None:
+    if code_module._product_replay_values_match(stored, current):
+        return None
+    if isinstance(stored, dict) and isinstance(current, dict):
+        for key in sorted(stored.keys() | current.keys()):
+            if key not in stored or key not in current:
+                return f"{path}.{key}: key missing"
+            mismatch = _first_code_replay_mismatch(
+                stored[key], current[key], f"{path}.{key}"
+            )
+            if mismatch is not None:
+                return mismatch
+    if isinstance(stored, list) and isinstance(current, list):
+        if len(stored) != len(current):
+            return f"{path}: length {len(stored)} != {len(current)}"
+        for index, (stored_row, current_row) in enumerate(
+            zip(stored, current, strict=True)
+        ):
+            mismatch = _first_code_replay_mismatch(
+                stored_row, current_row, f"{path}[{index}]"
+            )
+            if mismatch is not None:
+                return mismatch
+    return f"{path}: stored={stored!r}, current={current!r}"
+
+
 def _materialize_summary_evidence(
     evidence_root: Path, payload: dict
 ) -> None:
@@ -314,7 +340,9 @@ def test_summary_schema_allows_only_the_named_host_replays() -> None:
         validator.validate(payload)
 
 
-def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources() -> None:
+def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     summary = _json(SUMMARY)
     code = _json(CODE_RECEIPT)
     modal = _json(MODAL_RECEIPT)
@@ -338,14 +366,49 @@ def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sourc
             receipt["internal_source"]["input_checksums"] == current_checksums
         )
         if source_is_current:
-            validator(receipt, repo_root=ROOT, require_current_sources=True)
+            if receipt is code:
+                current_comparisons = []
+                original_match = code_module._product_replay_values_match
+
+                def capture_comparisons(stored, current):
+                    if stored is receipt["comparisons"]:
+                        current_comparisons.append(current)
+                    return original_match(stored, current)
+
+                with monkeypatch.context() as patch:
+                    patch.setattr(
+                        code_module,
+                        "_product_replay_values_match",
+                        capture_comparisons,
+                    )
+                    try:
+                        validator(receipt, repo_root=ROOT, require_current_sources=True)
+                    except code_module.ExternalCodeToCodeReceiptError as error:
+                        if (
+                            str(error) != "receipt_product_comparisons_stale"
+                            or not current_comparisons
+                        ):
+                            raise
+                        mismatch = _first_code_replay_mismatch(
+                            receipt["comparisons"], current_comparisons[-1]
+                        )
+                        pytest.fail(f"receipt_product_comparisons_stale: {mismatch}")
+            else:
+                validator(receipt, repo_root=ROOT, require_current_sources=True)
         else:
             with pytest.raises(error_type, match="receipt_sources_stale"):
                 validator(receipt, repo_root=ROOT, require_current_sources=True)
-            assert (
-                "external_runtime_current_source_rerun_missing"
-                in receipt["blockers_remaining"]
-            )
+            replay = receipt["replay_provenance"]
+            if replay["external_execution_reused"]:
+                assert (
+                    "external_runtime_current_source_rerun_missing"
+                    in receipt["blockers_remaining"]
+                )
+            else:
+                assert replay["external_runtime_executed_in_this_generation"] is True
+                assert replay["external_execution_source_commit_sha"] == receipt[
+                    "source_commit_sha"
+                ]
 
     for name, receipt, path in (
         ("code_to_code", code, CODE_RECEIPT),

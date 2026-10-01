@@ -98,6 +98,14 @@ SPATIAL_FRAME3D_ABSOLUTE_TOLERANCE = 1.0e-10
 SPATIAL_FRAME3D_RELATIVE_TOLERANCE = 1.0e-4
 FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE = 1.0e-10
 FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE = 1.0e-8
+PLANAR_LOAD_PATH_CASE_IDS = frozenset(
+    (
+        "public_corotational_portal_load_path",
+        "bounded_planar_member_feature_load_path",
+        "bounded_planar_prescribed_settlement_load_path",
+    )
+)
+PLANAR_LOAD_PATH_TARGETS = (0.25, 0.5, 0.75, 1.0)
 PRODUCT_REPLAY_ABSOLUTE_TOLERANCE = COMPARISON_ABSOLUTE_TOLERANCE
 PRODUCT_REPLAY_RELATIVE_TOLERANCE = COMPARISON_RELATIVE_TOLERANCE
 PUBLIC_COROTATIONAL_PORTAL_MODEL = Path(
@@ -381,6 +389,7 @@ SOURCE_PATHS = (
     Path("scripts/run_external_code_to_code_technical_receipt.py"),
     SCHEMA_PATH,
     Path("tests/test_external_code_to_code_technical_receipt.py"),
+    Path("tests/test_opensees_planar_load_path_attempts.py"),
     Path("src/structural_analysis/api/core.py"),
     Path("src/structural_analysis/api/frame3d_direct_control.py"),
     Path("src/structural_analysis/api/nonlinear_frame.py"),
@@ -454,9 +463,38 @@ SOURCE_PATHS = (
 
 OPENSEES_DRIVER = r'''
 import json
+from time import perf_counter_ns
 import openseespy.opensees as ops
 
-payload = {"runtime_version": ops.version()}
+payload = {"runtime_version": ops.version(), "load_path_attempts": {}}
+
+
+def run_planar_load_path(case_id):
+    # A failed analyze reverts the domain. Continuing the old four-call loop
+    # would retry the failed target, not advance to the next load step.
+    attempts = []
+    payload["load_path_attempts"][case_id] = attempts
+    codes = []
+    for target in (0.25, 0.5, 0.75, 1.0):
+        previous_load_factor = ops.getTime()
+        started = perf_counter_ns()
+        code = int(ops.analyze(1))
+        elapsed = perf_counter_ns() - started
+        codes.append(code)
+        attempts.append({
+            "target_load_factor": target,
+            "previous_load_factor": previous_load_factor,
+            "achieved_load_factor": ops.getTime(),
+            "analyze_return_code": code,
+            "analyze_wall_ns": elapsed,
+            "test_iterations_reported": ops.testIter(),
+            "test_norms_reported": list(ops.testNorms()),
+        })
+        if code != 0:
+            break
+    return codes
+
+
 ops.wipe()
 ops.model("basic", "-ndm", 1, "-ndf", 1)
 for tag in (0, 1, 2):
@@ -526,9 +564,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["public_corotational_portal_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["public_corotational_portal_analyze_codes"] = run_planar_load_path(
+    "public_corotational_portal"
+)
 ops.reactions()
 payload["public_corotational_portal"] = {
     "node_displacements": {
@@ -578,9 +616,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["bounded_planar_member_feature_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["bounded_planar_member_feature_analyze_codes"] = run_planar_load_path(
+    "bounded_planar_member_feature"
+)
 ops.reactions()
 member_feature_local_force = ops.eleResponse(4, "localForce")
 payload["bounded_planar_member_feature"] = {
@@ -639,9 +677,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["bounded_planar_settlement_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["bounded_planar_settlement_analyze_codes"] = run_planar_load_path(
+    "bounded_planar_settlement"
+)
 ops.reactions()
 settlement_local_force = ops.eleResponse(5, "localForce")
 payload["bounded_planar_settlement"] = {
@@ -2466,6 +2504,63 @@ def _product_replay_numbers_close(stored: float, current: float) -> bool:
     )
 
 
+_REPLAY_METRIC_FIELDS = frozenset({
+    "quantity", "product_value", "reference_value", "absolute_error",
+    "relative_error", "absolute_tolerance", "relative_tolerance", "contract_pass",
+})
+
+
+def _replay_metric_errors_consistent(metric: dict[str, Any]) -> bool:
+    # Validate each derived diagnostic against its own primitive values before
+    # comparing primitive response drift. A near-zero denominator must not
+    # amplify an otherwise allowed response difference into stale provenance.
+    fields = (
+        "product_value", "reference_value", "absolute_error", "relative_error",
+        "absolute_tolerance", "relative_tolerance",
+    )
+    if any(isinstance(metric[key], bool) or not isinstance(metric[key], (int, float))
+           for key in fields):
+        return False
+    try:
+        values = {key: float(metric[key]) for key in fields}
+    except (OverflowError, ValueError):
+        return False
+    if not all(math.isfinite(value) for value in values.values()):
+        return False
+    if values["absolute_tolerance"] < 0 or values["relative_tolerance"] < 0:
+        return False
+    tolerances = (values["absolute_tolerance"], values["relative_tolerance"])
+    # The stored receipt validator uses a unity scale for the base cases and
+    # a tiny floor for bounded 3-D cases; require one of those known contracts.
+    if tolerances == (
+        COMPARISON_ABSOLUTE_TOLERANCE, COMPARISON_RELATIVE_TOLERANCE,
+    ):
+        scale = max(abs(values["product_value"]), abs(values["reference_value"]), 1.0)
+    elif tolerances in {
+        (SPATIAL_FRAME3D_ABSOLUTE_TOLERANCE, SPATIAL_FRAME3D_RELATIVE_TOLERANCE),
+        (FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE,
+         FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE),
+    }:
+        scale = max(
+            abs(values["product_value"]), abs(values["reference_value"]),
+            np.finfo(np.float64).tiny,
+        )
+    else:
+        return False
+    absolute = abs(values["product_value"] - values["reference_value"])
+    relative = absolute / max(abs(values["reference_value"]), np.finfo(np.float64).tiny)
+    expected_pass = absolute <= (
+        values["absolute_tolerance"] + values["relative_tolerance"] * scale
+    )
+    return (
+        math.isfinite(relative)
+        and math.isclose(values["absolute_error"], absolute, rel_tol=1e-14, abs_tol=1e-30)
+        and math.isclose(values["relative_error"], relative, rel_tol=1e-14, abs_tol=1e-30)
+        and type(metric["contract_pass"]) is bool
+        and metric["contract_pass"] is expected_pass
+    )
+
+
 def _product_replay_values_match(stored: Any, current: Any) -> bool:
     """Compare replay payloads while allowing bounded numerical runtime drift."""
     if isinstance(stored, bool) or isinstance(current, bool):
@@ -2475,6 +2570,15 @@ def _product_replay_values_match(stored: Any, current: Any) -> bool:
     if isinstance(stored, (int, float)) and isinstance(current, (int, float)):
         return _product_replay_numbers_close(stored, current)
     if isinstance(stored, dict):
+        if stored.keys() == _REPLAY_METRIC_FIELDS and isinstance(current, dict):
+            if current.keys() != _REPLAY_METRIC_FIELDS or not all(
+                _replay_metric_errors_consistent(metric) for metric in (stored, current)
+            ):
+                return False
+            return all(
+                _product_replay_values_match(stored[key], current[key])
+                for key in stored if key != "relative_error"
+            )
         return (
             isinstance(current, dict)
             and stored.keys() == current.keys()
@@ -2495,6 +2599,53 @@ def _product_replay_values_match(stored: Any, current: Any) -> bool:
     return type(stored) is type(current) and stored == current
 
 
+def _planar_load_path_attempts_complete(
+    attempts: list[dict[str, Any]] | None,
+) -> bool:
+    # Earlier replay receipts have no per-step records.
+    if attempts is None:
+        return True
+    return len(attempts) == len(PLANAR_LOAD_PATH_TARGETS) and all(
+        attempt["target_load_factor"] == target
+        and attempt["analyze_return_code"] == 0
+        and math.isclose(
+            attempt["achieved_load_factor"],
+            target,
+            rel_tol=0.0,
+            abs_tol=1.0e-12,
+        )
+        for attempt, target in zip(attempts, PLANAR_LOAD_PATH_TARGETS, strict=True)
+    )
+
+
+def _product_replay_mismatch_path(stored: Any, current: Any) -> tuple[Any, ...] | None:
+    """Locate a rejected field without changing the acceptance predicate."""
+    if _product_replay_values_match(stored, current):
+        return None
+    if isinstance(stored, dict) and isinstance(current, dict):
+        for key in sorted(stored.keys() | current.keys()):
+            if key not in stored or key not in current:
+                return (key,)
+        consistent_metric = stored.keys() == _REPLAY_METRIC_FIELDS and all(
+            _replay_metric_errors_consistent(metric) for metric in (stored, current)
+        )
+        for key in sorted(stored):
+            if consistent_metric and key == "relative_error":
+                continue
+            child = _product_replay_mismatch_path(stored[key], current[key])
+            if child is not None:
+                return (key, *child)
+    elif isinstance(stored, list) and isinstance(current, list):
+        for index, (left, right) in enumerate(zip(stored, current)):
+            child = _product_replay_mismatch_path(left, right)
+            if child is not None:
+                return (index, *child)
+        if len(stored) != len(current):
+            return (min(len(stored), len(current)),)
+    # Also covers a malformed metric whose leaves separately compare equal.
+    return ()
+
+
 def _case(
     *,
     case_id: str,
@@ -2505,6 +2656,7 @@ def _case(
     external_return_code: int,
     product_regularization_applied: bool,
     product_fallback_used: bool,
+    load_path_attempts: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     contract_pass = bool(
         metrics
@@ -2512,8 +2664,9 @@ def _case(
         and external_return_code == 0
         and not product_regularization_applied
         and not product_fallback_used
+        and _planar_load_path_attempts_complete(load_path_attempts)
     )
-    return {
+    case = {
         "case_id": case_id,
         "analysis_type": analysis_type,
         "reference_solver": reference_solver,
@@ -2524,6 +2677,9 @@ def _case(
         "product_fallback_used": product_fallback_used,
         "contract_pass": contract_pass,
     }
+    if load_path_attempts is not None:
+        case["load_path_attempts"] = load_path_attempts
+    return case
 
 
 def _current_product_comparison_cases(
@@ -2816,6 +2972,9 @@ def _current_product_comparison_cases(
                 portal["regularization_used"]
             ),
             product_fallback_used=bool(portal["fallback_used"]),
+            load_path_attempts=stored[
+                "public_corotational_portal_load_path"
+            ].get("load_path_attempts"),
         ),
         _case(
             case_id="bounded_planar_member_feature_load_path",
@@ -2880,6 +3039,9 @@ def _current_product_comparison_cases(
                 member_feature["regularization_used"]
             ),
             product_fallback_used=bool(member_feature["fallback_used"]),
+            load_path_attempts=stored[
+                "bounded_planar_member_feature_load_path"
+            ].get("load_path_attempts"),
         ),
         *(
             [
@@ -2944,6 +3106,9 @@ def _current_product_comparison_cases(
                         settlement["regularization_used"]
                     ),
                     product_fallback_used=bool(settlement["fallback_used"]),
+                    load_path_attempts=stored[
+                        "bounded_planar_prescribed_settlement_load_path"
+                    ].get("load_path_attempts"),
                 )
             ]
             if settlement is not None
@@ -3362,6 +3527,9 @@ def build_external_code_to_code_technical_receipt(
                     "public_corotational_portal_analyze_codes"
                 ]
             ),
+            load_path_attempts=opensees["load_path_attempts"][
+                "public_corotational_portal"
+            ],
             product_regularization_applied=bool(
                 portal["regularization_used"]
             ),
@@ -3382,6 +3550,9 @@ def build_external_code_to_code_technical_receipt(
                     "bounded_planar_member_feature_analyze_codes"
                 ]
             ),
+            load_path_attempts=opensees["load_path_attempts"][
+                "bounded_planar_member_feature"
+            ],
             product_regularization_applied=bool(
                 member_feature["regularization_used"]
             ),
@@ -3404,6 +3575,9 @@ def build_external_code_to_code_technical_receipt(
                     "bounded_planar_settlement_analyze_codes"
                 ]
             ),
+            load_path_attempts=opensees["load_path_attempts"][
+                "bounded_planar_settlement"
+            ],
             product_regularization_applied=bool(
                 settlement["regularization_used"]
             ),
@@ -3738,6 +3912,60 @@ def validate_external_code_to_code_technical_receipt(
     if stored_assets != expected_assets:
         raise ExternalCodeToCodeReceiptError("receipt_external_assets_invalid")
     for case in payload["comparisons"]:
+        attempts = case.get("load_path_attempts")
+        if case["case_id"] in PLANAR_LOAD_PATH_CASE_IDS:
+            if attempts is None:
+                if require_current_sources and not replay["external_execution_reused"]:
+                    raise ExternalCodeToCodeReceiptError(
+                        "receipt_planar_load_path_attempts_missing"
+                    )
+            else:
+                for index, attempt in enumerate(attempts):
+                    expected_target = PLANAR_LOAD_PATH_TARGETS[index]
+                    expected_previous = (
+                        0.0
+                        if index == 0
+                        else attempts[index - 1]["achieved_load_factor"]
+                    )
+                    if (
+                        attempt["target_load_factor"] != expected_target
+                        or not math.isfinite(attempt["previous_load_factor"])
+                        or not math.isfinite(attempt["achieved_load_factor"])
+                        or not math.isclose(
+                            attempt["previous_load_factor"],
+                            expected_previous,
+                            rel_tol=0.0,
+                            abs_tol=1.0e-12,
+                        )
+                        or (
+                            attempt["analyze_return_code"] == 0
+                            and not math.isclose(
+                                attempt["achieved_load_factor"],
+                                expected_target,
+                                rel_tol=0.0,
+                                abs_tol=1.0e-12,
+                            )
+                        )
+                        or any(
+                            not math.isfinite(norm)
+                            for norm in attempt["test_norms_reported"]
+                        )
+                    ):
+                        raise ExternalCodeToCodeReceiptError(
+                            "receipt_planar_load_path_attempt_invalid"
+                        )
+                    if attempt["analyze_return_code"] != 0 and index != len(attempts) - 1:
+                        raise ExternalCodeToCodeReceiptError(
+                            "receipt_planar_load_path_continued_after_failure"
+                        )
+                if (
+                    (attempts[-1]["analyze_return_code"] == 0 and len(attempts) != 4)
+                    or case["external_return_code"]
+                    != max(abs(row["analyze_return_code"]) for row in attempts)
+                ):
+                    raise ExternalCodeToCodeReceiptError(
+                        "receipt_planar_load_path_return_code_invalid"
+                    )
         frame3d_case = (
             case["case_id"] == "spatial_frame3d_cantilever_combined_load"
         )
@@ -3878,6 +4106,7 @@ def validate_external_code_to_code_technical_receipt(
             and case["external_return_code"] == 0
             and case["product_regularization_applied"] is False
             and case["product_fallback_used"] is False
+            and _planar_load_path_attempts_complete(attempts)
         )
         if case["contract_pass"] is not expected_case_pass:
             raise ExternalCodeToCodeReceiptError("receipt_case_pass_invalid")
@@ -4042,8 +4271,12 @@ def validate_external_code_to_code_technical_receipt(
             payload["comparisons"],
             current_comparisons,
         ):
+            mismatch_path = _product_replay_mismatch_path(
+                payload["comparisons"], current_comparisons,
+            )
             raise ExternalCodeToCodeReceiptError(
-                "receipt_product_comparisons_stale"
+                "receipt_product_comparisons_stale:path="
+                + json.dumps(mismatch_path, ensure_ascii=True)
             )
         if replay["current_product_replay_pass"] is not expected_technical_pass:
             raise ExternalCodeToCodeReceiptError(

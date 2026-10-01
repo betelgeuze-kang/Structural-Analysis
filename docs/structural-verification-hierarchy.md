@@ -48,26 +48,23 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   보존하며 fallback과 regularization은 모두 `false`다.
 - Level 2: OpenSees 3.7.1과 CalculiX CrunchiX 2.17을 실제 실행한 좁은 기술
   candidate는 존재하지만 hierarchy evidence credit은 여전히 `0/2`다.
-  `external_code_to_code_technical_execution_receipt.json`은 2자유도 modal,
-  cantilever static, 공개 corotational portal의 4-step elastic-state load path,
-  rigid-offset/RZ-release/uniform-member-load bounded planar path,
-  1 kN 기준하중과 `-0.1 mm` 지점침하가 결합된 source-bound bounded planar
-  path, axial-member static, 6-member tetrahedral spatial-truss static의 일곱
-  case와 48개 metric을 통과하며
-  artifact hash
-  `sha256:dce3d05c6f694474d7327e8766858b93ed3ec07324587075a97f8a4d36782c7a`를
-  기록한다. 추가
+  `artifacts/vv/opensees_calculix_planar_attempts/host_fresh_receipt_84602ccf9.json`은
+  당시 source에서 같은 host로 OpenSees와 CalculiX를 실행한 12개 case와 94개
+  metric을 통과한다. 새 후보 source의 제품 replay는 외부 실행값을 재사용하며
+  current-source rerun blocker를 유지한다. 세
+  planar load path는 각각 네 성공 시도가 목표 하중계수 `1.0`에 도달했고,
+  Frame3D axial-yield·cyclic reversal·rotational direct-control 및 CalculiX
+  axial/spatial-truss 비교도 포함한다. 별도
   `external_modal_buckling_technical_execution_receipt.json`은 공개 전체 모델
-  frame modal을 OpenSees에, 반복 2모드 frame 선형좌굴을 CalculiX B32에
-  비교한다. Modal 고유값 2개와 MAC 2개가 통과하고, 좌굴계수 2개는 선언된
-  1% tolerance에서 최대 상대오차 `0.007029687670241386`, 반복군집 최소
-  principal-correlation-squared는 `0.9999999970332671`로 통과한다. 네 mode
-  matrix는 little-endian binary artifact로 분리돼 있다. 추가 receipt의
-  artifact hash는
-  `sha256:b28112ee8e73af7e1506ae1b0c2e4d25a3a857812618f7f7d3e33b28f4ea808f`다.
-  동일 운영자 container-isolated clean runner도 두 영수증을 재현했고 107개
-  host/container scalar 계약을 통과했다. 해당 summary artifact hash는
-  `sha256:b07e198d5fd74ce56edb386f2b770b79320b8d3abb38cfd5e6562f90daa22a8f`다.
+  frame modal과 반복 2모드 frame 선형좌굴의 두 case를 통과하지만, 외부 실행값은
+  재사용했고 저장된 generation에서는 제품 replay만 수행했다. Modal 고유값·MAC
+  4개, 좌굴계수·부분공간 3개가 통과하며 네 mode matrix는 little-endian binary
+  artifact로 분리돼 있다. 당시 동일 운영자의 격리 clean runner에서는 두 외부
+  자식 영수증을 새로 실행했고, 같은 source에서 만든 host 제품 replay와
+  scalar `199/199`, source-set 및 결합 수치 허용오차 계약을 통과했다. 따라서
+  당시 source 집합에서 이 범위의 container parity는 `true`지만 새 후보
+  HEAD의 재실행이나 독립 운영자 재현은 아직 없다.
+  Buckling semantic result hash의 정확한 일치는 수치 허용오차 안에서 실패했다.
   그러나 제품 법무 승인, redistribution 승인, 독립 운영자 재현·서명,
   material-nonlinear 구조형식 breadth, published benchmark decision과 operator manifest가 없으므로
   `verification_hierarchy_credit=false`이고 Level 2로 승격하지 않는다. 중형
@@ -79,8 +76,8 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
 - `phase2_whole_model_modal_result.json`과
   `phase2_whole_model_buckling_result.json`은 각각 bounded frame/truss 공개
   모달 및 compression-only frame 선형좌굴 경로에서 analytic/invariant gate
-  `4/4`를 통과한다. 위 별도 기술 receipt가 각각 한 frame/column의 독립
-  reference 비교를 추가했고 같은 운영자 격리 재현도 통과했지만 법무/use approval,
+  `4/4`를 통과한다. 위 별도 기술 receipt가 각각 한 frame/column의 보존된 외부
+  reference 비교를 추가했고 같은 운영자의 좁은 격리 재현은 통과했다. 법무/use approval,
   독립 운영자 attestation, breadth,
   published decision과 hierarchy operator manifest가 없으므로 Level 2 슬롯을
   채우지 않는다. 따라서 receipts를 추가해도 최고 검증 단계는 `1`이다.
@@ -100,7 +97,8 @@ solver, published/experimental/customer truth 또는 release readiness로 승격
 
 ```bash
 PYTHONPATH=src python3 scripts/build_analytic_frame_verification_artifact.py --check
-PYTHONPATH=src python3 scripts/run_external_code_to_code_technical_receipt.py --check
+PYTHONPATH=src python3 scripts/run_external_code_to_code_technical_receipt.py \
+  --out artifacts/vv/opensees_calculix_planar_attempts/current_product_replay_receipt.json --check
 PYTHONPATH=src python3 scripts/run_external_modal_buckling_technical_receipt.py --check
 PYTHONPATH=src python3 -m pytest -q \
   tests/test_analytic_frame_verification.py \
@@ -110,5 +108,9 @@ PYTHONPATH=src python3 -m pytest -q \
   tests/test_build_verification_hierarchy_status.py
 python3 scripts/build_verification_hierarchy_status.py --check
 ```
+
+보호된 productization code-to-code 영수증과 modal·buckling 영수증은 이 후보
+source의 외부 재실행이 아니므로 기본 경로의 `--check`가 source freshness를
+통과한다고 주장하지 않는다.
 
 이 검사는 evidence metadata와 선언된 hash/판정을 집계한다. Solver를 재실행하거나 source byte, publisher, 실험 데이터, customer reviewer 신원을 독립 인증하지 않는다.

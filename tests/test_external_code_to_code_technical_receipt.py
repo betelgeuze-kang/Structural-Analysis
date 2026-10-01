@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from functools import lru_cache
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -18,8 +20,13 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/run_external_code_to_code_technical_receipt.py"
 RECEIPT = (
     ROOT
-    / "implementation/phase1/release_evidence/productization/"
-    "external_code_to_code_technical_execution_receipt.json"
+    / "artifacts/vv/opensees_calculix_planar_attempts/"
+    "current_product_replay_receipt.json"
+)
+FRESH_HOST_RECEIPT = (
+    ROOT
+    / "artifacts/vv/opensees_calculix_planar_attempts/"
+    "host_fresh_receipt_84602ccf9.json"
 )
 SPEC = importlib.util.spec_from_file_location(
     "run_external_code_to_code_technical_receipt",
@@ -31,13 +38,109 @@ sys.modules[SPEC.name] = module
 SPEC.loader.exec_module(module)
 
 
-def _stored_receipt() -> dict[str, object]:
+@lru_cache(maxsize=1)
+def _current_product_replay_receipt() -> dict[str, object]:
+    # Historical external execution remains immutable; only replay the product.
     payload = json.loads(RECEIPT.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
-    return payload
+    return module.refresh_external_code_to_code_product_replay(
+        payload,
+        repo_root=ROOT,
+        reuse_reason=(
+            "Test current-product-only replay; historical external execution "
+            "is reused without freshness or promotion credit."
+        ),
+    )
 
 
-def test_stored_receipt_validates_and_records_actual_technical_execution() -> None:
+def _stored_receipt() -> dict[str, object]:
+    return deepcopy(_current_product_replay_receipt())
+
+
+@pytest.fixture(scope="module")
+def current_replay_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    path = tmp_path_factory.mktemp("code-to-code-replay") / "receipt.json"
+    path.write_text(
+        json.dumps(_stored_receipt(), ensure_ascii=False, indent=2, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+@pytest.mark.parametrize("receipt_path", [RECEIPT, FRESH_HOST_RECEIPT])
+def test_committed_candidate_receipt_sources_match_declared_commit(
+    receipt_path: Path,
+) -> None:
+    # Check historical provenance independently of the temporary product replay.
+    relative_path = receipt_path.relative_to(ROOT).as_posix()
+    committed_receipt = subprocess.run(
+        ["git", "show", f"HEAD:{relative_path}"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    payload = json.loads(committed_receipt.stdout)
+    source_commit = payload["source_commit_sha"]
+    for path, expected_hash in payload["internal_source"]["input_checksums"].items():
+        source = subprocess.run(
+            ["git", "show", f"{source_commit}:{path}"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        )
+        actual_hash = "sha256:" + hashlib.sha256(source.stdout).hexdigest()
+        assert actual_hash == expected_hash, (
+            f"{relative_path} declares {source_commit}, but {path} has different bytes"
+        )
+
+
+def test_current_product_replay_preserves_historical_external_evidence() -> None:
+    original_bytes = {
+        path: path.read_bytes() for path in (RECEIPT, FRESH_HOST_RECEIPT)
+    }
+    original = json.loads(original_bytes[RECEIPT])
+    payload = _stored_receipt()
+
+    assert all(
+        path.read_bytes() == contents for path, contents in original_bytes.items()
+    )
+    for field in ("runtimes", "external_assets", "execution_environment"):
+        assert payload[field] == original[field]
+    original_replay = original["replay_provenance"]
+    replay = payload["replay_provenance"]
+    assert replay["external_runtime_executed_in_this_generation"] is False
+    assert replay["external_execution_reused"] is True
+    for field in (
+        "external_execution_source_commit_sha",
+        "external_execution_generated_at",
+    ):
+        assert replay[field] == original_replay[field]
+    assert module.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
+
+    original_cases = {row["case_id"]: row for row in original["comparisons"]}
+    assert {row["case_id"] for row in payload["comparisons"]} == set(original_cases)
+    for row in payload["comparisons"]:
+        historical = original_cases[row["case_id"]]
+        for field in (
+            "reference_solver", "external_return_code", "load_path_attempts"
+        ):
+            assert row.get(field) == historical.get(field)
+        assert {
+            metric["quantity"]: metric["reference_value"] for metric in row["metrics"]
+        } == {
+            metric["quantity"]: metric["reference_value"]
+            for metric in historical["metrics"]
+        }
+
+    # Mutation tests must not alter the process-local replay used by other tests.
+    expected = deepcopy(payload)
+    payload["comparisons"][0]["metrics"][0]["reference_value"] += 1.0
+    payload["replay_provenance"]["external_execution_source_commit_sha"] = None
+    assert _stored_receipt() == expected
+
+
+def test_stored_candidate_replay_validates_without_new_external_execution() -> None:
     payload = _stored_receipt()
     schema = json.loads((ROOT / module.SCHEMA_PATH).read_text(encoding="utf-8"))
 
@@ -110,17 +213,25 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     )
     replay = payload["replay_provenance"]
     assert replay["current_product_replay_pass"] is True
-    fresh_execution = (
-        replay["external_runtime_executed_in_this_generation"] is True
-        and replay["external_execution_reused"] is False
-    )
     reused_execution = (
         replay["external_runtime_executed_in_this_generation"] is False
         and replay["external_execution_reused"] is True
         and isinstance(replay["reuse_reason"], str)
         and bool(replay["reuse_reason"].strip())
     )
-    assert fresh_execution or reused_execution
+    assert reused_execution
+    fresh_host = json.loads(FRESH_HOST_RECEIPT.read_text(encoding="utf-8"))
+    module.validate_external_code_to_code_technical_receipt(
+        fresh_host,
+        repo_root=ROOT,
+        require_current_sources=False,
+    )
+    assert fresh_host["replay_provenance"]["external_runtime_executed_in_this_generation"] is True
+    assert fresh_host["replay_provenance"]["external_execution_reused"] is False
+    assert replay["external_execution_source_commit_sha"] == fresh_host["source_commit_sha"]
+    assert replay["external_execution_generated_at"] == fresh_host[
+        "replay_provenance"
+    ]["external_execution_generated_at"]
     assert (
         module.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
     ) is reused_execution
@@ -336,7 +447,7 @@ def test_receipt_does_not_promote_legal_hierarchy_or_release_claims() -> None:
 
 
 def test_product_replay_migrates_only_the_known_prior_claim_boundary() -> None:
-    stored = _stored_receipt()
+    stored = json.loads(RECEIPT.read_text(encoding="utf-8"))
     refreshed = module.refresh_external_code_to_code_product_replay(
         stored,
         repo_root=ROOT,
@@ -534,8 +645,45 @@ def test_product_replay_comparison_allows_only_bounded_runtime_drift() -> None:
     assert not module._product_replay_values_match(stored, current)
 
 
+def test_product_replay_ignores_only_revalidated_derived_metric_errors() -> None:
+    stored = [{"metrics": [module._comparison("near_zero", 1.0e-12, 0.0)]}]
+    current = [{"metrics": [module._comparison("near_zero", 1.1e-12, 0.0)]}]
+    stored_error = stored[0]["metrics"][0]["relative_error"]
+    current_error = current[0]["metrics"][0]["relative_error"]
+    assert not module._product_replay_numbers_close(stored_error, current_error)
+    assert module._product_replay_values_match(stored, current)
+
+    metric = current[0]["metrics"][0]
+    metric["contract_pass"] = not metric["contract_pass"]
+    assert not module._product_replay_values_match(stored, current)
+
+
+@pytest.mark.parametrize("derived_field", ["absolute_error", "relative_error"])
+def test_validation_rejects_rehashed_derived_metric_error_tampering(
+    derived_field: str,
+) -> None:
+    tampered = deepcopy(_stored_receipt())
+    tampered["comparisons"][0]["metrics"][0][derived_field] += 1.0
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_error_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+
 def test_product_replay_refresh_does_not_invent_legacy_execution_source() -> None:
-    stored = _stored_receipt()
+    stored = deepcopy(_stored_receipt())
+    replay = stored["replay_provenance"]
+    replay["external_runtime_executed_in_this_generation"] = False
+    replay["external_execution_reused"] = True
+    replay["reuse_reason"] = "legacy_reference_execution_origin_unknown"
+    replay["external_execution_source_commit_sha"] = None
+    stored["artifact_hash"] = module._artifact_hash(stored)
     refreshed = module.refresh_external_code_to_code_product_replay(
         stored,
         repo_root=ROOT,
@@ -580,9 +728,9 @@ def test_fresh_receipt_without_execution_source_fails_closed() -> None:
         )
 
 
-def test_cli_offline_check_validates_stored_receipt() -> None:
+def test_cli_offline_check_validates_stored_receipt(current_replay_path: Path) -> None:
     completed = subprocess.run(
-        [sys.executable, str(SCRIPT), "--check"],
+        [sys.executable, str(SCRIPT), "--out", str(current_replay_path), "--check"],
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -595,13 +743,10 @@ def test_cli_offline_check_validates_stored_receipt() -> None:
 
 def test_cli_refresh_can_use_a_validated_current_reference_receipt(
     tmp_path: Path,
+    current_replay_path: Path,
 ) -> None:
     out = tmp_path / "embedded-code-receipt.json"
-    reference = (
-        ROOT
-        / "implementation/phase1/release_evidence/productization/"
-        "external_code_to_code_technical_execution_receipt.json"
-    )
+    reference = current_replay_path
     completed = subprocess.run(
         [
             sys.executable,
@@ -623,6 +768,127 @@ def test_cli_refresh_can_use_a_validated_current_reference_receipt(
     assert completed.returncode == 0, completed.stderr + completed.stdout
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["replay_provenance"]["external_execution_reused"] is True
+    assert payload["replay_provenance"]["external_execution_source_commit_sha"] == (
+        _stored_receipt()["replay_provenance"][
+            "external_execution_source_commit_sha"
+        ]
+    )
     assert [row["case_id"] for row in payload["comparisons"]] == [
         row["case_id"] for row in _stored_receipt()["comparisons"]
     ]
+
+
+@pytest.mark.parametrize('reference,stored_product,current_product', [
+    (0.0, 4.440892098500626e-13, -1.3322676295501878e-12),
+    (4.96422719988357e-7, 4.964233584953451e-7, 4.964244685421869e-7),
+])
+def test_replay_near_zero_derived_error_does_not_amplify_allowed_response_drift(
+    reference, stored_product, current_product,
+):
+    stored = module._comparison('witness', stored_product, reference)
+    current = module._comparison('witness', current_product, reference)
+    assert stored['contract_pass'] and current['contract_pass']
+    assert module._product_replay_values_match(stored, current)
+
+
+def test_saved_zero_reference_metric_allows_bounded_product_replay_drift():
+    stored = _stored_receipt()["comparisons"]
+    current = deepcopy(stored)
+    case = next(
+        row for row in current
+        if row["case_id"] == "bounded_planar_member_feature_load_path"
+    )
+    metric = next(
+        row for row in case["metrics"]
+        if row["quantity"] == "member_E1_end_j_MZ_N_m"
+    )
+    assert metric["reference_value"] == 0.0
+    replay_metric = module._comparison(
+        metric["quantity"], 4.440892098500626e-13, metric["reference_value"],
+    )
+    assert module._product_replay_numbers_close(
+        metric["product_value"], replay_metric["product_value"],
+    )
+    assert not module._product_replay_numbers_close(
+        metric["relative_error"], replay_metric["relative_error"],
+    )
+    assert metric["contract_pass"] is replay_metric["contract_pass"] is True
+    metric.update(replay_metric)
+    assert module._product_replay_values_match(stored, current)
+
+
+@pytest.mark.parametrize('field,value', [
+    ('relative_error', 0.0), ('relative_error', float('nan')),
+    ('absolute_error', 0.0), ('contract_pass', False),
+    ('product_value', 1.0), ('reference_value', 1.0),
+    ('quantity', 'different'), ('absolute_tolerance', 1.0),
+])
+def test_replay_near_zero_cannot_hide_tampered_metric(field, value):
+    stored = module._comparison('witness', 4e-13, 0.0)
+    current = module._comparison('witness', -1e-12, 0.0)
+    current[field] = value
+    assert not module._product_replay_values_match(stored, current)
+
+
+def test_replay_small_drift_cannot_flip_comparison_pass():
+    stored = module._comparison('witness', 1.9e-10, 0.0)
+    current = module._comparison('witness', 2.1e-10, 0.0)
+    assert stored['contract_pass'] and not current['contract_pass']
+    assert not module._product_replay_values_match(stored, current)
+
+
+@pytest.mark.parametrize("bounded", [False, True])
+def test_replay_rejects_current_false_pass_label_even_with_bounded_drift(bounded):
+    if bounded:
+        kwargs = {
+            "absolute_tolerance": module.FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE,
+            "relative_tolerance": module.FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE,
+        }
+        stored = module._bounded_comparison("witness", 0.0, 0.0, **kwargs)
+        current = module._bounded_comparison("witness", 1.5e-10, 0.0, **kwargs)
+    else:
+        stored = module._comparison("witness", 1.9e-10, 0.0)
+        current = module._comparison("witness", 2.1e-10, 0.0)
+    assert stored["contract_pass"] and not current["contract_pass"]
+    assert module._product_replay_numbers_close(
+        stored["product_value"], current["product_value"],
+    )
+    current["contract_pass"] = True
+    assert not module._product_replay_values_match(stored, current)
+
+
+def test_replay_rejects_inconsistent_stored_relative_diagnostic():
+    stored = module._comparison('witness', 4e-13, 0.0)
+    current = module._comparison('witness', -1e-12, 0.0)
+    stored['relative_error'] = 0.0
+    assert not module._product_replay_values_match(stored, current)
+
+
+def test_replay_mismatch_path_uses_same_metric_acceptance_rule():
+    left = module._comparison('witness', 4e-13, 0.0)
+    right = module._comparison('witness', -1e-12, 0.0)
+    assert module._product_replay_mismatch_path([{'metrics': [left]}], [{'metrics': [right]}]) is None
+    right['contract_pass'] = False
+    assert module._product_replay_mismatch_path([{'metrics': [left]}], [{'metrics': [right]}]) == (0, 'metrics', 0, 'contract_pass')
+
+
+@pytest.mark.parametrize('left,right,expected', [
+    ({'a': 1}, {}, ('a',)), ([1], [1, 2], (1,)),
+    ([{'value': 1.0}], [{'value': 2.0}], (0, 'value')),
+    (1, True, ()),
+])
+def test_replay_mismatch_path_retains_structural_and_scalar_failures(left, right, expected):
+    assert module._product_replay_mismatch_path(left, right) == expected
+
+
+def test_validator_reports_replay_mismatch_path_without_accepting_it(monkeypatch):
+    payload = _stored_receipt()
+    current = deepcopy(payload['comparisons'])
+    current[0]['contract_pass'] = not current[0]['contract_pass']
+    monkeypatch.setattr(module, '_source_checksums', lambda root: payload['internal_source']['input_checksums'])
+    monkeypatch.setattr(module, '_current_product_comparison_cases', lambda *a, **k: current)
+    with pytest.raises(module.ExternalCodeToCodeReceiptError) as caught:
+        module.validate_external_code_to_code_technical_receipt(
+            payload, repo_root=ROOT, require_current_sources=True,
+        )
+    assert str(caught.value) == 'receipt_product_comparisons_stale:path=[0, "contract_pass"]'

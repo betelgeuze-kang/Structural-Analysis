@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:da853c4797f89850f889bec26f7c9b36285dea48b96a9d4933d70586978d77b0",
+  "inventory_digest": "sha256:01243a695ae3b09f58139df5385b55061fb2e0889705e10292c49f3b606559cd",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -488,7 +488,7 @@
           "blob_sha": "001b984650f2f8a2e01f8820d35c33b196721c60",
           "change_status": "modified",
           "changes": 16,
-          "current_blob_sha": "65285e7e9a0df3130425a9745159337cd6e555f8",
+          "current_blob_sha": "74af3cb9d0ce6af1a78bf3929d5c06f109346d2e",
           "current_relation": "different",
           "deletions": 6,
           "path": ".github/workflows/frontend-web-ci.yml",

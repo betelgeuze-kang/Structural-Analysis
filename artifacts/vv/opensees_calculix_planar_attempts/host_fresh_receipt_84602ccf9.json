@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:6334d935e56f1d09a3051271bf6572f075818fe9e8695a251c14633993d7e0cb",
+  "artifact_hash": "sha256:1128f4a00911fbde0bbc4c108dc8905e087575ec63104714a0b8a4a6da6a56a4",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -115,7 +115,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 28771,
+          "analyze_wall_ns": 30721,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 2,
@@ -205,7 +205,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 13391,
+          "analyze_wall_ns": 13370,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 3,
@@ -295,7 +295,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 8750,
+          "analyze_wall_ns": 8751,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 2,
@@ -385,7 +385,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 12351,
+          "analyze_wall_ns": 18260,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 3,
@@ -609,7 +609,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 12150,
+          "analyze_wall_ns": 11600,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 2,
@@ -699,7 +699,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 6410,
+          "analyze_wall_ns": 4020,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 2,
@@ -789,7 +789,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 9381,
+          "analyze_wall_ns": 7000,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 4,
@@ -879,7 +879,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 4240,
+          "analyze_wall_ns": 3720,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 2,
@@ -1063,7 +1063,7 @@
         {
           "achieved_load_factor": 0.25,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 13081,
+          "analyze_wall_ns": 14401,
           "previous_load_factor": 0.0,
           "target_load_factor": 0.25,
           "test_iterations_reported": 1,
@@ -1153,7 +1153,7 @@
         {
           "achieved_load_factor": 0.5,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 3150,
+          "analyze_wall_ns": 3550,
           "previous_load_factor": 0.25,
           "target_load_factor": 0.5,
           "test_iterations_reported": 1,
@@ -1243,7 +1243,7 @@
         {
           "achieved_load_factor": 0.75,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 2860,
+          "analyze_wall_ns": 2630,
           "previous_load_factor": 0.5,
           "target_load_factor": 0.75,
           "test_iterations_reported": 1,
@@ -1333,7 +1333,7 @@
         {
           "achieved_load_factor": 1.0,
           "analyze_return_code": 0,
-          "analyze_wall_ns": 2610,
+          "analyze_wall_ns": 2500,
           "previous_load_factor": 0.75,
           "target_load_factor": 1.0,
           "test_iterations_reported": 1,
@@ -2206,8 +2206,8 @@
   "engine_version": "0.3.0",
   "execution_environment": {
     "machine": "x86_64",
-    "python_executable_sha256": "sha256:22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
-    "python_version": "3.11.15",
+    "python_executable_sha256": "sha256:a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+    "python_version": "3.10.12",
     "system": "Linux"
   },
   "external_assets": [
@@ -2260,7 +2260,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-09-28T14:01:48.692959+00:00",
+  "generated_at": "2026-09-28T13:52:02.353070+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -2475,11 +2475,11 @@
     "source_set_hash": "sha256:ea0de04e69a558ba9a3529fd9650851a4bb58b48cd4f2f911ec1a27b9bdaf61c"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-09-28T14:01:48.705801+00:00",
+    "current_product_replay_generated_at": "2026-09-28T13:52:02.364369+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-09-28T14:01:48.705796+00:00",
+    "external_execution_generated_at": "2026-09-28T13:52:02.364362+00:00",
     "external_execution_reused": false,
-    "external_execution_source_commit_sha": "170b703d25e64ec97266386408c9893ebaf08aa5",
+    "external_execution_source_commit_sha": "84602ccf9065c8aa407f91adbb24b2b947676b29",
     "external_runtime_executed_in_this_generation": true,
     "reuse_reason": null
   },
@@ -2490,17 +2490,17 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
-        "frd_sha256": "sha256:774668d0dfdafe77e21ab5240f9a71ef812c453bdb94191456072e7ce8bc6953",
+        "frd_sha256": "sha256:bd3d5950498c9af1259ae5a9d328845527148b74308fb8e971ea41cda79ece9b",
         "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
         "return_code": 0,
         "spatial_truss_dat_sha256": "sha256:d754b6dc5fd1e316b516629ed970a5bf1f6e274849c436222b8ea5eb63545cd6",
-        "spatial_truss_frd_sha256": "sha256:54a50389a0637f359043fdbd42e20fe78469e610e7f884da59f9a6d10128ea84",
+        "spatial_truss_frd_sha256": "sha256:72d9a3a587791f4331886c10841be44873bfcbbfc5d3e4ac49aee5cf1535321d",
         "spatial_truss_input_deck_sha256": "sha256:6675595b476187c36132d260a624bb85d0a9d155c31ff6aba38006f6ab3645b1",
         "spatial_truss_return_code": 0,
         "spatial_truss_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "spatial_truss_stdout_sha256": "sha256:5570e936885933051a20b603fe934262040cd5e47075cac5ab0ce2904b1f65a3",
+        "spatial_truss_stdout_sha256": "sha256:a1c77b71c99d527e755ad8cf4f0dd501334f6fb94d0465aec6a3c308a9c2bdcf",
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:72ca7bd9700dec5c3442e3c34f0cb54829a2bf724a4a729a6ee37fa553410557",
+        "stdout_sha256": "sha256:2b0f9b1e343fe457f62aa999e2375e369f87a5676c29158a8cb36711782670cd",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -2523,13 +2523,13 @@
         "driver_sha256": "sha256:f46dbe613df6525c32968bf81ac0b02ea0b4c1123174add02745f7861b0444e1",
         "return_code": 0,
         "stderr_sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea",
-        "stdout_sha256": "sha256:2fc4ff69d5604edf4a8153485a57f4666849ffa99272ec5d40d2cf461ca545e3"
+        "stdout_sha256": "sha256:38c06456af30be7f58f76c2da91567de95b73b4019a623a662e1c8b6eb14151e"
       },
       "independent_from_product": true,
       "license": {
         "commercial_redistribution_approved": false,
         "declared_license_posture": "internal_use_allowed_commercial_redistribution_requires_license",
-        "license_file_sha256": "sha256:289503a95d55c43668bdadcd1815c9a93b46cb6ec890b3e9aea6c559d3806382",
+        "license_file_sha256": "sha256:aeb25d4e6647320e0581d01b5bbc7f15606b7aaffa8f09c23a424cb95fa49761",
         "product_legal_approval": false
       },
       "name": "OpenSees",
@@ -2538,7 +2538,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "170b703d25e64ec97266386408c9893ebaf08aa5",
+  "source_commit_sha": "84602ccf9065c8aa407f91adbb24b2b947676b29",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",

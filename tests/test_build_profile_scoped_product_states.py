@@ -160,7 +160,10 @@ def test_commercial_state_is_acyclic_and_does_not_consume_legacy_pm_report() -> 
     assert "product_license_not_ready" in state["blockers"]
     assert "independent_operator_attestation_missing" in state["blockers"]
     assert "verification_level_2_not_achieved" in state["blockers"]
-    assert "fresh_code_to_code_execution_missing" in state["blockers"]
+    assert {
+        "fresh_code_to_code_execution_missing",
+        "external_vv_source_commit_mismatch",
+    }.intersection(state["blockers"])
 
 
 def test_profile_states_fail_closed_on_missing_or_tampered_authority_policy(
