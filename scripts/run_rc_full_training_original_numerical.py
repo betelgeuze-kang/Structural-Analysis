@@ -326,18 +326,47 @@ def counted(reports):
     result = Counter(core_calls=0, newton_iterations=0, linear_solves=0)
     unknown = False
     for report in reports:
-        unknown |= not report["all_execution_work_reported"]
-        for arm in (*report["arms"].values(), report["fresh_reference"]):
-            for invocation in [
-                *arm.get("preload_invocations", []),
-                *(v for entry in arm["entries"] for v in entry["invocations"]),
-            ]:
-                unknown |= invocation["unknown_work"]
-                for key, value in invocation["work"].items():
-                    if key in result and type(value) is int and value >= 0:
-                        result[key] += value
-                    elif key in result:
+        if type(report) is not dict:
+            unknown = True
+            continue
+        unknown |= report.get("all_execution_work_reported") is not True
+        arms = report.get("arms")
+        if type(arms) is not dict or not arms:
+            unknown = True
+            arms = {}
+        for arm in (*arms.values(), report.get("fresh_reference")):
+            if type(arm) is not dict:
+                unknown = True
+                continue
+            groups = [arm.get("preload_invocations", [])]
+            entries = arm.get("entries")
+            if type(entries) is not list:
+                unknown = True
+                entries = []
+            for entry in entries:
+                if type(entry) is not dict:
+                    unknown = True
+                    continue
+                groups.append(entry.get("invocations"))
+            for invocations in groups:
+                if type(invocations) is not list:
+                    unknown = True
+                    continue
+                for invocation in invocations:
+                    if type(invocation) is not dict:
                         unknown = True
+                        continue
+                    unknown |= invocation.get("unknown_work") is not False
+                    work = invocation.get("work")
+                    if type(work) is not dict:
+                        unknown = True
+                        continue
+                    for key in result:
+                        value = work.get(key)
+                        if type(value) is int and value >= 0:
+                            result[key] += value
+                        else:
+                            unknown = True
     return dict(known_completed_work=dict(result), unknown_work=unknown)
 
 
@@ -392,8 +421,9 @@ def seed_header(seed, plan, prepared):
 def generate(root):
     plan = read(root / "experiment-plan.json")
     profile = arithmetic_profile(plan)
+    declared = cases(root)
     report = learning.run_rc_control_learning_study(
-        cases(root),
+        declared,
         source_revision=plan["source_revision"],
         output_directory=root / "generation",
         ridge=10000.0,
@@ -405,17 +435,41 @@ def generate(root):
         **learning_kwargs(profile),
     )
     samples = read(root / "generation/training-samples.json", array=True)
-    original = [row["report"] for row in report["generation"] if "report" in row]
-    eligible = len(samples) == plan["sample_count"] and all(
-        row["labels_eligible"]
-        and row["report"]["arms"]["reference"]["status"] == "complete"
-        for row in report["generation"]
+    rows = report["generation"]
+    work = counted(row.get("report") if type(row) is dict else None for row in rows)
+    expected = [case.case_id for case in declared if case.split == "train"]
+    actual = [row.get("case_id") if type(row) is dict else None for row in rows]
+    work["unknown_work"] |= actual != expected or any(
+        type(row) is not dict or row.get("unknown_work", False) is not False
+        for row in rows
     )
+    # Keep both independent unknown sources. The producer includes failed rows
+    # without reports; the report recount also checks report-level completeness.
+    aggregate = report.get("generation_work")
+    if type(aggregate) is not dict:
+        work["unknown_work"] = True
+    else:
+        work["unknown_work"] |= aggregate.get("unknown_work") is not False
+        known = aggregate.get("known_work")
+        if type(known) is not dict:
+            work["unknown_work"] = True
+        else:
+            for key, value in work["known_completed_work"].items():
+                supplied = known.get(key)
+                work["unknown_work"] |= (
+                    type(supplied) is not int or supplied < 0 or supplied != value
+                )
     eligible = (
-        eligible
+        not work["unknown_work"]
+        and len(samples) == plan["sample_count"]
+        and actual == expected
+        and all(
+            row.get("labels_eligible") is True
+            and row["report"]["arms"].get("reference", {}).get("status") == "complete"
+            for row in rows
+        )
         and report["fit"] is not None
         and report["fit"]["status"] == "completed"
-        and not counted(original)["unknown_work"]
     )
     if eligible:
         policy = learning.RCControlSeedPolicy(
@@ -430,7 +484,7 @@ def generate(root):
         sample_count=len(samples),
         generation_report_hash=report["report_hash"],
         fit=report["fit"],
-        **counted(original),
+        **work,
     )
 
 

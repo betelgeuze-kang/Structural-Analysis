@@ -302,6 +302,235 @@ def test_generation_hold_blocks_teacher_fit_and_labels(tmp_path, driver, monkeyp
     assert not (root / "retained-labels").exists()
 
 
+def mock_generation_study(root, driver, monkeypatch, *, ready=False):
+    """Authored boundary fixtures; never structural or fitted observations."""
+    plan, samples, policy, _, _ = _authored_learning_inputs(root, driver)
+    rows = [
+        dict(
+            case_id=case["case_id"],
+            labels_eligible=True,
+            report=fixture_report(),
+        )
+        for case in plan["cases"]
+        if case["split"] == "train"
+    ]
+    report = dict(
+        generation=rows,
+        generation_work=dict(
+            known_work=dict(core_calls=12, newton_iterations=24, linear_solves=24),
+            unknown_work=False,
+        ),
+        report_hash=_sha(b"authored-generation-work-fixture"),
+        fit=(
+            dict(status="completed", policy_hash=policy.policy_hash) if ready else None
+        ),
+    )
+
+    def mocked_study(*args, **kwargs):
+        driver.save(root, "generation/training-samples.json", samples if ready else [])
+        if ready:
+            driver.save(root, "generation/policy.json", policy.to_dict())
+        return deepcopy(report)
+
+    monkeypatch.setattr(learning, "run_rc_control_learning_study", mocked_study)
+    return report
+
+
+@pytest.mark.parametrize("report_value", ["absent", None])
+def test_generation_keeps_failed_row_unknown_and_completed_work(
+    tmp_path, driver, monkeypatch, report_value
+):
+    root = prepared(tmp_path, driver)
+    report = mock_generation_study(root, driver, monkeypatch)
+    failed = dict(
+        case_id="authored-B",
+        labels_eligible=False,
+        exception_kind="ValueError",
+        unknown_work=True,
+    )
+    if report_value is None:
+        failed["report"] = None
+    report["generation"][1] = failed
+    report["generation_work"] = dict(
+        known_work=dict(core_calls=9, newton_iterations=18, linear_solves=18),
+        unknown_work=True,
+    )
+    outcome = driver.generate(root)
+    assert outcome["status"] == "HOLD"
+    assert outcome["unknown_work"] is True
+    assert outcome["known_completed_work"] == {
+        "core_calls": 9,
+        "newton_iterations": 18,
+        "linear_solves": 18,
+    }
+    assert outcome["generation_report_hash"] == report["report_hash"]
+    driver.save(root, "generate-result.json", outcome)
+    driver.save(root, "campaign-started.json", {"monotonic_ns": perf_counter_ns()})
+    with pytest.raises(AssertionError, match="unknown native work; stop budget reuse"):
+        driver.check_budget(root)
+    with pytest.raises(AssertionError, match="generation HOLD"):
+        driver.labels(root)
+
+
+@pytest.mark.parametrize(
+    "counter", ["core_calls", "newton_iterations", "linear_solves"]
+)
+def test_counted_retains_known_values_and_marks_missing_counter_unknown(
+    driver, counter
+):
+    report = fixture_report()
+    del report["arms"]["reference"]["entries"][0]["invocations"][0]["work"][counter]
+    outcome = driver.counted([report])
+    assert outcome["unknown_work"] is True
+    expected = dict(core_calls=3, newton_iterations=6, linear_solves=6)
+    expected[counter] -= 1 if counter == "core_calls" else 2
+    assert outcome["known_completed_work"] == expected
+
+
+@pytest.mark.parametrize("source", ["aggregate", "comparison", "row"])
+def test_generation_never_lowers_any_recorded_unknown(
+    tmp_path, driver, monkeypatch, source
+):
+    root = prepared(tmp_path, driver)
+    report = mock_generation_study(root, driver, monkeypatch, ready=True)
+    if source == "aggregate":
+        report["generation_work"]["unknown_work"] = True
+    elif source == "comparison":
+        report["generation"][0]["report"]["all_execution_work_reported"] = False
+    else:
+        report["generation"][0]["unknown_work"] = True
+    outcome = driver.generate(root)
+    assert outcome["status"] == "HOLD" and outcome["unknown_work"] is True
+    assert outcome["known_completed_work"] == {
+        "core_calls": 12,
+        "newton_iterations": 24,
+        "linear_solves": 24,
+    }
+    assert report["fit"]["status"] == "completed"  # Cannot excuse unknown native work.
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["absent", "flag", "missing_counter", "boolean", "negative", "disagreement"],
+)
+def test_generation_aggregate_integrity_is_required_before_ready(
+    tmp_path, driver, monkeypatch, mutation
+):
+    root = prepared(tmp_path, driver)
+    report = mock_generation_study(root, driver, monkeypatch, ready=True)
+    aggregate = report["generation_work"]
+    if mutation == "absent":
+        del report["generation_work"]
+    elif mutation == "flag":
+        aggregate["unknown_work"] = 0
+    elif mutation == "missing_counter":
+        del aggregate["known_work"]["linear_solves"]
+    elif mutation == "boolean":
+        aggregate["known_work"]["core_calls"] = True
+    elif mutation == "negative":
+        aggregate["known_work"]["newton_iterations"] = -1
+    else:
+        aggregate["known_work"]["core_calls"] += 1
+    untouched = deepcopy(report)
+    outcome = driver.generate(root)
+    assert outcome["status"] == "HOLD" and outcome["unknown_work"] is True
+    assert outcome["known_completed_work"] == {
+        "core_calls": 12,
+        "newton_iterations": 24,
+        "linear_solves": 24,
+    }
+    assert report == untouched  # Preserve source claims; do not repair them in place.
+
+
+@pytest.mark.parametrize("mutation", ["empty", "missing", "duplicate", "foreign"])
+def test_generation_requires_the_entire_declared_train_denominator(
+    tmp_path, driver, monkeypatch, mutation
+):
+    root = prepared(tmp_path, driver)
+    report = mock_generation_study(root, driver, monkeypatch, ready=True)
+    rows = report["generation"]
+    if mutation == "empty":
+        rows.clear()
+    elif mutation == "missing":
+        rows.pop()
+    elif mutation == "duplicate":
+        rows[1]["case_id"] = rows[0]["case_id"]
+    else:
+        rows[1]["case_id"] = "authored-E"  # Declared validation, not TRAIN.
+    report["generation_work"] = learning._execution_work(rows)
+    outcome = driver.generate(root)
+    assert outcome["status"] == "HOLD" and outcome["unknown_work"] is True
+    assert outcome["sample_count"] == 20  # Cached sample count cannot prove coverage.
+
+
+@pytest.mark.parametrize("failure", ["physical", "fit"])
+def test_generation_known_failure_remains_hold_without_unknown_native_work(
+    tmp_path, driver, monkeypatch, failure
+):
+    root = prepared(tmp_path, driver)
+    report = mock_generation_study(root, driver, monkeypatch, ready=True)
+    if failure == "physical":
+        report["generation"][0]["labels_eligible"] = False
+        report["generation"][0]["report"]["reference_repeat_exact"] = False
+        report["generation"][0]["report"]["arms"]["reference"]["status"] = "blocked"
+    else:
+        report["fit"] = dict(status="failed", unknown_fit_work=True)
+    outcome = driver.generate(root)
+    assert outcome["status"] == "HOLD" and outcome["unknown_work"] is False
+    assert outcome["fit"] == report["fit"]
+    assert outcome["known_completed_work"]["core_calls"] == 12
+
+
+@pytest.mark.parametrize(
+    "arithmetic_profile", ["binary64", learning.RETAINED_LEARNING_ARITHMETIC_PROFILE]
+)
+def test_generation_complete_mocked_receipts_retain_ready_contract(
+    tmp_path, driver, monkeypatch, arithmetic_profile
+):
+    root = prepared(tmp_path, driver, arithmetic_profile=arithmetic_profile)
+    report = mock_generation_study(root, driver, monkeypatch, ready=True)
+    outcome = driver.generate(root)
+    assert outcome["status"] == "ready" and outcome["unknown_work"] is False
+    assert outcome["sample_count"] == 20
+    assert outcome["known_completed_work"] == report["generation_work"]["known_work"]
+    assert outcome["fit"]["policy_hash"] == report["fit"]["policy_hash"]
+
+
+@pytest.mark.parametrize("value", [None, True, -1, 1.0, "2"])
+def test_counted_rejects_unreported_or_invalid_work_without_losing_other_values(
+    driver, value
+):
+    report = fixture_report()
+    invocation = report["arms"]["reference"]["entries"][0]["invocations"][0]
+    invocation["work"]["newton_iterations"] = value
+    outcome = driver.counted([report])
+    assert outcome["unknown_work"] is True
+    assert outcome["known_completed_work"] == {
+        "core_calls": 3,
+        "newton_iterations": 4,
+        "linear_solves": 6,
+    }
+
+
+def test_counted_accounts_preload_and_marks_missing_work_record_unknown(driver):
+    report = fixture_report()
+    report["arms"]["reference"]["preload_invocations"] = [
+        dict(
+            ordinal=0,
+            unknown_work=False,
+            work=dict(core_calls=2, newton_iterations=5, linear_solves=5),
+        )
+    ]
+    report["arms"]["secant"]["entries"][0]["invocations"][0]["work"] = None
+    outcome = driver.counted([report])
+    assert outcome["unknown_work"] is True
+    assert outcome["known_completed_work"] == {
+        "core_calls": 4,
+        "newton_iterations": 9,
+        "linear_solves": 9,
+    }
+
+
 def test_large_original_read_bound_and_atomic_progress_preserve_immutable_files(
     tmp_path, driver, monkeypatch
 ):
