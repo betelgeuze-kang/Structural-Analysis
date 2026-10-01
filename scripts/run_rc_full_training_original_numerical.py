@@ -8,6 +8,7 @@ rejected, and incomplete stages are never inferred from file presence.
 import argparse
 from collections import Counter
 from copy import deepcopy
+from dataclasses import asdict, replace
 from pathlib import Path
 import subprocess
 from time import perf_counter_ns, process_time_ns
@@ -17,6 +18,10 @@ from structural_analysis.api.frame3d_direct_control_request import (
 )
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
+    decode_bounded_rc_fiber_direct_control_request,
+)
+from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
+    StatefulFiberFrame2DDisplacementControlConfig,
 )
 from structural_analysis.benchmark import rc_control_learning as learning
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha, _save
@@ -49,6 +54,36 @@ MAX_CALLS = 2048
 MAX_SECONDS = 1800
 MAX_BYTES = 2 * 1024**3
 MAX_FILE_BYTES = 64 * 1024**2
+DEFAULT_SOLVER_PROFILE = "default"
+EXTENDED_LINE_SEARCH_PROFILE = "extended-backtracking-v1"
+SOLVER_PROFILES = (DEFAULT_SOLVER_PROFILE, EXTENDED_LINE_SEARCH_PROFILE)
+
+
+def solver_configuration(profile):
+    if type(profile) is not str or profile not in SOLVER_PROFILES:
+        raise ValueError("unsupported authored solver profile")
+    config = StatefulFiberFrame2DDisplacementControlConfig()
+    if profile == EXTENDED_LINE_SEARCH_PROFILE:
+        config = replace(
+            config,
+            newton=replace(
+                config.newton,
+                line_search_alphas=tuple(2.0**-k for k in range(14)),
+            ),
+        )
+    return config
+
+
+def solver_payload(config):
+    payload = asdict(config)
+    payload["newton"]["line_search_alphas"] = list(config.newton.line_search_alphas)
+    return payload
+
+
+def authored_request(targets, config):
+    return BoundedRCFiberDirectControlRequest(
+        7, tuple(targets), config, allow_reversals=True, maximum_reversals=2
+    )
 
 
 def read(path, *, array=False):
@@ -75,26 +110,38 @@ def descriptor(root, name):
 def cases(root, plan=None):
     if plan is None:
         plan = read(root / "experiment-plan.json")
-    return tuple(
-        learning.RCControlLearningCase(
-            row["case_id"],
-            row["case_id"],
-            row["case_id"],
-            row["case_id"],
-            row["split"],
-            load_neutral_json(root / row["model_file"]),
-            BoundedRCFiberDirectControlRequest(
-                7,
-                tuple(row["targets_m"]),
-                allow_reversals=True,
-                maximum_reversals=2,
-            ),
+    config = solver_configuration(plan["solver_profile"])
+    assert (
+        _bytes(plan["solver_config"]) == _bytes(solver_payload(config))
+        and plan["solver_config_hash"] == config.contract_hash
+    ), "predeclared solver profile differs"
+    result = []
+    for row in plan["cases"]:
+        request = decode_bounded_rc_fiber_direct_control_request(row["request"])
+        assert _bytes(request.to_dict()) == _bytes(row["request"]), (
+            "predeclared request is not exact canonical typed payload"
         )
-        for row in plan["cases"]
-    )
+        assert request.request_hash == row["request_hash"] and _bytes(
+            request.to_dict()
+        ) == _bytes(authored_request(row["targets_m"], config).to_dict()), (
+            "predeclared request differs from authored solver profile"
+        )
+        result.append(
+            learning.RCControlLearningCase(
+                row["case_id"],
+                row["case_id"],
+                row["case_id"],
+                row["case_id"],
+                row["split"],
+                load_neutral_json(root / row["model_file"]),
+                request,
+            )
+        )
+    return tuple(result)
 
 
-def prepare(root):
+def prepare(root, *, solver_profile=DEFAULT_SOLVER_PROFILE):
+    config = solver_configuration(solver_profile)
     root.mkdir(parents=True, exist_ok=False)
     model = read(Path("examples/public_rc_fiber_frame_l_frame_material_history.json"))
     rows = []
@@ -124,10 +171,15 @@ def prepare(root):
                 ],
             )
         )
+        request = authored_request(rows[-1]["targets_m"], config)
+        rows[-1].update(request=request.to_dict(), request_hash=request.request_hash)
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     plan = dict(
         schema_version="rc-authored-full-training-original-numerical.v1",
         source_revision=revision,
+        solver_profile=solver_profile,
+        solver_config=solver_payload(config),
+        solver_config_hash=config.contract_hash,
         cases=rows,
         groups=[[row["case_id"]] for row in rows[:4]],
         seed_recipe=dict(
@@ -693,7 +745,10 @@ def main():
         "stage", choices=("prepare", "generate", "labels", "join-fit", "evaluate")
     )
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--solver-profile", choices=SOLVER_PROFILES)
     args = parser.parse_args()
+    if args.stage != "prepare" and args.solver_profile is not None:
+        parser.error("--solver-profile is only available for prepare")
     root = args.output.resolve()
     if args.stage != "prepare":
         assert not (root / f"{args.stage}-started.json").exists(), (
@@ -725,7 +780,11 @@ def main():
     wall, cpu = perf_counter_ns(), process_time_ns()
     try:
         function = globals()[args.stage.replace("-", "_")]
-        result = function(root)
+        result = (
+            function(root, solver_profile=args.solver_profile or DEFAULT_SOLVER_PROFILE)
+            if args.stage == "prepare"
+            else function(root)
+        )
         result.update(
             stage_wall_ns=perf_counter_ns() - wall,
             stage_cpu_ns=process_time_ns() - cpu,

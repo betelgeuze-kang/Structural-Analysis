@@ -17,6 +17,8 @@ from structural_analysis.benchmark import rc_control_learning as learning
 from structural_analysis.benchmark import rc_control_seed_runtime as runtime
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 
+_BENCHMARK_WRAPPER = runtime.benchmark_rc_control_seed_paths
+
 
 @pytest.fixture
 def driver(monkeypatch):
@@ -43,6 +45,8 @@ def native_solves_forbidden(monkeypatch, driver):
         (runtime, "benchmark_rc_control_seed_paths"),
         (learning, "benchmark_rc_control_seed_paths"),
         (driver, "benchmark_rc_control_seed_paths"),
+        (driver, "fit_declared_seeds"),
+        (learning, "_fit"),
         (public, "analyze_public_rc_fiber_frame"),
     ):
         monkeypatch.setattr(owner, name, forbidden)
@@ -50,9 +54,13 @@ def native_solves_forbidden(monkeypatch, driver):
     assert attempts == []
 
 
-def prepared(tmp_path, driver, *, campaign=False):
+def prepared(tmp_path, driver, *, campaign=False, solver_profile=None):
     root = tmp_path / "authored-driver"
-    receipt = driver.prepare(root)
+    receipt = (
+        driver.prepare(root)
+        if solver_profile is None
+        else driver.prepare(root, solver_profile=solver_profile)
+    )
     driver.save(root, "prepare-result.json", receipt)
     if campaign:
         driver.save(root, "campaign-started.json", {"monotonic_ns": perf_counter_ns()})
@@ -306,3 +314,257 @@ def test_large_original_read_bound_and_atomic_progress_preserve_immutable_files(
     monkeypatch.setattr(driver, "MAX_FILE_BYTES", len(raw) - 1)
     with pytest.raises(ValueError, match="bounded numerical original file exceeded"):
         driver.read(root / "original.json")
+
+
+def test_opt_in_alphas_preserve_default_request_and_every_other_solver_knob(
+    tmp_path, driver
+):
+    roots, plans, restored = {}, {}, {}
+    for profile in driver.SOLVER_PROFILES:
+        folder = tmp_path / profile
+        folder.mkdir()
+        roots[profile] = prepared(folder, driver, solver_profile=profile)
+        plans[profile] = driver.read(roots[profile] / "experiment-plan.json")
+        restored[profile] = driver.cases(roots[profile])
+    default = plans[driver.DEFAULT_SOLVER_PROFILE]
+    extended = plans[driver.EXTENDED_LINE_SEARCH_PROFILE]
+    assert default["solver_config"]["newton"]["line_search_alphas"] == [
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+    ]
+    assert extended["solver_config"]["newton"]["line_search_alphas"] == [
+        2.0**-k for k in range(14)
+    ]
+    without_alphas = deepcopy(extended["solver_config"])
+    without_alphas["newton"]["line_search_alphas"] = default["solver_config"]["newton"][
+        "line_search_alphas"
+    ]
+    assert without_alphas == default["solver_config"]
+    assert default["solver_config"]["newton"]["max_iterations"] == 25
+    assert extended["solver_config_hash"] != default["solver_config_hash"]
+    for old, new, row, new_row in zip(
+        restored[driver.DEFAULT_SOLVER_PROFILE],
+        restored[driver.EXTENDED_LINE_SEARCH_PROFILE],
+        default["cases"],
+        extended["cases"],
+        strict=True,
+    ):
+        legacy = driver.BoundedRCFiberDirectControlRequest(
+            7,
+            tuple(row["targets_m"]),
+            allow_reversals=True,
+            maximum_reversals=2,
+        )
+        assert _bytes(old.request.to_dict()) == _bytes(legacy.to_dict())
+        assert old.request.request_hash != new.request.request_hash
+        assert old.model.canonical_model_checksum == new.model.canonical_model_checksum
+        assert old.request.targets_m == new.request.targets_m
+        assert new.request.solver_config.contract_hash == extended["solver_config_hash"]
+        assert new.request.to_dict() == new_row["request"]
+
+
+def test_cli_requires_explicit_prepare_profile_and_freezes_exact_typed_requests(
+    tmp_path, driver, monkeypatch
+):
+    root = tmp_path / "cli-profile"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "driver",
+            "prepare",
+            "--output",
+            str(root),
+            "--solver-profile",
+            driver.EXTENDED_LINE_SEARCH_PROFILE,
+        ],
+    )
+    driver.main()
+    plan = driver.read(root / "experiment-plan.json")
+    assert plan["solver_profile"] == driver.EXTENDED_LINE_SEARCH_PROFILE
+    for row, case in zip(plan["cases"], driver.cases(root), strict=True):
+        assert _bytes(row["request"]) == _bytes(case.request.to_dict())
+        assert row["request_hash"] == case.request.request_hash
+    untouched = tmp_path / "non-prepare-option"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "driver",
+            "generate",
+            "--output",
+            str(untouched),
+            "--solver-profile",
+            driver.EXTENDED_LINE_SEARCH_PROFILE,
+        ],
+    )
+    with pytest.raises(SystemExit) as error:
+        driver.main()
+    assert error.value.code == 2 and not untouched.exists()
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["alpha", "residual", "increment", "control", "max_iterations", "missing_default"],
+)
+def test_rehashed_request_mutation_is_rejected_before_benchmark(
+    tmp_path, driver, monkeypatch, mutation
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        campaign=True,
+        solver_profile=driver.EXTENDED_LINE_SEARCH_PROFILE,
+    )
+    plan = driver.read(root / "experiment-plan.json")
+    row = plan["cases"][0]
+    newton = row["request"]["solver_config"]["newton"]
+    if mutation == "alpha":
+        newton["line_search_alphas"].pop()
+    elif mutation == "residual":
+        newton["residual_tolerance"] *= 10
+    elif mutation == "increment":
+        newton["increment_tolerance"] *= 10
+    elif mutation == "control":
+        row["request"]["solver_config"]["control_tolerance_m"] *= 10
+    elif mutation == "max_iterations":
+        newton["max_iterations"] += 1
+    else:
+        del row["request"]["maximum_targets"]
+    restored = driver.decode_bounded_rc_fiber_direct_control_request(row["request"])
+    row["request_hash"] = restored.request_hash
+    (root / "experiment-plan.json").write_bytes(_bytes(plan))
+    driver.save(
+        root, "join-fit-result.json", dict(status="HOLD", candidate_fitted=False)
+    )
+    callbacks = []
+
+    def unexpected(*args, **kwargs):
+        callbacks.append(True)
+        raise AssertionError("modified request crossed the benchmark boundary")
+
+    monkeypatch.setattr(driver, "benchmark_rc_control_seed_paths", unexpected)
+    with pytest.raises(AssertionError, match="predeclared request"):
+        driver.evaluate(root)
+    assert callbacks == []
+
+
+def test_rehashed_solver_profile_declaration_cannot_authorize_other_tolerances(
+    tmp_path, driver
+):
+    root = prepared(
+        tmp_path, driver, solver_profile=driver.EXTENDED_LINE_SEARCH_PROFILE
+    )
+    plan = driver.read(root / "experiment-plan.json")
+    payload = plan["cases"][0]["request"]
+    payload["solver_config"]["newton"]["residual_tolerance"] *= 10
+    changed = driver.decode_bounded_rc_fiber_direct_control_request(payload)
+    plan["solver_config"] = changed.to_dict()["solver_config"]
+    plan["solver_config_hash"] = changed.solver_config.contract_hash
+    plan["cases"][0]["request_hash"] = changed.request_hash
+    with pytest.raises(AssertionError, match="predeclared solver profile differs"):
+        driver.cases(root, plan)
+
+
+@pytest.mark.parametrize("stage", ["generate", "labels", "evaluate"])
+def test_each_stage_receives_the_frozen_extended_typed_request(
+    tmp_path, driver, monkeypatch, stage
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        campaign=True,
+        solver_profile=driver.EXTENDED_LINE_SEARCH_PROFILE,
+    )
+    expected = tuple(case.request for case in driver.cases(root))
+    seen = []
+
+    class BoundaryReached(Exception):
+        pass
+
+    def inspect_cases(values):
+        actual = tuple(case.request for case in values)
+        assert actual == expected
+        assert all(
+            r.solver_config.newton.line_search_alphas
+            == tuple(2.0**-k for k in range(14))
+            for r in actual
+        )
+        seen.append(actual)
+        raise BoundaryReached
+
+    if stage == "generate":
+        monkeypatch.setattr(
+            learning,
+            "run_rc_control_learning_study",
+            lambda values, **kwargs: inspect_cases(values),
+        )
+    elif stage == "labels":
+        driver.save(root, "generate-result.json", dict(status="ready"))
+        driver.save(
+            root,
+            "generation/training-samples.json",
+            [
+                dict(
+                    case_id=f"authored-{name}",
+                    split="train",
+                    sample_hash=_sha(name.encode()),
+                )
+                for name in "ABCD"
+            ],
+        )
+        monkeypatch.setattr(
+            driver,
+            "validate_connected_partition",
+            lambda *, cases, **kwargs: inspect_cases(cases),
+        )
+    else:
+        driver.save(
+            root, "join-fit-result.json", dict(status="HOLD", candidate_fitted=False)
+        )
+
+        def inspect_benchmark(model, request, **kwargs):
+            assert request == expected[0]
+            seen.append(request)
+            raise BoundaryReached
+
+        monkeypatch.setattr(
+            driver, "benchmark_rc_control_seed_paths", inspect_benchmark
+        )
+    with pytest.raises(BoundaryReached):
+        getattr(driver, stage)(root)
+    assert len(seen) == 1
+
+
+def test_actual_runtime_wrapper_passes_same_profile_to_arms_and_fresh_reference(
+    tmp_path, driver, monkeypatch
+):
+    root = prepared(
+        tmp_path, driver, solver_profile=driver.EXTENDED_LINE_SEARCH_PROFILE
+    )
+    case = driver.cases(root)[0]
+    seen = []
+
+    def mocked_path(compiled, request, name, callback, directory, *args):
+        # Only the wrapper dispatch is real; empty path responses are synthetic.
+        seen.append((directory.name, request.to_dict()))
+        assert request == case.request
+        return dict(
+            status="complete", response_history=[], terminal_checkpoint={}, entries=[]
+        )
+
+    monkeypatch.setattr(runtime, "_path", mocked_path)
+    report = _BENCHMARK_WRAPPER(
+        case.model,
+        case.request,
+        source_revision=driver.read(root / "experiment-plan.json")["source_revision"],
+        output_directory=tmp_path / "mocked-wrapper-dispatch",
+        arm_order=("secant", "reference"),
+    )
+    assert [name for name, _ in seen] == ["secant", "reference", "fresh-reference"]
+    assert all(payload == case.request.to_dict() for _, payload in seen)
+    assert report["request"] == case.request.to_dict()
