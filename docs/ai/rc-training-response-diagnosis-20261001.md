@@ -254,8 +254,99 @@ training observations or independent physical validation.
 
 The raw final validation is retained under
 `root-integration-whole-modules-02/receipt.json` in the continuation packet.
-The next numerical step must create new limit-2 generation and label originals
-at the final published source, preserve the exclusion split, and measure the
-full training/evaluation cost against a matching non-AI baseline. Previous E04
-labels and the limit-1 diagnostic remain unchanged and are not admitted by
-metadata relabelling. The overall development goal remains active.
+At that implementation checkpoint, the next numerical step was new limit-2
+generation and labels at the published source, with the exclusion split and
+matching non-AI baseline preserved. The E05 execution below completes that
+specific experiment. Previous E04 labels and the limit-1 diagnostic remain
+unchanged and are not admitted by metadata relabelling. The overall development
+goal remains active.
+
+## E05: completed limit-2 training and whole-path evaluation
+
+The numerical source was **`cd74aa59ee57a5da3b835f1500e1009d7449b25b`**.
+The frozen plan uses `extended-backtracking-v1`, terminal polishing and
+`retained-twofold-refinement.v1` with refinement limit **2** in every arm.
+These are six existing authored development cases: four TRAIN groups, one
+validation case and one development holdout case. They are not independent
+projects, newly unseen experimental specimens or a reserved locked cohort.
+Validation and holdout outcomes did not select or refit the candidate.
+
+| Completed stage | Observations / fits | Native calls | Newton / linear solves |
+| --- | --- | ---: | ---: |
+| Generation | 20 TRAIN samples; 1 fit | 73 | 654 |
+| Excluded-group teachers and labels | 6 complementary fits; 60 pairs x 3 repeats | 741 | 5,775 |
+| Original join and final pair | 20 verified rows; 1 seed fit and 1 gate fit | 0 | 0 |
+| Whole-path evaluation | 6 cases x 3 repeats | 450 | 4,026 |
+| Total | 9 fits; 180 label and 18 whole-path comparisons | 1,264 | 10,455 |
+
+All four numerical stages exited zero and their owned children were reaped.
+The original generation work agrees with the convenience result, with no
+unknown work. All **18/18** final comparisons passed the existing internal
+response/history criteria. Execution source descriptors for 962 public paths
+were identical before, after and at the root's terminal check, with clean
+source HEAD `cd74aa5`. This is correspondence to the same engine's fresh
+reference runs; it is not independent physical validation.
+
+The final training join has **20 verified negative rows, zero positive rows and
+zero unknown/unavailable rows**. The pair was fitted and frozen before final
+evaluation, but was not promoted. All final decisions abstained: 18 to the
+reference initial value and 90 to secant, with **zero learned corrections**.
+
+| Development split | Final comparisons | Mean conservative online time / secant |
+| --- | ---: | ---: |
+| TRAIN | 12 | 1.031121 |
+| Validation | 3 | 1.031464 |
+| Development holdout | 3 | 1.022761 |
+
+The online ratio charges source setup, guard binding and the full proposal arm
+to the candidate; offline generation, teacher and pair-fit costs remain
+separate. These fixed-order observations show additional overhead, not AI
+acceleration. No amortized benefit or generalization to independent projects
+is established.
+
+The enclosing owned wrapper took **812.683 seconds**; its nested supervisor
+took 811.987 seconds. These clocks are not added together. Recorded output
+inside the runtime/campaign scope was **664,888,890 logical bytes**. The largest
+reported child VmHWM was the join stage's **1,219,502,080 bytes**; its separately
+sampled live RSS maximum was 1,218,322,432 bytes. The declared caps were 1,800
+seconds, 2 GiB output, 2 GiB live process memory, 2,048 native calls and nine
+fits. These observations do not establish filesystem blocks/inodes, whole-host
+memory capacity, independent hardware identity, or production response time.
+
+The first external wrapper attempt found the pure-test symlink fixtures inside
+its output-accounting directory and stopped before numerical stage entry. Its
+supervisor exited -15 and was reaped; the original `unknown_work=true` receipt
+is retained. A second runtime-only directory uses the exact same programs and
+unchanged prepared inputs, with only four frozen path keys rebased. The actual
+review and root byte guard preceded this successful first numerical campaign
+execution. No completed campaign or numerical stage was restarted.
+
+The full originals remain on the host under the continuation packet's
+`e05-preparation-01/campaign/` and `e05-execution-02/`. Failure, review, validation
+and follow-up records are under `e05-execution-01/`, `e05-recovery-review-02/`
+and `e05-campaign-followup-20261001/`; they are not shipped in the wheel.
+
+| Immutable artifact | SHA256 |
+| --- | --- |
+| E05 prepared numerical plan | `d6f0a08c57aa265c22a15153a5b7afb71473df48c57b7e6d08ca83246a76648e` |
+| Successful owned wrapper outcome | `0b3192ea957b956697351ea521f17b7a78085ca1859af54ebd58fd0831aee34f` |
+| Successful supervisor outcome | `61828ae59e24fce2a177cf07a40344e69f928523f92a4062b21bc69837c97ef5` |
+| Root terminal source/owned-process guard | `fd767f5376e6acd8bb1c45f272dbed7998d6cfaa4da7c7f9f16fd5136022b154` |
+| Preserved first failed wrapper | `1999cc7f195d5855163913aec9fe55178ca635e6c5f340f5dbff6ce1473c5468` |
+
+### Browser readiness follow-up
+
+The same-source hosted Workbench E2E failed while checking the eight unavailable
+design deltas before the verified comparison panel was ready. The retained
+trace subsequently contains the verified panel and all eight expected
+`UNAVAILABLE` values. A focused test change explicitly waits for that panel
+before the original count, value-state and no-selection assertions. No explicit
+timeout values or expected results were changed.
+
+The changed scenario passed once on desktop and once on mobile Chromium with
+zero retries, using the verified Node 24.20.0 binary. Registration, TypeScript,
+build and viewer delivery checks also passed. This scoped local validation does
+not replace the complete hosted frontend or Python checks at the subsequent
+published HEAD, and it is not a product performance improvement or release
+approval. Independent experimental data, rights and operational dependencies
+remain open.
