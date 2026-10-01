@@ -1709,20 +1709,21 @@ def _compare_path_comparison_snapshots(
             right_displacement = np.asarray(
                 right["global_displacements"], dtype=np.float64
             )
-            abs_difference, rel_difference = _array_difference(
-                left_displacement,
-                right_displacement,
+            (
+                _,
+                abs_difference,
+                rel_difference,
+                within_tolerance,
+            ) = _numeric_payload_difference(
+                left_displacement.tolist(),
+                right_displacement.tolist(),
+                absolute_tolerance=absolute_tolerance,
+                relative_tolerance=relative_tolerance,
             )
             displacement_max_abs = max(displacement_max_abs, abs_difference)
             displacement_max_rel = max(displacement_max_rel, rel_difference)
             displacement_tolerance_match = bool(
-                displacement_tolerance_match
-                and np.allclose(
-                    left_displacement,
-                    right_displacement,
-                    rtol=relative_tolerance,
-                    atol=absolute_tolerance,
-                )
+                displacement_tolerance_match and within_tolerance
             )
             (
                 compatible,
@@ -1872,6 +1873,13 @@ def _numeric_payload_difference(
             max_abs = max(max_abs, row_abs)
             max_rel = max(max_rel, row_rel)
         return compatible, max_abs, max_rel, within_tolerance
+    if isinstance(left, (bool, np.bool_)) or isinstance(right, (bool, np.bool_)):
+        equal = (
+            isinstance(left, (bool, np.bool_))
+            and isinstance(right, (bool, np.bool_))
+            and bool(left) == bool(right)
+        )
+        return equal, 0.0, 0.0, equal
     if (
         isinstance(left, (int, float, np.integer, np.floating))
         and not isinstance(left, (bool, np.bool_))
