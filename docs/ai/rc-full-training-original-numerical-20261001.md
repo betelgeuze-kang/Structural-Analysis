@@ -1,6 +1,6 @@
 # Authored nonlinear full-training experiment, 2026-10-01
 
-The four-group numerical producer stopped on **HOLD** before teacher fitting.
+The E03 four-group numerical producer stopped on **HOLD** before teacher fitting.
 It produced five of twenty declared TRAIN samples. This is a newly executed
 nonlinear failure observation, not a completed learning or performance campaign.
 
@@ -75,11 +75,12 @@ Two observer preparation failures each performed zero assemblies/linear checks
 and remain in the diagnostic record. Diagnostic costs are separate from the
 generation counters above.
 
-Next, declare a new protocol using the already supported explicit line-search
-alpha list through 2^-13, while preserving targets, material histories, numerical
-tolerances and rollback gates. The ordinary defaults and original failed packet
+This diagnostic motivated a separately declared protocol using the already
+supported explicit line-search alpha list through 2^-13, while preserving
+targets, material histories, numerical tolerances and rollback gates. Its
+completed, unqualified outcomes are recorded in the [E04 note](rc-full-training-original-numerical-e04-20261001.md). The ordinary defaults and original failed packet
 remain unchanged. Full reference completion and repeated-history equivalence
-must be checked before fitting teachers. Any subsequent algorithm change requires
+remain necessary checks before fitting teachers. Any subsequent algorithm change requires
 new source-specific numerical evidence. Learned net benefit, independent
 experiments/rights, commercial qualification and the entire agreed roadmap remain
 open.
