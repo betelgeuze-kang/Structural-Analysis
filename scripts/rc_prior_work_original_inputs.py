@@ -41,20 +41,26 @@ from plan_rc_gate_inner_validation import inner_validation_plan
 from prepare_rc_nested_switch_labels import nested_plan, require
 from rc_connected_split_provenance import (
     require_exact_seed_policy_complement,
+    validate_connected_partition,
     validate_inner_validation_provenance,
 )
-from rc_gate_validation_rows import assemble_fold
+from rc_gate_validation_rows import _index, assemble_fold
 from rc_prior_work_cost_margin_gate import (
+    FULL_TRAINING_PROFILE,
     JOIN_PROFILE,
     append_prior_work_inputs,
+    fit_full_training_prior_work_cost_gate,
     fit_prior_work_cost_gate,
     _checked_row_inputs,
 )
-from rc_switch_prefix_features import prefix_features
+from rc_cost_margin_gate import TARGET_PROFILE
+from rc_switch_prefix_features import PRIOR_WORK_PROFILE, prefix_features
 from run_rc_nested_switch_labels import LABEL_RULE
 
 
 PROFILE = "rc-original-policy-prior-work-fold.v1"
+FULL_READER_PROFILE = "rc-original-policy-prior-work-full-training.v1"
+FULL_PAIR_PROFILE = "rc-original-full-training-seed-prior-work-pair.v1"
 _ARMS = ("reference", "secant", "proposal")
 _ORDER = [list(_ARMS[i:] + _ARMS[:i]) for i in range(3)]
 _ANCHORS = {
@@ -67,6 +73,15 @@ _ANCHORS = {
     "retained-seed-receipts",
     "new-label-plan",
     "new-label-outcome",
+    "retained-label-plan",
+    "retained-label-outcome",
+}
+_FULL_ANCHORS = {
+    "generation-plan",
+    "generation-samples",
+    "generation-export",
+    "retained-seed-plan",
+    "retained-seed-receipts",
     "retained-label-plan",
     "retained-label-outcome",
 }
@@ -1088,3 +1103,458 @@ def fit_original_prior_work_fold(verified_fold):
     }
     payload["pair_hash"] = _sha(_bytes(payload))
     return payload
+
+
+def _seed_recipe(policy):
+    """Extract static declared fit settings, never teacher weights/statistics."""
+    payload = policy.to_dict()
+    keys = (
+        "model_context_hash",
+        "model_feature_names",
+        "free_global_dofs",
+        "control_free_index",
+        "solver_config_hash",
+        "arithmetic_profile",
+        "feature_profile",
+        "load_factor_coordinate_scale_m",
+        "material_feature_names",
+    )
+    return {
+        "profile": {key: deepcopy(payload[key]) for key in keys if key in payload},
+        "ridge": payload["ridge"],
+        "ood_margin": payload["ood_margin"],
+        "fit_solver": payload.get(
+            "fit_solver_profile", learning.NORMAL_RIDGE_FIT_PROFILE
+        ),
+    }
+
+
+def read_original_prior_work_full_training(
+    *, generation_root, cases, retained_seed_stage, retained_label_root, anchors
+):
+    """Join all declared TRAIN samples with one predetermined OOF teacher each.
+
+    Choose directed teacher (outer=(group+1)%G, inner=group) before reading labels.
+    All teacher fits exclude that entire connected group and a second group.
+    Numerical validation/holdout originals are never read. Original TRAIN label
+    inventories are audited completely, but only the selected teacher per sample
+    enters the full-training table. This is an original-file correspondence
+    check, not producer attestation or admission of a historical dataset.
+    """
+    wall, cpu = perf_counter_ns(), process_time_ns()
+    require(
+        type(anchors) is dict and set(anchors) == _FULL_ANCHORS,
+        "complete predeclared original pins required",
+    )
+    require(
+        all(
+            type(value) is dict and set(value) == {"path", "sha256", "byte_length"}
+            for value in anchors.values()
+        ),
+        "exact original artifact pins required",
+    )
+    require(
+        type(retained_seed_stage) is OriginalSeedStage,
+        "typed original seed stage required",
+    )
+    reader, generation_artifacts, plan, samples, export, sources, by_case = _generation(
+        generation_root, cases, anchors
+    )
+    _, stored = _read(
+        _Reader(retained_seed_stage.root),
+        retained_seed_stage.plan_path,
+        {},
+        pin=anchors["retained-seed-plan"],
+    )
+    groups = stored["groups"]
+    retained = nested_plan(groups, samples)
+    provenance = validate_connected_partition(
+        cases=cases, source_samples=samples, groups=groups
+    )
+    _, seed_artifacts, policies, seed_checks = _seed_stage(
+        retained_seed_stage, retained, samples, "retained", anchors
+    )
+    fits = {fit["fit_index"]: fit for fit in retained["seed_fits"]}
+    group_by_case = {
+        name: i for i, group in enumerate(retained["groups"]) for name in group
+    }
+    chosen = {
+        (task["outer_group_index"], task["inner_group_index"]): task
+        for task in retained["label_tasks"]
+    }
+    roster, recipe = [], None
+    for sample in samples:
+        group = group_by_case[sample["case_id"]]
+        task = chosen[(group + 1) % len(groups), group]
+        fit_index = task["seed_fit_index"]
+        teacher = policies[fit_index]
+        current = _seed_recipe(teacher)
+        if recipe is None:
+            recipe = current
+        _same(current, recipe, "original full-training teacher fit recipes differ")
+        require(
+            sample["sample_hash"] in task["label_source_sample_hashes"]
+            and sample["case_id"] in fits[fit_index]["excluded_case_ids"]
+            and sample["sample_hash"]
+            not in teacher.to_dict()["training_sample_hashes"],
+            "exact out-of-fold original teacher required",
+        )
+        roster.append(
+            {
+                "case_id": sample["case_id"],
+                "source_sample_hash": sample["sample_hash"],
+                "parent_hash": sample["parent_hash"],
+                "target_index": sample["target_index"],
+                "policy_hash": teacher.policy_hash,
+                "seed_fit_index": fit_index,
+                "outer_group_index": task["outer_group_index"],
+                "inner_group_index": group,
+                "excluded_case_ids": list(fits[fit_index]["excluded_case_ids"]),
+                "teacher_training_sample_hashes": list(
+                    teacher.to_dict()["training_sample_hashes"]
+                ),
+            }
+        )
+    # Frozen teacher selection is independent of measured costs or eligibility.
+    roster_hash = _sha(_bytes(roster))
+    for sample in samples:
+        source = sources[sample["sample_hash"]]
+        base = f"{sample['case_id']}/generation/reference/{sample['target_index']:03d}"
+        _, context = _read(reader, base + "-context.json", generation_artifacts)
+        _, step = _read(reader, base + "-1-step.json", generation_artifacts)
+        source["context"], source["current_parent"] = context, step["parent_checkpoint"]
+    audit, label_artifacts = _labels(
+        retained_label_root,
+        "retained",
+        retained["label_tasks"],
+        policies,
+        sources,
+        by_case,
+        samples,
+        anchors,
+    )
+    indexed, prefix_names = _index(
+        audit,
+        retained["label_tasks"],
+        {i: p.policy_hash for i, p in policies.items()},
+        retained=True,
+    )
+    rows, joined, names = [], [], None
+    for declaration in roster:
+        row = deepcopy(
+            indexed[
+                (
+                    declaration["outer_group_index"],
+                    declaration["inner_group_index"],
+                    declaration["source_sample_hash"],
+                )
+            ]
+        )
+        for key in (
+            "case_id",
+            "source_sample_hash",
+            "parent_hash",
+            "policy_hash",
+            "seed_fit_index",
+        ):
+            _same(row[key], declaration[key], "selected original teacher row differs")
+        source = sources[row["source_sample_hash"]]
+        usable = (
+            source["status"] == "available"
+            and source["six_counter_profile_usable"] is True
+        )
+        rows.append(
+            {
+                **{
+                    key: row[key]
+                    for key in (
+                        "case_id",
+                        "source_sample_hash",
+                        "policy_hash",
+                        "seed_fit_index",
+                        "parent_hash",
+                    )
+                },
+                "status": "ready" if usable else "unavailable",
+                "unavailable_reason": None
+                if usable
+                else (
+                    source["unavailable_reason"] or source["optional_counter_reason"]
+                ),
+                "label_known": row["label"] is not None,
+            }
+        )
+        if usable:
+            row["prior_work_context"] = deepcopy(source["context"])
+            row["model_features"] = deepcopy(source["model_features"])
+            context, model, features = _checked_row_inputs(row)
+            prefix = prefix_features(context, model)
+            _same(
+                prefix["feature_names"],
+                prefix_names,
+                "original accepted-prefix feature names differ",
+            )
+            _same(
+                prefix["values"],
+                row["values"],
+                "original accepted-prefix input correspondence differs",
+            )
+            if names is None:
+                names = features["feature_names"]
+            _same(
+                names,
+                features["feature_names"],
+                "aligned prior-work feature schema required",
+            )
+            row["values"] = list(features["values"])
+            joined.append(row)
+    require(roster_hash == _sha(_bytes(roster)), "frozen teacher roster changed")
+    ready = bool(rows) and all(row["status"] == "ready" for row in rows)
+    training = None
+    if ready:
+        known = [row for row in joined if row["label"] is not None]
+        training = {
+            "schema_version": FULL_TRAINING_PROFILE,
+            "training_scope": "declared_training_only",
+            "excluded_case_ids": [],
+            "seed_policy_hash": None,
+            "teacher_roster_hash": roster_hash,
+            "declared_training_sample_hashes": [row["sample_hash"] for row in samples],
+            "feature_profile": PRIOR_WORK_PROFILE,
+            "feature_names": list(names),
+            "cost_target_profile": TARGET_PROFILE,
+            "prior_work_join_profile": JOIN_PROFILE,
+            "training_rows": known,
+            "unverified_rows": [row for row in joined if row["label"] is None],
+            "verified_positive_count": sum(row["label"] is True for row in known),
+            "verified_negative_count": sum(row["label"] is False for row in known),
+            "normalization_scope": "verified declared TRAIN rows only; no validation or holdout statistics",
+            "gate_fitted": False,
+            "independent_evaluation": False,
+        }
+    payload = {
+        "schema_version": FULL_READER_PROFILE,
+        "status": "ready" if ready else "HOLD",
+        "training_scope": "declared_training_only",
+        "rows": rows,
+        "training": training,
+        "training_samples": deepcopy(samples),
+        "seed_fit_recipe": recipe,
+        "teacher_roster": roster,
+        "teacher_roster_hash": roster_hash,
+        "coverage": {
+            "selected_total": len(rows),
+            "ready": sum(row["status"] == "ready" for row in rows),
+            "unavailable": sum(row["status"] != "ready" for row in rows),
+            "unknown_label": sum(not row["label_known"] for row in rows),
+        },
+        "generation_coverage": deepcopy(export["coverage"]),
+        "generation_rows": deepcopy(export["rows"]),
+        "provenance": provenance,
+        "seed_checks": seed_checks,
+        "artifacts": {
+            "generation": generation_artifacts,
+            "retained_seeds": seed_artifacts,
+            "retained_labels": label_artifacts,
+        },
+        "anchors": deepcopy(anchors),
+        "source_revision": plan["source_revision"],
+        "reference_parent_conditioned": True,
+        "claims": {
+            "original_file_correspondence": True,
+            "source_authenticity": False,
+            "dataset_admitted": False,
+            "independent_physics": False,
+            "full_path_gain": False,
+            "proposal_arm_predecessor_provenance": False,
+            "release_qualified": False,
+        },
+        "read_check_join_wall_ns": perf_counter_ns() - wall,
+        "read_check_join_cpu_ns": process_time_ns() - cpu,
+        "cost_scope": "original reads and TRAIN label audits and join only; excludes caller pin preparation, output serialization/writes, fits and solves",
+    }
+    # Selector factory identity excludes the mixed audit inventory and non-TRAIN
+    # declarations. Policy identity and training arrays cannot depend on them.
+    payload["full_training_pair_factory_identity"] = _sha(
+        _bytes(
+            {
+                "schema_version": "rc-original-train-only-pair-factory.v1",
+                "training_samples": samples,
+                "seed_fit_recipe": recipe,
+                "teacher_roster_hash": roster_hash,
+                "training": training,
+            }
+        )
+    )
+    payload["full_training_hash"] = _sha(_bytes(payload))
+    return payload
+
+
+def _checked_full_training(verified):
+    require(
+        type(verified) is dict
+        and verified.get("schema_version") == FULL_READER_PROFILE,
+        "original full-training reader result required",
+    )
+    _checked_hash(verified, "full_training_hash")
+    require(
+        verified["status"] == "ready" and verified["coverage"]["unavailable"] == 0,
+        "HOLD: complete original prior inputs required before fitting",
+    )
+    samples = deepcopy(verified["training_samples"])
+    training = deepcopy(verified["training"])
+    require(
+        type(training) is dict
+        and training.get("schema_version") == FULL_TRAINING_PROFILE
+        and training.get("training_scope") == "declared_training_only"
+        and training.get("excluded_case_ids") == []
+        and "outer_group_index" not in training
+        and "validation_group_index" not in training,
+        "exact original full-training scope required",
+    )
+    require(
+        training["seed_policy_hash"] is None,
+        "original full-training table must await actual destination seed",
+    )
+    _same(
+        [row["sample_hash"] for row in samples],
+        training["declared_training_sample_hashes"],
+        "exact original full-training sample order required",
+    )
+    require(
+        all(row["split"] == "train" for row in samples),
+        "training-only original samples required",
+    )
+    require(
+        training["teacher_roster_hash"]
+        == verified["teacher_roster_hash"]
+        == _sha(_bytes(verified["teacher_roster"])),
+        "original teacher roster hash differs",
+    )
+    require(
+        training["training_rows"],
+        "HOLD: known full-training labels required before fitting",
+    )
+    return samples, training
+
+
+def fit_original_prior_work_full_training(verified, *, policy=None):
+    """Fit an explicit coupled full-training pair; never score evaluation rows.
+
+    Use only the just-read original result. Self-hashes are not authentication.
+    A supplied selector seed must match the complete numeric TRAIN roster and
+    declared teacher recipe; it is not refitted. Original-label target costs do
+    not include the new gate's extraction/decision cost or own proposal-arm
+    predecessor work. Subsequent full-path evaluation remains mandatory.
+    """
+    wall, cpu = perf_counter_ns(), process_time_ns()
+    samples, training = _checked_full_training(verified)
+    recipe = deepcopy(verified["seed_fit_recipe"])
+    seed_wall, seed_cpu = perf_counter_ns(), process_time_ns()
+    seed_fit_count = int(policy is None)
+    if policy is None:
+        policy = learning._fit(
+            samples,
+            recipe["profile"],
+            recipe["ridge"],
+            recipe["ood_margin"],
+            fit_solver=recipe["fit_solver"],
+        )
+    require(
+        type(policy) is learning.RCControlSeedPolicy,
+        "exact typed full-training seed required",
+    )
+    _same(
+        _seed_recipe(policy), recipe, "original full-training seed fit recipe differs"
+    )
+    _same(
+        policy.to_dict()["training_sample_hashes"],
+        training["declared_training_sample_hashes"],
+        "exact ordered full-training seed sample identities required",
+    )
+    _normalization(policy, samples)
+    seed_elapsed, seed_cpu_elapsed = (
+        perf_counter_ns() - seed_wall,
+        process_time_ns() - seed_cpu,
+    )
+    training["seed_policy_hash"] = policy.policy_hash
+    gate_wall, gate_cpu = perf_counter_ns(), process_time_ns()
+    gate, gate_receipt = fit_full_training_prior_work_cost_gate(training)
+    gate_elapsed, gate_cpu_elapsed = (
+        perf_counter_ns() - gate_wall,
+        process_time_ns() - gate_cpu,
+    )
+    gate_payload = gate.to_dict()
+    selected_pair = {
+        "schema_version": FULL_PAIR_PROFILE,
+        "training_scope": "declared_training_only",
+        "seed_policy": policy.to_dict(),
+        "gate_policy": gate_payload,
+        "seed_policy_hash": policy.policy_hash,
+        "gate_policy_hash": gate.policy_hash,
+        "training_sample_hashes": list(training["declared_training_sample_hashes"]),
+        "teacher_roster_hash": training["teacher_roster_hash"],
+        "excluded_case_ids": [],
+        "reference_parent_conditioned": True,
+        "full_training_refit": True,
+        "original_training_admitted": False,
+        "source_authenticity": False,
+        "full_path_gain": False,
+        "independent_validation": False,
+    }
+    selected_pair["pair_hash"] = _sha(_bytes(selected_pair))
+    receipt = {
+        **gate_receipt,
+        "seed_fit_count": seed_fit_count,
+        "gate_fit_count": 1,
+        "seed_fit_completed": bool(seed_fit_count),
+        "seed_supplied_by_selector": not seed_fit_count,
+        "seed_check_wall_ns": seed_elapsed,
+        "seed_check_cpu_ns": seed_cpu_elapsed,
+        "seed_check_scope": "full seed fit and correspondence check"
+        if seed_fit_count
+        else "supplied seed correspondence check; excludes selector seed fit",
+        "gate_fit_wall_ns": gate_elapsed,
+        "gate_fit_cpu_ns": gate_cpu_elapsed,
+        "fit_completed": True,
+        "unknown_work": False,
+        "paired_fit_wall_ns": perf_counter_ns() - wall,
+        "paired_fit_cpu_ns": process_time_ns() - cpu,
+        "cost_scope": "full-training input checks, optional seed fit, gate fit and pair materialization; excludes preceding original reads/audits and caller serialization/writes and solves",
+    }
+    return {
+        **selected_pair,
+        "selected_pair": deepcopy(selected_pair),
+        "fit_receipt": receipt,
+    }
+
+
+def make_original_full_training_pair_factory(verified):
+    """Create the selector callback from a frozen, checked TRAIN-only packet."""
+    _checked_full_training(verified)
+    frozen = deepcopy(verified)
+    frozen_samples = _bytes(frozen["training_samples"])
+
+    def factory(*, policy, training_samples):
+        require(
+            type(training_samples) is list,
+            "original full-training sample list required",
+        )
+        require(
+            _bytes(training_samples) == frozen_samples,
+            "selector original full-training samples differ",
+        )
+        result = fit_original_prior_work_full_training(frozen, policy=policy)
+        return {
+            key: deepcopy(result[key])
+            for key in (
+                "training_scope",
+                "seed_policy_hash",
+                "gate_policy_hash",
+                "gate_policy",
+                "training_sample_hashes",
+                "fit_receipt",
+            )
+        }
+
+    return factory

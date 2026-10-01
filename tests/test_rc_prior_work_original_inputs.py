@@ -368,7 +368,16 @@ def _comparison(paths):
     return comparisons
 
 
-def _labels(root, tasks, policies, generation, *, family, unknown_validation=False):
+def _labels(
+    root,
+    tasks,
+    policies,
+    generation,
+    *,
+    family,
+    unknown_validation=False,
+    unknown_full_teacher=False,
+):
     from rc_switch_prefix_features import prefix_features
     from run_rc_nested_switch_labels import LABEL_RULE
 
@@ -490,11 +499,25 @@ def _labels(root, tasks, policies, generation, *, family, unknown_validation=Fal
                         authored_response=0.0,
                     )
                     if (
-                        unknown_validation
-                        and family == "retained"
-                        and task["outer_group_index"] == 0
-                        and task["inner_group_index"] == 1
+                        family == "retained"
                         and name == "proposal"
+                        and (
+                            (
+                                unknown_validation
+                                and task["outer_group_index"] == 0
+                                and task["inner_group_index"] == 1
+                            )
+                            or (
+                                unknown_full_teacher
+                                and (
+                                    unknown_full_teacher == "all"
+                                    or (
+                                        task["outer_group_index"] == 2
+                                        and task["inner_group_index"] == 1
+                                    )
+                                )
+                            )
+                        )
                     ):
                         response["authored_response"] = 1.0
                     path = dict(
@@ -612,6 +635,7 @@ def authored_fold_files(tmp_path, module, **options):
         generation,
         family="retained",
         unknown_validation=options.get("unknown_validation", False),
+        unknown_full_teacher=options.get("unknown_full_teacher", False),
     )
     paths = {
         "generation-plan": (generation["root"], "plan.json"),
@@ -1123,3 +1147,547 @@ def test_actual_tiny_generation_and_three_proposal_capture_reports_use_current_c
             "scope": "one tiny public authored generation and three same-parent proposal-only captures; retained originals",
         },
     )
+
+
+FULL_ANCHOR_KEYS = {
+    "generation-plan",
+    "generation-samples",
+    "generation-export",
+    "retained-seed-plan",
+    "retained-seed-receipts",
+    "retained-label-plan",
+    "retained-label-outcome",
+}
+
+
+@pytest.fixture(autouse=True)
+def _full_training_contracts_do_not_execute_physics(request, monkeypatch):
+    if "full_training" not in request.node.name:
+        return
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("pure full-training codec contract attempted a solve")
+
+    for owner, name in (
+        (runtime, "solve_stateful_fiber_frame2d_displacement_control_step"),
+        (runtime, "_execute_preload"),
+        (runtime, "benchmark_rc_control_seed_paths"),
+        (learning, "benchmark_rc_control_seed_paths"),
+        (public, "analyze_public_rc_fiber_frame"),
+    ):
+        monkeypatch.setattr(owner, name, forbidden)
+
+
+def _full_training_files(tmp_path, module, **options):
+    fold, generation, paths = authored_fold_files(tmp_path, module, **options)
+    return (
+        {
+            key: fold[key]
+            for key in (
+                "generation_root",
+                "cases",
+                "retained_seed_stage",
+                "retained_label_root",
+            )
+        }
+        | {
+            "anchors": {key: deepcopy(fold["anchors"][key]) for key in FULL_ANCHOR_KEYS}
+        },
+        generation,
+        paths,
+    )
+
+
+def _full_training_seed(generation, *, fit_solver=learning.SVD_RIDGE_FIT_PROFILE):
+    original = generation["originals"]["A", 1]
+    model = original["model_features"]
+    profile = dict(
+        model_context_hash=model.context_hash,
+        model_feature_names=list(model.feature_names),
+        free_global_dofs=list(original["free"]),
+        control_free_index=original["sample"]["context"]["control_free_index"],
+        solver_config_hash=generation["cases"][0].request.solver_config.contract_hash,
+    )
+    return learning._fit(
+        generation["samples"],
+        profile,
+        10000.0,
+        0.1,
+        fit_solver=fit_solver,
+    )
+
+
+def test_full_training_all_original_samples_have_one_predeclared_oof_teacher(
+    tmp_path, module
+):
+    args, generation, _ = _full_training_files(tmp_path, module)
+    result = module.read_original_prior_work_full_training(**args)
+    assert result["status"] == "ready"
+    assert result["coverage"]["selected_total"] == 8
+    assert result["coverage"]["ready"] == 8 and result["coverage"]["unavailable"] == 0
+    assert len(result["generation_rows"]) == 12
+    hashes = [row["sample_hash"] for row in generation["samples"]]
+    assert len(result["rows"]) == len(hashes)
+    assert {row["source_sample_hash"] for row in result["rows"]} == set(hashes)
+    assert len({row["source_sample_hash"] for row in result["rows"]}) == 8
+    training = result["training"]
+    assert training["training_scope"] == "declared_training_only"
+    assert training["declared_training_sample_hashes"] == hashes
+    assert (
+        "outer_group_index" not in training and "validation_group_index" not in training
+    )
+    assert training["excluded_case_ids"] == []
+    assert all(
+        row["label"] is True and row["cost_target"] == pytest.approx(0.02)
+        for row in training["training_rows"]
+    )
+    assert result["reference_parent_conditioned"] is True
+
+
+@pytest.mark.parametrize("key", sorted(FULL_ANCHOR_KEYS))
+def test_full_training_each_of_seven_original_pins_is_required(tmp_path, module, key):
+    args, _, _ = _full_training_files(tmp_path, module)
+    args["anchors"][key]["sha256"] = _sha(b"foreign full-training original")
+    with pytest.raises(ValueError, match="pin"):
+        module.read_original_prior_work_full_training(**args)
+
+
+def test_full_training_unknown_prior_inputs_hold_without_reducing_all_train_coverage(
+    tmp_path, module
+):
+    args, _, _ = _full_training_files(tmp_path, module, assembly=False)
+    result = module.read_original_prior_work_full_training(**args)
+    assert result["status"] == "HOLD"
+    assert result["coverage"]["selected_total"] == 8
+    assert result["coverage"]["ready"] == 0 and result["coverage"]["unavailable"] == 8
+    assert len(result["generation_rows"]) == 12
+    assert all(row["unavailable_reason"] for row in result["rows"])
+    with pytest.raises(ValueError, match="HOLD"):
+        module.fit_original_prior_work_full_training(result)
+
+
+def test_full_training_teacher_policy_and_fit_are_the_predeclared_directed_complement(
+    tmp_path, module
+):
+    args, generation, _ = _full_training_files(tmp_path, module)
+    result = module.read_original_prior_work_full_training(**args)
+    roster = _load(args["retained_label_root"] / "plan.json")["roster"]
+    groups = _load(args["retained_seed_stage"].root / "plan.json")["groups"]
+    expected = {}
+    for group, names in enumerate(groups):
+        for row in roster:
+            if row["inner_group_index"] == group and row["outer_group_index"] == (
+                group + 1
+            ) % len(groups):
+                assert row["case_id"] in names
+                expected[row["source_sample_hash"]] = row
+    assert len(expected) == len(generation["samples"]) == 8
+    for row in result["rows"]:
+        original = expected[row["source_sample_hash"]]
+        for key in ("case_id", "parent_hash", "policy_hash", "seed_fit_index"):
+            assert row[key] == original[key]
+    assert {row["source_sample_hash"] for row in result["rows"]} == set(expected)
+
+
+def _add_unexecuted_nontraining_declarations(args, generation, tmp_path):
+    for name, split, ratio, targets in (
+        ("authored-validation-unused", "validation", 1.7, (-0.8e-4, 1.3e-4, -0.9e-4)),
+        ("authored-holdout-unused", "holdout", 1.9, (-1.2e-4, 0.7e-4, -1.1e-4)),
+    ):
+        case = make(
+            tmp_path / "models",
+            name,
+            split,
+            lengths=(3.0, 3.0 * ratio),
+            targets=targets,
+        )
+        compiled, blockers, _ = public._compile(case.model)
+        assert compiled is not None and not blockers
+        generation["cases"].append(case)
+        generation["declarations"].append(
+            dict(
+                case_id=name,
+                split=split,
+                identities={
+                    key: getattr(case, key)
+                    for key in ("project_id", "geometry_family_id", "load_history_id")
+                },
+                model_checksum=case.model.canonical_model_checksum,
+                request=case.request.to_dict(),
+                model_features=fiber_frame_warm_start_model_features(
+                    compiled.problem
+                ).to_dict(),
+            )
+        )
+    args["cases"] = generation["cases"]
+    _refresh_generation_originals(args, generation)
+
+
+def _refresh_generation_originals(args, generation):
+    root = generation["root"]
+    _write(
+        root / "plan.json",
+        dict(source_revision=REVISION, cases=generation["declarations"]),
+    )
+    _write(root / "training-samples.json", generation["samples"])
+    exported = build_generation_prior_work_export(
+        study_root=root,
+        declarations=generation["declarations"],
+        generation=generation["generation"],
+        samples=generation["samples"],
+        source_revision=REVISION,
+    )
+    _write(root / "generation-prior-work-export.json", exported)
+    for key, relative in (
+        ("generation-plan", "plan.json"),
+        ("generation-samples", "training-samples.json"),
+        ("generation-export", "generation-prior-work-export.json"),
+    ):
+        args["anchors"][key] = _descriptor(root, relative)
+
+
+def test_full_training_unexecuted_validation_and_holdout_numbers_cannot_enter_training(
+    tmp_path, module
+):
+    args, generation, _ = _full_training_files(tmp_path, module)
+    _add_unexecuted_nontraining_declarations(args, generation, tmp_path)
+    first = module.read_original_prior_work_full_training(**args)
+    for declaration in generation["declarations"]:
+        if declaration["split"] != "train":
+            declaration["model_features"]["values"][0] += 1e6
+            declaration["unscored_authored_label"] = {"gain": -1e9, "cost": 1e9}
+    _refresh_generation_originals(args, generation)
+    second = module.read_original_prior_work_full_training(**args)
+    assert first["status"] == second["status"] == "ready"
+    assert (
+        first["coverage"]["selected_total"] == second["coverage"]["selected_total"] == 8
+    )
+    assert _bytes(first["training"]) == _bytes(second["training"])
+    assert (
+        first["full_training_pair_factory_identity"]
+        == second["full_training_pair_factory_identity"]
+    )
+    assert all(row["case_id"] in "ABCD" for row in second["rows"])
+    # No generation/evaluation original is ever created for these authored declarations.
+    assert not list(generation["root"].glob("authored-*-generation-outcome.json"))
+    assert not list(generation["root"].glob("authored-*-evaluation*"))
+
+
+@pytest.mark.parametrize(
+    "kind", ["eligible_sample_omitted", "reference_tail_truncated"]
+)
+def test_full_training_original_request_denominator_cannot_be_coherently_shrunk(
+    tmp_path, module, kind
+):
+    args, generation, _ = _full_training_files(tmp_path, module)
+    generation["samples"] = [
+        row
+        for row in generation["samples"]
+        if (row["case_id"], row["target_index"]) != ("A", 2)
+    ]
+    if kind == "reference_tail_truncated":
+        outcome = generation["generation"][0]
+        report = outcome["report"]
+        report["arms"]["reference"]["entries"].pop()
+        report["arms"]["reference"]["accepted_target_count"] = 2
+        _seal(report, "report_hash")
+        _write(generation["root"] / "A/generation/comparison.json", report)
+        _write(generation["root"] / "A-generation-outcome.json", outcome)
+    _refresh_generation_originals(args, generation)
+    with pytest.raises(ValueError, match="denominator"):
+        module.read_original_prior_work_full_training(**args)
+
+
+def test_full_training_standalone_and_supplied_seed_share_one_exact_immutable_pair(
+    tmp_path, module
+):
+    from rc_prior_work_cost_margin_gate import FullTrainingPriorWorkCostMarginGate
+
+    args, generation, _ = _full_training_files(tmp_path, module)
+    verified = module.read_original_prior_work_full_training(**args)
+    before = _bytes(verified)
+    supplied = _full_training_seed(generation)
+    standalone = module.fit_original_prior_work_full_training(verified)
+    reused = module.fit_original_prior_work_full_training(verified, policy=supplied)
+    assert _bytes(verified) == before
+    assert verified["training"]["seed_policy_hash"] is None
+    assert standalone["selected_pair"] == reused["selected_pair"]
+    assert standalone["seed_policy"] == supplied.to_dict()
+    assert standalone["fit_receipt"]["seed_fit_count"] == 1
+    assert standalone["fit_receipt"]["gate_fit_count"] == 1
+    assert reused["fit_receipt"]["seed_fit_count"] == 0
+    assert reused["fit_receipt"]["gate_fit_count"] == 1
+    assert reused["fit_receipt"]["seed_supplied_by_selector"] is True
+    pair = standalone["selected_pair"]
+    assert pair["pair_hash"] == _sha(
+        _bytes({key: value for key, value in pair.items() if key != "pair_hash"})
+    )
+    assert pair["training_sample_hashes"] == [
+        row["sample_hash"] for row in generation["samples"]
+    ]
+    assert pair["seed_policy_hash"] == pair["gate_policy"]["seed_policy_hash"]
+    assert pair["seed_policy"]["fit_solver_profile"] == learning.SVD_RIDGE_FIT_PROFILE
+    assert pair["seed_policy"]["schema_version"].endswith(".v5")
+    assert pair["teacher_roster_hash"] == verified["teacher_roster_hash"]
+    assert pair["excluded_case_ids"] == []
+    assert pair["full_training_refit"] is True
+    assert pair["reference_parent_conditioned"] is True
+    assert (
+        pair["original_training_admitted"]
+        is pair["source_authenticity"]
+        is pair["full_path_gain"]
+        is pair["independent_validation"]
+        is False
+    )
+    assert (
+        not {
+            "outer_group_index",
+            "validation_group_index",
+            "validation_predictions",
+            "validation_scores",
+        }
+        & pair.keys()
+    )
+    gate = FullTrainingPriorWorkCostMarginGate(_bytes(pair["gate_policy"]).decode())
+    assert gate.policy_hash == pair["gate_policy_hash"]
+    detached = gate.to_dict()
+    detached["weights"][0] += 100.0
+    assert gate.to_dict() == pair["gate_policy"]
+    detached_seed = supplied.to_dict()
+    detached_seed["feature_mean"][0] += 100.0
+    assert supplied.to_dict() == pair["seed_policy"]
+    for key in (
+        "seed_check_wall_ns",
+        "seed_check_cpu_ns",
+        "gate_fit_wall_ns",
+        "gate_fit_cpu_ns",
+        "paired_fit_wall_ns",
+        "paired_fit_cpu_ns",
+    ):
+        assert type(reused["fit_receipt"][key]) is int
+        assert reused["fit_receipt"][key] >= 0
+
+
+def test_full_training_unknown_current_labels_remain_in_seed_and_gate_denominators(
+    tmp_path, module
+):
+    args, generation, _ = _full_training_files(
+        tmp_path, module, unknown_full_teacher=True
+    )
+    verified = module.read_original_prior_work_full_training(**args)
+    assert verified["status"] == "ready"
+    assert verified["coverage"] == dict(
+        selected_total=8, ready=8, unavailable=0, unknown_label=2
+    )
+    assert len(verified["training"]["training_rows"]) == 6
+    unknown = verified["training"]["unverified_rows"]
+    assert len(unknown) == 2 and all(row["case_id"] == "B" for row in unknown)
+    assert all(row["label"] is None and row["cost_target"] is None for row in unknown)
+    fitted = module.fit_original_prior_work_full_training(verified)
+    assert fitted["training_sample_hashes"] == [
+        row["sample_hash"] for row in generation["samples"]
+    ]
+    gate = fitted["gate_policy"]
+    assert gate["declared_training_sample_hashes"] == fitted["training_sample_hashes"]
+    assert gate["unverified_sample_hashes"] == [
+        row["source_sample_hash"] for row in unknown
+    ]
+    assert gate["unverified_count"] == 2
+    assert len(gate["training_sample_hashes"]) == 6
+    assert fitted["fit_receipt"]["declared_rows"] == 8
+    assert (
+        fitted["seed_policy"]["training_sample_hashes"]
+        == fitted["training_sample_hashes"]
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation", ["partial", "reordered", "recipe_v6", "ridge", "normalization"]
+)
+def test_full_training_supplied_seed_must_match_original_recipe_order_and_statistics(
+    tmp_path, module, mutation
+):
+    args, generation, _ = _full_training_files(tmp_path, module)
+    verified = module.read_original_prior_work_full_training(**args)
+    if mutation in ("partial", "reordered"):
+        modified = deepcopy(generation)
+        modified["samples"] = (
+            modified["samples"][:-1]
+            if mutation == "partial"
+            else list(reversed(modified["samples"]))
+        )
+        supplied = _full_training_seed(modified)
+    elif mutation == "recipe_v6":
+        supplied = _full_training_seed(
+            generation, fit_solver=learning.CONSTANT_SAFE_SVD_FIT_PROFILE
+        )
+    else:
+        supplied = _full_training_seed(generation)
+        payload = supplied.to_dict()
+        if mutation == "ridge":
+            payload["ridge"] = 3.0
+        else:
+            payload["feature_mean"][0] += 1.0
+        supplied = learning.RCControlSeedPolicy(
+            _bytes(_seal(payload, "policy_hash")).decode()
+        )
+    with pytest.raises(ValueError):
+        module.fit_original_prior_work_full_training(verified, policy=supplied)
+
+
+def test_full_training_factory_freezes_originals_and_returns_detached_exact_binding(
+    tmp_path, module
+):
+    args, generation, _ = _full_training_files(tmp_path, module)
+    verified = module.read_original_prior_work_full_training(**args)
+    factory = module.make_original_full_training_pair_factory(verified)
+    supplied = _full_training_seed(generation)
+    samples = deepcopy(generation["samples"])
+    first = factory(policy=supplied, training_samples=samples)
+    assert set(first) == {
+        "training_scope",
+        "seed_policy_hash",
+        "gate_policy_hash",
+        "gate_policy",
+        "training_sample_hashes",
+        "fit_receipt",
+    }
+    assert first["training_scope"] == "declared_training_only"
+    assert first["seed_policy_hash"] == supplied.policy_hash
+    assert first["gate_policy_hash"] == first["gate_policy"]["policy_hash"]
+    assert first["fit_receipt"]["seed_fit_count"] == 0
+    assert first["fit_receipt"]["gate_fit_count"] == 1
+    verified["training_samples"][0]["features"][0] += 100.0
+    verified["training"]["training_rows"][0]["values"][0] += 100.0
+    first["gate_policy"]["weights"][0] += 100.0
+    first["training_sample_hashes"].clear()
+    first["fit_receipt"]["seed_fit_count"] = 999
+    second = factory(policy=supplied, training_samples=samples)
+    assert second["training_sample_hashes"] == [row["sample_hash"] for row in samples]
+    assert second["gate_policy"]["policy_hash"] == second["gate_policy_hash"]
+    assert second["gate_policy"]["weights"][0] != first["gate_policy"]["weights"][0]
+    assert second["fit_receipt"]["seed_fit_count"] == 0
+
+
+@pytest.mark.parametrize(
+    "mutation", ["omitted", "duplicate", "reordered", "numeric", "foreign_identity"]
+)
+def test_full_training_factory_rejects_changed_selector_samples(
+    tmp_path, module, mutation
+):
+    args, generation, _ = _full_training_files(tmp_path, module)
+    verified = module.read_original_prior_work_full_training(**args)
+    factory = module.make_original_full_training_pair_factory(verified)
+    samples = deepcopy(generation["samples"])
+    if mutation == "omitted":
+        samples.pop()
+    elif mutation == "duplicate":
+        samples[-1] = deepcopy(samples[0])
+    elif mutation == "reordered":
+        samples.reverse()
+    elif mutation == "numeric":
+        samples[0]["features"][0] += 1.0
+    else:
+        samples[0]["case_id"] = "foreign"
+    with pytest.raises(ValueError, match="samples differ"):
+        factory(policy=_full_training_seed(generation), training_samples=samples)
+
+
+def test_full_training_fold_result_and_fake_outer_marker_are_rejected(tmp_path, module):
+    fold_args, _, _ = authored_fold_files(tmp_path, module)
+    fold = module.read_original_prior_work_fold(**fold_args)
+    with pytest.raises(ValueError, match="full-training reader"):
+        module.fit_original_prior_work_full_training(fold)
+    full_args = {
+        key: fold_args[key]
+        for key in (
+            "generation_root",
+            "cases",
+            "retained_seed_stage",
+            "retained_label_root",
+        )
+    }
+    full_args["anchors"] = {key: fold_args["anchors"][key] for key in FULL_ANCHOR_KEYS}
+    verified = module.read_original_prior_work_full_training(**full_args)
+    verified["training"]["outer_group_index"] = 0
+    _seal(verified, "full_training_hash")
+    with pytest.raises(ValueError, match="scope"):
+        module.fit_original_prior_work_full_training(verified)
+
+
+def test_full_training_exact_seven_pins_do_not_admit_extra_fold_originals(
+    tmp_path, module
+):
+    args, _, _ = _full_training_files(tmp_path, module)
+    args["anchors"]["new-label-plan"] = deepcopy(args["anchors"]["retained-label-plan"])
+    with pytest.raises(ValueError, match="predeclared original pins"):
+        module.read_original_prior_work_full_training(**args)
+
+
+@pytest.mark.parametrize(
+    "mutation", ["duplicate_sample", "foreign_policy", "foreign_fit", "foreign_parent"]
+)
+def test_full_training_repinned_label_roster_cannot_substitute_original_teachers(
+    tmp_path, module, mutation
+):
+    args, _, _ = _full_training_files(tmp_path, module)
+    label_root = args["retained_label_root"]
+    plan = _load(label_root / "plan.json")
+    row = plan["roster"][0]
+    if mutation == "duplicate_sample":
+        plan["roster"][1] = deepcopy(row)
+    elif mutation == "foreign_policy":
+        row["policy_hash"] = _sha(b"foreign teacher")
+    elif mutation == "foreign_fit":
+        row["seed_fit_index"] += 1
+    else:
+        row["parent_hash"] = _sha(b"foreign predecessor")
+    _write(label_root / "plan.json", plan)
+    args["anchors"]["retained-label-plan"] = _descriptor(label_root, "plan.json")
+    with pytest.raises(ValueError):
+        module.read_original_prior_work_full_training(**args)
+
+
+def test_full_training_all_unknown_labels_keep_denominator_and_refuse_fit(
+    tmp_path, module
+):
+    args, generation, _ = _full_training_files(
+        tmp_path, module, unknown_full_teacher="all"
+    )
+    verified = module.read_original_prior_work_full_training(**args)
+    assert verified["status"] == "ready"
+    assert verified["coverage"] == dict(
+        selected_total=8, ready=8, unavailable=0, unknown_label=8
+    )
+    assert verified["training"]["training_rows"] == []
+    assert len(verified["training"]["unverified_rows"]) == 8
+    assert verified["training"]["declared_training_sample_hashes"] == [
+        row["sample_hash"] for row in generation["samples"]
+    ]
+    with pytest.raises(ValueError, match="HOLD"):
+        module.fit_original_prior_work_full_training(verified)
+    with pytest.raises(ValueError, match="HOLD"):
+        module.make_original_full_training_pair_factory(verified)
+
+
+def test_full_training_reader_does_not_read_unselected_triple_stage_files(
+    tmp_path, module, monkeypatch
+):
+    args, _, _ = _full_training_files(tmp_path, module)
+    read = module._Reader.read
+    observed = []
+
+    def observed_read(reader, relative, artifacts, *, array=False):
+        assert reader.root.name not in ("new-seeds", "new-labels")
+        observed.append((reader.root, relative))
+        return read(reader, relative, artifacts, array=array)
+
+    monkeypatch.setattr(module._Reader, "read", observed_read)
+    result = module.read_original_prior_work_full_training(**args)
+    assert result["status"] == "ready"
+    assert observed
+    assert set(result["artifacts"]) == {
+        "generation",
+        "retained_seeds",
+        "retained_labels",
+    }

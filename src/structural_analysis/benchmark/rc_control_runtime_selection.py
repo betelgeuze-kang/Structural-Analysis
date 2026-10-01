@@ -4,6 +4,8 @@ Runtime fold scores are tuning evidence, not independent evaluation or net savin
 Original solver-produced labels and their generation costs remain required inputs.
 """
 
+from copy import deepcopy
+import json
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
@@ -298,6 +300,186 @@ def _validated_proposal_guard_binding(binding, policy_hash, excluded_case_ids):
     }
 
 
+def _validated_full_training_pair(binding, policy, sample_hashes):
+    """Check a detached full-training pair, without authenticating its caller."""
+    required = {
+        "training_scope",
+        "seed_policy_hash",
+        "gate_policy_hash",
+        "gate_policy",
+        "training_sample_hashes",
+        "fit_receipt",
+    }
+    if (
+        type(binding) is not dict
+        or set(binding) != required
+        or binding["training_scope"] != "declared_training_only"
+        or binding["seed_policy_hash"] != policy.policy_hash
+        or type(binding["training_sample_hashes"]) is not list
+        or binding["training_sample_hashes"] != sample_hashes
+        or policy.to_dict()["training_sample_hashes"] != sample_hashes
+    ):
+        raise ValueError("full-training pair must bind the actual seed and samples")
+    # JSON detaches caller-owned dictionaries and rejects nonfinite JSON numbers.
+    detached = json.loads(_bytes(binding))
+    gate, receipt = detached["gate_policy"], detached["fit_receipt"]
+    gate_fields = {
+        "schema_version",
+        "feature_profile",
+        "feature_names",
+        "mean",
+        "scale",
+        "minimum",
+        "maximum",
+        "weights",
+        "ridge",
+        "threshold",
+        "excluded_case_ids",
+        "training_sample_hashes",
+        "positive_count",
+        "negative_count",
+        "training_rows_hash",
+        "policy_hash",
+        "seed_policy_hash",
+        "training_scope",
+        "teacher_roster_hash",
+        "declared_training_sample_hashes",
+        "unverified_sample_hashes",
+        "unverified_count",
+        "cost_target_profile",
+    }
+    if (
+        type(gate) is not dict
+        or set(gate) != gate_fields
+        or gate["schema_version"] != "rc-full-training-prior-work-cost-margin-gate.v1"
+        or gate["training_scope"] != "declared_training_only"
+        or gate["excluded_case_ids"] != []
+        or gate["feature_profile"] != "rc-switch-accepted-prefix-prior-work-features.v1"
+        or gate["cost_target_profile"] != "minimum-three-repeat-relative-time-margin.v1"
+        or type(gate["ridge"]) is not float
+        or gate["ridge"] != 1.0
+        or type(gate["threshold"]) is not float
+        or gate["threshold"] != 0.01
+        or gate["seed_policy_hash"] != policy.policy_hash
+        or gate["declared_training_sample_hashes"] != sample_hashes
+        or gate["policy_hash"] != detached["gate_policy_hash"]
+        or gate["policy_hash"]
+        != _sha(_bytes({k: v for k, v in gate.items() if k != "policy_hash"}))
+    ):
+        raise ValueError("canonical full-training gate policy and scope required")
+    for key in ("training_rows_hash", "teacher_roster_hash", "policy_hash"):
+        if type(gate[key]) is not str or not re.fullmatch(
+            r"sha256:[0-9a-f]{64}", gate[key]
+        ):
+            raise ValueError("full-training gate provenance hashes required")
+    known, unknown = gate["training_sample_hashes"], gate["unverified_sample_hashes"]
+    if (
+        type(known) is not list
+        or not known
+        or type(unknown) is not list
+        or any(type(v) is not str for v in known + unknown)
+        or len(known) + len(unknown) != len(sample_hashes)
+        or bool(set(known) & set(unknown))
+        or len(set(known + unknown)) != len(sample_hashes)
+        or set(known + unknown) != set(sample_hashes)
+        or known != [v for v in sample_hashes if v in set(known)]
+        or unknown != [v for v in sample_hashes if v in set(unknown)]
+        or type(gate["unverified_count"]) is not int
+        or gate["unverified_count"] != len(unknown)
+        or any(
+            type(gate[k]) is not int or gate[k] < 0
+            for k in ("positive_count", "negative_count")
+        )
+        or gate["positive_count"] + gate["negative_count"] != len(known)
+    ):
+        raise ValueError(
+            "complete full-training known and unknown denominators required"
+        )
+    names = gate["feature_names"]
+    seed = policy.to_dict()
+    coordinates = len(seed["free_global_dofs"]) + 1
+    expected_names = [
+        *("model." + name for name in seed["model_feature_names"]),
+        "target_m",
+        "target_increment_m",
+        "previous_target_increment_m",
+        *(f"last_coordinate_{i}" for i in range(coordinates)),
+        *(f"coordinate_increment_{i}" for i in range(coordinates)),
+        *(
+            "prior_work." + name
+            for name in (
+                "core_calls",
+                "newton_iterations",
+                "linear_solves",
+                "assembly_dispatches",
+                "line_search_dispatches",
+                "terminal_refinement_dispatches",
+            )
+        ),
+    ]
+    if (
+        type(names) is not list
+        or names != expected_names
+        or len(set(names)) != len(names)
+    ):
+        raise ValueError("aligned full-training gate features required")
+    width = len(names)
+    for key in ("mean", "scale", "minimum", "maximum", "weights"):
+        values = gate[key]
+        if (
+            type(values) is not list
+            or len(values) != width + (key == "weights")
+            or any(type(v) not in (int, float) or not np.isfinite(v) for v in values)
+        ):
+            raise ValueError("finite aligned full-training gate arrays required")
+    if any(s <= 0 for s in gate["scale"]) or any(
+        not low <= center <= high
+        for low, center, high in zip(gate["minimum"], gate["mean"], gate["maximum"])
+    ):
+        raise ValueError("valid full-training gate normalization required")
+    if (
+        type(receipt) is not dict
+        or receipt.get("fit_completed") is not True
+        or receipt.get("unknown_work") is not False
+        or type(receipt.get("fit_wall_ns")) is not int
+        or receipt["fit_wall_ns"] < 0
+        or any(
+            receipt.get(k) is not False
+            for k in (
+                "independent_evaluation",
+                "historical_training_admitted",
+                "predecessor_counter_authenticity_established",
+                "online_extraction_cost_in_target",
+            )
+        )
+        or any(
+            type(receipt.get(k)) is not int or receipt[k] != expected
+            for k, expected in (
+                ("verified_rows", len(known)),
+                ("unverified_rows_excluded", len(unknown)),
+                ("declared_rows", len(sample_hashes)),
+                ("seed_fit_count", 0),
+                ("gate_fit_count", 1),
+            )
+        )
+        or any(
+            receipt.get(k) != expected
+            for k, expected in (
+                ("training_scope", "declared_training_only"),
+                ("seed_policy_hash", policy.policy_hash),
+                ("policy_hash", gate["policy_hash"]),
+                ("teacher_roster_hash", gate["teacher_roster_hash"]),
+                ("declared_training_sample_hashes", sample_hashes),
+                ("unverified_sample_hashes", unknown),
+                ("target_profile", gate["cost_target_profile"]),
+                ("feature_profile", gate["feature_profile"]),
+            )
+        )
+    ):
+        raise ValueError("known completed full-training fit receipt required")
+    return detached
+
+
 def run_rc_control_runtime_selection(
     cases,
     samples,
@@ -321,6 +503,8 @@ def run_rc_control_runtime_selection(
     proposal_guard_factory=None,
     proposal_guard_factory_identity=None,
     record_prior_accepted_transition_work=False,
+    full_training_pair_factory=None,
+    full_training_pair_factory_identity=None,
 ):
     """Fit each ridge with declared exclusions, then execute each case's full path.
 
@@ -335,10 +519,12 @@ def run_rc_control_runtime_selection(
     An optional guard factory receives only this fit, the held model's static
     features and its exact exclusions. Its identified binding runs before
     material capture, and setup/persistence costs enter the proposal score.
-    Guarded fold winners remain tuning records: this function does not refit or
-    promote an unguarded seed from guarded scores. A jointly bound full-training
-    seed-plus-guard artifact and authenticated causal training joins remain
-    separate requirements. All optional fields are absent from legacy output.
+    Guarded fold winners remain tuning records and cannot promote a bare seed.
+    An identified full-training pair factory may fit one gate to the actual final
+    seed and detached original TRAIN rows after repeated connected folds. Its
+    exact binding is checked and persisted before selection. Original data and
+    causal producer authenticity remain separate requirements. All optional
+    fields are absent from legacy output.
     """
     if withholding_strategy not in ("case", "connected_training_groups"):
         raise ValueError("supported runtime withholding strategy required")
@@ -364,6 +550,27 @@ def run_rc_control_runtime_selection(
         )
     ):
         raise ValueError("identified proposal guard factory requires secant abstention")
+    if (full_training_pair_factory is None) != (
+        full_training_pair_factory_identity is None
+    ) or (
+        full_training_pair_factory is not None
+        and (
+            not callable(full_training_pair_factory)
+            or type(full_training_pair_factory_identity) is not str
+            or not re.fullmatch(
+                r"sha256:[0-9a-f]{64}", full_training_pair_factory_identity
+            )
+            or proposal_guard_factory is None
+            or proposal_abstention_strategy != "secant"
+            or withholding_strategy != "connected_training_groups"
+            or type(repetitions) is not int
+            or repetitions not in (3, 6)
+            or record_prior_accepted_transition_work is not True
+        )
+    ):
+        raise ValueError(
+            "identified full-training pair requires repeated connected guarded prior-work folds"
+        )
     wall, cpu = perf_counter_ns(), process_time_ns()
     if type(record_assembly_timing) is not bool or (
         record_assembly_timing and not record_assembly_work
@@ -442,7 +649,11 @@ def run_rc_control_runtime_selection(
             case_id: group for group in exclusion_groups["groups"] for case_id in group
         }
     fit_bound = len(case_ids) * len(ridge_grid) + (
-        1 if proposal_guard_factory is None else 0
+        2
+        if full_training_pair_factory is not None
+        else 1
+        if proposal_guard_factory is None
+        else 0
     )
     # Reference and fresh reference use one call per target. Both secant and
     # proposer can retry once; constant preload runs once per path.
@@ -458,6 +669,14 @@ def run_rc_control_runtime_selection(
         raise ValueError(
             f"runtime selection requires budgets for {fit_bound} fits and up to {core_bound} core calls"
         )
+    frozen_training_samples = (
+        _bytes(samples) if full_training_pair_factory is not None else None
+    )
+    frozen_source_policy = (
+        _bytes(original_policy.to_dict())
+        if full_training_pair_factory is not None
+        else None
+    )
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
     capture = source.get("feature_profile") == MATERIAL_FEATURE_PROFILE
@@ -559,6 +778,17 @@ def run_rc_control_runtime_selection(
         plan["selection_score"] += (
             "; caller guard setup and binding persistence charged to proposal time"
         )
+    if full_training_pair_factory is not None:
+        plan["full_training_pair_factory"] = {
+            "identity": full_training_pair_factory_identity,
+            "training_scope": "declared_training_only",
+            "input_scope": "actual final seed and detached original TRAIN samples only",
+            "maximum_final_seed_fits": 1,
+            "maximum_final_gate_fits": 1,
+            "caller_identity_is_external_attestation": False,
+            "separate_locked_evaluation_required": True,
+            "original_read_join_preparation_cost_required_separately": True,
+        }
     if record_assembly_work:
         plan["assembly_work_recording"] = "vector-newton-assembly-dispatch-work.v1"
         plan["selection_score"] += "; opted-in assembly recording costs included"
@@ -906,10 +1136,126 @@ def run_rc_control_runtime_selection(
         min(eligible, key=lambda c: (c["score"], -c["ridge"])) if eligible else None
     )
     selected = None
+    selected_pair = None
+    final_pair_refit = None
     if winner is not None and proposal_guard_factory is None:
         selected, _ = fit(
             samples, winner["ridge"], {"selected_full_training_refit": True}
         )
+    if full_training_pair_factory is not None:
+        final_pair_refit = {"status": "not_attempted", "reason": "no_guarded_winner"}
+        if winner is not None:
+            pw, pc = perf_counter_ns(), process_time_ns()
+            phase = "final_seed_fit"
+            try:
+                frozen_samples = frozen_training_samples
+                if (
+                    _bytes(samples) != frozen_samples
+                    or _bytes(original_policy.to_dict()) != frozen_source_policy
+                ):
+                    raise ValueError(
+                        "frozen original full-training inputs changed during folds"
+                    )
+                final_seed, seed_index = fit(
+                    samples,
+                    winner["ridge"],
+                    {"selected_full_training_pair_seed_refit": True},
+                )
+                frozen_seed = _bytes(final_seed.to_dict())
+                if _bytes(samples) != frozen_samples:
+                    raise ValueError(
+                        "frozen full-training samples changed during seed fit"
+                    )
+                phase = "final_gate_fit"
+                index = len(fits)
+                if index >= maximum_fits:
+                    raise ValueError("declared fit budget exhausted")
+                stem = f"fit-{index:04d}"
+                record = {
+                    "index": index,
+                    "purpose": {"selected_full_training_pair_gate_refit": True},
+                    "seed_fit_index": seed_index,
+                    "seed_policy_hash": final_seed.policy_hash,
+                    "training_sample_hashes": [r["sample_hash"] for r in samples],
+                    "status": "started",
+                    "unknown_fit_work_until_outcome": True,
+                }
+                fits.append(record)
+                _save(root, stem + "-started.json", _bytes(record))
+                fw, fc = perf_counter_ns(), process_time_ns()
+                try:
+                    detached_samples = deepcopy(samples)
+                    binding = full_training_pair_factory(
+                        policy=final_seed, training_samples=detached_samples
+                    )
+                    if (
+                        _bytes(final_seed.to_dict()) != frozen_seed
+                        or _bytes(samples) != frozen_samples
+                        or _bytes(detached_samples) != frozen_samples
+                        or _bytes(original_policy.to_dict()) != frozen_source_policy
+                    ):
+                        raise ValueError(
+                            "frozen full-training inputs changed during pair factory"
+                        )
+                    binding = _validated_full_training_pair(
+                        binding, final_seed, record["training_sample_hashes"]
+                    )
+                except Exception as exc:
+                    record.update(
+                        status="raised",
+                        exception_kind=type(exc).__name__,
+                        wall_ns=perf_counter_ns() - fw,
+                        cpu_ns=process_time_ns() - fc,
+                    )
+                    _save(root, stem + "-outcome.json", _bytes(record))
+                    raise
+                record.update(
+                    status="completed",
+                    unknown_fit_work_until_outcome=False,
+                    wall_ns=perf_counter_ns() - fw,
+                    cpu_ns=process_time_ns() - fc,
+                    policy_hash=binding["gate_policy_hash"],
+                    policy_file=stem + "-gate-policy.json",
+                    fit_receipt=binding["fit_receipt"],
+                )
+                _save(root, record["policy_file"], _bytes(binding["gate_policy"]))
+                _save(root, stem + "-outcome.json", _bytes(record))
+                phase = "pair_persistence"
+                pair = {
+                    "schema_version": "rc-control-full-training-seed-prior-work-pair.v1",
+                    **binding,
+                    "seed_policy": json.loads(frozen_seed),
+                    "source_revision": source_revision,
+                    "source_policy_hash": original_policy.policy_hash,
+                    "factory_identity": full_training_pair_factory_identity,
+                    "seed_fit_index": seed_index,
+                    "gate_fit_index": index,
+                    "independent_evaluation": False,
+                    "source_authenticity": False,
+                    "historical_training_admitted": False,
+                    "full_path_gain_proved": False,
+                }
+                pair["pair_hash"] = _sha(_bytes(pair))
+                _save(root, "selected-pair.json", _bytes(pair))
+                selected_pair = pair
+                final_pair_refit = {
+                    "status": "completed",
+                    "pair_hash": pair["pair_hash"],
+                    "pair_file": "selected-pair.json",
+                    "unknown_work": False,
+                }
+            except Exception as exc:
+                final_pair_refit = {
+                    "status": "raised",
+                    "failed_phase": phase,
+                    "exception_kind": type(exc).__name__,
+                    "unknown_work": True,
+                }
+            final_pair_refit.update(
+                wall_ns=perf_counter_ns() - pw,
+                cpu_ns=process_time_ns() - pc,
+                timing_scope="final seed fit and gate callback validation and pair persistence; fit record clocks are nested",
+            )
     result = {
         "schema_version": "rc-control-runtime-selection-result.v1",
         "source_revision": source_revision,
@@ -919,9 +1265,17 @@ def run_rc_control_runtime_selection(
         "fit_records": fits,
         "fit_attempt_count": len(fits),
         "fit_completed_count": sum(f["status"] == "completed" for f in fits),
-        "selected_strategy": "secant" if selected is None else "learned_svd",
-        "selected_ridge": None if selected is None else winner["ridge"],
-        "selected_score": 1.0 if selected is None else winner["score"],
+        "selected_strategy": "guarded_seed_prior_work_pair"
+        if selected_pair is not None
+        else "secant"
+        if selected is None
+        else "learned_svd",
+        "selected_ridge": None
+        if selected is None and selected_pair is None
+        else winner["ridge"],
+        "selected_score": 1.0
+        if selected is None and selected_pair is None
+        else winner["score"],
         "selected_policy": None if selected is None else selected.to_dict(),
         "proposal_abstention_strategy": proposal_abstention_strategy,
         "wall_ns": perf_counter_ns() - wall,
@@ -943,6 +1297,17 @@ def run_rc_control_runtime_selection(
         result["guarded_policy_refit_performed"] = False
         result["guarded_deployment_artifact_required"] = (
             "a separately bound full-training seed-plus-guard policy; fold scores do not qualify the bare seed"
+        )
+    if full_training_pair_factory is not None:
+        result["full_training_pair_factory"] = plan["full_training_pair_factory"]
+        result["selected_pair"] = selected_pair
+        result["final_pair_refit"] = final_pair_refit
+        result["guarded_policy_refit_performed"] = selected_pair is not None
+        result["selected_score_scope"] = (
+            "guarded development fold score; final pair has not been evaluated"
+        )
+        result["timing_scope"] += (
+            "; enabled final seed and gate fits, validation and pair persistence included; original read/join preparation cost required separately"
         )
     if reuse_line_search_assembly:
         result["line_search_assembly_reuse"] = plan["line_search_assembly_reuse"]

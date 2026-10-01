@@ -723,3 +723,459 @@ def test_unknown_current_target_label_stays_in_denominator_and_out_of_normalizat
     joined["training"]["unverified_rows"][0]["cost_target"] = 0.0
     with pytest.raises(ValueError, match="unknown cost denominator"):
         gate_module.fit_prior_work_cost_gate(joined["training"])
+
+
+def _full_training(
+    gate_module, *, unknown=False, ratios=(1.25, 0.5), widths=(0.2, 0.6)
+):
+    """Authored codec rows only; no structural work or original data admission."""
+    tables, inputs = _tables_and_inputs(gate_module, ratios=ratios, widths=widths)
+    joined = gate_module.append_prior_work_inputs(
+        tables, inputs, seed_policy_hash=_seed_policy().policy_hash
+    )
+    training = joined["training"]
+    training.pop("outer_group_index")
+    training.pop("validation_group_index")
+    training.update(
+        schema_version=gate_module.FULL_TRAINING_PROFILE,
+        training_scope="declared_training_only",
+        excluded_case_ids=[],
+        teacher_roster_hash=_hash(90),
+        declared_training_sample_hashes=[_hash(11), _hash(12)],
+    )
+    if unknown:
+        row = training["training_rows"].pop()
+        row["label"], row["cost_target"] = None, None
+        row["cost_repetitions"][0].update(comparison_pass=False, path_time_ratio=None)
+        training["unverified_rows"] = [row]
+        training["verified_positive_count"] = sum(
+            r["label"] is True for r in training["training_rows"]
+        )
+        training["verified_negative_count"] = sum(
+            r["label"] is False for r in training["training_rows"]
+        )
+    seed_payload = _seed_policy().to_dict()
+    seed_payload["training_sample_hashes"] = list(
+        training["declared_training_sample_hashes"]
+    )
+    seed_payload.pop("policy_hash")
+    seed_payload["policy_hash"] = _sha(_bytes(seed_payload))
+    seed = RCControlSeedPolicy(_bytes(seed_payload).decode())
+    training["seed_policy_hash"] = seed.policy_hash
+    return training, seed
+
+
+def test_full_training_fit_is_explicit_fixed_scope_without_fold_impersonation(
+    gate_module,
+):
+    training, seed = _full_training(gate_module)
+    gate, receipt = gate_module.fit_full_training_prior_work_cost_gate(training)
+    assert type(gate) is gate_module.FullTrainingPriorWorkCostMarginGate
+    payload = gate.to_dict()
+    assert payload["schema_version"] == gate_module.FULL_TRAINING_GATE_SCHEMA
+    assert payload["training_scope"] == "declared_training_only"
+    assert payload["excluded_case_ids"] == []
+    assert (
+        "outer_group_index" not in payload and "validation_group_index" not in payload
+    )
+    assert payload["ridge"] == 1.0 and payload["threshold"] == 0.01
+    assert (
+        payload["cost_target_profile"] == "minimum-three-repeat-relative-time-margin.v1"
+    )
+    assert payload["mean"][0] == pytest.approx(0.4)
+    assert payload["scale"][0] == pytest.approx(0.2)
+    assert payload["weights"][0] == pytest.approx(0.25)
+    assert payload["weights"][-1] == pytest.approx(0.125)
+    assert payload["seed_policy_hash"] == seed.policy_hash
+    assert payload["teacher_roster_hash"] == training["teacher_roster_hash"]
+    assert payload["training_rows_hash"] == _sha(_bytes(training))
+    assert receipt["declared_rows"] == receipt["verified_rows"] == 2
+    assert receipt["unverified_rows_excluded"] == 0
+    assert receipt["fit_completed"] is True and receipt["unknown_work"] is False
+    for key in (
+        "historical_training_admitted",
+        "predecessor_counter_authenticity_established",
+        "independent_evaluation",
+        "gate_cost_in_training_target",
+    ):
+        assert receipt[key] is False
+    with pytest.raises(ValueError):
+        gate_module.PriorWorkCostMarginGate(gate._json)
+    with pytest.raises(ValueError):
+        gate_module.fit_prior_work_cost_gate(training)
+    with pytest.raises(FrozenInstanceError):
+        gate._json = "{}"
+    with pytest.raises(TypeError):
+        gate._payload["training_scope"] = "outer"
+    payload["weights"][-1] = 99.0
+    assert gate.to_dict()["weights"][-1] == pytest.approx(0.125)
+
+
+def test_full_known_numerics_match_legacy_fold_without_repurposing_fold_identity(
+    gate_module,
+):
+    training, _ = _full_training(gate_module)
+    tables, inputs = _tables_and_inputs(
+        gate_module, ratios=(1.25, 0.5), widths=(0.2, 0.6)
+    )
+    fold = gate_module.append_prior_work_inputs(
+        tables, inputs, seed_policy_hash=_seed_policy().policy_hash
+    )
+    old, _ = gate_module.fit_prior_work_cost_gate(fold["training"])
+    full, _ = gate_module.fit_full_training_prior_work_cost_gate(training)
+    for key in (
+        "mean",
+        "scale",
+        "minimum",
+        "maximum",
+        "weights",
+        "feature_names",
+        "ridge",
+        "threshold",
+    ):
+        assert _bytes(full.to_dict()[key]) == _bytes(old._payload[key])
+    assert old._payload["outer_group_index"] == 0
+    assert old.excluded_case_ids == ("outer", "validation")
+    assert full.excluded_case_ids == ()
+
+
+def test_full_unknown_denominator_is_hashed_and_excluded_from_numeric_statistics(
+    gate_module,
+):
+    training, _ = _full_training(
+        gate_module, unknown=True, ratios=(0.98, 0.98), widths=(0.4, 100.0)
+    )
+    gate, receipt = gate_module.fit_full_training_prior_work_cost_gate(training)
+    assert gate._payload["mean"][0] == 0.4
+    assert gate._payload["minimum"][0] == gate._payload["maximum"][0] == 0.4
+    assert gate._payload["declared_training_sample_hashes"] == (_hash(11), _hash(12))
+    assert gate._payload["training_sample_hashes"] == (_hash(11),)
+    assert gate._payload["unverified_sample_hashes"] == (_hash(12),)
+    assert gate._payload["unverified_count"] == 1
+    assert receipt["declared_rows"] == 2
+    assert receipt["verified_rows"] == receipt["unverified_rows_excluded"] == 1
+    altered = deepcopy(training)
+    context = _codec_context()
+    model = _codec_model(context, 900.0)
+    row = altered["unverified_rows"][0]
+    row["model_features"] = model.to_dict()
+    row["values"] = importlib.import_module(
+        "rc_switch_prefix_features"
+    ).prefix_prior_work_features(context, model)["values"]
+    changed, _ = gate_module.fit_full_training_prior_work_cost_gate(altered)
+    for key in ("mean", "scale", "minimum", "maximum", "weights"):
+        assert gate._payload[key] == changed._payload[key]
+    assert gate.policy_hash != changed.policy_hash
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "schema",
+        "scope",
+        "outer",
+        "validation",
+        "exclusions",
+        "duplicate_declared",
+        "foreign_declared",
+        "missing_row",
+        "duplicate_unknown",
+        "roster_order",
+        "bool_fit",
+        "future_feature",
+        "unknown_zero",
+        "unknown_known_cost",
+        "counts",
+        "seed",
+        "teacher",
+        "destination_teacher",
+        "row_extra",
+        "values",
+        "bool_value",
+        "target",
+        "label",
+        "promoted",
+        "independent",
+        "empty_scope",
+        "tuple_roster",
+    ],
+)
+def test_full_fitter_rejects_incomplete_foreign_or_ambiguous_scope(
+    gate_module, mutation
+):
+    training, _ = _full_training(gate_module, unknown=True, ratios=(0.98, 0.98))
+    row = training["training_rows"][0]
+    if mutation == "schema":
+        training["schema_version"] = gate_module.JOIN_PROFILE
+    elif mutation == "scope":
+        training["training_scope"] = "outer"
+    elif mutation in ("outer", "validation"):
+        training[mutation + "_group_index"] = 0
+    elif mutation == "exclusions":
+        training["excluded_case_ids"] = ["fake"]
+    elif mutation == "duplicate_declared":
+        training["declared_training_sample_hashes"] += [_hash(11)]
+    elif mutation == "foreign_declared":
+        training["declared_training_sample_hashes"][1] = _hash(99)
+    elif mutation == "missing_row":
+        training["unverified_rows"] = []
+    elif mutation == "duplicate_unknown":
+        training["unverified_rows"] += [deepcopy(training["unverified_rows"][0])]
+    elif mutation == "roster_order":
+        # Two known rows make the subsequence ordering check observable.
+        training, _ = _full_training(gate_module)
+        training["declared_training_sample_hashes"].reverse()
+    elif mutation == "bool_fit":
+        row["seed_fit_index"] = True
+    elif mutation == "future_feature":
+        row["prior_work_context"]["current_target_work"] = {"core_calls": 0}
+    elif mutation == "unknown_zero":
+        training["unverified_rows"][0]["cost_target"] = 0.0
+    elif mutation == "unknown_known_cost":
+        training["unverified_rows"][0]["cost_repetitions"][0].update(
+            comparison_pass=True, path_time_ratio=0.98
+        )
+    elif mutation == "counts":
+        training["verified_positive_count"] = True
+    elif mutation == "seed":
+        training["seed_policy_hash"] = "unbound"
+    elif mutation == "teacher":
+        training["teacher_roster_hash"] = "unbound"
+    elif mutation == "destination_teacher":
+        row["policy_hash"] = training["seed_policy_hash"]
+    elif mutation == "row_extra":
+        row["outer_group_index"] = 0
+    elif mutation == "values":
+        row["values"][-1] += 1.0
+    elif mutation == "bool_value":
+        row["values"][-1] = False
+    elif mutation == "target":
+        row["cost_target"] = 0.9
+    elif mutation == "label":
+        row["label"] = False
+    elif mutation == "promoted":
+        training["gate_fitted"] = True
+    elif mutation == "independent":
+        training["independent_evaluation"] = True
+    elif mutation == "empty_scope":
+        training["normalization_scope"] = ""
+    else:
+        training["declared_training_sample_hashes"] = tuple(
+            training["declared_training_sample_hashes"]
+        )
+    with pytest.raises(ValueError):
+        gate_module.fit_full_training_prior_work_cost_gate(training)
+
+
+def test_full_all_unknown_fit_stays_hold_without_zero_statistics(gate_module):
+    training, _ = _full_training(gate_module, unknown=True)
+    row = training["training_rows"].pop()
+    row["label"], row["cost_target"] = None, None
+    row["cost_repetitions"][0].update(comparison_pass=False, path_time_ratio=None)
+    training["unverified_rows"].insert(0, row)
+    training["verified_positive_count"] = training["verified_negative_count"] = 0
+    with pytest.raises(ValueError, match="nonempty"):
+        gate_module.fit_full_training_prior_work_cost_gate(training)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "two",
+        "duplicate_index",
+        "boolean_index",
+        "boolean_pass",
+        "boolean_ratio",
+        "string_ratio",
+        "foreign_report",
+        "extra_field",
+        "tuple_rows",
+    ],
+)
+def test_full_fit_rechecks_three_typed_original_repetition_records(
+    gate_module, mutation
+):
+    training, _ = _full_training(gate_module)
+    row = training["training_rows"][0]
+    repetition = row["cost_repetitions"][0]
+    if mutation == "two":
+        row["cost_repetitions"].pop()
+    elif mutation == "duplicate_index":
+        repetition["repetition"] = 1
+    elif mutation == "boolean_index":
+        repetition["repetition"] = False
+    elif mutation == "boolean_pass":
+        repetition["comparison_pass"] = 1
+    elif mutation == "boolean_ratio":
+        repetition["path_time_ratio"] = True
+    elif mutation == "string_ratio":
+        repetition["path_time_ratio"] = "0.98"
+    elif mutation == "foreign_report":
+        repetition["report_hash"] = "unsigned"
+    elif mutation == "extra_field":
+        repetition["current_target_core_calls"] = 0
+    else:
+        row["cost_repetitions"] = tuple(row["cost_repetitions"])
+    with pytest.raises(ValueError):
+        gate_module.fit_full_training_prior_work_cost_gate(training)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "schema",
+        "seed_hash",
+        "teacher_hash",
+        "bad_hash",
+        "duplicate_json",
+        "extra_outer",
+        "scope",
+        "exclusions",
+        "counts_bool",
+        "count_mismatch",
+        "declared_missing",
+        "duplicate_hash",
+        "known_unknown_overlap",
+        "unknown_count_bool",
+        "unknown_count",
+        "known_order",
+        "threshold",
+        "ridge",
+        "target_profile",
+        "boolean_array",
+        "scale",
+        "feature_layout",
+        "weight_width",
+        "hash_changed",
+    ],
+)
+def test_full_decoder_is_strict_even_for_self_consistently_rehashed_mutations(
+    gate_module, mutation
+):
+    training, _ = _full_training(gate_module, unknown=True)
+    gate, _ = gate_module.fit_full_training_prior_work_cost_gate(training)
+    payload = gate.to_dict()
+    if mutation == "duplicate_json":
+        with pytest.raises(ValueError):
+            gate_module.FullTrainingPriorWorkCostMarginGate(
+                '{"seed_policy_hash":"foreign",' + gate._json[1:]
+            )
+        return
+    if mutation == "schema":
+        payload["schema_version"] = gate_module.SCHEMA
+    elif mutation == "seed_hash":
+        payload["seed_policy_hash"] = "foreign"
+    elif mutation == "teacher_hash":
+        payload["teacher_roster_hash"] = True
+    elif mutation == "bad_hash":
+        payload["training_rows_hash"] = None
+    elif mutation == "extra_outer":
+        payload["outer_group_index"] = 0
+    elif mutation == "scope":
+        payload["training_scope"] = "fold"
+    elif mutation == "exclusions":
+        payload["excluded_case_ids"] = ["outer"]
+    elif mutation == "counts_bool":
+        payload["positive_count"] = True
+    elif mutation == "count_mismatch":
+        payload["positive_count"] += 1
+    elif mutation == "declared_missing":
+        payload["declared_training_sample_hashes"].pop()
+    elif mutation == "duplicate_hash":
+        payload["declared_training_sample_hashes"] += [
+            payload["declared_training_sample_hashes"][0]
+        ]
+    elif mutation == "known_unknown_overlap":
+        payload["unverified_sample_hashes"] = payload["training_sample_hashes"][:]
+    elif mutation == "unknown_count_bool":
+        payload["unverified_count"] = True
+    elif mutation == "unknown_count":
+        payload["unverified_count"] = 0
+    elif mutation == "known_order":
+        training, _ = _full_training(gate_module)
+        gate, _ = gate_module.fit_full_training_prior_work_cost_gate(training)
+        payload = gate.to_dict()
+        payload["training_sample_hashes"].reverse()
+    elif mutation == "threshold":
+        payload["threshold"] = 0.001
+    elif mutation == "ridge":
+        payload["ridge"] = 0.1
+    elif mutation == "target_profile":
+        payload["cost_target_profile"] = "tuned"
+    elif mutation == "boolean_array":
+        payload["mean"][0] = True
+    elif mutation == "scale":
+        payload["scale"][0] = 0.0
+    elif mutation == "feature_layout":
+        payload["feature_names"][-1] = "target_work"
+    elif mutation == "weight_width":
+        payload["weights"].pop()
+    else:
+        payload["weights"][-1] += 1.0
+    if mutation != "hash_changed":
+        payload.pop("policy_hash")
+        payload["policy_hash"] = _sha(_bytes(payload))
+    with pytest.raises(ValueError):
+        gate_module.FullTrainingPriorWorkCostMarginGate(_bytes(payload).decode())
+
+
+def test_full_binding_checks_actual_seed_roster_model_and_causal_context(gate_module):
+    training, seed = _full_training(gate_module, ratios=(0.98, 0.98), widths=(0.4, 0.4))
+    gate, _ = gate_module.fit_full_training_prior_work_cost_gate(training)
+    context = _codec_context()
+    model = _codec_model(context)
+    binding = gate_module.full_training_prior_work_guard_binding(
+        gate, policy=seed, model_features=model
+    )
+    assert set(binding) == {
+        "guard",
+        "guard_identity",
+        "seed_policy_hash",
+        "excluded_case_ids",
+    }
+    assert binding["guard_identity"] == gate.policy_hash
+    assert binding["seed_policy_hash"] == seed.policy_hash
+    assert binding["excluded_case_ids"] == ()
+    assert binding["guard"](context) is True
+    assert binding["guard"](_codec_context(assembly=False)) is False
+    assert binding["guard"](_context()) is False
+    assert binding["guard"](None) is False
+
+
+@pytest.mark.parametrize(
+    "mutation", ["seed", "seed_roster", "model", "names", "fold_gate", "opaque_seed"]
+)
+def test_full_binding_rejects_fold_or_foreign_destination(gate_module, mutation):
+    training, seed = _full_training(gate_module)
+    gate, _ = gate_module.fit_full_training_prior_work_cost_gate(training)
+    model = _codec_model(_codec_context())
+    if mutation in ("seed", "seed_roster"):
+        p = seed.to_dict()
+        if mutation == "seed":
+            p["weights"][0][0] = 1.0
+        else:
+            p["training_sample_hashes"].reverse()
+        p.pop("policy_hash")
+        p["policy_hash"] = _sha(_bytes(p))
+        seed = RCControlSeedPolicy(_bytes(p).decode())
+        if mutation == "seed_roster":
+            # Even a gate re-bound to this hash must reject reordered actual seed samples.
+            p = gate.to_dict()
+            p["seed_policy_hash"] = seed.policy_hash
+            p.pop("policy_hash")
+            p["policy_hash"] = _sha(_bytes(p))
+            gate = gate_module.FullTrainingPriorWorkCostMarginGate(_bytes(p).decode())
+    elif mutation == "model":
+        model = replace(model, context_hash=_hash(99))
+    elif mutation == "names":
+        model = replace(model, feature_names=("height",))
+    elif mutation == "fold_gate":
+        gate = _gate(gate_module)
+    else:
+        from types import SimpleNamespace
+
+        seed = SimpleNamespace(policy_hash=gate.seed_policy_hash)
+    with pytest.raises(ValueError):
+        gate_module.full_training_prior_work_guard_binding(
+            gate, policy=seed, model_features=model
+        )
