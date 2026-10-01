@@ -57,9 +57,16 @@ MAX_FILE_BYTES = 64 * 1024**2
 DEFAULT_SOLVER_PROFILE = "default"
 EXTENDED_LINE_SEARCH_PROFILE = "extended-backtracking-v1"
 SOLVER_PROFILES = (DEFAULT_SOLVER_PROFILE, EXTENDED_LINE_SEARCH_PROFILE)
+DEFAULT_ARITHMETIC_PROFILE = "binary64"
+ARITHMETIC_PROFILES = (
+    DEFAULT_ARITHMETIC_PROFILE,
+    learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+)
+AUTHORED_RATIOS = (0.55, 0.70, 0.85, 1.0, 1.15, 1.30)
 
 
-def solver_configuration(profile):
+def solver_configuration(profile, *, arithmetic_profile=DEFAULT_ARITHMETIC_PROFILE):
+    arithmetic = learning._arithmetic_manifest(arithmetic_profile)
     if type(profile) is not str or profile not in SOLVER_PROFILES:
         raise ValueError("unsupported authored solver profile")
     config = StatefulFiberFrame2DDisplacementControlConfig()
@@ -71,7 +78,48 @@ def solver_configuration(profile):
                 line_search_alphas=tuple(2.0**-k for k in range(14)),
             ),
         )
+    if arithmetic is not None:
+        config = replace(config, newton=replace(config.newton, terminal_polishing=True))
     return config
+
+
+def arithmetic_profile(plan):
+    recipe = plan["seed_recipe"]
+    profile = recipe["arithmetic_profile"]
+    manifest = learning._arithmetic_manifest(profile)
+    assert _bytes(recipe) == _bytes(
+        dict(
+            ridge=10000.0,
+            ood_margin=0.1,
+            fit_solver=learning.SVD_RIDGE_FIT_PROFILE,
+            feature_profile="legacy",
+            arithmetic_profile=profile,
+        )
+    ), "predeclared arithmetic seed recipe differs"
+    assert (
+        "arithmetic_profile" not in plan
+        if manifest is None
+        else _bytes(plan.get("arithmetic_profile")) == _bytes(manifest)
+    ), "predeclared arithmetic manifest differs"
+    return profile
+
+
+def authored_case(index, template):
+    name, ratio = "authored-" + "ABCDEF"[index], AUTHORED_RATIOS[index]
+    payload = deepcopy(template)
+    payload["nodes"][1]["coordinates"] = [2.0, 0.0, 0.0]
+    payload["nodes"][2]["coordinates"] = [2.0, 2.0 * ratio, 0.0]
+    payload["metadata"] = {"case_id": name}
+    targets = [
+        -0.004,
+        -0.008 * (1 + 0.12 * index),
+        0.003 * (1 + 0.20 * index),
+        0.007 * (1 + 0.08 * index),
+        0.0,
+        -0.006 * (1 + 0.10 * index),
+    ]
+    split = "train" if index < 4 else ("validation" if index == 4 else "holdout")
+    return name, ratio, payload, targets, split
 
 
 def solver_payload(config):
@@ -110,13 +158,38 @@ def descriptor(root, name):
 def cases(root, plan=None):
     if plan is None:
         plan = read(root / "experiment-plan.json")
-    config = solver_configuration(plan["solver_profile"])
+    profile = arithmetic_profile(plan)
+    config = solver_configuration(plan["solver_profile"], arithmetic_profile=profile)
     assert (
         _bytes(plan["solver_config"]) == _bytes(solver_payload(config))
         and plan["solver_config_hash"] == config.contract_hash
     ), "predeclared solver profile differs"
+    template = read(
+        Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
+    )
+    assert type(plan["cases"]) is list and len(plan["cases"]) == len(AUTHORED_RATIOS), (
+        "predeclared authored case roster differs"
+    )
     result = []
-    for row in plan["cases"]:
+    for index, row in enumerate(plan["cases"]):
+        name, ratio, payload, targets, split = authored_case(index, template)
+        assert _bytes(
+            [
+                row["case_id"],
+                row["ratio"],
+                row["targets_m"],
+                row["split"],
+                row["source_role"],
+            ]
+        ) == _bytes([name, ratio, targets, split, "authored_numerical"]), (
+            "predeclared authored case differs"
+        )
+        assert row["model_file"] == f"models/{name}.json" and _bytes(
+            descriptor(root, row["model_file"])
+        ) == _bytes(row["model_artifact"]), "predeclared model changed"
+        assert _bytes(read(root / row["model_file"])) == _bytes(payload), (
+            "predeclared authored model differs"
+        )
         request = decode_bounded_rc_fiber_direct_control_request(row["request"])
         assert _bytes(request.to_dict()) == _bytes(row["request"]), (
             "predeclared request is not exact canonical typed payload"
@@ -137,38 +210,36 @@ def cases(root, plan=None):
                 request,
             )
         )
+        assert "model_checksum" not in row or row["model_checksum"] == (
+            result[-1].model.canonical_model_checksum
+        ), "predeclared model checksum differs"
     return tuple(result)
 
 
-def prepare(root, *, solver_profile=DEFAULT_SOLVER_PROFILE):
-    config = solver_configuration(solver_profile)
+def prepare(
+    root,
+    *,
+    solver_profile=DEFAULT_SOLVER_PROFILE,
+    arithmetic_profile=DEFAULT_ARITHMETIC_PROFILE,
+):
+    arithmetic = learning._arithmetic_manifest(arithmetic_profile)
+    config = solver_configuration(solver_profile, arithmetic_profile=arithmetic_profile)
     root.mkdir(parents=True, exist_ok=False)
     model = read(Path("examples/public_rc_fiber_frame_l_frame_material_history.json"))
     rows = []
-    for i, ratio in enumerate((0.55, 0.70, 0.85, 1.0, 1.15, 1.30)):
-        name = "authored-" + "ABCDEF"[i]
-        payload = deepcopy(model)
-        payload["nodes"][1]["coordinates"] = [2.0, 0.0, 0.0]
-        payload["nodes"][2]["coordinates"] = [2.0, 2.0 * ratio, 0.0]
-        payload["metadata"] = {"case_id": name}
+    for i in range(len(AUTHORED_RATIOS)):
+        name, ratio, payload, targets, split = authored_case(i, model)
         model_file = f"models/{name}.json"
         save(root, model_file, payload)
         rows.append(
             dict(
                 case_id=name,
                 source_role="authored_numerical",
-                split="train" if i < 4 else ("validation" if i == 4 else "holdout"),
+                split=split,
                 model_file=model_file,
                 model_artifact=descriptor(root, model_file),
                 ratio=ratio,
-                targets_m=[
-                    -0.004,
-                    -0.008 * (1 + 0.12 * i),
-                    0.003 * (1 + 0.20 * i),
-                    0.007 * (1 + 0.08 * i),
-                    0.0,
-                    -0.006 * (1 + 0.10 * i),
-                ],
+                targets_m=targets,
             )
         )
         request = authored_request(rows[-1]["targets_m"], config)
@@ -187,7 +258,7 @@ def prepare(root, *, solver_profile=DEFAULT_SOLVER_PROFILE):
             ood_margin=0.1,
             fit_solver=learning.SVD_RIDGE_FIT_PROFILE,
             feature_profile="legacy",
-            arithmetic_profile="binary64",
+            arithmetic_profile=arithmetic_profile,
         ),
         sample_count=20,
         seed_fit_count=6,
@@ -229,8 +300,10 @@ def prepare(root, *, solver_profile=DEFAULT_SOLVER_PROFILE):
             byte_length=Path(__file__).stat().st_size,
         ),
     )
+    if arithmetic is not None:
+        plan["arithmetic_profile"] = arithmetic
     declared = cases(root, plan)
-    screen = learning._preflight(declared)
+    screen = learning._preflight(declared, arithmetic_profile)
     connected = control_training_exclusion_groups(declared)
     assert connected["groups"] == plan["groups"], "predeclared connected groups differ"
     plan["connected_training_screen"] = connected
@@ -276,8 +349,49 @@ def save_progress(root, name, value):
     temporary.replace(root / name)
 
 
+def learning_kwargs(profile):
+    # Preserve the original default call and binary64 manifest.
+    return (
+        {}
+        if learning._arithmetic_manifest(profile) is None
+        else {"arithmetic_profile": profile}
+    )
+
+
+def seed_header(seed, plan, prepared):
+    manifest = learning._arithmetic_manifest(arithmetic_profile(plan))
+    assert _bytes(seed.get("arithmetic_profile")) == _bytes(manifest), (
+        "original seed arithmetic profile differs"
+    )
+    header = {
+        key: seed[key]
+        for key in (
+            "model_context_hash",
+            "model_feature_names",
+            "free_global_dofs",
+            "control_free_index",
+            "solver_config_hash",
+        )
+    }
+    for _, compiled, features, _, _ in prepared.values():
+        expected = dict(
+            model_context_hash=features.context_hash,
+            model_feature_names=list(features.feature_names),
+            free_global_dofs=list(compiled.problem.free_global_dofs),
+            control_free_index=compiled.problem.free_global_dofs.index(
+                plan["cases"][0]["request"]["control_global_dof"]
+            ),
+            solver_config_hash=plan["solver_config_hash"],
+        )
+        assert _bytes(header) == _bytes(expected), "original seed native header differs"
+    if manifest is not None:
+        header["arithmetic_profile"] = deepcopy(manifest)
+    return header
+
+
 def generate(root):
     plan = read(root / "experiment-plan.json")
+    profile = arithmetic_profile(plan)
     report = learning.run_rc_control_learning_study(
         cases(root),
         source_revision=plan["source_revision"],
@@ -288,6 +402,7 @@ def generate(root):
         defer_evaluation=True,
         export_generation_prior_work=True,
         record_generation_assembly_work=True,
+        **learning_kwargs(profile),
     )
     samples = read(root / "generation/training-samples.json", array=True)
     original = [row["report"] for row in report["generation"] if "report" in row]
@@ -309,6 +424,7 @@ def generate(root):
         assert policy.policy_hash == report["fit"]["policy_hash"], (
             "generation fit receipt differs"
         )
+        seed_header(policy.to_dict(), plan, learning._preflight(cases(root), profile))
     return dict(
         status="ready" if eligible else "HOLD",
         sample_count=len(samples),
@@ -321,6 +437,7 @@ def generate(root):
 def labels(root):
     assert read(root / "generate-result.json")["status"] == "ready", "generation HOLD"
     plan = read(root / "experiment-plan.json")
+    arithmetic = arithmetic_profile(plan)
     generation = root / "generation"
     samples = read(generation / "training-samples.json", array=True)
     nested = nested_plan(plan["groups"], samples)
@@ -333,16 +450,21 @@ def labels(root):
     seed = learning.RCControlSeedPolicy(
         (generation / "policy.json").read_text()
     ).to_dict()
-    profile = {
-        key: seed[key]
-        for key in (
-            "model_context_hash",
-            "model_feature_names",
-            "free_global_dofs",
-            "control_free_index",
-            "solver_config_hash",
-        )
-    }
+    prepared = learning._preflight(cases(root), arithmetic)
+    profile = seed_header(seed, plan, prepared)
+    if learning._arithmetic_manifest(arithmetic) is not None:
+        assert _bytes(read(generation / "plan.json").get("arithmetic_profile")) == (
+            _bytes(profile["arithmetic_profile"])
+        ), "original generation arithmetic profile differs"
+        for sample in samples:
+            assert _bytes(sample.get("arithmetic_profile")) == _bytes(
+                profile["arithmetic_profile"]
+            ) and sample.get("label_representation") == (
+                "accepted-high-component-for-binary64-start.v1"
+            ), "original sample arithmetic profile differs"
+            assert sample["context"]["problem_contract_hash"] == (
+                prepared[sample["case_id"]][2].problem_contract_hash
+            ), "original sample native problem differs"
     receipts = fit_declared_seeds(nested, samples, profile, stage / "seeds")
     policies = {
         row["fit_index"]: learning.RCControlSeedPolicy(
@@ -350,7 +472,6 @@ def labels(root):
         )
         for row in receipts
     }
-    prepared = learning._preflight(cases(root))
     by_sample = {row["sample_hash"]: row for row in samples}
     by_case = {case.case_id: case for case in cases(root)}
     objects, roster = [], []
@@ -408,6 +529,7 @@ def labels(root):
                 features,
                 compiled.problem.free_global_dofs,
                 case.request.solver_config.contract_hash,
+                **learning_kwargs(arithmetic),
             )
 
         for repetition in range(3):
@@ -426,6 +548,7 @@ def labels(root):
                 capture_material_state=True,
                 material_capture_scope="proposal-only",
                 proposal_abstention_strategy="secant",
+                **learning._arithmetic_kwargs(arithmetic),
             )
             record = dict(
                 pair_index=pair_index,
@@ -469,6 +592,13 @@ def labels(root):
 
 
 def join_fit(root):
+    plan = read(root / "experiment-plan.json")
+    arithmetic = arithmetic_profile(plan)
+    declared = cases(root)
+    original_seed = learning.RCControlSeedPolicy(
+        (root / "generation/policy.json").read_text()
+    ).to_dict()
+    seed_header(original_seed, plan, learning._preflight(declared, arithmetic))
     anchors = {}
     for key, folder, file in (
         ("generation-plan", "generation", "plan.json"),
@@ -483,7 +613,7 @@ def join_fit(root):
     save(root, "original-input-anchors.json", anchors)
     verified = read_original_prior_work_full_training(
         generation_root=root / "generation",
-        cases=cases(root),
+        cases=declared,
         retained_seed_stage=OriginalSeedStage(root / "retained-seeds"),
         retained_label_root=root / "retained-labels",
         anchors=anchors,
@@ -533,6 +663,7 @@ def join_fit(root):
 
 def evaluate(root):
     plan = read(root / "experiment-plan.json")
+    arithmetic = arithmetic_profile(plan)
     result = read(root / "join-fit-result.json")
     pair = (
         read(root / "frozen-candidate-pair.json")
@@ -567,7 +698,9 @@ def evaluate(root):
         if pair
         else None
     )
-    prepared = learning._preflight(cases(root))
+    prepared = learning._preflight(cases(root), arithmetic)
+    if policy is not None:
+        seed_header(policy.to_dict(), plan, prepared)
     records, reports = [], []
     for case in cases(root):
         _, compiled, features, _, _ = prepared[case.case_id]
@@ -578,6 +711,7 @@ def evaluate(root):
                 features,
                 compiled.problem.free_global_dofs,
                 case.request.solver_config.contract_hash,
+                **learning_kwargs(arithmetic),
             )
 
         for repetition in range(3):
@@ -617,6 +751,7 @@ def evaluate(root):
                 output_directory=root / "full-paths" / f"{case.case_id}-{repetition}",
                 arm_order=order,
                 **options,
+                **learning._arithmetic_kwargs(arithmetic),
             )
             assert (
                 pair is None
@@ -746,9 +881,12 @@ def main():
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--solver-profile", choices=SOLVER_PROFILES)
+    parser.add_argument("--arithmetic-profile", choices=ARITHMETIC_PROFILES)
     args = parser.parse_args()
     if args.stage != "prepare" and args.solver_profile is not None:
         parser.error("--solver-profile is only available for prepare")
+    if args.stage != "prepare" and args.arithmetic_profile is not None:
+        parser.error("--arithmetic-profile is only available for prepare")
     root = args.output.resolve()
     if args.stage != "prepare":
         assert not (root / f"{args.stage}-started.json").exists(), (
@@ -765,6 +903,7 @@ def main():
             assert descriptor(root, row["model_file"]) == row["model_artifact"], (
                 "predeclared model changed"
             )
+        cases(root, plan)
         assert (
             subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
             == plan["source_revision"]
@@ -781,7 +920,12 @@ def main():
     try:
         function = globals()[args.stage.replace("-", "_")]
         result = (
-            function(root, solver_profile=args.solver_profile or DEFAULT_SOLVER_PROFILE)
+            function(
+                root,
+                solver_profile=args.solver_profile or DEFAULT_SOLVER_PROFILE,
+                arithmetic_profile=args.arithmetic_profile
+                or DEFAULT_ARITHMETIC_PROFILE,
+            )
             if args.stage == "prepare"
             else function(root)
         )

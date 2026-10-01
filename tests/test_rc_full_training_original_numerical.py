@@ -11,11 +11,13 @@ import sys
 from time import perf_counter_ns
 
 import pytest
+import numpy as np
 
 from structural_analysis.api import nonlinear_fiber_frame as public
 from structural_analysis.benchmark import rc_control_learning as learning
 from structural_analysis.benchmark import rc_control_seed_runtime as runtime
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
+from structural_analysis.materials.stateful_fiber_section import StatefulRCFiberSection
 
 _BENCHMARK_WRAPPER = runtime.benchmark_rc_control_seed_paths
 
@@ -48,19 +50,24 @@ def native_solves_forbidden(monkeypatch, driver):
         (driver, "fit_declared_seeds"),
         (learning, "_fit"),
         (public, "analyze_public_rc_fiber_frame"),
+        (StatefulRCFiberSection, "integrate"),
+        (StatefulRCFiberSection, "integrate_with_material_runtime"),
     ):
         monkeypatch.setattr(owner, name, forbidden)
     yield
     assert attempts == []
 
 
-def prepared(tmp_path, driver, *, campaign=False, solver_profile=None):
+def prepared(
+    tmp_path, driver, *, campaign=False, solver_profile=None, arithmetic_profile=None
+):
     root = tmp_path / "authored-driver"
-    receipt = (
-        driver.prepare(root)
-        if solver_profile is None
-        else driver.prepare(root, solver_profile=solver_profile)
-    )
+    options = {}
+    if solver_profile is not None:
+        options["solver_profile"] = solver_profile
+    if arithmetic_profile is not None:
+        options["arithmetic_profile"] = arithmetic_profile
+    receipt = driver.prepare(root, **options)
     driver.save(root, "prepare-result.json", receipt)
     if campaign:
         driver.save(root, "campaign-started.json", {"monotonic_ns": perf_counter_ns()})
@@ -568,3 +575,575 @@ def test_actual_runtime_wrapper_passes_same_profile_to_arms_and_fresh_reference(
     assert [name for name, _ in seen] == ["secant", "reference", "fresh-reference"]
     assert all(payload == case.request.to_dict() for _, payload in seen)
     assert report["request"] == case.request.to_dict()
+
+
+def _codec_policy(header, samples):
+    """Author a zero-weight codec fixture; no ridge/SVD fit is performed."""
+    x = np.asarray([row["features"] for row in samples])
+    count = len(header["free_global_dofs"]) + 1
+    scale = x.std(axis=0)
+    payload = dict(
+        schema_version="experimental-rc-control-secant-correction-policy.v2"
+        if "arithmetic_profile" in header
+        else "experimental-rc-control-secant-correction-policy.v1",
+        **deepcopy(header),
+        feature_mean=x.mean(axis=0).tolist(),
+        feature_scale=np.where(scale > 0, scale, 1.0).tolist(),
+        feature_min=x.min(axis=0).tolist(),
+        feature_max=x.max(axis=0).tolist(),
+        target_scale=[1.0] * count,
+        weights=[[0.0] * count for _ in range(x.shape[1] + 1)],
+        training_sample_hashes=[row["sample_hash"] for row in samples],
+        ridge=10000.0,
+        ood_margin=0.1,
+    )
+    payload["policy_hash"] = _sha(_bytes(payload))
+    return learning.RCControlSeedPolicy(_bytes(payload).decode())
+
+
+def _authored_learning_inputs(root, driver, *, write=False):
+    """Typed prefix/file fixtures, never solver-produced training observations."""
+    plan = driver.read(root / "experiment-plan.json")
+    profile = driver.arithmetic_profile(plan)
+    manifest = learning._arithmetic_manifest(profile)
+    values = learning._preflight(driver.cases(root), profile)
+    samples, contexts, header = [], {}, None
+    for case in driver.cases(root):
+        if case.split != "train":
+            continue
+        _, compiled, features, _, _ = values[case.case_id]
+        count = len(compiled.problem.free_global_dofs) + 1
+        control = compiled.problem.free_global_dofs.index(
+            case.request.control_global_dof
+        )
+        current = dict(
+            model_context_hash=features.context_hash,
+            model_feature_names=list(features.feature_names),
+            free_global_dofs=list(compiled.problem.free_global_dofs),
+            control_free_index=control,
+            solver_config_hash=case.request.solver_config.contract_hash,
+        )
+        if manifest is not None:
+            current["arithmetic_profile"] = deepcopy(manifest)
+        assert header is None or header == current
+        header = current
+        for index in range(1, len(case.request.targets_m)):
+            accepted = (0.0, *case.request.targets_m[:index])
+            coordinates = []
+            for target in accepted:
+                row = [0.0] * count
+                row[control] = target
+                coordinates.append(tuple(row))
+            context = runtime.RCControlSeedContext(
+                features.problem_contract_hash,
+                case.request.control_global_dof,
+                control,
+                case.request.targets_m[index],
+                accepted,
+                tuple(coordinates),
+            )
+            sample = dict(
+                case_id=case.case_id,
+                split="train",
+                target_index=index,
+                parent_hash=_sha(f"codec-parent:{case.case_id}:{index}".encode()),
+                context=context.to_dict(),
+                features=learning._features(context, features).tolist(),
+                correction=[0.0] * count,
+            )
+            if manifest is not None:
+                sample.update(
+                    arithmetic_profile=deepcopy(manifest),
+                    label_representation="accepted-high-component-for-binary64-start.v1",
+                    accepted_coordinate_compensation_m=[0.0] * count,
+                )
+            sample["sample_hash"] = _sha(_bytes(sample))
+            samples.append(sample)
+            contexts[case.case_id, index] = context
+            if write:
+                base = f"generation/{case.case_id}/generation/reference/{index:03d}"
+                (root / base).parent.mkdir(parents=True, exist_ok=True)
+                driver.save(root, base + "-context.json", context.to_dict())
+                driver.save(
+                    root,
+                    base + "-1-step.json",
+                    {"parent_checkpoint": {"state_hash": sample["parent_hash"]}},
+                )
+    policy = _codec_policy(header, samples)
+    if write:
+        driver.save(root, "generate-result.json", {"status": "ready"})
+        driver.save(root, "generation/training-samples.json", samples)
+        driver.save(root, "generation/policy.json", policy.to_dict())
+        driver.save(
+            root,
+            "generation/plan.json",
+            {"arithmetic_profile": manifest} if manifest is not None else {},
+        )
+    return plan, samples, policy, contexts, values
+
+
+@pytest.mark.parametrize("solver_profile", ["default", "extended-backtracking-v1"])
+def test_retained_prepare_changes_only_polishing_and_native_profile(
+    tmp_path, driver, solver_profile
+):
+    old_dir, new_dir = tmp_path / "old", tmp_path / "new"
+    old_dir.mkdir()
+    new_dir.mkdir()
+    old = prepared(old_dir, driver, solver_profile=solver_profile)
+    new = prepared(
+        new_dir,
+        driver,
+        solver_profile=solver_profile,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    binary, retained = (
+        driver.read(old / "experiment-plan.json"),
+        driver.read(new / "experiment-plan.json"),
+    )
+    assert (
+        "arithmetic_profile" not in binary and driver.learning_kwargs("binary64") == {}
+    )
+    assert retained["arithmetic_profile"] == learning._arithmetic_manifest(
+        learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+    )
+    assert retained["arithmetic_profile"]["terminal_refinement_limit"] == 2
+    modified = deepcopy(retained["solver_config"])
+    assert modified["newton"]["terminal_polishing"] is True
+    modified["newton"]["terminal_polishing"] = binary["solver_config"]["newton"][
+        "terminal_polishing"
+    ]
+    assert _bytes(modified) == _bytes(binary["solver_config"])
+    for first, second in zip(binary["cases"], retained["cases"], strict=True):
+        assert _bytes(first["model_artifact"]) == _bytes(second["model_artifact"])
+        assert first["targets_m"] == second["targets_m"]
+        assert first["request_hash"] != second["request_hash"]
+        name = first["case_id"]
+        assert (
+            binary["case_static_features"][name]["values"]
+            == retained["case_static_features"][name]["values"]
+        )
+        assert (
+            binary["case_static_features"][name]["problem_contract_hash"]
+            != retained["case_static_features"][name]["problem_contract_hash"]
+        )
+
+
+@pytest.mark.parametrize("stage", ["generate", "labels", "join-fit", "evaluate"])
+def test_arithmetic_cli_cannot_override_non_prepare_stage(
+    tmp_path, driver, monkeypatch, stage
+):
+    root = tmp_path / "must-not-exist"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["driver", stage, "--output", str(root), "--arithmetic-profile", "binary64"],
+    )
+    with pytest.raises(SystemExit) as error:
+        driver.main()
+    assert error.value.code == 2 and not root.exists()
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["refinement1", "floatlimit", "boollimit", "force", "model", "polishing", "target"],
+)
+def test_coherently_rehashed_retained_mutation_fails_before_work(
+    tmp_path, driver, monkeypatch, mutation
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    plan = driver.read(root / "experiment-plan.json")
+    row = plan["cases"][0]
+    if mutation in {"refinement1", "floatlimit", "boollimit"}:
+        plan["arithmetic_profile"]["terminal_refinement_limit"] = {
+            "refinement1": 1,
+            "floatlimit": 2.0,
+            "boollimit": True,
+        }[mutation]
+        message = "arithmetic manifest"
+    elif mutation == "force":
+        plan["arithmetic_profile"]["force_accumulation"] = "binary64"
+        message = "arithmetic manifest"
+    elif mutation == "model":
+        path = root / row["model_file"]
+        payload = driver.read(path)
+        payload["sections"][0]["width_m"] *= 0.9
+        path.write_bytes(_bytes(payload))
+        row["model_artifact"] = driver.descriptor(root, row["model_file"])
+        row["model_checksum"] = driver.load_neutral_json(path).canonical_model_checksum
+        message = "authored model"
+    elif mutation == "target":
+        row["targets_m"][1] *= 0.9
+        row["request"]["targets_m"] = deepcopy(row["targets_m"])
+        message = "authored case"
+    else:
+        row["request"]["solver_config"]["newton"]["terminal_polishing"] = False
+        changed = driver.decode_bounded_rc_fiber_direct_control_request(row["request"])
+        row["request_hash"] = changed.request_hash
+        plan["solver_config"] = changed.to_dict()["solver_config"]
+        plan["solver_config_hash"] = changed.solver_config.contract_hash
+        message = "solver profile"
+    (root / "experiment-plan.json").write_bytes(_bytes(plan))
+    receipt = driver.read(root / "prepare-result.json")
+    receipt["plan_hash"] = _sha(_bytes(plan))
+    (root / "prepare-result.json").write_bytes(_bytes(receipt))
+    callbacks = []
+    monkeypatch.setattr(driver, "generate", lambda *a, **k: callbacks.append(True))
+    monkeypatch.setattr(sys, "argv", ["driver", "generate", "--output", str(root)])
+    with pytest.raises(AssertionError, match=message):
+        driver.main()
+    assert callbacks == [] and not (root / "generate-started.json").exists()
+
+
+def test_generation_forwards_retained_profile_and_defers_evaluation(
+    tmp_path, driver, monkeypatch
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    seen = []
+
+    class Reached(Exception):
+        pass
+
+    def mocked_study(cases, **kwargs):
+        assert (
+            kwargs["arithmetic_profile"]
+            == learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        )
+        assert kwargs["defer_evaluation"] is True
+        assert kwargs["export_generation_prior_work"] is True
+        assert kwargs["record_generation_assembly_work"] is True
+        assert all(
+            case.request.solver_config.newton.terminal_polishing is True
+            for case in cases
+        )
+        seen.append(kwargs)
+        raise Reached
+
+    monkeypatch.setattr(learning, "run_rc_control_learning_study", mocked_study)
+    with pytest.raises(Reached):
+        driver.generate(root)
+    assert len(seen) == 1
+
+
+def test_retained_policy_requires_explicit_matching_inference_profile(tmp_path, driver):
+    root = prepared(
+        tmp_path,
+        driver,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    plan, samples, policy, contexts, values = _authored_learning_inputs(root, driver)
+    _, compiled, features, _, _ = values["authored-A"]
+    args = (
+        contexts["authored-A", 1],
+        features,
+        compiled.problem.free_global_dofs,
+        plan["solver_config_hash"],
+    )
+    assert policy.propose(*args) is None
+    assert policy.propose(*args, arithmetic_profile="binary64") is None
+    assert (
+        policy.propose(
+            *args,
+            arithmetic_profile="coherent-benchmark-retained-twofold-refinement1.v1",
+        )
+        is None
+    )
+    assert (
+        policy.propose(*args, **driver.learning_kwargs(driver.arithmetic_profile(plan)))
+        is not None
+    )
+    bad = policy.to_dict()
+    bad["arithmetic_profile"]["terminal_refinement_limit"] = 1
+    bad["policy_hash"] = _sha(
+        _bytes({k: v for k, v in bad.items() if k != "policy_hash"})
+    )
+    with pytest.raises(ValueError, match="arithmetic profile"):
+        learning.RCControlSeedPolicy(_bytes(bad).decode())
+
+
+def test_actual_wrapper_compiles_one_retained_problem_for_every_arm(
+    tmp_path, driver, monkeypatch
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        solver_profile=driver.EXTENDED_LINE_SEARCH_PROFILE,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    case = driver.cases(root)[0]
+    _, compiled, features, _, _ = learning._preflight(
+        driver.cases(root), learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+    )[case.case_id]
+    seen = []
+
+    def mocked_path(native, request, name, callback, directory, *args):
+        assert (
+            native.problem.contract_hash
+            == compiled.problem.contract_hash
+            == features.problem_contract_hash
+        )
+        assert native.problem.coordinate_precision == "twofold-increment"
+        assert native.problem.terminal_coordinate_precision == "twofold"
+        assert native.problem.terminal_refinement_limit == 2
+        assert request == case.request
+        seen.append(directory.name)
+        return dict(
+            strategy=name,
+            status="complete",
+            response_history=[],
+            terminal_checkpoint={},
+            entries=[],
+            source_problem_hash=native.problem.contract_hash,
+            requested_targets_m=list(request.targets_m),
+        )
+
+    monkeypatch.setattr(runtime, "_path", mocked_path)
+    output = tmp_path / "mocked-retained-wrapper"
+    report = _BENCHMARK_WRAPPER(
+        case.model,
+        case.request,
+        source_revision="c" * 40,
+        output_directory=output,
+        proposal=lambda _: None,
+        proposal_identity=_sha(b"codec-only"),
+        arm_order=("secant", "proposal", "reference"),
+        **learning._arithmetic_kwargs(learning.RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    assert seen == ["secant", "proposal", "reference", "fresh-reference"]
+    identity = driver.read(output / "request.json")
+    assert (
+        identity["terminal_refinement_limit"]
+        == report["terminal_refinement_limit"]
+        == 2
+    )
+    for key, value in learning._arithmetic_kwargs(
+        learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+    ).items():
+        assert _bytes(identity[key]) == _bytes(value)
+    assert identity["compiled_problem_contract_hash"] == compiled.problem.contract_hash
+    # Obtain an actual generation identity from the wrapper instead of authoring
+    # conditional runtime fields from the learning manifest in this test.
+    from structural_analysis.benchmark import rc_control_prior_work_export as export
+
+    study = tmp_path / "mocked-generation-identity"
+    generation_report = _BENCHMARK_WRAPPER(
+        case.model,
+        case.request,
+        source_revision="c" * 40,
+        output_directory=study / case.case_id / "generation",
+        record_prior_accepted_transition_work=True,
+        **learning._arithmetic_kwargs(learning.RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    declaration = dict(
+        case_id=case.case_id,
+        split="train",
+        request=case.request.to_dict(),
+        model_features=features.to_dict(),
+        model_checksum=case.model.canonical_model_checksum,
+    )
+    checked = export._case(
+        export._Reader(study),
+        declaration,
+        {"report": generation_report, "labels_eligible": True},
+        "c" * 40,
+        {},
+        learning._arithmetic_manifest(learning.RETAINED_LEARNING_ARITHMETIC_PROFILE),
+    )
+    assert checked[1].problem_contract_hash == compiled.problem.contract_hash
+
+
+def test_original_oof_fitter_and_every_label_proposal_preserve_manifest(
+    tmp_path, driver, monkeypatch
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        campaign=True,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    plan, samples, seed, contexts, values = _authored_learning_inputs(
+        root, driver, write=True
+    )
+    fits, proposals, comparisons = [], [], []
+    import prepare_rc_nested_switch_labels as fitter
+
+    real_propose = learning.RCControlSeedPolicy.propose
+
+    def mock_fit(selected, header, ridge, margin, *, fit_solver):
+        assert header["arithmetic_profile"] == plan["arithmetic_profile"]
+        assert (
+            ridge == 10000.0
+            and margin == 0.1
+            and fit_solver == learning.SVD_RIDGE_FIT_PROFILE
+        )
+        fits.append([row["sample_hash"] for row in selected])
+        return _codec_policy(header, selected)
+
+    def tracked_proposal(self, context, features, dofs, solver, **kwargs):
+        assert kwargs == {
+            "arithmetic_profile": learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        }
+        proposals.append(context.problem_contract_hash)
+        return real_propose(self, context, features, dofs, solver, **kwargs)
+
+    def mock_comparison(model, request, **kwargs):
+        for key, value in learning._arithmetic_kwargs(
+            learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        ).items():
+            assert kwargs[key] == value
+        assert request.solver_config.newton.terminal_polishing is True
+        kwargs["proposal"](kwargs["accepted_context"])
+        comparisons.append(kwargs["output_directory"])
+        return fixture_report()
+
+    monkeypatch.setattr(driver, "fit_declared_seeds", fitter.fit_declared_seeds)
+    monkeypatch.setattr(learning, "_fit", mock_fit)
+    monkeypatch.setattr(learning.RCControlSeedPolicy, "propose", tracked_proposal)
+    monkeypatch.setattr(driver, "benchmark_rc_control_seed_paths", mock_comparison)
+    result = driver.labels(root)
+    assert len(fits) == 6 and result["fits"] == 6
+    assert len(comparisons) == len(proposals) == result["comparisons"] == 180
+
+
+def test_retained_generation_header_mismatch_stops_before_teacher_fit(
+    tmp_path, driver, monkeypatch
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    _, samples, seed, _, values = _authored_learning_inputs(root, driver, write=True)
+    # A coherent legacy policy hash still cannot relabel the current native profile.
+    payload = seed.to_dict()
+    del payload["arithmetic_profile"]
+    payload["schema_version"] = "experimental-rc-control-secant-correction-policy.v1"
+    payload["policy_hash"] = _sha(
+        _bytes({k: v for k, v in payload.items() if k != "policy_hash"})
+    )
+    (root / "generation/policy.json").write_bytes(_bytes(payload))
+    with pytest.raises(AssertionError, match="original seed arithmetic profile"):
+        driver.labels(root)
+    assert not (root / "retained-labels").exists()
+
+
+def test_fallback_full_paths_use_retained_profile_even_without_fitted_pair(
+    tmp_path, driver, monkeypatch
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        campaign=True,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    driver.save(
+        root, "join-fit-result.json", dict(status="HOLD", candidate_fitted=False)
+    )
+    calls = []
+
+    def mocked_comparison(model, request, **kwargs):
+        assert "proposal" not in kwargs
+        assert request.solver_config.newton.terminal_polishing is True
+        for key, value in learning._arithmetic_kwargs(
+            learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        ).items():
+            assert kwargs[key] == value
+        calls.append(kwargs["arm_order"])
+        return fixture_report()
+
+    monkeypatch.setattr(driver, "benchmark_rc_control_seed_paths", mocked_comparison)
+    result = driver.evaluate(root)
+    assert (
+        result["comparisons"] == len(calls) == 18
+        and result["candidate_evaluated"] is False
+    )
+
+
+def test_frozen_candidate_full_paths_pass_profile_to_policy_and_all_arms(
+    tmp_path, driver, monkeypatch
+):
+    root = prepared(
+        tmp_path,
+        driver,
+        campaign=True,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    )
+    plan, samples, policy, contexts, values = _authored_learning_inputs(root, driver)
+    selected = dict(
+        seed_policy=policy.to_dict(), gate_policy={"authored_gate_codec": True}
+    )
+    selected["pair_hash"] = _sha(_bytes(selected))
+    pair = dict(selected, selected_pair=deepcopy(selected))
+    driver.save(root, "frozen-candidate-pair.json", pair)
+    driver.save(
+        root,
+        "join-fit-result.json",
+        dict(
+            candidate_fitted=True,
+            pair_hash=pair["pair_hash"],
+            candidate_artifact=driver.descriptor(root, "frozen-candidate-pair.json"),
+        ),
+    )
+    bindings, calls, proposals = [], [], []
+    real_propose = learning.RCControlSeedPolicy.propose
+
+    def tracked(self, context, features, dofs, solver_hash, **kwargs):
+        assert kwargs == {
+            "arithmetic_profile": learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        }
+        proposals.append(context.problem_contract_hash)
+        return real_propose(self, context, features, dofs, solver_hash, **kwargs)
+
+    def binding(gate, *, policy, model_features):
+        assert policy.policy_hash == selected["seed_policy"]["policy_hash"]
+        assert model_features.problem_contract_hash in {
+            v[2].problem_contract_hash for v in values.values()
+        }
+        bindings.append(model_features.problem_contract_hash)
+        return dict(guard=lambda _: False, guard_identity=_sha(b"codec-guard"))
+
+    def mocked_comparison(model, request, **kwargs):
+        for key, value in learning._arithmetic_kwargs(
+            learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        ).items():
+            assert kwargs[key] == value
+        assert kwargs["record_prior_accepted_transition_work"] is True
+        assert kwargs["material_capture_scope"] == "proposal-only"
+        name = kwargs["output_directory"].name.rsplit("-", 1)[0]
+        _, compiled, features, _, _ = values[name]
+        count = len(compiled.problem.free_global_dofs) + 1
+        control = compiled.problem.free_global_dofs.index(request.control_global_dof)
+        accepted = [0.0] * count
+        accepted[control] = request.targets_m[0]
+        context = runtime.RCControlSeedContext(
+            features.problem_contract_hash,
+            request.control_global_dof,
+            control,
+            request.targets_m[1],
+            (0.0, request.targets_m[0]),
+            (tuple([0.0] * count), tuple(accepted)),
+        )
+        kwargs["proposal"](context)
+        calls.append(kwargs["arm_order"])
+        report = fixture_report()
+        report["arms"]["proposal"] = deepcopy(report["arms"]["secant"])
+        report["comparisons"]["proposal"] = deepcopy(report["comparisons"]["secant"])
+        report["prior_work_source_setup_cost"] = {"wall_ns": 2, "cpu_ns": 1}
+        return report
+
+    monkeypatch.setattr(
+        driver, "FullTrainingPriorWorkCostMarginGate", lambda _: object()
+    )
+    monkeypatch.setattr(driver, "full_training_prior_work_guard_binding", binding)
+    monkeypatch.setattr(learning.RCControlSeedPolicy, "propose", tracked)
+    monkeypatch.setattr(driver, "benchmark_rc_control_seed_paths", mocked_comparison)
+    result = driver.evaluate(root)
+    assert len(bindings) == len(calls) == len(proposals) == result["comparisons"] == 18
+    assert result["candidate_evaluated"] is True

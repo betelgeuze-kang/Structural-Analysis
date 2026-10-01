@@ -318,7 +318,7 @@ def _invocations(reader, base, index, entry, artifacts, problem, request):
     return originals, steps
 
 
-def _case(reader, declaration, generation, source_revision, artifacts):
+def _case(reader, declaration, generation, source_revision, artifacts, arithmetic):
     case_id = declaration["case_id"]
     base = f"{case_id}/generation"
     request = decode_bounded_rc_fiber_direct_control_request(
@@ -393,6 +393,35 @@ def _case(reader, declaration, generation, source_revision, artifacts):
         and identity["proposal_identity"] is None,
         "generation_source_request_or_model_differ",
     )
+    if arithmetic is not None:
+        _require(
+            request.solver_config.newton.terminal_polishing is True
+            and identity.get("compiled_problem_contract_hash")
+            == model.problem_contract_hash
+            and all(
+                _bytes(identity.get(key)) == _bytes(value)
+                for key, value in arithmetic.items()
+                if key != "profile"
+            ),
+            "generation_arithmetic_identity_differ",
+        )
+    else:
+        binary64_modes = {
+            "strain_evaluation": "matrix",
+            "coordinate_precision": "binary64",
+            "material_arithmetic": "binary64",
+            "fiber_strain_evaluation": "generalized",
+            "force_accumulation": "binary64",
+            "terminal_coordinate_precision": "binary64",
+            "terminal_refinement_limit": 1,
+        }
+        _require(
+            all(
+                key not in identity or _bytes(identity[key]) == _bytes(value)
+                for key, value in binary64_modes.items()
+            ),
+            "generation_arithmetic_identity_differ",
+        )
     recording = identity["prior_accepted_transition_work"]
     sources = recording["sources"]
     _require(
@@ -443,11 +472,12 @@ def _case(reader, declaration, generation, source_revision, artifacts):
             "solver_config_hash": request.solver_config.contract_hash,
             "source_binding_hash": _sha(_bytes(sources)),
         },
+        arithmetic,
     )
 
 
 def _target(reader, declaration, case, index, sample, artifacts):
-    request, model, _, entries, expected = case
+    request, model, _, entries, expected, arithmetic = case
     _require(index < len(entries), "reference_target_not_attempted")
     entry = entries[index]
     base = f"{declaration['case_id']}/generation/reference"
@@ -509,6 +539,34 @@ def _target(reader, declaration, case, index, sample, artifacts):
         == _bytes(current_steps[0]["trial_solution"]["augmented_coordinates_m"]),
         "source_sample_original_context_or_step_differ",
     )
+    _require(
+        _bytes(sample.get("arithmetic_profile")) == _bytes(arithmetic),
+        "source_sample_arithmetic_profile_differ",
+    )
+    if arithmetic is not None:
+        original_low = current_steps[0]["trial_solution"].get(
+            "augmented_coordinate_compensation_m"
+        )
+        _require(
+            sample.get("label_representation")
+            == "accepted-high-component-for-binary64-start.v1"
+            and type(original_low) is list
+            and len(original_low) == len(sample["accepted_coordinates"])
+            and all(type(v) in (int, float) and math.isfinite(v) for v in original_low)
+            and _bytes(sample.get("accepted_coordinate_compensation_m"))
+            == _bytes(original_low),
+            "source_sample_original_compensation_or_label_differ",
+        )
+    else:
+        _require(
+            current_steps[0]["trial_solution"].get(
+                "augmented_coordinate_compensation_m"
+            )
+            is None
+            and sample.get("label_representation") is None
+            and sample.get("accepted_coordinate_compensation_m") is None,
+            "source_sample_unexpected_retained_metadata",
+        )
     work = validate_rc_control_prior_work(context)
     _require(
         context.prior_work_binding["previous_target_index"] == index - 1,
@@ -572,7 +630,7 @@ def build_generation_prior_work_export(
         raise ValueError("unique declared train generation rows required")
     reader = _Reader(study_root)
     generation_by_id = {row["case_id"]: row for row in generation}
-    study_artifacts, study_error = {}, None
+    study_artifacts, study_error, arithmetic = {}, None, None
     try:
         _require(
             not any(_forbidden(case_id) for case_id in declared_ids),
@@ -588,6 +646,18 @@ def build_generation_prior_work_export(
             "original_learning_plan_differ",
         )
         _require(raw_samples == _bytes(samples), "original_training_samples_differ")
+        arithmetic = original_plan.get("arithmetic_profile")
+        if arithmetic is not None:
+            from structural_analysis.benchmark.rc_control_learning import (
+                _arithmetic_manifest,
+            )
+
+            _require(
+                type(arithmetic) is dict
+                and _bytes(arithmetic)
+                == _bytes(_arithmetic_manifest(arithmetic.get("profile"))),
+                "original_learning_arithmetic_manifest_invalid",
+            )
     except (ValueError, KeyError, TypeError, IndexError, OverflowError) as exc:
         study_error = (
             str(exc)
@@ -608,7 +678,12 @@ def build_generation_prior_work_export(
                     "generation_report_unavailable",
                 )
                 case = _case(
-                    reader, declaration, matching, source_revision, case_artifacts
+                    reader,
+                    declaration,
+                    matching,
+                    source_revision,
+                    case_artifacts,
+                    arithmetic,
                 )
             except (ValueError, KeyError, TypeError, IndexError, OverflowError) as exc:
                 case_error = (

@@ -13,6 +13,7 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )
 from structural_analysis.benchmark import rc_control_prior_work_export as export
+from structural_analysis.benchmark import rc_control_learning as learning
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 from structural_analysis.benchmark.rc_control_prior_work import (
     make_rc_control_prior_work_record,
@@ -36,12 +37,23 @@ def _rehash_step(value):
     return value
 
 
-def authored_export_files(tmp_path, *, retries=0, assembly=True):
+def authored_export_files(
+    tmp_path, *, retries=0, assembly=True, arithmetic_profile="binary64"
+):
     """Schema-shaped bytes made in this test; no claimed solver observations."""
     root = tmp_path / "study"
     base = root / "train" / "generation"
     reference = base / "reference"
+    arithmetic = learning._arithmetic_manifest(arithmetic_profile)
     request = BoundedRCFiberDirectControlRequest(7, (0.1, 0.2))
+    if arithmetic is not None:
+        request = replace(
+            request,
+            solver_config=replace(
+                request.solver_config,
+                newton=replace(request.solver_config.newton, terminal_polishing=True),
+            ),
+        )
     original = synthetic_prior_context(retries=retries, assembly=assembly)
     model = FiberFrameWarmStartModelFeatures(
         original.problem_contract_hash, _sha(b"model-context"), ("width",), (0.4,)
@@ -79,6 +91,11 @@ def authored_export_files(tmp_path, *, retries=0, assembly=True):
             "sources": sources,
         },
     }
+    if arithmetic is not None:
+        identity.update(
+            compiled_problem_contract_hash=model.problem_contract_hash,
+            **{key: value for key, value in arithmetic.items() if key != "profile"},
+        )
     arm_identity = _sha(
         _bytes(
             {
@@ -151,6 +168,11 @@ def authored_export_files(tmp_path, *, retries=0, assembly=True):
         "linear_solve_count": 1,
     }
     current_step["trial_solution"]["augmented_coordinates_m"] = [0.2, 0.4]
+    if arithmetic is not None:
+        current_step["trial_solution"]["augmented_coordinate_compensation_m"] = [
+            2.0**-60,
+            -(2.0**-61),
+        ]
     _rehash_step(current_step)
     current_outcome = deepcopy(prior_outcomes[-1])
     current_outcome.update(
@@ -212,11 +234,22 @@ def authored_export_files(tmp_path, *, retries=0, assembly=True):
         "features": [0.4],
         "correction": [0.0, 0.0],
     }
+    if arithmetic is not None:
+        sample.update(
+            arithmetic_profile=deepcopy(arithmetic),
+            label_representation="accepted-high-component-for-binary64-start.v1",
+            accepted_coordinate_compensation_m=deepcopy(
+                current_step["trial_solution"]["augmented_coordinate_compensation_m"]
+            ),
+        )
     sample["sample_hash"] = _sha(_bytes(sample))
     _write(base / "request.json", identity)
     _write(base / "model.json", model_payload)
     _write(base / "comparison.json", report)
-    _write(root / "plan.json", {"source_revision": REVISION, "cases": [declaration]})
+    plan = {"source_revision": REVISION, "cases": [declaration]}
+    if arithmetic is not None:
+        plan["arithmetic_profile"] = deepcopy(arithmetic)
+    _write(root / "plan.json", plan)
     _write(root / "training-samples.json", [sample])
     return dict(
         study_root=root,
@@ -253,6 +286,152 @@ def _unknown(row):
     assert row["six_counter_profile_usable"] is False
     assert all(value is None for value in row["counters"].values())
     assert row["unavailable_reason"]
+
+
+def _rehash_sample_file(fixture):
+    sample = fixture["samples"][0]
+    sample["sample_hash"] = _sha(
+        _bytes({key: value for key, value in sample.items() if key != "sample_hash"})
+    )
+    _write(fixture["study_root"] / "training-samples.json", fixture["samples"])
+
+
+def test_retained_sample_low_and_profile_bind_original_plan_identity_and_step(tmp_path):
+    fixture = authored_export_files(
+        tmp_path, arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+    )
+    originals = {
+        path: path.read_bytes() for path in fixture["study_root"].rglob("*.json")
+    }
+    first, row = _result(fixture)["rows"]
+    _unknown(first)
+    assert row["status"] == "available" and row["six_counter_profile_usable"] is True
+    assert {path: path.read_bytes() for path in originals} == originals
+    # These are authored codec files; validation does not establish that the
+    # declared native checkpoint is reachable or that a solver produced it.
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "low",
+        "missing_low",
+        "label",
+        "sample_manifest",
+        "sample_limit_float",
+        "plan_limit1",
+        "identity_force",
+        "identity_limit",
+        "step_low",
+    ],
+)
+def test_rehashed_retained_sample_metadata_cannot_override_originals(
+    tmp_path, mutation
+):
+    fixture = authored_export_files(
+        tmp_path, arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+    )
+    sample = fixture["samples"][0]
+    root = fixture["study_root"]
+    if mutation == "low":
+        sample["accepted_coordinate_compensation_m"][0] *= 2
+    elif mutation == "missing_low":
+        del sample["accepted_coordinate_compensation_m"]
+    elif mutation == "label":
+        sample["label_representation"] = "absolute-coordinate-label"
+    elif mutation == "sample_manifest":
+        sample["arithmetic_profile"]["force_accumulation"] = "binary64"
+    elif mutation == "sample_limit_float":
+        sample["arithmetic_profile"]["terminal_refinement_limit"] = 2.0
+    elif mutation == "plan_limit1":
+        plan = json.loads((root / "plan.json").read_bytes())
+        plan["arithmetic_profile"]["terminal_refinement_limit"] = 1
+        _write(root / "plan.json", plan)
+    elif mutation in {"identity_force", "identity_limit"}:
+        key = (
+            "force_accumulation"
+            if mutation == "identity_force"
+            else "terminal_refinement_limit"
+        )
+        value = "binary64" if mutation == "identity_force" else 1
+        identity = json.loads((root / "train/generation/request.json").read_bytes())
+        identity[key] = value
+        _write(root / "train/generation/request.json", identity)
+        _update_report(fixture, lambda report: report.update({key: value}))
+    else:
+        path = root / "train/generation/reference/001-1-step.json"
+        step = json.loads(path.read_bytes())
+        step["trial_solution"]["augmented_coordinate_compensation_m"][0] *= 2
+        _write(path, _rehash_step(step))
+        sample["original_step_bytes_hash"] = _sha(path.read_bytes())
+    _rehash_sample_file(fixture)
+    result = _result(fixture)
+    assert len(result["rows"]) == 2
+    _unknown(result["rows"][1])
+
+
+def test_binary64_sample_cannot_be_relabelled_retained_by_rehashing_metadata(tmp_path):
+    fixture = authored_export_files(tmp_path)
+    assert _result(fixture)["rows"][1]["status"] == "available"
+    fixture["samples"][0].update(
+        arithmetic_profile=learning._arithmetic_manifest(
+            learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        ),
+        label_representation="accepted-high-component-for-binary64-start.v1",
+        accepted_coordinate_compensation_m=[1e-9, -1e-9],
+    )
+    _rehash_sample_file(fixture)
+    row = _result(fixture)["rows"][1]
+    _unknown(row)
+    assert row["unavailable_reason"] == "source_sample_arithmetic_profile_differ"
+
+
+def test_optional_none_binary64_metadata_remains_compatible(tmp_path):
+    fixture = authored_export_files(tmp_path)
+    plan = json.loads((fixture["study_root"] / "plan.json").read_bytes())
+    plan["arithmetic_profile"] = None
+    _write(fixture["study_root"] / "plan.json", plan)
+    fixture["samples"][0].update(
+        arithmetic_profile=None,
+        label_representation=None,
+        accepted_coordinate_compensation_m=None,
+    )
+    _rehash_sample_file(fixture)
+    assert _result(fixture)["rows"][1]["status"] == "available"
+
+
+@pytest.mark.parametrize("mutation", ["retained_identity", "binary64_step_low"])
+def test_reverse_profile_masking_keeps_original_identity_and_step_authority(
+    tmp_path, mutation
+):
+    fixture = authored_export_files(
+        tmp_path,
+        arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+        if mutation == "retained_identity"
+        else "binary64",
+    )
+    root = fixture["study_root"]
+    if mutation == "retained_identity":
+        plan = json.loads((root / "plan.json").read_bytes())
+        del plan["arithmetic_profile"]
+        _write(root / "plan.json", plan)
+        fixture["samples"][0].update(
+            arithmetic_profile=None,
+            label_representation=None,
+            accepted_coordinate_compensation_m=None,
+        )
+        reason = "generation_arithmetic_identity_differ"
+    else:
+        path = root / "train/generation/reference/001-1-step.json"
+        step = json.loads(path.read_bytes())
+        step["trial_solution"]["augmented_coordinate_compensation_m"] = [2.0**-60, 0.0]
+        _write(path, _rehash_step(step))
+        fixture["samples"][0]["original_step_bytes_hash"] = _sha(path.read_bytes())
+        reason = "source_sample_unexpected_retained_metadata"
+    _rehash_sample_file(fixture)
+    row = _result(fixture)["rows"][1]
+    _unknown(row)
+    assert row["unavailable_reason"] == reason
 
 
 @pytest.mark.parametrize("retries", [0, 1, 2])

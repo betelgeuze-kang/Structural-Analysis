@@ -143,3 +143,119 @@ validation/holdout outcomes, clip near-zero responses, or waive failed gates.
 Independent experiment correspondence/rights, learned total-cost benefit,
 final-head CI/main integration, hardware conditions, and release authority
 remain open.
+
+
+## Fresh complete-path TRAIN precision diagnosis
+
+The separately frozen follow-up ran once at numeric source
+`7cfc16fcab78b661f17bb6435fdecbe5db7127ed`. Four authored TRAIN cases
+A/B/C/D, three repetitions and two arithmetic profiles produced 24 comparisons
+and 72 complete six-target paths. Every arm started from its own new native
+initial state; no original checkpoint or teacher policy was reused.
+
+| Instrumented profile | Full-response eligible comparisons | Native invocations | Newton / linear solves | Disjoint comparison wall time |
+| --- | ---: | ---: | ---: | ---: |
+| Matrix / binary64 control with terminal polishing | 0 / 12 | 219 | 1,761 | 45.942 s |
+| Coupled retained precision, terminal refinement limit 1 | 12 / 12 | 219 | 1,845 | 141.624 s |
+
+Both profiles used the same original physical model, material, loads, six targets,
+14 explicit line-search alphas, solver iteration limits and typed
+`terminal_polishing=True` request. The comparison criterion remained absolute
+`1e-10` plus relative `1e-8`. The precision profile used exact-rational strain,
+twofold coordinate increments, retained material strain and coordinates,
+rational force accumulation and terminal twofold refinement with limit **1**.
+It is distinct from the existing `retained-twofold-refinement.v1` learning
+profile, whose terminal refinement limit is **2**.
+
+All 24 reference/fresh-reference repeats matched exactly. A declared physical
+response tolerance pass does not imply secant checkpoint byte equality. No seed
+proposal, gate, fit, validation/holdout numerical evaluation or original-label
+revision ran in this follow-up. E04's 19 unknown / one negative / zero positive
+labels and ineligible final comparisons remain unchanged.
+
+Actual work was 438 native invocations: 432 committed and six rejected seeded
+attempts. Newton and linear work was 3,606: 3,258 primary plus 348 accepted
+polishing solves. The 84 rejected polishing candidates stopped before another
+solve. Original assembly dispatch records counted 10,686 calls; element/material
+and outside-Newton assembly totals were not independently available. These are
+local instrumented diagnosis costs, not evidence of acceleration or AI benefit.
+The two profile clocks above cover disjoint comparisons; they are not added to
+the enclosing clocks.
+
+The owned process exited zero and was reaped. Enclosing wrapper time was
+195.518 s, child VmHWM 122,408,960 bytes and retained results 137,157,216 logical
+bytes. The frozen limits were 900 seconds, 768 MiB output, 2 GiB live child
+memory and 1,536 native calls. Source and original bytes stayed unchanged.
+Logical file lengths and one process's VmHWM are not filesystem or hardware
+qualification.
+
+The original-file reviewer recomputed the response/mismatch predicates and
+counters: 8,621 consistency checks, zero contradictions, and 2,367 inspected
+original/proof files unchanged. This is internal original correspondence, not
+an independent physical solver or laboratory comparison. A source-only final
+review was written after launch; it is not retroactively a prelaunch receipt.
+
+A separate read-only scalar experiment at the same source also found that
+exact finite-input summation alone left the selected authored-B target-1
+secant/proposal force comparisons outside the original criterion. It used no
+material update, adapter solve or fit; it does not establish a unique cause for
+all upstream response differences.
+
+The host retains the full originals outside this repository in
+`pr-backlog-20260929/full-training-numerical-followup-20261001/train-response-diagnosis-20261001/continuation-precision-20261001/fresh-path-precision-01/`.
+The summary below does not imply these raw originals are distributed in a wheel
+or published to GitHub.
+
+| Immutable artifact | SHA256 |
+| --- | --- |
+| Frozen canonical numerical plan | `d7e23d1aa762d38401a5b07d68730fe5fea19bb241eb7eaad88e58d7519cef70` |
+| Actual child outcome | `df5605e5cff7c634503089b92268b47c890df22180f200acf7bc7970c48cfe80` |
+| Actual owned-process outcome | `bd6f2b9107ce4b0bcb17a8cc60d9d322522738dfe9d87404a291c9a8cdea8d31` |
+| Original-file review | `71a4b9ce4c4c092c2124f51fa4f942efaadb727c2e2a1f450180a3c32d343667` |
+
+The next learned-pair experiment needs explicit same-profile limit-2 generation,
+teacher complements, original-file joins, inference and full-path cost evaluation.
+Passing this TRAIN-only limit-1 diagnosis does not close that work, prove learned
+gain, admit external data, or establish production readiness.
+
+
+## Opt-in full-training profile and original export binding
+
+The authored full-training driver can now prepare a new campaign with
+`--arithmetic-profile retained-twofold-refinement.v1`. This existing learning
+profile uses terminal refinement limit **2**. The fresh complete-path diagnosis
+above used limit **1** and source `7cfc16fcab78b661f17bb6435fdecbe5db7127ed`;
+its numerical outcomes do not verify the new limit-2 learning campaign.
+
+The prepared plan freezes the exact arithmetic manifest and enables terminal
+polishing in the typed request. Generation, complementary out-of-fold seed
+headers, inference, teacher comparisons, join/fit and final path comparisons
+forward the same profile. Rehashed changes to the authored roster, model,
+request, solver settings or arithmetic manifest are rejected before solver
+work. The default binary64 plan bodies for both original solver profiles and
+all six model files remain byte-identical to the prior version except for the
+driver artifact identity.
+
+The original-generation exporter now checks the sample manifest, label
+representation and retained low coordinates against the original plan,
+runtime identity and accepted step. Two reproduced provenance gaps are closed:
+adding retained metadata to ordinary binary64 originals and removing the
+metadata from actual retained originals. The producer/consumer API is unchanged.
+These are internal original-consistency checks; they do not establish an
+independent producer or hardware attestation.
+
+The final four source/test files passed **345 tests across five complete related
+modules**, with zero failures, errors or skips. Ruff lint/format and whitespace
+checks passed. Actual bytes of 8,923 guarded source paths were identical before
+and after the final validation. The focused 104 tests are included in that
+345-test total and must not be added again. Earlier intermediate runs are
+preserved separately. The regression fixtures are software tests, not new
+training observations or independent physical validation.
+
+The raw final validation is retained under
+`root-integration-whole-modules-02/receipt.json` in the continuation packet.
+The next numerical step must create new limit-2 generation and label originals
+at the final published source, preserve the exclusion split, and measure the
+full training/evaluation cost against a matching non-AI baseline. Previous E04
+labels and the limit-1 diagnostic remain unchanged and are not admitted by
+metadata relabelling. The overall development goal remains active.
