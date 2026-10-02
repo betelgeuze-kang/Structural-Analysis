@@ -459,11 +459,15 @@ def test_cleanup_signal_failure_remains_explicit_even_if_child_is_later_reaped(
         _cleanup_marker(marker)
 
 
-def test_child_environment_has_no_auth_or_loader_environment(tmp_path, monkeypatch):
+@pytest.mark.parametrize("coretype", ("Haswell", "Nehalem"))
+def test_child_environment_has_no_auth_or_loader_environment(
+    tmp_path, monkeypatch, coretype
+):
     monkeypatch.setenv("STRUCTURAL_SERVICE_TOKEN", "synthetic-token-not-forwarded")
     monkeypatch.setenv("LD_PRELOAD", "/synthetic-invalid-loader.so")
     monkeypatch.setenv("PYTHONPATH", "/synthetic-injected-import")
     monkeypatch.setenv("OPENBLAS_NUM_THREADS", "2")
+    monkeypatch.setenv("OPENBLAS_CORETYPE", coretype)
     body = _reply_code(phase="verification", report={"placeholder": True})
     body += "output=(None,None,ns['_json']({'environment':dict(os.environ)}),None)\n"
     body += "ns['_write_frame'](sys.stdout.buffer,reply,output)\n"
@@ -473,7 +477,16 @@ def test_child_environment_has_no_auth_or_loader_environment(tmp_path, monkeypat
     assert "STRUCTURAL_SERVICE_TOKEN" not in environment
     assert "LD_PRELOAD" not in environment and "PYTHONPATH" not in environment
     assert environment["OPENBLAS_NUM_THREADS"] == "2"
+    assert environment["OPENBLAS_CORETYPE"] == coretype
     _assert_reaped(reply.supervisor_timing["child_pid"])
+
+
+@pytest.mark.parametrize(
+    "coretype", ("", "Haswell ", "Haswell\n", "../Haswell", "Háswell", "H" * 65)
+)
+def test_child_environment_drops_unbounded_dispatch_values(monkeypatch, coretype):
+    monkeypatch.setenv("OPENBLAS_CORETYPE", coretype)
+    assert "OPENBLAS_CORETYPE" not in supervisor._child_environment()
 
 
 @pytest.mark.parametrize(

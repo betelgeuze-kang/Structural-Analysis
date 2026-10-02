@@ -197,6 +197,18 @@ def _child_argv(expected_parent_pid: int) -> list[str]:
 def _child_environment() -> dict[str, str]:
     # Never inherit authentication, loader injection, PYTHONPATH or user config.
     result = {"PATH": "/usr/bin:/bin"}
+    # A parent CPU dispatch pin must also reach fresh numerical interpreters.
+    # Otherwise identical requests can use different BLAS kernels and produce
+    # different native checkpoint/step bytes. Accept only a bounded identifier.
+    coretype = os.environ.get("OPENBLAS_CORETYPE")
+    if (
+        coretype is not None
+        and 1 <= len(coretype) <= 64
+        and coretype.isascii()
+        and coretype[0].isalpha()
+        and coretype.replace("_", "").isalnum()
+    ):
+        result["OPENBLAS_CORETYPE"] = coretype
     for name in (
         "OMP_NUM_THREADS",
         "OPENBLAS_NUM_THREADS",
