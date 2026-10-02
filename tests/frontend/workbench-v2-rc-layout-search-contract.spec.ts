@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
 import { validateRcControlSearch } from '../../src/workbench-v2/model/rcControlSearchSchema'
-import { fields, document, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
+import { fields, document, rawValues, selfHash } from '../../src/workbench-v2/model/rcJobSchema'
 import { layoutFiles, layoutRead } from './layoutSearchFixture'
 function changed(raw: Uint8Array, edits: Record<string,string>, key: string): Uint8Array {
   const values = new Map([...fields(new TextDecoder().decode(raw))].map(([k,v]) => [k,v.value]))
@@ -279,3 +279,88 @@ test('RC staged layout keeps full acceptance separate from unavailable prefix ve
   expect(review.designs.price_order.report.selected_candidate_id).toBe('middle')
   expect(review.designs.price_order.report.rows.find((r: any) => r.candidate_id === 'middle').full_reference_verification_pass).toBe(true)
 })
+
+// New metadata-only pool mutations leave every numerical payload untouched.
+function poolBindingMembers(raw: string, edits: Record<string, string>): string {
+  const values = new Map([...fields(raw)].map(([key, value]) => [key, value.value]))
+  for (const [key, value] of Object.entries(edits)) values.set(key, value)
+  return `{${[...values].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, value]) => `${JSON.stringify(key)}:${value}`).join(',')}}`
+}
+function poolBindingMetadata(original: Record<string, Buffer>, mutate: (model: any, id: string) => void,
+  control: Record<string, unknown> = {}): Record<string, Buffer> {
+  const files = { ...original }, plan = document(files['plan.json'])
+  const rows = rawValues(fields(plan.raw).get('pool')!.value)
+  for (const [index, row] of plan.value.pool.entries()) {
+    const model = document(files[row.model_artifact.path]), value = structuredClone(model.value)
+    mutate(value, row.candidate_id)
+    if (JSON.stringify(value) === JSON.stringify(model.value)) continue
+    const edits = Object.fromEntries(Object.entries(value).filter(([key, v]) => JSON.stringify(v) !== JSON.stringify(model.value[key])).map(([key, v]) => [key, JSON.stringify(v)]))
+    const bytes = Buffer.from(poolBindingMembers(model.raw, edits))
+    files[row.model_artifact.path] = bytes
+    const ref = { path: row.model_artifact.path, byte_length: bytes.byteLength, sha256: `sha256:${createHash('sha256').update(bytes).digest('hex')}` }
+    const rowFields = fields(rows[index])
+    const quantity = changed(Buffer.from(rowFields.get('quantities')!.value), { model_checksum: JSON.stringify(ref.sha256) }, 'quantity_hash')
+    const estimate = poolBindingMembers(rowFields.get('material_estimate')!.value, { quantity_hash: JSON.stringify(document(quantity).value.quantity_hash) })
+    rows[index] = poolBindingMembers(rows[index], { model_artifact: JSON.stringify(ref), quantities: new TextDecoder().decode(quantity), material_estimate: estimate })
+  }
+  const request = poolBindingMembers(fields(plan.raw).get('control_request')!.value, Object.fromEntries(Object.entries(control).map(([key, value]) => [key, JSON.stringify(value)])))
+  files['plan.json'] = Buffer.from(changed(files['plan.json'], { pool: `[${rows.join(',')}]`, control_request: request }, 'plan_hash'))
+  files['result.json'] = Buffer.from(changed(files['result.json'], { plan_hash: JSON.stringify(document(files['plan.json']).value.plan_hash) }, 'report_hash'))
+  const changedPaths = Object.keys(files).filter(path => !files[path].equals(original[path]))
+  expect(changedPaths.every(path => path === 'plan.json' || path === 'result.json' || path.startsWith('pool/'))).toBe(true)
+  return files
+}
+function poolBindingRename(model: any, left: string, right: string): void {
+  const remap = (id: string) => id === left ? right : id === right ? left : id
+  model.nodes.forEach((node: any) => { node.id = remap(node.id) })
+  model.elements.forEach((element: any) => { element.nodes = element.nodes.map(remap) })
+  for (const row of [...model.loads, ...model.supports]) row.node = remap(row.node)
+}
+const poolBindingSeed = standaloneLayouts['b2-o0-price_order']
+test('RC layout pool binding accepts rehashed ID rename with unchanged control meaning', async () => {
+  const files = poolBindingMetadata(poolBindingSeed, (model, id) => {
+    if (id === 'outside') for (const node of [...model.nodes]) poolBindingRename(model, node.id, `renamed_${node.id}`)
+  })
+  const review = await validateRcControlSearch(files['result.json'], async path => files[path])
+  expect(review.plan.pool.some((row: any) => row.candidate_id === 'outside')).toBe(true)
+  expect(review.designs.price_order.report).toEqual(document(poolBindingSeed['price_order/comparison.json']).value)
+})
+for (const [mode, seed] of [['full', poolBindingSeed], ['pruned', prunedLayouts.price], ['staged', stagedFiles]] as const) {
+  test(`RC layout pool binding rejects unvisited control drift in ${mode}`, async () => {
+    const rows = document(seed['price_order/comparison.json']).value.rows
+    const unvisited = document(seed['plan.json']).value.pool.find((row: any) => !rows.some((visited: any) => visited.candidate_id === row.candidate_id))
+    expect(unvisited).toBeTruthy()
+    const files = poolBindingMetadata(seed, (model, id) => { if (id === unvisited.candidate_id) model.nodes.reverse() })
+    const requested: string[] = []
+    await expect(validateRcControlSearch(files['result.json'], async path => { requested.push(path); return files[path] }))
+      .rejects.toThrow('layout_pool_control_binding_mismatch')
+    expect(requested.some(path => path.startsWith('price_order/') || path.startsWith('learned_order/'))).toBe(false)
+  })
+}
+const preload = [{ node_id: 'N2', FX_kN: -0, FY_kN: -10, MZ_kNm: 2 }]
+const signedLoads = [{ node_id: 'N2', FX_kN: -5, FY_kN: 6, MZ_kNm: -7 }, { node_id: 'N1', FX_kN: 2, FY_kN: -3, MZ_kNm: 4 }]
+const preloadRequest = (loads: unknown[]) => ({ schema_version: 'bounded-rc-fiber-direct-control-request.v2', constant_nodal_loads: loads })
+const poolBindingCases: Array<[string, (model: any, id: string) => void, Record<string, unknown>, string | null]> = [
+  ['non-control declaration permutation', (model, id) => { if (id === 'outside') [model.nodes[0], model.nodes[1]] = [model.nodes[1], model.nodes[0]] }, {}, null],
+  ['translated geometry', (model, id) => { if (id === 'outside') model.nodes.forEach((node: any) => { node.coordinates[0] += 100; node.coordinates[1] -= 20 }) }, {}, null],
+  ['common signed preload', () => {}, preloadRequest(preload), null],
+  ['preload canonical node drift', (model, id) => { if (id === 'outside') poolBindingRename(model, 'N1', 'N2') }, preloadRequest(preload), 'layout_pool_control_binding_mismatch'],
+  ['missing preload node', () => {}, preloadRequest([{ ...preload[0], node_id: 'missing' }]), 'layout_pool_preload_node_invalid'],
+  ['control outside model', () => {}, { control_global_dof: 46 }, 'layout_pool_control_node_invalid'],
+  ['rotational control', () => {}, { control_global_dof: 8 }, 'layout_pool_control_node_invalid'],
+  ['multiple signed loads with declaration remap', (model, id) => { if (id === 'outside') [model.nodes[0], model.nodes[1]] = [model.nodes[1], model.nodes[0]] }, preloadRequest(signedLoads), null],
+  ['multiple signed loads with node rank drift', (model, id) => { if (id === 'outside') poolBindingRename(model, 'N1', 'N2') }, preloadRequest(signedLoads), 'layout_pool_control_binding_mismatch'],
+]
+for (const [name, mutate, control, error] of poolBindingCases) {
+  test(`RC layout pool binding metadata ${name}`, async () => {
+    const files = poolBindingMetadata(poolBindingSeed, mutate, control), requested: string[] = []
+    // Stop after pool admission; these altered requests have no new solver proof.
+    const review = validateRcControlSearch(files['result.json'], async path => {
+      requested.push(path)
+      if (path.startsWith('price_order/')) throw new Error('metadata_pool_admission_complete')
+      return files[path]
+    })
+    await expect(review).rejects.toThrow(error ?? 'metadata_pool_admission_complete')
+    expect(requested.some(path => path.startsWith('price_order/'))).toBe(error === null)
+  })
+}

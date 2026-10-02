@@ -19,6 +19,23 @@ const features = ['member_count', 'total_length_m', 'gross_concrete_volume_m3', 
   ...Array.from({ length: 15 }, (_, i) => ['width_m', 'depth_m', 'cover_m', 'top_bar_count', 'bottom_bar_count', 'bar_area_m2'].map(n => `member_${i}_${n}`)).flat(),
   'node_count', 'rotation_coordinate_scale_m', ...Array.from({ length: 30 }, (_, i) => [`node_${i}_relative_x_m`, `node_${i}_relative_y_m`]).flat()]
 
+type LayoutControlBinding = [number, number, number[][]]
+function layoutControlBinding(model: RcObject, request: RcObject): LayoutControlBinding {
+  check(Array.isArray(model.nodes) && model.nodes.length > 0 && model.nodes.every((node: RcObject) => node
+    && typeof node.id === 'string' && Array.isArray(node.coordinates) && node.coordinates.length >= 2
+    && node.coordinates.slice(0, 2).every(num)) && new Set(model.nodes.map((node: RcObject) => node.id)).size === model.nodes.length, 'layout_pool_nodes_invalid')
+  const index = Math.floor(request.control_global_dof / 3), component = request.control_global_dof % 3
+  check(index < model.nodes.length && component < 2, 'layout_pool_control_node_invalid')
+  // Match Python's stable XY ranks without changing authored declaration order.
+  const canonical = new Map<string, number>([...model.nodes].sort((a, b) => a.coordinates[0] - b.coordinates[0]
+    || a.coordinates[1] - b.coordinates[1]).map((node, rank) => [node.id, rank]))
+  const preload = (request.constant_nodal_loads ?? []).map((load: RcObject) => {
+    check(canonical.has(load.node_id), 'layout_pool_preload_node_invalid')
+    return [canonical.get(load.node_id)!, load.FX_kN, load.FY_kN, load.MZ_kNm]
+  }).sort((a: number[], b: number[]) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2] || a[3] - b[3])
+  return [canonical.get(model.nodes[index].id)!, component, preload]
+}
+
 export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, work: (rows: RcObject[]) => RcObject, coverage: (plan: RcObject, oracle: RcObject | null) => RcObject): Promise<RcSearchReview> {
   const doc = document(raw), report = doc.value
   await selfHash(doc.raw, report, 'report_hash')
@@ -82,6 +99,7 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
   validateRcStudyLimits(common)
   const poolSlices = rawValues(fields(planDoc.raw).get('pool')!.value)
   const poolModels: Record<string, RcObject> = {}
+  let baselineBinding: LayoutControlBinding | null = null
   for (const [i, row] of plan.pool.entries()) {
     const ref = row.model_artifact
     check(ref && ref.path === `pool/${row.candidate_id}.json` && nat(ref.byte_length) && ref.byte_length > 0 && ref.byte_length <= 16 * MAX && hash(ref.sha256), 'layout_pool_reference_invalid')
@@ -90,6 +108,9 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
     const model = document(bytes).value
     check(model.schema_version === 'structural-analysis-canonical-model.v1', 'layout_model_invalid')
     await verifyQuantities({ ...row, artifacts: { model: ref } }, model, poolSlices[i], common)
+    const binding = layoutControlBinding(model, plan.control_request)
+    if (baselineBinding === null) baselineBinding = binding
+    else check(same(binding, baselineBinding), 'layout_pool_control_binding_mismatch')
     poolModels[row.candidate_id] = model
   }
   const ids: string[] = plan.pool.slice(1).map((r: RcObject) => r.candidate_id)

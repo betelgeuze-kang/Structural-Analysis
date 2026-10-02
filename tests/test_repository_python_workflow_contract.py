@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import shlex
 import subprocess
 import sys
 import textwrap
@@ -27,6 +28,25 @@ ANALYTIC_FRAME_REFRESH_COMMANDS = (
     "python scripts/build_verification_hierarchy_status.py",
     "python scripts/build_verification_hierarchy_status.py --check",
 )
+
+
+def _canonical_artifact_cli_bindings(run: str, mode: str) -> dict[str, str]:
+    expanded = run.replace("\\\n", " ")
+    marker = f"python scripts/verify_canonical_actions_artifact.py {mode} "
+    assert expanded.count(marker) == 1
+    line = next(line.lstrip() for line in expanded.splitlines() if marker in line)
+    prefix = 'if canonical_artifact_id="$(' if mode == "select" else ""
+    assert line.startswith(prefix + marker)
+    command = line.removeprefix(prefix + marker)
+    if mode == "select":
+        assert command.endswith(')"; then')
+        command = command.removesuffix(')"; then')
+    arguments = shlex.split(command)
+    assert len(arguments) % 2 == 0
+    assert all(flag.startswith("--") for flag in arguments[::2])
+    bindings = dict(zip(arguments[::2], arguments[1::2]))
+    assert len(bindings) == len(arguments) // 2
+    return bindings
 
 
 @pytest.mark.parametrize(
@@ -622,10 +642,87 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "sleep 10" in workflow
     assert "canonical workflow lookup failed after bounded retry" in workflow
     assert 'row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]' in workflow
-    assert "gh run download" in workflow
+    parsed = yaml.safe_load(workflow)
+    build_steps = parsed["jobs"]["build-current-state"]["steps"]
+    canonical_step = next(
+        step
+        for step in build_steps
+        if step["name"] == "Materialize exact-SHA canonical verification receipt"
+    )
+    canonical_run = canonical_step["run"]
+    assert "gh run download" not in canonical_run
+    selection_bindings = {
+        "--run": ".ci/product-state-inputs/canonical-verification-workflow-run.json",
+        "--inventory": ".ci/product-state-inputs/canonical-verification-artifacts.json",
+        "--repository": "$GITHUB_REPOSITORY",
+        "--source-sha": "$PRODUCT_STATE_SHA",
+        "--run-id": "$canonical_run_id",
+    }
+    assert _canonical_artifact_cli_bindings(canonical_run, "select") == (
+        selection_bindings
+    )
+    sealed_bindings = selection_bindings | {
+        "--artifact": ".ci/product-state-inputs/canonical-verification-artifact-api.json",
+        "--api-url": "$GITHUB_API_URL",
+        "--materialize-root": ".",
+        "--identity-out": ".ci/product-state-inputs/canonical-actions-artifact-identity.json",
+    }
+    assert _canonical_artifact_cli_bindings(canonical_run, "admit") == (
+        sealed_bindings
+        | {"--archive": ".ci/canonical-receipt-download/canonical-artifact.zip"}
+    )
+    run_lookup = '"repos/$GITHUB_REPOSITORY/actions/runs/$canonical_run_id"'
+    artifact_lookup = (
+        '"repos/$GITHUB_REPOSITORY/actions/artifacts/$canonical_artifact_id"'
+    )
+    archive_lookup = (
+        '"repos/$GITHUB_REPOSITORY/actions/artifacts/$canonical_artifact_id/zip"'
+    )
+    assert artifact_lookup in canonical_run
+    assert archive_lookup in canonical_run
+    assert canonical_run.count(run_lookup) == 2
+    assert (
+        canonical_run.index(run_lookup)
+        < canonical_run.index("verify_canonical_actions_artifact.py select")
+        < canonical_run.index(artifact_lookup)
+        < canonical_run.index(archive_lookup)
+        < canonical_run.rindex(run_lookup)
+        < canonical_run.index("verify_canonical_actions_artifact.py admit")
+    )
+    source_inputs = next(
+        step
+        for step in build_steps
+        if step["name"] == "Materialize exact current-source product-state inputs"
+    )["run"]
+    assert " ".join(source_inputs.replace("\\\n", " ").split()).startswith(
+        "python scripts/verify_tracked_source_tree.py --repo-root . "
+        '--source-sha "$PRODUCT_STATE_SHA" --profile consumer'
+    )
+    candidate = next(
+        step
+        for step in build_steps
+        if step["name"] == "Assemble allowlisted source-bound Product State candidate"
+    )["run"]
+    required = candidate.split("required = {", 1)[1].split("}", 1)[0]
+    for key in ("--run", "--inventory", "--artifact", "--identity-out"):
+        assert f'"{sealed_bindings[key]}"' in required
+    replay = next(
+        step
+        for step in parsed["jobs"]["verify-current-state"]["steps"]
+        if step["name"] == "Replay exact-source overlay, full DAG, and provenance"
+    )["run"]
+    assert _canonical_artifact_cli_bindings(replay, "replay") == sealed_bindings
+    assert (
+        replay.index("build_post_main_evidence_overlay.py materialize")
+        < replay.index("verify_canonical_actions_artifact.py replay")
+        < replay.index("check_generated_artifact_dag.py")
+        < replay.index("build_product_state_provenance_bundle.py")
+    )
     assert "for attempt in {1..12}" in workflow
     assert "sleep 5" in workflow
-    assert "exact-SHA canonical artifact unavailable after bounded retry" in workflow
+    assert "exact-attempt canonical artifact unavailable after bounded retry" in (
+        canonical_run
+    )
     assert (
         "artifacts/manifests/canonical_verification_environment.current.v1.json"
         in workflow
@@ -756,6 +853,79 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     ) < (workflow.index("  attest-current-state:"))
     assert workflow.count("include-hidden-files: true") == 3
     assert "retention-days: 90" in workflow
+
+
+@pytest.mark.parametrize(
+    ("original", "replacement"),
+    [
+        (
+            "python scripts/verify_canonical_actions_artifact.py select",
+            "python scripts/unverified_artifact_download.py select",
+        ),
+        (
+            'actions/artifacts/$canonical_artifact_id"',
+            'actions/artifacts/$unbound_artifact_id"',
+        ),
+        (
+            "actions/artifacts/$canonical_artifact_id/zip",
+            "actions/artifacts/$unbound_artifact_id/zip",
+        ),
+        (
+            "--archive .ci/canonical-receipt-download/canonical-artifact.zip",
+            "--archive .ci/canonical-receipt-download/unverified-artifact.zip",
+        ),
+        (
+            '--api-url "$GITHUB_API_URL"',
+            '--api-url "$UNBOUND_API_URL"',
+        ),
+        (
+            "python scripts/verify_canonical_actions_artifact.py admit",
+            "python scripts/unverified_artifact_download.py admit",
+        ),
+        (
+            "python scripts/verify_tracked_source_tree.py \\\n"
+            '            --repo-root . --source-sha "$PRODUCT_STATE_SHA" --profile consumer',
+            "true",
+        ),
+        (
+            '              ".ci/product-state-inputs/canonical-actions-artifact-identity.json",',
+            "",
+        ),
+        (
+            "python scripts/verify_canonical_actions_artifact.py replay",
+            "python scripts/unverified_artifact_download.py replay",
+        ),
+    ],
+    ids=[
+        "selection-bypass",
+        "metadata-id-drift",
+        "archive-id-drift",
+        "archive-path-drift",
+        "api-authority-drift",
+        "admission-bypass",
+        "source-admission-bypass",
+        "sealed-identity-omitted",
+        "replay-bypass",
+    ],
+)
+def test_product_state_rejects_unbound_canonical_artifact_wiring(
+    original: str,
+    replacement: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    path = Path(".github/workflows/product-state-current.yml")
+    workflow = (ROOT / path).read_text(encoding="utf-8")
+    assert original in workflow
+    mutated = workflow.replace(original, replacement, 1)
+    # A copy outside the actual step must not satisfy the scoped wiring checks.
+    decoy = "\n".join(f"# {line}" for line in original.splitlines())
+    target = tmp_path / path
+    target.parent.mkdir(parents=True)
+    target.write_text(mutated + "\n" + decoy + "\n", encoding="utf-8")
+    monkeypatch.setattr(sys.modules[__name__], "ROOT", tmp_path)
+    with pytest.raises(AssertionError):
+        test_current_product_state_records_every_completed_main_nightly_outcome()
 
 
 def test_product_state_privileged_authority_binding_rejects_byte_transplants() -> None:

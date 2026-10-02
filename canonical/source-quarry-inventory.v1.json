@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:449eeda0295c911300f1efc1939283f2edf3bca452253f4ca278f79947931756",
+  "inventory_digest": "sha256:8023bd4e134684dec05985dc22d891efda910e315bafcb36adbfebd2598b3670",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -522,7 +522,7 @@
           "blob_sha": "e928d9434f8d1eb8d0d22070206333c87db89ee5",
           "change_status": "modified",
           "changes": 55,
-          "current_blob_sha": "a69e16034f60f8b355b3429bf5d829757d93399e",
+          "current_blob_sha": "d0f3b621de903731adfa1519dedc7353cf36734b",
           "current_relation": "different",
           "deletions": 4,
           "path": ".github/workflows/nightly-full-quality.yml",
@@ -2323,7 +2323,7 @@
           "blob_sha": "58d5ac5d5d2258272787a3011b2a3d690e6df857",
           "change_status": "modified",
           "changes": 10,
-          "current_blob_sha": "741077cf2b48f9f54f86c7679db7c93505071a05",
+          "current_blob_sha": "7c271a3832cb9f135ea9cf7d44c299e8e992b8b1",
           "current_relation": "different",
           "deletions": 3,
           "path": "scripts/verify-workbench-v2-e2e.mjs",
