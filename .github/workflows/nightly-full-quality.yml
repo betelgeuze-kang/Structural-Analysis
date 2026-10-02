@@ -281,6 +281,8 @@ jobs:
           test "$(git rev-parse --verify 'HEAD^{commit}')" = "$GITHUB_SHA"
           test -z "$(git status --porcelain=v1 --untracked-files=all)"
           test -z "$(find . -xdev -type l -not -path './.git/*' -print -quit)"
+          python3 scripts/verify_tracked_source_tree.py \
+            --repo-root . --source-sha "$GITHUB_SHA" --profile pristine
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6

@@ -616,6 +616,28 @@ def build_overlay(
     _require(head == source_sha, "source_sha_not_head")
     tree_sha = _git_text(repo_root, "rev-parse", f"{source_sha}^{{tree}}")
     _require(SHA.fullmatch(tree_sha) is not None, "source_tree_sha_invalid")
+    from scripts.verify_tracked_source_tree import (
+        TrackedSourceTreeError,
+        source_profile_paths,
+        verify_tracked_source_tree,
+    )
+
+    modified_paths, untracked_paths = source_profile_paths("producer")
+
+    def verify_source() -> None:
+        try:
+            verify_tracked_source_tree(
+                repo_root=repo_root,
+                source_sha=source_sha,
+                allowed_modified_paths=modified_paths,
+                allowed_untracked_paths=untracked_paths,
+            )
+        except TrackedSourceTreeError as exc:
+            raise OverlayContractError(
+                "overlay_tracked_source_invalid:" + str(exc)
+            ) from exc
+
+    verify_source()
     _require(not out_dir.exists(), "overlay_output_already_exists")
     out_dir.mkdir(parents=True)
     out_dir = _safe_directory(out_dir, "overlay_output")
@@ -726,6 +748,7 @@ def build_overlay(
         "claim_boundary": CLAIM_BOUNDARY,
     }
     _validate_schema(repo_root, payload)
+    verify_source()
     (out_dir / MANIFEST_NAME).write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

@@ -90,6 +90,8 @@ jobs:
           test "$(git rev-parse --verify 'HEAD^{commit}')" = "$PRODUCT_STATE_SHA"
           test -z "$(git status --porcelain=v1 --untracked-files=all)"
           test -z "$(find . -xdev -type l -not -path './.git/*' -print -quit)"
+          python3 scripts/verify_tracked_source_tree.py \
+            --repo-root . --source-sha "$PRODUCT_STATE_SHA" --profile pristine
 
       - name: Verify product-state workflow execution identity
         shell: bash
@@ -555,6 +557,7 @@ jobs:
           import json
           import os
           from pathlib import Path
+          from scripts.verify_canonical_actions_artifact import workflow_path_matches
 
           payload = json.loads(
               Path(".ci/product-state-inputs/canonical-verification-workflow-runs.json").read_text()
@@ -565,7 +568,9 @@ jobs:
               if row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]
               and row.get("head_branch") == "main"
               and row.get("conclusion") == "success"
-              and row.get("path") == ".github/workflows/p0-canonical-contract.yml"
+              and workflow_path_matches(row.get("path"))
+              and type(row.get("id")) is int
+              and 0 < row["id"] <= 9007199254740991
           ]
           if matches:
               print(max(matches, key=lambda row: int(row["id"]))["id"])
@@ -585,52 +590,46 @@ jobs:
           gh api --method GET \
             "repos/$GITHUB_REPOSITORY/actions/runs/$canonical_run_id" \
             > .ci/product-state-inputs/canonical-verification-workflow-run.json
-          canonical_download_dir=""
+          canonical_artifact_id=""
           for attempt in {1..12}; do
-            attempt_dir=".ci/canonical-receipt-download/$attempt"
-            mkdir -p "$attempt_dir"
-            if gh run download "$canonical_run_id" \
-              --repo "$GITHUB_REPOSITORY" \
-              --name "canonical-verification-environment-$PRODUCT_STATE_SHA" \
-              --dir "$attempt_dir"; then
-              canonical_download_dir="$attempt_dir"
-              break
+            if gh api --method GET \
+              "repos/$GITHUB_REPOSITORY/actions/runs/$canonical_run_id/artifacts?per_page=100" \
+              > .ci/product-state-inputs/canonical-verification-artifacts.json; then
+              if canonical_artifact_id="$(python scripts/verify_canonical_actions_artifact.py select \
+                --run .ci/product-state-inputs/canonical-verification-workflow-run.json \
+                --inventory .ci/product-state-inputs/canonical-verification-artifacts.json \
+                --repository "$GITHUB_REPOSITORY" --source-sha "$PRODUCT_STATE_SHA" \
+                --run-id "$canonical_run_id")"; then
+                break
+              fi
             fi
             if test "$attempt" -lt 12; then
               sleep 5
             fi
           done
-          if test -z "$canonical_download_dir"; then
-            echo "exact-SHA canonical artifact unavailable after bounded retry" >&2
+          if test -z "$canonical_artifact_id"; then
+            echo "exact-attempt canonical artifact unavailable after bounded retry" >&2
             exit 1
           fi
-          mapfile -t downloaded_receipts < <(
-            find "$canonical_download_dir" \
-              -type f \
-              -name "$(basename "$CANONICAL_RECEIPT_PATH")"
-          )
-          mapfile -t downloaded_wheel_contracts < <(
-            find "$canonical_download_dir" \
-              -type f \
-              -name "$(basename "$CANONICAL_WHEEL_CONTRACT_PATH")"
-          )
-          mapfile -t downloaded_wheels < <(
-            find "$canonical_download_dir" \
-              -type f \
-              -name "$(basename "$CANONICAL_WHEEL_PATH")"
-          )
-          test "${#downloaded_receipts[@]}" -eq 1
-          test "${#downloaded_wheel_contracts[@]}" -eq 1
-          test "${#downloaded_wheels[@]}" -eq 1
-          downloaded_receipt="${downloaded_receipts[0]}"
-          downloaded_wheel_contract="${downloaded_wheel_contracts[0]}"
-          downloaded_wheel="${downloaded_wheels[0]}"
-          mkdir -p "$(dirname "$CANONICAL_RECEIPT_PATH")"
-          mkdir -p "$(dirname "$CANONICAL_WHEEL_CONTRACT_PATH")"
-          mkdir -p "$(dirname "$CANONICAL_WHEEL_PATH")"
-          cp "$downloaded_receipt" "$CANONICAL_RECEIPT_PATH"
-          cp "$downloaded_wheel_contract" "$CANONICAL_WHEEL_CONTRACT_PATH"
-          cp "$downloaded_wheel" "$CANONICAL_WHEEL_PATH"
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$canonical_artifact_id" \
+            > .ci/product-state-inputs/canonical-verification-artifact-api.json
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$canonical_artifact_id/zip" \
+            > .ci/canonical-receipt-download/canonical-artifact.zip
+          # A rerun between selection and download changes the expected name and fails admission.
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$canonical_run_id" \
+            > .ci/product-state-inputs/canonical-verification-workflow-run.json
+          python scripts/verify_canonical_actions_artifact.py admit \
+            --run .ci/product-state-inputs/canonical-verification-workflow-run.json \
+            --inventory .ci/product-state-inputs/canonical-verification-artifacts.json \
+            --artifact .ci/product-state-inputs/canonical-verification-artifact-api.json \
+            --archive .ci/canonical-receipt-download/canonical-artifact.zip \
+            --repository "$GITHUB_REPOSITORY" --source-sha "$PRODUCT_STATE_SHA" \
+            --run-id "$canonical_run_id" --api-url "$GITHUB_API_URL" \
+            --materialize-root . \
+            --identity-out .ci/product-state-inputs/canonical-actions-artifact-identity.json
           python - <<'PY'
           import hashlib
           import json
@@ -659,7 +658,8 @@ jobs:
           )
           assert wheel_contract["installed_replay"]["installed_source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
           assert run["name"] == "P0 Canonical Verification Contract"
-          assert run["path"] == ".github/workflows/p0-canonical-contract.yml"
+          from scripts.verify_canonical_actions_artifact import workflow_path_matches
+          assert workflow_path_matches(run["path"])
           assert run["head_branch"] == "main"
           assert run["head_sha"] == os.environ["PRODUCT_STATE_SHA"]
           assert run["conclusion"] == "success"
@@ -668,6 +668,8 @@ jobs:
       - name: Materialize exact current-source product-state inputs
         shell: bash
         run: |
+          python scripts/verify_tracked_source_tree.py \
+            --repo-root . --source-sha "$PRODUCT_STATE_SHA" --profile consumer
           git status --porcelain=v1 --untracked-files=all > .ci/product-state-inputs/post-overlay-status.txt
           python -I - <<'PY'
           from pathlib import Path
@@ -1598,6 +1600,10 @@ jobs:
                       "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
                   })
           required = {
+              ".ci/product-state-inputs/canonical-actions-artifact-identity.json",
+              ".ci/product-state-inputs/canonical-verification-workflow-run.json",
+              ".ci/product-state-inputs/canonical-verification-artifacts.json",
+              ".ci/product-state-inputs/canonical-verification-artifact-api.json",
               "artifacts/manifests/product_state.current.v1.json",
               ".ci/product-state-inputs/product-state.provenance-bundle.v1.json",
               ".ci/product-state-inputs/generated-artifact-dag-report.v2.json",
@@ -2666,6 +2672,15 @@ jobs:
             --source-sha "$PRODUCT_STATE_SHA" \
             --workflow-run-id "${{ github.event.workflow_run.id }}" \
             --workflow-run-attempt "${{ github.event.workflow_run.run_attempt }}"
+          canonical_run_id="$(python -c 'import json; from pathlib import Path; print(json.loads(Path(".ci/product-state-inputs/canonical-verification-workflow-run.json").read_text())["id"])')"
+          python scripts/verify_canonical_actions_artifact.py replay \
+            --run .ci/product-state-inputs/canonical-verification-workflow-run.json \
+            --inventory .ci/product-state-inputs/canonical-verification-artifacts.json \
+            --artifact .ci/product-state-inputs/canonical-verification-artifact-api.json \
+            --repository "$GITHUB_REPOSITORY" --source-sha "$PRODUCT_STATE_SHA" \
+            --run-id "$canonical_run_id" --api-url "$GITHUB_API_URL" \
+            --materialize-root . \
+            --identity-out .ci/product-state-inputs/canonical-actions-artifact-identity.json
           python scripts/check_generated_artifact_dag.py \
             --write-state "$DAG_STATE_PATH" \
             --report "$DAG_REPORT_PATH" \

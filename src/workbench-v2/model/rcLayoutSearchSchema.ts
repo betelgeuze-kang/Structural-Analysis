@@ -1,4 +1,5 @@
 import { validateRcTrainingIntervals } from './rcTrainingCost'
+import { validRcPriceMetadata } from './rcPriceMetadata'
 import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
 import { artifactMaximum, validateRcStudyControl, validateRcStudyLimits, verifyRcDesignCandidate, verifyQuantities, type RcDesignReview, type StudyRead } from './rcControlDesignSchema'
@@ -47,7 +48,7 @@ export async function validateRcLayoutSearch(raw: Uint8Array, read: StudyRead, w
   if (staged) validateStagingPolicy(plan, report)
   const priceDoc = document(await read('price-table.json', MAX)), prices = priceDoc.value
   check(keys(prices, ['concrete_per_m3', 'rebar_per_kg', 'currency', 'as_of', 'source']) && num(prices.concrete_per_m3) && prices.concrete_per_m3 >= 0 && num(prices.rebar_per_kg) && prices.rebar_per_kg >= 0
-    && typeof prices.currency === 'string' && /^[A-Z]{3}$/.test(prices.currency) && typeof prices.as_of === 'string' && typeof prices.source === 'string', 'layout_prices_invalid')
+    && validRcPriceMetadata(prices), 'layout_prices_invalid')
   const priceFields = fields(priceDoc.raw)
   priceFields.set('schema_version', { member: '"schema_version":"declared-rc-material-prices.v1"', value: '' })
   check(await sha256Hex(`{${[...priceFields.entries()].sort(([a], [b]) => a < b ? -1 : 1).map(([, v]) => v.member).join(',')}}`) === plan.price_table_hash, 'layout_price_hash_invalid')

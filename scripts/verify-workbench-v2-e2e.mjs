@@ -33,6 +33,7 @@ const specs = [
   'tests/frontend/workbench-v2-rc-search-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-portal-candidate-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-design-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-price-metadata-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-design-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-job-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-constant-job-contract.spec.ts',

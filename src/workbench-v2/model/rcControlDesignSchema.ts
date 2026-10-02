@@ -1,4 +1,5 @@
 import { longitudinalSteelArea } from './rcSteelLayers'
+import { validRcPriceMetadata } from './rcPriceMetadata'
 import { sha256Bytes, sha256Hex } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, rcControlHasPreload, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
 
@@ -343,7 +344,7 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
     && new Set(report.rows.map((r: RcObject) => r.candidate_id)).size === report.rows.length, 'study_denominator_invalid')
   if (report.prices !== null) {
     check(num(report.prices.concrete_per_m3) && report.prices.concrete_per_m3 >= 0 && num(report.prices.rebar_per_kg) && report.prices.rebar_per_kg >= 0
-      && ['currency', 'as_of', 'source'].every(k => typeof report.prices[k] === 'string'), 'study_prices_invalid')
+      && validRcPriceMetadata(report.prices), 'study_prices_invalid')
     const priceFields = fields(members.get('prices')!.value)
     priceFields.set('schema_version', { member: '"schema_version":"declared-rc-material-prices.v1"', value: '' })
     check(await sha256Hex(`{${[...priceFields.entries()].sort(([a], [b]) => a < b ? -1 : 1).map(([, v]) => v.member).join(',')}}`) === report.price_table_hash, 'study_price_hash_invalid')

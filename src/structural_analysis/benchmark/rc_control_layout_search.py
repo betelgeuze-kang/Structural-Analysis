@@ -117,6 +117,36 @@ def _training_cost(policy, report):
     return report
 
 
+def _price_order_control_binding(model, request):
+    """Bind a compiled layout's authored control/loading to its canonical slots.
+
+    Coordinates vary across layouts. Canonical ranks use the same XY ordering
+    as the already checked fixed physical context, without changing its bytes.
+    """
+    nodes = model.nodes
+    index, component = divmod(request.control_global_dof, 3)
+    if index >= len(nodes):
+        raise ValueError("layout price-order control node is outside the model")
+    canonical = {
+        node["id"]: rank
+        for rank, node in enumerate(
+            sorted(nodes, key=lambda node: tuple(node["coordinates"][:2]))
+        )
+    }
+    try:
+        preload = tuple(
+            sorted(
+                (canonical[node], fx, fy, mz)
+                for node, fx, fy, mz in request.constant_nodal_loads
+            )
+        )
+    except KeyError as error:
+        raise ValueError(
+            "layout price-order preload node is outside the model"
+        ) from error
+    return canonical[nodes[index]["id"]], component, preload
+
+
 def _run_layout_search(
     baseline,
     candidates,
@@ -193,6 +223,7 @@ def _run_layout_search(
     )
     pool, identities = [], set()
     context = None
+    control_binding = None
     for key, model in models.items():
         descriptor = control_layout_candidate_features(model, request)
         identity = descriptor["physical_model_identity"]
@@ -210,6 +241,13 @@ def _run_layout_search(
             and context != policy_data["context_hash"]
         ):
             raise ValueError("layout search fixed context mismatch")
+        binding = _price_order_control_binding(model, request)
+        if control_binding is None:
+            control_binding = binding
+        elif binding != control_binding:
+            raise ValueError(
+                "layout price-order physical control/preload binding mismatch"
+            )
         identities.add(identity)
         quantities = design.calculate_fiber_frame_member_quantities(
             model,
