@@ -15,6 +15,60 @@ const job = JSON.parse(originals.job.toString())
 const statusPath = `/api/v1/jobs/${job.job_id}`
 const credentials = { tenantId: 'transport-test', bearerToken: 'synthetic-memory-only-token' }
 
+test.describe('job transport failure classification', () => {
+  let originalFetch: typeof fetch
+  test.beforeEach(() => { originalFetch = globalThis.fetch })
+  test.afterEach(() => { globalThis.fetch = originalFetch })
+
+  for (const failingRole of ['job', 'result', 'evidence']) {
+    test(`redacts a ${failingRole} network failure without reporting invalid artifacts`, async () => {
+      globalThis.fetch = async (input) => {
+        const role = String(input).endsWith(statusPath) ? 'job' : String(input).split('/').pop()!
+        if (role === failingRole) throw new TypeError(credentials.bearerToken)
+        return new Response(originals[role], { headers: { 'content-type': 'application/json' } })
+      }
+      const result = await loadWorkbenchJob(`https://workbench.test${statusPath}`)
+      expect(result).toEqual({ status: 'error', job: null, errors: ['job API request failed'] })
+      expect(JSON.stringify(result)).not.toContain(credentials.bearerToken)
+    })
+  }
+
+  test('preserves caller abort instead of reporting a network or artifact failure', async () => {
+    const controller = new AbortController()
+    globalThis.fetch = async () => { controller.abort(); throw new TypeError(credentials.bearerToken) }
+    expect(await loadWorkbenchJob(`https://workbench.test${statusPath}`, controller.signal))
+      .toEqual({ status: 'unconfigured', job: null, errors: [] })
+  })
+
+  for (const status of [404, 503]) {
+    test(`preserves the HTTP ${status} status without exposing its body`, async () => {
+      globalThis.fetch = async () => new Response(credentials.bearerToken, { status })
+      expect(await loadWorkbenchJob(`https://workbench.test${statusPath}`)).toEqual({
+        status: status === 404 ? 'missing' : 'error', job: null,
+        errors: [status === 404 ? 'job not found' : `job API returned HTTP ${status}`],
+      })
+    })
+  }
+
+  test('keeps received malformed job JSON invalid', async () => {
+    globalThis.fetch = async () => new Response('{', { headers: { 'content-type': 'application/json' } })
+    expect(await loadWorkbenchJob(`https://workbench.test${statusPath}`))
+      .toEqual({ status: 'invalid', job: null, errors: ['job_view_json_invalid'], artifactStatus: 'invalid' })
+  })
+
+  for (const operation of ['read', 'submit']) {
+    test(`keeps a workflow ${operation} network exception redacted and original bytes unchanged`, async () => {
+      globalThis.fetch = async () => { throw new TypeError(credentials.bearerToken) }
+      const transport = await createJobWorkflowTransport('https://workbench.test/api/v1/jobs')
+      const bytes = new TextEncoder().encode('{ "operation": "synthetic_transport_only" }')
+      const original = bytes.slice()
+      const pending = operation === 'read' ? transport.getJob(job.job_id) : transport.submit(bytes, 'same-original-key')
+      await expect(pending).rejects.toThrow(/^job_api_request_failed$/)
+      expect(bytes).toEqual(original)
+    })
+  }
+})
+
 test('job transport cancels a pending sibling when an artifact exceeds its budget', async () => {
   const originalFetch = globalThis.fetch
   let siblingCancelled = false

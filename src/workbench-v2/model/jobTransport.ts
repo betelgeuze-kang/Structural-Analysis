@@ -117,7 +117,7 @@ async function request(url: string, headers: Headers, signal?: AbortSignal, body
     })
   } catch {
     signal?.throwIfAborted()
-    throw new JobArtifactError('job_api_request_failed')
+    throw new Error('job_api_request_failed')
   }
   if (!response.ok) { try { await response.body?.cancel() } catch { /* Never expose an error body. */ } }
   return response
