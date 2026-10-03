@@ -23,6 +23,13 @@ export interface RcJobSummary {
   historyFile?: { status: 'complete' | 'prefix' | 'blocked'; declaredTargets: number; bytes: number; unknownCalls: number }
 }
 export type RcArtifacts = Record<string, Uint8Array>
+/** Kept inside the original reviewer worker; no response arrays cross this boundary. */
+export interface RcQuantityReportSource {
+  tenantId: string | null
+  model: RcObject
+  bindings: RcObject
+  structuralAuthority: RcObject
+}
 const AUTHORITY = {
   design_authority: false, experimental_small_displacement_rc_control: true,
   independent_execution_authentication: false, independent_physical_validation: false,
@@ -156,8 +163,8 @@ function pinRollerSupports(model: RcObject): { pin: string; roller: string; reac
   return { pin, roller, reactions }
 }
 
-export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: RcArtifacts): Promise<{
-  summary: RcJobSummary; history: RcObject[]; terminalBytes: Uint8Array
+export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: RcArtifacts, tenantId?: string): Promise<{
+  summary: RcJobSummary; history: RcObject[]; terminalBytes: Uint8Array; quantitySource: RcQuantityReportSource
 }> {
   check(job.status === 'succeeded' && job.result && job.evidence, 'publication_invalid')
   for (const role of ['request', 'checkpoint', 'result', 'evidence'] as const) {
@@ -168,7 +175,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   }
   const requestDoc = document(artifacts.request), request = requestDoc.value
   const resultDoc = document(artifacts.result), result = resultDoc.value
-  const evidence = document(artifacts.evidence).value
+  const evidenceDoc = document(artifacts.evidence), evidence = evidenceDoc.value
   check(request.schema_version === 'structural-analysis-job-request.v3'
     && request.operation === 'bounded_rc_fiber_direct_control', 'request_invalid')
   const supplied = object(request.config), solver = supplied.solver_config === undefined ? {} : object(supplied.solver_config)
@@ -237,6 +244,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && same(result.control_targets, targets) && result.completed_target_count === targets.length
     && result.total_target_count === targets.length && job.progress.completed_steps === targets.length
     && job.progress.total_steps === targets.length, 'result_binding_invalid')
+  check(result.resume_contract_hash === job.resume_contract_hash
+    && result.resume_contract_hash === await sha256Hex(JSON.stringify({ profile: result.profile, request_hash: job.request.content_hash })), 'resume_binding_invalid')
   const budget = object(result.execution_budget)
   check(result.execution_budget_unit === 'reserved_api_invocations'
     && budget.maximum_attempts === execution.maximum_api_invocations
@@ -375,7 +384,50 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   }
   const acceptedHistory = validateRcAcceptedHistory(api, native, request.model, config)
   check(nat(core) && nat(iterations), 'work_total_invalid')
-  return { history: acceptedHistory, terminalBytes, summary: {
+  // Reconstruct the decoder's normalized config from already validated producer
+  // tokens. Authored integer tokens may become Python floats after decoding;
+  // JSON.stringify(config) would silently change those hash identities.
+  const apiRequestFields = fields(fields(apiRaw).get('request')!.value)
+  const configurationFields = fields(apiRequestFields.get('configuration')!.value)
+  const tokenObject = (values: Map<string, string>): string => `{${[...values].sort(([a], [b]) => a < b ? -1 : 1)
+    .map(([key, raw]) => `${JSON.stringify(key)}:${raw}`).join(',')}}`
+  const normalizedConfig = new Map<string, string>([
+    ['schema_version', JSON.stringify(config.schema_version)],
+    ['targets_m', fields(nativeDoc.raw).get('accepted_targets_m')!.value],
+    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m']
+      .map(key => [key, configurationFields.get(key)!.value])))],
+    ...['allow_reversals', 'maximum_reversals', 'maximum_targets', 'control_global_dof']
+      .map(key => [key, apiRequestFields.get(key)!.value] as [string, string]),
+  ])
+  for (const key of ['constant_nodal_loads', 'experimental_pin_roller_beam']) {
+    if (apiRequestFields.has(key)) normalizedConfig.set(key, apiRequestFields.get(key)!.value)
+  }
+  // canonical_hash normalizes signed floating zero; retain all other producer
+  // numeric spellings. This operates only on strict-validated JSON tokens.
+  const canonicalTokens = (raw: string): string => {
+    raw = raw.trim()
+    if (raw[0] === '{') return tokenObject(new Map([...fields(raw)].map(([key, row]) => [key, canonicalTokens(row.value)])))
+    if (raw[0] === '[') return `[${rawValues(raw).map(canonicalTokens).join(',')}]`
+    if (raw[0] === '"' || raw === 'null' || raw === 'true' || raw === 'false') return raw
+    return Number(raw) === 0 && /[.eE]/.test(raw) ? '0.0' : raw
+  }
+  const quantitySource: RcQuantityReportSource = {
+    tenantId: tenantId ?? null, model: request.model, structuralAuthority: result.authority,
+    bindings: {
+      tenant_id: tenantId ?? null, job_id: job.job_id, completed_job_revision: job.revision,
+      terminal_event_hash: job.terminal_event_hash,
+      original_artifacts: { request: job.request, checkpoint: job.checkpoint, result: job.result, evidence: job.evidence },
+      case_id: request.case_id, source_revision: request.source_revision, source_revision_is_execution_attestation: false,
+      canonical_model_checksum: api.model.canonical_model_checksum, model_input_checksum: api.model.input_checksum,
+      compiler_profile: api.model.compiler_profile, config_hash: await sha256Hex(canonicalTokens(tokenObject(normalizedConfig))),
+      profile: result.profile, numerical_request_hash: result.request_hash, resume_contract_hash: result.resume_contract_hash,
+      durable_result_hash: result.result_hash, api_result_hash: api.result_hash,
+      terminal_native_checkpoint_sha256: tail.checkpoint_sha256, terminal_native_checkpoint_byte_length: tail.checkpoint_byte_length,
+      worker_validation_report_hash: await sha256Hex(canonicalTokens(fields(evidenceDoc.raw).get('validation_report')!.value)),
+      receipt_hashes: report.receipt_hashes,
+    },
+  }
+  return { history: acceptedHistory, terminalBytes, quantitySource, summary: {
     resultHash: result.result_hash, sourceRevision: result.source_revision,
     ...(reuseProfile ? { assemblyReuse: true } : {}),
     targets, hasPreload, pinRoller: supportRoles && { pin: supportRoles.pin, roller: supportRoles.roller },

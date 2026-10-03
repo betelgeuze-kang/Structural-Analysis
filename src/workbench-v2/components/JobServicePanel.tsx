@@ -9,7 +9,7 @@ import { RcJobResultPanel } from './RcJobResultPanel'
 import type { RcJobReview } from '../model/rcJobReview'
 import type { FailureDiagnosticReview } from '../model/failureDiagnostic'
 import { HistoricalFailurePanel } from './HistoricalFailurePanel'
-import type { JobAuthorizationProvider } from '../model/jobTransport'
+import type { JobAuthorizationProvider, JobReadTransport } from '../model/jobTransport'
 import { FailureDiagnosticPanel } from './FailureDiagnosticPanel'
 
 interface JobServicePanelProps {
@@ -23,6 +23,8 @@ interface JobServicePanelProps {
   rcReview?: RcJobReview
   jobStatusUrl?: string
   jobAuthorization?: JobAuthorizationProvider
+  jobReadTransport?: JobReadTransport
+  verifyJobAuthorizationScope?: () => Promise<void>
   failureDiagnostic?: FailureDiagnosticReview
 }
 
@@ -48,6 +50,8 @@ export function JobServicePanel({
   failureDiagnostic,
   jobStatusUrl,
   jobAuthorization,
+  jobReadTransport,
+  verifyJobAuthorizationScope,
 }: JobServicePanelProps): ReactElement {
   if (loadStatus !== 'ready' || !job) {
     const label = loadStatus === 'loading' ? 'Loading durable job status…' : loadStatus === 'unconfigured'
@@ -121,7 +125,7 @@ export function JobServicePanel({
       {verified3D ? <Frame3DJobResultPanel key={`${job.job_id}:${frame3dResult.resultHash}`} jobId={job.job_id} review={frame3dResult} artifacts={frame3dArtifacts} /> : null}
       {verifiedRC ? <RcJobResultPanel key={`${job.job_id}:${rcReview.summary.resultHash}`} jobId={job.job_id} review={rcReview} /> : null}
       {failureDiagnostic ? <FailureDiagnosticPanel review={failureDiagnostic} /> : null}
-      {jobStatusUrl && job.attempt > 1 ? <HistoricalFailurePanel key={`${jobStatusUrl}:${job.job_id}:${job.request.content_hash}:${job.attempt}`} job={job} url={jobStatusUrl} authorize={jobAuthorization} /> : null}
+      {jobStatusUrl && job.attempt > 1 ? <HistoricalFailurePanel key={`${jobStatusUrl}:${job.job_id}:${job.request.content_hash}:${job.attempt}`} job={job} url={jobStatusUrl} authorize={jobAuthorization} transport={jobReadTransport} verifyAuthorizationScope={verifyJobAuthorizationScope} /> : null}
     </section>
   )
 }

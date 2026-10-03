@@ -19,6 +19,19 @@ const nat = (v: unknown): v is number => Number.isSafeInteger(v) && Number(v) >=
 const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 const hash = (v: unknown): boolean => typeof v === 'string' && /^sha256:[a-f0-9]{64}$/.test(v)
 const close = (a: unknown, b: number): boolean => num(a) && Math.abs(a - b) <= 1e-12 * Math.max(1, Math.abs(b))
+// Companion rederivation permits only a few floating-point rounding units for
+// Python math.dist/fsum versus browser arithmetic, rather than a takeoff tolerance.
+const preciseClose = (a: unknown, b: number): boolean => num(a) && num(b)
+  && Math.abs(a - b) <= 4 * Number.EPSILON * Math.max(Number.MIN_VALUE, Math.abs(a), Math.abs(b))
+function compensatedSum(values: number[]): number {
+  let total = 0, correction = 0
+  for (const value of values) {
+    const next = total + value
+    correction += Math.abs(total) >= Math.abs(value) ? (total - next) + value : (value - next) + total
+    total = next
+  }
+  return total + correction
+}
 export type StudyRead = (relative: string, maximum: number, expected?: number) => Promise<Uint8Array>
 export interface RcDesignReview { report: RcObject; models: Record<string, RcObject>; displayReport?: RcObject }
 
@@ -191,11 +204,19 @@ export function validateRcTwoFixedStudyProfile(model: RcObject, history: RcObjec
 
 export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: string, report: RcObject): Promise<void> {
   const q = row.quantities
+  await verifyRcQuantityGeometry(q, model, fields(rowRaw).get('quantities')!.value, row.artifacts.model.sha256)
+  verifyRcQuantityEstimate(q, report.prices, row.material_estimate, report.price_table_hash)
+}
+
+/** Geometry validation accepts an explicit trusted checksum, rather than a study artifact role. */
+export async function verifyRcQuantityGeometry(q: RcObject, model: RcObject, quantityRaw: string, modelChecksum: string, strict = false): Promise<void> {
+  const matches = strict ? preciseClose : close
   check(q && q.schema_version === 'public-rc-fiber-member-quantities.v1' && q.scope === SCOPE && q.detailed_takeoff === false
-    && same(q.excluded_items, EXCLUDED) && q.rebar_density_kg_per_m3 === 7850 && q.model_checksum === row.artifacts.model.sha256, 'study_quantity_scope_invalid')
-  await selfHash(fields(rowRaw).get('quantities')!.value, q, 'quantity_hash')
-  check(q.members.length === model.elements.length && new Set(q.members.map((m: RcObject) => m.member_id)).size === q.members.length, 'study_member_count_invalid')
+    && same(q.excluded_items, EXCLUDED) && q.rebar_density_kg_per_m3 === 7850 && q.model_checksum === modelChecksum, 'study_quantity_scope_invalid')
+  await selfHash(quantityRaw, q, 'quantity_hash')
+  check(Array.isArray(q.members) && q.members.length === model.elements.length && new Set(q.members.map((m: RcObject) => m.member_id)).size === q.members.length, 'study_member_count_invalid')
   const totals: RcObject = Object.fromEntries(QUANTITIES.map(k => [k, 0]))
+  const terms: Record<string, number[]> = Object.fromEntries(QUANTITIES.map(k => [k, []]))
   for (const member of model.elements) {
     const section = model.sections.find((s: RcObject) => s.id === member.section)
     const nodes = member.nodes.map((id: string) => model.nodes.find((n: RcObject) => n.id === id))
@@ -205,22 +226,29 @@ export async function verifyQuantities(row: RcObject, model: RcObject, rowRaw: s
     const rebar = length * longitudinalSteelArea(section)
     const values = [volume, rebar, rebar * 7850]
     const actual = q.members.find((m: RcObject) => m.member_id === member.id)
-    check(actual && actual.section_id === member.section && close(actual.length_m, length), 'study_member_identity_invalid')
-    QUANTITIES.forEach((key, i) => { check(close(actual[key], values[i]), 'study_member_quantity_invalid'); totals[key] += values[i] })
+    check(actual && actual.section_id === member.section && matches(actual.length_m, length), 'study_member_identity_invalid')
+    QUANTITIES.forEach((key, i) => { check(matches(actual[key], values[i]), 'study_member_quantity_invalid'); totals[key] += values[i]; terms[key].push(values[i]) })
   }
-  QUANTITIES.forEach(key => check(close(q.totals[key], totals[key]), 'study_quantity_total_invalid'))
-  const price = report.prices, estimate = row.material_estimate
+  QUANTITIES.forEach(key => check(matches(q.totals[key], strict ? compensatedSum(terms[key]) : totals[key]), 'study_quantity_total_invalid'))
+}
+
+/** Declared material prices never acquire quote or savings authority. */
+export function verifyRcQuantityEstimate(q: RcObject, price: RcObject | null, estimate: RcObject | null, priceTableHash: string | null, strict = false): void {
+  const matches = strict ? preciseClose : close
   if (price === null) { check(estimate === null, 'study_unpriced_estimate'); return }
+  const total = strict ? compensatedSum(q.members.map((member: RcObject) =>
+    member.gross_concrete_volume_m3 * price.concrete_per_m3 + member.longitudinal_rebar_mass_kg * price.rebar_per_kg))
+    : q.totals.gross_concrete_volume_m3 * price.concrete_per_m3 + q.totals.longitudinal_rebar_mass_kg * price.rebar_per_kg
   check(estimate && estimate.scope === SCOPE && estimate.verified_quote === false && estimate.confirmed_currency_savings === false
-    && same(estimate.excluded_items, EXCLUDED) && estimate.quantity_hash === q.quantity_hash && estimate.price_table_hash === report.price_table_hash
-    && estimate.currency === price.currency && close(estimate.total, totals.gross_concrete_volume_m3 * price.concrete_per_m3 + totals.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_estimate_invalid')
+    && same(estimate.excluded_items, EXCLUDED) && estimate.quantity_hash === q.quantity_hash && estimate.price_table_hash === priceTableHash
+    && estimate.currency === price.currency && matches(estimate.total, total), 'study_estimate_invalid')
   check(Array.isArray(estimate.members) && estimate.members.length === q.members.length
     && new Set(estimate.members.map((m: RcObject) => m.member_id)).size === q.members.length, 'study_member_estimate_count_invalid')
   for (const member of q.members) {
     const cost = estimate.members.find((m: RcObject) => m.member_id === member.member_id)
     check(cost && same(Object.keys(cost).sort(), ['concrete', 'longitudinal_rebar', 'member_id'])
-      && close(cost.concrete, member.gross_concrete_volume_m3 * price.concrete_per_m3)
-      && close(cost.longitudinal_rebar, member.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_member_estimate_invalid')
+      && matches(cost.concrete, member.gross_concrete_volume_m3 * price.concrete_per_m3)
+      && matches(cost.longitudinal_rebar, member.longitudinal_rebar_mass_kg * price.rebar_per_kg), 'study_member_estimate_invalid')
   }
 }
 

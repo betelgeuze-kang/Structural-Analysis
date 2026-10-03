@@ -105,6 +105,249 @@ def test_phase2_source_receipts_materialize_before_consumers(
         )
 
 
+CI_MODAL_REFRESH_COMMANDS = (
+    "env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 "
+    "python scripts/build_phase2_whole_model_modal_artifacts.py",
+    "env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 "
+    "python scripts/build_phase2_whole_model_modal_artifacts.py --check",
+)
+CI_MODAL_SUMMARY_PATH = (
+    "implementation/phase1/release_evidence/productization/"
+    "phase2_whole_model_modal_summary.json"
+)
+
+
+def _ci_modal_materialization_script(workflow: dict) -> str:
+    steps = workflow["jobs"]["verify"]["steps"]
+    names = [step["name"] for step in steps]
+    assert names.count("Materialize exact current-source test evidence") == 1
+    materialize_index = names.index("Materialize exact current-source test evidence")
+    step = steps[materialize_index]
+    assert step["shell"] == "bash"
+    assert step.get("continue-on-error", False) is False
+    lines = [line.strip() for line in step["run"].splitlines()]
+    assert step["run"].count("scripts/build_phase2_whole_model_modal_artifacts.py") == 2
+    assert all(lines.count(command) == 1 for command in CI_MODAL_REFRESH_COMMANDS)
+    producer, check = [lines.index(command) for command in CI_MODAL_REFRESH_COMMANDS]
+    assert max(lines.index(command) for command in PHASE2_REFRESH_COMMANDS) < producer
+    guard = lines.index("python - <<'MODAL_SUMMARY'")
+    end = lines.index("MODAL_SUMMARY")
+    external = next(
+        index
+        for index, line in enumerate(lines)
+        if line.startswith(
+            "python scripts/run_external_code_to_code_technical_receipt.py"
+        )
+    )
+    assert producer < check < guard < end < external
+    for consumer in ("Build current-HEAD readiness snapshot", "PR quality gate"):
+        assert materialize_index < names.index(consumer)
+    prefix = "python - <<'MODAL_SUMMARY'\n"
+    assert step["run"].count(prefix) == 1
+    code, suffix = step["run"].split(prefix, 1)[1].split("\nMODAL_SUMMARY\n", 1)
+    assert suffix
+    compile(code, "ci-modal-summary", "exec")
+    return code
+
+
+def test_ci_modal_materialization_is_scoped_before_consumers() -> None:
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    code = _ci_modal_materialization_script(workflow)
+    assert "scripts/" not in code
+    assert "structural_analysis" not in code
+    assert CI_MODAL_SUMMARY_PATH in code
+    assert "--check" not in PHASE2_REFRESH_COMMANDS
+    assert all(
+        "whole_model_modal" not in command for command in PHASE2_REFRESH_COMMANDS
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing_producer",
+        "missing_check",
+        "duplicate_producer",
+        "duplicate_check",
+        "unscoped_extra_producer",
+        "wrong_core",
+        "wrong_thread_count",
+        "check_before_producer",
+        "guard_before_check",
+        "missing_guard",
+        "outside_materialization_decoy",
+        "consumer_before_materialization",
+        "continue_on_error",
+    ],
+)
+def test_ci_modal_materialization_rejects_scoped_workflow_drift(mutation: str) -> None:
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    steps = workflow["jobs"]["verify"]["steps"]
+    index = next(
+        i
+        for i, step in enumerate(steps)
+        if step["name"] == "Materialize exact current-source test evidence"
+    )
+    step = steps[index]
+    producer, check = CI_MODAL_REFRESH_COMMANDS
+    run = step["run"]
+    if mutation == "missing_producer":
+        step["run"] = run.replace(producer + "\n", "", 1)
+    elif mutation == "missing_check":
+        step["run"] = run.replace(check + "\n", "", 1)
+    elif mutation == "duplicate_producer":
+        step["run"] = run.replace(producer + "\n", (producer + "\n") * 2, 1)
+    elif mutation == "duplicate_check":
+        step["run"] = run.replace(check + "\n", (check + "\n") * 2, 1)
+    elif mutation == "unscoped_extra_producer":
+        step["run"] = (
+            run + "python scripts/build_phase2_whole_model_modal_artifacts.py\n"
+        )
+    elif mutation == "wrong_core":
+        step["run"] = run.replace(
+            "OPENBLAS_CORETYPE=Haswell", "OPENBLAS_CORETYPE=Skylake", 1
+        )
+    elif mutation == "wrong_thread_count":
+        step["run"] = run.replace("OPENBLAS_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=2", 1)
+    elif mutation == "check_before_producer":
+        step["run"] = run.replace(producer + "\n" + check, check + "\n" + producer, 1)
+    elif mutation == "guard_before_check":
+        step["run"] = run.replace(check + "\n", "", 1).replace(
+            "MODAL_SUMMARY\n", "MODAL_SUMMARY\n" + check + "\n", 1
+        )
+    elif mutation == "missing_guard":
+        start = run.index("python - <<'MODAL_SUMMARY'\n")
+        end = run.index("\nMODAL_SUMMARY\n", start) + len("\nMODAL_SUMMARY\n")
+        step["run"] = run[:start] + run[end:]
+    elif mutation == "outside_materialization_decoy":
+        step["run"] = run.replace(producer + "\n", "", 1)
+        steps.append({"name": "Unrelated modal producer decoy", "run": producer})
+    elif mutation == "consumer_before_materialization":
+        consumer = next(
+            i
+            for i, item in enumerate(steps)
+            if item["name"] == "Build current-HEAD readiness snapshot"
+        )
+        steps.insert(index, steps.pop(consumer))
+    elif mutation == "continue_on_error":
+        step["continue-on-error"] = True
+    with pytest.raises((AssertionError, ValueError)):
+        _ci_modal_materialization_script(workflow)
+
+
+def _ci_modal_summary() -> dict:
+    return {
+        "schema_version": "phase2-whole-model-modal-artifacts.v1",
+        "status": "partial",
+        "contract_pass": True,
+        "case_count": 4,
+        "passing_case_count": 4,
+        "source_commit_sha": "a" * 40,
+        "source_set_hash": "sha256:" + "b" * 64,
+        "result_artifact_hash": "sha256:" + "c" * 64,
+        "claims": {
+            "independent_code_to_code_or_verification_level_2": False,
+            "release_readiness": False,
+        },
+    }
+
+
+def _run_ci_modal_summary(
+    tmp_path: Path,
+    summary: dict,
+    source_sha: str = "a" * 40,
+) -> subprocess.CompletedProcess:
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    code = _ci_modal_materialization_script(workflow)
+    output = tmp_path / CI_MODAL_SUMMARY_PATH
+    output.parent.mkdir(parents=True)
+    output.write_text(json.dumps(summary))
+    return subprocess.run(
+        [sys.executable, "-I", "-c", code],
+        cwd=tmp_path,
+        env={"GITHUB_SHA": source_sha},
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+
+
+def test_ci_modal_materialization_summary_accepts_only_bounded_current_identity(
+    tmp_path: Path,
+) -> None:
+    summary = _ci_modal_summary()
+    process = _run_ci_modal_summary(tmp_path, summary)
+    assert process.returncode == 0, process.stderr
+    receipt = json.loads(process.stdout)
+    assert receipt == {
+        "schema": "ci-whole-model-modal-materialization.v1",
+        **{
+            field: summary[field]
+            for field in (
+                "status",
+                "contract_pass",
+                "case_count",
+                "passing_case_count",
+                "source_commit_sha",
+                "source_set_hash",
+                "result_artifact_hash",
+            )
+        },
+        "verification_level_2": False,
+        "release_readiness": False,
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("schema_version", "other-schema.v1"),
+        ("status", "blocked"),
+        ("contract_pass", False),
+        ("contract_pass", 1),
+        ("case_count", 3),
+        ("case_count", 4.0),
+        ("passing_case_count", 3),
+        ("passing_case_count", 4.0),
+        ("source_commit_sha", "d" * 40),
+        ("source_set_hash", "not-a-hash"),
+        ("result_artifact_hash", "not-a-hash"),
+        ("claims.independent_code_to_code_or_verification_level_2", True),
+        ("claims.independent_code_to_code_or_verification_level_2", None),
+        ("claims.release_readiness", True),
+        ("claims.release_readiness", None),
+    ],
+)
+def test_ci_modal_materialization_summary_rejects_unqualified_receipts(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    summary = _ci_modal_summary()
+    if field.startswith("claims."):
+        summary["claims"][field.removeprefix("claims.")] = value
+    else:
+        summary[field] = value
+    process = _run_ci_modal_summary(tmp_path, summary)
+    assert process.returncode != 0
+    assert "modal materialization" in process.stderr
+    assert not process.stdout
+
+
+@pytest.mark.parametrize("source_sha", ["", "not-a-commit"])
+def test_ci_modal_materialization_summary_rejects_invalid_checkout_identity(
+    tmp_path: Path,
+    source_sha: str,
+) -> None:
+    summary = _ci_modal_summary()
+    summary["source_commit_sha"] = source_sha
+    process = _run_ci_modal_summary(tmp_path, summary, source_sha)
+    assert process.returncode != 0
+    assert "modal materialization is not bound to GITHUB_SHA" in process.stderr
+    assert not process.stdout
+
+
 @pytest.mark.parametrize(
     ("workflow_name", "job_name", "preparer_name", "consumer_steps"),
     [

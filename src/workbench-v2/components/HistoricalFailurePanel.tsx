@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { WorkbenchJobView } from '../model/jobSchema'
-import { createJobReadTransport, type JobAuthorizationProvider } from '../model/jobTransport'
+import { createJobReadTransport, type JobAuthorizationProvider, type JobReadTransport } from '../model/jobTransport'
 import { loadFailureDiagnostic, type FailureDiagnosticReview } from '../model/failureDiagnostic'
 import { FailureDiagnosticPanel } from './FailureDiagnosticPanel'
 
 /** Read-only, explicitly requested history; never replaces current job authority. */
-export function HistoricalFailurePanel({ job, url, authorize }: { job: WorkbenchJobView; url: string; authorize?: JobAuthorizationProvider }) {
+export function HistoricalFailurePanel({ job, url, authorize, transport: sessionTransport, verifyAuthorizationScope }: { job: WorkbenchJobView; url: string; authorize?: JobAuthorizationProvider; transport?: JobReadTransport; verifyAuthorizationScope?: () => Promise<void> }) {
   const [attempt, setAttempt] = useState(String(job.attempt - 1))
   const [status, setStatus] = useState('idle')
   const [review, setReview] = useState<FailureDiagnosticReview>()
@@ -19,11 +19,15 @@ export function HistoricalFailurePanel({ job, url, authorize }: { job: Workbench
     const controller = new AbortController(); active.current = controller
     setReview(undefined); setStatus('loading')
     try {
-      const transport = await createJobReadTransport(url, controller.signal, authorize)
+      const transport = sessionTransport?.withSignal?.(controller.signal) ?? sessionTransport ?? await createJobReadTransport(url, controller.signal, authorize)
       const value = await loadFailureDiagnostic(job, transport, number)
+      await verifyAuthorizationScope?.()
       if (controller.signal.aborted) return
       setReview(value); setStatus(value ? 'verified' : 'missing')
     } catch {
+      // A per-read session scope failure can arrive before diagnostic parsing
+      // returns. Give the workflow its final scope check on this path too.
+      try { await verifyAuthorizationScope?.() } catch { /* The workflow clears stale scope. */ }
       if (!controller.signal.aborted) { setReview(undefined); setStatus('invalid') }
     }
   }

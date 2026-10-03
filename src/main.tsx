@@ -67,6 +67,14 @@ function RootRouter(): ReactElement {
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobStatusUrl,
     window.location.origin,
   )
+  const rcJobCollectionUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_RC_JOB_COLLECTION_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcJobCollectionUrl,
+    window.location.origin,
+  )
+  const savedIds = new URLSearchParams(window.location.search)
+  const savedRcJob = savedIds.get('rcJob')
+  const savedRcReport = savedIds.get('rcReport')
   const designComparisonUrl = import.meta.env.VITE_DESIGN_COMPARISON_URL
     || window.__STRUCTURAL_WORKBENCH_CONFIG__?.designComparisonUrl
   const candidateSearchProcessUrl = import.meta.env.VITE_CANDIDATE_SEARCH_PROCESS_URL
@@ -116,6 +124,9 @@ function RootRouter(): ReactElement {
   ) : (
     <WorkbenchPage
       jobStatusUrl={jobStatusUrl}
+      rcJobCollectionUrl={rcJobCollectionUrl}
+      initialRcJobId={savedRcJob === null ? undefined : /^job_[0-9a-f]{32}$/.test(savedRcJob) ? savedRcJob : 'invalid'}
+      initialRcReportId={savedRcReport === null ? undefined : /^rcq_[0-9a-f]{64}$/.test(savedRcReport) ? savedRcReport : 'invalid'}
       jobAuthorization={window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobAuthorization}
       rcControlStrategyCohortUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlStrategyCohortUrl}
       rcControlSearchUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlSearchUrl}
