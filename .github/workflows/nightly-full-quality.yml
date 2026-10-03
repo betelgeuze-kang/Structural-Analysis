@@ -67,6 +67,45 @@ jobs:
           python scripts/build_phase2_state_updated_composite_section_artifacts.py
           python scripts/build_phase2_state_updated_concrete_damage_artifacts.py
           python scripts/build_phase2_adaptive_newton_continuation_artifacts.py
+          # Admit fresh bounded modal evidence without Level 2 or release credit.
+          env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/build_phase2_whole_model_modal_artifacts.py
+          env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/build_phase2_whole_model_modal_artifacts.py --check
+          python - <<'MODAL_SUMMARY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path("implementation/phase1/release_evidence/productization/phase2_whole_model_modal_summary.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          if payload.get("schema_version") != "phase2-whole-model-modal-artifacts.v1":
+              raise SystemExit("modal materialization summary schema is invalid")
+          if payload.get("status") != "partial" or payload.get("contract_pass") is not True:
+              raise SystemExit("modal materialization did not pass its bounded contract")
+          for field in ("case_count", "passing_case_count"):
+              if type(payload.get(field)) is not int or payload[field] != 4:
+                  raise SystemExit("modal materialization requires exactly four passing cases")
+          expected_sha = os.environ["GITHUB_SHA"]
+          if re.fullmatch(r"[0-9a-f]{40}", expected_sha) is None or payload.get("source_commit_sha") != expected_sha:
+              raise SystemExit("modal materialization is not bound to GITHUB_SHA")
+          claims = payload.get("claims")
+          if not isinstance(claims, dict) or any(claims.get(field) is not False for field in (
+              "independent_code_to_code_or_verification_level_2", "release_readiness",
+          )):
+              raise SystemExit("modal materialization cannot grant Level 2 or release authority")
+          for field in ("source_set_hash", "result_artifact_hash"):
+              if not isinstance(payload.get(field), str) or re.fullmatch(r"sha256:[0-9a-f]{64}", payload[field]) is None:
+                  raise SystemExit("modal materialization source/result identity is invalid")
+          print(json.dumps({
+              "schema": "ci-whole-model-modal-materialization.v1",
+              **{field: payload[field] for field in (
+                  "status", "contract_pass", "case_count", "passing_case_count",
+                  "source_commit_sha", "source_set_hash", "result_artifact_hash",
+              )},
+              "verification_level_2": False,
+              "release_readiness": False,
+          }, sort_keys=True))
+          MODAL_SUMMARY
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "Nightly product replay; external execution bytes reused without freshness credit."
@@ -165,6 +204,45 @@ jobs:
           python scripts/build_phase2_state_updated_composite_section_artifacts.py
           python scripts/build_phase2_state_updated_concrete_damage_artifacts.py
           python scripts/build_phase2_adaptive_newton_continuation_artifacts.py
+          # Admit fresh bounded modal evidence without Level 2 or release credit.
+          env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/build_phase2_whole_model_modal_artifacts.py
+          env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/build_phase2_whole_model_modal_artifacts.py --check
+          python - <<'MODAL_SUMMARY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path("implementation/phase1/release_evidence/productization/phase2_whole_model_modal_summary.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          if payload.get("schema_version") != "phase2-whole-model-modal-artifacts.v1":
+              raise SystemExit("modal materialization summary schema is invalid")
+          if payload.get("status") != "partial" or payload.get("contract_pass") is not True:
+              raise SystemExit("modal materialization did not pass its bounded contract")
+          for field in ("case_count", "passing_case_count"):
+              if type(payload.get(field)) is not int or payload[field] != 4:
+                  raise SystemExit("modal materialization requires exactly four passing cases")
+          expected_sha = os.environ["GITHUB_SHA"]
+          if re.fullmatch(r"[0-9a-f]{40}", expected_sha) is None or payload.get("source_commit_sha") != expected_sha:
+              raise SystemExit("modal materialization is not bound to GITHUB_SHA")
+          claims = payload.get("claims")
+          if not isinstance(claims, dict) or any(claims.get(field) is not False for field in (
+              "independent_code_to_code_or_verification_level_2", "release_readiness",
+          )):
+              raise SystemExit("modal materialization cannot grant Level 2 or release authority")
+          for field in ("source_set_hash", "result_artifact_hash"):
+              if not isinstance(payload.get(field), str) or re.fullmatch(r"sha256:[0-9a-f]{64}", payload[field]) is None:
+                  raise SystemExit("modal materialization source/result identity is invalid")
+          print(json.dumps({
+              "schema": "ci-whole-model-modal-materialization.v1",
+              **{field: payload[field] for field in (
+                  "status", "contract_pass", "case_count", "passing_case_count",
+                  "source_commit_sha", "source_set_hash", "result_artifact_hash",
+              )},
+              "verification_level_2": False,
+              "release_readiness": False,
+          }, sort_keys=True))
+          MODAL_SUMMARY
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "Nightly product replay; external execution bytes reused without freshness credit."

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import copy
 import hashlib
 import json
 import math
@@ -117,19 +118,32 @@ CI_MODAL_SUMMARY_PATH = (
 )
 
 
-def _ci_modal_materialization_script(workflow: dict) -> str:
-    steps = workflow["jobs"]["verify"]["steps"]
+def _modal_materialization_script(
+    workflow: dict, job_name: str, consumers: tuple[str, ...]
+) -> str:
+    job = workflow["jobs"][job_name]
+    assert job.get("continue-on-error", False) is False
+    assert job.get("if") is None
+    for owner in (workflow, job):
+        defaults = owner.get("defaults", {}).get("run", {})
+        assert defaults.get("shell") in (None, "bash")
+        assert defaults.get("working-directory") is None
+    steps = job["steps"]
     names = [step["name"] for step in steps]
     assert names.count("Materialize exact current-source test evidence") == 1
     materialize_index = names.index("Materialize exact current-source test evidence")
     step = steps[materialize_index]
     assert step["shell"] == "bash"
     assert step.get("continue-on-error", False) is False
+    assert step.get("if") is None
+    assert step.get("working-directory") is None
     lines = [line.strip() for line in step["run"].splitlines()]
     assert step["run"].count("scripts/build_phase2_whole_model_modal_artifacts.py") == 2
     assert all(lines.count(command) == 1 for command in CI_MODAL_REFRESH_COMMANDS)
     producer, check = [lines.index(command) for command in CI_MODAL_REFRESH_COMMANDS]
     assert max(lines.index(command) for command in PHASE2_REFRESH_COMMANDS) < producer
+    assert lines.count("python - <<'MODAL_SUMMARY'") == 1
+    assert lines.count("MODAL_SUMMARY") == 1
     guard = lines.index("python - <<'MODAL_SUMMARY'")
     end = lines.index("MODAL_SUMMARY")
     external = next(
@@ -140,14 +154,32 @@ def _ci_modal_materialization_script(workflow: dict) -> str:
         )
     )
     assert producer < check < guard < end < external
-    for consumer in ("Build current-HEAD readiness snapshot", "PR quality gate"):
+    assert lines[producer : guard + 1] == [
+        *CI_MODAL_REFRESH_COMMANDS,
+        "python - <<'MODAL_SUMMARY'",
+    ]
+    # The existing materialization prefix is straight-line Python commands.
+    # A copied block inside a branch or after a successful early exit is not admission.
+    assert all(
+        not line or line.startswith(("#", "python ")) for line in lines[:producer]
+    )
+    for consumer in consumers:
+        assert names.count(consumer) == 1
         assert materialize_index < names.index(consumer)
+        assert steps[names.index(consumer)].get("if") is None
+        assert steps[names.index(consumer)].get("continue-on-error", False) is False
     prefix = "python - <<'MODAL_SUMMARY'\n"
     assert step["run"].count(prefix) == 1
     code, suffix = step["run"].split(prefix, 1)[1].split("\nMODAL_SUMMARY\n", 1)
     assert suffix
     compile(code, "ci-modal-summary", "exec")
     return code
+
+
+def _ci_modal_materialization_script(workflow: dict) -> str:
+    return _modal_materialization_script(
+        workflow, "verify", ("Build current-HEAD readiness snapshot", "PR quality gate")
+    )
 
 
 def test_ci_modal_materialization_is_scoped_before_consumers() -> None:
@@ -346,6 +378,211 @@ def test_ci_modal_materialization_summary_rejects_invalid_checkout_identity(
     assert process.returncode != 0
     assert "modal materialization is not bound to GITHUB_SHA" in process.stderr
     assert not process.stdout
+
+
+EXPANDED_MODAL_CONTEXTS = (
+    (
+        "python-test-collection.yml",
+        "full_shards",
+        (
+            (
+                "Run materialized repository test suite shard",
+                "python scripts/run_pytest_shard.py --shard-index ",
+            ),
+        ),
+    ),
+    (
+        "nightly-full-quality.yml",
+        "python_full_shards",
+        (
+            (
+                "Run materialized repository test suite shard",
+                "python scripts/run_pytest_shard.py --shard-index ",
+            ),
+        ),
+    ),
+    (
+        "nightly-full-quality.yml",
+        "deterministic_quality",
+        (
+            (
+                "Deterministic repository quality gate",
+                "python scripts/verify_quality_gate.py --mode full --python-suite-delegated-to-workflow-shards",
+            ),
+        ),
+    ),
+    (
+        "nightly-heavy-solver.yml",
+        "heavy-full-quality",
+        (
+            ("Run materialized repository Python suite", "python -m pytest -q "),
+            (
+                "Full workstation/release quality gate",
+                "python scripts/verify_quality_gate.py --mode full --python-suite-verified-in-prior-step",
+            ),
+        ),
+    ),
+)
+EXPANDED_MODAL_CONTEXT_IDS = (
+    "python-full-shards",
+    "nightly-full-shards",
+    "nightly-deterministic-quality",
+    "heavy-full-quality",
+)
+
+
+def _expanded_modal_materialization_script(
+    workflow: dict,
+    job_name: str,
+    consumers: tuple[tuple[str, str], ...],
+) -> str:
+    code = _modal_materialization_script(
+        workflow, job_name, tuple(name for name, _ in consumers)
+    )
+    original = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    assert code == _ci_modal_materialization_script(original)
+    steps = workflow["jobs"][job_name]["steps"]
+    for name, command_prefix in consumers:
+        consumer = next(step for step in steps if step["name"] == name)
+        run = consumer["run"]
+        assert len(run.splitlines()) == 1
+        assert run.startswith(command_prefix)
+        lexer = shlex.shlex(run, posix=True, punctuation_chars=";&|<>")
+        lexer.whitespace_split = True
+        arguments = list(lexer)
+        assert not any(
+            token and all(character in ";&|<>" for character in token)
+            for token in arguments
+        )
+        assert consumer.get("shell") in (None, "bash")
+        assert consumer.get("working-directory") is None
+        if "run_pytest_shard.py" in run:
+            index = arguments.index("--shard-count")
+            assert arguments[index : index + 3] == ["--shard-count", "4", "--"]
+    return code
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name", "consumers"),
+    EXPANDED_MODAL_CONTEXTS,
+    ids=EXPANDED_MODAL_CONTEXT_IDS,
+)
+def test_all_modal_consumers_admit_exact_ci_summary_before_execution(
+    workflow_name: str,
+    job_name: str,
+    consumers: tuple[tuple[str, str], ...],
+) -> None:
+    workflow = yaml.safe_load((ROOT / ".github/workflows" / workflow_name).read_text())
+    code = _expanded_modal_materialization_script(workflow, job_name, consumers)
+    assert CI_MODAL_SUMMARY_PATH in code
+    assert all(
+        "whole_model_modal" not in command for command in PHASE2_REFRESH_COMMANDS
+    )
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "job_name", "consumers"),
+    EXPANDED_MODAL_CONTEXTS,
+    ids=EXPANDED_MODAL_CONTEXT_IDS,
+)
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        "missing_producer",
+        "missing_check",
+        "duplicate_producer",
+        "duplicate_check",
+        "wrong_core",
+        "wrong_thread_count",
+        "check_before_producer",
+        "guard_before_check",
+        "guard_code_changed",
+        "outside_materialization_decoy",
+        "consumer_before_materialization",
+        "consumer_command_decoy",
+        "materialization_continue_on_error",
+        "job_continue_on_error",
+        "conditional_materialization",
+        "conditional_consumer",
+        "early_successful_exit",
+        "disable_errexit",
+        "consumer_error_rescue",
+        "consumer_successful_suffix",
+    ),
+)
+def test_all_modal_consumers_reject_context_local_materialization_drift(
+    workflow_name: str,
+    job_name: str,
+    consumers: tuple[tuple[str, str], ...],
+    mutation: str,
+) -> None:
+    workflow = yaml.safe_load((ROOT / ".github/workflows" / workflow_name).read_text())
+    before = copy.deepcopy(workflow)
+    job = workflow["jobs"][job_name]
+    steps = job["steps"]
+    index = next(
+        i
+        for i, step in enumerate(steps)
+        if step["name"] == "Materialize exact current-source test evidence"
+    )
+    step = steps[index]
+    producer, check = CI_MODAL_REFRESH_COMMANDS
+    run = step["run"]
+    consumer_name = consumers[0][0]
+    consumer = next(item for item in steps if item["name"] == consumer_name)
+    if mutation == "missing_producer":
+        step["run"] = run.replace(producer + "\n", "", 1)
+    elif mutation == "missing_check":
+        step["run"] = run.replace(check + "\n", "", 1)
+    elif mutation == "duplicate_producer":
+        step["run"] = run.replace(producer + "\n", (producer + "\n") * 2, 1)
+    elif mutation == "duplicate_check":
+        step["run"] = run.replace(check + "\n", (check + "\n") * 2, 1)
+    elif mutation == "wrong_core":
+        step["run"] = run.replace(
+            "OPENBLAS_CORETYPE=Haswell", "OPENBLAS_CORETYPE=Skylake", 1
+        )
+    elif mutation == "wrong_thread_count":
+        step["run"] = run.replace("OPENBLAS_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=2", 1)
+    elif mutation == "check_before_producer":
+        step["run"] = run.replace(producer + "\n" + check, check + "\n" + producer, 1)
+    elif mutation == "guard_before_check":
+        step["run"] = run.replace(check + "\n", "", 1).replace(
+            "MODAL_SUMMARY\n", "MODAL_SUMMARY\n" + check + "\n", 1
+        )
+    elif mutation == "guard_code_changed":
+        step["run"] = run.replace(
+            'payload.get("contract_pass") is not True',
+            'payload.get("contract_pass") is True',
+            1,
+        )
+    elif mutation == "outside_materialization_decoy":
+        step["run"] = run.replace(producer + "\n", "", 1)
+        steps.insert(index, {"name": "Unrelated modal producer decoy", "run": producer})
+    elif mutation == "consumer_before_materialization":
+        steps.remove(consumer)
+        steps.insert(index, consumer)
+    elif mutation == "consumer_command_decoy":
+        consumer["run"] = "true"
+    elif mutation == "materialization_continue_on_error":
+        step["continue-on-error"] = True
+    elif mutation == "job_continue_on_error":
+        job["continue-on-error"] = True
+    elif mutation == "conditional_materialization":
+        step["if"] = "${{ false }}"
+    elif mutation == "conditional_consumer":
+        consumer["if"] = "${{ false }}"
+    elif mutation == "early_successful_exit":
+        step["run"] = run.replace(producer + "\n", "exit 0\n" + producer + "\n", 1)
+    elif mutation == "disable_errexit":
+        step["run"] = "set +e\n" + run
+    elif mutation == "consumer_error_rescue":
+        consumer["run"] += "||true"
+    elif mutation == "consumer_successful_suffix":
+        consumer["run"] += ";true"
+    assert workflow != before
+    with pytest.raises(AssertionError):
+        _expanded_modal_materialization_script(workflow, job_name, consumers)
 
 
 @pytest.mark.parametrize(
