@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:1b77df5280b65d90b650958baf59bac566a47f3984c72fb604c391fb75d3619e",
+  "inventory_digest": "sha256:012e3845acf5a8519ffb9bae5449d1564a23cdfdcb4a794611687d97330c6b82",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -2323,7 +2323,7 @@
           "blob_sha": "58d5ac5d5d2258272787a3011b2a3d690e6df857",
           "change_status": "modified",
           "changes": 10,
-          "current_blob_sha": "76d30258404aa7697343a4d1f385303d35b32460",
+          "current_blob_sha": "dbf02a761b8bfdb51fdac0822fa578407c75b9f5",
           "current_relation": "different",
           "deletions": 3,
           "path": "scripts/verify-workbench-v2-e2e.mjs",
