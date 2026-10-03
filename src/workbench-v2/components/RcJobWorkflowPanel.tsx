@@ -205,7 +205,7 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
     createJobWorkflowTransport(collectionUrl, controller.signal, authorize).then(value => {
       if (!active()) return
       transport = value
-      setSession({ key, transport: value, load: empty(), input: null })
+      setSession({ key, transport: value, load: savedId ? { status: 'loading', job: null, errors: [] } : empty(), input: null })
       if (invalidSavedId && !requestedId) setMessage('The saved RC job identifier is invalid. Open an exact job explicitly.')
       if (savedId) { setOpenId(savedId); void poll(savedId) }
     }).catch(error => { if (active()) setMessage(rcWorkflowMessage(error)) })
