@@ -28,6 +28,9 @@ JOB_HTTP_API_PROFILE = "structural-analysis-durable-job-http-api.v1"
 _JOB_ROUTE = re.compile(
     r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>request|checkpoint|result|evidence|resume|cancel|rc-invocations|failure-diagnostics)(?:/(?P<ordinal>[1-9][0-9]{0,3}))?)?$"
 )
+_RC_QUANTITY_ROUTE = re.compile(
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-quantity-reports(?:/(?P<report_id>rcq_[0-9a-f]{64}))?$"
+)
 _MAX_HTTP_BODY = 192 * 1024 * 1024
 _MAX_SUBMIT_BODY = 16 * 1024 * 1024
 # Base64 of a bounded RC result plus the existing small completion envelope.
@@ -35,6 +38,8 @@ _MAX_RC_COMPLETE_BODY = 800 * 1024 * 1024
 
 
 def _transport_body_limit(method: str, path: str) -> int:
+    if method.upper() == "POST" and _RC_QUANTITY_ROUTE.fullmatch(path):
+        return 16 * 1024
     if method.upper() == "POST" and path == "/v1/jobs":
         return _MAX_SUBMIT_BODY
     if method.upper() == "POST" and re.fullmatch(
@@ -89,6 +94,15 @@ class DurableJobHttpApi:
                 )
             if path == "/v1/jobs" and normalized_method == "POST":
                 return self._submit(normalized_headers, raw)
+            quantity_match = _RC_QUANTITY_ROUTE.fullmatch(path)
+            if quantity_match is not None:
+                return self._rc_quantity_route(
+                    normalized_method,
+                    quantity_match.group("job_id"),
+                    quantity_match.group("report_id"),
+                    normalized_headers,
+                    raw,
+                )
             match = _JOB_ROUTE.fullmatch(path)
             if match is not None:
                 return self._tenant_job_route(
@@ -122,6 +136,68 @@ class DurableJobHttpApi:
                 "request_field_invalid",
                 "One or more request fields have an invalid type or range.",
             )
+
+    def _rc_quantity_route(
+        self,
+        method: str,
+        job_id: str,
+        report_id: str | None,
+        headers: Mapping[str, str],
+        body: bytes,
+    ) -> JobHttpResponse:
+        tenant_id, token = _tenant_credentials(headers)
+        credentials = {"tenant_id": tenant_id, "authorization_token": token}
+        if report_id is None and method == "POST":
+            payload = _json_body(body)
+            if set(payload) != {
+                "expected_request_hash",
+                "expected_result_artifact_hash",
+                "declared_prices",
+            }:
+                _api_fail(
+                    "rc_quantity_fields_invalid",
+                    400,
+                    "Specify source references and explicit prices.",
+                )
+            reference = self.service.create_rc_quantity_report(
+                job_id,
+                **credentials,
+                **payload,
+            )
+            return _json_response(200, reference)
+        if method == "GET":
+            if body:
+                _api_fail("unexpected_body", 400, "Report reads do not accept a body.")
+            if report_id is not None:
+                raw = self.service.read_rc_quantity_report(
+                    job_id, report_id, **credentials
+                )
+                return JobHttpResponse(
+                    200,
+                    {
+                        **_headers("application/json"),
+                        "content-disposition": f'attachment; filename="{report_id}-quantity-price.json"',
+                        "x-structural-report-sha256": "sha256:"
+                        + hashlib.sha256(raw).hexdigest(),
+                    },
+                    raw,
+                )
+            page = {}
+            for header, field, default in (
+                ("x-structural-report-after-revision", "after_revision", "0"),
+                ("x-structural-report-limit", "limit", "20"),
+            ):
+                value = headers.get(header, default)
+                if not re.fullmatch(r"[0-9]{1,19}", value):
+                    _api_fail(
+                        "rc_quantity_page_invalid", 400, "Invalid report pagination."
+                    )
+                page[field] = int(value)
+            return _json_response(
+                200,
+                self.service.list_rc_quantity_reports(job_id, **credentials, **page),
+            )
+        _api_fail("method_not_allowed", 405, "Method is not allowed for this route.")
 
     def _submit(self, headers: Mapping[str, str], body: bytes) -> JobHttpResponse:
         tenant_id, token = _tenant_credentials(headers)
@@ -547,6 +623,7 @@ def _service_status(code: str) -> int:
         "job_not_found",
         "rc_invocation_not_recorded",
         "failure_diagnostic_not_recorded",
+        "rc_quantity_report_not_found",
     }:
         return 404
     if code in {
@@ -560,6 +637,8 @@ def _service_status(code: str) -> int:
         "cancel_state_invalid",
         "rc_invocation_outcome_conflict",
         "rc_invocation_reservation_lease_mismatch",
+        "rc_quantity_source_conflict",
+        "rc_quantity_job_not_succeeded",
     }:
         return 409
     if code.startswith("job_database_") or code in {
