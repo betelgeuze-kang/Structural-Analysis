@@ -12,15 +12,18 @@ const JOB_ID = /^job_[0-9a-f]{32}$/
 const terminal = (job: WorkbenchJobView) => ['succeeded', 'failed', 'cancelled'].includes(job.status)
 const empty = (): JobLoadResult => ({ status: 'unconfigured', job: null, errors: [] })
 
-export function rcWorkflowMessage(error: unknown): string {
+export function rcWorkflowMessage(error: unknown, operation: 'read' | 'submit' | 'resume' | 'save' = 'read'): string {
   const message = error instanceof Error ? error.message : ''
   if (message.includes('authorization_scope_changed')) return 'Authentication scope changed. Reopen this project with the current account.'
-  const status = /(?:http_|HTTP_)([0-9]{3})/.exec(message)?.[1]
+  const status = /(?:http_|HTTP_|HTTP )([0-9]{3})/.exec(message)?.[1]
   if (status === '401') return 'Authentication is unavailable. Reopen with the current account.'
   if (status === '404') return 'This saved job or report is unavailable for the current account.'
   if (status === '409') return 'The saved source or submission key conflicts. Refresh the exact job before an explicit retry.'
   if (status === '400' || status === '413') return 'The input was rejected. Keep the draft and check its supported fields and size.'
-  if (status === '503') return 'The service could not save this action. Earlier saved revisions are unchanged.'
+  if (operation !== 'read' && (status === '503' || message === 'job_api_request_failed')) {
+    return 'The RC action outcome is unconfirmed. Refresh the saved state before deciding on another action. The draft has been retained.'
+  }
+  if (status === '503' || message === 'job_api_request_failed' || message === 'job API request failed') return 'The saved RC state is temporarily unavailable. Refresh to read it again. The draft has been retained.'
   return 'The requested RC action could not be verified. The draft has been retained.'
 }
 export function rcWorkflowAuthorizationFailure(error: unknown): boolean {
@@ -71,6 +74,8 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
   const [intentVersion, setIntentVersion] = useState(0)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [resumeRefreshRequired, setResumeRefreshRequired] = useState<string | null>(null)
+  const resumeRefreshJob = useRef<string | null>(null)
   const generation = useRef(0)
   const fileGeneration = useRef(0)
   const controllerRef = useRef<AbortController | undefined>(undefined)
@@ -83,8 +88,8 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
   const key = JSON.stringify([collectionUrl, initialJobStatusUrl, initialJobId, initialReportId, requestedId, authEpoch, refreshEpoch])
   const current = session.key === key ? session : { key, transport: null, load: empty(), input: null }
 
-  function invalidate(error: unknown): void {
-    setMessage(rcWorkflowMessage(error))
+  function invalidate(error: unknown, operation: 'read' | 'submit' | 'resume' | 'save' = 'read'): void {
+    setMessage(rcWorkflowMessage(error, operation))
     if (rcWorkflowAuthorizationFailure(error)) {
       generation.current++
       controllerRef.current?.abort()
@@ -185,6 +190,10 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
         await transport.verifyAuthorizationScope()
         if (!active()) { loaded.rcReview?.dispose(); return }
         setSession(old => ({ ...old, key, transport, load: loaded }))
+        if (resumeRefreshJob.current === jobId) {
+          resumeRefreshJob.current = null
+          setResumeRefreshRequired(null)
+        }
         if (!terminal(job)) pollTimer.current = setTimeout(() => void poll(jobId), 2000)
       } catch (error) {
         if (!active()) return
@@ -226,17 +235,23 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
       await current.transport.verifyAuthorizationScope()
       if (generation.current !== ownGeneration) return
       setRequestedId(job.job_id); setOpenId(job.job_id); setRefreshEpoch(v => v + 1)
-    } catch (error) { if (generation.current === ownGeneration) invalidate(error) }
+    } catch (error) { if (generation.current === ownGeneration) invalidate(error, 'submit') }
     finally { if (generation.current === ownGeneration) setBusy(false) }
   }
   async function retry(): Promise<void> {
-    if (!current.transport || current.load.job?.status !== 'failed' || busy) return
+    if (!current.transport || current.load.job?.status !== 'failed' || busy || resumeRefreshJob.current === current.load.job.job_id) return
     const ownGeneration = generation.current
+    const jobId = current.load.job.job_id
     setBusy(true); setMessage('')
     try {
       await resumeRcJob(current.transport, current.load.job)
       if (generation.current === ownGeneration) setRefreshEpoch(v => v + 1)
-    } catch (error) { if (generation.current === ownGeneration) invalidate(error) }
+    } catch (error) {
+      if (generation.current === ownGeneration) {
+        resumeRefreshJob.current = jobId; setResumeRefreshRequired(jobId)
+        invalidate(error, 'resume')
+      }
+    }
     finally { if (generation.current === ownGeneration) setBusy(false) }
   }
   return <section className="wb2-panel" data-rc-workflow="project" aria-labelledby="wb2-rc-workflow-title">
@@ -263,7 +278,8 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
     {message ? <p role="alert" data-rc-workflow-error>{message}</p> : null}
     {current.input ? <InputSummary value={current.input} saved /> : null}
     {current.load.job ? <p><a data-rc-project-link href={rcProjectLink(current.load.job.job_id)} target="_blank" rel="noopener">Reopen this RC project</a></p> : null}
-    {current.load.job?.status === 'failed' ? <button type="button" className="wb2-btn" data-rc-explicit-retry disabled={!current.transport || busy} onClick={() => void retry()}>
+    {resumeRefreshRequired && resumeRefreshRequired === openId ? <p data-rc-resume-unconfirmed>The resume outcome is unconfirmed. Open the saved job or refresh the account and job to check its current state before another resume.</p> : null}
+    {current.load.job?.status === 'failed' ? <button type="button" className="wb2-btn" data-rc-explicit-retry disabled={!current.transport || busy || resumeRefreshRequired === current.load.job.job_id} onClick={() => void retry()}>
       {current.load.job.checkpoint ? 'Resume RC from saved checkpoint' : 'Retry RC from the beginning'}
     </button> : null}
     <JobServicePanel key={`${key}:${current.load.job?.job_id}:${current.load.job?.attempt}`} loadStatus={current.load.status} job={current.load.job} errors={current.load.errors} artifactStatus={current.load.artifactStatus}

@@ -20,13 +20,14 @@ export function RcQuantityReportPanel({ transport, job, review, initialReportId,
   const [includePrices, setIncludePrices] = useState(false)
   const [prices, setPrices] = useState({ concrete: '', rebar: '', currency: 'KRW', asOf: '', source: '' })
   const [dirty, setDirty] = useState(false)
+  const [saveUnconfirmed, setSaveUnconfirmed] = useState(false)
   const active = useRef(true)
   const sequence = useRef(0)
   const urls = useRef(new Set<string>())
   const initialHandled = useRef(false)
-  function failure(error: unknown): void {
+  function failure(error: unknown, operation: 'read' | 'save' = 'read'): void {
     if (!active.current) return
-    setError(rcWorkflowMessage(error))
+    setError(rcWorkflowMessage(error, operation))
     if (rcWorkflowAuthorizationFailure(error)) onAuthorizationFailure(error)
   }
   async function admit(reference: RcQuantityReportReference, ownSequence: number, expectedDeclaration?: RcQuantityReportReview['declared_prices']): Promise<void> {
@@ -65,26 +66,34 @@ export function RcQuantityReportPanel({ transport, job, review, initialReportId,
     if (!reference) return
     const ownSequence = ++sequence.current
     setBusy(true); setError('')
-    try { await admit(reference, ownSequence) }
+    try { await admit(reference, ownSequence); if (active.current && ownSequence === sequence.current) initialHandled.current = true }
     catch (error) { if (ownSequence === sequence.current) failure(error) }
     finally { if (active.current && ownSequence === sequence.current) setBusy(false) }
   }
   async function save(): Promise<void> {
     if (busy) return
     const ownSequence = ++sequence.current
+    let writeRequested = false
     setBusy(true); setError('')
     try {
       if (includePrices && (!prices.concrete.trim() || !prices.rebar.trim())) throw new Error('rc_prices_required')
       const declaration = parseRcDeclaredPrices(includePrices ? {
         concrete_per_m3: Number(prices.concrete), rebar_per_kg: Number(prices.rebar), currency: prices.currency, as_of: prices.asOf, source: prices.source,
       } : null)
+      writeRequested = true
       const reference = await createRcQuantityReport(transport, job, declaration)
       if (!active.current || ownSequence !== sequence.current) return
       await admit(reference, ownSequence, declaration)
       if (!active.current || ownSequence !== sequence.current) return
       setReferences(old => [...old.filter(ref => ref.report_id !== reference.report_id), reference].sort((a, b) => a.revision - b.revision))
-      setDirty(false)
-    } catch (error) { if (ownSequence === sequence.current) failure(error) }
+      initialHandled.current = true
+      setDirty(false); setSaveUnconfirmed(false)
+    } catch (error) {
+      if (active.current && ownSequence === sequence.current) {
+        if (writeRequested) { setDirty(true); setSaveUnconfirmed(true) }
+        failure(error, 'save')
+      }
+    }
     finally { if (active.current && ownSequence === sequence.current) setBusy(false) }
   }
   async function download(): Promise<void> {
@@ -119,10 +128,13 @@ export function RcQuantityReportPanel({ transport, job, review, initialReportId,
       <label>Price date <input type="date" value={prices.asOf} onChange={e => edit({ asOf: e.target.value })} /></label>{' '}
       <label>Declared source <input value={prices.source} maxLength={2000} onChange={e => edit({ source: e.target.value })} /></label>
     </fieldset> : null}
-    {dirty ? <p data-rc-price-draft>These declaration changes have not been saved. The selected revision below retains its original prices.</p> : null}
+    {dirty ? <p data-rc-price-draft>{saveUnconfirmed
+      ? 'The save outcome is unconfirmed. The declaration draft is retained; a saved-revision listing or matching prices alone cannot confirm this save.'
+      : 'These declaration changes have not been saved. The selected revision below retains its original prices.'}</p> : null}
     <div className="wb2-actions"><button type="button" className="wb2-btn" disabled={busy || !review.verifyQuantityReport} onClick={() => void save()}>Save quantity and price revision</button>
+      <button type="button" className="wb2-btn" disabled={busy} onClick={() => void page(0)}>Refresh saved revisions</button>
       <label>Saved quantity revision <select value={selectedRef?.report_id ?? ''} disabled={busy} onChange={e => void select(e.target.value)}>
-        <option value="">Choose a saved revision</option>{references.map(ref => <option key={ref.report_id} value={ref.report_id}>Revision {ref.revision} · {ref.created_at}</option>)}
+        <option value="">Choose a saved revision</option>{(selectedRef && !references.some(ref => ref.report_id === selectedRef.report_id) ? [...references, selectedRef] : references).map(ref => <option key={ref.report_id} value={ref.report_id}>Revision {ref.revision} · {ref.created_at}</option>)}
       </select></label>
       {canLoadMore && references.length < 640 ? <button type="button" className="wb2-btn" disabled={busy} onClick={() => void page(cursor)}>Load more saved revisions</button> : null}
     </div>

@@ -83,9 +83,9 @@ function sameSubmittedValues(leftRaw: string, rightRaw: string): boolean {
 }
 
 export async function verifyRcSubmissionBinding(transport: RcJobTransport, job: WorkbenchJobView, submittedBytes: Uint8Array): Promise<void> {
+  parseJson(submittedBytes, 'rc_submit')
+  const stored = await loadRcJobRequest(transport, job)
   try {
-    parseJson(submittedBytes, 'rc_submit')
-    const stored = await loadRcJobRequest(transport, job)
     if (!sameSubmittedValues(new TextDecoder('utf-8', { fatal: true }).decode(submittedBytes), new TextDecoder('utf-8', { fatal: true }).decode(stored.bytes))) {
       throw new JobArtifactError('rc_submission_source_mismatch')
     }

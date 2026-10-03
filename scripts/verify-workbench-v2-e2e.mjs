@@ -23,6 +23,7 @@ const specs = [
   'tests/frontend/workbench-v2-rc-quantity-report-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-submission-binding.spec.ts',
   'tests/frontend/workbench-v2-rc-workflow-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-report-recovery-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-job-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-cohort-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-cohort-browser.spec.ts',

@@ -429,3 +429,204 @@ test.describe('RC project workflow orchestration browser', () => {
     await expect(workflow(page).locator('[data-failure-diagnostic]')).toHaveCount(0)
   })
 })
+
+test.describe('RC recovery follow-up in compiled app', () => {
+  test.afterEach(() => { for (const release of pendingGates) release() })
+
+  for (const read of ['status', 'request'] as const) for (const failure of ['network', '503'] as const) {
+    test(`${read} GET ${failure} retains the saved ID and draft until explicit read recovery`, async ({ page }) => {
+      const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'queued')
+      let unavailable = true
+      await page.clock.install()
+      await configure(page)
+      await page.route(jobRoute, async route => {
+        const row = await observe(route, requests)
+        if (unavailable && row.path === `${collection}/${firstId}${read === 'request' ? '/request' : ''}`) {
+          if (failure === 'network') await route.abort('failed')
+          else await route.fulfill({ status: 503, contentType: 'application/json', body: '{}' })
+        } else await serve(route, row, current, firstInput)
+      })
+      await page.goto(`${baseUrl}/#/workbench-v2`)
+      await workflow(page).getByText('Submit a new RC input', { exact: true }).click()
+      await workflow(page).getByLabel('Typed RC request JSON', { exact: true }).fill(secondInput)
+      const submit = workflow(page).getByRole('button', { name: 'Submit RC analysis', exact: true })
+      const intent = await submit.getAttribute('data-rc-submit-intent')
+      await workflow(page).getByLabel('Saved RC job ID', { exact: true }).fill(firstId)
+      await workflow(page).getByRole('button', { name: 'Open saved RC job', exact: true }).click()
+      await expect(workflow(page).locator('[data-rc-workflow-error]')).toContainText('temporarily unavailable')
+      await expect(workflow(page).locator('[data-rc-input-summary="stored"], [data-rc-review], [data-rc-project-link]')).toHaveCount(0)
+      await expect(workflow(page).getByLabel('Saved RC job ID', { exact: true })).toHaveValue(firstId)
+      await expect(workflow(page).getByLabel('Typed RC request JSON', { exact: true })).toHaveValue(secondInput)
+      await expect(submit).toHaveAttribute('data-rc-submit-intent', intent!)
+      const before = requests.length
+      await page.clock.fastForward(6000)
+      expect(requests).toHaveLength(before)
+      unavailable = false
+      await workflow(page).getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+      await ready(page, 'queued')
+      await expect(workflow(page).getByLabel('Typed RC request JSON', { exact: true })).toHaveValue(secondInput)
+      expect(requests.every(row => row.method === 'GET')).toBe(true)
+    })
+  }
+
+  for (const failure of ['network', '503'] as const) test(`submit reply then request GET ${failure} keeps one exact submission intent`, async ({ page }) => {
+    const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'queued')
+    let unavailable = true
+    await configure(page)
+    await page.route(jobRoute, async route => {
+      const row = await observe(route, requests)
+      if (row.method === 'POST') await route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify(current) })
+      else if (unavailable && row.path.endsWith('/request')) {
+        if (failure === 'network') await route.abort('failed')
+        else await route.fulfill({ status: 503, contentType: 'application/json', body: '{}' })
+      } else await serve(route, row, current, firstInput)
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    await workflow(page).getByText('Submit a new RC input', { exact: true }).click()
+    await workflow(page).getByLabel('Typed RC request JSON', { exact: true }).fill(firstInput)
+    const submit = workflow(page).getByRole('button', { name: 'Submit RC analysis', exact: true })
+    await submit.click()
+    await expect(workflow(page).locator('[data-rc-workflow-error]')).toContainText('outcome is unconfirmed')
+    await expect(workflow(page).locator('[data-rc-workflow-error]')).not.toContainText('could not save')
+    await expect(workflow(page).locator('[data-rc-input-summary="stored"], [data-rc-project-link]')).toHaveCount(0)
+    await expect(workflow(page).getByLabel('Typed RC request JSON', { exact: true })).toHaveValue(firstInput)
+    expect(requests.filter(row => row.method === 'POST')).toHaveLength(1)
+    unavailable = false
+    await submit.click()
+    await ready(page, 'queued')
+    const posts = requests.filter(row => row.method === 'POST')
+    expect(posts).toHaveLength(2)
+    expect(posts[0].key).toBe(posts[1].key)
+    expect(posts.map(row => row.body)).toEqual([Buffer.from(firstInput), Buffer.from(firstInput)])
+  })
+
+  for (const reconciled of ['queued', 'checkpointed'] as const) test(`lost resume reply blocks writes until GET reconciles ${reconciled}`, async ({ page }) => {
+    const requests: ObservedRequest[] = []
+    let current = job(firstId, firstInput, 'failed')
+    await page.clock.install()
+    await configure(page, firstId)
+    await page.route(jobRoute, async route => {
+      const row = await observe(route, requests)
+      if (row.method === 'POST') {
+        current = job(firstId, firstInput, reconciled, 2)
+        await route.abort('failed')
+      } else await serve(route, row, current, firstInput)
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    await ready(page, 'failed')
+    const retry = workflow(page).locator('[data-rc-explicit-retry]')
+    await retry.click()
+    await expect(workflow(page).locator('[data-rc-resume-unconfirmed]')).toContainText('resume outcome is unconfirmed')
+    await expect(retry).toBeDisabled()
+    const before = requests.length
+    await page.clock.fastForward(6000)
+    expect(requests).toHaveLength(before)
+    expect(requests.filter(row => row.method === 'POST')).toHaveLength(1)
+    await workflow(page).getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+    await ready(page, reconciled)
+    await expect(retry).toHaveCount(0)
+    await expect(workflow(page).locator('[data-rc-resume-unconfirmed]')).toHaveCount(0)
+    expect(requests.filter(row => row.method === 'POST')).toHaveLength(1)
+    expect(requests.filter(row => row.path.endsWith('/request'))).toHaveLength(2)
+  })
+
+  for (const checkpoint of [null, `sha256:${'e'.repeat(64)}`]) test(`resume503 requires fresh failed GET before explicit ${checkpoint === null ? 'null' : 'changed'} checkpoint retry`, async ({ page }) => {
+    const requests: ObservedRequest[] = []
+    let current = job(firstId, firstInput, 'failed'), writes = 0, failedRead = false
+    await configure(page, firstId)
+    await page.route(jobRoute, async route => {
+      const row = await observe(route, requests)
+      if (row.method === 'POST') {
+        if (++writes === 1) {
+          current = { ...job(firstId, firstInput, 'failed', 2), checkpoint: checkpoint ? { role: 'checkpoint', content_hash: checkpoint, byte_length: 2, media_type: 'application/json' } : null,
+            can_resume: checkpoint !== null, resume_contract_hash: checkpoint ? hash : null }
+          await route.fulfill({ status: 503, contentType: 'application/json', body: '{}' })
+        } else { current = job(firstId, firstInput, 'queued', 3); await route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify(current) }) }
+      } else if (failedRead && row.path === `${collection}/${firstId}`) await route.fulfill({ status: 503, contentType: 'application/json', body: '{}' })
+      else await serve(route, row, current, firstInput)
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    await ready(page, 'failed')
+    await workflow(page).locator('[data-rc-explicit-retry]').click()
+    await expect(workflow(page).locator('[data-rc-workflow-error]')).toContainText('outcome is unconfirmed')
+    await expect(workflow(page).locator('[data-rc-explicit-retry]')).toBeDisabled()
+    failedRead = true
+    await workflow(page).getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+    await expect(workflow(page).locator('[data-rc-workflow-error]')).toContainText('temporarily unavailable')
+    await expect(workflow(page).locator('[data-rc-explicit-retry]')).toHaveCount(0)
+    expect(writes).toBe(1)
+    failedRead = false
+    await workflow(page).getByRole('button', { name: 'Open saved RC job', exact: true }).click()
+    await ready(page, 'failed')
+    await expect(workflow(page).locator('[data-rc-explicit-retry]')).toBeEnabled()
+    await workflow(page).locator('[data-rc-explicit-retry]').click()
+    await ready(page, 'queued')
+    const posts = requests.filter(row => row.method === 'POST')
+    expect(posts).toHaveLength(2)
+    expect(JSON.parse(posts[1].body!.toString())).toEqual({ expected_request_hash: digest(firstInput), expected_checkpoint_hash: checkpoint })
+    expect(requests.some(row => row.path.endsWith('/checkpoint'))).toBe(false)
+  })
+
+  test('resume reconciliation HTTP401 clears authority and cannot reopen a retry', async ({ page }) => {
+    const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'failed')
+    let unauthorized = false
+    await configure(page, firstId)
+    await page.route(jobRoute, async route => {
+      const row = await observe(route, requests)
+      if (row.method === 'POST') { unauthorized = true; await route.abort('failed') }
+      else if (unauthorized) await route.fulfill({ status: 401, contentType: 'application/json', body: '{}' })
+      else await serve(route, row, current, firstInput)
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    await ready(page, 'failed')
+    await workflow(page).locator('[data-rc-explicit-retry]').click()
+    await expect(workflow(page).locator('[data-rc-explicit-retry]')).toBeDisabled()
+    await workflow(page).getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+    await expect(workflow(page).locator('[data-rc-workflow-error]')).toContainText('Authentication is unavailable')
+    await expect(workflow(page).locator('[data-rc-input-summary="stored"], [data-rc-project-link], [data-rc-explicit-retry]')).toHaveCount(0)
+    expect(requests.filter(row => row.method === 'POST')).toHaveLength(1)
+  })
+
+  test('delayed resume reconciliation cannot restore an old project after a generation switch', async ({ page }) => {
+    const requests: ObservedRequest[] = [], gate = deferred()
+    let reconcile = false, started = false, completed = false
+    await configure(page, firstId)
+    await page.route(jobRoute, async route => {
+      const row = await observe(route, requests)
+      if (row.method === 'POST') { reconcile = true; await route.abort('failed') }
+      else if (row.path === `${collection}/${firstId}` && reconcile) {
+        started = true; await gate.promise
+        try { await serve(route, row, job(firstId, firstInput, 'failed', 2), firstInput) } catch { /* The old generation is aborted. */ }
+        finally { completed = true }
+      } else await serve(route, row, row.path.includes(secondId) ? job(secondId, secondInput, 'queued') : job(firstId, firstInput, 'failed'), row.path.includes(secondId) ? secondInput : firstInput)
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    await ready(page, 'failed')
+    await workflow(page).locator('[data-rc-explicit-retry]').click()
+    await expect(workflow(page).locator('[data-rc-explicit-retry]')).toBeDisabled()
+    await workflow(page).getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+    await expect.poll(() => started).toBe(true)
+    await workflow(page).getByLabel('Saved RC job ID', { exact: true }).fill(secondId)
+    await workflow(page).getByRole('button', { name: 'Open saved RC job', exact: true }).click()
+    await ready(page, 'queued')
+    gate.release(); await expect.poll(() => completed).toBe(true)
+    await expect(workflow(page).locator('[data-job-service]')).toContainText(secondId)
+    await expect(workflow(page).locator('[data-rc-explicit-retry], [data-rc-resume-unconfirmed]')).toHaveCount(0)
+    expect(requests.filter(row => row.method === 'POST')).toHaveLength(1)
+  })
+
+  for (const rejection of ['hash', 'operation'] as const) test(`recovery ${rejection} rejection does not regain stored input authority`, async ({ page }) => {
+    const requests: ObservedRequest[] = []
+    const invalid = rejection === 'operation' ? firstInput.replace('bounded_rc_fiber_direct_control', 'unsupported_synthetic_operation') : firstInput
+    const current = job(firstId, firstInput, 'failed')
+    await configure(page, firstId)
+    await page.route(jobRoute, async route => {
+      const row = await observe(route, requests)
+      await serve(route, row, rejection === 'operation' ? job(firstId, invalid, 'failed') : { ...current, request: { ...current.request, content_hash: hash } }, invalid)
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    await expect(workflow(page).locator('[data-rc-workflow-error]')).toContainText('could not be verified')
+    await expect(workflow(page).locator('[data-rc-input-summary="stored"], [data-rc-project-link], [data-rc-explicit-retry], [data-rc-review]')).toHaveCount(0)
+    expect(requests.every(row => row.method === 'GET')).toBe(true)
+  })
+})

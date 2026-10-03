@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { createHash } from 'node:crypto'
-import { createJobWorkflowTransport, type RcJobTransport } from '../../src/workbench-v2/model/jobTransport'
+import { createJobWorkflowTransport, JobArtifactError, type RcJobTransport } from '../../src/workbench-v2/model/jobTransport'
 import { verifyRcSubmissionBinding } from '../../src/workbench-v2/model/rcWorkflowProvider'
 import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 
@@ -44,6 +44,29 @@ test('rejects stored request byte hash contradiction and duplicate submitted key
   const { job, transport } = source(canonical)
   await expect(verifyRcSubmissionBinding(transport, { ...job, request: { ...job.request, content_hash: hash('other') } }, encode(original))).rejects.toThrow('request_hash_mismatch')
   await expect(verifyRcSubmissionBinding(transport, job, encode('{"value":1,"value":2}'))).rejects.toThrow('rc_submit_json_invalid')
+})
+for (const [name, error] of [
+  ['network rejection', new Error('job_api_request_failed')],
+  ['caller abort', new DOMException('Synthetic caller cancellation', 'AbortError')],
+  ['authorization scope change', new JobArtifactError('job_authorization_scope_changed')],
+] as const) test(`binding read preserves ${name} rather than claiming source mismatch`, async () => {
+  const { job, transport } = source(canonical)
+  transport.getRequest = async () => { throw error }
+  const bytes = encode(original), copy = bytes.slice()
+  await expect(verifyRcSubmissionBinding(transport, job, bytes)).rejects.toBe(error)
+  expect(bytes).toEqual(copy)
+})
+test('binding read preserves service unavailable without claiming source mismatch', async () => {
+  const { job, transport } = source(canonical)
+  transport.getRequest = async () => new Response('{}', { status: 503 })
+  await expect(verifyRcSubmissionBinding(transport, job, encode(original))).rejects.toThrow('job_api_http_503')
+})
+test('invalid submitted duplicate keys are rejected before reading a saved request', async () => {
+  const { job, transport } = source(canonical)
+  let reads = 0
+  transport.getRequest = async () => { reads++; return new Response(canonical) }
+  await expect(verifyRcSubmissionBinding(transport, job, encode('{"value":1,"value":2}'))).rejects.toThrow('rc_submit_json_invalid')
+  expect(reads).toBe(0)
 })
 test('tenant switching during an HTTP response rejects its bytes and latches the session', async () => {
   const originalFetch = globalThis.fetch, originalLocation = Object.getOwnPropertyDescriptor(globalThis, 'location')
