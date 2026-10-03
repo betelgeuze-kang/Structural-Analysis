@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:8023bd4e134684dec05985dc22d891efda910e315bafcb36adbfebd2598b3670",
+  "inventory_digest": "sha256:1b77df5280b65d90b650958baf59bac566a47f3984c72fb604c391fb75d3619e",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -471,7 +471,7 @@
           "blob_sha": "774c0dc9dda94658de61ed500b3c16548cf3331d",
           "change_status": "modified",
           "changes": 66,
-          "current_blob_sha": "1d197f9a969c25f8a7108bb332de0f9ebcd7df52",
+          "current_blob_sha": "7e66a45c285a194984e13794b9d3db3038822840",
           "current_relation": "different",
           "deletions": 7,
           "path": ".github/workflows/ci.yml",
@@ -522,7 +522,7 @@
           "blob_sha": "e928d9434f8d1eb8d0d22070206333c87db89ee5",
           "change_status": "modified",
           "changes": 55,
-          "current_blob_sha": "d0f3b621de903731adfa1519dedc7353cf36734b",
+          "current_blob_sha": "1f83f8582959af4f0e66c06cc30aadc3673369f9",
           "current_relation": "different",
           "deletions": 4,
           "path": ".github/workflows/nightly-full-quality.yml",
@@ -539,7 +539,7 @@
           "blob_sha": "46f9c2a5e063f09d618f01592532277f25c5557a",
           "change_status": "added",
           "changes": 46,
-          "current_blob_sha": "ff717b188094016e4e72d058a8a96b513a05263a",
+          "current_blob_sha": "7716fc7262a6de55848bd94fdb4aa4036bede2d4",
           "current_relation": "different",
           "deletions": 0,
           "path": ".github/workflows/nightly-heavy-solver.yml",
@@ -2323,7 +2323,7 @@
           "blob_sha": "58d5ac5d5d2258272787a3011b2a3d690e6df857",
           "change_status": "modified",
           "changes": 10,
-          "current_blob_sha": "7c271a3832cb9f135ea9cf7d44c299e8e992b8b1",
+          "current_blob_sha": "76d30258404aa7697343a4d1f385303d35b32460",
           "current_relation": "different",
           "deletions": 3,
           "path": "scripts/verify-workbench-v2-e2e.mjs",
