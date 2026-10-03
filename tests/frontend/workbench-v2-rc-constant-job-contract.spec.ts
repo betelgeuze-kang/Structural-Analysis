@@ -84,3 +84,16 @@ for (const [name, path, value, error] of [
     await expect(validateRcJobArtifacts(source.job, source.artifacts)).rejects.toThrow(`rc_review_${error}`)
   })
 }
+
+
+test('v2 rejects rehashed unknown work in a successful last verification receipt', async () => {
+  const source = fixture()
+  const original = new TextDecoder().decode(source.artifacts.result)
+  const tail = JSON.parse(original).receipts.length - 1
+  const checkpoint = source.artifacts.checkpoint.slice(), request = source.artifacts.request.slice()
+  bind(source, replace(original, ['receipts', tail, 'verification_metrics', 'replay_control_work', 'unknown_solver_work_attempt_count'], '1'))
+  expect(source.artifacts.checkpoint).toEqual(checkpoint)
+  expect(source.artifacts.request).toEqual(request)
+  expect(get(new TextDecoder().decode(source.artifacts.result), ['api_result'])).toBe(get(original, ['api_result']))
+  await expect(validateRcJobArtifacts(source.job, source.artifacts).then(review => review.summary)).rejects.toThrow('rc_review_work_invalid')
+})

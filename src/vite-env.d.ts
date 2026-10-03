@@ -4,6 +4,7 @@ interface ImportMetaEnv {
   readonly VITE_DESIGN_COMPARISON_URL?: string
   readonly VITE_CANDIDATE_SEARCH_PROCESS_URL?: string
   readonly VITE_JOB_STATUS_URL?: string
+  readonly VITE_RC_JOB_COLLECTION_URL?: string
   readonly VITE_NATIVE_FRAME_RESULT_URL?: string
   readonly VITE_NATIVE_FRAME_REPORT_URL?: string
   readonly VITE_NATIVE_FRAME_BUNDLE_URL?: string
@@ -24,6 +25,8 @@ interface StructuralWorkbenchRuntimeConfig {
   readonly rcControlDesignUrl?: string
   readonly candidateSearchProcessUrl?: string
   readonly jobStatusUrl?: string
+  /** Same-origin durable RC collection; enables explicit submit/retry/report actions. */
+  readonly rcJobCollectionUrl?: string
   /** Host-provided credentials for one same-origin job load; not a build-time setting. */
   readonly jobAuthorization?: import('./workbench-v2/model/jobTransport').JobAuthorizationProvider
   readonly nativeFrameResultUrl?: string

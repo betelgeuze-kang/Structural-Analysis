@@ -42,7 +42,9 @@ def control_history_turning_points(targets):
     return normalized
 
 
-def geometry_shape_signature(model, *, experimental_two_fixed_endpoints=False):
+def geometry_shape_signature(
+    model, *, experimental_two_fixed_endpoints=False, experimental_pin_roller_beam=False
+):
     """Sorted normalized pair distances plus coarse connectivity; no solver calls.
 
     Congruent, mirrored and uniformly scaled coordinate sets group together even
@@ -51,13 +53,22 @@ def geometry_shape_signature(model, *, experimental_two_fixed_endpoints=False):
     """
     if type(experimental_two_fixed_endpoints) is not bool:
         raise ValueError("explicit boolean two-fixed-endpoint shape profile required")
-    payload = (
-        fiber_frame_physical_model_payload(
-            model, experimental_two_fixed_endpoints=True
+    if type(experimental_pin_roller_beam) is not bool:
+        raise ValueError("explicit boolean pin-roller-beam shape profile required")
+    if experimental_two_fixed_endpoints and experimental_pin_roller_beam:
+        raise ValueError("RC shape profiles are mutually exclusive")
+    if experimental_pin_roller_beam:
+        payload = fiber_frame_physical_model_payload(
+            model, experimental_pin_roller_beam=True
         )
-        if experimental_two_fixed_endpoints
-        else fiber_frame_physical_model_payload(model)
-    )
+    else:
+        payload = (
+            fiber_frame_physical_model_payload(
+                model, experimental_two_fixed_endpoints=True
+            )
+            if experimental_two_fixed_endpoints
+            else fiber_frame_physical_model_payload(model)
+        )
     coordinates = np.asarray(payload["node_coordinates_m"], dtype=float)
     edges = [tuple(member["nodes"]) for member in payload["members"]]
     signature = _distance_signature(

@@ -1,3 +1,4 @@
+import { pinRollerDesignBytes } from './rcPinRollerDesignFixture'
 import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
@@ -253,5 +254,71 @@ for (const changed of [false, true]) {
     await expect(page.locator('[data-rc-design-candidate]')).toHaveCount(0)
     const panel = await waitForRcDesign(page, changed ? 'invalid' : 'verified')
     await expect(panel.locator('[data-rc-design-candidate]')).toHaveCount(changed ? 0 : 3)
+  })
+}
+
+for (const study of ['no-preload', 'preload'] as const) {
+  test(`pin/roller actual ${study} study retains original full references and member quantities in the browser`, async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlDesignUrl: '/rc-study/comparison.json', jobAuthorization: () => ({ tenantId: 'synthetic-study', bearerToken: 'synthetic-only' }) }
+    })
+    await page.route('**/rc-study/**', async route => {
+      expect(await route.request().headerValue('authorization')).toBe('Bearer synthetic-only')
+      expect(await route.request().headerValue('x-structural-tenant')).toBe('synthetic-study')
+      const path = new URL(route.request().url()).pathname.replace('/rc-study/', '')
+      await route.fulfill({ contentType: 'application/json', body: Buffer.from(pinRollerDesignBytes(path, study)) })
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = await waitForRcDesign(page)
+    await expect(panel.locator('[data-rc-design-candidate]')).toHaveCount(2)
+    await expect(panel.locator('[data-rc-design-selected]')).toHaveAttribute('data-rc-design-selected', 'narrower')
+    await expect(panel.locator('[data-rc-design-constants]')).toHaveCount(study === 'preload' ? 1 : 0)
+    if (study === 'preload') {
+      await expect(panel.locator('[data-rc-design-constants]')).toContainText('N4, 0, -0.01, 0')
+      await expect(panel.locator('[data-rc-design-constants]')).toContainText('Path screens include that accepted preload')
+    }
+    const details = panel.locator('[data-rc-design-details="narrower"]')
+    await expect(panel.locator('[data-rc-design-members="narrower"] tbody tr')).toHaveCount(6)
+    const costs = details.getByRole('region', { name: 'narrower RC execution costs' })
+    await expect(costs.locator('tbody tr')).toHaveCount(2)
+    for (const row of await costs.locator('tbody tr').all()) await expect(row.locator('td').nth(2)).toHaveText(study === 'preload' ? '3' : '2')
+    const parsed = JSON.parse(new TextDecoder().decode(pinRollerDesignBytes('comparison.json', study)))
+    const summary = panel.locator('[data-rc-design-summary="narrower"]')
+    for (const [key, value] of [['concrete', parsed.rows[1].quantities.totals.gross_concrete_volume_m3], ['rebar', parsed.rows[1].quantities.totals.longitudinal_rebar_mass_kg], ['estimate', parsed.rows[1].material_estimate.total]]) {
+      await expect(summary.locator(`[data-rc-design-summary-field="${key}"] dd`)).toHaveAttribute('title', String(value))
+    }
+    for (const role of ['model', 'result', 'checkpoint', 'verification']) {
+      const pending = page.waitForEvent('download')
+      await details.getByRole('button', { name: `Download narrower ${role}`, exact: true }).click()
+      expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(pinRollerDesignBytes(`narrower/${role}.json`, study)))
+    }
+    const pending = page.waitForEvent('download')
+    await panel.getByRole('button', { name: 'Download original RC comparison' }).click()
+    expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(pinRollerDesignBytes('comparison.json', study)))
+    const bounds = await panel.boundingBox()
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width + 1)
+  })
+}
+for (const study of ['fixed-control', 'support-preload'] as const) {
+  test(`pin/roller browser preserves actual ${study} failed rows and keeps selection disabled`, async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlDesignUrl: '/rc-study/comparison.json', jobAuthorization: () => ({ tenantId: 'synthetic-study', bearerToken: 'synthetic-only' }) }
+    })
+    await page.route('**/rc-study/**', async route => {
+      const path = new URL(route.request().url()).pathname.replace('/rc-study/', '')
+      await route.fulfill({ contentType: 'application/json', body: Buffer.from(pinRollerDesignBytes(path, study)) })
+    })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = await waitForRcDesign(page)
+    await expect(panel.locator('[data-rc-design-candidate]')).toHaveCount(2)
+    await expect(panel.locator('[data-rc-design-selected]')).toHaveCount(0)
+    for (const candidate of ['baseline', 'narrower']) {
+      await expect(panel.getByRole('button', { name: `Select ${candidate}`, exact: true })).toBeDisabled()
+      const row = panel.locator(`[data-rc-design-candidate="${candidate}"]`)
+      const parsed = JSON.parse(new TextDecoder().decode(pinRollerDesignBytes('comparison.json', study))).rows.find((r: any) => r.candidate_id === candidate)
+      await expect(row.locator('td').nth(1)).toContainText(String(parsed.quantities.totals.gross_concrete_volume_m3))
+      await expect(row.locator('td').nth(2)).toContainText(String(parsed.quantities.totals.longitudinal_rebar_mass_kg))
+      await expect(panel.locator(`[data-rc-design-candidate="${candidate}"]`)).toContainText('execution_error')
+    }
   })
 }

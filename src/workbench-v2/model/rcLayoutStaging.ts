@@ -1,6 +1,6 @@
 import { sha256Bytes } from './checksum'
 import { check, document, same, selfHash, type RcObject } from './rcJobSchema'
-import { artifactMaximum, validateRcStudyControl, verifyRcDesignCandidate, type StudyRead } from './rcControlDesignSchema'
+import { artifactMaximum, rcStudyCompilerProfile, validateRcStudyControl, verifyRcDesignCandidate, type StudyRead } from './rcControlDesignSchema'
 import { validateLayoutPruning } from './rcLayoutCostPruning'
 
 const MAX = 2 * 1024 ** 2
@@ -56,9 +56,8 @@ export async function validateLayoutStaging(plan: RcObject, comparison: RcObject
         && api.request.allow_reversals === request.allow_reversals && api.request.maximum_reversals === request.maximum_reversals && api.request.maximum_targets === request.maximum_targets
         && same(api.request.constant_nodal_loads ?? [], request.constant_nodal_loads ?? [])
         && api.request.experimental_two_fixed_endpoints === (request.schema_version === 'bounded-rc-fiber-direct-control-request.v3' ? true : undefined)
-        && api.model.compiler_profile === (request.schema_version === 'bounded-rc-fiber-direct-control-request.v3'
-          ? 'planar_serial_two_fixed_endpoints_explicit_rectangular_rc_direct_control.v1'
-          : 'planar_serial_cantilever_explicit_rectangular_rc.v1')
+        && api.request.experimental_pin_roller_beam === (request.schema_version === 'bounded-rc-fiber-direct-control-request.v4' ? true : undefined)
+        && api.model.compiler_profile === rcStudyCompilerProfile(request)
         && same(api.request.configuration, { ...request.solver_config, augmented_coordinates: '[q_free_m,load_factor_coordinate_scale_m*lambda]', control_row_weight: 'F_reference*residual_tolerance/control_tolerance_m', profile: 'small-displacement-rc-fiber-direct-control.v1' })
         && validation.verified_result_hash === api.result_hash && validation.unavailable_execution_work === false
         && same(row.invocations[0].work, api.metrics.control_work) && same(row.invocations[1].work, validation.replay_control_work), 'layout_prefix_unverified_binding_invalid')

@@ -248,7 +248,9 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
             raise ValueError("declared control path budget exceeded")
         model = case.model
         two_fixed = case.request.experimental_two_fixed_endpoints
-        compiler_option = {"experimental_two_fixed_endpoints": True} if two_fixed else {}
+        compiler_option = (
+            {"experimental_two_fixed_endpoints": True} if two_fixed else {}
+        )
         physical = fiber_frame_physical_model_payload(model, **compiler_option)
         # Separate geometry from section/material/load changes and entity names.
         geometry = {k: physical[k] for k in ("node_coordinates_m", "fixed_global_dofs")}
@@ -381,7 +383,9 @@ def _features(context, model_features):
 
 def _freeze_policy_payload(value):
     if type(value) is dict:
-        return MappingProxyType({k: _freeze_policy_payload(v) for k, v in value.items()})
+        return MappingProxyType(
+            {k: _freeze_policy_payload(v) for k, v in value.items()}
+        )
     if type(value) is list:
         return tuple(_freeze_policy_payload(v) for v in value)
     return value
@@ -408,13 +412,16 @@ class RCControlSeedPolicy:
         if type(self._json) is not str:
             raise ValueError("policy JSON text required")
         d = strict_json_object_bytes(self._json.encode(), maximum_bytes=8 * 1024 * 1024)
-        if (
-            d.get("schema_version")
-            in ("experimental-rc-control-secant-correction-policy.v5",
-                "experimental-rc-control-secant-correction-policy.v6")
+        if d.get("schema_version") in (
+            "experimental-rc-control-secant-correction-policy.v5",
+            "experimental-rc-control-secant-correction-policy.v6",
         ):
             constant_safe = d["schema_version"].endswith(".v6")
-            expected_fit = CONSTANT_SAFE_SVD_FIT_PROFILE if constant_safe else SVD_RIDGE_FIT_PROFILE
+            expected_fit = (
+                CONSTANT_SAFE_SVD_FIT_PROFILE
+                if constant_safe
+                else SVD_RIDGE_FIT_PROFILE
+            )
             if d.get("fit_solver_profile") != expected_fit:
                 raise ValueError("exact SVD ridge fit profile required")
             if d.get("policy_hash") != _sha(
@@ -442,10 +449,16 @@ class RCControlSeedPolicy:
             RCControlSeedPolicy(_bytes(base).decode())
             if constant_safe:
                 for low, high, mean, scale in zip(
-                    d["feature_min"], d["feature_max"], d["feature_mean"], d["feature_scale"], strict=True
+                    d["feature_min"],
+                    d["feature_max"],
+                    d["feature_mean"],
+                    d["feature_scale"],
+                    strict=True,
                 ):
                     if low == high and (mean != low or scale != 1.0):
-                        raise ValueError("exact constant centering and unit scale required")
+                        raise ValueError(
+                            "exact constant centering and unit scale required"
+                        )
             return
         expected = {
             "schema_version",
@@ -745,9 +758,11 @@ def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PRO
     }
     if fit_solver in (SVD_RIDGE_FIT_PROFILE, CONSTANT_SAFE_SVD_FIT_PROFILE):
         d.update(
-            schema_version=("experimental-rc-control-secant-correction-policy.v6"
-                            if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE else
-                            "experimental-rc-control-secant-correction-policy.v5"),
+            schema_version=(
+                "experimental-rc-control-secant-correction-policy.v6"
+                if fit_solver == CONSTANT_SAFE_SVD_FIT_PROFILE
+                else "experimental-rc-control-secant-correction-policy.v5"
+            ),
             fit_solver_profile=fit_solver,
         )
     d["policy_hash"] = _sha(_bytes(d))
@@ -793,14 +808,26 @@ def run_rc_control_learning_study(
     feature_profile="legacy",
     fit_solver=NORMAL_RIDGE_FIT_PROFILE,
     defer_evaluation=False,
+    export_generation_prior_work=False,
+    record_generation_assembly_work=False,
 ):
     """Preflight all splits, collect train labels, fit, then optionally evaluate.
 
     Explicit deferral preserves validation/holdout solver outputs for subsequent
     training-only runtime selection. It does not attest that an external caller
     has never evaluated these cases elsewhere.
+
+    The optional predecessor export records original reference-generation work
+    separately from numeric seed samples. It does not admit policy-specific gate
+    labels or alter ordinary evaluation arms. Missing predecessor work remains
+    unavailable in the export.
     """
     wall, cpu = perf_counter_ns(), process_time_ns()
+    for value in (export_generation_prior_work, record_generation_assembly_work):
+        if type(value) is not bool:
+            raise ValueError("explicit boolean generation-work options required")
+    if record_generation_assembly_work and not export_generation_prior_work:
+        raise ValueError("generation assembly recording requires prior-work export")
     cases = tuple(cases)
     if type(defer_evaluation) is not bool:
         raise ValueError("explicit boolean evaluation deferral required")
@@ -868,6 +895,23 @@ def run_rc_control_learning_study(
     arithmetic_identity = (
         {} if arithmetic is None else {"arithmetic_profile": arithmetic}
     )
+    prior_generation_options = {}
+    prior_export_identity = {}
+    if export_generation_prior_work:
+        from structural_analysis.benchmark.rc_control_prior_work_export import (
+            GENERATION_PRIOR_WORK_EXPORT_PROFILE,
+            build_generation_prior_work_export,
+        )
+
+        prior_generation_options["record_prior_accepted_transition_work"] = True
+        if record_generation_assembly_work:
+            prior_generation_options["record_assembly_work"] = True
+        prior_export_identity = {
+            "generation_prior_work_export": {
+                "schema_version": GENERATION_PRIOR_WORK_EXPORT_PROFILE,
+                "record_assembly_work": record_generation_assembly_work,
+            }
+        }
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
     declarations = []
@@ -897,6 +941,7 @@ def run_rc_control_learning_study(
                     else {}
                 ),
                 **arithmetic_identity,
+                **prior_export_identity,
                 **(
                     {"feature_profile": feature_profile}
                     if feature_profile != "legacy"
@@ -948,6 +993,7 @@ def run_rc_control_learning_study(
                 arm_order=generation_arm_order,
                 capture_material_state=capture_material,
                 **_arithmetic_kwargs(arithmetic_profile),
+                **prior_generation_options,
             )
             row = {
                 "case_id": case.case_id,
@@ -1072,6 +1118,39 @@ def run_rc_control_learning_study(
         generation.append(row)
         _save(root, f"{case.case_id}-generation-outcome.json", _bytes(row))
     _save(root, "training-samples.json", _bytes(samples))
+    prior_export_receipt = None
+    if export_generation_prior_work:
+        _save(
+            root,
+            "generation-prior-work-export-started.json",
+            _bytes({"status": "started", "unknown_export_cost_until_outcome": True}),
+        )
+        export_wall, export_cpu = perf_counter_ns(), process_time_ns()
+        export = build_generation_prior_work_export(
+            study_root=root,
+            declarations=declarations,
+            generation=generation,
+            samples=samples,
+            source_revision=source_revision,
+        )
+        export_bytes = _bytes(export)
+        _save(root, "generation-prior-work-export.json", export_bytes)
+        prior_export_receipt = {
+            "status": "completed",
+            "schema_version": GENERATION_PRIOR_WORK_EXPORT_PROFILE,
+            "file": "generation-prior-work-export.json",
+            "sha256": _sha(export_bytes),
+            "byte_length": len(export_bytes),
+            "wall_ns": perf_counter_ns() - export_wall,
+            "cpu_ns": process_time_ns() - export_cpu,
+            "scope": "original_file_reads_checks_encoding_and_export_write; included_in_whole_study; excludes_started_and_outcome_receipt_writes",
+            "policy_specific_label_lineage_checked": False,
+        }
+        _save(
+            root,
+            "generation-prior-work-export-outcome.json",
+            _bytes(prior_export_receipt),
+        )
     if generation and all(row["labels_eligible"] for row in generation):
         _save(
             root,
@@ -1206,6 +1285,11 @@ def run_rc_control_learning_study(
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
         **({"evaluation_deferred": True} if defer_evaluation else {}),
+        **(
+            {"generation_prior_work_export": prior_export_receipt}
+            if export_generation_prior_work
+            else {}
+        ),
         "generation": generation,
         "fit": fit,
         "generation_work": _execution_work(generation),
@@ -1219,8 +1303,8 @@ def run_rc_control_learning_study(
         "whole_study_cpu_ns": process_time_ns() - cpu,
         "timing_scope": (
             "preflight_all_generation_reference_secant_fresh_verification_fit_deferred_evaluation_receipts_and_io_excluding_final_report_write"
-            if defer_evaluation else
-            "preflight_all_generation_reference_secant_fresh_verification_fit_all_evaluation_proposals_recovery_and_io_excluding_final_report_write"
+            if defer_evaluation
+            else "preflight_all_generation_reference_secant_fresh_verification_fit_all_evaluation_proposals_recovery_and_io_excluding_final_report_write"
         ),
         "claims": {
             "policy_training_performed": policy is not None,

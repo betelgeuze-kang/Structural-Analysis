@@ -21,6 +21,7 @@ from structural_analysis.api.frame3d_direct_control_request import (
     strict_json_object_bytes,
 )
 from structural_analysis.api.nonlinear_fiber_frame import (
+    EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
     PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
     _compile,
 )
@@ -52,6 +53,9 @@ from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
 from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
     StatefulFiberFrame2DDisplacementControlStepAdapter,
     validate_stateful_fiber_frame2d_control_problem,
+)
+from structural_analysis.execution.rc_fiber_phase_policy import (
+    decode_rc_fiber_phase_policy,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.model.schema import CanonicalModel
@@ -292,6 +296,7 @@ def validate_rc_fiber_job_request(
             "chunk_target_count",
             "maximum_api_invocations",
             "reuse_line_search_assembly",
+            "phase_execution_policy",
         }
         or (
             "reuse_line_search_assembly" in execution
@@ -303,12 +308,11 @@ def validate_rc_fiber_job_request(
         or not 2 <= execution["maximum_api_invocations"] <= 4096
     ):
         raise ValueError("invalid RC durable execution configuration")
+    if "phase_execution_policy" in execution:
+        decode_rc_fiber_phase_policy(execution["phase_execution_policy"])
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
-    if config.experimental_two_fixed_endpoints or config.experimental_pin_roller_beam:
-        raise ValueError(
-            "RC durable service supports only the one-fixed-endpoint profile; "
-            "two-fixed-endpoint and pin-roller profiles require the direct-control API"
-        )
+    if config.experimental_two_fixed_endpoints:
+        raise ValueError("RC durable support/loading profile is unsupported")
     expected_result = (
         CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
         if config.constant_nodal_loads
@@ -329,7 +333,10 @@ def validate_rc_fiber_job_request(
     model = load_neutral_json_bytes(
         rc_fiber_job_canonical_bytes(value["model"]), source_path="<durable-rc-model>"
     )
-    compiled, unsupported, _ = _compile(model.detached_analysis_snapshot())
+    compiled, unsupported, _ = _compile(
+        model.detached_analysis_snapshot(),
+        experimental_pin_roller_beam=config.experimental_pin_roller_beam,
+    )
     if compiled is None or unsupported:
         raise ValueError("RC durable request uses an unsupported canonical model")
     compiled = _with_constant_loading(compiled, config.constant_nodal_loads)
@@ -350,7 +357,10 @@ def validate_rc_fiber_job_request(
 
 def _context(request):
     model, config = validate_rc_fiber_job_request(request)
-    compiled, _, _ = _compile(model.detached_analysis_snapshot())
+    compiled, _, _ = _compile(
+        model.detached_analysis_snapshot(),
+        experimental_pin_roller_beam=config.experimental_pin_roller_beam,
+    )
     compiled = _with_constant_loading(compiled, config.constant_nodal_loads)
     scope = _scope(
         compiled.problem,
@@ -365,7 +375,11 @@ def _context(request):
         "canonical_model_checksum": model.canonical_model_checksum,
         "input_checksum": model.input_checksum,
         "source_format": model.source_format,
-        "compiler_profile": PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
+        "compiler_profile": (
+            EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+            if config.experimental_pin_roller_beam
+            else PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
+        ),
         "problem_contract_hash": compiled.problem.contract_hash,
     }
     control = {
@@ -389,6 +403,11 @@ def _chunk(config, request, before):
 def _api_request(config, restart_hash, reuse_line_search_assembly=False):
     return {
         "targets_m": list(config.targets_m),
+        **(
+            {"experimental_pin_roller_beam": True}
+            if config.experimental_pin_roller_beam
+            else {}
+        ),
         **(
             {"line_search_assembly_reuse": "rc-control-immediate-line-search-reuse.v1"}
             if reuse_line_search_assembly

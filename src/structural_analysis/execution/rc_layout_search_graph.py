@@ -185,6 +185,8 @@ def _read_layout_search_graph(read, result):
     request = decode_bounded_rc_fiber_direct_control_request(
         study._bytes(plan["control_request"])
     )
+    if request.experimental_pin_roller_beam and uses_policy:
+        raise ValueError("pin-roller RC layout learned policy is not supported")
     if staged:
         from structural_analysis.execution.rc_layout_staged_graph import (
             check_staged_policy,
@@ -232,6 +234,7 @@ def _read_layout_search_graph(read, result):
             calculate_fiber_frame_member_quantities(
                 model,
                 experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+                experimental_pin_roller_beam=request.experimental_pin_roller_beam,
             ),
             "original layout quantities differ",
         )
@@ -437,6 +440,12 @@ def _read_layout_search_graph(read, result):
                     },
                     "reference model differs from pool",
                 )
+            if request.experimental_pin_roller_beam and not pruned:
+                from structural_analysis.execution.rc_layout_cost_pruning_graph import (
+                    _original_row,
+                )
+
+                _original_row(read, name, row, models[row["candidate_id"]], request)
         if staged:
             from structural_analysis.execution.rc_layout_staged_graph import (
                 check_staged_comparison,

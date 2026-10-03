@@ -75,7 +75,7 @@ export interface EngineeringArrayDescriptor {
   content_hash: string
 }
 
-const JOB_VIEW_MAX_BYTES = 256 * 1024
+export const JOB_VIEW_MAX_BYTES = 256 * 1024
 const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
 // Python SparseFactorizationPolicy canonical hashes: unchanged diagnostic gates,
@@ -92,6 +92,7 @@ const PLANAR_SPARSE_POLICIES: Record<string, { maximumEquations: number; hash: s
 }
 export async function loadWorkbenchJob(
   url: string, signal?: AbortSignal, authorize?: JobAuthorizationProvider,
+  sessionTransport?: JobReadTransport,
 ): Promise<JobLoadResult> {
   if (!url || signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
   const callerSignal = signal
@@ -101,7 +102,8 @@ export async function loadWorkbenchJob(
   signal = controller.signal
   let job: WorkbenchJobView | null = null
   try {
-    const transport = await createJobReadTransport(url, signal, authorize)
+    const transport = sessionTransport?.withSignal?.(signal)
+      ?? sessionTransport ?? await createJobReadTransport(url, signal, authorize)
     const response = await transport.get()
     if (response.status === 404) return { status: 'missing', job: null, errors: ['job not found'] }
     if (!response.ok) return { status: 'error', job: null, errors: [`job API returned HTTP ${response.status}`] }
@@ -111,6 +113,10 @@ export async function loadWorkbenchJob(
       return { status: 'invalid', job: null, errors: validation.errors, artifactStatus: 'invalid' }
     }
     job = validation.value
+    if (sessionTransport) {
+      const expectedId = new URL(url, typeof location === 'undefined' ? undefined : location.origin).pathname.replace(/\/+$/, '').split('/').pop()
+      if (job.job_id !== expectedId) throw new JobArtifactError('job_view_identity_mismatch')
+    }
     if (job.status === 'failed' && job.attempt > 0) {
       const failureDiagnostic = await loadFailureDiagnostic(job, transport)
       if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
@@ -199,6 +205,16 @@ export async function loadWorkbenchJob(
     callerSignal?.removeEventListener('abort', abort)
     controller.abort()
   }
+}
+
+/** Lightweight status read; no numerical artifacts, worker or solver is loaded. */
+export async function readWorkbenchJobViewResponse(response: Response, expectedJobId?: string): Promise<WorkbenchJobView> {
+  if (!response.ok) throw new JobArtifactError(`job_api_http_${response.status}`)
+  const bytes = await readBoundedJobBytes(response, JOB_VIEW_MAX_BYTES, 'job view')
+  const validation = validateWorkbenchJobView(parseJson(bytes, 'job view'))
+  if (!validation.ok || !validation.value) throw new JobArtifactError('job_view_invalid')
+  if (expectedJobId !== undefined && validation.value.job_id !== expectedJobId) throw new JobArtifactError('job_view_identity_mismatch')
+  return validation.value
 }
 
 async function fetchArtifact(

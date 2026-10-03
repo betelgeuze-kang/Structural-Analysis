@@ -216,6 +216,11 @@ jobs:
         id: materialize
         shell: bash
         run: |
+          # Recompute bounded internal Level 1 evidence only in this ephemeral checkout.
+          python scripts/build_analytic_frame_verification_artifact.py
+          python scripts/build_analytic_frame_verification_artifact.py --check
+          python scripts/build_verification_hierarchy_status.py
+          python scripts/build_verification_hierarchy_status.py --check
           # Refresh internal source-bound summaries only in the ephemeral runner.
           # Protected checked-in evidence remains unchanged by the development PR.
           python scripts/build_phase2_state_updated_steel_material_artifacts.py
@@ -223,6 +228,45 @@ jobs:
           python scripts/build_phase2_state_updated_composite_section_artifacts.py
           python scripts/build_phase2_state_updated_concrete_damage_artifacts.py
           python scripts/build_phase2_adaptive_newton_continuation_artifacts.py
+          # Admit fresh bounded modal evidence without Level 2 or release credit.
+          env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/build_phase2_whole_model_modal_artifacts.py
+          env OPENBLAS_CORETYPE=Haswell OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python scripts/build_phase2_whole_model_modal_artifacts.py --check
+          python - <<'MODAL_SUMMARY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path("implementation/phase1/release_evidence/productization/phase2_whole_model_modal_summary.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          if payload.get("schema_version") != "phase2-whole-model-modal-artifacts.v1":
+              raise SystemExit("modal materialization summary schema is invalid")
+          if payload.get("status") != "partial" or payload.get("contract_pass") is not True:
+              raise SystemExit("modal materialization did not pass its bounded contract")
+          for field in ("case_count", "passing_case_count"):
+              if type(payload.get(field)) is not int or payload[field] != 4:
+                  raise SystemExit("modal materialization requires exactly four passing cases")
+          expected_sha = os.environ["GITHUB_SHA"]
+          if re.fullmatch(r"[0-9a-f]{40}", expected_sha) is None or payload.get("source_commit_sha") != expected_sha:
+              raise SystemExit("modal materialization is not bound to GITHUB_SHA")
+          claims = payload.get("claims")
+          if not isinstance(claims, dict) or any(claims.get(field) is not False for field in (
+              "independent_code_to_code_or_verification_level_2", "release_readiness",
+          )):
+              raise SystemExit("modal materialization cannot grant Level 2 or release authority")
+          for field in ("source_set_hash", "result_artifact_hash"):
+              if not isinstance(payload.get(field), str) or re.fullmatch(r"sha256:[0-9a-f]{64}", payload[field]) is None:
+                  raise SystemExit("modal materialization source/result identity is invalid")
+          print(json.dumps({
+              "schema": "ci-whole-model-modal-materialization.v1",
+              **{field: payload[field] for field in (
+                  "status", "contract_pass", "case_count", "passing_case_count",
+                  "source_commit_sha", "source_set_hash", "result_artifact_hash",
+              )},
+              "verification_level_2": False,
+              "release_readiness": False,
+          }, sort_keys=True))
+          MODAL_SUMMARY
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
@@ -325,3 +369,100 @@ jobs:
         env:
           FULL_SHARDS_RESULT: ${{ needs.full_shards.result }}
         run: test "$FULL_SHARDS_RESULT" = "success"
+
+  refinement_contracts:
+    name: rc-refinement-integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.10"
+      - name: Install package and tools
+        run: |
+          python -m pip install numpy==1.26.4 scipy==1.12.0
+          python -m pip install -e '.[dev]' ruff==0.15.0
+      - name: Run integrated RC and input regressions
+        run: >-
+          python -m pytest -q --junitxml=rc-refinement-tests.xml
+          tests/test_neutral_strict_input.py
+          tests/test_rc_control_refinement.py
+          tests/test_rc_control_local_research.py
+          tests/test_rc_control_persistence.py
+          tests/test_rc_local_resources.py
+          tests/test_rc_refinement_workflow.py
+          tests/test_rc_control_durable_research.py
+          tests/test_local_amd_diagnostic.py
+          tests/test_rc_merge_reconciliation.py
+          tests/test_rc_control_support_profile_integration.py
+      - name: Check formatting without changing committed bytes
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m ruff format --check --diff
+          src/structural_analysis/io/neutral/loader.py
+          src/structural_analysis/benchmark/rc_control_refinement.py
+          src/structural_analysis/benchmark/rc_control_refinement_cli.py
+          src/structural_analysis/benchmark/rc_control_design.py
+          src/structural_analysis/benchmark/rc_control_reuse.py
+          tests/test_neutral_strict_input.py
+          tests/test_rc_control_refinement.py
+          src/structural_analysis/benchmark/rc_control_cost_search.py
+          src/structural_analysis/benchmark/rc_control_local_search_cli.py
+          src/structural_analysis/benchmark/rc_control_durable.py
+          src/structural_analysis/benchmark/rc_control_durable_cli.py
+          src/structural_analysis/benchmark/rc_control_local_batch.py
+          src/structural_analysis/engine_v2_backends/local_amd_diagnostic.py
+          tests/test_rc_control_durable_research.py
+          tests/test_local_amd_diagnostic.py
+          tests/test_rc_control_local_research.py
+          src/structural_analysis/execution/rc_result_repository.py
+          src/structural_analysis/execution/local_runtime_doctor.py
+          tests/test_rc_control_persistence.py
+          tests/test_rc_local_resources.py
+          tests/test_rc_merge_reconciliation.py
+          tests/test_rc_control_support_profile_integration.py
+          > rc-refinement-format.diff
+      - name: Check changed Python lint
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m ruff check --output-format=json
+          src/structural_analysis/io/neutral/loader.py
+          src/structural_analysis/benchmark/rc_control_refinement.py
+          src/structural_analysis/benchmark/rc_control_refinement_cli.py
+          src/structural_analysis/benchmark/rc_control_design.py
+          src/structural_analysis/benchmark/rc_control_reuse.py
+          tests/test_neutral_strict_input.py
+          tests/test_rc_control_refinement.py
+          src/structural_analysis/benchmark/rc_control_cost_search.py
+          src/structural_analysis/benchmark/rc_control_local_search_cli.py
+          src/structural_analysis/benchmark/rc_control_durable.py
+          src/structural_analysis/benchmark/rc_control_durable_cli.py
+          src/structural_analysis/benchmark/rc_control_local_batch.py
+          src/structural_analysis/engine_v2_backends/local_amd_diagnostic.py
+          tests/test_rc_control_durable_research.py
+          tests/test_local_amd_diagnostic.py
+          tests/test_rc_control_local_research.py
+          src/structural_analysis/execution/rc_result_repository.py
+          src/structural_analysis/execution/local_runtime_doctor.py
+          tests/test_rc_control_persistence.py
+          tests/test_rc_local_resources.py
+          tests/test_rc_merge_reconciliation.py
+          tests/test_rc_control_support_profile_integration.py
+          > rc-refinement-lint.json
+      - name: Retain original diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: rc-refinement-diagnostics-${{ github.sha }}
+          path: |
+            rc-refinement-tests.xml
+            rc-refinement-format.diff
+            rc-refinement-lint.json
+          if-no-files-found: warn
+          retention-days: 14

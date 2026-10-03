@@ -324,3 +324,33 @@ def test_original_group_audit_pins_protocol_and_original_input_bytes(tmp_path):
         out.write(b" ")
     with pytest.raises(ValueError, match="input mismatch"):
         audit(root, pin)
+
+
+def test_pin_roller_shape_screen_is_explicit_and_does_not_grant_learning_support():
+    from copy import deepcopy
+    from tests.test_rc_fiber_pin_roller_beam_public import _model
+    from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+
+    model = _model()
+    shape = geometry_shape_signature(model, experimental_pin_roller_beam=True)
+    assert shape["restraint_count"] == 3
+    moved = deepcopy(model.canonical_payload())
+    for node in moved["nodes"]:
+        node["coordinates"][0] = 1.1 * node["coordinates"][0] + 10
+        node["coordinates"][1] -= 20
+    other = load_neutral_json_bytes(json.dumps(moved).encode())
+    transformed = geometry_shape_signature(other, experimental_pin_roller_beam=True)
+    np.testing.assert_allclose(
+        shape["normalized_pair_distances"], transformed["normalized_pair_distances"]
+    )
+    with pytest.raises(ValueError, match="supported public RC profile"):
+        geometry_shape_signature(model)
+    for invalid in (1, "true", None):
+        with pytest.raises(ValueError, match="boolean pin-roller"):
+            geometry_shape_signature(model, experimental_pin_roller_beam=invalid)
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        geometry_shape_signature(
+            model,
+            experimental_pin_roller_beam=True,
+            experimental_two_fixed_endpoints=True,
+        )

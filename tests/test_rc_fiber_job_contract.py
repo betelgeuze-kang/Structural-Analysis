@@ -19,6 +19,7 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
 )
 from structural_analysis.execution import rc_fiber_job_contract as contract
+from tests.test_rc_fiber_pin_roller_beam_public import _payload as pin_roller_payload
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,15 +100,64 @@ def test_request_compiles_supported_model_without_solving_and_detaches():
 
 
 @pytest.mark.parametrize(
-    "profile", ["experimental_two_fixed_endpoints", "experimental_pin_roller_beam"]
+    ("profile", "reason"),
+    [
+        ("experimental_two_fixed_endpoints", "support/loading profile is unsupported"),
+        ("experimental_pin_roller_beam", "unsupported canonical model"),
+    ],
 )
-def test_unavailable_durable_profile_is_rejected_before_default_model_compile(profile):
+def test_unavailable_durable_profile_or_incompatible_geometry_is_rejected(
+    profile, reason
+):
     request = _request()
     request["config"] = BoundedRCFiberDirectControlRequest(
         7, (-1e-6,), **{profile: True}
     ).to_dict()
-    with pytest.raises(ValueError, match="only the one-fixed-endpoint profile"):
+    with pytest.raises(ValueError, match=reason):
         contract.validate_rc_fiber_job_request(request)
+
+
+def test_canonical_pin_roller_preload_binds_original_model_without_solving():
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        control_global_dof=10,
+        targets_m=(-1e-6,),
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),),
+    ).to_dict()
+    schema = json.loads(
+        (
+            ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+        ).read_bytes()
+    )
+    jsonschema.validate(request, schema)
+    model, config = contract.validate_rc_fiber_job_request(request)
+    assert model.source_path == "<durable-rc-model>"
+    assert config.experimental_pin_roller_beam is True
+    assert config.constant_nodal_loads == (("N4", 0.0, -1.0, 0.0),)
+    _, compiled, scope, binding, control = contract._context(request)
+    assert compiled.problem.constant_external_loads == ((10, -1.0),)
+    assert scope["problem_contract_hash"] == compiled.problem.contract_hash
+    assert binding["compiler_profile"] == (
+        contract.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+    )
+    assert control == {
+        "global_dof": 10,
+        "node_id": "N4",
+        "component": "UY",
+        "unit": "m",
+    }
+    assert (
+        contract._api_request(config, None)["constant_nodal_loads"]
+        == (request["config"]["constant_nodal_loads"])
+    )
+    changed = deepcopy(request)
+    changed["config"]["constant_nodal_loads"][0]["FY_kN"] = -2.0
+    assert contract.rc_fiber_job_resume_contract_hash(changed) != (
+        contract.rc_fiber_job_resume_contract_hash(request)
+    )
 
 
 def test_constant_load_request_requires_matching_v2_durable_result():
@@ -173,6 +223,62 @@ def test_request_schema_requires_full_configuration_and_rejects_initial_restart(
     for changed in (request | {"restart": None}, request | {"config": {}}):
         with pytest.raises(jsonschema.ValidationError):
             validator.validate(changed)
+
+
+def test_v4_request_binds_explicit_pin_roller_profile_without_solving():
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        control_global_dof=10,
+        targets_m=(-1e-6, -2e-6),
+        experimental_pin_roller_beam=True,
+    ).to_dict()
+    validator = jsonschema.Draft202012Validator(
+        json.loads(
+            (
+                ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+            ).read_bytes()
+        )
+    )
+    validator.validate(request)
+    model, config = contract.validate_rc_fiber_job_request(request)
+    assert config.experimental_pin_roller_beam is True
+    assert model.source_path == "<durable-rc-model>"
+    chunk, compiled, scope, binding, control = contract._context(request)
+    assert chunk == config and compiled.problem.fixed_global_dofs == (3, 4, 16)
+    assert binding["compiler_profile"] == (
+        contract.EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+    )
+    assert control == {
+        "global_dof": 10,
+        "node_id": "N4",
+        "component": "UY",
+        "unit": "m",
+    }
+    assert scope["problem_contract_hash"] == compiled.problem.contract_hash
+    assert contract._api_request(config, None)["experimental_pin_roller_beam"] is True
+
+    for invalid in (
+        lambda value: value["config"].pop("experimental_pin_roller_beam"),
+        lambda value: value["config"].update(experimental_pin_roller_beam=False),
+        lambda value: value["config"].update(
+            constant_nodal_loads=[
+                {"node_id": "N3", "FX_kN": 0.0, "FY_kN": -1.0, "MZ_kNm": 0.0}
+            ],
+        ),
+    ):
+        changed = deepcopy(request)
+        invalid(changed)
+        with pytest.raises(jsonschema.ValidationError):
+            validator.validate(changed)
+        with pytest.raises(ValueError):
+            contract.validate_rc_fiber_job_request(changed)
+
+    changed = deepcopy(request)
+    changed["model"]["supports"][1]["dofs"] = ["UX", "UY"]
+    validator.validate(changed)
+    with pytest.raises(ValueError, match="unsupported canonical model"):
+        contract.validate_rc_fiber_job_request(changed)
 
 
 @pytest.mark.parametrize(
@@ -556,3 +662,417 @@ def test_real_native_decoder_rejects_unbound_artifact_without_solving():
     config, compiled, scope, _, _ = contract._context(request)
     with pytest.raises(ValueError):
         contract._native(b"{}", compiled, scope, config.targets_m[:2])
+
+
+@pytest.mark.parametrize("node", ["N2", "N6", "missing"])
+def test_pin_roller_preload_unsupported_nodes_rejected_without_solving(node):
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        10,
+        (-1e-6,),
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=((node, 0.0, -1.0, 0.0),),
+    ).to_dict()
+    reason = "undeclared node" if node == "missing" else "pin or roller support node"
+    with pytest.raises(ValueError, match=reason):
+        contract.validate_rc_fiber_job_request(request)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "empty",
+        "zero",
+        "duplicate",
+        "boolean",
+        "integer",
+        "result",
+        "restrained",
+        "twofixed",
+    ],
+)
+def test_v4_preload_rejects_noncanonical_or_incompatible_input_before_solving(mutation):
+    request = _request()
+    request["model"] = pin_roller_payload()
+    request["result_contract"] = contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    request["config"] = BoundedRCFiberDirectControlRequest(
+        10,
+        (0.0, -1e-6),
+        allow_reversals=True,
+        maximum_reversals=1,
+        experimental_pin_roller_beam=True,
+        constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),),
+    ).to_dict()
+    loads = request["config"]["constant_nodal_loads"]
+    if mutation == "empty":
+        loads.clear()
+    elif mutation == "zero":
+        loads[0]["FY_kN"] = 0.0
+    elif mutation == "duplicate":
+        loads.append(deepcopy(loads[0]))
+    elif mutation == "boolean":
+        loads[0]["FY_kN"] = True
+    elif mutation == "integer":
+        loads[0]["FY_kN"] = -1
+    elif mutation == "result":
+        request["result_contract"] = contract.RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    elif mutation == "restrained":
+        request["config"]["control_global_dof"] = 4
+    elif mutation == "twofixed":
+        request["config"] = BoundedRCFiberDirectControlRequest(
+            10,
+            (-1e-6,),
+            experimental_two_fixed_endpoints=True,
+            constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),),
+        ).to_dict()
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_request(request)
+
+
+def _phase_policy():
+    return {
+        "schema_version": "bounded-rc-fiber-phase-execution-policy.v1",
+        "analysis_timeout_ms": 60_000,
+        "verification_timeout_ms": 120_000,
+        "termination_grace_ms": 1_000,
+    }
+
+
+def test_authored_phase_policy_request_accepts_without_solving():
+    request = _request()
+    request["execution_config"]["phase_execution_policy"] = _phase_policy()
+    before = contract.rc_fiber_job_canonical_bytes(request)
+    model, config = contract.validate_rc_fiber_job_request(request)
+    assert model.source_path == "<durable-rc-model>"
+    assert config.to_dict() == request["config"]
+    assert contract.rc_fiber_job_canonical_bytes(request) == before
+
+
+def test_authored_phase_policy_schema_accepts_explicit_bounds():
+    schema = json.loads(
+        (
+            ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+        ).read_bytes()
+    )
+    jsonschema.Draft202012Validator.check_schema(schema)
+    request = _request()
+    request["execution_config"]["phase_execution_policy"] = _phase_policy()
+    jsonschema.Draft202012Validator(schema).validate(request)
+
+
+@pytest.mark.parametrize(
+    "field,maximum",
+    [
+        ("analysis_timeout_ms", 3_600_000),
+        ("verification_timeout_ms", 3_600_000),
+        ("termination_grace_ms", 5_000),
+    ],
+)
+def test_phase_policy_inclusive_bounds_frozen_snapshot_and_seconds(field, maximum):
+    from dataclasses import FrozenInstanceError
+    from structural_analysis.execution.rc_fiber_phase_policy import (
+        decode_rc_fiber_phase_policy,
+    )
+
+    for value in (1, maximum):
+        payload = _phase_policy()
+        payload[field] = value
+        policy = decode_rc_fiber_phase_policy(payload)
+        expected = deepcopy(payload)
+        payload[field] = maximum + 1
+        assert policy.to_dict() == expected
+        assert getattr(policy, field.replace("_ms", "_seconds")) == value / 1000
+        with pytest.raises(FrozenInstanceError):
+            setattr(policy, field, maximum + 1)
+        rendered = policy.to_dict()
+        rendered[field] = maximum + 1
+        assert policy.to_dict() == expected
+
+
+@pytest.mark.parametrize(
+    "field,maximum",
+    [
+        ("analysis_timeout_ms", 3_600_000),
+        ("verification_timeout_ms", 3_600_000),
+        ("termination_grace_ms", 5_000),
+    ],
+)
+@pytest.mark.parametrize(
+    "invalid",
+    [None, True, False, "1", 1.0, 1.5, 0, -1, [], {}, float("nan"), float("inf")],
+)
+def test_phase_policy_rejects_noninteger_missing_coerced_and_unbounded_values(
+    field, maximum, invalid
+):
+    from structural_analysis.execution.rc_fiber_phase_policy import (
+        decode_rc_fiber_phase_policy,
+    )
+
+    policy = _phase_policy()
+    policy[field] = invalid
+    with pytest.raises(ValueError):
+        decode_rc_fiber_phase_policy(policy)
+    request = _request()
+    request["execution_config"]["phase_execution_policy"] = policy
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_request(request)
+    # JSON Schema considers 1.0 an integer; semantic readers enforce exact type.
+    if not (
+        type(invalid) is float
+        and (invalid == 1.0 or invalid != invalid or invalid == float("inf"))
+    ):
+        schema = json.loads(
+            (
+                ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+            ).read_bytes()
+        )
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schema).validate(request)
+
+
+@pytest.mark.parametrize(
+    "field,maximum",
+    [
+        ("analysis_timeout_ms", 3_600_000),
+        ("verification_timeout_ms", 3_600_000),
+        ("termination_grace_ms", 5_000),
+    ],
+)
+def test_phase_policy_rejects_each_missing_or_above_maximum_value(field, maximum):
+    from structural_analysis.execution.rc_fiber_phase_policy import (
+        decode_rc_fiber_phase_policy,
+    )
+
+    for policy in (
+        _phase_policy() | {field: maximum + 1},
+        {key: value for key, value in _phase_policy().items() if key != field},
+    ):
+        with pytest.raises(ValueError):
+            decode_rc_fiber_phase_policy(policy)
+        request = _request()
+        request["execution_config"]["phase_execution_policy"] = policy
+        with pytest.raises(ValueError):
+            contract.validate_rc_fiber_job_request(request)
+        schema = json.loads(
+            (
+                ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+            ).read_bytes()
+        )
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.Draft202012Validator(schema).validate(request)
+
+
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        None,
+        False,
+        [],
+        "policy",
+        {},
+        {
+            "schema_version": "bounded-rc-fiber-phase-execution-policy.v2",
+            "analysis_timeout_ms": 1,
+            "verification_timeout_ms": 1,
+            "termination_grace_ms": 1,
+        },
+        {
+            "analysis_timeout_ms": 1,
+            "verification_timeout_ms": 1,
+            "termination_grace_ms": 1,
+        },
+        _phase_policy() | {"memory_limit_bytes": 1},
+    ],
+)
+def test_phase_policy_rejects_container_version_and_extra_keys(invalid):
+    from structural_analysis.execution.rc_fiber_phase_policy import (
+        decode_rc_fiber_phase_policy,
+    )
+
+    with pytest.raises(ValueError):
+        decode_rc_fiber_phase_policy(invalid)
+    request = _request()
+    request["execution_config"]["phase_execution_policy"] = invalid
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_request(request)
+    schema = json.loads(
+        (
+            ROOT / "src/structural_analysis/schemas/job_request_v3.schema.json"
+        ).read_bytes()
+    )
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.Draft202012Validator(schema).validate(request)
+
+
+@pytest.mark.parametrize("profile", ["v1", "v2", "v4", "v4-preload"])
+def test_phase_policy_preserves_supported_request_profiles_and_explicit_identity(
+    profile,
+):
+    request = _request()
+    if profile.startswith("v4"):
+        request["model"] = pin_roller_payload()
+        request["config"] = BoundedRCFiberDirectControlRequest(
+            control_global_dof=10,
+            targets_m=(-1e-6,),
+            experimental_pin_roller_beam=True,
+            constant_nodal_loads=(("N4", 0.0, -1.0, 0.0),)
+            if profile == "v4-preload"
+            else (),
+        ).to_dict()
+    elif profile == "v2":
+        request["config"] = BoundedRCFiberDirectControlRequest(
+            control_global_dof=7,
+            targets_m=(-1e-6,),
+            constant_nodal_loads=(("N3", 0.0, -600.0, 0.0),),
+        ).to_dict()
+    if profile in ("v2", "v4-preload"):
+        request["result_contract"] = (
+            contract.CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+        )
+    legacy = deepcopy(request)
+    legacy_request_hash = contract.rc_fiber_job_request_hash(legacy)
+    legacy_resume_hash = contract.rc_fiber_job_resume_contract_hash(legacy)
+    request["execution_config"]["phase_execution_policy"] = _phase_policy()
+    _, typed = contract.validate_rc_fiber_job_request(request)
+    assert typed.to_dict() == legacy["config"]
+    assert request["model"] == legacy["model"] and request["config"] == legacy["config"]
+    assert request["source_revision"] == legacy["source_revision"]
+    assert contract.rc_fiber_job_request_hash(request) != legacy_request_hash
+    assert contract.rc_fiber_job_resume_contract_hash(request) != legacy_resume_hash
+    del request["execution_config"]["phase_execution_policy"]
+    assert request == legacy
+    assert contract.rc_fiber_job_request_hash(request) == legacy_request_hash
+    assert contract.rc_fiber_job_resume_contract_hash(request) == legacy_resume_hash
+
+
+def test_phase_policy_absence_keeps_known_legacy_identity_without_defaults():
+    request = _request()
+    raw = contract.rc_fiber_job_canonical_bytes(request)
+    contract.validate_rc_fiber_job_request(request)
+    assert contract.rc_fiber_job_canonical_bytes(request) == raw
+    assert set(request["execution_config"]) == {
+        "chunk_target_count",
+        "maximum_api_invocations",
+    }
+    assert (
+        contract.rc_fiber_job_request_hash(request)
+        == "sha256:9ea1c39a05d5be2cd1e51e532aba07c3dffb11171a8fd75ca8db2237cfc88e61"
+    )
+    assert (
+        contract.rc_fiber_job_resume_contract_hash(request)
+        == "sha256:d319eb6433cee578e78834b90d2abf9c0d2af759757360ab2c3690e265ec4de7"
+    )
+
+
+@pytest.mark.parametrize(
+    "field", ["analysis_timeout_ms", "verification_timeout_ms", "termination_grace_ms"]
+)
+def test_each_authored_phase_bound_changes_both_immutable_request_identities(field):
+    request = _request()
+    request["execution_config"]["phase_execution_policy"] = _phase_policy()
+    changed = deepcopy(request)
+    changed["execution_config"]["phase_execution_policy"][field] += 1
+    contract.validate_rc_fiber_job_request(changed)
+    assert contract.rc_fiber_job_request_hash(
+        changed
+    ) != contract.rc_fiber_job_request_hash(request)
+    assert contract.rc_fiber_job_resume_contract_hash(
+        changed
+    ) != contract.rc_fiber_job_resume_contract_hash(request)
+
+
+def test_existing_checkpoint_cannot_resume_under_new_authored_phase_policy(
+    synthetic_chunks,
+):
+    request, (checkpoint, _, _), _ = synthetic_chunks
+    changed = deepcopy(request)
+    changed["execution_config"]["phase_execution_policy"] = _phase_policy()
+    assert (
+        contract.rc_fiber_job_resume_contract_hash(changed)
+        != checkpoint["resume_contract_hash"]
+    )
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_checkpoint(
+            checkpoint,
+            request=changed,
+            progress_completed=2,
+            execution_budget=_budget(2),
+        )
+
+
+@pytest.mark.parametrize("token", ["1.0", "1e0", "true", "null"])
+def test_phase_policy_original_noninteger_tokens_are_rejected(token):
+    request = _request()
+    request["execution_config"]["phase_execution_policy"] = _phase_policy() | {
+        "analysis_timeout_ms": 1
+    }
+    raw = contract.rc_fiber_job_canonical_bytes(request).replace(
+        b'"analysis_timeout_ms":1', f'"analysis_timeout_ms":{token}'.encode()
+    )
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_request(raw)
+
+
+def test_phase_policy_duplicate_integer_key_is_rejected_before_identity():
+    request = _request()
+    request["execution_config"]["phase_execution_policy"] = _phase_policy()
+    raw = contract.rc_fiber_job_canonical_bytes(request).replace(
+        b'"analysis_timeout_ms":', b'"analysis_timeout_ms":1,"analysis_timeout_ms":'
+    )
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_request(raw)
+
+
+def test_phase_policy_bound_transport_keeps_physics_payload_and_authority(
+    synthetic_chunks,
+):
+    request, originals, _ = synthetic_chunks
+    changed_request = deepcopy(request)
+    changed_request["execution_config"]["phase_execution_policy"] = _phase_policy()
+    rebound = deepcopy(originals)
+    for artifact in rebound:
+        artifact["request_hash"] = contract.rc_fiber_job_request_hash(changed_request)
+        artifact["resume_contract_hash"] = contract.rc_fiber_job_resume_contract_hash(
+            changed_request
+        )
+        for receipt in artifact["receipts"]:
+            receipt["job_request_hash"] = artifact["request_hash"]
+            _rehash(receipt, "receipt_hash")
+        _rehash(
+            artifact, "result_hash" if "api_result" in artifact else "checkpoint_hash"
+        )
+    first, second, result = rebound
+    contract.validate_rc_fiber_job_checkpoint(
+        first,
+        request=changed_request,
+        progress_completed=2,
+        execution_budget=_budget(2),
+    )
+    contract.validate_rc_fiber_job_checkpoint(
+        second,
+        request=changed_request,
+        progress_completed=4,
+        execution_budget=_budget(9),
+        checkpoint=first,
+    )
+    report = contract.validate_rc_fiber_job_result(
+        result,
+        request=changed_request,
+        execution_budget=_budget(9),
+        checkpoint=second,
+    )
+    assert report["contract_pass"] is True
+    assert report["authority"] == originals[-1]["authority"]
+    assert result["api_result"] == originals[-1]["api_result"]
+    for original, changed in zip(originals, rebound):
+        assert set(changed) == set(original)
+        assert (
+            changed["terminal_checkpoint_artifact_base64"]
+            == original["terminal_checkpoint_artifact_base64"]
+        )
+        assert changed["authority"] == original["authority"]
+        assert changed["source_revision"] == original["source_revision"]
+        assert changed["source_revision_is_attestation"] is False
+        assert changed["execution_budget"] == original["execution_budget"]

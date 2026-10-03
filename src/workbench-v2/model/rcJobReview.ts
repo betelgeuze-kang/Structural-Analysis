@@ -1,6 +1,7 @@
 import type { WorkbenchJobView } from './jobSchema'
 import { JobArtifactError, readBoundedJobBytes, type JobReadTransport } from './jobTransport'
 import type { RcArtifacts, RcJobSummary, RcObject } from './rcJobSchema'
+import type { RcQuantityReportReference, RcQuantityReportReview } from './rcQuantityReportSchema'
 
 export interface RcJobReview {
   summary: RcJobSummary
@@ -8,6 +9,8 @@ export interface RcJobReview {
   material(memberId: string, integrationPoint: number, fiberIndex: number): Promise<RcObject[]>
   materialPage?(memberId: string, integrationPoint: number, fiberIndex: number, start: number, count: number): Promise<RcObject[]>
   download(role: string): Promise<Blob>
+  verifyQuantityReport?(bytes: Uint8Array, reference?: RcQuantityReportReference): Promise<RcQuantityReportReview>
+  downloadQuantityReport?(reportId: string): Promise<Blob>
   onFailure(listener: (message: string) => void): () => void
   dispose(): void
 }
@@ -29,7 +32,7 @@ export async function loadRcJobReview(
   }
   signal?.throwIfAborted()
   const worker = new Worker(new URL('./rcJobReview.worker.ts', import.meta.url), { type: 'module' })
-  const pending = new Map<number, { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>()
+  const pending = new Map<number, { type: string; resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>()
   const listeners = new Set<(message: string) => void>()
   let sequence = 0, failure: string | null = null
   function stop(message = 'rc_review_disposed'): void {
@@ -50,23 +53,47 @@ export async function loadRcJobReview(
     const item = pending.get(data.id)
     if (!item) return
     if (data.error) { stop(/^rc_review_[a-z_]+$/.test(data.error) ? data.error : 'rc_review_worker_failed'); return }
+    if (data.quantityError && ['quantityReport', 'quantityDownload'].includes(item.type)) {
+      pending.delete(data.id); clearTimeout(item.timer)
+      item.reject(new JobArtifactError(/^rc_review_[a-z_]+$/.test(data.quantityError) ? data.quantityError : 'rc_review_quantity_contract_invalid'))
+      return
+    }
     pending.delete(data.id); clearTimeout(item.timer); item.resolve(data.value)
   }
   function call<T>(type: string, payload: object, transfer: Transferable[] = []): Promise<T> {
     if (failure) return Promise.reject(new JobArtifactError(failure))
     const id = ++sequence
     return new Promise<T>((resolve, reject) => {
-      pending.set(id, { resolve, reject, timer: setTimeout(() => stop('rc_review_worker_timeout'), 60000) })
-      try { worker.postMessage({ id, type, ...payload }, transfer) } catch { stop('rc_review_worker_failed') }
+      pending.set(id, { type, resolve, reject, timer: setTimeout(() => {
+        if (type === 'quantityReport' || type === 'quantityDownload') {
+          pending.delete(id); reject(new JobArtifactError('rc_review_quantity_timeout'))
+        } else stop('rc_review_worker_timeout')
+      }, 60000) })
+      try { worker.postMessage({ id, type, ...payload }, transfer) } catch {
+        if (type === 'quantityReport' || type === 'quantityDownload') {
+          const item = pending.get(id)
+          if (item) clearTimeout(item.timer)
+          pending.delete(id); reject(new JobArtifactError('rc_review_quantity_message_invalid'))
+        } else stop('rc_review_worker_failed')
+      }
     })
   }
   try {
-    const summary = await call<RcJobSummary>('initialize', { job, artifacts }, Object.values(artifacts).map((bytes) => bytes.buffer))
+    const summary = await call<RcJobSummary>('initialize', { job, artifacts, tenantId: (transport as JobReadTransport & { tenantId?: string }).tenantId }, Object.values(artifacts).map((bytes) => bytes.buffer))
     return {
       summary,
       epoch: (index) => call('epoch', { index }),
       material: (memberId, integrationPoint, fiberIndex) => call('material', { memberId, integrationPoint, fiberIndex }),
       download: (role) => call('download', { role }),
+      verifyQuantityReport: (bytes, reference) => {
+        // Copy only the bounded companion so its caller can retain the received
+        // bytes; never copy or retransmit the original numerical result arrays.
+        if (!(bytes instanceof Uint8Array) || bytes.byteLength === 0) return Promise.reject(new JobArtifactError('rc_review_quantity_report_invalid'))
+        if (bytes.byteLength > 4 * 1024 * 1024) return Promise.reject(new JobArtifactError('rc_review_quantity_report_too_large'))
+        const transfer = bytes.slice()
+        return call('quantityReport', { bytes: transfer, reference }, [transfer.buffer])
+      },
+      downloadQuantityReport: (reportId) => call('quantityDownload', { reportId }),
       onFailure(listener) {
         if (failure) listener(failure)
         else listeners.add(listener)

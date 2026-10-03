@@ -48,6 +48,7 @@ from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
 from structural_analysis.benchmark.rc_control_assembly_phases import (
     summarize_rc_control_assembly_phases,
 )
+from structural_analysis.benchmark import rc_control_prior_work as prior_work
 from structural_analysis.benchmark.rc_control_trust_region import (
     TrustRegionReversalProposal,
     TRUST_REGION_REVERSAL_IDENTITY,
@@ -76,11 +77,16 @@ class RCControlSeedContext:
     accepted_targets_m: tuple[float, ...]
     accepted_augmented_coordinates_m: tuple[tuple[float, ...], ...]
     committed_material_state_json: str | None = None
+    prior_work_binding: dict[str, Any] | None = None
+    prior_accepted_transition_work: dict[str, Any] | None = None
 
     def to_dict(self):
         payload = asdict(self)
         if self.committed_material_state_json is None:
             payload.pop("committed_material_state_json")
+        for name in ("prior_work_binding", "prior_accepted_transition_work"):
+            if getattr(self, name) is None:
+                payload.pop(name)
         return payload
 
 
@@ -329,7 +335,7 @@ def _preload(
     return step, response, coordinates, inv, failure
 
 
-def _guard_decision(context, guard, root, index):
+def _guard_decision(context, guard, root, index, require_prior_work=False):
     """Time a decision on the accepted prefix before material capture."""
     _save(root, f"{index:03d}-guard-context.json", _bytes(context.to_dict()))
     _save(root, f"{index:03d}-guard-started.json", _bytes({
@@ -338,7 +344,14 @@ def _guard_decision(context, guard, root, index):
     wall, cpu = perf_counter_ns(), process_time_ns()
     result = {"status": "returned", "allow_proposal": None}
     try:
-        allowed = guard(context)
+        prior_valid = True
+        if require_prior_work:
+            try:
+                prior_work.validate_rc_control_prior_work(context)
+            except ValueError:
+                prior_valid = False
+                result["decline_reason"] = "causal_prior_work_unavailable"
+        allowed = guard(context) if prior_valid else False
         if type(allowed) is not bool:
             raise ValueError("proposal guard must return an exact boolean")
         result["allow_proposal"] = allowed
@@ -367,6 +380,7 @@ def _path(
     continuation_on_failure=False,
     continuation_all_failed_targets=False,
     continuation_adaptive=False,
+    prior_work_metadata=None,
 ):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
@@ -426,18 +440,53 @@ def _path(
         # not be executed again on this already accepted parent.
         targets = list(initial_prefix[1])
         coordinates = list(initial_prefix[2])
+    # A supplied parent has no original invocation bytes from this newly run
+    # arm. Never infer or borrow prior work from its coordinates/native state.
+    prior_record = None
+    prior_prefix_cost = None
+    if prior_work_metadata is not None:
+        nw, nc = perf_counter_ns(), process_time_ns()
+        # The legacy adapter returns NumPy scalars for the initial prefix.
+        # Freeze their identical binary64 values as exact JSON numeric types.
+        coordinates = [tuple(float(value) for value in row) for row in coordinates]
+        prior_prefix_cost = {
+            "wall_ns": perf_counter_ns() - nw,
+            "cpu_ns": process_time_ns() - nc,
+            "scope": "opt_in_initial_prefix_scalar_normalization_inside_path",
+        }
     for index, target in enumerate(() if failure else request.targets_m):
         material_state = None
         capture_cost = None
         guard_result = None
         allow_proposal = True
+        prior_binding = None
+        prior_binding_cost = None
+        if prior_work_metadata is not None:
+            bw, bc = perf_counter_ns(), process_time_ns()
+            prefix_context = RCControlSeedContext(
+                source_hash, request.control_global_dof,
+                compiled.problem.free_global_dofs.index(request.control_global_dof),
+                target, tuple(targets), tuple(coordinates),
+            )
+            prior_binding = prior_work.make_rc_control_prior_work_binding(
+                prefix_context, accepted_checkpoint=accepted, **prior_work_metadata,
+            )
+            prior_binding_cost = {
+                "wall_ns": perf_counter_ns() - bw,
+                "cpu_ns": process_time_ns() - bc,
+                "scope": "current_parent_prefix_binding_before_guard_excludes_guard_material_capture_and_io",
+            }
         if proposal_guard is not None:
             guard_context = RCControlSeedContext(
                 source_hash, request.control_global_dof,
                 compiled.problem.free_global_dofs.index(request.control_global_dof),
                 target, tuple(targets), tuple(coordinates), None,
+                prior_binding, prior_record,
             )
-            guard_result = _guard_decision(guard_context, proposal_guard, root, index)
+            guard_result = _guard_decision(
+                guard_context, proposal_guard, root, index,
+                require_prior_work=prior_work_metadata is not None,
+            )
             allow_proposal = guard_result["allow_proposal"] is True
         if capture_material_state and allow_proposal:
             from structural_analysis.benchmark.rc_control_material_features import (
@@ -458,6 +507,8 @@ def _path(
             tuple(targets),
             tuple(coordinates),
             material_state,
+            prior_binding,
+            prior_record,
         )
         before = accepted.canonical_bytes()
         entry = {
@@ -473,6 +524,8 @@ def _path(
             entry["committed_material_capture"] = capture_cost
         if guard_result is not None:
             entry["proposal_guard"] = guard_result
+        if prior_binding_cost is not None:
+            entry["prior_work_binding_cost"] = prior_binding_cost
         entries.append(entry)
         _save(root, f"{index:03d}-context.json", _bytes(context.to_dict()))
         if guard_result is not None and guard_result["status"] != "returned":
@@ -596,6 +649,7 @@ def _path(
         # A rejected numerical proposal may fall back exactly once, with both
         # attempts retained. An exception leaves unknown work and stops the path.
         attempt_seeds = [seed, None] if seed is not None else [None]
+        original_invocations = []
         for attempt, current in enumerate(attempt_seeds):
             inv = {
                 "ordinal": attempt + 1,
@@ -664,9 +718,13 @@ def _path(
                 )
             if assembly_work is not None:
                 inv["newton_assembly_work"] = assembly_work.to_dict()
-            _save(root, stem + "-outcome.json", _bytes(inv))
+            original_outcome = _bytes(inv)
+            _save(root, stem + "-outcome.json", original_outcome)
             if step is not None:
-                _save(root, stem + "-step.json", _bytes(step.to_dict()))
+                original_step = _bytes(step.to_dict())
+                _save(root, stem + "-step.json", original_step)
+                if prior_work_metadata is not None:
+                    original_invocations.append((original_outcome, original_step))
             if failure or step is None:
                 break
             if step.committed:
@@ -754,6 +812,24 @@ def _path(
                 "target_index": index,
             }
             break
+        if prior_work_metadata is not None:
+            rw, rc = perf_counter_ns(), process_time_ns()
+            accepted_context_now = replace(
+                context, accepted_targets_m=tuple(targets),
+                accepted_augmented_coordinates_m=tuple(coordinates),
+            )
+            next_binding = prior_work.make_rc_control_prior_work_binding(
+                accepted_context_now, accepted_checkpoint=accepted,
+                **prior_work_metadata,
+            )
+            prior_record = prior_work.make_rc_control_prior_work_record(
+                next_binding, original_invocations,
+            )
+            entry["prior_work_recording_cost"] = {
+                "wall_ns": perf_counter_ns() - rw,
+                "cpu_ns": process_time_ns() - rc,
+                "scope": "accepted_transition_original_byte_record_preparation_excludes_original_step_io",
+            }
     result = {
         "schema_version": "experimental-rc-control-seed-path.v2"
         if request.constant_nodal_loads
@@ -789,6 +865,8 @@ def _path(
             original_complete_path_executed=False,
             preload_reexecuted=False,
         )
+    if prior_prefix_cost is not None:
+        result["prior_work_initial_prefix_cost"] = prior_prefix_cost
     result["path_hash"] = _sha(_bytes(result))
     _save(root, "path.json", _bytes(result))
     return result
@@ -1140,6 +1218,7 @@ def benchmark_rc_control_seed_paths(
     record_assembly_work: bool = False,
     reuse_line_search_assembly: bool = False,
     record_assembly_timing: bool = False,
+    record_prior_accepted_transition_work: bool = False,
     observe_initial_residuals: bool = False,
     trust_region_reversal: bool = False,
     frozen_parent_continuation: bool = False,
@@ -1154,6 +1233,14 @@ def benchmark_rc_control_seed_paths(
     original prefix, and cannot provide complete-path performance credit.
     """
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(record_prior_accepted_transition_work) is not bool:
+        raise ValueError("explicit boolean causal prior-work recording required")
+    if record_prior_accepted_transition_work and (
+        trust_region_reversal or frozen_parent_continuation
+        or isinstance(proposal, (TrustRegionReversalProposal, FrozenParentContinuationProposal))
+        or (proposal is not None and proposal_guard is None)
+    ):
+        raise ValueError("causal prior work requires an ordinary proposal and identified pre-capture guard")
     if type(trust_region_reversal) is not bool:
         raise ValueError("explicit boolean trust-region reversal option required")
     if type(frozen_parent_continuation) is not bool:
@@ -1531,6 +1618,39 @@ def benchmark_rc_control_seed_paths(
             "decline_strategy": "secant",
             "errors_fail_path": True,
         }
+    prior_source_cost = prior_source_binding = None
+    if record_prior_accepted_transition_work:
+        sw, sc = perf_counter_ns(), process_time_ns()
+        from structural_analysis.solvers.nonlinear import newton, assembly_work
+        from structural_analysis.assembly import stateful_fiber_frame2d_displacement_control
+
+        prior_source_binding = {
+            "source_revision": source_revision,
+            "source_revision_is_attestation": False,
+            "selected_local_source_sha256": {
+                name: _sha(Path(path).read_bytes())
+                for name, path in (
+                    ("rc_control_seed_runtime", __file__),
+                    ("rc_control_prior_work", prior_work.__file__),
+                    ("newton", newton.__file__),
+                    ("assembly_work", assembly_work.__file__),
+                    ("rc_control_step", stateful_fiber_frame2d_displacement_control.__file__),
+                )
+            },
+            "scope": "selected_local_file_bytes_not_loaded_code_or_operator_attestation",
+        }
+        prior_source_cost = {
+            "wall_ns": perf_counter_ns() - sw,
+            "cpu_ns": process_time_ns() - sc,
+            "scope": "once_per_benchmark_prior_source_binding_setup_inside_whole_study",
+        }
+        identity["prior_accepted_transition_work"] = {
+            "profile": prior_work.PRIOR_WORK_PROFILE,
+            "sources": prior_source_binding,
+            "decline_on_missing_original_record": True,
+            "cost_included_in_path_and_study": True,
+            "is_attestation": False,
+        }
     _save(root, "request.json", _bytes(identity))
     _save(root, "model.json", _bytes(model.canonical_payload()))
     origin_bytes = (
@@ -1556,6 +1676,15 @@ def benchmark_rc_control_seed_paths(
             continuation_on_failure and name == "proposal",
             continuation_all_failed_targets and name == "proposal",
             continuation_adaptive and name == "proposal",
+            {
+                "arm_identity": _sha(_bytes({
+                    "comparison_identity": _sha(_bytes(identity)),
+                    "arm_directory": str((root / directory).resolve()),
+                })),
+                "request_hash": _sha(_bytes(source_request.to_dict())),
+                "solver_config_hash": source_request.solver_config.contract_hash,
+                "source_binding_hash": _sha(_bytes(prior_source_binding)),
+            } if record_prior_accepted_transition_work else None,
         )
         if initial_prefix is not None:
             unknown = any(
@@ -1680,6 +1809,8 @@ def benchmark_rc_control_seed_paths(
             "design_approval": False,
         },
     }
+    if prior_source_cost is not None:
+        report["prior_work_source_setup_cost"] = prior_source_cost
     if trust_region_reversal or frozen_parent_continuation:
         observations = [entry["numerical_proposal"]
                         for arm in (*arms.values(), fresh) for entry in arm["entries"]

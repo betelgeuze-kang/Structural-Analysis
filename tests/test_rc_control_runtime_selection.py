@@ -991,8 +991,10 @@ def test_connected_runtime_fits_exclude_every_related_case(original, tmp_path):
         defer_evaluation=True,
     )
     assert labels["evaluation_deferred"] is True
-    assert all(row["reason"] == "evaluation_explicitly_deferred"
-               for row in labels["evaluation"])
+    assert all(
+        row["reason"] == "evaluation_explicitly_deferred"
+        for row in labels["evaluation"]
+    )
     assert labels["evaluation_work"]["known_work"]["core_calls"] == 0
     policy = learning.RCControlSeedPolicy(json.dumps(labels["policy"]))
     samples = json.loads((tmp_path / "labels/training-samples.json").read_bytes())
@@ -1051,23 +1053,950 @@ def test_constant_safe_runtime_selection_refits_preserve_opt_in_profile(
 
 
 @pytest.mark.parametrize("enabled", [False, True])
-def test_initial_observation_option_reaches_every_fold(tmp_path, original, monkeypatch, enabled):
+def test_initial_observation_option_reaches_every_fold(
+    tmp_path, original, monkeypatch, enabled
+):
     seen = []
     real = learning.benchmark_rc_control_seed_paths
+
     def observe(*args, **kwargs):
-        seen.append(kwargs.get('observe_initial_residuals', False))
+        seen.append(kwargs.get("observe_initial_residuals", False))
         return real(*args, **kwargs)
-    monkeypatch.setattr(learning, 'benchmark_rc_control_seed_paths', observe)
-    result = run(tmp_path / 'observed', original, ridge_grid=(1e4,),
-                 observe_initial_residuals=enabled)
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", observe)
+    result = run(
+        tmp_path / "observed",
+        original,
+        ridge_grid=(1e4,),
+        observe_initial_residuals=enabled,
+    )
     assert seen == [enabled, enabled]
-    assert result.get('observe_initial_residuals', False) is enabled
+    assert result.get("observe_initial_residuals", False) is enabled
 
 
-@pytest.mark.parametrize("enabled", [None, 1, 'true'])
+@pytest.mark.parametrize("enabled", [None, 1, "true"])
 def test_initial_observation_option_rejects_before_fit(tmp_path, enabled):
-    with pytest.raises(ValueError, match='boolean initial residual'):
-        selection.run_rc_control_runtime_selection(None, None, None,
-            source_revision='a'*40, output_directory=tmp_path/'invalid',
-            ridge_grid=(1e4,), observe_initial_residuals=enabled)
-    assert not (tmp_path/'invalid').exists()
+    with pytest.raises(ValueError, match="boolean initial residual"):
+        selection.run_rc_control_runtime_selection(
+            None,
+            None,
+            None,
+            source_revision="a" * 40,
+            output_directory=tmp_path / "invalid",
+            ridge_grid=(1e4,),
+            observe_initial_residuals=enabled,
+        )
+    assert not (tmp_path / "invalid").exists()
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"proposal_guard_factory": lambda **kwargs: None},
+        {"proposal_guard_factory_identity": "sha256:" + "b" * 64},
+        {
+            "proposal_guard_factory": 1,
+            "proposal_guard_factory_identity": "sha256:" + "b" * 64,
+        },
+        {
+            "proposal_guard_factory": lambda **kwargs: None,
+            "proposal_guard_factory_identity": "b" * 64,
+        },
+        {
+            "proposal_guard_factory": lambda **kwargs: None,
+            "proposal_guard_factory_identity": "sha256:" + "b" * 64,
+        },
+        {"record_prior_accepted_transition_work": 1},
+        {"record_prior_accepted_transition_work": None},
+        {"record_prior_accepted_transition_work": True},
+    ],
+)
+def test_guard_and_prior_work_options_reject_before_inputs_or_output(tmp_path, options):
+    root = tmp_path / "invalid"
+    with pytest.raises(ValueError):
+        selection.run_rc_control_runtime_selection(
+            None,
+            None,
+            None,
+            source_revision="a" * 40,
+            output_directory=root,
+            ridge_grid=(1e4,),
+            **options,
+        )
+    assert not root.exists()
+
+
+def _guard_factory(*, policy, model_features, excluded_case_ids):
+    return {
+        "guard": lambda context: True,
+        "guard_identity": "sha256:" + "b" * 64,
+        "seed_policy_hash": policy.policy_hash,
+        "excluded_case_ids": excluded_case_ids,
+    }
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"seed_policy_hash": "sha256:" + "c" * 64},
+        {"excluded_case_ids": ("foreign-case",)},
+        {"excluded_case_ids": ["train-a"]},
+        {"guard_identity": True},
+        {"guard": None},
+        {"unexpected": True},
+    ],
+)
+def test_foreign_guard_binding_stops_before_held_path(
+    tmp_path, original, monkeypatch, change
+):
+    def forbidden(*args, **kwargs):
+        pytest.fail("a foreign guard must not execute the withheld path")
+
+    def factory(**kwargs):
+        return _guard_factory(**kwargs) | change
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", forbidden)
+    root = tmp_path / "foreign-guard"
+    with pytest.raises(ValueError, match="guard binding"):
+        run(
+            root,
+            original,
+            ridge_grid=(1e4,),
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+        )
+    failure = json.loads((root / "fold-0000-outcome.json").read_text())
+    assert failure["status"] == "raised" and failure["unknown_work_until_outcome"]
+    assert not (root / "fold-0000").exists()
+
+
+def test_guarded_selector_charges_setup_and_withholds_bare_policy_refit(
+    tmp_path, original, monkeypatch
+):
+    cases, samples, _, source_report = original
+    template = deepcopy(source_report["evaluation"][0]["report"])
+    by_hash = {c.model.canonical_model_checksum: c.case_id for c in cases}
+    calls = []
+    factories = []
+    monkeypatch.setattr(
+        learning.RCControlSeedPolicy,
+        "propose",
+        lambda self, context, *args, **kwargs: learning.secant_seed(context),
+    )
+
+    def factory(**kwargs):
+        factories.append(kwargs["excluded_case_ids"])
+        return _guard_factory(**kwargs)
+
+    def benchmark(model, request, **kwargs):
+        held = by_hash[model.canonical_model_checksum]
+        calls.append(held)
+        assert kwargs["record_prior_accepted_transition_work"] is True
+        observed = {}
+        for row in samples:
+            if row["case_id"] == held:
+                context = learning.RCControlSeedContext(**row["context"])
+                if kwargs["proposal_guard"](context):
+                    seed = kwargs["proposal"](context)
+                    observed[row["target_index"]] = (
+                        "proposed" if seed is not None else "abstained_to_reference"
+                    )
+        report = deepcopy(template)
+        entries = report["arms"]["proposal"]["entries"]
+        # Training rows omit the initial target; preserve that actual abstention.
+        assert entries[0]["target_index"] == 0 and 0 not in observed
+        assert entries[0]["proposal_decision"] == "abstained_to_reference"
+        assert set(observed) == {entry["target_index"] for entry in entries[1:]}
+        for entry in entries[1:]:
+            entry["proposal_decision"] = observed[entry["target_index"]]
+        # These are software contract timings, not measured speed evidence.
+        report["arms"]["secant"]["wall_ns"] = 10**9
+        report["arms"]["proposal"]["wall_ns"] = 2 * 10**8
+        report["prior_work_source_setup_cost"] = {
+            "wall_ns": 77,
+            "cpu_ns": 33,
+            "scope": "once_per_benchmark_prior_source_binding_setup_inside_whole_study",
+        }
+        return report
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", benchmark)
+    root = tmp_path / "guarded"
+    result = run(
+        root,
+        original,
+        ridge_grid=(1e4,),
+        proposal_abstention_strategy="secant",
+        proposal_guard_factory=factory,
+        proposal_guard_factory_identity="sha256:" + "d" * 64,
+        record_prior_accepted_transition_work=True,
+    )
+    assert calls == ["train-a", "train-b"]
+    assert factories == [("train-a",), ("train-b",)]
+    assert result["guarded_fold_winner"] is not None
+    assert result["selected_strategy"] == "secant" and result["selected_policy"] is None
+    assert (
+        not result["guarded_policy_refit_performed"]
+        and not result["candidate_promoted"]
+    )
+    assert result["fit_attempt_count"] == 2
+    for fold in result["folds"]:
+        setup = fold["proposal_guard_setup_wall_ns"]
+        assert type(setup) is int and setup > 0
+        assert fold["score"]["proposal_scored_wall_ns"] == 2 * 10**8 + setup + 77
+        assert (
+            fold["score"]["proposal_over_secant_path_wall_ratio"]
+            == (2 * 10**8 + setup + 77) / 10**9
+        )
+        assert (
+            fold["score"]["whole_scored_benchmark_wall_ns"]
+            == template["whole_study_wall_ns"] + setup
+        )
+        assert fold["proposal_guard_binding"]["seed_policy_hash"] == fold["policy_hash"]
+    assert json.loads((root / "plan.json").read_text())["maximum_required_fits"] == 2
+
+
+def test_guard_factory_cannot_change_static_model_inputs(
+    tmp_path, original, monkeypatch
+):
+    def factory(**kwargs):
+        features = kwargs["model_features"]
+        object.__setattr__(features, "values", tuple(v + 1 for v in features.values))
+        return _guard_factory(**kwargs)
+
+    monkeypatch.setattr(
+        learning,
+        "benchmark_rc_control_seed_paths",
+        lambda *args, **kwargs: pytest.fail("mutated inputs cannot execute"),
+    )
+    with pytest.raises(ValueError, match="frozen fold inputs"):
+        run(
+            tmp_path / "mutated",
+            original,
+            ridge_grid=(1e4,),
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+        )
+
+
+def test_actual_pre_capture_guard_decline_is_accounted_as_secant(tmp_path, original):
+    def factory(**kwargs):
+        return _guard_factory(**kwargs) | {"guard": lambda context: False}
+
+    root = tmp_path / "decline"
+    result = run(
+        root,
+        original,
+        ridge_grid=(1e4,),
+        proposal_abstention_strategy="secant",
+        proposal_guard_factory=factory,
+        proposal_guard_factory_identity="sha256:" + "d" * 64,
+        record_prior_accepted_transition_work=True,
+        record_assembly_work=True,
+    )
+    assert result["selected_strategy"] == "secant"
+    assert result["guarded_fold_winner"] is None
+    for fold in result["folds"]:
+        assert fold["score"]["full_comparison_pass"]
+        assert fold["score"]["proposed_count"] == 0
+        assert fold["score"]["abstained_count"] == 4
+        report = json.loads(
+            (root / f"fold-{fold['index']:04d}" / "comparison.json").read_text()
+        )
+        entries = report["arms"]["proposal"]["entries"]
+        assert len(entries) == 4
+        assert all(e["proposal_guard"]["allow_proposal"] is False for e in entries)
+        assert all("committed_material_capture" not in e for e in entries)
+
+
+def test_guard_identity_is_frozen_across_repeated_fold_paths(
+    tmp_path, original, monkeypatch
+):
+    calls = []
+    factory_calls = []
+    template = original[3]["evaluation"][0]["report"]
+
+    def benchmark(*args, **kwargs):
+        calls.append(True)
+        return deepcopy(template)
+
+    def factory(**kwargs):
+        factory_calls.append(True)
+        return _guard_factory(**kwargs) | {
+            "guard_identity": "sha256:"
+            + ("b" if len(factory_calls) == 1 else "c") * 64,
+        }
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", benchmark)
+    with pytest.raises(ValueError, match="guard changed across repetitions"):
+        run(
+            tmp_path / "changed-repeat",
+            original,
+            ridge_grid=(1e4,),
+            repetitions=3,
+            maximum_core_calls=336,
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+        )
+    assert len(factory_calls) == 2 and len(calls) == 1
+
+
+def _prior_source_cost(**changes):
+    return {
+        "wall_ns": 10,
+        "cpu_ns": 12,
+        "scope": "once_per_benchmark_prior_source_binding_setup_inside_whole_study",
+    } | changes
+
+
+def test_prior_source_setup_counts_once_in_proposal_not_whole(original):
+    report = deepcopy(original[3]["evaluation"][0]["report"])
+    report["arms"]["secant"]["wall_ns"] = 100
+    report["arms"]["proposal"]["wall_ns"] = 80
+    report["whole_study_wall_ns"] = 1000
+    report["prior_work_source_setup_cost"] = _prior_source_cost()
+    frozen = deepcopy(report)
+    score = selection._runtime_score(
+        report,
+        [],
+        proposal_setup_wall_ns=5,
+        include_prior_work_source_setup=True,
+    )
+    assert score["proposal_scored_wall_ns"] == 95
+    assert score["proposal_over_secant_path_wall_ratio"] == 0.95
+    assert score["whole_scored_benchmark_wall_ns"] == 1005
+    assert report == frozen
+    legacy = selection._runtime_score(report, [], proposal_setup_wall_ns=5)
+    del report["prior_work_source_setup_cost"]
+    assert legacy == selection._runtime_score(report, [], proposal_setup_wall_ns=5)
+
+
+@pytest.mark.parametrize(
+    "cost",
+    [
+        None,
+        {},
+        _prior_source_cost(wall_ns=True),
+        _prior_source_cost(wall_ns=-1),
+        _prior_source_cost(wall_ns=1.0),
+        _prior_source_cost(wall_ns="10"),
+        _prior_source_cost(cpu_ns=True),
+        _prior_source_cost(cpu_ns=-1),
+        _prior_source_cost(cpu_ns=1.0),
+        _prior_source_cost(scope="foreign"),
+        _prior_source_cost(extra=0),
+    ],
+)
+def test_enabled_prior_source_cost_refuses_missing_or_malformed(original, cost):
+    report = deepcopy(original[3]["evaluation"][0]["report"])
+    report["prior_work_source_setup_cost"] = cost
+    with pytest.raises(ValueError, match="measured prior source setup"):
+        selection._runtime_score(report, [], include_prior_work_source_setup=True)
+
+
+def test_selector_preserves_unknown_cost_when_prior_source_measurement_missing(
+    tmp_path, original, monkeypatch
+):
+    template = deepcopy(original[3]["evaluation"][0]["report"])
+    assert "prior_work_source_setup_cost" not in template
+    monkeypatch.setattr(
+        learning,
+        "benchmark_rc_control_seed_paths",
+        lambda *args, **kwargs: deepcopy(template),
+    )
+    root = tmp_path / "missing-source-cost"
+    with pytest.raises(ValueError, match="measured prior source setup"):
+        run(
+            root,
+            original,
+            ridge_grid=(1e4,),
+            proposal_abstention_strategy="secant",
+            proposal_guard_factory=_guard_factory,
+            proposal_guard_factory_identity="sha256:" + "d" * 64,
+            record_prior_accepted_transition_work=True,
+        )
+    failure = json.loads((root / "fold-0000-outcome.json").read_text())
+    assert failure["status"] == "raised" and failure["unknown_work_until_outcome"]
+
+
+@pytest.fixture
+def full_pair_inputs(tmp_path, monkeypatch):
+    """Authored small algebra rows and mocked paths; no numerical entrypoint."""
+    cases = []
+    for name, split, length, targets in (
+        ("train-a", "train", 2.0, (-1e-6, -2e-6, 1e-6, 0.0)),
+        ("train-b", "train", 3.0, (-0.8e-6, -1.5e-6, 1.2e-6, -0.2e-6)),
+        ("locked", "validation", 2.5, (-0.7e-6, -1.3e-6, 1.1e-6, 0.1e-6)),
+    ):
+        payload = json.loads(
+            Path(
+                "examples/public_rc_fiber_frame_l_frame_material_history.json"
+            ).read_bytes()
+        )
+        for node in payload["nodes"]:
+            if node["id"] == "N2":
+                node["coordinates"] = [length, 0.0, 0.0]
+            if node["id"] == "N3":
+                node["coordinates"] = [length, length - 0.5, 0.0]
+        path = tmp_path / (name + ".json")
+        path.write_text(json.dumps(payload))
+        request = BoundedRCFiberDirectControlRequest(
+            7, targets, allow_reversals=True, maximum_reversals=3
+        )
+        cases.append(
+            learning.RCControlLearningCase(
+                name, name, name, name, split, load_neutral_json(path), request
+            )
+        )
+    prepared = learning._preflight(cases)
+    samples, profile = [], None
+    for case in cases[:2]:
+        _, compiled, features, _, _ = prepared[case.case_id]
+        control = compiled.problem.free_global_dofs.index(
+            case.request.control_global_dof
+        )
+        profile = dict(
+            model_context_hash=features.context_hash,
+            model_feature_names=list(features.feature_names),
+            free_global_dofs=list(compiled.problem.free_global_dofs),
+            control_free_index=control,
+            solver_config_hash=case.request.solver_config.contract_hash,
+        )
+        width = len(compiled.problem.free_global_dofs) + 1
+        for index in range(1, len(case.request.targets_m)):
+            prefix = (0.0, *case.request.targets_m[:index])
+            q = []
+            for ordinal, target in enumerate(prefix):
+                values = [0.0] * width
+                values[control] = target
+                values[-1] = ordinal * 0.01
+                q.append(tuple(values))
+            context = learning.RCControlSeedContext(
+                compiled.problem.contract_hash,
+                case.request.control_global_dof,
+                control,
+                case.request.targets_m[index],
+                prefix,
+                tuple(q),
+            )
+            baseline = learning.secant_seed(context)
+            accepted = np.asarray(baseline) + np.arange(width) * 1e-8
+            row = dict(
+                case_id=case.case_id,
+                split="train",
+                target_index=index,
+                parent_hash="sha256:" + "c" * 64,
+                context=json.loads(selection._bytes(context.to_dict())),
+                features=learning._features(context, features).tolist(),
+                accepted_coordinates=accepted.tolist(),
+                correction=(accepted - baseline).tolist(),
+                arithmetic_profile=None,
+            )
+            row["sample_hash"] = selection._sha(selection._bytes(row))
+            samples.append(row)
+    policy = learning._fit(
+        samples, profile, 1e4, 0.1, fit_solver=learning.SVD_RIDGE_FIT_PROFILE
+    )
+    calls = []
+    by_hash = {case.model.canonical_model_checksum: case.case_id for case in cases}
+
+    def benchmark(model, request, **kwargs):
+        held = by_hash[model.canonical_model_checksum]
+        assert held != "locked"
+        calls.append(held)
+        entries = [
+            {
+                "target_index": i,
+                "target_m": target,
+                "proposal_decision": "abstained_to_reference" if i == 0 else "proposed",
+                "invocations": [
+                    {
+                        "unknown_work": False,
+                        "work": {
+                            "core_calls": 1,
+                            "newton_iterations": 1,
+                            "linear_solves": 1,
+                        },
+                    }
+                ],
+            }
+            for i, target in enumerate(request.targets_m)
+        ]
+        arms = {
+            name: {
+                "status": "complete",
+                "entries": deepcopy(entries),
+                "wall_ns": 10**9 if name == "secant" else 2 * 10**8,
+            }
+            for name in ("reference", "secant", "proposal")
+        }
+        return {
+            "schema_version": "experimental-rc-control-seed-comparison.v1",
+            "arms": arms,
+            "fresh_reference": deepcopy(arms["reference"]),
+            "reference_repeat_exact": True,
+            "all_execution_work_reported": True,
+            "comparisons": {name: {"full_history_pass": True} for name in arms},
+            "whole_study_wall_ns": 2 * 10**9,
+            "report_hash": "sha256:" + "e" * 64,
+            "prior_work_source_setup_cost": _prior_source_cost(),
+        }
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", benchmark)
+    return cases, samples, policy, calls
+
+
+def _full_pair_binding(*, policy, training_samples, unknown=False):
+    seed = policy.to_dict()
+    hashes = [row["sample_hash"] for row in training_samples]
+    names = [
+        *("model." + name for name in seed["model_feature_names"]),
+        "target_m",
+        "target_increment_m",
+        "previous_target_increment_m",
+        *(f"last_coordinate_{i}" for i in range(len(seed["free_global_dofs"]) + 1)),
+        *(
+            f"coordinate_increment_{i}"
+            for i in range(len(seed["free_global_dofs"]) + 1)
+        ),
+        *(
+            "prior_work." + name
+            for name in (
+                "core_calls",
+                "newton_iterations",
+                "linear_solves",
+                "assembly_dispatches",
+                "line_search_dispatches",
+                "terminal_refinement_dispatches",
+            )
+        ),
+    ]
+    known, unverified = (hashes[:-1], hashes[-1:]) if unknown else (hashes, [])
+    gate = dict(
+        schema_version="rc-full-training-prior-work-cost-margin-gate.v1",
+        training_scope="declared_training_only",
+        excluded_case_ids=[],
+        feature_profile="rc-switch-accepted-prefix-prior-work-features.v1",
+        feature_names=names,
+        cost_target_profile="minimum-three-repeat-relative-time-margin.v1",
+        mean=[0.0] * len(names),
+        scale=[1.0] * len(names),
+        minimum=[0.0] * len(names),
+        maximum=[0.0] * len(names),
+        weights=[0.0] * (len(names) + 1),
+        ridge=1.0,
+        threshold=0.01,
+        seed_policy_hash=policy.policy_hash,
+        teacher_roster_hash="sha256:" + "f" * 64,
+        training_rows_hash="sha256:" + "b" * 64,
+        declared_training_sample_hashes=hashes,
+        training_sample_hashes=known,
+        unverified_sample_hashes=unverified,
+        unverified_count=len(unverified),
+        positive_count=len(known),
+        negative_count=0,
+    )
+    gate["policy_hash"] = selection._sha(selection._bytes(gate))
+    receipt = dict(
+        fit_completed=True,
+        unknown_work=False,
+        fit_wall_ns=10,
+        verified_rows=len(known),
+        unverified_rows_excluded=len(unverified),
+        declared_rows=len(hashes),
+        training_scope="declared_training_only",
+        seed_policy_hash=policy.policy_hash,
+        teacher_roster_hash=gate["teacher_roster_hash"],
+        declared_training_sample_hashes=hashes,
+        unverified_sample_hashes=unverified,
+        policy_hash=gate["policy_hash"],
+        target_profile=gate["cost_target_profile"],
+        feature_profile=gate["feature_profile"],
+        independent_evaluation=False,
+        historical_training_admitted=False,
+        predecessor_counter_authenticity_established=False,
+        online_extraction_cost_in_target=False,
+        seed_fit_count=0,
+        gate_fit_count=1,
+    )
+    return dict(
+        training_scope="declared_training_only",
+        seed_policy_hash=policy.policy_hash,
+        gate_policy_hash=gate["policy_hash"],
+        gate_policy=gate,
+        training_sample_hashes=hashes,
+        fit_receipt=receipt,
+    )
+
+
+def _run_full_pair(root, inputs, **changes):
+    cases, samples, policy, _ = inputs
+    options = dict(
+        ridge_grid=(1e4,),
+        maximum_fits=4,
+        maximum_core_calls=168,
+        proposal_abstention_strategy="secant",
+        withholding_strategy="connected_training_groups",
+        repetitions=3,
+        proposal_guard_factory=_guard_factory,
+        proposal_guard_factory_identity="sha256:" + "d" * 64,
+        record_prior_accepted_transition_work=True,
+        full_training_pair_factory=_full_pair_binding,
+        full_training_pair_factory_identity="sha256:" + "a" * 64,
+    )
+    return selection.run_rc_control_runtime_selection(
+        cases,
+        samples,
+        policy,
+        source_revision="a" * 40,
+        output_directory=root,
+        **(options | changes),
+    )
+
+
+@pytest.mark.parametrize("unknown", [False, True])
+def test_full_pair_selected_after_frozen_folds_and_retains_unknown_denominator(
+    tmp_path, full_pair_inputs, unknown
+):
+    external = []
+
+    def factory(*, policy, training_samples):
+        assert full_pair_inputs[3] == ["train-a"] * 3 + ["train-b"] * 3
+        assert (
+            training_samples == full_pair_inputs[1]
+            and training_samples is not full_pair_inputs[1]
+        )
+        assert all(row["case_id"] != "locked" for row in training_samples)
+        result = _full_pair_binding(
+            policy=policy, training_samples=training_samples, unknown=unknown
+        )
+        external.append(result)
+        return result
+
+    root = tmp_path / "selected"
+    result = _run_full_pair(root, full_pair_inputs, full_training_pair_factory=factory)
+    pair = json.loads((root / "selected-pair.json").read_bytes())
+    assert pair == result["selected_pair"] and result["selected_policy"] is None
+    assert result["selected_strategy"] == "guarded_seed_prior_work_pair"
+    assert (
+        result["guarded_policy_refit_performed"]
+        and result["fit_completed_count"] == result["fit_attempt_count"] == 4
+    )
+    assert pair["pair_hash"] == selection._sha(
+        selection._bytes({k: v for k, v in pair.items() if k != "pair_hash"})
+    )
+    assert pair["seed_policy"]["training_sample_hashes"] == [
+        s["sample_hash"] for s in full_pair_inputs[1]
+    ]
+    assert (
+        pair["gate_policy"]["seed_policy_hash"]
+        == pair["seed_policy_hash"]
+        == pair["seed_policy"]["policy_hash"]
+    )
+    assert pair["gate_policy"]["unverified_count"] == int(unknown)
+    assert (
+        not pair["independent_evaluation"]
+        and not pair["full_path_gain_proved"]
+        and not pair["source_authenticity"]
+    )
+    assert (
+        result["final_pair_refit"]["status"] == "completed"
+        and not result["final_pair_refit"]["unknown_work"]
+    )
+    external[0]["gate_policy"]["weights"][0] = 9000.0
+    external[0]["fit_receipt"]["verified_rows"] = 0
+    assert (
+        pair
+        == result["selected_pair"]
+        == json.loads((root / "selected-pair.json").read_bytes())
+    )
+    assert json.loads((root / "fit-0003-started.json").read_bytes())[
+        "unknown_fit_work_until_outcome"
+    ]
+    assert not json.loads((root / "fit-0003-outcome.json").read_bytes())[
+        "unknown_fit_work_until_outcome"
+    ]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"full_training_pair_factory_identity": None},
+        {"full_training_pair_factory": None},
+        {"full_training_pair_factory": 1},
+        {"full_training_pair_factory_identity": "a" * 64},
+        {"withholding_strategy": "case"},
+        {"repetitions": 1},
+        {"record_prior_accepted_transition_work": False},
+        {"proposal_guard_factory": None, "proposal_guard_factory_identity": None},
+        {"proposal_abstention_strategy": "reference"},
+    ],
+)
+def test_full_pair_invalid_options_reject_before_inputs_and_output(tmp_path, change):
+    root = tmp_path / "invalid"
+    with pytest.raises(ValueError):
+        _run_full_pair(root, (None, None, None, None), **change)
+    assert not root.exists()
+
+
+def test_full_pair_budget_reserves_final_seed_and_gate_before_output(
+    tmp_path, full_pair_inputs
+):
+    with pytest.raises(ValueError, match="4 fits"):
+        _run_full_pair(tmp_path / "underbudget", full_pair_inputs, maximum_fits=3)
+    assert not (tmp_path / "underbudget").exists() and not full_pair_inputs[3]
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "seed",
+        "sample_order",
+        "unknown_work",
+        "fit_completed",
+        "extra_field",
+        "outer",
+        "foreign_problem_layout",
+        "unknown_count",
+        "duplicate",
+        "nan",
+        "negative_wall",
+        "invented_fit_count",
+        "overlap",
+    ],
+)
+def test_full_pair_invalid_binding_preserves_secant_and_unknown_fit(
+    tmp_path, full_pair_inputs, kind
+):
+    def factory(**kwargs):
+        binding = _full_pair_binding(**kwargs)
+        if kind == "seed":
+            binding["seed_policy_hash"] = "sha256:" + "9" * 64
+        elif kind == "sample_order":
+            binding["training_sample_hashes"] = list(
+                reversed(binding["training_sample_hashes"])
+            )
+        elif kind in ("unknown_work", "fit_completed"):
+            binding["fit_receipt"][kind] = kind == "unknown_work"
+        elif kind == "extra_field":
+            binding["validation_rows"] = []
+        elif kind == "negative_wall":
+            binding["fit_receipt"]["fit_wall_ns"] = -1
+        elif kind == "invented_fit_count":
+            binding["fit_receipt"]["gate_fit_count"] = 0
+        else:
+            gate = binding["gate_policy"]
+            if kind == "outer":
+                gate["outer_group_index"] = 0
+            elif kind == "foreign_problem_layout":
+                gate["feature_names"][0] = "model.foreign"
+            elif kind == "unknown_count":
+                gate["unverified_count"] = True
+            elif kind == "duplicate":
+                gate["training_sample_hashes"][1] = gate["training_sample_hashes"][0]
+            elif kind == "overlap":
+                gate["unverified_sample_hashes"] = gate["training_sample_hashes"][:1]
+                gate["unverified_count"] = 1
+                binding["fit_receipt"]["unverified_sample_hashes"] = gate[
+                    "unverified_sample_hashes"
+                ]
+                binding["fit_receipt"]["unverified_rows_excluded"] = 1
+            elif kind == "nan":
+                gate["weights"][0] = float("nan")
+                return binding
+            gate["policy_hash"] = selection._sha(
+                selection._bytes({k: v for k, v in gate.items() if k != "policy_hash"})
+            )
+            binding["gate_policy_hash"] = gate["policy_hash"]
+            binding["fit_receipt"]["policy_hash"] = gate["policy_hash"]
+        return binding
+
+    root = tmp_path / kind
+    result = _run_full_pair(root, full_pair_inputs, full_training_pair_factory=factory)
+    assert (
+        result["selected_strategy"] == "secant"
+        and result["selected_policy"] is result["selected_pair"] is None
+    )
+    assert (
+        result["final_pair_refit"]["status"] == "raised"
+        and result["final_pair_refit"]["unknown_work"]
+    )
+    assert result["fit_attempt_count"] == 4 and result["fit_completed_count"] == 3
+    failure = json.loads((root / "fit-0003-outcome.json").read_bytes())
+    assert failure["status"] == "raised" and failure["unknown_fit_work_until_outcome"]
+    assert not (root / "selected-pair.json").exists()
+
+
+@pytest.mark.parametrize("kind", ["seed", "detached_samples", "original_samples"])
+def test_full_pair_rejects_factory_mutation_of_frozen_inputs(
+    tmp_path, full_pair_inputs, kind
+):
+    before = selection._bytes(full_pair_inputs[1])
+
+    def factory(**kwargs):
+        binding = _full_pair_binding(**kwargs)
+        if kind == "seed":
+            payload = kwargs["policy"].to_dict()
+            payload["ridge"] *= 2
+            object.__setattr__(
+                kwargs["policy"], "_json", selection._bytes(payload).decode()
+            )
+        elif kind == "detached_samples":
+            kwargs["training_samples"][0]["features"][0] += 1
+        else:
+            full_pair_inputs[1][0]["features"][0] += 1
+        return binding
+
+    result = _run_full_pair(
+        tmp_path / kind, full_pair_inputs, full_training_pair_factory=factory
+    )
+    assert (
+        result["selected_pair"] is None
+        and result["final_pair_refit"]["status"] == "raised"
+    )
+    if kind != "original_samples":
+        assert selection._bytes(full_pair_inputs[1]) == before
+
+
+def test_full_pair_final_seed_failure_keeps_secant_and_does_not_call_gate(
+    tmp_path, full_pair_inputs, monkeypatch
+):
+    fitting = learning._fit
+
+    def fit(rows, *args, **kwargs):
+        if len(rows) == len(full_pair_inputs[1]):
+            raise RuntimeError("controlled final algebra failure")
+        return fitting(rows, *args, **kwargs)
+
+    monkeypatch.setattr(learning, "_fit", fit)
+    result = _run_full_pair(
+        tmp_path / "seed-failure",
+        full_pair_inputs,
+        full_training_pair_factory=lambda **kwargs: pytest.fail(
+            "failed seed cannot call final gate"
+        ),
+    )
+    assert result["selected_pair"] is None and result["selected_policy"] is None
+    assert result["final_pair_refit"]["failed_phase"] == "final_seed_fit"
+    assert result["fit_attempt_count"] == 3 and result["fit_completed_count"] == 2
+    assert (
+        result["fit_records"][-1]["status"] == "raised"
+        and result["fit_records"][-1]["unknown_fit_work_until_outcome"]
+    )
+
+
+def test_full_pair_callback_exception_retains_measured_unknown_cost(
+    tmp_path, full_pair_inputs
+):
+    def factory(**kwargs):
+        raise RuntimeError("controlled callback failure")
+
+    result = _run_full_pair(
+        tmp_path / "gate-failure", full_pair_inputs, full_training_pair_factory=factory
+    )
+    assert (
+        result["selected_pair"] is None
+        and result["final_pair_refit"]["exception_kind"] == "RuntimeError"
+    )
+    for key in ("wall_ns", "cpu_ns"):
+        assert (
+            type(result["fit_records"][-1][key]) is int
+            and result["fit_records"][-1][key] >= 0
+        )
+
+
+def test_full_pair_no_winner_does_not_fit_final_pair(
+    tmp_path, full_pair_inputs, monkeypatch
+):
+    benchmark = learning.benchmark_rc_control_seed_paths
+
+    def slower(*args, **kwargs):
+        report = benchmark(*args, **kwargs)
+        report["arms"]["proposal"]["wall_ns"] = 2 * 10**9
+        return report
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", slower)
+    result = _run_full_pair(
+        tmp_path / "no-winner",
+        full_pair_inputs,
+        full_training_pair_factory=lambda **kwargs: pytest.fail(
+            "no winner cannot trigger final fit"
+        ),
+    )
+    assert result["guarded_fold_winner"] is None and result["selected_pair"] is None
+    assert result["fit_attempt_count"] == 2 and result["final_pair_refit"] == {
+        "status": "not_attempted",
+        "reason": "no_guarded_winner",
+    }
+
+
+def test_full_pair_optional_fields_remain_absent_for_legacy_guard_mode(
+    tmp_path, full_pair_inputs
+):
+    result = _run_full_pair(
+        tmp_path / "legacy",
+        full_pair_inputs,
+        full_training_pair_factory=None,
+        full_training_pair_factory_identity=None,
+    )
+    assert (
+        result["guarded_fold_winner"] is not None
+        and result["selected_policy"] is None
+        and result["fit_attempt_count"] == 2
+    )
+    assert (
+        not {"selected_pair", "final_pair_refit", "full_training_pair_factory"}
+        & result.keys()
+    )
+    plan = json.loads((tmp_path / "legacy/plan.json").read_bytes())
+    assert (
+        "full_training_pair_factory" not in plan and plan["maximum_required_fits"] == 2
+    )
+
+
+def test_full_pair_failed_persistence_never_selects_retained_partial_bytes(
+    tmp_path, full_pair_inputs, monkeypatch
+):
+    save = selection._save
+
+    def interrupted(root, relative, raw):
+        if relative == "selected-pair.json":
+            (root / relative).write_bytes(raw[:19])
+            raise OSError("controlled write failure")
+        return save(root, relative, raw)
+
+    monkeypatch.setattr(selection, "_save", interrupted)
+    root = tmp_path / "partial-pair"
+    result = _run_full_pair(root, full_pair_inputs)
+    assert len((root / "selected-pair.json").read_bytes()) == 19
+    assert (
+        result["selected_strategy"] == "secant"
+        and result["selected_pair"] is result["selected_policy"] is None
+    )
+    assert (
+        result["final_pair_refit"]["failed_phase"] == "pair_persistence"
+        and result["final_pair_refit"]["unknown_work"]
+    )
+    assert result["fit_attempt_count"] == result["fit_completed_count"] == 4
+    assert json.loads((root / "result.json").read_bytes())["selected_pair"] is None
+
+
+def test_full_pair_source_changes_during_fold_block_final_refit(
+    tmp_path, full_pair_inputs
+):
+    def guard_factory(**kwargs):
+        full_pair_inputs[1][0]["features"][0] += 1.0
+        return _guard_factory(**kwargs)
+
+    result = _run_full_pair(
+        tmp_path / "source-changed",
+        full_pair_inputs,
+        proposal_guard_factory=guard_factory,
+    )
+    assert (
+        result["selected_pair"] is None
+        and result["final_pair_refit"]["failed_phase"] == "final_seed_fit"
+    )
+    assert result["fit_attempt_count"] == 2 and result["selected_strategy"] == "secant"

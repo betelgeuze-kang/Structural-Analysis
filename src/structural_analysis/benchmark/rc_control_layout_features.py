@@ -48,9 +48,12 @@ def control_layout_candidate_features(model, request):
         model,
         config,
         experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=request.experimental_pin_roller_beam,
     )
     physical = fiber_frame_physical_model_payload(
-        model, experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints
+        model,
+        experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+        experimental_pin_roller_beam=request.experimental_pin_roller_beam,
     )
     coordinates = physical.pop("node_coordinates_m")
     if not 2 <= len(coordinates) <= MAX_NODES:
@@ -81,6 +84,36 @@ def control_layout_candidate_features(model, request):
         "configuration": asdict(config),
         "control_request": request.to_dict(),
     }
+    if request.experimental_pin_roller_beam:
+        # Global DOFs index the authored node declaration, whereas the physical
+        # payload sorts nodes by coordinates. Bind their meaning before allowing
+        # different layouts into one context. Legacy contexts stay byte-exact.
+        authored = model.nodes
+        index, component = divmod(request.control_global_dof, 3)
+        if index >= len(authored):
+            raise ValueError("pin-roller layout control node is outside the model")
+        canonical = {tuple(row): i for i, row in enumerate(coordinates)}
+        nodes = {
+            row["id"]: canonical[tuple(row["coordinates"][:2])] for row in authored
+        }
+        try:
+            preload = [
+                {
+                    "canonical_node_index": nodes[node],
+                    "FX_kN": fx,
+                    "FY_kN": fy,
+                    "MZ_kNm": mz,
+                }
+                for node, fx, fy, mz in request.constant_nodal_loads
+            ]
+        except KeyError as error:
+            raise ValueError(
+                "pin-roller layout preload node is outside the model"
+            ) from error
+        context["canonical_control_request_binding"] = {
+            "control_global_dof": 3 * nodes[authored[index]["id"]] + component,
+            "constant_nodal_loads": preload,
+        }
     return {
         "feature_profile": PROFILE,
         "feature_names": list(LAYOUT_FEATURE_NAMES),
@@ -89,10 +122,12 @@ def control_layout_candidate_features(model, request):
         "physical_model_identity": fiber_frame_physical_model_identity(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         ),
         "geometry_shape_screen": geometry_shape_signature(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         ),
         "same_context_is_independent_geometry": False,
         "existing_candidate_policy_compatible": False,

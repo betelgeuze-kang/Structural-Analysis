@@ -18,11 +18,17 @@ from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint as _Checkpoint,
 )
 import structural_analysis.benchmark.fiber_frame_runtime as runtime
-from structural_analysis.benchmark.fiber_frame_runtime_suite import FiberFrameRuntimeCase
-from structural_analysis.elements.stateful_fiber_beam2d_state import StatefulFiberBeam2DState
+from structural_analysis.benchmark.fiber_frame_runtime_suite import (
+    FiberFrameRuntimeCase,
+)
+from structural_analysis.elements.stateful_fiber_beam2d_state import (
+    StatefulFiberBeam2DState,
+)
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.io.neutral.loader import load_neutral_json
-from structural_analysis.materials.stateful_fiber_section import StatefulFiberSectionState
+from structural_analysis.materials.stateful_fiber_section import (
+    StatefulFiberSectionState,
+)
 from structural_analysis.materials.uniaxial_plasticity import UniaxialPlasticityState
 
 
@@ -48,7 +54,11 @@ class _Path:
     @property
     def final_checkpoint(self) -> _Checkpoint:
         return next(
-            (step.accepted_checkpoint for step in reversed(self.steps) if step.committed),
+            (
+                step.accepted_checkpoint
+                for step in reversed(self.steps)
+                if step.committed
+            ),
             self.initial_checkpoint,
         )
 
@@ -76,22 +86,32 @@ def _path() -> _Path:
             accumulated_plastic_strain=epoch * 0.001,
         )
         section = StatefulFiberSectionState(
-            section_id="section-1", section_contract_hash="sha256:" + "2" * 64,
-            step_index=epoch, axial_strain=epoch * 0.002, curvature_z_per_m=0.0,
+            section_id="section-1",
+            section_contract_hash="sha256:" + "2" * 64,
+            step_index=epoch,
+            axial_strain=epoch * 0.002,
+            curvature_z_per_m=0.0,
             fiber_states=(fiber,),
         )
         beam = StatefulFiberBeam2DState(
-            element_id="beam-1", element_contract_hash="sha256:" + "3" * 64,
-            step_index=epoch, local_displacements=(0.0,) * 6,
+            element_id="beam-1",
+            element_contract_hash="sha256:" + "3" * 64,
+            step_index=epoch,
+            local_displacements=(0.0,) * 6,
             integration_point_states=(section,),
         )
-        checkpoints.append(_Checkpoint(
-            case_id="synthetic", problem_contract_hash="sha256:" + "4" * 64,
-            epoch=epoch, step_index=epoch, load_factor=epoch / 2,
-            parent_state_hash=checkpoints[-1].state_hash if checkpoints else None,
-            global_displacements=(0.0, epoch * 1.0e-3, -epoch * 2.0e-3),
-            element_states=(beam,),
-        ))
+        checkpoints.append(
+            _Checkpoint(
+                case_id="synthetic",
+                problem_contract_hash="sha256:" + "4" * 64,
+                epoch=epoch,
+                step_index=epoch,
+                load_factor=epoch / 2,
+                parent_state_hash=checkpoints[-1].state_hash if checkpoints else None,
+                global_displacements=(0.0, epoch * 1.0e-3, -epoch * 2.0e-3),
+                element_states=(beam,),
+            )
+        )
     return _Path(
         checkpoints[0],
         [
@@ -129,7 +149,9 @@ def _execution(path: _Path | None = None) -> runtime._VariantExecution:
         attempted_stateful_runtime={"total_wall_ns": 71},
         selected_newton_runtime={"total_wall_ns": 41},
         attempted_newton_runtime={"total_wall_ns": 51},
-        step_rows=({"step_index": 0, "seeded_attempt": None, "baseline_recovery": None},),
+        step_rows=(
+            {"step_index": 0, "seeded_attempt": None, "baseline_recovery": None},
+        ),
     )
 
 
@@ -155,8 +177,12 @@ def cases() -> tuple[FiberFrameRuntimeCase, ...]:
     variant = model.detached_analysis_snapshot()
     variant.sections[0]["depth_m"] = 0.7
     return (
-        FiberFrameRuntimeCase("baseline", model, PublicRCFiberFrameConfig(load_steps=2)),
-        FiberFrameRuntimeCase("variant", variant, PublicRCFiberFrameConfig(load_steps=2)),
+        FiberFrameRuntimeCase(
+            "baseline", model, PublicRCFiberFrameConfig(load_steps=2)
+        ),
+        FiberFrameRuntimeCase(
+            "variant", variant, PublicRCFiberFrameConfig(load_steps=2)
+        ),
     )
 
 
@@ -246,7 +272,8 @@ def _report(module: Any, cases: Any, **kwargs: Any) -> dict[str, Any]:
     ],
 )
 def test_snapshot_preserves_complete_legacy_comparison_body(
-    mutation: str, matched: bool,
+    mutation: str,
+    matched: bool,
 ) -> None:
     reference = _path()
     candidate = deepcopy(reference)
@@ -254,12 +281,17 @@ def test_snapshot_preserves_complete_legacy_comparison_body(
         step.accepted_checkpoint for step in candidate.steps
     ]
     if mutation.endswith("_displacement"):
-        index = {"initial_displacement": 0, "intermediate_displacement": 1,
-                 "terminal_displacement": 2}[mutation]
+        index = {
+            "initial_displacement": 0,
+            "intermediate_displacement": 1,
+            "terminal_displacement": 2,
+        }[mutation]
         values = list(checkpoints[index].global_displacements)
         values[1] += 0.25
         checkpoints[index] = replace(
-            checkpoints[index], global_displacements=tuple(values), state_hash="",
+            checkpoints[index],
+            global_displacements=tuple(values),
+            state_hash="",
         )
     elif mutation in {"initial_material", "intermediate_material"}:
         index = int(mutation == "intermediate_material")
@@ -268,10 +300,14 @@ def test_snapshot_preserves_complete_legacy_comparison_body(
         fiber = replace(section.fiber_states[0], plastic_strain=0.2)
         section = replace(section, fiber_states=(fiber,))
         beam = replace(beam, integration_point_states=(section,))
-        checkpoints[index] = replace(checkpoints[index], element_states=(beam,), state_hash="")
+        checkpoints[index] = replace(
+            checkpoints[index], element_states=(beam,), state_hash=""
+        )
     elif mutation == "material_structure":
         beam = checkpoints[1].element_states[0]
-        checkpoints[1] = replace(checkpoints[1], element_states=(beam, beam), state_hash="")
+        checkpoints[1] = replace(
+            checkpoints[1], element_states=(beam, beam), state_hash=""
+        )
     elif mutation == "intermediate_trial_force":
         candidate.steps[0].trial_assembly.value["internal_force"][0] += 0.25
     elif mutation == "terminal_trial_material":
@@ -295,11 +331,15 @@ def test_snapshot_preserves_complete_legacy_comparison_body(
         values = list(checkpoints[1].global_displacements)
         values[1] += 1.0e-13
         checkpoints[1] = replace(
-            checkpoints[1], global_displacements=tuple(values), state_hash="",
+            checkpoints[1],
+            global_displacements=tuple(values),
+            state_hash="",
         )
     elif mutation == "signed_zero":
         checkpoints[0] = replace(
-            checkpoints[0], global_displacements=(-0.0, 0.0, 0.0), state_hash="",
+            checkpoints[0],
+            global_displacements=(-0.0, 0.0, 0.0),
+            state_hash="",
         )
     candidate.initial_checkpoint = checkpoints[0]
     for step in candidate.steps:
@@ -323,12 +363,182 @@ def test_snapshot_preserves_complete_legacy_comparison_body(
         assert actual["displacement_max_abs_difference"] == 0.0
 
 
+@pytest.mark.parametrize("swapped", [False, True])
+@pytest.mark.parametrize(
+    "boolean,numeric",
+    [
+        (boolean, numeric)
+        for boolean, value in (
+            (True, 1),
+            (np.bool_(True), 1),
+            (False, 0),
+            (np.bool_(False), 0),
+        )
+        for numeric in (value, float(value), np.int64(value), np.float64(value))
+    ],
+)
+def test_numeric_payload_rejects_boolean_numeric_coercion(
+    boolean: Any,
+    numeric: Any,
+    swapped: bool,
+) -> None:
+    left, right = (numeric, boolean) if swapped else (boolean, numeric)
+    result = runtime._numeric_payload_difference(
+        left,
+        right,
+        absolute_tolerance=1.0e-10,
+        relative_tolerance=1.0e-8,
+    )
+    assert result == (False, 0.0, 0.0, False)
+    assert type(result[0]) is type(result[3]) is bool
+
+
+@pytest.mark.parametrize(
+    "left,right,expected",
+    [
+        (True, True, True),
+        (False, False, True),
+        (True, False, False),
+        (True, np.bool_(True), True),
+        (np.bool_(False), False, True),
+        (np.bool_(True), False, False),
+        (np.bool_(True), np.bool_(True), True),
+        (np.bool_(False), np.bool_(True), False),
+    ],
+)
+def test_numeric_payload_preserves_actual_boolean_values(
+    left: Any,
+    right: Any,
+    expected: bool,
+) -> None:
+    result = runtime._numeric_payload_difference(
+        left,
+        right,
+        absolute_tolerance=0.0,
+        relative_tolerance=0.0,
+    )
+    assert result == (expected, 0.0, 0.0, expected)
+    assert type(result[0]) is type(result[3]) is bool
+
+
+def test_boolean_numeric_mismatch_survives_nested_response_diagnostics() -> None:
+    from structural_analysis.benchmark.rc_control_seed_runtime import (
+        _physical_mismatch_locations,
+    )
+
+    left = [{"material_point_count": True, "checkpoint_hash": "one"}]
+    right = [{"checkpoint_hash": "two", "material_point_count": 1}]
+    result = runtime._numeric_payload_difference(
+        left,
+        right,
+        absolute_tolerance=1.0e-10,
+        relative_tolerance=1.0e-8,
+    )
+    assert result == (False, 0.0, 0.0, False)
+    diagnostic = _physical_mismatch_locations(
+        left,
+        right,
+        absolute_tolerance=1.0e-10,
+        relative_tolerance=1.0e-8,
+    )
+    assert diagnostic["mismatch_count"] == 1
+    assert diagnostic["by_response_field"] == {"material_point_count": 1}
+    assert diagnostic["examples"][0]["path"] == [0, "material_point_count"]
+    assert diagnostic["examples"][0]["kind"] == "value_or_type_differ"
+
+
+@pytest.mark.parametrize(
+    "left,right,atol,rtol,expected,delta,relative",
+    [
+        (1, 1.0, 0.0, 0.0, True, 0.0, 0.0),
+        (np.int64(-2), np.float64(-2), 0.0, 0.0, True, 0.0, 0.0),
+        (0.0, -0.0, 0.0, 0.0, True, 0.0, 0.0),
+        (1.0, 2.0, 0.0, 0.5, True, 1.0, 0.5),
+        (1.0, 2.0, 0.0, 0.25, False, 1.0, 0.5),
+        (0.0, 1.0e-10, 1.0e-10, 0.0, True, 1.0e-10, 1.0),
+        (0.0, 2.0e-10, 1.0e-10, 0.0, False, 2.0e-10, 1.0),
+    ],
+)
+def test_numeric_payload_keeps_numeric_and_absolute_relative_boundaries(
+    left: Any,
+    right: Any,
+    atol: float,
+    rtol: float,
+    expected: bool,
+    delta: float,
+    relative: float,
+) -> None:
+    for first, second in ((left, right), (right, left)):
+        result = runtime._numeric_payload_difference(
+            first,
+            second,
+            absolute_tolerance=atol,
+            relative_tolerance=rtol,
+        )
+        assert result == (True, delta, relative, expected)
+
+
+@pytest.mark.parametrize(
+    "nonfinite",
+    [float("nan"), float("inf"), -float("inf"), np.float64("nan"), np.float64("inf")],
+)
+def test_numeric_payload_never_accepts_nonfinite_values(nonfinite: Any) -> None:
+    for left, right in ((nonfinite, 0.0), (0.0, nonfinite), (nonfinite, nonfinite)):
+        result = runtime._numeric_payload_difference(
+            left,
+            right,
+            absolute_tolerance=1.0e-10,
+            relative_tolerance=1.0e-8,
+        )
+        assert result[0] is False and result[3] is False
+        assert np.isinf(result[1]) and np.isinf(result[2])
+
+
+@pytest.mark.parametrize("left_value,matched", [(1.140625, True), (1.25, False)])
+def test_displacement_comparison_uses_declared_symmetric_rule_in_both_orders(
+    left_value: float,
+    matched: bool,
+) -> None:
+    left, right = _path(), _path()
+    left.initial_checkpoint = replace(
+        left.initial_checkpoint,
+        global_displacements=(left_value, 0.0, 0.0),
+        state_hash="",
+    )
+    right.initial_checkpoint = replace(
+        right.initial_checkpoint,
+        global_displacements=(1.0, 0.0, 0.0),
+        state_hash="",
+    )
+    # 73/64, 1, and 1/8 are exactly representable: the old right-referenced
+    # np.allclose rejected forward and accepted reverse for the first case.
+    for first, second in ((left, right), (right, left)):
+        result = runtime._compare_paths(
+            first,
+            second,
+            absolute_tolerance=0.0,
+            relative_tolerance=0.125,
+        )
+        assert result["tolerance_rule"] == (
+            "abs_delta <= atol + rtol * max(abs(left), abs(right))"
+        )
+        assert result["displacement_within_elementwise_tolerance"] is matched
+        assert result["full_history_response_match"] is matched
+        assert result["displacement_max_abs_difference"] == left_value - 1.0
+        assert result["displacement_max_relative_difference"] == (
+            (left_value - 1.0) / left_value
+        )
+        assert result["checkpoint_bytes_exact"] is False
+
+
 def test_snapshot_is_detached_from_later_path_mutation() -> None:
     path = _path()
     snapshot = runtime._path_comparison_snapshot(path)
     before = deepcopy(snapshot)
     path.initial_checkpoint = replace(
-        path.initial_checkpoint, global_displacements=(100.0, 0.0, 0.0), state_hash="",
+        path.initial_checkpoint,
+        global_displacements=(100.0, 0.0, 0.0),
+        state_hash="",
     )
     path.steps[0].trial_assembly.value["internal_force"][0] = 500.0
     assert snapshot == before
@@ -337,10 +547,21 @@ def test_snapshot_is_detached_from_later_path_mutation() -> None:
 @pytest.mark.parametrize(
     "mutation",
     [
-        "hash", "canonical_bytes", "displacement", "load_factor", "epoch",
-        "nested_material", "nested_hash", "status_type", "contract_type",
-        "trial_type", "missing_field", "extra_field", "invalid_schema",
-        "nan_trial", "boolean_epoch",
+        "hash",
+        "canonical_bytes",
+        "displacement",
+        "load_factor",
+        "epoch",
+        "nested_material",
+        "nested_hash",
+        "status_type",
+        "contract_type",
+        "trial_type",
+        "missing_field",
+        "extra_field",
+        "invalid_schema",
+        "nan_trial",
+        "boolean_epoch",
     ],
 )
 def test_snapshot_rehash_does_not_admit_invalid_or_contradictory_transport(
@@ -352,7 +573,9 @@ def test_snapshot_rehash_does_not_admit_invalid_or_contradictory_transport(
     if mutation == "hash":
         candidate["snapshot_hash"] = "sha256:" + "f" * 64
     elif mutation == "canonical_bytes":
-        checkpoint["canonical_bytes_hex"] = checkpoint["canonical_bytes_hex"][:-2] + "ff"
+        checkpoint["canonical_bytes_hex"] = (
+            checkpoint["canonical_bytes_hex"][:-2] + "ff"
+        )
     elif mutation == "displacement":
         checkpoint["global_displacements"][1] += 0.25
     elif mutation == "load_factor":
@@ -391,7 +614,10 @@ def test_snapshot_rehash_does_not_admit_invalid_or_contradictory_transport(
         )
     with pytest.raises(ValueError):
         runtime._compare_path_comparison_snapshots(
-            reference, candidate, absolute_tolerance=1.0e-10, relative_tolerance=1.0e-8,
+            reference,
+            candidate,
+            absolute_tolerance=1.0e-10,
+            relative_tolerance=1.0e-8,
         )
 
 
@@ -407,14 +633,22 @@ def test_snapshot_comparison_rejects_invalid_tolerances(name: str, value: Any) -
 
 @pytest.mark.parametrize(
     "selected_strategy",
-    [runtime.FIBER_FRAME_REFERENCE_STRATEGY, runtime.FIBER_FRAME_NON_AI_STRATEGY,
-     runtime.FIBER_FRAME_AI_STRATEGY],
+    [
+        runtime.FIBER_FRAME_REFERENCE_STRATEGY,
+        runtime.FIBER_FRAME_NON_AI_STRATEGY,
+        runtime.FIBER_FRAME_AI_STRATEGY,
+    ],
 )
 def test_batch_runs_one_declared_strategy_with_separate_warmup_and_authority_costs(
-    cases: Any, strategy_module: Any, fake_runtime: Any, selected_strategy: str,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    selected_strategy: str,
 ) -> None:
     policy = _Policy() if selected_strategy == runtime.FIBER_FRAME_AI_STRATEGY else None
-    report = _report(strategy_module, cases, strategy=selected_strategy, ai_policy=policy)
+    report = _report(
+        strategy_module, cases, strategy=selected_strategy, ai_policy=policy
+    )
     assert report["schema_version"] == "public-rc-fiber-frame-runtime-strategy.v1"
     assert report["status"] == "ready"
     assert report["measurement_contract_pass"] is True
@@ -444,9 +678,12 @@ def test_batch_runs_one_declared_strategy_with_separate_warmup_and_authority_cos
             assert run["attempted_newton_iteration_count"] == 6
             assert run["attempted_line_search_evaluation_count"] == 8
             assert run["authority_verification"]["contract_pass"] is True
-            assert run["comparison_snapshot"] == runtime._path_comparison_snapshot(_path())
+            assert run["comparison_snapshot"] == runtime._path_comparison_snapshot(
+                _path()
+            )
             for name in (
-                "execution_cpu_process_time_ns", "verification_cpu_process_time_ns",
+                "execution_cpu_process_time_ns",
+                "verification_cpu_process_time_ns",
                 "execution_and_authority_verification_cpu_process_time_ns",
             ):
                 assert type(run[name]) is int and run[name] >= 0
@@ -467,7 +704,10 @@ def test_batch_runs_one_declared_strategy_with_separate_warmup_and_authority_cos
 
 
 def test_failed_warmup_is_retained_and_disqualifies_case(
-    cases: Any, strategy_module: Any, fake_runtime: Any, monkeypatch: pytest.MonkeyPatch,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     original = runtime._run_strategy
     attempts = 0
@@ -497,11 +737,15 @@ def test_failed_warmup_is_retained_and_disqualifies_case(
 
 @pytest.mark.parametrize("phase", ["execution", "authority", "episode"])
 def test_exception_retains_prior_measured_run_and_later_case(
-    cases: Any, strategy_module: Any, fake_runtime: Any, monkeypatch: pytest.MonkeyPatch,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    monkeypatch: pytest.MonkeyPatch,
     phase: str,
 ) -> None:
     name = {
-        "execution": "_run_strategy", "authority": "_verify_selected_path",
+        "execution": "_run_strategy",
+        "authority": "_verify_selected_path",
         "episode": "_verify_reference_solver_episode",
     }[phase]
     original = getattr(runtime, name)
@@ -516,9 +760,12 @@ def test_exception_retains_prior_measured_run_and_later_case(
 
     monkeypatch.setattr(runtime, name, fail_second)
     report = _report(
-        strategy_module, cases, strategy=runtime.FIBER_FRAME_REFERENCE_STRATEGY,
+        strategy_module,
+        cases,
+        strategy=runtime.FIBER_FRAME_REFERENCE_STRATEGY,
         benchmark_config=runtime.FiberFrameRuntimeBenchmarkConfig(
-            repetitions=2, warmup_repetitions=0,
+            repetitions=2,
+            warmup_repetitions=0,
         ),
     )
     first, second = report["cases"]
@@ -529,7 +776,8 @@ def test_exception_retains_prior_measured_run_and_later_case(
     assert first["runs"][0]["authority_verification"]["contract_pass"] is True
     failed_row = (
         first["reference_solver_episode_verification"]["runs"][1]
-        if phase == "episode" else first["runs"][1]
+        if phase == "episode"
+        else first["runs"][1]
     )
     assert failed_row["failure"]["exception_type"] == "RuntimeError"
     assert "synthetic second-run failure" in failed_row["failure"]["detail"]
@@ -539,7 +787,10 @@ def test_exception_retains_prior_measured_run_and_later_case(
 
 @pytest.mark.parametrize("unsupported", [False, True])
 def test_compile_failure_does_not_drop_declared_case(
-    cases: Any, strategy_module: Any, fake_runtime: Any, monkeypatch: pytest.MonkeyPatch,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    monkeypatch: pytest.MonkeyPatch,
     unsupported: bool,
 ) -> None:
     original = runtime.public_api._compile
@@ -581,11 +832,16 @@ def test_compile_failure_does_not_drop_declared_case(
 
 @pytest.mark.parametrize("phase", ["authority", "episode"])
 def test_blocked_verification_retains_measured_cost_without_promoting_case(
-    cases: Any, strategy_module: Any, fake_runtime: Any, monkeypatch: pytest.MonkeyPatch,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    monkeypatch: pytest.MonkeyPatch,
     phase: str,
 ) -> None:
-    name = {"authority": "_verify_selected_path",
-            "episode": "_verify_reference_solver_episode"}[phase]
+    name = {
+        "authority": "_verify_selected_path",
+        "episode": "_verify_reference_solver_episode",
+    }[phase]
     original = getattr(runtime, name)
 
     def blocked(*args: Any, **kwargs: Any) -> Any:
@@ -597,7 +853,9 @@ def test_blocked_verification_retains_measured_cost_without_promoting_case(
         return result
 
     monkeypatch.setattr(runtime, name, blocked)
-    report = _report(strategy_module, cases, strategy=runtime.FIBER_FRAME_REFERENCE_STRATEGY)
+    report = _report(
+        strategy_module, cases, strategy=runtime.FIBER_FRAME_REFERENCE_STRATEGY
+    )
     assert report["measurement_contract_pass"] is False
     for case in report["cases"]:
         assert case["measurement_contract_pass"] is False
@@ -606,7 +864,9 @@ def test_blocked_verification_retains_measured_cost_without_promoting_case(
 
 
 def test_all_case_inputs_are_snapshotted_before_policy_execution(
-    cases: Any, strategy_module: Any, fake_runtime: Any,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
 ) -> None:
     expected_checksum = cases[1].model.canonical_model_checksum
 
@@ -616,17 +876,23 @@ def test_all_case_inputs_are_snapshotted_before_policy_execution(
             return super().propose(value)
 
     report = _report(
-        strategy_module, cases, strategy=runtime.FIBER_FRAME_AI_STRATEGY,
+        strategy_module,
+        cases,
+        strategy=runtime.FIBER_FRAME_AI_STRATEGY,
         ai_policy=MutateCallerInput(),
     )
     assert report["measurement_contract_pass"] is True
     assert cases[1].model.canonical_model_checksum != expected_checksum
     assert fake_runtime.compile[1].canonical_model_checksum == expected_checksum
-    assert report["cases"][1]["binding"]["canonical_model_checksum"] == expected_checksum
+    assert (
+        report["cases"][1]["binding"]["canonical_model_checksum"] == expected_checksum
+    )
 
 
 def test_policy_identity_change_during_execution_cannot_pass(
-    cases: Any, strategy_module: Any, fake_runtime: Any,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
 ) -> None:
     class MutateIdentity(_Policy):
         def propose(self, value: Any) -> runtime.FiberFrameWarmStartProposal:
@@ -634,7 +900,9 @@ def test_policy_identity_change_during_execution_cannot_pass(
             return super().propose(value)
 
     report = _report(
-        strategy_module, cases, strategy=runtime.FIBER_FRAME_AI_STRATEGY,
+        strategy_module,
+        cases,
+        strategy=runtime.FIBER_FRAME_AI_STRATEGY,
         ai_policy=MutateIdentity(),
     )
     assert report["measurement_contract_pass"] is False
@@ -658,7 +926,10 @@ def test_policy_identity_change_during_execution_cannot_pass(
     ],
 )
 def test_invalid_declarations_fail_before_compile(
-    cases: Any, strategy_module: Any, fake_runtime: Any, changes: dict[str, Any],
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    changes: dict[str, Any],
     match: str,
 ) -> None:
     changes = dict(changes)
@@ -669,7 +940,9 @@ def test_invalid_declarations_fail_before_compile(
 
 
 def test_duplicate_case_identifiers_fail_before_compile(
-    cases: Any, strategy_module: Any, fake_runtime: Any,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
 ) -> None:
     with pytest.raises(ValueError, match="unique"):
         _report(strategy_module, (cases[0], cases[0]))
@@ -677,7 +950,9 @@ def test_duplicate_case_identifiers_fail_before_compile(
 
 
 def test_identity_binds_declaration_but_excludes_volatile_observations(
-    cases: Any, strategy_module: Any, fake_runtime: Any,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
 ) -> None:
     first = _report(strategy_module, cases)
     second = _report(strategy_module, cases)
@@ -690,16 +965,24 @@ def test_identity_binds_declaration_but_excludes_volatile_observations(
     assert declaration["benchmark_configuration"] == MEASURE.to_dict()
     assert declaration["policy"] is None
     assert [row["case_id"] for row in declaration["cases_in_execution_order"]] == [
-        "baseline", "variant",
+        "baseline",
+        "variant",
     ]
-    for binding, case in zip(declaration["cases_in_execution_order"], cases, strict=True):
-        assert binding["canonical_model_checksum"] == case.model.canonical_model_checksum
+    for binding, case in zip(
+        declaration["cases_in_execution_order"], cases, strict=True
+    ):
+        assert (
+            binding["canonical_model_checksum"] == case.model.canonical_model_checksum
+        )
         assert binding["target_load_factors"] == list(case.config.target_load_factors)
 
 
 @pytest.mark.parametrize("change", ["order", "revision", "configuration", "strategy"])
 def test_experiment_changes_change_identity(
-    cases: Any, strategy_module: Any, fake_runtime: Any, change: str,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    change: str,
 ) -> None:
     first = _report(strategy_module, cases)
     kwargs = {}
@@ -716,7 +999,10 @@ def test_experiment_changes_change_identity(
 
 
 def test_nested_cpu_intervals_and_unmeasured_claims_are_explicit(
-    cases: Any, strategy_module: Any, fake_runtime: Any, monkeypatch: pytest.MonkeyPatch,
+    cases: Any,
+    strategy_module: Any,
+    fake_runtime: Any,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def ticking(step: int) -> Any:
         value = 0
@@ -730,7 +1016,9 @@ def test_nested_cpu_intervals_and_unmeasured_claims_are_explicit(
 
     monkeypatch.setattr(strategy_module, "perf_counter_ns", ticking(17))
     monkeypatch.setattr(strategy_module, "process_time_ns", ticking(3))
-    report = _report(strategy_module, cases, strategy=runtime.FIBER_FRAME_REFERENCE_STRATEGY)
+    report = _report(
+        strategy_module, cases, strategy=runtime.FIBER_FRAME_REFERENCE_STRATEGY
+    )
     for case in report["cases"]:
         assert case["compile_wall_ns"] == 17
         assert case["compile_cpu_process_time_ns"] == 3
@@ -761,7 +1049,9 @@ def test_nested_cpu_intervals_and_unmeasured_claims_are_explicit(
 
 @pytest.fixture
 def accounted_phases(
-    strategy_module: Any, fake_runtime: Any, monkeypatch: pytest.MonkeyPatch,
+    strategy_module: Any,
+    fake_runtime: Any,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> Any:
     # Clock reads do not consume time. Each operation advances independent wall
     # and CPU clocks by a known cost, including work between nested intervals.
@@ -802,12 +1092,16 @@ def accounted_phases(
 
 
 def test_inclusive_interval_contains_metadata_and_snapshot_preparation(
-    cases: Any, strategy_module: Any, accounted_phases: Any,
+    cases: Any,
+    strategy_module: Any,
+    accounted_phases: Any,
 ) -> None:
     report = _report(
-        strategy_module, cases[:1],
+        strategy_module,
+        cases[:1],
         benchmark_config=runtime.FiberFrameRuntimeBenchmarkConfig(
-            repetitions=1, warmup_repetitions=0,
+            repetitions=1,
+            warmup_repetitions=0,
         ),
     )
     run = report["cases"][0]["runs"][0]
@@ -827,20 +1121,28 @@ def test_inclusive_interval_contains_metadata_and_snapshot_preparation(
     assert run["execution_and_authority_verification_cpu_process_time_ns"] > (
         run["execution_cpu_process_time_ns"] + run["verification_cpu_process_time_ns"]
     )
-    assert report["measurement_scope"][
-        "comparison_snapshot_preparation_included_in_verified_run_interval"
-    ] is True
+    assert (
+        report["measurement_scope"][
+            "comparison_snapshot_preparation_included_in_verified_run_interval"
+        ]
+        is True
+    )
 
 
 @pytest.mark.parametrize("phase", ["execution", "metadata", "snapshot", "authority"])
 def test_failed_actual_call_retains_known_inclusive_cost(
-    cases: Any, strategy_module: Any, accounted_phases: Any, phase: str,
+    cases: Any,
+    strategy_module: Any,
+    accounted_phases: Any,
+    phase: str,
 ) -> None:
     accounted_phases.fail_phase = phase
     report = _report(
-        strategy_module, cases[:1],
+        strategy_module,
+        cases[:1],
         benchmark_config=runtime.FiberFrameRuntimeBenchmarkConfig(
-            repetitions=1, warmup_repetitions=0,
+            repetitions=1,
+            warmup_repetitions=0,
         ),
     )
     run = report["cases"][0]["runs"][0]
@@ -850,7 +1152,7 @@ def test_failed_actual_call_retains_known_inclusive_cost(
     assert run["execution_call_wall_ns"] == 1010
     assert run["execution_cpu_process_time_ns"] == 101
     attempted_phases = list(accounted_phases.costs)
-    attempted_phases = attempted_phases[:attempted_phases.index(phase) + 1]
+    attempted_phases = attempted_phases[: attempted_phases.index(phase) + 1]
     assert accounted_phases.seen == attempted_phases
     assert run["execution_and_authority_verification_wall_ns"] == sum(
         accounted_phases.costs[name][0] for name in attempted_phases
