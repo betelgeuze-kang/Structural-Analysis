@@ -2,7 +2,7 @@ import { expect, test, type Page, type Route } from '@playwright/test'
 import { createHash } from 'node:crypto'
 import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 import type { RcPhaseMarker } from '../../src/workbench-v2/model/rcWorkflowTrace'
-import { finishRcInitialReadyDiagnostics } from './rcInitialReadyDiagnostics'
+import { beginRcReadyBoundary, enableRcReadyClockDiagnostics, finishRcReadyBoundary, finishRcInitialReadyDiagnosticsWithClock } from './rcReadyClockDiagnostics'
 
 // Synthetic orchestration envelopes only. These summary inputs are not admitted
 // solver models; no numerical result, checkpoint payload or worker is fabricated.
@@ -18,6 +18,7 @@ declare global {
   interface Window {
     __RC_INITIAL_READY_MARKER_HOOK__?: (marker: Readonly<RcPhaseMarker>) => void
     __RC_INITIAL_READY_MARKERS__?: { rows: RcPhaseMarker[]; overflow: boolean }
+    __RC_INITIAL_READY_CLOCK__?: { schema: 1; rows: Record<string, unknown>[]; overflow: boolean }
     __rcWorkflowBrowserHost?: { tenantId: string; bearerToken: string; throwAuthorization?: boolean }
     __rcWorkflowBrowserFile?: { started: boolean; completed: boolean; release: () => void }
   }
@@ -57,13 +58,64 @@ async function observe(route: Route, requests: ObservedRequest[]): Promise<Obser
   return row
 }
 async function configure(page: Page, initialId?: string, capturePhases = false): Promise<void> {
+  enableRcReadyClockDiagnostics(page, capturePhases)
   await page.addInitScript(({ collection, initialId, host, capturePhases }) => {
     if (capturePhases) {
       const markers: { rows: RcPhaseMarker[]; overflow: boolean } = { rows: [], overflow: false }
+      const clocks = { schema: 1 as const, rows: [] as Record<string, unknown>[], overflow: false }
+      window.__RC_INITIAL_READY_CLOCK__ = clocks
       window.__RC_INITIAL_READY_MARKERS__ = markers
       window.__RC_INITIAL_READY_MARKER_HOOK__ = marker => {
         if (markers.rows.length >= 512) { markers.overflow = true; return }
         markers.rows.push(marker)
+        // Separate bounded observation; sampling can perturb this layout-effect path.
+        if (marker.phase === 'ui.ready.commit') {
+          try {
+            if (clocks.rows.length >= 32) { clocks.overflow = true; return }
+            const sample: Record<string, unknown> = { schema: 1, session: marker.session, generation: marker.generation,
+              sequence: marker.sequence, clockSource: 'unavailable', clockStatus: 'unavailable',
+              realMonotonicMs: null, realTimeOriginMs: null, realWallMs: null,
+              exposedClockStatus: 'unavailable', exposedMonotonicMs: null, exposedTimeOriginMs: null, exposedWallMs: null,
+              domStatus: 'error', projectCount: null, readyCount: null, storedInputCount: null, jobStatus: 'unobserved' }
+            const finite = (values: unknown[]): values is number[] => values.every(value => typeof value === 'number'
+              && Number.isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER)
+            try {
+              // Playwright 1.56.1 private builtins are source-pinned; the retained Performance is a receiver.
+              const hasClock = Object.prototype.hasOwnProperty.call(window, '__pwClock')
+              const privateClock = (window as unknown as { __pwClock?: { builtins?: { performance?: Performance; Date?: DateConstructor } } }).__pwClock
+              const originalPerformance = hasClock ? privateClock?.builtins?.performance : window.performance
+              const OriginalDate = hasClock ? privateClock?.builtins?.Date : Date
+              sample.clockSource = hasClock ? 'retained_pwClock_builtins' : 'global_without_pwClock'
+              if (typeof originalPerformance?.now === 'function' && typeof OriginalDate?.now === 'function') {
+                const stamps = [originalPerformance.now(), originalPerformance.timeOrigin, OriginalDate.now()]
+                sample.clockStatus = finite(stamps) ? 'available' : 'invalid'
+                if (finite(stamps)) [sample.realMonotonicMs, sample.realTimeOriginMs, sample.realWallMs] = stamps
+              }
+              // A present fake clock with unavailable builtins never falls back to fake globals.
+            } catch { sample.clockStatus = 'error' }
+            try {
+              const stamps = [window.performance.now(), window.performance.timeOrigin, Date.now()]
+              sample.exposedClockStatus = finite(stamps) ? 'available' : 'invalid'
+              if (finite(stamps)) [sample.exposedMonotonicMs, sample.exposedTimeOriginMs, sample.exposedWallMs] = stamps
+            } catch { sample.exposedClockStatus = 'error' }
+            try {
+              // Counts are 0, 1, or 2-or-more. No text, layout, URLs or request/tenant values are read.
+              const projects = document.querySelectorAll('[data-rc-workflow="project"]')
+              const readyNodes = document.querySelectorAll('[data-rc-workflow="project"] [data-job-service="ready"]')
+              const stored = document.querySelectorAll('[data-rc-workflow="project"] [data-rc-input-summary="stored"]')
+              sample.projectCount = Math.min(projects.length, 2); sample.readyCount = Math.min(readyNodes.length, 2)
+              sample.storedInputCount = Math.min(stored.length, 2)
+              sample.domStatus = projects.length > 1 || readyNodes.length > 1 ? 'ambiguous' : 'available'
+              if (sample.domStatus === 'ambiguous') sample.jobStatus = 'ambiguous'
+              else if (readyNodes.length === 0) sample.jobStatus = 'absent'
+              else {
+                const status = readyNodes[0].getAttribute('data-job-status')
+                sample.jobStatus = ['queued', 'failed', 'checkpointed', 'cancelled', 'succeeded'].includes(status ?? '') ? status : 'invalid'
+              }
+            } catch { sample.domStatus = 'error'; sample.projectCount = null; sample.readyCount = null; sample.storedInputCount = null; sample.jobStatus = 'unobserved' }
+            clocks.rows.push(sample)
+          } catch { try { clocks.overflow = true } catch { /* Never stop original phase delivery. */ } }
+        }
       }
     }
     const mutable: { tenantId: string; bearerToken: string; throwAuthorization?: boolean } = { ...host }
@@ -88,7 +140,12 @@ async function serve(route: Route, row: ObservedRequest, current: WorkbenchJobVi
 }
 const workflow = (page: Page) => page.locator('[data-rc-workflow="project"]')
 async function ready(page: Page, status: 'queued' | 'failed' | 'checkpointed' | 'cancelled'): Promise<void> {
-  await expect(workflow(page).locator('[data-job-service="ready"]')).toHaveAttribute('data-job-status', status)
+  const boundary = beginRcReadyBoundary(page, status)
+  let attributePassed = false
+  try {
+    await expect(workflow(page).locator('[data-job-service="ready"]')).toHaveAttribute('data-job-status', status)
+    attributePassed = true
+  } finally { finishRcReadyBoundary(boundary, attributePassed) }
   await expect(workflow(page).locator('[data-rc-input-summary="stored"]')).toHaveCount(1)
 }
 const pendingGates = new Set<() => void>()
@@ -102,7 +159,7 @@ function deferred(): { promise: Promise<void>; release: () => void } {
 
 test.describe('RC project workflow orchestration browser', () => {
   test.afterEach(async ({ page }, testInfo) => {
-    await finishRcInitialReadyDiagnostics(page, testInfo, pendingGates)
+    await finishRcInitialReadyDiagnosticsWithClock(page, testInfo, pendingGates)
   })
   test('queued saved job uses hash-checked input without numerical or quantity requests', async ({ page }) => {
     const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'queued')
@@ -155,7 +212,7 @@ test.describe('RC project workflow orchestration browser', () => {
       current = { ...current, checkpoint: { role: 'checkpoint', content_hash: checkpointHash, byte_length: 2, media_type: 'application/json' },
         can_resume: true, resume_contract_hash: hash, progress: { completed_steps: 1, total_steps: 2 } }
     }
-    await configure(page, firstId, checkpointHash === null)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST' && row.path === `${collection}/${firstId}/resume`) {
@@ -357,7 +414,7 @@ test.describe('RC project workflow orchestration browser', () => {
 
   test('submit HTTP401 clears authority and leaves account refresh and exact opening usable', async ({ page }) => {
     const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'failed')
-    await configure(page, firstId)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST' && row.path === collection) {
@@ -388,7 +445,7 @@ test.describe('RC project workflow orchestration browser', () => {
 
   test('retry host authorization failure clears busy state and can explicitly recover the same account', async ({ page }) => {
     const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'failed')
-    await configure(page, firstId)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => { const row = await observe(route, requests); await serve(route, row, current, firstInput) })
     await page.goto(`${baseUrl}/#/workbench-v2`)
     await ready(page, 'failed')
@@ -444,7 +501,7 @@ test.describe('RC project workflow orchestration browser', () => {
 
 test.describe('RC recovery follow-up in compiled app', () => {
   test.afterEach(async ({ page }, testInfo) => {
-    await finishRcInitialReadyDiagnostics(page, testInfo, pendingGates)
+    await finishRcInitialReadyDiagnosticsWithClock(page, testInfo, pendingGates)
   })
 
   for (const read of ['status', 'request'] as const) for (const failure of ['network', '503'] as const) {
@@ -547,7 +604,7 @@ test.describe('RC recovery follow-up in compiled app', () => {
   for (const checkpoint of [null, `sha256:${'e'.repeat(64)}`]) test(`resume503 requires fresh failed GET before explicit ${checkpoint === null ? 'null' : 'changed'} checkpoint retry`, async ({ page }) => {
     const requests: ObservedRequest[] = []
     let current = job(firstId, firstInput, 'failed'), writes = 0, failedRead = false
-    await configure(page, firstId, checkpoint === null)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST') {
