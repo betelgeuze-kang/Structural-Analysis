@@ -125,8 +125,8 @@ def test_packaged_browser_schema_rejects_missing_execution_proof(check: str) -> 
 
 def test_packaged_browser_result_contract_rejects_binding_substitution() -> None:
     module_uri = (
-        ROOT / "scripts/verify-native-frame-packaged-browser.mjs"
-    ).resolve().as_uri()
+        (ROOT / "scripts/verify-native-frame-packaged-browser.mjs").resolve().as_uri()
+    )
     script = f"""
       import {{ validateBrowserResultContract }} from {json.dumps(module_uri)};
       const sha = (digit) => `sha256:${{digit.repeat(64)}}`;
@@ -197,10 +197,55 @@ def test_packaged_browser_result_contract_rejects_binding_substitution() -> None
     )
 
 
+def test_packaged_browser_preserves_only_exact_workstation_http_error_codes() -> None:
+    module_uri = (
+        (ROOT / "scripts/verify-native-frame-packaged-browser.mjs").resolve().as_uri()
+    )
+    script = f"""
+      import assert from 'node:assert/strict';
+      import {{ extractStableDiagnosticCode, buildBrowserFailureDiagnostic }} from {json.dumps(module_uri)};
+      for (const status of [400, 401, 403, 404, 409, 429, 500, 502, 503, 599]) {{
+        const message = `Native workstation returned HTTP ${{status}}`;
+        const expected = `native_workstation_http_${{status}}`;
+        assert.equal(extractStableDiagnosticCode(message), expected);
+        assert.equal(extractStableDiagnosticCode(`Error: ${{message}}`), expected);
+        const diagnostic = buildBrowserFailureDiagnostic({{
+          sourceCommit: 'a'.repeat(40), platformTag: 'linux-x86_64-gnu',
+          phase: 'native_job_terminal_wait', panel: {{ status: 'failed', errorText: message }},
+          submittedJobId: `job_${{'b'.repeat(32)}}`, jobView: {{ status: 'succeeded' }},
+          pageErrors: [], verifierError: 'browser_native_run_failed',
+          hostExitCode: null, hostStderrBytes: 0, elapsedMs: 1,
+        }});
+        assert.equal(diagnostic.panel.error_code, expected);
+        assert.equal(diagnostic.panel.status, 'failed');
+        assert.equal(diagnostic.job_view.status, 'succeeded');
+        assert.equal(diagnostic.status, 'fail');
+      }}
+      for (const value of [
+        'Native workstation returned HTTP 200', 'Native workstation returned HTTP 399',
+        'Native workstation returned HTTP 600', 'Native workstation returned HTTP 4040',
+        'Native workstation returned HTTP 404 private-value',
+        'Native workstation returned HTTP 404\\nprivate-value',
+        'Native workstation returned HTTP 404\\n',
+        'Native workstation returned HTTP ４０４',
+        'Prefix Native workstation returned HTTP 404',
+        'Native workstation returned HTTP 404: Bearer private-value',
+      ]) assert.equal(extractStableDiagnosticCode(value), null);
+      assert.equal(extractStableDiagnosticCode('native_worker_failed: detail'), 'native_worker_failed');
+    """
+    subprocess.run(
+        ["node", "--input-type=module", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
 def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() -> None:
     module_uri = (
-        ROOT / "scripts/verify-native-frame-packaged-browser.mjs"
-    ).resolve().as_uri()
+        (ROOT / "scripts/verify-native-frame-packaged-browser.mjs").resolve().as_uri()
+    )
     script = f"""
       import {{ createServer }} from 'node:http';
       import {{ spawn }} from 'node:child_process';
@@ -573,7 +618,9 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
 def test_packaged_browser_failure_writes_only_bounded_non_authoritative_diagnostic(
     tmp_path: Path,
 ) -> None:
-    package_root = tmp_path / "structural-frame-alpha-workstation-0.1.0-linux-x86_64-gnu"
+    package_root = (
+        tmp_path / "structural-frame-alpha-workstation-0.1.0-linux-x86_64-gnu"
+    )
     binary = package_root / "bin" / "structural-cli"
     binary.parent.mkdir(parents=True)
     binary.write_text(
