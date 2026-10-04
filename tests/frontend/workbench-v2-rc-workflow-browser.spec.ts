@@ -232,7 +232,7 @@ test.describe('RC project workflow orchestration browser', () => {
 
   test('same mutable host tenant change clears the old project before explicit retry', async ({ page }) => {
     const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'failed')
-    await configure(page, firstId)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => { const row = await observe(route, requests); await serve(route, row, current, firstInput) })
     await page.goto(`${baseUrl}/#/workbench-v2`)
     await ready(page, 'failed')
@@ -518,7 +518,7 @@ test.describe('RC recovery follow-up in compiled app', () => {
     const requests: ObservedRequest[] = []
     let current = job(firstId, firstInput, 'failed')
     await page.clock.install()
-    await configure(page, firstId)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST') {
@@ -604,7 +604,7 @@ test.describe('RC recovery follow-up in compiled app', () => {
   test('resume reconciliation HTTP401 clears authority and cannot reopen a retry', async ({ page }) => {
     const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'failed')
     let unauthorized = false
-    await configure(page, firstId)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST') { unauthorized = true; await route.abort('failed') }
@@ -624,7 +624,7 @@ test.describe('RC recovery follow-up in compiled app', () => {
   test('delayed resume reconciliation cannot restore an old project after a generation switch', async ({ page }) => {
     const requests: ObservedRequest[] = [], gate = deferred()
     let reconcile = false, started = false, completed = false
-    await configure(page, firstId)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST') { reconcile = true; await route.abort('failed') }
