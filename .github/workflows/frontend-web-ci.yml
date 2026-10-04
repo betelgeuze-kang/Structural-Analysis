@@ -218,7 +218,11 @@ jobs:
       - name: Workbench v2 E2E
         id: workbench_e2e
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs" --trace=retain-on-failure
+        shell: bash
+        run: |
+          /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs" --trace=retain-on-failure \
+            "--diagnostics-dir=$RUNNER_TEMP/frontend-web-repository-tmp/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}" \
+            "--diagnostics-sha=${{ github.sha }}" "--diagnostics-run-id=${{ github.run_id }}" "--diagnostics-run-attempt=${{ github.run_attempt }}"
 
       - name: Preserve failed Workbench browser diagnostics
         if: failure() && steps.workbench_e2e.outcome == 'failure'
@@ -230,6 +234,45 @@ jobs:
             test-results/**/error-context.md
             test-results/**/*.png
           if-no-files-found: warn
+          retention-days: 7
+
+      - name: Preserve native Workbench diagnostic retention
+        if: always() && (steps.workbench_e2e.outcome == 'success' || steps.workbench_e2e.outcome == 'failure')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: workbench-browser-native-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/frontend-web-repository-tmp/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}/run-linkage.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}/retention.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}/native-playwright.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Dedicated real React observer controls
+        id: rc_observer_controls
+        if: always() && (steps.workbench_e2e.outcome == 'success' || steps.workbench_e2e.outcome == 'failure')
+        timeout-minutes: 12
+        env: *trusted-node-env
+        shell: bash
+        run: |
+          /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-rc-observer-controls.mjs" \
+            "--controls-dir=$RUNNER_TEMP/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}" \
+            "--controls-sha=${{ github.sha }}" "--controls-run-id=${{ github.run_id }}" "--controls-run-attempt=${{ github.run_attempt }}"
+
+      - name: Preserve dedicated RC controls native outcomes
+        if: always() && (steps.rc_observer_controls.outcome == 'success' || steps.rc_observer_controls.outcome == 'failure')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: workbench-rc-observer-controls-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}/run-linkage.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}/control-retention.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}/positive-native-playwright.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}/negative-native-playwright.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}/compiled-manifest.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}/listener-start.json
+            ${{ runner.temp }}/frontend-web-repository-tmp/rc-observer-controls-${{ github.run_id }}-${{ github.run_attempt }}/listener-cleanup.json
+          if-no-files-found: error
           retention-days: 7
 
   frontend-required:

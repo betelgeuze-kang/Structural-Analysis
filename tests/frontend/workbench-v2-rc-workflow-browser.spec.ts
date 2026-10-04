@@ -1,6 +1,8 @@
 import { expect, test, type Page, type Route } from '@playwright/test'
 import { createHash } from 'node:crypto'
 import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
+import type { RcPhaseMarker } from '../../src/workbench-v2/model/rcWorkflowTrace'
+import { finishRcInitialReadyDiagnostics } from './rcInitialReadyDiagnostics'
 
 // Synthetic orchestration envelopes only. These summary inputs are not admitted
 // solver models; no numerical result, checkpoint payload or worker is fabricated.
@@ -14,6 +16,8 @@ const hash = `sha256:${'c'.repeat(64)}`
 
 declare global {
   interface Window {
+    __RC_INITIAL_READY_MARKER_HOOK__?: (marker: Readonly<RcPhaseMarker>) => void
+    __RC_INITIAL_READY_MARKERS__?: { rows: RcPhaseMarker[]; overflow: boolean }
     __rcWorkflowBrowserHost?: { tenantId: string; bearerToken: string; throwAuthorization?: boolean }
     __rcWorkflowBrowserFile?: { started: boolean; completed: boolean; release: () => void }
   }
@@ -52,16 +56,25 @@ async function observe(route: Route, requests: ObservedRequest[]): Promise<Obser
   requests.push(row)
   return row
 }
-async function configure(page: Page, initialId?: string): Promise<void> {
-  await page.addInitScript(({ collection, initialId, host }) => {
+async function configure(page: Page, initialId?: string, capturePhases = false): Promise<void> {
+  await page.addInitScript(({ collection, initialId, host, capturePhases }) => {
+    if (capturePhases) {
+      const markers: { rows: RcPhaseMarker[]; overflow: boolean } = { rows: [], overflow: false }
+      window.__RC_INITIAL_READY_MARKERS__ = markers
+      window.__RC_INITIAL_READY_MARKER_HOOK__ = marker => {
+        if (markers.rows.length >= 512) { markers.overflow = true; return }
+        markers.rows.push(marker)
+      }
+    }
     const mutable: { tenantId: string; bearerToken: string; throwAuthorization?: boolean } = { ...host }
     window.__rcWorkflowBrowserHost = mutable
-    window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcJobCollectionUrl: collection,
+    const configuration: StructuralWorkbenchRuntimeConfig = { rcJobCollectionUrl: collection,
       ...(initialId ? { jobStatusUrl: `${collection}/${initialId}` } : {}), jobAuthorization: () => {
         if (mutable.throwAuthorization) throw new Error(mutable.bearerToken)
         return mutable
       } }
-  }, { collection, initialId, host })
+    Object.assign(window, { __STRUCTURAL_WORKBENCH_CONFIG__: configuration })
+  }, { collection, initialId, host, capturePhases })
 }
 async function serve(route: Route, row: ObservedRequest, current: WorkbenchJobView, raw: string): Promise<void> {
   if (row.method === 'GET' && row.path === `${collection}/${current.job_id}`) {
@@ -88,9 +101,8 @@ function deferred(): { promise: Promise<void>; release: () => void } {
 }
 
 test.describe('RC project workflow orchestration browser', () => {
-  test.afterEach(async ({ page }) => {
-    for (const release of pendingGates) release()
-    await page.evaluate(() => window.__rcWorkflowBrowserFile?.release()).catch(() => { /* Closed context needs no gate release. */ })
+  test.afterEach(async ({ page }, testInfo) => {
+    await finishRcInitialReadyDiagnostics(page, testInfo, pendingGates)
   })
   test('queued saved job uses hash-checked input without numerical or quantity requests', async ({ page }) => {
     const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'queued')
@@ -431,7 +443,9 @@ test.describe('RC project workflow orchestration browser', () => {
 })
 
 test.describe('RC recovery follow-up in compiled app', () => {
-  test.afterEach(() => { for (const release of pendingGates) release() })
+  test.afterEach(async ({ page }, testInfo) => {
+    await finishRcInitialReadyDiagnostics(page, testInfo, pendingGates)
+  })
 
   for (const read of ['status', 'request'] as const) for (const failure of ['network', '503'] as const) {
     test(`${read} GET ${failure} retains the saved ID and draft until explicit read recovery`, async ({ page }) => {
@@ -533,7 +547,7 @@ test.describe('RC recovery follow-up in compiled app', () => {
   for (const checkpoint of [null, `sha256:${'e'.repeat(64)}`]) test(`resume503 requires fresh failed GET before explicit ${checkpoint === null ? 'null' : 'changed'} checkpoint retry`, async ({ page }) => {
     const requests: ObservedRequest[] = []
     let current = job(firstId, firstInput, 'failed'), writes = 0, failedRead = false
-    await configure(page, firstId)
+    await configure(page, firstId, checkpoint === null)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST') {
@@ -547,6 +561,26 @@ test.describe('RC recovery follow-up in compiled app', () => {
     })
     await page.goto(`${baseUrl}/#/workbench-v2`)
     await ready(page, 'failed')
+    if (checkpoint === null) {
+      const markers = await page.evaluate(() => window.__RC_INITIAL_READY_MARKERS__ ?? null)
+      expect(markers?.overflow).toBe(false)
+      const commits = markers?.rows.filter(row => row.phase === 'ui.ready.commit')
+      const commit = commits?.[commits.length - 1]
+      expect(commit).toBeDefined()
+      const session = markers!.rows.filter(row => row.session === commit!.session)
+      expect(session.map(row => row.phase)).toEqual(expect.arrayContaining([
+        'effect.setup', 'auth.begin', 'auth.end', 'body.read.begin', 'body.read.end',
+        'request.hash.begin', 'request.hash.end', 'request.parse.begin', 'request.parse.end',
+        'poll.failed-load.begin', 'job.parse.begin', 'job.parse.end', 'diagnostic.begin',
+        'http.cancel.begin', 'http.cancel.settled', 'diagnostic.absent',
+        'poll.failed-load.end', 'scope.end', 'ui.ready.queue', 'ui.ready.commit',
+      ]))
+      expect(session.length).toBeLessThanOrEqual(256)
+      expect(session.every(row => Number.isFinite(row.monotonic_ms) && row.monotonic_ms >= 0
+        && row.generation === commit!.generation && row.schema === 1)).toBe(true)
+      expect(session.every(row => Object.keys(row).sort().join(',')
+        === 'generation,monotonic_ms,phase,schema,sequence,session')).toBe(true)
+    }
     await workflow(page).locator('[data-rc-explicit-retry]').click()
     await expect(workflow(page).locator('[data-rc-workflow-error]')).toContainText('outcome is unconfirmed')
     await expect(workflow(page).locator('[data-rc-explicit-retry]')).toBeDisabled()

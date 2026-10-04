@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { JobServicePanel } from './JobServicePanel'
 import { RcQuantityReportPanel } from './RcQuantityReportPanel'
 import { loadWorkbenchJob, type JobLoadResult } from '../model/jobProvider'
@@ -7,6 +7,7 @@ import { loadRcJobRequest, refreshRcJob, resumeRcJob, submitRcJob, verifyRcSubmi
 import { parseNativeJsonStrict } from '../model/nativeFrameProvider'
 import type { RcJobReview } from '../model/rcJobReview'
 import type { WorkbenchJobView } from '../model/jobSchema'
+import { beginRcPhaseSession, traceRcPhase } from '../model/rcWorkflowTrace'
 
 const JOB_ID = /^job_[0-9a-f]{32}$/
 const terminal = (job: WorkbenchJobView) => ['succeeded', 'failed', 'cancelled'].includes(job.status)
@@ -126,6 +127,8 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
   }, [current.transport, key])
   useEffect(() => {
     const controller = new AbortController(), ownGeneration = ++generation.current
+    beginRcPhaseSession(controller.signal, ownGeneration)
+    traceRcPhase(controller.signal, 'effect.setup')
     controllerRef.current = controller; fileGeneration.current++
     let transport: RcJobTransport | null = null
     const active = () => !controller.signal.aborted && ownGeneration === generation.current
@@ -136,8 +139,11 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
     const savedId = requestedId ?? (invalidSavedId ? undefined : initialJobId ?? configuredJob(collectionUrl, initialJobStatusUrl))
     async function poll(jobId: string): Promise<void> {
       if (!transport || !active()) return
+      traceRcPhase(controller.signal, 'poll.begin')
       try {
+        traceRcPhase(controller.signal, 'poll.job.begin')
         const job = await refreshRcJob(transport, jobId)
+        traceRcPhase(controller.signal, 'poll.job.end')
         if (!active()) return
         if (immutableRequest.current && immutableRequest.current !== job.request.content_hash) throw new Error('rc_request_identity_changed')
         if (!immutableRequest.current) {
@@ -182,13 +188,16 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
         } else {
           review.current?.dispose(); review.current = undefined; fullSource.current = ''
           if (job.status === 'failed' && job.attempt > 0) {
+            traceRcPhase(controller.signal, 'poll.failed-load.begin')
             loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId))
+            traceRcPhase(controller.signal, 'poll.failed-load.end')
             if (!active()) return
             if (!loaded.job || sourceKey(loaded.job) !== sourceKey(job)) throw new Error('rc_terminal_source_unavailable')
           }
         }
         await transport.verifyAuthorizationScope()
         if (!active()) { loaded.rcReview?.dispose(); return }
+        traceRcPhase(controller.signal, loaded.status === 'ready' ? 'ui.ready.queue' : 'ui.other.queue')
         setSession(old => ({ ...old, key, transport, load: loaded }))
         if (resumeRefreshJob.current === jobId) {
           resumeRefreshJob.current = null
@@ -196,6 +205,7 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
         }
         if (!terminal(job)) pollTimer.current = setTimeout(() => void poll(jobId), 2000)
       } catch (error) {
+        traceRcPhase(controller.signal, 'poll.error')
         if (!active()) return
         review.current?.dispose(); review.current = undefined
         setSession({ key, transport: null, input: null, load: { status: 'invalid', job: null, errors: [rcWorkflowMessage(error)], artifactStatus: 'invalid' } })
@@ -205,12 +215,16 @@ export function RcJobWorkflowPanel({ collectionUrl, initialJobStatusUrl, initial
     createJobWorkflowTransport(collectionUrl, controller.signal, authorize).then(value => {
       if (!active()) return
       transport = value
+      traceRcPhase(controller.signal, 'transport.ready')
       setSession({ key, transport: value, load: savedId ? { status: 'loading', job: null, errors: [] } : empty(), input: null })
       if (invalidSavedId && !requestedId) setMessage('The saved RC job identifier is invalid. Open an exact job explicitly.')
       if (savedId) { setOpenId(savedId); void poll(savedId) }
     }).catch(error => { if (active()) setMessage(rcWorkflowMessage(error)) })
-    return () => { controller.abort(); fileGeneration.current++; if (pollTimer.current) clearTimeout(pollTimer.current); review.current?.dispose(); review.current = undefined }
+    return () => { traceRcPhase(controller.signal, 'effect.cleanup'); controller.abort(); fileGeneration.current++; if (pollTimer.current) clearTimeout(pollTimer.current); review.current?.dispose(); review.current = undefined }
   }, [key, collectionUrl, authorize])
+  useLayoutEffect(() => {
+    if (current.transport && current.load.status === 'ready') traceRcPhase(current.transport, 'ui.ready.commit')
+  }, [key, current.transport, current.load.status, current.load.job?.job_id, current.load.job?.attempt])
 
   function replaceDraft(text: string): void {
     fileGeneration.current++

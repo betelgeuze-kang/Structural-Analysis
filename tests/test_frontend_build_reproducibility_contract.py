@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -56,11 +57,12 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     }
     assert package_json["devDependencies"] == {
         "@playwright/test": "1.56.1",
+        "@types/node": "24.0.0",
         "@types/react": "18.2.15",
         "@types/react-dom": "18.2.7",
         "@vitejs/plugin-react": "6.0.1",
         "postcss": "8.5.26",
-        "typescript": "5.0.2",
+        "typescript": "5.1.6",
         "vite": "8.0.16",
     }
     assert not (ROOT / "pakage.json").exists()
@@ -250,7 +252,7 @@ def test_browser_helpers_spawn_only_trusted_node_with_sanitized_environment() ->
         assert "NODE_OPTIONS" not in text
         assert "node_modules/.bin" not in text
         assert "spawn('npm'" not in text
-        assert "spawn(\"npm\"" not in text
+        assert 'spawn("npm"' not in text
         assert "trustedNode()" in text
         assert "sanitizedFrontendEnvironment" in text
 
@@ -260,3 +262,234 @@ def test_browser_helpers_spawn_only_trusted_node_with_sanitized_environment() ->
     assert "node_modules/typescript/bin/tsc" in workbench
     assert "node_modules/vite/bin/vite.js" in workbench
     assert "node_modules/playwright/cli.js" in workbench
+
+
+# These cases exercise the real complete verifier with metadata mutations only.
+# Empty required-path carriers satisfy its unrelated existence gate; they are not
+# frontend code/build/delivery evidence, and their contents are never executed.
+@pytest.fixture
+def frontend_build_contract_fixture(tmp_path: Path) -> Path:
+    fixture = tmp_path / "contract-fixture"
+    fixture.mkdir()
+    source = (ROOT / "scripts/verify-frontend-build-contract.mjs").read_text(
+        encoding="utf-8"
+    )
+    required = re.search(r"const requiredFiles = \[(.*?)\n\]", source, re.S)
+    assert required is not None, "Expected unchanged literal required-files contract"
+    for relative in re.findall(r"'([^']+)'", required.group(1)):
+        target = fixture / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"")
+    (fixture / "scripts/verify-frontend-build-contract.mjs").write_text(
+        source, encoding="utf-8"
+    )
+    for relative in ("package.json", "package-lock.json"):
+        shutil.copyfile(ROOT / relative, fixture / relative)
+    return fixture
+
+
+def _execute_frontend_build_contract_fixture(
+    fixture: Path,
+) -> subprocess.CompletedProcess[str]:
+    node = shutil.which("node")
+    assert node is not None
+    node = str(Path(node).resolve())
+    temporary = fixture.parent / "contract-tmp"
+    temporary.mkdir(exist_ok=True)
+    return subprocess.run(
+        [node, "scripts/verify-frontend-build-contract.mjs"],
+        cwd=fixture,
+        env={
+            "PATH": f"{Path(node).parent}:/usr/bin:/bin",
+            "TMPDIR": str(temporary),
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+
+
+def test_frontend_build_contract_fixture_accepts_exact_current_metadata(
+    frontend_build_contract_fixture: Path,
+) -> None:
+    result = _execute_frontend_build_contract_fixture(frontend_build_contract_fixture)
+    assert result.returncode == 0, result.stderr
+    assert "Frontend build contract OK" in result.stdout
+    assert "node_modules missing: contract-only verification passed" in result.stdout
+    assert result.stderr == ""
+
+
+@pytest.mark.parametrize(
+    ("target", "keys", "action", "value", "expected_message"),
+    [
+        pytest.param(
+            "package.json",
+            ("devDependencies", "@types/node"),
+            "set",
+            "24.0.1",
+            "Unexpected devDependencies version for @types/node",
+            id="manifest-node-version",
+        ),
+        pytest.param(
+            "package.json",
+            ("devDependencies", "typescript"),
+            "set",
+            "5.0.2",
+            "Unexpected devDependencies version for typescript",
+            id="manifest-old-typescript",
+        ),
+        pytest.param(
+            "package.json",
+            ("devDependencies", "typescript"),
+            "set",
+            "^5.1.6",
+            "Unexpected devDependencies version for typescript",
+            id="manifest-typescript-range",
+        ),
+        pytest.param(
+            "package.json",
+            ("devDependencies", "@types/node"),
+            "delete",
+            None,
+            "Unexpected devDependencies keys",
+            id="manifest-node-key-missing",
+        ),
+        pytest.param(
+            "package.json",
+            ("devDependencies", "extra-test-only"),
+            "set",
+            "1.0.0",
+            "Unexpected devDependencies keys",
+            id="manifest-extra-key",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("packages", "", "devDependencies", "@types/node"),
+            "set",
+            "24.0.1",
+            "Unexpected lockfile root devDependencies version for @types/node",
+            id="lock-node-version",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("packages", "", "devDependencies", "typescript"),
+            "set",
+            "5.0.2",
+            "Unexpected lockfile root devDependencies version for typescript",
+            id="lock-old-typescript",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("packages", "", "devDependencies", "@types/node"),
+            "delete",
+            None,
+            "Unexpected lockfile root devDependencies keys",
+            id="lock-node-key-missing",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("packages", "", "devDependencies", "extra-test-only"),
+            "set",
+            "1.0.0",
+            "Unexpected lockfile root devDependencies keys",
+            id="lock-extra-key",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("name",),
+            "set",
+            "different-fixture",
+            "package-lock.json name mismatch",
+            id="lock-manifest-name-mismatch",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("packages", "", "name"),
+            "set",
+            "different-fixture",
+            "package-lock.json root package metadata does not match package.json",
+            id="lock-root-name-mismatch",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("lockfileVersion",),
+            "set",
+            2,
+            "Expected npm lockfileVersion 3 with requires=true",
+            id="lock-version",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("requires",),
+            "set",
+            False,
+            "Expected npm lockfileVersion 3 with requires=true",
+            id="lock-requires",
+        ),
+        pytest.param(
+            "package.json",
+            ("engines", "node"),
+            "set",
+            "24.19.0",
+            "Unexpected engine pins",
+            id="manifest-engine",
+        ),
+        pytest.param(
+            "package-lock.json",
+            ("packages", "", "engines", "node"),
+            "set",
+            "24.19.0",
+            "package-lock.json root engines do not match package.json",
+            id="lock-engine",
+        ),
+        pytest.param(
+            "package.json",
+            ("scripts", "build"),
+            "set",
+            "npm run untrusted-fixture",
+            "Unexpected script for build",
+            id="manifest-build-command",
+        ),
+        pytest.param(
+            "package.json",
+            ("overrides",),
+            "set",
+            {},
+            "Unsupported package manifest field: overrides",
+            id="unsupported-manifest-field",
+        ),
+        pytest.param(
+            "package.json",
+            ("dependencies", "react"),
+            "set",
+            "18.3.0",
+            "Unexpected dependencies version for react",
+            id="unchanged-production-dependency",
+        ),
+    ],
+)
+def test_frontend_build_contract_fixture_rejects_metadata_mutations(
+    frontend_build_contract_fixture: Path,
+    target: str,
+    keys: tuple[str, ...],
+    action: str,
+    value: object,
+    expected_message: str,
+) -> None:
+    file = frontend_build_contract_fixture / target
+    content = json.loads(file.read_text(encoding="utf-8"))
+    container = content
+    for key in keys[:-1]:
+        container = container[key]
+    if action == "delete":
+        del container[keys[-1]]
+    else:
+        container[keys[-1]] = value
+    file.write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8")
+    result = _execute_frontend_build_contract_fixture(frontend_build_contract_fixture)
+    assert result.returncode != 0
+    assert expected_message in result.stderr
+    assert "Frontend build contract OK" not in result.stdout

@@ -1,4 +1,5 @@
 import { parseRcDeclaredPrices, type RcDeclaredPrices } from './rcQuantityReportSchema'
+import { bindRcPhase, traceRcPhase } from './rcWorkflowTrace'
 
 /** Credentials remain private to one explicit host-authorized load/session. */
 export interface JobAuthorization {
@@ -65,8 +66,10 @@ function endpoint(value: string, authorize?: JobAuthorizationProvider): URL {
 async function authorization(url: URL, signal?: AbortSignal, authorize?: JobAuthorizationProvider): Promise<JobAuthorization | undefined> {
   signal?.throwIfAborted()
   if (!authorize) return undefined
+  traceRcPhase(signal, 'auth.begin')
   let value: JobAuthorization
   try { value = await authorize({ statusUrl: url.href, signal }) } catch {
+    traceRcPhase(signal, 'auth.error')
     signal?.throwIfAborted()
     throw new JobArtifactError('job_authorization_unavailable')
   }
@@ -78,6 +81,7 @@ async function authorization(url: URL, signal?: AbortSignal, authorize?: JobAuth
     || !/^[\x21-\x7e]{1,256}$/.test(tenantId) || !/^[\x21-\x7e]{1,4096}$/.test(bearerToken)) {
     throw new JobArtifactError('job_authorization_invalid')
   }
+  traceRcPhase(signal, 'auth.end')
   return { tenantId, bearerToken }
 }
 
@@ -104,22 +108,30 @@ function linkedSignal(first?: AbortSignal, second?: AbortSignal): AbortSignal | 
   const abortSecond = () => { cleanup(); controller.abort(second.reason) }
   first.addEventListener('abort', abortFirst, { once: true })
   second.addEventListener('abort', abortSecond, { once: true })
-  return controller.signal
+  return bindRcPhase(controller.signal, first, second)
 }
 
 async function request(url: string, headers: Headers, signal?: AbortSignal, body?: ArrayBuffer | string): Promise<Response> {
   signal?.throwIfAborted()
   let response: Response
+  traceRcPhase(signal, 'http.fetch.begin')
   try {
     response = await fetch(url, {
       method: body === undefined ? 'GET' : 'POST', credentials: 'include', cache: 'no-store',
       redirect: 'error', headers, signal, ...(body === undefined ? {} : { body }),
     })
   } catch {
+    traceRcPhase(signal, 'http.fetch.error')
     signal?.throwIfAborted()
     throw new Error('job_api_request_failed')
   }
-  if (!response.ok) { try { await response.body?.cancel() } catch { /* Never expose an error body. */ } }
+  bindRcPhase(response, signal)
+  traceRcPhase(signal, 'http.fetch.end')
+  if (!response.ok) {
+    traceRcPhase(response, 'http.cancel.begin')
+    try { await response.body?.cancel() } catch { /* Never expose an error body. */ }
+    traceRcPhase(response, 'http.cancel.settled')
+  }
   return response
 }
 
@@ -158,13 +170,15 @@ export async function createJobWorkflowTransport(
   let headers = authHeaders(initial)
   let scopeChanged = false
   async function verify(readSignal = signal): Promise<void> {
+    traceRcPhase(readSignal, 'scope.begin')
     readSignal?.throwIfAborted()
     if (scopeChanged) throw new JobArtifactError('job_authorization_scope_changed')
     const current = await authorization(url, readSignal, authorize)
-    if (current?.tenantId !== initial?.tenantId) scopeChanged = true
+    if (current?.tenantId !== initial?.tenantId) { scopeChanged = true; traceRcPhase(readSignal, 'scope.changed') }
     if (scopeChanged) throw new JobArtifactError('job_authorization_scope_changed')
     // Token rotation within the same tenant is private to this session.
     headers = authHeaders(current)
+    traceRcPhase(readSignal, 'scope.end')
   }
   function jobPath(jobId: string): string {
     if (!JOB_ID.test(jobId)) throw new JobArtifactError('job_id_invalid')
@@ -187,16 +201,16 @@ export async function createJobWorkflowTransport(
   function readTransport(jobId: string, extraSignal?: AbortSignal): JobReadTransport {
     const path = jobPath(jobId)
     const readSignal = linkedSignal(signal, extraSignal)
-    return {
+    return bindRcPhase<JobReadTransport>({
       tenantId: initial?.tenantId,
       withSignal: (next) => readTransport(jobId, linkedSignal(readSignal, next)),
       get(role, accept = 'application/json') {
         if (role !== undefined && !ROLE.test(role)) throw new JobArtifactError('job_artifact_role_invalid')
         return send(`${path}${role === undefined ? '' : `/${role}`}`, undefined, undefined, readSignal, accept)
       },
-    }
+    }, readSignal)
   }
-  return {
+  return bindRcPhase<RcJobTransport>({
     tenantId: initial?.tenantId,
     collectionUrl: url.href,
     verifyAuthorizationScope: () => verify(),
@@ -239,7 +253,7 @@ export async function createJobWorkflowTransport(
       if (!REPORT_ID.test(reportId)) throw new JobArtifactError('rc_report_id_invalid')
       return send(`${path}/rc-quantity-reports/${reportId}`)
     },
-  }
+  }, signal)
 }
 
 /** Bound actual streamed bytes, including absent or dishonest Content-Length headers. */
@@ -252,6 +266,7 @@ export async function readBoundedJobBytes(
   const tooLarge = () => new JobArtifactError(`${label.replace(' ', '_')}_too_large`)
   const lengthMismatch = () => new JobArtifactError(`${label} byte length mismatch`)
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
+  traceRcPhase(response, 'body.read.begin')
   try {
     if (!Number.isSafeInteger(maximumBytes) || maximumBytes < 0
       || (expectedBytes !== undefined && (!Number.isSafeInteger(expectedBytes) || expectedBytes < 0))) {
@@ -289,15 +304,17 @@ export async function readBoundedJobBytes(
       size += value.byteLength
     }
     if (expectedBytes !== undefined && size !== expectedBytes) throw lengthMismatch()
-    if (target) return target
+    if (target) { traceRcPhase(response, 'body.read.end'); return target }
     const bytes = new Uint8Array(size)
     let offset = 0
     for (const chunk of chunks) {
       bytes.set(chunk, offset)
       offset += chunk.byteLength
     }
+    traceRcPhase(response, 'body.read.end')
     return bytes
   } catch (error) {
+    traceRcPhase(response, 'body.read.error')
     try {
       if (reader) await reader.cancel()
       else await response.body?.cancel()

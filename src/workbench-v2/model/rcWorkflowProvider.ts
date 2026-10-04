@@ -1,4 +1,5 @@
 import { sha256Bytes } from './checksum'
+import { traceRcPhase } from './rcWorkflowTrace'
 import { readWorkbenchJobViewResponse } from './jobProvider'
 import { validateWorkbenchJobView, type WorkbenchJobView } from './jobSchema'
 import { JobArtifactError, readBoundedJobBytes, type RcJobTransport, type RcReportPage } from './jobTransport'
@@ -105,10 +106,14 @@ export async function loadRcJobRequest(transport: RcJobTransport, job: Workbench
   const response = await transport.getRequest(job.job_id)
   if (!response.ok) throw new JobArtifactError(`job_api_http_${response.status}`)
   const bytes = await readBoundedJobBytes(response, REQUEST_MAX_BYTES, 'request', job.request.byte_length)
+  traceRcPhase(transport, 'request.hash.begin')
   const hash = await sha256Bytes(bytes)
+  traceRcPhase(transport, 'request.hash.end')
   if (hash === null) throw new JobArtifactError('request_integrity_unavailable')
   if (hash !== job.request.content_hash) throw new JobArtifactError('request_hash_mismatch')
+  traceRcPhase(transport, 'request.parse.begin')
   const value = parseJson(bytes, 'request')
+  traceRcPhase(transport, 'request.parse.end')
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new JobArtifactError('request_json_invalid')
   return { bytes, value: value as Record<string, unknown> }
 }
