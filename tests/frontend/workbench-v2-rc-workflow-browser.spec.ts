@@ -155,7 +155,7 @@ test.describe('RC project workflow orchestration browser', () => {
       current = { ...current, checkpoint: { role: 'checkpoint', content_hash: checkpointHash, byte_length: 2, media_type: 'application/json' },
         can_resume: true, resume_contract_hash: hash, progress: { completed_steps: 1, total_steps: 2 } }
     }
-    await configure(page, firstId)
+    await configure(page, firstId, checkpointHash === null)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.method === 'POST' && row.path === `${collection}/${firstId}/resume`) {
@@ -414,7 +414,7 @@ test.describe('RC project workflow orchestration browser', () => {
   test('delayed missing historical diagnostic cannot survive a mutable tenant change', async ({ page }) => {
     const requests: ObservedRequest[] = [], current = job(firstId, firstInput, 'failed', 2), gate = deferred()
     let historicalStarted = false
-    await configure(page, firstId)
+    await configure(page, firstId, true)
     await page.route(jobRoute, async route => {
       const row = await observe(route, requests)
       if (row.path === `${collection}/${firstId}/failure-diagnostics/1`) {
