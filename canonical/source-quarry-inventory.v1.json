@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:012e3845acf5a8519ffb9bae5449d1564a23cdfdcb4a794611687d97330c6b82",
+  "inventory_digest": "sha256:cbe8d7ce0fdccc36c2642714aa323c97e7a3ffedb146c0c0f832c808bb2fa380",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -488,7 +488,7 @@
           "blob_sha": "001b984650f2f8a2e01f8820d35c33b196721c60",
           "change_status": "modified",
           "changes": 16,
-          "current_blob_sha": "64474ce04c3fb2a66d66bd16813f55cf25a127c1",
+          "current_blob_sha": "549877028f1591d5cf40abb7a59c8d5b3cd590e9",
           "current_relation": "different",
           "deletions": 6,
           "path": ".github/workflows/frontend-web-ci.yml",
@@ -2323,7 +2323,7 @@
           "blob_sha": "58d5ac5d5d2258272787a3011b2a3d690e6df857",
           "change_status": "modified",
           "changes": 10,
-          "current_blob_sha": "dbf02a761b8bfdb51fdac0822fa578407c75b9f5",
+          "current_blob_sha": "1c4b452da8519ff00d573d820c1c892a49d1ba3c",
           "current_relation": "different",
           "deletions": 3,
           "path": "scripts/verify-workbench-v2-e2e.mjs",
@@ -7594,7 +7594,7 @@
           "blob_sha": "e9dd89ccde4405eeac936c33be164282d2f1c667",
           "change_status": "added",
           "changes": 117,
-          "current_blob_sha": "95416da49037d5d87cb4e66dae0d2afabdb1a992",
+          "current_blob_sha": "c437fc865f26313ef7943beb88eb388945a8c116",
           "current_relation": "different",
           "deletions": 0,
           "path": "tests/test_product_ci_workflow_contract.py",
