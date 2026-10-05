@@ -518,7 +518,10 @@ def _independent_chain_hash(payload: dict, checkpoints: tuple) -> str:
 
 
 @pytest.mark.parametrize("kind", [bytes, bytearray, memoryview])
-def test_neutral_bytes_to_restart_preserves_numeric_metadata_and_source_digest(kind):
+def test_neutral_bytes_and_restart_preserve_numeric_and_compiler_boundaries(
+    kind,
+    monkeypatch,
+):
     payload = _payload()
     payload["metadata"].update({"negative_zero": -0.0, "large_integer": 2**60 + 1})
     raw = json.dumps(payload, indent=2).encode("utf-8") + b"\n"
@@ -531,8 +534,44 @@ def test_neutral_bytes_to_restart_preserves_numeric_metadata_and_source_digest(k
     assert math.copysign(1.0, model.metadata["negative_zero"]) == -1.0
 
     config = PublicRCFiberFrameConfig(load_steps=2)
+    numeric_model = model
+    numeric_before = before
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("unsupported metadata reached the nonlinear solver")
+
+    with monkeypatch.context() as boundary:
+        boundary.setattr(
+            nonlinear_fiber_frame,
+            "run_stateful_fiber_frame2d_load_path",
+            forbidden,
+        )
+        blocked = analyze_public_rc_fiber_frame(numeric_model, config)
+    assert blocked.status == "blocked"
+    assert blocked.contract_pass is False
+    assert blocked.metrics["solver_executed"] is False
+    assert blocked.checkpoint["available"] is False
+    assert blocked.input_checksum == expected_digest
+    assert len(blocked.unsupported_features) == 1
+    assert (
+        blocked.unsupported_features[0]["kind"] == "rc_fiber_frame_metadata_unsupported"
+    )
+    assert blocked.unsupported_features[0]["path"] == "/metadata"
+    assert blocked.unsupported_features[0]["detail"] == (
+        "Only optional metadata.case_id is supported."
+    )
+
+    # Neutral input accepts numeric metadata, but this bounded compiler does not.
+    # Successful restart uses only supported fields, including a signed-zero coordinate.
+    payload = _payload()
+    payload["nodes"][0]["coordinates"][0] = -0.0
+    raw = json.dumps(payload, indent=2).encode("utf-8") + b"\n"
+    model = load_neutral_json_bytes(kind(raw), source_path="memory://rc-supported.json")
+    expected_digest = "sha256:" + hashlib.sha256(raw).hexdigest()
+    before = model.canonical_payload()
+    assert math.copysign(1.0, model.nodes[0]["coordinates"][0]) == -1.0
     first = analyze_public_rc_fiber_frame(model, config)
-    assert first.status == "ready"
+    assert first.status == "ready", first.unsupported_features
     prefix = first.checkpoint_artifact(1)
     compact = json.dumps(payload, separators=(",", ":")).encode("utf-8")
     equivalent = load_neutral_json_bytes(kind(compact))
@@ -544,7 +583,7 @@ def test_neutral_bytes_to_restart_preserves_numeric_metadata_and_source_digest(k
         config,
         restart_checkpoint_chain=kind(prefix),
     )
-    assert resumed.status == "ready"
+    assert resumed.status == "ready", resumed.unsupported_features
     assert resumed.contract_pass is True
     assert first.input_checksum == expected_digest
     assert resumed.input_checksum == compact_digest
@@ -558,7 +597,9 @@ def test_neutral_bytes_to_restart_preserves_numeric_metadata_and_source_digest(k
         == (first.contract_bindings["engineering_result_hash"])
     )
     assert model.canonical_payload() == before
-    assert math.copysign(1.0, model.metadata["negative_zero"]) == -1.0
+    assert math.copysign(1.0, model.nodes[0]["coordinates"][0]) == -1.0
+    assert numeric_model.canonical_payload() == numeric_before
+    assert math.copysign(1.0, numeric_model.metadata["negative_zero"]) == -1.0
 
 
 def test_public_checkpoint_bytes_have_independent_chain_and_artifact_digests(solved):
