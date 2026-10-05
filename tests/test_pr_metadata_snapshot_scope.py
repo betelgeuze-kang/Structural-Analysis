@@ -54,7 +54,7 @@ def _fetcher(event: dict, files: list[dict] | None = None):
         calls.append(endpoint)
         if "/files?" in endpoint:
             page = int(endpoint.rsplit("=", 1)[1])
-            return deepcopy(rows[(page - 1) * 100:page * 100])
+            return deepcopy(rows[(page - 1) * 100 : page * 100])
         if endpoint.endswith("/issues/493"):
             return {"number": 493, "state": "open"}
         return deepcopy(event["pull_request"])
@@ -86,25 +86,26 @@ class SnapshotScopeTests(unittest.TestCase):
         self.assertEqual(report["closing_issue_numbers"], [])
         self.assertEqual(report["snapshot_scope"]["head_sha"], "b" * 40)
         self.assertEqual(report["snapshot_scope"]["base_sha"], "a" * 40)
-        self.assertEqual(report["snapshot_scope"]["changed_paths"], [
-            validator.SNAPSHOT_INVENTORY_PATH,
-        ])
+        self.assertEqual(
+            report["snapshot_scope"]["changed_paths"],
+            [
+                validator.SNAPSHOT_INVENTORY_PATH,
+            ],
+        )
         absent = validator.build_report(self.event)
         self.assertFalse(absent["contract_pass"])
-        self.assertIn(
-            "snapshot_authenticated_observation_missing", absent["blockers"]
-        )
+        self.assertIn("snapshot_authenticated_observation_missing", absent["blockers"])
 
     def test_associated_existing_expectation_test_is_optional(self):
         self.event["pull_request"]["changed_files"] = 2
-        files = _files() + [{
-            "filename": "tests/test_check_issue_supersession_inventory.py",
-            "status": "modified",
-        }]
+        files = _files() + [
+            {
+                "filename": "tests/test_check_issue_supersession_inventory.py",
+                "status": "modified",
+            }
+        ]
         fetch, _ = _fetcher(self.event, files)
-        observation = validator.collect_snapshot_observation(
-            self.event, fetcher=fetch
-        )
+        observation = validator.collect_snapshot_observation(self.event, fetcher=fetch)
         self.assertTrue(self.report(observation=observation)["contract_pass"])
 
     def test_bootstrap_remains_a_normal_closing_issue_pr(self):
@@ -187,9 +188,16 @@ class SnapshotScopeTests(unittest.TestCase):
             with self.subTest(path=path):
                 event = deepcopy(self.event)
                 event["pull_request"]["changed_files"] = 2
-                fetch, _ = _fetcher(event, _files() + [{
-                    "filename": path, "status": "modified",
-                }])
+                fetch, _ = _fetcher(
+                    event,
+                    _files()
+                    + [
+                        {
+                            "filename": path,
+                            "status": "modified",
+                        }
+                    ],
+                )
                 observation = validator.collect_snapshot_observation(
                     event, fetcher=fetch
                 )
@@ -199,22 +207,28 @@ class SnapshotScopeTests(unittest.TestCase):
 
     def test_missing_inventory_renames_deletions_and_duplicates_fail(self):
         for files in (
-            [{
-                "filename": "tests/test_check_issue_supersession_inventory.py",
-                "status": "modified",
-            }],
+            [
+                {
+                    "filename": "tests/test_check_issue_supersession_inventory.py",
+                    "status": "modified",
+                }
+            ],
             [{"filename": validator.SNAPSHOT_INVENTORY_PATH, "status": "removed"}],
             [{"filename": validator.SNAPSHOT_INVENTORY_PATH, "status": "added"}],
-            [{
-                "filename": validator.SNAPSHOT_INVENTORY_PATH,
-                "status": "renamed",
-                "previous_filename": "src/solver.py",
-            }],
-            [{
-                "filename": validator.SNAPSHOT_INVENTORY_PATH,
-                "status": "modified",
-                "previous_filename": "old.json",
-            }],
+            [
+                {
+                    "filename": validator.SNAPSHOT_INVENTORY_PATH,
+                    "status": "renamed",
+                    "previous_filename": "src/solver.py",
+                }
+            ],
+            [
+                {
+                    "filename": validator.SNAPSHOT_INVENTORY_PATH,
+                    "status": "modified",
+                    "previous_filename": "old.json",
+                }
+            ],
             _files() * 2,
         ):
             with self.subTest(files=files):
@@ -253,7 +267,9 @@ class SnapshotScopeTests(unittest.TestCase):
             event["pull_request"]["base"][key] = value
             events.append(event)
         for key, value in (
-            ("number", True), ("changed_files", True), ("state", "closed")
+            ("number", True),
+            ("changed_files", True),
+            ("state", "closed"),
         ):
             event = deepcopy(self.event)
             event["pull_request"][key] = value
@@ -327,8 +343,7 @@ class SnapshotScopeTests(unittest.TestCase):
 
     def test_paginated_files_are_fetched_to_the_terminal_page(self):
         files = [
-            {"filename": f"file-{index}", "status": "modified"}
-            for index in range(101)
+            {"filename": f"file-{index}", "status": "modified"} for index in range(101)
         ]
         fetch, calls = _fetcher(self.event, files)
         actual = validator._fetch_snapshot_files("repos/example/pulls/900", fetch)
@@ -393,15 +408,16 @@ class SnapshotScopeTests(unittest.TestCase):
             payload = deepcopy(self.event)
             payload["pull_request"]["body"] = "Closes #549."
             event.write_text(json.dumps(payload))
-            with patch.dict(os.environ, {}, clear=True), patch.object(
-                validator,
-                "collect_snapshot_observation",
-                side_effect=AssertionError("network"),
+            with (
+                patch.dict(os.environ, {}, clear=True),
+                patch.object(
+                    validator,
+                    "collect_snapshot_observation",
+                    side_effect=AssertionError("network"),
+                ),
             ):
                 self.assertEqual(
-                    validator.main([
-                        "--event-json", str(event), "--out", str(out)
-                    ]),
+                    validator.main(["--event-json", str(event), "--out", str(out)]),
                     0,
                 )
 
@@ -413,10 +429,13 @@ class SnapshotScopeTests(unittest.TestCase):
         self.assertNotIn("--allow-unlinked", workflow)
         self.assertNotIn("issues: write", workflow)
         self.assertNotIn("pull-requests: write", workflow)
-        self.assertEqual(validator.SNAPSHOT_ALLOWED_PATHS, {
-            validator.SNAPSHOT_INVENTORY_PATH,
-            "tests/test_check_issue_supersession_inventory.py",
-        })
+        self.assertEqual(
+            validator.SNAPSHOT_ALLOWED_PATHS,
+            {
+                validator.SNAPSHOT_INVENTORY_PATH,
+                "tests/test_check_issue_supersession_inventory.py",
+            },
+        )
 
 
 if __name__ == "__main__":

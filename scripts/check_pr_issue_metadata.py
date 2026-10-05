@@ -136,9 +136,13 @@ def _github_json(
 ) -> Any:
     result = runner(
         [
-            "gh", "api", endpoint,
-            "-H", "Accept: application/vnd.github+json",
-            "-H", "X-GitHub-Api-Version: 2022-11-28",
+            "gh",
+            "api",
+            endpoint,
+            "-H",
+            "Accept: application/vnd.github+json",
+            "-H",
+            "X-GitHub-Api-Version: 2022-11-28",
         ],
         check=False,
         capture_output=True,
@@ -216,9 +220,7 @@ def collect_snapshot_observation(
     }
 
 
-def _snapshot_scope_blockers(
-    payload: dict[str, Any], observation: Any
-) -> list[str]:
+def _snapshot_scope_blockers(payload: dict[str, Any], observation: Any) -> list[str]:
     pr = payload["pull_request"]
     body = str(pr.get("body") or "")
     blockers: list[str] = []
@@ -273,10 +275,7 @@ def _snapshot_scope_blockers(
             or path not in SNAPSHOT_ALLOWED_PATHS
         ):
             blockers.append("snapshot_file_scope_invalid")
-    if (
-        len(paths) != len(set(paths))
-        or SNAPSHOT_INVENTORY_PATH not in paths
-    ):
+    if len(paths) != len(set(paths)) or SNAPSHOT_INVENTORY_PATH not in paths:
         blockers.append("snapshot_inventory_change_required")
     return blockers
 
@@ -315,15 +314,12 @@ def build_report(
     snapshot_requested = _snapshot_requested(body)
     snapshot_blockers = (
         _snapshot_scope_blockers(payload, snapshot_observation)
-        if snapshot_requested else []
+        if snapshot_requested
+        else []
     )
     snapshot_verified = snapshot_requested and not snapshot_blockers
     blockers.extend(snapshot_blockers)
-    if (
-        require_closing_issue
-        and not closing_issue_numbers
-        and not snapshot_verified
-    ):
+    if require_closing_issue and not closing_issue_numbers and not snapshot_verified:
         blockers.append("recognized_closing_issue_reference_missing")
     ambiguous = sorted(set(referenced_issue_numbers) - set(closing_issue_numbers))
     if ambiguous and not closing_issue_numbers and not snapshot_verified:
@@ -386,7 +382,8 @@ def build_report(
                     row["filename"] for row in snapshot_observation["files"]
                 ),
             }
-            if snapshot_verified and snapshot_observation is not None else None
+            if snapshot_verified and snapshot_observation is not None
+            else None
         ),
         "blockers": blockers,
         "claim_boundary": (
@@ -422,7 +419,8 @@ def main(argv: list[str] | None = None) -> int:
             observation = collect_snapshot_observation(payload)
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
             observation_error = (
-                str(exc) if isinstance(exc, ValueError)
+                str(exc)
+                if isinstance(exc, ValueError)
                 else "snapshot_github_read_failed"
             )
     report = build_report(
