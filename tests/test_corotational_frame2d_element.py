@@ -244,9 +244,7 @@ def test_axial_prestress_matches_closed_form_under_rigid_motion(
     current_direction = np.array([math.cos(current_angle), math.sin(current_angle)])
     translation = np.array([0.25, -0.5])
     coordinates = np.array([[0.0, 0.0], length * initial_direction])
-    displacement_j = (
-        translation + current_length * current_direction - coordinates[1]
-    )
+    displacement_j = translation + current_length * current_direction - coordinates[1]
     displacements = np.array(
         [*translation, rigid_rotation, *displacement_j, rigid_rotation]
     )
@@ -288,9 +286,7 @@ def test_axial_prestress_matches_closed_form_under_rigid_motion(
     local_to_global[:2, :2] = planar_rotation
     local_to_global[3:5, 3:5] = planar_rotation
     expected_force = local_to_global @ expected_force_local
-    expected_tangent = (
-        local_to_global @ expected_tangent_local @ local_to_global.T
-    )
+    expected_tangent = local_to_global @ expected_tangent_local @ local_to_global.T
 
     assert np.isfinite(response.strain_energy_kn_m)
     assert np.all(np.isfinite(response.internal_force_global))
