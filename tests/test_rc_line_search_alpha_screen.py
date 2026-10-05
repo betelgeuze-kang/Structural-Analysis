@@ -304,7 +304,15 @@ def test_packet_reader_keeps_byte_hash_check(tmp_path, monkeypatch):
         screen.OriginalPacket(root).read("data.json")
 
 
-def test_unattempted_target_survives_in_blocked_report(monkeypatch, tmp_path):
+@pytest.mark.parametrize(
+    "failure_code",
+    [
+        "unattempted_targets", "missing_invocation", "multiple_invocations",
+        "unknown_work", "nonreturned_invocation", "noncommitted_invocation",
+        "unverified_trial_history", "incomplete_physical_work_comparison",
+    ],
+)
+def test_original_failures_survive_in_blocked_report(monkeypatch, tmp_path, failure_code):
     records = {
         "study/plan.json": {
             "source_revision": screen.SOURCE_REVISION,
@@ -367,11 +375,54 @@ def test_unattempted_target_survives_in_blocked_report(monkeypatch, tmp_path):
                 "problem_contract_hash": "model",
             }
 
+    if failure_code != "unattempted_targets":
+        prefix = "study/selection/fold-0000"
+        path = records[prefix + "/secant/path.json"]
+        entry = {"target_index": 0, "target_m": 0.1, "invocations": [], "parent_hash": "parent"}
+        path["entries"] = [entry]
+        records[prefix + "/secant/000-context.json"] = {
+            "target_m": 0.1, "problem_contract_hash": "model", "accepted_targets_m": [0.0],
+        }
+        if failure_code != "missing_invocation":
+            count = 2 if failure_code == "multiple_invocations" else 1
+            for ordinal in range(1, count + 1):
+                invocation = {
+                    "ordinal": ordinal, "status": "returned", "committed": True,
+                    "unknown_work": False,
+                }
+                step = _step(accepted_index=1)
+                step.update({
+                    "parent_checkpoint": {"state_hash": "parent"},
+                    "metrics": {"target_control_displacement_m": 0.1}, "committed": True,
+                })
+                if failure_code == "unknown_work":
+                    invocation["unknown_work"] = True
+                elif failure_code == "nonreturned_invocation":
+                    invocation["status"] = "unknown"
+                elif failure_code == "noncommitted_invocation":
+                    invocation["committed"] = False
+                elif failure_code == "unverified_trial_history":
+                    step["trial_solution"]["line_search_history"][0].pop("attempts")
+                entry["invocations"].append(invocation)
+                records[f"{prefix}/secant/000-{ordinal}-outcome.json"] = invocation
+                if invocation["status"] == "returned":
+                    records[f"{prefix}/secant/000-{ordinal}-step.json"] = step
+        comparison = records[prefix + "/comparison.json"]
+        if failure_code == "incomplete_physical_work_comparison":
+            comparison["all_execution_work_reported"] = False
+        path.pop("path_hash")
+        path["path_hash"] = "sha256:" + screen._hash(screen._json_bytes(path))
+        comparison["arms"]["secant"]["path_hash"] = path["path_hash"]
+        comparison.pop("report_hash")
+        comparison["report_hash"] = "sha256:" + screen._hash(screen._json_bytes(comparison))
+        records[prefix + "-outcome.json"]["report_hash"] = comparison["report_hash"]
+
     class FakePacket:
         def __init__(self, root):
             self.consumed = set()
 
         def read(self, relative):
+            assert relative.startswith(("study/plan.json", "study/selection/"))
             self.consumed.add(relative)
             value = copy.deepcopy(records[relative])
             return value, screen._hash(screen._json_bytes(value))
@@ -379,5 +430,177 @@ def test_unattempted_target_survives_in_blocked_report(monkeypatch, tmp_path):
     monkeypatch.setattr(screen, "OriginalPacket", FakePacket)
     report = screen.screen_packet(tmp_path)
     assert report["status"] == "blocked_original_work_or_repeat_identity"
-    assert "1 unattempted targets" in report["fold_issues"][0]["issues"]
+    if failure_code == "unattempted_targets":
+        assert "1 unattempted targets" in report["fold_issues"][0]["issues"]
+    assert failure_code in {row["code"] for row in report["fold_issues"][0]["failures"]}
+    assert report["diagnostics"]["failure_counts"][failure_code] >= 1
+    assert report["diagnostics"]["classification"] == "blocked_original_evidence"
     assert report["screen_decision"]["supports_online_experiment_design"] is False
+    assert report["group_held_out_screen"] == []
+    assert report["solver_calls"] == report["reserved_cases_read"] == 0
+    screen._self_hash(report, "report_hash")
+
+
+def test_diagnostic_failure_codes_preserve_unknown_work_and_repeat_boundaries():
+    report = {
+        "status": "blocked_original_work_or_repeat_identity",
+        "fold_issues": [{"failures": [
+            {"code": "unknown_work", "target_index": 0, "ordinal": 1},
+            {"code": "unknown_work", "target_index": 1, "ordinal": 1},
+            {"code": "nonreturned_invocation", "target_index": 1, "ordinal": 1},
+        ]}],
+        "repeat_mismatches": [{"case_id": "train-a-amp050"}],
+        "screen_decision": {"supports_online_experiment_design": False},
+    }
+    before = copy.deepcopy(report)
+    diagnostics = screen._diagnostics(report)
+    assert report == before
+    assert diagnostics["classification"] == "blocked_original_evidence"
+    assert diagnostics["failure_counts"] == {
+        "unknown_work": 2, "nonreturned_invocation": 1, "repeat_identity_mismatch": 1,
+    }
+    assert "not measured time savings" in diagnostics["boundary"]
+
+
+@pytest.mark.parametrize(
+    "support,false_skips,classification",
+    [
+        (True, 0, "offline_design_support_only"),
+        (False, 1, "false_skip_gate_failed"),
+        (False, 0, "insufficient_group_support"),
+    ],
+)
+def test_diagnostics_describe_existing_decision_without_promoting_it(
+    support, false_skips, classification
+):
+    report = {
+        "status": "complete", "fold_issues": [], "repeat_mismatches": [],
+        "screen_decision": {
+            "supports_online_experiment_design": support, "false_skips": false_skips,
+        },
+    }
+    diagnostics = screen._diagnostics(report)
+    assert diagnostics["classification"] == classification
+    assert diagnostics["failure_counts"] == {}
+    assert "Zero solver calls" in diagnostics["boundary"]
+    if support:
+        assert "no online result is verified" in diagnostics["summary"]
+
+
+@pytest.mark.parametrize("data", [b'{"x":1,"x":2}', b'{"x":NaN}', b'{', b'"\xff"'])
+def test_invalid_json_has_stable_failure_code(data):
+    with pytest.raises(TraceError) as failure:
+        screen._strict_json(data)
+    assert failure.value.code == "invalid_json"
+
+
+def test_content_binding_failure_has_stable_code():
+    with pytest.raises(TraceError) as failure:
+        screen._self_hash({"value": 1, "report_hash": "sha256:wrong"}, "report_hash")
+    assert failure.value.code == "content_binding_failed"
+
+
+def test_cli_rejected_input_is_json_and_creates_no_report(tmp_path, monkeypatch, capsys):
+    output = tmp_path / "uncreated" / "report.json"
+    monkeypatch.setattr(
+        screen.sys, "argv", ["screen", str(tmp_path / "missing"), str(output)]
+    )
+    assert screen.main() == 2
+    captured = capsys.readouterr()
+    record = json.loads(captured.out)
+    assert record["status"] == "rejected_input"
+    assert record["failure_code"] == "unsafe_or_missing_input"
+    assert record["solver_calls"] == 0
+    assert "screen_decision" not in record
+    assert "no screen decision" in captured.err
+    assert not output.parent.exists()
+
+
+def test_cli_does_not_overwrite_existing_report(tmp_path, monkeypatch):
+    output = tmp_path / "report.json"
+    output.write_text("existing report")
+    monkeypatch.setattr(screen.sys, "argv", ["screen", str(tmp_path), str(output)])
+    monkeypatch.setattr(screen, "screen_packet", lambda root: {})
+    with pytest.raises(FileExistsError):
+        screen.main()
+    assert output.read_text() == "existing report"
+
+
+def test_packet_reader_rejects_fifo_without_blocking(tmp_path):
+    fifo = tmp_path / "inventory.json"
+    screen.os.mkfifo(fifo)
+    with pytest.raises(TraceError) as failure:
+        screen.OriginalPacket(tmp_path)
+    assert failure.value.code == "unsafe_or_missing_input"
+
+
+def test_packet_reader_rejects_parent_traversal_before_open(tmp_path, monkeypatch):
+    def forbidden_open(*args, **kwargs):
+        pytest.fail("traversal must be rejected before opening any path")
+
+    monkeypatch.setattr(screen.os, "open", forbidden_open)
+    with pytest.raises(TraceError) as failure:
+        screen._read_unlinked_regular_file(tmp_path, screen.Path("../data.json"), "input")
+    assert failure.value.code == "unsafe_or_missing_input"
+
+
+def test_complete_alpha_prefix_without_acceptance_stays_unknown():
+    step = _step(accepted_index=0)
+    line = step["trial_solution"]["line_search_history"][0]
+    line["attempts"] = [
+        {"alpha": alpha, "accepted": False, "trial_residual_kn": [1.0, 0.1],
+         "trial_relative_residual": 0.5}
+        for alpha in screen.ALPHAS
+    ]
+    line["attempt_count"] = len(screen.ALPHAS)
+    line["selected_alpha"] = 0.0
+    before = step["trial_solution"]["convergence_history"][0]
+    before["line_search_attempt_count"] = len(screen.ALPHAS)
+    before["line_search_alpha"] = 0.0
+    row = _rows(step)[0]
+    assert row["first_accepted_index"] is None
+    assert row["trial_count"] == len(screen.ALPHAS)
+    line["attempts"].append(copy.deepcopy(line["attempts"][-1]))
+    line["attempt_count"] += 1
+    before["line_search_attempt_count"] += 1
+    with pytest.raises(TraceError, match="bounded alpha-trial"):
+        _rows(step)
+
+
+def test_cli_rejection_does_not_echo_private_or_multiline_input(tmp_path, monkeypatch, capsys):
+    secret = "private-packet-key\nsecond-line"
+
+    def rejected(root):
+        raise TraceError(f"duplicate JSON key: {secret}", code="invalid_json")
+
+    output = tmp_path / "report.json"
+    monkeypatch.setattr(screen, "screen_packet", rejected)
+    monkeypatch.setattr(screen.sys, "argv", ["screen", str(tmp_path / secret), str(output)])
+    assert screen.main() == 2
+    captured = capsys.readouterr()
+    assert "private-packet-key" not in captured.out + captured.err
+    assert "second-line" not in captured.out + captured.err
+    assert json.loads(captured.out)["failure_code"] == "invalid_json"
+    assert len(captured.out.splitlines()) == 1
+    assert not output.exists()
+
+
+def test_cli_complete_report_keeps_json_stdout_and_human_stderr(tmp_path, monkeypatch, capsys):
+    report = {
+        "status": "complete", "fold_issues": [], "repeat_mismatches": [],
+        "observed_line_search_events": 7, "observed_first_alpha_failures": 2,
+        "screen_decision": {"supports_online_experiment_design": False, "false_skips": 1},
+    }
+    report["diagnostics"] = screen._diagnostics(report)
+    output = tmp_path / "report.json"
+    monkeypatch.setattr(screen, "screen_packet", lambda root: report)
+    monkeypatch.setattr(screen.sys, "argv", ["screen", str(tmp_path), str(output)])
+    assert screen.main() == 0
+    captured = capsys.readouterr()
+    record = json.loads(captured.out)
+    assert record["events"] == 7
+    assert record["first_alpha_failures"] == 2
+    assert record["screen_decision"] == report["screen_decision"]
+    assert "false skips were observed" in captured.err
+    assert "not measured time savings" in captured.err
+    assert json.loads(output.read_text()) == report
