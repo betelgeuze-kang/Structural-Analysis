@@ -13,6 +13,11 @@ interface Boundary { expected: Expected; before: NodeStamp; after: NodeStamp | n
 export interface RcReadyBoundaryToken { readonly kind: 'rc-ready-boundary-token.v1' }
 interface State { enabled: boolean; begun: boolean; boundary: Boundary | null }
 const states = new WeakMap<Page, State>(), tokens = new WeakMap<RcReadyBoundaryToken, Boundary>()
+interface AwaitObserver { begin(expected: Expected): object | undefined; end(token: object): unknown }
+const awaitObservations = new WeakMap<Boundary, { observer: AwaitObserver; token: object; capture?: unknown }>()
+function awaitObserver(): AwaitObserver | undefined {
+  return (globalThis as unknown as Record<symbol, AwaitObserver | undefined>)[Symbol.for('structural.rc.expect-await.v1')]
+}
 const clockStatuses = new Set(['available', 'unavailable', 'invalid', 'error'])
 const jobStatuses = new Set(['queued', 'failed', 'checkpointed', 'cancelled', 'succeeded', 'absent', 'ambiguous', 'invalid', 'unobserved'])
 const rowKeys = ['schema', 'session', 'generation', 'sequence', 'clockSource', 'clockStatus',
@@ -49,6 +54,10 @@ export function beginRcReadyBoundary(page: Page, expected: Expected): RcReadyBou
       nominalDeadlineMonotonicMs: finite(nominal) ? nominal : null }
     const token: RcReadyBoundaryToken = Object.freeze({ kind: 'rc-ready-boundary-token.v1' })
     state.boundary = boundary; tokens.set(token, boundary)
+    try {
+      const observer = awaitObserver(), observerToken = observer?.begin(expected)
+      if (observer && observerToken) awaitObservations.set(boundary, { observer, token: observerToken })
+    } catch { /* Retain the existing clock boundary even if the optional observer fails. */ }
     return token
   } catch { return undefined }
 }
@@ -59,6 +68,8 @@ export function finishRcReadyBoundary(token: RcReadyBoundaryToken | undefined, p
     if (!boundary || boundary.after !== null) return
     boundary.after = stamp(); boundary.outcome = passed ? 'passed' : 'failed'
     tokens.delete(token)
+    const observation = awaitObservations.get(boundary)
+    if (observation) observation.capture = observation.observer.end(observation.token)
   } catch { /* No exception can supersede the original assertion. */ }
 }
 
@@ -138,6 +149,15 @@ export async function finishRcInitialReadyDiagnosticsWithClock(page: Page, testI
   })
   const originalStatus = testInfo.status, originalErrors = [...testInfo.errors]
   const state = states.get(page)
+  // Server-side diagnostic snapshot was closed synchronously with the original
+  // assertion. It does not issue page commands or alter the existing phase ledger.
+  try {
+    const observation = state?.boundary && awaitObservations.get(state.boundary)
+    if (observation?.capture) {
+      const body = Buffer.from(JSON.stringify(observation.capture), 'utf8')
+      if (body.length <= 64 * 1024) await testInfo.attach('rc-initial-ready-await-observation', { body, contentType: 'application/json' })
+    }
+  } catch { /* Optional attachment failure does not replace the original outcome. */ }
   let retrieval = 'disabled', binding = 'not_attempted', serialization = 'not_attempted', attachment = 'not_attempted'
   let data = 'unobserved', boundaryStatus = state?.boundary ? 'observed' : 'absent'
   try {

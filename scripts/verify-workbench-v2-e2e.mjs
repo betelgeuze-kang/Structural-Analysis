@@ -144,6 +144,8 @@ async function main() {
     '.github/workflows/runtime-input-viewer-ci.yml',
     'scripts/verify-workbench-v2-e2e.mjs', 'scripts/trusted-frontend-runtime.mjs',
     'scripts/workbench-browser-diagnostics.mjs', 'tests/workbench-browser-diagnostic-retention.test.mjs',
+    'scripts/rc-expect-await-observer.cjs', 'scripts/rc-expect-await-preload.cjs',
+    'tests/rc-expect-await-observer.test.cjs',
     'tests/frontend/rcInitialReadyDiagnostics.ts', 'tests/frontend/rcReadyClockDiagnostics.ts',
     'src/workbench-v2/model/rcWorkflowTrace.ts',
     'src/workbench-v2/components/RcJobWorkflowPanel.tsx', 'src/workbench-v2/model/jobTransport.ts',
@@ -153,7 +155,8 @@ async function main() {
   // Build with base '/' for local serving.
   for (const [args, extraEnvironment] of [
     [['--test', trustedRepoTool(rootDir, 'tests/workbench-test-registration.test.mjs', 'workbench_registration_test'),
-      trustedRepoTool(rootDir, 'tests/workbench-browser-diagnostic-retention.test.mjs', 'workbench_diagnostic_retention_test')], {}],
+      trustedRepoTool(rootDir, 'tests/workbench-browser-diagnostic-retention.test.mjs', 'workbench_diagnostic_retention_test'),
+      trustedRepoTool(rootDir, 'tests/rc-expect-await-observer.test.cjs', 'rc_expect_await_observer_test')], {}],
     [[typescript, '--noEmit'], {}],
     [[vite, 'build'], { VITE_BASE_PATH: '/' }],
     [[delivery], {}],
@@ -180,7 +183,8 @@ async function main() {
     const loaderOption = `--loader=${jsonLoader}`
     const nativeCode = await run(
       node,
-      [loaderOption, playwright, 'test', ...specs, diagnostics ? '--reporter=line,json' : '--reporter=line', ...passthrough],
+      [...(diagnostics ? ['--require', trustedRepoTool(rootDir, 'scripts/rc-expect-await-preload.cjs', 'rc_expect_await_preload')] : []),
+        loaderOption, playwright, 'test', ...specs, diagnostics ? '--reporter=line,json' : '--reporter=line', ...passthrough],
       sanitizedFrontendEnvironment(node, {
         WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
         ...(diagnostics ? { PLAYWRIGHT_JSON_OUTPUT_FILE: diagnostics.rawReport } : {}),
