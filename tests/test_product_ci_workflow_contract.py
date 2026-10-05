@@ -524,7 +524,7 @@ def test_runtime_browser_failure_diagnostics_precede_http_output_replacement() -
     assert browser < preserve < http
     execution = job[browser:preserve]
     assert "id: workbench_e2e" in execution
-    assert "-- --trace retain-on-failure" in execution
+    assert "-- --trace=retain-on-failure" in execution
     assert 'exit "$code"' in execution
     upload = job[preserve:http]
     assert "if: failure() && steps.workbench_e2e.outcome == 'failure'" in upload
