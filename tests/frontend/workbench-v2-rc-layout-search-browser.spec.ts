@@ -297,7 +297,7 @@ for (const run of ['staged', 'full'] as const satisfies readonly PortalSpanRun[]
       await expect(panel.locator('[data-rc-search-layout]')).toContainText('equivalent building function')
       const planDownload = page.waitForEvent('download')
       await panel.getByRole('button', { name: 'Download search plan', exact: true }).click()
-      expect(await readFile((await (await planDownload).path())!)).toEqual(Buffer.from(portalSpanBytes(run, 'plan.json')))
+      expect((await readFile((await (await planDownload).path())!)).equals(Buffer.from(portalSpanBytes(run, 'plan.json')))).toBe(true)
       if (run === 'staged') {
         await expect(panel.locator('[data-rc-search-staging]')).toContainText('Prefix steps: 4; full steps: 16')
         await expect(panel.locator('[data-rc-search-pool-minimum]')).toContainText('unavailable')
@@ -310,7 +310,7 @@ for (const run of ['staged', 'full'] as const satisfies readonly PortalSpanRun[]
         ]) {
           const pending = page.waitForEvent('download')
           await panel.getByRole('button', { name: label, exact: true }).click()
-          expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(portalSpanBytes(run, path)))
+          expect((await readFile((await (await pending).path())!)).equals(Buffer.from(portalSpanBytes(run, path)))).toBe(true)
         }
       } else {
         await expect(panel.locator('[data-rc-pruning-candidate]')).toHaveCount(0)
@@ -319,7 +319,7 @@ for (const run of ['staged', 'full'] as const satisfies readonly PortalSpanRun[]
         await expect(panel.locator('[data-rc-design-candidate="longer_span_440"]')).toContainText('502.35744')
         const pending = page.waitForEvent('download')
         await details.getByRole('button', { name: 'Download longer_span_440 result', exact: true }).click()
-        expect(await readFile((await (await pending).path())!)).toEqual(Buffer.from(portalSpanBytes(run, 'price_order/longer_span_440/baseline/result.json')))
+        expect((await readFile((await (await pending).path())!)).equals(Buffer.from(portalSpanBytes(run, 'price_order/longer_span_440/baseline/result.json')))).toBe(true)
       }
       const bounds = await panel.boundingBox()
       expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
