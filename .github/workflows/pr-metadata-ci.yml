@@ -26,6 +26,8 @@ jobs:
           python-version: "3.12"
 
       - name: Validate issue auto-close and factual PR metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: >-
           python scripts/check_pr_issue_metadata.py
           --event-json "$GITHUB_EVENT_PATH"
