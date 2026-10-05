@@ -56,6 +56,9 @@ function boundedDiagnosticByteCount(value) {
 
 export function extractStableDiagnosticCode(value) {
   const text = String(value ?? '').replace(/^Error:\s*/, '')
+  // Recognize only the client-owned message, never an HTTP body or appended detail.
+  const http = text.match(/^Native workstation returned HTTP ([45][0-9]{2})$/)
+  if (http && http[0] === text) return `native_workstation_http_${http[1]}`
   const match = text.match(/^([A-Za-z][A-Za-z0-9_.-]{0,127})(?=[:\s]|$)/)
   const code = match?.[1] ?? ''
   const prefix = code.split('_', 1)[0]
