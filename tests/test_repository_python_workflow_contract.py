@@ -50,13 +50,18 @@ def test_runtime_browser_retains_native_report_before_http_overwrites_results(
         [
             "bash",
             "-c",
-            'npm() { printf "%s\\n" "$@" > arguments.txt; return '
+            'npm() { [ "$TMPDIR" = "$RUNNER_TEMP" ] || return 97; '
+            'printf "%s\\n" "$@" > arguments.txt; return '
             + str(native_code)
             + "; };\n"
             + command,
         ],
         cwd=tmp_path,
-        env={"PATH": "/usr/bin:/bin", "RUNNER_TEMP": str(tmp_path)},
+        env={
+            "PATH": "/usr/bin:/bin",
+            "RUNNER_TEMP": str(tmp_path),
+            "TMPDIR": str(tmp_path / "inherited-other-temp"),
+        },
         capture_output=True,
         text=True,
         check=False,

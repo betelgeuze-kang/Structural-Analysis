@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:9556fd9d8feca49dd5ea816ca616903613fb38a391ada141393fb261409631ef",
+  "inventory_digest": "sha256:7b96d2a57eba32becd01da0fe8fc3c40a5764eaa7fed5be0cdac43bb1dc7ca3d",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -556,7 +556,7 @@
           "blob_sha": "2849e4d4f189a3ff74982c783d4dc6a7f7cc1146",
           "change_status": "added",
           "changes": 131,
-          "current_blob_sha": "74c3b19018a7bb3c01b57d4fb7c16bfd084b3d00",
+          "current_blob_sha": "f812c1e52fb90e87a71af2c8bc29c20c67b0bf03",
           "current_relation": "different",
           "deletions": 0,
           "path": ".github/workflows/runtime-input-viewer-ci.yml",
@@ -7594,7 +7594,7 @@
           "blob_sha": "e9dd89ccde4405eeac936c33be164282d2f1c667",
           "change_status": "added",
           "changes": 117,
-          "current_blob_sha": "c437fc865f26313ef7943beb88eb388945a8c116",
+          "current_blob_sha": "6efc53e74f4766ce2c563a610702a81d9f067bf0",
           "current_relation": "different",
           "deletions": 0,
           "path": "tests/test_product_ci_workflow_contract.py",

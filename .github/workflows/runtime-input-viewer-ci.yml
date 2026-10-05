@@ -195,7 +195,7 @@ jobs:
         id: workbench_e2e
         run: |
           set +e
-          npm run verify:workbench-v2-e2e -- --trace=retain-on-failure \
+          TMPDIR="$RUNNER_TEMP" npm run verify:workbench-v2-e2e -- --trace=retain-on-failure \
             "--diagnostics-dir=$RUNNER_TEMP/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}" \
             "--diagnostics-sha=${{ github.sha }}" "--diagnostics-run-id=${{ github.run_id }}" "--diagnostics-run-attempt=${{ github.run_attempt }}" \
             > workbench-v2-e2e.log 2>&1
