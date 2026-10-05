@@ -493,7 +493,10 @@ def test_model_snapshot_is_not_mutated_by_compile(solved) -> None:
 
 def _canonical_restart_bytes(payload: dict) -> bytes:
     return json.dumps(
-        payload, ensure_ascii=False, allow_nan=False, sort_keys=True,
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
 
@@ -537,7 +540,9 @@ def test_neutral_bytes_to_restart_preserves_numeric_metadata_and_source_digest(k
     assert compact_digest != expected_digest
     assert equivalent.canonical_model_checksum == model.canonical_model_checksum
     resumed = analyze_public_rc_fiber_frame(
-        equivalent, config, restart_checkpoint_chain=kind(prefix),
+        equivalent,
+        config,
+        restart_checkpoint_chain=kind(prefix),
     )
     assert resumed.status == "ready"
     assert resumed.contract_pass is True
@@ -548,8 +553,9 @@ def test_neutral_bytes_to_restart_preserves_numeric_metadata_and_source_digest(k
         "sha256:" + hashlib.sha256(prefix).hexdigest()
     )
     assert resumed.checkpoint_artifact() == first.checkpoint_artifact()
-    assert resumed.contract_bindings["engineering_result_hash"] == (
-        first.contract_bindings["engineering_result_hash"]
+    assert (
+        resumed.contract_bindings["engineering_result_hash"]
+        == (first.contract_bindings["engineering_result_hash"])
     )
     assert model.canonical_payload() == before
     assert math.copysign(1.0, model.metadata["negative_zero"]) == -1.0
@@ -562,10 +568,13 @@ def test_public_checkpoint_bytes_have_independent_chain_and_artifact_digests(sol
     assert _canonical_restart_bytes(payload) == raw
     assert payload["storage_profile"] == "canonical-signed-zero-preserving-utf8-json.v1"
     assert payload["chain_hash"] == _independent_chain_hash(
-        payload, result._checkpoint_chain.checkpoints,
+        payload,
+        result._checkpoint_chain.checkpoints,
     )
     resumed = analyze_public_rc_fiber_frame(
-        model, PublicRCFiberFrameConfig(load_steps=2), restart_checkpoint_chain=raw,
+        model,
+        PublicRCFiberFrameConfig(load_steps=2),
+        restart_checkpoint_chain=raw,
     )
     assert resumed.status == "ready"
     assert resumed.metrics["replayed_prefix_step_count"] == 2
@@ -579,9 +588,18 @@ def test_public_checkpoint_bytes_have_independent_chain_and_artifact_digests(sol
 @pytest.mark.parametrize(
     "mutation",
     [
-        "truncated-tail", "truncated-middle", "chain-checksum", "terminal-checksum",
-        "state-checksum", "signed-zero", "large-integer", "uint64-overflow",
-        "boolean-epoch", "float-epoch", "missing-root", "missing-ancestor",
+        "truncated-tail",
+        "truncated-middle",
+        "chain-checksum",
+        "terminal-checksum",
+        "state-checksum",
+        "signed-zero",
+        "large-integer",
+        "uint64-overflow",
+        "boolean-epoch",
+        "float-epoch",
+        "missing-root",
+        "missing-ancestor",
     ],
 )
 def test_restart_adversarial_corpus_never_reaches_solver(solved, monkeypatch, mutation):
@@ -591,7 +609,7 @@ def test_restart_adversarial_corpus_never_reaches_solver(solved, monkeypatch, mu
     if mutation == "truncated-tail":
         raw = original[:-1]
     elif mutation == "truncated-middle":
-        raw = original[:len(original) // 2]
+        raw = original[: len(original) // 2]
     else:
         if mutation in ("chain-checksum", "terminal-checksum"):
             key = (
@@ -606,7 +624,10 @@ def test_restart_adversarial_corpus_never_reaches_solver(solved, monkeypatch, mu
             assert zero == 0.0
             payload["checkpoints"][0]["global_displacements"][0] = -float(zero)
         elif mutation in (
-            "large-integer", "uint64-overflow", "boolean-epoch", "float-epoch",
+            "large-integer",
+            "uint64-overflow",
+            "boolean-epoch",
+            "float-epoch",
         ):
             payload["checkpoints"][-1]["epoch"] = {
                 "large-integer": 2**60 + 1,
@@ -617,7 +638,8 @@ def test_restart_adversarial_corpus_never_reaches_solver(solved, monkeypatch, mu
         else:
             removed = 0 if mutation == "missing-root" else 1
             checkpoints = tuple(
-                row for index, row in enumerate(result._checkpoint_chain.checkpoints)
+                row
+                for index, row in enumerate(result._checkpoint_chain.checkpoints)
                 if index != removed
             )
             del payload["checkpoints"][removed]
@@ -633,10 +655,14 @@ def test_restart_adversarial_corpus_never_reaches_solver(solved, monkeypatch, mu
         raise AssertionError("invalid restart reached the nonlinear load-path solver")
 
     monkeypatch.setattr(
-        nonlinear_fiber_frame, "run_stateful_fiber_frame2d_load_path", forbidden,
+        nonlinear_fiber_frame,
+        "run_stateful_fiber_frame2d_load_path",
+        forbidden,
     )
     blocked = analyze_public_rc_fiber_frame(
-        model, PublicRCFiberFrameConfig(load_steps=2), restart_checkpoint_chain=raw,
+        model,
+        PublicRCFiberFrameConfig(load_steps=2),
+        restart_checkpoint_chain=raw,
     )
     assert blocked.status == "blocked"
     assert blocked.contract_pass is False
