@@ -141,6 +141,7 @@ async function main() {
   const playwright = trustedRepoTool(rootDir, 'node_modules/playwright/cli.js', 'playwright_cli')
   const diagnostics = prepareWorkbenchDiagnostics(diagnosticRequest.options, rootDir, [...specs,
     'package.json', 'package-lock.json', '.github/workflows/frontend-web-ci.yml',
+    '.github/workflows/runtime-input-viewer-ci.yml',
     'scripts/verify-workbench-v2-e2e.mjs', 'scripts/trusted-frontend-runtime.mjs',
     'scripts/workbench-browser-diagnostics.mjs', 'tests/workbench-browser-diagnostic-retention.test.mjs',
     'tests/frontend/rcInitialReadyDiagnostics.ts', 'tests/frontend/rcReadyClockDiagnostics.ts',

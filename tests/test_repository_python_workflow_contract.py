@@ -16,6 +16,62 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.parametrize("native_code", [0, 7])
+def test_runtime_browser_retains_native_report_before_http_overwrites_results(
+    tmp_path: Path, native_code: int
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/runtime-input-viewer-ci.yml").read_text()
+    )
+    steps = workflow["jobs"]["frontend-contracts"]["steps"]
+    names = [step["name"] for step in steps]
+    runner = steps[names.index("Workbench v2 guarded E2E")]
+    retention = steps[names.index("Preserve native Workbench diagnostic retention")]
+    assert names.index(retention["name"]) < names.index(
+        "Workbench actual HTTP integration"
+    )
+    assert retention["if"] == (
+        "always() && (steps.workbench_e2e.outcome == 'success' || "
+        "steps.workbench_e2e.outcome == 'failure')"
+    )
+    assert retention["with"]["if-no-files-found"] == "error"
+    assert "${{ github.run_attempt }}" in retention["with"]["name"]
+    assert {Path(line).name for line in retention["with"]["path"].splitlines()} == {
+        "run-linkage.json",
+        "retention.json",
+        "native-playwright.json",
+    }
+    command = runner["run"]
+    for key, value in {"sha": "a" * 40, "run_id": "123", "run_attempt": "2"}.items():
+        command = command.replace("${{ github." + key + " }}", value)
+    result = subprocess.run(
+        [
+            "bash",
+            "-c",
+            'npm() { printf "%s\\n" "$@" > arguments.txt; return '
+            + str(native_code)
+            + "; };\n"
+            + command,
+        ],
+        cwd=tmp_path,
+        env={"PATH": "/usr/bin:/bin", "RUNNER_TEMP": str(tmp_path)},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == native_code
+    arguments = (tmp_path / "arguments.txt").read_text().splitlines()
+    assert "--trace=retain-on-failure" in arguments
+    assert (
+        f"--diagnostics-dir={tmp_path}/workbench-browser-diagnostics-123-2" in arguments
+    )
+    assert "--diagnostics-sha=" + "a" * 40 in arguments
+    assert "--diagnostics-run-id=123" in arguments
+    assert "--diagnostics-run-attempt=2" in arguments
+
+
 PHASE2_REFRESH_COMMANDS = (
     "python scripts/build_phase2_state_updated_steel_material_artifacts.py",
     "python scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
