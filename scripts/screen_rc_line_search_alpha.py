@@ -75,14 +75,17 @@ def _self_hash(value: dict[str, Any], key: str) -> None:
         _json_bytes({k: v for k, v in value.items() if k != key})
     )
     if value.get(key) != expected:
-        raise TraceError(f"{key} does not bind original content", code="content_binding_failed")
+        raise TraceError(
+            f"{key} does not bind original content", code="content_binding_failed"
+        )
 
 
 def _read_unlinked_regular_file(root: Path, relative: Path, description: str) -> bytes:
     """Read through no-follow directory handles, including the packet root."""
     if ".." in root.parts or relative.is_absolute() or ".." in relative.parts:
         raise TraceError(
-            f"missing or linked {description}: {relative}", code="unsafe_or_missing_input"
+            f"missing or linked {description}: {relative}",
+            code="unsafe_or_missing_input",
         )
     components = (*root.parts[1:], *relative.parts)
     directory_fd = None
@@ -110,7 +113,8 @@ def _read_unlinked_regular_file(root: Path, relative: Path, description: str) ->
             return stream.read()
     except OSError as exc:
         raise TraceError(
-            f"missing or linked {description}: {relative}", code="unsafe_or_missing_input"
+            f"missing or linked {description}: {relative}",
+            code="unsafe_or_missing_input",
         ) from exc
     finally:
         if directory_fd is not None:
@@ -125,7 +129,8 @@ class OriginalPacket:
         )
         if _hash(raw) != INVENTORY_SHA256:
             raise TraceError(
-                "pooled packet inventory identity differs", code="inventory_identity_failed"
+                "pooled packet inventory identity differs",
+                code="inventory_identity_failed",
             )
         inventory = _strict_json(raw)
         files = inventory.get("files")
@@ -143,7 +148,9 @@ class OriginalPacket:
     def read(self, relative: str) -> tuple[Any, str]:
         path = Path(relative)
         if path.is_absolute() or ".." in path.parts or relative not in self.files:
-            raise TraceError(f"undeclared packet path: {relative}", code="undeclared_input")
+            raise TraceError(
+                f"undeclared packet path: {relative}", code="undeclared_input"
+            )
         raw = _read_unlinked_regular_file(self.root, path, "original file")
         expected = self.files[relative]
         digest = _hash(raw)
@@ -457,6 +464,7 @@ def screen_packet(root: Path) -> dict[str, Any]:
         def record_failure(code: str, message: str, **location: int) -> None:
             issues.append(message)
             failures.append({"code": code, **location})
+
         if len(entries) < len(targets):
             record_failure(
                 "unattempted_targets",
@@ -483,15 +491,18 @@ def screen_packet(root: Path) -> dict[str, Any]:
                 raise TraceError("attempt list required")
             if not invocations:
                 record_failure(
-                    "missing_invocation", f"target {target_index}: no returned invocation",
+                    "missing_invocation",
+                    f"target {target_index}: no returned invocation",
                     target_index=target_index,
                 )
                 signature.append((context_sha, ()))
                 continue
             if len(invocations) != 1:
                 record_failure(
-                    "multiple_invocations", f"target {target_index}: {len(invocations)} attempts",
-                    target_index=target_index, count=len(invocations),
+                    "multiple_invocations",
+                    f"target {target_index}: {len(invocations)} attempts",
+                    target_index=target_index,
+                    count=len(invocations),
                 )
             trial_signature = []
             for ordinal, invocation in enumerate(invocations, start=1):
@@ -505,13 +516,15 @@ def screen_packet(root: Path) -> dict[str, Any]:
                     record_failure(
                         "unknown_work",
                         f"target {target_index} attempt {ordinal}: unknown work",
-                        target_index=target_index, ordinal=ordinal,
+                        target_index=target_index,
+                        ordinal=ordinal,
                     )
                 if stored.get("status") != "returned":
                     record_failure(
                         "nonreturned_invocation",
                         f"target {target_index} attempt {ordinal}: nonreturned",
-                        target_index=target_index, ordinal=ordinal,
+                        target_index=target_index,
+                        ordinal=ordinal,
                     )
                     trial_signature.append(None)
                     continue
@@ -532,7 +545,8 @@ def screen_packet(root: Path) -> dict[str, Any]:
                     record_failure(
                         "noncommitted_invocation",
                         f"target {target_index} attempt {ordinal}: noncommitted",
-                        target_index=target_index, ordinal=ordinal,
+                        target_index=target_index,
+                        ordinal=ordinal,
                     )
                 if ridge == RIDGES[0] and repeat == 0 and ordinal == 1:
                     try:
@@ -553,7 +567,8 @@ def screen_packet(root: Path) -> dict[str, Any]:
                             "unverified_trial_history",
                             f"target {target_index} attempt {ordinal}: "
                             f"unverified trial history ({type(exc).__name__})",
-                            target_index=target_index, ordinal=ordinal,
+                            target_index=target_index,
+                            ordinal=ordinal,
                         )
             signature.append((context_sha, tuple(trial_signature)))
         if (
@@ -719,12 +734,21 @@ def main() -> int:
     try:
         report = screen_packet(args.packet_root)
     except TraceError as exc:
-        print(json.dumps({
-            "status": "rejected_input", "failure_code": exc.code,
-            "summary": "Input rejected; no screen decision or report was produced.",
-            "solver_calls": 0,
-        }, sort_keys=True))
-        print("Input rejected; no screen decision or report was produced.", file=sys.stderr)
+        print(
+            json.dumps(
+                {
+                    "status": "rejected_input",
+                    "failure_code": exc.code,
+                    "summary": "Input rejected; no screen decision or report was produced.",
+                    "solver_calls": 0,
+                },
+                sort_keys=True,
+            )
+        )
+        print(
+            "Input rejected; no screen decision or report was produced.",
+            file=sys.stderr,
+        )
         return 2
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x", encoding="utf-8") as stream:
