@@ -152,12 +152,17 @@ def _live_fixture(payload: dict) -> list[dict]:
                 "is_pull_request": False,
             }
         )
+    payload["implemented_but_open_issues"] = [
+        deepcopy(row)
+        for row in payload["open_issues"]
+        if row["merged_implementation_pull_requests"]
+    ]
     projection = inventory.issue_projection(payload["open_issues"])
     payload["open_issue_projection_sha256"] = inventory.projection_sha256(projection)
     return rows
 
 
-def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> None:
+def test_inventory_tracks_complete_queue_and_offline_non_authoritative() -> None:
     report = inventory.build_report(ROOT)
 
     assert report["contract_pass"] is True
@@ -170,6 +175,34 @@ def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> No
         291,
         293,
         297,
+        438,
+        441,
+        443,
+        445,
+        447,
+        449,
+        460,
+        463,
+        465,
+        467,
+        468,
+        470,
+        475,
+        476,
+        477,
+        480,
+        483,
+        486,
+        488,
+        492,
+        493,
+        495,
+        512,
+        513,
+        518,
+        520,
+        522,
+        524,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -191,6 +224,40 @@ def test_offline_report_validates_against_schema() -> None:
     Draft202012Validator(schema).validate(inventory.build_report(ROOT))
 
 
+def test_snapshot_retains_reviewed_boundaries_and_historical_records() -> None:
+    payload = _payload()
+    rows = {row["number"]: row for row in payload["open_issues"]}
+    external_numbers = {247, 258, 260, 290, 291, 293, 297, 438, 475, 480, 486}
+    assert len(rows) == 35
+    assert payload["observation_source"] == "github_rest_read_only_current_github_state"
+    for number, row in rows.items():
+        assert row["current_product_authority"] is False
+        if number in external_numbers:
+            assert row["classification"] in inventory.EXTERNAL_CLASSIFICATIONS
+            assert row["closable_by_repository_code_alone"] is False
+            assert row["required_external_inputs"]
+        else:
+            assert row["classification"] == "repository_implementation"
+            assert row["closable_by_repository_code_alone"] is True
+            assert row["required_external_inputs"] == []
+    assert rows[493]["state"] == "open"
+    assert rows[493]["linked_pull_requests"] == [494, 556]
+    assert rows[486]["classification"] == "external_platform_operator_user"
+    assert [row["number"] for row in payload["implemented_but_open_issues"]] == [
+        438,
+        467,
+    ]
+    assert [row["number"] for row in payload["resolved_issues"]] == [
+        207,
+        210,
+        212,
+        216,
+        218,
+    ]
+    assert all("normalization_comment_id" in row for row in payload["resolved_issues"])
+    assert all("closure_event_id" not in row for row in payload["resolved_issues"])
+
+
 def test_implemented_but_open_summary_is_derived_from_open_rows(
     tmp_path: Path,
 ) -> None:
@@ -205,7 +272,11 @@ def test_implemented_but_open_summary_is_derived_from_open_rows(
     assert stale_report["contract_pass"] is False
     assert "implemented_but_open_issues_inconsistent" in stale_report["blockers"]
 
-    payload["implemented_but_open_issues"] = [deepcopy(implemented_row)]
+    payload["implemented_but_open_issues"] = [
+        deepcopy(row)
+        for row in payload["open_issues"]
+        if row["merged_implementation_pull_requests"]
+    ]
     exact_path = _write(tmp_path / "exact-summary.json", payload)
 
     exact_report = inventory.build_report(ROOT, inventory_path=exact_path)
