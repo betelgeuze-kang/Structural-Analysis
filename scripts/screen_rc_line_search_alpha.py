@@ -8,6 +8,7 @@ import json
 import math
 import os
 import stat
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,10 @@ NEIGHBORS = 3
 class TraceError(ValueError):
     """The original packet cannot support the declared screen."""
 
+    def __init__(self, message: str, *, code: str = "trace_validation_failed") -> None:
+        super().__init__(message)
+        self.code = code
+
 
 def _json_bytes(value: Any) -> bytes:
     return json.dumps(
@@ -47,19 +52,22 @@ def _hash(value: bytes) -> str:
 
 def _strict_json(data: bytes) -> Any:
     def reject_constant(value: str) -> None:
-        raise TraceError(f"nonfinite JSON constant: {value}")
+        raise TraceError(f"nonfinite JSON constant: {value}", code="invalid_json")
 
     def object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
         result: dict[str, Any] = {}
         for key, value in pairs:
             if key in result:
-                raise TraceError(f"duplicate JSON key: {key}")
+                raise TraceError(f"duplicate JSON key: {key}", code="invalid_json")
             result[key] = value
         return result
 
-    return json.loads(
-        data, parse_constant=reject_constant, object_pairs_hook=object_pairs
-    )
+    try:
+        return json.loads(
+            data, parse_constant=reject_constant, object_pairs_hook=object_pairs
+        )
+    except (json.JSONDecodeError, UnicodeDecodeError, RecursionError) as exc:
+        raise TraceError("invalid original JSON", code="invalid_json") from exc
 
 
 def _self_hash(value: dict[str, Any], key: str) -> None:
@@ -67,13 +75,18 @@ def _self_hash(value: dict[str, Any], key: str) -> None:
         _json_bytes({k: v for k, v in value.items() if k != key})
     )
     if value.get(key) != expected:
-        raise TraceError(f"{key} does not bind original content")
+        raise TraceError(
+            f"{key} does not bind original content", code="content_binding_failed"
+        )
 
 
 def _read_unlinked_regular_file(root: Path, relative: Path, description: str) -> bytes:
     """Read through no-follow directory handles, including the packet root."""
     if ".." in root.parts or relative.is_absolute() or ".." in relative.parts:
-        raise TraceError(f"missing or linked {description}: {relative}")
+        raise TraceError(
+            f"missing or linked {description}: {relative}",
+            code="unsafe_or_missing_input",
+        )
     components = (*root.parts[1:], *relative.parts)
     directory_fd = None
     try:
@@ -93,10 +106,16 @@ def _read_unlinked_regular_file(root: Path, relative: Path, description: str) ->
         )
         with os.fdopen(file_fd, "rb") as stream:
             if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
-                raise TraceError(f"missing or linked {description}: {relative}")
+                raise TraceError(
+                    f"missing or linked {description}: {relative}",
+                    code="unsafe_or_missing_input",
+                )
             return stream.read()
     except OSError as exc:
-        raise TraceError(f"missing or linked {description}: {relative}") from exc
+        raise TraceError(
+            f"missing or linked {description}: {relative}",
+            code="unsafe_or_missing_input",
+        ) from exc
     finally:
         if directory_fd is not None:
             os.close(directory_fd)
@@ -109,7 +128,10 @@ class OriginalPacket:
             self.root, Path("inventory.json"), "inventory file"
         )
         if _hash(raw) != INVENTORY_SHA256:
-            raise TraceError("pooled packet inventory identity differs")
+            raise TraceError(
+                "pooled packet inventory identity differs",
+                code="inventory_identity_failed",
+            )
         inventory = _strict_json(raw)
         files = inventory.get("files")
         if type(files) is not list:
@@ -126,12 +148,17 @@ class OriginalPacket:
     def read(self, relative: str) -> tuple[Any, str]:
         path = Path(relative)
         if path.is_absolute() or ".." in path.parts or relative not in self.files:
-            raise TraceError(f"undeclared packet path: {relative}")
+            raise TraceError(
+                f"undeclared packet path: {relative}", code="undeclared_input"
+            )
         raw = _read_unlinked_regular_file(self.root, path, "original file")
         expected = self.files[relative]
         digest = _hash(raw)
         if len(raw) != expected.get("byte_length") or digest != expected.get("sha256"):
-            raise TraceError(f"original bytes differ from inventory: {relative}")
+            raise TraceError(
+                f"original bytes differ from inventory: {relative}",
+                code="content_binding_failed",
+            )
         self.consumed.add(relative)
         return _strict_json(raw), digest
 
@@ -432,8 +459,18 @@ def screen_packet(root: Path) -> dict[str, Any]:
         if type(entries) is not list or len(entries) > len(targets):
             raise TraceError("bounded declared target roster required")
         issues = []
+        failures = []
+
+        def record_failure(code: str, message: str, **location: int) -> None:
+            issues.append(message)
+            failures.append({"code": code, **location})
+
         if len(entries) < len(targets):
-            issues.append(f"{len(targets) - len(entries)} unattempted targets")
+            record_failure(
+                "unattempted_targets",
+                f"{len(targets) - len(entries)} unattempted targets",
+                count=len(targets) - len(entries),
+            )
         signature = []
         for target_index, entry in enumerate(entries):
             target = targets[target_index]
@@ -453,11 +490,20 @@ def screen_packet(root: Path) -> dict[str, Any]:
             if type(invocations) is not list:
                 raise TraceError("attempt list required")
             if not invocations:
-                issues.append(f"target {target_index}: no returned invocation")
+                record_failure(
+                    "missing_invocation",
+                    f"target {target_index}: no returned invocation",
+                    target_index=target_index,
+                )
                 signature.append((context_sha, ()))
                 continue
             if len(invocations) != 1:
-                issues.append(f"target {target_index}: {len(invocations)} attempts")
+                record_failure(
+                    "multiple_invocations",
+                    f"target {target_index}: {len(invocations)} attempts",
+                    target_index=target_index,
+                    count=len(invocations),
+                )
             trial_signature = []
             for ordinal, invocation in enumerate(invocations, start=1):
                 if invocation.get("ordinal") != ordinal:
@@ -467,12 +513,18 @@ def screen_packet(root: Path) -> dict[str, Any]:
                 if stored != invocation:
                     raise TraceError("attempt record differs from path")
                 if stored.get("unknown_work") is not False:
-                    issues.append(
-                        f"target {target_index} attempt {ordinal}: unknown work"
+                    record_failure(
+                        "unknown_work",
+                        f"target {target_index} attempt {ordinal}: unknown work",
+                        target_index=target_index,
+                        ordinal=ordinal,
                     )
                 if stored.get("status") != "returned":
-                    issues.append(
-                        f"target {target_index} attempt {ordinal}: nonreturned"
+                    record_failure(
+                        "nonreturned_invocation",
+                        f"target {target_index} attempt {ordinal}: nonreturned",
+                        target_index=target_index,
+                        ordinal=ordinal,
                     )
                     trial_signature.append(None)
                     continue
@@ -490,8 +542,11 @@ def screen_packet(root: Path) -> dict[str, Any]:
                     step.get("committed") is not True
                     or stored.get("committed") is not True
                 ):
-                    issues.append(
-                        f"target {target_index} attempt {ordinal}: noncommitted"
+                    record_failure(
+                        "noncommitted_invocation",
+                        f"target {target_index} attempt {ordinal}: noncommitted",
+                        target_index=target_index,
+                        ordinal=ordinal,
                     )
                 if ridge == RIDGES[0] and repeat == 0 and ordinal == 1:
                     try:
@@ -508,9 +563,12 @@ def screen_packet(root: Path) -> dict[str, Any]:
                             )
                         )
                     except (KeyError, TypeError, TraceError) as exc:
-                        issues.append(
+                        record_failure(
+                            "unverified_trial_history",
                             f"target {target_index} attempt {ordinal}: "
-                            f"unverified trial history ({type(exc).__name__})"
+                            f"unverified trial history ({type(exc).__name__})",
+                            target_index=target_index,
+                            ordinal=ordinal,
                         )
             signature.append((context_sha, tuple(trial_signature)))
         if (
@@ -524,7 +582,10 @@ def screen_packet(root: Path) -> dict[str, Any]:
             .get("full_history_pass")
             is not True
         ):
-            issues.append("complete physical/work comparison unavailable")
+            record_failure(
+                "incomplete_physical_work_comparison",
+                "complete physical/work comparison unavailable",
+            )
         fold = {
             "index": index,
             "case_id": case,
@@ -534,6 +595,7 @@ def screen_packet(root: Path) -> dict[str, Any]:
             "secant_path_hash": path["path_hash"],
             "step_signature": signature,
             "issues": issues,
+            "failures": failures,
         }
         roster[key] = fold
         fold_records.append(fold)
@@ -560,6 +622,7 @@ def screen_packet(root: Path) -> dict[str, Any]:
             "fold_index": fold["index"],
             "case_id": fold["case_id"],
             "issues": fold["issues"],
+            "failures": fold["failures"],
         }
         for fold in fold_records
         if fold["issues"]
@@ -624,16 +687,69 @@ def screen_packet(root: Path) -> dict[str, Any]:
             "path, verification, and audit intervals are separate."
         ),
     }
+    report["diagnostics"] = _diagnostics(report)
     report["report_hash"] = "sha256:" + _hash(_json_bytes(report))
     return report
 
 
-def main() -> None:
+def _diagnostics(report: dict[str, Any]) -> dict[str, Any]:
+    """Describe existing gates without changing their authority or outcomes."""
+    counts: dict[str, int] = {}
+    for fold in report["fold_issues"]:
+        for failure in fold["failures"]:
+            code = failure["code"]
+            counts[code] = counts.get(code, 0) + 1
+    if report["repeat_mismatches"]:
+        counts["repeat_identity_mismatch"] = len(report["repeat_mismatches"])
+    decision = report["screen_decision"]
+    if report["status"] != "complete":
+        classification = "blocked_original_evidence"
+        summary = "Blocked: original work or repeat identity is not verified."
+    elif decision["supports_online_experiment_design"]:
+        classification = "offline_design_support_only"
+        summary = "Offline screen supports experiment design only; no online result is verified."
+    elif decision["false_skips"]:
+        classification = "false_skip_gate_failed"
+        summary = "Offline screen does not support experiment design: false skips were observed."
+    else:
+        classification = "insufficient_group_support"
+        summary = (
+            "Offline screen does not support experiment design: "
+            "group support is insufficient."
+        )
+    return {
+        "schema_version": "rc-line-search-alpha-screen-diagnostics.v1",
+        "classification": classification,
+        "failure_counts": dict(sorted(counts.items())),
+        "summary": summary,
+        "boundary": "Zero solver calls; trial counts are work proxies, not measured time savings.",
+    }
+
+
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("packet_root", type=Path)
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
-    report = screen_packet(args.packet_root)
+    try:
+        report = screen_packet(args.packet_root)
+    except TraceError as exc:
+        print(
+            json.dumps(
+                {
+                    "status": "rejected_input",
+                    "failure_code": exc.code,
+                    "summary": "Input rejected; no screen decision or report was produced.",
+                    "solver_calls": 0,
+                },
+                sort_keys=True,
+            )
+        )
+        print(
+            "Input rejected; no screen decision or report was produced.",
+            file=sys.stderr,
+        )
+        return 2
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x", encoding="utf-8") as stream:
         json.dump(report, stream, sort_keys=True, indent=2, allow_nan=False)
@@ -645,11 +761,15 @@ def main() -> None:
                 "events": report["observed_line_search_events"],
                 "first_alpha_failures": report["observed_first_alpha_failures"],
                 "screen_decision": report["screen_decision"],
+                "diagnostics": report["diagnostics"],
             },
             sort_keys=True,
         )
     )
+    print(report["diagnostics"]["summary"], file=sys.stderr)
+    print(report["diagnostics"]["boundary"], file=sys.stderr)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
