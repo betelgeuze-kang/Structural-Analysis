@@ -60,7 +60,7 @@
   "available_artifact_count": 5,
   "claim_boundary": "This is a technical native-artifact inventory only. It grants no product license, commercial use, redistribution, third-party-material clearance, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-08-28T07:42:07.241145+00:00",
+  "generated_at": "2026-10-06T03:35:24.448841+00:00",
   "missing_required": [],
   "schema_version": "native-runtime-artifact-manifest.v1"
 }
