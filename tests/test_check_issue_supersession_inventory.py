@@ -241,6 +241,7 @@ def test_snapshot_retains_reviewed_boundaries_and_historical_records() -> None:
             assert row["closable_by_repository_code_alone"] is True
             assert row["required_external_inputs"] == []
     assert rows[493]["state"] == "open"
+    assert rows[493]["linked_pull_requests"] == [494, 556]
     assert rows[486]["classification"] == "external_platform_operator_user"
     assert [row["number"] for row in payload["implemented_but_open_issues"]] == [
         438,
