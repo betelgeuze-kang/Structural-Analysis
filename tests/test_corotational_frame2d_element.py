@@ -207,3 +207,106 @@ def test_invalid_inputs_fail_closed(overrides, message) -> None:
     arguments.update(overrides)
     with pytest.raises(ValueError, match=message):
         corotational_frame2d_response(**arguments)
+
+
+@pytest.mark.parametrize("axial_strain", [-1.0e-3, 0.0, 1.0e-3])
+@pytest.mark.parametrize("second_moment", [2.0e-8, 2.0e-4])
+@pytest.mark.parametrize(
+    ("initial_angle", "rigid_rotation"),
+    [
+        (0.0, 0.0),
+        (math.pi - 0.02, 0.05),
+        (-math.pi + 0.02, -0.05),
+        (0.6, 2.0),
+    ],
+    ids=["horizontal", "positive-atan2-cut", "negative-atan2-cut", "large-rotation"],
+)
+def test_axial_prestress_matches_closed_form_under_rigid_motion(
+    axial_strain: float,
+    second_moment: float,
+    initial_angle: float,
+    rigid_rotation: float,
+) -> None:
+    """Analytic local beam response, independently rotated into global axes.
+
+    The strain stays small while rotations are finite. The two cut cases cross
+    the absolute atan2 cut, but not the relative-angle branch at +/- pi.
+    Compression can make the free-element tangent indefinite; positivity or a
+    finite condition number is not assumed for its rigid translation modes.
+    This stateless elastic check does not validate buckling loads, a global
+    solver, cyclic history, or multi-turn angle unwrapping.
+    """
+    length = 2.0
+    extension = length * axial_strain
+    current_length = length + extension
+    current_angle = initial_angle + rigid_rotation
+    initial_direction = np.array([math.cos(initial_angle), math.sin(initial_angle)])
+    current_direction = np.array([math.cos(current_angle), math.sin(current_angle)])
+    translation = np.array([0.25, -0.5])
+    coordinates = np.array([[0.0, 0.0], length * initial_direction])
+    displacement_j = translation + current_length * current_direction - coordinates[1]
+    displacements = np.array(
+        [*translation, rigid_rotation, *displacement_j, rigid_rotation]
+    )
+    response = corotational_frame2d_response(
+        node_coordinates_m=coordinates,
+        element_displacements=displacements,
+        youngs_modulus_kn_per_m2=MODULUS,
+        area_m2=AREA,
+        second_moment_m4=second_moment,
+    )
+
+    # Closed-form axial energy and prestress, without kinematics/assembly helpers.
+    axial_stiffness = MODULUS * AREA / length
+    axial_force = axial_stiffness * extension
+    expected_energy = 0.5 * axial_stiffness * extension**2
+    expected_force_local = np.array([-axial_force, 0.0, 0.0, axial_force, 0.0, 0.0])
+
+    # A transverse chord increment changes its angle by dy/l and its length by
+    # dy**2/(2*l). Thus N/l adds geometric stiffness to the elastic 12*EI/(L*l**2).
+    flexural_stiffness = MODULUS * second_moment / length
+    transverse = 12.0 * flexural_stiffness / current_length**2
+    transverse += axial_force / current_length
+    coupling = 6.0 * flexural_stiffness / current_length
+    end_rotation = 4.0 * flexural_stiffness
+    cross_rotation = 2.0 * flexural_stiffness
+    expected_tangent_local = np.array(
+        [
+            [axial_stiffness, 0.0, 0.0, -axial_stiffness, 0.0, 0.0],
+            [0.0, transverse, coupling, 0.0, -transverse, coupling],
+            [0.0, coupling, end_rotation, 0.0, -coupling, cross_rotation],
+            [-axial_stiffness, 0.0, 0.0, axial_stiffness, 0.0, 0.0],
+            [0.0, -transverse, -coupling, 0.0, transverse, -coupling],
+            [0.0, coupling, cross_rotation, 0.0, -coupling, end_rotation],
+        ]
+    )
+    cosine, sine = current_direction
+    local_to_global = np.eye(6)
+    planar_rotation = np.array([[cosine, -sine], [sine, cosine]])
+    local_to_global[:2, :2] = planar_rotation
+    local_to_global[3:5, 3:5] = planar_rotation
+    expected_force = local_to_global @ expected_force_local
+    expected_tangent = local_to_global @ expected_tangent_local @ local_to_global.T
+
+    assert np.isfinite(response.strain_energy_kn_m)
+    assert np.all(np.isfinite(response.internal_force_global))
+    assert np.all(np.isfinite(response.consistent_tangent_global))
+    np.testing.assert_allclose(
+        response.basic_deformations, [extension, 0.0, 0.0], rtol=0.0, atol=1.0e-14
+    )
+    np.testing.assert_allclose(
+        response.strain_energy_kn_m, expected_energy, rtol=2.0e-12, atol=1.0e-14
+    )
+    np.testing.assert_allclose(
+        response.internal_force_global, expected_force, rtol=2.0e-12, atol=1.0e-10
+    )
+    np.testing.assert_allclose(
+        response.consistent_tangent_global,
+        expected_tangent,
+        rtol=2.0e-12,
+        atol=1.0e-10,
+    )
+    translations = np.array([[1.0, 0.0], [0.0, 1.0], [0.0, 0.0]] * 2)
+    np.testing.assert_allclose(
+        response.consistent_tangent_global @ translations, 0.0, rtol=0.0, atol=1.0e-10
+    )
