@@ -54,6 +54,11 @@ EXTERNAL_CLASSIFICATIONS = {
     "licensed_corpus_validation",
     "repository_admin_policy",
 }
+REPOSITORY_IMPLEMENTATION_CLASSIFICATION = "repository_implementation"
+OBSERVATION_SOURCES = (
+    "gh_cli_read_only_current_github_state",
+    "github_rest_read_only_current_github_state",
+)
 FALSE_AUTHORITY = {
     "commercial_authority": False,
     "design_authority": False,
@@ -552,9 +557,19 @@ def _validate_open_rows(
             blockers.append(f"open_issue_labels_invalid:{number}")
         elif labels != sorted(set(labels)):
             blockers.append(f"open_issue_labels_invalid:{number}")
-        if row.get("classification") not in EXTERNAL_CLASSIFICATIONS:
+        classification = row.get("classification")
+        repository_implementation = (
+            classification == REPOSITORY_IMPLEMENTATION_CLASSIFICATION
+        )
+        if (
+            classification not in EXTERNAL_CLASSIFICATIONS
+            and not repository_implementation
+        ):
             blockers.append(f"open_issue_classification_invalid:{number}")
-        if row.get("closable_by_repository_code_alone") is not False:
+        if (
+            row.get("closable_by_repository_code_alone")
+            is not repository_implementation
+        ):
             blockers.append(f"open_issue_repository_closure_boundary_invalid:{number}")
         if row.get("current_product_authority") is not False:
             blockers.append(f"open_issue_product_authority_invalid:{number}")
@@ -566,7 +581,8 @@ def _validate_open_rows(
         external_inputs = row.get("required_external_inputs")
         if (
             not isinstance(external_inputs, list)
-            or not external_inputs
+            or (not external_inputs and not repository_implementation)
+            or (bool(external_inputs) and repository_implementation)
             or any(not isinstance(value, str) or not value for value in external_inputs)
         ):
             blockers.append(f"open_issue_external_inputs_invalid:{number}")
@@ -678,7 +694,7 @@ def _validate_inventory_contract(
     observed_at = payload.get("observed_at")
     if not isinstance(observed_at, str) or _TIMESTAMP_RE.fullmatch(observed_at) is None:
         blockers.append("inventory_observed_at_invalid")
-    if payload.get("observation_source") != "gh_cli_read_only_current_github_state":
+    if payload.get("observation_source") not in OBSERVATION_SOURCES:
         blockers.append("inventory_observation_source_invalid")
     if payload.get("claim_boundary") != CLAIM_BOUNDARY:
         blockers.append("inventory_claim_boundary_invalid")
