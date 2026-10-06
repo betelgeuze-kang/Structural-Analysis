@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
 import json
+import math
+import struct
 from pathlib import Path
 
 import pytest
@@ -14,7 +17,10 @@ from structural_analysis.api import (
 )
 from structural_analysis.api import nonlinear_fiber_frame_cli
 from structural_analysis.api import nonlinear_fiber_frame
-from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.io.neutral.loader import (
+    load_neutral_json,
+    load_neutral_json_bytes,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -483,3 +489,233 @@ def test_model_snapshot_is_not_mutated_by_compile(solved) -> None:
         restart_checkpoint_chain=b"not-json",
     )
     assert model.canonical_payload() == before
+
+
+def _canonical_restart_bytes(payload: dict) -> bytes:
+    return json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _independent_chain_hash(payload: dict, checkpoints: tuple) -> str:
+    # Independent chain framing/digest oracle; per-checkpoint bytes still use
+    # the production codec, so this is not an independent checkpoint codec.
+    raw = bytearray(b"structural-analysis/stateful-fiber-frame2d-checkpoint-chain/v1\0")
+    for key in ("role", "storage_profile", "case_id", "problem_contract_hash"):
+        value = payload[key].encode("utf-8")
+        raw.extend(struct.pack("<Q", len(value)))
+        raw.extend(value)
+    raw.extend(struct.pack("<Q", len(checkpoints)))
+    for checkpoint in checkpoints:
+        value = checkpoint.canonical_bytes()
+        raw.extend(struct.pack("<Q", len(value)))
+        raw.extend(value)
+    return "sha256:" + hashlib.sha256(raw).hexdigest()
+
+
+@pytest.mark.parametrize("kind", [bytes, bytearray, memoryview])
+def test_neutral_bytes_and_restart_preserve_numeric_and_compiler_boundaries(
+    kind,
+    monkeypatch,
+):
+    payload = _payload()
+    payload["metadata"].update({"negative_zero": -0.0, "large_integer": 2**60 + 1})
+    raw = json.dumps(payload, indent=2).encode("utf-8") + b"\n"
+    model = load_neutral_json_bytes(kind(raw), source_path="memory://rc-input.json")
+    expected_digest = "sha256:" + hashlib.sha256(raw).hexdigest()
+    before = model.canonical_payload()
+    assert model.input_checksum == expected_digest
+    assert type(model.metadata["large_integer"]) is int
+    assert model.metadata["large_integer"] == 2**60 + 1
+    assert math.copysign(1.0, model.metadata["negative_zero"]) == -1.0
+
+    config = PublicRCFiberFrameConfig(load_steps=2)
+    numeric_model = model
+    numeric_before = before
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("unsupported metadata reached the nonlinear solver")
+
+    with monkeypatch.context() as boundary:
+        boundary.setattr(
+            nonlinear_fiber_frame,
+            "run_stateful_fiber_frame2d_load_path",
+            forbidden,
+        )
+        blocked = analyze_public_rc_fiber_frame(numeric_model, config)
+    assert blocked.status == "blocked"
+    assert blocked.contract_pass is False
+    assert blocked.metrics["solver_executed"] is False
+    assert blocked.checkpoint["available"] is False
+    assert blocked.input_checksum == expected_digest
+    assert len(blocked.unsupported_features) == 1
+    assert (
+        blocked.unsupported_features[0]["kind"] == "rc_fiber_frame_metadata_unsupported"
+    )
+    assert blocked.unsupported_features[0]["path"] == "/metadata"
+    assert blocked.unsupported_features[0]["detail"] == (
+        "Only optional metadata.case_id is supported."
+    )
+
+    # Neutral input accepts numeric metadata, but this bounded compiler does not.
+    # Successful restart uses only supported fields, including a signed-zero coordinate.
+    payload = _payload()
+    payload["nodes"][0]["coordinates"][0] = -0.0
+    raw = json.dumps(payload, indent=2).encode("utf-8") + b"\n"
+    model = load_neutral_json_bytes(kind(raw), source_path="memory://rc-supported.json")
+    expected_digest = "sha256:" + hashlib.sha256(raw).hexdigest()
+    before = model.canonical_payload()
+    assert math.copysign(1.0, model.nodes[0]["coordinates"][0]) == -1.0
+    first = analyze_public_rc_fiber_frame(model, config)
+    assert first.status == "ready", first.unsupported_features
+    prefix = first.checkpoint_artifact(1)
+    compact = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    equivalent = load_neutral_json_bytes(kind(compact))
+    compact_digest = "sha256:" + hashlib.sha256(compact).hexdigest()
+    assert compact_digest != expected_digest
+    assert equivalent.canonical_model_checksum == model.canonical_model_checksum
+    resumed = analyze_public_rc_fiber_frame(
+        equivalent,
+        config,
+        restart_checkpoint_chain=kind(prefix),
+    )
+    assert resumed.status == "ready", resumed.unsupported_features
+    assert resumed.contract_pass is True
+    assert first.input_checksum == expected_digest
+    assert resumed.input_checksum == compact_digest
+    assert resumed.canonical_model_checksum == model.canonical_model_checksum
+    assert resumed.configuration["restart_checkpoint_artifact_hash"] == (
+        "sha256:" + hashlib.sha256(prefix).hexdigest()
+    )
+    assert resumed.checkpoint_artifact() == first.checkpoint_artifact()
+    assert (
+        resumed.contract_bindings["engineering_result_hash"]
+        == (first.contract_bindings["engineering_result_hash"])
+    )
+    assert model.canonical_payload() == before
+    assert math.copysign(1.0, model.nodes[0]["coordinates"][0]) == -1.0
+    assert numeric_model.canonical_payload() == numeric_before
+    assert math.copysign(1.0, numeric_model.metadata["negative_zero"]) == -1.0
+
+
+def test_public_checkpoint_bytes_have_independent_chain_and_artifact_digests(solved):
+    _, _, model, result = solved
+    raw = result.checkpoint_artifact()
+    payload = json.loads(raw)
+    assert _canonical_restart_bytes(payload) == raw
+    assert payload["storage_profile"] == "canonical-signed-zero-preserving-utf8-json.v1"
+    assert payload["chain_hash"] == _independent_chain_hash(
+        payload,
+        result._checkpoint_chain.checkpoints,
+    )
+    resumed = analyze_public_rc_fiber_frame(
+        model,
+        PublicRCFiberFrameConfig(load_steps=2),
+        restart_checkpoint_chain=raw,
+    )
+    assert resumed.status == "ready"
+    assert resumed.metrics["replayed_prefix_step_count"] == 2
+    assert resumed.metrics["newly_solved_step_count"] == 0
+    assert resumed.configuration["restart_checkpoint_artifact_hash"] == (
+        "sha256:" + hashlib.sha256(raw).hexdigest()
+    )
+    assert resumed.checkpoint_artifact() == raw
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "truncated-tail",
+        "truncated-middle",
+        "chain-checksum",
+        "terminal-checksum",
+        "state-checksum",
+        "signed-zero",
+        "large-integer",
+        "uint64-overflow",
+        "boolean-epoch",
+        "float-epoch",
+        "missing-root",
+        "missing-ancestor",
+    ],
+)
+def test_restart_adversarial_corpus_never_reaches_solver(solved, monkeypatch, mutation):
+    _, _, model, result = solved
+    original = result.checkpoint_artifact()
+    payload = json.loads(original)
+    if mutation == "truncated-tail":
+        raw = original[:-1]
+    elif mutation == "truncated-middle":
+        raw = original[: len(original) // 2]
+    else:
+        if mutation in ("chain-checksum", "terminal-checksum"):
+            key = (
+                "chain_hash" if mutation == "chain-checksum" else "terminal_state_hash"
+            )
+            payload[key] = "sha256:" + "0" * 64
+        elif mutation == "state-checksum":
+            payload["checkpoints"][-1]["state_hash"] = "sha256:" + "0" * 64
+        elif mutation == "signed-zero":
+            # Numerically equal, but the immutable state bytes have changed.
+            zero = payload["checkpoints"][0]["global_displacements"][0]
+            assert zero == 0.0
+            payload["checkpoints"][0]["global_displacements"][0] = -float(zero)
+        elif mutation in (
+            "large-integer",
+            "uint64-overflow",
+            "boolean-epoch",
+            "float-epoch",
+        ):
+            payload["checkpoints"][-1]["epoch"] = {
+                "large-integer": 2**60 + 1,
+                "uint64-overflow": 2**64,
+                "boolean-epoch": True,
+                "float-epoch": 2.0,
+            }[mutation]
+        else:
+            removed = 0 if mutation == "missing-root" else 1
+            checkpoints = tuple(
+                row
+                for index, row in enumerate(result._checkpoint_chain.checkpoints)
+                if index != removed
+            )
+            del payload["checkpoints"][removed]
+            payload["checkpoint_count"] = len(checkpoints)
+            payload["root_state_hash"] = checkpoints[0].state_hash
+            # Repair the container hash so rejection actually requires ancestry.
+            payload["chain_hash"] = _independent_chain_hash(payload, checkpoints)
+        raw = _canonical_restart_bytes(payload)
+    assert raw != original
+    before = model.canonical_payload()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("invalid restart reached the nonlinear load-path solver")
+
+    monkeypatch.setattr(
+        nonlinear_fiber_frame,
+        "run_stateful_fiber_frame2d_load_path",
+        forbidden,
+    )
+    blocked = analyze_public_rc_fiber_frame(
+        model,
+        PublicRCFiberFrameConfig(load_steps=2),
+        restart_checkpoint_chain=raw,
+    )
+    assert blocked.status == "blocked"
+    assert blocked.contract_pass is False
+    assert blocked.metrics["solver_executed"] is False
+    assert blocked.checkpoint["available"] is False
+    assert blocked.unsupported_features[0]["kind"] == (
+        "rc_fiber_frame_checkpoint_restart_invalid"
+    )
+    assert blocked.configuration["restart_checkpoint_artifact_hash"] == (
+        "sha256:" + hashlib.sha256(raw).hexdigest()
+    )
+    assert model.canonical_payload() == before
+    assert result.checkpoint_artifact() == original
+    with pytest.raises(ValueError, match="no checkpoint artifact"):
+        blocked.checkpoint_artifact()
