@@ -2,15 +2,15 @@
   "artifacts": {
     "native_artifact_manifest": {
       "path": "implementation/phase1/native_runtime_artifact_manifest.json",
-      "sha256": "3aa1f52a49c545c1c3bcc0b5c86ca2b6d1b24c42db07509affacbd9ddd82a598"
+      "sha256": "5691c775bafe540e5443915e6c5b9577247e54d695e3f94cc6eaac6a4e2fc43a"
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "5ebad255aac741f47cda4dbdda6cdeef23d2eaae259caf76f919162dad7b2821"
+      "sha256": "cbd21805b94aeb7d42d1456dd0e60362841fde44fd8a6c392187ab03f511f53f"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "1b2bb95273c9a7570da10cf928bed8492b75cfad087daade1a67dd6c6bfc212d"
+      "sha256": "88ac08b3faa2f67e7c551182dca6f39bb1bee7d6ae14279572032f53754c4aab"
     }
   },
   "authority": {
@@ -30,7 +30,7 @@
       "lockfile_version": 3,
       "package_count": 68,
       "package_json_sha256": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
-      "package_lock_sha256": "0a3bf9e86e6ac73b13c5b6a9b7c1166cf517b27ddcb8ad20af5d83600a144b6f",
+      "package_lock_sha256": "141049f7f4b191d2d14f22462f8376c67f6daae952ce55acd5150f6e0734a38d",
       "postcss_version": "8.5.26",
       "requires": true
     },
@@ -42,7 +42,7 @@
   },
   "claim_boundary": "contract_pass covers the technical runtime packaging contract only. It grants no product license, commercial use, redistribution, third-party-material clearance, signing authority, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-09-29T08:03:39.364433+00:00",
+  "generated_at": "2026-10-06T03:35:24.452115+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
