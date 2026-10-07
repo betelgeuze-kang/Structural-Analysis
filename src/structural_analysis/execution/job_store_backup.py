@@ -166,9 +166,13 @@ def _copy(source, destination, budget):
     return {"bytes": written, "sha256": digest.hexdigest()}
 
 
-def _database_checks(root, files, budget):
+def _database_checks(root, files, budget, *, immutable=False):
     with closing(
-        sqlite3.connect((root / "jobs.sqlite3").as_uri() + "?mode=ro", uri=True)
+        sqlite3.connect(
+            (root / "jobs.sqlite3").as_uri()
+            + ("?mode=ro&immutable=1" if immutable else "?mode=ro"),
+            uri=True,
+        )
     ) as db:
         db.set_progress_handler(lambda: int(time.monotonic() >= budget.deadline), 1000)
         if (
@@ -351,18 +355,7 @@ def backup_job_store(
     }
 
 
-def restore_job_store(
-    source,
-    destination,
-    *,
-    manifest_sha256,
-    maximum_bytes,
-    maximum_files=10000,
-    timeout_seconds=60,
-):
-    """Verify against a separately retained digest; restore only to a new root."""
-    budget = _Budget(maximum_bytes, maximum_files, timeout_seconds)
-    source, destination = _roots(source, destination)
+def _backup_inventory(source, manifest_sha256, budget):
     if (source / BACKUP_PENDING).exists() or (source / BACKUP_PENDING).is_symlink():
         raise ValueError("backup is incomplete")
     manifest_path = source / "backup-manifest.json"
@@ -386,7 +379,7 @@ def restore_job_store(
     if (
         type(files) is not dict
         or "jobs.sqlite3" not in files
-        or len(files) > maximum_files
+        or len(files) > budget.files
     ):
         raise ValueError("invalid backup inventory")
     for name, item in files.items():
@@ -403,6 +396,78 @@ def restore_job_store(
         if name != "jobs.sqlite3" and item["sha256"] != name.rsplit("/", 1)[1]:
             raise ValueError("backup content address differs")
     budget.check(sum(item["bytes"] for item in files.values()))
+    return files
+
+
+def verify_job_store_backup(
+    source,
+    *,
+    manifest_sha256,
+    maximum_bytes,
+    maximum_files=10000,
+    timeout_seconds=60,
+):
+    """Read a sealed, quiescent backup without creating a recovery destination.
+
+    SQLite is opened immutable only after hashing its sealed main database and
+    rejecting sidecars. This is not a verification mode for a live store.
+    """
+    budget = _Budget(maximum_bytes, maximum_files, timeout_seconds)
+    source = Path(source).absolute()
+    _safe(source, directory=True)
+    source = source.resolve()
+    files = _backup_inventory(source, manifest_sha256, budget)
+    for name in (
+        RESTORE_PENDING,
+        "jobs.sqlite3-wal",
+        "jobs.sqlite3-shm",
+        "jobs.sqlite3-journal",
+    ):
+        path = source / name
+        if path.exists() or path.is_symlink():
+            raise ValueError("backup is not sealed")
+    for name, expected in files.items():
+        path = source / name
+        _safe(path)
+        if path.stat().st_size != expected["bytes"]:
+            raise ValueError("backup member differs")
+        digest = hashlib.sha256()
+        size = 0
+        with path.open("rb") as stream:
+            while data := stream.read(65536):
+                budget.check(len(data))
+                size += len(data)
+                budget.used += len(data)
+                if size > expected["bytes"]:
+                    raise ValueError("backup member changed")
+                digest.update(data)
+        if size != expected["bytes"] or digest.hexdigest() != expected["sha256"]:
+            raise ValueError("backup member differs")
+    _database_checks(source, files, budget, immutable=True)
+    budget.check()
+    return {
+        "schema": "durable-job-store-backup-verification.v1",
+        "manifest_sha256": manifest_sha256,
+        "files": len(files),
+        "payload_bytes": budget.used,
+        "application_integrity_checked": False,
+        "service_started": False,
+    }
+
+
+def restore_job_store(
+    source,
+    destination,
+    *,
+    manifest_sha256,
+    maximum_bytes,
+    maximum_files=10000,
+    timeout_seconds=60,
+):
+    """Verify against a separately retained digest; restore only to a new root."""
+    budget = _Budget(maximum_bytes, maximum_files, timeout_seconds)
+    source, destination = _roots(source, destination)
+    files = _backup_inventory(source, manifest_sha256, budget)
     destination.mkdir(mode=0o700)
     _pending(destination, RESTORE_PENDING)
     for name, expected in files.items():

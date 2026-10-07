@@ -1,18 +1,23 @@
-"""Explicit local-operator backup/restore commands; never starts a service."""
+"""Explicit local-operator backup/verify/restore commands; never starts a service."""
 
 from __future__ import annotations
 import argparse
 import json
 import sqlite3
-from .job_store_backup import backup_job_store, restore_job_store
+from .job_store_backup import (
+    backup_job_store,
+    restore_job_store,
+    verify_job_store_backup,
+)
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("backup", "restore"))
+    parser.add_argument("operation", choices=("backup", "verify", "restore"))
     parser.add_argument("source")
     parser.add_argument(
         "destination",
+        nargs="?",
         help="new external directory; existing stores are never overwritten",
     )
     parser.add_argument("--maximum-bytes", type=int, required=True)
@@ -20,11 +25,13 @@ def main(argv=None):
     parser.add_argument("--timeout-seconds", type=int, default=60)
     parser.add_argument(
         "--manifest-sha256",
-        help="restore only: digest retained separately after successful backup",
+        help="verify/restore: digest retained separately after successful backup",
     )
     args = parser.parse_args(argv)
-    if (args.operation == "restore") != (args.manifest_sha256 is not None):
-        parser.error("--manifest-sha256 is required only for restore")
+    if (args.operation != "backup") != (args.manifest_sha256 is not None):
+        parser.error("--manifest-sha256 is required only for verify or restore")
+    if (args.operation != "verify") != (args.destination is not None):
+        parser.error("a destination is required only for backup or restore")
     kwargs = dict(
         maximum_bytes=args.maximum_bytes,
         maximum_files=args.maximum_files,
@@ -33,6 +40,10 @@ def main(argv=None):
     try:
         if args.operation == "backup":
             receipt = backup_job_store(args.source, args.destination, **kwargs)
+        elif args.operation == "verify":
+            receipt = verify_job_store_backup(
+                args.source, manifest_sha256=args.manifest_sha256, **kwargs
+            )
         else:
             receipt = restore_job_store(
                 args.source,

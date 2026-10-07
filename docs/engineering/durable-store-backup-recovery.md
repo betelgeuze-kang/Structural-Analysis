@@ -24,6 +24,25 @@ backup directory. Hashes detect different bytes; they do not authenticate a
 compromised operator or storage host. Backups may contain private project data;
 the destination is created with owner-only directory/file access.
 
+## Verify a sealed backup without restoring it
+
+```bash
+python -m structural_analysis.execution.job_store_backup_cli verify \
+  /path/to/new-backup \
+  --manifest-sha256 REPLACE_WITH_THE_SEPARATELY_RETAINED_DIGEST \
+  --maximum-bytes 1073741824 --maximum-files 10000 --timeout-seconds 60
+```
+
+Verification takes no destination and writes no receipt into the backup. Save its
+JSON output separately if an operator record is needed. It checks the separately
+retained manifest digest, every listed member's bytes, database integrity and
+stored references. Pending markers and SQLite WAL/journal sidecars are rejected;
+this command is for a sealed, quiescent backup, never a live store. No other process
+may modify that backup during verification. SQLite reads its verified main file
+in immutable read-only mode without creating sidecars. Unlisted unrelated files
+are not admitted or inspected. A passing receipt covers storage integrity only;
+restore and the service's application checks are still separate steps.
+
 ## Restore without activating a service
 
 ```bash

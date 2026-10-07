@@ -438,3 +438,95 @@ def test_finalization_sync_failure_restores_quarantine(store, tmp_path, monkeypa
     assert failed and (target / backup_module.RESTORE_PENDING).exists()
     with pytest.raises(JobServiceError):
         service(target)
+
+
+def test_verify_sealed_backup_without_writes_or_destination(
+    store, tmp_path, monkeypatch
+):
+    from structural_analysis.execution import job_store_backup as backup
+
+    source, receipt = saved(store, tmp_path)
+    before = {
+        p.relative_to(source): p.read_bytes() for p in source.rglob("*") if p.is_file()
+    }
+    real_connect = backup.sqlite3.connect
+    observed = []
+
+    def connect(database, **kwargs):
+        observed.append(database)
+        assert database.endswith("?mode=ro&immutable=1")
+        return real_connect(database, **kwargs)
+
+    monkeypatch.setattr(backup.sqlite3, "connect", connect)
+    result = backup.verify_job_store_backup(
+        source, manifest_sha256=receipt["manifest_sha256"], maximum_bytes=LIMIT
+    )
+    assert observed
+    assert result["files"] == receipt["files"]
+    assert result["payload_bytes"] == receipt["payload_bytes"]
+    assert result["application_integrity_checked"] is False
+    assert result["service_started"] is False
+    assert before == {
+        p.relative_to(source): p.read_bytes() for p in source.rglob("*") if p.is_file()
+    }
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        ".job-store-backup.pending",
+        ".job-store-restore.pending",
+        "jobs.sqlite3-wal",
+        "jobs.sqlite3-shm",
+        "jobs.sqlite3-journal",
+    ],
+)
+def test_verify_rejects_incomplete_or_unsealed_backup(store, tmp_path, name):
+    from structural_analysis.execution.job_store_backup import verify_job_store_backup
+
+    source, receipt = saved(store, tmp_path)
+    (source / name).symlink_to(source / "missing")
+    with pytest.raises(ValueError):
+        verify_job_store_backup(
+            source, manifest_sha256=receipt["manifest_sha256"], maximum_bytes=LIMIT
+        )
+
+
+@pytest.mark.parametrize("change", ["digest", "bytes", "budget", "link"])
+def test_verify_rejects_mismatch_and_budget(store, tmp_path, change):
+    from structural_analysis.execution.job_store_backup import verify_job_store_backup
+
+    source, receipt = saved(store, tmp_path)
+    digest = receipt["manifest_sha256"]
+    limit = LIMIT
+    if change == "digest":
+        digest = "0" * 64
+    elif change == "budget":
+        limit = 1
+    else:
+        blob = next((source / "blobs/sha256").glob("*/*"))
+        if change == "bytes":
+            data = blob.read_bytes()
+            blob.write_bytes(bytes([data[0] ^ 1]) + data[1:])
+        else:
+            blob.unlink()
+            blob.symlink_to(tmp_path / "missing")
+    with pytest.raises(ValueError):
+        verify_job_store_backup(source, manifest_sha256=digest, maximum_bytes=limit)
+
+
+def test_cli_verify_accepts_no_destination_and_requires_digest(store, tmp_path, capsys):
+    from structural_analysis.execution.job_store_backup_cli import main
+
+    source, receipt = saved(store, tmp_path)
+    args = ["verify", str(source), "--maximum-bytes", str(LIMIT)]
+    with pytest.raises(SystemExit) as exc:
+        main(args)
+    assert exc.value.code == 2
+    args += ["--manifest-sha256", receipt["manifest_sha256"]]
+    assert main(args) == 0
+    assert json.loads(capsys.readouterr().out)["operation"] == "verify"
+    with pytest.raises(SystemExit) as exc:
+        main(args + [str(tmp_path / "unwanted")])
+    assert exc.value.code == 2
+    assert not (tmp_path / "unwanted").exists()
