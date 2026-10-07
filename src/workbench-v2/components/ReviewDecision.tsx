@@ -107,7 +107,7 @@ export function ReviewDecision({ dataMode, draftState, onDraftChange }: ReviewDe
 
           <p className="wb2-review-meta" data-wb2-review-meta aria-live="polite">
             <span className={`wb2-chip wb2-chip--${draft.decision === 'pass' ? 'live' : draft.decision === 'fail' ? 'blocked' : 'unavailable'}`} data-wb2-review-state={draft.decision}>
-              draft: {draft.decision}
+              loaded-case draft: {draft.decision}
             </span>
             <span
               className="wb2-persistence-status"
@@ -120,6 +120,7 @@ export function ReviewDecision({ dataMode, draftState, onDraftChange }: ReviewDe
               {receipt.displayStatus}
             </span>
             {draft.updatedAt ? <> · updated {new Date(draft.updatedAt).toLocaleString()}</> : <> · not yet edited</>}
+            {draft.caseSha256 ? <> · case <code className="wb2-mono">{draft.caseSha256.slice(7, 19)}</code></> : null}
             <> · commit <code className="wb2-mono">{sourceCommitSha.slice(0, 12)}</code></>
           </p>
           <p className="wb2-action-hint" data-wb2-persistence-hint>{persistenceHint(receipt)}</p>

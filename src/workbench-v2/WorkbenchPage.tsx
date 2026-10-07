@@ -1,3 +1,4 @@
+import { canonicalJson, sha256Hex } from './model/checksum'
 import { RcStrategyCohortPanel } from './components/RcStrategyCohortPanel'
 import { RcControlSearchPanel } from './components/RcControlSearchPanel'
 import { RcControlDesignPanel } from './components/RcControlDesignPanel'
@@ -165,23 +166,24 @@ export function WorkbenchPage({
   )
   const reviewDraftStatesRef = useRef<ReadonlyMap<string, ReviewDraftState>>(reviewDraftStates)
 
+  const [reviewCaseSha256, setReviewCaseSha256] = useState<string | null>(null)
   const reviewSourceCommitSha = caseV2?.provenance.sourceCommitSha ?? null
 
   const reviewDraftState = useMemo(() => {
-    if (!reviewSourceCommitSha) return null
-    return reviewDraftStates.get(reviewSourceCommitSha) ?? null
-  }, [reviewDraftStates, reviewSourceCommitSha])
+    if (!reviewSourceCommitSha || !reviewCaseSha256) return null
+    return reviewDraftStates.get(reviewCaseSha256) ?? null
+  }, [reviewDraftStates, reviewSourceCommitSha, reviewCaseSha256])
 
   useEffect(() => {
     setSelectedNativeFrameMemberId(null)
   }, [nativeFrameLoad.resultIr?.result_hash])
 
   function updateReviewDraft(patch: Partial<ReviewDraft>): void {
-    if (!reviewSourceCommitSha) return
-    const current = reviewDraftStatesRef.current.get(reviewSourceCommitSha)
-      ?? loadReviewDraftState(reviewSourceCommitSha)
+    if (!reviewSourceCommitSha || !reviewCaseSha256) return
+    const current = reviewDraftStatesRef.current.get(reviewCaseSha256)
+      ?? loadReviewDraftState(reviewSourceCommitSha, { caseSha256: reviewCaseSha256 })
     const next = new Map(reviewDraftStatesRef.current)
-    next.set(reviewSourceCommitSha, updateReviewDraftState(current, patch))
+    next.set(reviewCaseSha256, updateReviewDraftState(current, patch))
     reviewDraftStatesRef.current = next
     setReviewDraftStates(next)
   }
@@ -218,17 +220,21 @@ export function WorkbenchPage({
     let cancelled = false
     setLoadState('loading')
     setCaseV2(null)
+    setReviewCaseSha256(null)
     provider
       .load()
-      .then((res) => {
+      .then(async (res) => {
         if (cancelled) return
         setSourceLabel(res.sourcePath)
         if (res.status === 'ready' && res.caseV2) {
           const w = res.validation?.warnings ?? []
           const reviewCommitSha = res.caseV2.provenance.sourceCommitSha
-          if (!reviewDraftStatesRef.current.has(reviewCommitSha)) {
+          const caseDigest = await sha256Hex(canonicalJson(res.caseV2))
+          if (cancelled) return
+          setReviewCaseSha256(caseDigest)
+          if (caseDigest && !reviewDraftStatesRef.current.has(caseDigest)) {
             const nextReviewStates = new Map(reviewDraftStatesRef.current)
-            nextReviewStates.set(reviewCommitSha, loadReviewDraftState(reviewCommitSha))
+            nextReviewStates.set(caseDigest, loadReviewDraftState(reviewCommitSha, { caseSha256: caseDigest }))
             reviewDraftStatesRef.current = nextReviewStates
             setReviewDraftStates(nextReviewStates)
           }
@@ -511,7 +517,7 @@ export function WorkbenchPage({
           <section className="wb2-panel" aria-labelledby="wb2-verdict-title">
             <h2 id="wb2-verdict-title" className="wb2-panel__title">Review decision</h2>
             <p className="wb2-empty" role="status" data-wb2-review-loading>
-              Loading reviewer draft persistence…
+              {reviewCaseSha256 ? 'Loading reviewer draft persistence…' : 'Reviewer draft and export unavailable: loaded-case identity could not be verified.'}
             </p>
           </section>
         ) : (
