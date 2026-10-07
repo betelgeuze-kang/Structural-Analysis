@@ -376,6 +376,15 @@ def backup_job_store(
 def _backup_inventory(source, manifest_sha256, budget):
     if (source / BACKUP_PENDING).exists() or (source / BACKUP_PENDING).is_symlink():
         raise ValueError("backup is incomplete")
+    for name in (
+        RESTORE_PENDING,
+        "jobs.sqlite3-wal",
+        "jobs.sqlite3-shm",
+        "jobs.sqlite3-journal",
+    ):
+        path = source / name
+        if path.exists() or path.is_symlink():
+            raise ValueError("backup is not sealed")
     manifest_path = source / "backup-manifest.json"
     _safe(manifest_path)
     with manifest_path.open("rb") as stream:
@@ -435,15 +444,6 @@ def verify_job_store_backup(
     _safe(source, directory=True)
     source = source.resolve()
     files = _backup_inventory(source, manifest_sha256, budget)
-    for name in (
-        RESTORE_PENDING,
-        "jobs.sqlite3-wal",
-        "jobs.sqlite3-shm",
-        "jobs.sqlite3-journal",
-    ):
-        path = source / name
-        if path.exists() or path.is_symlink():
-            raise ValueError("backup is not sealed")
     for name, expected in files.items():
         path = source / name
         _safe(path)

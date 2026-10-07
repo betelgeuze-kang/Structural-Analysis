@@ -624,3 +624,37 @@ def test_restored_running_job_preserves_expiry_and_rejects_old_token_after_recla
         ).to_dict()
         == before
     )
+
+
+@pytest.mark.parametrize(
+    "member",
+    [
+        ".job-store-backup.pending",
+        ".job-store-restore.pending",
+        "jobs.sqlite3-wal",
+        "jobs.sqlite3-shm",
+        "jobs.sqlite3-journal",
+    ],
+)
+@pytest.mark.parametrize("dangling", [False, True])
+def test_restore_rejects_unsealed_source_before_destination_creation(
+    store, tmp_path, member, dangling
+):
+    source, receipt = saved(store, tmp_path)
+    marker = source / member
+    if dangling:
+        marker.symlink_to(tmp_path / "absent-marker-target")
+    else:
+        marker.write_bytes(b"unfinished")
+    destination = tmp_path / "must-not-be-created"
+    original_db = (source / "jobs.sqlite3").read_bytes()
+    with pytest.raises(ValueError, match="incomplete|not sealed"):
+        restore_job_store(
+            source,
+            destination,
+            manifest_sha256=receipt["manifest_sha256"],
+            maximum_bytes=LIMIT,
+        )
+    assert not destination.exists()
+    assert (source / "jobs.sqlite3").read_bytes() == original_db
+    assert marker.is_symlink() if dangling else marker.read_bytes() == b"unfinished"
