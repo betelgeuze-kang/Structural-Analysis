@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-10-06T13:53:55Z",
+  "observed_at": "2026-10-07T15:52:00Z",
   "observation_source": "github_rest_read_only_current_github_state",
-  "observed_open_issue_count": 35,
+  "observed_open_issue_count": 38,
   "open_issue_numbers": [
     247,
     258,
@@ -39,9 +39,12 @@
     518,
     520,
     522,
-    524
+    524,
+    560,
+    561,
+    563
   ],
-  "open_issue_projection_sha256": "sha256:ad1b39d5fbb5571c6f84ead571c55bceece52ee8ab4eb0676b79832583166da9",
+  "open_issue_projection_sha256": "sha256:f10ed9257cb1f1e096b64bed6de09334bad6ab03e4309446febb3b7f38ad2a26",
   "open_issues": [
     {
       "number": 247,
@@ -447,7 +450,7 @@
     },
     {
       "number": 476,
-      "title": "Complete pin–roller v4 design pair reanalysis and quantities",
+      "title": "Complete pin\u2013roller v4 design pair reanalysis and quantities",
       "state": "open",
       "updated_at": "2026-09-28T09:56:58Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/476",
@@ -467,7 +470,7 @@
     },
     {
       "number": 477,
-      "title": "Review v4 pin–roller design comparisons in Workbench",
+      "title": "Review v4 pin\u2013roller design comparisons in Workbench",
       "state": "open",
       "updated_at": "2026-09-28T09:57:05Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/477",
@@ -730,6 +733,60 @@
       "required_external_inputs": [],
       "closable_by_repository_code_alone": true,
       "current_product_authority": false
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        557
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_nightly_analytic_and_buckling_command_parity",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:22b0e87c958d463b83a3209beaf80a98f3a607149fbb94d3fa8d57b3ad340ebc",
+      "labels": [],
+      "number": 560,
+      "state": "open",
+      "title": "Restore Nightly analytic and buckling preparation command parity",
+      "updated_at": "2026-10-07T12:26:07Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/560"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        558
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_modal_and_buckling_early_dense_work_guards",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:da775e47fffe32c49193853305c7390099c63353cf7d2c6593c77743fbcd2d4f",
+      "labels": [],
+      "number": 561,
+      "state": "open",
+      "title": "Reject oversized modal and buckling requests before dense work",
+      "updated_at": "2026-10-07T12:26:24Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/561"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        564
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_bounded_rc_displacement_control_and_full_prefix_restart",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:334da2bfb3918b7bf129984bdad0ac986e0f36492a48a8f17ec3256ce6f00603",
+      "labels": [],
+      "number": 563,
+      "state": "open",
+      "title": "Add bounded RC displacement-control and full-prefix restart primitives",
+      "updated_at": "2026-10-07T12:32:21Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/563"
     }
   ],
   "implemented_but_open_issues": [
