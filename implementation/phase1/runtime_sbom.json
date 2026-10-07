@@ -839,14 +839,14 @@
     {
       "development": true,
       "ecosystem": "node",
-      "integrity": "sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==",
+      "integrity": "sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==",
       "kind": "package-lock-v3-package",
       "license": "BSD-3-Clause",
       "lock_path": "node_modules/source-map-js",
       "name": "source-map-js",
       "optional": false,
       "peer": false,
-      "version": "1.2.1"
+      "version": "1.2.2"
     },
     {
       "development": true,
@@ -955,7 +955,7 @@
     },
     "third_party_redistribution_clearance": "not_established"
   },
-  "generated_at": "2026-10-04T05:15:10.799982+00:00",
+  "generated_at": "2026-10-07T11:51:56.404369+00:00",
   "schema_version": "runtime-sbom.v1",
   "source_files": {
     "cargo_lock": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.lock",
@@ -968,7 +968,7 @@
     "cargo_lock": "4112b6718c940b132ef7023b0bdb6adfdb454a3fe0ec079b8f69dbe20445cbff",
     "cargo_toml": "73badcc7336768424ef718dd1bb7f3f62eff4da09d18cee7b1d915c2e74f4eea",
     "package_json": "83076239a8bd5b7a70df673e20f5b2f4c2e81387a14b17f0cd63ac1032a49795",
-    "package_lock": "867923e83542b870d0ad832d7f552059a4cde90f5b4e1ad5fbeb0c7e35158ef0",
+    "package_lock": "f42d2f2178cec315c5f24d81855e0821e8fd2c2883c20e650c813d173715d325",
     "pyproject": "ac8911e7db8e8cccb0aafa037ecc88381764ffdd2f853425472d3bbfe6e56b5b",
     "repository_license": "2cb0e9dff0aa63dee5f398a0dd7f3471d67a94178c935b5fb6b94a6ac5fd7778"
   }
