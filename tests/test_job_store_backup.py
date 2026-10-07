@@ -298,3 +298,143 @@ def test_manifest_cannot_rebind_a_content_address_to_other_bytes(store, tmp_path
             maximum_bytes=LIMIT,
         )
     assert not (tmp_path / "restored").exists()
+
+
+@pytest.mark.parametrize(
+    "marker",
+    [".job-store-backup.pending", ".job-store-restore.pending", "backup-manifest.json"],
+)
+def test_service_refuses_incomplete_or_sealed_store_before_database_changes(
+    store, marker
+):
+    from structural_analysis.execution.job_service import JobServiceError
+
+    root = store[0].root
+    before = (root / "jobs.sqlite3").read_bytes()
+    (root / marker).write_text("reserved marker")
+    with pytest.raises(JobServiceError) as error:
+        service(root)
+    assert error.value.code == "job_store_not_activated"
+    assert (root / "jobs.sqlite3").read_bytes() == before
+
+
+def test_dangling_pending_marker_also_blocks_service(store):
+    from structural_analysis.execution.job_service import JobServiceError
+
+    (store[0].root / ".job-store-restore.pending").symlink_to("missing")
+    with pytest.raises(JobServiceError):
+        service(store[0].root)
+
+
+def test_failed_restore_stays_quarantined(store, tmp_path):
+    from structural_analysis.execution.job_service import JobServiceError
+
+    source, receipt = saved(store, tmp_path)
+    blob = next((source / "blobs/sha256").glob("*/*"))
+    blob.write_bytes(b"changed")
+    target = tmp_path / "restored"
+    with pytest.raises(ValueError):
+        restore_job_store(
+            source,
+            target,
+            manifest_sha256=receipt["manifest_sha256"],
+            maximum_bytes=LIMIT,
+        )
+    assert (target / ".job-store-restore.pending").exists()
+    with pytest.raises(JobServiceError):
+        service(target)
+
+
+def test_cli_backup_restore_produces_receipt_without_starting_service(
+    store, tmp_path, capsys
+):
+    from structural_analysis.execution.job_store_backup_cli import main
+
+    backup = tmp_path / "backup"
+    target = tmp_path / "restored"
+    assert (
+        main(["backup", str(store[0].root), str(backup), "--maximum-bytes", str(LIMIT)])
+        == 0
+    )
+    first = json.loads(capsys.readouterr().out)
+    assert first["service_started"] is False
+    assert (
+        main(
+            [
+                "restore",
+                str(backup),
+                str(target),
+                "--maximum-bytes",
+                str(LIMIT),
+                "--manifest-sha256",
+                first["manifest_sha256"],
+            ]
+        )
+        == 0
+    )
+    result = json.loads(capsys.readouterr().out)
+    assert result["service_started"] is False
+    assert not (target / ".job-store-restore.pending").exists()
+    receipt = json.loads((target / "restore-receipt.json").read_text())
+    assert receipt["manifest_sha256"] == first["manifest_sha256"]
+    assert (
+        service(target)
+        .get_job(store[1].job_id, tenant_id="tenant", authorization_token=TOKEN)
+        .to_dict()
+        == store[1].to_dict()
+    )
+
+
+def test_cli_failure_does_not_print_underlying_exception(capsys, monkeypatch):
+    from structural_analysis.execution import job_store_backup_cli as cli
+
+    def fail(*args, **kwargs):
+        raise OSError("private-path-sentinel")
+
+    monkeypatch.setattr(cli, "backup_job_store", fail)
+    assert cli.main(["backup", "source", "new-target", "--maximum-bytes", "100"]) == 1
+    output = capsys.readouterr().out
+    assert "private-path-sentinel" not in output
+    assert json.loads(output)["status"] == "failed"
+
+
+def test_cli_restore_requires_separately_held_digest():
+    from structural_analysis.execution.job_store_backup_cli import main
+
+    with pytest.raises(SystemExit) as error:
+        main(["restore", "backup", "new-target", "--maximum-bytes", "100"])
+    assert error.value.code == 2
+
+
+def test_finalization_sync_failure_restores_quarantine(store, tmp_path, monkeypatch):
+    from structural_analysis.execution import job_store_backup as backup_module
+    from structural_analysis.execution.job_service import JobServiceError
+
+    source, receipt = saved(store, tmp_path)
+    target = tmp_path / "restored"
+    original = backup_module._sync_directory
+    failed = False
+
+    def sync(path):
+        nonlocal failed
+        if (
+            path == target
+            and (target / "restore-receipt.json").exists()
+            and not (target / backup_module.RESTORE_PENDING).exists()
+            and not failed
+        ):
+            failed = True
+            raise OSError("synthetic final sync failure")
+        return original(path)
+
+    monkeypatch.setattr(backup_module, "_sync_directory", sync)
+    with pytest.raises(OSError):
+        restore_job_store(
+            source,
+            target,
+            manifest_sha256=receipt["manifest_sha256"],
+            maximum_bytes=LIMIT,
+        )
+    assert failed and (target / backup_module.RESTORE_PENDING).exists()
+    with pytest.raises(JobServiceError):
+        service(target)

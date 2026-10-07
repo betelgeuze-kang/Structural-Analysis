@@ -23,6 +23,50 @@ _BLOB = re.compile(r"blobs/sha256/([0-9a-f]{2})/([0-9a-f]{64})\Z")
 _SCHEMA = "durable-job-store-backup.v1"
 
 
+BACKUP_PENDING = ".job-store-backup.pending"
+RESTORE_PENDING = ".job-store-restore.pending"
+
+
+def _sync_directory(path):
+    fd = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def _pending(root, name):
+    with (root / name).open("xb") as stream:
+        stream.write(b"incomplete; do not start a service from this root\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    _sync_directory(root)
+
+
+def _finish_pending(root, name):
+    (root / name).unlink()
+    try:
+        _sync_directory(root)
+    except BaseException:
+        # A reported finalization failure must remain visibly quarantined.
+        # If the filesystem also refuses this marker, the exception propagates;
+        # no power-loss or arbitrary hardware-failure guarantee is claimed.
+        _pending(root, name)
+        raise
+
+
+def _sync_payload_directories(root, files, budget):
+    directories = {root}
+    for name in files:
+        current = (root / name).parent
+        while current != root:
+            directories.add(current)
+            current = current.parent
+    for directory in sorted(directories, key=lambda p: len(p.parts), reverse=True):
+        budget.check()
+        _sync_directory(directory)
+
+
 def _strict_json(raw):
     def pairs(items):
         result = {}
@@ -215,6 +259,10 @@ def backup_job_store(
     """
     budget = _Budget(maximum_bytes, maximum_files, timeout_seconds)
     source, destination = _roots(source, destination)
+    for name in (BACKUP_PENDING, RESTORE_PENDING, "backup-manifest.json"):
+        marker = source / name
+        if marker.exists() or marker.is_symlink():
+            raise ValueError("backup source is not an active-store root")
     _safe(source / "jobs.sqlite3")
     _safe(source / "blobs/sha256", directory=True)
     files = {}
@@ -229,6 +277,7 @@ def backup_job_store(
         lock.execute("BEGIN IMMEDIATE")
         try:
             destination.mkdir(mode=0o700)
+            _pending(destination, BACKUP_PENDING)
             target = destination / "jobs.sqlite3"
             with (
                 closing(
@@ -280,6 +329,7 @@ def backup_job_store(
             _database_checks(destination, files, budget)
         finally:
             lock.rollback()
+    _sync_payload_directories(destination, files, budget)
     manifest = {
         "schema": _SCHEMA,
         "files": files,
@@ -292,6 +342,8 @@ def backup_job_store(
         stream.write(raw)
         stream.flush()
         os.fsync(stream.fileno())
+    _sync_directory(destination)
+    _finish_pending(destination, BACKUP_PENDING)
     return {
         "manifest_sha256": hashlib.sha256(raw).hexdigest(),
         "files": len(files),
@@ -311,6 +363,8 @@ def restore_job_store(
     """Verify against a separately retained digest; restore only to a new root."""
     budget = _Budget(maximum_bytes, maximum_files, timeout_seconds)
     source, destination = _roots(source, destination)
+    if (source / BACKUP_PENDING).exists() or (source / BACKUP_PENDING).is_symlink():
+        raise ValueError("backup is incomplete")
     manifest_path = source / "backup-manifest.json"
     _safe(manifest_path)
     with manifest_path.open("rb") as stream:
@@ -350,11 +404,27 @@ def restore_job_store(
             raise ValueError("backup content address differs")
     budget.check(sum(item["bytes"] for item in files.values()))
     destination.mkdir(mode=0o700)
+    _pending(destination, RESTORE_PENDING)
     for name, expected in files.items():
         actual = _copy(source / name, destination / name, budget)
         if actual != expected:
             raise ValueError("backup member differs")
     _database_checks(destination, files, budget)
+    _sync_payload_directories(destination, files, budget)
+    receipt = {
+        "schema": "durable-job-store-restore.v1",
+        "manifest_sha256": manifest_sha256,
+        "files": len(files),
+        "payload_bytes": budget.used,
+        "service_started": False,
+        "application_integrity_checked": False,
+    }
+    with (destination / "restore-receipt.json").open("xb") as stream:
+        stream.write(json.dumps(receipt, sort_keys=True).encode())
+        stream.flush()
+        os.fsync(stream.fileno())
+    _sync_directory(destination)
+    _finish_pending(destination, RESTORE_PENDING)
     return {
         "files": len(files),
         "payload_bytes": budget.used,
