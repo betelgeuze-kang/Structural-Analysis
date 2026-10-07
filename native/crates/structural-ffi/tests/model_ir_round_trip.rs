@@ -45,7 +45,11 @@ fn every_tracked_positive_fixture_completes_the_native_round_trip() {
             .expect("verified native round-trip");
         assert!(validation.report.contract_valid, "{relative}");
         assert!(validation.report.analysis_ready, "{relative}");
-        assert!(validation.report.issues.is_empty(), "{relative}");
+        assert_eq!(
+            validation.report.issues,
+            [] as [structural_ffi::ModelIrValidationIssue; 0],
+            "{relative}"
+        );
         assert_eq!(
             validation.snapshot.canonical_bytes(),
             source.canonical_bytes(),
@@ -199,7 +203,10 @@ fn descriptor_arena_covers_the_remaining_typed_families_and_nullable_fields() {
         .expect("full typed family round-trip");
     assert!(validation.report.contract_valid);
     assert!(validation.report.analysis_ready);
-    assert!(validation.report.issues.is_empty());
+    assert_eq!(
+        validation.report.issues,
+        [] as [structural_ffi::ModelIrValidationIssue; 0]
+    );
     assert_eq!(validation.report.entity_counts.nodes, 3);
     assert_eq!(validation.report.entity_counts.sections, 2);
     assert_eq!(validation.report.entity_counts.elements, 2);
@@ -247,7 +254,10 @@ fn semantic_invalidity_and_explicit_blockers_remain_distinct_success_reports() {
     assert!(blocked.report.contract_valid);
     assert!(!blocked.report.analysis_ready);
     assert_eq!(blocked.report.blocking_feature_ids, ["feature.blocked"]);
-    assert!(blocked.report.issues.is_empty());
+    assert_eq!(
+        blocked.report.issues,
+        [] as [structural_ffi::ModelIrValidationIssue; 0]
+    );
 }
 
 #[test]
