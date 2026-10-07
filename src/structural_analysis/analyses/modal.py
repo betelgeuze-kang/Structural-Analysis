@@ -16,6 +16,7 @@ from structural_analysis.assembly.modal import (
     DOF_PER_NODE,
     ModalAssembly,
     assemble_modal_matrices,
+    preflight_modal_resources,
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.equation_scaling_6dof import (
@@ -62,6 +63,16 @@ def run_authoritative_modal(
         return _blocked_solution(
             model,
             unsupported=unsupported,
+            eigen_backend=eigen_backend,
+        )
+
+    resource_unsupported = preflight_modal_resources(
+        model, maximum_free_dof_count=MAX_DENSE_MODAL_FREE_DOF
+    )
+    if resource_unsupported:
+        return _blocked_solution(
+            model,
+            unsupported=resource_unsupported,
             eigen_backend=eigen_backend,
         )
 
@@ -416,6 +427,14 @@ def _blocked_solution(
     eigen_backend: str,
     assembly: ModalAssembly | None = None,
 ) -> WholeModelModalSolution:
+    preflight_counts = next(
+        (
+            row
+            for row in unsupported
+            if row.get("kind") == "modal_dense_free_dof_limit_exceeded"
+        ),
+        {},
+    )
     return WholeModelModalSolution(
         status="blocked",
         metrics={
@@ -432,8 +451,16 @@ def _blocked_solution(
             "fallback_used": False,
             "matrix_backend": eigen_backend,
             "sparse_backend_used": False,
-            "free_dof_count": len(assembly.free_dofs) if assembly else 0,
-            "active_dof_count": len(assembly.active_dofs) if assembly else 0,
+            "free_dof_count": (
+                len(assembly.free_dofs)
+                if assembly
+                else preflight_counts.get("free_dof_count", 0)
+            ),
+            "active_dof_count": (
+                len(assembly.active_dofs)
+                if assembly
+                else preflight_counts.get("active_dof_count", 0)
+            ),
             "whole_model_frame_truss_modal_workflow": False,
             "general_frame_shell_modal_workflow": False,
             "nodal_lumped_mass_supported": False,

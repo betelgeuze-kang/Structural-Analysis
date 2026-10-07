@@ -121,13 +121,8 @@ def _assemble_linear_static(
             continue
         element_stiffness, record = assembled
         records.append(record)
-        row_scale = max(float(np.max(np.abs(element_stiffness))), 1.0)
+        active_dofs.update(_element_active_dofs(element_stiffness, record))
         for local_row, global_row in enumerate(record.dofs):
-            if (
-                float(np.max(np.abs(element_stiffness[local_row, :])))
-                > 1.0e-14 * row_scale
-            ):
-                active_dofs.add(global_row)
             for local_column, global_column in enumerate(record.dofs):
                 value = float(element_stiffness[local_row, local_column])
                 if value == 0.0:
@@ -195,6 +190,19 @@ def _assemble_linear_static(
         ),
         [],
     )
+
+
+def _element_active_dofs(
+    element_stiffness: np.ndarray,
+    record: ElementAssemblyRecord,
+) -> set[int]:
+    """Keep static activity identical in assembly and resource-only preflight."""
+    row_scale = max(float(np.max(np.abs(element_stiffness))), 1.0)
+    return {
+        global_row
+        for local_row, global_row in enumerate(record.dofs)
+        if float(np.max(np.abs(element_stiffness[local_row, :]))) > 1.0e-14 * row_scale
+    }
 
 
 def _duplicate_model_ids(model: CanonicalModel) -> list[dict[str, Any]]:

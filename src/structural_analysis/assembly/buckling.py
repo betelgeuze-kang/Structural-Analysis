@@ -8,7 +8,15 @@ from typing import Any
 
 import numpy as np
 
-from structural_analysis.assembly.linear_static import assemble_linear_static
+from structural_analysis.assembly.linear_static import (
+    DOF_PER_NODE,
+    _constrained_dofs,
+    _duplicate_model_ids,
+    _element_active_dofs,
+    _element_matrix,
+    _node_coordinates,
+    assemble_linear_static,
+)
 from structural_analysis.elements.frame3d import (
     Frame3DProperties,
     frame3d_global_geometric_stiffness,
@@ -16,6 +24,9 @@ from structural_analysis.elements.frame3d import (
 from structural_analysis.model.schema import CanonicalModel
 
 
+# Payload of full binary64 K/Kg only, not reference-solve workspace or peak RSS.
+MAX_DENSE_BUCKLING_MATRIX_BYTES = 64 * 1024 * 1024
+MAX_DENSE_BUCKLING_FREE_DOF = 512
 SUPPORTED_BUCKLING_ELEMENT_TYPES = {"frame", "beam", "column"}
 GEOMETRIC_STIFFNESS_FORMULATION = (
     "euler_bernoulli_constant_axial_compression_initial_stress_v1"
@@ -57,6 +68,72 @@ class BucklingAssembly:
     geometric_stiffness_sign_convention: str = GEOMETRIC_STIFFNESS_SIGN_CONVENTION
 
 
+def preflight_buckling_resources(
+    model: CanonicalModel,
+    *,
+    maximum_free_dof_count: int = MAX_DENSE_BUCKLING_FREE_DOF,
+) -> list[dict[str, Any]]:
+    """Bound full matrix payload and exact static free DOFs before baseline.
+
+    Every canonical node occupies six full-matrix coordinates, including
+    disconnected and restrained nodes. The local stiffness pass is repeated
+    after admission; it does not bound element inventory cost or job time.
+    """
+    total_dof_count = len(model.nodes) * DOF_PER_NODE
+    matrix_pair_bytes = 2 * total_dof_count**2 * np.dtype(np.float64).itemsize
+    if matrix_pair_bytes > MAX_DENSE_BUCKLING_MATRIX_BYTES:
+        return [
+            {
+                "kind": "buckling_dense_matrix_payload_limit_exceeded",
+                "total_dof_count": total_dof_count,
+                "matrix_pair_bytes": matrix_pair_bytes,
+                "maximum_matrix_pair_bytes": MAX_DENSE_BUCKLING_MATRIX_BYTES,
+                "detail": "Limit covers full binary64 K/Kg payload only, not peak RSS.",
+            }
+        ]
+    # Reuse main's effective string keys and all four duplicate namespaces.
+    unsupported = _duplicate_model_ids(model)
+    if unsupported:
+        return unsupported
+    node_ids = tuple(str(node.get("id", "")) for node in model.nodes)
+    node_index = {node_id: index for index, node_id in enumerate(node_ids)}
+    coordinates = _node_coordinates(model.nodes, unsupported)
+    materials = {str(row.get("id", "")): row for row in model.materials}
+    sections = {str(row.get("id", "")): row for row in model.sections}
+    constrained = set(_constrained_dofs(model.supports, node_index, unsupported))
+    if unsupported:
+        return unsupported
+    active_dofs: set[int] = set()
+    for element in model.elements:
+        assembled = _element_matrix(
+            element=element,
+            node_index=node_index,
+            coordinates=coordinates,
+            materials=materials,
+            sections=sections,
+            unsupported=unsupported,
+        )
+        if assembled is not None:
+            stiffness, record = assembled
+            active_dofs.update(_element_active_dofs(stiffness, record))
+    free_dof_count = len(active_dofs - constrained)
+    if not unsupported and free_dof_count > maximum_free_dof_count:
+        unsupported.append(
+            {
+                "kind": "buckling_dense_free_dof_limit_exceeded",
+                "free_dof_count": free_dof_count,
+                "active_dof_count": len(active_dofs),
+                "constrained_dof_count": len(constrained),
+                "maximum_free_dof_count": maximum_free_dof_count,
+                "detail": (
+                    "Sparse eigen extraction and binary buckling-mode vector "
+                    "artifacts are not connected to the public path."
+                ),
+            }
+        )
+    return unsupported
+
+
 def assemble_linear_buckling_matrices(
     model: CanonicalModel,
     *,
@@ -92,6 +169,10 @@ def assemble_linear_buckling_matrices(
             )
     if unsupported:
         return None, unsupported
+
+    resource_unsupported = preflight_buckling_resources(model)
+    if resource_unsupported:
+        return None, resource_unsupported
 
     linear, linear_unsupported = assemble_linear_static(model, load_case=load_case)
     if linear is None:

@@ -8,6 +8,7 @@ from pathlib import Path
 import textwrap
 
 import pytest
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -155,6 +156,49 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
     gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     assert '[_python(), "-m", "pytest", "-q"]' in gate
     assert "python_suite_delegated_to_workflow_shards" in gate
+
+
+@pytest.mark.parametrize(
+    ("job_id", "consumer"),
+    (
+        ("python_full_shards", "Run materialized repository test suite shard"),
+        ("deterministic_quality", "Deterministic repository quality gate"),
+    ),
+)
+def test_nightly_materializes_and_checks_current_source_mechanics_before_consumers(
+    job_id: str,
+    consumer: str,
+) -> None:
+    workflows = ROOT / ".github" / "workflows"
+    nightly = yaml.safe_load((workflows / "nightly-full-quality.yml").read_text())
+    ci = yaml.safe_load((workflows / "ci.yml").read_text())
+    materialize = "Materialize exact current-source test evidence"
+    ci_step = next(
+        step
+        for step in ci["jobs"]["verify"]["steps"]
+        if step.get("name") == materialize
+    )
+    steps = nightly["jobs"][job_id]["steps"]
+    names = [step.get("name") for step in steps]
+    assert names.count(materialize) == 1
+    assert names.index("Validate pristine commercial gap ledger") < names.index(
+        materialize
+    )
+    assert names.index(materialize) < names.index(consumer)
+    step = steps[names.index(materialize)]
+    assert "if" not in step
+    assert "continue-on-error" not in step
+    commands = [line.strip() for line in step["run"].splitlines()]
+    ci_commands = [line.strip() for line in ci_step["run"].splitlines()]
+    for script in (
+        "build_analytic_frame_verification_artifact.py",
+        "build_phase2_whole_model_buckling_artifacts.py",
+    ):
+        build = f"python scripts/{script}"
+        check = f"{build} --check"
+        assert commands.count(build) == commands.count(check) == 1
+        assert commands.index(check) == commands.index(build) + 1
+        assert ci_commands.index(check) == ci_commands.index(build) + 1
 
 
 def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:

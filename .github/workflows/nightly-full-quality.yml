@@ -57,6 +57,15 @@ jobs:
       - name: Materialize exact current-source test evidence
         shell: bash
         run: |
+          # Match CI: recompute and strictly replay source-bound mechanics
+          # evidence in this ephemeral checkout before any consumer runs.
+          python scripts/build_analytic_frame_verification_artifact.py
+          python scripts/build_analytic_frame_verification_artifact.py --check
+          python scripts/build_phase2_whole_model_buckling_artifacts.py
+          python scripts/build_phase2_whole_model_buckling_artifacts.py --check
+          # Rebuild modal source hashes in this ephemeral checkout; keep strict replay.
+          python scripts/build_phase2_whole_model_modal_artifacts.py
+          python scripts/build_phase2_whole_model_modal_artifacts.py --check
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "Nightly product replay; external execution bytes reused without freshness credit."
@@ -145,6 +154,15 @@ jobs:
       - name: Materialize exact current-source test evidence
         shell: bash
         run: |
+          # Match CI: recompute and strictly replay source-bound mechanics
+          # evidence in this ephemeral checkout before any consumer runs.
+          python scripts/build_analytic_frame_verification_artifact.py
+          python scripts/build_analytic_frame_verification_artifact.py --check
+          python scripts/build_phase2_whole_model_buckling_artifacts.py
+          python scripts/build_phase2_whole_model_buckling_artifacts.py --check
+          # Rebuild modal source hashes in this ephemeral checkout; keep strict replay.
+          python scripts/build_phase2_whole_model_modal_artifacts.py
+          python scripts/build_phase2_whole_model_modal_artifacts.py --check
           python scripts/run_external_code_to_code_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "Nightly product replay; external execution bytes reused without freshness credit."
