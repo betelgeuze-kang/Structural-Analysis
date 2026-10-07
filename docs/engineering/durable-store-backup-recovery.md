@@ -54,6 +54,12 @@ single store, existing claims remain unavailable until their saved expiry; a lat
 claim uses the service's ordinary expiry/requeue transition and a new lease token.
 An old token is then rejected. Never edit lease rows to skip that procedure.
 
+The snapshot also retains the root's immutable blob payload cap and each RC job's
+consumed invocation reservations. Recovery does not replenish an exhausted job
+budget; reopening with a conflicting payload cap is rejected. These are the
+existing application limits, not guarantees for total disk/WAL/inodes, memory,
+CPU time or duplicate work across two independently active restored copies.
+
 ## Restore without activating a service
 
 ```bash
