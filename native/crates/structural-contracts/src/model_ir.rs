@@ -765,7 +765,7 @@ mod tests {
         let error = decode_json_strict(br#"{"outer":{"id":1,"id":2}}"#)
             .expect_err("duplicate key must fail before schema validation");
         assert_eq!(error.code, "model_ir_duplicate_json_key");
-        assert!(error.issues.is_empty());
+        assert_eq!(error.issues, [] as [super::ModelIrValidationIssue; 0]);
     }
 
     #[test]
