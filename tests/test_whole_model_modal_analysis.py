@@ -18,7 +18,12 @@ from structural_analysis.analyses.modal import (
     EIGEN_BACKEND,
     MODAL_CLAIM_BOUNDARY,
 )
-from structural_analysis.assembly.modal import assemble_modal_matrices
+import structural_analysis.analyses.modal as modal_analysis
+import structural_analysis.assembly.modal as modal_assembly
+from structural_analysis.assembly.modal import (
+    assemble_modal_matrices,
+    preflight_modal_resources,
+)
 from structural_analysis.elements.axial import (
     axial_element_properties,
     axial_global_consistent_mass,
@@ -470,3 +475,239 @@ def test_analysis_config_serializes_modal_controls() -> None:
     assert payload["mode_count"] == 3
     assert payload["eigen_backend"] == EIGEN_BACKEND
     assert math.isfinite(payload["tolerance"])
+
+
+def _modal_inventory_payload(
+    node_count: int,
+    *,
+    connected: bool,
+    restrained: bool,
+) -> dict[str, object]:
+    payload = _axial_payload()
+    payload["nodes"] = [
+        {"id": f"N{index + 1}", "coordinates": [float(index), 0.0, 0.0]}
+        for index in range(node_count)
+    ]
+    if connected:
+        payload["elements"] = [
+            {
+                "id": f"E{index + 1}",
+                "type": "truss",
+                "nodes": [f"N{index + 1}", f"N{index + 2}"],
+                "material": "M1",
+                "section": "S1",
+            }
+            for index in range(node_count - 1)
+        ]
+    if restrained:
+        payload["supports"] = [
+            {"node_id": "N1", "restrained_dofs": "all"},
+            {"node": "N2", "dofs": ["uy", "uz", "UY"]},
+            *[
+                {"node": f"N{index + 1}", "dofs": "all"}
+                for index in range(2, node_count)
+            ],
+        ]
+    else:
+        payload["supports"] = []
+    return payload
+
+
+@pytest.mark.parametrize("restrained", [False, True])
+def test_public_free_dof_overflow_never_calls_assembler_or_eigensolver(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    restrained: bool,
+) -> None:
+    # 171 truss nodes have 513 active translations, not 1026 active equations.
+    payload = _modal_inventory_payload(171, connected=True, restrained=False)
+    if restrained:
+        # Inactive rotations must not subtract from the 513 active translations.
+        payload["supports"] = [
+            {"node": f"N{index + 1}", "dofs": ["RX", "RY", "RZ"]}
+            for index in range(171)
+        ]
+    path = tmp_path / "free-overflow.json"
+    _write_model(path, payload)
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("Over-limit input reached whole-model assembly or eigensolve")
+
+    monkeypatch.setattr(modal_analysis, "assemble_modal_matrices", forbidden)
+    monkeypatch.setattr(modal_analysis, "solve_modal_modes", forbidden)
+    result = analyze(
+        load_model(path), AnalysisConfig(analysis_type="modal", mode_count=1)
+    )
+    assert result.status == "blocked"
+    assert result.unsupported_features == [
+        {
+            "kind": "modal_dense_free_dof_limit_exceeded",
+            "free_dof_count": 513,
+            "active_dof_count": 513,
+            "constrained_dof_count": 513 if restrained else 0,
+            "maximum_free_dof_count": 512,
+            "detail": (
+                "Sparse modal extraction and binary mode-vector artifacts "
+                "are not connected to the public whole-model path."
+            ),
+        }
+    ]
+    assert result.metrics["free_dof_count"] == 513
+    assert result.metrics["active_dof_count"] == 513
+    assert result.convergence_history == []
+
+
+def test_exact_512_active_free_dofs_reach_existing_public_assembly(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = _modal_inventory_payload(171, connected=True, restrained=False)
+    payload["supports"] = [{"node": "N1", "dofs": ["UX"]}]
+    path = tmp_path / "free-at-limit.json"
+    _write_model(path, payload)
+    calls = []
+
+    def admitted(model: object) -> tuple[None, list[dict[str, str]]]:
+        calls.append(model)
+        return None, [{"kind": "test_admitted_to_existing_assembly"}]
+
+    monkeypatch.setattr(modal_analysis, "assemble_modal_matrices", admitted)
+    result = analyze(
+        load_model(path), AnalysisConfig(analysis_type="modal", mode_count=1)
+    )
+    assert len(calls) == 1
+    assert result.unsupported_features == [
+        {"kind": "test_admitted_to_existing_assembly"}
+    ]
+    # This is admission evidence only, not a 512-equation successful modal solve.
+    assert result.status == "blocked"
+
+
+@pytest.mark.parametrize("connected", [False, True])
+def test_many_restrained_or_disconnected_nodes_keep_only_active_free_dofs(
+    tmp_path: Path,
+    connected: bool,
+) -> None:
+    payload = _modal_inventory_payload(341, connected=connected, restrained=True)
+    path = tmp_path / "mostly-restrained.json"
+    _write_model(path, payload)
+    model = load_model(path)
+    assert 2 * (6 * 341) ** 2 * 8 <= modal_assembly.MAX_DENSE_MODAL_MATRIX_BYTES
+    assert preflight_modal_resources(model, maximum_free_dof_count=1) == []
+
+
+@pytest.mark.parametrize("connected", [False, True])
+def test_real_full_matrix_byte_cap_includes_restrained_and_disconnected_nodes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    connected: bool,
+) -> None:
+    payload = _modal_inventory_payload(342, connected=connected, restrained=True)
+    path = tmp_path / "payload-overflow.json"
+    _write_model(path, payload)
+    model = load_model(path)
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("Full-matrix byte overflow reached element matrices or assembly")
+
+    monkeypatch.setattr(modal_assembly, "_modal_element_matrices", forbidden)
+    monkeypatch.setattr(modal_analysis, "assemble_modal_matrices", forbidden)
+    # Also cover the direct assembler: no full (or local) zeros allocation.
+    monkeypatch.setattr(modal_assembly.np, "zeros", forbidden)
+    direct, direct_unsupported = assemble_modal_matrices(model)
+    result = modal_analysis.run_authoritative_modal(
+        model, tolerance=1.0e-8, mode_count=1
+    )
+    assert direct is None
+    assert result.status == "blocked"
+    assert direct_unsupported == result.unsupported_features
+    row = result.unsupported_features[0]
+    assert row["kind"] == "modal_dense_matrix_payload_limit_exceeded"
+    assert row["total_dof_count"] == 2052
+    assert row["matrix_pair_bytes"] == 2 * 2052**2 * 8
+    assert row["maximum_matrix_pair_bytes"] == 64 * 1024 * 1024
+
+
+@pytest.mark.parametrize("cap_offset", [-1, 0, 1])
+def test_dense_pair_payload_boundary_is_exact_and_inclusive(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    cap_offset: int,
+) -> None:
+    path = tmp_path / "pair-boundary.json"
+    _write_model(path, _axial_payload())
+    model = load_model(path)
+    pair_bytes = 2 * 12**2 * 8
+    monkeypatch.setattr(
+        modal_assembly, "MAX_DENSE_MODAL_MATRIX_BYTES", pair_bytes + cap_offset
+    )
+    unsupported = preflight_modal_resources(model, maximum_free_dof_count=512)
+    assembly, direct_unsupported = assemble_modal_matrices(model)
+    if cap_offset < 0:
+        assert assembly is None
+        assert unsupported == direct_unsupported
+        assert unsupported[0]["matrix_pair_bytes"] == pair_bytes
+    else:
+        assert unsupported == direct_unsupported == []
+        assert assembly is not None
+        assert assembly.free_dofs == (6,)
+
+
+@pytest.mark.parametrize("density", [None, 0.0, -1.0, True, "bad"])
+def test_public_invalid_density_is_rejected_before_global_assembly(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    density: object,
+) -> None:
+    path = tmp_path / "density-preflight.json"
+    _write_model(path, _frame_payload(density=density))
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("Invalid density reached whole-model assembly")
+
+    monkeypatch.setattr(modal_analysis, "assemble_modal_matrices", forbidden)
+    result = analyze(
+        load_model(path), AnalysisConfig(analysis_type="modal", mode_count=1)
+    )
+    assert result.status == "blocked"
+    assert (
+        result.unsupported_features[0]["kind"]
+        == "modal_material_density_missing_or_invalid"
+    )
+
+
+@pytest.mark.parametrize("location", ["node", "element", "metadata", "load"])
+def test_unconnected_mass_is_rejected_without_any_matrix_allocation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    location: str,
+) -> None:
+    payload = _frame_payload()
+    if location == "node":
+        payload["nodes"][1]["mass_kg"] = 100.0
+    elif location == "element":
+        payload["elements"][0]["mass_scale"] = 1.0
+    elif location == "metadata":
+        payload["metadata"] = {"nodal_masses": [{"node": "N2", "mass_kg": 100.0}]}
+    else:
+        payload["loads"] = [{"kind": "nodal_mass", "node": "N2", "mass_kg": 100.0}]
+    path = tmp_path / "unconnected-mass-preflight.json"
+    _write_model(path, payload)
+    model = load_model(path)
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        pytest.fail("Unconnected mass reached element/global matrices")
+
+    monkeypatch.setattr(modal_assembly.np, "zeros", forbidden)
+    assembly, unsupported = assemble_modal_matrices(model)
+    result = modal_analysis.run_authoritative_modal(
+        model, tolerance=1.0e-8, mode_count=1
+    )
+    assert assembly is None
+    assert result.status == "blocked"
+    assert unsupported == result.unsupported_features
+    assert {row["kind"] for row in unsupported} == {
+        "modal_element_mass_override_not_supported"
+        if location == "element"
+        else "modal_nodal_mass_not_supported"
+    }

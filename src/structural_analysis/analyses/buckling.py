@@ -17,9 +17,11 @@ from structural_analysis.analyses.linear_static import (
 )
 from structural_analysis.assembly.buckling import (
     BucklingAssembly,
+    MAX_DENSE_BUCKLING_FREE_DOF,
     SUPPORTED_BUCKLING_ELEMENT_TYPES,
     assemble_linear_buckling_matrices,
     reference_load_vector_hash_payload,
+    preflight_buckling_resources,
 )
 from structural_analysis.assembly.linear_static import DOF_LABELS, DOF_PER_NODE
 from structural_analysis.model.schema import CanonicalModel
@@ -38,7 +40,6 @@ AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID = (
     "authoritative_cpu_linear_buckling_fea_3d_v1"
 )
 BUCKLING_EIGEN_BACKEND = "scipy_linalg_eigh_dense"
-MAX_DENSE_BUCKLING_FREE_DOF = 512
 BUCKLING_MODE_SHAPE_STORAGE_PROFILE = (
     "inline_max_component_normalized_small_dense_v1"
 )
@@ -85,6 +86,16 @@ def run_authoritative_linear_buckling(
         return _blocked_solution(
             model,
             unsupported=unsupported,
+            eigen_backend=eigen_backend,
+        )
+
+    resource_unsupported = preflight_buckling_resources(
+        model, maximum_free_dof_count=MAX_DENSE_BUCKLING_FREE_DOF
+    )
+    if resource_unsupported:
+        return _blocked_solution(
+            model,
+            unsupported=resource_unsupported,
             eigen_backend=eigen_backend,
         )
 
@@ -539,6 +550,14 @@ def _blocked_solution(
     reference_status: str = "not_run",
     assembly: BucklingAssembly | None = None,
 ) -> WholeModelBucklingSolution:
+    preflight_counts = next(
+        (
+            row
+            for row in unsupported
+            if row.get("kind") == "buckling_dense_free_dof_limit_exceeded"
+        ),
+        {},
+    )
     return WholeModelBucklingSolution(
         status="blocked",
         metrics={
@@ -557,8 +576,16 @@ def _blocked_solution(
             "sparse_backend_used": False,
             "reference_static_status": reference_status,
             "reference_load_factor": 1.0,
-            "free_dof_count": len(assembly.free_dofs) if assembly else 0,
-            "active_dof_count": len(assembly.active_dofs) if assembly else 0,
+            "free_dof_count": (
+                len(assembly.free_dofs)
+                if assembly
+                else preflight_counts.get("free_dof_count", 0)
+            ),
+            "active_dof_count": (
+                len(assembly.active_dofs)
+                if assembly
+                else preflight_counts.get("active_dof_count", 0)
+            ),
             "whole_model_frame_linear_buckling_workflow": False,
             "general_frame_shell_linear_buckling_workflow": False,
             "mixed_tension_compression_reference_supported": False,
