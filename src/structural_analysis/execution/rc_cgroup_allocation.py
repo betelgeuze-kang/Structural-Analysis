@@ -29,7 +29,10 @@ class BoundarySetupError(RuntimeError):
     """Retain ownership after failed setup so uncertain cleanup can be retried."""
 
     def __init__(self, boundary: CgroupAllocation, cleanup: dict[str, str]):
-        super().__init__("cgroup setup failed; inspect cleanup outcome")
+        super().__init__(
+            f"cgroup setup failed for {boundary.name}; "
+            f"cleanup={cleanup.get('status', 'UNKNOWN')}: {cleanup.get('reason', '')}"
+        )
         self.boundary = boundary
         self.cleanup = cleanup
 
