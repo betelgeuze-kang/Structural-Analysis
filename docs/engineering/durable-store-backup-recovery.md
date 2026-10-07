@@ -43,6 +43,17 @@ in immutable read-only mode without creating sidecars. Unlisted unrelated files
 are not admitted or inspected. A passing receipt covers storage integrity only;
 restore and the service's application checks are still separate steps.
 
+The verification response includes aggregate job-state counts and the number of
+recorded worker leases, without job identifiers or token material. These are
+snapshot facts: expiry is not evaluated, and the checker cannot establish that
+original writers have stopped. A backup of running jobs retains those leases.
+Before routing work to a restored store, fence the original service and workers
+through the approved operational procedure. A lease copied to two independently
+active stores cannot prevent duplicate execution across them. On the recovered
+single store, existing claims remain unavailable until their saved expiry; a later
+claim uses the service's ordinary expiry/requeue transition and a new lease token.
+An old token is then rejected. Never edit lease rows to skip that procedure.
+
 ## Restore without activating a service
 
 ```bash

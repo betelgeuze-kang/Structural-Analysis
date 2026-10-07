@@ -250,6 +250,24 @@ def _database_checks(root, files, budget, *, immutable=False):
                     if type(item["size"]) is not int:
                         raise ValueError("invalid persistent artifact length")
                     reference(item["hash"], item["size"])
+        counts = dict.fromkeys(
+            ("queued", "running", "checkpointed", "succeeded", "failed", "cancelled"), 0
+        )
+        recorded_leases = 0
+        for status, lease_present in db.execute(
+            "SELECT status, lease_token_hash IS NOT NULL FROM jobs"
+        ):
+            budget.check()
+            if status not in counts:
+                raise ValueError("unsupported stored job status")
+            counts[status] += 1
+            recorded_leases += int(lease_present)
+        return {
+            "job_status_counts": counts,
+            "recorded_leases": recorded_leases,
+            "lease_expiry_evaluated": False,
+            "original_writers_fenced": False,
+        }
 
 
 def backup_job_store(
@@ -443,10 +461,11 @@ def verify_job_store_backup(
                 digest.update(data)
         if size != expected["bytes"] or digest.hexdigest() != expected["sha256"]:
             raise ValueError("backup member differs")
-    _database_checks(source, files, budget, immutable=True)
+    recovery_snapshot = _database_checks(source, files, budget, immutable=True)
     budget.check()
     return {
         "schema": "durable-job-store-backup-verification.v1",
+        "recovery_snapshot": recovery_snapshot,
         "manifest_sha256": manifest_sha256,
         "files": len(files),
         "payload_bytes": budget.used,

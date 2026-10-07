@@ -530,3 +530,97 @@ def test_cli_verify_accepts_no_destination_and_requires_digest(store, tmp_path, 
         main(args + [str(tmp_path / "unwanted")])
     assert exc.value.code == 2
     assert not (tmp_path / "unwanted").exists()
+
+
+@pytest.mark.parametrize("claim_job", [False, True])
+def test_verification_reports_recovery_counts_without_token_material(
+    store, tmp_path, claim_job
+):
+    from structural_analysis.execution.job_store_backup import verify_job_store_backup
+
+    original, job = store
+    claim = (
+        original.claim_next(
+            worker_id="worker", authorization_token="test-worker-backup-0123456789"
+        )
+        if claim_job
+        else None
+    )
+    source, receipt = saved(store, tmp_path)
+    result = verify_job_store_backup(
+        source, manifest_sha256=receipt["manifest_sha256"], maximum_bytes=LIMIT
+    )
+    snapshot = result["recovery_snapshot"]
+    assert sum(snapshot["job_status_counts"].values()) == 1
+    assert snapshot["job_status_counts"]["running" if claim_job else "queued"] == 1
+    assert snapshot["recorded_leases"] == int(claim_job)
+    assert snapshot["lease_expiry_evaluated"] is False
+    assert snapshot["original_writers_fenced"] is False
+    text = json.dumps(result)
+    assert job.job_id not in text
+    assert TOKEN not in text
+    if claim:
+        assert claim.lease_token not in text
+
+
+def test_restored_running_job_preserves_expiry_and_rejects_old_token_after_reclaim(
+    store, tmp_path
+):
+    from datetime import datetime, timedelta, timezone
+    from structural_analysis.execution.job_service import JobServiceError
+
+    original, job = store
+    now = [datetime(2026, 10, 8, tzinfo=timezone.utc)]
+
+    def open_at_clock(root):
+        return DurableJobService(
+            root,
+            tenant_tokens={"tenant": TOKEN},
+            worker_tokens={"worker": "test-worker-backup-0123456789"},
+            clock=lambda: now[0],
+        )
+
+    live = open_at_clock(original.root)
+    worker = dict(
+        worker_id="worker", authorization_token="test-worker-backup-0123456789"
+    )
+    old = live.claim_next(**worker, lease_seconds=60)
+    assert old is not None
+    before = live.get_job(
+        job.job_id, tenant_id="tenant", authorization_token=TOKEN
+    ).to_dict()
+    source, receipt = saved(store, tmp_path)
+    destination = tmp_path / "restored-running"
+    restore_job_store(
+        source,
+        destination,
+        manifest_sha256=receipt["manifest_sha256"],
+        maximum_bytes=LIMIT,
+    )
+    restored = open_at_clock(destination)
+    assert (
+        restored.get_job(
+            job.job_id, tenant_id="tenant", authorization_token=TOKEN
+        ).to_dict()
+        == before
+    )
+    assert restored.claim_next(**worker) is None
+    now[0] += timedelta(seconds=60)
+    new = restored.claim_next(**worker)
+    assert new is not None and new.job.job_id == job.job_id
+    assert new.job.attempt == old.job.attempt + 1
+    assert new.lease_token != old.lease_token
+    with pytest.raises(JobServiceError) as exc:
+        restored.heartbeat(job.job_id, **worker, lease_token=old.lease_token)
+    assert exc.value.code == "lease_unauthorized"
+    renewed = restored.heartbeat(job.job_id, **worker, lease_token=new.lease_token)
+    assert renewed.status == "running"
+    restored.validate_integrity(
+        job.job_id, tenant_id="tenant", authorization_token=TOKEN
+    )
+    assert (
+        live.get_job(
+            job.job_id, tenant_id="tenant", authorization_token=TOKEN
+        ).to_dict()
+        == before
+    )
