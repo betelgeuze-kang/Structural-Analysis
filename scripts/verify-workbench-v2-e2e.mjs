@@ -184,7 +184,8 @@ async function main() {
     const nativeCode = await run(
       node,
       [...(diagnostics ? ['--require', trustedRepoTool(rootDir, 'scripts/rc-expect-await-preload.cjs', 'rc_expect_await_preload')] : []),
-        loaderOption, playwright, 'test', ...specs, diagnostics ? '--reporter=line,json' : '--reporter=line', ...passthrough],
+        loaderOption, playwright, 'test', ...specs, diagnostics ? '--reporter=line,json' : '--reporter=line',
+        ...(diagnostics ? ['--workers=1'] : []), ...passthrough],
       sanitizedFrontendEnvironment(node, {
         WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
         ...(diagnostics ? { PLAYWRIGHT_JSON_OUTPUT_FILE: diagnostics.rawReport } : {}),

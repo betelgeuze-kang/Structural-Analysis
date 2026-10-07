@@ -35,7 +35,8 @@ export function workbenchDiagnosticOptions(args) {
   if (names.some(name => !Object.hasOwn(options, name))) fail('diagnostic_identity_missing')
   if (!/^[a-f0-9]{40}$/.test(options.sha) || !/^[1-9][0-9]*$/.test(options['run-id'])
     || !/^[1-9][0-9]*$/.test(options['run-attempt'])) fail('diagnostic_identity_invalid')
-  // This hosted mode keeps the entire registered lane and standard runner defaults.
+  // Hosted runs keep the entire lane and assertion defaults, with one browser
+  // worker explicitly budgeted by the launcher instead of CPU-derived parallelism.
   // Local invocations without diagnostic options retain their existing passthrough.
   if (passthrough.some(arg => arg !== '--trace=retain-on-failure') || passthrough.length > 1) {
     fail('diagnostic_runner_override')
@@ -160,6 +161,7 @@ function ledgerProjection(description) {
 export function qualifyWorkbenchDiagnosticReport(report, root) {
   if (!Array.isArray(report?.suites) || !Array.isArray(report.errors)
     || report.errors.length || report.stats?.unexpected !== 0 || report.stats?.flaky !== 0) fail('diagnostic_native_report_invalid_or_failed')
+  if (report.config?.workers !== 1 || report.config?.metadata?.actualWorkers !== 1) fail('diagnostic_worker_budget_mismatch')
   const reportRoot = nativeReportRoot(report.config?.rootDir, root)
   const selected = specs(report.suites).filter(spec => spec.title === targetTitle)
     .filter(spec => nativeSpecFile(spec.file, reportRoot) === path.join(root, targetFile))

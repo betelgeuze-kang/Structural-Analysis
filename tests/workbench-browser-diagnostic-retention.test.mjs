@@ -30,7 +30,7 @@ function report(root) {
     pageCleanup: 'complete', retrieval: 'present', rows: rows.length, overflow: false,
     bytes: bytes.length, serialization: 'complete', attachment: 'complete', diagnosticQualified: true }
   const annotations = [{ type: 'rc-initial-ready-diagnostic-ledger', description: JSON.stringify(ledger) }]
-  return { config: { rootDir: root }, errors: [], stats: { expected: 1, unexpected: 0, skipped: 0, flaky: 0 },
+  return { config: { rootDir: root, workers: 1, metadata: { actualWorkers: 1 } }, errors: [], stats: { expected: 1, unexpected: 0, skipped: 0, flaky: 0 },
     suites: [{ specs: [{ title: 'resume503 requires fresh failed GET before explicit null checkpoint retry',
       file: 'tests/frontend/workbench-v2-rc-workflow-browser.spec.ts', tests: [{ expectedStatus: 'passed',
         status: 'expected', annotations, results: [{ status: 'passed', retry: 0, errors: [], annotations,
@@ -50,8 +50,24 @@ test('hosted options require all exact identity values and reject runner overrid
     assert.throws(() => workbenchDiagnosticOptions([...args, args[0]]), /duplicate/)
     assert.throws(() => workbenchDiagnosticOptions(args.map(arg => arg.replace(f.options.sha, '../unsafe'))), /identity_invalid/)
     for (const extra of [['--reporter=json'], ['--reporter', 'line'], ['--output=elsewhere'],
-      ['--output', 'elsewhere'], ['--config=alternate'], ['--grep=one'], ['--retries=1'], ['--timeout=1']]) {
+      ['--output', 'elsewhere'], ['--config=alternate'], ['--grep=one'], ['--retries=1'], ['--timeout=1'],
+      ['--workers=2'], ['--workers', '1']]) {
       assert.throws(() => workbenchDiagnosticOptions([...args, ...extra]), /runner_override/)
+    }
+  } finally { f.cleanup() }
+})
+
+test('native receipt must confirm both configured and actual single-worker budget', () => {
+  const f = fixture()
+  try {
+    assert.doesNotThrow(() => qualifyWorkbenchDiagnosticReport(report(f.root), f.root))
+    for (const workers of [undefined, 0, 2, '1']) {
+      const configured = report(f.root)
+      configured.config.workers = workers
+      assert.throws(() => qualifyWorkbenchDiagnosticReport(configured, f.root), /worker_budget_mismatch/)
+      const actual = report(f.root)
+      actual.config.metadata.actualWorkers = workers
+      assert.throws(() => qualifyWorkbenchDiagnosticReport(actual, f.root), /worker_budget_mismatch/)
     }
   } finally { f.cleanup() }
 })
