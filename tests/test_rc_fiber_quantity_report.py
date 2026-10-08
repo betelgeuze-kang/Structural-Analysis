@@ -8,7 +8,7 @@ from structural_analysis.api import rc_fiber_frame_direct_control as api
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.execution import rc_fiber_job_contract as contract
 from structural_analysis.execution import rc_fiber_quantity_report as reports
-from test_rc_fiber_job_contract import _request
+from .test_rc_fiber_job_contract import _request
 
 
 @pytest.fixture(autouse=True)

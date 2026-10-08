@@ -19,7 +19,7 @@ from structural_analysis.execution.job_service import JobServiceError
 from structural_analysis.execution.rc_fiber_direct_control_worker import (
     execute_rc_fiber_direct_control_claim,
 )
-from test_rc_real_process_lifecycle import TENANTS, request, service, tenant, worker
+from .test_rc_real_process_lifecycle import TENANTS, request, service, tenant, worker
 
 
 @pytest.fixture(scope="module")

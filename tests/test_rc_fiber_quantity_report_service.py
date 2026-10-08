@@ -17,11 +17,11 @@ from structural_analysis.execution.job_service import (
     JobServiceError,
     build_job_completion_evidence,
 )
-import test_rc_fiber_job_service as seams
-from test_rc_fiber_quantity_report import (
+from . import test_rc_fiber_job_service as seams
+from .test_rc_fiber_quantity_report import (
     no_numerical_execution as no_numerical_execution,
 )
-from test_rc_fiber_quantity_report import prices
+from .test_rc_fiber_quantity_report import prices
 
 
 @pytest.fixture
