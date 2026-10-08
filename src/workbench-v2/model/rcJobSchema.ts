@@ -190,7 +190,7 @@ export function validateRcRequestProfile(value: unknown): void {
   const initialTrialAuthored = Object.prototype.hasOwnProperty.call(solver, 'initial_trial_policy')
   exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
     ...(initialTrialAuthored ? ['initial_trial_policy'] : [])], 'solver_config_invalid')
-  check(!initialTrialAuthored || ['accepted_checkpoint', 'prescribed_control', 'accepted_then_prescribed'].includes(solver.initial_trial_policy), 'solver_config_invalid')
+  check(!initialTrialAuthored || ['accepted_checkpoint', 'prescribed_control', 'accepted_then_prescribed', 'accepted_then_prescribed_then_secant'].includes(solver.initial_trial_policy), 'solver_config_invalid')
   exact(newton, ['residual_tolerance', 'increment_tolerance', 'max_iterations',
     'line_search_alphas', 'matrix_backend'], 'newton_config_invalid')
   const positive = (number: unknown): number is number => typeof number === 'number' && Number.isFinite(number) && number > 0
@@ -603,30 +603,58 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
 
 /** Recount declared trial work, including a rejected first Newton invocation. */
 export function validateRcDeclaredInitialTrials(api: RcObject, config: RcObject): void {
-  if (config.solver_config.initial_trial_policy !== 'accepted_then_prescribed') return
+  const policy = config.solver_config.initial_trial_policy
+  const extended = policy === 'accepted_then_prescribed_then_secant'
+  if (!extended && policy !== 'accepted_then_prescribed') return
+  const maximum = extended ? 3 : 2
+  let previousStep: RcObject | null = null
   const countGroup = (attempts: RcObject[]): RcObject => {
     check(Array.isArray(attempts), 'initial_trial_attempts_invalid')
     let count = 0
     for (const attempt of attempts) {
       const step = object(attempt.step), trace = object(step.initial_trial_search)
       const trials = trace.trials
-      check(trace.schema_version === 'rc-declared-initial-trial-search.v1'
-        && trace.policy === 'accepted_then_prescribed' && trace.maximum_trials === 2
-        && Array.isArray(trials) && trials.length >= 1 && trials.length <= 2
+      check(trace.schema_version === `rc-declared-initial-trial-search.v${extended ? 2 : 1}`
+        && trace.policy === policy && trace.maximum_trials === maximum
+        && Array.isArray(trials) && trials.length >= 1 && trials.length <= maximum
         && attempt.committed === true && step.committed === true
         && same(step.metrics.config, api.request.configuration), 'initial_trial_policy_invalid')
+      if (extended) check(trace.secant_predecessor_hash === (previousStep?.parent_checkpoint.state_hash ?? null)
+        && (previousStep !== null || trials.length <= 2), 'initial_trial_predecessor_invalid')
       let subtotal = 0
       for (const [index, row] of trials.entries()) {
         const solver = object(row.solver), metrics = object(solver.metrics)
         const history = solver.convergence_history, searches = solver.line_search_history
         const terminal = index === trials.length - 1
-        check(row.initial_trial_policy === ['accepted_checkpoint', 'prescribed_control'][index]
+        check(row.initial_trial_policy === ['accepted_checkpoint', 'prescribed_control', 'secant_prediction'][index]
           && row.parent_checkpoint_hash === attempt.parent_checkpoint_hash
           && row.parent_checkpoint_hash === step.parent_checkpoint.state_hash
           && Array.isArray(history) && history.length > 0
           && history.every((entry: RcObject, i: number) => entry.iteration === i)
           && Array.isArray(searches) && metrics.fallback_used === false
           && metrics.regularization_used === false, 'initial_trial_binding_invalid')
+        if (index === 2) {
+          check(extended && previousStep !== null, 'initial_trial_predecessor_invalid')
+          const prediction = object(row.prediction), parent = step.parent_checkpoint
+          const prior = previousStep!.parent_checkpoint
+          const left = prior.global_displacements[config.control_global_dof]
+          const right = parent.global_displacements[config.control_global_dof]
+          const target = attempt.target_control_displacement_m
+          const ratio = (target - right) / (right - left)
+          const current = trials[0].solver.convergence_history[0].free_displacements_m
+          const old = previousStep!.initial_trial_search.trials[0].solver.convergence_history[0].free_displacements_m
+          check(Number.isFinite(ratio) && right !== left && Array.isArray(current) && Array.isArray(old)
+            && current.length === old.length && current.length === metrics.active_equation_count,
+            'initial_trial_prediction_invalid')
+          const expected = current.map((value: number, i: number) => value + ratio * (value - old[i]))
+          check(prediction.schema_version === 'rc-secant-initial-prediction.v1'
+            && prediction.previous_checkpoint_hash === prior.state_hash
+            && prediction.parent_checkpoint_hash === parent.state_hash
+            && prediction.previous_control_m === left && prediction.parent_control_m === right
+            && prediction.target_control_m === target && prediction.ratio === ratio
+            && expected.every(Number.isFinite) && same(prediction.initial_coordinates_m, expected)
+            && same(history[0].free_displacements_m, expected), 'initial_trial_prediction_invalid')
+        } else check(!('prediction' in row), 'initial_trial_prediction_invalid')
         if (terminal) check(row.committed === true && solver.status === 'ready'
           && metrics.contract_pass === true && metrics.linear_solve_count === history.length
           && metrics.iteration_count === history.length && searches.length === history.length - 1
@@ -650,6 +678,7 @@ export function validateRcDeclaredInitialTrials(api: RcObject, config: RcObject)
         && work.work_scope === 'all_declared_initial_trials'
         && same(work.initial_trial_search, trace), 'initial_trial_total_invalid')
       count += subtotal
+      previousStep = step
     }
     return { attempted_step_count: attempts.length, known_linear_solve_count: count,
       known_newton_iteration_count: count, unknown_solver_work_attempt_count: 0 }

@@ -125,6 +125,7 @@ def is_authored_request(value):
         authored_isolated_request("pin-roller-layers"),
         authored_prescribed_trial_request(),
         authored_prescribed_trial_request("accepted_then_prescribed"),
+        authored_prescribed_trial_request("accepted_then_prescribed_then_secant"),
     )
 
 

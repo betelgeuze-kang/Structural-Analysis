@@ -77,9 +77,10 @@ class StatefulFiberFrame2DDisplacementControlConfig:
             "accepted_checkpoint",
             "prescribed_control",
             "accepted_then_prescribed",
+            "accepted_then_prescribed_then_secant",
         ):
             raise ValueError(
-                "initial_trial_policy must be accepted_checkpoint, prescribed_control or accepted_then_prescribed"
+                "initial_trial_policy must be an explicitly supported bounded policy"
             )
         if type(self.newton) is not NewtonRaphsonConfig:
             raise ValueError("newton must be an exact NewtonRaphsonConfig")
@@ -140,6 +141,7 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
     control_global_dof: int
     target_control_displacement_m: float
     config: StatefulFiberFrame2DDisplacementControlConfig
+    _initial_coordinates_m: tuple[float, ...] | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         if type(self.problem) is not StatefulFiberFrame2DProblem:
@@ -218,6 +220,19 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
         return self.problem.reference_force_scale()
 
     def initial_free_displacements_m(self) -> np.ndarray:
+        if self._initial_coordinates_m is not None:
+            if (
+                len(self._initial_coordinates_m)
+                != len(self.problem.free_global_dofs) + 1
+            ):
+                raise ValueError("secant initial coordinate size mismatch")
+            return np.asarray(
+                [
+                    _number(v, "secant initial coordinate")
+                    for v in self._initial_coordinates_m
+                ],
+                dtype=np.float64,
+            )
         physical = np.asarray(
             self.accepted_checkpoint.global_displacements, dtype=np.float64
         )
@@ -298,6 +313,9 @@ class StatefulFiberFrame2DDisplacementControlStepResult:
     trial_assembly: StatefulFiberFrame2DAssembly
     metrics: dict[str, Any]
     initial_trial_search_json: bytes | None = field(default=None, repr=False)
+    _search_predecessor: StatefulFiberFrame2DCheckpoint | None = field(
+        default=None, repr=False
+    )
 
     def _payload(self) -> dict[str, Any]:
         return deepcopy(
@@ -331,16 +349,21 @@ class StatefulFiberFrame2DDisplacementControlStepResult:
             raise ValueError("step has no declared initial trial search")
         trace = json.loads(self.initial_trial_search_json)
         trials = trace["trials"]
+        extended = trace["policy"] == "accepted_then_prescribed_then_secant"
+        maximum = 3 if extended else 2
+        policies = ["accepted_checkpoint", "prescribed_control", "secant_prediction"]
         if (
-            trace["schema_version"] != "rc-declared-initial-trial-search.v1"
-            or trace["maximum_trials"] != 2
-            or trace["policy"] != "accepted_then_prescribed"
+            trace["schema_version"]
+            != f"rc-declared-initial-trial-search.v{2 if extended else 1}"
+            or trace["maximum_trials"] != maximum
+            or trace["policy"]
+            not in ("accepted_then_prescribed", "accepted_then_prescribed_then_secant")
             or self.metrics["config"]["initial_trial_policy"] != trace["policy"]
-            or not 1 <= len(trials) <= 2
+            or not 1 <= len(trials) <= maximum
             or trials[-1]["committed"] is not self.committed
-            or (len(trials) == 2 and trials[0]["committed"] is not False)
+            or any(row["committed"] is not False for row in trials[:-1])
             or [row["initial_trial_policy"] for row in trials]
-            != ["accepted_checkpoint", "prescribed_control"][: len(trials)]
+            != policies[: len(trials)]
             or any(
                 row["parent_checkpoint_hash"] != self.parent_checkpoint.state_hash
                 for row in trials
@@ -348,10 +371,42 @@ class StatefulFiberFrame2DDisplacementControlStepResult:
             or trials[-1]["solver"] != _trial_payload(self.trial_solution)
         ):
             raise ValueError("initial trial search binding mismatch")
+        if extended:
+            previous = self._search_predecessor
+            expected_hash = None if previous is None else previous.state_hash
+            if trace["secant_predecessor_hash"] != expected_hash:
+                raise ValueError("initial trial predecessor binding mismatch")
+            if previous is not None:
+                adapter = self.trial_solution.problem
+                _, prediction = _secant_prediction(
+                    adapter.problem,
+                    self.parent_checkpoint,
+                    previous,
+                    adapter.control_global_dof,
+                    adapter.target_control_displacement_m,
+                    adapter.config,
+                )
+                if len(trials) == 3 and (
+                    trials[-1].get("prediction") != prediction
+                    or adapter._initial_coordinates_m
+                    != tuple(prediction["initial_coordinates_m"])
+                    or trials[-1]["solver"]["convergence_history"][0][
+                        "free_displacements_m"
+                    ]
+                    != prediction["initial_coordinates_m"]
+                ):
+                    raise ValueError("initial trial secant prediction mismatch")
+            elif len(trials) == 3:
+                raise ValueError("initial trial secant predecessor missing")
         for row in trials:
+            if (
+                row["initial_trial_policy"] != "secant_prediction"
+                and "prediction" in row
+            ):
+                raise ValueError("initial trial unexpected prediction")
             if row["work"] != _trial_work(row["solver"]):
                 raise ValueError("initial trial search work mismatch")
-        if len(trials) == 2 and not _retryable_trial_payload(trials[0]["solver"]):
+        if any(not _retryable_trial_payload(row["solver"]) for row in trials[:-1]):
             raise ValueError("initial trial retry reason mismatch")
         return trace
 
@@ -396,6 +451,7 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     control_global_dof: int,
     target_control_displacement_m: float,
     config: StatefulFiberFrame2DDisplacementControlConfig | None = None,
+    previous_checkpoint: StatefulFiberFrame2DCheckpoint | None = None,
 ) -> StatefulFiberFrame2DDisplacementControlStepResult:
     """Use ordinary Newton on one augmented target; commit only all passed gates."""
     cfg = (
@@ -403,13 +459,22 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         if config is not None
         else StatefulFiberFrame2DDisplacementControlConfig()
     )
-    if cfg.initial_trial_policy == "accepted_then_prescribed":
+    if (
+        previous_checkpoint is not None
+        and cfg.initial_trial_policy != "accepted_then_prescribed_then_secant"
+    ):
+        raise ValueError("previous checkpoint requires the declared secant policy")
+    if cfg.initial_trial_policy in (
+        "accepted_then_prescribed",
+        "accepted_then_prescribed_then_secant",
+    ):
         return _solve_initial_trial_search(
             problem,
             accepted_checkpoint,
             control_global_dof,
             target_control_displacement_m,
             cfg,
+            previous_checkpoint,
         )
     adapter = StatefulFiberFrame2DDisplacementControlStepAdapter(
         problem,
@@ -418,6 +483,12 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         target_control_displacement_m,
         cfg,
     )
+    return _solve_adapter(
+        problem, accepted_checkpoint, control_global_dof, cfg, adapter
+    )
+
+
+def _solve_adapter(problem, accepted_checkpoint, control_global_dof, cfg, adapter):
     parent_bytes = accepted_checkpoint.canonical_bytes()
     solution = newton_raphson_vector(adapter, config=cfg.newton)
     terminal = adapter.observe(solution.free_displacements_m)
@@ -635,29 +706,102 @@ class StatefulFiberInitialTrialSearchError(ValueError):
         return _search_work(json.loads(self._trace))
 
 
-def _solve_initial_trial_search(problem, parent, control_dof, target, cfg):
+def _secant_prediction(problem, parent, previous, control_dof, target, cfg):
+    """Derive one initial vector from two adjacent, validated accepted states."""
+    validate_stateful_fiber_frame2d_checkpoint(problem, parent)
+    validate_stateful_fiber_frame2d_checkpoint(problem, previous)
+    if (
+        parent.parent_state_hash != previous.state_hash
+        or parent.epoch != previous.epoch + 1
+        or parent.step_index != previous.step_index + 1
+    ):
+        raise ValueError("secant predecessor is not the immediate accepted parent")
+    plain = replace(cfg, initial_trial_policy="accepted_checkpoint")
+    adapter = StatefulFiberFrame2DDisplacementControlStepAdapter(
+        problem, parent, control_dof, target, plain
+    )
+    left = previous.global_displacements[control_dof]
+    right = parent.global_displacements[control_dof]
+    if right == left:
+        raise ValueError("secant predecessor control interval is zero")
+    ratio = _number((target - right) / (right - left), "secant ratio")
+    current = adapter.initial_free_displacements_m()
+    old_free = (
+        np.asarray(previous.global_displacements) / problem.physical_coordinate_scale
+    )[list(problem.free_global_dofs)]
+    old = np.concatenate(
+        (old_free, [plain.load_factor_coordinate_scale_m * previous.load_factor])
+    )
+    predicted = tuple(
+        _number(float(v), "secant coordinate")
+        for v in current + ratio * (current - old)
+    )
+    receipt = {
+        "schema_version": "rc-secant-initial-prediction.v1",
+        "previous_checkpoint_hash": previous.state_hash,
+        "parent_checkpoint_hash": parent.state_hash,
+        "previous_control_m": left,
+        "parent_control_m": right,
+        "target_control_m": target,
+        "ratio": ratio,
+        "initial_coordinates_m": list(predicted),
+    }
+    return replace(adapter, _initial_coordinates_m=predicted), receipt
+
+
+def _solve_initial_trial_search(
+    problem, parent, control_dof, target, cfg, previous=None
+):
     original = parent.canonical_bytes()
     source_hash, config_hash = problem.contract_hash, cfg.contract_hash
+    extended = cfg.initial_trial_policy == "accepted_then_prescribed_then_secant"
+    previous_bytes = None if previous is None else previous.canonical_bytes()
+    predicted_adapter, prediction = (
+        (None, None)
+        if previous is None
+        else _secant_prediction(problem, parent, previous, control_dof, target, cfg)
+    )
     trace = {
-        "schema_version": "rc-declared-initial-trial-search.v1",
-        "policy": "accepted_then_prescribed",
-        "maximum_trials": 2,
+        "schema_version": f"rc-declared-initial-trial-search.v{2 if extended else 1}",
+        "policy": cfg.initial_trial_policy,
+        "maximum_trials": 3 if extended else 2,
         "trials": [],
     }
-    for policy in ("accepted_checkpoint", "prescribed_control"):
+    if extended:
+        trace["secant_predecessor_hash"] = (
+            None if previous is None else previous.state_hash
+        )
+    policies = ("accepted_checkpoint", "prescribed_control") + (
+        ("secant_prediction",) if predicted_adapter is not None else ()
+    )
+    for policy in policies:
         try:
-            step = solve_stateful_fiber_frame2d_displacement_control_step(
-                problem,
-                parent,
-                control_global_dof=control_dof,
-                target_control_displacement_m=target,
-                config=replace(cfg, initial_trial_policy=policy),
+            step = (
+                _solve_adapter(
+                    problem,
+                    parent,
+                    control_dof,
+                    predicted_adapter.config,
+                    predicted_adapter,
+                )
+                if policy == "secant_prediction"
+                else solve_stateful_fiber_frame2d_displacement_control_step(
+                    problem,
+                    parent,
+                    control_global_dof=control_dof,
+                    target_control_displacement_m=target,
+                    config=replace(cfg, initial_trial_policy=policy),
+                )
             )
             if (
                 type(step) is not StatefulFiberFrame2DDisplacementControlStepResult
                 or parent.canonical_bytes() != original
                 or problem.contract_hash != source_hash
                 or cfg.contract_hash != config_hash
+                or (
+                    previous is not None
+                    and previous.canonical_bytes() != previous_bytes
+                )
             ):
                 raise ValueError("initial trial source or parent changed")
             solver = _trial_payload(step.trial_solution)
@@ -671,6 +815,8 @@ def _solve_initial_trial_search(problem, parent, control_dof, target, cfg):
                 "solver": solver,
                 "work": work,
             }
+            if policy == "secant_prediction":
+                row["prediction"] = prediction
             # Freeze before another invocation can mutate its return metadata.
             trace["trials"].append(json.loads(_pack_search(row)))
         except Exception as exc:
@@ -699,7 +845,7 @@ def _solve_initial_trial_search(problem, parent, control_dof, target, cfg):
                 )
             )
         )
-        if policy == "prescribed_control" or not retryable:
+        if policy == policies[-1] or not retryable:
             break
     metrics = deepcopy(step.metrics)
     metrics.update(
@@ -707,4 +853,9 @@ def _solve_initial_trial_search(problem, parent, control_dof, target, cfg):
         config=cfg.to_manifest(),
         declared_initial_trial_retry_used=len(trace["trials"]) > 1,
     )
-    return replace(step, metrics=metrics, initial_trial_search_json=_pack_search(trace))
+    return replace(
+        step,
+        metrics=metrics,
+        initial_trial_search_json=_pack_search(trace),
+        _search_predecessor=previous,
+    )

@@ -211,7 +211,8 @@
               "enum": [
                 "accepted_checkpoint",
                 "prescribed_control",
-                "accepted_then_prescribed"
+                "accepted_then_prescribed",
+                "accepted_then_prescribed_then_secant"
               ]
             }
           }
