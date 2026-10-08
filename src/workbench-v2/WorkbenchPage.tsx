@@ -1,3 +1,5 @@
+import { RcJobWorkflowPanel } from './components/RcJobWorkflowPanel'
+import type { JobAuthorizationProvider } from './model/jobTransport'
 import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
@@ -45,6 +47,10 @@ import {
 } from './model/nativeFrameComparisonProvider'
 
 export interface WorkbenchPageProps {
+  rcJobCollectionUrl?: string
+  rcJobId?: string
+  rcReportId?: string
+  jobAuthorization?: JobAuthorizationProvider
   initialProviderMode?: ProviderMode
   /** Same-origin authenticated status endpoint; no bearer credential is stored in the browser. */
   jobStatusUrl?: string
@@ -68,6 +74,7 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 
 export function WorkbenchPage({
   initialProviderMode = 'demo',
+  rcJobCollectionUrl, rcJobId, rcReportId, jobAuthorization,
   jobStatusUrl,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
@@ -219,7 +226,7 @@ export function WorkbenchPage({
   }, [provider])
 
   useEffect(() => {
-    if (!jobStatusUrl) {
+    if (!jobStatusUrl || rcJobCollectionUrl) {
       setJobLoad({ status: 'unconfigured', job: null, errors: [] })
       return undefined
     }
@@ -227,7 +234,7 @@ export function WorkbenchPage({
     setJobLoad({ status: 'loading', job: null, errors: [] })
     loadWorkbenchJob(jobStatusUrl, controller.signal).then(setJobLoad)
     return () => controller.abort()
-  }, [jobStatusUrl])
+  }, [jobStatusUrl, rcJobCollectionUrl])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -359,17 +366,18 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-run" className="wb2-section">
+        {rcJobCollectionUrl ? <RcJobWorkflowPanel collectionUrl={rcJobCollectionUrl} initialJobStatusUrl={jobStatusUrl} initialJobId={rcJobId} initialReportId={rcReportId} authorize={jobAuthorization} /> : null}
         <NativeFrameRunPanel
           submissionUrl={nativeFrameSubmissionUrl}
           onJobAvailable={setSubmittedNativeFrameJobUrl}
         />
-        <JobServicePanel
+        {!rcJobCollectionUrl ? <JobServicePanel
           loadStatus={jobLoad.status}
           job={jobLoad.job}
           errors={jobLoad.errors}
           artifactStatus={jobLoad.artifactStatus}
           engineeringResultIr={jobLoad.engineeringResultIr}
-        />
+        /> : null}
         {caseV2 ? (
           <RunMonitor
             runStatus={state.runStatus}

@@ -1,3 +1,5 @@
+import { createJobReadTransport, JobArtifactError, readBoundedJobBytes, type JobAuthorizationProvider, type JobReadTransport } from './jobTransport'
+import { loadRcJobReview, type RcJobReview } from './rcJobReview'
 import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
 import {
   validateWorkbenchJobView,
@@ -12,6 +14,7 @@ export interface JobLoadResult {
   job: WorkbenchJobView | null
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
+  rcReview?: RcJobReview
   engineeringResultIr?: EngineeringResultIrManifest
 }
 
@@ -62,16 +65,11 @@ const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
 
-export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promise<JobLoadResult> {
+export async function loadWorkbenchJob(url: string, signal?: AbortSignal, authorize?: JobAuthorizationProvider, sessionTransport?: JobReadTransport): Promise<JobLoadResult> {
   if (!url) return { status: 'unconfigured', job: null, errors: [] }
   try {
-    const response = await fetch(url, {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-      signal,
-    })
+    const transport = sessionTransport?.withSignal?.(signal ?? new AbortController().signal) ?? sessionTransport ?? await createJobReadTransport(url, signal, authorize)
+    const response = await transport.get()
     if (response.status === 404) return { status: 'missing', job: null, errors: ['job not found'] }
     if (!response.ok) return { status: 'error', job: null, errors: [`job API returned HTTP ${response.status}`] }
     const viewBytes = await boundedBytes(response, JOB_VIEW_MAX_BYTES, 'job view')
@@ -80,12 +78,19 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       return { status: 'invalid', job: null, errors: validation.errors, artifactStatus: 'invalid' }
     }
     const job = validation.value
+    const expectedId = new URL(url, typeof location === 'undefined' ? undefined : location.origin).pathname.replace(/\/+$/, '').split('/').pop()
+    if (sessionTransport && job.job_id !== expectedId) throw new JobArtifactError('job_view_identity_mismatch')
     if (job.status !== 'succeeded' || !job.result || !job.evidence) {
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
     }
+    if (job.result.media_type === 'application/vnd.structural-analysis.rc-fiber-job-result+json') {
+      const rcReview = await loadRcJobReview(job, transport, signal)
+      if (signal?.aborted) { rcReview.dispose(); return { status: 'unconfigured', job: null, errors: [] } }
+      return { status: 'ready', job, errors: [], artifactStatus: 'verified', rcReview }
+    }
     const [result, evidence] = await Promise.all([
-      fetchArtifact(url, job.result, RESULT_MAX_BYTES, signal),
-      fetchArtifact(url, job.evidence, EVIDENCE_MAX_BYTES, signal),
+      fetchArtifact(transport, job.result, RESULT_MAX_BYTES),
+      fetchArtifact(transport, job.evidence, EVIDENCE_MAX_BYTES),
     ])
     const artifactErrors = [...result.errors, ...evidence.errors]
     if (artifactErrors.length) {
@@ -127,19 +132,22 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
   }
 }
 
+/** Lightweight status read; no numerical artifacts, worker or solver is loaded. */
+export async function readWorkbenchJobViewResponse(response: Response, expectedJobId?: string): Promise<WorkbenchJobView> {
+  if (!response.ok) throw new JobArtifactError(`job_api_http_${response.status}`)
+  const bytes = await readBoundedJobBytes(response, JOB_VIEW_MAX_BYTES, 'job view')
+  const validation = validateWorkbenchJobView(parseJson(bytes, 'job view'))
+  if (!validation.ok || !validation.value) throw new JobArtifactError('job_view_invalid')
+  if (expectedJobId !== undefined && validation.value.job_id !== expectedJobId) throw new JobArtifactError('job_view_identity_mismatch')
+  return validation.value
+}
+
 async function fetchArtifact(
-  statusUrl: string,
+  transport: JobReadTransport,
   reference: JobArtifactReference,
   maximumBytes: number,
-  signal?: AbortSignal,
 ): Promise<{ value: unknown; errors: string[]; integrityUnavailable: boolean }> {
-  const response = await fetch(`${statusUrl}/${reference.role}`, {
-    method: 'GET',
-    credentials: 'include',
-    cache: 'no-store',
-    headers: { Accept: reference.media_type },
-    signal,
-  })
+  const response = await transport.get(reference.role, reference.media_type)
   if (!response.ok) return { value: null, errors: [`${reference.role} HTTP ${response.status}`], integrityUnavailable: false }
   const bytes = await boundedBytes(response, maximumBytes, reference.role)
   if (bytes.byteLength !== reference.byte_length) {
