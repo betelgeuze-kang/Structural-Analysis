@@ -1471,9 +1471,8 @@ def test_prewrite_admitted_existing_blob_corruption_is_not_repaired(
     assert s.read_checkpoint(c.job.job_id, **tenant()) == prefix
     assert path.read_bytes() == b"corrupted unreferenced synthetic artifact"
     after = request_blob_inventory(tmp_path)
-    assert [value for key, value in after.items() if key not in blobs] == (
-        [raw] if corrupt_role == "evidence" else []
-    )
+    # Group admission verifies both existing candidates before the first write.
+    assert after == blobs
 
 
 def test_prewrite_accepted_artifacts_reopen_dedup_and_exact_retries(
