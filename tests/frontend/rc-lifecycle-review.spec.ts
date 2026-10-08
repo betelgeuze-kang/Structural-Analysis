@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
-import { readFileSync, mkdtempSync, rmSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { validateRcJobArtifacts, validateRcRequestProfile, fields } from '../../src/workbench-v2/model/rcJobSchema'
@@ -14,7 +14,12 @@ test.describe('Narrow RC production reviewer with freshly computed artifacts', (
   test.beforeAll(async () => {
     temporary = mkdtempSync(path.join(tmpdir(), 'rc-review-contract-'))
     const output = path.join(temporary, 'review.json')
-    execFileSync('python', ['tests/frontend/rc_lifecycle_review_snapshot.py', '--output', output], { timeout: 100000, stdio: 'pipe' })
+    const authored = JSON.parse(execFileSync('python', ['-c',
+      "import sys; sys.path.insert(0, 'tests/frontend'); from rc_lifecycle_http_fixture import authored_request, canonical; print(canonical(authored_request()).decode())"], { encoding: 'utf8' }))
+    const requestFile = path.join(temporary, 'browser-request.json')
+    // The exact browser JSON.stringify boundary converts Python 1.0 to JSON 1.
+    writeFileSync(requestFile, JSON.stringify(authored))
+    execFileSync('python', ['tests/frontend/rc_lifecycle_review_snapshot.py', '--output', output, '--request-file', requestFile], { timeout: 100000, stdio: 'pipe' })
     snapshot = JSON.parse(readFileSync(output, 'utf8'))
     reviewed = await validateRcJobArtifacts(snapshot.job, Object.fromEntries(
       Object.entries(snapshot.artifacts).map(([role, value]: [string, any]) => [role, bytes(value.base64)])), 'a')
@@ -22,6 +27,7 @@ test.describe('Narrow RC production reviewer with freshly computed artifacts', (
   test.afterAll(() => { if (temporary) rmSync(temporary, { recursive: true, force: true }) })
 
   test('verifies original execution, unknown reservation and two price-only revisions', async () => {
+    expect(snapshot.original_request_representation_retained).toBe(true)
     expect(reviewed.summary.targets).toEqual([-1e-6, -2e-6])
     expect(reviewed.summary.unknownWork).toBe(true)
     expect(reviewed.summary.reservedInvocations).toBe(5)

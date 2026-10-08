@@ -233,6 +233,26 @@ def _same(left: Any, right: Any) -> bool:
     return rc_fiber_job_canonical_bytes(left) == rc_fiber_job_canonical_bytes(right)
 
 
+def _same_request_config_values(left: Any, right: Any) -> bool:
+    """Compare decoded config values without imposing Python float spelling.
+
+    Only admission uses this after strict typed decoding. Original request
+    bytes and all artifact/receipt comparisons retain their exact identities.
+    Booleans are never numbers, and dictionary keys must still be complete.
+    """
+    if type(left) is dict and type(right) is dict:
+        return left.keys() == right.keys() and all(
+            _same_request_config_values(left[key], right[key]) for key in left
+        )
+    if type(left) is list and type(right) is list:
+        return len(left) == len(right) and all(
+            _same_request_config_values(a, b) for a, b in zip(left, right)
+        )
+    if type(left) in (int, float) and type(right) in (int, float):
+        return left == right
+    return type(left) is type(right) and left == right
+
+
 def _self_hash(value, key):
     if type(value) is not dict or value.get(key) != _hash(
         {name: item for name, item in value.items() if name != key}
@@ -276,7 +296,9 @@ def validate_rc_fiber_job_request(
     ):
         raise ValueError("invalid RC durable execution configuration")
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
-    if not config.targets_m or not _same(config.to_dict(), value["config"]):
+    if not config.targets_m or not _same_request_config_values(
+        config.to_dict(), value["config"]
+    ):
         raise ValueError("RC durable config must be the complete canonical request")
     _, reversals = _directions(config.targets_m)
     if reversals > config.maximum_reversals or (

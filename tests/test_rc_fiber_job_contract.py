@@ -535,3 +535,42 @@ def test_real_native_decoder_rejects_unbound_artifact_without_solving():
     config, compiled, scope, _, _ = contract._context(request)
     with pytest.raises(ValueError):
         contract._native(b"{}", compiled, scope, config.targets_m[:2])
+
+
+def test_request_accepts_javascript_number_spelling_without_rewriting_input():
+    request = _request()
+    request["config"]["solver_config"]["newton"]["line_search_alphas"][0] = 1
+    original = contract.rc_fiber_job_canonical_bytes(request)
+    original_hash = contract._hash(request)
+    _, typed = contract.validate_rc_fiber_job_request(original)
+    assert (
+        type(request["config"]["solver_config"]["newton"]["line_search_alphas"][0])
+        is int
+    )
+    assert (
+        type(typed.to_dict()["solver_config"]["newton"]["line_search_alphas"][0])
+        is float
+    )
+    assert contract.rc_fiber_job_canonical_bytes(request) == original
+    assert contract._hash(request) == original_hash
+    assert not contract._same(request["config"], typed.to_dict())
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda c: c["solver_config"]["newton"].update(line_search_alphas=[True, 0.5]),
+        lambda c: c["solver_config"]["newton"].update(max_iterations=25.0),
+        lambda c: c["solver_config"].update(control_tolerance_m=True),
+        lambda c: c.update(allow_reversals=0),
+        lambda c: c.update(control_global_dof=4.0),
+        lambda c: c["solver_config"]["newton"].pop("matrix_backend"),
+        lambda c: c["solver_config"]["newton"].update(residual_tolerance=float("nan")),
+        lambda c: c["solver_config"]["newton"].update(line_search_alphas=[1, 2]),
+    ],
+)
+def test_numeric_spelling_admission_preserves_strict_types_and_shape(mutate):
+    request = _request()
+    mutate(request["config"])
+    with pytest.raises(ValueError):
+        contract.validate_rc_fiber_job_request(request)

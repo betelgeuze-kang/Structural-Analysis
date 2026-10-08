@@ -29,7 +29,7 @@ from rc_lifecycle_http_fixture import (
 )
 
 
-def snapshot(output):
+def snapshot(output, request_bytes=None):
     with tempfile.TemporaryDirectory(prefix="structural-rc-browser-") as directory:
         workspace = Path(directory)
         supervisor = Supervisor(workspace)
@@ -47,10 +47,24 @@ def snapshot(output):
                     **headers,
                     "Idempotency-Key": "generated-review-snapshot",
                 },
-                body=canonical(authored_request()),
+                body=request_bytes
+                if request_bytes is not None
+                else canonical(authored_request()),
             )
             assert submitted.status == 202
             job_id = json.loads(submitted.body)["job_id"]
+            # Persist the submitted numeric representation, not decoder defaults.
+            submitted_values = (
+                json.loads(request_bytes)
+                if request_bytes is not None
+                else authored_request()
+            )
+            expected_request_bytes = canonical(submitted_values)
+            assert current.read_request(job_id, **tenant()) == expected_request_bytes
+            assert json.loads(submitted.body)["request"]["content_hash"] == digest(
+                expected_request_bytes
+            )
+
             supervisor.command({"command": "first_checkpoint"})
             supervisor.command({"command": "kill_first"})
             supervisor.command({"command": "resume_ready"})
@@ -93,6 +107,7 @@ def snapshot(output):
                     "schema_version": "generated-rc-review-snapshot.v1",
                     "evidence_scope": "socket-free real worker process and adapter regression; not browser or hosted proof",
                     "tenant_id": "a",
+                    "original_request_representation_retained": True,
                     "job": job.to_dict(),
                     "artifacts": {
                         role: encoded(original_bytes(current, getattr(job, role)))
@@ -126,4 +141,11 @@ def snapshot(output):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
-    emit(snapshot(parser.parse_args().output))
+    parser.add_argument("--request-file", type=Path)
+    arguments = parser.parse_args()
+    emit(
+        snapshot(
+            arguments.output,
+            arguments.request_file.read_bytes() if arguments.request_file else None,
+        )
+    )
