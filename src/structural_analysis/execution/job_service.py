@@ -14,8 +14,10 @@ from __future__ import annotations
 
 from collections.abc import Callable, Collection, Mapping
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
+import base64
+import binascii
 import hashlib
 import hmac
 from importlib import resources
@@ -33,6 +35,7 @@ from jsonschema import Draft202012Validator
 
 
 JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
+RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
     "structural-analysis-job-completion-evidence.v1"
@@ -101,7 +104,7 @@ class JobServiceError(ValueError):
 
 @dataclass(frozen=True)
 class ArtifactReference:
-    role: Literal["request", "checkpoint", "result", "evidence"]
+    role: Literal["request", "checkpoint", "result", "evidence", "rc-quantity-report"]
     content_hash: str
     byte_length: int
     media_type: str
@@ -287,7 +290,24 @@ class DurableJobService:
         self._authorize_tenant(tenant_id, authorization_token)
         _stable(idempotency_key, "/idempotency_key")
         normalized_request = _canonical_mapping(request, "/request")
-        _validate_schema(normalized_request, "job_request_v1.schema.json", "/request")
+        if (
+            normalized_request.get("schema_version")
+            == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+        ):
+            _validate_schema(
+                normalized_request, "job_request_v3.schema.json", "/request"
+            )
+            _model, rc_config = _rc_fiber_request(normalized_request)
+            total_steps = len(rc_config.targets_m)
+            maximum_attempts = normalized_request["execution_config"][
+                "maximum_api_invocations"
+            ]
+        else:
+            _validate_schema(
+                normalized_request, "job_request_v1.schema.json", "/request"
+            )
+            total_steps = int(normalized_request["config"]["load_steps"])
+            maximum_attempts = None
         request_bytes = _canonical_json_bytes(normalized_request)
         _bounded(request_bytes, _MAX_REQUEST_BYTES, "/request")
         request_hash = _sha256(request_bytes)
@@ -297,7 +317,6 @@ class DurableJobService:
             + b"\0"
             + idempotency_key.encode("utf-8")
         )
-        total_steps = int(normalized_request["config"]["load_steps"])
         request_ref = self._put_blob(
             request_bytes,
             role="request",
@@ -366,6 +385,12 @@ class DurableJobService:
                 """,
                 (job_id, now, event_json, event_hash),
             )
+            if maximum_attempts is not None:
+                connection.execute(
+                    "INSERT INTO job_execution_budgets "
+                    "(job_id, maximum_attempts, reserved_attempts) VALUES (?, ?, 0)",
+                    (job_id, str(maximum_attempts)),
+                )
             row = self._job_row(connection, job_id)
         return self._view(row)
 
@@ -517,6 +542,573 @@ class DurableJobService:
             )
         return self._view(row)
 
+    def read_execution_budget(
+        self,
+        job_id: str,
+        *,
+        worker_id: str,
+        authorization_token: str,
+        lease_token: str,
+    ) -> dict[str, int]:
+        """Read the immutable budget under an active lease.
+
+        RC units are reserved API invocations, including the separate mandatory
+        verification invocation.
+        """
+
+        self._authorize_worker(worker_id, authorization_token)
+        with self._transaction() as connection:
+            _now, now_us = self._now()
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            return self._execution_budget(connection, row)
+
+    def reserve_execution_attempt(
+        self,
+        job_id: str,
+        *,
+        worker_id: str,
+        authorization_token: str,
+        lease_token: str,
+    ) -> int:
+        """Commit one global execution reservation before entering the invocation.
+
+        RC reserves one API invocation, which may perform multiple prefix or
+        suffix core solve calls.
+        A crash between reservation and execution consumes the reservation.
+        This conservative upper bound survives lease expiry and failed-job
+        resume; it is not a count of confirmed completed numerical attempts.
+        """
+
+        self._authorize_worker(worker_id, authorization_token)
+        with self._transaction() as connection:
+            now, now_us = self._now()
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            budget = self._execution_budget(connection, row)
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            if budget["remaining_attempts"] == 0:
+                _fail(
+                    "execution_attempt_budget_exhausted",
+                    "/execution_budget",
+                    "The immutable job-wide execution reservation limit is exhausted.",
+                )
+            reserved = budget["reserved_attempts"] + 1
+            connection.execute(
+                "UPDATE job_execution_budgets SET reserved_attempts = ? WHERE job_id = ?",
+                (reserved, job_id),
+            )
+            self._transition(
+                connection,
+                row,
+                event_type="execution_attempt_reserved",
+                status="running",
+                occurred_at=now,
+                payload={
+                    "worker_id": worker_id,
+                    "reserved_attempts": reserved,
+                    "maximum_attempts": budget["maximum_attempts"],
+                    **(
+                        {
+                            "attempt": int(row["attempt"]),
+                            "lease_token_hash": str(row["lease_token_hash"]),
+                        }
+                        if self._request_for_row(row).get("schema_version")
+                        == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+                        else {}
+                    ),
+                },
+                updates={},
+            )
+        return reserved
+
+    def worker_result_byte_limit(
+        self, job_id: str, *, worker_id: str, authorization_token: str, lease_token: str
+    ) -> int:
+        """Return an operation-bound transport limit after authenticating the lease."""
+        self._authorize_worker(worker_id, authorization_token)
+        with self._connect() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            return _result_byte_limit(self._request_for_row(row))
+
+    def _checkpoint_for_row(self, row: sqlite3.Row) -> bytes | None:
+        return (
+            self._read_blob(
+                str(row["checkpoint_hash"]),
+                int(row["checkpoint_size"]),
+                maximum_bytes=_MAX_CHECKPOINT_BYTES,
+            )
+            if row["checkpoint_hash"] is not None
+            else None
+        )
+
+    def record_rc_invocation_outcome(
+        self,
+        job_id: str,
+        *,
+        worker_id: str,
+        authorization_token: str,
+        lease_token: str,
+        ordinal: int,
+        outcome: Mapping[str, Any],
+    ) -> None:
+        """Attach one immutable invocation outcome to its exact reserved lease.
+
+        Reservation does not prove execution. An unrecorded ordinal remains
+        explicitly unknown after a crash, cancellation or lease takeover.
+        """
+        self._authorize_worker(worker_id, authorization_token)
+        with self._connect() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            request = self._request_for_row(row)
+        _model, typed = _rc_fiber_request(request)
+        if not isinstance(outcome, Mapping):
+            _fail(
+                "rc_invocation_contract_invalid",
+                "/outcome",
+                "Expected an outcome object.",
+            )
+        raw = _canonical_json_bytes(dict(outcome))
+        _bounded(raw, _result_byte_limit(request), "/rc_invocation")
+        normalized = _strict_json_object(raw, "/rc_invocation")
+        _validate_rc_outcome(normalized, request, typed, str(row["request_hash"]))
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            reservations = self._rc_reservations(connection, row)
+            if type(ordinal) is not int or ordinal not in reservations:
+                _fail(
+                    "rc_invocation_reservation_missing",
+                    "/ordinal",
+                    "A recorded outcome requires a reserved ordinal.",
+                )
+            reservation, event_hash = reservations[ordinal]
+            if any(
+                reservation.get(key) != value
+                for key, value in {
+                    "worker_id": worker_id,
+                    "attempt": int(row["attempt"]),
+                    "lease_token_hash": str(row["lease_token_hash"]),
+                }.items()
+            ):
+                _fail(
+                    "rc_invocation_reservation_lease_mismatch",
+                    "/ordinal",
+                    "The reservation belongs to a different worker attempt or lease.",
+                )
+            self._rc_invocation_rows(connection, row)
+            prior = connection.execute(
+                "SELECT * FROM job_rc_invocation_outcomes WHERE job_id = ? AND ordinal = ?",
+                (job_id, ordinal),
+            ).fetchone()
+            if prior is not None:
+                if prior["outcome_hash"] != _sha256(raw) or prior[
+                    "outcome_size"
+                ] != len(raw):
+                    _fail(
+                        "rc_invocation_outcome_conflict",
+                        "/ordinal",
+                        "A reserved ordinal already has a different immutable outcome.",
+                    )
+                self._read_blob(
+                    str(prior["outcome_hash"]),
+                    int(prior["outcome_size"]),
+                    maximum_bytes=_result_byte_limit(request),
+                )
+                return
+            if normalized["completed_before"] != int(row["progress_completed"]):
+                _fail(
+                    "rc_invocation_progress_mismatch",
+                    "/completed_before",
+                    "The invocation must start at the current durable prefix.",
+                )
+            expected_restart_hash = None
+            if int(row["progress_completed"]) > 0:
+                prior_checkpoint = _strict_json_object(
+                    self._checkpoint_for_row(row), "/checkpoint"
+                )
+                expected_restart_hash = _sha256(
+                    base64.b64decode(
+                        prior_checkpoint["terminal_checkpoint_artifact_base64"],
+                        validate=True,
+                    )
+                )
+            if normalized["restart_input_sha256"] != expected_restart_hash:
+                _fail(
+                    "rc_invocation_restart_mismatch",
+                    "/restart_input_sha256",
+                    "The invocation restart must match the current durable checkpoint bytes.",
+                )
+            ref = self._put_blob(
+                raw,
+                role="evidence",
+                media_type="application/json",
+                maximum_bytes=_result_byte_limit(request),
+            )
+            metadata = {
+                key: normalized[key]
+                for key in (
+                    "schema_version",
+                    "phase",
+                    "status",
+                    "job_request_hash",
+                    "chunk_request_hash",
+                    "completed_before",
+                    "completed_after",
+                    "restart_input_sha256",
+                    "timing",
+                    "unavailable_execution_work",
+                )
+            }
+            event_payload = {
+                "ordinal": ordinal,
+                "outcome_hash": ref.content_hash,
+                "outcome_size": ref.byte_length,
+                "reservation_event_hash": event_hash,
+                "metadata": metadata,
+            }
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            connection.execute(
+                "INSERT INTO job_rc_invocation_outcomes (job_id, ordinal, outcome_hash, outcome_size, metadata_json, reservation_event_hash) VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    job_id,
+                    ordinal,
+                    ref.content_hash,
+                    ref.byte_length,
+                    _canonical_json_bytes(metadata).decode("utf-8"),
+                    event_hash,
+                ),
+            )
+            self._transition(
+                connection,
+                row,
+                event_type="rc_invocation_recorded",
+                status="running",
+                occurred_at=now,
+                payload=event_payload,
+                updates={},
+            )
+
+    def _rc_reservations(
+        self, connection: sqlite3.Connection, row: sqlite3.Row
+    ) -> dict[int, tuple[dict[str, Any], str]]:
+        if (
+            self._request_for_row(row).get("schema_version")
+            != RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+        ):
+            _fail(
+                "rc_invocation_operation_unsupported",
+                "/job_id",
+                "Invocation outcomes require an RC job.",
+            )
+        self._execution_budget(connection, row)
+        events = connection.execute(
+            "SELECT payload_json, event_hash FROM job_events WHERE job_id = ? AND event_type = 'execution_attempt_reserved' ORDER BY revision",
+            (row["job_id"],),
+        ).fetchall()
+        reservations = {}
+        for ordinal, event in enumerate(events, 1):
+            payload = _strict_json_object(
+                str(event["payload_json"]).encode(), "/rc_invocations/reservation"
+            )
+            if type(payload.get("attempt")) is not int or not 1 <= payload[
+                "attempt"
+            ] <= int(row["attempt"]):
+                _fail(
+                    "rc_invocation_reservation_invalid",
+                    "/rc_invocations",
+                    "Reservation attempt binding is invalid.",
+                )
+            _stable(payload.get("worker_id"), "/rc_invocations/worker_id")
+            _hash(payload.get("lease_token_hash"), "/rc_invocations/lease_token_hash")
+            reservations[ordinal] = (payload, str(event["event_hash"]))
+        return reservations
+
+    def _rc_invocation_rows(
+        self,
+        connection: sqlite3.Connection,
+        row: sqlite3.Row,
+        *,
+        verify_blobs: bool = False,
+    ) -> list[sqlite3.Row]:
+        reservations = self._rc_reservations(connection, row)
+        records = connection.execute(
+            "SELECT * FROM job_rc_invocation_outcomes WHERE job_id = ? ORDER BY ordinal",
+            (row["job_id"],),
+        ).fetchall()
+        events = connection.execute(
+            "SELECT payload_json FROM job_events WHERE job_id = ? AND event_type = 'rc_invocation_recorded' ORDER BY revision",
+            (row["job_id"],),
+        ).fetchall()
+        recorded_events = {}
+        for event in events:
+            payload = _strict_json_object(
+                str(event["payload_json"]).encode(), "/rc_invocations/events"
+            )
+            ordinal = payload.get("ordinal")
+            if type(ordinal) is not int or ordinal in recorded_events:
+                _fail(
+                    "rc_invocation_integrity_failed",
+                    "/rc_invocations",
+                    "Recorded invocation event ordinals are invalid.",
+                )
+            recorded_events[ordinal] = payload
+        if len(records) != len(recorded_events):
+            _fail(
+                "rc_invocation_integrity_failed",
+                "/rc_invocations",
+                "Invocation references disagree with event history.",
+            )
+        maximum = _result_byte_limit(self._request_for_row(row))
+        for record in records:
+            ordinal = record["ordinal"]
+            metadata = _strict_json_object(
+                str(record["metadata_json"]).encode(), "/rc_invocations/metadata"
+            )
+            expected = {
+                "ordinal": ordinal,
+                "outcome_hash": record["outcome_hash"],
+                "outcome_size": record["outcome_size"],
+                "reservation_event_hash": record["reservation_event_hash"],
+                "metadata": metadata,
+            }
+            if (
+                ordinal not in reservations
+                or record["reservation_event_hash"] != reservations[ordinal][1]
+                or _canonical_json_bytes(recorded_events.get(ordinal))
+                != _canonical_json_bytes(expected)
+            ):
+                _fail(
+                    "rc_invocation_integrity_failed",
+                    "/rc_invocations",
+                    "Invocation references disagree with their immutable reservation and record events.",
+                )
+            _hash(record["outcome_hash"], "/rc_invocations/outcome_hash")
+            if (
+                type(record["outcome_size"]) is not int
+                or not 0 <= record["outcome_size"] <= maximum
+            ):
+                _fail(
+                    "rc_invocation_integrity_failed",
+                    "/rc_invocations",
+                    "Recorded invocation size exceeds its operation limit.",
+                )
+            if verify_blobs:
+                self._read_blob(
+                    str(record["outcome_hash"]),
+                    int(record["outcome_size"]),
+                    maximum_bytes=maximum,
+                )
+        return records
+
+    def read_rc_invocation_outcomes(
+        self, job_id: str, *, worker_id: str, authorization_token: str, lease_token: str
+    ) -> list[dict[str, Any]]:
+        """Explicit worker read of full outcomes; normal commit/integrity paths do not aggregate them."""
+        self._authorize_worker(worker_id, authorization_token)
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            maximum = _result_byte_limit(self._request_for_row(row))
+            return [
+                {
+                    "ordinal": record["ordinal"],
+                    "outcome": _strict_json_object(
+                        self._read_blob(
+                            str(record["outcome_hash"]),
+                            int(record["outcome_size"]),
+                            maximum_bytes=maximum,
+                        ),
+                        "/rc_invocation",
+                    ),
+                }
+                for record in self._rc_invocation_rows(connection, row)
+            ]
+
+    def read_rc_invocation_evidence(
+        self, job_id: str, *, tenant_id: str, authorization_token: str
+    ) -> dict[str, Any]:
+        """Expose bounded metadata and explicit unknown reservations without copying cumulative results."""
+        self._authorize_tenant(tenant_id, authorization_token)
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            records = self._rc_invocation_rows(connection, row)
+            budget = self._execution_budget(connection, row)
+            present = {record["ordinal"] for record in records}
+            pending = [
+                n for n in range(1, budget["reserved_attempts"] + 1) if n not in present
+            ]
+            return {
+                "schema_version": "bounded-rc-fiber-job-invocation-evidence.v1",
+                "job_id": job_id,
+                "job_request_hash": str(row["request_hash"]),
+                "execution_budget_unit": "reserved_api_invocations",
+                "execution_budget": budget,
+                "pending_ordinals": pending,
+                "pending_execution_work": "unknown" if pending else "none_pending",
+                "invocations": [
+                    {
+                        "ordinal": record["ordinal"],
+                        "content_hash": record["outcome_hash"],
+                        "byte_length": record["outcome_size"],
+                        **_strict_json_object(
+                            str(record["metadata_json"]).encode(),
+                            "/rc_invocations/metadata",
+                        ),
+                    }
+                    for record in records
+                ],
+                "claim_boundary": "Stored worker observations and unknown reservations; no independent physical validation or zero-work inference.",
+            }
+
+    def read_rc_invocation_artifact(
+        self, job_id: str, *, tenant_id: str, authorization_token: str, ordinal: int
+    ) -> bytes:
+        self._authorize_tenant(tenant_id, authorization_token)
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            if type(ordinal) is not int:
+                _fail(
+                    "rc_invocation_ordinal_invalid",
+                    "/ordinal",
+                    "Expected an integer ordinal.",
+                )
+            records = self._rc_invocation_rows(connection, row)
+            selected = next(
+                (record for record in records if record["ordinal"] == ordinal), None
+            )
+            if selected is None:
+                _fail(
+                    "rc_invocation_not_recorded",
+                    "/ordinal",
+                    "No outcome is recorded for this reserved ordinal.",
+                )
+            return self._read_blob(
+                str(selected["outcome_hash"]),
+                int(selected["outcome_size"]),
+                maximum_bytes=_result_byte_limit(self._request_for_row(row)),
+            )
+
+    def _bind_rc_receipts(
+        self, connection: sqlite3.Connection, row: sqlite3.Row, receipts: Any
+    ) -> None:
+        """Check each claimed receipt against its actual durable invocation pair, one pair at a time."""
+        records = {
+            record["ordinal"]: record
+            for record in self._rc_invocation_rows(connection, row)
+        }
+        maximum = _result_byte_limit(self._request_for_row(row))
+        used: set[int] = set()
+        for receipt in receipts:
+            outcomes = {}
+            for phase in ("analysis", "verification"):
+                ordinal = receipt[f"{phase}_ordinal"]
+                if (
+                    type(ordinal) is not int
+                    or ordinal in used
+                    or ordinal not in records
+                ):
+                    raise ValueError(
+                        "RC receipt invocation ordinal is missing or reused"
+                    )
+                used.add(ordinal)
+                record = records[ordinal]
+                outcome = _strict_json_object(
+                    self._read_blob(
+                        str(record["outcome_hash"]),
+                        int(record["outcome_size"]),
+                        maximum_bytes=maximum,
+                    ),
+                    "/rc_invocation",
+                )
+                if (
+                    outcome["phase"] != phase
+                    or outcome["status"] != "returned"
+                    or outcome["unavailable_execution_work"]
+                ):
+                    raise ValueError(
+                        "RC receipt requires two returned, accounted invocations"
+                    )
+                for key in (
+                    "job_request_hash",
+                    "chunk_request_hash",
+                    "completed_before",
+                    "completed_after",
+                    "restart_input_sha256",
+                ):
+                    if _canonical_json_bytes(outcome[key]) != _canonical_json_bytes(
+                        receipt[key]
+                    ):
+                        raise ValueError("RC receipt invocation input binding changed")
+                if _canonical_json_bytes(outcome["timing"]) != _canonical_json_bytes(
+                    receipt[f"{phase}_timing"]
+                ):
+                    raise ValueError("RC receipt invocation timing changed")
+                outcomes[phase] = outcome
+            analysis = outcomes["analysis"]
+            result = analysis["api_result"]
+            verification = outcomes["verification"]
+            if (
+                result["result_hash"] != receipt["result_hash"]
+                or _sha256(_canonical_json_bytes(result))
+                != receipt["result_artifact_sha256"]
+                or _canonical_json_bytes(result["metrics"])
+                != _canonical_json_bytes(receipt["analysis_metrics"])
+                or _canonical_json_bytes(verification["verification_report"])
+                != _canonical_json_bytes(receipt["validation_report"])
+            ):
+                raise ValueError(
+                    "RC receipt result or report differs from the recorded invocation"
+                )
+            for key, source in (
+                ("api_request", "request"),
+                ("model_binding", "model"),
+                ("control", "control"),
+            ):
+                if _canonical_json_bytes(receipt[key]) != _canonical_json_bytes(
+                    result[source]
+                ):
+                    raise ValueError("RC receipt API source identity changed")
+            if (
+                receipt["path_hash"] != result["path"]["path_hash"]
+                or receipt["checkpoint_state_hash"]
+                != result["path"]["final_checkpoint"]["state_hash"]
+            ):
+                raise ValueError("RC receipt path or terminal checkpoint state changed")
+            expected_verification_metrics = {
+                key: verification["verification_report"][key]
+                for key in (
+                    "replay_control_work",
+                    "response_reassembly_attempts",
+                    "response_reassembly_verified_count",
+                )
+            }
+            if _canonical_json_bytes(
+                receipt["verification_metrics"]
+            ) != _canonical_json_bytes(expected_verification_metrics):
+                raise ValueError("RC receipt verification metrics changed")
+            checkpoint = base64.b64decode(
+                analysis["checkpoint_artifact_base64"], validate=True
+            )
+            if _sha256(checkpoint) != receipt[
+                "checkpoint_sha256"
+            ] or _canonical_json_bytes(len(checkpoint)) != _canonical_json_bytes(
+                receipt["checkpoint_byte_length"]
+            ):
+                raise ValueError("RC receipt checkpoint bytes changed")
+
     def save_checkpoint(
         self,
         job_id: str,
@@ -532,8 +1124,9 @@ class DurableJobService:
     ) -> JobView:
         self._authorize_worker(worker_id, authorization_token)
         _hash(resume_contract_hash, "/resume_contract_hash")
+        normalized_checkpoint = bytes(checkpoint_bytes)
         checkpoint_ref = self._put_blob(
-            bytes(checkpoint_bytes),
+            normalized_checkpoint,
             role="checkpoint",
             media_type=checkpoint_media_type,
             maximum_bytes=_MAX_CHECKPOINT_BYTES,
@@ -566,6 +1159,32 @@ class DurableJobService:
                     "/resume_contract_hash",
                     "The job is already bound to a different resume contract.",
                 )
+            request = self._request_for_row(row)
+            if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+                from structural_analysis.execution.rc_fiber_job_contract import (
+                    validate_rc_fiber_job_checkpoint,
+                )
+
+                checkpoint = self._checkpoint_for_row(row)
+                try:
+                    validated = validate_rc_fiber_job_checkpoint(
+                        normalized_checkpoint,
+                        request=request,
+                        progress_completed=progress_completed,
+                        execution_budget=self._execution_budget(connection, row),
+                        checkpoint=checkpoint,
+                    )
+                    if validated["resume_contract_hash"] != resume_contract_hash:
+                        raise ValueError("RC checkpoint resume contract changed")
+                    self._bind_rc_receipts(connection, row, validated["receipts"])
+                except (TypeError, ValueError, KeyError):
+                    _fail(
+                        "rc_fiber_checkpoint_contract_invalid",
+                        "/checkpoint",
+                        "The RC checkpoint must preserve its request, prefix and recorded invocations.",
+                    )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
             row = self._transition(
                 connection,
                 row,
@@ -604,8 +1223,14 @@ class DurableJobService:
         """Atomically publish a worker-validated result/evidence pair."""
 
         self._authorize_worker(worker_id, authorization_token)
+        maximum_result_bytes = self.worker_result_byte_limit(
+            job_id,
+            worker_id=worker_id,
+            authorization_token=authorization_token,
+            lease_token=lease_token,
+        )
         normalized_result = bytes(result_bytes)
-        _bounded(normalized_result, _MAX_RESULT_BYTES, "/result")
+        _bounded(normalized_result, maximum_result_bytes, "/result")
         result_payload = _strict_json_object(normalized_result, "/result")
         normalized_evidence = _canonical_mapping(evidence, "/evidence")
         _validate_schema(
@@ -621,7 +1246,7 @@ class DurableJobService:
             normalized_result,
             role="result",
             media_type=result_media_type,
-            maximum_bytes=_MAX_RESULT_BYTES,
+            maximum_bytes=maximum_result_bytes,
         )
         evidence_ref = self._put_blob(
             evidence_bytes,
@@ -673,6 +1298,38 @@ class DurableJobService:
                     "/evidence/contract_pass",
                     "A trusted core validation PASS is required before publication.",
                 )
+            if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+                from structural_analysis.execution.rc_fiber_job_contract import (
+                    RC_FIBER_JOB_VALIDATOR_ID,
+                    validate_rc_fiber_job_result,
+                )
+
+                try:
+                    report = validate_rc_fiber_job_result(
+                        result_payload,
+                        request=request,
+                        execution_budget=self._execution_budget(connection, row),
+                        checkpoint=self._checkpoint_for_row(row),
+                    )
+                    self._bind_rc_receipts(connection, row, result_payload["receipts"])
+                except (TypeError, ValueError, KeyError):
+                    _fail(
+                        "rc_fiber_result_contract_invalid",
+                        "/result",
+                        "The RC result must preserve its request, prefix and recorded invocations.",
+                    )
+                if normalized_evidence[
+                    "validator_id"
+                ] != RC_FIBER_JOB_VALIDATOR_ID or _canonical_json_bytes(
+                    normalized_evidence["validation_report"]
+                ) != _canonical_json_bytes(report):
+                    _fail(
+                        "rc_fiber_completion_report_mismatch",
+                        "/evidence/validation_report",
+                        "The evidence must retain the exact pure RC job validation report.",
+                    )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
             row = self._transition(
                 connection,
                 row,
@@ -717,9 +1374,7 @@ class DurableJobService:
                 "Use a stable lowercase machine error code.",
             )
         if type(retriable) is not bool:
-            _fail(
-                "retriable_invalid", "/retriable", "retriable must be boolean."
-            )
+            _fail("retriable_invalid", "/retriable", "retriable must be boolean.")
         now, now_us = self._now()
         with self._transaction() as connection:
             row = self._job_row(connection, job_id)
@@ -832,6 +1487,38 @@ class DurableJobService:
             )
         return self._view(row)
 
+    def read_request(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+    ) -> bytes:
+        """Read the immutable submitted request in any job lifecycle state."""
+        return self._read_published_artifact(
+            job_id,
+            tenant_id=tenant_id,
+            authorization_token=authorization_token,
+            role="request",
+            maximum_bytes=_MAX_REQUEST_BYTES,
+        )
+
+    def read_checkpoint(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+    ) -> bytes:
+        """Read the last attached checkpoint, including after failure or cancellation."""
+        return self._read_published_artifact(
+            job_id,
+            tenant_id=tenant_id,
+            authorization_token=authorization_token,
+            role="checkpoint",
+            maximum_bytes=_MAX_CHECKPOINT_BYTES,
+        )
+
     def read_result(
         self,
         job_id: str,
@@ -862,6 +1549,369 @@ class DurableJobService:
             maximum_bytes=_MAX_EVIDENCE_BYTES,
         )
 
+    def create_rc_quantity_report(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+        expected_request_hash: str,
+        expected_result_artifact_hash: str,
+        declared_prices: Mapping[str, Any] | None,
+    ) -> dict[str, Any]:
+        """Append quantities/prices for existing trusted originals without a solve.
+
+        Identical source and normalized prices return the same immutable revision.
+        Prices never enter the numerical request, lease, budget, or result fields.
+        """
+        from structural_analysis.execution.rc_fiber_quantity_report import (
+            RC_QUANTITY_REPORT_MAX_BYTES,
+            build_rc_quantity_report,
+            decode_rc_declared_prices,
+        )
+
+        self._authorize_tenant(tenant_id, authorization_token)
+        _hash(expected_request_hash, "/expected_request_hash")
+        _hash(expected_result_artifact_hash, "/expected_result_artifact_hash")
+        decode_rc_declared_prices(declared_prices)
+        self.validate_integrity(
+            job_id, tenant_id=tenant_id, authorization_token=authorization_token
+        )
+        with self._connect() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            if row["status"] != "succeeded":
+                _fail(
+                    "rc_quantity_job_not_succeeded",
+                    "/job",
+                    "A successful RC job is required.",
+                )
+            if (
+                row["request_hash"] != expected_request_hash
+                or row["result_hash"] != expected_result_artifact_hash
+            ):
+                _fail(
+                    "rc_quantity_source_conflict",
+                    "/source",
+                    "Refresh the exact job request and published result references.",
+                )
+            originals = self._rc_quantity_originals(connection, row)
+            snapshot = _canonical_json_bytes(self._view(row).to_dict())
+        report = build_rc_quantity_report(**originals, prices=declared_prices)
+        raw = _canonical_json_bytes(report)
+        _bounded(raw, RC_QUANTITY_REPORT_MAX_BYTES, "/rc_quantity_report")
+        report_id = "rcq_" + _sha256(raw).removeprefix("sha256:")
+        with self._transaction() as connection:
+            current = self._job_row(connection, job_id)
+            self._require_tenant(current, tenant_id)
+            if _canonical_json_bytes(self._view(current).to_dict()) != snapshot:
+                _fail("rc_quantity_source_conflict", "/source", "Job source changed.")
+            prior = connection.execute(
+                "SELECT * FROM job_rc_quantity_reports WHERE job_id = ? AND report_id = ?",
+                (job_id, report_id),
+            ).fetchone()
+            if prior is not None:
+                if (
+                    self._read_blob(
+                        prior["content_hash"],
+                        prior["byte_length"],
+                        maximum_bytes=RC_QUANTITY_REPORT_MAX_BYTES,
+                    )
+                    != raw
+                ):
+                    _fail(
+                        "rc_quantity_report_integrity_failed",
+                        "/report",
+                        "Revision changed.",
+                    )
+                return self._rc_quantity_reference(current, prior)
+            ref = self._put_blob(
+                raw,
+                role="rc-quantity-report",
+                media_type="application/json",
+                maximum_bytes=RC_QUANTITY_REPORT_MAX_BYTES,
+            )
+            revision = connection.execute(
+                "SELECT COALESCE(MAX(revision), 0) + 1 FROM job_rc_quantity_reports WHERE job_id = ?",
+                (job_id,),
+            ).fetchone()[0]
+            created_at, _ = self._now()
+            connection.execute(
+                "INSERT INTO job_rc_quantity_reports VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    job_id,
+                    revision,
+                    report_id,
+                    ref.content_hash,
+                    ref.byte_length,
+                    created_at,
+                ),
+            )
+            published = connection.execute(
+                "SELECT * FROM job_rc_quantity_reports WHERE job_id = ? AND report_id = ?",
+                (job_id, report_id),
+            ).fetchone()
+            return self._rc_quantity_reference(current, published)
+
+    def list_rc_quantity_reports(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+        after_revision: int = 0,
+        limit: int = 20,
+    ) -> dict[str, Any]:
+        """List bounded immutable references; consumers read one explicit revision."""
+        self._authorize_tenant(tenant_id, authorization_token)
+        if (
+            type(after_revision) is not int
+            or not 0 <= after_revision < 2**63
+            or type(limit) is not int
+            or not 1 <= limit <= 100
+        ):
+            _fail("rc_quantity_page_invalid", "/page", "Invalid report pagination.")
+        with self._connect() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            reports = connection.execute(
+                "SELECT * FROM job_rc_quantity_reports WHERE job_id = ? AND revision > ? "
+                "ORDER BY revision LIMIT ?",
+                (job_id, after_revision, limit),
+            ).fetchall()
+        return {
+            "schema_version": "durable-rc-fiber-quantity-report-index.v1",
+            "job_id": job_id,
+            "tenant_id": tenant_id,
+            "reports": [self._rc_quantity_reference(row, report) for report in reports],
+            "next_after_revision": reports[-1]["revision"]
+            if reports
+            else after_revision,
+        }
+
+    def read_rc_quantity_report(
+        self,
+        job_id: str,
+        report_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+    ) -> bytes:
+        """Read and rederive the report against actual authenticated originals."""
+        from structural_analysis.execution.rc_fiber_quantity_report import (
+            RC_QUANTITY_REPORT_MAX_BYTES,
+            validate_rc_quantity_report,
+        )
+
+        self._authorize_tenant(tenant_id, authorization_token)
+        if not re.fullmatch(r"rcq_[0-9a-f]{64}", report_id):
+            _fail("rc_quantity_report_id_invalid", "/report_id", "Invalid report ID.")
+        self.validate_integrity(
+            job_id, tenant_id=tenant_id, authorization_token=authorization_token
+        )
+        with self._connect() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            record = connection.execute(
+                "SELECT * FROM job_rc_quantity_reports WHERE job_id = ? AND report_id = ?",
+                (job_id, report_id),
+            ).fetchone()
+            if record is None:
+                _fail(
+                    "rc_quantity_report_not_found",
+                    "/report_id",
+                    "Report is not published.",
+                )
+            self._rc_quantity_reference(row, record)
+            raw = self._read_blob(
+                record["content_hash"],
+                record["byte_length"],
+                maximum_bytes=RC_QUANTITY_REPORT_MAX_BYTES,
+            )
+            originals = self._rc_quantity_originals(connection, row)
+        try:
+            validate_rc_quantity_report(
+                _strict_json_object(raw, "/report"), **originals
+            )
+        except (TypeError, ValueError, KeyError):
+            _fail(
+                "rc_quantity_report_integrity_failed",
+                "/report",
+                "Report derivation differs.",
+            )
+        return raw
+
+    def _rc_quantity_reference(
+        self, job: sqlite3.Row, report: sqlite3.Row
+    ) -> dict[str, Any]:
+        digest = _hash(report["content_hash"], "/report/content_hash")
+        if (
+            report["job_id"] != job["job_id"]
+            or report["report_id"] != "rcq_" + digest.removeprefix("sha256:")
+            or type(report["revision"]) is not int
+            or report["revision"] < 1
+        ):
+            _fail(
+                "rc_quantity_report_integrity_failed",
+                "/report",
+                "Report index differs.",
+            )
+        return {
+            "schema_version": "durable-rc-fiber-quantity-report-reference.v1",
+            "tenant_id": job["tenant_id"],
+            "job_id": job["job_id"],
+            "report_id": report["report_id"],
+            "revision": report["revision"],
+            "content_hash": digest,
+            "byte_length": report["byte_length"],
+            "media_type": "application/json",
+            "created_at": report["created_at"],
+        }
+
+    def _rc_quantity_originals(
+        self, connection: sqlite3.Connection, row: sqlite3.Row
+    ) -> dict[str, Any]:
+        """Pure RC contract checks and recorded-worker custody, never a fresh replay."""
+        from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+        from structural_analysis.execution.rc_fiber_job_contract import (
+            RC_FIBER_JOB_VALIDATOR_ID,
+            validate_rc_fiber_job_request,
+            validate_rc_fiber_job_result,
+        )
+
+        if (
+            row["status"] != "succeeded"
+            or row["result_hash"] is None
+            or row["evidence_hash"] is None
+        ):
+            _fail(
+                "rc_quantity_job_not_succeeded",
+                "/job",
+                "A successful RC job is required.",
+            )
+        validate_job_view(self._view(row))
+        event = connection.execute(
+            "SELECT * FROM job_events WHERE job_id = ? AND revision = ?",
+            (row["job_id"], row["revision"]),
+        ).fetchone()
+        expected_completed = {
+            "result_hash": row["result_hash"],
+            "evidence_hash": row["evidence_hash"],
+            "progress_completed": row["progress_total"],
+        }
+        if (
+            event is None
+            or event["event_type"] != "completed"
+            or event["event_hash"] != row["terminal_event_hash"]
+            or _canonical_json_bytes(
+                {
+                    k: _strict_json_object(
+                        str(event["payload_json"]).encode(), "/event"
+                    ).get(k)
+                    for k in expected_completed
+                }
+            )
+            != _canonical_json_bytes(expected_completed)
+        ):
+            _fail(
+                "rc_quantity_original_invalid",
+                "/source",
+                "Completed-event artifact custody differs.",
+            )
+        request = self._request_for_row(row)
+        if request.get("schema_version") != RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+            _fail(
+                "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
+            )
+        result = _strict_json_object(
+            self._read_blob(
+                row["result_hash"],
+                row["result_size"],
+                maximum_bytes=_result_byte_limit(request),
+            ),
+            "/result",
+        )
+        evidence = _strict_json_object(
+            self._read_blob(
+                row["evidence_hash"],
+                row["evidence_size"],
+                maximum_bytes=_MAX_EVIDENCE_BYTES,
+            ),
+            "/evidence",
+        )
+        try:
+            model, config = validate_rc_fiber_job_request(request)
+            report = validate_rc_fiber_job_result(
+                result,
+                request=request,
+                execution_budget=self._execution_budget(connection, row),
+                checkpoint=self._checkpoint_for_row(row),
+            )
+            self._bind_rc_receipts(connection, row, result["receipts"])
+            _validate_schema(
+                evidence, "job_completion_evidence_v1.schema.json", "/evidence"
+            )
+            expected = {
+                "job_id": row["job_id"],
+                "request_hash": row["request_hash"],
+                "checkpoint_hash": row["checkpoint_hash"],
+                "result_artifact_hash": row["result_hash"],
+                "validator_id": RC_FIBER_JOB_VALIDATOR_ID,
+                "contract_pass": True,
+                "solver_truth_owner": "structural_analysis_core",
+                "validation_report": report,
+            }
+            if _canonical_json_bytes(
+                {k: evidence[k] for k in expected}
+            ) != _canonical_json_bytes(expected):
+                raise ValueError("Completion evidence binding mismatch")
+            if (
+                result["api_result"]["model"]["canonical_model_checksum"]
+                != model.canonical_model_checksum
+            ):
+                raise ValueError("Result model binding mismatch")
+            tail = result["receipts"][-1]
+            bindings = {
+                "tenant_id": row["tenant_id"],
+                "job_id": row["job_id"],
+                "completed_job_revision": row["revision"],
+                "terminal_event_hash": row["terminal_event_hash"],
+                "original_artifacts": {
+                    role: ref.to_dict() if ref is not None else None
+                    for role, ref in self._row_references(row).items()
+                },
+                "case_id": request["case_id"],
+                "source_revision": request["source_revision"],
+                "source_revision_is_execution_attestation": False,
+                "canonical_model_checksum": model.canonical_model_checksum,
+                "model_input_checksum": model.input_checksum,
+                "compiler_profile": result["api_result"]["model"]["compiler_profile"],
+                "config_hash": canonical_hash(config.to_dict()),
+                "profile": result["profile"],
+                "numerical_request_hash": result["request_hash"],
+                "resume_contract_hash": result["resume_contract_hash"],
+                "durable_result_hash": result["result_hash"],
+                "api_result_hash": result["api_result"]["result_hash"],
+                "terminal_native_checkpoint_sha256": tail["checkpoint_sha256"],
+                "terminal_native_checkpoint_byte_length": tail[
+                    "checkpoint_byte_length"
+                ],
+                "worker_validation_report_hash": canonical_hash(report),
+                "receipt_hashes": report["receipt_hashes"],
+            }
+            return {
+                "model": model,
+                "config": config,
+                "bindings": bindings,
+                "structural_authority": result["authority"],
+            }
+        except (TypeError, ValueError, KeyError, IndexError):
+            _fail(
+                "rc_quantity_original_invalid",
+                "/source",
+                "The original RC authority bindings differ.",
+            )
+
     def validate_integrity(
         self,
         job_id: str,
@@ -879,6 +1929,27 @@ class DurableJobService:
                 "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision",
                 (job_id,),
             ).fetchall()
+            request = self._request_for_row(row)
+            if request.get("schema_version") in {
+                RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
+            }:
+                self._execution_budget(connection, row)
+            elif (
+                connection.execute(
+                    "SELECT 1 FROM job_execution_budgets WHERE job_id = ?", (job_id,)
+                ).fetchone()
+                is not None
+            ):
+                _fail(
+                    "execution_budget_integrity_failed",
+                    "/execution_budget",
+                    "An unsupported job operation has an unexpected execution budget.",
+                )
+            rc_records = (
+                self._rc_invocation_rows(connection, row, verify_blobs=True)
+                if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+                else []
+            )
         refs = self._row_references(row)
         for ref in refs.values():
             if ref is not None:
@@ -888,7 +1959,7 @@ class DurableJobService:
                     maximum_bytes={
                         "request": _MAX_REQUEST_BYTES,
                         "checkpoint": _MAX_CHECKPOINT_BYTES,
-                        "result": _MAX_RESULT_BYTES,
+                        "result": _result_byte_limit(request),
                         "evidence": _MAX_EVIDENCE_BYTES,
                     }[ref.role],
                 )
@@ -946,6 +2017,16 @@ class DurableJobService:
                 role: ref.content_hash if ref is not None else None
                 for role, ref in refs.items()
             },
+            **(
+                {
+                    "rc_invocation_artifact_hashes": {
+                        str(record["ordinal"]): record["outcome_hash"]
+                        for record in rc_records
+                    }
+                }
+                if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+                else {}
+            ),
             "claim_boundary": JOB_SERVICE_CLAIM_BOUNDARY,
         }
 
@@ -1002,6 +2083,30 @@ class DurableJobService:
                 );
                 CREATE INDEX IF NOT EXISTS jobs_claim_queue
                     ON jobs(status, tenant_id, created_at, job_id);
+                CREATE TABLE IF NOT EXISTS job_rc_invocation_outcomes (
+                    job_id TEXT NOT NULL REFERENCES jobs(job_id) ON DELETE RESTRICT,
+                    ordinal INTEGER NOT NULL CHECK (ordinal > 0),
+                    outcome_hash TEXT NOT NULL,
+                    outcome_size INTEGER NOT NULL,
+                    metadata_json TEXT NOT NULL,
+                    reservation_event_hash TEXT NOT NULL,
+                    PRIMARY KEY (job_id, ordinal)
+                );
+                CREATE TABLE IF NOT EXISTS job_rc_quantity_reports (
+                    job_id TEXT NOT NULL REFERENCES jobs(job_id) ON DELETE RESTRICT,
+                    revision INTEGER NOT NULL CHECK (typeof(revision) = 'integer' AND revision > 0),
+                    report_id TEXT NOT NULL,
+                    content_hash TEXT NOT NULL,
+                    byte_length INTEGER NOT NULL CHECK (typeof(byte_length) = 'integer' AND byte_length >= 0),
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (job_id, revision),
+                    UNIQUE (job_id, report_id)
+                );
+                CREATE TABLE IF NOT EXISTS job_execution_budgets (
+                    job_id TEXT PRIMARY KEY REFERENCES jobs(job_id) ON DELETE RESTRICT,
+                    maximum_attempts TEXT NOT NULL,
+                    reserved_attempts INTEGER NOT NULL CHECK (reserved_attempts >= 0)
+                );
                 """
             )
         except sqlite3.DatabaseError:
@@ -1060,6 +2165,78 @@ class DurableJobService:
         if row is None:
             _fail("job_not_found", "/job_id", "No job exists for this identifier.")
         return row
+
+    def _request_for_row(self, row: sqlite3.Row) -> dict[str, Any]:
+        return _strict_json_object(
+            self._read_blob(
+                str(row["request_hash"]),
+                int(row["request_size"]),
+                maximum_bytes=_MAX_REQUEST_BYTES,
+            ),
+            "/request",
+        )
+
+    def _execution_budget(
+        self, connection: sqlite3.Connection, row: sqlite3.Row
+    ) -> dict[str, int]:
+        request = self._request_for_row(row)
+        if request.get("schema_version") not in {
+            RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
+        }:
+            _fail(
+                "execution_budget_operation_unsupported",
+                "/execution_budget",
+                "Only bounded RC jobs have a persisted execution budget.",
+            )
+        _rc_fiber_request(request)
+        maximum = request["execution_config"]["maximum_api_invocations"]
+        budget = connection.execute(
+            "SELECT * FROM job_execution_budgets WHERE job_id = ?",
+            (str(row["job_id"]),),
+        ).fetchone()
+        if (
+            budget is None
+            or budget["maximum_attempts"] != str(maximum)
+            or type(budget["reserved_attempts"]) is not int
+            or not 0 <= budget["reserved_attempts"] <= maximum
+        ):
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "The durable budget disagrees with the immutable request.",
+            )
+        reservations = connection.execute(
+            "SELECT payload_json FROM job_events "
+            "WHERE job_id = ? AND event_type = 'execution_attempt_reserved' "
+            "ORDER BY revision",
+            (str(row["job_id"]),),
+        ).fetchall()
+        if len(reservations) != budget["reserved_attempts"]:
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "The durable reservation count disagrees with the event history.",
+            )
+        for ordinal, event in enumerate(reservations, 1):
+            payload = _strict_json_object(
+                str(event["payload_json"]).encode("utf-8"), "/execution_budget/events"
+            )
+            if (
+                type(payload.get("reserved_attempts")) is not int
+                or payload["reserved_attempts"] != ordinal
+                or type(payload.get("maximum_attempts")) is not int
+                or payload["maximum_attempts"] != maximum
+            ):
+                _fail(
+                    "execution_budget_integrity_failed",
+                    "/execution_budget",
+                    "Reservation event ordinals or immutable limits changed.",
+                )
+        return {
+            "maximum_attempts": maximum,
+            "reserved_attempts": budget["reserved_attempts"],
+            "remaining_attempts": maximum - budget["reserved_attempts"],
+        }
 
     def _transition(
         self,
@@ -1232,7 +2409,9 @@ class DurableJobService:
         self,
         payload: bytes,
         *,
-        role: Literal["request", "checkpoint", "result", "evidence"],
+        role: Literal[
+            "request", "checkpoint", "result", "evidence", "rc-quantity-report"
+        ],
         media_type: str,
         maximum_bytes: int,
     ) -> ArtifactReference:
@@ -1305,9 +2484,7 @@ class DurableJobService:
         return payload
 
     def _blob_path(self, content_hash: str) -> Path:
-        digest = _hash(content_hash, "/artifact/content_hash").removeprefix(
-            "sha256:"
-        )
+        digest = _hash(content_hash, "/artifact/content_hash").removeprefix("sha256:")
         return self._blob_root / digest[:2] / digest
 
     def _read_published_artifact(
@@ -1316,14 +2493,16 @@ class DurableJobService:
         *,
         tenant_id: str,
         authorization_token: str,
-        role: Literal["result", "evidence"],
+        role: Literal["request", "checkpoint", "result", "evidence"],
         maximum_bytes: int,
     ) -> bytes:
         self._authorize_tenant(tenant_id, authorization_token)
         with self._connect() as connection:
             row = self._job_row(connection, job_id)
         self._require_tenant(row, tenant_id)
-        if str(row["status"]) != "succeeded" or row[f"{role}_hash"] is None:
+        if row[f"{role}_hash"] is None or (
+            role in {"result", "evidence"} and str(row["status"]) != "succeeded"
+        ):
             _fail(
                 "artifact_not_published",
                 f"/{role}",
@@ -1332,12 +2511,12 @@ class DurableJobService:
         return self._read_blob(
             str(row[f"{role}_hash"]),
             int(row[f"{role}_size"]),
-            maximum_bytes=maximum_bytes,
+            maximum_bytes=_result_byte_limit(self._request_for_row(row))
+            if role == "result"
+            else maximum_bytes,
         )
 
-    def _row_references(
-        self, row: sqlite3.Row
-    ) -> dict[str, ArtifactReference | None]:
+    def _row_references(self, row: sqlite3.Row) -> dict[str, ArtifactReference | None]:
         references: dict[str, ArtifactReference | None] = {}
         for role in ("request", "checkpoint", "result", "evidence"):
             content_hash = row[f"{role}_hash"]
@@ -1411,6 +2590,233 @@ class DurableJobService:
             pass
         finally:
             os.close(descriptor)
+
+
+def _validate_rc_outcome(
+    outcome: Mapping[str, Any],
+    request: Mapping[str, Any],
+    typed: Any,
+    request_hash: str,
+) -> None:
+    fields = {
+        "schema_version",
+        "phase",
+        "status",
+        "job_request_hash",
+        "chunk_request_hash",
+        "completed_before",
+        "completed_after",
+        "restart_input_sha256",
+        "timing",
+        "api_result",
+        "checkpoint_artifact_base64",
+        "verification_report",
+        "error",
+        "unavailable_execution_work",
+    }
+    if (
+        set(outcome) != fields
+        or outcome["schema_version"] != "bounded-rc-fiber-job-invocation.v1"
+    ):
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome",
+            "Invocation fields or schema are invalid.",
+        )
+    if (
+        type(outcome["phase"]) is not str
+        or type(outcome["status"]) is not str
+        or outcome["phase"] not in {"analysis", "verification"}
+        or outcome["status"] not in {"returned", "raised"}
+    ):
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome",
+            "Invocation phase or status is invalid.",
+        )
+    before, after = outcome["completed_before"], outcome["completed_after"]
+    if (
+        type(before) is not int
+        or type(after) is not int
+        or not 0 <= before < after <= len(typed.targets_m)
+        or after
+        != min(
+            before + request["execution_config"]["chunk_target_count"],
+            len(typed.targets_m),
+        )
+    ):
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome/progress",
+            "Invocation suffix boundaries must follow the immutable chunk policy.",
+        )
+    expected_chunk = replace(
+        typed, targets_m=typed.targets_m[before:after]
+    ).request_hash
+    if (
+        outcome["job_request_hash"] != request_hash
+        or outcome["chunk_request_hash"] != expected_chunk
+    ):
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome/request_hash",
+            "Invocation inputs must bind the immutable job and exact typed suffix.",
+        )
+    if before == 0:
+        if outcome["restart_input_sha256"] is not None:
+            _fail(
+                "rc_invocation_contract_invalid",
+                "/outcome/restart_input_sha256",
+                "The first invocation has no restart input.",
+            )
+    else:
+        _hash(outcome["restart_input_sha256"], "/outcome/restart_input_sha256")
+    timing = outcome["timing"]
+    if (
+        type(timing) is not dict
+        or set(timing) != {"wall_ns", "process_cpu_ns"}
+        or any(type(v) is not int or v < 0 for v in timing.values())
+    ):
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome/timing",
+            "Invocation timings must be non-negative integer nanoseconds.",
+        )
+    if type(outcome["unavailable_execution_work"]) is not bool:
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome/unavailable_execution_work",
+            "Unknown execution work requires an explicit boolean.",
+        )
+    for key in ("api_result", "verification_report", "error"):
+        if outcome[key] is not None and type(outcome[key]) is not dict:
+            _fail(
+                "rc_invocation_contract_invalid",
+                f"/outcome/{key}",
+                "Expected an object or null.",
+            )
+    checkpoint = outcome["checkpoint_artifact_base64"]
+    if checkpoint is not None:
+        if type(checkpoint) is not str or len(checkpoint) > 4 * (
+            (_MAX_CHECKPOINT_BYTES + 2) // 3
+        ):
+            _fail(
+                "rc_invocation_contract_invalid",
+                "/outcome/checkpoint_artifact_base64",
+                "The checkpoint encoding exceeds its bounded profile.",
+            )
+        try:
+            decoded = base64.b64decode(checkpoint, validate=True)
+        except (ValueError, binascii.Error):
+            _fail(
+                "rc_invocation_contract_invalid",
+                "/outcome/checkpoint_artifact_base64",
+                "Expected canonical base64.",
+            )
+        if (
+            len(decoded) > _MAX_CHECKPOINT_BYTES
+            or base64.b64encode(decoded).decode("ascii") != checkpoint
+        ):
+            _fail(
+                "rc_invocation_contract_invalid",
+                "/outcome/checkpoint_artifact_base64",
+                "Expected bounded canonical base64.",
+            )
+    if outcome["status"] == "raised":
+        unknown_work = True
+    else:
+        observed = (
+            outcome["api_result"]
+            if outcome["phase"] == "analysis"
+            else outcome["verification_report"]
+        )
+        metrics = (
+            observed.get("metrics")
+            if outcome["phase"] == "analysis" and type(observed) is dict
+            else observed
+        )
+        work_key = (
+            "control_work" if outcome["phase"] == "analysis" else "replay_control_work"
+        )
+        work = metrics.get(work_key) if type(metrics) is dict else None
+        count = (
+            work.get("unknown_solver_work_attempt_count")
+            if type(work) is dict
+            else None
+        )
+        unknown_work = (
+            type(count) is not int
+            or count < 0
+            or count > 0
+            or (
+                type(metrics) is dict
+                and metrics.get("unavailable_execution_work") is True
+            )
+        )
+    if unknown_work and not outcome["unavailable_execution_work"]:
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome/unavailable_execution_work",
+            "Missing or unknown execution work cannot be reported as fully accounted.",
+        )
+    if outcome["phase"] == "verification" and (
+        outcome["api_result"] is not None or checkpoint is not None
+    ):
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome",
+            "A verification invocation cannot duplicate the analysis result or checkpoint.",
+        )
+    if outcome["phase"] == "analysis" and outcome["verification_report"] is not None:
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome",
+            "An analysis invocation cannot claim its own verification report.",
+        )
+    if outcome["status"] == "raised":
+        if outcome["error"] is None:
+            _fail(
+                "rc_invocation_contract_invalid",
+                "/outcome/error",
+                "A raised invocation must retain a structured error.",
+            )
+    elif (
+        outcome["error"] is not None
+        or outcome[
+            "api_result" if outcome["phase"] == "analysis" else "verification_report"
+        ]
+        is None
+    ):
+        _fail(
+            "rc_invocation_contract_invalid",
+            "/outcome",
+            "A returned invocation must retain its actual result or report without an exception.",
+        )
+
+
+def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
+    from structural_analysis.execution.rc_fiber_job_contract import (
+        validate_rc_fiber_job_request,
+    )
+
+    try:
+        return validate_rc_fiber_job_request(request)
+    except (TypeError, ValueError):
+        _fail(
+            "rc_fiber_job_request_invalid",
+            "/request",
+            "The RC job request contract is invalid.",
+        )
+
+
+def _result_byte_limit(request: Mapping[str, Any]) -> int:
+    if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+        from structural_analysis.execution.rc_fiber_job_contract import (
+            RC_FIBER_JOB_MAX_BYTES,
+        )
+
+        return RC_FIBER_JOB_MAX_BYTES
+    return _MAX_RESULT_BYTES
 
 
 def build_job_completion_evidence(

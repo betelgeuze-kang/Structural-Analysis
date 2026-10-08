@@ -3,7 +3,14 @@ name: Runtime Input and Viewer CI
 on:
   pull_request:
     paths:
-      - "src/structural_analysis/io/midas/**"
+      - "src/structural_analysis/**"
+      - "src/main.tsx"
+      - "src/vite-env.d.ts"
+      - "src/workbench-v2/WorkbenchPage.tsx"
+      - "src/workbench-v2/components/**"
+      - "examples/public_rc_fiber_frame_cantilever.json"
+      - "tests/frontend/rc_lifecycle*.py"
+      - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
       - "src/structure-viewer/viewer-contracts.js"
@@ -22,6 +29,7 @@ on:
       - "scripts/verify-workbench-v2-e2e.mjs"
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
+      - "tests/frontend/rc-lifecycle-review.spec.ts"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
       - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
@@ -34,7 +42,14 @@ on:
   push:
     branches: ["main", "hardening/**"]
     paths:
-      - "src/structural_analysis/io/midas/**"
+      - "src/structural_analysis/**"
+      - "src/main.tsx"
+      - "src/vite-env.d.ts"
+      - "src/workbench-v2/WorkbenchPage.tsx"
+      - "src/workbench-v2/components/**"
+      - "examples/public_rc_fiber_frame_cantilever.json"
+      - "tests/frontend/rc_lifecycle*.py"
+      - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
       - "src/structure-viewer/viewer-contracts.js"
@@ -53,6 +68,7 @@ on:
       - "scripts/verify-workbench-v2-e2e.mjs"
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
+      - "tests/frontend/rc-lifecycle-review.spec.ts"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
       - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
@@ -102,6 +118,9 @@ jobs:
           tests/test_structure_viewer_runtime_ingest_payload_storage.py
           tests/test_structure_viewer_module_boundaries.py
           tests/test_verify_quality_gate_contract.py
+          tests/frontend/rc_lifecycle_http_fixture.py
+          tests/frontend/rc_lifecycle_review_snapshot.py
+          tests/test_rc_lifecycle_http_fixture.py
 
       - name: Compile MIDAS adapter
         run: python -m compileall -q src/structural_analysis/io/midas
@@ -124,6 +143,7 @@ jobs:
           tests/test_mgt_frame_kernel_extraction.py
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
+          tests/test_rc_lifecycle_http_fixture.py
 
       - name: Upload Python test receipt
         if: always()
@@ -179,6 +199,52 @@ jobs:
           code=$?
           tail -n 200 workbench-v2-e2e.log
           exit "$code"
+
+      # Keep the standard frontend runner hermetic. Only this explicit actual
+      # HTTP integration step retains setup-python's interpreter on PATH.
+      - name: Set up Python for actual RC HTTP integration
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install actual RC HTTP integration dependencies
+        run: python -m pip install -e '.[dev]'
+
+      - name: Record actual RC hosted checkout identity
+        run: |
+          mkdir -p rc-lifecycle-evidence
+          python - <<'PYTHON'
+          import json, os, pathlib, subprocess
+          pathlib.Path("rc-lifecycle-evidence/hosted-source.json").write_text(json.dumps({
+              "checkout_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "github_sha": os.environ["GITHUB_SHA"],
+              "github_run_id": os.environ["GITHUB_RUN_ID"],
+              "github_run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "scope": "checkout identity only; lifecycle assertions are in browser proof",
+          }, indent=2))
+          PYTHON
+
+      - name: Workbench actual RC lifecycle HTTP integration
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+        run: >-
+          node --loader ./scripts/json-module-loader.mjs
+          node_modules/@playwright/test/cli.js test
+          tests/frontend/rc-lifecycle-review.spec.ts
+          tests/frontend/workbench-v2-rc-lifecycle-http-browser.spec.ts
+          --workers=1 --retries=0 --reporter=line --trace=retain-on-failure
+
+      - name: Upload actual RC lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: workbench-rc-lifecycle-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            rc-lifecycle-evidence/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload Workbench E2E log
         if: always()

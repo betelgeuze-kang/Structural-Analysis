@@ -1,3 +1,5 @@
+import { RcJobResultPanel } from './RcJobResultPanel'
+import type { RcJobReview } from '../model/rcJobReview'
 import type { ReactElement } from 'react'
 import type { EngineeringResultIrManifest, JobLoadStatus } from '../model/jobProvider'
 import type { WorkbenchJobView } from '../model/jobSchema'
@@ -9,6 +11,7 @@ interface JobServicePanelProps {
   job: WorkbenchJobView | null
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
+  rcReview?: RcJobReview
   engineeringResultIr?: EngineeringResultIrManifest
 }
 
@@ -28,6 +31,7 @@ export function JobServicePanel({
   errors,
   artifactStatus,
   engineeringResultIr,
+  rcReview,
 }: JobServicePanelProps): ReactElement {
   if (loadStatus !== 'ready' || !job) {
     const label = loadStatus === 'loading' ? 'Loading durable job status…' : loadStatus === 'unconfigured'
@@ -77,6 +81,7 @@ export function JobServicePanel({
             : 'UNAVAILABLE'}
         </dd>
       </dl>
+      {artifactStatus === 'verified' && rcReview ? <RcJobResultPanel jobId={job.job_id} review={rcReview} /> : null}
       <p className="wb2-muted" data-job-authority={job.result_authority}>
         Job state is orchestration evidence only. This panel consumes only the verified embedded engineering ResultIR identity and authority axes; it never falls back to top-level result arrays.
       </p>

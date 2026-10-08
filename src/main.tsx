@@ -46,10 +46,13 @@ function LegacyAppSurface(): ReactElement {
 }
 
 function RootRouter(): ReactElement {
-  const [surface, setSurface] = useState<ProductSurface>(() => resolveProductSurface(window.location))
+  // URL identity matters even when navigation remains on the same surface.
+  const [route, setRoute] = useState(() => window.location.href)
+  const location = new URL(route)
+  const surface = resolveProductSurface(location)
 
   useEffect(() => {
-    const updateSurface = () => setSurface(resolveProductSurface(window.location))
+    const updateSurface = () => setRoute(window.location.href)
     window.addEventListener('hashchange', updateSurface)
     window.addEventListener('popstate', updateSurface)
     return () => {
@@ -103,6 +106,10 @@ function RootRouter(): ReactElement {
     <LegacyAppSurface />
   ) : (
     <WorkbenchPage
+      rcJobCollectionUrl={resolveSameOriginJobUrl(window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcJobCollectionUrl, window.location.origin)}
+      rcJobId={location.searchParams.get('rcJob') ?? undefined}
+      rcReportId={location.searchParams.get('rcReport') ?? undefined}
+      jobAuthorization={window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobAuthorization}
       jobStatusUrl={jobStatusUrl}
       nativeFrameResultUrl={nativeFrameResultUrl}
       nativeFrameReportUrl={nativeFrameReportUrl}
