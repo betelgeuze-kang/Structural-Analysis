@@ -63,6 +63,7 @@ def test_all_constructor_settings_preserved_including_line_search():
         ),
         control_tolerance_m=4e-12,
         load_factor_coordinate_scale_m=0.004,
+        initial_trial_policy="prescribed_control",
     )
     typed = request.BoundedRCFiberDirectControlRequest(
         4, (-1e-5, 2e-5, 0.0), config, True, 2, 7
@@ -89,6 +90,32 @@ def test_all_constructor_settings_preserved_including_line_search():
         replace(typed, solver_config=replace(config, control_tolerance_m=8e-12)),
     ):
         assert changed.resume_contract_hash != typed.resume_contract_hash
+
+
+def test_trial_policy_is_explicit_and_binds_request_and_restart_identity():
+    legacy = request.decode_bounded_rc_fiber_direct_control_request(minimal())
+    assert "initial_trial_policy" not in legacy.to_dict()["solver_config"]
+    assert "initial_trial_policy" not in legacy.solver_config.to_manifest()
+    opted = replace(
+        legacy,
+        solver_config=replace(
+            legacy.solver_config, initial_trial_policy="prescribed_control"
+        ),
+    )
+    assert opted.request_hash != legacy.request_hash
+    assert opted.resume_contract_hash != legacy.resume_contract_hash
+    assert opted.solver_config.contract_hash != legacy.solver_config.contract_hash
+    assert (
+        request.decode_bounded_rc_fiber_direct_control_request(opted.to_dict()) == opted
+    )
+
+
+@pytest.mark.parametrize("policy", [None, True, 1, [], {}, "", "automatic", "retry"])
+def test_invalid_trial_policy_rejected_without_solver(policy):
+    with pytest.raises(ValueError, match="initial_trial_policy"):
+        request.decode_bounded_rc_fiber_direct_control_request(
+            minimal(solver_config={"initial_trial_policy": policy})
+        )
 
 
 @pytest.mark.parametrize(

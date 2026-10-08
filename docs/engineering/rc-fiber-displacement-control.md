@@ -38,6 +38,27 @@ loading. Geometry remains small-displacement. Unsupported requests are rejected.
 
 ## Authored paths and restart
 
+The default initial trial retains the accepted checkpoint coordinates. An explicit
+`StatefulFiberFrame2DDisplacementControlConfig(initial_trial_policy="prescribed_control")`
+instead sets only the trial control coordinate to the requested displacement
+before ordinary augmented Newton starts. Other trial coordinates, the initial
+load factor, committed material parent, line search, and acceptance tolerances
+are unchanged. There is no automatic retry, final coordinate snap, or implicit
+policy switch after failure. This can avoid a particular crack-onset line-search
+failure, but does not guarantee convergence or establish a physical branch.
+
+The public request accepts the same `solver_config.initial_trial_policy` value.
+It is included in the nondefault configuration/request/restart identity. A
+restart cannot switch this policy; a changed policy requires a new calculation
+from the unloaded state. The omitted/default `accepted_checkpoint` policy keeps
+the previous serialized manifest and request identity.
+
+`tests/test_rc_prescribed_control_trial.py` covers a nominal paper-informed beam
+with explicitly uncalibrated software material assumptions, the original failure,
+explicit-policy success, rollback, reversal/restart equivalence, and policy
+mismatch rejection. Its fixture is not a reproduction of the paper's material
+model or experimental validation.
+
 Given an existing original compiled `problem`, the internal entry point is:
 
 ```python

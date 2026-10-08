@@ -205,6 +205,13 @@
                   "const": "numpy_linalg_solve_dense"
                 }
               }
+            },
+            "initial_trial_policy": {
+              "type": "string",
+              "enum": [
+                "accepted_checkpoint",
+                "prescribed_control"
+              ]
             }
           }
         },
