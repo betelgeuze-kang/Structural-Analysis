@@ -2119,6 +2119,7 @@ class DurableJobService:
             connection.close()
 
     def _connect(self) -> sqlite3.Connection:
+        connection = None
         try:
             connection = sqlite3.connect(
                 self._db_path,
@@ -2131,6 +2132,11 @@ class DurableJobService:
             connection.execute("PRAGMA synchronous = FULL")
             return connection
         except sqlite3.DatabaseError:
+            # Setup can fail after connect succeeds (for example a corrupt
+            # database during PRAGMA). Retained error tracebacks must not retain
+            # an open store handle while callers inspect or log the rejection.
+            if connection is not None:
+                connection.close()
             _fail(
                 "job_database_open_failed",
                 "/database",
