@@ -1027,7 +1027,9 @@ def _replay_terminal_engineering_outputs(
             ):
                 if fiber.material_kind == "steel":
                     expected_type = UniaxialPlasticityState
-                    material_type_id = section.steel.material_id
+                    material_type_id = section.steel_material_for(
+                        fiber.fiber_id
+                    ).material_id
                     material_schema_version = STEEL_PLASTICITY_STATE_SCHEMA_VERSION
                 else:
                     expected_type = ConcreteDamageState

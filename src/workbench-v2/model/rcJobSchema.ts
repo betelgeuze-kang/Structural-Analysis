@@ -143,8 +143,8 @@ export async function selfHash(raw: string, value: RcObject, key: string): Promi
 function nat(value: unknown): value is number { return Number.isSafeInteger(value) && (value as number) >= 0 }
 function hash(value: unknown): boolean { return typeof value === 'string' && /^sha256:[a-f0-9]{64}$/.test(value) }
 
-/** Admission for the narrow durable cantilever service, not a model compiler.
- * The durable API requires the complete canonical v1 config. Unknown fields are
+/** Admission for explicit durable cantilever or pin/roller requests, not a model compiler.
+ * The durable API requires the complete canonical v1 or no-preload v4 config. Unknown fields are
  * rejected even when false: later donor options must never become UI defaults.
  * Source, numerical and quantity authority still require the original artifacts.
  */
@@ -156,7 +156,8 @@ export function validateRcRequestProfile(value: unknown): void {
   }
   exact(request, ['schema_version', 'operation', 'case_id', 'model', 'config',
     'source_revision', 'result_contract', 'execution_config'], 'request_invalid')
-  check(request.schema_version === 'structural-analysis-job-request.v3'
+  const pinRoller = request.schema_version === 'structural-analysis-job-request.v4'
+  check((request.schema_version === 'structural-analysis-job-request.v3' || pinRoller)
     && request.operation === 'bounded_rc_fiber_direct_control'
     && request.result_contract === 'bounded-rc-fiber-job-result.v1'
     && typeof request.case_id === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(request.case_id)
@@ -164,8 +165,10 @@ export function validateRcRequestProfile(value: unknown): void {
     && /^(?:[a-f0-9]{40}|sha256:[a-f0-9]{64})$/.test(request.source_revision), 'request_invalid')
   const config = object(request.config), execution = object(request.execution_config)
   exact(config, ['schema_version', 'control_global_dof', 'targets_m', 'solver_config',
-    'allow_reversals', 'maximum_reversals', 'maximum_targets'], 'request_config_invalid')
-  check(config.schema_version === 'bounded-rc-fiber-direct-control-request.v1'
+    'allow_reversals', 'maximum_reversals', 'maximum_targets',
+    ...(pinRoller ? ['experimental_pin_roller_beam'] : [])], 'request_config_invalid')
+  check(config.schema_version === (pinRoller ? 'bounded-rc-fiber-direct-control-request.v4' : 'bounded-rc-fiber-direct-control-request.v1')
+    && (!pinRoller || config.experimental_pin_roller_beam === true)
     && nat(config.control_global_dof) && config.control_global_dof <= 47
     && config.control_global_dof % 3 !== 2
     && nat(config.maximum_targets) && config.maximum_targets >= 1 && config.maximum_targets <= 255
@@ -196,7 +199,9 @@ export function validateRcRequestProfile(value: unknown): void {
   check(Array.isArray(newton.line_search_alphas) && newton.line_search_alphas.length > 0
     && newton.line_search_alphas.every((alpha: unknown, index: number, alphas: unknown[]) =>
       positive(alpha) && alpha <= 1 && (index === 0 || alpha < (alphas[index - 1] as number))), 'newton_config_invalid')
-  exact(execution, ['chunk_target_count', 'maximum_api_invocations'], 'execution_config_invalid')
+  const phaseAuthored = Object.prototype.hasOwnProperty.call(execution, 'phase_execution_policy')
+  exact(execution, ['chunk_target_count', 'maximum_api_invocations', ...(phaseAuthored ? ['phase_execution_policy'] : [])], 'execution_config_invalid')
+  if (phaseAuthored) decodeRcFiberPhasePolicy(JSON.stringify(execution.phase_execution_policy))
   check(nat(execution.chunk_target_count) && execution.chunk_target_count >= 1 && execution.chunk_target_count <= 255
     && nat(execution.maximum_api_invocations) && execution.maximum_api_invocations >= 2
     && execution.maximum_api_invocations <= 4096, 'execution_config_invalid')
@@ -204,7 +209,16 @@ export function validateRcRequestProfile(value: unknown): void {
   check(model.schema_version === 'structural-analysis-canonical-model.v1'
     && Array.isArray(model.nodes) && model.nodes.length >= 2 && model.nodes.length <= 16
     && Array.isArray(model.elements) && model.elements.length === model.nodes.length - 1
-    && Array.isArray(model.supports) && model.supports.length === 1, 'cantilever_profile_invalid')
+    && Array.isArray(model.supports) && model.supports.length === (pinRoller ? 2 : 1), 'rc_support_profile_invalid')
+  if (pinRoller) {
+    pinRollerSupports(model)
+    for (const raw of model.supports) exact(object(raw), ['node', 'dofs'], 'pin_roller_support_invalid')
+    check(config.control_global_dof < model.nodes.length * 3, 'control_dof_invalid')
+    const controlNode = object(model.nodes[Math.floor(config.control_global_dof / 3)]).id
+    const component = config.control_global_dof % 3 === 0 ? 'UX' : 'UY'
+    check(!model.supports.some((raw: unknown) => { const row = object(raw); return row.node === controlNode && row.dofs.includes(component) }), 'control_dof_invalid')
+    return
+  }
   const support = object(model.supports[0])
   exact(support, ['node', 'dofs'], 'cantilever_profile_invalid')
   check(Array.isArray(support.dofs) && same([...support.dofs].sort(), ['RZ', 'UX', 'UY'])

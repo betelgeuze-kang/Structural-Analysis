@@ -20,6 +20,7 @@ from structural_analysis.api.strict_json import (
 )
 from structural_analysis.api.nonlinear_fiber_frame import (
     PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
+    EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
     _compile,
     _node_displacement_rows,
     _reaction_rows,
@@ -442,7 +443,10 @@ def _prepare(
     maximum_reversals,
     maximum_targets,
     restart,
+    experimental_pin_roller_beam=False,
 ):
+    if type(experimental_pin_roller_beam) is not bool:
+        raise ValueError("experimental_pin_roller_beam must be a boolean")
     if type(model) is not CanonicalModel:
         raise ValueError("model must be an exact CanonicalModel")
     snapshot = model.detached_analysis_snapshot()
@@ -471,6 +475,11 @@ def _prepare(
     if not targets and resume is None:
         raise ValueError("empty targets require an explicit restart")
     request = {
+        **(
+            {"experimental_pin_roller_beam": True}
+            if experimental_pin_roller_beam
+            else {}
+        ),
         "targets_m": list(targets),
         "control_global_dof": control_global_dof,
         "configuration": cfg.to_manifest(),
@@ -484,7 +493,11 @@ def _prepare(
         "canonical_model_checksum": snapshot.canonical_model_checksum,
         "input_checksum": snapshot.input_checksum,
         "source_format": snapshot.source_format,
-        "compiler_profile": PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
+        "compiler_profile": (
+            EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+            if experimental_pin_roller_beam
+            else PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
+        ),
     }
     return snapshot, targets, cfg, resume, request, model_binding
 
@@ -499,6 +512,7 @@ def analyze_bounded_rc_fiber_direct_control(
     maximum_reversals: int = 0,
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
+    experimental_pin_roller_beam: bool = False,
 ) -> BoundedRCFiberDirectControlResult:
     snapshot, targets, cfg, resume, request, binding = _prepare(
         model,
@@ -509,8 +523,11 @@ def analyze_bounded_rc_fiber_direct_control(
         maximum_reversals,
         maximum_targets,
         restart,
+        experimental_pin_roller_beam,
     )
-    compiled, unsupported, warnings = _compile(snapshot)
+    compiled, unsupported, warnings = _compile(
+        snapshot, experimental_pin_roller_beam=experimental_pin_roller_beam
+    )
     payload = {
         "schema_version": BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
         "status": "unsupported",
@@ -595,6 +612,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
     maximum_reversals: int = 0,
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
+    experimental_pin_roller_beam: bool = False,
 ) -> BoundedRCFiberDirectControlValidationReport:
     """Verify against a fresh complete source execution, never a supplied success flag."""
     report = {
@@ -641,6 +659,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_reversals,
             maximum_targets,
             restart,
+            experimental_pin_roller_beam,
         )
         if (
             supplied.get("schema_version")
@@ -674,6 +693,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_reversals=maximum_reversals,
             maximum_targets=maximum_targets,
             restart=resume,
+            experimental_pin_roller_beam=experimental_pin_roller_beam,
         )
         regenerated = expected.to_dict()
         report["replay_control_work"] = regenerated["metrics"]["control_work"]

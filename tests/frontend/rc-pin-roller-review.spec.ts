@@ -7,28 +7,18 @@ import { validateRcJobArtifacts, validateRcRequestProfile, fields } from '../../
 import { validateRcQuantityReport } from '../../src/workbench-v2/model/rcQuantityReportSchema'
 import { sha256Hex } from '../../src/workbench-v2/model/checksum'
 
-for (const { profile, isolated } of [
-  { profile: 'legacy', isolated: false },
-  { profile: 'explicit-layers', isolated: false },
-  { profile: 'explicit-layers', isolated: true },
-] as const) {
-test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer with freshly computed artifacts`, () => {
+test.describe('Explicit pin-roller RC reviewer with freshly computed artifacts', () => {
   test.describe.configure({ mode: 'serial', timeout: 120000 })
   let temporary: string, snapshot: any, reviewed: Awaited<ReturnType<typeof validateRcJobArtifacts>>
   const bytes = (value: string) => new Uint8Array(Buffer.from(value, 'base64'))
   test.beforeAll(async () => {
     temporary = mkdtempSync(path.join(tmpdir(), 'rc-review-contract-'))
     const output = path.join(temporary, 'review.json')
-    const authored = JSON.parse(execFileSync('python', ['-c',
-      `import sys; sys.path.insert(0, 'tests/frontend'); from rc_lifecycle_http_fixture import ${profile === 'legacy' ? 'authored_request' : 'authored_explicit_layers_request as authored_request'}, canonical; print(canonical(authored_request()).decode())`], { encoding: 'utf8' }))
-    if (isolated) authored.execution_config.phase_execution_policy = {
-      schema_version: 'bounded-rc-fiber-phase-execution-policy.v1',
-      analysis_timeout_ms: 30000, verification_timeout_ms: 30000, termination_grace_ms: 100,
-    }
+    const authored = JSON.parse(execFileSync('python3', ['tests/frontend/rc_pin_roller_request.py'], { encoding: 'utf8' }))
     const requestFile = path.join(temporary, 'browser-request.json')
     // The exact browser JSON.stringify boundary converts Python 1.0 to JSON 1.
     writeFileSync(requestFile, JSON.stringify(authored))
-    execFileSync('python', ['tests/frontend/rc_lifecycle_review_snapshot.py', '--output', output, '--request-file', requestFile], { timeout: 100000, stdio: 'pipe' })
+    execFileSync('python3', ['tests/frontend/rc_lifecycle_review_snapshot.py', '--output', output, '--request-file', requestFile], { timeout: 100000, stdio: 'pipe' })
     snapshot = JSON.parse(readFileSync(output, 'utf8'))
     reviewed = await validateRcJobArtifacts(snapshot.job, Object.fromEntries(
       Object.entries(snapshot.artifacts).map(([role, value]: [string, any]) => [role, bytes(value.base64)])), 'a')
@@ -37,6 +27,7 @@ test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer
 
   test('verifies original execution, unknown reservation and two price-only revisions', async () => {
     expect(snapshot.original_request_representation_retained).toBe(true)
+    expect(reviewed.summary.pinRoller).toEqual({ pin: 'N2', roller: 'N6' })
     expect(reviewed.summary.targets).toEqual([-1e-6, -2e-6])
     expect(reviewed.summary.unknownWork).toBe(true)
     expect(reviewed.summary.reservedInvocations).toBe(5)
@@ -46,7 +37,6 @@ test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer
     expect(reports[0].bindings).toEqual(reports[1].bindings)
     expect(reports[0].quantities).toEqual(reports[1].quantities)
     expect(reports[0].declared_prices).not.toEqual(reports[1].declared_prices)
-    if (profile === 'explicit-layers') expect(reports[0].quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(28.26, 10)
   })
 
   test('rejects unsupported request extensions before submission', () => {
@@ -55,7 +45,9 @@ test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer
     for (const mutate of [
       (r: any) => { r.config.solver_config.newton.terminal_polishing = false },
       (r: any) => { r.config.constant_nodal_loads = [] },
-      (r: any) => { r.config.schema_version = 'bounded-rc-fiber-direct-control-request.v4' },
+      (r: any) => { r.config.schema_version = 'bounded-rc-fiber-direct-control-request.v1' },
+      (r: any) => { r.schema_version = 'structural-analysis-job-request.v3' },
+      (r: any) => { r.config.experimental_pin_roller_beam = false },
       (r: any) => { r.config.experimental_two_fixed_endpoints = true },
       (r: any) => { r.execution_config.reuse_line_search_assembly = false },
       (r: any) => { r.execution_config.phase_execution_policy = {} },
@@ -85,5 +77,3 @@ test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer
     await expect(validateRcQuantityReport(forged, reviewed.quantitySource)).rejects.toThrow('study_estimate_invalid')
   })
 })
-
-}

@@ -9,6 +9,8 @@ on:
       - "src/workbench-v2/WorkbenchPage.tsx"
       - "src/workbench-v2/components/**"
       - "examples/public_rc_fiber_frame_cantilever.json"
+      - "examples/public_rc_fiber_frame_explicit_layers.json"
+      - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
       - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
@@ -30,6 +32,8 @@ on:
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/frontend/rc-lifecycle-review.spec.ts"
+      - "tests/frontend/rc-pin-roller-review.spec.ts"
+      - "tests/frontend/rc_pin_roller_request.py"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
       - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
@@ -48,6 +52,8 @@ on:
       - "src/workbench-v2/WorkbenchPage.tsx"
       - "src/workbench-v2/components/**"
       - "examples/public_rc_fiber_frame_cantilever.json"
+      - "examples/public_rc_fiber_frame_explicit_layers.json"
+      - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
       - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
@@ -69,6 +75,8 @@ on:
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/frontend/rc-lifecycle-review.spec.ts"
+      - "tests/frontend/rc-pin-roller-review.spec.ts"
+      - "tests/frontend/rc_pin_roller_request.py"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
       - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
@@ -121,6 +129,7 @@ jobs:
           tests/frontend/rc_lifecycle_http_fixture.py
           tests/frontend/rc_lifecycle_review_snapshot.py
           tests/test_rc_lifecycle_http_fixture.py
+          tests/test_rc_explicit_steel_input.py
 
       - name: Compile MIDAS adapter
         run: python -m compileall -q src/structural_analysis/io/midas
@@ -144,6 +153,7 @@ jobs:
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
           tests/test_rc_lifecycle_http_fixture.py
+          tests/test_rc_explicit_steel_input.py
 
       - name: Upload Python test receipt
         if: always()
@@ -232,6 +242,7 @@ jobs:
           node --loader ./scripts/json-module-loader.mjs
           node_modules/@playwright/test/cli.js test
           tests/frontend/rc-lifecycle-review.spec.ts
+          tests/frontend/rc-pin-roller-review.spec.ts
           tests/frontend/workbench-v2-rc-lifecycle-http-browser.spec.ts
           --workers=1 --retries=0 --reporter=line --trace=retain-on-failure
 
