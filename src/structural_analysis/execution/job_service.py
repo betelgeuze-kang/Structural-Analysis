@@ -317,13 +317,6 @@ class DurableJobService:
             + b"\0"
             + idempotency_key.encode("utf-8")
         )
-        request_ref = self._put_blob(
-            request_bytes,
-            role="request",
-            media_type="application/json",
-            maximum_bytes=_MAX_REQUEST_BYTES,
-        )
-        now, _now_us = self._now()
         with self._transaction() as connection:
             prior = connection.execute(
                 "SELECT * FROM jobs WHERE tenant_id = ? AND idempotency_key_hash = ?",
@@ -336,6 +329,16 @@ class DurableJobService:
                         "/idempotency_key",
                         "The key is already bound to a different immutable request.",
                     )
+            # Resolve conflicts under the writer lock before persisting bytes.
+            # Exact retries still verify or repair their existing request blob.
+            request_ref = self._put_blob(
+                request_bytes,
+                role="request",
+                media_type="application/json",
+                maximum_bytes=_MAX_REQUEST_BYTES,
+            )
+            now, _now_us = self._now()
+            if prior is not None:
                 return self._view(prior)
 
             job_id = "job_" + secrets.token_hex(16)
