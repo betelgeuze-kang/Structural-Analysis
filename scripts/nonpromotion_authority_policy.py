@@ -341,6 +341,12 @@ def promoted_authority_violations(
                 ("bounded_planar_external_vv", "stored_claims"): frozenset({"recommended_matrix_technical_coverage_complete", "fresh_current_source_technical_matrix_complete", "fresh_current_source_external_matrix_complete"}),
                 ("internal_license_due_diligence", "claims"): frozenset({"internal_due_diligence_complete", "license_inventory_complete", "spdx_notices_complete", "redistribution_boundaries_explicit", "source_use_declarations_complete"}),
                 ("authority_tracks", "internal_license_due_diligence", "claims"): frozenset({"internal_due_diligence_complete", "license_inventory_complete", "spdx_notices_complete", "redistribution_boundaries_explicit", "source_use_declarations_complete"}),
+                # Execution facts in current and historical bindings do not grant
+                # independent verification or product-promotion authority.
+                ("bounded_planar_external_vv", "same_operator_execution_binding"): frozenset({"actual_external_solver_execution"}),
+                ("bounded_planar_external_vv", "stored_same_operator_execution_binding"): frozenset({"actual_external_solver_execution"}),
+                ("bounded_planar_external_vv", "same_operator_supplemental_execution_binding"): frozenset({"actual_external_solver_execution"}),
+                ("bounded_planar_external_vv", "stored_same_operator_supplemental_execution_binding"): frozenset({"actual_external_solver_execution"}),
                 ("external_vv_nonpromotion", "effective_claims"): frozenset(),
             }
             allowed_here = pointer_true_claims.get(json_pointer, frozenset())
