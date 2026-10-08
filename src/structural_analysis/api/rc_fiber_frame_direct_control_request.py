@@ -17,6 +17,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
 from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
 
 REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v1"
+PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v4"
 REQUEST_MAX_BYTES = 128 * 1024
 _NEWTON_FIELDS = {
     "residual_tolerance",
@@ -114,8 +115,11 @@ class BoundedRCFiberDirectControlRequest:
     allow_reversals: bool = False
     maximum_reversals: int = 0
     maximum_targets: int = 255
+    experimental_pin_roller_beam: bool = False
 
     def __post_init__(self):
+        if type(self.experimental_pin_roller_beam) is not bool:
+            raise ValueError("experimental_pin_roller_beam must be a boolean")
         _integer(self.control_global_dof, "control_global_dof", 0, 47)
         if self.control_global_dof % 3 not in (0, 1):
             raise ValueError("control_global_dof must name a translational UX/UY DOF")
@@ -164,6 +168,11 @@ class BoundedRCFiberDirectControlRequest:
 
     def api_kwargs(self) -> dict[str, Any]:
         return {
+            **(
+                {"experimental_pin_roller_beam": True}
+                if self.experimental_pin_roller_beam
+                else {}
+            ),
             "control_global_dof": self.control_global_dof,
             "config": self.solver_config,
             "allow_reversals": self.allow_reversals,
@@ -177,7 +186,16 @@ class BoundedRCFiberDirectControlRequest:
             self.solver_config.newton.line_search_alphas
         )
         return {
-            "schema_version": REQUEST_SCHEMA_VERSION,
+            "schema_version": (
+                PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
+                if self.experimental_pin_roller_beam
+                else REQUEST_SCHEMA_VERSION
+            ),
+            **(
+                {"experimental_pin_roller_beam": True}
+                if self.experimental_pin_roller_beam
+                else {}
+            ),
             "control_global_dof": self.control_global_dof,
             "targets_m": list(self.targets_m),
             "solver_config": solver,
@@ -227,10 +245,20 @@ def decode_bounded_rc_fiber_direct_control_request(
         except (ValueError, UnicodeError, OverflowError, RecursionError) as error:
             raise ValueError(f"invalid request mapping: {error}") from error
     payload = strict_json_object_bytes(data, maximum_bytes=REQUEST_MAX_BYTES)
-    _object(payload, _REQUEST_FIELDS, "request")
+    pin_roller = payload.get("schema_version") == PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
+    _object(
+        payload,
+        _REQUEST_FIELDS | ({"experimental_pin_roller_beam"} if pin_roller else set()),
+        "request",
+    )
+    if pin_roller and payload.get("experimental_pin_roller_beam") is not True:
+        raise ValueError("pin-roller request requires explicit true opt-in")
     if not {"schema_version", "control_global_dof", "targets_m"} <= payload.keys():
         raise ValueError("request is missing required fields")
-    if payload["schema_version"] != REQUEST_SCHEMA_VERSION:
+    if payload["schema_version"] not in (
+        REQUEST_SCHEMA_VERSION,
+        PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION,
+    ):
         raise ValueError("request schema_version is unsupported")
     if type(payload["targets_m"]) is not list:
         raise ValueError("targets_m must be a JSON array")

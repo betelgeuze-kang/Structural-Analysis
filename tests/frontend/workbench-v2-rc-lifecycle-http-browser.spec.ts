@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test'
-import { spawn, type ChildProcess } from 'node:child_process'
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -119,7 +119,8 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
 
-test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two', async ({ browser }, testInfo) => {
+for (const profile of ['cantilever', 'pin-roller'] as const) {
+test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two`, async ({ browser }, testInfo) => {
   test.setTimeout(300000)
   const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
   const driver = new Driver(workspace)
@@ -132,6 +133,9 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
   try {
     const ready = await driver.read<Ready>(20000)
     expect(ready.ready).toBe(true)
+    if (profile === 'pin-roller') ready.request = JSON.parse(execFileSync('python3',
+      ['tests/frontend/rc_pin_roller_request.py'], { encoding: 'utf8', env: { ...process.env, PYTHONPATH: resolve('src') } }))
+    evidence.support_profile = profile
     evidence.source = ready.proof
     // A hosted receipt must name the checked-out commit and run identity rather
     // than relabel the caller-authored source_revision as attestation.
@@ -370,3 +374,5 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     expect(driver.child.exitCode).toBe(0)
   }
 })
+
+}
