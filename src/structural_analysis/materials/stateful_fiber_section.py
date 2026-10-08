@@ -275,6 +275,7 @@ class StatefulRCFiberSection:
         default_factory=AsymmetricConcreteDamageMaterial
     )
     section_id: str = "rectangular_rc_stateful_fiber_section"
+    steel_overrides: tuple[tuple[str, BilinearCombinedHardeningSteel], ...] = ()
 
     def __post_init__(self) -> None:
         normalized_id = str(self.section_id).strip()
@@ -289,6 +290,48 @@ class StatefulRCFiberSection:
         kinds = {fiber.material_kind for fiber in self.fibers}
         if kinds != {"steel", "concrete"}:
             raise ValueError("section must contain steel and concrete fibers")
+        if type(self.steel_overrides) is not tuple:
+            raise ValueError("steel_overrides must be an immutable tuple")
+        steel_ids = {
+            fiber.fiber_id for fiber in self.fibers if fiber.material_kind == "steel"
+        }
+        overrides = {}
+        for row in self.steel_overrides:
+            if type(row) is not tuple or len(row) != 2:
+                raise ValueError("steel override requires (fiber_id, steel material)")
+            fiber_id, material = row
+            if type(fiber_id) is not str or fiber_id not in steel_ids:
+                raise ValueError(
+                    "steel override must reference an existing steel fiber"
+                )
+            if fiber_id in overrides:
+                raise ValueError("steel override fiber_id must be unique")
+            if type(material) is not BilinearCombinedHardeningSteel:
+                raise ValueError(
+                    "steel override requires BilinearCombinedHardeningSteel"
+                )
+            overrides[fiber_id] = material
+        # Input ordering is not a physical property. Fiber order remains authoritative.
+        object.__setattr__(
+            self,
+            "steel_overrides",
+            tuple(
+                (fiber.fiber_id, overrides[fiber.fiber_id])
+                for fiber in self.fibers
+                if fiber.fiber_id in overrides
+            ),
+        )
+
+    def steel_material_for(self, fiber_id: str) -> BilinearCombinedHardeningSteel:
+        """Return the constitutive law bound to an existing steel fiber."""
+        if not any(
+            f.fiber_id == fiber_id and f.material_kind == "steel" for f in self.fibers
+        ):
+            raise ValueError("fiber_id must reference an existing steel fiber")
+        return next(
+            (material for key, material in self.steel_overrides if key == fiber_id),
+            self.steel,
+        )
 
     @property
     def contract_hash(self) -> str:
@@ -302,6 +345,16 @@ class StatefulRCFiberSection:
                 "fibers": [fiber.to_dict() for fiber in self.fibers],
                 "steel": asdict(self.steel),
                 "concrete": asdict(self.concrete),
+                **(
+                    {
+                        "steel_overrides": [
+                            {"fiber_id": fiber_id, "material": asdict(material)}
+                            for fiber_id, material in self.steel_overrides
+                        ]
+                    }
+                    if self.steel_overrides
+                    else {}
+                ),
             }
         )
 
@@ -313,7 +366,7 @@ class StatefulRCFiberSection:
             axial_strain=0.0,
             curvature_z_per_m=0.0,
             fiber_states=tuple(
-                self.steel.initial_state()
+                self.steel_material_for(fiber.fiber_id).initial_state()
                 if fiber.material_kind == "steel"
                 else self.concrete.initial_state()
                 for fiber in self.fibers
@@ -386,7 +439,9 @@ class StatefulRCFiberSection:
             strain = axial_strain - curvature * fiber.y_m
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
-                steel_response = self.steel.integrate(strain, parent)
+                steel_response = self.steel_material_for(fiber.fiber_id).integrate(
+                    strain, parent
+                )
                 yielded_count += int(steel_response.yielded)
                 response: FiberResponse = steel_response
             else:
