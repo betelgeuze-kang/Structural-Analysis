@@ -245,6 +245,19 @@ class DurableJobService:
                 "The durable service root may not be a symbolic link.",
             )
         self.root = requested_root.resolve()
+        # Incomplete destinations and sealed backups are never live stores.
+        for marker in (
+            ".job-store-backup.pending",
+            ".job-store-restore.pending",
+            "backup-manifest.json",
+        ):
+            path = self.root / marker
+            if path.exists() or path.is_symlink():
+                _fail(
+                    "job_store_not_activated",
+                    "/root",
+                    "An incomplete recovery or sealed backup cannot be opened as a live job store.",
+                )
         self.root.mkdir(parents=True, exist_ok=True)
         self._blob_root = self.root / "blobs" / "sha256"
         self._blob_root.mkdir(parents=True, exist_ok=True)
