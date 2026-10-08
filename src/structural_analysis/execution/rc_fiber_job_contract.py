@@ -47,6 +47,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
 from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
     StatefulFiberFrame2DDisplacementControlStepAdapter,
 )
+from structural_analysis.execution.rc_fiber_phase_policy import decode_rc_fiber_phase_policy
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.model.schema import CanonicalModel
 
@@ -288,13 +289,16 @@ def validate_rc_fiber_job_request(
     execution = value["execution_config"]
     if (
         type(execution) is not dict
-        or set(execution) != {"chunk_target_count", "maximum_api_invocations"}
+        or not {"chunk_target_count", "maximum_api_invocations"} <= set(execution)
+        or set(execution) - {"chunk_target_count", "maximum_api_invocations", "phase_execution_policy"}
         or type(execution["chunk_target_count"]) is not int
         or not 1 <= execution["chunk_target_count"] <= 255
         or type(execution["maximum_api_invocations"]) is not int
         or not 2 <= execution["maximum_api_invocations"] <= 4096
     ):
         raise ValueError("invalid RC durable execution configuration")
+    if "phase_execution_policy" in execution:
+        decode_rc_fiber_phase_policy(execution["phase_execution_policy"])
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
     if not config.targets_m or not _same_request_config_values(
         config.to_dict(), value["config"]
