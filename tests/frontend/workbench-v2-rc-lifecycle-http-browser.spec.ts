@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test'
-import { spawn, type ChildProcess } from 'node:child_process'
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -11,6 +11,7 @@ type ReportReference = { report_id: string; revision: number; content_hash: stri
 type Ready = {
   ready: boolean; request: Record<string, unknown>; credentials: Credentials; other_credentials: Credentials
   explicit_layers_request: Record<string, unknown>
+  pin_roller_layers_request: Record<string, unknown>
   proof: { checkout_sha: string | null; github_sha: string | null; github_run_id: string | null; github_run_attempt: string | null; source_revision_caller_declaration: string }
 }
 type Server = { pid: number; origin: string; port: number; previous_pid?: number }
@@ -120,7 +121,7 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
 
-for (const profile of ['legacy', 'explicit-layers'] as const) {
+for (const profile of ['legacy', 'explicit-layers', 'pin-roller', 'pin-roller-layers'] as const) {
 test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two`, async ({ browser }, testInfo) => {
   test.setTimeout(300000)
   const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
@@ -136,6 +137,9 @@ test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/brow
     expect(ready.ready).toBe(true)
     if (profile === 'explicit-layers') ready.request = ready.explicit_layers_request
     evidence.profile = profile
+    if (profile === 'pin-roller') ready.request = JSON.parse(execFileSync('python3',
+      ['tests/frontend/rc_pin_roller_request.py'], { encoding: 'utf8', env: { ...process.env, PYTHONPATH: resolve('src') } }))
+    if (profile === 'pin-roller-layers') ready.request = ready.pin_roller_layers_request
     evidence.source = ready.proof
     // A hosted receipt must name the checked-out commit and run identity rather
     // than relabel the caller-authored source_revision as attestation.
@@ -194,6 +198,15 @@ test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/brow
     evidence.worker_death = killed
 
     await view.context.close()
+    if (profile === 'pin-roller-layers') {
+      const backup = await driver.command<{ restored_rows_equal: boolean; source_store: string; restored_store: string; original_worker_returncode: number; original_http_returncode: number; automatic_original_writer_fencing: boolean }>('backup_restore')
+      expect(backup.restored_rows_equal).toBe(true)
+      expect(backup.source_store).not.toBe(backup.restored_store)
+      expect(backup.original_worker_returncode).toBe(-9)
+      expect(backup.original_http_returncode).not.toBeNull()
+      expect(backup.automatic_original_writer_fencing).toBe(false)
+      evidence.operator_backup_restore = backup
+    }
     server = await driver.command<Server>('restart_http')
     servers.push(server)
     expect(server.origin).toBe(new URL(savedJobUrl).origin)
@@ -324,7 +337,7 @@ test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/brow
     const stored = await driver.command<{ base64: string; sha256: string; bytes: number }>('inspect_report', { job_id: job.job_id, report_id: reports[1].report_id })
     expect(downloaded).toEqual(Buffer.from(stored.base64, 'base64'))
     expect(downloaded.length).toBe(stored.bytes)
-    if (profile === 'explicit-layers') expect(JSON.parse(downloaded.toString()).quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(28.26, 10)
+    if (profile.endsWith('layers')) expect(JSON.parse(downloaded.toString()).quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(profile === 'pin-roller-layers' ? 17.898 : 28.26, 10)
     expect(digest(downloaded)).toBe(stored.sha256)
     expect(stored.sha256).toBe(reports[1].content_hash)
     const direct = await view.page.request.get(`${server.origin}/v1/jobs/${job.job_id}/rc-quantity-reports/${reports[1].report_id}`, { headers: headers(ready.credentials) })

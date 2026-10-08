@@ -36,6 +36,11 @@ from jsonschema import Draft202012Validator
 
 JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
+PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
+RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
+    RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
+    PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
+)
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
     "structural-analysis-job-completion-evidence.v1"
@@ -240,6 +245,19 @@ class DurableJobService:
                 "The durable service root may not be a symbolic link.",
             )
         self.root = requested_root.resolve()
+        # Incomplete destinations and sealed backups are never live stores.
+        for marker in (
+            ".job-store-backup.pending",
+            ".job-store-restore.pending",
+            "backup-manifest.json",
+        ):
+            path = self.root / marker
+            if path.exists() or path.is_symlink():
+                _fail(
+                    "job_store_not_activated",
+                    "/root",
+                    "An incomplete recovery or sealed backup cannot be opened as a live job store.",
+                )
         self.root.mkdir(parents=True, exist_ok=True)
         self._blob_root = self.root / "blobs" / "sha256"
         self._blob_root.mkdir(parents=True, exist_ok=True)
@@ -292,10 +310,17 @@ class DurableJobService:
         normalized_request = _canonical_mapping(request, "/request")
         if (
             normalized_request.get("schema_version")
-            == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+            in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
         ):
             _validate_schema(
-                normalized_request, "job_request_v3.schema.json", "/request"
+                normalized_request,
+                (
+                    "job_request_v4.schema.json"
+                    if normalized_request["schema_version"]
+                    == PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION
+                    else "job_request_v3.schema.json"
+                ),
+                "/request",
             )
             _model, rc_config = _rc_fiber_request(normalized_request)
             total_steps = len(rc_config.targets_m)
@@ -617,7 +642,7 @@ class DurableJobService:
                             "lease_token_hash": str(row["lease_token_hash"]),
                         }
                         if self._request_for_row(row).get("schema_version")
-                        == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+                        in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
                         else {}
                     ),
                 },
@@ -803,7 +828,7 @@ class DurableJobService:
     ) -> dict[int, tuple[dict[str, Any], str]]:
         if (
             self._request_for_row(row).get("schema_version")
-            != RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+            not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
         ):
             _fail(
                 "rc_invocation_operation_unsupported",
@@ -1160,7 +1185,7 @@ class DurableJobService:
                     "The job is already bound to a different resume contract.",
                 )
             request = self._request_for_row(row)
-            if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+            if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
                 from structural_analysis.execution.rc_fiber_job_contract import (
                     validate_rc_fiber_job_checkpoint,
                 )
@@ -1298,7 +1323,7 @@ class DurableJobService:
                     "/evidence/contract_pass",
                     "A trusted core validation PASS is required before publication.",
                 )
-            if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+            if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
                 from structural_analysis.execution.rc_fiber_job_contract import (
                     RC_FIBER_JOB_VALIDATOR_ID,
                     validate_rc_fiber_job_result,
@@ -1819,7 +1844,7 @@ class DurableJobService:
                 "Completed-event artifact custody differs.",
             )
         request = self._request_for_row(row)
-        if request.get("schema_version") != RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+        if request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
             _fail(
                 "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
             )
@@ -1930,9 +1955,7 @@ class DurableJobService:
                 (job_id,),
             ).fetchall()
             request = self._request_for_row(row)
-            if request.get("schema_version") in {
-                RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
-            }:
+            if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
                 self._execution_budget(connection, row)
             elif (
                 connection.execute(
@@ -1947,7 +1970,7 @@ class DurableJobService:
                 )
             rc_records = (
                 self._rc_invocation_rows(connection, row, verify_blobs=True)
-                if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+                if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
                 else []
             )
         refs = self._row_references(row)
@@ -2024,7 +2047,7 @@ class DurableJobService:
                         for record in rc_records
                     }
                 }
-                if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+                if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
                 else {}
             ),
             "claim_boundary": JOB_SERVICE_CLAIM_BOUNDARY,
@@ -2180,9 +2203,7 @@ class DurableJobService:
         self, connection: sqlite3.Connection, row: sqlite3.Row
     ) -> dict[str, int]:
         request = self._request_for_row(row)
-        if request.get("schema_version") not in {
-            RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
-        }:
+        if request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
             _fail(
                 "execution_budget_operation_unsupported",
                 "/execution_budget",
@@ -2810,7 +2831,7 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
 
 
 def _result_byte_limit(request: Mapping[str, Any]) -> int:
-    if request.get("schema_version") == RC_FIBER_JOB_REQUEST_SCHEMA_VERSION:
+    if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
         from structural_analysis.execution.rc_fiber_job_contract import (
             RC_FIBER_JOB_MAX_BYTES,
         )

@@ -32,6 +32,8 @@ on:
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/frontend/rc-lifecycle-review.spec.ts"
+      - "tests/frontend/rc-pin-roller-review.spec.ts"
+      - "tests/frontend/rc_pin_roller_request.py"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
       - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
@@ -73,6 +75,8 @@ on:
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/frontend/rc-lifecycle-review.spec.ts"
+      - "tests/frontend/rc-pin-roller-review.spec.ts"
+      - "tests/frontend/rc_pin_roller_request.py"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
       - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
@@ -238,6 +242,7 @@ jobs:
           node --loader ./scripts/json-module-loader.mjs
           node_modules/@playwright/test/cli.js test
           tests/frontend/rc-lifecycle-review.spec.ts
+          tests/frontend/rc-pin-roller-review.spec.ts
           tests/frontend/workbench-v2-rc-lifecycle-http-browser.spec.ts
           --workers=1 --retries=0 --reporter=line --trace=retain-on-failure
 
