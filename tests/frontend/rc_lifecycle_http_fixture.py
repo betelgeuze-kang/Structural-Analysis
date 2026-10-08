@@ -105,6 +105,19 @@ def authored_request():
     }
 
 
+def authored_explicit_layers_request():
+    request = authored_request()
+    request["case_id"] = "hosted-workbench-explicit-steel-layers"
+    request["model"] = json.loads(
+        (ROOT / "examples/public_rc_fiber_frame_explicit_layers.json").read_text()
+    )
+    return request
+
+
+def is_authored_request(value):
+    return value in (authored_request(), authored_explicit_layers_request())
+
+
 def append_receipt(path, value):
     with path.open("a", encoding="utf-8") as stream:
         stream.write(json.dumps(value, sort_keys=True, allow_nan=False) + "\n")
@@ -230,7 +243,7 @@ def run_worker(workspace, name):
         if claim is None:
             assert name == "fresh" and time.monotonic() < deadline
             time.sleep(0.1)  # Wait for the dead process's actual lease to expire.
-    assert json.loads(claim.request_bytes) == authored_request()
+    assert is_authored_request(json.loads(claim.request_bytes))
     counts = {"analysis": 0, "verification": 0}
     phase = ["analysis"]
     analyze_original = rc_api.analyze_bounded_rc_fiber_direct_control
@@ -416,7 +429,7 @@ class Supervisor:
         current = service(self.store)
         job = current.get_job(job_id, **tenant())
         request = original_bytes(current, job.request)
-        assert json.loads(request) == authored_request()
+        assert is_authored_request(json.loads(request))
         result = {
             "job": job.to_dict(),
             "original_request": json.loads(request),
@@ -568,6 +581,7 @@ def run_driver(workspace):
         {
             "ready": True,
             "request": authored_request(),
+            "explicit_layers_request": authored_explicit_layers_request(),
             "credentials": {"tenantId": "a", "bearerToken": TENANTS["a"]},
             "other_credentials": {"tenantId": "b", "bearerToken": TENANTS["b"]},
             "proof": current.proof,

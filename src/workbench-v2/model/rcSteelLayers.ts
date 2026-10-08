@@ -1,3 +1,43 @@
+interface ExplicitSteelLayer { id: string; y_m: number; bar_count: number; bar_area_m2: number; steel_material: string }
+const explicitSectionType = 'rectangular_rc_explicit_steel_layers'
+
+/** Validate authored geometry before recomputing a stored quantity report. */
+function explicitSteelLayers(section: Record<string, unknown>): ExplicitSteelLayer[] {
+  const layers = section.steel_layers
+  const depth = section.depth_m, width = section.width_m
+  if (!Array.isArray(layers) || layers.length < 1 || layers.length > 32
+    || typeof depth !== 'number' || !Number.isFinite(depth) || depth <= 0
+    || typeof width !== 'number' || !Number.isFinite(width) || width <= 0) throw new Error('explicit_steel_layers_invalid')
+  let previous = -depth / 2
+  const ids = new Set<string>()
+  for (const layer of layers) {
+    if (!layer || typeof layer !== 'object' || Array.isArray(layer)
+      || Object.keys(layer).sort().join(',') !== 'bar_area_m2,bar_count,id,steel_material,y_m'
+      || typeof layer.id !== 'string' || !layer.id || ids.has(layer.id)
+      || typeof layer.steel_material !== 'string' || !layer.steel_material
+      || typeof layer.y_m !== 'number' || !Number.isFinite(layer.y_m) || !(previous < layer.y_m && layer.y_m < depth / 2)
+      || !Number.isInteger(layer.bar_count) || layer.bar_count < 1 || layer.bar_count > 64
+      || typeof layer.bar_area_m2 !== 'number' || !Number.isFinite(layer.bar_area_m2) || layer.bar_area_m2 <= 0) {
+      throw new Error('explicit_steel_layer_invalid')
+    }
+    previous = layer.y_m
+    ids.add(layer.id)
+  }
+  const total = sumAreas(layers.map(layer => layer.bar_count * layer.bar_area_m2))
+  if (!Number.isFinite(total) || !Number.isFinite(width * depth) || total >= width * depth) throw new Error('explicit_steel_area_invalid')
+  return layers
+}
+
+function sumAreas(values: number[]): number {
+  let total = 0, correction = 0
+  for (const value of values) {
+    const next = total + value
+    correction += Math.abs(total) >= Math.abs(value) ? (total - next) + value : (value - next) + total
+    total = next
+  }
+  return total + correction
+}
+
 /** Distances are from each concrete face to the longitudinal bar centroid. */
 export function outerSteelCentroidDistances(section: Record<string, unknown>): [number, number] {
   const depth = section.depth_m
@@ -48,6 +88,7 @@ export function outerSteelAreas(section: Record<string, unknown>): [number, numb
 }
 
 export function longitudinalSteelArea(section: Record<string, unknown>): number {
+  if (section.type === explicitSectionType) return sumAreas(explicitSteelLayers(section).map(layer => layer.bar_count * layer.bar_area_m2))
   const [top, bottom] = outerSteelAreas(section)
   const common = section.bar_area_m2 as number
   const counts = ['top_bar_count', 'bottom_bar_count'].map(key => {
@@ -62,6 +103,8 @@ export function longitudinalSteelArea(section: Record<string, unknown>): number 
 }
 
 export function longitudinalSteelDescription(section: Record<string, unknown>): string {
+  if (section.type === explicitSectionType) return explicitSteelLayers(section)
+    .map(layer => `${layer.id}: ${layer.bar_count} × ${layer.bar_area_m2} m² at ${layer.y_m} m; ${layer.steel_material}`).join('; ')
   const [top, bottom] = outerSteelAreas(section)
   const middle = intermediateSteelBarCount(section)
   return `top ${section.top_bar_count} × ${top} m²; bottom ${section.bottom_bar_count} × ${bottom} m²`

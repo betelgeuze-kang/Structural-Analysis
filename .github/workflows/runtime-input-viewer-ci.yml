@@ -9,6 +9,8 @@ on:
       - "src/workbench-v2/WorkbenchPage.tsx"
       - "src/workbench-v2/components/**"
       - "examples/public_rc_fiber_frame_cantilever.json"
+      - "examples/public_rc_fiber_frame_explicit_layers.json"
+      - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
       - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
@@ -48,6 +50,8 @@ on:
       - "src/workbench-v2/WorkbenchPage.tsx"
       - "src/workbench-v2/components/**"
       - "examples/public_rc_fiber_frame_cantilever.json"
+      - "examples/public_rc_fiber_frame_explicit_layers.json"
+      - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
       - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
@@ -121,6 +125,7 @@ jobs:
           tests/frontend/rc_lifecycle_http_fixture.py
           tests/frontend/rc_lifecycle_review_snapshot.py
           tests/test_rc_lifecycle_http_fixture.py
+          tests/test_rc_explicit_steel_input.py
 
       - name: Compile MIDAS adapter
         run: python -m compileall -q src/structural_analysis/io/midas
@@ -144,6 +149,7 @@ jobs:
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
           tests/test_rc_lifecycle_http_fixture.py
+          tests/test_rc_explicit_steel_input.py
 
       - name: Upload Python test receipt
         if: always()

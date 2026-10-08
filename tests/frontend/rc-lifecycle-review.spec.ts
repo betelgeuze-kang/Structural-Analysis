@@ -7,7 +7,8 @@ import { validateRcJobArtifacts, validateRcRequestProfile, fields } from '../../
 import { validateRcQuantityReport } from '../../src/workbench-v2/model/rcQuantityReportSchema'
 import { sha256Hex } from '../../src/workbench-v2/model/checksum'
 
-test.describe('Narrow RC production reviewer with freshly computed artifacts', () => {
+for (const profile of ['legacy', 'explicit-layers'] as const) {
+test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, () => {
   test.describe.configure({ mode: 'serial', timeout: 120000 })
   let temporary: string, snapshot: any, reviewed: Awaited<ReturnType<typeof validateRcJobArtifacts>>
   const bytes = (value: string) => new Uint8Array(Buffer.from(value, 'base64'))
@@ -15,7 +16,7 @@ test.describe('Narrow RC production reviewer with freshly computed artifacts', (
     temporary = mkdtempSync(path.join(tmpdir(), 'rc-review-contract-'))
     const output = path.join(temporary, 'review.json')
     const authored = JSON.parse(execFileSync('python', ['-c',
-      "import sys; sys.path.insert(0, 'tests/frontend'); from rc_lifecycle_http_fixture import authored_request, canonical; print(canonical(authored_request()).decode())"], { encoding: 'utf8' }))
+      `import sys; sys.path.insert(0, 'tests/frontend'); from rc_lifecycle_http_fixture import ${profile === 'legacy' ? 'authored_request' : 'authored_explicit_layers_request as authored_request'}, canonical; print(canonical(authored_request()).decode())`], { encoding: 'utf8' }))
     const requestFile = path.join(temporary, 'browser-request.json')
     // The exact browser JSON.stringify boundary converts Python 1.0 to JSON 1.
     writeFileSync(requestFile, JSON.stringify(authored))
@@ -37,6 +38,7 @@ test.describe('Narrow RC production reviewer with freshly computed artifacts', (
     expect(reports[0].bindings).toEqual(reports[1].bindings)
     expect(reports[0].quantities).toEqual(reports[1].quantities)
     expect(reports[0].declared_prices).not.toEqual(reports[1].declared_prices)
+    if (profile === 'explicit-layers') expect(reports[0].quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(28.26, 10)
   })
 
   test('rejects unsupported request extensions before submission', () => {
@@ -75,3 +77,5 @@ test.describe('Narrow RC production reviewer with freshly computed artifacts', (
     await expect(validateRcQuantityReport(forged, reviewed.quantitySource)).rejects.toThrow('study_estimate_invalid')
   })
 })
+
+}
