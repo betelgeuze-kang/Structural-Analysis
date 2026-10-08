@@ -26,6 +26,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
     StatefulFiberFrame2DDisplacementControlConfig,
     StatefulFiberFrame2DDisplacementControlStepAdapter,
     StatefulFiberFrame2DDisplacementControlStepResult,
+    StatefulFiberInitialTrialSearchError,
     solve_stateful_fiber_frame2d_displacement_control_step,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
@@ -284,15 +285,24 @@ def _binding(step, target, direction, reversals):
 def _counts(attempts):
     linear = iterations = unknown = 0
     for attempt in attempts:
-        if attempt["step"] is None:
+        if attempt["solver_work"] is None:
             unknown += 1
             continue
         metrics = attempt["solver_work"]
         solves = metrics.get("linear_solve_count")
         count = metrics.get("iteration_count")
-        if type(solves) is int and solves >= 0 and type(count) is int and count >= 0:
+        extra_unknown = metrics.get("initial_trial_unknown_work_count", 0)
+        if (
+            type(solves) is int
+            and solves >= 0
+            and type(count) is int
+            and count >= 0
+            and type(extra_unknown) is int
+            and extra_unknown >= 0
+        ):
             linear += solves
             iterations += count
+            unknown += extra_unknown
         else:
             unknown += 1
     return {
@@ -329,7 +339,7 @@ class StatefulFiberFrame2DControlExecutionError(ValueError):
 def _execute_raw(
     problem, initial, targets, control_global_dof, config, source_hash, *, phase
 ):
-    """Exactly one core call per authored target, without recursive restart or retries."""
+    """One core call per target; any declared initial trials retain all their work."""
     accepted = initial
     steps = []
     attempts = []
@@ -366,7 +376,9 @@ def _execute_raw(
                 "parent_checkpoint_immutable": source_unchanged(),
                 "rollback_exact": None,
                 "step": None,
-                "solver_work": None,
+                "solver_work": exc.solver_work()
+                if isinstance(exc, StatefulFiberInitialTrialSearchError)
+                else None,
                 "failure": {"type": type(exc).__name__, "message": str(exc)},
                 "artifact_contract_pass": False,
             }
@@ -402,7 +414,9 @@ def _execute_raw(
                     "parent_checkpoint_immutable": True,
                     "rollback_exact": True,
                     "step": None,
-                    "solver_work": None,
+                    "solver_work": exc.solver_work()
+                    if isinstance(exc, StatefulFiberInitialTrialSearchError)
+                    else None,
                     "failure": {"type": type(exc).__name__, "message": str(exc)},
                 }
             )
@@ -438,7 +452,7 @@ def _execute_raw(
             # Snapshot now: later core calls may expose mutation of a retained step.
             # Previously observed work must survive even non-finite later mutations.
             step_payload = json.loads(_json(step.to_dict()))
-            solver_work = json.loads(_json(dict(step.trial_solution.metrics)))
+            solver_work = json.loads(_json(step.solver_work()))
         except Exception as exc:
             raise reject(exc, "returned_step_validation") from exc
         steps.append(step)
