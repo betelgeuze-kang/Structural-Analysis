@@ -1,3 +1,4 @@
+import { canonicalJson, sha256Hex } from './model/checksum'
 import { RcStrategyCohortPanel } from './components/RcStrategyCohortPanel'
 import { RcControlSearchPanel } from './components/RcControlSearchPanel'
 import { RcControlDesignPanel } from './components/RcControlDesignPanel'
@@ -28,6 +29,7 @@ import { CandidateSearchProcessPanel } from './components/CandidateSearchProcess
 import { loadCandidateProcessReview, type CandidateProcessLoadResult } from './model/candidateProcessProvider'
 import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import { JobServicePanel } from './components/JobServicePanel'
+import { RcJobWorkflowPanel } from './components/RcJobWorkflowPanel'
 import { EquationScalingPanel } from './components/EquationScalingPanel'
 import { NativeFrameArtifactsPanel } from './components/NativeFrameArtifactsPanel'
 import { NativeFrameRunPanel } from './components/NativeFrameRunPanel'
@@ -64,6 +66,9 @@ export interface WorkbenchPageProps {
   candidateSearchProcessUrl?: string
   /** Same-origin authenticated status endpoint. */
   jobStatusUrl?: string
+  rcJobCollectionUrl?: string
+  initialRcJobId?: string
+  initialRcReportId?: string
   /** Optional host credential callback, used in memory for one load, never persisted. */
   jobAuthorization?: JobAuthorizationProvider
   /** Same-origin canonical bounded native Frame3D ResultIR artifact. */
@@ -92,6 +97,9 @@ export function WorkbenchPage({
   rcControlDesignUrl,
   candidateSearchProcessUrl,
   jobStatusUrl,
+  rcJobCollectionUrl,
+  initialRcJobId,
+  initialRcReportId,
   jobAuthorization,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
@@ -158,23 +166,24 @@ export function WorkbenchPage({
   )
   const reviewDraftStatesRef = useRef<ReadonlyMap<string, ReviewDraftState>>(reviewDraftStates)
 
+  const [reviewCaseSha256, setReviewCaseSha256] = useState<string | null>(null)
   const reviewSourceCommitSha = caseV2?.provenance.sourceCommitSha ?? null
 
   const reviewDraftState = useMemo(() => {
-    if (!reviewSourceCommitSha) return null
-    return reviewDraftStates.get(reviewSourceCommitSha) ?? null
-  }, [reviewDraftStates, reviewSourceCommitSha])
+    if (!reviewSourceCommitSha || !reviewCaseSha256) return null
+    return reviewDraftStates.get(reviewCaseSha256) ?? null
+  }, [reviewDraftStates, reviewSourceCommitSha, reviewCaseSha256])
 
   useEffect(() => {
     setSelectedNativeFrameMemberId(null)
   }, [nativeFrameLoad.resultIr?.result_hash])
 
   function updateReviewDraft(patch: Partial<ReviewDraft>): void {
-    if (!reviewSourceCommitSha) return
-    const current = reviewDraftStatesRef.current.get(reviewSourceCommitSha)
-      ?? loadReviewDraftState(reviewSourceCommitSha)
+    if (!reviewSourceCommitSha || !reviewCaseSha256) return
+    const current = reviewDraftStatesRef.current.get(reviewCaseSha256)
+      ?? loadReviewDraftState(reviewSourceCommitSha, { caseSha256: reviewCaseSha256 })
     const next = new Map(reviewDraftStatesRef.current)
-    next.set(reviewSourceCommitSha, updateReviewDraftState(current, patch))
+    next.set(reviewCaseSha256, updateReviewDraftState(current, patch))
     reviewDraftStatesRef.current = next
     setReviewDraftStates(next)
   }
@@ -211,17 +220,21 @@ export function WorkbenchPage({
     let cancelled = false
     setLoadState('loading')
     setCaseV2(null)
+    setReviewCaseSha256(null)
     provider
       .load()
-      .then((res) => {
+      .then(async (res) => {
         if (cancelled) return
         setSourceLabel(res.sourcePath)
         if (res.status === 'ready' && res.caseV2) {
           const w = res.validation?.warnings ?? []
           const reviewCommitSha = res.caseV2.provenance.sourceCommitSha
-          if (!reviewDraftStatesRef.current.has(reviewCommitSha)) {
+          const caseDigest = await sha256Hex(canonicalJson(res.caseV2))
+          if (cancelled) return
+          setReviewCaseSha256(caseDigest)
+          if (caseDigest && !reviewDraftStatesRef.current.has(caseDigest)) {
             const nextReviewStates = new Map(reviewDraftStatesRef.current)
-            nextReviewStates.set(reviewCommitSha, loadReviewDraftState(reviewCommitSha))
+            nextReviewStates.set(caseDigest, loadReviewDraftState(reviewCommitSha, { caseSha256: caseDigest }))
             reviewDraftStatesRef.current = nextReviewStates
             setReviewDraftStates(nextReviewStates)
           }
@@ -255,7 +268,7 @@ export function WorkbenchPage({
   }, [provider])
 
   useEffect(() => {
-    if (!jobStatusUrl) {
+    if (!jobStatusUrl || rcJobCollectionUrl) {
       setJobLoad({ status: 'unconfigured', job: null, errors: [] })
       return undefined
     }
@@ -265,7 +278,7 @@ export function WorkbenchPage({
       if (!controller.signal.aborted) setJobLoad(result)
     })
     return () => controller.abort()
-  }, [jobStatusUrl, jobAuthorization])
+  }, [jobStatusUrl, jobAuthorization, rcJobCollectionUrl])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -423,7 +436,13 @@ export function WorkbenchPage({
           submissionUrl={nativeFrameSubmissionUrl}
           onJobAvailable={setSubmittedNativeFrameJobUrl}
         />
-        <JobServicePanel
+        {rcJobCollectionUrl ? <RcJobWorkflowPanel
+          collectionUrl={rcJobCollectionUrl}
+          initialJobStatusUrl={jobStatusUrl}
+          initialJobId={initialRcJobId}
+          initialReportId={initialRcReportId}
+          authorize={jobAuthorization}
+        /> : <JobServicePanel
           loadStatus={jobLoad.status}
           job={jobLoad.job}
           errors={jobLoad.errors}
@@ -435,7 +454,7 @@ export function WorkbenchPage({
           failureDiagnostic={jobLoad.failureDiagnostic}
           jobStatusUrl={jobStatusUrl}
           jobAuthorization={jobAuthorization}
-        />
+        />}
         {caseV2 ? (
           <RunMonitor
             runStatus={state.runStatus}
@@ -498,7 +517,7 @@ export function WorkbenchPage({
           <section className="wb2-panel" aria-labelledby="wb2-verdict-title">
             <h2 id="wb2-verdict-title" className="wb2-panel__title">Review decision</h2>
             <p className="wb2-empty" role="status" data-wb2-review-loading>
-              Loading reviewer draft persistence…
+              {reviewCaseSha256 ? 'Loading reviewer draft persistence…' : 'Reviewer draft and export unavailable: loaded-case identity could not be verified.'}
             </p>
           </section>
         ) : (

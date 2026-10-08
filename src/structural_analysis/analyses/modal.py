@@ -16,6 +16,7 @@ from structural_analysis.assembly.modal import (
     DOF_PER_NODE,
     ModalAssembly,
     assemble_modal_matrices,
+    preflight_modal_resources,
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.equation_scaling_6dof import (
@@ -62,6 +63,16 @@ def run_authoritative_modal(
         return _blocked_solution(
             model,
             unsupported=unsupported,
+            eigen_backend=eigen_backend,
+        )
+
+    resource_unsupported = preflight_modal_resources(
+        model, maximum_free_dof_count=MAX_DENSE_MODAL_FREE_DOF
+    )
+    if resource_unsupported:
+        return _blocked_solution(
+            model,
+            unsupported=resource_unsupported,
             eigen_backend=eigen_backend,
         )
 
@@ -117,9 +128,7 @@ def run_authoritative_modal(
         * reduced_mass
         * coordinate_recovery_scale[None, :]
     )
-    scaled_stiffness_condition = exact_scaled_condition_number_1(
-        scaled_stiffness
-    )
+    scaled_stiffness_condition = exact_scaled_condition_number_1(scaled_stiffness)
     scaled_mass_condition = exact_scaled_condition_number_1(scaled_mass)
     try:
         modal = solve_modal_modes(
@@ -201,9 +210,7 @@ def run_authoritative_modal(
         "stiffness_diagonalization_error_inf": (
             modal.stiffness_diagonalization_error_inf
         ),
-        "stiffness_relative_symmetry_error": (
-            modal.stiffness_relative_symmetry_error
-        ),
+        "stiffness_relative_symmetry_error": (modal.stiffness_relative_symmetry_error),
         "mass_relative_symmetry_error": modal.mass_relative_symmetry_error,
         "stiffness_matrix_hash": modal.stiffness_matrix_hash,
         "mass_matrix_hash": modal.mass_matrix_hash,
@@ -239,9 +246,7 @@ def run_authoritative_modal(
         "claim_boundary": MODAL_CLAIM_BOUNDARY,
     }
     if scaled_stiffness_condition is not None:
-        metrics["scaled_stiffness_condition_number"] = (
-            scaled_stiffness_condition
-        )
+        metrics["scaled_stiffness_condition_number"] = scaled_stiffness_condition
     if scaled_mass_condition is not None:
         metrics["scaled_mass_condition_number"] = scaled_mass_condition
     return WholeModelModalSolution(
@@ -293,9 +298,7 @@ def _mode_rows(
             )
             cumulative[label] += ratio
             participation[label] = {
-                "applicable": bool(
-                    total_coefficient > np.finfo(np.float64).tiny
-                ),
+                "applicable": bool(total_coefficient > np.finfo(np.float64).tiny),
                 "participation_factor": factor,
                 "effective_modal_mass_kg": effective_coefficient * 1000.0,
                 "effective_modal_mass_ratio": ratio,
@@ -377,7 +380,11 @@ def _public_preflight(
                 "detail": "Modal tolerance must be finite and positive.",
             }
         )
-    if isinstance(mode_count, bool) or not isinstance(mode_count, int) or mode_count <= 0:
+    if (
+        isinstance(mode_count, bool)
+        or not isinstance(mode_count, int)
+        or mode_count <= 0
+    ):
         unsupported.append(
             {
                 "kind": "modal_mode_count_invalid",
@@ -416,6 +423,14 @@ def _blocked_solution(
     eigen_backend: str,
     assembly: ModalAssembly | None = None,
 ) -> WholeModelModalSolution:
+    preflight_counts = next(
+        (
+            row
+            for row in unsupported
+            if row.get("kind") == "modal_dense_free_dof_limit_exceeded"
+        ),
+        {},
+    )
     return WholeModelModalSolution(
         status="blocked",
         metrics={
@@ -432,8 +447,16 @@ def _blocked_solution(
             "fallback_used": False,
             "matrix_backend": eigen_backend,
             "sparse_backend_used": False,
-            "free_dof_count": len(assembly.free_dofs) if assembly else 0,
-            "active_dof_count": len(assembly.active_dofs) if assembly else 0,
+            "free_dof_count": (
+                len(assembly.free_dofs)
+                if assembly
+                else preflight_counts.get("free_dof_count", 0)
+            ),
+            "active_dof_count": (
+                len(assembly.active_dofs)
+                if assembly
+                else preflight_counts.get("active_dof_count", 0)
+            ),
             "whole_model_frame_truss_modal_workflow": False,
             "general_frame_shell_modal_workflow": False,
             "nodal_lumped_mass_supported": False,

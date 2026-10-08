@@ -13,6 +13,8 @@ export interface ReviewDraft {
   reviewer: string
   updatedAt: string | null
   sourceCommitSha: string
+  /** Exact canonical loaded-case digest; absent only for legacy commit notes. */
+  caseSha256?: string
 }
 
 export const reviewDecisionOptions: { value: ReviewDecisionValue; label: string }[] = [
@@ -82,6 +84,7 @@ type ReviewDraftStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
 export interface ReviewDraftPersistenceOptions {
   /** Explicit adapter for deterministic tests. Omit to use window.localStorage. */
+  caseSha256?: string
   storage?: ReviewDraftStorage | null
   /** Deterministic timestamp source for tests. */
   now?: () => string
@@ -127,17 +130,19 @@ function makeState(draft: ReviewDraft, receipt: ReviewDraftPersistenceReceipt): 
   return Object.freeze({ draft: freezeDraft(draft), receipt })
 }
 
-export function defaultDraft(sourceCommitSha: string): ReviewDraft {
+export function defaultDraft(sourceCommitSha: string, caseSha256?: string): ReviewDraft {
   return freezeDraft({
     decision: 'unreviewed',
     comment: '',
     reviewer: '',
     updatedAt: null,
     sourceCommitSha,
+    ...(caseSha256 === undefined ? {} : { caseSha256 }),
   })
 }
 
-function storageKey(sourceCommitSha: string): string {
+function storageKey(sourceCommitSha: string, caseSha256?: string): string {
+  if (caseSha256 !== undefined) return `${STORAGE_PREFIX}case:v1:${sourceCommitSha}:${caseSha256}`
   return `${STORAGE_PREFIX}${sourceCommitSha}`
 }
 
@@ -164,7 +169,7 @@ function isTimestamp(value: unknown): value is string | null {
   )
 }
 
-function normalizedDraft(value: unknown, sourceCommitSha: string): ReviewDraft | null {
+function normalizedDraft(value: unknown, sourceCommitSha: string, caseSha256?: string): ReviewDraft | null {
   if (
     !isRecord(value)
     || !isValidSourceCommitSha(sourceCommitSha)
@@ -175,6 +180,8 @@ function normalizedDraft(value: unknown, sourceCommitSha: string): ReviewDraft |
     || value.reviewer.length > MAX_REVIEWER_CHARS
     || !isTimestamp(value.updatedAt)
     || value.sourceCommitSha !== sourceCommitSha
+    || value.caseSha256 !== caseSha256
+    || (caseSha256 !== undefined && !/^sha256:[0-9a-f]{64}$/.test(caseSha256))
   ) {
     return null
   }
@@ -184,6 +191,7 @@ function normalizedDraft(value: unknown, sourceCommitSha: string): ReviewDraft |
     reviewer: value.reviewer,
     updatedAt: value.updatedAt,
     sourceCommitSha,
+    ...(caseSha256 === undefined ? {} : { caseSha256 }),
   })
 }
 
@@ -230,9 +238,9 @@ function resolveStorage(options: ReviewDraftPersistenceOptions): StorageResoluti
   }
 }
 
-export function createReviewDraftState(sourceCommitSha: string): ReviewDraftState {
+export function createReviewDraftState(sourceCommitSha: string, caseSha256?: string): ReviewDraftState {
   return makeState(
-    defaultDraft(sourceCommitSha),
+    defaultDraft(sourceCommitSha, caseSha256),
     makeReceipt({
       ok: true,
       operation: 'initialize',
@@ -248,8 +256,9 @@ export function loadReviewDraftState(
   sourceCommitSha: string,
   options: ReviewDraftPersistenceOptions = {},
 ): ReviewDraftState {
-  const base = defaultDraft(sourceCommitSha)
-  if (!isValidSourceCommitSha(sourceCommitSha)) {
+  const caseSha256 = options.caseSha256
+  const base = defaultDraft(sourceCommitSha, caseSha256)
+  if (!isValidSourceCommitSha(sourceCommitSha) || (caseSha256 !== undefined && !/^sha256:[0-9a-f]{64}$/.test(caseSha256))) {
     return makeState(base, makeReceipt({
       ok: false,
       operation: 'read',
@@ -263,7 +272,7 @@ export function loadReviewDraftState(
 
   const resolution = resolveStorage(options)
   if (!resolution.storage) {
-    if (!resolution.failure) return createReviewDraftState(sourceCommitSha)
+    if (!resolution.failure) return createReviewDraftState(sourceCommitSha, caseSha256)
     return makeState(base, makeReceipt({
       ok: false,
       operation: 'read',
@@ -277,7 +286,7 @@ export function loadReviewDraftState(
 
   let raw: string | null
   try {
-    raw = resolution.storage.getItem(storageKey(sourceCommitSha))
+    raw = resolution.storage.getItem(storageKey(sourceCommitSha, caseSha256))
   } catch (error) {
     const failure = stableStorageFailure(error, 'get')
     return makeState(base, makeReceipt({
@@ -320,7 +329,7 @@ export function loadReviewDraftState(
     }
   }
 
-  const storedDraft = primaryFailure ? null : normalizedDraft(parsed, sourceCommitSha)
+  const storedDraft = primaryFailure ? null : normalizedDraft(parsed, sourceCommitSha, caseSha256)
   if (!storedDraft) {
     primaryFailure ??= {
       code: 'review_draft_storage_value_invalid',
@@ -329,7 +338,7 @@ export function loadReviewDraftState(
     let corruptedEntryRemoved = false
     let cleanupFailure: StableFailure | null = null
     try {
-      resolution.storage.removeItem(storageKey(sourceCommitSha))
+      resolution.storage.removeItem(storageKey(sourceCommitSha, caseSha256))
       corruptedEntryRemoved = true
     } catch (error) {
       cleanupFailure = stableStorageFailure(error, 'remove')
@@ -393,9 +402,10 @@ export function updateReviewDraftState(
       ...previous.draft,
       ...patch,
       sourceCommitSha: previous.draft.sourceCommitSha,
+      caseSha256: previous.draft.caseSha256,
       updatedAt: timestamp,
     }
-    const validated = normalizedDraft(candidate, previous.draft.sourceCommitSha)
+    const validated = normalizedDraft(candidate, previous.draft.sourceCommitSha, previous.draft.caseSha256)
     if (!validated) {
       return makeState(previous.draft, previousStateReceipt(previous, {
         code: 'review_draft_value_invalid',
@@ -435,7 +445,7 @@ export function updateReviewDraftState(
     }))
   }
 
-  const key = storageKey(nextDraft.sourceCommitSha)
+  const key = storageKey(nextDraft.sourceCommitSha, nextDraft.caseSha256)
   try {
     resolution.storage.setItem(key, serialized)
   } catch (error) {

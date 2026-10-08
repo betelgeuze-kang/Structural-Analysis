@@ -387,9 +387,7 @@ def test_lease_expiring_while_waiting_for_transaction_cannot_mutate_job(
     assert _budget(service, active)["reserved_attempts"] == 0
 
 
-def test_claim_lease_starts_after_lock_wait_and_blob_read(
-    tmp_path, monkeypatch
-):
+def test_claim_lease_starts_after_lock_wait_and_blob_read(tmp_path, monkeypatch):
     clock = Clock()
     service = _service(tmp_path / "jobs", clock)
     _submit(service)
@@ -705,3 +703,309 @@ def test_integrity_rejects_budget_projection_changed_without_reservation_events(
         _reserve(service, claim)
     with pytest.raises(JobServiceError, match="execution_budget_integrity_failed"):
         _integrity(service, submitted.job_id)
+
+
+def _prewrite_frame_inventory(service):
+    return {
+        str(path.relative_to(service.root)): path.read_bytes()
+        for path in sorted((service.root / "blobs" / "sha256").rglob("*"))
+        if path.is_file()
+    }
+
+
+def _prewrite_frame_state(service, job_id):
+    view = service.get_job(
+        job_id, tenant_id="tenant-a", authorization_token=TENANT_TOKEN
+    )
+    with sqlite3.connect(service.root / "jobs.sqlite3") as connection:
+        events = connection.execute(
+            "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision", (job_id,)
+        ).fetchall()
+        budget = connection.execute(
+            "SELECT * FROM job_execution_budgets WHERE job_id = ?", (job_id,)
+        ).fetchall()
+    return view, events, budget
+
+
+@pytest.fixture
+def prewrite_frame_prefix(tmp_path, monkeypatch):
+    from structural_analysis.execution import frame3d_job_contract as contract
+
+    def validate_synthetic(raw, *, request, progress_completed, execution_budget):
+        # Pure service binding seam; these bytes are not numerical evidence.
+        assert type(raw) is bytes
+        return {
+            "resume_contract_hash": RESUME_HASH,
+            "receipts": [
+                {"synthetic_index": index} for index in range(progress_completed)
+            ],
+        }
+
+    monkeypatch.setattr(contract, "validate_frame3d_job_checkpoint", validate_synthetic)
+    clock = Clock()
+    service = _service(tmp_path / "jobs", clock)
+    job = _submit(service)
+    claim = _claim(service)
+    assert _reserve(service, claim) == 1
+    assert _reserve(service, claim) == 2
+    prefix = _save(service, claim, 1, release_lease=False)
+    return service, job, claim, prefix, clock, validate_synthetic
+
+
+@pytest.mark.parametrize(
+    "rejected", ["stale", "progress", "resume", "contract", "prefix"]
+)
+def test_prewrite_frame3d_checkpoint_rejection_preserves_blobs_and_budget(
+    prewrite_frame_prefix, monkeypatch, rejected
+):
+    from structural_analysis.execution import frame3d_job_contract as contract
+
+    service, job, claim, prefix, clock, validate = prewrite_frame_prefix
+    arguments = _lease(claim) | {
+        "checkpoint_bytes": b"rejected Frame3D service checkpoint " + rejected.encode(),
+        "checkpoint_media_type": "application/octet-stream",
+        "progress_completed": 2,
+        "progress_total": 4,
+        "resume_contract_hash": RESUME_HASH,
+        "release_lease": False,
+    }
+    if rejected == "stale":
+        arguments["lease_token"] = "stale-lease-token-0123456789"
+        code = "lease_unauthorized"
+    elif rejected == "progress":
+        arguments["progress_completed"] = 1
+        code = "checkpoint_progress_invalid"
+    elif rejected == "resume":
+        arguments["resume_contract_hash"] = "sha256:" + "d" * 64
+        code = "resume_contract_mismatch"
+    else:
+
+        def reject_synthetic(raw, **kwargs):
+            if kwargs["progress_completed"] == 2:
+                if rejected == "contract":
+                    raise ValueError("synthetic detached checkpoint")
+                value = validate(raw, **kwargs)
+                value["receipts"][0]["synthetic_index"] = 99
+                return value
+            return validate(raw, **kwargs)
+
+        monkeypatch.setattr(
+            contract, "validate_frame3d_job_checkpoint", reject_synthetic
+        )
+        code = "frame3d_checkpoint_contract_invalid"
+    before_state = _prewrite_frame_state(service, job.job_id)
+    before_blobs = _prewrite_frame_inventory(service)
+    with pytest.raises(JobServiceError, match=code):
+        service.save_checkpoint(job.job_id, **arguments)
+    assert _prewrite_frame_state(service, job.job_id) == before_state
+    assert before_state[0].checkpoint == prefix.checkpoint
+    assert _budget(service, claim) == {
+        "maximum_attempts": 4,
+        "reserved_attempts": 2,
+        "remaining_attempts": 2,
+    }
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_TOKEN
+        )
+        == b"synthetic-orchestration-checkpoint-1"
+    )
+    assert _prewrite_frame_inventory(service) == before_blobs
+
+
+def _prewrite_frame_completion(service, job, prefix, monkeypatch):
+    from structural_analysis.execution import frame3d_job_contract as contract
+    from structural_analysis.execution.job_service import build_job_completion_evidence
+
+    raw = json.dumps(
+        {
+            "schema_version": "bounded-frame3d-job-result.v1",
+            "synthetic_orchestration_only": True,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    report = {"contract_pass": True, "synthetic_orchestration_only": True}
+    monkeypatch.setattr(
+        contract,
+        "validate_frame3d_job_result",
+        lambda *args, **kwargs: deepcopy(report),
+    )
+    proof = build_job_completion_evidence(
+        job_id=job.job_id,
+        request_hash=job.request.content_hash,
+        checkpoint_hash=prefix.checkpoint.content_hash,
+        result_bytes=raw,
+        validation_report=report,
+        validator_id="structural_analysis.execution.frame3d_job_contract.validate_frame3d_job_result",
+    )
+    return raw, proof
+
+
+@pytest.mark.parametrize("rejected", ["family", "contract", "report", "validator"])
+def test_prewrite_frame3d_completion_rejection_keeps_blobs_prefix_and_budget(
+    prewrite_frame_prefix, monkeypatch, rejected
+):
+    from structural_analysis.execution import frame3d_job_contract as contract
+    from structural_analysis.execution.job_service import build_job_completion_evidence
+
+    service, job, claim, prefix, _clock, _validate = prewrite_frame_prefix
+    raw, proof = _prewrite_frame_completion(service, job, prefix, monkeypatch)
+    if rejected == "family":
+        payload = json.loads(raw)
+        payload["schema_version"] = "synthetic-invalid-result.v1"
+        raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+        proof = build_job_completion_evidence(
+            job_id=job.job_id,
+            request_hash=job.request.content_hash,
+            checkpoint_hash=prefix.checkpoint.content_hash,
+            result_bytes=raw,
+            validation_report=proof["validation_report"],
+            validator_id=proof["validator_id"],
+        )
+        code = "result_contract_mismatch"
+    elif rejected == "contract":
+
+        def detached(*args, **kwargs):
+            raise ValueError("synthetic detached Frame3D result")
+
+        monkeypatch.setattr(contract, "validate_frame3d_job_result", detached)
+        code = "frame3d_result_contract_invalid"
+    else:
+        if rejected == "report":
+            proof["validation_report"]["unbound"] = True
+        else:
+            proof["validator_id"] = "test.synthetic.wrong.validator"
+        code = "frame3d_completion_report_mismatch"
+    before_state = _prewrite_frame_state(service, job.job_id)
+    before_blobs = _prewrite_frame_inventory(service)
+    with pytest.raises(JobServiceError, match=code):
+        service.complete_job(
+            job.job_id,
+            **_lease(claim),
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert _prewrite_frame_state(service, job.job_id) == before_state
+    assert _budget(service, claim)["reserved_attempts"] == 2
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_TOKEN
+        )
+        == b"synthetic-orchestration-checkpoint-1"
+    )
+    assert _prewrite_frame_inventory(service) == before_blobs
+
+
+def test_prewrite_frame3d_expiry_during_validation_creates_no_checkpoint(
+    prewrite_frame_prefix, monkeypatch
+):
+    from structural_analysis.execution import frame3d_job_contract as contract
+
+    service, job, claim, _prefix, clock, validate = prewrite_frame_prefix
+    before_state = _prewrite_frame_state(service, job.job_id)
+    before_blobs = _prewrite_frame_inventory(service)
+
+    def expiry(raw, **kwargs):
+        value = validate(raw, **kwargs)
+        if kwargs["progress_completed"] == 2:
+            clock.advance(5)
+        return value
+
+    monkeypatch.setattr(contract, "validate_frame3d_job_checkpoint", expiry)
+    with pytest.raises(JobServiceError, match="lease_expired"):
+        _save(service, claim, 2, release_lease=False)
+    assert _prewrite_frame_state(service, job.job_id) == before_state
+    assert _prewrite_frame_inventory(service) == before_blobs
+
+
+def test_prewrite_frame3d_dedup_snapshot_reopen_keeps_conservative_budget(
+    prewrite_frame_prefix, monkeypatch
+):
+    service, job, claim, prefix, clock, _validate = prewrite_frame_prefix
+    initial = b"synthetic-orchestration-checkpoint-1"
+    buffer = bytearray(initial)
+    before_blobs = _prewrite_frame_inventory(service)
+    put = service._put_blob
+
+    def mutate_after_store(payload, **kwargs):
+        reference = put(payload, **kwargs)
+        buffer[:] = b"caller changed after snapshot"
+        return reference
+
+    monkeypatch.setattr(service, "_put_blob", mutate_after_store)
+    saved = service.save_checkpoint(
+        job.job_id,
+        **_lease(claim),
+        checkpoint_bytes=buffer,
+        checkpoint_media_type="application/octet-stream",
+        progress_completed=2,
+        progress_total=4,
+        resume_contract_hash=RESUME_HASH,
+        release_lease=False,
+    )
+    assert bytes(buffer) != initial
+    assert saved.checkpoint == prefix.checkpoint
+    assert _prewrite_frame_inventory(service) == before_blobs
+    assert _budget(service, claim)["reserved_attempts"] == 2
+    failed = service.fail_job(
+        job.job_id, **_lease(claim), error_code="synthetic_reopen_boundary"
+    )
+    assert failed.checkpoint == saved.checkpoint and failed.progress_completed == 2
+    reopened = _service(service.root, clock)
+    resumed = reopened.resume_failed_job(
+        job.job_id,
+        tenant_id="tenant-a",
+        authorization_token=TENANT_TOKEN,
+        expected_request_hash=job.request.content_hash,
+        expected_checkpoint_hash=saved.checkpoint.content_hash,
+    )
+    assert resumed.status == "checkpointed"
+    successor = _claim(reopened)
+    assert (
+        successor.checkpoint_bytes == initial and successor.job.progress_completed == 2
+    )
+    # Reservations are retained; this synthetic seam confirms no solver work.
+    assert _budget(reopened, successor) == {
+        "maximum_attempts": 4,
+        "reserved_attempts": 2,
+        "remaining_attempts": 2,
+    }
+    assert _integrity(reopened, job.job_id)["contract_pass"]
+
+
+def test_prewrite_frame3d_evidence_write_failure_keeps_prefix_and_budget(
+    prewrite_frame_prefix, monkeypatch
+):
+    service, job, claim, prefix, _clock, _validate = prewrite_frame_prefix
+    raw, proof = _prewrite_frame_completion(service, job, prefix, monkeypatch)
+    before_state = _prewrite_frame_state(service, job.job_id)
+    before_blobs = _prewrite_frame_inventory(service)
+    put = service._put_blob
+
+    def fail_evidence(payload, **kwargs):
+        if kwargs["role"] == "evidence":
+            raise JobServiceError(
+                "artifact_write_failed", "/evidence", "synthetic write failure"
+            )
+        return put(payload, **kwargs)
+
+    monkeypatch.setattr(service, "_put_blob", fail_evidence)
+    with pytest.raises(JobServiceError, match="artifact_write_failed"):
+        service.complete_job(
+            job.job_id,
+            **_lease(claim),
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert _prewrite_frame_state(service, job.job_id) == before_state
+    assert _budget(service, claim)["reserved_attempts"] == 2
+    remaining = _prewrite_frame_inventory(service)
+    assert len(set(remaining) - set(before_blobs)) == 1 and raw in remaining.values()
+    assert (
+        json.dumps(proof, sort_keys=True, separators=(",", ":")).encode()
+        not in remaining.values()
+    )
+    assert _integrity(service, job.job_id)["contract_pass"]

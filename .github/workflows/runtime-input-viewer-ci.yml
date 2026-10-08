@@ -195,7 +195,10 @@ jobs:
         id: workbench_e2e
         run: |
           set +e
-          npm run verify:workbench-v2-e2e -- --trace retain-on-failure > workbench-v2-e2e.log 2>&1
+          TMPDIR="$RUNNER_TEMP" npm run verify:workbench-v2-e2e -- --trace=retain-on-failure \
+            "--diagnostics-dir=$RUNNER_TEMP/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}" \
+            "--diagnostics-sha=${{ github.sha }}" "--diagnostics-run-id=${{ github.run_id }}" "--diagnostics-run-attempt=${{ github.run_attempt }}" \
+            > workbench-v2-e2e.log 2>&1
           code=$?
           tail -n 200 workbench-v2-e2e.log
           exit "$code"
@@ -209,6 +212,18 @@ jobs:
             test-results/**/trace.zip
             test-results/**/error-context.md
           if-no-files-found: warn
+          retention-days: 7
+
+      - name: Preserve native Workbench diagnostic retention
+        if: always() && (steps.workbench_e2e.outcome == 'success' || steps.workbench_e2e.outcome == 'failure')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: workbench-browser-native-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}/run-linkage.json
+            ${{ runner.temp }}/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}/retention.json
+            ${{ runner.temp }}/workbench-browser-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}/native-playwright.json
+          if-no-files-found: error
           retention-days: 7
 
       - name: Workbench actual HTTP integration

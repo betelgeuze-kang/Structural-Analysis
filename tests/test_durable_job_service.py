@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 import hashlib
 from io import BytesIO
 import json
 from pathlib import Path
+import sqlite3
+from threading import Barrier, Event
 
 import pytest
 
@@ -21,6 +24,7 @@ from structural_analysis.execution.job_http_api import (
     DurableJobHttpApi,
     DurableJobWSGIApplication,
 )
+from structural_analysis.execution import job_service as job_service_module
 from structural_analysis.execution.job_service import (
     DurableJobService,
     JobServiceError,
@@ -900,3 +904,605 @@ def test_original_artifact_checkpoint_race_requires_refresh(
     )
     assert response.status == 409
     assert json.loads(response.body)["error"]["code"] == "artifact_reference_changed"
+
+
+class _ConnectionClock:
+    def __init__(self):
+        self.value = 0.0
+        self.sleeps = []
+
+    def monotonic(self):
+        return self.value
+
+    def sleep(self, seconds):
+        assert seconds > 0
+        self.sleeps.append(seconds)
+        self.value += seconds
+
+
+class _ConnectionProbe:
+    def __init__(self, failure=None, *, stage="PRAGMA journal_mode = WAL", mode="wal"):
+        self.failure = failure
+        self.stage = stage
+        self.mode = mode
+        self.statements = []
+        self.closed = False
+
+    def execute(self, statement):
+        self.statements.append(statement)
+        if statement == self.stage and self.failure is not None:
+            raise self.failure
+        return self
+
+    def fetchone(self):
+        return (self.mode,)
+
+    def close(self):
+        assert not self.closed
+        self.closed = True
+
+
+def _bare_connection_service(tmp_path):
+    service = object.__new__(DurableJobService)
+    service._db_path = tmp_path / "jobs.sqlite3"
+    return service
+
+
+def _sqlite_failure(message, code=None):
+    failure = sqlite3.OperationalError(message)
+    if code is not None:
+        failure.sqlite_errorcode = code
+    return failure
+
+
+@pytest.mark.parametrize("code", [None, 5, 5 | (2 << 8)])
+def test_connection_retries_only_busy_and_closes_each_failed_connection(
+    tmp_path,
+    monkeypatch,
+    code,
+):
+    service = _bare_connection_service(tmp_path)
+    clock = _ConnectionClock()
+    probes = [
+        _ConnectionProbe(_sqlite_failure("database is locked", code)),
+        _ConnectionProbe(_sqlite_failure("database is locked", code)),
+        _ConnectionProbe(),
+    ]
+    calls = []
+
+    def connect(path, **kwargs):
+        if calls:
+            assert probes[len(calls) - 1].closed
+        calls.append(kwargs)
+        return probes[len(calls) - 1]
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic, raising=False)
+    monkeypatch.setattr(job_service_module, "sleep", clock.sleep, raising=False)
+    connection = service._connect()
+    assert connection is probes[-1]
+    assert [probe.closed for probe in probes] == [True, True, False]
+    assert len(clock.sleeps) == 2
+    assert all(call == {"timeout": 0.0, "isolation_level": None} for call in calls)
+    assert connection.row_factory is sqlite3.Row
+    assert connection.statements == [
+        "PRAGMA foreign_keys = ON",
+        "PRAGMA journal_mode = WAL",
+        "PRAGMA synchronous = FULL",
+        "PRAGMA busy_timeout = 30000",
+    ]
+    connection.close()
+
+
+def test_connection_busy_retries_share_one_monotonic_thirty_second_deadline(
+    tmp_path,
+    monkeypatch,
+):
+    clock = _ConnectionClock()
+    probes = []
+
+    def connect(path, **kwargs):
+        assert clock.value < 30.0
+        assert kwargs["timeout"] == 0.0
+        if probes:
+            assert probes[-1].closed
+        probe = _ConnectionProbe(_sqlite_failure("database is locked"))
+        probes.append(probe)
+        return probe
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic, raising=False)
+    monkeypatch.setattr(job_service_module, "sleep", clock.sleep, raising=False)
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert clock.value == pytest.approx(30.0)
+    assert 2 < len(probes) < 1000
+    assert all(probe.closed for probe in probes)
+    assert max(clock.sleeps) <= 0.05
+
+
+@pytest.mark.parametrize(
+    "stage", ["connect", "PRAGMA journal_mode = WAL", "PRAGMA synchronous = FULL"]
+)
+@pytest.mark.parametrize(
+    "message,code",
+    [
+        ("database table is locked", None),
+        ("database is locked", 6),
+        ("disk I/O error", 10),
+        ("attempt to write a readonly database", 8),
+    ],
+)
+def test_connection_non_busy_errors_fail_once_and_close(
+    tmp_path, monkeypatch, stage, message, code
+):
+    failure = _sqlite_failure(message, code)
+    probe = _ConnectionProbe(failure, stage=stage)
+    calls = []
+
+    def connect(path, **kwargs):
+        calls.append(kwargs)
+        if stage == "connect":
+            raise failure
+        return probe
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(
+        job_service_module,
+        "sleep",
+        lambda _: pytest.fail("non-BUSY retried"),
+        raising=False,
+    )
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert len(calls) == 1
+    assert probe.closed is (stage != "connect")
+
+
+def test_connection_rejects_an_unavailable_wal_mode_without_fallback(
+    tmp_path, monkeypatch
+):
+    probe = _ConnectionProbe(mode="delete")
+    monkeypatch.setattr(
+        job_service_module.sqlite3, "connect", lambda *args, **kwargs: probe
+    )
+    monkeypatch.setattr(
+        job_service_module,
+        "sleep",
+        lambda _: pytest.fail("WAL fallback retried"),
+        raising=False,
+    )
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert probe.closed
+    assert "PRAGMA synchronous = FULL" not in probe.statements
+
+
+def test_constructor_retries_real_wal_conversion_after_reader_releases_lock(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "jobs"
+    root.mkdir()
+    reader = sqlite3.connect(root / "jobs.sqlite3", isolation_level=None)
+    reader.execute("CREATE TABLE retained (value INTEGER)")
+    reader.execute("INSERT INTO retained VALUES (7)")
+    reader.execute("BEGIN")
+    assert reader.execute("SELECT value FROM retained").fetchone() == (7,)
+    retried = Event()
+    real_sleep = job_service_module.sleep
+
+    def observed_retry(seconds):
+        retried.set()
+        real_sleep(seconds)
+
+    monkeypatch.setattr(job_service_module, "sleep", observed_retry)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(_service, root)
+        try:
+            assert retried.wait(5), "WAL conversion did not retry the held reader lock"
+        finally:
+            reader.rollback()
+            reader.close()
+        service = future.result(timeout=5)
+    connection = service._connect()
+    try:
+        assert connection.execute("SELECT value FROM retained").fetchone()[0] == 7
+        assert connection.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
+        assert connection.execute("PRAGMA synchronous").fetchone()[0] == 2
+        assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        assert connection.execute("PRAGMA busy_timeout").fetchone()[0] == 30000
+        assert connection.isolation_level is None
+    finally:
+        connection.close()
+
+
+def test_simultaneous_constructors_submit_once_and_claim_once(tmp_path):
+    count = 4
+    barrier = Barrier(count, timeout=10)
+    root = tmp_path / "jobs"
+
+    def submit_and_claim(_):
+        barrier.wait()
+        service = _service(root)
+        barrier.wait()
+        submitted = _submit(service, key="simultaneous")
+        barrier.wait()
+        claim = service.claim_next(
+            worker_id="worker-a", authorization_token=WORKER_TOKEN
+        )
+        return submitted, claim
+
+    with ThreadPoolExecutor(max_workers=count) as pool:
+        results = list(pool.map(submit_and_claim, range(count)))
+    assert len({job.job_id for job, _ in results}) == 1
+    claims = [claim for _, claim in results if claim is not None]
+    assert len(claims) == 1
+    assert claims[0].job.attempt == 1
+    service = _service(root)
+    integrity = service.validate_integrity(
+        claims[0].job.job_id,
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+    )
+    assert integrity["contract_pass"] is True
+    assert integrity["event_count"] == 2
+    assert integrity["job_status"] == "running"
+
+
+def test_connection_busy_during_open_retries_without_a_connection_to_close(
+    tmp_path, monkeypatch
+):
+    clock = _ConnectionClock()
+    probe = _ConnectionProbe()
+    calls = []
+
+    def connect(path, **kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise _sqlite_failure("database is locked", 5)
+        return probe
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic)
+    monkeypatch.setattr(job_service_module, "sleep", clock.sleep)
+    connection = _bare_connection_service(tmp_path)._connect()
+    assert connection is probe
+    assert len(calls) == 2
+    assert len(clock.sleeps) == 1
+    assert not probe.closed
+    connection.close()
+
+
+def test_connection_setup_cannot_extend_deadline_and_closes_before_failure(
+    tmp_path, monkeypatch
+):
+    clock = _ConnectionClock()
+    probe = _ConnectionProbe()
+    execute = probe.execute
+
+    def slow_setup(statement):
+        if statement == "PRAGMA synchronous = FULL":
+            clock.value = 30.0
+        return execute(statement)
+
+    probe.execute = slow_setup
+    monkeypatch.setattr(
+        job_service_module.sqlite3, "connect", lambda *args, **kwargs: probe
+    )
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic)
+    monkeypatch.setattr(
+        job_service_module, "sleep", lambda _: pytest.fail("expired deadline waited")
+    )
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert probe.closed
+    assert "PRAGMA busy_timeout = 30000" not in probe.statements
+
+
+def test_connection_unexpected_setup_exception_closes_without_retry(
+    tmp_path, monkeypatch
+):
+    probe = _ConnectionProbe(RuntimeError("setup interrupted"))
+    monkeypatch.setattr(
+        job_service_module.sqlite3, "connect", lambda *args, **kwargs: probe
+    )
+    monkeypatch.setattr(
+        job_service_module, "sleep", lambda _: pytest.fail("unexpected error retried")
+    )
+    with pytest.raises(RuntimeError, match="setup interrupted"):
+        _bare_connection_service(tmp_path)._connect()
+    assert probe.closed
+
+
+def _prewrite_legacy_inventory(service):
+    return {
+        str(path.relative_to(service.root)): path.read_bytes()
+        for path in sorted((service.root / "blobs" / "sha256").rglob("*"))
+        if path.is_file()
+    }
+
+
+def _prewrite_legacy_state(service, job_id):
+    view = service.get_job(
+        job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+    )
+    with sqlite3.connect(service.root / "jobs.sqlite3") as connection:
+        events = connection.execute(
+            "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision", (job_id,)
+        ).fetchall()
+    return view, events
+
+
+@pytest.mark.parametrize("rejected", ["stale", "expired", "progress", "resume"])
+def test_prewrite_legacy_checkpoint_rejection_preserves_blob_inventory(
+    original_artifact_job, monkeypatch, rejected
+):
+    # The existing fixture forbids solvers; these are opaque service bytes.
+    service, job = original_artifact_job
+    clock = MutableClock()
+    clock.value = datetime.fromisoformat(job.created_at.replace("Z", "+00:00"))
+    monkeypatch.setattr(service, "_clock", clock)
+    claim = _claim(service)
+    raw, prefix = _original_checkpoint(service, claim, release=False)
+    arguments = {
+        "worker_id": "worker-a",
+        "authorization_token": WORKER_TOKEN,
+        "lease_token": claim.lease_token,
+        "checkpoint_bytes": b"rejected opaque checkpoint " + rejected.encode(),
+        "checkpoint_media_type": "application/octet-stream",
+        "progress_completed": 2,
+        "progress_total": 4,
+        "resume_contract_hash": "sha256:" + "c" * 64,
+        "release_lease": False,
+    }
+    if rejected == "stale":
+        arguments["lease_token"] = "stale-lease-token-0123456789"
+        code = "lease_unauthorized"
+    elif rejected == "expired":
+        clock.advance(61)
+        code = "lease_expired"
+    elif rejected == "progress":
+        arguments["progress_completed"] = 1
+        code = "checkpoint_progress_invalid"
+    else:
+        arguments["resume_contract_hash"] = "sha256:" + "d" * 64
+        code = "resume_contract_mismatch"
+    before_state = _prewrite_legacy_state(service, job.job_id)
+    before_blobs = _prewrite_legacy_inventory(service)
+    with pytest.raises(JobServiceError, match=code):
+        service.save_checkpoint(job.job_id, **arguments)
+    assert _prewrite_legacy_state(service, job.job_id) == before_state
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == raw
+    )
+    assert before_state[0].checkpoint == prefix.checkpoint
+    assert _prewrite_legacy_inventory(service) == before_blobs
+
+
+def _prewrite_legacy_timed(original_artifact_job, monkeypatch):
+    service, job = original_artifact_job
+    clock = MutableClock()
+    clock.value = datetime.fromisoformat(job.created_at.replace("Z", "+00:00"))
+    monkeypatch.setattr(service, "_clock", clock)
+    claim = _claim(service)
+    raw, prefix = _original_checkpoint(service, claim, release=False)
+    return service, job, claim, raw, prefix, clock
+
+
+def _prewrite_legacy_completion(
+    job, prefix, *, family="unified-nonlinear-frame-result.v1"
+):
+    raw = _canonical_bytes(
+        {
+            "schema_version": family,
+            "synthetic_orchestration_only": True,
+            "result_hash": "sha256:" + "1" * 64,
+        }
+    )
+    proof = build_job_completion_evidence(
+        job_id=job.job_id,
+        request_hash=job.request.content_hash,
+        checkpoint_hash=prefix.checkpoint.content_hash,
+        result_bytes=raw,
+        validation_report={"contract_pass": True, "synthetic_orchestration_only": True},
+        validator_id="test.synthetic.service.boundary",
+    )
+    return raw, proof
+
+
+@pytest.mark.parametrize("rejected", ["family", "request", "checkpoint", "result"])
+def test_prewrite_legacy_completion_rejection_preserves_blob_inventory(
+    original_artifact_job, monkeypatch, rejected
+):
+    service, job, claim, checkpoint, prefix, _clock = _prewrite_legacy_timed(
+        original_artifact_job, monkeypatch
+    )
+    family = (
+        "synthetic-invalid-result.v1"
+        if rejected == "family"
+        else "unified-nonlinear-frame-result.v1"
+    )
+    raw, proof = _prewrite_legacy_completion(job, prefix, family=family)
+    if rejected != "family":
+        key = {
+            "request": "request_hash",
+            "checkpoint": "checkpoint_hash",
+            "result": "result_artifact_hash",
+        }[rejected]
+        proof[key] = "sha256:" + "e" * 64
+    before_state = _prewrite_legacy_state(service, job.job_id)
+    before_blobs = _prewrite_legacy_inventory(service)
+    code = (
+        "result_contract_mismatch"
+        if rejected == "family"
+        else "completion_evidence_binding_mismatch"
+    )
+    with pytest.raises(JobServiceError, match=code):
+        service.complete_job(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert _prewrite_legacy_state(service, job.job_id) == before_state
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == checkpoint
+    )
+    assert _prewrite_legacy_inventory(service) == before_blobs
+
+
+def test_prewrite_legacy_completion_takeover_after_early_gate_stores_nothing(
+    original_artifact_job, monkeypatch
+):
+    service, job, claim, checkpoint, prefix, clock = _prewrite_legacy_timed(
+        original_artifact_job, monkeypatch
+    )
+    raw, proof = _prewrite_legacy_completion(job, prefix)
+    passed, resume = Event(), Event()
+    limit = service.worker_result_byte_limit
+
+    def pause_after_gate(*args, **kwargs):
+        value = limit(*args, **kwargs)
+        passed.set()
+        assert resume.wait(5), "test completion gate did not resume"
+        return value
+
+    monkeypatch.setattr(service, "worker_result_byte_limit", pause_after_gate)
+    before_blobs = _prewrite_legacy_inventory(service)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(
+            service.complete_job,
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+        try:
+            assert passed.wait(5), "test never passed the authenticated early gate"
+            clock.advance(61)
+            successor_service = _service(service.root, clock=clock)
+            successor = _claim(successor_service)
+            assert successor.checkpoint_bytes == checkpoint
+            before_state = _prewrite_legacy_state(successor_service, job.job_id)
+        finally:
+            resume.set()
+        with pytest.raises(JobServiceError, match="lease_unauthorized"):
+            future.result(timeout=5)
+    assert _prewrite_legacy_state(successor_service, job.job_id) == before_state
+    assert _prewrite_legacy_inventory(service) == before_blobs
+
+
+def test_prewrite_legacy_result_fsync_expiry_skips_evidence_and_keeps_prefix(
+    original_artifact_job, monkeypatch
+):
+    service, job, claim, checkpoint, prefix, clock = _prewrite_legacy_timed(
+        original_artifact_job, monkeypatch
+    )
+    raw, proof = _prewrite_legacy_completion(job, prefix)
+    before_state = _prewrite_legacy_state(service, job.job_id)
+    before_blobs = _prewrite_legacy_inventory(service)
+    put = service._put_blob
+    writes = []
+
+    def expires_after_result(payload, **kwargs):
+        reference = put(payload, **kwargs)
+        writes.append(kwargs["role"])
+        if kwargs["role"] == "result":
+            clock.advance(61)
+        return reference
+
+    monkeypatch.setattr(service, "_put_blob", expires_after_result)
+    with pytest.raises(JobServiceError, match="lease_expired"):
+        service.complete_job(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert writes == ["result"]
+    assert _prewrite_legacy_state(service, job.job_id) == before_state
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == checkpoint
+    )
+    remaining = _prewrite_legacy_inventory(service)
+    # A late-I/O result orphan is retained; no evidence or metadata is published.
+    assert set(remaining) - set(before_blobs) == {
+        str(
+            service._blob_path("sha256:" + hashlib.sha256(raw).hexdigest()).relative_to(
+                service.root
+            )
+        )
+    }
+    assert raw in remaining.values()
+    assert _canonical_bytes(proof) not in remaining.values()
+
+
+def test_prewrite_legacy_accepted_snapshots_dedup_and_completion_reopen(
+    original_artifact_job, monkeypatch
+):
+    service, job = original_artifact_job
+    assert _submit(service) == job
+    claim = _claim(service)
+    checkpoint, _first = _original_checkpoint(service, claim, release=False)
+    before_blobs = _prewrite_legacy_inventory(service)
+    prefix = service.save_checkpoint(
+        job.job_id,
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+        lease_token=claim.lease_token,
+        checkpoint_bytes=checkpoint,
+        checkpoint_media_type="application/octet-stream",
+        progress_completed=2,
+        progress_total=4,
+        resume_contract_hash="sha256:" + "c" * 64,
+        release_lease=False,
+    )
+    assert _prewrite_legacy_inventory(service) == before_blobs
+    assert _submit(service) == prefix
+    raw, proof = _prewrite_legacy_completion(job, prefix)
+    frozen_evidence = _canonical_bytes(proof)
+    buffer = bytearray(raw)
+    put = service._put_blob
+
+    def mutate_caller_after_result(payload, **kwargs):
+        reference = put(payload, **kwargs)
+        if kwargs["role"] == "result":
+            buffer[:] = b"caller changed after snapshot"
+            proof["validation_report"]["contract_pass"] = False
+        return reference
+
+    monkeypatch.setattr(service, "_put_blob", mutate_caller_after_result)
+    final = service.complete_job(
+        job.job_id,
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+        lease_token=claim.lease_token,
+        result_bytes=buffer,
+        result_media_type="application/json",
+        evidence=proof,
+    )
+    assert final.status == "succeeded" and bytes(buffer) != raw
+    reopened = _service(service.root)
+    auth = {"tenant_id": "tenant-a", "authorization_token": TENANT_A_TOKEN}
+    assert reopened.read_result(job.job_id, **auth) == raw
+    assert reopened.read_evidence(job.job_id, **auth) == frozen_evidence
+    assert reopened.read_checkpoint(job.job_id, **auth) == checkpoint
+    assert reopened.validate_integrity(job.job_id, **auth)["contract_pass"]

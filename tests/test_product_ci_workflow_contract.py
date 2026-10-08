@@ -492,8 +492,14 @@ def test_workbench_http_ci_installs_python_and_runs_real_transport_specs() -> No
     assert job.index("actions/setup-python@") < install < execute
     step = job[execute:].split("- name:", 2)[1]
     for name in (
-        "job-api", "failure-diagnostic", "failure-history", "successful-retry-history", "checkpoint-retry-history", "existing-checkpoint-history",
-        "rc-search-http", "rc-cohort-http",
+        "job-api",
+        "failure-diagnostic",
+        "failure-history",
+        "successful-retry-history",
+        "checkpoint-retry-history",
+        "existing-checkpoint-history",
+        "rc-search-http",
+        "rc-cohort-http",
     ):
         assert f"tests/frontend/workbench-v2-{name}-browser.spec.ts" in step
     assert "node_modules/@playwright/test/cli.js test" in step
@@ -518,10 +524,76 @@ def test_runtime_browser_failure_diagnostics_precede_http_output_replacement() -
     assert browser < preserve < http
     execution = job[browser:preserve]
     assert "id: workbench_e2e" in execution
-    assert "-- --trace retain-on-failure" in execution
+    assert "-- --trace=retain-on-failure" in execution
     assert 'exit "$code"' in execution
     upload = job[preserve:http]
     assert "if: failure() && steps.workbench_e2e.outcome == 'failure'" in upload
     assert "test-results/**/trace.zip" in upload
     assert "test-results/**/error-context.md" in upload
     assert "retention-days: 7" in upload
+
+
+def test_frontend_native_diagnostic_retention_is_same_run_and_fail_closed() -> None:
+    workflow = _read("frontend-web-ci.yml")
+    e2e = workflow.split("- name: Workbench v2 E2E", 1)[1].split(
+        "- name: Preserve failed Workbench browser diagnostics", 1
+    )[0]
+    assert "--trace=retain-on-failure" in e2e
+    assert "--diagnostics-sha=${{ github.sha }}" in e2e
+    assert "--diagnostics-run-id=${{ github.run_id }}" in e2e
+    assert "--diagnostics-run-attempt=${{ github.run_attempt }}" in e2e
+    assert "frontend-web-repository-tmp/workbench-browser-diagnostics-" in e2e
+    assert "continue-on-error" not in e2e
+    upload = workflow.split(
+        "- name: Preserve native Workbench diagnostic retention", 1
+    )[1].split("  frontend-required:", 1)[0]
+    assert (
+        "if: always() && (steps.workbench_e2e.outcome == 'success' || steps.workbench_e2e.outcome == 'failure')"
+        in upload
+    )
+    assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in upload
+    assert (
+        "workbench-browser-native-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}"
+        in upload
+    )
+    for name in ("run-linkage.json", "retention.json", "native-playwright.json"):
+        assert name in upload
+    assert "raw-native-playwright.json" not in upload
+    assert "if-no-files-found: error" in upload
+    assert "retention-days: 7" in upload
+    assert (
+        'test "$FRONTEND_RESULT" = success'
+        in workflow.split("  frontend-required:", 1)[1]
+    )
+
+
+def test_frontend_dedicated_rc_controls_keep_intentional_failures_separate() -> None:
+    workflow = _read("frontend-web-ci.yml")
+    control = workflow.split("- name: Dedicated real React observer controls", 1)[1]
+    execution, upload = control.split(
+        "- name: Preserve dedicated RC controls native outcomes", 1
+    )
+    assert "id: rc_observer_controls" in execution
+    assert "scripts/verify-rc-observer-controls.mjs" in execution
+    assert "--controls-sha=${{ github.sha }}" in execution
+    assert "--controls-run-id=${{ github.run_id }}" in execution
+    assert "--controls-run-attempt=${{ github.run_attempt }}" in execution
+    assert "frontend-web-repository-tmp/rc-observer-controls-" in execution
+    assert "timeout-minutes: 12" in execution
+    assert "continue-on-error" not in execution
+    assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in upload
+    assert "workbench-rc-observer-controls-" in upload
+    for name in (
+        "run-linkage.json",
+        "control-retention.json",
+        "positive-native-playwright.json",
+        "negative-native-playwright.json",
+        "compiled-manifest.json",
+        "listener-start.json",
+        "listener-cleanup.json",
+    ):
+        assert name in upload
+    assert "raw-native" not in upload
+    assert "if-no-files-found: error" in upload
+    assert "retention-days: 7" in upload
+    assert 'test "$FRONTEND_RESULT" = success' in workflow

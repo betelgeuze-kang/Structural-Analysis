@@ -29,6 +29,8 @@ SUPPORTED_MODAL_ELEMENT_TYPES = {"truss", "axial", "frame", "beam", "column"}
 MASS_MATRIX_UNIT = "kN_s2_per_m"
 DENSITY_UNIT = "kg_per_m3"
 MASS_FORMULATION = "consistent_euler_bernoulli_with_torsional_rotary_inertia_v1"
+# Payload of the two full binary64 arrays only, not peak RSS or a job budget.
+MAX_DENSE_MODAL_MATRIX_BYTES = 64 * 1024 * 1024
 NODAL_MASS_FIELDS = {
     "mass",
     "mass_kg",
@@ -75,11 +77,97 @@ class ModalAssembly:
     mass_formulation: str = MASS_FORMULATION
 
 
-def assemble_modal_matrices(
-    model: CanonicalModel,
-) -> tuple[ModalAssembly | None, list[dict[str, Any]]]:
-    """Assemble full and reduced-ready matrices without inventing mass inputs."""
+@dataclass(frozen=True)
+class _ModalAssemblyInputs:
+    node_ids: tuple[str, ...]
+    coordinates: dict[str, tuple[float, float, float]]
+    node_index: dict[str, int]
+    materials: dict[str, dict[str, Any]]
+    sections: dict[str, dict[str, Any]]
+    constrained_dofs: tuple[int, ...]
 
+
+def preflight_modal_resources(
+    model: CanonicalModel,
+    *,
+    maximum_free_dof_count: int,
+) -> list[dict[str, Any]]:
+    """Check the public dense limits without allocating full K/M or solving.
+
+    Active rows use the assembly's exact local matrix predicate. This local
+    element pass is repeated by assembly after admission; it is not an estimate
+    of whole-job memory, time, or element inventory cost.
+    """
+
+    inputs, unsupported = _modal_assembly_inputs(model)
+    if inputs is None:
+        return unsupported
+    active_dofs: set[int] = set()
+    element_ids: set[str] = set()
+    record_count = 0
+    for element in model.elements:
+        assembled = _modal_element_matrices(
+            element=element,
+            element_ids=element_ids,
+            node_index=inputs.node_index,
+            coordinates=inputs.coordinates,
+            materials=inputs.materials,
+            sections=inputs.sections,
+            unsupported=unsupported,
+        )
+        if assembled is not None:
+            element_stiffness, element_mass, record = assembled
+            record_count += 1
+            active_dofs.update(
+                _element_active_dofs(element_stiffness, element_mass, record)
+            )
+    if not model.elements:
+        unsupported.append({"kind": "modal_elements_missing"})
+    elif not record_count and not unsupported:
+        unsupported.append({"kind": "modal_no_supported_elements"})
+    free_dof_count = len(active_dofs - set(inputs.constrained_dofs))
+    if record_count and not free_dof_count:
+        unsupported.append(
+            {
+                "kind": "modal_free_active_dofs_missing",
+                "active_dof_count": len(active_dofs),
+                "constrained_dof_count": len(inputs.constrained_dofs),
+            }
+        )
+    if not unsupported and free_dof_count > maximum_free_dof_count:
+        unsupported.append(
+            {
+                "kind": "modal_dense_free_dof_limit_exceeded",
+                "free_dof_count": free_dof_count,
+                "active_dof_count": len(active_dofs),
+                "constrained_dof_count": len(inputs.constrained_dofs),
+                "maximum_free_dof_count": maximum_free_dof_count,
+                "detail": (
+                    "Sparse modal extraction and binary mode-vector artifacts "
+                    "are not connected to the public whole-model path."
+                ),
+            }
+        )
+    return unsupported
+
+
+def _modal_assembly_inputs(
+    model: CanonicalModel,
+) -> tuple[_ModalAssemblyInputs | None, list[dict[str, Any]]]:
+    # Include constrained and disconnected canonical nodes: full matrices use
+    # six coordinates per node before reduction to active/free equations.
+    total_dof_count = len(model.nodes) * DOF_PER_NODE
+    matrix_pair_bytes = 2 * total_dof_count**2 * np.dtype(np.float64).itemsize
+    if matrix_pair_bytes > MAX_DENSE_MODAL_MATRIX_BYTES:
+        return None, [
+            {
+                "kind": "modal_dense_matrix_payload_limit_exceeded",
+                "total_dof_count": total_dof_count,
+                "matrix_pair_bytes": matrix_pair_bytes,
+                "maximum_matrix_pair_bytes": MAX_DENSE_MODAL_MATRIX_BYTES,
+                "detail": "Limit covers full binary64 K/M payload only, not peak RSS.",
+            }
+        ]
     unsupported: list[dict[str, Any]] = []
     if model.units.length != "m" or model.units.force != "kN":
         unsupported.append(
@@ -89,7 +177,6 @@ def assemble_modal_matrices(
             }
         )
     unsupported.extend(_unsupported_mass_inputs(model))
-
     node_ids = tuple(str(node.get("id", "")).strip() for node in model.nodes)
     if not node_ids:
         unsupported.append({"kind": "modal_nodes_missing"})
@@ -101,6 +188,37 @@ def assemble_modal_matrices(
     node_index = {node_id: index for index, node_id in enumerate(node_ids)}
     materials = _unique_rows(model.materials, owner="material", unsupported=unsupported)
     sections = _unique_rows(model.sections, owner="section", unsupported=unsupported)
+    constrained = tuple(
+        sorted(set(_constrained_dofs(model.supports, node_index, unsupported)))
+    )
+    if unsupported:
+        return None, unsupported
+    return (
+        _ModalAssemblyInputs(
+            node_ids=node_ids,
+            coordinates=coordinates,
+            node_index=node_index,
+            materials=materials,
+            sections=sections,
+            constrained_dofs=constrained,
+        ),
+        [],
+    )
+
+
+def assemble_modal_matrices(
+    model: CanonicalModel,
+) -> tuple[ModalAssembly | None, list[dict[str, Any]]]:
+    """Assemble full and reduced-ready matrices without inventing mass inputs."""
+
+    inputs, unsupported = _modal_assembly_inputs(model)
+    if inputs is None:
+        return None, unsupported
+    node_ids = inputs.node_ids
+    coordinates = inputs.coordinates
+    node_index = inputs.node_index
+    materials = inputs.materials
+    sections = inputs.sections
 
     dof_count = len(node_ids) * DOF_PER_NODE
     stiffness = np.zeros((dof_count, dof_count), dtype=np.float64)
@@ -126,33 +244,16 @@ def assemble_modal_matrices(
         stiffness[np.ix_(record.dofs, record.dofs)] += element_stiffness
         mass[np.ix_(record.dofs, record.dofs)] += element_mass
 
-        stiffness_scale = max(
-            float(np.max(np.abs(element_stiffness))),
-            np.finfo(np.float64).tiny,
+        active_dofs.update(
+            _element_active_dofs(element_stiffness, element_mass, record)
         )
-        mass_scale = max(
-            float(np.max(np.abs(element_mass))),
-            np.finfo(np.float64).tiny,
-        )
-        for local_row, global_row in enumerate(record.dofs):
-            stiffness_active = (
-                float(np.max(np.abs(element_stiffness[local_row, :])))
-                > 1.0e-14 * stiffness_scale
-            )
-            mass_active = (
-                float(np.max(np.abs(element_mass[local_row, :])))
-                > 1.0e-14 * mass_scale
-            )
-            if stiffness_active or mass_active:
-                active_dofs.add(global_row)
 
     if not model.elements:
         unsupported.append({"kind": "modal_elements_missing"})
     elif not records and not unsupported:
         unsupported.append({"kind": "modal_no_supported_elements"})
 
-    constrained = _constrained_dofs(model.supports, node_index, unsupported)
-    constrained_set = set(constrained)
+    constrained_set = set(inputs.constrained_dofs)
     free_dofs = tuple(sorted(active_dofs - constrained_set))
     if records and not free_dofs:
         unsupported.append(
@@ -192,6 +293,26 @@ def assemble_modal_matrices(
     )
 
 
+def _element_active_dofs(
+    element_stiffness: np.ndarray,
+    element_mass: np.ndarray,
+    record: ModalElementAssemblyRecord,
+) -> set[int]:
+    stiffness_scale = max(
+        float(np.max(np.abs(element_stiffness))), np.finfo(np.float64).tiny
+    )
+    mass_scale = max(float(np.max(np.abs(element_mass))), np.finfo(np.float64).tiny)
+    return {
+        global_row
+        for local_row, global_row in enumerate(record.dofs)
+        if (
+            float(np.max(np.abs(element_stiffness[local_row, :])))
+            > 1.0e-14 * stiffness_scale
+            or float(np.max(np.abs(element_mass[local_row, :]))) > 1.0e-14 * mass_scale
+        )
+    }
+
+
 def _modal_element_matrices(
     *,
     element: dict[str, Any],
@@ -227,8 +348,7 @@ def _modal_element_matrices(
         return None
     node_pair = (str(raw_nodes[0]), str(raw_nodes[1]))
     if any(
-        node_id not in node_index or node_id not in coordinates
-        for node_id in node_pair
+        node_id not in node_index or node_id not in coordinates for node_id in node_pair
     ):
         unsupported.append(
             {"kind": "modal_element_node_missing", "element": element_id}
@@ -335,7 +455,9 @@ def _modal_element_matrices(
         )
         return None
 
-    if not np.all(np.isfinite(element_stiffness)) or not np.all(np.isfinite(element_mass)):
+    if not np.all(np.isfinite(element_stiffness)) or not np.all(
+        np.isfinite(element_mass)
+    ):
         unsupported.append(
             {"kind": "modal_element_matrix_nonfinite", "element": element_id}
         )
@@ -417,9 +539,7 @@ def _constrained_dofs(
         if raw_dofs == "all":
             raw_dofs = list(DOF_LABELS)
         if not isinstance(raw_dofs, (list, tuple)):
-            unsupported.append(
-                {"kind": "modal_support_dofs_invalid", "node": node_id}
-            )
+            unsupported.append({"kind": "modal_support_dofs_invalid", "node": node_id})
             continue
         for raw_dof in raw_dofs:
             label = str(raw_dof).strip().upper()

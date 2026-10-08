@@ -1,3 +1,4 @@
+import { traceRcPhase } from './rcWorkflowTrace'
 import { sha256Bytes, sha256Hex } from './checksum'
 import { document, fields, rawValues, selfHash, same } from './rcJobSchema'
 import { JobArtifactError, readBoundedJobBytes, type JobReadTransport } from './jobTransport'
@@ -147,9 +148,10 @@ export async function validateFailureDiagnostic(
 }
 
 export async function loadFailureDiagnostic(job: WorkbenchJobView, transport: JobReadTransport, attempt = job.attempt): Promise<FailureDiagnosticReview | undefined> {
+  traceRcPhase(transport, 'diagnostic.begin')
   if (!Number.isSafeInteger(attempt) || attempt < 1 || attempt > job.attempt) throw new JobArtifactError('failure_attempt_invalid')
   const response = await transport.get(`failure-diagnostics/${attempt}`)
-  if (response.status === 404) return undefined
+  if (response.status === 404) { traceRcPhase(transport, 'diagnostic.absent'); return undefined }
   if (!response.ok) throw new JobArtifactError(`failure_diagnostic_HTTP_${response.status}`)
   const diagnostic = await readBoundedJobBytes(response, 12 * 1024 * 1024, 'failure diagnostic')
   const requestResponse = await transport.get('request', job.request.media_type)

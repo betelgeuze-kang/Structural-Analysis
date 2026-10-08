@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
-import { createJobReadTransport, readBoundedJobBytes } from '../../src/workbench-v2/model/jobTransport'
+import { createHash } from 'node:crypto'
+import { createJobReadTransport, createJobWorkflowTransport, readBoundedJobBytes, SUBMIT_MAX_BYTES } from '../../src/workbench-v2/model/jobTransport'
 import { loadWorkbenchJob } from '../../src/workbench-v2/model/jobProvider'
+import { createRcQuantityReport, listRcQuantityReports, loadRcJobRequest, loadRcQuantityReportBytes, refreshRcJob, resumeRcJob, submitRcJob } from '../../src/workbench-v2/model/rcWorkflowProvider'
+import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
+import type { RcQuantityReportReference } from '../../src/workbench-v2/model/rcQuantityReportSchema'
 import { waitForJobService } from './jobServiceBrowserWait'
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
@@ -10,6 +14,60 @@ const originals = Object.fromEntries(['job', 'result', 'evidence'].map((role) =>
 const job = JSON.parse(originals.job.toString())
 const statusPath = `/api/v1/jobs/${job.job_id}`
 const credentials = { tenantId: 'transport-test', bearerToken: 'synthetic-memory-only-token' }
+
+test.describe('job transport failure classification', () => {
+  let originalFetch: typeof fetch
+  test.beforeEach(() => { originalFetch = globalThis.fetch })
+  test.afterEach(() => { globalThis.fetch = originalFetch })
+
+  for (const failingRole of ['job', 'result', 'evidence']) {
+    test(`redacts a ${failingRole} network failure without reporting invalid artifacts`, async () => {
+      globalThis.fetch = async (input) => {
+        const role = String(input).endsWith(statusPath) ? 'job' : String(input).split('/').pop()!
+        if (role === failingRole) throw new TypeError(credentials.bearerToken)
+        return new Response(originals[role], { headers: { 'content-type': 'application/json' } })
+      }
+      const result = await loadWorkbenchJob(`https://workbench.test${statusPath}`)
+      expect(result).toEqual({ status: 'error', job: null, errors: ['job API request failed'] })
+      expect(JSON.stringify(result)).not.toContain(credentials.bearerToken)
+    })
+  }
+
+  test('preserves caller abort instead of reporting a network or artifact failure', async () => {
+    const controller = new AbortController()
+    globalThis.fetch = async () => { controller.abort(); throw new TypeError(credentials.bearerToken) }
+    expect(await loadWorkbenchJob(`https://workbench.test${statusPath}`, controller.signal))
+      .toEqual({ status: 'unconfigured', job: null, errors: [] })
+  })
+
+  for (const status of [404, 503]) {
+    test(`preserves the HTTP ${status} status without exposing its body`, async () => {
+      globalThis.fetch = async () => new Response(credentials.bearerToken, { status })
+      expect(await loadWorkbenchJob(`https://workbench.test${statusPath}`)).toEqual({
+        status: status === 404 ? 'missing' : 'error', job: null,
+        errors: [status === 404 ? 'job not found' : `job API returned HTTP ${status}`],
+      })
+    })
+  }
+
+  test('keeps received malformed job JSON invalid', async () => {
+    globalThis.fetch = async () => new Response('{', { headers: { 'content-type': 'application/json' } })
+    expect(await loadWorkbenchJob(`https://workbench.test${statusPath}`))
+      .toEqual({ status: 'invalid', job: null, errors: ['job_view_json_invalid'], artifactStatus: 'invalid' })
+  })
+
+  for (const operation of ['read', 'submit']) {
+    test(`keeps a workflow ${operation} network exception redacted and original bytes unchanged`, async () => {
+      globalThis.fetch = async () => { throw new TypeError(credentials.bearerToken) }
+      const transport = await createJobWorkflowTransport('https://workbench.test/api/v1/jobs')
+      const bytes = new TextEncoder().encode('{ "operation": "synthetic_transport_only" }')
+      const original = bytes.slice()
+      const pending = operation === 'read' ? transport.getJob(job.job_id) : transport.submit(bytes, 'same-original-key')
+      await expect(pending).rejects.toThrow(/^job_api_request_failed$/)
+      expect(bytes).toEqual(original)
+    })
+  }
+})
 
 test('job transport cancels a pending sibling when an artifact exceeds its budget', async () => {
   const originalFetch = globalThis.fetch
@@ -189,4 +247,254 @@ test('authenticated job browser refuses a redirect without forwarding tenant cre
   await waitForJobService(page, 'error')
   expect(redirected).toBe(0)
   await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)
+})
+
+test.describe('RC workflow transport session', () => {
+  let originalFetch: typeof fetch
+  let originalLocation: PropertyDescriptor | undefined
+  const collection = 'https://workbench.test/api/v1/jobs'
+  const id = `job_${'a'.repeat(32)}`
+  const hash = `sha256:${'b'.repeat(64)}`
+  const encode = (value: string) => new TextEncoder().encode(value)
+  const digest = (bytes: Uint8Array) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`
+  const json = (value: unknown, headers: Record<string, string> = {}) => new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json', ...headers } })
+  function view(status: WorkbenchJobView['status'] = 'succeeded'): WorkbenchJobView {
+    const ref = (role: 'request' | 'result' | 'evidence') => ({ role, content_hash: hash, byte_length: 2, media_type: role === 'result' ? 'application/vnd.structural-analysis.rc-fiber-job-result+json' : 'application/json' })
+    return {
+      schema_version: 'structural-analysis-job-view.v1', service_profile: 'sqlite_wal_content_addressed_single_host.v1',
+      job_id: id, status, revision: 1, attempt: 1, progress: { completed_steps: status === 'succeeded' ? 1 : 0, total_steps: 1 },
+      created_at: '2026-10-03T00:00:00Z', updated_at: '2026-10-03T00:00:00Z',
+      lease_expires_at: status === 'running' ? '2026-10-03T00:01:00Z' : null, error_code: status === 'failed' ? 'synthetic' : null,
+      can_resume: false, request: ref('request'), checkpoint: null, result: status === 'succeeded' ? ref('result') : null,
+      evidence: status === 'succeeded' ? ref('evidence') : null, resume_contract_hash: null,
+      solver_truth_owner: 'structural_analysis_core', result_authority: 'referenced_result_and_evidence_contracts_only',
+      claim_boundary: 'synthetic transport metadata only', terminal_event_hash: hash,
+    }
+  }
+  function reference(bytes: Uint8Array): RcQuantityReportReference {
+    const contentHash = digest(bytes)
+    return { schema_version: 'durable-rc-fiber-quantity-report-reference.v1', tenant_id: credentials.tenantId, job_id: id,
+      report_id: `rcq_${contentHash.slice(7)}`, revision: 1, content_hash: contentHash, byte_length: bytes.byteLength,
+      media_type: 'application/json', created_at: '2026-10-03T00:00:00Z' }
+  }
+  test.beforeEach(() => {
+    originalFetch = globalThis.fetch
+    originalLocation = Object.getOwnPropertyDescriptor(globalThis, 'location')
+    Object.defineProperty(globalThis, 'location', { value: { origin: 'https://workbench.test' }, configurable: true })
+  })
+  test.afterEach(() => {
+    globalThis.fetch = originalFetch
+    if (originalLocation) Object.defineProperty(globalThis, 'location', originalLocation)
+    else Reflect.deleteProperty(globalThis, 'location')
+  })
+
+  for (const [name, destination] of [['other origin', 'https://other.test/v1/jobs'], ['query', `${collection}?token=private`], ['worker path', 'https://workbench.test/api/v1/jobs/../worker'], ['userinfo', 'https://user:private@workbench.test/v1/jobs']]) {
+    test(`validates collection destination before authorization: ${name}`, async () => {
+      let calls = 0
+      await expect(createJobWorkflowTransport(destination, undefined, () => { calls++; return credentials })).rejects.toThrow(/job_(?:collection_)?endpoint_invalid/)
+      expect(calls).toBe(0)
+    })
+  }
+
+  test('uncertain submit retries retain exact original tokens and idempotency key', async () => {
+    const requests: { bytes: string; key: string | null; init: RequestInit }[] = []
+    globalThis.fetch = async (_url, init) => {
+      requests.push({ bytes: new TextDecoder().decode(init!.body as ArrayBuffer), key: new Headers(init!.headers).get('Idempotency-Key'), init: init! })
+      return json(view('queued'))
+    }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+    const bytes = encode(' {"input":1.0,"negative_zero":-0.0} ')
+    await submitRcJob(transport, bytes, 'stable.synthetic:1')
+    await submitRcJob(transport, bytes, 'stable.synthetic:1')
+    expect(requests.map(row => [row.bytes, row.key])).toEqual([[new TextDecoder().decode(bytes), 'stable.synthetic:1'], [new TextDecoder().decode(bytes), 'stable.synthetic:1']])
+    expect(requests.every(row => row.init.redirect === 'error' && row.init.credentials === 'include' && row.init.cache === 'no-store')).toBe(true)
+    expect(transport.tenantId).toBe(credentials.tenantId)
+    expect(Object.keys(transport)).not.toContain('bearerToken')
+  })
+
+  test('all read roles retain one tenant while rotating tokens privately', async () => {
+    let calls = 0
+    const observed: Headers[] = []
+    globalThis.fetch = async (_url, init) => { observed.push(new Headers(init?.headers)); return json(view('queued')) }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => ({ ...credentials, bearerToken: `rotating-${++calls}` }))
+    await refreshRcJob(transport, id)
+    await transport.readTransport(id).get('evidence')
+    expect(observed.map(headers => headers.get('X-Structural-Tenant'))).toEqual([credentials.tenantId, credentials.tenantId])
+    expect(observed.map(headers => headers.get('Authorization'))).toEqual(['Bearer rotating-2', 'Bearer rotating-4'])
+  })
+
+  test('a tenant change in the same callback latches scope failure before any fetch', async () => {
+    let tenant = credentials.tenantId
+    let fetches = 0
+    globalThis.fetch = async () => { fetches++; return json(view()) }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => ({ ...credentials, tenantId: tenant }))
+    tenant = 'different-tenant'
+    await expect(refreshRcJob(transport, id)).rejects.toThrow('job_authorization_scope_changed')
+    tenant = credentials.tenantId
+    await expect(transport.readTransport(id).get('result')).rejects.toThrow('job_authorization_scope_changed')
+    expect(fetches).toBe(0)
+  })
+
+  test('mutating the host credential object cannot change the captured session tenant', async () => {
+    const mutable = { ...credentials }
+    let fetches = 0
+    globalThis.fetch = async () => { fetches++; return json(view()) }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => mutable)
+    mutable.tenantId = 'changed-in-place'
+    await expect(transport.verifyAuthorizationScope()).rejects.toThrow('job_authorization_scope_changed')
+    expect(transport.tenantId).toBe(credentials.tenantId)
+    expect(fetches).toBe(0)
+  })
+
+  test('aborted pending host reauthorization cannot issue a stale request', async () => {
+    const controller = new AbortController()
+    let calls = 0
+    let release!: (value: typeof credentials) => void
+    let fetches = 0
+    globalThis.fetch = async () => { fetches++; return json(view()) }
+    const transport = await createJobWorkflowTransport(collection, controller.signal, () => ++calls === 1 ? credentials : new Promise(resolve => { release = resolve }))
+    const pending = refreshRcJob(transport, id)
+    controller.abort()
+    release(credentials)
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    expect(fetches).toBe(0)
+  })
+
+  test('child load abort releases forwarding listeners without aborting its parent session', async () => {
+    const parent = new AbortController(), child = new AbortController()
+    const parentListeners = new Set<EventListenerOrEventListenerObject>()
+    const childListeners = new Set<EventListenerOrEventListenerObject>()
+    for (const [signal, listeners] of [[parent.signal, parentListeners], [child.signal, childListeners]] as const) {
+      const add = signal.addEventListener.bind(signal), remove = signal.removeEventListener.bind(signal)
+      signal.addEventListener = (type, listener, options) => {
+        if (type === 'abort' && listener) listeners.add(listener)
+        add(type, listener, options)
+      }
+      signal.removeEventListener = (type, listener, options) => {
+        if (type === 'abort' && listener) listeners.delete(listener)
+        remove(type, listener, options)
+      }
+    }
+    globalThis.fetch = async (_url, init) => {
+      expect(init?.signal?.aborted).toBe(false)
+      return json(view('queued'))
+    }
+    const transport = await createJobWorkflowTransport(collection, parent.signal, () => credentials)
+    const read = transport.readTransport(id).withSignal!(child.signal)
+    await read.get()
+    expect(parentListeners.size).toBeGreaterThan(0)
+    expect(childListeners.size).toBeGreaterThan(0)
+    child.abort()
+    expect(parent.signal.aborted).toBe(false)
+    expect(parentListeners.size).toBe(0)
+    expect(childListeners.size).toBe(0)
+    await expect(read.get()).rejects.toMatchObject({ name: 'AbortError' })
+    await expect(transport.getJob(id)).resolves.toBeInstanceOf(Response)
+  })
+
+  test('rejects oversize submit, path injection and invalid pagination before reauthorization', async () => {
+    let calls = 0, fetches = 0
+    globalThis.fetch = async () => { fetches++; return json(view()) }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => { calls++; return credentials })
+    expect(() => transport.submit(new Uint8Array(SUBMIT_MAX_BYTES + 1), 'stable')).toThrow('job_submit_too_large')
+    expect(() => transport.getJob(`${id}/result`)).toThrow('job_id_invalid')
+    expect(() => transport.getQuantityReport(id, '../result')).toThrow('rc_report_id_invalid')
+    expect(() => transport.listQuantityReports(id, { afterRevision: -1 })).toThrow('rc_report_page_invalid')
+    expect(() => transport.listQuantityReports(id, { limit: 101 })).toThrow('rc_report_page_invalid')
+    expect(calls).toBe(1)
+    expect(fetches).toBe(0)
+  })
+
+  test('failed-job explicit resume sends exact hashes including a null checkpoint', async () => {
+    let body: unknown
+    globalThis.fetch = async (url, init) => { expect(String(url)).toBe(`${collection}/${id}/resume`); body = JSON.parse(init!.body as string); return json(view('queued')) }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+    await resumeRcJob(transport, view('failed'))
+    expect(body).toEqual({ expected_request_hash: hash, expected_checkpoint_hash: null })
+    await expect(resumeRcJob(transport, view('checkpointed'))).rejects.toThrow('job_resume_state_invalid')
+  })
+
+  test('lightweight refresh rejects a different returned job identity', async () => {
+    globalThis.fetch = async () => json({ ...view('queued'), job_id: `job_${'c'.repeat(32)}` })
+    const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+    await expect(refreshRcJob(transport, id)).rejects.toThrow('job_view_identity_mismatch')
+  })
+
+  test('stored request is read once and bound to exact raw bytes before adoption', async () => {
+    const bytes = encode('{"synthetic":1.0}')
+    const source = view('queued'); source.request = { ...source.request, byte_length: bytes.byteLength, content_hash: digest(bytes) }
+    const paths: string[] = []
+    globalThis.fetch = async url => { paths.push(String(url)); return new Response(bytes, { headers: { 'content-type': 'application/json' } }) }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+    expect(await loadRcJobRequest(transport, source)).toEqual({ bytes, value: { synthetic: 1 } })
+    await expect(loadRcJobRequest(transport, { ...source, request: { ...source.request, content_hash: hash } })).rejects.toThrow('request_hash_mismatch')
+    expect(paths).toEqual([`${collection}/${id}/request`, `${collection}/${id}/request`])
+  })
+
+  test('report creation preserves explicit unpriced null and zero declarations without numerical reads', async () => {
+    const raw = encode('{}'), ref = reference(raw)
+    const bodies: unknown[] = [], paths: string[] = []
+    globalThis.fetch = async (url, init) => { paths.push(String(url)); bodies.push(JSON.parse(init!.body as string)); return json(ref) }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+    await createRcQuantityReport(transport, view(), null)
+    const prices = { concrete_per_m3: 0, rebar_per_kg: 0, currency: 'KRW', as_of: '2026-10-03', source: 'synthetic only' }
+    await createRcQuantityReport(transport, view(), prices)
+    expect(bodies).toEqual([null, prices].map(declared_prices => ({ expected_request_hash: hash, expected_result_artifact_hash: hash, declared_prices })))
+    expect(paths).toEqual([`${collection}/${id}/rc-quantity-reports`, `${collection}/${id}/rc-quantity-reports`])
+  })
+
+  test('report pagination uses bounded headers and checks immutable index identities/cursor', async () => {
+    const ref = { ...reference(encode('{}')), revision: 3 }
+    let mismatch = false
+    globalThis.fetch = async (_url, init) => {
+      const headers = new Headers(init?.headers)
+      expect(headers.get('X-Structural-Report-After-Revision')).toBe('2')
+      expect(headers.get('X-Structural-Report-Limit')).toBe('1')
+      return json({ schema_version: 'durable-rc-fiber-quantity-report-index.v1', tenant_id: mismatch ? 'other' : credentials.tenantId, job_id: id, reports: [ref], next_after_revision: 3 })
+    }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+    expect((await listRcQuantityReports(transport, view(), { afterRevision: 2, limit: 1 })).reports).toEqual([ref])
+    mismatch = true
+    await expect(listRcQuantityReports(transport, view(), { afterRevision: 2, limit: 1 })).rejects.toThrow('rc_report_index_invalid')
+  })
+
+  test('exact report GET checks header, length and raw SHA while leaving semantic review to the worker', async () => {
+    const raw = encode('{"transport_only":true}'), ref = reference(raw)
+    let corrupted = false
+    globalThis.fetch = async url => {
+      expect(String(url)).toBe(`${collection}/${id}/rc-quantity-reports/${ref.report_id}`)
+      return new Response(corrupted ? encode('{"transport_only":null}') : raw, { headers: { 'content-type': 'application/json', 'x-structural-report-sha256': ref.content_hash } })
+    }
+    const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+    expect(await loadRcQuantityReportBytes(transport, view(), ref)).toEqual({ reference: ref, bytes: raw })
+    corrupted = true
+    await expect(loadRcQuantityReportBytes(transport, view(), ref)).rejects.toThrow('rc_report_hash_mismatch')
+  })
+
+  for (const fault of ['missing-header', 'wrong-header', 'wrong-tenant', 'wrong-job', 'oversize-ref'] as const) {
+    test(`rejects report ${fault} before reading payload`, async () => {
+      const raw = encode('{}'), ref = reference(raw)
+      if (fault === 'wrong-tenant') ref.tenant_id = 'other'
+      if (fault === 'wrong-job') ref.job_id = `job_${'c'.repeat(32)}`
+      if (fault === 'oversize-ref') ref.byte_length = 4 * 1024 * 1024 + 1
+      let reads = 0, fetches = 0
+      globalThis.fetch = async () => {
+        fetches++
+        const body = new ReadableStream<Uint8Array>({ pull(controller) { reads++; controller.enqueue(raw); controller.close() } }, { highWaterMark: 0 })
+        return new Response(body, { headers: { 'content-type': 'application/json', ...(fault === 'missing-header' ? {} : { 'x-structural-report-sha256': fault === 'wrong-header' ? hash : ref.content_hash }) } })
+      }
+      const transport = await createJobWorkflowTransport(collection, undefined, () => credentials)
+      await expect(loadRcQuantityReportBytes(transport, view(), ref)).rejects.toThrow(fault.endsWith('header') ? 'rc_report_hash_header_mismatch' : 'rc_report_reference_invalid')
+      expect(reads).toBe(0)
+      expect(fetches).toBe(fault.endsWith('header') ? 1 : 0)
+    })
+  }
+
+  test('server error bodies and host exceptions never become raw diagnostics', async () => {
+    let calls = 0
+    globalThis.fetch = async () => new Response(`secret=${credentials.bearerToken}`, { status: 409 })
+    const transport = await createJobWorkflowTransport(collection, undefined, () => { calls++; if (calls > 3) throw new Error(credentials.bearerToken); return credentials })
+    await expect(refreshRcJob(transport, id)).rejects.toThrow('job_api_http_409')
+    await expect(refreshRcJob(transport, id)).rejects.toThrow('job_authorization_unavailable')
+  })
 })

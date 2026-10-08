@@ -20,11 +20,20 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
     PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION,
 )
-from structural_analysis.assembly import stateful_fiber_frame2d_control_path as control_path
+from structural_analysis.assembly import (
+    stateful_fiber_frame2d_control_path as control_path,
+)
+from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
+    StatefulFiberFrame2DDisplacementControlConfig,
+)
+from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
 
-BASE = Path(__file__).resolve().parents[1] / "examples/public_rc_fiber_frame_cantilever.json"
+BASE = (
+    Path(__file__).resolve().parents[1]
+    / "examples/public_rc_fiber_frame_cantilever.json"
+)
 STATIONS_M = (0.0, 0.2, 0.7, 0.95, 1.2, 1.7, 1.9)
 
 
@@ -97,11 +106,7 @@ def test_legacy_v1_v3_problem_identity_hashes_and_reaction_rows_remain_exact():
             (0, 1, 2, 3, 4, 5),
             "sha256:79a077684e27c4468e8941a33189e5daac38f4eb3a5dc90ecc6487e5ca65d45d",
             "sha256:841696507774a66d92701f2bf2cb5c3b76f9d2b9599f964c6e45ce1788c921a5",
-            [
-                (node, dof)
-                for node in ("N1", "N2")
-                for dof in ("UX", "UY", "RZ")
-            ],
+            [(node, dof) for node in ("N1", "N2") for dof in ("UX", "UY", "RZ")],
         ),
     )
     for path, profile, fixed, problem_hash, identity_hash, reaction_ids in sources:
@@ -124,12 +129,14 @@ def test_legacy_v1_v3_problem_identity_hashes_and_reaction_rows_remain_exact():
     for profile, request_hash, resume_hash in (
         (
             {},
-             "sha256:b35c8acebb4e4a4aec77e50a996c21457299f8e07228e6495b22919a31cf3a56",
-             "sha256:477939f60a5dc50b612dce4407248f38a66090b6401bf609eeea2aaafe5ac1ae"),
+            "sha256:b35c8acebb4e4a4aec77e50a996c21457299f8e07228e6495b22919a31cf3a56",
+            "sha256:477939f60a5dc50b612dce4407248f38a66090b6401bf609eeea2aaafe5ac1ae",
+        ),
         (
             {"experimental_two_fixed_endpoints": True},
-             "sha256:24614ea8bd32628c5dbfc98a98a51c9b61e35978604328b26c71d388911009f0",
-             "sha256:1e5c806c54a22047563d454771273e5a51f2f0d43bd7d339bd014d5e67373a0a"),
+            "sha256:24614ea8bd32628c5dbfc98a98a51c9b61e35978604328b26c71d388911009f0",
+            "sha256:1e5c806c54a22047563d454771273e5a51f2f0d43bd7d339bd014d5e67373a0a",
+        ),
     ):
         request = BoundedRCFiberDirectControlRequest(4, (-1e-6,), **profile)
         assert request.request_hash == request_hash
@@ -140,19 +147,79 @@ def test_explicit_v4_compiler_accepts_interior_pin_and_roller_only():
     model = _model()
     for flags, expected in (
         ({}, "rc_fiber_frame_support_count_unsupported"),
-        ({"experimental_two_fixed_endpoints": True}, "rc_fiber_frame_support_node_invalid"),
+        (
+            {"experimental_two_fixed_endpoints": True},
+            "rc_fiber_frame_support_node_invalid",
+        ),
     ):
         compiled, blockers, _ = public._compile(model, **flags)
         assert compiled is None and blockers[0]["kind"] == expected
-    compiled, blockers, _ = public._compile(
-        model, experimental_pin_roller_beam=True
-    )
+    compiled, blockers, _ = public._compile(model, experimental_pin_roller_beam=True)
     assert compiled is not None and not blockers
     assert compiled.problem.fixed_global_dofs == (3, 4, 16)
     assert compiled.support_node_ids == ("N2", "N6")
     assert compiled.problem.free_global_dofs.count(5) == 1  # pin rotation
     assert compiled.problem.free_global_dofs.count(15) == 1  # roller UX
     assert compiled.problem.free_global_dofs.count(17) == 1  # roller rotation
+
+
+def test_v4_member_quantities_require_opt_in_and_count_authored_lengths_once():
+    model = _model()
+    with pytest.raises(design.FiberFrameDesignError, match="support_count_unsupported"):
+        design.calculate_fiber_frame_member_quantities(model)
+
+    quantities = design.calculate_fiber_frame_member_quantities(
+        model, experimental_pin_roller_beam=True
+    )
+    assert [row["member_id"] for row in quantities["members"]] == [
+        f"M{index}" for index in range(1, len(STATIONS_M))
+    ]
+    assert [row["length_m"] for row in quantities["members"]] == pytest.approx(
+        [right - left for left, right in zip(STATIONS_M, STATIONS_M[1:])]
+    )
+    assert quantities["totals"]["gross_concrete_volume_m3"] == pytest.approx(
+        0.4 * 0.6 * 1.9
+    )
+    assert quantities["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+        8 * 0.000387 * 1.9 * 7850
+    )
+    assert quantities["detailed_takeoff"] is False
+
+    swapped = _payload()
+    swapped["supports"] = [
+        {"node": "N2", "dofs": ["UY"]},
+        {"node": "N6", "dofs": ["UX", "UY"]},
+    ]
+    changed = design.calculate_fiber_frame_member_quantities(
+        _model(swapped), experimental_pin_roller_beam=True
+    )
+    assert changed["totals"] == quantities["totals"]
+    assert changed["quantity_hash"] != quantities["quantity_hash"]
+
+
+def test_v4_member_quantities_reject_invalid_opt_in_and_geometry():
+    model = _model()
+    with pytest.raises(
+        design.FiberFrameDesignError, match="explicit boolean pin-roller"
+    ):
+        design.calculate_fiber_frame_member_quantities(
+            model, experimental_pin_roller_beam=1
+        )
+    with pytest.raises(design.FiberFrameDesignError, match="mutually exclusive"):
+        design.calculate_fiber_frame_member_quantities(
+            model,
+            experimental_two_fixed_endpoints=True,
+            experimental_pin_roller_beam=True,
+        )
+    nonhorizontal = _payload()
+    nonhorizontal["nodes"][3]["coordinates"][1] = 0.01
+    with pytest.raises(
+        design.FiberFrameDesignError,
+        match="rc_fiber_frame_pin_roller_beam_geometry_invalid",
+    ):
+        design.calculate_fiber_frame_member_quantities(
+            _model(nonhorizontal), experimental_pin_roller_beam=True
+        )
 
 
 @pytest.mark.parametrize(
@@ -303,6 +370,68 @@ def test_v4_four_point_path_reactions_rotation_and_fresh_restart_replay():
     assert continuation.to_dict()["response_history"][0] == response
 
 
+def test_v4_synthetic_tensile_damage_onset_blocks_default_but_strict_control_replays():
+    """The short beam path crosses a constitutive kink under explicit control weighting."""
+    model = _model()
+    targets = (-1.5e-4, -1.6e-4)
+    default = analyze_bounded_rc_fiber_direct_control(
+        model, targets, control_global_dof=10, experimental_pin_roller_beam=True
+    )
+    blocked = default.to_dict()
+    assert default.status == "blocked" and default.contract_pass is False
+    assert len(blocked["response_history"]) == 1
+    first, failed = blocked["path"]["attempts"]
+    assert first["committed"] is True
+    assert failed["target_control_displacement_m"] == targets[1]
+    assert failed["committed"] is False and failed["rollback_exact"] is True
+    assert failed["accepted_checkpoint_hash"] == failed["parent_checkpoint_hash"]
+    assert failed["step"]["metrics"]["terminal_reason"] == (
+        "line_search_failed_to_reduce_residual"
+    )
+
+    config = StatefulFiberFrame2DDisplacementControlConfig(control_tolerance_m=1e-15)
+    strict = analyze_bounded_rc_fiber_direct_control(
+        model,
+        targets,
+        control_global_dof=10,
+        experimental_pin_roller_beam=True,
+        config=config,
+    )
+    accepted = strict.to_dict()
+    assert strict.status == "ready" and strict.contract_pass is True
+    assert len(accepted["response_history"]) == len(targets)
+    assert all(row["committed"] for row in accepted["path"]["attempts"])
+    assert all(
+        row["step"]["metrics"]["relative_equilibrium"]
+        <= config.newton.residual_tolerance
+        for row in accepted["path"]["attempts"]
+    )
+    assert all(
+        abs(row["step"]["metrics"]["control_error_m"]) <= config.control_tolerance_m
+        for row in accepted["path"]["attempts"]
+    )
+    damage_counts = [
+        sum(
+            section["damaged_concrete_fiber_count"]
+            for member in row["step"]["trial_assembly"]["member_assemblies"]
+            for section in member["element_response"]["section_responses"]
+        )
+        for row in accepted["path"]["attempts"]
+    ]
+    assert damage_counts[0] == 0 and damage_counts[1] > 0
+    verification = validate_bounded_rc_fiber_direct_control_artifacts(
+        model,
+        targets,
+        control_global_dof=10,
+        experimental_pin_roller_beam=True,
+        config=config,
+        result=strict.result_artifact_bytes(),
+        checkpoint=strict.checkpoint_artifact_bytes(),
+    )
+    assert verification.status == "valid_artifact"
+    assert verification.contract_pass is True
+
+
 def test_v4_restart_rejects_a_different_pin_roller_partition():
     model, request = _model(), _request()
     first = analyze_bounded_rc_fiber_direct_control(
@@ -313,7 +442,9 @@ def test_v4_restart_rejects_a_different_pin_roller_partition():
         {"node": "N2", "dofs": ["UY"]},
         {"node": "N6", "dofs": ["UX", "UY"]},
     ]
-    with pytest.raises(ValueError, match="restart source/configuration/control/budget mismatch"):
+    with pytest.raises(
+        ValueError, match="restart source/configuration/control/budget mismatch"
+    ):
         analyze_bounded_rc_fiber_direct_control(
             _model(swapped),
             (-2e-6,),
@@ -362,8 +493,9 @@ def test_v4_failed_second_target_rolls_back_to_first_original(monkeypatch):
     assert result.status == "blocked" and result.contract_pass is False
     assert len(payload["response_history"]) == 1
     assert payload["path"]["attempts"][1]["rollback_exact"] is True
-    assert payload["path"]["attempts"][1]["accepted_checkpoint_hash"] == (
-        payload["path"]["attempts"][1]["parent_checkpoint_hash"]
+    assert (
+        payload["path"]["attempts"][1]["accepted_checkpoint_hash"]
+        == (payload["path"]["attempts"][1]["parent_checkpoint_hash"])
     )
     assert payload["checkpoint"] is not None
 
@@ -376,21 +508,24 @@ def test_v4_cli_run_replays_exact_synthetic_beam(tmp_path):
     checkpoint_path = tmp_path / "checkpoint.json"
     model_path.write_text(json.dumps(_payload()))
     request_path.write_text(json.dumps(_request().to_dict()))
-    assert cli.main(
-        [
-            "run",
-            "--model",
-            str(model_path),
-            "--request",
-            str(request_path),
-            "--output",
-            str(result_path),
-            "--report",
-            str(report_path),
-            "--checkpoint-output",
-            str(checkpoint_path),
-        ]
-    ) == 0
+    assert (
+        cli.main(
+            [
+                "run",
+                "--model",
+                str(model_path),
+                "--request",
+                str(request_path),
+                "--output",
+                str(result_path),
+                "--report",
+                str(report_path),
+                "--checkpoint-output",
+                str(checkpoint_path),
+            ]
+        )
+        == 0
+    )
     result = json.loads(result_path.read_bytes())
     report = json.loads(report_path.read_bytes())
     assert result["request"]["experimental_pin_roller_beam"] is True
@@ -400,21 +535,24 @@ def test_v4_cli_run_replays_exact_synthetic_beam(tmp_path):
     assert report["verification"]["fresh_source_execution_invoked"] is True
     assert checkpoint_path.is_file()
     verify_report_path = tmp_path / "verify-report.json"
-    assert cli.main(
-        [
-            "verify",
-            "--model",
-            str(model_path),
-            "--request",
-            str(request_path),
-            "--result",
-            str(result_path),
-            "--checkpoint",
-            str(checkpoint_path),
-            "--report",
-            str(verify_report_path),
-        ]
-    ) == 0
+    assert (
+        cli.main(
+            [
+                "verify",
+                "--model",
+                str(model_path),
+                "--request",
+                str(request_path),
+                "--result",
+                str(result_path),
+                "--checkpoint",
+                str(checkpoint_path),
+                "--report",
+                str(verify_report_path),
+            ]
+        )
+        == 0
+    )
     verify_report = json.loads(verify_report_path.read_bytes())
     assert verify_report["contract_pass"] is True
     assert verify_report["verification"]["fresh_source_execution_invoked"] is True
@@ -423,20 +561,23 @@ def test_v4_cli_run_replays_exact_synthetic_beam(tmp_path):
     tampered_path = tmp_path / "tampered-result.json"
     tampered_path.write_text(json.dumps(tampered))
     bad_report_path = tmp_path / "bad-verify-report.json"
-    assert cli.main(
-        [
-            "verify",
-            "--model",
-            str(model_path),
-            "--request",
-            str(request_path),
-            "--result",
-            str(tampered_path),
-            "--checkpoint",
-            str(checkpoint_path),
-            "--report",
-            str(bad_report_path),
-        ]
-    ) == 2
+    assert (
+        cli.main(
+            [
+                "verify",
+                "--model",
+                str(model_path),
+                "--request",
+                str(request_path),
+                "--result",
+                str(tampered_path),
+                "--checkpoint",
+                str(checkpoint_path),
+                "--report",
+                str(bad_report_path),
+            ]
+        )
+        == 2
+    )
     bad_report = json.loads(bad_report_path.read_bytes())
     assert bad_report["artifact_contract_pass"] is False

@@ -106,11 +106,19 @@ export function ExportPanel({
   reviewDraftState,
 }: ExportPanelProps): ReactElement {
   const [busy, setBusy] = useState(false)
+  const [reviewBindingError, setReviewBindingError] = useState(false)
   const provenanceIssues = productProvenanceIssues(caseV2, dataMode)
 
   async function exportBundle(): Promise<void> {
     setBusy(true)
+    setReviewBindingError(false)
     try {
+      const caseSha256 = await sha256Hex(canonicalJson(caseV2))
+      if (!caseSha256 || caseSha256 !== reviewDraftState.draft.caseSha256
+        || caseV2.provenance.sourceCommitSha !== reviewDraftState.draft.sourceCommitSha) {
+        setReviewBindingError(true)
+        return
+      }
       const evidenceManifest = await loadEvidenceManifestRef(baseUrl)
       const immutableAnalysisCore = {
         schema_version: 'workbench-v2-immutable-analysis-core.v1',
@@ -130,6 +138,7 @@ export function ExportPanel({
       )
       const reviewEnvelope = {
         schema_version: 'workbench-v2-review-envelope.v1',
+        review_subject: { schema_version: 'workbench-loaded-case-review.v1', case_sha256: caseSha256, loaded_case: caseV2 },
         data_mode: dataMode,
         is_demo: dataMode === 'demo',
         run_status: runStatus,
@@ -213,6 +222,7 @@ export function ExportPanel({
   return (
     <section className="wb2-panel" aria-labelledby="wb2-export-title">
       <h2 id="wb2-export-title" className="wb2-panel__title">Export</h2>
+      {reviewBindingError ? <p role="alert">Export blocked: the reviewer draft does not match the loaded case.</p> : null}
       <dl className="wb2-kv" data-export-truth-state>
         <dt>Product profile</dt><dd>
           <EvidenceValueText value={caseV2.productProfile.id} format={(value) => value} />

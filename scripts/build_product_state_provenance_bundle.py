@@ -41,6 +41,7 @@ from build_post_main_evidence_overlay import (  # noqa: E402
     validate_overlay,
 )
 from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
+from scripts.verify_canonical_actions_artifact import workflow_path_matches  # noqa: E402
 from scripts.nonpromotion_authority_policy import (  # noqa: E402
     AuthorityPolicy,
     AuthorityPolicyError,
@@ -500,7 +501,13 @@ def _workflow_identity(
     require_success: bool,
 ) -> dict[str, Any]:
     _require(run.get("name") == expected_name, f"{authority}_workflow_name_invalid")
-    _require(run.get("path") == expected_path, f"{authority}_workflow_path_invalid")
+    path_matches = (
+        workflow_path_matches(run.get("path"))
+        if authority == "github_actions_workflow_run_api"
+        and expected_path == ".github/workflows/p0-canonical-contract.yml"
+        else run.get("path") == expected_path
+    )
+    _require(path_matches, f"{authority}_workflow_path_invalid")
     _require(run.get("head_branch") == "main", f"{authority}_head_branch_invalid")
     _require(run.get("head_sha") == source_sha, f"{authority}_head_sha_mismatch")
     trigger_event = run.get("event")

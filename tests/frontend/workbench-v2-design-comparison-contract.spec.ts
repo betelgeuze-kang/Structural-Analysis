@@ -368,6 +368,7 @@ test('browser keeps changes unavailable when baseline verification fails', async
   await page.route('**/comparisons/comparison.json', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify(report) }))
   await page.goto(process.env.WORKBENCH_V2_BASE_URL || 'http://127.0.0.1:4173')
   const panel = page.locator('[data-design-comparison="verified"]')
+  await panel.waitFor({ state: 'visible' })
   const deltas = panel.locator('[data-design-delta]')
   await expect(deltas).toHaveCount(8)
   for (const delta of await deltas.all()) {

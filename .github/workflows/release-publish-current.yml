@@ -184,6 +184,11 @@ jobs:
 
       - name: Regenerate release viewer artifacts
         run: |
+          # Recompute bounded internal Level 1 evidence only in this ephemeral checkout.
+          python scripts/build_analytic_frame_verification_artifact.py
+          python scripts/build_analytic_frame_verification_artifact.py --check
+          python scripts/build_verification_hierarchy_status.py
+          python scripts/build_verification_hierarchy_status.py --check
           echo "Release workflow github.sha: $GITHUB_SHA"
           echo "Release workflow checkout HEAD: $(git rev-parse HEAD)"
           echo "Track irregularity generator import preflight:"

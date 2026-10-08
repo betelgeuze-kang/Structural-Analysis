@@ -4,6 +4,7 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { validateWorkbenchTestRegistration } from './workbench-test-registration.mjs'
+import { finishWorkbenchDiagnostics, prepareWorkbenchDiagnostics, workbenchDiagnosticOptions, workbenchExitCode } from './workbench-browser-diagnostics.mjs'
 import {
   sanitizedFrontendEnvironment,
   trustedNode,
@@ -20,6 +21,12 @@ const specs = [
   'tests/frontend/workbench-v2-live-provider-guard.spec.ts',
   'tests/frontend/workbench-v2-job-contract.spec.ts',
   'tests/frontend/workbench-v2-job-transport.spec.ts',
+  'tests/frontend/workbench-v2-rc-quantity-report-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-submission-binding.spec.ts',
+  'tests/frontend/workbench-v2-rc-trace-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-workflow-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-initial-load-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-report-recovery-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-job-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-cohort-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-cohort-browser.spec.ts',
@@ -33,6 +40,7 @@ const specs = [
   'tests/frontend/workbench-v2-rc-search-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-portal-candidate-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-design-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-price-metadata-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-design-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-job-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-constant-job-contract.spec.ts',
@@ -41,6 +49,8 @@ const specs = [
   'tests/frontend/workbench-v2-rc-history-file-browser.spec.ts',
   'tests/frontend/workbench-v2-rc-pin-roller-original-contract.spec.ts',
   'tests/frontend/workbench-v2-rc-pin-roller-original-browser.spec.ts',
+  'tests/frontend/workbench-v2-rc-pin-roller-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-rc-pin-roller-job-browser.spec.ts',
   'tests/frontend/workbench-v2-frame3d-job-contract.spec.ts',
   'tests/frontend/workbench-v2-extended-sparse-job-contract.spec.ts',
   'tests/frontend/frame3d-job-browser.spec.ts',
@@ -74,7 +84,8 @@ const pythonSpecs = [
 ]
 validateWorkbenchTestRegistration(rootDir, specs, pythonSpecs)
 if (withJobApi) specs.push(...pythonSpecs)
-const passthrough = process.argv.slice(2).filter((arg) => arg !== '--with-job-api')
+const diagnosticRequest = workbenchDiagnosticOptions(process.argv.slice(2).filter((arg) => arg !== '--with-job-api'))
+const passthrough = diagnosticRequest.passthrough
 
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -128,9 +139,24 @@ async function main() {
     'viewer_delivery_contract',
   )
   const playwright = trustedRepoTool(rootDir, 'node_modules/playwright/cli.js', 'playwright_cli')
+  const diagnostics = prepareWorkbenchDiagnostics(diagnosticRequest.options, rootDir, [...specs,
+    'package.json', 'package-lock.json', '.github/workflows/frontend-web-ci.yml',
+    '.github/workflows/runtime-input-viewer-ci.yml',
+    'scripts/verify-workbench-v2-e2e.mjs', 'scripts/trusted-frontend-runtime.mjs',
+    'scripts/workbench-browser-diagnostics.mjs', 'tests/workbench-browser-diagnostic-retention.test.mjs',
+    'scripts/rc-expect-await-observer.cjs', 'scripts/rc-expect-await-preload.cjs',
+    'tests/rc-expect-await-observer.test.cjs',
+    'tests/frontend/rcInitialReadyDiagnostics.ts', 'tests/frontend/rcReadyClockDiagnostics.ts',
+    'src/workbench-v2/model/rcWorkflowTrace.ts',
+    'src/workbench-v2/components/RcJobWorkflowPanel.tsx', 'src/workbench-v2/model/jobTransport.ts',
+    'src/workbench-v2/model/jobProvider.ts', 'src/workbench-v2/model/rcWorkflowProvider.ts',
+    'src/workbench-v2/model/failureDiagnostic.ts',
+  ])
   // Build with base '/' for local serving.
   for (const [args, extraEnvironment] of [
-    [['--test', trustedRepoTool(rootDir, 'tests/workbench-test-registration.test.mjs', 'workbench_registration_test')], {}],
+    [['--test', trustedRepoTool(rootDir, 'tests/workbench-test-registration.test.mjs', 'workbench_registration_test'),
+      trustedRepoTool(rootDir, 'tests/workbench-browser-diagnostic-retention.test.mjs', 'workbench_diagnostic_retention_test'),
+      trustedRepoTool(rootDir, 'tests/rc-expect-await-observer.test.cjs', 'rc_expect_await_observer_test')], {}],
     [[typescript, '--noEmit'], {}],
     [[vite, 'build'], { VITE_BASE_PATH: '/' }],
     [[delivery], {}],
@@ -142,6 +168,7 @@ async function main() {
     )
     if (buildCode !== 0) {
       process.exitCode = buildCode
+      finishWorkbenchDiagnostics(diagnostics, buildCode, 'build')
       return
     }
   }
@@ -154,13 +181,18 @@ async function main() {
   const { port } = server.address()
   try {
     const loaderOption = `--loader=${jsonLoader}`
-    process.exitCode = await run(
+    const nativeCode = await run(
       node,
-      [loaderOption, playwright, 'test', ...specs, '--reporter=line', ...passthrough],
+      [...(diagnostics ? ['--require', trustedRepoTool(rootDir, 'scripts/rc-expect-await-preload.cjs', 'rc_expect_await_preload')] : []),
+        loaderOption, playwright, 'test', ...specs, diagnostics ? '--reporter=line,json' : '--reporter=line',
+        ...(diagnostics ? ['--workers=1'] : []), ...passthrough],
       sanitizedFrontendEnvironment(node, {
         WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
+        ...(diagnostics ? { PLAYWRIGHT_JSON_OUTPUT_FILE: diagnostics.rawReport } : {}),
       }),
     )
+    const retention = finishWorkbenchDiagnostics(diagnostics, nativeCode)
+    process.exitCode = workbenchExitCode(nativeCode, retention.qualified)
   } finally {
     await new Promise((resolve) => server.close(resolve))
   }

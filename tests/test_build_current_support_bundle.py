@@ -75,11 +75,11 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
             },
             "dependencies": {
                 "prod": 11,
-                "dev": 58,
+                "dev": 60,
                 "optional": 34,
                 "peer": 0,
                 "peerOptional": 0,
-                "total": 68,
+                "total": 70,
             },
         },
     }

@@ -6,11 +6,11 @@
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "52fb7f38d7a7090933eee54f3141ed1596f882e0f4d2471fade75191c39c691f"
+      "sha256": "2109bb4aaffefd8bcc050aca1ad13884e48cd45dea758aeb321fdce4b29e5afd"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "1b2bb95273c9a7570da10cf928bed8492b75cfad087daade1a67dd6c6bfc212d"
+      "sha256": "2780f931d2f29d9c4be05be1138ed1aceb4c3f00452a4e684832c8f3b1e03116"
     }
   },
   "authority": {
@@ -28,9 +28,9 @@
     "node_lock_graph": {
       "ajv_version": "8.20.0",
       "lockfile_version": 3,
-      "package_count": 68,
-      "package_json_sha256": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
-      "package_lock_sha256": "0a3bf9e86e6ac73b13c5b6a9b7c1166cf517b27ddcb8ad20af5d83600a144b6f",
+      "package_count": 70,
+      "package_json_sha256": "83076239a8bd5b7a70df673e20f5b2f4c2e81387a14b17f0cd63ac1032a49795",
+      "package_lock_sha256": "f42d2f2178cec315c5f24d81855e0821e8fd2c2883c20e650c813d173715d325",
       "postcss_version": "8.5.26",
       "requires": true
     },
@@ -42,7 +42,7 @@
   },
   "claim_boundary": "contract_pass covers the technical runtime packaging contract only. It grants no product license, commercial use, redistribution, third-party-material clearance, signing authority, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-09-29T09:30:59.710975+00:00",
+  "generated_at": "2026-10-07T11:51:56.404369+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
@@ -67,5 +67,5 @@
     "version": "0.1.0"
   },
   "schema_version": "production-runtime-packaging-manifest.v1",
-  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=76 | native_artifacts=5/6"
+  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=78 | native_artifacts=5/6"
 }

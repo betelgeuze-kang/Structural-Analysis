@@ -48,6 +48,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Verify pristine canonical source
+        run: >-
+          python scripts/verify_tracked_source_tree.py
+          --repo-root . --source-sha "${{ github.sha }}" --profile pristine
+
       - name: Materialize and install exact hashed canonical dependencies
         shell: bash
         run: |
@@ -105,6 +110,7 @@ jobs:
           tests/test_build_canonical_project_wheel.py
           tests/test_bounded_planar_wheel_smoke.py
           tests/test_generated_artifact_dag.py
+          tests/test_verify_canonical_actions_artifact.py
 
       - name: Build exact-source canonical environment receipt
         run: >-
@@ -182,14 +188,44 @@ jobs:
           assert report["nodes"]["product-state"]["current_binding"]["status"] == "out_of_scope"
           PY
 
+      - name: Stage exact canonical archive members
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from scripts.verify_tracked_source_tree import CANONICAL_RECEIPT, source_profile_paths, verify_tracked_source_tree
+
+          modified, untracked = source_profile_paths("producer")
+          admission = verify_tracked_source_tree(
+              repo_root=Path("."), source_sha=os.environ["GITHUB_SHA"],
+              allowed_modified_paths=modified,
+              allowed_untracked_paths=untracked | {CANONICAL_RECEIPT},
+          )
+          print(json.dumps(admission, sort_keys=True))
+          PY
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          from scripts.verify_canonical_actions_artifact import MEMBERS
+
+          package = Path(".ci/canonical-artifact-package")
+          assert not package.exists()
+          for relative in sorted(MEMBERS):
+              source = Path(relative)
+              assert source.is_file() and not source.is_symlink()
+              target = package / relative
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(source, target)
+          assert {path.relative_to(package).as_posix() for path in package.rglob("*") if path.is_file()} == MEMBERS
+          PY
+
       - name: Upload canonical environment identity
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: canonical-verification-environment-${{ github.sha }}
-          path: |
-            ${{ env.CANONICAL_RECEIPT_PATH }}
-            ${{ env.CANONICAL_WHEEL_CONTRACT }}
-            ${{ env.CANONICAL_WHEEL_DIR }}/*.whl
+          name: canonical-verification-environment-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
+          path: .ci/canonical-artifact-package
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90

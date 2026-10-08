@@ -164,11 +164,12 @@ const expectedDependencies = {
 
 const expectedDevDependencies = {
   '@playwright/test': '1.56.1',
+  '@types/node': '24.0.0',
   '@types/react': '18.2.15',
   '@types/react-dom': '18.2.7',
   '@vitejs/plugin-react': '6.0.1',
   postcss: '8.5.26',
-  typescript: '5.0.2',
+  typescript: '5.1.6',
   vite: '8.0.16',
 }
 

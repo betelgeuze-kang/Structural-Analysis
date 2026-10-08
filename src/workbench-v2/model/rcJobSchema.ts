@@ -10,6 +10,7 @@ export interface RcJobSummary {
   sourceRevision: string
   targets: number[]
   hasPreload?: boolean
+  pinRoller?: { pin: string; roller: string }
   assemblyReuse?: boolean
   constantLoads?: RcObject[]
   control: { node_id: string; component: string; unit: string }
@@ -22,6 +23,13 @@ export interface RcJobSummary {
   historyFile?: { status: 'complete' | 'prefix' | 'blocked'; declaredTargets: number; bytes: number; unknownCalls: number }
 }
 export type RcArtifacts = Record<string, Uint8Array>
+/** Kept inside the original reviewer worker; no response arrays cross this boundary. */
+export interface RcQuantityReportSource {
+  tenantId: string | null
+  model: RcObject
+  bindings: RcObject
+  structuralAuthority: RcObject
+}
 const AUTHORITY = {
   design_authority: false, experimental_small_displacement_rc_control: true,
   independent_execution_authentication: false, independent_physical_validation: false,
@@ -43,6 +51,8 @@ export const PATH_CLAIMS = {
   performance_improvement_claimed: false, production_promotion_eligible: false,
   public_j1_j5_authority: false,
 }
+const PIN_ROLLER_COMPILER_PROFILE = 'planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1'
+const CANTILEVER_COMPILER_PROFILE = 'planar_serial_cantilever_explicit_rectangular_rc.v1'
 export function check(value: unknown, code: string): asserts value {
   if (!value) throw new Error(`rc_review_${code}`)
 }
@@ -98,6 +108,32 @@ export function fields(raw: string): Map<string, { member: string; value: string
     return [JSON.parse(key[1]), { member, value: member.slice(key[0].length).trim() }]
   }))
 }
+export interface RcFiberPhasePolicy {
+  readonly analysis_timeout_ms: number
+  readonly verification_timeout_ms: number
+  readonly termination_grace_ms: number
+}
+/** Validate the original authored policy tokens; JS numbers alone lose 1.0/1e0. */
+export function decodeRcFiberPhasePolicy(raw: string): RcFiberPhasePolicy {
+  const policy = document(new TextEncoder().encode(raw)).value
+  check(same(Object.keys(policy).sort(), [
+    'analysis_timeout_ms', 'schema_version', 'termination_grace_ms', 'verification_timeout_ms',
+  ]) && policy.schema_version === 'bounded-rc-fiber-phase-execution-policy.v1', 'phase_execution_policy_invalid')
+  const members = fields(raw)
+  for (const [key, maximum] of [
+    ['analysis_timeout_ms', 3600000], ['verification_timeout_ms', 3600000], ['termination_grace_ms', 5000],
+  ] as const) {
+    const value = policy[key], token = members.get(key)!.value
+    check(Number.isSafeInteger(value) && value >= 1 && value <= maximum
+      && /^(?:0|[1-9]\d*)$/.test(token), 'phase_execution_policy_invalid')
+  }
+  return Object.freeze({
+    analysis_timeout_ms: policy.analysis_timeout_ms,
+    verification_timeout_ms: policy.verification_timeout_ms,
+    termination_grace_ms: policy.termination_grace_ms,
+  })
+}
+
 export async function selfHash(raw: string, value: RcObject, key: string): Promise<void> {
   const members = fields(raw)
   check(members.has(key), 'hash_missing')
@@ -107,8 +143,28 @@ export async function selfHash(raw: string, value: RcObject, key: string): Promi
 function nat(value: unknown): value is number { return Number.isSafeInteger(value) && (value as number) >= 0 }
 function hash(value: unknown): boolean { return typeof value === 'string' && /^sha256:[a-f0-9]{64}$/.test(value) }
 
-export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: RcArtifacts): Promise<{
-  summary: RcJobSummary; history: RcObject[]; terminalBytes: Uint8Array
+function pinRollerSupports(model: RcObject): { pin: string; roller: string; reactions: Array<[string, 'UX' | 'UY']> } {
+  check(Array.isArray(model.nodes) && Array.isArray(model.supports) && model.supports.length === 2, 'pin_roller_support_invalid')
+  const nodes = model.nodes.map((item: unknown) => object(item).id)
+  check(nodes.every((id: unknown) => typeof id === 'string' && id.length > 0)
+    && new Set(nodes).size === nodes.length, 'pin_roller_support_invalid')
+  const supported = new Map<string, string[]>()
+  for (const item of model.supports) {
+    const row = object(item)
+    check(typeof row.node === 'string' && nodes.includes(row.node) && !supported.has(row.node)
+      && Array.isArray(row.dofs), 'pin_roller_support_invalid')
+    supported.set(row.node, row.dofs)
+  }
+  const pin = [...supported].find(([, dofs]) => same([...dofs].sort(), ['UX', 'UY']))?.[0]
+  const roller = [...supported].find(([, dofs]) => same(dofs, ['UY']))?.[0]
+  check(pin && roller && pin !== roller, 'pin_roller_support_invalid')
+  const reactions = nodes.flatMap((node: string): Array<[string, 'UX' | 'UY']> =>
+    node === pin ? [[node, 'UX'], [node, 'UY']] : node === roller ? [[node, 'UY']] : [])
+  return { pin, roller, reactions }
+}
+
+export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: RcArtifacts, tenantId?: string): Promise<{
+  summary: RcJobSummary; history: RcObject[]; terminalBytes: Uint8Array; quantitySource: RcQuantityReportSource
 }> {
   check(job.status === 'succeeded' && job.result && job.evidence, 'publication_invalid')
   for (const role of ['request', 'checkpoint', 'result', 'evidence'] as const) {
@@ -119,7 +175,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   }
   const requestDoc = document(artifacts.request), request = requestDoc.value
   const resultDoc = document(artifacts.result), result = resultDoc.value
-  const evidence = document(artifacts.evidence).value
+  const evidenceDoc = document(artifacts.evidence), evidence = evidenceDoc.value
   check(request.schema_version === 'structural-analysis-job-request.v3'
     && request.operation === 'bounded_rc_fiber_direct_control', 'request_invalid')
   const supplied = object(request.config), solver = supplied.solver_config === undefined ? {} : object(supplied.solver_config)
@@ -137,9 +193,16 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       },
     },
   } as RcObject
+  const pinRoller = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
+  // Preserve v2 invalid-load checks while v4 binds the actual constant-load field.
   const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+    || (pinRoller && rcControlHasPreload(config))
   const version = hasPreload ? 'v2' : 'v1', offset = hasPreload ? 1 : 0
   check(request.result_contract === `bounded-rc-fiber-job-result.${version}`, 'loading_profile_invalid')
+  check(pinRoller ? config.experimental_pin_roller_beam === true
+    : config.experimental_pin_roller_beam === undefined, 'pin_roller_opt_in_invalid')
+  check(config.experimental_two_fixed_endpoints === undefined, 'request_config_invalid')
+  const supportRoles = pinRoller ? pinRollerSupports(object(request.model)) : undefined
   if (hasPreload) {
     const loads = config.constant_nodal_loads
     check(Array.isArray(loads) && loads.length > 0 && loads.length <= 16, 'constant_loads_invalid')
@@ -155,9 +218,13 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     }
   } else check(config.constant_nodal_loads === undefined, 'constant_loads_invalid')
   const execution = object(request.execution_config)
+  if (Object.prototype.hasOwnProperty.call(execution, 'phase_execution_policy')) {
+    const executionRaw = fields(requestDoc.raw).get('execution_config')!.value
+    decodeRcFiberPhasePolicy(fields(executionRaw).get('phase_execution_policy')!.value)
+  }
   check(execution.reuse_line_search_assembly === undefined || typeof execution.reuse_line_search_assembly === 'boolean', 'execution_reuse_invalid')
   const reuseProfile = execution.reuse_line_search_assembly === true ? 'rc-control-immediate-line-search-reuse.v1' : undefined
-  check(config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`
+  check((pinRoller || config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`)
     && request.model.schema_version === 'structural-analysis-canonical-model.v1'
     && typeof config.solver_config.control_tolerance_m === 'number'
     && config.solver_config.control_tolerance_m > 0, 'request_config_invalid')
@@ -172,11 +239,13 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && result.profile === `bounded_rc_fiber_durable_chunk_execution.${version}`
     && result.status === 'ready' && result.contract_pass === true
     && result.request_hash === job.request.content_hash && result.case_id === request.case_id
-    && result.source_revision === request.source_revision && /^[a-f0-9]{40}$/.test(result.source_revision)
+    && result.source_revision === request.source_revision && /^(?:[a-f0-9]{40}|sha256:[a-f0-9]{64})$/.test(result.source_revision)
     && result.source_revision_is_attestation === false && same(result.authority, AUTHORITY)
     && same(result.control_targets, targets) && result.completed_target_count === targets.length
     && result.total_target_count === targets.length && job.progress.completed_steps === targets.length
     && job.progress.total_steps === targets.length, 'result_binding_invalid')
+  check(result.resume_contract_hash === job.resume_contract_hash
+    && result.resume_contract_hash === await sha256Hex(JSON.stringify({ profile: result.profile, request_hash: job.request.content_hash })), 'resume_binding_invalid')
   const budget = object(result.execution_budget)
   check(result.execution_budget_unit === 'reserved_api_invocations'
     && budget.maximum_attempts === execution.maximum_api_invocations
@@ -200,9 +269,12 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && api.status === 'ready' && api.contract_pass === true && api.failure === null
     && same(api.unsupported_features, []) && same(api.claims, CLAIMS), 'api_invalid')
   check(await sha256Hex(fields(requestDoc.raw).get('model')!.value) === api.model.input_checksum
-    && api.model.canonical_model_checksum === api.model.input_checksum, 'model_binding_invalid')
+    && api.model.canonical_model_checksum === api.model.input_checksum
+    && api.model.compiler_profile === (pinRoller ? PIN_ROLLER_COMPILER_PROFILE : CANTILEVER_COMPILER_PROFILE), 'model_binding_invalid')
   check(api.control.global_dof === config.control_global_dof && api.control.unit === 'm'
     && ['UX', 'UY'].includes(api.control.component), 'control_invalid')
+  check(pinRoller ? api.request.experimental_pin_roller_beam === true
+    : api.request.experimental_pin_roller_beam === undefined, 'pin_roller_api_invalid')
   const binary = atob(result.terminal_checkpoint_artifact_base64)
   check(binary.length <= 128 * 1024 * 1024, 'native_too_large')
   const terminalBytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
@@ -232,7 +304,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   check(Array.isArray(receipts) && receipts.length > 0 && receipts.length <= targets.length
     && same(report.receipt_hashes, receipts.map((r: RcObject) => r.receipt_hash)), 'receipts_invalid')
   const receiptRaws = rawValues(fields(resultDoc.raw).get('receipts')!.value)
-  let completed = 0, previousOrdinal = 0, restart: string | null = null, core = 0, iterations = 0, unknown = false
+  let completed = 0, previousOrdinal = 0, restart: string | null = null, core = 0, iterations = 0
   for (const [index, item] of receipts.entries()) {
     const receipt = object(item)
     await selfHash(receiptRaws[index], receipt, 'receipt_hash')
@@ -253,6 +325,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       && receipt.api_request.allow_reversals === config.allow_reversals
       && receipt.api_request.maximum_reversals === config.maximum_reversals
       && receipt.api_request.maximum_targets === config.maximum_targets
+      && (pinRoller ? receipt.api_request.experimental_pin_roller_beam === true
+        : receipt.api_request.experimental_pin_roller_beam === undefined)
       && same(receipt.api_request.configuration.newton, config.solver_config.newton)
       && receipt.api_request.configuration.control_tolerance_m === config.solver_config.control_tolerance_m
       && receipt.api_request.configuration.load_factor_coordinate_scale_m === config.solver_config.load_factor_coordinate_scale_m
@@ -268,12 +342,11 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     for (const metrics of [receipt.analysis_metrics, receipt.verification_metrics]) {
       const work = object(metrics.control_work ?? metrics.replay_control_work)
       check(Object.values(work).every(nat) && nat(work.attempted_step_count)
-        && nat(work.known_newton_iteration_count) && nat(work.unknown_solver_work_attempt_count)
+        && nat(work.known_newton_iteration_count) && work.unknown_solver_work_attempt_count === 0
         && work.attempted_step_count === after + offset
         && metrics.response_reassembly_attempts === after + offset
         && metrics.response_reassembly_verified_count === after + offset, 'work_invalid')
       core += work.attempted_step_count; iterations += work.known_newton_iteration_count
-      unknown ||= work.unknown_solver_work_attempt_count > 0
     }
     completed = after; previousOrdinal = receipt.verification_ordinal; restart = receipt.checkpoint_sha256
   }
@@ -311,29 +384,75 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   }
   const acceptedHistory = validateRcAcceptedHistory(api, native, request.model, config)
   check(nat(core) && nat(iterations), 'work_total_invalid')
-  return { history: acceptedHistory, terminalBytes, summary: {
+  // Reconstruct the decoder's normalized config from already validated producer
+  // tokens. Authored integer tokens may become Python floats after decoding;
+  // JSON.stringify(config) would silently change those hash identities.
+  const apiRequestFields = fields(fields(apiRaw).get('request')!.value)
+  const configurationFields = fields(apiRequestFields.get('configuration')!.value)
+  const tokenObject = (values: Map<string, string>): string => `{${[...values].sort(([a], [b]) => a < b ? -1 : 1)
+    .map(([key, raw]) => `${JSON.stringify(key)}:${raw}`).join(',')}}`
+  const normalizedConfig = new Map<string, string>([
+    ['schema_version', JSON.stringify(config.schema_version)],
+    ['targets_m', fields(nativeDoc.raw).get('accepted_targets_m')!.value],
+    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m']
+      .map(key => [key, configurationFields.get(key)!.value])))],
+    ...['allow_reversals', 'maximum_reversals', 'maximum_targets', 'control_global_dof']
+      .map(key => [key, apiRequestFields.get(key)!.value] as [string, string]),
+  ])
+  for (const key of ['constant_nodal_loads', 'experimental_pin_roller_beam']) {
+    if (apiRequestFields.has(key)) normalizedConfig.set(key, apiRequestFields.get(key)!.value)
+  }
+  // canonical_hash normalizes signed floating zero; retain all other producer
+  // numeric spellings. This operates only on strict-validated JSON tokens.
+  const canonicalTokens = (raw: string): string => {
+    raw = raw.trim()
+    if (raw[0] === '{') return tokenObject(new Map([...fields(raw)].map(([key, row]) => [key, canonicalTokens(row.value)])))
+    if (raw[0] === '[') return `[${rawValues(raw).map(canonicalTokens).join(',')}]`
+    if (raw[0] === '"' || raw === 'null' || raw === 'true' || raw === 'false') return raw
+    return Number(raw) === 0 && /[.eE]/.test(raw) ? '0.0' : raw
+  }
+  const quantitySource: RcQuantityReportSource = {
+    tenantId: tenantId ?? null, model: request.model, structuralAuthority: result.authority,
+    bindings: {
+      tenant_id: tenantId ?? null, job_id: job.job_id, completed_job_revision: job.revision,
+      terminal_event_hash: job.terminal_event_hash,
+      original_artifacts: { request: job.request, checkpoint: job.checkpoint, result: job.result, evidence: job.evidence },
+      case_id: request.case_id, source_revision: request.source_revision, source_revision_is_execution_attestation: false,
+      canonical_model_checksum: api.model.canonical_model_checksum, model_input_checksum: api.model.input_checksum,
+      compiler_profile: api.model.compiler_profile, config_hash: await sha256Hex(canonicalTokens(tokenObject(normalizedConfig))),
+      profile: result.profile, numerical_request_hash: result.request_hash, resume_contract_hash: result.resume_contract_hash,
+      durable_result_hash: result.result_hash, api_result_hash: api.result_hash,
+      terminal_native_checkpoint_sha256: tail.checkpoint_sha256, terminal_native_checkpoint_byte_length: tail.checkpoint_byte_length,
+      worker_validation_report_hash: await sha256Hex(canonicalTokens(fields(evidenceDoc.raw).get('validation_report')!.value)),
+      receipt_hashes: report.receipt_hashes,
+    },
+  }
+  return { history: acceptedHistory, terminalBytes, quantitySource, summary: {
     resultHash: result.result_hash, sourceRevision: result.source_revision,
     ...(reuseProfile ? { assemblyReuse: true } : {}),
-    targets, hasPreload, constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
+    targets, hasPreload, pinRoller: supportRoles && { pin: supportRoles.pin, roller: supportRoles.roller },
+    constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
     control: api.control, reservedInvocations: budget.reserved_attempts,
     confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
-    unknownWork: unknown || budget.reserved_attempts !== receipts.length * 2,
+    unknownWork: budget.reserved_attempts !== receipts.length * 2,
     artifactRoles: [...Object.keys(artifacts), 'terminal'],
   } }
 }
 
-// The experimental two-fixed-endpoint request uses v3 transport, while its
-// result and restart schema still follow whether a constant preload exists.
-// Durable-job admission above remains limited to its existing v1/v2 profiles.
+// Direct studies can carry v3/v4 preload; durable v4 binds optional loads to v2
+// results. Admission still requires its declared support/loading profile.
 export function rcControlHasPreload(config: RcObject): boolean {
   return (config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
-    || config.schema_version === 'bounded-rc-fiber-direct-control-request.v3')
+    || config.schema_version === 'bounded-rc-fiber-direct-control-request.v3'
+    || config.schema_version === 'bounded-rc-fiber-direct-control-request.v4')
     && Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0
 }
 
 /** Shared stored-history binding checks; no numerical execution. */
 export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model: RcObject, config: RcObject): RcObject[] {
   const hasPreload = rcControlHasPreload(config)
+  const supportRoles = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
+    ? pinRollerSupports(model) : undefined
   const offset = hasPreload ? 1 : 0
   const history = hasPreload ? [api.preload_response, ...api.response_history] : api.response_history
   const targets = config.targets_m
@@ -370,6 +489,18 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
     if (!preload) check(controlled && Math.abs(controlled[`${api.control.component}_m`] - targets[targetIndex]) <= config.solver_config.control_tolerance_m, 'controlled_target_invalid')
     for (const r of row.support_reactions) check(nodeIds.includes(r.node_id) && ['UX', 'UY', 'RZ'].includes(r.dof)
       && r.unit === (r.dof === 'RZ' ? 'N*m' : 'N') && typeof r.value_si === 'number', 'reaction_invalid')
+    if (supportRoles) {
+      check(row.support_reactions.length === 3, 'pin_roller_reaction_invalid')
+      row.support_reactions.forEach((reaction: RcObject, i: number) => {
+        check(reaction.node_id === supportRoles.reactions[i][0]
+          && reaction.dof === supportRoles.reactions[i][1]
+          && reaction.unit === 'N', 'pin_roller_reaction_invalid')
+      })
+      for (const [nodeId, dof] of supportRoles.reactions) {
+        const node = row.node_displacements.find((item: RcObject) => item.node_id === nodeId)
+        check(node && node[`${dof}_m`] === 0, 'pin_roller_restrained_displacement_invalid')
+      }
+    }
     for (const m of row.member_end_forces) check(nodeIds.includes(m.node_i) && nodeIds.includes(m.node_j)
       && ['local_end_i', 'local_end_j'].every((end) => ['FX_N', 'FY_N', 'MZ_Nm'].every((key) => typeof object(m[end])[key] === 'number')), 'member_invalid')
     for (const s of row.section_results) check(memberIds.includes(s.member_id) && nat(s.integration_point_index)

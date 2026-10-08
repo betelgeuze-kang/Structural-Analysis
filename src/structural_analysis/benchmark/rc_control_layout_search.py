@@ -31,6 +31,9 @@ from structural_analysis.benchmark.rc_control_layout_learning import (
 from structural_analysis.api.frame3d_direct_control_request import (
     strict_json_object_bytes,
 )
+from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+    BoundedRCFiberDirectControlRequest,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.benchmark.rc_control_prefix_screen import run_prefix_screen
 
@@ -114,6 +117,36 @@ def _training_cost(policy, report):
     return report
 
 
+def _price_order_control_binding(model, request):
+    """Bind a compiled layout's authored control/loading to its canonical slots.
+
+    Coordinates vary across layouts. Canonical ranks use the same XY ordering
+    as the already checked fixed physical context, without changing its bytes.
+    """
+    nodes = model.nodes
+    index, component = divmod(request.control_global_dof, 3)
+    if index >= len(nodes):
+        raise ValueError("layout price-order control node is outside the model")
+    canonical = {
+        node["id"]: rank
+        for rank, node in enumerate(
+            sorted(nodes, key=lambda node: tuple(node["coordinates"][:2]))
+        )
+    }
+    try:
+        preload = tuple(
+            sorted(
+                (canonical[node], fx, fy, mz)
+                for node, fx, fy, mz in request.constant_nodal_loads
+            )
+        )
+    except KeyError as error:
+        raise ValueError(
+            "layout price-order preload node is outside the model"
+        ) from error
+    return canonical[nodes[index]["id"]], component, preload
+
+
 def _run_layout_search(
     baseline,
     candidates,
@@ -142,6 +175,10 @@ def _run_layout_search(
     if only_strategy is not None and evaluate_exhaustive_oracle:
         raise ValueError("standalone layout execution cannot receive an oracle")
     uses_policy = only_strategy != "price_order"
+    if type(request) is not BoundedRCFiberDirectControlRequest:
+        raise ValueError("exact bounded direct-control request required")
+    if request.experimental_pin_roller_beam and uses_policy:
+        raise ValueError("pin-roller RC layout learned policy is not supported")
     if not uses_policy and (policy is not None or training_report is not None):
         raise ValueError("price-only layout execution cannot receive learned artifacts")
     if uses_policy and type(policy) is not RCControlLayoutPolicy:
@@ -186,6 +223,7 @@ def _run_layout_search(
     )
     pool, identities = [], set()
     context = None
+    control_binding = None
     for key, model in models.items():
         descriptor = control_layout_candidate_features(model, request)
         identity = descriptor["physical_model_identity"]
@@ -203,10 +241,18 @@ def _run_layout_search(
             and context != policy_data["context_hash"]
         ):
             raise ValueError("layout search fixed context mismatch")
+        binding = _price_order_control_binding(model, request)
+        if control_binding is None:
+            control_binding = binding
+        elif binding != control_binding:
+            raise ValueError(
+                "layout price-order physical control/preload binding mismatch"
+            )
         identities.add(identity)
         quantities = design.calculate_fiber_frame_member_quantities(
             model,
             experimental_two_fixed_endpoints=request.experimental_two_fixed_endpoints,
+            experimental_pin_roller_beam=request.experimental_pin_roller_beam,
         )
         raw = study._bytes(model.canonical_payload())
         pool.append(

@@ -12,6 +12,7 @@ const allowedExtraEnvironment = new Set([
   'VITE_BASE_PATH',
   'WORKBENCH_PROTOTYPE_BASE_URL',
   'WORKBENCH_V2_BASE_URL',
+  'PLAYWRIGHT_JSON_OUTPUT_FILE',
 ])
 
 export function sha256(file) {

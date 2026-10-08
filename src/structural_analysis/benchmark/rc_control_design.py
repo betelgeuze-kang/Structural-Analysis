@@ -286,8 +286,11 @@ def _reference_design_row(
         # Preserve that distinction instead of making every block look like a
         # mismatch introduced by fresh verification.
         path = payload.get("path") or {}
-        failed = [attempt for attempt in path.get("attempts", ())
-                  if attempt.get("committed") is False]
+        failed = [
+            attempt
+            for attempt in path.get("attempts", ())
+            if attempt.get("committed") is False
+        ]
         if failed:
             attempt = failed[-1]
             work = attempt.get("solver_work") or {}
@@ -408,7 +411,9 @@ def compare_rc_control_designs(
         "source_revision_is_attestation": False,
     }
     if prune_cost_dominated:
-        identity["execution_policy"] = "strict_verified_cost_dominance_in_authored_order.v1"
+        identity["execution_policy"] = (
+            "strict_verified_cost_dominance_in_authored_order.v1"
+        )
     if reuse_line_search_assembly:
         identity["line_search_assembly_reuse"] = (
             "rc-control-immediate-line-search-reuse.v1"
@@ -421,8 +426,15 @@ def compare_rc_control_designs(
     incumbent = None
     for candidate in (None, *candidates):
         row = _reference_design_row(
-            baseline, candidate, request, root, kwargs, prices,
-            history_limits, material_limits, terminal_limits,
+            baseline,
+            candidate,
+            request,
+            root,
+            kwargs,
+            prices,
+            history_limits,
+            material_limits,
+            terminal_limits,
             **({"cost_incumbent": incumbent} if prune_cost_dominated else {}),
         )
         rows.append(row)
@@ -430,12 +442,16 @@ def compare_rc_control_designs(
             prune_cost_dominated
             and row["full_reference_verification_pass"]
             and row["selection_eligible"]
-            and all(inv["status"] == "returned" and inv["unknown_execution_work"] is False for inv in row["invocations"])
+            and all(
+                inv["status"] == "returned" and inv["unknown_execution_work"] is False
+                for inv in row["invocations"]
+            )
         ):
             estimate = row["material_estimate"]["total"]
             if incumbent is None or estimate < incumbent["estimate"]:
                 incumbent = {
-                    "candidate_id": row["candidate_id"], "estimate": estimate,
+                    "candidate_id": row["candidate_id"],
+                    "estimate": estimate,
                     "result_sha256": row["artifacts"]["result"]["sha256"],
                     "verification_sha256": row["artifacts"]["verification"]["sha256"],
                     "model_sha256": row["artifacts"]["model"]["sha256"],
@@ -499,17 +515,60 @@ def compare_rc_control_designs(
             or row["status"] == "skipped_cost_dominated"
             for row in rows
         )
-        report["status"] = ("complete_with_cost_exclusions" if skipped else "complete") if resolved else "incomplete"
+        report["status"] = (
+            ("complete_with_cost_exclusions" if skipped else "complete")
+            if resolved
+            else "incomplete"
+        )
         report["cost_pruning"] = {
             "skipped_candidate_ids": [row["candidate_id"] for row in skipped],
             "skipped_count": len(skipped),
             "api_invocation_count": sum(len(row["invocations"]) for row in rows),
-            "minimum_scoped_estimate_proved_within_declared_candidates": resolved and selected is not None,
+            "minimum_scoped_estimate_proved_within_declared_candidates": resolved
+            and selected is not None,
             "skipped_candidate_feasibility_known": False,
-            "all_requested_models_physically_verified": all(row["full_reference_verification_pass"] for row in rows),
+            "all_requested_models_physically_verified": all(
+                row["full_reference_verification_pass"] for row in rows
+            ),
             "saved_wall_time_measured": False,
         }
     design._finite_tree(report)
     report["report_hash"] = _sha(_bytes(report))
     _save(root, "comparison.json", _bytes(report))
     return report
+
+
+def _evaluate_design_row(
+    baseline,
+    candidate,
+    request,
+    *,
+    root,
+    prices,
+    history_limits,
+    material_limits,
+    terminal_limits,
+    reuse_line_search_assembly: bool = False,
+):
+    """Compatibility hook for local reuse; delegate to the current fresh path.
+
+    The original implementation, work counters and verification remain in one
+    place. The complete request includes constant preload and solver settings.
+    Reuse never changes the current scientific comparison's execution policy.
+    """
+    if type(reuse_line_search_assembly) is not bool:
+        raise ValueError("explicit boolean line-search assembly reuse required")
+    kwargs = request.api_kwargs() | {"restart": None}
+    if reuse_line_search_assembly:
+        kwargs["reuse_line_search_assembly"] = True
+    return _reference_design_row(
+        baseline,
+        candidate,
+        request,
+        root,
+        kwargs,
+        prices,
+        history_limits,
+        material_limits,
+        terminal_limits,
+    )
