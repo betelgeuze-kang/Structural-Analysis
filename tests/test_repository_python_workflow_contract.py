@@ -201,6 +201,26 @@ def test_nightly_materializes_and_checks_current_source_mechanics_before_consume
         assert ci_commands.index(check) == ci_commands.index(build) + 1
 
 
+def test_heavy_quality_matches_deterministic_numerical_environment() -> None:
+    workflows = ROOT / ".github" / "workflows"
+    heavy = yaml.safe_load((workflows / "nightly-heavy-solver.yml").read_text())
+    nightly = yaml.safe_load((workflows / "nightly-full-quality.yml").read_text())
+    expected = {
+        "OPENBLAS_CORETYPE": "Haswell",
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+    }
+    for name, value in expected.items():
+        assert nightly["env"][name] == value
+        assert heavy["env"][name] == value
+    job = heavy["jobs"]["heavy-full-quality"]
+    # Job/step overrides must not split the producer, parent validator and
+    # isolated worker numerical environments.
+    for scope in (job, *job["steps"]):
+        for name, value in expected.items():
+            assert scope.get("env", {}).get(name, value) == value
+
+
 def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
     workflow = (ROOT / ".github" / "workflows" / "nightly-heavy-solver.yml").read_text(
         encoding="utf-8"

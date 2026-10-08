@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:d82cd040de643d83ba774dca3c0983d28e316f32216805a3661fdf2bf75f4efe",
+  "inventory_digest": "sha256:3e9e2755f2fb7d352fcabcd22d4300c728a113c421b205d6ee7bf44ed337a669",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -539,7 +539,7 @@
           "blob_sha": "46f9c2a5e063f09d618f01592532277f25c5557a",
           "change_status": "added",
           "changes": 46,
-          "current_blob_sha": "dfecf184ef211ba99dd1a6d466fda74fc89211fa",
+          "current_blob_sha": "1e6f1e486f34455c49b2a956209014a4f59a0f92",
           "current_relation": "different",
           "deletions": 0,
           "path": ".github/workflows/nightly-heavy-solver.yml",
