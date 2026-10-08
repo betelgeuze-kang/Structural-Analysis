@@ -63,6 +63,14 @@ Sigstore attestation 검증이 필수다.
 `non_authoritative_pre_attestation_observation`으로 표시된다. 측정 API는
 실행 platform과 일치해야 하지만, 관측 수치 자체는
 `verified_exact_source_github_provenance_attestation`을 검증하기 전에는 권위가 없다.
+Linux에서는 `/proc/self/status`의 `VmHWM`을 읽어 현재 worker 주소 공간의
+최고 RSS를 바이트로 기록한다. `getrusage(RUSAGE_SELF).ru_maxrss`는 실행 방식에
+따라 exec 이전 부모의 최고값을 유지할 수 있어, 큰 pytest 실행기에서 시작한
+작은 worker를 1 GiB 초과로 오판할 수 있다. VmHWM이 없거나 단위·값이 잘못되면
+다른 측정값으로 대체하지 않고 실패한다. 이는 worker 자체의 관측치이며 자손
+프로세스나 시스템 전체 메모리의 합계·강제 제한이 아니다. Windows는 기존
+PeakWorkingSetSize, 다른 POSIX 환경은 기존 getrusage 측정을 유지한다.
+
 Worker가 timeout·signal·nonzero exit·invalid JSON·identity/schema 오류를 내면
 유형·crash/OOM·wall-limit·blocker가 서로 결합된 blocked receipt로
 정규화한다. Workflow는 실행 실패 시에도 생성된 blocked receipt를
