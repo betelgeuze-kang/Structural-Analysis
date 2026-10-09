@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import signal
 import time
+import pytest
 
 
 from structural_analysis.execution.job_store_backup import (
@@ -24,11 +25,23 @@ _SPEC.loader.exec_module(lifecycle)
 LIMIT = 10 * 1024 * 1024
 
 
-def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch):
+@pytest.mark.parametrize("profile", ["legacy", "pin-roller-layers"])
+def test_rc_checkpoint_backup_stop_restore_resume_and_report(
+    tmp_path, monkeypatch, profile
+):
     source = tmp_path / "source"
     service = lifecycle.service(source)
+    request = lifecycle.request()
+    if profile == "pin-roller-layers":
+        spec = importlib.util.spec_from_file_location(
+            "combined_rc_browser_helpers",
+            Path(__file__).parent / "frontend/rc_lifecycle_http_fixture.py",
+        )
+        fixture = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixture)
+        request = fixture.authored_pin_roller_layers_request()
     job = service.submit_job(
-        **lifecycle.tenant(), idempotency_key="backup-rc", request=lifecycle.request()
+        **lifecycle.tenant(), idempotency_key="backup-rc", request=request
     )
     first = lifecycle.spawn(source, "first")
     try:
@@ -149,6 +162,13 @@ def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypat
     report_bytes = reopened.read_rc_quantity_report(
         job.job_id, report["report_id"], **lifecycle.tenant()
     )
+    assert (
+        json.loads(reopened.read_request(job.job_id, **lifecycle.tenant())) == request
+    )
+    if profile == "pin-roller-layers":
+        assert json.loads(report_bytes)["quantities"]["totals"][
+            "longitudinal_rebar_mass_kg"
+        ] == pytest.approx(17.898)
     assert (
         "sha256:" + hashlib.sha256(report_bytes).hexdigest() == report["content_hash"]
     )
