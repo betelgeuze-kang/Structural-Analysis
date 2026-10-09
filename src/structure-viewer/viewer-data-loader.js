@@ -38,10 +38,14 @@ export function resolveRepoArtifactUrl(logicalPath, href = globalThis.window?.lo
   }
 }
 
+// Make the default public preset a build asset; dynamic script strings are not
+// discovered by Vite and otherwise resolve to the host's HTML fallback.
+const MIDAS33_SIDECAR_URL = new URL('./index.midas33.data.js', import.meta.url).href;
+
 export const PRESET_SIDECAR_FILES = {
-  midas33: './index.midas33.data.js',
-  midas33_pr: './index.midas33.data.js',
-  midas33_optimized: './index.midas33.data.js',
+  midas33: MIDAS33_SIDECAR_URL,
+  midas33_pr: MIDAS33_SIDECAR_URL,
+  midas33_optimized: MIDAS33_SIDECAR_URL,
   real_drawing_private_3d: './index.real_drawing_private.data.js',
 };
 

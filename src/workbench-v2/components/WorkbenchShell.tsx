@@ -4,6 +4,7 @@ import type { ProviderMode } from '../model/evidenceAdapter'
 import { StateChip, dataModeChipState } from './StateChip'
 
 interface WorkbenchShellProps {
+  workflow?: 'rc'
   dataMode: DataMode
   providerMode: ProviderMode
   sourceLabel: string
@@ -14,6 +15,7 @@ interface WorkbenchShellProps {
 }
 
 export function WorkbenchShell({
+  workflow,
   dataMode,
   providerMode,
   sourceLabel,
@@ -34,12 +36,12 @@ export function WorkbenchShell({
         <div>
           <p className="wb2-eyebrow">Structural Optimization Workbench</p>
           <div className="wb2-title-row">
-            <h1>Workbench v2</h1>
-            <StateChip state={dataModeChipState(dataMode)} srLabel="Data mode" />
+            <h1>{workflow === 'rc' ? 'RC project' : 'Workbench v2'}</h1>
+            {workflow !== 'rc' ? <StateChip state={dataModeChipState(dataMode)} srLabel="Data mode" /> : null}
           </div>
         </div>
         <div className="wb2-header-actions">
-          <div className="wb2-mode-switch" role="group" aria-label="Data provider">
+          {workflow !== 'rc' ? <div className="wb2-mode-switch" role="group" aria-label="Data provider">
             <span className="wb2-mode-label">Provider</span>
             {(['demo', 'live'] as ProviderMode[]).map((m) => (
               <button
@@ -53,7 +55,7 @@ export function WorkbenchShell({
                 {m === 'demo' ? 'Demo' : 'Live'}
               </button>
             ))}
-          </div>
+          </div> : null}
           <a className="wb2-legacy-link" href="#/legacy" data-wb2-legacy-link>
             Legacy desk
           </a>
