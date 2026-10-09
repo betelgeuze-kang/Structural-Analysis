@@ -39,3 +39,13 @@ The loader now uses a build-resolved asset URL for that preset, and the delivery
 verifier requires one emitted file with exact source bytes. Private drawing
 sidecar loading is unchanged. Missing or substituted public preset files fail the
 delivery check instead of silently receiving an HTML fallback from a static host.
+
+## RC project surface
+
+When the host configures only the RC job collection, Workbench opens a dedicated
+RC project surface. It does not mount the unrelated demo case provider, building
+viewer, analysis status or general-case export. Job status, stored result checks,
+request editing and saved quantity reports remain in the RC workflow panel.
+The header makes no success or verification claim before those checks finish.
+An explicitly combined native Frame3D/RC host configuration retains the general
+workspace so neither configured work area is silently removed.
