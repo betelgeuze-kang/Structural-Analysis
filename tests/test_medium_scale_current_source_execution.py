@@ -125,6 +125,56 @@ def test_one_medium_scale_case_runs_all_resource_and_numerical_gates() -> None:
     )
 
 
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux address-space peak")
+def test_worker_peak_excludes_launcher_peak_but_retains_worker_allocations() -> None:
+    child = (
+        "import json, resource; "
+        "from structural_analysis.benchmark.medium_scale_execution import _peak_memory; "
+        "before = _peak_memory(); "
+        "allocation = bytearray(32 * 1024 * 1024); "
+        "after = _peak_memory(); del allocation; "
+        "print(json.dumps(dict(before=before, after=after, released=_peak_memory(), "
+        "legacy=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024)))"
+    )
+    parent = (
+        "import json, resource, subprocess, sys; "
+        "allocation = bytearray(256 * 1024 * 1024); del allocation; "
+        f"result = json.loads(subprocess.check_output([sys.executable, '-c', {child!r}], text=True)); "
+        "result['parent_peak'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024; "
+        "print(json.dumps(result))"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", parent],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    data = json.loads(result.stdout)
+    assert data["before"][1] == "Linux /proc/self/status VmHWM"
+    assert data["before"][0] < data["parent_peak"]
+    assert data["after"][0] >= data["before"][0] + 24 * 1024 * 1024
+    # /proc RSS accounting is asynchronous (docs.kernel.org/filesystems/proc.html).
+    # Consecutive VmHWM samples can differ slightly after freeing pages. Verify
+    # that the worker allocation remains represented, not exact monotonicity.
+    assert data["released"][0] >= data["before"][0] + 24 * 1024 * 1024
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux address-space peak")
+@pytest.mark.parametrize(
+    "raw",
+    ["", "VmHWM: 0 kB", "VmHWM: -1 kB", "VmHWM: 1 MB", "VmHWM: 1 kB\nVmHWM: 2 kB"],
+)
+def test_worker_peak_rejects_unavailable_or_ambiguous_observation(
+    monkeypatch: pytest.MonkeyPatch, raw: str,
+) -> None:
+    from structural_analysis.benchmark.medium_scale_execution import _peak_memory
+
+    monkeypatch.setattr(Path, "read_text", lambda *args, **kwargs: raw)
+    with pytest.raises(ValueError, match="linux_worker_peak_memory_unavailable"):
+        _peak_memory()
+
+
 def test_internal_oracle_is_a_separate_source_boundary_and_deterministic() -> None:
     source_path = (
         ROOT / "src/structural_analysis/benchmark/medium_scale_independent_oracle.py"
