@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use serde_json::{json, Value};
 use structural_contracts::model_ir::{
     canonicalize_model_ir_v2, parse_model_ir_v2, provenance_projection, semantic_projection,
-    validate_model_ir_v2_wire,
+    validate_model_ir_v2_wire, ModelIrValidationIssue,
 };
 
 const GOLDEN_FIXTURES: [(&str, usize, &str, &str, &str); 8] = [
@@ -239,7 +239,7 @@ fn strict_decode_and_schema_negative_matrix_fails_before_cpp() {
     ] {
         let error = parse_model_ir_v2(bytes).expect_err("invalid input must fail");
         assert_eq!(error.code, expected_code);
-        assert!(error.issues.is_empty());
+        assert_eq!(error.issues, [] as [ModelIrValidationIssue; 0]);
     }
 
     let root_error = parse_model_ir_v2(b"[]").expect_err("root array is schema-invalid");
@@ -291,7 +291,7 @@ fn signed_zero_and_key_order_have_one_canonical_identity() {
 fn schema_report_is_explicitly_not_a_semantic_or_solver_claim() {
     let report = validate_model_ir_v2_wire(&fixture_value()).expect("schema report");
     assert!(report.schema_valid);
-    assert!(report.issues.is_empty());
+    assert_eq!(report.issues, [] as [ModelIrValidationIssue; 0]);
     assert_eq!(
         report.claim_boundary,
         "json_schema_and_canonical_identity_not_semantic_or_solver_readiness"
