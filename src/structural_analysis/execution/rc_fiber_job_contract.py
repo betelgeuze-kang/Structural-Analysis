@@ -22,6 +22,7 @@ from structural_analysis.api.strict_json import (
 )
 from structural_analysis.api.nonlinear_fiber_frame import (
     PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
+    EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
     _compile,
 )
 from structural_analysis.api.rc_fiber_frame_direct_control import (
@@ -53,6 +54,11 @@ from structural_analysis.model.schema import CanonicalModel
 
 
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
+PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
+RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
+    RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
+    PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
+)
 RC_FIBER_JOB_OPERATION = "bounded_rc_fiber_direct_control"
 RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION = "bounded-rc-fiber-job-checkpoint.v1"
 RC_FIBER_JOB_RESULT_SCHEMA_VERSION = "bounded-rc-fiber-job-result.v1"
@@ -275,7 +281,7 @@ def validate_rc_fiber_job_request(
     value = _mapping(request, 16 * 1024 * 1024)
     if (
         set(value) != _REQUEST_KEYS
-        or value["schema_version"] != RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
+        or value["schema_version"] not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
         or value["operation"] != RC_FIBER_JOB_OPERATION
         or value["result_contract"] != RC_FIBER_JOB_RESULT_SCHEMA_VERSION
         or type(value["case_id"]) is not str
@@ -300,6 +306,10 @@ def validate_rc_fiber_job_request(
     if "phase_execution_policy" in execution:
         decode_rc_fiber_phase_policy(execution["phase_execution_policy"])
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
+    if (
+        value["schema_version"] == PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION
+    ) != config.experimental_pin_roller_beam:
+        raise ValueError("RC job schema and support profile mismatch")
     if not config.targets_m or not _same_request_config_values(
         config.to_dict(), value["config"]
     ):
@@ -312,7 +322,10 @@ def validate_rc_fiber_job_request(
     model = load_neutral_json_bytes(
         rc_fiber_job_canonical_bytes(value["model"]), source_path="<durable-rc-model>"
     )
-    compiled, unsupported, _ = _compile(model.detached_analysis_snapshot())
+    compiled, unsupported, _ = _compile(
+        model.detached_analysis_snapshot(),
+        experimental_pin_roller_beam=config.experimental_pin_roller_beam,
+    )
     if compiled is None or unsupported:
         raise ValueError("RC durable request uses an unsupported canonical model")
     StatefulFiberFrame2DDisplacementControlStepAdapter(
@@ -327,7 +340,10 @@ def validate_rc_fiber_job_request(
 
 def _context(request):
     model, config = validate_rc_fiber_job_request(request)
-    compiled, _, _ = _compile(model.detached_analysis_snapshot())
+    compiled, _, _ = _compile(
+        model.detached_analysis_snapshot(),
+        experimental_pin_roller_beam=config.experimental_pin_roller_beam,
+    )
     scope = _scope(
         compiled.problem,
         config.solver_config,
@@ -340,7 +356,11 @@ def _context(request):
         "canonical_model_checksum": model.canonical_model_checksum,
         "input_checksum": model.input_checksum,
         "source_format": model.source_format,
-        "compiler_profile": PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
+        "compiler_profile": (
+            EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+            if config.experimental_pin_roller_beam
+            else PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
+        ),
         "problem_contract_hash": compiled.problem.contract_hash,
     }
     control = {
@@ -363,6 +383,11 @@ def _chunk(config, request, before):
 
 def _api_request(config, restart_hash):
     return {
+        **(
+            {"experimental_pin_roller_beam": True}
+            if config.experimental_pin_roller_beam
+            else {}
+        ),
         "targets_m": list(config.targets_m),
         "control_global_dof": config.control_global_dof,
         "configuration": config.solver_config.to_manifest(),

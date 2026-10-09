@@ -29,8 +29,9 @@ LIMIT = 10 * 1024 * 1024
 
 
 @pytest.mark.parametrize("isolated", [False, pytest.param(True, marks=pytest.mark.skipif(sys.platform != "linux", reason="Linux phase isolation"))])
+@pytest.mark.parametrize("profile", ["legacy", "pin-roller-layers"])
 @pytest.mark.parametrize("payload_cap", [None, LIMIT])
-def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch, payload_cap, isolated):
+def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch, payload_cap, isolated, profile):
     source = tmp_path / "source"
     service = lifecycle.DurableJobService(
         source, tenant_tokens=lifecycle.TENANTS, worker_tokens=lifecycle.WORKERS,
@@ -38,6 +39,14 @@ def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypat
         max_blob_payload_bytes=payload_cap,
     )
     request = lifecycle.request()
+    if profile == "pin-roller-layers":
+        spec = importlib.util.spec_from_file_location(
+            "combined_rc_browser_helpers",
+            Path(__file__).parent / "frontend/rc_lifecycle_http_fixture.py",
+        )
+        fixture = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixture)
+        request = fixture.authored_pin_roller_layers_request()
     if isolated:
         from structural_analysis.execution.rc_fiber_phase_policy import RCFiberPhasePolicy
         request["execution_config"]["phase_execution_policy"] = RCFiberPhasePolicy(30000, 30000, 100).to_dict()
@@ -169,6 +178,10 @@ def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypat
     assert lifecycle.numerical_rows(reopened_root) == lifecycle.numerical_rows(
         restored_root
     )
+
+    assert json.loads(reopened.read_request(job.job_id, **lifecycle.tenant())) == request
+    if profile == "pin-roller-layers":
+        assert json.loads(report_bytes)["quantities"]["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(17.898)
 
     for root in (source, restored_root, reopened_root):
         with sqlite3.connect(root / "jobs.sqlite3") as connection:

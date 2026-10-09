@@ -964,3 +964,34 @@ def test_actual_competing_reaper_after_observation_cannot_synthesize_exit_zero(
     assert captured.value.cleanup["direct_child_reaped"] is False
     assert len(stolen) == 1 and stolen[0]["actual_exitcode"] == 0
     _assert_reaped(stolen[0]["pid"])
+
+
+def test_browser_integer_spelling_preserves_original_identity_and_typed_chunk(real_phase_artifacts):
+    policy, original_request, original, _ = real_phase_artifacts
+    def browser_numbers(value):
+        if type(value) is float and value.is_integer():
+            return int(value)
+        if isinstance(value, dict):
+            return {key: browser_numbers(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [browser_numbers(item) for item in value]
+        return value
+    request = json.loads(original_request)
+    request["config"] = browser_numbers(request["config"])
+    browser_request = _bytes(request)
+    assert browser_request != original_request
+    before = supervisor._input_metadata('analysis', original_request, 0, 1, None, None, None, policy)
+    after = supervisor._input_metadata('analysis', browser_request, 0, 1, None, None, None, policy)
+    assert before['identity']['job_request_hash'] != after['identity']['job_request_hash']
+    assert before['identity']['chunk_request_hash'] == after['identity']['chunk_request_hash']
+    result = supervisor.run_rc_fiber_phase(
+        phase='analysis', request_bytes=browser_request, completed_before=0,
+        completed_after=1, restart=None, policy=policy, lease_check=lambda: None)
+    assert result.raw_result == original.raw_result
+    assert result.native_checkpoint == original.native_checkpoint
+    verified = supervisor.run_rc_fiber_phase(
+        phase='verification', request_bytes=browser_request, completed_before=0,
+        completed_after=1, restart=None, result=result.raw_result,
+        checkpoint=result.native_checkpoint, policy=policy, lease_check=lambda: None)
+    assert verified.verification_report['contract_pass']
+    assert verified.verification_report['fresh_source_execution_invoked']

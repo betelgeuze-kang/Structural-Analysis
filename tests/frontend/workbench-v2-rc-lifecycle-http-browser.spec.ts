@@ -1,5 +1,5 @@
-import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test'
-import { spawn, type ChildProcess } from 'node:child_process'
+import { expect, test, type Browser, type BrowserContext, type Page, type Response } from '@playwright/test'
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -10,11 +10,19 @@ type Credentials = { tenantId: string; bearerToken: string }
 type ReportReference = { report_id: string; revision: number; content_hash: string; byte_length: number }
 type Ready = {
   ready: boolean; request: Record<string, unknown>; credentials: Credentials; other_credentials: Credentials
+  explicit_layers_request: Record<string, unknown>
+  pin_roller_layers_request: Record<string, unknown>
   proof: { checkout_sha: string | null; github_sha: string | null; github_run_id: string | null; github_run_attempt: string | null; source_revision_caller_declaration: string }
 }
 type Server = { pid: number; origin: string; port: number; previous_pid?: number }
 const digest = (bytes: Uint8Array) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`
 const headers = ({ tenantId, bearerToken }: Credentials) => ({ 'X-Structural-Tenant': tenantId, Authorization: `Bearer ${bearerToken}` })
+
+// Deliberately expose no body-reading method: every lifecycle profile must
+// retain its assertions even when the browser protocol has no body to return.
+function mutationMetadata(response: Response): Pick<Response, 'status' | 'request'> {
+  return { status: () => response.status(), request: () => response.request() }
+}
 
 async function deadline<T>(pending: Promise<T>, milliseconds: number, message: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -119,7 +127,11 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
 
-test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two', async ({ browser }, testInfo) => {
+for (const { profile, isolated } of [
+  ...['legacy', 'explicit-layers', 'pin-roller', 'pin-roller-layers'].map(profile => ({ profile, isolated: false })),
+  { profile: 'pin-roller-layers', isolated: true },
+]) {
+test(`actual Workbench ${profile}${isolated ? ' isolated' : ''} RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two`, async ({ browser }, testInfo) => {
   test.setTimeout(300000)
   const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
   const driver = new Driver(workspace)
@@ -132,6 +144,16 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
   try {
     const ready = await driver.read<Ready>(20000)
     expect(ready.ready).toBe(true)
+    if (profile === 'explicit-layers') ready.request = ready.explicit_layers_request
+    evidence.profile = profile
+    if (profile === 'pin-roller') ready.request = JSON.parse(execFileSync('python3',
+      ['tests/frontend/rc_pin_roller_request.py'], { encoding: 'utf8', env: { ...process.env, PYTHONPATH: resolve('src') } }))
+    if (profile === 'pin-roller-layers') ready.request = ready.pin_roller_layers_request
+    if (isolated) (ready.request.execution_config as Record<string, unknown>).phase_execution_policy = {
+      schema_version: 'bounded-rc-fiber-phase-execution-policy.v1',
+      analysis_timeout_ms: 30000, verification_timeout_ms: 30000, termination_grace_ms: 100,
+    }
+    evidence.isolated = isolated
     evidence.source = ready.proof
     // A hosted receipt must name the checked-out commit and run identity rather
     // than relabel the caller-authored source_revision as attestation.
@@ -151,19 +173,28 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     await view.page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(ready.request))
     const submission = view.page.waitForResponse(response => response.url() === `${server.origin}/v1/jobs` && response.request().method() === 'POST')
     await view.page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
-    const submitted = await submission
+    const submitted = mutationMetadata(await submission)
     expect(submitted.status()).toBe(202)
     expect(submitted.request().postDataJSON()).toEqual(ready.request)
-    const job = await submitted.json()
-    expect(job.status).toBe('queued')
-    expect(job.job_id).toMatch(/^job_[0-9a-f]{32}$/)
-    evidence.submission = { status: submitted.status(), job_id: job.job_id, request: job.request }
-    const persisted = await driver.command<{ original_request: Record<string, unknown>; original_request_hash: string }>('inspect_job', { job_id: job.job_id })
-    expect(persisted.original_request).toEqual(ready.request)
-    expect(persisted.original_request_hash).toBe(job.request.content_hash)
+    // Chromium may discard the DevTools copy of a consumed fetch body. Bind
+    // the browser's real POST to its visible identity and independent store read.
     const projectLink = view.page.locator('[data-rc-project-link]')
     await expect(projectLink).toBeVisible()
     const savedJobUrl = (await projectLink.getAttribute('href'))!
+    expect(new URL(savedJobUrl).origin).toBe(server.origin)
+    const visibleJobId = new URL(savedJobUrl).searchParams.get('rcJob')
+    expect(visibleJobId).toMatch(/^job_[0-9a-f]{32}$/)
+    const persisted = await driver.command<{
+      job: { job_id: string; status: string; request: { content_hash: string } }
+      original_request: Record<string, unknown>; original_request_hash: string
+    }>('inspect_job', { job_id: visibleJobId })
+    const job = persisted.job
+    expect(job.job_id).toBe(visibleJobId)
+    expect(job.status).toBe('queued')
+    expect(job.job_id).toMatch(/^job_[0-9a-f]{32}$/)
+    evidence.submission = { status: submitted.status(), job_id: job.job_id, request: job.request }
+    expect(persisted.original_request).toEqual(ready.request)
+    expect(persisted.original_request_hash).toBe(job.request.content_hash)
     expect(new URL(savedJobUrl).searchParams.get('rcJob')).toBe(job.job_id)
     expect(new URL(savedJobUrl).origin).toBe(server.origin)
     // Submission creates local Open intent. A same-surface history entry must
@@ -181,8 +212,8 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     await navigateSavedLink(view.page, savedJobUrl)
     await expect(view.page.locator('[data-rc-input-summary="stored"]')).toBeAttached()
     await expect(view.page.locator('[data-rc-project-link]')).toHaveAttribute('href', savedJobUrl)
-    const first = await driver.command<{ pid: number; checkpoint_hash: string; abandoned_ordinal: number; actual_calls: { analysis: number; verification: number } }>('first_checkpoint')
-    expect(first.actual_calls).toEqual({ analysis: 1, verification: 1 })
+    const first = await driver.command<{ pid: number; checkpoint_hash: string; abandoned_ordinal: number; actual_calls: { analysis: number; verification: number }; isolated_phases: { phase: string; status: string; supervision: { child_pid: number; child_returncode: number; direct_child_reaped: boolean } }[] }>('first_checkpoint')
+    expect(first.actual_calls).toEqual({ analysis: isolated ? 0 : 1, verification: isolated ? 0 : 1 })
     expect(first.abandoned_ordinal).toBe(3)
     const killed = await driver.command<{ returncode: number; signal: string }>('kill_first')
     expect(killed).toMatchObject({ returncode: -9, signal: 'SIGKILL' })
@@ -190,6 +221,15 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     evidence.worker_death = killed
 
     await view.context.close()
+    if (profile === 'pin-roller-layers') {
+      const backup = await driver.command<{ restored_rows_equal: boolean; source_store: string; restored_store: string; original_worker_returncode: number; original_http_returncode: number; automatic_original_writer_fencing: boolean }>('backup_restore')
+      expect(backup.restored_rows_equal).toBe(true)
+      expect(backup.source_store).not.toBe(backup.restored_store)
+      expect(backup.original_worker_returncode).toBe(-9)
+      expect(backup.original_http_returncode).not.toBeNull()
+      expect(backup.automatic_original_writer_fencing).toBe(false)
+      evidence.operator_backup_restore = backup
+    }
     server = await driver.command<Server>('restart_http')
     servers.push(server)
     expect(server.origin).toBe(new URL(savedJobUrl).origin)
@@ -198,16 +238,25 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     await view.page.goto(savedJobUrl)
     await expect(view.page.locator('[data-rc-input-summary="stored"]')).toBeAttached()
     await expect(view.page.locator('[data-job-service="ready"]')).toBeVisible()
-    const restored = await driver.command<{ pid: number; checkpoint_hash: string; request_hash: string; progress: number; actual_calls: { analysis: number; verification: number } }>('resume_ready')
+    const restored = await driver.command<{ pid: number; checkpoint_hash: string; request_hash: string; progress: number; actual_calls: { analysis: number; verification: number }; isolated_phases: { phase: string; status: string; supervision: { child_pid: number; child_returncode: number; direct_child_reaped: boolean } }[] }>('resume_ready')
     expect(restored.pid).not.toBe(first.pid)
     expect(restored.checkpoint_hash).toBe(first.checkpoint_hash)
     expect(restored.request_hash).toBe(job.request.content_hash)
     expect(restored.progress).toBe(1)
     expect(restored.actual_calls).toEqual({ analysis: 0, verification: 0 })
     evidence.restored_before_numerical_calls = restored
-    const completed = await driver.command<{ job: { status: string; result: { content_hash: string } }; actual_calls: { analysis: number; verification: number } }>('complete')
+    const completed = await driver.command<{ job: { status: string; result: { content_hash: string } }; actual_calls: { analysis: number; verification: number }; isolated_phases: { phase: string; status: string; supervision: { child_pid: number; child_returncode: number; direct_child_reaped: boolean } }[] }>('complete')
     expect(completed.job.status).toBe('succeeded')
-    expect(completed.actual_calls).toEqual({ analysis: 1, verification: 1 })
+    expect(completed.actual_calls).toEqual({ analysis: isolated ? 0 : 1, verification: isolated ? 0 : 1 })
+    for (const phaseRecords of [first.isolated_phases, completed.isolated_phases]) {
+      expect(phaseRecords.map(record => record.phase)).toEqual(isolated ? ['analysis', 'verification'] : [])
+      for (const record of phaseRecords) {
+        expect(record.status).toBe('returned')
+        expect(record.supervision.direct_child_reaped).toBe(true)
+        expect(record.supervision.child_returncode).toBe(0)
+      }
+    }
+    expect(restored.isolated_phases).toEqual([])
     await verifiedReview(view.page, view.workerUrls)
     const invocationResponse = await view.page.request.get(`${server.origin}/v1/jobs/${job.job_id}/rc-invocations`, { headers: headers(ready.credentials) })
     expect(invocationResponse.status()).toBe(200)
@@ -230,15 +279,28 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
       await view.page.getByLabel('Concrete price per m³', { exact: true }).fill(concrete)
       const saved = view.page.waitForResponse(response => response.url() === `${server.origin}/v1/jobs/${job.job_id}/rc-quantity-reports` && response.request().method() === 'POST')
       await view.page.getByRole('button', { name: 'Save quantity and price revision', exact: true }).click()
-      const response = await saved
+      const response = mutationMetadata(await saved)
       expect(response.status()).toBe(200)
       const declaration = response.request().postDataJSON()
       expect(declaration.expected_request_hash).toBe(job.request.content_hash)
       expect(declaration.expected_result_artifact_hash).toBe(completed.job.result.content_hash)
       expect(declaration.declared_prices.concrete_per_m3).toBe(Number(concrete))
-      const reference = await response.json() as ReportReference
-      reports.push(reference)
       await expect(view.page.locator('[data-rc-quantity-report="verified"]')).toBeVisible()
+      const visibleReport = view.page.locator('[data-rc-saved-report-id]')
+      await expect(visibleReport).toBeVisible()
+      if (reports.length) await expect(visibleReport).not.toHaveText(reports[reports.length - 1].report_id)
+      const visibleReportId = (await visibleReport.textContent())!.trim()
+      // Read actual persisted references through the authenticated API, not
+      // Chromium's optional response-body cache. No POST is repeated.
+      const reportList = await view.context.request.get(`${server.origin}/v1/jobs/${job.job_id}/rc-quantity-reports`, { headers: headers(ready.credentials) })
+      expect(reportList.status()).toBe(200)
+      const listed = await reportList.json() as { reports: ReportReference[] }
+      expect(listed.reports).toHaveLength(reports.length + 1)
+      const matches = listed.reports.filter(reference => reference.report_id === visibleReportId)
+      expect(matches).toHaveLength(1)
+      const reference = matches[0]
+      expect(reference.revision).toBe(reports.length + 1)
+      reports.push(reference)
       await expect(view.page.locator('[data-rc-saved-report-id]')).toHaveText(reference.report_id)
     }
     expect(reports.map(report => report.revision)).toEqual([1, 2])
@@ -320,6 +382,7 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     const stored = await driver.command<{ base64: string; sha256: string; bytes: number }>('inspect_report', { job_id: job.job_id, report_id: reports[1].report_id })
     expect(downloaded).toEqual(Buffer.from(stored.base64, 'base64'))
     expect(downloaded.length).toBe(stored.bytes)
+    if (profile.endsWith('layers')) expect(JSON.parse(downloaded.toString()).quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(profile === 'pin-roller-layers' ? 17.898 : 28.26, 10)
     expect(digest(downloaded)).toBe(stored.sha256)
     expect(stored.sha256).toBe(reports[1].content_hash)
     const direct = await view.page.request.get(`${server.origin}/v1/jobs/${job.job_id}/rc-quantity-reports/${reports[1].report_id}`, { headers: headers(ready.credentials) })
@@ -370,3 +433,4 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     expect(driver.child.exitCode).toBe(0)
   }
 })
+}

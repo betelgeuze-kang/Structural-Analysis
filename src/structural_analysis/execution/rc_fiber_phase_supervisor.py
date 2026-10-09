@@ -392,13 +392,19 @@ def _input_metadata(
         raise ValueError("phase range/restart differs from the authored fixed chunk")
     if request["execution_config"].get("phase_execution_policy") != policy.to_dict():
         raise ValueError("phase policy differs from the immutable authored request")
-    chunk = dict(
-        config, targets_m=config["targets_m"][completed_before:completed_after]
+    # The durable request keeps its original byte identity, including numeric
+    # spelling. The API request hash belongs to the strictly decoded typed
+    # config: browser JSON.stringify may legitimately serialize 1.0 as 1.
+    from dataclasses import replace
+    from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+        decode_bounded_rc_fiber_direct_control_request,
     )
+    decoded = decode_bounded_rc_fiber_direct_control_request(config)
+    chunk = replace(decoded, targets_m=decoded.targets_m[completed_before:completed_after])
     identity = {
         "phase": phase,
         "job_request_hash": _hash(request_bytes),
-        "chunk_request_hash": _hash(_json(chunk)),
+        "chunk_request_hash": chunk.request_hash,
         "source_revision": request.get("source_revision"),
         "completed_before": completed_before,
         "completed_after": completed_after,
