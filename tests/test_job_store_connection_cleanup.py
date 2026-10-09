@@ -42,12 +42,17 @@ def test_repeated_corrupt_store_rejection_releases_handles_without_gc(tmp_path):
         try:
             open_store(root)
         except JobServiceError as error:
-            assert error.code == "job_database_open_failed"
+            # Existing stores are rejected by the read-only authority preflight,
+            # before the writable connection setup can begin.
+            assert error.code == "execution_authority_invalid"
+            assert isinstance(error.__cause__, sqlite3.DatabaseError)
             errors.append(error)  # Retain traceback/diagnostics as a caller may.
         else:
             pytest.fail("corrupt database accepted")
     assert len(errors) == 8
     assert database.read_bytes() == original
+    assert not database.with_name("jobs.sqlite3-wal").exists()
+    assert not database.with_name("jobs.sqlite3-shm").exists()
     assert retained_store_descriptors(root) == []
 
 
@@ -98,3 +103,48 @@ def test_successful_connection_remains_usable_until_transaction_returns(tmp_path
         assert connection.execute("SELECT 1").fetchone()[0] == 1
     with pytest.raises(sqlite3.ProgrammingError, match="closed"):
         connection.cursor()
+
+
+@pytest.mark.parametrize("failing_statement", [1, 2])
+def test_readonly_authority_preflight_failure_closes_connection(
+    tmp_path, monkeypatch, failing_statement
+):
+    root = tmp_path / "legacy"
+    root.mkdir()
+    database = root / "jobs.sqlite3"
+    connection = sqlite3.connect(database)
+    connection.execute("CREATE TABLE legacy (value INTEGER)")
+    connection.commit()
+    connection.close()
+    original = database.read_bytes()
+    connections = []
+    calls = []
+    connect = sqlite3.connect
+
+    class FailingReadConnection(sqlite3.Connection):
+        statements = 0
+
+        def execute(self, *args, **kwargs):
+            self.statements += 1
+            if self.statements == failing_statement:
+                raise sqlite3.DatabaseError("synthetic read-only preflight failure")
+            return super().execute(*args, **kwargs)
+
+    def tracked_connect(*args, **kwargs):
+        calls.append((args, kwargs.copy()))
+        connection = connect(*args, **kwargs, factory=FailingReadConnection)
+        connections.append(connection)
+        return connection
+
+    monkeypatch.setattr(job_service.sqlite3, "connect", tracked_connect)
+    with pytest.raises(JobServiceError, match="execution_authority_invalid") as error:
+        open_store(root)
+    assert isinstance(error.value.__cause__, sqlite3.DatabaseError)
+    assert len(connections) == 1
+    assert calls[0][0] == (database.as_uri() + "?mode=ro",)
+    assert calls[0][1] == {"uri": True}
+    with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+        connections[0].cursor()
+    assert database.read_bytes() == original
+    assert not database.with_name("jobs.sqlite3-wal").exists()
+    assert not database.with_name("jobs.sqlite3-shm").exists()
