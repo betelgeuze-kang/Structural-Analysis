@@ -123,7 +123,14 @@ def is_authored_request(value):
         authored_pin_roller_layers_request(),
         authored_isolated_request("explicit-layers"),
         authored_isolated_request("pin-roller-layers"),
+        authored_prescribed_trial_request(),
     )
+
+
+def authored_prescribed_trial_request():
+    request = authored_isolated_request("explicit-layers")
+    request["config"]["solver_config"]["initial_trial_policy"] = "prescribed_control"
+    return request
 
 
 def authored_pin_roller_request():

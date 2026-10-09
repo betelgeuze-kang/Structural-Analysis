@@ -26,7 +26,12 @@ _NEWTON_FIELDS = {
     "line_search_alphas",
     "matrix_backend",
 }
-_SOLVER_FIELDS = {"newton", "control_tolerance_m", "load_factor_coordinate_scale_m"}
+_SOLVER_FIELDS = {
+    "newton",
+    "control_tolerance_m",
+    "load_factor_coordinate_scale_m",
+    "initial_trial_policy",
+}
 _REQUEST_FIELDS = {
     "schema_version",
     "control_global_dof",
@@ -182,6 +187,8 @@ class BoundedRCFiberDirectControlRequest:
 
     def to_dict(self) -> dict[str, Any]:
         solver = asdict(self.solver_config)
+        if solver["initial_trial_policy"] == "accepted_checkpoint":
+            del solver["initial_trial_policy"]
         solver["newton"]["line_search_alphas"] = list(
             self.solver_config.newton.line_search_alphas
         )

@@ -187,7 +187,10 @@ export function validateRcRequestProfile(value: unknown): void {
   }
   check(reversals <= config.maximum_reversals && (config.allow_reversals || reversals === 0), 'targets_invalid')
   const solver = object(config.solver_config), newton = object(solver.newton)
-  exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m'], 'solver_config_invalid')
+  const initialTrialAuthored = Object.prototype.hasOwnProperty.call(solver, 'initial_trial_policy')
+  exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
+    ...(initialTrialAuthored ? ['initial_trial_policy'] : [])], 'solver_config_invalid')
+  check(!initialTrialAuthored || ['accepted_checkpoint', 'prescribed_control'].includes(solver.initial_trial_policy), 'solver_config_invalid')
   exact(newton, ['residual_tolerance', 'increment_tolerance', 'max_iterations',
     'line_search_alphas', 'matrix_backend'], 'newton_config_invalid')
   const positive = (number: unknown): number is number => typeof number === 'number' && Number.isFinite(number) && number > 0
@@ -400,6 +403,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       && same(receipt.api_request.configuration.newton, config.solver_config.newton)
       && receipt.api_request.configuration.control_tolerance_m === config.solver_config.control_tolerance_m
       && receipt.api_request.configuration.load_factor_coordinate_scale_m === config.solver_config.load_factor_coordinate_scale_m
+      && (receipt.api_request.configuration.initial_trial_policy ?? 'accepted_checkpoint') === (config.solver_config.initial_trial_policy ?? 'accepted_checkpoint')
       && same(receipt.control, api.control) && same(receipt.model_binding, api.model)
       && validation.schema_version === 'bounded-rc-fiber-direct-control-validation.v1'
       && validation.contract_pass === true && validation.artifact_contract_pass === true
@@ -464,7 +468,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   const normalizedConfig = new Map<string, string>([
     ['schema_version', JSON.stringify(config.schema_version)],
     ['targets_m', fields(nativeDoc.raw).get('accepted_targets_m')!.value],
-    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m']
+    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
+      ...(config.solver_config.initial_trial_policy === 'prescribed_control' ? ['initial_trial_policy'] : [])]
       .map(key => [key, configurationFields.get(key)!.value])))],
     ...['allow_reversals', 'maximum_reversals', 'maximum_targets', 'control_global_dof']
       .map(key => [key, apiRequestFields.get(key)!.value] as [string, string]),

@@ -12,12 +12,15 @@ from tests.test_rc_fiber_durable_worker import (
 
 
 @pytest.mark.skipif(sys.platform != 'linux', reason='Linux phase isolation')
-def test_current_full_and_restarted_isolated_results_match_inline(tmp_path, monkeypatch):
+@pytest.mark.parametrize('initial_trial_policy', ['accepted_checkpoint', 'prescribed_control'])
+def test_current_full_and_restarted_isolated_results_match_inline(tmp_path, monkeypatch, initial_trial_policy):
     results = []
     for name, chunk_size, isolated in [('inline', 3, False), ('isolated', 3, True),
                                        ('restarted', 1, True)]:
         root = tmp_path / name
         request = _request(chunk_size=chunk_size)
+        if initial_trial_policy != 'accepted_checkpoint':
+            request['config']['solver_config']['initial_trial_policy'] = initial_trial_policy
         if isolated:
             request['execution_config']['phase_execution_policy'] = RCFiberPhasePolicy(
                 30000, 30000, 100).to_dict()

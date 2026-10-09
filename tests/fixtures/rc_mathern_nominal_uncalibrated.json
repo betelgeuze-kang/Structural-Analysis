@@ -1,0 +1,226 @@
+{
+  "coordinate_system": {
+    "axis_order": [
+      "X",
+      "Y",
+      "Z"
+    ],
+    "up_axis": "Z"
+  },
+  "elements": [
+    {
+      "id": "M1",
+      "integration_order": 2,
+      "nodes": [
+        "N1",
+        "N2"
+      ],
+      "section": "RC1",
+      "type": "stateful_rc_fiber_frame2d"
+    },
+    {
+      "id": "M2",
+      "integration_order": 2,
+      "nodes": [
+        "N2",
+        "N3"
+      ],
+      "section": "RC1",
+      "type": "stateful_rc_fiber_frame2d"
+    },
+    {
+      "id": "M3",
+      "integration_order": 2,
+      "nodes": [
+        "N3",
+        "N4"
+      ],
+      "section": "RC1",
+      "type": "stateful_rc_fiber_frame2d"
+    },
+    {
+      "id": "M4",
+      "integration_order": 2,
+      "nodes": [
+        "N4",
+        "N5"
+      ],
+      "section": "RC1",
+      "type": "stateful_rc_fiber_frame2d"
+    },
+    {
+      "id": "M5",
+      "integration_order": 2,
+      "nodes": [
+        "N5",
+        "N6"
+      ],
+      "section": "RC1",
+      "type": "stateful_rc_fiber_frame2d"
+    },
+    {
+      "id": "M6",
+      "integration_order": 2,
+      "nodes": [
+        "N6",
+        "N7"
+      ],
+      "section": "RC1",
+      "type": "stateful_rc_fiber_frame2d"
+    }
+  ],
+  "loads": [
+    {
+      "components": {
+        "FX": 0.0,
+        "FY": -10.0,
+        "FZ": 0.0,
+        "MX": 0.0,
+        "MY": 0.0,
+        "MZ": 0.0
+      },
+      "node": "N3"
+    },
+    {
+      "components": {
+        "FX": 0.0,
+        "FY": -10.0,
+        "FZ": 0.0,
+        "MX": 0.0,
+        "MY": 0.0,
+        "MZ": 0.0
+      },
+      "node": "N5"
+    }
+  ],
+  "materials": [
+    {
+      "elastic_modulus_mpa": 201000.0,
+      "id": "steel",
+      "isotropic_hardening_modulus_mpa": 0.0,
+      "kinematic_hardening_modulus_mpa": 0.0,
+      "type": "bilinear_combined_hardening_steel",
+      "yield_stress_mpa": 510.0,
+      "yield_tolerance_mpa": 1e-10
+    },
+    {
+      "compressive_softening_rate": 400.0,
+      "compressive_strength_mpa": 51.1,
+      "elastic_modulus_mpa": 36900.0,
+      "history_tolerance": 1e-14,
+      "id": "concrete",
+      "tensile_softening_rate": 3000.0,
+      "tensile_strength_mpa": 3.6,
+      "type": "asymmetric_concrete_damage"
+    }
+  ],
+  "metadata": {
+    "case_id": "public-rc-cantilever"
+  },
+  "nodes": [
+    {
+      "coordinates": [
+        0,
+        0.0,
+        0.0
+      ],
+      "id": "N1"
+    },
+    {
+      "coordinates": [
+        0.15,
+        0.0,
+        0.0
+      ],
+      "id": "N2"
+    },
+    {
+      "coordinates": [
+        1.6,
+        0.0,
+        0.0
+      ],
+      "id": "N3"
+    },
+    {
+      "coordinates": [
+        2.25,
+        0.0,
+        0.0
+      ],
+      "id": "N4"
+    },
+    {
+      "coordinates": [
+        2.9,
+        0.0,
+        0.0
+      ],
+      "id": "N5"
+    },
+    {
+      "coordinates": [
+        4.35,
+        0.0,
+        0.0
+      ],
+      "id": "N6"
+    },
+    {
+      "coordinates": [
+        4.5,
+        0.0,
+        0.0
+      ],
+      "id": "N7"
+    }
+  ],
+  "schema_version": "structural-analysis-canonical-model.v1",
+  "sections": [
+    {
+      "concrete_layer_count": 16,
+      "concrete_material": "concrete",
+      "depth_m": 0.3,
+      "id": "RC1",
+      "steel_layers": [
+        {
+          "bar_area_m2": 0.00020106192982974675,
+          "bar_count": 2,
+          "id": "bottom",
+          "steel_material": "steel",
+          "y_m": -0.07
+        },
+        {
+          "bar_area_m2": 0.00020106192982974675,
+          "bar_count": 2,
+          "id": "top",
+          "steel_material": "steel",
+          "y_m": 0.08
+        }
+      ],
+      "type": "rectangular_rc_explicit_steel_layers",
+      "width_m": 0.2
+    }
+  ],
+  "supports": [
+    {
+      "dofs": [
+        "UX",
+        "UY"
+      ],
+      "node": "N2"
+    },
+    {
+      "dofs": [
+        "UY"
+      ],
+      "node": "N6"
+    }
+  ],
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "unsupported_features": [],
+  "warnings": []
+}

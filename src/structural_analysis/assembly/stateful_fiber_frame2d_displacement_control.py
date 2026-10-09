@@ -67,8 +67,18 @@ class StatefulFiberFrame2DDisplacementControlConfig:
     newton: NewtonRaphsonConfig = field(default_factory=NewtonRaphsonConfig)
     control_tolerance_m: float = 1.0e-12
     load_factor_coordinate_scale_m: float = 1.0e-3
+    initial_trial_policy: str = "accepted_checkpoint"
 
     def __post_init__(self) -> None:
+        if type(
+            self.initial_trial_policy
+        ) is not str or self.initial_trial_policy not in (
+            "accepted_checkpoint",
+            "prescribed_control",
+        ):
+            raise ValueError(
+                "initial_trial_policy must be accepted_checkpoint or prescribed_control"
+            )
         if type(self.newton) is not NewtonRaphsonConfig:
             raise ValueError("newton must be an exact NewtonRaphsonConfig")
         if self.newton.matrix_backend != VECTOR_MATRIX_BACKEND:
@@ -94,6 +104,12 @@ class StatefulFiberFrame2DDisplacementControlConfig:
         newton["line_search_alphas"] = list(self.newton.line_search_alphas)
         return {
             "profile": STATEFUL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE,
+            # Preserve the historical default manifest and restart identity.
+            **(
+                {"initial_trial_policy": self.initial_trial_policy}
+                if self.initial_trial_policy != "accepted_checkpoint"
+                else {}
+            ),
             "newton": newton,
             "control_tolerance_m": self.control_tolerance_m,
             "load_factor_coordinate_scale_m": self.load_factor_coordinate_scale_m,
@@ -206,7 +222,7 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
         free = (physical / self.problem.physical_coordinate_scale)[
             list(self.problem.free_global_dofs)
         ]
-        return np.concatenate(
+        initial = np.concatenate(
             (
                 free,
                 [
@@ -215,6 +231,11 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
                 ],
             )
         )
+        if self.config.initial_trial_policy == "prescribed_control":
+            # This is an initial trial, never a committed-state edit or a final
+            # coordinate snap. Ordinary Newton and all acceptance gates follow.
+            initial[self.control_free_index] = self.target_control_displacement_m
+        return initial
 
     def observe(
         self, augmented_coordinates_m: Any

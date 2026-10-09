@@ -170,6 +170,30 @@ def test_accepted_state_initial_coordinates_preserve_rotation_and_load_scale(
     assert parent.global_displacements[7] == pytest.approx(pair.target, abs=1.0e-12)
 
 
+def test_prescribed_initial_trial_does_not_edit_parent_or_other_coordinates(
+    elastic_pair,
+):
+    pair = elastic_pair
+    parent = pair.direct.accepted_checkpoint
+    original = parent.canonical_bytes()
+    target = 1.1 * pair.target
+    legacy = Adapter(pair.problem, parent, 7, target, Config())
+    prescribed = Adapter(
+        pair.problem,
+        parent,
+        7,
+        target,
+        Config(initial_trial_policy="prescribed_control"),
+    )
+    expected = legacy.initial_free_displacements_m()
+    expected[prescribed.control_free_index] = target
+    trial = prescribed.initial_free_displacements_m()
+    np.testing.assert_array_equal(trial, expected)
+    assert prescribed.observe(trial).control_error_m == 0.0
+    trial[:] = 0.0
+    assert parent.canonical_bytes() == original
+
+
 def test_augmented_jacobian_matches_finite_difference_with_original_rc_materials(
     rc_problem,
 ):

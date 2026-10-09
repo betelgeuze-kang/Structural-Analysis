@@ -7,12 +7,13 @@ import { validateRcJobArtifacts, validateRcRequestProfile, fields } from '../../
 import { validateRcQuantityReport } from '../../src/workbench-v2/model/rcQuantityReportSchema'
 import { sha256Hex } from '../../src/workbench-v2/model/checksum'
 
-for (const { profile, isolated } of [
-  { profile: 'legacy', isolated: false },
-  { profile: 'explicit-layers', isolated: false },
-  { profile: 'explicit-layers', isolated: true },
+for (const { profile, isolated, prescribed } of [
+  { profile: 'legacy', isolated: false, prescribed: false },
+  { profile: 'explicit-layers', isolated: false, prescribed: false },
+  { profile: 'explicit-layers', isolated: true, prescribed: false },
+  { profile: 'explicit-layers', isolated: true, prescribed: true },
 ] as const) {
-test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer with freshly computed artifacts`, () => {
+test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} ${prescribed ? 'prescribed' : 'accepted'} reviewer with freshly computed artifacts`, () => {
   test.describe.configure({ mode: 'serial', timeout: 120000 })
   let temporary: string, snapshot: any, reviewed: Awaited<ReturnType<typeof validateRcJobArtifacts>>
   const bytes = (value: string) => new Uint8Array(Buffer.from(value, 'base64'))
@@ -25,6 +26,7 @@ test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer
       schema_version: 'bounded-rc-fiber-phase-execution-policy.v1',
       analysis_timeout_ms: 30000, verification_timeout_ms: 30000, termination_grace_ms: 100,
     }
+    if (prescribed) authored.config.solver_config.initial_trial_policy = 'prescribed_control'
     const requestFile = path.join(temporary, 'browser-request.json')
     // The exact browser JSON.stringify boundary converts Python 1.0 to JSON 1.
     writeFileSync(requestFile, JSON.stringify(authored))
@@ -54,6 +56,7 @@ test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} reviewer
     expect(() => validateRcRequestProfile(original)).not.toThrow()
     for (const mutate of [
       (r: any) => { r.config.solver_config.newton.terminal_polishing = false },
+      (r: any) => { r.config.solver_config.initial_trial_policy = 'automatic_retry' },
       (r: any) => { r.config.constant_nodal_loads = [] },
       (r: any) => { r.config.schema_version = 'bounded-rc-fiber-direct-control-request.v4' },
       (r: any) => { r.config.experimental_two_fixed_endpoints = true },
