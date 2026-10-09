@@ -9,7 +9,8 @@ monotonic-load J1--J5 profile or a corotational model.
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
+import json
 import math
 from typing import Any
 
@@ -75,9 +76,10 @@ class StatefulFiberFrame2DDisplacementControlConfig:
         ) is not str or self.initial_trial_policy not in (
             "accepted_checkpoint",
             "prescribed_control",
+            "accepted_then_prescribed",
         ):
             raise ValueError(
-                "initial_trial_policy must be accepted_checkpoint or prescribed_control"
+                "initial_trial_policy must be accepted_checkpoint, prescribed_control or accepted_then_prescribed"
             )
         if type(self.newton) is not NewtonRaphsonConfig:
             raise ValueError("newton must be an exact NewtonRaphsonConfig")
@@ -295,6 +297,7 @@ class StatefulFiberFrame2DDisplacementControlStepResult:
     trial_solution: NewtonRaphsonVectorSolution
     trial_assembly: StatefulFiberFrame2DAssembly
     metrics: dict[str, Any]
+    initial_trial_search_json: bytes | None = field(default=None, repr=False)
 
     def _payload(self) -> dict[str, Any]:
         return deepcopy(
@@ -315,8 +318,49 @@ class StatefulFiberFrame2DDisplacementControlStepResult:
                 "trial_assembly": self.trial_assembly.to_dict(),
                 "metrics": dict(self.metrics),
                 "claim_boundary": STATEFUL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY,
+                **(
+                    {"initial_trial_search": self.initial_trial_search()}
+                    if self.initial_trial_search_json is not None
+                    else {}
+                ),
             }
         )
+
+    def initial_trial_search(self) -> dict[str, Any]:
+        if self.initial_trial_search_json is None:
+            raise ValueError("step has no declared initial trial search")
+        trace = json.loads(self.initial_trial_search_json)
+        trials = trace["trials"]
+        if (
+            trace["schema_version"] != "rc-declared-initial-trial-search.v1"
+            or trace["maximum_trials"] != 2
+            or trace["policy"] != "accepted_then_prescribed"
+            or self.metrics["config"]["initial_trial_policy"] != trace["policy"]
+            or not 1 <= len(trials) <= 2
+            or trials[-1]["committed"] is not self.committed
+            or (len(trials) == 2 and trials[0]["committed"] is not False)
+            or [row["initial_trial_policy"] for row in trials]
+            != ["accepted_checkpoint", "prescribed_control"][: len(trials)]
+            or any(
+                row["parent_checkpoint_hash"] != self.parent_checkpoint.state_hash
+                for row in trials
+            )
+            or trials[-1]["solver"] != _trial_payload(self.trial_solution)
+        ):
+            raise ValueError("initial trial search binding mismatch")
+        for row in trials:
+            if row["work"] != _trial_work(row["solver"]):
+                raise ValueError("initial trial search work mismatch")
+        if len(trials) == 2 and not _retryable_trial_payload(trials[0]["solver"]):
+            raise ValueError("initial trial retry reason mismatch")
+        return trace
+
+    def solver_work(self) -> dict[str, Any]:
+        metrics = deepcopy(self.trial_solution.metrics)
+        if self.initial_trial_search_json is not None:
+            trace = self.initial_trial_search()
+            metrics.update(_search_work(trace))
+        return metrics
 
     @property
     def step_hash(self) -> str:
@@ -359,6 +403,14 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         if config is not None
         else StatefulFiberFrame2DDisplacementControlConfig()
     )
+    if cfg.initial_trial_policy == "accepted_then_prescribed":
+        return _solve_initial_trial_search(
+            problem,
+            accepted_checkpoint,
+            control_global_dof,
+            target_control_displacement_m,
+            cfg,
+        )
     adapter = StatefulFiberFrame2DDisplacementControlStepAdapter(
         problem,
         accepted_checkpoint,
@@ -475,3 +527,184 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
             ),
         },
     )
+
+
+def _trial_payload(solution: NewtonRaphsonVectorSolution) -> dict[str, Any]:
+    return deepcopy(
+        {
+            "status": solution.status,
+            "augmented_coordinates_m": solution.free_displacements_m.tolist(),
+            "metrics": solution.metrics,
+            "convergence_history": solution.convergence_history,
+            "line_search_history": solution.line_search_history,
+            "unsupported_features": solution.unsupported_features,
+        }
+    )
+
+
+def _trial_work(solver: dict[str, Any] | None) -> dict[str, int]:
+    unknown = {
+        "known_linear_solve_count": 0,
+        "known_newton_iteration_count": 0,
+        "unknown_solver_work_attempt_count": 1,
+    }
+    if solver is None:
+        return unknown
+    metrics = solver["metrics"]
+    history = solver["convergence_history"]
+    searches = solver["line_search_history"]
+    count = len(history)
+    # Each recorded dense iteration follows exactly one successful linear solve.
+    # A singular/exceptional iteration may be absent: never infer its work.
+    if not count or [r["iteration"] for r in history] != list(range(count)):
+        return unknown
+    if solver["status"] == "ready":
+        if (
+            type(metrics.get("linear_solve_count")) is not int
+            or type(metrics.get("iteration_count")) is not int
+            or metrics.get("linear_solve_count") != count
+            or metrics.get("iteration_count") != count
+            or len(searches) != count - 1
+        ):
+            return unknown
+    elif (
+        metrics.get("terminal_reason") == "line_search_failed_to_reduce_residual"
+        and len(searches) == count
+        and searches[-1]["selected_alpha"] == 0.0
+        and history[-1]["accepted"] is False
+        and all(row["accepted"] is True for row in history[:-1])
+        and _same_vector(
+            history[-1]["free_displacements_m"], solver["augmented_coordinates_m"]
+        )
+        and _same_vector(history[-1]["residual_kn"], metrics.get("residual_kn"))
+    ):
+        pass
+    else:
+        return unknown
+    return {
+        "known_linear_solve_count": count,
+        "known_newton_iteration_count": count,
+        "unknown_solver_work_attempt_count": 0,
+    }
+
+
+def _retryable_trial_payload(solver: dict[str, Any]) -> bool:
+    metrics = solver["metrics"]
+    return bool(
+        solver["status"] == "blocked"
+        and metrics.get("terminal_reason") == "line_search_failed_to_reduce_residual"
+        and metrics.get("contract_pass") is False
+        and metrics.get("fallback_used") is False
+        and metrics.get("regularization_used") is False
+        and _trial_work(solver)["unknown_solver_work_attempt_count"] == 0
+    )
+
+
+def _pack_search(trace: dict[str, Any]) -> bytes:
+    return json.dumps(
+        trace, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
+
+
+def _search_work(trace: dict[str, Any]) -> dict[str, Any]:
+    rows = trace["trials"]
+    return {
+        "linear_solve_count": sum(r["work"]["known_linear_solve_count"] for r in rows),
+        "iteration_count": sum(r["work"]["known_newton_iteration_count"] for r in rows),
+        "newton_iteration_count": sum(
+            r["work"]["known_newton_iteration_count"] for r in rows
+        ),
+        "work_scope": "all_declared_initial_trials",
+        "initial_trial_unknown_work_count": sum(
+            r["work"]["unknown_solver_work_attempt_count"] for r in rows
+        ),
+        "declared_initial_trial_attempt_count": len(rows),
+        "declared_initial_trial_retry_used": len(rows) > 1,
+        "initial_trial_search": deepcopy(trace),
+    }
+
+
+class StatefulFiberInitialTrialSearchError(ValueError):
+    """Retain earlier observed trial work when a later invocation is invalid."""
+
+    def __init__(self, message: str, trace: dict[str, Any]):
+        super().__init__(message)
+        self._trace = _pack_search(trace)
+
+    def solver_work(self) -> dict[str, Any]:
+        return _search_work(json.loads(self._trace))
+
+
+def _solve_initial_trial_search(problem, parent, control_dof, target, cfg):
+    original = parent.canonical_bytes()
+    source_hash, config_hash = problem.contract_hash, cfg.contract_hash
+    trace = {
+        "schema_version": "rc-declared-initial-trial-search.v1",
+        "policy": "accepted_then_prescribed",
+        "maximum_trials": 2,
+        "trials": [],
+    }
+    for policy in ("accepted_checkpoint", "prescribed_control"):
+        try:
+            step = solve_stateful_fiber_frame2d_displacement_control_step(
+                problem,
+                parent,
+                control_global_dof=control_dof,
+                target_control_displacement_m=target,
+                config=replace(cfg, initial_trial_policy=policy),
+            )
+            if (
+                type(step) is not StatefulFiberFrame2DDisplacementControlStepResult
+                or parent.canonical_bytes() != original
+                or problem.contract_hash != source_hash
+                or cfg.contract_hash != config_hash
+            ):
+                raise ValueError("initial trial source or parent changed")
+            solver = _trial_payload(step.trial_solution)
+            work = _trial_work(solver)
+            if step.committed and work["unknown_solver_work_attempt_count"]:
+                raise ValueError("successful initial trial work is not verifiable")
+            row = {
+                "initial_trial_policy": policy,
+                "parent_checkpoint_hash": parent.state_hash,
+                "committed": step.committed,
+                "solver": solver,
+                "work": work,
+            }
+            # Freeze before another invocation can mutate its return metadata.
+            trace["trials"].append(json.loads(_pack_search(row)))
+        except Exception as exc:
+            trace["trials"].append(
+                {
+                    "initial_trial_policy": policy,
+                    "parent_checkpoint_hash": parent.state_hash,
+                    "committed": False,
+                    "solver": None,
+                    "work": _trial_work(None),
+                    "failure": {"type": type(exc).__name__, "message": str(exc)},
+                }
+            )
+            raise StatefulFiberInitialTrialSearchError(str(exc), trace) from exc
+        gates = step.metrics
+        retryable = (
+            not step.committed
+            and _retryable_trial_payload(solver)
+            and all(
+                gates.get(key) is True
+                for key in (
+                    "parent_checkpoint_immutable",
+                    "section_and_element_parent_binding_passed",
+                    "solver_assembly_coordinate_residual_binding_passed",
+                    "rollback_exact",
+                )
+            )
+        )
+        if policy == "prescribed_control" or not retryable:
+            break
+    metrics = deepcopy(step.metrics)
+    metrics.update(
+        config_hash=cfg.contract_hash,
+        config=cfg.to_manifest(),
+        declared_initial_trial_retry_used=len(trace["trials"]) > 1,
+    )
+    return replace(step, metrics=metrics, initial_trial_search_json=_pack_search(trace))

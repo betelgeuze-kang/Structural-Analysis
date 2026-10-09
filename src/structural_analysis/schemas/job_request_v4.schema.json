@@ -210,7 +210,8 @@
               "type": "string",
               "enum": [
                 "accepted_checkpoint",
-                "prescribed_control"
+                "prescribed_control",
+                "accepted_then_prescribed"
               ]
             }
           }

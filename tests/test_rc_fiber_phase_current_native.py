@@ -12,7 +12,7 @@ from tests.test_rc_fiber_durable_worker import (
 
 
 @pytest.mark.skipif(sys.platform != 'linux', reason='Linux phase isolation')
-@pytest.mark.parametrize('initial_trial_policy', ['accepted_checkpoint', 'prescribed_control'])
+@pytest.mark.parametrize('initial_trial_policy', ['accepted_checkpoint', 'prescribed_control', 'accepted_then_prescribed'])
 def test_current_full_and_restarted_isolated_results_match_inline(tmp_path, monkeypatch, initial_trial_policy):
     results = []
     for name, chunk_size, isolated in [('inline', 3, False), ('isolated', 3, True),
