@@ -1,6 +1,8 @@
 """Managed restore activation: real execution, old snapshots and interrupted cutover."""
 
 import json
+import gc
+import hashlib
 import selectors
 import sqlite3
 import subprocess
@@ -117,6 +119,41 @@ def test_active_execution_prevents_cutover(tmp_path):
         with pytest.raises(ValueError, match="authority busy"):
             activate_managed_restore(backup, restored, **options)
     assert current.claim_next(**worker("first"), lease_seconds=60) is not None
+
+
+def test_fenced_read_does_not_reconfigure_original_database(tmp_path):
+    current, authority, binding, job, backup, restored, options = setup_store(tmp_path)
+    activate_managed_restore(backup, restored, **options)
+    gc.collect()
+    # Deliberately choose DELETE in this disposable stale store. A query must not
+    # restore WAL after the authority has switched to a different active root.
+    database = current.root / "jobs.sqlite3"
+    with sqlite3.connect(database) as db:
+        assert db.execute("PRAGMA journal_mode=DELETE").fetchone() == ("delete",)
+    db.close()
+    before = hashlib.sha256(database.read_bytes()).hexdigest()
+    with pytest.raises(JobServiceError, match="execution_authority_rejected"):
+        current.get_job(job.job_id, **tenant())
+    assert hashlib.sha256(database.read_bytes()).hexdigest() == before
+    with sqlite3.connect(database) as db:
+        assert db.execute("PRAGMA journal_mode").fetchone() == ("delete",)
+    db.close()
+
+
+def test_connection_configuration_holds_execution_authority(tmp_path, monkeypatch):
+    current, authority, binding, job, backup, restored, options = setup_store(tmp_path)
+    original = current._open_configured_connection
+    observed = []
+
+    def configured():
+        with pytest.raises(ValueError, match="authority busy"):
+            authority.activate(binding, restored)
+        observed.append(True)
+        return original()
+
+    monkeypatch.setattr(current, "_open_configured_connection", configured)
+    assert current.get_job(job.job_id, **tenant()).job_id == job.job_id
+    assert observed == [True]
 
 
 def test_changed_destination_is_rejected_before_source_is_fenced(tmp_path):

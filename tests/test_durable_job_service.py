@@ -676,6 +676,8 @@ class _ConnectionProbe:
 
 def _bare_connection_service(tmp_path):
     service = object.__new__(DurableJobService)
+    service._execution_authority = None
+    service._execution_binding = None
     service._db_path = tmp_path / "jobs.sqlite3"
     return service
 

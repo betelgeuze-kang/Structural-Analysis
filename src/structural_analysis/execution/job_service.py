@@ -2446,6 +2446,13 @@ class DurableJobService:
             connection.close()
 
     def _connect(self) -> sqlite3.Connection:
+        # Even read callers configure SQLite's persistent journal mode. Fence
+        # this setup before opening the store; writes retain their transaction-
+        # lifetime guard separately.
+        with self.execution_guard():
+            return self._open_configured_connection()
+
+    def _open_configured_connection(self) -> sqlite3.Connection:
         # WAL setup can return BUSY without invoking SQLite's busy handler.
         # Retry fresh connections under one deadline, releasing every failed
         # connection before waiting. Transactions retain their 30-second wait.
