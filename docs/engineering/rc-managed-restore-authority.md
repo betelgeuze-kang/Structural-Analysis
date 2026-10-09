@@ -13,6 +13,23 @@ the `DurableJobService` constructor's `execution_authority` and
 staged, no-replace installation. Existing unmanaged stores are rejected; an
 offline adoption procedure is still outstanding.
 
+The operator can initialize a new store under existing parent directories:
+
+```sh
+PYTHONPATH=src python3 -m structural_analysis.execution.job_managed_init_cli \
+  /path/to/new-store /path/to/new-external-authority \
+  --maximum-blob-bytes 100000000
+```
+
+This commits the store's immutable blob payload cap and authority binding but
+starts no listener or worker. Initialize runtime tenant/worker authentication
+through the normal runtime configuration when reopening the store; initialization
+does not persist authentication credentials or create tenant jobs. The constructor
+credentials used internally exist only for the initialization object. Existing
+stores and authority directories are not overwritten. If initialization fails,
+preserve any authority directory and staged store and inspect them before another
+attempt; do not recreate authority for a store that has executed work.
+
 ## Restore and explicitly activate
 
 Use the existing backup/verify/restore command with a separately retained
