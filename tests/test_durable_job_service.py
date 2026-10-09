@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier, Event
+
 from datetime import datetime, timedelta, timezone
 import hashlib
 from io import BytesIO
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
+
+from structural_analysis.execution import job_service as job_service_module
 
 from structural_analysis.api.nonlinear_frame import (
     COROTATIONAL_GENERAL_PROFILE,
@@ -630,3 +636,311 @@ def test_service_rejects_a_symlink_root(tmp_path: Path) -> None:
         pytest.skip("platform runner does not allow unprivileged directory symlinks")
     with pytest.raises(JobServiceError, match="service_root_symlink_rejected"):
         _service(link)
+
+
+class _ConnectionClock:
+    def __init__(self):
+        self.value = 0.0
+        self.sleeps = []
+
+    def monotonic(self):
+        return self.value
+
+    def sleep(self, seconds):
+        assert seconds > 0
+        self.sleeps.append(seconds)
+        self.value += seconds
+
+
+class _ConnectionProbe:
+    def __init__(self, failure=None, *, stage="PRAGMA journal_mode = WAL", mode="wal"):
+        self.failure = failure
+        self.stage = stage
+        self.mode = mode
+        self.statements = []
+        self.closed = False
+
+    def execute(self, statement):
+        self.statements.append(statement)
+        if statement == self.stage and self.failure is not None:
+            raise self.failure
+        return self
+
+    def fetchone(self):
+        return (self.mode,)
+
+    def close(self):
+        assert not self.closed
+        self.closed = True
+
+
+def _bare_connection_service(tmp_path):
+    service = object.__new__(DurableJobService)
+    service._db_path = tmp_path / "jobs.sqlite3"
+    return service
+
+
+def _sqlite_failure(message, code=None):
+    failure = sqlite3.OperationalError(message)
+    if code is not None:
+        failure.sqlite_errorcode = code
+    return failure
+
+
+@pytest.mark.parametrize("code", [None, 5, 5 | (2 << 8)])
+def test_connection_retries_only_busy_and_closes_each_failed_connection(
+    tmp_path,
+    monkeypatch,
+    code,
+):
+    service = _bare_connection_service(tmp_path)
+    clock = _ConnectionClock()
+    probes = [
+        _ConnectionProbe(_sqlite_failure("database is locked", code)),
+        _ConnectionProbe(_sqlite_failure("database is locked", code)),
+        _ConnectionProbe(),
+    ]
+    calls = []
+
+    def connect(path, **kwargs):
+        if calls:
+            assert probes[len(calls) - 1].closed
+        calls.append(kwargs)
+        return probes[len(calls) - 1]
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic, raising=False)
+    monkeypatch.setattr(job_service_module, "sleep", clock.sleep, raising=False)
+    connection = service._connect()
+    assert connection is probes[-1]
+    assert [probe.closed for probe in probes] == [True, True, False]
+    assert len(clock.sleeps) == 2
+    assert all(call == {"timeout": 0.0, "isolation_level": None} for call in calls)
+    assert connection.row_factory is sqlite3.Row
+    assert connection.statements == [
+        "PRAGMA foreign_keys = ON",
+        "PRAGMA journal_mode = WAL",
+        "PRAGMA synchronous = FULL",
+        "PRAGMA busy_timeout = 30000",
+    ]
+    connection.close()
+
+
+def test_connection_busy_retries_share_one_monotonic_thirty_second_deadline(
+    tmp_path,
+    monkeypatch,
+):
+    clock = _ConnectionClock()
+    probes = []
+
+    def connect(path, **kwargs):
+        assert clock.value < 30.0
+        assert kwargs["timeout"] == 0.0
+        if probes:
+            assert probes[-1].closed
+        probe = _ConnectionProbe(_sqlite_failure("database is locked"))
+        probes.append(probe)
+        return probe
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic, raising=False)
+    monkeypatch.setattr(job_service_module, "sleep", clock.sleep, raising=False)
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert clock.value == pytest.approx(30.0)
+    assert 2 < len(probes) < 1000
+    assert all(probe.closed for probe in probes)
+    assert max(clock.sleeps) <= 0.05
+
+
+@pytest.mark.parametrize(
+    "stage", ["connect", "PRAGMA journal_mode = WAL", "PRAGMA synchronous = FULL"]
+)
+@pytest.mark.parametrize(
+    "message,code",
+    [
+        ("database table is locked", None),
+        ("database is locked", 6),
+        ("disk I/O error", 10),
+        ("attempt to write a readonly database", 8),
+    ],
+)
+def test_connection_non_busy_errors_fail_once_and_close(
+    tmp_path, monkeypatch, stage, message, code
+):
+    failure = _sqlite_failure(message, code)
+    probe = _ConnectionProbe(failure, stage=stage)
+    calls = []
+
+    def connect(path, **kwargs):
+        calls.append(kwargs)
+        if stage == "connect":
+            raise failure
+        return probe
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(
+        job_service_module,
+        "sleep",
+        lambda _: pytest.fail("non-BUSY retried"),
+        raising=False,
+    )
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert len(calls) == 1
+    assert probe.closed is (stage != "connect")
+
+
+def test_connection_rejects_an_unavailable_wal_mode_without_fallback(
+    tmp_path, monkeypatch
+):
+    probe = _ConnectionProbe(mode="delete")
+    monkeypatch.setattr(
+        job_service_module.sqlite3, "connect", lambda *args, **kwargs: probe
+    )
+    monkeypatch.setattr(
+        job_service_module,
+        "sleep",
+        lambda _: pytest.fail("WAL fallback retried"),
+        raising=False,
+    )
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert probe.closed
+    assert "PRAGMA synchronous = FULL" not in probe.statements
+
+
+def test_constructor_retries_real_wal_conversion_after_reader_releases_lock(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "jobs"
+    root.mkdir()
+    reader = sqlite3.connect(root / "jobs.sqlite3", isolation_level=None)
+    reader.execute("CREATE TABLE retained (value INTEGER)")
+    reader.execute("INSERT INTO retained VALUES (7)")
+    reader.execute("BEGIN")
+    assert reader.execute("SELECT value FROM retained").fetchone() == (7,)
+    retried = Event()
+    real_sleep = job_service_module.sleep
+
+    def observed_retry(seconds):
+        retried.set()
+        real_sleep(seconds)
+
+    monkeypatch.setattr(job_service_module, "sleep", observed_retry)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(_service, root)
+        try:
+            assert retried.wait(5), "WAL conversion did not retry the held reader lock"
+        finally:
+            reader.rollback()
+            reader.close()
+        service = future.result(timeout=5)
+    connection = service._connect()
+    try:
+        assert connection.execute("SELECT value FROM retained").fetchone()[0] == 7
+        assert connection.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
+        assert connection.execute("PRAGMA synchronous").fetchone()[0] == 2
+        assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        assert connection.execute("PRAGMA busy_timeout").fetchone()[0] == 30000
+        assert connection.isolation_level is None
+    finally:
+        connection.close()
+
+
+def test_simultaneous_constructors_submit_once_and_claim_once(tmp_path):
+    count = 4
+    barrier = Barrier(count, timeout=10)
+    root = tmp_path / "jobs"
+
+    def submit_and_claim(_):
+        barrier.wait()
+        service = _service(root)
+        barrier.wait()
+        submitted = _submit(service, key="simultaneous")
+        barrier.wait()
+        claim = service.claim_next(
+            worker_id="worker-a", authorization_token=WORKER_TOKEN
+        )
+        return submitted, claim
+
+    with ThreadPoolExecutor(max_workers=count) as pool:
+        results = list(pool.map(submit_and_claim, range(count)))
+    assert len({job.job_id for job, _ in results}) == 1
+    claims = [claim for _, claim in results if claim is not None]
+    assert len(claims) == 1
+    assert claims[0].job.attempt == 1
+    service = _service(root)
+    integrity = service.validate_integrity(
+        claims[0].job.job_id,
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+    )
+    assert integrity["contract_pass"] is True
+    assert integrity["event_count"] == 2
+    assert integrity["job_status"] == "running"
+
+
+def test_connection_busy_during_open_retries_without_a_connection_to_close(
+    tmp_path, monkeypatch
+):
+    clock = _ConnectionClock()
+    probe = _ConnectionProbe()
+    calls = []
+
+    def connect(path, **kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise _sqlite_failure("database is locked", 5)
+        return probe
+
+    monkeypatch.setattr(job_service_module.sqlite3, "connect", connect)
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic)
+    monkeypatch.setattr(job_service_module, "sleep", clock.sleep)
+    connection = _bare_connection_service(tmp_path)._connect()
+    assert connection is probe
+    assert len(calls) == 2
+    assert len(clock.sleeps) == 1
+    assert not probe.closed
+    connection.close()
+
+
+def test_connection_setup_cannot_extend_deadline_and_closes_before_failure(
+    tmp_path, monkeypatch
+):
+    clock = _ConnectionClock()
+    probe = _ConnectionProbe()
+    execute = probe.execute
+
+    def slow_setup(statement):
+        if statement == "PRAGMA synchronous = FULL":
+            clock.value = 30.0
+        return execute(statement)
+
+    probe.execute = slow_setup
+    monkeypatch.setattr(
+        job_service_module.sqlite3, "connect", lambda *args, **kwargs: probe
+    )
+    monkeypatch.setattr(job_service_module, "monotonic", clock.monotonic)
+    monkeypatch.setattr(
+        job_service_module, "sleep", lambda _: pytest.fail("expired deadline waited")
+    )
+    with pytest.raises(JobServiceError, match="job_database_open_failed"):
+        _bare_connection_service(tmp_path)._connect()
+    assert probe.closed
+    assert "PRAGMA busy_timeout = 30000" not in probe.statements
+
+
+def test_connection_unexpected_setup_exception_closes_without_retry(
+    tmp_path, monkeypatch
+):
+    probe = _ConnectionProbe(RuntimeError("setup interrupted"))
+    monkeypatch.setattr(
+        job_service_module.sqlite3, "connect", lambda *args, **kwargs: probe
+    )
+    monkeypatch.setattr(
+        job_service_module, "sleep", lambda _: pytest.fail("unexpected error retried")
+    )
+    with pytest.raises(RuntimeError, match="setup interrupted"):
+        _bare_connection_service(tmp_path)._connect()
+    assert probe.closed

@@ -5,6 +5,9 @@ import importlib.util
 import json
 from pathlib import Path
 import signal
+import sqlite3
+
+import pytest
 import time
 
 
@@ -24,9 +27,14 @@ _SPEC.loader.exec_module(lifecycle)
 LIMIT = 10 * 1024 * 1024
 
 
-def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch):
+@pytest.mark.parametrize("payload_cap", [None, LIMIT])
+def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch, payload_cap):
     source = tmp_path / "source"
-    service = lifecycle.service(source)
+    service = lifecycle.DurableJobService(
+        source, tenant_tokens=lifecycle.TENANTS, worker_tokens=lifecycle.WORKERS,
+        worker_tenants={name: {"a"} for name in lifecycle.WORKERS},
+        max_blob_payload_bytes=payload_cap,
+    )
     job = service.submit_job(
         **lifecycle.tenant(), idempotency_key="backup-rc", request=lifecycle.request()
     )
@@ -155,3 +163,10 @@ def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypat
     assert lifecycle.numerical_rows(reopened_root) == lifecycle.numerical_rows(
         restored_root
     )
+
+    for root in (source, restored_root, reopened_root):
+        with sqlite3.connect(root / "jobs.sqlite3") as connection:
+            policy = connection.execute("SELECT maximum_bytes FROM job_blob_payload_policy").fetchall()
+        assert policy == ([] if payload_cap is None else [(payload_cap,)])
+        if payload_cap is not None:
+            assert sum(p.stat().st_size for p in (root / "blobs").rglob("*") if p.is_file()) <= payload_cap
