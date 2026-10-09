@@ -230,7 +230,7 @@ fn bounded_cli_html_is_byte_deterministic_and_keeps_the_claim_boundary_visible()
         String::from_utf8_lossy(&first.stdout)
     );
     assert_eq!(second.status.code(), Some(0));
-    assert!(first.stderr.is_empty());
+    assert_eq!(first.stderr, [] as [u8; 0]);
     assert_eq!(first.stdout, second.stdout);
     let html = String::from_utf8(first.stdout).expect("UTF-8 HTML");
     assert!(html.starts_with("<!doctype html>\n"));
