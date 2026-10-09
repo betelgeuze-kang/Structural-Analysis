@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import signal
 import sqlite3
+import sys
 
 import pytest
 import time
@@ -27,16 +28,21 @@ _SPEC.loader.exec_module(lifecycle)
 LIMIT = 10 * 1024 * 1024
 
 
+@pytest.mark.parametrize("isolated", [False, pytest.param(True, marks=pytest.mark.skipif(sys.platform != "linux", reason="Linux phase isolation"))])
 @pytest.mark.parametrize("payload_cap", [None, LIMIT])
-def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch, payload_cap):
+def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch, payload_cap, isolated):
     source = tmp_path / "source"
     service = lifecycle.DurableJobService(
         source, tenant_tokens=lifecycle.TENANTS, worker_tokens=lifecycle.WORKERS,
         worker_tenants={name: {"a"} for name in lifecycle.WORKERS},
         max_blob_payload_bytes=payload_cap,
     )
+    request = lifecycle.request()
+    if isolated:
+        from structural_analysis.execution.rc_fiber_phase_policy import RCFiberPhasePolicy
+        request["execution_config"]["phase_execution_policy"] = RCFiberPhasePolicy(30000, 30000, 100).to_dict()
     job = service.submit_job(
-        **lifecycle.tenant(), idempotency_key="backup-rc", request=lifecycle.request()
+        **lifecycle.tenant(), idempotency_key="backup-rc", request=request
     )
     first = lifecycle.spawn(source, "first")
     try:
