@@ -337,7 +337,15 @@ class StatefulFiberFrame2DControlExecutionError(ValueError):
 
 
 def _execute_raw(
-    problem, initial, targets, control_global_dof, config, source_hash, *, phase
+    problem,
+    initial,
+    targets,
+    control_global_dof,
+    config,
+    source_hash,
+    *,
+    phase,
+    previous=None,
 ):
     """One core call per target; any declared initial trials retain all their work."""
     accepted = initial
@@ -401,6 +409,12 @@ def _execute_raw(
                 control_global_dof=control_global_dof,
                 target_control_displacement_m=target,
                 config=config,
+                **(
+                    {"previous_checkpoint": previous}
+                    if config.initial_trial_policy
+                    == "accepted_then_prescribed_then_secant"
+                    else {}
+                ),
             )
         except Exception as exc:
             if not source_unchanged():
@@ -471,7 +485,7 @@ def _execute_raw(
         )
         if not step.committed:
             break
-        accepted = step.accepted_checkpoint
+        previous, accepted = accepted, step.accepted_checkpoint
     return accepted, tuple(steps), attempts
 
 
@@ -706,6 +720,7 @@ def run_stateful_fiber_frame2d_control_path(
             cfg,
             scope["problem_contract_hash"],
             phase="suffix",
+            previous=replay_steps[-1].parent_checkpoint if replay_steps else None,
         )
     except StatefulFiberFrame2DControlExecutionError as exc:
         failure = exc.to_dict()
