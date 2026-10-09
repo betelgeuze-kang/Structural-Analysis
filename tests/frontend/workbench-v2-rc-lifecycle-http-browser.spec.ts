@@ -10,6 +10,7 @@ type Credentials = { tenantId: string; bearerToken: string }
 type ReportReference = { report_id: string; revision: number; content_hash: string; byte_length: number }
 type Ready = {
   ready: boolean; request: Record<string, unknown>; credentials: Credentials; other_credentials: Credentials
+  explicit_layers_request: Record<string, unknown>
   proof: { checkout_sha: string | null; github_sha: string | null; github_run_id: string | null; github_run_attempt: string | null; source_revision_caller_declaration: string }
 }
 type Server = { pid: number; origin: string; port: number; previous_pid?: number }
@@ -119,7 +120,8 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
 
-test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two', async ({ browser }, testInfo) => {
+for (const profile of ['legacy', 'explicit-layers'] as const) {
+test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two`, async ({ browser }, testInfo) => {
   test.setTimeout(300000)
   const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
   const driver = new Driver(workspace)
@@ -132,6 +134,8 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
   try {
     const ready = await driver.read<Ready>(20000)
     expect(ready.ready).toBe(true)
+    if (profile === 'explicit-layers') ready.request = ready.explicit_layers_request
+    evidence.profile = profile
     evidence.source = ready.proof
     // A hosted receipt must name the checked-out commit and run identity rather
     // than relabel the caller-authored source_revision as attestation.
@@ -320,6 +324,7 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     const stored = await driver.command<{ base64: string; sha256: string; bytes: number }>('inspect_report', { job_id: job.job_id, report_id: reports[1].report_id })
     expect(downloaded).toEqual(Buffer.from(stored.base64, 'base64'))
     expect(downloaded.length).toBe(stored.bytes)
+    if (profile === 'explicit-layers') expect(JSON.parse(downloaded.toString()).quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(28.26, 10)
     expect(digest(downloaded)).toBe(stored.sha256)
     expect(stored.sha256).toBe(reports[1].content_hash)
     const direct = await view.page.request.get(`${server.origin}/v1/jobs/${job.job_id}/rc-quantity-reports/${reports[1].report_id}`, { headers: headers(ready.credentials) })
@@ -370,3 +375,4 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
     expect(driver.child.exitCode).toBe(0)
   }
 })
+}

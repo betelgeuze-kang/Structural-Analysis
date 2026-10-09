@@ -67,6 +67,7 @@ from structural_analysis.materials.concrete_damage import (
 )
 from structural_analysis.materials.stateful_fiber_section import (
     StatefulRCFiberSection,
+    StatefulSectionFiber,
     make_rectangular_stateful_rc_fiber_section,
 )
 from structural_analysis.materials.uniaxial_plasticity import (
@@ -144,6 +145,16 @@ _SECTION_KEYS = {
     "bar_area_m2",
     "steel_material",
     "concrete_material",
+}
+_EXPLICIT_SECTION_TYPE = "rectangular_rc_explicit_steel_layers"
+_EXPLICIT_SECTION_KEYS = {
+    "id",
+    "type",
+    "width_m",
+    "depth_m",
+    "concrete_layer_count",
+    "concrete_material",
+    "steel_layers",
 }
 
 
@@ -676,10 +687,15 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
             f"Expected between 1 and {_MAX_SECTIONS} explicit sections.",
         )
     sections: dict[str, StatefulRCFiberSection] = {}
-    section_material_ids: dict[str, tuple[str, str]] = {}
+    section_material_ids: dict[str, tuple[str, ...]] = {}
     for index, row in enumerate(model.sections):
         path = f"/sections/{index}"
-        _exact_keys(row, _SECTION_KEYS, path)
+        explicit_layers = (
+            isinstance(row, Mapping) and row.get("type") == _EXPLICIT_SECTION_TYPE
+        )
+        _exact_keys(
+            row, _EXPLICIT_SECTION_KEYS if explicit_layers else _SECTION_KEYS, path
+        )
         section_id = _stable_id(row["id"], f"{path}/id")
         if section_id in sections:
             _fail_compile(
@@ -687,6 +703,18 @@ def _compile_exact(model: CanonicalModel) -> _CompiledPublicRCFiberFrame:
                 f"{path}/id",
                 "Section IDs must be unique.",
             )
+        if explicit_layers:
+            try:
+                section, material_ids = _compile_explicit_steel_section(
+                    row, materials, path
+                )
+            except (ValueError, OverflowError) as exc:
+                if isinstance(exc, _PublicRCFiberFrameCompileError):
+                    raise
+                _fail_compile("rc_fiber_frame_section_invalid", path, str(exc))
+            sections[section_id] = section
+            section_material_ids[section_id] = material_ids
+            continue
         if row["type"] != "rectangular_rc_fiber_section":
             _fail_compile(
                 "rc_fiber_frame_section_type_unsupported",
@@ -1557,6 +1585,108 @@ def _connected_nodes(adjacency: Mapping[str, set[str]], start: str) -> set[str]:
         visited.add(current)
         pending.extend(adjacency[current] - visited)
     return visited
+
+
+def _compile_explicit_steel_section(
+    row: Mapping[str, Any],
+    materials: Mapping[str, Any],
+    path: str,
+) -> tuple[StatefulRCFiberSection, tuple[str, ...]]:
+    """Compile authored centroid layers without equivalent common-bar substitution."""
+    width = _positive_number(row["width_m"], f"{path}/width_m")
+    depth = _positive_number(row["depth_m"], f"{path}/depth_m")
+    gross_area = _positive_number(width * depth, f"{path}/gross_area_m2")
+    count = _integer_range(
+        row["concrete_layer_count"],
+        f"{path}/concrete_layer_count",
+        2,
+        _MAX_CONCRETE_LAYERS,
+    )
+    concrete_id = _stable_id(row["concrete_material"], f"{path}/concrete_material")
+    concrete = materials.get(concrete_id)
+    if concrete is None or concrete[0] != "concrete":
+        _fail_compile(
+            "rc_fiber_frame_section_concrete_reference_invalid",
+            f"{path}/concrete_material",
+            "Expected a concrete material reference.",
+        )
+    layers = row["steel_layers"]
+    if type(layers) is not list or not 1 <= len(layers) <= 32:
+        _fail_compile(
+            "rc_fiber_frame_steel_layers_invalid",
+            f"{path}/steel_layers",
+            "Expected 1 to 32 explicit steel layers.",
+        )
+    height = depth / count
+    fibers = [
+        StatefulSectionFiber(
+            fiber_id=f"concrete-{i:02d}",
+            y_m=-depth / 2 + (i + 0.5) * height,
+            area_m2=width * height,
+            material_kind="concrete",
+        )
+        for i in range(count)
+    ]
+    overrides = []
+    material_ids = [concrete_id]
+    previous = -depth / 2
+    ids = set()
+    for index, layer in enumerate(layers):
+        layer_path = f"{path}/steel_layers/{index}"
+        if type(layer) is not dict:
+            _fail_compile(
+                "rc_fiber_frame_steel_layer_invalid",
+                layer_path,
+                "Expected an explicit layer object.",
+            )
+        _exact_keys(
+            layer,
+            {"id", "y_m", "bar_count", "bar_area_m2", "steel_material"},
+            layer_path,
+        )
+        layer_id = _stable_id(layer["id"], f"{layer_path}/id")
+        y = _finite_number(layer["y_m"], f"{layer_path}/y_m")
+        if layer_id in ids or not previous < y < depth / 2:
+            _fail_compile(
+                "rc_fiber_frame_steel_layer_position_invalid",
+                layer_path,
+                "Unique layers must increase strictly inside the section depth.",
+            )
+        ids.add(layer_id)
+        previous = y
+        bars = _integer_range(
+            layer["bar_count"], f"{layer_path}/bar_count", 1, _MAX_BARS_PER_LAYER
+        )
+        area = _positive_number(layer["bar_area_m2"], f"{layer_path}/bar_area_m2")
+        steel_id = _stable_id(layer["steel_material"], f"{layer_path}/steel_material")
+        steel = materials.get(steel_id)
+        if steel is None or steel[0] != "steel":
+            _fail_compile(
+                "rc_fiber_frame_section_steel_reference_invalid",
+                f"{layer_path}/steel_material",
+                "Expected a steel material reference.",
+            )
+        fiber_id = f"steel-layer-{layer_id}"
+        fibers.append(
+            StatefulSectionFiber(
+                fiber_id=fiber_id, y_m=y, area_m2=bars * area, material_kind="steel"
+            )
+        )
+        overrides.append((fiber_id, steel[1]))
+        material_ids.append(steel_id)
+    if math.fsum(f.area_m2 for f in fibers if f.material_kind == "steel") >= gross_area:
+        _fail_compile(
+            "rc_fiber_frame_steel_layer_area_invalid",
+            path,
+            "Total steel area must be less than gross section area.",
+        )
+    return StatefulRCFiberSection(
+        fibers=tuple(fibers),
+        steel=overrides[0][1],
+        concrete=concrete[1],
+        section_id=row["id"],
+        steel_overrides=tuple(overrides),
+    ), tuple(material_ids)
 
 
 def _exact_keys(row: Mapping[str, Any], expected: set[str], path: str) -> None:

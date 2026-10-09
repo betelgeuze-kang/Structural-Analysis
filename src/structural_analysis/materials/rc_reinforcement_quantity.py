@@ -7,6 +7,11 @@ from typing import Any
 
 def longitudinal_rebar_area_m2(section: Mapping[str, Any]) -> float:
     """Keep legacy arithmetic exact when all authored bars share one area."""
+    if section.get("type") == "rectangular_rc_explicit_steel_layers":
+        return math.fsum(
+            layer["bar_count"] * layer["bar_area_m2"]
+            for layer in section["steel_layers"]
+        )
     common = section["bar_area_m2"]
     top = section.get("top_bar_area_m2", common)
     bottom = section.get("bottom_bar_area_m2", common)
