@@ -78,3 +78,13 @@ and checkpointed snapshots, conservative spend, process death during cutover,
 reopening and quantity-report reads with synthetic RC inputs. They are not
 independent specimen validation, a total-host resource guarantee or release
 qualification. Publication review and the wider readiness gates remain open.
+
+The real HTTP/browser lifecycle suite also has an isolated-worker managed-store
+profile. It initializes an external authority, submits the authored synthetic RC
+request through the built Workbench, kills the checkpointed worker, stops HTTP,
+backs up and restores, explicitly activates generation 2, and verifies that an
+already opened source service rejects access. A fresh worker resumes; two cold
+HTTP/browser reopens and immutable report downloads exercise the ordinary service
+and browser paths. The backup receipt itself still does not claim writer fencing:
+that is established separately by activation and the stale-service rejection.
+The original unmanaged isolated profile remains as a regression comparison.
