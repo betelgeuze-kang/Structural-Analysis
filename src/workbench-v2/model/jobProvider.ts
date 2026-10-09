@@ -65,7 +65,7 @@ const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
 
-export async function loadWorkbenchJob(url: string, signal?: AbortSignal, authorize?: JobAuthorizationProvider, sessionTransport?: JobReadTransport): Promise<JobLoadResult> {
+export async function loadWorkbenchJob(url: string, signal?: AbortSignal, authorize?: JobAuthorizationProvider, sessionTransport?: JobReadTransport, rcReviewResultMaxBytes?: number): Promise<JobLoadResult> {
   if (!url) return { status: 'unconfigured', job: null, errors: [] }
   try {
     const transport = sessionTransport?.withSignal?.(signal ?? new AbortController().signal) ?? sessionTransport ?? await createJobReadTransport(url, signal, authorize)
@@ -84,7 +84,7 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal, author
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
     }
     if (job.result.media_type === 'application/vnd.structural-analysis.rc-fiber-job-result+json') {
-      const rcReview = await loadRcJobReview(job, transport, signal)
+      const rcReview = await loadRcJobReview(job, transport, signal, rcReviewResultMaxBytes)
       if (signal?.aborted) { rcReview.dispose(); return { status: 'unconfigured', job: null, errors: [] } }
       return { status: 'ready', job, errors: [], artifactStatus: 'verified', rcReview }
     }
@@ -128,6 +128,10 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal, author
     }
   } catch (error: unknown) {
     if ((error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
+    const message = (error as Error)?.message
+    if (/^rc_(?:request|checkpoint|result|evidence|artifacts)_too_large$/.test(message) || message === 'rc_review_budget_invalid') {
+      return { status: 'error', job: null, errors: [message] }
+    }
     return { status: 'error', job: null, errors: ['job API request failed'] }
   }
 }
