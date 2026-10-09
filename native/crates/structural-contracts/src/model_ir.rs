@@ -757,14 +757,17 @@ impl<'de> Visitor<'de> for StrictValueVisitor {
 mod tests {
     use serde_json::json;
 
-    use super::{canonicalize_model_ir_v2, decode_json_strict, python_compatible_float};
+    use super::{
+        canonicalize_model_ir_v2, decode_json_strict, python_compatible_float,
+        ModelIrValidationIssue,
+    };
 
     #[test]
     fn strict_decoder_rejects_duplicate_keys_at_any_depth() {
         let error = decode_json_strict(br#"{"outer":{"id":1,"id":2}}"#)
             .expect_err("duplicate key must fail before schema validation");
         assert_eq!(error.code, "model_ir_duplicate_json_key");
-        assert!(error.issues.is_empty());
+        assert_eq!(error.issues, [] as [ModelIrValidationIssue; 0]);
     }
 
     #[test]

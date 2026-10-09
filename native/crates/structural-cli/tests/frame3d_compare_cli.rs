@@ -128,7 +128,7 @@ fn comparison_cli_emits_hash_bound_non_promoting_comparison_ir() {
         "{}",
         String::from_utf8_lossy(&output.stdout)
     );
-    assert!(output.stderr.is_empty());
+    assert_eq!(output.stderr, [] as [u8; 0]);
     let comparison: Value = serde_json::from_slice(&output.stdout).expect("ComparisonIR JSON");
     assert_eq!(
         comparison["schema_version"],

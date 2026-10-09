@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{json, Value};
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
-use structural_ffi::Api;
+use structural_ffi::{Api, ModelIrValidationIssue};
 
 const GOLDEN_FIXTURES: [&str; 8] = [
     "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json",
@@ -199,7 +199,7 @@ fn descriptor_arena_covers_the_remaining_typed_families_and_nullable_fields() {
         .expect("full typed family round-trip");
     assert!(validation.report.contract_valid);
     assert!(validation.report.analysis_ready);
-    assert!(validation.report.issues.is_empty());
+    assert_eq!(validation.report.issues, [] as [ModelIrValidationIssue; 0]);
     assert_eq!(validation.report.entity_counts.nodes, 3);
     assert_eq!(validation.report.entity_counts.sections, 2);
     assert_eq!(validation.report.entity_counts.elements, 2);
@@ -247,7 +247,7 @@ fn semantic_invalidity_and_explicit_blockers_remain_distinct_success_reports() {
     assert!(blocked.report.contract_valid);
     assert!(!blocked.report.analysis_ready);
     assert_eq!(blocked.report.blocking_feature_ids, ["feature.blocked"]);
-    assert!(blocked.report.issues.is_empty());
+    assert_eq!(blocked.report.issues, [] as [ModelIrValidationIssue; 0]);
 }
 
 #[test]
