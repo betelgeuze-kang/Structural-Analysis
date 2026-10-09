@@ -399,8 +399,11 @@ def _input_metadata(
     from structural_analysis.api.rc_fiber_frame_direct_control_request import (
         decode_bounded_rc_fiber_direct_control_request,
     )
+
     decoded = decode_bounded_rc_fiber_direct_control_request(config)
-    chunk = replace(decoded, targets_m=decoded.targets_m[completed_before:completed_after])
+    chunk = replace(
+        decoded, targets_m=decoded.targets_m[completed_before:completed_after]
+    )
     identity = {
         "phase": phase,
         "job_request_hash": _hash(request_bytes),
@@ -636,7 +639,16 @@ def _stop_process(process, grace_ms):
     return diagnostics
 
 
-def _supervise(phase, parts, expected, started_ns, deadline_ns, grace_ms, lease_check):
+def _supervise(
+    phase,
+    parts,
+    expected,
+    started_ns,
+    deadline_ns,
+    grace_ms,
+    lease_check,
+    authority_fd=None,
+):
     code = f"rc_fiber_worker_{phase}_"
     process = None
     receiver = _FrameReceiver("output", phase)
@@ -673,6 +685,7 @@ def _supervise(phase, parts, expected, started_ns, deadline_ns, grace_ms, lease_
             cwd="/tmp",
             start_new_session=True,
             close_fds=True,
+            pass_fds=() if authority_fd is None else (authority_fd,),
         )
         # Track all owned endpoints before setup can fail for any one of them.
         endpoints.extend((process.stdin, process.stdout, process.stderr))
@@ -862,6 +875,7 @@ def run_rc_fiber_phase(
     checkpoint: bytes | None = None,
     policy,
     lease_check: Callable[[], None],
+    authority_fd: int | None = None,
 ) -> RCFiberPhaseReply:
     """Execute one authored phase; incomplete work never yields a measured reply."""
     started_ns = time.perf_counter_ns()
@@ -872,6 +886,15 @@ def run_rc_fiber_phase(
             "rc_fiber_worker_analysis_unsupported", "unknown numerical phase"
         )
     code = f"rc_fiber_worker_{phase}_"
+    if authority_fd is not None:
+        try:
+            if type(authority_fd) is not int or not 3 <= authority_fd <= 2**31 - 1:
+                raise ValueError("invalid authority descriptor")
+            os.fstat(authority_fd)
+        except (OSError, ValueError) as error:
+            raise RCFiberPhaseError(
+                code + "authority_invalid", "execution authority descriptor unavailable"
+            ) from error
     if (
         sys.platform != "linux"
         or type(policy) is not RCFiberPhasePolicy
@@ -931,6 +954,7 @@ def run_rc_fiber_phase(
         deadline_ns,
         policy.termination_grace_ms,
         lease_check,
+        authority_fd,
     )
 
 

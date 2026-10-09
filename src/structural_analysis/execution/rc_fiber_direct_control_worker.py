@@ -111,6 +111,34 @@ def execute_rc_fiber_direct_control_claim(
     checkpoint_target_budget: int | None = None,
     lease_seconds: int = 300,
 ) -> JobView:
+    if type(service) is not DurableJobService or type(claim) is not JobClaim:
+        raise RCFiberDirectControlWorkerError(
+            "rc_fiber_worker_argument_invalid", "exact service/claim types required"
+        )
+    # Retain authority through result publication, heartbeat shutdown, and phase
+    # child cleanup. Each numerical child also inherits its own lock descriptor.
+    with service.execution_guard() as authority_fd:
+        return _execute_rc_fiber_direct_control_claim(
+            service,
+            claim,
+            worker_id=worker_id,
+            authorization_token=authorization_token,
+            checkpoint_target_budget=checkpoint_target_budget,
+            lease_seconds=lease_seconds,
+            authority_fd=authority_fd,
+        )
+
+
+def _execute_rc_fiber_direct_control_claim(
+    service: DurableJobService,
+    claim: JobClaim,
+    *,
+    worker_id: str,
+    authorization_token: str,
+    checkpoint_target_budget: int | None = None,
+    lease_seconds: int = 300,
+    authority_fd: int | None = None,
+) -> JobView:
     """Run one immutable chunk per lease, then release or publish completion.
 
     The optional dispatcher budget must equal the authored chunk size. Cancellation
@@ -277,6 +305,11 @@ def execute_rc_fiber_direct_control_claim(
                             checkpoint=checkpoint if phase == "verification" else None,
                             policy=phase_policy,
                             lease_check=lease.check,
+                            **(
+                                {"authority_fd": authority_fd}
+                                if authority_fd is not None
+                                else {}
+                            ),
                         )
                     except phase_runner.RCFiberPhaseError as error:
                         # A killed, missing, malformed or late reply has no
