@@ -39,33 +39,46 @@ async function nativeFrameModelFixture(): Promise<Record<string, unknown>> {
   return model
 }
 
+function observeLegacyChunkRequests(page: Page): string[] {
+  const requests: string[] = []
+  page.on('request', (request) => {
+    if (/\/assets\/App-[^/]+\.js(?:\?|$)/.test(request.url())) requests.push(request.url())
+  })
+  return requests
+}
+
 test.describe('Product surface routing', () => {
   test('renders Workbench v2 at the default root', async ({ page }) => {
+    const legacyRequests = observeLegacyChunkRequests(page)
     await page.goto(defaultUrl, { waitUntil: 'load', timeout: 30000 })
     await expect(page.locator('[data-wb2-root]')).toBeVisible()
     await expect(page.locator('[data-legacy-surface]')).toHaveCount(0)
-    const eagerLegacyChunks = await page.evaluate(() => performance.getEntriesByType('resource')
-      .map((entry) => entry.name)
-      .filter((name) => /\/assets\/App-[^/]+\.js(?:\?|$)/.test(name)))
-    expect(eagerLegacyChunks).toHaveLength(0)
+    expect(legacyRequests).toHaveLength(0)
   })
 
-  test('switches to the compatibility desk only through the explicit legacy link', async ({ page }) => {
-    await page.goto(defaultUrl, { waitUntil: 'load', timeout: 30000 })
-    await page.locator('[data-wb2-legacy-link]').click()
-    await expect(page.locator('[data-legacy-surface]')).toBeVisible()
-    await expect(page.locator('.legacy-surface-route__notice')).toContainText(/legacy evidence desk/i)
-    await expect(page.locator('[data-wb2-root]')).toHaveCount(0)
-    await expect(page).toHaveURL(/#\/legacy$/)
-    const loadedLegacyChunks = await page.evaluate(() => performance.getEntriesByType('resource')
-      .map((entry) => entry.name)
-      .filter((name) => /\/assets\/App-[^/]+\.js(?:\?|$)/.test(name)))
-    expect(loadedLegacyChunks).toHaveLength(1)
+  for (const timingBuffer of ['default', 'empty'] as const) {
+    test(`switches to the compatibility desk only through the explicit legacy link (${timingBuffer} timing buffer)`, async ({ page }) => {
+      const legacyRequests = observeLegacyChunkRequests(page)
+      if (timingBuffer === 'empty') {
+        // Loading correctness must not depend on retained performance telemetry.
+        await page.addInitScript(() => performance.setResourceTimingBufferSize(0))
+      }
+      await page.goto(defaultUrl, { waitUntil: 'load', timeout: 30000 })
+      await expect(page.locator('[data-wb2-root]')).toBeVisible()
+      expect(legacyRequests).toHaveLength(0)
+      await page.locator('[data-wb2-legacy-link]').click()
+      await expect(page.locator('[data-legacy-surface]')).toBeVisible()
+      await expect(page.locator('.legacy-surface-route__notice')).toContainText(/legacy evidence desk/i)
+      await expect(page.locator('[data-wb2-root]')).toHaveCount(0)
+      await expect(page).toHaveURL(/#\/legacy$/)
+      await expect.poll(() => legacyRequests.length).toBe(1)
 
-    await page.getByRole('link', { name: /return to workbench v2/i }).click()
-    await expect(page.locator('[data-wb2-root]')).toBeVisible()
-    await expect(page.locator('[data-legacy-surface]')).toHaveCount(0)
-  })
+      await page.getByRole('link', { name: /return to workbench v2/i }).click()
+      await expect(page.locator('[data-wb2-root]')).toBeVisible()
+      await expect(page.locator('[data-legacy-surface]')).toHaveCount(0)
+      expect(legacyRequests).toHaveLength(1)
+    })
+  }
 })
 
 test.describe('Workbench v2 — shell & demo case', () => {
