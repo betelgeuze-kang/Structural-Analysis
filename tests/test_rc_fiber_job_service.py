@@ -890,3 +890,907 @@ def test_posted_complete_envelope_limit_is_authenticated_and_operation_bound(
         s, "worker_result_byte_limit", lambda *args, **kwargs: 64 * 1024 * 1024
     )
     assert app.handle("POST", path, headers=headers, body=raw).status == 413
+
+
+def request_blob_inventory(root):
+    return {
+        str(path.relative_to(root)): path.read_bytes()
+        for path in sorted((root / "blobs" / "sha256").rglob("*"))
+        if path.is_file()
+    }
+
+# Admission/storage tests below use the existing synthetic pure-contract seam.
+# They do not establish RC numerical correctness or a filesystem/database quota.
+def admission_state_snapshot(s, root, job_id):
+    with sqlite3.connect(root / "jobs.sqlite3") as connection:
+        tables = {}
+        for table in (
+            "jobs",
+            "job_events",
+            "job_execution_budgets",
+            "job_rc_invocation_outcomes",
+        ):
+            tables[table] = connection.execute(
+                f"SELECT * FROM {table} WHERE job_id = ? ORDER BY rowid", (job_id,)
+            ).fetchall()
+    return {
+        "job": s.get_job(job_id, **tenant()),
+        "tables": tables,
+        "invocations": evidence(s, job_id),
+        "integrity": s.validate_integrity(job_id, **tenant()),
+    }
+
+
+def synthetic_admission_artifacts(s, c, monkeypatch, *, marker="admission"):
+    receipt = synthetic_pair(s, c)
+    checkpoint = canonical(
+        {"resume_contract_hash": RESUME, "receipts": [receipt], "marker": marker}
+    )
+    result = {
+        "schema_version": "bounded-rc-fiber-job-result.v1",
+        "receipts": [receipt],
+        "synthetic_orchestration_only": marker,
+    }
+    raw = canonical(result)
+    report = {"contract_pass": True, "result_hash": sha(raw)}
+    monkeypatch.setattr(
+        contract,
+        "validate_rc_fiber_job_checkpoint",
+        lambda raw, **kwargs: json.loads(raw),
+    )
+    monkeypatch.setattr(
+        contract,
+        "validate_rc_fiber_job_result",
+        lambda value, **kwargs: deepcopy(report),
+    )
+    proof = build_job_completion_evidence(
+        job_id=c.job.job_id,
+        request_hash=c.job.request.content_hash,
+        checkpoint_hash=None,
+        result_bytes=raw,
+        validation_report=report,
+        validator_id=contract.RC_FIBER_JOB_VALIDATOR_ID,
+    )
+    return checkpoint, result, raw, report, proof
+
+
+@pytest.mark.parametrize("progress", [True, 1.0, 0, 3, 4])
+def test_prewrite_checkpoint_progress_rejection_stores_no_blob(
+    tmp_path, monkeypatch, progress
+):
+    s = service(tmp_path)
+    submit(s)
+    c = claim(s)
+    checkpoint, *_ = synthetic_admission_artifacts(s, c, monkeypatch)
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    with pytest.raises(JobServiceError, match="checkpoint_progress_invalid"):
+        s.save_checkpoint(
+            c.job.job_id,
+            **lease(c),
+            checkpoint_bytes=checkpoint,
+            checkpoint_media_type="application/json",
+            progress_completed=progress,
+            progress_total=3,
+            resume_contract_hash=RESUME,
+        )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert request_blob_inventory(tmp_path) == blobs
+
+
+@pytest.mark.parametrize(
+    "changed", ["analysis_ordinal", "analysis_timing", "result_hash"]
+)
+def test_prewrite_checkpoint_recorded_binding_rejection_stores_no_blob(
+    tmp_path, monkeypatch, changed
+):
+    s = service(tmp_path)
+    submit(s)
+    c = claim(s)
+    checkpoint, *_ = synthetic_admission_artifacts(s, c, monkeypatch)
+    value = json.loads(checkpoint)
+    value["receipts"][0][changed] = (
+        2
+        if changed == "analysis_ordinal"
+        else {}
+        if changed == "analysis_timing"
+        else sha(b"other")
+    )
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    with pytest.raises(JobServiceError, match="rc_fiber_checkpoint_contract_invalid"):
+        s.save_checkpoint(
+            c.job.job_id,
+            **lease(c),
+            checkpoint_bytes=canonical(value),
+            checkpoint_media_type="application/json",
+            progress_completed=1,
+            progress_total=3,
+            resume_contract_hash=RESUME,
+        )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert request_blob_inventory(tmp_path) == blobs
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "family",
+        "job_id",
+        "request_hash",
+        "checkpoint_hash",
+        "result_artifact_hash",
+        "validator_id",
+        "report",
+        "recorded_pair",
+    ],
+)
+def test_prewrite_completion_semantic_rejection_stores_no_blob(
+    tmp_path, monkeypatch, changed
+):
+    s = service(tmp_path)
+    submit(s)
+    c = claim(s)
+    _, result, raw, _, proof = synthetic_admission_artifacts(s, c, monkeypatch)
+    if changed == "family":
+        result["schema_version"] = "different-job-result.v1"
+        raw = canonical(result)
+        proof["result_artifact_hash"] = sha(raw)
+        expected = "result_contract_mismatch"
+    elif changed in {
+        "job_id",
+        "request_hash",
+        "checkpoint_hash",
+        "result_artifact_hash",
+    }:
+        proof[changed] = "job_" + "f" * 32 if changed == "job_id" else sha(b"other")
+        expected = "completion_evidence_binding_mismatch"
+    elif changed == "validator_id":
+        proof["validator_id"] = "untrusted.validator"
+        expected = "rc_fiber_completion_report_mismatch"
+    elif changed == "report":
+        proof["validation_report"]["unbound"] = True
+        expected = "rc_fiber_completion_report_mismatch"
+    else:
+        result["receipts"][0]["analysis_ordinal"] = 2
+        raw = canonical(result)
+        proof["result_artifact_hash"] = sha(raw)
+        expected = "rc_fiber_result_contract_invalid"
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    with pytest.raises(JobServiceError, match=expected):
+        s.complete_job(
+            c.job.job_id,
+            **lease(c),
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert request_blob_inventory(tmp_path) == blobs
+
+
+def save_synthetic_checkpoint(s, c, raw, *, progress=1, resume=RESUME):
+    return s.save_checkpoint(
+        c.job.job_id,
+        **lease(c),
+        checkpoint_bytes=raw,
+        checkpoint_media_type="application/json",
+        progress_completed=progress,
+        progress_total=3,
+        resume_contract_hash=resume,
+    )
+
+
+def prepare_synthetic_prefix_pending(s, c, monkeypatch):
+    checkpoint, result, raw, report, proof = synthetic_admission_artifacts(
+        s, c, monkeypatch, marker="accepted-prefix"
+    )
+    saved = save_synthetic_checkpoint(s, c, checkpoint)
+    assert saved.progress_completed == 1 and saved.status == "checkpointed"
+    c = claim(s)
+    assert reserve(s, c) == 3
+    proof["checkpoint_hash"] = sha(checkpoint)
+    next_checkpoint = json.loads(checkpoint)
+    next_checkpoint["marker"] = "unpublished-next-prefix"
+    return c, checkpoint, canonical(next_checkpoint), result, raw, report, proof
+
+
+@pytest.mark.parametrize(
+    "changed,expected",
+    [
+        ("unknown_job", "job_not_found"),
+        ("worker_tenant", "worker_tenant_forbidden"),
+        ("expired", "lease_expired"),
+        ("wrong_token", "lease_unauthorized"),
+        ("superseded", "lease_unauthorized"),
+        ("total", "checkpoint_progress_invalid"),
+        ("total_bool", "checkpoint_progress_invalid"),
+        ("resume", "resume_contract_mismatch"),
+        ("pure_contract", "rc_fiber_checkpoint_contract_invalid"),
+        ("pure_resume", "rc_fiber_checkpoint_contract_invalid"),
+    ],
+)
+def test_prewrite_checkpoint_lease_and_contract_rejection_preserves_storage(
+    tmp_path, monkeypatch, changed, expected
+):
+    clock = Clock()
+    s = service(tmp_path, clock)
+    submit(s)
+    c = claim(s)
+    checkpoint, *_ = synthetic_admission_artifacts(s, c, monkeypatch, marker=changed)
+    job_id = c.job.job_id
+    args = dict(
+        **lease(c),
+        checkpoint_bytes=checkpoint,
+        checkpoint_media_type="application/json",
+        progress_completed=1,
+        progress_total=3,
+        resume_contract_hash=RESUME,
+    )
+    if changed == "unknown_job":
+        job_id = "job_" + "e" * 32
+    elif changed == "worker_tenant":
+        s = DurableJobService(
+            tmp_path,
+            tenant_tokens={"a": TENANT, "b": OTHER},
+            worker_tokens={"worker-a": WORKER, "worker-b": WORKER_B},
+            worker_tenants={"worker-a": {"b"}, "worker-b": {"a", "b"}},
+            clock=clock,
+        )
+    elif changed == "expired":
+        clock.advance()
+    elif changed == "wrong_token":
+        args["lease_token"] = "wrong-but-well-formed-lease-token"
+    elif changed == "superseded":
+        clock.advance()
+        successor = claim(service(tmp_path, clock), worker="worker-b")
+        assert successor.lease_token != c.lease_token
+    elif changed in {"total", "total_bool"}:
+        args["progress_total"] = 4 if changed == "total" else True
+    elif changed == "resume":
+        save_synthetic_checkpoint(s, c, checkpoint)
+        c = claim(s)
+        args.update(lease(c))
+        args["progress_completed"] = 2
+        args["resume_contract_hash"] = sha(b"new resume contract")
+        value = json.loads(checkpoint)
+        value["marker"] = "rejected-resume-checkpoint"
+        args["checkpoint_bytes"] = canonical(value)
+    elif changed == "pure_contract":
+
+        def reject(*args, **kwargs):
+            raise ValueError("synthetic pure-contract rejection")
+
+        monkeypatch.setattr(contract, "validate_rc_fiber_job_checkpoint", reject)
+    elif changed == "pure_resume":
+        value = json.loads(checkpoint)
+        value["resume_contract_hash"] = sha(b"different validated resume")
+        args["checkpoint_bytes"] = canonical(value)
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    with pytest.raises(JobServiceError, match=expected):
+        s.save_checkpoint(job_id, **args)
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert request_blob_inventory(tmp_path) == blobs
+
+
+@pytest.mark.parametrize("operation", ["checkpoint", "completion"])
+def test_prewrite_expiry_during_pure_validation_stores_no_blob(
+    tmp_path, monkeypatch, operation
+):
+    clock = Clock()
+    s = service(tmp_path, clock)
+    submit(s)
+    c = claim(s)
+    c, _, checkpoint, _, raw, report, proof = prepare_synthetic_prefix_pending(
+        s, c, monkeypatch
+    )
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    if operation == "checkpoint":
+
+        def validate(value, **kwargs):
+            clock.advance()
+            return json.loads(value)
+
+        monkeypatch.setattr(contract, "validate_rc_fiber_job_checkpoint", validate)
+
+        def invoke():
+            return save_synthetic_checkpoint(s, c, checkpoint, progress=2)
+    else:
+
+        def validate(value, **kwargs):
+            clock.advance()
+            return deepcopy(report)
+
+        monkeypatch.setattr(contract, "validate_rc_fiber_job_result", validate)
+
+        def invoke():
+            return s.complete_job(
+                c.job.job_id,
+                **lease(c),
+                result_bytes=raw,
+                result_media_type="application/json",
+                evidence=proof,
+            )
+
+    with pytest.raises(JobServiceError, match="lease_expired"):
+        invoke()
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert request_blob_inventory(tmp_path) == blobs
+    assert before["invocations"]["pending_ordinals"] == [3]
+
+
+@pytest.mark.parametrize(
+    "changed", ["pure_contract", "authority_pass", "authority_owner"]
+)
+def test_prewrite_completion_authority_and_pure_rejection_stores_no_blob(
+    tmp_path, monkeypatch, changed
+):
+    s = service(tmp_path)
+    submit(s)
+    c = claim(s)
+    _, _, raw, _, proof = synthetic_admission_artifacts(s, c, monkeypatch)
+    if changed == "pure_contract":
+
+        def reject(*args, **kwargs):
+            raise ValueError("synthetic result contract rejection")
+
+        monkeypatch.setattr(contract, "validate_rc_fiber_job_result", reject)
+        expected = "rc_fiber_result_contract_invalid"
+    else:
+        proof[
+            "contract_pass" if changed == "authority_pass" else "solver_truth_owner"
+        ] = False if changed == "authority_pass" else "other_solver"
+        expected = "job_schema_invalid"
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    with pytest.raises(JobServiceError, match=expected):
+        s.complete_job(
+            c.job.job_id,
+            **lease(c),
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert request_blob_inventory(tmp_path) == blobs
+
+
+@pytest.mark.parametrize("race", ["expiry", "takeover"])
+def test_prewrite_completion_rechecks_lease_after_initial_budget_gate(
+    tmp_path, monkeypatch, race
+):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    clock = Clock()
+    s = service(tmp_path, clock)
+    submit(s)
+    c = claim(s)
+    _, _, raw, _, proof = synthetic_admission_artifacts(s, c, monkeypatch)
+    reached, resume = Event(), Event()
+    initial_gate = s.worker_result_byte_limit
+
+    def gated(*args, **kwargs):
+        maximum = initial_gate(*args, **kwargs)
+        reached.set()
+        assert resume.wait(10), "early completion gate did not resume"
+        return maximum
+
+    monkeypatch.setattr(s, "worker_result_byte_limit", gated)
+
+    def complete():
+        try:
+            s.complete_job(
+                c.job.job_id,
+                **lease(c),
+                result_bytes=raw,
+                result_media_type="application/json",
+                evidence=proof,
+            )
+        except JobServiceError as exc:
+            return exc.code
+        pytest.fail("stale completion was accepted")
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        pending = pool.submit(complete)
+        try:
+            assert reached.wait(10), "completion did not reach initial lease gate"
+            clock.advance()
+            if race == "takeover":
+                successor = claim(service(tmp_path, clock), worker="worker-b")
+                assert successor.lease_token != c.lease_token
+            before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+            blobs = request_blob_inventory(tmp_path)
+        finally:
+            resume.set()
+        assert pending.result(timeout=10) == (
+            "lease_expired" if race == "expiry" else "lease_unauthorized"
+        )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert request_blob_inventory(tmp_path) == blobs
+
+
+@pytest.mark.parametrize("expired_role", ["checkpoint", "result", "evidence"])
+def test_prewrite_late_real_blob_fsync_expiry_preserves_prefix_and_unknown_work(
+    tmp_path, monkeypatch, expired_role
+):
+    clock = Clock()
+    s = service(tmp_path, clock)
+    submit(s)
+    c = claim(s)
+    c, prefix, checkpoint, _, raw, _, proof = prepare_synthetic_prefix_pending(
+        s, c, monkeypatch
+    )
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    written_roles = []
+    put = s._put_blob
+
+    def expiring(value, **kwargs):
+        # The real content-addressed write, file fsync, rename, directory fsync
+        # and reread finish before the clock moves. This is a late I/O boundary.
+        ref = put(value, **kwargs)
+        written_roles.append(kwargs["role"])
+        if kwargs["role"] == expired_role:
+            clock.advance()
+        return ref
+
+    monkeypatch.setattr(s, "_put_blob", expiring)
+    with pytest.raises(JobServiceError, match="lease_expired"):
+        if expired_role == "checkpoint":
+            save_synthetic_checkpoint(s, c, checkpoint, progress=2)
+        else:
+            s.complete_job(
+                c.job.job_id,
+                **lease(c),
+                result_bytes=raw,
+                result_media_type="application/json",
+                evidence=proof,
+            )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert s.read_checkpoint(c.job.job_id, **tenant()) == prefix
+    assert written_roles == (
+        ["checkpoint"]
+        if expired_role == "checkpoint"
+        else ["result"]
+        if expired_role == "result"
+        else ["result", "evidence"]
+    )
+    expected = (
+        [checkpoint]
+        if expired_role == "checkpoint"
+        else [raw]
+        if expired_role == "result"
+        else [raw, canonical(proof)]
+    )
+    after = request_blob_inventory(tmp_path)
+    assert sorted(
+        value for path, value in after.items() if path not in blobs
+    ) == sorted(expected)
+    assert before["invocations"]["pending_ordinals"] == [3]
+    assert before["job"].result is None and before["job"].evidence is None
+    successor = claim(service(tmp_path, clock), worker="worker-b")
+    assert successor.checkpoint_bytes == prefix
+    assert successor.job.progress_completed == 1
+    assert evidence(s, c.job.job_id)["pending_ordinals"] == [3]
+
+
+@pytest.mark.parametrize("failing_role", ["checkpoint", "result", "evidence"])
+def test_prewrite_admitted_fsync_failure_keeps_durable_state(
+    tmp_path, monkeypatch, failing_role
+):
+    import errno
+
+    s = service(tmp_path)
+    submit(s)
+    c = claim(s)
+    c, prefix, checkpoint, _, raw, _, proof = prepare_synthetic_prefix_pending(
+        s, c, monkeypatch
+    )
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    put = s._put_blob
+    writes = []
+
+    def fail_fsync(value, **kwargs):
+        writes.append(kwargs["role"])
+        if kwargs["role"] == failing_role:
+
+            def no_space(*args):
+                raise OSError(errno.ENOSPC, "synthetic full storage")
+
+            with monkeypatch.context() as isolated:
+                isolated.setattr(implementation.os, "fsync", no_space)
+                return put(value, **kwargs)
+        return put(value, **kwargs)
+
+    monkeypatch.setattr(s, "_put_blob", fail_fsync)
+    with pytest.raises(JobServiceError, match="artifact_write_failed"):
+        if failing_role == "checkpoint":
+            save_synthetic_checkpoint(s, c, checkpoint, progress=2)
+        else:
+            s.complete_job(
+                c.job.job_id,
+                **lease(c),
+                result_bytes=raw,
+                result_media_type="application/json",
+                evidence=proof,
+            )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert s.read_checkpoint(c.job.job_id, **tenant()) == prefix
+    after = request_blob_inventory(tmp_path)
+    added = [value for path, value in after.items() if path not in blobs]
+    assert added == ([raw] if failing_role == "evidence" else [])
+    assert not list((tmp_path / "blobs").rglob(".job-blob-*"))
+    assert writes == (
+        ["checkpoint"]
+        if failing_role == "checkpoint"
+        else ["result"]
+        if failing_role == "result"
+        else ["result", "evidence"]
+    )
+
+
+@pytest.mark.parametrize("corrupt_role", ["checkpoint", "result", "evidence"])
+def test_prewrite_admitted_existing_blob_corruption_is_not_repaired(
+    tmp_path, monkeypatch, corrupt_role
+):
+    s = service(tmp_path)
+    submit(s)
+    c = claim(s)
+    c, prefix, checkpoint, _, raw, _, proof = prepare_synthetic_prefix_pending(
+        s, c, monkeypatch
+    )
+    payload = (
+        checkpoint
+        if corrupt_role == "checkpoint"
+        else raw
+        if corrupt_role == "result"
+        else canonical(proof)
+    )
+    path = s._blob_path(sha(payload))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b"corrupted unreferenced synthetic artifact")
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    with pytest.raises(JobServiceError, match="artifact_integrity_failed"):
+        if corrupt_role == "checkpoint":
+            save_synthetic_checkpoint(s, c, checkpoint, progress=2)
+        else:
+            s.complete_job(
+                c.job.job_id,
+                **lease(c),
+                result_bytes=raw,
+                result_media_type="application/json",
+                evidence=proof,
+            )
+    assert admission_state_snapshot(s, tmp_path, c.job.job_id) == before
+    assert s.read_checkpoint(c.job.job_id, **tenant()) == prefix
+    assert path.read_bytes() == b"corrupted unreferenced synthetic artifact"
+    after = request_blob_inventory(tmp_path)
+    assert [value for key, value in after.items() if key not in blobs] == (
+        [raw] if corrupt_role == "evidence" else []
+    )
+
+
+def test_prewrite_accepted_artifacts_reopen_dedup_and_exact_retries(
+    tmp_path, monkeypatch
+):
+    s = service(tmp_path)
+    original_request = request()
+    job = submit(s, original_request)
+    c = claim(s)
+    checkpoint, _, raw, _, proof = synthetic_admission_artifacts(s, c, monkeypatch)
+    saved = save_synthetic_checkpoint(s, c, checkpoint)
+    reopened = service(tmp_path)
+    assert reopened.read_checkpoint(job.job_id, **tenant()) == checkpoint
+    assert submit(reopened, deepcopy(original_request)) == saved
+    blobs = request_blob_inventory(tmp_path)
+    assert submit(reopened, deepcopy(original_request)) == saved
+    assert request_blob_inventory(tmp_path) == blobs
+    c = claim(reopened)
+    with pytest.raises(JobServiceError, match="checkpoint_progress_invalid"):
+        save_synthetic_checkpoint(reopened, c, checkpoint)
+    assert request_blob_inventory(tmp_path) == blobs
+    proof["checkpoint_hash"] = sha(checkpoint)
+    # Admitted duplicate contents exercise real _put_blob integrity/dedup.
+    reopened._put_blob(
+        raw,
+        role="result",
+        media_type="application/json",
+        maximum_bytes=576 * 1024 * 1024,
+    )
+    reopened._put_blob(
+        canonical(proof),
+        role="evidence",
+        media_type="application/json",
+        maximum_bytes=1024 * 1024,
+    )
+    blobs = request_blob_inventory(tmp_path)
+    completed = reopened.complete_job(
+        job.job_id,
+        **lease(c),
+        result_bytes=raw,
+        result_media_type="application/json",
+        evidence=proof,
+    )
+    assert completed.status == "succeeded"
+    assert request_blob_inventory(tmp_path) == blobs
+    final = service(tmp_path)
+    assert final.read_request(job.job_id, **tenant()) == canonical(original_request)
+    assert final.read_checkpoint(job.job_id, **tenant()) == checkpoint
+    assert final.read_result(job.job_id, **tenant()) == raw
+    assert final.read_evidence(job.job_id, **tenant()) == canonical(proof)
+    assert submit(final, deepcopy(original_request)) == completed
+    stable = admission_state_snapshot(final, tmp_path, job.job_id)
+    with pytest.raises(JobServiceError, match="lease_state_invalid"):
+        final.complete_job(
+            job.job_id,
+            **lease(c),
+            result_bytes=raw,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+    assert admission_state_snapshot(final, tmp_path, job.job_id) == stable
+    assert request_blob_inventory(tmp_path) == blobs
+
+
+@pytest.mark.parametrize("operation", ["checkpoint", "completion"])
+def test_prewrite_writer_lock_defers_takeover_and_preserves_committed_prefix(
+    tmp_path, monkeypatch, operation
+):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    clock = Clock()
+    s = service(tmp_path, clock)
+    submit(s)
+    c = claim(s)
+    c, prefix, checkpoint, _, raw, report, proof = prepare_synthetic_prefix_pending(
+        s, c, monkeypatch
+    )
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    validating, continue_validation, claimant_entered, claimant_finished = (
+        Event(),
+        Event(),
+        Event(),
+        Event(),
+    )
+    successor_service = service(tmp_path, clock)
+
+    def hold_validation(value, **kwargs):
+        validating.set()
+        assert continue_validation.wait(10), "validation boundary did not resume"
+        return json.loads(value) if operation == "checkpoint" else deepcopy(report)
+
+    monkeypatch.setattr(
+        contract,
+        "validate_rc_fiber_job_checkpoint"
+        if operation == "checkpoint"
+        else "validate_rc_fiber_job_result",
+        hold_validation,
+    )
+
+    def publication():
+        try:
+            if operation == "checkpoint":
+                save_synthetic_checkpoint(s, c, checkpoint, progress=2)
+            else:
+                s.complete_job(
+                    c.job.job_id,
+                    **lease(c),
+                    result_bytes=raw,
+                    result_media_type="application/json",
+                    evidence=proof,
+                )
+        except JobServiceError as exc:
+            return exc.code
+        pytest.fail("expired publication committed")
+
+    def takeover():
+        claimant_entered.set()
+        try:
+            return claim(successor_service, worker="worker-b")
+        finally:
+            claimant_finished.set()
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        attempted = pool.submit(publication)
+        successor = None
+        try:
+            assert validating.wait(10), "publication did not reach validation"
+            clock.advance()
+            successor = pool.submit(takeover)
+            assert claimant_entered.wait(10), "takeover did not enter service"
+            assert not claimant_finished.wait(0.1), (
+                "writer takeover bypassed publication lock"
+            )
+            # A separate WAL reader observes only the prior committed projection.
+            with sqlite3.connect(tmp_path / "jobs.sqlite3") as reader:
+                row = reader.execute(
+                    "SELECT * FROM jobs WHERE job_id = ?", (c.job.job_id,)
+                ).fetchone()
+            assert row == before["tables"]["jobs"][0]
+        finally:
+            continue_validation.set()
+        assert attempted.result(timeout=10) == "lease_expired"
+        assert successor is not None
+        claimed = successor.result(timeout=10)
+    assert claimed.checkpoint_bytes == prefix
+    assert claimed.job.progress_completed == 1
+    assert claimed.job.result is None and claimed.job.evidence is None
+    assert request_blob_inventory(tmp_path) == blobs
+    after = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    assert (
+        after["tables"]["job_execution_budgets"]
+        == before["tables"]["job_execution_budgets"]
+    )
+    assert (
+        after["tables"]["job_rc_invocation_outcomes"]
+        == before["tables"]["job_rc_invocation_outcomes"]
+    )
+    assert after["invocations"]["pending_ordinals"] == [3]
+    assert after["invocations"]["pending_execution_work"] == "unknown"
+    assert len(after["tables"]["job_events"]) == len(before["tables"]["job_events"]) + 2
+
+
+@pytest.mark.parametrize("operation", ["checkpoint", "completion"])
+def test_prewrite_validation_and_storage_use_frozen_mutable_inputs(
+    tmp_path, monkeypatch, operation
+):
+    s = service(tmp_path)
+    submit(s)
+    c = claim(s)
+    checkpoint, _, raw, report, proof = synthetic_admission_artifacts(s, c, monkeypatch)
+    frozen_proof = canonical(proof)
+    if operation == "checkpoint":
+        buffer = bytearray(checkpoint)
+
+        def mutate_caller(value, **kwargs):
+            buffer[:] = b"changed caller checkpoint"
+            return json.loads(value)
+
+        monkeypatch.setattr(contract, "validate_rc_fiber_job_checkpoint", mutate_caller)
+        saved = save_synthetic_checkpoint(s, c, buffer)
+        assert saved.checkpoint.content_hash == sha(checkpoint)
+        assert service(tmp_path).read_checkpoint(c.job.job_id, **tenant()) == checkpoint
+    else:
+        buffer = bytearray(raw)
+
+        def mutate_caller(value, **kwargs):
+            buffer[:] = b"changed caller result"
+            proof["validation_report"]["mutated_after_snapshot"] = True
+            return deepcopy(report)
+
+        monkeypatch.setattr(contract, "validate_rc_fiber_job_result", mutate_caller)
+        completed = s.complete_job(
+            c.job.job_id,
+            **lease(c),
+            result_bytes=buffer,
+            result_media_type="application/json",
+            evidence=proof,
+        )
+        assert completed.result.content_hash == sha(raw)
+        assert completed.evidence.content_hash == sha(frozen_proof)
+        reopened = service(tmp_path)
+        assert reopened.read_result(c.job.job_id, **tenant()) == raw
+        assert reopened.read_evidence(c.job.job_id, **tenant()) == frozen_proof
+
+
+@pytest.mark.parametrize("operation", ["checkpoint", "completion"])
+def test_prewrite_real_fsync_writer_lock_blocks_heartbeat_and_takeover(
+    tmp_path, monkeypatch, operation
+):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    clock = Clock()
+    s = service(tmp_path, clock)
+    submit(s)
+    c = claim(s)
+    c, prefix, checkpoint, _, raw, _, proof = prepare_synthetic_prefix_pending(
+        s, c, monkeypatch
+    )
+    before = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    blobs = request_blob_inventory(tmp_path)
+    heartbeat_service, successor_service = (
+        service(tmp_path, clock),
+        service(tmp_path, clock),
+    )
+    synced, resume_writer = Event(), Event()
+    heartbeat_entered, heartbeat_finished = Event(), Event()
+    successor_entered, successor_finished = Event(), Event()
+    sync_directory = s._fsync_directory
+
+    def hold_synced_directory(path):
+        # The real file fsync, atomic rename and directory fsync have completed.
+        # The writer still holds BEGIN IMMEDIATE while two real writers compete.
+        sync_directory(path)
+        synced.set()
+        assert resume_writer.wait(10), "fsync publication did not resume"
+
+    monkeypatch.setattr(s, "_fsync_directory", hold_synced_directory)
+
+    def publication():
+        try:
+            if operation == "checkpoint":
+                save_synthetic_checkpoint(s, c, checkpoint, progress=2)
+            else:
+                s.complete_job(
+                    c.job.job_id,
+                    **lease(c),
+                    result_bytes=raw,
+                    result_media_type="application/json",
+                    evidence=proof,
+                )
+        except JobServiceError as exc:
+            return exc.code
+        pytest.fail("publication crossed expired fsync lease")
+
+    def heartbeat_attempt():
+        heartbeat_entered.set()
+        try:
+            heartbeat_service.heartbeat(c.job.job_id, **lease(c), lease_seconds=5)
+        except JobServiceError as exc:
+            return exc.code
+        finally:
+            heartbeat_finished.set()
+        pytest.fail("expired heartbeat renewed lease")
+
+    def successor_attempt():
+        successor_entered.set()
+        try:
+            return claim(successor_service, worker="worker-b")
+        finally:
+            successor_finished.set()
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        attempted = pool.submit(publication)
+        heartbeat = successor = None
+        try:
+            assert synced.wait(10), "publication did not reach actual directory fsync"
+            clock.advance()
+            heartbeat = pool.submit(heartbeat_attempt)
+            successor = pool.submit(successor_attempt)
+            assert heartbeat_entered.wait(10) and successor_entered.wait(10)
+            assert not heartbeat_finished.wait(0.1), (
+                "heartbeat bypassed fsync writer lock"
+            )
+            assert not successor_finished.wait(0.1), (
+                "takeover bypassed fsync writer lock"
+            )
+            with sqlite3.connect(tmp_path / "jobs.sqlite3") as reader:
+                row = reader.execute(
+                    "SELECT * FROM jobs WHERE job_id = ?", (c.job.job_id,)
+                ).fetchone()
+            assert row == before["tables"]["jobs"][0]
+        finally:
+            resume_writer.set()
+        assert attempted.result(timeout=10) == "lease_expired"
+        assert heartbeat is not None and successor is not None
+        assert heartbeat.result(timeout=10) in {"lease_expired", "lease_unauthorized"}
+        claimed = successor.result(timeout=10)
+    assert claimed.checkpoint_bytes == prefix
+    assert claimed.job.progress_completed == 1
+    assert claimed.job.result is None and claimed.job.evidence is None
+    after = admission_state_snapshot(s, tmp_path, c.job.job_id)
+    assert (
+        after["tables"]["job_execution_budgets"]
+        == before["tables"]["job_execution_budgets"]
+    )
+    assert (
+        after["tables"]["job_rc_invocation_outcomes"]
+        == before["tables"]["job_rc_invocation_outcomes"]
+    )
+    assert after["invocations"]["pending_ordinals"] == [3]
+    assert after["invocations"]["pending_execution_work"] == "unknown"
+    assert len(after["tables"]["job_events"]) == len(before["tables"]["job_events"]) + 2
+    after_blobs = request_blob_inventory(tmp_path)
+    added = [value for path, value in after_blobs.items() if path not in blobs]
+    assert added == ([checkpoint] if operation == "checkpoint" else [raw])
+    if operation == "completion":
+        assert not s._blob_path(sha(canonical(proof))).exists()
