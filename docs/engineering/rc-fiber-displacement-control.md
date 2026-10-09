@@ -168,3 +168,21 @@ a specific hosted gate ran these tests.
 This is local implementation verification. Independent material benchmarks,
 published cyclic acceptance, public recovery/authority, durable jobs and
 Workbench integration for this profile remain separate work.
+
+### Portable third-seed trace regression
+
+The cross-language auditor still requires a genuinely computed, committed third
+initial trial and rejects altered ancestry, extrapolation, trial order and work.
+A fixed target need not take the same Newton route across numerical runtimes.
+The diagnostic fixture therefore computes one immutable reversal prefix, then
+tries at most seven predeclared positive targets from that same state. It retains
+the first actual committed three-trial witness; failure to find one fails the
+test. Tolerances, material laws and production solver policy are unchanged.
+
+This is diagnostic witness selection, not specimen calibration or a replacement
+physical path. Every probe remains in the fixture-generation cost record,
+including successful one/two-trial probes and rejected probes. That total is
+separate from the selected path cost verified by the product trace auditor.
+The subprocess has a 295-second deadline (300-second test deadline) covering
+the bounded search. Original fixed-witness hosted failure evidence is retained;
+local runtime variants do not substitute for new exact-head hosted validation.

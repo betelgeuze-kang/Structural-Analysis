@@ -145,10 +145,12 @@ def secant_trace_snapshot(output):
     """
     from structural_analysis.api.nonlinear_fiber_frame import _compile
     from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
+        _counts,
         run_stateful_fiber_frame2d_control_path,
     )
     from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
         StatefulFiberFrame2DDisplacementControlConfig,
+        solve_stateful_fiber_frame2d_displacement_control_step,
     )
     from structural_analysis.io.neutral.loader import load_neutral_json_bytes
     from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
@@ -169,7 +171,6 @@ def secant_trace_snapshot(output):
         (-1e-5, -0.0001, -0.00025, -0.0005)
         + tuple(-i / 2000 for i in range(2, 51))
         + tuple(-i / 400 for i in range(9, -1, -1))
-        + (0.0025,)
     )
     result = run_stateful_fiber_frame2d_control_path(
         compiled.problem,
@@ -181,7 +182,65 @@ def secant_trace_snapshot(output):
     )
     assert result.status == "ready"
     path = result.to_dict()
-    assert len(path["attempts"][-1]["step"]["initial_trial_search"]["trials"]) == 3
+    # Newton's accepted route can vary across BLAS implementations. Keep the
+    # real third-seed requirement, but do not assume a particular target needs it.
+    # These are independent diagnostic probes from the same immutable prefix,
+    # not additional accepted path steps or a physical specimen fit.
+    parent = result.final_checkpoint
+    previous = result.steps[-1].parent_checkpoint
+    before = (previous.canonical_bytes(), parent.canonical_bytes())
+    probe_targets = (0.00125, 0.0025, 0.00375, 0.005, 0.0075, 0.01, 0.0125)
+    probes = []
+    selected = None
+    for target in probe_targets:
+        trial = solve_stateful_fiber_frame2d_displacement_control_step(
+            compiled.problem,
+            parent,
+            control_global_dof=10,
+            target_control_displacement_m=target,
+            config=config,
+            previous_checkpoint=previous,
+        )
+        assert before == (previous.canonical_bytes(), parent.canonical_bytes())
+        if not trial.committed:
+            assert (
+                trial.accepted_checkpoint.canonical_bytes() == parent.canonical_bytes()
+            )
+        row = {
+            "committed": trial.committed,
+            "parent_checkpoint_hash": parent.state_hash,
+            "target_control_displacement_m": target,
+            "solver_work": trial.solver_work(),
+            "step": trial.to_dict(),
+        }
+        probes.append(row)
+        if trial.committed and len(trial.initial_trial_search()["trials"]) == 3:
+            selected = row
+            break
+    generation = {
+        "scope": "bounded diagnostic witness search; not specimen calibration or product path cost",
+        "candidate_targets_m": probe_targets,
+        "prefix_work": _counts(path["attempts"]),
+        "probes": [
+            {
+                k: row[k]
+                for k in ("committed", "target_control_displacement_m", "solver_work")
+            }
+            for row in probes
+        ],
+        "total_work": _counts([*path["attempts"], *probes]),
+    }
+    output.with_suffix(".search.json").write_bytes(canonical(generation))
+    assert selected is not None, (
+        f"no real third-seed witness in bounded probes: {generation}"
+    )
+    path["attempts"].append(selected)
+    # Export only the projected work metrics, not stale prefix-only path claims.
+    path["metrics"] = {
+        "prefix_replay_work": _counts(path["replay_attempts"]),
+        "suffix_work": _counts(path["attempts"]),
+        "total_work": _counts([*path["replay_attempts"], *path["attempts"]]),
+    }
     attempts = []
     for row in path["attempts"]:
         step = row["step"]
@@ -215,6 +274,7 @@ def secant_trace_snapshot(output):
         )
     packet = {
         "scope": "trial-audit projection; not a complete product artifact",
+        "fixture_generation": generation,
         "config": {
             "solver_config": {"initial_trial_policy": config.initial_trial_policy},
             "control_global_dof": 10,
