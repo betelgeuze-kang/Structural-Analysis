@@ -112,13 +112,13 @@ test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} ${secant
 
 
 test.describe('Third-seed trace auditor with fresh numerical projection', () => {
-  test.describe.configure({ mode: 'serial', timeout: 180000 })
+  test.describe.configure({ mode: 'serial', timeout: 300000 })
   let temporary: string, packet: any
   test.beforeAll(() => {
     temporary = mkdtempSync(path.join(tmpdir(), 'rc-secant-trace-'))
     const output = path.join(temporary, 'trace.json')
     execFileSync('python', ['tests/frontend/rc_lifecycle_review_snapshot.py', '--secant-trace', '--output', output],
-      { timeout: 175000, stdio: 'pipe' })
+      { timeout: 295000, stdio: 'pipe' })
     packet = JSON.parse(readFileSync(output, 'utf8'))
   })
   test.afterAll(() => { if (temporary) rmSync(temporary, { recursive: true, force: true }) })
@@ -126,6 +126,34 @@ test.describe('Third-seed trace auditor with fresh numerical projection', () => 
     expect(packet.scope).toContain('not a complete product artifact')
     expect(packet.api.path.attempts.at(-1).step.initial_trial_search.trials).toHaveLength(3)
     expect(() => validateRcDeclaredInitialTrials(packet.api, packet.config)).not.toThrow()
+    expect(Object.keys(packet.api.path.metrics).sort())
+      .toEqual(['prefix_replay_work', 'suffix_work', 'total_work'])
+    const generation = packet.fixture_generation
+    console.log(JSON.stringify({
+      evidence: 'bounded_real_third_seed_fixture_work',
+      probes: generation.probes.map((probe: any) => ({
+        target_m: probe.target_control_displacement_m,
+        committed: probe.committed,
+        trials: probe.solver_work.declared_initial_trial_attempt_count,
+        linear_solves: probe.solver_work.linear_solve_count,
+      })),
+      generation_work: generation.total_work,
+      selected_path_work: packet.api.metrics.control_work,
+    }))
+    expect(generation.scope).toContain('not specimen calibration')
+    expect(generation.probes.length).toBeGreaterThan(0)
+    expect(generation.probes.length).toBeLessThanOrEqual(generation.candidate_targets_m.length)
+    expect(generation.probes.map((probe: any) => probe.target_control_displacement_m))
+      .toEqual(generation.candidate_targets_m.slice(0, generation.probes.length))
+    const probeSolves = generation.probes.reduce((sum: number, probe: any) =>
+      sum + probe.solver_work.linear_solve_count, 0)
+    expect(generation.total_work.known_linear_solve_count)
+      .toBe(generation.prefix_work.known_linear_solve_count + probeSolves)
+    expect(generation.total_work.attempted_step_count)
+      .toBe(generation.prefix_work.attempted_step_count + generation.probes.length)
+    expect(generation.total_work.unknown_solver_work_attempt_count).toBe(0)
+    expect(generation.probes.at(-1).committed).toBe(true)
+    expect(generation.probes.at(-1).solver_work.declared_initial_trial_attempt_count).toBe(3)
   })
   test('rejects changed predecessor, ratio, seed, iteration start, order and work', () => {
     for (const mutate of [
