@@ -79,7 +79,7 @@ fn persisted_result_replays_to_a_source_bound_report_ir() {
 
     assert_eq!(first.status.code(), Some(0));
     assert_eq!(first.stdout, second.stdout);
-    assert!(first.stderr.is_empty());
+    assert_eq!(first.stderr, [] as [u8; 0]);
     let report: Value = serde_json::from_slice(&first.stdout).expect("ReportIR JSON");
     assert_eq!(
         report["schema_version"],

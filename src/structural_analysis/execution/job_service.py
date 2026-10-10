@@ -240,6 +240,19 @@ class DurableJobService:
                 "The durable service root may not be a symbolic link.",
             )
         self.root = requested_root.resolve()
+        # Incomplete destinations and sealed backups are never live stores.
+        for marker in (
+            ".job-store-backup.pending",
+            ".job-store-restore.pending",
+            "backup-manifest.json",
+        ):
+            path = self.root / marker
+            if path.exists() or path.is_symlink():
+                _fail(
+                    "job_store_not_activated",
+                    "/root",
+                    "An incomplete recovery or sealed backup cannot be opened as a live job store.",
+                )
         self.root.mkdir(parents=True, exist_ok=True)
         self._blob_root = self.root / "blobs" / "sha256"
         self._blob_root.mkdir(parents=True, exist_ok=True)
@@ -2119,6 +2132,7 @@ class DurableJobService:
             connection.close()
 
     def _connect(self) -> sqlite3.Connection:
+        connection = None
         try:
             connection = sqlite3.connect(
                 self._db_path,
@@ -2131,6 +2145,11 @@ class DurableJobService:
             connection.execute("PRAGMA synchronous = FULL")
             return connection
         except sqlite3.DatabaseError:
+            # Setup can fail after connect succeeds (for example a corrupt
+            # database during PRAGMA). Retained error tracebacks must not retain
+            # an open store handle while callers inspect or log the rejection.
+            if connection is not None:
+                connection.close()
             _fail(
                 "job_database_open_failed",
                 "/database",

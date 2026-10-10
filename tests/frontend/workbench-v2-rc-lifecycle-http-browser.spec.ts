@@ -236,9 +236,22 @@ test('actual Workbench RC job survives SIGKILL and two cold HTTP/browser reopens
       expect(declaration.expected_request_hash).toBe(job.request.content_hash)
       expect(declaration.expected_result_artifact_hash).toBe(completed.job.result.content_hash)
       expect(declaration.declared_prices.concrete_per_m3).toBe(Number(concrete))
-      const reference = await response.json() as ReportReference
-      reports.push(reference)
       await expect(view.page.locator('[data-rc-quantity-report="verified"]')).toBeVisible()
+      const visibleReport = view.page.locator('[data-rc-saved-report-id]')
+      await expect(visibleReport).toBeVisible()
+      if (reports.length) await expect(visibleReport).not.toHaveText(reports[reports.length - 1].report_id)
+      const visibleReportId = (await visibleReport.textContent())!.trim()
+      // Read actual persisted references through the authenticated API, not
+      // Chromium's optional response-body cache. No POST is repeated.
+      const reportList = await view.context.request.get(`${server.origin}/v1/jobs/${job.job_id}/rc-quantity-reports`, { headers: headers(ready.credentials) })
+      expect(reportList.status()).toBe(200)
+      const listed = await reportList.json() as { reports: ReportReference[] }
+      expect(listed.reports).toHaveLength(reports.length + 1)
+      const matches = listed.reports.filter(reference => reference.report_id === visibleReportId)
+      expect(matches).toHaveLength(1)
+      const reference = matches[0]
+      expect(reference.revision).toBe(reports.length + 1)
+      reports.push(reference)
       await expect(view.page.locator('[data-rc-saved-report-id]')).toHaveText(reference.report_id)
     }
     expect(reports.map(report => report.revision)).toEqual([1, 2])
