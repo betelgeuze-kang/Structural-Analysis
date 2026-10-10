@@ -592,7 +592,9 @@ def _flatten_checkpoint(
                             ),
                             "Steel fiber does not retain UniaxialPlasticityState.",
                         )
-                    material_type_id = section.steel.material_id
+                    material_type_id = section.steel_material_for(
+                        fiber.fiber_id
+                    ).material_id
                     material_schema_version = STEEL_PLASTICITY_STATE_SCHEMA_VERSION
                 else:
                     if type(fiber_state) is not ConcreteDamageState:
