@@ -399,3 +399,35 @@ def test_production_policy_rejects_noncanonical_policy_key(tmp_path: Path) -> No
         AuthorityPolicyError, match="prohibited_keys_invalid|key_invalid"
     ):
         load_authority_policy(target)
+
+
+@pytest.mark.parametrize("binding_key", [
+    "same_operator_supplemental_execution_binding",
+    "stored_same_operator_supplemental_execution_binding",
+])
+@pytest.mark.parametrize("field,value", [
+    ("family_attestation_count", True),
+    ("family_attestation_count", -1),
+    ("family_attestation_count", 1.5),
+    ("family_attestation_count", "5"),
+    ("family_attestation_count", 9_007_199_254_740_992),
+    ("repository", {"release_authority": True}),
+    ("repository", ""),
+    ("same_operator_github_hosted_execution", 1),
+    ("sigstore_attestations_reverified", "true"),
+    ("runtime_asset_metadata_sealed", []),
+    ("runtime_byte_lock_complete", 1),
+    ("producer_signing_privilege_separated", {"status": "verified"}),
+    ("familyAttestationCount", 5),
+])
+def test_hosted_supplemental_metadata_rejects_bad_shapes(binding_key, field, value):
+    policy = load_authority_policy(ROOT / POLICY_PATH)
+    payload = {"bounded_planar_external_vv": {binding_key: {field: value}}}
+    assert promoted_authority_violations(payload, policy)
+
+
+@pytest.mark.parametrize("location", ["claims", "same_operator_execution_binding", "future_binding"])
+def test_hosted_supplemental_metadata_cannot_be_transplanted(location):
+    policy = load_authority_policy(ROOT / POLICY_PATH)
+    payload = {"bounded_planar_external_vv": {location: {"family_attestation_count": 5}}}
+    assert promoted_authority_violations(payload, policy)
