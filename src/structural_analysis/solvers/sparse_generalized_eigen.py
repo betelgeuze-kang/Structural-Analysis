@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 import hashlib
 import math
 import struct
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 from scipy.sparse import csr_matrix, issparse
@@ -777,10 +777,13 @@ def _canonicalize_sparse_eigenspace(
         required_count=basis.shape[1],
     )
     coefficients = np.asarray(orthonormal.T @ metric, dtype=np.float64)
-    candidates = [
+    # Stop generating coordinate projections once the requested basis is full.
+    # Materializing every n-vector here would turn low-rank sparse extraction
+    # into an avoidable n-by-n allocation, even for a single isolated mode.
+    candidates = (
         orthonormal @ coefficients[:, coordinate]
         for coordinate in range(metric.shape[0])
-    ]
+    )
     return _metric_orthonormalize(
         candidates,
         metric,
@@ -789,7 +792,7 @@ def _canonicalize_sparse_eigenspace(
 
 
 def _metric_orthonormalize(
-    candidates: list[np.ndarray],
+    candidates: Iterable[np.ndarray],
     metric: csr_matrix,
     *,
     required_count: int,
