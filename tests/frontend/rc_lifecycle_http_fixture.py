@@ -130,6 +130,26 @@ def authored_control_target_request():
     return request
 
 
+def authored_fixed_guided_request():
+    request = authored_control_target_request()
+    request["schema_version"] = "structural-analysis-job-request.v5"
+    request["case_id"] = "synthetic-fixed-guided-axial-browser"
+    request["config"].update(
+        schema_version="bounded-rc-fiber-direct-control-request.v5",
+        experimental_fixed_guided_axial=True,
+        control_global_dof=4,
+    )
+    model = request["model"]
+    for node in model["nodes"]:
+        node["coordinates"][0], node["coordinates"][1] = (
+            node["coordinates"][1],
+            node["coordinates"][0],
+        )
+    model["supports"].append({"node": "N2", "dofs": ["UX", "RZ"]})
+    model["loads"][0]["components"].update(FX=0.0, FY=1.0)
+    return request
+
+
 def is_authored_request(value):
     return value in (
         authored_request(),
@@ -137,6 +157,7 @@ def is_authored_request(value):
         authored_pin_roller_request(),
         authored_circular_layers_request(),
         authored_control_target_request(),
+        authored_fixed_guided_request(),
     )
 
 

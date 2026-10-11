@@ -23,6 +23,7 @@ from structural_analysis.api.strict_json import (
 from structural_analysis.api.nonlinear_fiber_frame import (
     PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
     EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
+    EXPERIMENTAL_RC_FIBER_FRAME_FIXED_GUIDED_AXIAL_CONTROL_PROFILE,
     _compile,
 )
 from structural_analysis.api.rc_fiber_frame_direct_control import (
@@ -54,9 +55,11 @@ from structural_analysis.model.schema import CanonicalModel
 
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
 PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
+FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v5"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
     RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
     PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
+    FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION,
 )
 RC_FIBER_JOB_OPERATION = "bounded_rc_fiber_direct_control"
 RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION = "bounded-rc-fiber-job-checkpoint.v1"
@@ -306,6 +309,10 @@ def validate_rc_fiber_job_request(
         value["schema_version"] == PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION
     ) != config.experimental_pin_roller_beam:
         raise ValueError("RC job schema and support profile mismatch")
+    if (
+        value["schema_version"] == FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION
+    ) != config.experimental_fixed_guided_axial:
+        raise ValueError("RC job schema and support profile mismatch")
     if not config.targets_m or not _same_request_config_values(
         config.to_dict(), value["config"]
     ):
@@ -321,6 +328,7 @@ def validate_rc_fiber_job_request(
     compiled, unsupported, _ = _compile(
         model.detached_analysis_snapshot(),
         experimental_pin_roller_beam=config.experimental_pin_roller_beam,
+        experimental_fixed_guided_axial=config.experimental_fixed_guided_axial,
     )
     if compiled is None or unsupported:
         raise ValueError("RC durable request uses an unsupported canonical model")
@@ -339,6 +347,7 @@ def _context(request):
     compiled, _, _ = _compile(
         model.detached_analysis_snapshot(),
         experimental_pin_roller_beam=config.experimental_pin_roller_beam,
+        experimental_fixed_guided_axial=config.experimental_fixed_guided_axial,
     )
     scope = _scope(
         compiled.problem,
@@ -353,7 +362,9 @@ def _context(request):
         "input_checksum": model.input_checksum,
         "source_format": model.source_format,
         "compiler_profile": (
-            EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+            EXPERIMENTAL_RC_FIBER_FRAME_FIXED_GUIDED_AXIAL_CONTROL_PROFILE
+            if config.experimental_fixed_guided_axial
+            else EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
             if config.experimental_pin_roller_beam
             else PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
         ),
@@ -382,6 +393,11 @@ def _api_request(config, restart_hash):
         **(
             {"experimental_pin_roller_beam": True}
             if config.experimental_pin_roller_beam
+            else {}
+        ),
+        **(
+            {"experimental_fixed_guided_axial": True}
+            if config.experimental_fixed_guided_axial
             else {}
         ),
         "targets_m": list(config.targets_m),

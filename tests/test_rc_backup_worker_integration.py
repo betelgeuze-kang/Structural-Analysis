@@ -7,6 +7,8 @@ from pathlib import Path
 import signal
 import time
 
+import pytest
+
 
 from structural_analysis.execution.job_store_backup import (
     backup_job_store,
@@ -24,7 +26,14 @@ _SPEC.loader.exec_module(lifecycle)
 LIMIT = 10 * 1024 * 1024
 
 
-def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch):
+@pytest.mark.parametrize("profile", ["cantilever", "fixed_guided_axial"])
+def test_rc_checkpoint_backup_stop_restore_resume_and_report(
+    tmp_path, monkeypatch, profile
+):
+    if profile == "fixed_guided_axial":
+        from tests.test_rc_fixed_guided_axial_integration import request
+
+        monkeypatch.setattr(lifecycle, "request", request)
     source = tmp_path / "source"
     service = lifecycle.service(source)
     job = service.submit_job(
@@ -92,6 +101,7 @@ def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypat
     restored = lifecycle.service(restored_root)
     completed = restored.get_job(job.job_id, **lifecycle.tenant())
     assert completed.status == "succeeded"
+    assert completed.request.content_hash == job.request.content_hash
     result_bytes = restored.read_result(job.job_id, **lifecycle.tenant())
     result = json.loads(result_bytes)
     assert result["completed_target_count"] == 2
