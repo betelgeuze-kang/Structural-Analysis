@@ -143,7 +143,10 @@ def test_public_restart_preserves_points_and_rejects_changed_quadrature():
 
 
 @pytest.mark.parametrize("yield_radius_fraction", [0.25, 0.5])
-def test_partial_yield_circular_bar_converges_to_closed_form(yield_radius_fraction):
+@pytest.mark.parametrize("unload_ratio", [None, 0.0, -0.5, -1.0])
+def test_partial_yield_circular_bar_converges_to_closed_form(
+    yield_radius_fraction, unload_ratio
+):
     """Compare chord quadrature against the elastic-perfectly-plastic disk integral."""
     radius, modulus, yield_stress = 0.01, 200000.0, 250.0
     elastic_radius = yield_radius_fraction * radius
@@ -154,6 +157,21 @@ def test_partial_yield_circular_bar_converges_to_closed_form(yield_radius_fracti
     exact_moment = 4 * (
         modulus * curvature * elastic_integral + yield_stress * plastic_integral
     )
+    if unload_ratio is not None:
+        # EPP unloading has M(k) = M(k0) - 2 M_monotonic((k0-k)/2).
+        # This continuum disk identity is independent of fiber state updates.
+        half_reversal = curvature * (1 - unload_ratio) / 2
+        core_radius = yield_stress / (modulus * half_reversal)
+        if core_radius >= radius:
+            reverse_moment = modulus * half_reversal * math.pi * radius**4 / 4
+        else:
+            angle = math.asin(core_radius / radius)
+            elastic = radius**4 * (angle - math.sin(4 * angle) / 4) / 8
+            plastic = (radius**2 - core_radius**2)**1.5 / 3
+            reverse_moment = 4 * (
+                modulus * half_reversal * elastic + yield_stress * plastic
+            )
+        exact_moment -= 2 * reverse_moment
     errors = []
     for points in [2, 8, 32, 64]:
         data = authored(points)
@@ -176,6 +194,15 @@ def test_partial_yield_circular_bar_converges_to_closed_form(yield_radius_fracti
                 continue
             law = section.steel_material_for(fiber.fiber_id)
             response = law.integrate(curvature * fiber.y_m, law.initial_state())
+            if unload_ratio is not None:
+                committed = response.state
+                before = committed.state_hash
+                # An abandoned trial must not change the state used to unload.
+                law.integrate(0.3 * curvature * fiber.y_m, committed)
+                assert committed.state_hash == before
+                response = law.integrate(
+                    unload_ratio * curvature * fiber.y_m, committed
+                )
             terms.append(fiber.area_m2 * fiber.y_m * response.stress_mpa)
         moment = math.fsum(terms)
         errors.append(abs(moment / exact_moment - 1))
