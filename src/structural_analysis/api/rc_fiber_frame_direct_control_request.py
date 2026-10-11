@@ -18,6 +18,7 @@ from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
 
 REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v1"
 PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v4"
+FIXED_GUIDED_AXIAL_REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v5"
 REQUEST_MAX_BYTES = 128 * 1024
 _NEWTON_FIELDS = {
     "residual_tolerance",
@@ -121,10 +122,15 @@ class BoundedRCFiberDirectControlRequest:
     maximum_reversals: int = 0
     maximum_targets: int = 255
     experimental_pin_roller_beam: bool = False
+    experimental_fixed_guided_axial: bool = False
 
     def __post_init__(self):
         if type(self.experimental_pin_roller_beam) is not bool:
             raise ValueError("experimental_pin_roller_beam must be a boolean")
+        if type(self.experimental_fixed_guided_axial) is not bool:
+            raise ValueError("experimental_fixed_guided_axial must be a boolean")
+        if self.experimental_pin_roller_beam and self.experimental_fixed_guided_axial:
+            raise ValueError("support profiles are mutually exclusive")
         _integer(self.control_global_dof, "control_global_dof", 0, 47)
         if self.control_global_dof % 3 not in (0, 1):
             raise ValueError("control_global_dof must name a translational UX/UY DOF")
@@ -178,6 +184,11 @@ class BoundedRCFiberDirectControlRequest:
                 if self.experimental_pin_roller_beam
                 else {}
             ),
+            **(
+                {"experimental_fixed_guided_axial": True}
+                if self.experimental_fixed_guided_axial
+                else {}
+            ),
             "control_global_dof": self.control_global_dof,
             "config": self.solver_config,
             "allow_reversals": self.allow_reversals,
@@ -194,13 +205,20 @@ class BoundedRCFiberDirectControlRequest:
         )
         return {
             "schema_version": (
-                PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
+                FIXED_GUIDED_AXIAL_REQUEST_SCHEMA_VERSION
+                if self.experimental_fixed_guided_axial
+                else PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
                 if self.experimental_pin_roller_beam
                 else REQUEST_SCHEMA_VERSION
             ),
             **(
                 {"experimental_pin_roller_beam": True}
                 if self.experimental_pin_roller_beam
+                else {}
+            ),
+            **(
+                {"experimental_fixed_guided_axial": True}
+                if self.experimental_fixed_guided_axial
                 else {}
             ),
             "control_global_dof": self.control_global_dof,
@@ -253,18 +271,26 @@ def decode_bounded_rc_fiber_direct_control_request(
             raise ValueError(f"invalid request mapping: {error}") from error
     payload = strict_json_object_bytes(data, maximum_bytes=REQUEST_MAX_BYTES)
     pin_roller = payload.get("schema_version") == PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION
+    fixed_guided = (
+        payload.get("schema_version") == FIXED_GUIDED_AXIAL_REQUEST_SCHEMA_VERSION
+    )
     _object(
         payload,
-        _REQUEST_FIELDS | ({"experimental_pin_roller_beam"} if pin_roller else set()),
+        _REQUEST_FIELDS
+        | ({"experimental_pin_roller_beam"} if pin_roller else set())
+        | ({"experimental_fixed_guided_axial"} if fixed_guided else set()),
         "request",
     )
     if pin_roller and payload.get("experimental_pin_roller_beam") is not True:
         raise ValueError("pin-roller request requires explicit true opt-in")
+    if fixed_guided and payload.get("experimental_fixed_guided_axial") is not True:
+        raise ValueError("fixed-guided request requires explicit true opt-in")
     if not {"schema_version", "control_global_dof", "targets_m"} <= payload.keys():
         raise ValueError("request is missing required fields")
     if payload["schema_version"] not in (
         REQUEST_SCHEMA_VERSION,
         PIN_ROLLER_BEAM_REQUEST_SCHEMA_VERSION,
+        FIXED_GUIDED_AXIAL_REQUEST_SCHEMA_VERSION,
     ):
         raise ValueError("request schema_version is unsupported")
     if type(payload["targets_m"]) is not list:

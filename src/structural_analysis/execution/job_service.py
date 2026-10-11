@@ -37,9 +37,11 @@ from jsonschema import Draft202012Validator
 JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
 PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
+FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v5"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
     RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
     PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
+    FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION,
 )
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
@@ -315,7 +317,10 @@ class DurableJobService:
             _validate_schema(
                 normalized_request,
                 (
-                    "job_request_v4.schema.json"
+                    "job_request_v5.schema.json"
+                    if normalized_request["schema_version"]
+                    == FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION
+                    else "job_request_v4.schema.json"
                     if normalized_request["schema_version"]
                     == PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION
                     else "job_request_v3.schema.json"

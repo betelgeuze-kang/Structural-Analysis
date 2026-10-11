@@ -91,6 +91,9 @@ PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE = (
 EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE = (
     "planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1"
 )
+EXPERIMENTAL_RC_FIBER_FRAME_FIXED_GUIDED_AXIAL_CONTROL_PROFILE = (
+    "planar_serial_axis_aligned_fixed_guided_explicit_rectangular_rc_direct_control.v1"
+)
 PUBLIC_RC_FIBER_FRAME_CLAIM_BOUNDARY = (
     "This public Developer Preview path accepts only one XY-plane serial "
     "cantilever chain with a single fully fixed endpoint, UX/UY/RZ activity, "
@@ -547,10 +550,82 @@ def _pin_roller_supports(model, coordinates, node_ids, node_index, adjacency):
     return support_ids, fixed
 
 
+def _fixed_guided_axial_supports(model, coordinates, node_ids, node_index, adjacency):
+    """Axis-aligned straight chain with a fixed end and an axially sliding guide.
+
+    This is a small-displacement ideal support profile, not fixture compliance,
+    geometric nonlinearity, eccentric loading, or a specimen material model.
+    """
+    axes = [axis for axis in (0, 1) if len({p[axis] for p in coordinates}) > 1]
+    if len(axes) != 1:
+        _fail_compile(
+            "rc_fiber_frame_fixed_guided_geometry_invalid",
+            "/nodes",
+            "The fixed-guided chain must be straight and parallel to X or Y.",
+        )
+    axial_axis = axes[0]
+    ordered = sorted(range(len(node_ids)), key=lambda i: coordinates[i][axial_axis])
+    if len({p[axial_axis] for p in coordinates}) != len(node_ids) or any(
+        node_ids[b] not in adjacency[node_ids[a]] for a, b in zip(ordered, ordered[1:])
+    ):
+        _fail_compile(
+            "rc_fiber_frame_fixed_guided_geometry_invalid",
+            "/nodes",
+            "The fixed-guided chain must be monotone along its axis.",
+        )
+    if len(model.supports) != 2:
+        _fail_compile(
+            "rc_fiber_frame_support_count_unsupported",
+            "/supports",
+            "Exactly one fully fixed end and one axially sliding guided end are required.",
+        )
+    endpoints = {node_ids[ordered[0]], node_ids[ordered[-1]]}
+    fixed_role = frozenset(_ACTIVE_COMPONENTS)
+    guide_role = frozenset((_ACTIVE_COMPONENTS[1 - axial_axis], "RZ"))
+    by_node = {}
+    for index, support in enumerate(model.supports):
+        path = f"/supports/{index}"
+        _exact_keys(support, {"node", "dofs"}, path)
+        node, dofs = support["node"], support["dofs"]
+        if type(node) is not str or node not in endpoints or node in by_node:
+            _fail_compile(
+                "rc_fiber_frame_support_node_invalid",
+                path + "/node",
+                "The fixed and guided supports must occupy distinct chain endpoints.",
+            )
+        if (
+            type(dofs) is not list
+            or any(type(dof) is not str for dof in dofs)
+            or len(dofs) != len(set(dofs))
+            or frozenset(dofs) not in (fixed_role, guide_role)
+        ):
+            _fail_compile(
+                "rc_fiber_frame_support_dofs_invalid",
+                path + "/dofs",
+                "One end restrains UX/UY/RZ; the guide restrains transverse motion and RZ.",
+            )
+        by_node[node] = frozenset(dofs)
+    if set(by_node.values()) != {fixed_role, guide_role}:
+        _fail_compile(
+            "rc_fiber_frame_fixed_guided_support_roles_invalid",
+            "/supports",
+            "Exactly one fully fixed endpoint and one axial guide are required.",
+        )
+    support_ids = tuple(node for node in node_ids if node in by_node)
+    fixed = tuple(
+        3 * node_index[node] + offset
+        for node in support_ids
+        for offset, component in enumerate(_ACTIVE_COMPONENTS)
+        if component in by_node[node]
+    )
+    return support_ids, fixed
+
+
 def _compile(
     model: CanonicalModel,
     *,
     experimental_pin_roller_beam: bool = False,
+    experimental_fixed_guided_axial: bool = False,
 ) -> tuple[
     _CompiledPublicRCFiberFrame | None,
     list[Mapping[str, Any]],
@@ -558,6 +633,10 @@ def _compile(
 ]:
     if type(experimental_pin_roller_beam) is not bool:
         raise ValueError("explicit boolean pin-roller-beam compiler opt-in required")
+    if type(experimental_fixed_guided_axial) is not bool:
+        raise ValueError("explicit boolean fixed-guided-axial compiler opt-in required")
+    if experimental_pin_roller_beam and experimental_fixed_guided_axial:
+        raise ValueError("compiler support profiles are mutually exclusive")
     unsupported: list[Mapping[str, Any]] = [
         dict(row) for row in model.unsupported_features
     ]
@@ -566,7 +645,9 @@ def _compile(
         return None, unsupported, warnings
     try:
         compiled = _compile_exact(
-            model, experimental_pin_roller_beam=experimental_pin_roller_beam
+            model,
+            experimental_pin_roller_beam=experimental_pin_roller_beam,
+            experimental_fixed_guided_axial=experimental_fixed_guided_axial,
         )
     except _PublicRCFiberFrameCompileError as exc:
         unsupported.append(exc.to_blocker())
@@ -575,7 +656,10 @@ def _compile(
 
 
 def _compile_exact(
-    model: CanonicalModel, *, experimental_pin_roller_beam: bool = False
+    model: CanonicalModel,
+    *,
+    experimental_pin_roller_beam: bool = False,
+    experimental_fixed_guided_axial: bool = False,
 ) -> _CompiledPublicRCFiberFrame:
     if model.schema_version != CANONICAL_MODEL_SCHEMA_VERSION:
         _fail_compile(
@@ -973,7 +1057,12 @@ def _compile_exact(
             "Only one connected, unbranched, acyclic member chain is supported.",
         )
 
-    if experimental_pin_roller_beam:
+    if experimental_fixed_guided_axial:
+        support_node_ids, fixed_global_dofs = _fixed_guided_axial_supports(
+            model, coordinates, node_ids, node_index, adjacency
+        )
+        support_node_id = support_node_ids[0]
+    elif experimental_pin_roller_beam:
         support_node_ids, fixed_global_dofs = _pin_roller_supports(
             model, coordinates, node_ids, node_index, adjacency
         )
@@ -1027,7 +1116,7 @@ def _compile_exact(
                 f"{path}/node",
                 "Nodal load must reference a declared node.",
             )
-        if load_node_id in support_node_ids:
+        if load_node_id in support_node_ids and not experimental_fixed_guided_axial:
             _fail_compile(
                 "rc_fiber_frame_support_load_unsupported",
                 f"{path}/node",
@@ -1068,6 +1157,15 @@ def _compile_exact(
                 "Every load row must contain a nonzero in-plane component.",
             )
         base_dof = 3 * node_index[load_node_id]
+        if experimental_fixed_guided_axial and any(
+            value != 0.0 and base_dof + offset in fixed_global_dofs
+            for offset, value in enumerate(active_values)
+        ):
+            _fail_compile(
+                "rc_fiber_frame_restrained_load_unsupported",
+                f"{path}/components",
+                "Fixed-guided reference loads must act only on free components.",
+            )
         reference_loads.extend(
             (base_dof + offset, value)
             for offset, value in enumerate(active_values)

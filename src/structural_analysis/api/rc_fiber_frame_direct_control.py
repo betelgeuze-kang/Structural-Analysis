@@ -21,6 +21,7 @@ from structural_analysis.api.strict_json import (
 from structural_analysis.api.nonlinear_fiber_frame import (
     PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
     EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE,
+    EXPERIMENTAL_RC_FIBER_FRAME_FIXED_GUIDED_AXIAL_CONTROL_PROFILE,
     _compile,
     _node_displacement_rows,
     _reaction_rows,
@@ -444,9 +445,14 @@ def _prepare(
     maximum_targets,
     restart,
     experimental_pin_roller_beam=False,
+    experimental_fixed_guided_axial=False,
 ):
     if type(experimental_pin_roller_beam) is not bool:
         raise ValueError("experimental_pin_roller_beam must be a boolean")
+    if type(experimental_fixed_guided_axial) is not bool:
+        raise ValueError("experimental_fixed_guided_axial must be a boolean")
+    if experimental_pin_roller_beam and experimental_fixed_guided_axial:
+        raise ValueError("support profiles are mutually exclusive")
     if type(model) is not CanonicalModel:
         raise ValueError("model must be an exact CanonicalModel")
     snapshot = model.detached_analysis_snapshot()
@@ -480,6 +486,11 @@ def _prepare(
             if experimental_pin_roller_beam
             else {}
         ),
+        **(
+            {"experimental_fixed_guided_axial": True}
+            if experimental_fixed_guided_axial
+            else {}
+        ),
         "targets_m": list(targets),
         "control_global_dof": control_global_dof,
         "configuration": cfg.to_manifest(),
@@ -494,7 +505,9 @@ def _prepare(
         "input_checksum": snapshot.input_checksum,
         "source_format": snapshot.source_format,
         "compiler_profile": (
-            EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
+            EXPERIMENTAL_RC_FIBER_FRAME_FIXED_GUIDED_AXIAL_CONTROL_PROFILE
+            if experimental_fixed_guided_axial
+            else EXPERIMENTAL_RC_FIBER_FRAME_PIN_ROLLER_BEAM_CONTROL_PROFILE
             if experimental_pin_roller_beam
             else PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE
         ),
@@ -513,6 +526,7 @@ def analyze_bounded_rc_fiber_direct_control(
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
     experimental_pin_roller_beam: bool = False,
+    experimental_fixed_guided_axial: bool = False,
 ) -> BoundedRCFiberDirectControlResult:
     snapshot, targets, cfg, resume, request, binding = _prepare(
         model,
@@ -524,9 +538,12 @@ def analyze_bounded_rc_fiber_direct_control(
         maximum_targets,
         restart,
         experimental_pin_roller_beam,
+        experimental_fixed_guided_axial,
     )
     compiled, unsupported, warnings = _compile(
-        snapshot, experimental_pin_roller_beam=experimental_pin_roller_beam
+        snapshot,
+        experimental_pin_roller_beam=experimental_pin_roller_beam,
+        experimental_fixed_guided_axial=experimental_fixed_guided_axial,
     )
     payload = {
         "schema_version": BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
@@ -613,6 +630,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
     experimental_pin_roller_beam: bool = False,
+    experimental_fixed_guided_axial: bool = False,
 ) -> BoundedRCFiberDirectControlValidationReport:
     """Verify against a fresh complete source execution, never a supplied success flag."""
     report = {
@@ -660,6 +678,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_targets,
             restart,
             experimental_pin_roller_beam,
+            experimental_fixed_guided_axial,
         )
         if (
             supplied.get("schema_version")
@@ -694,6 +713,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_targets=maximum_targets,
             restart=resume,
             experimental_pin_roller_beam=experimental_pin_roller_beam,
+            experimental_fixed_guided_axial=experimental_fixed_guided_axial,
         )
         regenerated = expected.to_dict()
         report["replay_control_work"] = regenerated["metrics"]["control_work"]

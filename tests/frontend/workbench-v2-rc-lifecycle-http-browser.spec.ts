@@ -126,7 +126,7 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
 
-for (const profile of ['cantilever', 'explicit-layers', 'pin-roller'] as const) {
+for (const profile of ['cantilever', 'explicit-layers', 'pin-roller', 'fixed-guided'] as const) {
 test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two`, async ({ browser }, testInfo) => {
   test.setTimeout(300000)
   const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
@@ -144,6 +144,8 @@ test(`actual Workbench ${profile} RC job survives SIGKILL and two cold HTTP/brow
     evidence.profile = profile
     if (profile === 'pin-roller') ready.request = JSON.parse(execFileSync('python3',
       ['tests/frontend/rc_pin_roller_request.py'], { encoding: 'utf8', env: { ...process.env, PYTHONPATH: resolve('src') } }))
+    if (profile === 'fixed-guided') ready.request = JSON.parse(execFileSync('python3',
+      ['tests/frontend/rc_fixed_guided_request.py'], { encoding: 'utf8', env: { ...process.env, PYTHONPATH: resolve('src') } }))
     evidence.support_profile = profile
     evidence.source = ready.proof
     // A hosted receipt must name the checked-out commit and run identity rather

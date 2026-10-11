@@ -79,6 +79,7 @@ def calculate_fiber_frame_member_quantities(
     *,
     rebar_density_kg_per_m3: float = 7850.0,
     experimental_pin_roller_beam: bool = False,
+    experimental_fixed_guided_axial: bool = False,
 ) -> dict[str, Any]:
     """Calculate explicit geometry quantities once per member, never per Gauss point."""
     if type(model) is not CanonicalModel:
@@ -86,7 +87,9 @@ def calculate_fiber_frame_member_quantities(
     density = _number(rebar_density_kg_per_m3, "rebar_density_kg_per_m3")
     snapshot = model.detached_analysis_snapshot()
     compiled, unsupported, _ = public_api._compile(
-        snapshot, experimental_pin_roller_beam=experimental_pin_roller_beam
+        snapshot,
+        experimental_pin_roller_beam=experimental_pin_roller_beam,
+        experimental_fixed_guided_axial=experimental_fixed_guided_axial,
     )
     if compiled is None:
         raise FiberFrameDesignError(
