@@ -55,3 +55,14 @@ Payload/file/time bounds are cooperative and do not establish filesystem quotas,
 hard I/O deadlines, power-loss durability, remote replication, or original-writer
 fencing. Sealed-container verification leaves `application_integrity_checked`
 false; retained results still require the service's application-level validation.
+
+## Concurrent processes in one store
+
+`test_rc_process_reservation_race.py` starts four fresh interpreter processes
+behind a barrier. Exactly one claims the queued RC job. Four further processes
+then race twelve reservation requests under that lease: ordinals 1 through 8
+are issued once each and four requests are rejected at the configured limit.
+A fresh service instance retains all eight reservations. No solver is invoked;
+reserved work remains consumed even without a numerical outcome. This verifies
+single-store atomicity and does not close the independent-copy activation gap
+above. The race and RC service tests passed together (66 tests).
