@@ -901,6 +901,26 @@ def test_matrix_credits_sixteen_attested_rows_without_promoting(
     )
     assert len(requirements) == 16
 
+    # Feed the producer's actual binding into the downstream authority gate.
+    from scripts.nonpromotion_authority_policy import (
+        POLICY_PATH, load_authority_policy, promoted_authority_violations,
+    )
+
+    policy = load_authority_policy(ROOT / POLICY_PATH)
+    for binding_key in (
+        "same_operator_supplemental_execution_binding",
+        "stored_same_operator_supplemental_execution_binding",
+    ):
+        product_fragment = {"bounded_planar_external_vv": {binding_key: binding}}
+        assert promoted_authority_violations(product_fragment, policy) == []
+        for field in (
+            "independent_operator_attested", "product_legal_license_approval",
+            "verification_level_2", "release_authority", "unexpected_claim",
+        ):
+            promoted = deepcopy(product_fragment)
+            promoted["bounded_planar_external_vv"][binding_key][field] = True
+            assert promoted_authority_violations(promoted, policy)
+
     core_case_ids = {
         "code_to_code": [
             "bounded_planar_member_feature_load_path",

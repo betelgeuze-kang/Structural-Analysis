@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import base64
 from contextlib import ExitStack, contextmanager
+from copy import deepcopy
 import hashlib
 import json
 import mimetypes
@@ -115,7 +116,38 @@ def authored_explicit_layers_request():
 
 
 def is_authored_request(value):
-    return value in (authored_request(), authored_explicit_layers_request())
+    return value in (
+        authored_request(), authored_explicit_layers_request(), authored_pin_roller_request()
+    )
+
+
+def authored_pin_roller_request():
+    request = authored_request()
+    request["schema_version"] = "structural-analysis-job-request.v4"
+    request["case_id"] = "synthetic-pin-roller-browser"
+    request["config"].update(
+        schema_version="bounded-rc-fiber-direct-control-request.v4",
+        experimental_pin_roller_beam=True,
+        control_global_dof=10,
+    )
+    model = request["model"]
+    stations = (0.0, 0.2, 0.7, 0.95, 1.2, 1.7, 1.9)
+    model["nodes"] = [
+        {"id": f"N{i + 1}", "coordinates": [x, 0.0, 0.0]}
+        for i, x in enumerate(stations)
+    ]
+    model["elements"] = [
+        dict(model["elements"][0], id=f"M{i + 1}", nodes=[f"N{i + 1}", f"N{i + 2}"])
+        for i in range(6)
+    ]
+    model["supports"] = [
+        {"node": "N2", "dofs": ["UX", "UY"]},
+        {"node": "N6", "dofs": ["UY"]},
+    ]
+    model["loads"] = [
+        dict(deepcopy(model["loads"][0]), node=node) for node in ("N3", "N5")
+    ]
+    return request
 
 
 def append_receipt(path, value):
@@ -233,7 +265,7 @@ def serve(workspace, port):
 
 def run_worker(workspace, name):
     current = service(workspace / "store")
-    # Only a fixed, tiny, UI-submitted request is authorized for this harness.
+    # Only the two fixed, tiny, UI-submitted requests are authorized here.
     deadline = time.monotonic() + 20
     claim = None
     while claim is None:
