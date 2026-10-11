@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:3c97815a5010e650dafe8fa2f2630537af1e77c88d3f0e014f65fd7111ef7126",
+  "inventory_digest": "sha256:a7398b9c8a23c4d334584506797841674c9819c03061991776ef11bcdd9b1b19",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -556,7 +556,7 @@
           "blob_sha": "2849e4d4f189a3ff74982c783d4dc6a7f7cc1146",
           "change_status": "added",
           "changes": 131,
-          "current_blob_sha": "eb0358170932a94b7351e8d670ed0e109ab7d6c8",
+          "current_blob_sha": "fffc34ff2e379ec77a6d79c210286fa17605ac80",
           "current_relation": "different",
           "deletions": 0,
           "path": ".github/workflows/runtime-input-viewer-ci.yml",
