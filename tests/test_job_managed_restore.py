@@ -113,6 +113,60 @@ def test_older_generation_backup_requires_explicit_current_binding(tmp_path):
     assert service(third).claim_next(**worker("first"), lease_seconds=60)
 
 
+def test_running_snapshot_cannot_reissue_post_backup_reservations(tmp_path):
+    """A copied live lease must not recover budget spent after its snapshot."""
+    source, backup, restored = (
+        tmp_path / name for name in ("source", "backup", "restored")
+    )
+    authority, binding = JobExecutionAuthority.create(tmp_path / "authority", source)
+    current = service(source, execution_authority=authority, execution_binding=binding)
+    job = current.submit_job(
+        **tenant(), idempotency_key="live-snapshot", request=request()
+    )
+    claim = current.claim_next(**worker("first"), lease_seconds=300)
+    assert claim is not None
+    authorization = dict(worker("first"), lease_token=claim.lease_token)
+    assert [
+        current.reserve_execution_attempt(job.job_id, **authorization) for _ in range(2)
+    ] == [1, 2]
+    receipt = backup_job_store(source, backup, maximum_bytes=10_000_000)
+    options = {
+        "manifest_sha256": receipt["manifest_sha256"],
+        "maximum_bytes": 10_000_000,
+    }
+    assert [
+        current.reserve_execution_attempt(job.job_id, **authorization) for _ in range(6)
+    ] == list(range(3, 9))
+    restore_job_store(backup, restored, **options)
+    with pytest.raises(JobServiceError, match="execution_authority_rejected"):
+        service(restored)
+    # Holding the complete worker lifetime blocks activation, not just claims.
+    with authority.execution(binding):
+        with pytest.raises(ValueError, match="authority busy"):
+            activate_managed_restore(backup, restored, **options)
+    assert current.heartbeat(job.job_id, **authorization).status == "running"
+    assert (
+        activate_managed_restore(backup, restored, **options)["status"] == "activated"
+    )
+    for operation in (current.heartbeat, current.reserve_execution_attempt):
+        with pytest.raises(JobServiceError, match="execution_authority_rejected"):
+            operation(job.job_id, **authorization)
+    fresh = service(restored)
+    # Lease expiry is preserved by activation. Even that still-valid copied
+    # lease sees all external spend, including the six post-snapshot ordinals.
+    budget = fresh.read_execution_budget(job.job_id, **authorization)
+    assert budget == {
+        "maximum_attempts": 8,
+        "reserved_attempts": 8,
+        "remaining_attempts": 0,
+    }
+    with pytest.raises(JobServiceError, match="execution_attempt_budget_exhausted"):
+        fresh.reserve_execution_attempt(job.job_id, **authorization)
+    evidence = fresh.read_rc_invocation_evidence(job.job_id, **tenant())
+    assert evidence["pending_ordinals"] == list(range(1, 9))
+    assert evidence["invocations"] == []
+
+
 def test_active_execution_prevents_cutover(tmp_path):
     current, authority, binding, job, backup, restored, options = setup_store(tmp_path)
     with current.execution_guard():
