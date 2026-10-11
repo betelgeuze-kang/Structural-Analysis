@@ -387,17 +387,14 @@ class StatefulRCFiberSection:
             state.fiber_states,
             strict=True,
         ):
-            expected = (
-                UniaxialPlasticityState
-                if fiber.material_kind == "steel"
-                else ConcreteDamageState
-            )
-            if type(fiber_state) is not expected:
-                raise ValueError("state fiber material type does not match section")
             if fiber.material_kind == "steel":
+                if type(fiber_state) is not UniaxialPlasticityState:
+                    raise ValueError("state fiber material type does not match section")
                 self.steel_material_for(fiber.fiber_id).validate_state_admissibility(
                     fiber_state
                 )
+            elif type(fiber_state) is not ConcreteDamageState:
+                raise ValueError("state fiber material type does not match section")
 
     def dissipated_energy_mj_per_m(
         self,
