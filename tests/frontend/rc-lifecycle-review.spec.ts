@@ -1,3 +1,4 @@
+import { longitudinalSteelArea } from '../../src/workbench-v2/model/rcSteelLayers'
 import { test, expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs'
@@ -7,7 +8,7 @@ import { validateRcJobArtifacts, validateRcRequestProfile, fields } from '../../
 import { validateRcQuantityReport } from '../../src/workbench-v2/model/rcQuantityReportSchema'
 import { sha256Hex } from '../../src/workbench-v2/model/checksum'
 
-for (const profile of ['legacy', 'explicit-layers'] as const) {
+for (const profile of ['legacy', 'explicit-layers', 'circular-layers'] as const) {
 test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, () => {
   test.describe.configure({ mode: 'serial', timeout: 120000 })
   let temporary: string, snapshot: any, reviewed: Awaited<ReturnType<typeof validateRcJobArtifacts>>
@@ -17,6 +18,10 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
     const output = path.join(temporary, 'review.json')
     const authored = JSON.parse(execFileSync('python', ['-c',
       `import sys; sys.path.insert(0, 'tests/frontend'); from rc_lifecycle_http_fixture import ${profile === 'legacy' ? 'authored_request' : 'authored_explicit_layers_request as authored_request'}, canonical; print(canonical(authored_request()).decode())`], { encoding: 'utf8' }))
+    if (profile === 'circular-layers') {
+      authored.case_id = 'hosted-workbench-circular-steel-layers'
+      for (const layer of authored.model.sections[0].steel_layers) layer.circular_integration_points = 8
+    }
     const requestFile = path.join(temporary, 'browser-request.json')
     // The exact browser JSON.stringify boundary converts Python 1.0 to JSON 1.
     writeFileSync(requestFile, JSON.stringify(authored))
@@ -38,7 +43,7 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
     expect(reports[0].bindings).toEqual(reports[1].bindings)
     expect(reports[0].quantities).toEqual(reports[1].quantities)
     expect(reports[0].declared_prices).not.toEqual(reports[1].declared_prices)
-    if (profile === 'explicit-layers') expect(reports[0].quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(28.26, 10)
+    if (profile !== 'legacy') expect(reports[0].quantities.totals.longitudinal_rebar_mass_kg).toBeCloseTo(28.26, 10)
   })
 
   test('rejects unsupported request extensions before submission', () => {
@@ -79,3 +84,17 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
 })
 
 }
+
+
+test('circular layer quantities reject malformed counts and protruding circles', () => {
+  const section: any = { type: 'rectangular_rc_explicit_steel_layers', width_m: 0.3, depth_m: 0.1,
+    steel_layers: [{ id: 'bar', y_m: 0.008, bar_count: 3, bar_area_m2: Math.PI * 0.016 ** 2 / 4,
+      steel_material: 'steel', circular_integration_points: 8 }] }
+  expect(longitudinalSteelArea(section)).toBeCloseTo(3 * Math.PI * 0.016 ** 2 / 4, 14)
+  for (const count of [true, null, 1, 65, 3.5, '8']) {
+    const changed = structuredClone(section); changed.steel_layers[0].circular_integration_points = count
+    expect(() => longitudinalSteelArea(changed)).toThrow()
+  }
+  const outside = structuredClone(section); outside.steel_layers[0].y_m = 0.049
+  expect(() => longitudinalSteelArea(outside)).toThrow()
+})

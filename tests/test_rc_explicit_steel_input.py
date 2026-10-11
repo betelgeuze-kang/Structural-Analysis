@@ -133,7 +133,10 @@ def test_layer_model_restart_is_exact_and_changed_layer_is_rejected():
         )
 
 
-def test_mixed_layers_survive_durable_restart_and_quantity_report(tmp_path):
+@pytest.mark.parametrize("circular_points", [None, 8])
+def test_mixed_layers_survive_durable_restart_and_quantity_report(
+    tmp_path, circular_points
+):
     from structural_analysis.execution.job_service import DurableJobService
     from structural_analysis.execution.rc_fiber_direct_control_worker import (
         execute_rc_fiber_direct_control_claim,
@@ -165,6 +168,9 @@ def test_mixed_layers_survive_durable_restart_and_quantity_report(tmp_path):
         "result_contract": "bounded-rc-fiber-job-result.v1",
         "execution_config": {"chunk_target_count": 1, "maximum_api_invocations": 8},
     }
+    if circular_points is not None:
+        for layer in request["model"]["sections"][0]["steel_layers"]:
+            layer["circular_integration_points"] = circular_points
     current = service()
     job = current.submit_job(
         **tenant, idempotency_key="layers", request=deepcopy(request)

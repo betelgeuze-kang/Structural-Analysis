@@ -1,4 +1,4 @@
-interface ExplicitSteelLayer { id: string; y_m: number; bar_count: number; bar_area_m2: number; steel_material: string }
+interface ExplicitSteelLayer { id: string; y_m: number; bar_count: number; bar_area_m2: number; steel_material: string; circular_integration_points?: number }
 const explicitSectionType = 'rectangular_rc_explicit_steel_layers'
 
 /** Validate authored geometry before recomputing a stored quantity report. */
@@ -12,13 +12,21 @@ function explicitSteelLayers(section: Record<string, unknown>): ExplicitSteelLay
   const ids = new Set<string>()
   for (const layer of layers) {
     if (!layer || typeof layer !== 'object' || Array.isArray(layer)
-      || Object.keys(layer).sort().join(',') !== 'bar_area_m2,bar_count,id,steel_material,y_m'
+      || !['bar_area_m2,bar_count,id,steel_material,y_m', 'bar_area_m2,bar_count,circular_integration_points,id,steel_material,y_m'].includes(Object.keys(layer).sort().join(','))
       || typeof layer.id !== 'string' || !layer.id || ids.has(layer.id)
       || typeof layer.steel_material !== 'string' || !layer.steel_material
       || typeof layer.y_m !== 'number' || !Number.isFinite(layer.y_m) || !(previous < layer.y_m && layer.y_m < depth / 2)
       || !Number.isInteger(layer.bar_count) || layer.bar_count < 1 || layer.bar_count > 64
       || typeof layer.bar_area_m2 !== 'number' || !Number.isFinite(layer.bar_area_m2) || layer.bar_area_m2 <= 0) {
       throw new Error('explicit_steel_layer_invalid')
+    }
+    if (Object.prototype.hasOwnProperty.call(layer, 'circular_integration_points')) {
+      const points = layer.circular_integration_points
+      const radius = Math.sqrt(layer.bar_area_m2 / Math.PI)
+      if (!Number.isInteger(points) || points < 2 || points > 64
+        || !(Math.abs(layer.y_m) + radius < depth / 2) || !(2 * radius < width)) {
+        throw new Error('circular_steel_layer_invalid')
+      }
     }
     previous = layer.y_m
     ids.add(layer.id)

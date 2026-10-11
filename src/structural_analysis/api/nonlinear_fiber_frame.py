@@ -1729,11 +1729,11 @@ def _compile_explicit_steel_section(
                 layer_path,
                 "Expected an explicit layer object.",
             )
-        _exact_keys(
-            layer,
-            {"id", "y_m", "bar_count", "bar_area_m2", "steel_material"},
-            layer_path,
-        )
+        layer_keys = {"id", "y_m", "bar_count", "bar_area_m2", "steel_material"}
+        circular = "circular_integration_points" in layer
+        if circular:
+            layer_keys.add("circular_integration_points")
+        _exact_keys(layer, layer_keys, layer_path)
         layer_id = _stable_id(layer["id"], f"{layer_path}/id")
         y = _finite_number(layer["y_m"], f"{layer_path}/y_m")
         if layer_id in ids or not previous < y < depth / 2:
@@ -1756,13 +1756,42 @@ def _compile_explicit_steel_section(
                 f"{layer_path}/steel_material",
                 "Expected a steel material reference.",
             )
-        fiber_id = f"steel-layer-{layer_id}"
-        fibers.append(
-            StatefulSectionFiber(
-                fiber_id=fiber_id, y_m=y, area_m2=bars * area, material_kind="steel"
+        if circular:
+            points = _integer_range(
+                layer["circular_integration_points"],
+                f"{layer_path}/circular_integration_points",
+                2,
+                64,
             )
-        )
-        overrides.append((fiber_id, steel[1]))
+            radius = math.sqrt(area / math.pi)
+            if not abs(y) + radius < depth / 2 or not 2 * radius < width:
+                _fail_compile(
+                    "rc_fiber_frame_circular_bar_extent_invalid",
+                    layer_path,
+                    "Circular bars must fit strictly inside the section faces.",
+                )
+            # Gauss-Chebyshev II integrates the circular chord-area weight.
+            # Every point owns its material state; this is not an elastic EI patch.
+            for point in range(1, points + 1):
+                angle = point * math.pi / (points + 1)
+                fiber_id = f"steel-circular-{layer_id}-{point:02d}"
+                fibers.append(
+                    StatefulSectionFiber(
+                        fiber_id=fiber_id,
+                        y_m=y + radius * math.cos(angle),
+                        area_m2=bars * area * 2 / (points + 1) * math.sin(angle) ** 2,
+                        material_kind="steel",
+                    )
+                )
+                overrides.append((fiber_id, steel[1]))
+        else:
+            fiber_id = f"steel-layer-{layer_id}"
+            fibers.append(
+                StatefulSectionFiber(
+                    fiber_id=fiber_id, y_m=y, area_m2=bars * area, material_kind="steel"
+                )
+            )
+            overrides.append((fiber_id, steel[1]))
         material_ids.append(steel_id)
     if math.fsum(f.area_m2 for f in fibers if f.material_kind == "steel") >= gross_area:
         _fail_compile(
