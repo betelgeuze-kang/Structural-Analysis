@@ -142,12 +142,51 @@ def test_public_restart_preserves_points_and_rejects_changed_quadrature():
         )
 
 
+def _first_reversal_disk_moment(radius, modulus, fy, hi, hk, curvature, ratio):
+    """Integrate three linear stress regions over the continuum disk.
+
+    On the positive half-disk, the virgin elastic core ends at c=fy/(E*k0).
+    Previously yielded material reverses when E*(1-r)*k0*y exceeds
+    2*(fy + Hi*p0), where p0=(E*k0*y-fy)/(E+Hi+Hk). Each region has
+    stress A*y+B, so only the analytic first and second chord moments enter.
+    This assumes a virgin state, positive k0, and a first reversal -1 <= r <= 1.
+    """
+    denominator = modulus + hi + hk
+    core = min(radius, fy / (modulus * curvature))
+    reverse_slope = modulus * curvature * (1 - ratio - 2 * hi / denominator)
+    reverse_intercept = 2 * fy * (1 - hi / denominator)
+    reverse = radius if reverse_slope <= 0 else min(
+        radius, max(core, reverse_intercept / reverse_slope)
+    )
+
+    def second(y):
+        angle = math.asin(y / radius)
+        return radius**4 * (angle - math.sin(4 * angle) / 4) / 8
+
+    def first(y):
+        return -(max(0.0, radius**2 - y**2))**1.5 / 3
+
+    slope = (modulus * (hi + hk) / denominator + modulus * (ratio - 1)) * curvature
+    intercept = modulus * fy / denominator
+    regions = [
+        (0.0, core, modulus * ratio * curvature, 0.0),
+        (core, reverse, slope, intercept),
+        (reverse, radius, slope + modulus * reverse_slope / denominator,
+         intercept - modulus * reverse_intercept / denominator),
+    ]
+    return 4 * math.fsum(
+        a * (second(upper) - second(lower)) + b * (first(upper) - first(lower))
+        for lower, upper, a, b in regions
+    )
+
+
 @pytest.mark.parametrize("yield_radius_fraction", [0.25, 0.5])
 @pytest.mark.parametrize(
     "isotropic,kinematic,unload_ratio",
-    [(0.0, h, r) for h in (0.0, 2000.0, 20000.0)
-     for r in (None, 0.0, -0.5, -1.0)]
-    + [(20000.0, 0.0, None), (8000.0, 12000.0, None)],
+    [(hi, hk, r)
+     for hi, hk in ((0.0, 0.0), (0.0, 2000.0), (0.0, 20000.0),
+                    (20000.0, 0.0), (8000.0, 12000.0))
+     for r in (None, 0.0, -0.5, -1.0)],
 )
 def test_partial_yield_circular_bar_converges_to_closed_form(
     yield_radius_fraction, isotropic, kinematic, unload_ratio
@@ -182,11 +221,20 @@ def test_partial_yield_circular_bar_converges_to_closed_form(
     target_curvature = curvature * (1 if unload_ratio is None else unload_ratio)
     # The bilinear monotonic disk is an elastic spring in parallel with a
     # scaled EPP disk. This decomposition also holds on reversal for PURE
-    # kinematic hardening; isotropic/mixed hardening is tested only monotonically.
+    # kinematic hardening; isotropic reversal uses the piecewise integral below.
     exact_moment = (
         tangent_ratio * modulus * target_curvature * math.pi * radius**4 / 4
         + (1 - tangent_ratio) * exact_moment
     )
+    piecewise = _first_reversal_disk_moment(
+        radius, modulus, yield_stress, isotropic, kinematic, curvature,
+        1.0 if unload_ratio is None else unload_ratio,
+    )
+    if isotropic == 0 or unload_ratio is None:
+        # Cross-check the piecewise integral with the separate parallel-spring
+        # identity in the cases where that identity applies.
+        assert piecewise == pytest.approx(exact_moment, rel=1e-12, abs=1e-15)
+    exact_moment = piecewise
     errors = []
     for points in [2, 8, 32, 64]:
         data = authored(points)
