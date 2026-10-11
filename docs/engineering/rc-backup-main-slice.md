@@ -42,6 +42,12 @@ lease rejection, five preserved reservations with unknown ordinal 3, then backs
 up and reopens the result and quantity report byte-for-byte. Read-only reopen is
 tested with numerical entry points forbidden.
 
+The backup integration now runs for both the cantilever request and the
+explicit fixed-guided axial v5 request. It additionally checks that restoration
+preserves the immutable request content hash. The two backup cases and four
+fixed-guided public/lifecycle cases passed together (6 tests). These checks
+exercise separate-store backup recovery rather than only restart in place.
+
 The model and prices are synthetic test inputs. This is software workflow proof,
 not a real specimen comparison, actual construction estimate, or release proof.
 Process exit is not an OS-wide RAM/CPU ceiling or descendant-process guarantee.
