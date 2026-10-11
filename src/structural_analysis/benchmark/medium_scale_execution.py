@@ -16,6 +16,7 @@ from importlib import resources
 import json
 import math
 import os
+from pathlib import Path
 import platform
 import re
 import subprocess
@@ -814,6 +815,24 @@ def _assembly_and_conditioning(model: CanonicalModel) -> dict[str, Any]:
 
 
 def _peak_memory() -> tuple[int, str]:
+    if sys.platform == "linux":
+        # ru_maxrss can retain the launcher's high-water mark across exec.
+        # VmHWM belongs to the worker's current address space instead.
+        rows = [
+            line.split()
+            for line in Path("/proc/self/status").read_text(encoding="ascii").splitlines()
+            if line.startswith("VmHWM:")
+        ]
+        if (
+            len(rows) != 1
+            or len(rows[0]) != 3
+            or rows[0][2] != "kB"
+            or not rows[0][1].isascii()
+            or not rows[0][1].isdecimal()
+            or int(rows[0][1]) <= 0
+        ):
+            raise ValueError("linux_worker_peak_memory_unavailable")
+        return int(rows[0][1]) * 1024, "Linux /proc/self/status VmHWM"
     if resource is not None:
         maximum_rss = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         memory_bytes = maximum_rss if sys.platform == "darwin" else maximum_rss * 1024
@@ -1349,6 +1368,8 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
     expected_resource_measurement = (
         "Windows GetProcessMemoryInfo PeakWorkingSetSize"
         if sys.platform == "win32"
+        else "Linux /proc/self/status VmHWM"
+        if sys.platform == "linux"
         else "resource.getrusage(RUSAGE_SELF).ru_maxrss"
     )
     if payload["claim_boundary"] != CLAIM_BOUNDARY:

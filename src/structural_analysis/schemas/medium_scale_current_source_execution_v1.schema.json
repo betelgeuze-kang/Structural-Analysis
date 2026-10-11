@@ -504,6 +504,7 @@
             "peak_memory_limit_bytes": {"const": 1073741824},
             "measurement": {
               "enum": [
+                "Linux /proc/self/status VmHWM",
                 "resource.getrusage(RUSAGE_SELF).ru_maxrss",
                 "Windows GetProcessMemoryInfo PeakWorkingSetSize"
               ]

@@ -106,7 +106,7 @@ jobs:
                   "schema": "src/structural_analysis/schemas/medium_scale_current_source_execution_v1.schema.json",
                   "manifest": None,
                   "receipt_version": "medium-scale-current-source-execution.v1",
-                  "schema_sha256": "3a39104ea9313ffb24c8bcfad905f513cc2cfae47b1526c158d7b512b5b52305",
+                  "schema_sha256": "50ceff8d4cb756150d0ebad233ad6f7b8c120e7ffeff7c567d64b868b4973c46",
               },
               "ifc": {
                   "workflow": ".github/workflows/ifc-import-health-current-source.yml",
