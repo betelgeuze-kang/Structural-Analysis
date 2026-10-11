@@ -544,11 +544,7 @@ def test_reversal_opt_in_still_rejects_duplicate_target():
         )
 
 
-def test_nonlinear_fixed_axial_reversal_restart_and_coarse_failure():
-    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
-        solve_stateful_corotational_fiber_frame2d_load_step,
-    )
-
+def _nonlinear_fixed_axial_problem():
     coords = ((0.0, 0.0), (0.0, 1.0))
     steel = BilinearCombinedHardeningSteel(
         elastic_modulus_mpa=200000,
@@ -596,6 +592,15 @@ def test_nonlinear_fixed_axial_reversal_restart_and_coarse_failure():
         rotation_coordinate_scale_m=1.0,
     )
 
+    return p
+
+
+def test_nonlinear_fixed_axial_reversal_restart_and_coarse_failure():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
+        solve_stateful_corotational_fiber_frame2d_load_step,
+    )
+
+    p = _nonlinear_fixed_axial_problem()
     pre = solve_stateful_corotational_fiber_frame2d_load_step(
         p,
         initial_stateful_corotational_fiber_frame2d_checkpoint(p),
@@ -665,3 +670,199 @@ def test_nonlinear_fixed_axial_reversal_restart_and_coarse_failure():
         suffix.final_checkpoint.canonical_bytes()
         == full.final_checkpoint.canonical_bytes()
     )
+
+
+def test_subdivision_reaches_nonlinear_reversals_and_counts_failed_attempts():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
+        solve_stateful_corotational_fiber_frame2d_load_step,
+    )
+
+    problem = _nonlinear_fixed_axial_problem()
+    pre = solve_stateful_corotational_fiber_frame2d_load_step(
+        problem,
+        initial_stateful_corotational_fiber_frame2d_checkpoint(problem),
+        target_load_factor=0.0,
+    )
+    assert pre.committed
+    targets = (0.005, 0.01, -0.005, -0.01, 0.005)
+    result = run_corotational_control_subdivision(
+        problem,
+        targets,
+        control_global_dof=3,
+        initial_checkpoint=pre.accepted_checkpoint,
+    )
+    assert result.contract_pass
+    assert result.completed_target_count == 5
+    assert any(not step.committed for step in result.attempts)
+    assert len(result.attempts) <= 255
+    assert result.final_checkpoint.global_displacements[3] == pytest.approx(
+        0.005, abs=1e-12
+    )
+    replay_targets = tuple(
+        step.metrics["target_control_displacement_m"]
+        for step in result.attempts
+        if step.committed
+    )
+    replay = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        replay_targets,
+        control_global_dof=3,
+        allow_reversal=True,
+        initial_checkpoint=pre.accepted_checkpoint,
+    )
+    assert replay.contract_pass
+    assert (
+        replay.final_checkpoint.canonical_bytes()
+        == result.final_checkpoint.canonical_bytes()
+    )
+    exhausted = run_corotational_control_subdivision(
+        problem,
+        targets,
+        control_global_dof=3,
+        initial_checkpoint=pre.accepted_checkpoint,
+        maximum_attempt_count=1,
+    )
+    assert not exhausted.contract_pass
+    assert exhausted.terminal_reason == "attempt_budget_exhausted"
+    assert len(exhausted.attempts) == 1
+    assert exhausted.completed_target_count == 0
+    assert (
+        exhausted.final_checkpoint.canonical_bytes()
+        == pre.accepted_checkpoint.canonical_bytes()
+    )
+
+
+@pytest.mark.parametrize(
+    "option,value",
+    [
+        ("maximum_attempt_count", True),
+        ("maximum_attempt_count", 0),
+        ("maximum_attempt_count", 4097),
+        ("maximum_subdivision_depth", -1),
+        ("maximum_subdivision_depth", 21),
+        ("maximum_subdivision_depth", 1.5),
+    ],
+)
+def test_subdivision_rejects_invalid_budget(option, value):
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    with pytest.raises(ValueError, match=option):
+        run_corotational_control_subdivision(
+            _arch_problem("invalid-budget"),
+            (-0.01,),
+            control_global_dof=4,
+            **{option: value},
+        )
+
+
+def test_subdivision_rejects_falsey_non_config():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    with pytest.raises(ValueError, match="config type"):
+        run_corotational_control_subdivision(
+            _arch_problem("bad-config"),
+            (-0.01,),
+            control_global_dof=4,
+            config=False,
+        )
+
+
+@pytest.mark.parametrize("invalid_checkpoint", [False, 0, ()])
+def test_subdivision_rejects_falsey_checkpoint(invalid_checkpoint):
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    with pytest.raises(ValueError, match="checkpoint type"):
+        run_corotational_control_subdivision(
+            _arch_problem("bad-checkpoint"),
+            (-0.01,),
+            control_global_dof=4,
+            initial_checkpoint=invalid_checkpoint,
+        )
+
+
+def test_subdivision_depth_limit_and_float_progress_preserve_parent():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    problem = replace(_arch_problem("depth-limit"), fixed_external_loads=((4, -0.01),))
+    seed = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    kwargs = dict(
+        control_global_dof=4,
+        initial_checkpoint=seed,
+        config=StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+            maximum_iterations=0
+        ),
+    )
+    depth = run_corotational_control_subdivision(
+        problem,
+        (-0.01,),
+        maximum_subdivision_depth=0,
+        **kwargs,
+    )
+    assert depth.terminal_reason == "subdivision_depth_exhausted"
+    assert not depth.contract_pass
+    assert len(depth.attempts) == 1
+    assert depth.final_checkpoint.canonical_bytes() == seed.canonical_bytes()
+    tiny = run_corotational_control_subdivision(
+        problem, (np.nextafter(0.0, 1.0),), **kwargs
+    )
+    assert tiny.terminal_reason == "subdivision_has_no_representable_progress"
+    assert not tiny.contract_pass
+    assert len(tiny.attempts) == 1
+    assert tiny.final_checkpoint.canonical_bytes() == seed.canonical_bytes()
+
+
+def test_subdivision_budget_preserves_partial_success():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    problem = _arch_problem("partial-budget")
+    result = run_corotational_control_subdivision(
+        problem,
+        (-0.01, -0.02),
+        control_global_dof=4,
+        maximum_attempt_count=1,
+    )
+    assert result.terminal_reason == "attempt_budget_exhausted"
+    assert not result.contract_pass
+    assert result.completed_target_count == 1
+    assert len(result.attempts) == 1
+    assert result.attempts[0].committed
+    assert (
+        result.final_checkpoint.canonical_bytes()
+        == result.attempts[0].accepted_checkpoint.canonical_bytes()
+    )
+
+
+def test_subdivision_bounds_lazy_input_before_solving():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    consumed = []
+
+    def unbounded_targets():
+        value = 0
+        while True:
+            value += 1
+            consumed.append(value)
+            yield value * 1e-4
+
+    with pytest.raises(ValueError, match="1 to 255"):
+        run_corotational_control_subdivision(
+            _arch_problem("bounded-input"),
+            unbounded_targets(),
+            control_global_dof=4,
+        )
+    assert len(consumed) == 256
