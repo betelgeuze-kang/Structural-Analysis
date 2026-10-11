@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-10-10T11:03:02Z",
+  "observed_at": "2026-10-11T11:10:18Z",
   "observation_source": "github_rest_read_only_current_github_state",
-  "observed_open_issue_count": 51,
+  "observed_open_issue_count": 50,
   "open_issue_numbers": [
     247,
     258,
@@ -40,7 +40,6 @@
     520,
     522,
     524,
-    574,
     576,
     578,
     580,
@@ -57,7 +56,7 @@
     610,
     612
   ],
-  "open_issue_projection_sha256": "sha256:3b5e335d73b61ce50fd1db5a866668c29dccec3613a946b1d5a4714269f4fb01",
+  "open_issue_projection_sha256": "sha256:d668b1f5553fdd1ba4e177cfedeefed99efb86f2b15ec8f8c8cf241481ad12fc",
   "open_issues": [
     {
       "number": 247,
@@ -746,24 +745,6 @@
       "required_external_inputs": [],
       "closable_by_repository_code_alone": true,
       "current_product_authority": false
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
-        575
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_pin_roller_rc_durable_workbench_integration",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:93bf3252500c38f53c43bee37dd07f3b938aaef65df9c20b6f77cd5d189c19cd",
-      "labels": [],
-      "number": 574,
-      "state": "open",
-      "title": "Connect explicit pin-roller RC beams to durable Workbench workflow",
-      "updated_at": "2026-10-08T13:27:42Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/574"
     },
     {
       "classification": "repository_implementation",
