@@ -866,3 +866,190 @@ def test_subdivision_bounds_lazy_input_before_solving():
             control_global_dof=4,
         )
     assert len(consumed) == 256
+
+
+def test_subdivision_serialized_resume_preserves_failed_work_and_nonlinear_state(
+    tmp_path,
+):
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
+        solve_stateful_corotational_fiber_frame2d_load_step,
+    )
+
+    p = _nonlinear_fixed_axial_problem()
+    pre = solve_stateful_corotational_fiber_frame2d_load_step(
+        p,
+        initial_stateful_corotational_fiber_frame2d_checkpoint(p),
+        target_load_factor=0.0,
+    )
+    assert pre.committed
+    targets = (0.005, 0.01, -0.005, -0.01, 0.005)
+    kwargs = dict(control_global_dof=3, initial_checkpoint=pre.accepted_checkpoint)
+    full = run_corotational_control_subdivision(p, targets, **kwargs)
+    pause = run_corotational_control_subdivision(
+        p, targets, attempt_limit_per_call=1, **kwargs
+    )
+    assert pause.status == "paused"
+    assert pause.total_attempt_count == 1
+    assert not pause.attempts[0].committed
+    saved = tmp_path / "continuation.json"
+    saved.write_bytes(pause.continuation)
+    resumed = run_corotational_control_subdivision(
+        p, targets, continuation=saved.read_bytes(), **kwargs
+    )
+    assert resumed.contract_pass
+    assert resumed.total_attempt_count == full.total_attempt_count
+    assert resumed.total_attempt_count == len(pause.attempts) + len(resumed.attempts)
+    assert (
+        resumed.final_checkpoint.canonical_bytes()
+        == full.final_checkpoint.canonical_bytes()
+    )
+    assert resumed.continuation == full.continuation
+    complete = run_corotational_control_subdivision(
+        p, targets, continuation=resumed.continuation, **kwargs
+    )
+    assert complete.contract_pass
+    assert complete.attempts == ()
+    assert complete.continuation == resumed.continuation
+
+
+def test_subdivision_resume_keeps_exhausted_budget_and_terminal_failure():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    p = _arch_problem("resume-budget")
+    kwargs = dict(control_global_dof=4, maximum_attempt_count=1)
+    first = run_corotational_control_subdivision(p, (-0.01, -0.02), **kwargs)
+    resumed = run_corotational_control_subdivision(
+        p, (-0.01, -0.02), continuation=first.continuation, **kwargs
+    )
+    assert resumed.terminal_reason == "attempt_budget_exhausted"
+    assert resumed.total_attempt_count == 1
+    assert not resumed.attempts
+    assert resumed.continuation == first.continuation
+    cfg = StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+        maximum_iterations=0
+    )
+    kwargs = dict(control_global_dof=4, config=cfg, maximum_subdivision_depth=0)
+    stopped = run_corotational_control_subdivision(p, (-0.01,), **kwargs)
+    assert stopped.terminal_reason == "subdivision_depth_exhausted"
+    restored = run_corotational_control_subdivision(
+        p, (-0.01,), continuation=stopped.continuation, **kwargs
+    )
+    assert restored.terminal_reason == stopped.terminal_reason
+    assert not restored.attempts
+    assert restored.continuation == stopped.continuation
+
+
+def test_subdivision_resume_rejects_corruption_and_changed_context(monkeypatch):
+    import json
+    import structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision as module
+
+    p = _arch_problem("resume-rejection")
+    targets = (-0.01, -0.02)
+    pause = module.run_corotational_control_subdivision(
+        p, targets, control_global_dof=4, attempt_limit_per_call=1
+    )
+    options = dict(control_global_dof=4, continuation=pause.continuation)
+    for changed in (
+        {"maximum_attempt_count": 256},
+        {"maximum_subdivision_depth": 9},
+        {
+            "config": StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+                maximum_iterations=39
+            )
+        },
+    ):
+        with pytest.raises(ValueError, match="input, policy or source mismatch"):
+            module.run_corotational_control_subdivision(
+                p, targets, **options, **changed
+            )
+    with pytest.raises(ValueError, match="input, policy or source mismatch"):
+        module.run_corotational_control_subdivision(p, (-0.01, -0.03), **options)
+    artifact = json.loads(pause.continuation)
+    artifact["payload"]["spent"] = 0
+    with pytest.raises(ValueError, match="checksum"):
+        module.run_corotational_control_subdivision(
+            p, targets, control_global_dof=4, continuation=json.dumps(artifact).encode()
+        )
+    for raw in (b'{"payload":{},"payload":{}}', b'{"payload":NaN}', b"not json"):
+        with pytest.raises(ValueError):
+            module.run_corotational_control_subdivision(
+                p, targets, control_global_dof=4, continuation=raw
+            )
+    monkeypatch.setattr(module, "_source_identity", lambda: "changed-source")
+    with pytest.raises(ValueError, match="input, policy or source mismatch"):
+        module.run_corotational_control_subdivision(p, targets, **options)
+
+
+def test_subdivision_repeated_resume_keeps_partial_success_and_seed_identity():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    p = _arch_problem("resume-partial")
+    targets = (-0.01, -0.02, -0.015)
+    full = run_corotational_control_subdivision(p, targets, control_global_dof=4)
+    assert full.contract_pass
+    kwargs = dict(control_global_dof=4, attempt_limit_per_call=1)
+    part = run_corotational_control_subdivision(p, targets, **kwargs)
+    assert part.completed_target_count == 1
+    with pytest.raises(ValueError, match="initial checkpoint mismatch"):
+        run_corotational_control_subdivision(
+            p,
+            targets,
+            initial_checkpoint=part.final_checkpoint,
+            continuation=part.continuation,
+            **kwargs,
+        )
+    for _ in range(full.total_attempt_count):
+        if part.contract_pass:
+            break
+        prior_spent = part.total_attempt_count
+        part = run_corotational_control_subdivision(
+            p, targets, continuation=part.continuation, **kwargs
+        )
+        assert part.total_attempt_count == prior_spent + 1
+    assert part.contract_pass
+    assert part.continuation == full.continuation
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("spent", -1),
+        ("spent", True),
+        ("spent", 256),
+        ("completed", 256),
+        ("completed", True),
+        ("pending", []),
+        ("pending", [[-0.02, 21, 1]]),
+        ("pending", [[-0.02, 0, True]]),
+        ("terminal", "unknown"),
+    ],
+)
+def test_subdivision_resume_rejects_malformed_rehashed_records(field, value):
+    import hashlib
+    import json
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_subdivision import (
+        run_corotational_control_subdivision,
+    )
+
+    p = _arch_problem("resume-malformed")
+    targets = (-0.01, -0.02)
+    part = run_corotational_control_subdivision(
+        p, targets, control_global_dof=4, attempt_limit_per_call=1
+    )
+    record = json.loads(part.continuation)
+    record["payload"][field] = value
+    canonical = json.dumps(
+        record["payload"], sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
+    record["sha256"] = hashlib.sha256(canonical).hexdigest()
+    with pytest.raises(ValueError, match="continuation"):
+        run_corotational_control_subdivision(
+            p, targets, control_global_dof=4, continuation=json.dumps(record).encode()
+        )
