@@ -1,6 +1,7 @@
 """Mixed constituent mechanics and persistence; no specimen-law calibration."""
 
 from dataclasses import replace
+import json
 
 import numpy as np
 import pytest
@@ -252,3 +253,114 @@ def test_mixed_steel_terminal_recovery_replays_bound_constituent_laws(
         ]
     )
     np.testing.assert_array_equal(operator.array("fiber_stress_mpa"), expected)
+
+
+@pytest.mark.parametrize("law_difference", ["yield", "kinematic"])
+def test_swapped_steel_histories_rejected_by_section_checkpoint_and_projection(
+    law_difference,
+):
+    from structural_analysis.assembly import (
+        dump_stateful_fiber_frame2d_checkpoint_bytes,
+        initial_stateful_fiber_frame2d_checkpoint,
+    )
+    from structural_analysis.assembly.stateful_fiber_frame2d import (
+        validate_stateful_fiber_frame2d_checkpoint,
+    )
+    from structural_analysis.assembly.stateful_fiber_frame2d_material_state_bundle import (
+        create_initial_fiber_frame_material_state_projection,
+        advance_fiber_frame_material_state_projection,
+    )
+    from structural_analysis.benchmark import make_two_element_stateful_fiber_cantilever
+
+    base = make_rectangular_stateful_rc_fiber_section()
+    other = replace(
+        base.steel,
+        **(
+            {"yield_stress_mpa": 100.0}
+            if law_difference == "yield"
+            else {"kinematic_hardening_modulus_mpa": 17000.0}
+        ),
+    )
+    section = replace(base, steel_overrides=(("steel-top-layer", other),))
+    original = make_two_element_stateful_fiber_cantilever(angle_rad=0.0)
+    problem = replace(
+        original,
+        members=tuple(
+            replace(m, element=replace(m.element, section=section))
+            for m in original.members
+        ),
+    )
+    parent = initial_stateful_fiber_frame2d_checkpoint(problem)
+    # Constitutively integrated, kinematically consistent prescribed strain.
+    # No claim that this manually authored checkpoint satisfies load equilibrium.
+    displacements = np.zeros(problem.global_dof_count)
+    for i, point in enumerate(problem.node_coordinates_m):
+        displacements[3 * i] = 0.003 * point[0]
+    element_states = tuple(
+        member.element.integrate(
+            problem.member_transformation(member)
+            @ displacements[list(problem.member_global_dofs(member))],
+            state,
+        ).state
+        for member, state in zip(problem.members, parent.element_states)
+    )
+    valid = replace(
+        parent,
+        epoch=1,
+        step_index=1,
+        parent_state_hash=parent.state_hash,
+        global_displacements=tuple(displacements),
+        element_states=element_states,
+        state_hash="",
+    )
+    validate_stateful_fiber_frame2d_checkpoint(problem, valid)
+    projection = create_initial_fiber_frame_material_state_projection(
+        problem,
+        parent,
+        model_ir_content_hash="sha256:" + "1" * 64,
+        execution_plan_hash="sha256:" + "2" * 64,
+        solver_state_hash="sha256:" + "3" * 64,
+    )
+    advance_fiber_frame_material_state_projection(
+        problem, parent, valid, projection, solver_state_hash="sha256:" + "4" * 64
+    )
+    beam = valid.element_states[0]
+    state = beam.integration_point_states[0]
+    assert all(s.accumulated_plastic_strain > 0 for s in state.fiber_states[-2:])
+    swapped = replace(
+        state, fiber_states=state.fiber_states[:-2] + state.fiber_states[-2:][::-1]
+    )
+    corrupted_beam = replace(
+        beam, integration_point_states=(swapped, *beam.integration_point_states[1:])
+    )
+    corrupt = replace(
+        valid, element_states=(corrupted_beam, *valid.element_states[1:]), state_hash=""
+    )
+    before = valid.canonical_bytes()
+    message = "dissipated energy" if law_difference == "yield" else "backstress"
+    for operation in (
+        lambda: section.validate_state(swapped),
+        lambda: validate_stateful_fiber_frame2d_checkpoint(problem, corrupt),
+        lambda: advance_fiber_frame_material_state_projection(
+            problem, parent, corrupt, projection, solver_state_hash="sha256:" + "5" * 64
+        ),
+    ):
+        with pytest.raises(ValueError, match=message):
+            operation()
+    from structural_analysis.assembly import (
+        load_stateful_fiber_frame2d_checkpoint_bytes,
+    )
+
+    # Coherently rehashed JSON must still fail the per-fiber law checks.
+    raw = json.dumps(corrupt.to_dict(), sort_keys=True, separators=(",", ":")).encode()
+    for operation in (
+        lambda: dump_stateful_fiber_frame2d_checkpoint_bytes(problem, corrupt),
+        lambda: load_stateful_fiber_frame2d_checkpoint_bytes(raw, problem),
+    ):
+        with pytest.raises(ValueError) as caught:
+            operation()
+        error = caught.value
+        while error.__cause__ is not None:
+            error = error.__cause__
+        assert message in str(error)
+    assert valid.canonical_bytes() == before

@@ -394,6 +394,10 @@ class StatefulRCFiberSection:
             )
             if type(fiber_state) is not expected:
                 raise ValueError("state fiber material type does not match section")
+            if fiber.material_kind == "steel":
+                self.steel_material_for(fiber.fiber_id).validate_state_admissibility(
+                    fiber_state
+                )
 
     def dissipated_energy_mj_per_m(
         self,
