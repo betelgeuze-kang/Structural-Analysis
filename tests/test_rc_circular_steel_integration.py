@@ -140,3 +140,134 @@ def test_public_restart_preserves_points_and_rejects_changed_quadrature():
             restart=prefix.checkpoint_artifact_bytes(),
             **config.api_kwargs(),
         )
+
+
+def _first_reversal_disk_moment(radius, modulus, fy, hi, hk, curvature, ratio):
+    """Integrate three linear stress regions over the continuum disk.
+
+    On the positive half-disk, the virgin elastic core ends at c=fy/(E*k0).
+    Previously yielded material reverses when E*(1-r)*k0*y exceeds
+    2*(fy + Hi*p0), where p0=(E*k0*y-fy)/(E+Hi+Hk). Each region has
+    stress A*y+B, so only the analytic first and second chord moments enter.
+    This assumes a virgin state, positive k0, and a first reversal -1 <= r <= 1.
+    """
+    denominator = modulus + hi + hk
+    core = min(radius, fy / (modulus * curvature))
+    reverse_slope = modulus * curvature * (1 - ratio - 2 * hi / denominator)
+    reverse_intercept = 2 * fy * (1 - hi / denominator)
+    reverse = radius if reverse_slope <= 0 else min(
+        radius, max(core, reverse_intercept / reverse_slope)
+    )
+
+    def second(y):
+        angle = math.asin(y / radius)
+        return radius**4 * (angle - math.sin(4 * angle) / 4) / 8
+
+    def first(y):
+        return -(max(0.0, radius**2 - y**2))**1.5 / 3
+
+    slope = (modulus * (hi + hk) / denominator + modulus * (ratio - 1)) * curvature
+    intercept = modulus * fy / denominator
+    regions = [
+        (0.0, core, modulus * ratio * curvature, 0.0),
+        (core, reverse, slope, intercept),
+        (reverse, radius, slope + modulus * reverse_slope / denominator,
+         intercept - modulus * reverse_intercept / denominator),
+    ]
+    return 4 * math.fsum(
+        a * (second(upper) - second(lower)) + b * (first(upper) - first(lower))
+        for lower, upper, a, b in regions
+    )
+
+
+@pytest.mark.parametrize("yield_radius_fraction", [0.25, 0.5])
+@pytest.mark.parametrize(
+    "isotropic,kinematic,unload_ratio",
+    [(hi, hk, r)
+     for hi, hk in ((0.0, 0.0), (0.0, 2000.0), (0.0, 20000.0),
+                    (20000.0, 0.0), (8000.0, 12000.0))
+     for r in (None, 0.0, -0.5, -1.0)],
+)
+def test_partial_yield_circular_bar_converges_to_closed_form(
+    yield_radius_fraction, isotropic, kinematic, unload_ratio
+):
+    """Independent continuum moments for EPP and linear-hardening disks."""
+    radius, modulus, yield_stress = 0.01, 200000.0, 250.0
+    elastic_radius = yield_radius_fraction * radius
+    curvature = yield_stress / (modulus * elastic_radius)
+    theta = math.asin(yield_radius_fraction)
+    elastic_integral = radius**4 * (theta - math.sin(4 * theta) / 4) / 8
+    plastic_integral = (radius**2 - elastic_radius**2) ** 1.5 / 3
+    exact_moment = 4 * (
+        modulus * curvature * elastic_integral + yield_stress * plastic_integral
+    )
+    if unload_ratio is not None:
+        # EPP unloading has M(k) = M(k0) - 2 M_monotonic((k0-k)/2).
+        # This continuum disk identity is independent of fiber state updates.
+        half_reversal = curvature * (1 - unload_ratio) / 2
+        core_radius = yield_stress / (modulus * half_reversal)
+        if core_radius >= radius:
+            reverse_moment = modulus * half_reversal * math.pi * radius**4 / 4
+        else:
+            angle = math.asin(core_radius / radius)
+            elastic = radius**4 * (angle - math.sin(4 * angle) / 4) / 8
+            plastic = (radius**2 - core_radius**2)**1.5 / 3
+            reverse_moment = 4 * (
+                modulus * half_reversal * elastic + yield_stress * plastic
+            )
+        exact_moment -= 2 * reverse_moment
+    hardening = isotropic + kinematic
+    tangent_ratio = hardening / (modulus + hardening)
+    target_curvature = curvature * (1 if unload_ratio is None else unload_ratio)
+    # The bilinear monotonic disk is an elastic spring in parallel with a
+    # scaled EPP disk. This decomposition also holds on reversal for PURE
+    # kinematic hardening; isotropic reversal uses the piecewise integral below.
+    exact_moment = (
+        tangent_ratio * modulus * target_curvature * math.pi * radius**4 / 4
+        + (1 - tangent_ratio) * exact_moment
+    )
+    piecewise = _first_reversal_disk_moment(
+        radius, modulus, yield_stress, isotropic, kinematic, curvature,
+        1.0 if unload_ratio is None else unload_ratio,
+    )
+    if isotropic == 0 or unload_ratio is None:
+        # Cross-check the piecewise integral with the separate parallel-spring
+        # identity in the cases where that identity applies.
+        assert piecewise == pytest.approx(exact_moment, rel=1e-12, abs=1e-15)
+    exact_moment = piecewise
+    errors = []
+    for points in [2, 8, 32, 64]:
+        data = authored(points)
+        data["materials"] = [m for m in data["materials"] if m["id"] != "hanger"]
+        steel = next(m for m in data["materials"] if m["id"] == "steel")
+        steel["isotropic_hardening_modulus_mpa"] = isotropic
+        steel["kinematic_hardening_modulus_mpa"] = kinematic
+        data["sections"][0]["steel_layers"] = [{
+            "id": "central", "y_m": 0.0, "bar_count": 1,
+            "bar_area_m2": math.pi * radius**2, "steel_material": "steel",
+            "circular_integration_points": points,
+        }]
+        compiled, blockers, _ = _compile(model(data))
+        assert not blockers
+        section = compiled.problem.members[0].element.section
+        # Isolate steel so concrete damage cannot mask bar integration error.
+        terms = []
+        for fiber in section.fibers:
+            if fiber.material_kind != "steel":
+                continue
+            law = section.steel_material_for(fiber.fiber_id)
+            response = law.integrate(curvature * fiber.y_m, law.initial_state())
+            if unload_ratio is not None:
+                committed = response.state
+                before = committed.state_hash
+                # An abandoned trial must not change the state used to unload.
+                law.integrate(0.3 * curvature * fiber.y_m, committed)
+                assert committed.state_hash == before
+                response = law.integrate(
+                    unload_ratio * curvature * fiber.y_m, committed
+                )
+            terms.append(fiber.area_m2 * fiber.y_m * response.stress_mpa)
+        moment = math.fsum(terms)
+        errors.append(abs(moment / exact_moment - 1))
+    assert errors[-1] < 1e-3
+    assert errors[-1] < errors[0] / 20
