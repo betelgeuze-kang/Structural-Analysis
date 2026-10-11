@@ -36,7 +36,7 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
 )
 from structural_analysis.assembly import stateful_fiber_frame2d_control_path as paths
 from structural_analysis.execution.job_http_api import DurableJobWSGIApplication
-from structural_analysis.execution.job_service import DurableJobService
+from structural_analysis.execution.job_service import DurableJobService, JobServiceError
 from structural_analysis.execution.rc_fiber_direct_control_worker import (
     execute_rc_fiber_direct_control_claim,
 )
@@ -406,12 +406,19 @@ def run_worker(workspace, name):
 class Supervisor:
     """Control/inspection only. No job submission or report writes live here."""
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, *, managed=False):
+        self.managed = managed
         self.workspace = workspace
         self.runtime_workspace = workspace
         self.original_store = self.original_rows = None
         self.store = workspace / "store"
         assert not self.store.exists(), "an empty isolated durable store is required"
+        if managed:
+            from structural_analysis.execution.job_managed_init_cli import initialize_managed_store
+
+            initialize_managed_store(
+                self.store, workspace / "execution-authority", maximum_blob_bytes=10 * 1024 * 1024
+            )
         service(self.store)
         self.processes = []
         self.http = self.first = self.fresh = None
@@ -435,6 +442,7 @@ class Supervisor:
             "github_run_id": os.environ.get("GITHUB_RUN_ID"),
             "github_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
             "source_revision_caller_declaration": SOURCE_REVISION,
+            "managed_execution_authority": managed,
             "independent_physical_validation": False,
             "design_authority": False,
             "commands": [],
@@ -600,6 +608,7 @@ class Supervisor:
             assert self.http is not None
             self.stop(self.http)
             assert self.http["child"].poll() is not None
+            stale_service = service(self.store) if self.managed else None
             self.original_store = self.store
             self.original_rows = numerical_rows(self.store)
             limit = 10 * 1024 * 1024
@@ -617,8 +626,25 @@ class Supervisor:
                 manifest_sha256=receipt["manifest_sha256"],
                 maximum_bytes=limit,
             )
+            activation = None
+            stale_source_rejected = False
+            if self.managed:
+                from structural_analysis.execution.job_managed_restore import activate_managed_restore
+
+                activation = activate_managed_restore(
+                    sealed, self.store, manifest_sha256=receipt["manifest_sha256"], maximum_bytes=limit
+                )
+                assert activation["status"] == "activated" and activation["generation"] == 2
+                try:
+                    stale_service.get_job(self.proof["first_checkpoint"]["job_id"], **tenant())
+                except JobServiceError as error:
+                    assert error.code == "execution_authority_rejected"
+                    stale_source_rejected = True
+                assert stale_source_rejected, "old managed source must reject access after activation"
             assert numerical_rows(self.store) == self.original_rows
             result = {
+                "managed_activation": activation,
+                "stale_source_rejected": stale_source_rejected,
                 "manifest_sha256": receipt["manifest_sha256"],
                 "source_store": str(self.original_store),
                 "restored_store": str(self.store),
@@ -715,8 +741,8 @@ class Supervisor:
         self.save_proof()
 
 
-def run_driver(workspace):
-    current = Supervisor(workspace)
+def run_driver(workspace, *, managed=False):
+    current = Supervisor(workspace, managed=managed)
     emit(
         {
             "ready": True,
@@ -769,6 +795,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("driver", "http", "worker"))
     parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--managed", action="store_true")
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument("--name", choices=tuple(WORKERS))
     args = parser.parse_args()
@@ -780,7 +807,7 @@ def main():
     if args.mode == "driver":
         if any(workspace.iterdir()):
             parser.error("driver requires an empty workspace")
-        return run_driver(workspace)
+        return run_driver(workspace, managed=args.managed)
     if args.mode == "http":
         serve(workspace, args.port)
     else:

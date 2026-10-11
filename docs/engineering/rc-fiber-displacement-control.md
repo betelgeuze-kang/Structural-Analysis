@@ -106,6 +106,29 @@ path. These observations neither establish general reversal convergence nor
 experimental agreement, and the extra failed trials must be included in cost
 comparisons.
 
+### Interpreting a failed target
+
+`line_search_failed_to_reduce_residual` reports failure of the attempted solve.
+It does not establish physical failure, an ultimate load, or the absence of an
+equilibrium solution. A smaller increment, another initial trial, or a different
+optimizer is not a guarantee of convergence. Optimizer termination must never
+replace the equilibrium, control, increment and state-binding acceptance gates.
+
+Keep the failed target and trial work visible alongside the accepted prefix.
+Restart replays that prefix; it does not accept the failed iterate or reset its
+material history. For a durable job, the resumable boundary is the last fully
+verified chunk: an attempted suffix may contain additional locally converged
+states without advancing that durable boundary. A failed job must not produce a
+successful quantity report, and restoring a backup must not refund reserved or
+unknown work.
+
+Following a different controlled quantity to investigate a solution branch is a
+separate diagnostic. A branch computed with one frozen material parent and a
+branch that updates irreversible history are also different experiments. Neither
+completes the authored central-displacement targets. Changing the control path,
+material law or acceptance settings requires a separately identified analysis;
+do not relabel those changes as recovery of the original accepted trajectory.
+
 Given an existing original compiled `problem`, the internal entry point is:
 
 ```python

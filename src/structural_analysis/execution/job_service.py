@@ -33,6 +33,13 @@ from time import monotonic, sleep
 from types import MappingProxyType
 from typing import Any, Final, Iterator, Literal, NoReturn
 
+from .job_execution_authority import (
+    ExecutionBinding,
+    ExecutionAuthorityError,
+    JobExecutionAuthority,
+    install_new_store,
+)
+
 from jsonschema import Draft202012Validator
 
 
@@ -249,6 +256,8 @@ class DurableJobService:
         worker_tenants: Mapping[str, Collection[str]] | None = None,
         clock: Callable[[], datetime] | None = None,
         max_blob_payload_bytes: int | None = None,
+        execution_authority: JobExecutionAuthority | None = None,
+        execution_binding: ExecutionBinding | None = None,
     ) -> None:
         if max_blob_payload_bytes is not None and (
             type(max_blob_payload_bytes) is not int
@@ -271,6 +280,7 @@ class DurableJobService:
         for marker in (
             ".job-store-backup.pending",
             ".job-store-restore.pending",
+            ".job-store-authority.pending",
             "backup-manifest.json",
         ):
             path = self.root / marker
@@ -280,10 +290,26 @@ class DurableJobService:
                     "/root",
                     "An incomplete recovery or sealed backup cannot be opened as a live job store.",
                 )
-        self.root.mkdir(parents=True, exist_ok=True)
-        self._blob_root = self.root / "blobs" / "sha256"
+        storage_root = self.root
+        if execution_authority is not None:
+            if self.root.exists() or self.root.is_symlink():
+                _fail(
+                    "execution_authority_adoption_required",
+                    "/root",
+                    "Managed enrollment requires a new destination.",
+                )
+            self.root.parent.mkdir(parents=True, exist_ok=True)
+            storage_root = Path(
+                tempfile.mkdtemp(prefix=".job-store-enroll-", dir=self.root.parent)
+            )
+        else:
+            self.root.mkdir(parents=True, exist_ok=True)
+        self._blob_root = storage_root / "blobs" / "sha256"
         self._blob_root.mkdir(parents=True, exist_ok=True)
-        self._db_path = self.root / "jobs.sqlite3"
+        self._db_path = storage_root / "jobs.sqlite3"
+        self._execution_authority = None
+        self._execution_binding = None
+        self._load_execution_authority(execution_authority, execution_binding)
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._tenant_token_hashes = MappingProxyType(
             _credential_map("tenant", tenant_tokens)
@@ -316,7 +342,34 @@ class DurableJobService:
                 permissions[worker_id] = normalized
         self._worker_tenants = MappingProxyType(permissions)
         self._blob_admissions: dict[sqlite3.Connection, _BlobAdmission | None] = {}
-        self._initialize_database()
+        authority_pending = storage_root / ".job-store-authority.pending"
+        if execution_authority is not None:
+            with authority_pending.open("xb") as stream:
+                stream.write(b"Managed enrollment incomplete; preserve for recovery.\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            self._sync_authority_directory(storage_root)
+        with self.execution_guard():
+            self._initialize_database()
+        if execution_authority is not None:
+            with self.execution_guard(), self._connect() as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                connection.execute(
+                    "CREATE TABLE job_execution_authority_binding (singleton INTEGER PRIMARY KEY CHECK(singleton=1), directory TEXT NOT NULL, identity TEXT NOT NULL, generation INTEGER NOT NULL, root TEXT NOT NULL)"
+                )
+                connection.execute(
+                    "INSERT INTO job_execution_authority_binding VALUES (1, ?, ?, ?, ?)",
+                    (
+                        str(execution_authority.directory),
+                        execution_binding.authority_id,
+                        execution_binding.generation,
+                        execution_binding.root,
+                    ),
+                )
+                connection.execute("PRAGMA application_id=1380140373")
+                connection.commit()
+            authority_pending.unlink()
+            self._sync_authority_directory(storage_root)
         # Policy is committed independently of subsequent job transactions.
         with self._transaction() as connection:
             current = self._blob_payload_limit(connection)
@@ -332,6 +385,99 @@ class DurableJobService:
                         "/max_blob_payload_bytes",
                         "The root already has a different immutable payload cap.",
                     )
+
+        if execution_authority is not None:
+            with self.execution_guard():
+                try:
+                    install_new_store(storage_root, self.root)
+                except ExecutionAuthorityError as exc:
+                    raise JobServiceError(
+                        "execution_authority_install_failed", "/root", str(exc)
+                    ) from exc
+                self._sync_authority_directory(self.root.parent)
+            self._blob_root = self.root / "blobs" / "sha256"
+            self._db_path = self.root / "jobs.sqlite3"
+
+    def _sync_authority_directory(self, root):
+        descriptor = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+
+    def _load_execution_authority(self, authority, binding):
+        if (authority is None) != (binding is None):
+            _fail(
+                "execution_authority_invalid",
+                "/root",
+                "Authority and binding must be supplied together.",
+            )
+        if authority is not None:
+            if (
+                type(authority) is not JobExecutionAuthority
+                or type(binding) is not ExecutionBinding
+            ):
+                _fail(
+                    "execution_authority_invalid",
+                    "/root",
+                    "Invalid managed execution binding.",
+                )
+            if self._db_path.exists():
+                _fail(
+                    "execution_authority_adoption_required",
+                    "/root",
+                    "Existing stores require explicit offline adoption; constructor enrollment is only for new stores.",
+                )
+        elif self._db_path.exists():
+            connection = None
+            try:
+                connection = sqlite3.connect(
+                    self._db_path.as_uri() + "?mode=ro", uri=True
+                )
+                marker = connection.execute("PRAGMA application_id").fetchone()[0]
+                exists = connection.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='job_execution_authority_binding'"
+                ).fetchone()
+                if marker == 1380140373 or exists:
+                    if marker != 1380140373 or not exists:
+                        raise ValueError("managed authority metadata incomplete")
+                    rows = connection.execute(
+                        "SELECT directory, identity, generation, root FROM job_execution_authority_binding"
+                    ).fetchall()
+                    if len(rows) != 1:
+                        raise ValueError("managed authority metadata invalid")
+                    directory, identity, generation, root = rows[0]
+                    authority = JobExecutionAuthority(directory)
+                    binding = ExecutionBinding(identity, generation, root)
+            except (sqlite3.Error, ValueError, TypeError) as exc:
+                raise JobServiceError(
+                    "execution_authority_invalid",
+                    "/root",
+                    "Managed execution metadata cannot be read.",
+                ) from exc
+            finally:
+                if connection is not None:
+                    connection.close()
+        self._execution_authority, self._execution_binding = authority, binding
+        with self.execution_guard():
+            pass
+
+    @contextmanager
+    def execution_guard(self):
+        if self._execution_authority is None:
+            yield None
+            return
+        try:
+            if self._execution_binding.root != str(self.root):
+                raise ExecutionAuthorityError(
+                    "store root differs from execution binding"
+                )
+            with self._execution_authority.execution(self._execution_binding) as fd:
+                yield fd
+        except ExecutionAuthorityError as exc:
+            raise JobServiceError(
+                "execution_authority_rejected", "/root", str(exc)
+            ) from exc
 
     def submit_job(
         self,
@@ -525,6 +671,10 @@ class DurableJobService:
             if row is None:
                 return None
 
+            if self._execution_authority is not None:
+                # Only the RC worker holds the authority through child cleanup.
+                row, _budget = self._reconcile_execution_reservations(connection, row)
+
             request_bytes = self._read_blob(
                 str(row["request_hash"]),
                 int(row["request_size"]),
@@ -630,7 +780,69 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
-            return self._execution_budget(connection, row)
+            return self._reconcile_execution_reservations(connection, row)[1]
+
+    def reconcile_execution_reservations(
+        self, job_id: str, *, tenant_id: str, authorization_token: str
+    ) -> dict[str, int]:
+        """Import missing external spend as unknown, never as a worker outcome.
+
+        This is an explicit managed-store operation. It cannot activate a copied
+        store, adopt legacy spend, or repair damaged local event history.
+        """
+        self._authorize_tenant(tenant_id, authorization_token)
+        if self._execution_authority is None:
+            _fail(
+                "execution_authority_required", "/root", "A managed store is required."
+            )
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            return self._reconcile_execution_reservations(connection, row)[1]
+
+    def _reconcile_execution_reservations(self, connection, row):
+        if self._execution_authority is None:
+            return row, self._execution_budget(connection, row)
+        budget = self._execution_budget(connection, row)
+        authority = self._execution_authority
+        try:
+            authority.register_job(
+                self._execution_binding,
+                str(row["job_id"]),
+                str(row["request_hash"]),
+                budget["maximum_attempts"],
+            )
+            snapshot = authority.read_reservations(
+                self._execution_binding, str(row["job_id"]), str(row["request_hash"])
+            )
+        except ExecutionAuthorityError as exc:
+            _fail("execution_authority_rejected", "/execution_budget", str(exc))
+        external = snapshot["budget"]
+        if (
+            external["adopted_reserved_attempts"] != 0
+            or external["maximum_attempts"] != budget["maximum_attempts"]
+            or external["reserved_attempts"] < budget["reserved_attempts"]
+        ):
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "External spend cannot be reconciled with this managed store.",
+            )
+        for payload in snapshot["reservations"][budget["reserved_attempts"] :]:
+            row = self._transition(
+                connection,
+                row,
+                event_type="execution_authority_reservation_imported",
+                status=row["status"],
+                occurred_at=self._now()[0],
+                payload=payload,
+                updates={},
+            )
+        connection.execute(
+            "UPDATE job_execution_budgets SET reserved_attempts=? WHERE job_id=?",
+            (external["reserved_attempts"], str(row["job_id"])),
+        )
+        return row, self._execution_budget(connection, row)
 
     def reserve_execution_attempt(
         self,
@@ -655,7 +867,7 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
-            budget = self._execution_budget(connection, row)
+            row, budget = self._reconcile_execution_reservations(connection, row)
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
             if budget["remaining_attempts"] == 0:
@@ -665,6 +877,25 @@ class DurableJobService:
                     "The immutable job-wide execution reservation limit is exhausted.",
                 )
             reserved = budget["reserved_attempts"] + 1
+            authority_payload = {}
+            if self._execution_authority is not None:
+                try:
+                    external_ordinal = self._execution_authority.reserve(
+                        self._execution_binding, job_id, str(row["request_hash"])
+                    )
+                except ExecutionAuthorityError as exc:
+                    _fail("execution_authority_rejected", "/execution_budget", str(exc))
+                if external_ordinal != reserved:
+                    _fail(
+                        "execution_authority_reservation_race",
+                        "/execution_budget",
+                        "External spend changed; reconcile before retrying. No work may begin.",
+                    )
+                authority_payload = {
+                    "authority_id": self._execution_binding.authority_id,
+                    "authority_generation": self._execution_binding.generation,
+                    "authority_root": self._execution_binding.root,
+                }
             connection.execute(
                 "UPDATE job_execution_budgets SET reserved_attempts = ? WHERE job_id = ?",
                 (reserved, job_id),
@@ -676,6 +907,7 @@ class DurableJobService:
                 status="running",
                 occurred_at=now,
                 payload={
+                    **authority_payload,
                     "worker_id": worker_id,
                     "reserved_attempts": reserved,
                     "maximum_attempts": budget["maximum_attempts"],
@@ -888,10 +1120,11 @@ class DurableJobService:
             (row["job_id"],),
         ).fetchall()
         reservations = {}
-        for ordinal, event in enumerate(events, 1):
+        for event in events:
             payload = _strict_json_object(
                 str(event["payload_json"]).encode(), "/rc_invocations/reservation"
             )
+            ordinal = payload["reserved_attempts"]
             if type(payload.get("attempt")) is not int or not 1 <= payload[
                 "attempt"
             ] <= int(row["attempt"]):
@@ -2213,6 +2446,13 @@ class DurableJobService:
             connection.close()
 
     def _connect(self) -> sqlite3.Connection:
+        # Even read callers configure SQLite's persistent journal mode. Fence
+        # this setup before opening the store; writes retain their transaction-
+        # lifetime guard separately.
+        with self.execution_guard():
+            return self._open_configured_connection()
+
+    def _open_configured_connection(self) -> sqlite3.Connection:
         # WAL setup can return BUSY without invoking SQLite's busy handler.
         # Retry fresh connections under one deadline, releasing every failed
         # connection before waiting. Transactions retain their 30-second wait.
@@ -2268,6 +2508,11 @@ class DurableJobService:
 
     @contextmanager
     def _transaction(self) -> Iterator[sqlite3.Connection]:
+        with self.execution_guard(), self._unguarded_transaction() as connection:
+            yield connection
+
+    @contextmanager
+    def _unguarded_transaction(self) -> Iterator[sqlite3.Connection]:
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
@@ -2335,8 +2580,8 @@ class DurableJobService:
                 "The durable budget disagrees with the immutable request.",
             )
         reservations = connection.execute(
-            "SELECT payload_json FROM job_events "
-            "WHERE job_id = ? AND event_type = 'execution_attempt_reserved' "
+            "SELECT payload_json, event_type FROM job_events "
+            "WHERE job_id = ? AND event_type IN ('execution_attempt_reserved', 'execution_authority_reservation_imported') "
             "ORDER BY revision",
             (str(row["job_id"]),),
         ).fetchall()
@@ -2346,6 +2591,7 @@ class DurableJobService:
                 "/execution_budget",
                 "The durable reservation count disagrees with the event history.",
             )
+        imported = None
         for ordinal, event in enumerate(reservations, 1):
             payload = _strict_json_object(
                 str(event["payload_json"]).encode("utf-8"), "/execution_budget/events"
@@ -2361,6 +2607,53 @@ class DurableJobService:
                     "/execution_budget",
                     "Reservation event ordinals or immutable limits changed.",
                 )
+            if (
+                event["event_type"] == "execution_authority_reservation_imported"
+                or self._execution_authority is not None
+            ):
+                if self._execution_authority is None:
+                    _fail(
+                        "execution_budget_integrity_failed",
+                        "/execution_budget",
+                        "Imported reservations require an execution authority.",
+                    )
+                if imported is None:
+                    try:
+                        snapshot = self._execution_authority.read_reservations(
+                            self._execution_binding,
+                            str(row["job_id"]),
+                            str(row["request_hash"]),
+                        )
+                    except ExecutionAuthorityError as exc:
+                        _fail(
+                            "execution_authority_rejected",
+                            "/execution_budget",
+                            str(exc),
+                        )
+                    imported = {
+                        item["reserved_attempts"]: item
+                        for item in snapshot["reservations"]
+                    }
+                expected = imported.get(ordinal)
+                observed = payload
+                if event["event_type"] == "execution_attempt_reserved":
+                    observed = {
+                        key: payload.get(key)
+                        for key in (
+                            "reserved_attempts",
+                            "maximum_attempts",
+                            "authority_id",
+                            "authority_generation",
+                            "authority_root",
+                        )
+                    }
+                    observed["execution_work"] = "unknown"
+                if _canonical_json_bytes(observed) != _canonical_json_bytes(expected):
+                    _fail(
+                        "execution_budget_integrity_failed",
+                        "/execution_budget",
+                        "Imported unknown spend differs from the external journal.",
+                    )
         return {
             "maximum_attempts": maximum,
             "reserved_attempts": budget["reserved_attempts"],
@@ -2656,7 +2949,9 @@ class DurableJobService:
         self,
         payload: bytes,
         *,
-        role: Literal["request", "checkpoint", "result", "evidence", "rc-quantity-report"],
+        role: Literal[
+            "request", "checkpoint", "result", "evidence", "rc-quantity-report"
+        ],
         media_type: str,
         maximum_bytes: int,
         admission: _BlobAdmission | None = None,

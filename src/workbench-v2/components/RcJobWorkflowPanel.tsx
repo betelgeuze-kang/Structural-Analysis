@@ -16,6 +16,8 @@ const empty = (): JobLoadResult => ({ status: 'unconfigured', job: null, errors:
 export function rcWorkflowMessage(error: unknown, operation: 'read' | 'submit' | 'resume' | 'save' = 'read'): string {
   const message = error instanceof Error ? error.message : ''
   if (message.includes('authorization_scope_changed')) return 'Authentication scope changed. Reopen this project with the current account.'
+  if (/^rc_(?:request|checkpoint|result|evidence|artifacts)_too_large$/.test(message)) return 'This saved result exceeds this workspace’s review size limit.'
+  if (message === 'rc_review_budget_invalid') return 'This workspace’s review size limit is invalid. Contact the workspace administrator.'
   const status = /(?:http_|HTTP_|HTTP )([0-9]{3})/.exec(message)?.[1]
   if (status === '401') return 'Authentication is unavailable. Reopen with the current account.'
   if (status === '404') return 'This saved job or report is unavailable for the current account.'
@@ -64,17 +66,18 @@ function InputSummary({ value, saved }: { value: Record<string, unknown>; saved:
 }
 
 interface RcJobWorkflowPanelProps {
+  rcReviewResultMaxBytes?: number
   collectionUrl: string; initialJobStatusUrl?: string; initialJobId?: string; initialReportId?: string; authorize?: JobAuthorizationProvider
 }
 
 export function RcJobWorkflowPanel(props: RcJobWorkflowPanelProps): ReactElement {
   // A saved link is a new session. Local Open/submit intent must never shadow
   // later Back/Forward navigation, including a different report on the same job.
-  const source = JSON.stringify([props.collectionUrl, props.initialJobStatusUrl, props.initialJobId, props.initialReportId])
+  const source = JSON.stringify([props.collectionUrl, props.initialJobStatusUrl, props.initialJobId, props.initialReportId, props.rcReviewResultMaxBytes])
   return <RcJobWorkflowSession key={source} {...props} />
 }
 
-function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId, initialReportId, authorize }: RcJobWorkflowPanelProps): ReactElement {
+function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId, initialReportId, authorize, rcReviewResultMaxBytes }: RcJobWorkflowPanelProps): ReactElement {
   const [authEpoch, setAuthEpoch] = useState(0)
   const [openId, setOpenId] = useState('')
   const [requestedId, setRequestedId] = useState<string>()
@@ -143,8 +146,9 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
           if (fullSource.current === identity && review.current) loaded = { ...loaded, artifactStatus: 'verified', rcReview: review.current }
           else {
             review.current?.dispose(); review.current = undefined
-            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId))
+            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId), rcReviewResultMaxBytes)
             if (!active()) { loaded.rcReview?.dispose(); return }
+            if (loaded.status === 'error' && loaded.errors.length === 1 && /^(?:rc_(?:request|checkpoint|result|evidence|artifacts)_too_large|rc_review_budget_invalid)$/.test(loaded.errors[0])) throw new Error(loaded.errors[0])
             if (!loaded.job || sourceKey(loaded.job) !== identity || loaded.status !== 'ready') throw new Error('rc_terminal_source_unavailable')
             if (loaded.rcReview) {
               const original = loaded.rcReview
@@ -173,7 +177,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
           review.current?.dispose(); review.current = undefined; fullSource.current = ''
           if (job.status === 'failed' && job.attempt > 0) {
             traceRcPhase(controller.signal, 'poll.failed-load.begin')
-            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId))
+            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId), rcReviewResultMaxBytes)
             traceRcPhase(controller.signal, 'poll.failed-load.end')
             if (!active()) return
             if (!loaded.job || sourceKey(loaded.job) !== sourceKey(job)) throw new Error('rc_terminal_source_unavailable')
@@ -205,7 +209,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       if (savedId) { setOpenId(savedId); void poll(savedId) }
     }).catch(error => { if (active()) setMessage(rcWorkflowMessage(error)) })
     return () => { traceRcPhase(controller.signal, 'effect.cleanup'); generation.current++; controller.abort(); fileGeneration.current++; if (pollTimer.current) clearTimeout(pollTimer.current); review.current?.dispose(); review.current = undefined }
-  }, [key, collectionUrl, authorize])
+  }, [key, collectionUrl, authorize, rcReviewResultMaxBytes])
   useLayoutEffect(() => {
     if (current.transport && current.load.status === 'ready') traceRcPhase(current.transport, 'ui.ready.commit')
   }, [key, current.transport, current.load.status, current.load.job?.job_id, current.load.job?.attempt])

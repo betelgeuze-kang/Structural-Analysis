@@ -42,10 +42,10 @@ class Driver {
   sequence = 0
   ended = false
   protocolHealthy = true
-  constructor(workspace: string) {
+  constructor(workspace: string, managed = false) {
     // This separate hosted lane intentionally retains setup-python's PATH.
     // The normal sanitized frontend runner is unchanged and never starts Python.
-    this.child = spawn('python', ['-B', 'tests/frontend/rc_lifecycle_http_fixture.py', 'driver', '--workspace', workspace], {
+    this.child = spawn('python', ['-B', 'tests/frontend/rc_lifecycle_http_fixture.py', 'driver', '--workspace', workspace, ...(managed ? ['--managed'] : [])], {
       env: { ...process.env, PYTHONPATH: resolve('src'), OPENBLAS_NUM_THREADS: '1' },
       stdio: ['pipe', 'pipe', 'pipe'],
     })
@@ -127,14 +127,15 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
 
-for (const { profile, isolated } of [
-  ...['legacy', 'explicit-layers', 'pin-roller', 'pin-roller-layers'].map(profile => ({ profile, isolated: false })),
-  { profile: 'pin-roller-layers', isolated: true },
+for (const { profile, isolated, managed } of [
+  ...['legacy', 'explicit-layers', 'pin-roller', 'pin-roller-layers'].map(profile => ({ profile, isolated: false, managed: false })),
+  { profile: 'pin-roller-layers', isolated: true, managed: false },
+  { profile: 'pin-roller-layers', isolated: true, managed: true },
 ]) {
-test(`actual Workbench ${profile}${isolated ? ' isolated' : ''} RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two`, async ({ browser }, testInfo) => {
+test(`actual Workbench ${profile}${isolated ? ' isolated' : ''}${managed ? ' managed' : ''} RC job survives SIGKILL and two cold HTTP/browser reopens, then downloads immutable price revision two`, async ({ browser }, testInfo) => {
   test.setTimeout(300000)
   const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
-  const driver = new Driver(workspace)
+  const driver = new Driver(workspace, managed)
   const contexts: BrowserContext[] = []
   const evidence: Record<string, unknown> = {
     schema_version: 'workbench-rc-hosted-browser-proof.v1',
@@ -222,12 +223,15 @@ test(`actual Workbench ${profile}${isolated ? ' isolated' : ''} RC job survives 
 
     await view.context.close()
     if (profile === 'pin-roller-layers') {
-      const backup = await driver.command<{ restored_rows_equal: boolean; source_store: string; restored_store: string; original_worker_returncode: number; original_http_returncode: number; automatic_original_writer_fencing: boolean }>('backup_restore')
+      const backup = await driver.command<{ restored_rows_equal: boolean; source_store: string; restored_store: string; original_worker_returncode: number; original_http_returncode: number; automatic_original_writer_fencing: boolean; managed_activation: { status: string; generation: number } | null; stale_source_rejected: boolean }>('backup_restore')
       expect(backup.restored_rows_equal).toBe(true)
       expect(backup.source_store).not.toBe(backup.restored_store)
       expect(backup.original_worker_returncode).toBe(-9)
       expect(backup.original_http_returncode).not.toBeNull()
       expect(backup.automatic_original_writer_fencing).toBe(false)
+      expect(backup.stale_source_rejected).toBe(managed)
+      if (managed) expect(backup.managed_activation).toMatchObject({ status: 'activated', generation: 2 })
+      else expect(backup.managed_activation).toBeNull()
       evidence.operator_backup_restore = backup
     }
     server = await driver.command<Server>('restart_http')

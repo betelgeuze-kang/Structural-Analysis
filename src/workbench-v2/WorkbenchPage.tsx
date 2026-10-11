@@ -48,6 +48,7 @@ import {
 
 export interface WorkbenchPageProps {
   rcJobCollectionUrl?: string
+  rcReviewResultMaxBytes?: number
   rcJobId?: string
   rcReportId?: string
   jobAuthorization?: JobAuthorizationProvider
@@ -72,9 +73,41 @@ export interface WorkbenchPageProps {
 
 type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 
-export function WorkbenchPage({
+export function WorkbenchPage(props: WorkbenchPageProps): ReactElement {
+  const hasNativeFrameSource = Boolean(
+    props.nativeFrameResultUrl || props.nativeFrameReportUrl || props.nativeFrameBundleUrl
+    || props.nativeFrameJobUrl || props.nativeFrameSubmissionUrl
+    || props.nativeFrameReferenceUrl || props.nativeFrameComparisonUrl,
+  )
+  if (props.rcJobCollectionUrl && !hasNativeFrameSource) {
+    return (
+      <WorkbenchShell
+        workflow="rc"
+        dataMode="demo"
+        providerMode="demo"
+        sourceLabel="Configured RC job service; stored input and result bindings are checked below."
+        claimBoundary="Experimental RC workflow. A completed job or verified stored report does not establish independent physical validation, design approval or release readiness."
+        onProviderModeChange={() => undefined}
+      >
+        <div id="wb2-sec-run" className="wb2-section" data-rc-project-workspace>
+          <RcJobWorkflowPanel
+            rcReviewResultMaxBytes={props.rcReviewResultMaxBytes}
+            collectionUrl={props.rcJobCollectionUrl}
+            initialJobStatusUrl={props.jobStatusUrl}
+            initialJobId={props.rcJobId}
+            initialReportId={props.rcReportId}
+            authorize={props.jobAuthorization}
+          />
+        </div>
+      </WorkbenchShell>
+    )
+  }
+  return <GeneralWorkbenchPage {...props} />
+}
+
+function GeneralWorkbenchPage({
   initialProviderMode = 'demo',
-  rcJobCollectionUrl, rcJobId, rcReportId, jobAuthorization,
+  rcJobCollectionUrl, rcJobId, rcReportId, jobAuthorization, rcReviewResultMaxBytes,
   jobStatusUrl,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
@@ -232,9 +265,9 @@ export function WorkbenchPage({
     }
     const controller = new AbortController()
     setJobLoad({ status: 'loading', job: null, errors: [] })
-    loadWorkbenchJob(jobStatusUrl, controller.signal).then(setJobLoad)
+    loadWorkbenchJob(jobStatusUrl, controller.signal, undefined, undefined, rcReviewResultMaxBytes).then(setJobLoad)
     return () => controller.abort()
-  }, [jobStatusUrl, rcJobCollectionUrl])
+  }, [jobStatusUrl, rcJobCollectionUrl, rcReviewResultMaxBytes])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -366,7 +399,7 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-run" className="wb2-section">
-        {rcJobCollectionUrl ? <RcJobWorkflowPanel collectionUrl={rcJobCollectionUrl} initialJobStatusUrl={jobStatusUrl} initialJobId={rcJobId} initialReportId={rcReportId} authorize={jobAuthorization} /> : null}
+        {rcJobCollectionUrl ? <RcJobWorkflowPanel rcReviewResultMaxBytes={rcReviewResultMaxBytes} collectionUrl={rcJobCollectionUrl} initialJobStatusUrl={jobStatusUrl} initialJobId={rcJobId} initialReportId={rcReportId} authorize={jobAuthorization} /> : null}
         <NativeFrameRunPanel
           submissionUrl={nativeFrameSubmissionUrl}
           onJobAvailable={setSubmittedNativeFrameJobUrl}
