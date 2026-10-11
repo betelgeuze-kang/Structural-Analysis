@@ -218,6 +218,8 @@ def test_inventory_tracks_complete_queue_and_offline_non_authoritative() -> None
         602,
         610,
         612,
+        621,
+        622,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -243,7 +245,7 @@ def test_snapshot_retains_reviewed_boundaries_and_historical_records() -> None:
     payload = _payload()
     rows = {row["number"]: row for row in payload["open_issues"]}
     external_numbers = {247, 258, 260, 290, 291, 293, 297, 438, 475, 480, 486}
-    assert len(rows) == 50
+    assert len(rows) == 52
     assert payload["observation_source"] == "github_rest_read_only_current_github_state"
     for number, row in rows.items():
         assert row["current_product_authority"] is False

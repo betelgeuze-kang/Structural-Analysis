@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-10-11T11:10:18Z",
+  "observed_at": "2026-10-11T13:21:48Z",
   "observation_source": "github_rest_read_only_current_github_state",
-  "observed_open_issue_count": 50,
+  "observed_open_issue_count": 52,
   "open_issue_numbers": [
     247,
     258,
@@ -54,9 +54,11 @@
     600,
     602,
     610,
-    612
+    612,
+    621,
+    622
   ],
-  "open_issue_projection_sha256": "sha256:d668b1f5553fdd1ba4e177cfedeefed99efb86f2b15ec8f8c8cf241481ad12fc",
+  "open_issue_projection_sha256": "sha256:190054027a75aaab96720b976264ecd14e610ec86a711ec2a3cdcf04fb44458d",
   "open_issues": [
     {
       "number": 247,
@@ -1015,6 +1017,42 @@
       "title": "Protect managed RC restores with shared execution authority and invocation budget",
       "updated_at": "2026-10-09T02:13:46Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/612"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        620
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_explicit_rc_control_target_initial_guess_and_restart_binding",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:ded95b4da49876c299075b360a6662c98a980adefa3b8cf519fd227dc4c66c74",
+      "labels": [],
+      "number": 621,
+      "state": "open",
+      "title": "RC direct control: explicit feasible initial guess at material kinks",
+      "updated_at": "2026-10-11T12:51:37Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/621"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        619
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_finite_circular_bar_inertia_state_and_restart_integration",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:382bd46d5ab399e3a7693e90cdb11026ff8d8fbce33b7ebc3ad389f2e15a9c6c",
+      "labels": [],
+      "number": 622,
+      "state": "open",
+      "title": "RC explicit layers: finite circular-bar inertia and state integration",
+      "updated_at": "2026-10-11T12:52:11Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/622"
     }
   ],
   "implemented_but_open_issues": [
