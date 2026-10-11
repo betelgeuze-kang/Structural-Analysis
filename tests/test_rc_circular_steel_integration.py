@@ -140,3 +140,44 @@ def test_public_restart_preserves_points_and_rejects_changed_quadrature():
             restart=prefix.checkpoint_artifact_bytes(),
             **config.api_kwargs(),
         )
+
+
+@pytest.mark.parametrize("yield_radius_fraction", [0.25, 0.5])
+def test_partial_yield_circular_bar_converges_to_closed_form(yield_radius_fraction):
+    """Compare chord quadrature against the elastic-perfectly-plastic disk integral."""
+    radius, modulus, yield_stress = 0.01, 200000.0, 250.0
+    elastic_radius = yield_radius_fraction * radius
+    curvature = yield_stress / (modulus * elastic_radius)
+    theta = math.asin(yield_radius_fraction)
+    elastic_integral = radius**4 * (theta - math.sin(4 * theta) / 4) / 8
+    plastic_integral = (radius**2 - elastic_radius**2) ** 1.5 / 3
+    exact_moment = 4 * (
+        modulus * curvature * elastic_integral + yield_stress * plastic_integral
+    )
+    errors = []
+    for points in [2, 8, 32, 64]:
+        data = authored(points)
+        data["materials"] = [m for m in data["materials"] if m["id"] != "hanger"]
+        steel = next(m for m in data["materials"] if m["id"] == "steel")
+        steel["isotropic_hardening_modulus_mpa"] = 0.0
+        steel["kinematic_hardening_modulus_mpa"] = 0.0
+        data["sections"][0]["steel_layers"] = [{
+            "id": "central", "y_m": 0.0, "bar_count": 1,
+            "bar_area_m2": math.pi * radius**2, "steel_material": "steel",
+            "circular_integration_points": points,
+        }]
+        compiled, blockers, _ = _compile(model(data))
+        assert not blockers
+        section = compiled.problem.members[0].element.section
+        # Isolate steel so concrete damage cannot mask bar integration error.
+        terms = []
+        for fiber in section.fibers:
+            if fiber.material_kind != "steel":
+                continue
+            law = section.steel_material_for(fiber.fiber_id)
+            response = law.integrate(curvature * fiber.y_m, law.initial_state())
+            terms.append(fiber.area_m2 * fiber.y_m * response.stress_mpa)
+        moment = math.fsum(terms)
+        errors.append(abs(moment / exact_moment - 1))
+    assert errors[-1] < 1e-3
+    assert errors[-1] < errors[0] / 20
