@@ -404,3 +404,264 @@ def test_direct_control_manifest_keeps_non_promoting_claim_boundary(
     assert "does not promote the unified public API" in payload["claim_boundary"]
     assert "external Level 2 validation" in payload["claim_boundary"]
     assert np.isfinite(payload["final_checkpoint"]["load_factor"])
+
+
+def test_constant_axial_load_reversal_and_serialized_restart():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
+        solve_stateful_corotational_fiber_frame2d_load_step,
+    )
+
+    coordinates = ((0.0, 0.0), (0.0, 1.0))
+    problem = StatefulCorotationalFiberFrame2DProblem(
+        case_id="fixed-axial-reversal",
+        node_coordinates_m=coordinates,
+        members=(_member(coordinates, "column", 0, 1),),
+        fixed_global_dofs=(0, 1, 2),
+        reference_external_loads=((3, 1.0),),
+        fixed_external_loads=((4, -0.01),),
+        rotation_coordinate_scale_m=1.0,
+    )
+    seed = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    preload = solve_stateful_corotational_fiber_frame2d_load_step(
+        problem,
+        seed,
+        target_load_factor=0.0,
+    )
+    assert preload.committed
+    step_problem = StatefulCorotationalFiberFrame2DDisplacementControlStepProblem(
+        problem=problem,
+        accepted_checkpoint=preload.accepted_checkpoint,
+        control_global_dof=3,
+        target_control_displacement_m=0.001,
+        config=StatefulCorotationalFiberFrame2DDisplacementControlConfig(),
+    )
+    check = finite_difference_stateful_corotational_fiber_frame2d_displacement_control_linearization_check(
+        step_problem,
+        displacement_step_m=1e-6,
+        load_factor_step=1e-6,
+    )
+    assert check["parent_binding_passed"]
+    np.testing.assert_allclose(
+        check["finite_difference_displacement_column_kn_per_m"],
+        check["analytic_displacement_column_kn_per_m"],
+        rtol=1e-6,
+        atol=1e-5,
+    )
+    assert check["load_factor_column_max_abs_error_kn"] < 1e-8
+    targets = (0.001, -0.001, 0.002)
+    kwargs = dict(control_global_dof=3, allow_reversal=True)
+    full = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        targets,
+        initial_checkpoint=preload.accepted_checkpoint,
+        **kwargs,
+    )
+    assert full.contract_pass
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        targets[:1],
+        initial_checkpoint=preload.accepted_checkpoint,
+        **kwargs,
+    )
+    raw = dump_stateful_corotational_fiber_frame2d_checkpoint_bytes(
+        problem,
+        prefix.final_checkpoint,
+    )
+    restored = load_stateful_corotational_fiber_frame2d_checkpoint_bytes(raw, problem)
+    suffix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        targets[1:],
+        initial_checkpoint=restored,
+        **kwargs,
+    )
+    assert suffix.contract_pass
+    assert (
+        suffix.final_checkpoint.canonical_bytes()
+        == full.final_checkpoint.canonical_bytes()
+    )
+    failed = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
+        problem,
+        restored,
+        control_global_dof=3,
+        target_control_displacement_m=-0.002,
+        config=StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+            maximum_iterations=0,
+        ),
+    )
+    assert not failed.committed
+    assert failed.accepted_checkpoint.canonical_bytes() == restored.canonical_bytes()
+    assert failed.metrics["rollback_exact"] is True
+
+    assert full.steps[0].accepted_checkpoint.load_factor > 0.0
+    assert full.steps[1].accepted_checkpoint.load_factor < 0.0
+    from structural_analysis.assembly import (
+        assemble_stateful_corotational_fiber_frame2d,
+    )
+
+    for step in full.steps:
+        state = step.accepted_checkpoint
+        assembly = assemble_stateful_corotational_fiber_frame2d(
+            problem,
+            state,
+            target_load_factor=state.load_factor,
+            trial_free_coordinates_m=np.asarray(state.global_displacements)[
+                list(problem.free_global_dofs)
+            ],
+        )
+        assert assembly.external_loads_global[4] == -0.01
+        np.testing.assert_allclose(
+            (assembly.internal_loads_global - assembly.external_loads_global)[
+                list(problem.free_global_dofs)
+            ],
+            0.0,
+            atol=1e-6,
+        )
+    with pytest.raises(ValueError, match="does not match the supplied frame problem"):
+        load_stateful_corotational_fiber_frame2d_checkpoint_bytes(
+            raw,
+            replace(problem, fixed_external_loads=((4, -0.02),)),
+        )
+
+
+@pytest.mark.parametrize("flag", [1, "true", None])
+def test_reversal_opt_in_requires_boolean(flag):
+    with pytest.raises(ValueError, match="allow_reversal must be a boolean"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            _arch_problem("invalid-flag"),
+            (-0.01, 0.01),
+            control_global_dof=4,
+            allow_reversal=flag,
+        )
+
+
+def test_reversal_opt_in_still_rejects_duplicate_target():
+    with pytest.raises(ValueError, match="distinct consecutive targets"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            _arch_problem("duplicate-target"),
+            (-0.01, -0.01),
+            control_global_dof=4,
+            allow_reversal=True,
+        )
+
+
+def test_nonlinear_fixed_axial_reversal_restart_and_coarse_failure():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
+        solve_stateful_corotational_fiber_frame2d_load_step,
+    )
+
+    coords = ((0.0, 0.0), (0.0, 1.0))
+    steel = BilinearCombinedHardeningSteel(
+        elastic_modulus_mpa=200000,
+        yield_stress_mpa=400,
+        isotropic_hardening_modulus_mpa=1000,
+        kinematic_hardening_modulus_mpa=1000,
+    )
+    concrete = AsymmetricConcreteDamageMaterial(
+        elastic_modulus_mpa=30000,
+        tensile_strength_mpa=3,
+        compressive_strength_mpa=30,
+        tensile_softening_rate=20,
+        compressive_softening_rate=20,
+    )
+    section = make_rectangular_stateful_rc_fiber_section(
+        width_m=0.2,
+        depth_m=0.2,
+        cover_m=0.03,
+        concrete_layer_count=8,
+        top_bar_count=2,
+        bottom_bar_count=2,
+        bar_area_m2=0.0002,
+        section_id="diagnostic",
+        steel=steel,
+        concrete=concrete,
+    )
+    member = StatefulCorotationalFiberFrame2DMember(
+        member_id="column",
+        node_i=0,
+        node_j=1,
+        element=StatefulCorotationalFiberBeam2D(
+            node_coordinates_m=coords,
+            section=section,
+            integration_order=3,
+            element_id="column",
+        ),
+    )
+    p = StatefulCorotationalFiberFrame2DProblem(
+        case_id="nonlinear-diagnostic",
+        node_coordinates_m=coords,
+        members=(member,),
+        fixed_global_dofs=(0, 1, 2),
+        reference_external_loads=((3, 1.0),),
+        fixed_external_loads=((4, -10.0),),
+        rotation_coordinate_scale_m=1.0,
+    )
+
+    pre = solve_stateful_corotational_fiber_frame2d_load_step(
+        p,
+        initial_stateful_corotational_fiber_frame2d_checkpoint(p),
+        target_load_factor=0.0,
+    )
+    assert pre.committed
+    turns = (0.0, 0.005, 0.01, -0.005, -0.01, 0.005)
+    coarse = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        p,
+        turns[1:],
+        initial_checkpoint=pre.accepted_checkpoint,
+        control_global_dof=3,
+        allow_reversal=True,
+    )
+    # If convergence improves, success is acceptable; failure must not advance state.
+    if not coarse.contract_pass:
+        assert coarse.steps[-1].metrics["rollback_exact"]
+        assert (
+            coarse.final_checkpoint.canonical_bytes()
+            == coarse.steps[-1].parent_checkpoint.canonical_bytes()
+        )
+    targets = tuple(
+        v for a, b in zip(turns[:-1], turns[1:]) for v in np.linspace(a, b, 11)[1:]
+    )
+    kwargs = dict(control_global_dof=3, allow_reversal=True)
+    full = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        p,
+        targets,
+        initial_checkpoint=pre.accepted_checkpoint,
+        **kwargs,
+    )
+    assert full.contract_pass
+    observed = {"plastic_strain": 0.0, "tensile_damage": 0.0, "compressive_damage": 0.0}
+
+    def visit(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key in observed:
+                    observed[key] = max(observed[key], abs(item))
+                visit(item)
+        elif isinstance(value, list):
+            for item in value:
+                visit(item)
+
+    for step in full.steps:
+        visit(step.accepted_checkpoint.to_dict())
+    assert all(value > 0.0 for value in observed.values())
+    prefix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        p,
+        targets[:25],
+        initial_checkpoint=pre.accepted_checkpoint,
+        **kwargs,
+    )
+    assert prefix.contract_pass
+    raw = dump_stateful_corotational_fiber_frame2d_checkpoint_bytes(
+        p, prefix.final_checkpoint
+    )
+    restored = load_stateful_corotational_fiber_frame2d_checkpoint_bytes(raw, p)
+    suffix = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        p,
+        targets[25:],
+        initial_checkpoint=restored,
+        **kwargs,
+    )
+    assert suffix.contract_pass
+    assert (
+        suffix.final_checkpoint.canonical_bytes()
+        == full.final_checkpoint.canonical_bytes()
+    )

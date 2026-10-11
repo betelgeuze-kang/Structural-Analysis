@@ -1,0 +1,11 @@
+# Internal corotational control with fixed nodal loads
+
+A cyclic column experiment can hold axial load constant while the lateral reaction changes sign. Putting both components into the reference load vector changes both with the solved load factor. `StatefulCorotationalFiberFrame2DProblem.fixed_external_loads` supplies dead nodal forces and moments in global coordinates, independently of that factor.
+
+The assembly uses `F_external = F_fixed + lambda * F_reference` plus existing member load contributions. Fixed loads contribute to equilibrium and reactions but not to the load-factor derivative or displacement tangent. Their direction does not follow the rotating member. Nonempty fixed-load definitions are bound into the problem contract hash; checkpoints cannot be restored against a changed definition. Empty fixed loads preserve the previous problem fingerprint.
+
+The epoch-zero checkpoint is a constitutive seed, not a claim of equilibrium under fixed loads. Solve a load step at factor zero to obtain the preloaded state before the control history. The direct path accepts that state as `initial_checkpoint`. `allow_reversal=True` explicitly permits changing displacement direction; its default remains false. Consecutive identical targets remain rejected. Checkpoint restoration still requires the caller's same problem, including its fixed loads.
+
+Regression covers constant axial load through lateral load-factor sign changes, initial equilibrium, finite-difference tangent and load-factor columns, exact failed-step rollback, changed-load checkpoint rejection, and byte-identical serialized restart. A synthetic concrete-damage/steel-plasticity column reaches positive and negative 10 mm with 50 prescribed increments and reproduces its terminal state after restart. The coarse five-target path can fail line search and must preserve its last committed state; convergence improvement is allowed, so the test does not require failure forever.
+
+This is an internal assembly/control capability. Automatic subdivision, repeated-target semantics, the public RC compiler and managed workflow are not connected by this change. The synthetic material values are not measured specimen inputs. This does not establish independent physical validation, design authority, general failure prediction, or release readiness.

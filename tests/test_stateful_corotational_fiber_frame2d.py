@@ -640,3 +640,100 @@ def test_problem_and_trial_inputs_fail_closed() -> None:
             global_displacements=(0.0,) * problem.global_dof_count,
             element_states=initial.element_states,
         )
+
+
+def test_fixed_load_remains_under_load_factor_reversal_and_binds_checkpoint():
+    baseline = _problem()
+    problem = replace(baseline, fixed_external_loads=((4, -740.0), (0, 12.0)))
+    initial = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    fixed = problem.fixed_external_load_vector()
+    assert fixed[4] == -740.0
+    assert fixed[0] == 12.0
+    assert not fixed.flags.writeable
+    assert baseline.contract_hash != problem.contract_hash
+    with pytest.raises(ValueError, match="problem_contract_hash"):
+        validate_stateful_corotational_fiber_frame2d_checkpoint(baseline, initial)
+    for factor in (-2.0, 0.0, 3.0):
+        assembly = assemble_stateful_corotational_fiber_frame2d(
+            problem,
+            initial,
+            target_load_factor=factor,
+            trial_free_coordinates_m=np.zeros(len(problem.free_global_dofs)),
+        )
+        np.testing.assert_array_equal(
+            assembly.external_loads_global,
+            fixed + factor * problem.reference_external_load_vector(),
+        )
+        np.testing.assert_array_equal(
+            assembly.partial_residual_load_factor_derivative_global,
+            -problem.reference_external_load_vector(),
+        )
+        epsilon = 1e-5
+        other = assemble_stateful_corotational_fiber_frame2d(
+            problem,
+            initial,
+            target_load_factor=factor + epsilon,
+            trial_free_coordinates_m=np.zeros(len(problem.free_global_dofs)),
+        )
+        np.testing.assert_allclose(
+            (other.external_loads_global - assembly.external_loads_global) / epsilon,
+            problem.reference_external_load_vector(),
+            rtol=1e-7,
+            atol=1e-7,
+        )
+    assert initial == initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+
+
+@pytest.mark.parametrize(
+    "loads",
+    [
+        [(4, 1.0)],
+        ((True, 1.0),),
+        ((-1, 1.0),),
+        ((9, 1.0),),
+        ((4, float("nan")),),
+        ((4, True),),
+        ((4, 1.0), (4, 2.0)),
+    ],
+)
+def test_fixed_load_rejects_ambiguous_or_nonfinite_input(loads):
+    with pytest.raises(ValueError, match="fixed"):
+        replace(_problem(), fixed_external_loads=loads)
+
+
+def test_fixed_load_is_equilibrated_at_zero_control_load_factor():
+    from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
+        solve_stateful_corotational_fiber_frame2d_load_step,
+    )
+
+    problem = replace(
+        _problem(), fixed_global_dofs=(0, 1, 2), fixed_external_loads=((4, -0.1),)
+    )
+    initial = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    initial_bytes = initial.canonical_bytes()
+    result = solve_stateful_corotational_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=0.0,
+    )
+    assert result.committed
+    assert result.accepted_checkpoint.load_factor == 0.0
+    assert result.accepted_checkpoint.epoch == 1
+    assert (
+        result.accepted_checkpoint.global_displacements != initial.global_displacements
+    )
+    np.testing.assert_allclose(
+        result.trial_assembly.external_loads_global,
+        problem.fixed_external_load_vector(),
+        atol=0.0,
+        rtol=0.0,
+    )
+    np.testing.assert_allclose(
+        (
+            result.trial_assembly.internal_loads_global
+            - result.trial_assembly.external_loads_global
+        )[list(problem.free_global_dofs)],
+        0.0,
+        atol=1e-6,
+    )
+    assert initial.canonical_bytes() == initial_bytes
