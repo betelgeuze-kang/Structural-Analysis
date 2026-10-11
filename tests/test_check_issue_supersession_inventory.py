@@ -207,7 +207,6 @@ def test_inventory_tracks_complete_queue_and_offline_non_authoritative() -> None
         578,
         580,
         584,
-        586,
         588,
         590,
         592,
@@ -220,6 +219,7 @@ def test_inventory_tracks_complete_queue_and_offline_non_authoritative() -> None
         612,
         621,
         622,
+        623,
     ]
     assert report["live_github"] == {
         "verified": False,

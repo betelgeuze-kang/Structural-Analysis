@@ -1,7 +1,7 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-10-11T13:21:48Z",
+  "observed_at": "2026-10-11T18:25:11Z",
   "observation_source": "github_rest_read_only_current_github_state",
   "observed_open_issue_count": 52,
   "open_issue_numbers": [
@@ -44,7 +44,6 @@
     578,
     580,
     584,
-    586,
     588,
     590,
     592,
@@ -56,9 +55,10 @@
     610,
     612,
     621,
-    622
+    622,
+    623
   ],
-  "open_issue_projection_sha256": "sha256:190054027a75aaab96720b976264ecd14e610ec86a711ec2a3cdcf04fb44458d",
+  "open_issue_projection_sha256": "sha256:48b1b6061c324dacff075686de5941773e92ee3620a432c6aa0e81bb183a22f7",
   "open_issues": [
     {
       "number": 247,
@@ -823,24 +823,6 @@
     {
       "classification": "repository_implementation",
       "linked_pull_requests": [
-        587
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_lazy_sparse_mode_canonicalization",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:1a32dc1c0e5f472e3b48f7b2262817e63babeab9597c4bba72f27d0501f4770b",
-      "labels": [],
-      "number": 586,
-      "state": "open",
-      "title": "Avoid quadratic candidate allocation in sparse mode canonicalization",
-      "updated_at": "2026-10-08T15:06:20Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/586"
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
         589
       ],
       "merged_implementation_pull_requests": [],
@@ -1053,6 +1035,24 @@
       "title": "RC explicit layers: finite circular-bar inertia and state integration",
       "updated_at": "2026-10-11T12:52:11Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/622"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        624
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_fixed_guided_axial_rc_input_restart_and_report_integration",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:ff38d59e40c2eaa31307dd9ff17f6c096b83c8ff822a71314bded1a14342dfec",
+      "labels": [],
+      "number": 623,
+      "state": "open",
+      "title": "RC fixed-guided axial input through durable restart and reports",
+      "updated_at": "2026-10-11T13:41:25Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/623"
     }
   ],
   "implemented_but_open_issues": [
