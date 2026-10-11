@@ -80,6 +80,7 @@ def build_rc_quantity_report(
     quantities = design.calculate_fiber_frame_member_quantities(
         model,
         rebar_density_kg_per_m3=7850.0,
+        experimental_pin_roller_beam=config.experimental_pin_roller_beam,
     )
     payload = {
         "schema_version": RC_QUANTITY_REPORT_SCHEMA,
