@@ -44,8 +44,33 @@ full regression and exact new-HEAD hosted checks remain outstanding.
 The isolated diagonal prototype measured before this production edit is stored
 in `rc-diagonal-mass-prototype-20261012` on the secondary disk. Its source hash,
 protocol and results bind that prototype, not the current production source.
-Production performance must be measured independently before assigning a
-speedup to this change.
+The committed production measurement below is an independent campaign.
+
+## Committed production cost measurement
+
+Source `db0d3ca74bbb719387fca95c0c09bfa7e6e3c248`, solver SHA256
+`dc02a0f96cc6d2baa803533c6e60db227b9810797dc6ada839b1b3976307bc31`,
+was measured in 32 fresh processes / 64 solves. Four alternating dense/sparse
+pairs per size and mass family passed identical analytic, small-chain,
+shape, residual and orthogonality gates. All persisted hashes and exact
+in-version two-solve replays were verified. Wall time includes startup,
+imports, assembly, two solves, validation, serialization, persistence and exit.
+
+| Mass | DOF | Dense median seconds | Sparse median seconds | Sparse faster pairs | RSS reduction |
+| --- | --- | --- | --- | --- | --- |
+| Uniform | 768 | 1.7768 | 1.8554 | 0/4 | 38.1% |
+| Uniform | 1536 | 3.9194 | 3.6972 | 4/4 | 69.7% |
+| Nonuniform | 768 | 1.7933 | 1.7861 | 2/4 | 38.0% |
+| Nonuniform | 1536 | 3.9349 | 3.3298 | 4/4 | 69.7% |
+
+The nonuniform 1536-DOF median is 15.4% lower; the 768-DOF timing difference
+is inconsistent across pairs. Maximum small-chain relative error was
+5.32e-11 and maximum analytic shape L2 error 1.17e-8. A combined full
+regression ran concurrently on the same host. These four-pair observations
+are bounded synthetic-family evidence, not a general speedup or physical RC
+validation. Earlier prototype timings are historical, not simultaneous
+controls. Protocol, script, individual results, hashes and report are in the
+secondary-disk packet `rc-diagonal-mass-production-cost-20261012/`.
 
 ## Historical scalar verification and exploratory cost
 
