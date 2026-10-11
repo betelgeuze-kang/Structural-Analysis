@@ -143,11 +143,16 @@ def test_public_restart_preserves_points_and_rejects_changed_quadrature():
 
 
 @pytest.mark.parametrize("yield_radius_fraction", [0.25, 0.5])
-@pytest.mark.parametrize("unload_ratio", [None, 0.0, -0.5, -1.0])
+@pytest.mark.parametrize(
+    "isotropic,kinematic,unload_ratio",
+    [(0.0, h, r) for h in (0.0, 2000.0, 20000.0)
+     for r in (None, 0.0, -0.5, -1.0)]
+    + [(20000.0, 0.0, None), (8000.0, 12000.0, None)],
+)
 def test_partial_yield_circular_bar_converges_to_closed_form(
-    yield_radius_fraction, unload_ratio
+    yield_radius_fraction, isotropic, kinematic, unload_ratio
 ):
-    """Compare chord quadrature against the elastic-perfectly-plastic disk integral."""
+    """Independent continuum moments for EPP and linear-hardening disks."""
     radius, modulus, yield_stress = 0.01, 200000.0, 250.0
     elastic_radius = yield_radius_fraction * radius
     curvature = yield_stress / (modulus * elastic_radius)
@@ -172,13 +177,23 @@ def test_partial_yield_circular_bar_converges_to_closed_form(
                 modulus * half_reversal * elastic + yield_stress * plastic
             )
         exact_moment -= 2 * reverse_moment
+    hardening = isotropic + kinematic
+    tangent_ratio = hardening / (modulus + hardening)
+    target_curvature = curvature * (1 if unload_ratio is None else unload_ratio)
+    # The bilinear monotonic disk is an elastic spring in parallel with a
+    # scaled EPP disk. This decomposition also holds on reversal for PURE
+    # kinematic hardening; isotropic/mixed hardening is tested only monotonically.
+    exact_moment = (
+        tangent_ratio * modulus * target_curvature * math.pi * radius**4 / 4
+        + (1 - tangent_ratio) * exact_moment
+    )
     errors = []
     for points in [2, 8, 32, 64]:
         data = authored(points)
         data["materials"] = [m for m in data["materials"] if m["id"] != "hanger"]
         steel = next(m for m in data["materials"] if m["id"] == "steel")
-        steel["isotropic_hardening_modulus_mpa"] = 0.0
-        steel["kinematic_hardening_modulus_mpa"] = 0.0
+        steel["isotropic_hardening_modulus_mpa"] = isotropic
+        steel["kinematic_hardening_modulus_mpa"] = kinematic
         data["sections"][0]["steel_layers"] = [{
             "id": "central", "y_m": 0.0, "bar_count": 1,
             "bar_area_m2": math.pi * radius**2, "steel_material": "steel",
