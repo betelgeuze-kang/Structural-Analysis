@@ -1,25 +1,55 @@
-# Exact scalar-mass sparse modal reduction
+# Exact scalar and positive diagonal mass sparse modal reduction
 
 For exactly `M = c I`, solve the ordinary symmetric stiffness eigenproblem,
 divide eigenvalues by `c`, and mass-normalize vectors by `sqrt(c)`. Reuse the
 already computed largest algebraic stiffness eigenvalue for the generalized
 spectral threshold. Mass factorization, positive-definiteness, stiffness
 semidefiniteness, cluster, residual and orthogonality checks remain active.
-Nonuniform mass, even a one-ULP diagonal difference, and off-diagonal mass
-retain the generalized path. No approximate scalar detection or shift-invert
-policy is introduced. Buckling behavior is unchanged.
+For exact positive diagonal mass `M = D^2`, nonuniform entries (including a
+one-ULP difference) use the symmetric problem `D^-1 K D^-1`. Eigenvectors
+return to the original coordinates as `phi = D^-1 y` before residual and
+mass-orthogonality checks. The transformed start vector corresponds to the
+same original-coordinate start. Off-diagonal mass retains the generalized
+path. No approximate scalar detection or shift-invert policy is introduced.
+Buckling behavior is unchanged.
 
 The regression includes a diagonal stiffness with one exact zero and two
 repeated positive eigenvalues. The previous generalized extraction omitted
 the exact zero and reported zero rigid modes; scalar reduction reports one.
 This is a bounded regression, not a proof of arbitrary nullspace completeness.
-Non-scalar singular problems have not been qualified by this change. Output
+The new nonuniform diagonal regression also reproduced the missing rigid
+mode before the fix and reports one after the transformation. Arbitrary
+nullspace completeness and non-diagonal singular problems remain unqualified. Output
 schema is unchanged, but numerical values and artifact hashes may differ from
 the previous extraction algorithm. Repeatability is checked within this version.
 
-## Verification and exploratory cost
+## Current diagonal-mass verification
 
-61 focused solver and workflow tests passed. Contract verification passed five
+The scalar, diagonal, generalized and canonical-memory solver tests passed
+23 tests. The diagonal cases cover a rigid mode with repeated positive modes,
+cluster truncation rejection, two nonuniform mass ranges compared to dense
+solutions, original mass normalization, deterministic replay, invalid masses
+and preservation of the non-diagonal generalized path. An additional 112-test
+modal/buckling run passed 110 tests; two committed artifact checks rejected
+stale source checksums already present at the committed HEAD. Regenerating
+the four modal/buckling artifacts changed source hashes only, preserving
+numerical results and claim boundaries; all 12 artifact tests then passed.
+The core quality gate passed 156 tests, its 36-file typecheck and 86% branch
+coverage against an 85% threshold. This gate has a bounded manifest scope and
+does not by itself check the sparse solver. Focused Ruff checks, source
+compilation, the frontend build/viewer delivery check, and all five contract
+checks also passed. The optional Cursor CLI remains unavailable. The combined
+full regression and exact new-HEAD hosted checks remain outstanding.
+
+The isolated diagonal prototype measured before this production edit is stored
+in `rc-diagonal-mass-prototype-20261012` on the secondary disk. Its source hash,
+protocol and results bind that prototype, not the current production source.
+Production performance must be measured independently before assigning a
+speedup to this change.
+
+## Historical scalar verification and exploratory cost
+
+The earlier scalar candidate passed 61 focused solver and workflow tests. Contract verification passed five
 checks; the existing unavailable optional Cursor CLI warning remains.
 
 A frozen grounded-chain protocol used 64, 256, 768 and 1536 DOF, three fresh

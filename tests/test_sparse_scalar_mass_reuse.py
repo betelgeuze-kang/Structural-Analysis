@@ -41,7 +41,7 @@ def test_scalar_mass_reuses_stiffness_extreme_without_losing_accuracy(monkeypatc
 
 
 @pytest.mark.parametrize("change", ["one_ulp", "off_diagonal"])
-def test_nearly_scalar_mass_keeps_generalized_extreme_path(monkeypatch, change):
+def test_nearly_scalar_mass_selects_exact_diagonal_or_generalized_path(monkeypatch, change):
     n = 80
     k = diags(np.arange(1.0, n+1), format="csr")
     diagonal = np.ones(n)
@@ -60,7 +60,7 @@ def test_nearly_scalar_mass_keeps_generalized_extreme_path(monkeypatch, change):
 
     monkeypatch.setattr(sparse, "eigsh", observed)
     assert sparse.solve_sparse_modal_modes(k, m, mode_count=3).contract_pass
-    assert len(calls) == 1
+    assert len(calls) == (0 if change == "one_ulp" else 1)
 
 
 @pytest.mark.parametrize("scale", [0.125, 7.0])

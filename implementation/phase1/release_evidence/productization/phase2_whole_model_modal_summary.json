@@ -35,12 +35,12 @@
   "contract_pass": true,
   "engine_version": "0.3.0",
   "free_free_rigid_mode_contract_pass": true,
-  "generated_at": "2026-08-29T00:10:44.135444+00:00",
+  "generated_at": "2026-10-11T16:08:11.596696+00:00",
   "passing_case_count": 4,
   "repeated_cluster_contract_pass": true,
-  "result_artifact_hash": "sha256:73c4573bd560ec0094328c5633134cf866bfb0bd05afc188ee1ddc3218d0e86d",
+  "result_artifact_hash": "sha256:b7494a4df1facd8097d032c17abcc680f4cba86a53c3d71567f40f74d7e3b9b0",
   "schema_version": "phase2-whole-model-modal-artifacts.v1",
-  "source_commit_sha": "a82cb946d938c63be093320f3a1c789179f27fa9",
-  "source_set_hash": "sha256:11c2366bb656fa49977f0304781f66c2d31adc283b044848e36990aaa2f08314",
+  "source_commit_sha": "90364458c54ced93aa68aef545afe97a7dba66a7",
+  "source_set_hash": "sha256:d60062c2a6db86b637a7c67dfa2b08fdf9e5a53dd90c3c2d587a117131088712",
   "status": "partial"
 }

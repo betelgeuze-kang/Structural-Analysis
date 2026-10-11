@@ -9,7 +9,7 @@ import struct
 from typing import Any, Iterable
 
 import numpy as np
-from scipy.sparse import csr_matrix, issparse
+from scipy.sparse import csr_matrix, diags, issparse
 from scipy.sparse.linalg import (
     ArpackNoConvergence,
     LinearOperator,
@@ -210,6 +210,21 @@ def solve_sparse_modal_modes(
             and np.all(mass_diagonal == mass_diagonal[0])
             else None
         )
+        diagonal_stiffness = None
+        inverse_mass_sqrt = None
+        diagonal_start = None
+        if scalar_mass is None and m_matrix.nnz == n and np.all(mass_diagonal > 0.0):
+            # Exact positive diagonal M = D^2 admits the symmetric congruence
+            # D^-1 K D^-1. Recover phi = D^-1 y before all original-metric gates.
+            # This preserves the rigid mode in the bounded diagonal regression.
+            inverse_mass_sqrt = 1.0 / np.sqrt(mass_diagonal)
+            scaling = diags(inverse_mass_sqrt, format="csr")
+            diagonal_stiffness = (scaling @ k_matrix @ scaling).tocsr()
+            if not np.all(np.isfinite(diagonal_stiffness.data)):
+                raise SparseGeneralizedEigenError(
+                    "mass-scaled stiffness must contain finite values"
+                )
+            diagonal_start = _deterministic_start(n) / inverse_mass_sqrt
         if scalar_mass is not None:
             # Exact M = c I reduces to the ordinary symmetric problem. This
             # also avoids generalized ARPACK silently omitting an exact zero.
@@ -223,6 +238,17 @@ def solve_sparse_modal_modes(
             )
             raw_values = raw_values / scalar_mass
             raw_vectors = raw_vectors / math.sqrt(scalar_mass)
+        elif diagonal_stiffness is not None:
+            assert inverse_mass_sqrt is not None
+            raw_values, raw_vectors = eigsh(
+                diagonal_stiffness,
+                k=candidate_count,
+                which="SM",
+                tol=tolerances["arpack_tolerance"],
+                maxiter=maximum_iterations,
+                v0=diagonal_start,
+            )
+            raw_vectors = inverse_mass_sqrt[:, None] * raw_vectors
         else:
             raw_values, raw_vectors = eigsh(
                 k_matrix,
@@ -242,6 +268,18 @@ def solve_sparse_modal_modes(
             # Reuse the already computed largest algebraic stiffness eigenvalue;
             # the absolute spectral scale is not a substitute for this value.
             largest_generalized = stiffness_largest / scalar_mass
+        elif diagonal_stiffness is not None:
+            largest_generalized = float(
+                eigsh(
+                    diagonal_stiffness,
+                    k=1,
+                    which="LA",
+                    return_eigenvectors=False,
+                    tol=tolerances["arpack_tolerance"],
+                    maxiter=maximum_iterations,
+                    v0=diagonal_start,
+                )[0]
+            )
         else:
             largest_generalized = float(
                 eigsh(
