@@ -79,6 +79,14 @@ reopening and quantity-report reads with synthetic RC inputs. They are not
 independent specimen validation, a total-host resource guarantee or release
 qualification. Publication review and the wider readiness gates remain open.
 
+A combined timeout/restore regression uses the ordinary managed worker path
+with a synthetic analysis child that ignores graceful termination. Activation
+is rejected after that child reports readiness, the timeout path reaps the direct
+child, and activation succeeds only after the worker has returned. Restoring the
+older queued snapshot imports the already-spent reservation as unknown; the next
+reservation advances the ordinal without refund. This is a process and budget
+boundary test, not a numerical nonconvergence or physical-validation result.
+
 The real HTTP/browser lifecycle suite also has an isolated-worker managed-store
 profile. It initializes an external authority, submits the authored synthetic RC
 request through the built Workbench, kills the checkpointed worker, stops HTTP,

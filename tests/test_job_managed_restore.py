@@ -404,3 +404,83 @@ else:
             child.wait(timeout=10)
             for stream in (child.stdin, child.stdout, child.stderr):
                 stream.close()
+
+
+def test_managed_timeout_then_restore_keeps_spend_and_releases_guard(
+    tmp_path, monkeypatch
+):
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+
+    from structural_analysis.execution.rc_fiber_direct_control_worker import (
+        RCFiberDirectControlWorkerError,
+    )
+    from tests.test_rc_fiber_phase_supervisor import _blocking_script, _assert_reaped
+
+    root = tmp_path / "source"
+    authority, binding = JobExecutionAuthority.create(tmp_path / "authority", root)
+    current = service(root, execution_authority=authority, execution_binding=binding)
+    authored = request()
+    authored["execution_config"]["phase_execution_policy"] = {
+        "schema_version": "bounded-rc-fiber-phase-execution-policy.v1",
+        "analysis_timeout_ms": 5000,
+        "verification_timeout_ms": 5000,
+        "termination_grace_ms": 50,
+    }
+    job = current.submit_job(
+        **tenant(), idempotency_key="managed-timeout", request=authored
+    )
+    backup, restored = tmp_path / "backup", tmp_path / "restored"
+    receipt = backup_job_store(root, backup, maximum_bytes=10_000_000)
+    options = {
+        "manifest_sha256": receipt["manifest_sha256"],
+        "maximum_bytes": 10_000_000,
+    }
+    restore_job_store(backup, restored, **options)
+    claim = current.claim_next(**worker("first"), lease_seconds=60)
+    marker = _blocking_script(tmp_path, monkeypatch, ignore_term=True)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(
+            execute_rc_fiber_direct_control_claim,
+            current,
+            claim,
+            **worker("first"),
+            lease_seconds=60,
+        )
+        deadline = time.monotonic() + 3.0
+        while not marker.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert marker.exists(), "Synthetic child failed to reach ready barrier"
+        with pytest.raises(ValueError, match="authority busy"):
+            activate_managed_restore(backup, restored, **options)
+        with pytest.raises(RCFiberDirectControlWorkerError) as caught:
+            future.result(timeout=10)
+        assert caught.value.code == "rc_fiber_worker_analysis_timeout"
+    child = json.loads(marker.read_text())
+    _assert_reaped(child["pid"])
+    assert current.get_job(job.job_id, **tenant()).status == "failed"
+    evidence = current.read_rc_invocation_evidence(job.job_id, **tenant())
+    assert evidence["execution_budget"]["reserved_attempts"] == 1
+    assert evidence["pending_ordinals"] == [1]
+    assert evidence["invocations"] == []
+    assert (
+        activate_managed_restore(backup, restored, **options)["status"] == "activated"
+    )
+    with pytest.raises(JobServiceError, match="execution_authority_rejected"):
+        current.claim_next(**worker("first"), lease_seconds=60)
+    fresh = service(restored)
+    restored_claim = fresh.claim_next(**worker("first"), lease_seconds=60)
+    budget = fresh.read_execution_budget(
+        job.job_id, **worker("first"), lease_token=restored_claim.lease_token
+    )
+    assert budget["reserved_attempts"] == 1
+    assert (
+        fresh.reserve_execution_attempt(
+            job.job_id, **worker("first"), lease_token=restored_claim.lease_token
+        )
+        == 2
+    )
+    final = fresh.read_rc_invocation_evidence(job.job_id, **tenant())
+    assert final["execution_budget"]["reserved_attempts"] == 2
+    assert final["pending_ordinals"] == [1, 2]
+    assert final["invocations"] == []
