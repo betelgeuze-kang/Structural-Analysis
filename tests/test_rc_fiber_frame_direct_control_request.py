@@ -63,6 +63,7 @@ def test_all_constructor_settings_preserved_including_line_search():
         ),
         control_tolerance_m=4e-12,
         load_factor_coordinate_scale_m=0.004,
+        initial_guess="control_target",
     )
     typed = request.BoundedRCFiberDirectControlRequest(
         4, (-1e-5, 2e-5, 0.0), config, True, 2, 7
@@ -224,3 +225,25 @@ def test_unavailable_terminal_polishing_is_rejected(value):
         request.decode_bounded_rc_fiber_direct_control_request(
             minimal(solver_config={"newton": {"terminal_polishing": value}})
         )
+
+
+@pytest.mark.parametrize("value", [None, True, 1, "automatic", [], {}])
+def test_invalid_initial_guess_rejects_before_solve(value):
+    with pytest.raises(ValueError, match="initial_guess"):
+        request.decode_bounded_rc_fiber_direct_control_request(
+            minimal(solver_config={"initial_guess": value})
+        )
+
+
+def test_default_initial_guess_preserves_existing_configuration_identity():
+    config = StatefulFiberFrame2DDisplacementControlConfig()
+    assert (
+        config.contract_hash
+        == "sha256:3107df390d74d083ff2dff88c79460b25b79d687b6269bdcc19e07bfe9ddba55"
+    )
+    typed = request.decode_bounded_rc_fiber_direct_control_request(minimal())
+    assert "initial_guess" not in typed.to_dict()["solver_config"]
+    projected = replace(
+        typed, solver_config=replace(config, initial_guess="control_target")
+    )
+    assert projected.resume_contract_hash != typed.resume_contract_hash

@@ -151,17 +151,21 @@ def test_low_load_direct_control_matches_existing_force_path(elastic_pair):
     assert steel and all(state.accumulated_plastic_strain == 0.0 for state in steel)
 
 
+@pytest.mark.parametrize("initial_guess", ["parent", "control_target"])
 def test_accepted_state_initial_coordinates_preserve_rotation_and_load_scale(
     elastic_pair,
+    initial_guess,
 ):
     pair = elastic_pair
     parent = pair.direct.accepted_checkpoint
-    config = Config(load_factor_coordinate_scale_m=0.007)
+    config = Config(load_factor_coordinate_scale_m=0.007, initial_guess=initial_guess)
     adapter = Adapter(pair.problem, parent, 7, 1.1 * pair.target, config)
     z = adapter.initial_free_displacements_m()
     expected = (
         np.asarray(parent.global_displacements) / pair.problem.physical_coordinate_scale
     )[list(pair.problem.free_global_dofs)]
+    if initial_guess == "control_target":
+        expected[adapter.control_free_index] = adapter.target_control_displacement_m
     np.testing.assert_array_equal(z[:-1], expected)
     assert z[-1] == parent.load_factor * config.load_factor_coordinate_scale_m
     assert adapter.reference_force_scale() > 0.0

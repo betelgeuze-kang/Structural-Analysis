@@ -67,8 +67,14 @@ class StatefulFiberFrame2DDisplacementControlConfig:
     newton: NewtonRaphsonConfig = field(default_factory=NewtonRaphsonConfig)
     control_tolerance_m: float = 1.0e-12
     load_factor_coordinate_scale_m: float = 1.0e-3
+    initial_guess: str = "parent"
 
     def __post_init__(self) -> None:
+        if type(self.initial_guess) is not str or self.initial_guess not in (
+            "parent",
+            "control_target",
+        ):
+            raise ValueError("initial_guess must be parent or control_target")
         if type(self.newton) is not NewtonRaphsonConfig:
             raise ValueError("newton must be an exact NewtonRaphsonConfig")
         if self.newton.matrix_backend != VECTOR_MATRIX_BACKEND:
@@ -93,12 +99,21 @@ class StatefulFiberFrame2DDisplacementControlConfig:
         newton = asdict(self.newton)
         newton["line_search_alphas"] = list(self.newton.line_search_alphas)
         return {
-            "profile": STATEFUL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE,
+            "profile": (
+                STATEFUL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE
+                if self.initial_guess == "parent"
+                else "small-displacement-rc-fiber-direct-control.v2"
+            ),
             "newton": newton,
             "control_tolerance_m": self.control_tolerance_m,
             "load_factor_coordinate_scale_m": self.load_factor_coordinate_scale_m,
             "control_row_weight": "F_reference*residual_tolerance/control_tolerance_m",
             "augmented_coordinates": "[q_free_m,load_factor_coordinate_scale_m*lambda]",
+            **(
+                {"initial_guess": self.initial_guess}
+                if self.initial_guess != "parent"
+                else {}
+            ),
         }
 
     @property
@@ -206,6 +221,12 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
         free = (physical / self.problem.physical_coordinate_scale)[
             list(self.problem.free_global_dofs)
         ]
+        # Start on the authored control constraint. Starting at parent equilibrium
+        # can reject every line-search trial when crossing a material tangent kink:
+        # its tiny control residual competes with the new equilibrium residual.
+        # This is only a trial guess; all commit/rollback gates remain unchanged.
+        if self.config.initial_guess == "control_target":
+            free[self.control_free_index] = self.target_control_displacement_m
         return np.concatenate(
             (
                 free,
