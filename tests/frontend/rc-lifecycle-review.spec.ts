@@ -8,7 +8,7 @@ import { validateRcJobArtifacts, validateRcRequestProfile, fields } from '../../
 import { validateRcQuantityReport } from '../../src/workbench-v2/model/rcQuantityReportSchema'
 import { sha256Hex } from '../../src/workbench-v2/model/checksum'
 
-for (const profile of ['legacy', 'explicit-layers', 'circular-layers'] as const) {
+for (const profile of ['legacy', 'explicit-layers', 'circular-layers', 'control-target'] as const) {
 test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, () => {
   test.describe.configure({ mode: 'serial', timeout: 120000 })
   let temporary: string, snapshot: any, reviewed: Awaited<ReturnType<typeof validateRcJobArtifacts>>
@@ -21,6 +21,10 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
     if (profile === 'circular-layers') {
       authored.case_id = 'hosted-workbench-circular-steel-layers'
       for (const layer of authored.model.sections[0].steel_layers) layer.circular_integration_points = 8
+    }
+    if (profile === 'control-target') {
+      authored.case_id = 'hosted-workbench-control-target-start'
+      authored.config.solver_config.initial_guess = 'control_target'
     }
     const requestFile = path.join(temporary, 'browser-request.json')
     // The exact browser JSON.stringify boundary converts Python 1.0 to JSON 1.
@@ -51,6 +55,7 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
     expect(() => validateRcRequestProfile(original)).not.toThrow()
     for (const mutate of [
       (r: any) => { r.config.solver_config.newton.terminal_polishing = false },
+      (r: any) => { r.config.solver_config.initial_guess = 'automatic' },
       (r: any) => { r.config.constant_nodal_loads = [] },
       (r: any) => { r.config.schema_version = 'bounded-rc-fiber-direct-control-request.v4' },
       (r: any) => { r.config.experimental_two_fixed_endpoints = true },

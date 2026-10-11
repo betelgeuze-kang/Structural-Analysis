@@ -123,12 +123,20 @@ def authored_circular_layers_request():
     return request
 
 
+def authored_control_target_request():
+    request = authored_explicit_layers_request()
+    request["case_id"] = "hosted-workbench-control-target-start"
+    request["config"]["solver_config"]["initial_guess"] = "control_target"
+    return request
+
+
 def is_authored_request(value):
     return value in (
         authored_request(),
         authored_explicit_layers_request(),
         authored_pin_roller_request(),
         authored_circular_layers_request(),
+        authored_control_target_request(),
     )
 
 

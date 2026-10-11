@@ -187,7 +187,9 @@ export function validateRcRequestProfile(value: unknown): void {
   }
   check(reversals <= config.maximum_reversals && (config.allow_reversals || reversals === 0), 'targets_invalid')
   const solver = object(config.solver_config), newton = object(solver.newton)
-  exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m'], 'solver_config_invalid')
+  exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
+    ...(solver.initial_guess === undefined ? [] : ['initial_guess'])], 'solver_config_invalid')
+  check(solver.initial_guess === undefined || solver.initial_guess === 'parent' || solver.initial_guess === 'control_target', 'solver_config_invalid')
   exact(newton, ['residual_tolerance', 'increment_tolerance', 'max_iterations',
     'line_search_alphas', 'matrix_backend'], 'newton_config_invalid')
   const positive = (number: unknown): number is number => typeof number === 'number' && Number.isFinite(number) && number > 0
@@ -395,6 +397,9 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       && receipt.api_request.maximum_targets === config.maximum_targets
       && (pinRoller ? receipt.api_request.experimental_pin_roller_beam === true
         : receipt.api_request.experimental_pin_roller_beam === undefined)
+      && receipt.api_request.configuration.initial_guess === (config.solver_config.initial_guess === 'control_target' ? 'control_target' : undefined)
+      && receipt.api_request.configuration.profile === (config.solver_config.initial_guess === 'control_target'
+        ? 'small-displacement-rc-fiber-direct-control.v2' : 'small-displacement-rc-fiber-direct-control.v1')
       && same(receipt.api_request.configuration.newton, config.solver_config.newton)
       && receipt.api_request.configuration.control_tolerance_m === config.solver_config.control_tolerance_m
       && receipt.api_request.configuration.load_factor_coordinate_scale_m === config.solver_config.load_factor_coordinate_scale_m
@@ -462,7 +467,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   const normalizedConfig = new Map<string, string>([
     ['schema_version', JSON.stringify(config.schema_version)],
     ['targets_m', fields(nativeDoc.raw).get('accepted_targets_m')!.value],
-    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m']
+    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
+      ...(config.solver_config.initial_guess === 'control_target' ? ['initial_guess'] : [])]
       .map(key => [key, configurationFields.get(key)!.value])))],
     ...['allow_reversals', 'maximum_reversals', 'maximum_targets', 'control_global_dof']
       .map(key => [key, apiRequestFields.get(key)!.value] as [string, string]),

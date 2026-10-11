@@ -173,6 +173,13 @@
                   "const": "numpy_linalg_solve_dense"
                 }
               }
+            },
+            "initial_guess": {
+              "type": "string",
+              "enum": [
+                "parent",
+                "control_target"
+              ]
             }
           }
         }
