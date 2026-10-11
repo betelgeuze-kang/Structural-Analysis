@@ -1789,11 +1789,41 @@ jobs:
               value = float(token)
               if not math.isfinite(value): fail(f"nonfinite_json_number:{token}")
               return value
-          def load(raw, label):
+          def load(raw, label, object_required=True):
               try: value = json.loads(raw, object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
               except (UnicodeError, json.JSONDecodeError, ValueError) as exc: fail(f"strict_json_invalid:{label}:{exc}")
-              if type(value) is not dict: fail(f"json_object_required:{label}")
+              if object_required and type(value) is not dict: fail(f"json_object_required:{label}")
               return value
+          def load_candidate_json(raw, name):
+              # gh attestation verify emits singleton report arrays. Only these
+              # producer/consumer audit caches have that contract; ordinary
+              # manifests, seals, API payloads and policies remain objects.
+              prefix = ".ci/product-state-inputs/"
+              reports = {
+                  prefix + "post-main-overlay-attestation-verification.json",
+                  prefix + "opensees-calculix-clean-runner/attestation-verification.json",
+                  prefix + "opensees-calculix-clean-runner/artifacts/vv/opensees_calculix_clean_runner/clean_runner_handoff.attestation-verification.json",
+              }
+              for family, producer in (
+                  ("linear", "bounded-planar-opensees"),
+                  ("negative", "bounded-planar-negative-opensees"),
+                  ("scaling", "bounded-planar-scaling-opensees"),
+                  ("modal_buckling", "bounded-planar-modal-buckling"),
+                  ("nonlinear_material_recovery", "bounded-planar-nonlinear-material-recovery"),
+              ):
+                  family_prefix = prefix + f"bounded-planar-supplemental-attestations/{family}/"
+                  reports.add(family_prefix + "product-state-attestation-verification.json")
+                  reports.add(family_prefix + f"artifact/.ci/{producer}/attestation-verification.json")
+              if name not in reports: return load(raw, name)
+              report = load(raw, name, object_required=False)
+              if type(report) is not list or len(report) != 1 or type(report[0]) is not dict: fail(f"candidate_attestation_report_shape_invalid:{name}")
+              attestation = report[0].get("attestation")
+              verification = report[0].get("verificationResult")
+              if type(attestation) is not dict or type(attestation.get("bundle")) is not dict or not attestation["bundle"] or type(verification) is not dict: fail(f"candidate_attestation_report_shape_invalid:{name}")
+              if verification.get("mediaType") != "application/vnd.dev.sigstore.verificationresult+json;version=0.1" or type(verification.get("signature")) is not dict or type(verification["signature"].get("certificate")) is not dict or not verification["signature"]["certificate"] or type(verification.get("statement")) is not dict or not verification["statement"] or type(verification.get("verifiedTimestamps")) is not list or not verification["verifiedTimestamps"] or any(type(row) is not dict for row in verification["verifiedTimestamps"]): fail(f"candidate_attestation_report_shape_invalid:{name}")
+              # Shape validation is not cryptographic verification or authority.
+              # Preserve original bytes and all existing independent trust checks.
+              return report
           def digest(raw): return "sha256:" + hashlib.sha256(raw).hexdigest()
           def git_blob_sha(raw): return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
           def source_file(api_payload, expected_path, candidate_raw=None):
@@ -1854,7 +1884,8 @@ jobs:
               if type(value) is str: return value in authority_policy["safe_statuses"]
               if type(value) is dict: return set(value) == {"status"} and type(value["status"]) is str and value["status"] in authority_policy["safe_statuses"]
               return False
-          def reject_promoted_authority(value, path="$", parent_key=None, inside_open_claims=False, json_pointer=()):
+          def reject_promoted_authority(value, path="$", parent_key=None, inside_open_claims=False, json_pointer=(), document_schema=None):
+              if path == "$" and document_schema is not None and (type(value) is not dict or value.get("schema_version") != document_schema): fail("authority_document_schema_invalid")
               if type(value) is dict:
                   for key, child in value.items():
                       child_path = f"{path}.{key!r}"
@@ -1872,7 +1903,15 @@ jobs:
                       if (is_grants or is_negative) and type(child) is not list: fail(f"authority_token_container_not_list:{child_path}")
                       if is_open_claims and key != canonical_key: fail(f"noncanonical_open_claim_container:{child_path}")
                       if is_prohibited and (key != canonical_key or canonical_key not in authority_policy["prohibited_keys"]): fail(f"noncanonical_authority_key:{child_path}")
-                      if (is_prohibited or affix_prohibited or semantic_alias) and not nonpromoting(child): fail(f"promoted_authority:{child_path}")
+                      # Source schemas require these exact DAG-validity facts.
+                      # Trusted call-site context and exact path forbid transplants;
+                      # this exception never grants release or scientific authority.
+                      release_leaf_fact = (document_schema, child_path) in {
+                          ("product-state-provenance-bundle.v1", "$.'contracts'.'post_main_overlay'.'release_leaf_contract_pass'"),
+                          ("post-main-evidence-overlay.v1", "$.'generated_artifact_dag'.'release_leaf_contract_pass'"),
+                      }
+                      if release_leaf_fact and child is not True: fail(f"release_leaf_contract_fact_invalid:{child_path}")
+                      if (is_prohibited or affix_prohibited or semantic_alias) and not release_leaf_fact and not nonpromoting(child): fail(f"promoted_authority:{child_path}")
                       child_pointer = (*json_pointer, canonical_key)
                       open_object_keys = {("quality_evidence",): {"status","authority","workflow_name","run_id","run_number","run_attempt","trigger_event","conclusion","head_branch","head_sha","html_url","reason"}, ("authority_tracks","internal_license_due_diligence","evidence"): {"path","sha256","schema_version","artifact_hash","source_commit_sha","source_commit_matches_current","contract_pass","validation_reason","third_party_redistribution_clearance"}, ("bounded_planar_external_vv",): {"path","sha256","schema_version","source_commit_sha","source_commit_matches_current","artifact_load_pass","status_check_pass","validation_pass","validation_reason","status","contract_pass","claims","stored_claims","claim_boundary","summary","stored_status","stored_contract_pass","stored_summary","execution_package_binding","supplemental_execution_package_bindings","current_source_workflow_binding","same_operator_execution_binding","same_operator_supplemental_execution_binding","operator_intake_binding","stored_execution_package_binding","stored_supplemental_execution_package_bindings","stored_current_source_workflow_binding","stored_same_operator_execution_binding","stored_same_operator_supplemental_execution_binding","stored_operator_intake_binding","blockers"}}
                       allowed_object_keys = open_object_keys.get(json_pointer)
@@ -1914,16 +1953,27 @@ jobs:
                           ("bounded_planar_external_vv","same_operator_supplemental_execution_binding","execution_window"): {"started_at","completed_at"},
                           ("bounded_planar_external_vv","stored_same_operator_supplemental_execution_binding","execution_window"): {"started_at","completed_at"},
                       }
-                      if json_pointer[:1] == ("bounded_planar_external_vv",) and len(json_pointer) > 1 and (json_pointer not in exact_pointer_keys or key not in exact_pointer_keys[json_pointer]) and not nonpromoting(child): fail(f"unapproved_truthy_exact_pointer:{child_path}")
+                      exact_keys = exact_pointer_keys.get(json_pointer)
+                      # Mirror the source policy's typed hosted-evidence metadata.
+                      if json_pointer in {("bounded_planar_external_vv", "same_operator_supplemental_execution_binding"), ("bounded_planar_external_vv", "stored_same_operator_supplemental_execution_binding")}:
+                          supplemental_fields = {"repository": str, "family_attestation_count": int, "same_operator_github_hosted_execution": bool, "sigstore_attestations_reverified": bool, "runtime_asset_metadata_sealed": bool, "runtime_byte_lock_complete": bool, "producer_signing_privilege_separated": bool}
+                          exact_keys = (exact_keys or set()) | supplemental_fields.keys()
+                          expected_type = supplemental_fields.get(key)
+                          if expected_type is not None and (type(child) is not expected_type or (expected_type is int and not 0 <= child <= 9007199254740991) or (expected_type is str and not child)): fail(f"supplemental_metadata_shape_invalid:{child_path}")
+                      if json_pointer[:1] == ("bounded_planar_external_vv",) and len(json_pointer) > 1 and (exact_keys is None or key not in exact_keys) and not nonpromoting(child): fail(f"unapproved_truthy_exact_pointer:{child_path}")
                       canonical_allowed_true = {canonical_authority_key(item, "policy") for item in authority_policy["allowed_true_technical_completeness"]}
                       pointer_true_claims = {("claims",): authority_policy["allowed_true_technical_completeness"], ("bounded_planar_external_vv","claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete"}, ("bounded_planar_external_vv","stored_claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete"}, ("internal_license_due_diligence","claims"): {"internal_due_diligence_complete","license_inventory_complete","spdx_notices_complete","redistribution_boundaries_explicit","source_use_declarations_complete"}, ("authority_tracks","internal_license_due_diligence","claims"): {"internal_due_diligence_complete","license_inventory_complete","spdx_notices_complete","redistribution_boundaries_explicit","source_use_declarations_complete"}, ("external_vv_nonpromotion","effective_claims"): set()}
+                      # Keep the source policy's four bounded execution-fact
+                      # locations in sync; these facts grant no promotion.
+                      for binding in ("same_operator_execution_binding", "stored_same_operator_execution_binding", "same_operator_supplemental_execution_binding", "stored_same_operator_supplemental_execution_binding"):
+                          pointer_true_claims[("bounded_planar_external_vv", binding)] = {"actual_external_solver_execution"}
                       allowed_here = pointer_true_claims.get(json_pointer, set())
                       if child is True and canonical_key in canonical_allowed_true and key not in allowed_here: fail(f"unapproved_technical_true_path:{child_path}")
                       if inside_open_claims and not nonpromoting(child) and not (child is True and canonical_key in canonical_allowed_true and key in allowed_here): fail(f"unapproved_true_open_claim:{child_path}")
                       normalized_parent = "grants" if is_grants else canonical_key
                       if is_negative:
                           normalized_parent = next(value for value in authority_policy["negative_authority_token_containers"] if value == canonical_key or value.replace("_", "") == compact_key)
-                      reject_promoted_authority(child, child_path, normalized_parent, inside_open_claims or is_open_claims, child_pointer)
+                      reject_promoted_authority(child, child_path, normalized_parent, inside_open_claims or is_open_claims, child_pointer, document_schema)
               elif type(value) is list:
                   for index, child in enumerate(value):
                       child_path = f"{path}[{index}]"
@@ -1936,7 +1986,7 @@ jobs:
                               if parent_key in authority_policy["negative_authority_token_containers"]:
                                   if child != canonical_token or canonical_token not in authority_policy["prohibited_keys"]: fail(f"noncanonical_negative_authority_token:{child_path}")
                               else: fail(f"promoted_authority_token:{child_path}")
-                      else: reject_promoted_authority(child, child_path, parent_key, inside_open_claims, json_pointer)
+                      else: reject_promoted_authority(child, child_path, parent_key, inside_open_claims, json_pointer, document_schema)
           def validate_extra(extra):
               cursor = 0
               seen = set()
@@ -2063,7 +2113,7 @@ jobs:
               expected.add(name)
               raw = files[name]
               if row["bytes"] != len(raw) or row["sha256"] != digest(raw): fail("candidate_file_digest_invalid")
-              if name.endswith(".json"): load(raw, name)
+              if name.endswith(".json"): load_candidate_json(raw, name)
           if set(files) != expected: fail("candidate_archive_member_set_invalid")
           nightly_inventory = load((temp / "nightly-artifacts.json").read_bytes(), "nightly_artifacts")
           nightly_rows = nightly_inventory.get("artifacts")
@@ -2217,7 +2267,7 @@ jobs:
           grants = license_track.get("does_not_grant")
           if type(grants) is not list or not {"product_legal_license_approval", "commercial_redistribution_approval", "independent_verification_level_2", "release_authority"} <= set(grants): fail("internal_license_boundary_invalid")
           if provenance.get("source_commit_sha") != source_sha or provenance.get("bundle_integrity_pass") is not True or provenance.get("release_authority") is not False: fail("provenance_authority_invalid")
-          reject_promoted_authority(provenance)
+          reject_promoted_authority(provenance, document_schema="product-state-provenance-bundle.v1")
           if digest(str(provenance.get("claim_boundary", "")).encode()) != "sha256:7e64826d3036d506e0c88c018a1c8542c81e5693915b6ea8293149468289b9e0": fail("provenance_claim_boundary_invalid")
           product_contract = provenance.get("contracts", {}).get("product_state", {})
           if product_contract.get("release_authority") is not False or product_contract.get("release_eligible") is not False or product_contract.get("external_promotion_status") != "unavailable" or product_contract.get("authority_claims_nonpromoting") is not True or product_contract.get("claim_boundary_sha256") != "sha256:e7d4347adbb32dea5ad315f43fa01783d3f77e6e0f1caa9485b7908d89778e4b": fail("provenance_product_boundary_invalid")
@@ -2230,7 +2280,7 @@ jobs:
           if overlay_contract.get("contract_pass") is not True or overlay_contract.get("technical_handoff_promotion_eligible") is not False or overlay_contract.get("external_vv_promotion_eligible") is not False or overlay_contract.get("external_vv_effective_claims") != expected_effective_claims: fail("provenance_overlay_boundary_invalid")
           if dag_report.get("contract_pass") is not True or dag_report.get("stale_nodes") != []: fail("dag_report_invalid")
           overlay_nonpromotion = overlay.get("external_vv_nonpromotion", {})
-          reject_promoted_authority(overlay)
+          reject_promoted_authority(overlay, document_schema="post-main-evidence-overlay.v1")
           if overlay.get("source", {}).get("commit_sha") != source_sha or overlay.get("producer", {}).get("run_id") != nightly_run_id or overlay.get("producer", {}).get("run_attempt") != nightly_run_attempt or overlay.get("contract_pass") is not True or overlay.get("technical_handoff_contracts", {}).get("promotion_eligible") is not False or overlay_nonpromotion.get("promotion_eligible") is not False or overlay_nonpromotion.get("effective_claims") != expected_effective_claims or digest(str(overlay.get("claim_boundary", "")).encode()) != "sha256:de844d427c210a0967b1c25c086c423b5aa02c140d800751294808de34e32c4f": fail("post_main_overlay_invalid")
           receipt_contracts = {
               "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json": (".ci/product-state-inputs/code-to-code-receipt.json", "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json", "external-code-to-code-technical-execution.v1", "external_code_to_code_technical_execution", "sha256:2c3877649b94ddd250ec2f5d4690f18c13b126db274c31c43b0232763fb0fd7a"),

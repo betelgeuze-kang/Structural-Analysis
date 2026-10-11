@@ -30,6 +30,22 @@ _CAMEL_BOUNDARY = re.compile(r"([a-z0-9])([A-Z])")
 _ALNUM_BOUNDARY = re.compile(r"(?<=[A-Za-z])(?=[0-9])|(?<=[0-9])(?=[A-Za-z])")
 _SEPARATORS = re.compile(r"[^A-Za-z0-9]+")
 
+# Execution metadata from the authenticated hosted supplemental producer.
+# These fields describe evidence; they do not grant independent/design authority.
+_ATTESTED_SUPPLEMENTAL_FIELDS = {
+    "repository": str,
+    "family_attestation_count": int,
+    "same_operator_github_hosted_execution": bool,
+    "sigstore_attestations_reverified": bool,
+    "runtime_asset_metadata_sealed": bool,
+    "runtime_byte_lock_complete": bool,
+    "producer_signing_privilege_separated": bool,
+}
+_SUPPLEMENTAL_POINTERS = frozenset({
+    ("bounded_planar_external_vv", "same_operator_supplemental_execution_binding"),
+    ("bounded_planar_external_vv", "stored_same_operator_supplemental_execution_binding"),
+})
+
 
 class AuthorityPolicyError(ValueError):
     """Raised when the authority policy or a governed payload is unsafe."""
@@ -330,6 +346,15 @@ def promoted_authority_violations(
                 ("bounded_planar_external_vv", "stored_same_operator_supplemental_execution_binding", "execution_window"): frozenset({"started_at", "completed_at"}),
             }
             exact_keys = exact_pointer_keys.get(json_pointer)
+            if json_pointer in _SUPPLEMENTAL_POINTERS:
+                exact_keys = (exact_keys or frozenset()) | _ATTESTED_SUPPLEMENTAL_FIELDS.keys()
+                expected_type = _ATTESTED_SUPPLEMENTAL_FIELDS.get(key)
+                if expected_type is not None and (
+                    type(child) is not expected_type
+                    or (expected_type is int and not 0 <= child <= 9_007_199_254_740_991)
+                    or (expected_type is str and not child)
+                ):
+                    violations.append(f"supplemental_metadata_shape_invalid:{child_path}")
             if json_pointer[:1] == ("bounded_planar_external_vv",) and len(json_pointer) > 1 and (exact_keys is None or key not in exact_keys) and not authority_value_is_nonpromoting(child, policy):
                 violations.append(f"unapproved_truthy_exact_pointer:{child_path}")
             # Technical true claims are deliberately bound to their schema location.
