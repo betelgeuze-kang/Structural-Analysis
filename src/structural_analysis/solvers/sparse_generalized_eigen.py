@@ -9,7 +9,7 @@ import struct
 from typing import Any, Iterable
 
 import numpy as np
-from scipy.sparse import csr_matrix, issparse
+from scipy.sparse import csr_matrix, diags, issparse
 from scipy.sparse.linalg import (
     ArpackNoConvergence,
     LinearOperator,
@@ -170,7 +170,7 @@ def solve_sparse_modal_modes(
             dtype=np.float64,
         )
         try:
-            mass_minimum, mass_scale = _extreme_eigenvalues(
+            mass_minimum, mass_scale, _ = _extreme_eigenvalues(
                 m_matrix,
                 maximum_iterations=maximum_iterations,
                 arpack_tolerance=tolerances["arpack_tolerance"],
@@ -190,7 +190,7 @@ def solve_sparse_modal_modes(
             size=n,
             name="mass",
         )
-        stiffness_minimum, stiffness_scale = _extreme_eigenvalues(
+        stiffness_minimum, stiffness_scale, stiffness_largest = _extreme_eigenvalues(
             k_matrix,
             maximum_iterations=maximum_iterations,
             arpack_tolerance=tolerances["arpack_tolerance"],
@@ -202,32 +202,98 @@ def solve_sparse_modal_modes(
             raise SparseGeneralizedEigenError(
                 "stiffness violates the positive-semidefinite contract"
             )
-        raw_values, raw_vectors = eigsh(
-            k_matrix,
-            k=candidate_count,
-            M=m_matrix,
-            Minv=mass_inverse,
-            which="SM",
-            tol=tolerances["arpack_tolerance"],
-            maxiter=maximum_iterations,
-            v0=_deterministic_start(n),
+        mass_diagonal = m_matrix.diagonal()
+        scalar_mass = (
+            float(mass_diagonal[0])
+            if m_matrix.nnz == n
+            and mass_diagonal[0] > 0.0
+            and np.all(mass_diagonal == mass_diagonal[0])
+            else None
         )
-        order = np.argsort(raw_values, kind="stable")
-        raw_values = np.asarray(raw_values[order], dtype=np.float64)
-        raw_vectors = np.asarray(raw_vectors[:, order], dtype=np.float64)
-        largest_generalized = float(
-            eigsh(
+        diagonal_stiffness = None
+        inverse_mass_sqrt = None
+        diagonal_start = None
+        if scalar_mass is None and m_matrix.nnz == n and np.all(mass_diagonal > 0.0):
+            # Exact positive diagonal M = D^2 admits the symmetric congruence
+            # D^-1 K D^-1. Recover phi = D^-1 y before all original-metric gates.
+            # This preserves the rigid mode in the bounded diagonal regression.
+            inverse_mass_sqrt = 1.0 / np.sqrt(mass_diagonal)
+            scaling = diags(inverse_mass_sqrt, format="csr")
+            diagonal_stiffness = (scaling @ k_matrix @ scaling).tocsr()
+            if not np.all(np.isfinite(diagonal_stiffness.data)):
+                raise SparseGeneralizedEigenError(
+                    "mass-scaled stiffness must contain finite values"
+                )
+            diagonal_start = _deterministic_start(n) / inverse_mass_sqrt
+        if scalar_mass is not None:
+            # Exact M = c I reduces to the ordinary symmetric problem. This
+            # also avoids generalized ARPACK silently omitting an exact zero.
+            raw_values, raw_vectors = eigsh(
                 k_matrix,
-                k=1,
-                M=m_matrix,
-                Minv=mass_inverse,
-                which="LA",
-                return_eigenvectors=False,
+                k=candidate_count,
+                which="SM",
                 tol=tolerances["arpack_tolerance"],
                 maxiter=maximum_iterations,
                 v0=_deterministic_start(n),
-            )[0]
-        )
+            )
+            raw_values = raw_values / scalar_mass
+            raw_vectors = raw_vectors / math.sqrt(scalar_mass)
+        elif diagonal_stiffness is not None:
+            assert inverse_mass_sqrt is not None
+            raw_values, raw_vectors = eigsh(
+                diagonal_stiffness,
+                k=candidate_count,
+                which="SM",
+                tol=tolerances["arpack_tolerance"],
+                maxiter=maximum_iterations,
+                v0=diagonal_start,
+            )
+            raw_vectors = inverse_mass_sqrt[:, None] * raw_vectors
+        else:
+            raw_values, raw_vectors = eigsh(
+                k_matrix,
+                k=candidate_count,
+                M=m_matrix,
+                Minv=mass_inverse,
+                which="SM",
+                tol=tolerances["arpack_tolerance"],
+                maxiter=maximum_iterations,
+                v0=_deterministic_start(n),
+            )
+        order = np.argsort(raw_values, kind="stable")
+        raw_values = np.asarray(raw_values[order], dtype=np.float64)
+        raw_vectors = np.asarray(raw_vectors[:, order], dtype=np.float64)
+        if scalar_mass is not None:
+            # For exact M = c I, every generalized eigenvalue is lambda(K)/c.
+            # Reuse the already computed largest algebraic stiffness eigenvalue;
+            # the absolute spectral scale is not a substitute for this value.
+            largest_generalized = stiffness_largest / scalar_mass
+        elif diagonal_stiffness is not None:
+            largest_generalized = float(
+                eigsh(
+                    diagonal_stiffness,
+                    k=1,
+                    which="LA",
+                    return_eigenvectors=False,
+                    tol=tolerances["arpack_tolerance"],
+                    maxiter=maximum_iterations,
+                    v0=diagonal_start,
+                )[0]
+            )
+        else:
+            largest_generalized = float(
+                eigsh(
+                    k_matrix,
+                    k=1,
+                    M=m_matrix,
+                    Minv=mass_inverse,
+                    which="LA",
+                    return_eigenvectors=False,
+                    tol=tolerances["arpack_tolerance"],
+                    maxiter=maximum_iterations,
+                    v0=_deterministic_start(n),
+                )[0]
+            )
         spectral_scale = max(abs(largest_generalized), 1.0)
         rigid_threshold = rigid_tolerance * spectral_scale
         positive_indices = np.flatnonzero(raw_values > rigid_threshold)
@@ -399,7 +465,7 @@ def solve_sparse_linear_buckling(
             name="geometric_stiffness_per_unit_load",
             tolerance=tolerances["symmetry_relative_tolerance"],
         )
-        stiffness_minimum, stiffness_scale = _extreme_eigenvalues(
+        stiffness_minimum, stiffness_scale, _ = _extreme_eigenvalues(
             k_matrix,
             maximum_iterations=maximum_iterations,
             arpack_tolerance=tolerances["arpack_tolerance"],
@@ -410,7 +476,7 @@ def solve_sparse_linear_buckling(
             size=n,
             name="stiffness",
         )
-        geometric_minimum, geometric_scale = _extreme_eigenvalues(
+        geometric_minimum, geometric_scale, _ = _extreme_eigenvalues(
             kg_matrix,
             maximum_iterations=maximum_iterations,
             arpack_tolerance=tolerances["arpack_tolerance"],
@@ -677,7 +743,7 @@ def _extreme_eigenvalues(
     *,
     maximum_iterations: int | None,
     arpack_tolerance: float,
-) -> tuple[float, float]:
+) -> tuple[float, float, float]:
     start = _deterministic_start(matrix.shape[0])
     minimum = float(
         eigsh(
@@ -701,11 +767,12 @@ def _extreme_eigenvalues(
             v0=start,
         )[0]
     )
-    return minimum, max(
+    scale = max(
         abs(minimum),
         abs(largest),
         float(np.finfo(np.float64).tiny),
     )
+    return minimum, scale, largest
 
 
 def _require_numerically_positive_definite(
