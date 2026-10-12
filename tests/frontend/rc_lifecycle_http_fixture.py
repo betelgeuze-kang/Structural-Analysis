@@ -36,7 +36,7 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
 )
 from structural_analysis.assembly import stateful_fiber_frame2d_control_path as paths
 from structural_analysis.execution.job_http_api import DurableJobWSGIApplication
-from structural_analysis.execution.job_service import DurableJobService
+from structural_analysis.execution.job_service import DurableJobService, JobServiceError
 from structural_analysis.execution.rc_fiber_direct_control_worker import (
     execute_rc_fiber_direct_control_claim,
 )
@@ -158,7 +158,19 @@ def is_authored_request(value):
         authored_circular_layers_request(),
         authored_control_target_request(),
         authored_fixed_guided_request(),
+        authored_pin_roller_layers_request(),
+        authored_isolated_request("explicit-layers"),
+        authored_isolated_request("pin-roller-layers"),
+        authored_prescribed_trial_request(),
+        authored_prescribed_trial_request("accepted_then_prescribed"),
+        authored_prescribed_trial_request("accepted_then_prescribed_then_secant"),
     )
+
+
+def authored_prescribed_trial_request(policy="prescribed_control"):
+    request = authored_isolated_request("explicit-layers")
+    request["config"]["solver_config"]["initial_trial_policy"] = policy
+    return request
 
 
 def authored_pin_roller_request():
@@ -187,6 +199,26 @@ def authored_pin_roller_request():
     model["loads"] = [
         dict(deepcopy(model["loads"][0]), node=node) for node in ("N3", "N5")
     ]
+    return request
+
+
+def authored_pin_roller_layers_request():
+    request = authored_pin_roller_request()
+    request["case_id"] = "synthetic-pin-roller-explicit-layers"
+    layers = authored_explicit_layers_request()["model"]
+    request["model"]["materials"] = layers["materials"]
+    request["model"]["sections"] = layers["sections"]
+    return request
+
+
+def authored_isolated_request(profile):
+    request = (authored_explicit_layers_request() if profile == "explicit-layers"
+               else authored_pin_roller_layers_request())
+    request["execution_config"]["phase_execution_policy"] = {
+        "schema_version": "bounded-rc-fiber-phase-execution-policy.v1",
+        "analysis_timeout_ms": 30000, "verification_timeout_ms": 30000,
+        "termination_grace_ms": 100,
+    }
     return request
 
 
@@ -317,6 +349,16 @@ def run_worker(workspace, name):
             time.sleep(0.1)  # Wait for the dead process's actual lease to expire.
     assert is_authored_request(json.loads(claim.request_bytes))
     counts = {"analysis": 0, "verification": 0}
+    isolated = "phase_execution_policy" in json.loads(claim.request_bytes)["execution_config"]
+    from structural_analysis.execution import rc_fiber_phase_supervisor as supervisor
+    phase_receipts = []
+    original_phase = supervisor.run_rc_fiber_phase
+
+    def observed_phase(**kwargs):
+        reply = original_phase(**kwargs)
+        phase_receipts.append({"phase": kwargs["phase"], "status": reply.status,
+                               "supervision": reply.supervisor_timing})
+        return reply
     phase = ["analysis"]
     analyze_original = rc_api.analyze_bounded_rc_fiber_direct_control
     verify_original = rc_api.validate_bounded_rc_fiber_direct_control_artifacts
@@ -345,6 +387,7 @@ def run_worker(workspace, name):
                 "checkpoint_hash": digest(claim.checkpoint_bytes),
                 "request_hash": digest(claim.request_bytes),
                 "actual_calls": dict(counts),
+                "isolated_phases": list(phase_receipts),
             }
         )
         assert sys.stdin.readline() == "continue\n"
@@ -359,6 +402,7 @@ def run_worker(workspace, name):
     else:
         assert claim.job.progress_completed == 0 and claim.checkpoint_bytes is None
     with (
+        patch.object(supervisor, "run_rc_fiber_phase", observed_phase),
         patch.object(rc_api, "analyze_bounded_rc_fiber_direct_control", analyze),
         patch.object(
             rc_api, "validate_bounded_rc_fiber_direct_control_artifacts", verify
@@ -367,7 +411,12 @@ def run_worker(workspace, name):
         result = execute_rc_fiber_direct_control_claim(
             current, claim, **worker(name), lease_seconds=60
         )
-    assert counts == {"analysis": 1, "verification": 1}
+    assert counts == {"analysis": 0 if isolated else 1, "verification": 0 if isolated else 1}
+    assert [item["phase"] for item in phase_receipts] == (["analysis", "verification"] if isolated else [])
+    for item in phase_receipts:
+        assert item["status"] == "returned"
+        assert item["supervision"]["direct_child_reaped"]
+        assert item["supervision"]["child_returncode"] == 0
     if name == "first":
         assert result.status == "checkpointed" and result.progress_completed == 1
         abandoned = current.claim_next(**worker(name), lease_seconds=LEASE_SECONDS)
@@ -383,21 +432,31 @@ def run_worker(workspace, name):
                 "checkpoint_hash": result.checkpoint.content_hash,
                 "abandoned_ordinal": ordinal,
                 "actual_calls": counts,
+                "isolated_phases": list(phase_receipts),
             }
         )
         while True:
             time.sleep(60)  # Parent must SIGKILL, not a graceful exit.
     assert result.status == "succeeded" and result.progress_completed == 2
-    emit({"pid": os.getpid(), "job": result.to_dict(), "actual_calls": counts})
+    emit({"pid": os.getpid(), "job": result.to_dict(), "actual_calls": counts, "isolated_phases": list(phase_receipts)})
 
 
 class Supervisor:
     """Control/inspection only. No job submission or report writes live here."""
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, *, managed=False):
+        self.managed = managed
         self.workspace = workspace
+        self.runtime_workspace = workspace
+        self.original_store = self.original_rows = None
         self.store = workspace / "store"
         assert not self.store.exists(), "an empty isolated durable store is required"
+        if managed:
+            from structural_analysis.execution.job_managed_init_cli import initialize_managed_store
+
+            initialize_managed_store(
+                self.store, workspace / "execution-authority", maximum_blob_bytes=10 * 1024 * 1024
+            )
         service(self.store)
         self.processes = []
         self.http = self.first = self.fresh = None
@@ -421,6 +480,7 @@ class Supervisor:
             "github_run_id": os.environ.get("GITHUB_RUN_ID"),
             "github_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
             "source_revision_caller_declaration": SOURCE_REVISION,
+            "managed_execution_authority": managed,
             "independent_physical_validation": False,
             "design_authority": False,
             "commands": [],
@@ -450,7 +510,7 @@ class Supervisor:
                 str(Path(__file__).resolve()),
                 role,
                 "--workspace",
-                str(self.workspace),
+                str(self.runtime_workspace),
                 *arguments,
             ],
             stdin=subprocess.PIPE,
@@ -570,6 +630,70 @@ class Supervisor:
                 "signal": "SIGKILL",
             }
             self.proof["first_worker_death"] = result
+        elif command == "backup_restore":
+            # Private test-driver operation, never a production HTTP route.
+            # The operator stops all original writers before activating a copy.
+            from structural_analysis.execution.job_store_backup import (
+                backup_job_store,
+                restore_job_store,
+                verify_job_store_backup,
+            )
+
+            assert (
+                self.first is not None and self.first["child"].poll() == -signal.SIGKILL
+            )
+            assert self.fresh is None and self.original_store is None
+            assert self.http is not None
+            self.stop(self.http)
+            assert self.http["child"].poll() is not None
+            stale_service = service(self.store) if self.managed else None
+            self.original_store = self.store
+            self.original_rows = numerical_rows(self.store)
+            limit = 10 * 1024 * 1024
+            sealed = self.workspace / "sealed-backup"
+            receipt = backup_job_store(self.store, sealed, maximum_bytes=limit)
+            verified = verify_job_store_backup(
+                sealed, manifest_sha256=receipt["manifest_sha256"], maximum_bytes=limit
+            )
+            self.runtime_workspace = self.workspace / "recovered-runtime"
+            self.runtime_workspace.mkdir()
+            self.store = self.runtime_workspace / "store"
+            restore_job_store(
+                sealed,
+                self.store,
+                manifest_sha256=receipt["manifest_sha256"],
+                maximum_bytes=limit,
+            )
+            activation = None
+            stale_source_rejected = False
+            if self.managed:
+                from structural_analysis.execution.job_managed_restore import activate_managed_restore
+
+                activation = activate_managed_restore(
+                    sealed, self.store, manifest_sha256=receipt["manifest_sha256"], maximum_bytes=limit
+                )
+                assert activation["status"] == "activated" and activation["generation"] == 2
+                try:
+                    stale_service.get_job(self.proof["first_checkpoint"]["job_id"], **tenant())
+                except JobServiceError as error:
+                    assert error.code == "execution_authority_rejected"
+                    stale_source_rejected = True
+                assert stale_source_rejected, "old managed source must reject access after activation"
+            assert numerical_rows(self.store) == self.original_rows
+            result = {
+                "managed_activation": activation,
+                "stale_source_rejected": stale_source_rejected,
+                "manifest_sha256": receipt["manifest_sha256"],
+                "source_store": str(self.original_store),
+                "restored_store": str(self.store),
+                "original_worker_returncode": self.first["child"].poll(),
+                "original_http_returncode": self.http["child"].poll(),
+                "restored_rows_equal": True,
+                "automatic_original_writer_fencing": verified["recovery_snapshot"][
+                    "original_writers_fenced"
+                ],
+            }
+            self.proof["operator_backup_restore"] = result
         elif command == "resume_ready":
             assert self.fresh is None and self.first["child"].poll() == -signal.SIGKILL
             self.fresh = self.spawn("worker", "--name", "fresh")
@@ -606,7 +730,12 @@ class Supervisor:
                 and message["job_id"] == self.prices_job_id
             )
             assert numerical_rows(self.store) == self.before_prices
-            assert not (self.workspace / "http-numerical-attempts.jsonl").exists()
+            assert not any(
+                (root / "http-numerical-attempts.jsonl").exists()
+                for root in (self.workspace, self.runtime_workspace)
+            )
+            if self.original_store is not None:
+                assert numerical_rows(self.original_store) == self.original_rows
             reports = self.reports(message["job_id"])
             assert [report["revision"] for report in reports] == [1, 2]
             if self.reports_before_restart is not None:
@@ -616,6 +745,9 @@ class Supervisor:
                 "reports": reports,
                 "numerical_state_unchanged": True,
                 "http_numerical_calls": 0,
+                "original_store_unchanged": True
+                if self.original_store is not None
+                else None,
                 "numerical_state_hash": digest(canonical(self.before_prices)),
             }
             self.proof["price_only_evidence"] = result
@@ -647,13 +779,14 @@ class Supervisor:
         self.save_proof()
 
 
-def run_driver(workspace):
-    current = Supervisor(workspace)
+def run_driver(workspace, *, managed=False):
+    current = Supervisor(workspace, managed=managed)
     emit(
         {
             "ready": True,
             "request": authored_request(),
             "explicit_layers_request": authored_explicit_layers_request(),
+            "pin_roller_layers_request": authored_pin_roller_layers_request(),
             "credentials": {"tenantId": "a", "bearerToken": TENANTS["a"]},
             "other_credentials": {"tenantId": "b", "bearerToken": TENANTS["b"]},
             "proof": current.proof,
@@ -683,26 +816,36 @@ def run_driver(workspace):
     return 0
 
 
+def valid_workspace(workspace, mode):
+    """Keep all child runtimes inside the driver's disposable temporary root."""
+    workspace = workspace.resolve()
+    root = workspace
+    if mode != "driver" and workspace.name == "recovered-runtime":
+        root = workspace.parent
+    return (
+        root.parent == Path(tempfile.gettempdir()).resolve()
+        and root.name.startswith("structural-rc-browser-")
+        and workspace.is_dir()
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("driver", "http", "worker"))
     parser.add_argument("--workspace", required=True, type=Path)
+    parser.add_argument("--managed", action="store_true")
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument("--name", choices=tuple(WORKERS))
     args = parser.parse_args()
     workspace = args.workspace.resolve()
-    if (
-        workspace.parent != Path(tempfile.gettempdir()).resolve()
-        or not workspace.name.startswith("structural-rc-browser-")
-        or not workspace.is_dir()
-    ):
+    if not valid_workspace(workspace, args.mode):
         parser.error(
             "an existing disposable /tmp/structural-rc-browser-* directory is required"
         )
     if args.mode == "driver":
         if any(workspace.iterdir()):
             parser.error("driver requires an empty workspace")
-        return run_driver(workspace)
+        return run_driver(workspace, managed=args.managed)
     if args.mode == "http":
         serve(workspace, args.port)
     else:

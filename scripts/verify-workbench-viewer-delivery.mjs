@@ -70,6 +70,19 @@ if (viewerHtml.includes('data-wb2-root')) {
 
 const workbenchAssets = verifyAssetReferences(workbenchHtml, 'Workbench entry')
 const viewerAssets = verifyAssetReferences(viewerHtml, 'Viewer entry')
+// The default public viewer preset is loaded dynamically, so HTML references
+// alone do not establish that a cold Workbench can actually load it.
+const viewerScripts = viewerAssets.filter(({ reference }) => reference.split(/[?#]/, 1)[0].endsWith('.js'))
+  .map(({ absolutePath }) => readRequiredFile(absolutePath, 'Viewer JavaScript asset'))
+const presetNames = new Set(viewerScripts.flatMap(source =>
+  [...source.matchAll(/(?:assets\/|\.\/)(index\.midas33\.data-[^"'`]+\.js)/g)].map(match => match[1])))
+if (presetNames.size !== 1) fail('Viewer must reference one emitted public MIDAS33 preset')
+const presetName = [...presetNames][0]
+const preset = readRequiredFile(path.join(distDir, 'assets', presetName), 'Public MIDAS33 preset')
+if (preset !== readRequiredFile(path.join(rootDir, 'src', 'structure-viewer', 'index.midas33.data.js'), 'Source public MIDAS33 preset')) {
+  fail('Emitted public MIDAS33 preset differs from its source')
+}
+
 const workbenchScripts = workbenchAssets
   .filter(({ reference }) => reference.split(/[?#]/, 1)[0].endsWith('.js'))
   .map(({ absolutePath }) => readRequiredFile(absolutePath, 'Workbench JavaScript asset'))

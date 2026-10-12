@@ -14,6 +14,7 @@ const distDir = path.join(rootDir, 'dist')
 const jsonLoader = pathToFileURL(path.join(rootDir, 'scripts', 'json-module-loader.mjs')).href
 const specs = [
   'tests/frontend/workbench-v2-e2e.spec.ts',
+  'tests/frontend/workbench-v2-rc-workspace.spec.ts',
   'tests/frontend/workbench-v2-import-health.spec.ts',
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
   'tests/frontend/workbench-v2-live-provider-guard.spec.ts',

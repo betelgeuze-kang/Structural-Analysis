@@ -4,12 +4,21 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { validateRcJobArtifacts, validateRcRequestProfile, fields } from '../../src/workbench-v2/model/rcJobSchema'
+import { validateRcJobArtifacts, validateRcRequestProfile, validateRcDeclaredInitialTrials, fields } from '../../src/workbench-v2/model/rcJobSchema'
 import { validateRcQuantityReport } from '../../src/workbench-v2/model/rcQuantityReportSchema'
 import { sha256Hex } from '../../src/workbench-v2/model/checksum'
 
-for (const profile of ['legacy', 'explicit-layers', 'circular-layers', 'control-target'] as const) {
-test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, () => {
+for (const { profile, isolated, prescribed, search, secant } of [
+  { profile: 'legacy', isolated: false, prescribed: false, search: false, secant: false },
+  { profile: 'explicit-layers', isolated: false, prescribed: false, search: false, secant: false },
+  { profile: 'circular-layers', isolated: false, prescribed: false, search: false, secant: false },
+  { profile: 'control-target', isolated: false, prescribed: false, search: false, secant: false },
+  { profile: 'explicit-layers', isolated: true, prescribed: false, search: false, secant: false },
+  { profile: 'explicit-layers', isolated: true, prescribed: true, search: false, secant: false },
+  { profile: 'explicit-layers', isolated: true, prescribed: false, search: true, secant: false },
+  { profile: 'explicit-layers', isolated: true, prescribed: false, search: true, secant: true },
+] as const) {
+test.describe(`Narrow RC ${profile} ${isolated ? 'isolated' : 'inline'} ${secant ? 'secant' : search ? 'search' : prescribed ? 'prescribed' : 'accepted'} reviewer with freshly computed artifacts`, () => {
   test.describe.configure({ mode: 'serial', timeout: 120000 })
   let temporary: string, snapshot: any, reviewed: Awaited<ReturnType<typeof validateRcJobArtifacts>>
   const bytes = (value: string) => new Uint8Array(Buffer.from(value, 'base64'))
@@ -26,6 +35,12 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
       authored.case_id = 'hosted-workbench-control-target-start'
       authored.config.solver_config.initial_guess = 'control_target'
     }
+    if (isolated) authored.execution_config.phase_execution_policy = {
+      schema_version: 'bounded-rc-fiber-phase-execution-policy.v1',
+      analysis_timeout_ms: 30000, verification_timeout_ms: 30000, termination_grace_ms: 100,
+    }
+    if (prescribed) authored.config.solver_config.initial_trial_policy = 'prescribed_control'
+    if (search) authored.config.solver_config.initial_trial_policy = secant ? 'accepted_then_prescribed_then_secant' : 'accepted_then_prescribed'
     const requestFile = path.join(temporary, 'browser-request.json')
     // The exact browser JSON.stringify boundary converts Python 1.0 to JSON 1.
     writeFileSync(requestFile, JSON.stringify(authored))
@@ -56,6 +71,8 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
     for (const mutate of [
       (r: any) => { r.config.solver_config.newton.terminal_polishing = false },
       (r: any) => { r.config.solver_config.initial_guess = 'automatic' },
+      (r: any) => { r.config.solver_config.initial_trial_policy = 'automatic_retry' },
+      (r: any) => { r.config.solver_config.initial_guess = 'control_target'; r.config.solver_config.initial_trial_policy = 'prescribed_control' },
       (r: any) => { r.config.constant_nodal_loads = [] },
       (r: any) => { r.config.schema_version = 'bounded-rc-fiber-direct-control-request.v4' },
       (r: any) => { r.config.experimental_two_fixed_endpoints = true },
@@ -64,6 +81,22 @@ test.describe(`Narrow RC ${profile} reviewer with freshly computed artifacts`, (
     ]) {
       const request = structuredClone(original); mutate(request)
       expect(() => validateRcRequestProfile(request)).toThrow()
+    }
+  })
+
+  if (search) test('rejects altered trial work and parent bindings without trusting summary totals', () => {
+    const result = JSON.parse(Buffer.from(snapshot.artifacts.result.base64, 'base64').toString())
+    const request = JSON.parse(Buffer.from(snapshot.artifacts.request.base64, 'base64').toString())
+    expect(() => validateRcDeclaredInitialTrials(result.api_result, request.config)).not.toThrow()
+    for (const mutate of [
+      (step: any) => { step.initial_trial_search.trials[0].work.known_linear_solve_count += 1 },
+      (step: any) => { step.initial_trial_search.trials[0].parent_checkpoint_hash = 'sha256:' + '0'.repeat(64) },
+      (step: any) => { step.initial_trial_search.maximum_trials = secant ? 2 : 3 },
+      (step: any) => { step.initial_trial_search.trials[0].solver.metrics.linear_solve_count += 1 },
+    ]) {
+      const api = structuredClone(result.api_result)
+      mutate([...api.path.replay_attempts, ...api.path.attempts][0].step)
+      expect(() => validateRcDeclaredInitialTrials(api, request.config)).toThrow(/initial_trial_/)
     }
   })
 
@@ -102,4 +135,66 @@ test('circular layer quantities reject malformed counts and protruding circles',
   }
   const outside = structuredClone(section); outside.steel_layers[0].y_m = 0.049
   expect(() => longitudinalSteelArea(outside)).toThrow()
+})
+
+test.describe('Third-seed trace auditor with fresh numerical projection', () => {
+  test.describe.configure({ mode: 'serial', timeout: 300000 })
+  let temporary: string, packet: any
+  test.beforeAll(() => {
+    temporary = mkdtempSync(path.join(tmpdir(), 'rc-secant-trace-'))
+    const output = path.join(temporary, 'trace.json')
+    execFileSync('python', ['tests/frontend/rc_lifecycle_review_snapshot.py', '--secant-trace', '--output', output],
+      { timeout: 295000, stdio: 'pipe' })
+    packet = JSON.parse(readFileSync(output, 'utf8'))
+  })
+  test.afterAll(() => { if (temporary) rmSync(temporary, { recursive: true, force: true }) })
+  test('recomputes the actual third initial vector and all rejected-trial work', () => {
+    expect(packet.scope).toContain('not a complete product artifact')
+    expect(packet.api.path.attempts.at(-1).step.initial_trial_search.trials).toHaveLength(3)
+    expect(() => validateRcDeclaredInitialTrials(packet.api, packet.config)).not.toThrow()
+    expect(Object.keys(packet.api.path.metrics).sort())
+      .toEqual(['prefix_replay_work', 'suffix_work', 'total_work'])
+    const generation = packet.fixture_generation
+    console.log(JSON.stringify({
+      evidence: 'bounded_real_third_seed_fixture_work',
+      probes: generation.probes.map((probe: any) => ({
+        target_m: probe.target_control_displacement_m,
+        committed: probe.committed,
+        trials: probe.solver_work.declared_initial_trial_attempt_count,
+        linear_solves: probe.solver_work.linear_solve_count,
+      })),
+      generation_work: generation.total_work,
+      selected_path_work: packet.api.metrics.control_work,
+    }))
+    expect(generation.scope).toContain('not specimen calibration')
+    expect(generation.probes.length).toBeGreaterThan(0)
+    expect(generation.probes.length).toBeLessThanOrEqual(generation.candidate_targets_m.length)
+    expect(generation.probes.map((probe: any) => probe.target_control_displacement_m))
+      .toEqual(generation.candidate_targets_m.slice(0, generation.probes.length))
+    const probeSolves = generation.probes.reduce((sum: number, probe: any) =>
+      sum + probe.solver_work.linear_solve_count, 0)
+    expect(generation.total_work.known_linear_solve_count)
+      .toBe(generation.prefix_work.known_linear_solve_count + probeSolves)
+    expect(generation.total_work.attempted_step_count)
+      .toBe(generation.prefix_work.attempted_step_count + generation.probes.length)
+    expect(generation.total_work.unknown_solver_work_attempt_count).toBe(0)
+    expect(generation.probes.at(-1).committed).toBe(true)
+    expect(generation.probes.at(-1).solver_work.declared_initial_trial_attempt_count).toBe(3)
+  })
+  test('rejects changed predecessor, ratio, seed, iteration start, order and work', () => {
+    for (const mutate of [
+      (step: any) => { step.initial_trial_search.secant_predecessor_hash = null },
+      (step: any) => { step.initial_trial_search.trials[2].prediction.previous_checkpoint_hash = 'sha256:' + '0'.repeat(64) },
+      (step: any) => { step.initial_trial_search.trials[2].prediction.ratio += 1 },
+      (step: any) => { step.initial_trial_search.trials[2].prediction.initial_coordinates_m[0] += .001 },
+      (step: any) => { step.initial_trial_search.trials[2].solver.convergence_history[0].free_displacements_m[0] += .001 },
+      (step: any) => { step.initial_trial_search.trials[2].initial_trial_policy = 'prescribed_control' },
+      (step: any) => { step.initial_trial_search.trials[2].work.known_linear_solve_count += 1 },
+      (step: any) => { step.initial_trial_search.maximum_trials = 4 },
+    ]) {
+      const api = structuredClone(packet.api)
+      mutate(api.path.attempts.at(-1).step)
+      expect(() => validateRcDeclaredInitialTrials(api, packet.config)).toThrow(/initial_trial_/)
+    }
+  })
 })

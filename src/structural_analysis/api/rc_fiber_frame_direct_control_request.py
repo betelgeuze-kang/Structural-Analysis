@@ -32,6 +32,7 @@ _SOLVER_FIELDS = {
     "control_tolerance_m",
     "load_factor_coordinate_scale_m",
     "initial_guess",
+    "initial_trial_policy",
 }
 _REQUEST_FIELDS = {
     "schema_version",
@@ -200,6 +201,8 @@ class BoundedRCFiberDirectControlRequest:
         solver = asdict(self.solver_config)
         if solver["initial_guess"] == "parent":
             solver.pop("initial_guess")
+        if solver["initial_trial_policy"] == "accepted_checkpoint":
+            solver.pop("initial_trial_policy")
         solver["newton"]["line_search_alphas"] = list(
             self.solver_config.newton.line_search_alphas
         )

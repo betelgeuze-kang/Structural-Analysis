@@ -621,7 +621,12 @@ def _service_status(code: str) -> int:
         "rc_quantity_job_not_succeeded",
     }:
         return 409
-    if code.startswith("job_database_") or code == "artifact_write_failed":
+    if code.startswith("job_database_") or code in {
+        "artifact_write_failed",
+        "blob_payload_budget_exceeded",
+        "blob_payload_inventory_invalid",
+        "blob_payload_policy_invalid",
+    }:
         return 503
     return 400
 

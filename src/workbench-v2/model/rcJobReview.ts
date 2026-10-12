@@ -1,3 +1,4 @@
+import { admitRcReviewArtifacts } from './rcJobReviewBudget'
 import type { WorkbenchJobView } from './jobSchema'
 import { JobArtifactError, readBoundedJobBytes, type JobReadTransport } from './jobTransport'
 import type { RcArtifacts, RcJobSummary, RcObject } from './rcJobSchema'
@@ -16,16 +17,14 @@ export interface RcJobReview {
 }
 
 export async function loadRcJobReview(
-  job: WorkbenchJobView, transport: JobReadTransport, signal?: AbortSignal,
+  job: WorkbenchJobView, transport: JobReadTransport, signal?: AbortSignal, resultMaximum?: number,
 ): Promise<RcJobReview> {
+  const limits = admitRcReviewArtifacts(job, resultMaximum)
   const artifacts: RcArtifacts = {}
   for (const role of ['request', 'checkpoint', 'result', 'evidence'] as const) {
     const reference = job[role]
     if (!reference) continue
-    // The first RC review retains the existing 64 MiB result limit. No media
-    // type or self-declared operation grants a larger browser memory budget.
-    const maximum = role === 'result' ? 64 * 1024 * 1024 : role === 'checkpoint' ? 128 * 1024 * 1024 : 16 * 1024 * 1024
-    if (reference.byte_length > maximum) throw new JobArtifactError(`rc_${role}_too_large`)
+    const maximum = limits[role]
     const response = await transport.get(role, reference.media_type)
     if (!response.ok) throw new JobArtifactError(`rc_${role}_HTTP_${response.status}`)
     artifacts[role] = await readBoundedJobBytes(response, maximum, `rc ${role}`, reference.byte_length)

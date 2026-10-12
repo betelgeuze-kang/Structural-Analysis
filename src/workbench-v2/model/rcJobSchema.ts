@@ -192,9 +192,15 @@ export function validateRcRequestProfile(value: unknown): void {
   }
   check(reversals <= config.maximum_reversals && (config.allow_reversals || reversals === 0), 'targets_invalid')
   const solver = object(config.solver_config), newton = object(solver.newton)
+  const initialGuessAuthored = Object.prototype.hasOwnProperty.call(solver, 'initial_guess')
+  const initialTrialAuthored = Object.prototype.hasOwnProperty.call(solver, 'initial_trial_policy')
   exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
-    ...(solver.initial_guess === undefined ? [] : ['initial_guess'])], 'solver_config_invalid')
-  check(solver.initial_guess === undefined || solver.initial_guess === 'parent' || solver.initial_guess === 'control_target', 'solver_config_invalid')
+    ...(initialGuessAuthored ? ['initial_guess'] : []),
+    ...(initialTrialAuthored ? ['initial_trial_policy'] : [])], 'solver_config_invalid')
+  check(!initialGuessAuthored || ['parent', 'control_target'].includes(solver.initial_guess), 'solver_config_invalid')
+  check(!initialTrialAuthored || ['accepted_checkpoint', 'prescribed_control', 'accepted_then_prescribed', 'accepted_then_prescribed_then_secant'].includes(solver.initial_trial_policy), 'solver_config_invalid')
+  check(!(solver.initial_guess === 'control_target' && initialTrialAuthored
+    && solver.initial_trial_policy !== 'accepted_checkpoint'), 'solver_config_invalid')
   exact(newton, ['residual_tolerance', 'increment_tolerance', 'max_iterations',
     'line_search_alphas', 'matrix_backend'], 'newton_config_invalid')
   const positive = (number: unknown): number is number => typeof number === 'number' && Number.isFinite(number) && number > 0
@@ -206,7 +212,9 @@ export function validateRcRequestProfile(value: unknown): void {
   check(Array.isArray(newton.line_search_alphas) && newton.line_search_alphas.length > 0
     && newton.line_search_alphas.every((alpha: unknown, index: number, alphas: unknown[]) =>
       positive(alpha) && alpha <= 1 && (index === 0 || alpha < (alphas[index - 1] as number))), 'newton_config_invalid')
-  exact(execution, ['chunk_target_count', 'maximum_api_invocations'], 'execution_config_invalid')
+  const phaseAuthored = Object.prototype.hasOwnProperty.call(execution, 'phase_execution_policy')
+  exact(execution, ['chunk_target_count', 'maximum_api_invocations', ...(phaseAuthored ? ['phase_execution_policy'] : [])], 'execution_config_invalid')
+  if (phaseAuthored) decodeRcFiberPhasePolicy(JSON.stringify(execution.phase_execution_policy))
   check(nat(execution.chunk_target_count) && execution.chunk_target_count >= 1 && execution.chunk_target_count <= 255
     && nat(execution.maximum_api_invocations) && execution.maximum_api_invocations >= 2
     && execution.maximum_api_invocations <= 4096, 'execution_config_invalid')
@@ -450,6 +458,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       && same(receipt.api_request.configuration.newton, config.solver_config.newton)
       && receipt.api_request.configuration.control_tolerance_m === config.solver_config.control_tolerance_m
       && receipt.api_request.configuration.load_factor_coordinate_scale_m === config.solver_config.load_factor_coordinate_scale_m
+      && (receipt.api_request.configuration.initial_trial_policy ?? 'accepted_checkpoint') === (config.solver_config.initial_trial_policy ?? 'accepted_checkpoint')
       && same(receipt.control, api.control) && same(receipt.model_binding, api.model)
       && validation.schema_version === 'bounded-rc-fiber-direct-control-validation.v1'
       && validation.contract_pass === true && validation.artifact_contract_pass === true
@@ -515,7 +524,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     ['schema_version', JSON.stringify(config.schema_version)],
     ['targets_m', fields(nativeDoc.raw).get('accepted_targets_m')!.value],
     ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
-      ...(config.solver_config.initial_guess === 'control_target' ? ['initial_guess'] : [])]
+      ...(config.solver_config.initial_guess === 'control_target' ? ['initial_guess'] : []),
+      ...(config.solver_config.initial_trial_policy && config.solver_config.initial_trial_policy !== 'accepted_checkpoint' ? ['initial_trial_policy'] : [])]
       .map(key => [key, configurationFields.get(key)!.value])))],
     ...['allow_reversals', 'maximum_reversals', 'maximum_targets', 'control_global_dof']
       .map(key => [key, apiRequestFields.get(key)!.value] as [string, string]),
@@ -572,6 +582,7 @@ export function rcControlHasPreload(config: RcObject): boolean {
 
 /** Shared stored-history binding checks; no numerical execution. */
 export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model: RcObject, config: RcObject): RcObject[] {
+  validateRcDeclaredInitialTrials(api, config)
   const hasPreload = rcControlHasPreload(config)
   const supportRoles = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
     ? pinRollerSupports(model) : undefined
@@ -657,6 +668,95 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
   check(history[history.length - 1].checkpoint_hash === native.terminal_checkpoint.state_hash
     && history[history.length - 1].load_factor === native.terminal_checkpoint.load_factor, 'terminal_state_invalid')
   return history
+}
+
+/** Recount declared trial work, including a rejected first Newton invocation. */
+export function validateRcDeclaredInitialTrials(api: RcObject, config: RcObject): void {
+  const policy = config.solver_config.initial_trial_policy
+  const extended = policy === 'accepted_then_prescribed_then_secant'
+  if (!extended && policy !== 'accepted_then_prescribed') return
+  const maximum = extended ? 3 : 2
+  let previousStep: RcObject | null = null
+  const countGroup = (attempts: RcObject[]): RcObject => {
+    check(Array.isArray(attempts), 'initial_trial_attempts_invalid')
+    let count = 0
+    for (const attempt of attempts) {
+      const step = object(attempt.step), trace = object(step.initial_trial_search)
+      const trials = trace.trials
+      check(trace.schema_version === `rc-declared-initial-trial-search.v${extended ? 2 : 1}`
+        && trace.policy === policy && trace.maximum_trials === maximum
+        && Array.isArray(trials) && trials.length >= 1 && trials.length <= maximum
+        && attempt.committed === true && step.committed === true
+        && same(step.metrics.config, api.request.configuration), 'initial_trial_policy_invalid')
+      if (extended) check(trace.secant_predecessor_hash === (previousStep?.parent_checkpoint.state_hash ?? null)
+        && (previousStep !== null || trials.length <= 2), 'initial_trial_predecessor_invalid')
+      let subtotal = 0
+      for (const [index, row] of trials.entries()) {
+        const solver = object(row.solver), metrics = object(solver.metrics)
+        const history = solver.convergence_history, searches = solver.line_search_history
+        const terminal = index === trials.length - 1
+        check(row.initial_trial_policy === ['accepted_checkpoint', 'prescribed_control', 'secant_prediction'][index]
+          && row.parent_checkpoint_hash === attempt.parent_checkpoint_hash
+          && row.parent_checkpoint_hash === step.parent_checkpoint.state_hash
+          && Array.isArray(history) && history.length > 0
+          && history.every((entry: RcObject, i: number) => entry.iteration === i)
+          && Array.isArray(searches) && metrics.fallback_used === false
+          && metrics.regularization_used === false, 'initial_trial_binding_invalid')
+        if (index === 2) {
+          check(extended && previousStep !== null, 'initial_trial_predecessor_invalid')
+          const prediction = object(row.prediction), parent = step.parent_checkpoint
+          const prior = previousStep!.parent_checkpoint
+          const left = prior.global_displacements[config.control_global_dof]
+          const right = parent.global_displacements[config.control_global_dof]
+          const target = attempt.target_control_displacement_m
+          const ratio = (target - right) / (right - left)
+          const current = trials[0].solver.convergence_history[0].free_displacements_m
+          const old = previousStep!.initial_trial_search.trials[0].solver.convergence_history[0].free_displacements_m
+          check(Number.isFinite(ratio) && right !== left && Array.isArray(current) && Array.isArray(old)
+            && current.length === old.length && current.length === metrics.active_equation_count,
+            'initial_trial_prediction_invalid')
+          const expected = current.map((value: number, i: number) => value + ratio * (value - old[i]))
+          check(prediction.schema_version === 'rc-secant-initial-prediction.v1'
+            && prediction.previous_checkpoint_hash === prior.state_hash
+            && prediction.parent_checkpoint_hash === parent.state_hash
+            && prediction.previous_control_m === left && prediction.parent_control_m === right
+            && prediction.target_control_m === target && prediction.ratio === ratio
+            && expected.every(Number.isFinite) && same(prediction.initial_coordinates_m, expected)
+            && same(history[0].free_displacements_m, expected), 'initial_trial_prediction_invalid')
+        } else check(!('prediction' in row), 'initial_trial_prediction_invalid')
+        if (terminal) check(row.committed === true && solver.status === 'ready'
+          && metrics.contract_pass === true && metrics.linear_solve_count === history.length
+          && metrics.iteration_count === history.length && searches.length === history.length - 1
+          && same(solver, step.trial_solution), 'initial_trial_terminal_invalid')
+        else check(row.committed === false && solver.status === 'blocked'
+          && metrics.contract_pass === false && metrics.terminal_reason === 'line_search_failed_to_reduce_residual'
+          && searches.length === history.length && searches[searches.length - 1].selected_alpha === 0
+          && history[history.length - 1].accepted === false
+          && history.slice(0, -1).every((entry: RcObject) => entry.accepted === true)
+          && same(history[history.length - 1].free_displacements_m, solver.augmented_coordinates_m)
+          && same(history[history.length - 1].residual_kn, metrics.residual_kn), 'initial_trial_failure_invalid')
+        check(same(row.work, { known_linear_solve_count: history.length,
+          known_newton_iteration_count: history.length, unknown_solver_work_attempt_count: 0 }), 'initial_trial_work_invalid')
+        subtotal += history.length
+      }
+      const work = object(attempt.solver_work)
+      check(work.linear_solve_count === subtotal && work.iteration_count === subtotal
+        && work.newton_iteration_count === subtotal && work.initial_trial_unknown_work_count === 0
+        && work.declared_initial_trial_attempt_count === trials.length
+        && work.declared_initial_trial_retry_used === (trials.length > 1)
+        && work.work_scope === 'all_declared_initial_trials'
+        && same(work.initial_trial_search, trace), 'initial_trial_total_invalid')
+      count += subtotal
+      previousStep = step
+    }
+    return { attempted_step_count: attempts.length, known_linear_solve_count: count,
+      known_newton_iteration_count: count, unknown_solver_work_attempt_count: 0 }
+  }
+  const path = object(api.path), metrics = object(path.metrics)
+  const prefix = countGroup(path.replay_attempts), suffix = countGroup(path.attempts)
+  const total = Object.fromEntries(Object.keys(prefix).map(key => [key, prefix[key] + suffix[key]]))
+  check(same(prefix, metrics.prefix_replay_work) && same(suffix, metrics.suffix_work)
+    && same(total, metrics.total_work) && same(total, api.metrics.control_work), 'initial_trial_path_work_invalid')
 }
 
 /** Shared original preload and complete execution-work bindings. */
