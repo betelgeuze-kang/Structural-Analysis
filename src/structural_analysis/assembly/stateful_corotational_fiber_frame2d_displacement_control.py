@@ -911,9 +911,17 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
     *,
     control_global_dof: int,
     initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint | None = None,
+    allow_reversal: bool = False,
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig | None = None,
 ) -> StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
-    """Run a strictly monotone displacement target path until one step fails."""
+    """Run displacement targets; reversal requires explicit opt-in.
+
+    Repeated targets remain invalid. A fixed-load initial equilibrium can be
+    supplied through initial_checkpoint before starting the control history.
+    """
+
+    if type(allow_reversal) is not bool:
+        raise ValueError("allow_reversal must be a boolean")
 
     _require_connected_member_graph(problem)
     _controlled_free_index(problem, control_global_dof)
@@ -932,7 +940,7 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
     accepted_control = _free_generalized_coordinates(problem, first)[control_index]
     direction = math.copysign(1.0, targets[0] - accepted_control)
     if targets[0] == accepted_control or any(
-        direction * (right - left) <= 0.0
+        (right == left if allow_reversal else direction * (right - left) <= 0.0)
         for left, right in zip(
             (accepted_control, *targets[:-1]),
             targets,
@@ -940,7 +948,9 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
         )
     ):
         raise ValueError(
-            "control_displacements_m must advance strictly in one direction"
+            "control_displacements_m must have distinct consecutive targets"
+            if allow_reversal
+            else "control_displacements_m must advance strictly in one direction"
         )
     solver_config = config or (
         StatefulCorotationalFiberFrame2DDisplacementControlConfig()

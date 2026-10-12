@@ -38,10 +38,12 @@ JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
 PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
 FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v5"
+RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v6"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
     RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
     PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
     FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION,
+    RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
 )
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
@@ -153,6 +155,7 @@ class JobView:
     evidence: ArtifactReference | None
     resume_contract_hash: str | None
     terminal_event_hash: str
+    progress_unit: str | None = None
 
     @property
     def can_resume(self) -> bool:
@@ -163,7 +166,11 @@ class JobView:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "schema_version": JOB_VIEW_SCHEMA_VERSION,
+            "schema_version": (
+                "structural-analysis-job-view.v2"
+                if self.progress_unit is not None
+                else JOB_VIEW_SCHEMA_VERSION
+            ),
             "service_profile": JOB_SERVICE_PROFILE,
             "job_id": self.job_id,
             "status": self.status,
@@ -172,6 +179,11 @@ class JobView:
             "progress": {
                 "completed_steps": self.progress_completed,
                 "total_steps": self.progress_total,
+                **(
+                    {"unit": self.progress_unit}
+                    if self.progress_unit is not None
+                    else {}
+                ),
             },
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -317,7 +329,10 @@ class DurableJobService:
             _validate_schema(
                 normalized_request,
                 (
-                    "job_request_v5.schema.json"
+                    "job_request_v6.schema.json"
+                    if normalized_request["schema_version"]
+                    == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                    else "job_request_v5.schema.json"
                     if normalized_request["schema_version"]
                     == FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION
                     else "job_request_v4.schema.json"
@@ -328,7 +343,12 @@ class DurableJobService:
                 "/request",
             )
             _model, rc_config = _rc_fiber_request(normalized_request)
-            total_steps = len(rc_config.targets_m)
+            total_steps = (
+                rc_config.progress_total
+                if normalized_request["schema_version"]
+                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                else len(rc_config.targets_m)
+            )
             maximum_attempts = normalized_request["execution_config"][
                 "maximum_api_invocations"
             ]
@@ -347,13 +367,6 @@ class DurableJobService:
             + b"\0"
             + idempotency_key.encode("utf-8")
         )
-        request_ref = self._put_blob(
-            request_bytes,
-            role="request",
-            media_type="application/json",
-            maximum_bytes=_MAX_REQUEST_BYTES,
-        )
-        now, _now_us = self._now()
         with self._transaction() as connection:
             prior = connection.execute(
                 "SELECT * FROM jobs WHERE tenant_id = ? AND idempotency_key_hash = ?",
@@ -366,6 +379,16 @@ class DurableJobService:
                         "/idempotency_key",
                         "The key is already bound to a different immutable request.",
                     )
+            # Resolve conflicts under the writer lock before persisting bytes.
+            # Exact retries still verify or repair their existing request blob.
+            request_ref = self._put_blob(
+                request_bytes,
+                role="request",
+                media_type="application/json",
+                maximum_bytes=_MAX_REQUEST_BYTES,
+            )
+            now, _now_us = self._now()
+            if prior is not None:
                 return self._view(prior)
 
             job_id = "job_" + secrets.token_hex(16)
@@ -1035,6 +1058,44 @@ class DurableJobService:
         self, connection: sqlite3.Connection, row: sqlite3.Row, receipts: Any
     ) -> None:
         """Check each claimed receipt against its actual durable invocation pair, one pair at a time."""
+        if (
+            self._request_for_row(row).get("schema_version")
+            == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+        ):
+            from structural_analysis.execution.rc_corotational_job_contract import (
+                bind_rc_corotational_receipts,
+            )
+
+            records = {
+                record["ordinal"]: record
+                for record in self._rc_invocation_rows(connection, row)
+            }
+            used = set()
+            request = self._request_for_row(row)
+            for receipt in receipts:
+                outcomes = {}
+                for phase in ("analysis", "verification"):
+                    ordinal = receipt[f"{phase}_ordinal"]
+                    if (
+                        type(ordinal) is not int
+                        or ordinal in used
+                        or ordinal not in records
+                    ):
+                        raise ValueError(
+                            "Corotational invocation ordinal missing or reused"
+                        )
+                    used.add(ordinal)
+                    record = records[ordinal]
+                    outcomes[ordinal] = _strict_json_object(
+                        self._read_blob(
+                            str(record["outcome_hash"]),
+                            int(record["outcome_size"]),
+                            maximum_bytes=_result_byte_limit(request),
+                        ),
+                        "/rc_invocation",
+                    )
+                bind_rc_corotational_receipts([receipt], outcomes, request)
+            return
         records = {
             record["ordinal"]: record
             for record in self._rc_invocation_rows(connection, row)
@@ -1196,6 +1257,19 @@ class DurableJobService:
                 )
 
                 checkpoint = self._checkpoint_for_row(row)
+                if (
+                    request.get("schema_version")
+                    == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                ):
+                    from structural_analysis.execution.rc_corotational_job_contract import (
+                        validate_rc_corotational_job_checkpoint,
+                    )
+
+                    def validate_rc_fiber_job_checkpoint(data, **kwargs):
+                        return validate_rc_corotational_job_checkpoint(
+                            data, resume_contract_hash=resume_contract_hash, **kwargs
+                        )["payload"]
+
                 try:
                     validated = validate_rc_fiber_job_checkpoint(
                         normalized_checkpoint,
@@ -1334,6 +1408,17 @@ class DurableJobService:
                     validate_rc_fiber_job_result,
                 )
 
+                if (
+                    request.get("schema_version")
+                    == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                ):
+                    from structural_analysis.execution.rc_corotational_job_contract import (
+                        RC_COROTATIONAL_JOB_VALIDATOR_ID,
+                        validate_rc_corotational_job_result,
+                    )
+
+                    RC_FIBER_JOB_VALIDATOR_ID = RC_COROTATIONAL_JOB_VALIDATOR_ID
+                    validate_rc_fiber_job_result = validate_rc_corotational_job_result
                 try:
                     report = validate_rc_fiber_job_result(
                         result_payload,
@@ -1360,6 +1445,12 @@ class DurableJobService:
                     )
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
+            completed_progress = (
+                result_payload["progress_completed"]
+                if request.get("schema_version")
+                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                else int(row["progress_total"])
+            )
             row = self._transition(
                 connection,
                 row,
@@ -1370,10 +1461,10 @@ class DurableJobService:
                     "worker_id": worker_id,
                     "result_hash": result_hash,
                     "evidence_hash": evidence_hash,
-                    "progress_completed": int(row["progress_total"]),
+                    "progress_completed": completed_progress,
                 },
                 updates={
-                    "progress_completed": int(row["progress_total"]),
+                    "progress_completed": completed_progress,
                     "result_hash": result_ref.content_hash,
                     "result_size": result_ref.byte_length,
                     "result_media_type": result_ref.media_type,
@@ -1819,6 +1910,15 @@ class DurableJobService:
                 "/job",
                 "A successful RC job is required.",
             )
+        request = self._request_for_row(row)
+        if (
+            request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
+            or request.get("schema_version")
+            == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+        ):
+            _fail(
+                "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
+            )
         validate_job_view(self._view(row))
         event = connection.execute(
             "SELECT * FROM job_events WHERE job_id = ? AND revision = ?",
@@ -1847,11 +1947,6 @@ class DurableJobService:
                 "rc_quantity_original_invalid",
                 "/source",
                 "Completed-event artifact custody differs.",
-            )
-        request = self._request_for_row(row)
-        if request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
-            _fail(
-                "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
             )
         result = _strict_json_object(
             self._read_blob(
@@ -1942,6 +2037,113 @@ class DurableJobService:
                 "The original RC authority bindings differ.",
             )
 
+    def _validate_rc_corotational_projection(
+        self,
+        connection: sqlite3.Connection,
+        row: sqlite3.Row,
+        request: dict[str, Any],
+        events: list[sqlite3.Row],
+    ) -> None:
+        """Bind v6 mutable counters to retained bytes/events without a solve."""
+        from structural_analysis.execution.rc_corotational_job_request import (
+            validate_rc_corotational_job_request,
+        )
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            validate_rc_corotational_job_checkpoint,
+            validate_rc_corotational_job_result,
+        )
+
+        try:
+            typed = validate_rc_corotational_job_request(request)
+            if row["progress_total"] != typed.progress_total:
+                raise ValueError("Corotational attempt cap differs from request")
+            submitted = _strict_json_object(
+                str(events[0]["payload_json"]).encode(), "/events/payload"
+            )
+            if (
+                events[0]["event_type"] != "submitted"
+                or submitted.get("request_hash") != row["request_hash"]
+                or submitted.get("progress_total") != typed.progress_total
+            ):
+                raise ValueError("Corotational submitted request/cap differs")
+            budget = self._execution_budget(connection, row)
+            checkpoint = self._checkpoint_for_row(row)
+            committed = next(
+                (
+                    event
+                    for event in reversed(events)
+                    if event["event_type"] == "checkpoint_committed"
+                ),
+                None,
+            )
+            if (committed is None) != (checkpoint is None):
+                raise ValueError("Corotational retained checkpoint projection differs")
+            if checkpoint is not None:
+                saved = _strict_json_object(checkpoint, "/checkpoint")
+                report = validate_rc_corotational_job_checkpoint(
+                    saved,
+                    request=request,
+                    progress_completed=saved["progress_completed"],
+                    resume_contract_hash=row["resume_contract_hash"],
+                    execution_budget=budget,
+                )
+                self._bind_rc_receipts(connection, row, saved["receipts"])
+                committed_payload = _strict_json_object(
+                    str(committed["payload_json"]).encode(), "/events/payload"
+                )
+                expected = {
+                    "checkpoint_hash": row["checkpoint_hash"],
+                    "resume_contract_hash": row["resume_contract_hash"],
+                    "progress_completed": report["progress_completed"],
+                    "progress_total": typed.progress_total,
+                }
+                if _canonical_json_bytes(
+                    {key: committed_payload.get(key) for key in expected}
+                ) != _canonical_json_bytes(expected):
+                    raise ValueError("Corotational checkpoint event differs")
+                completed = report["progress_completed"]
+            else:
+                if row["resume_contract_hash"] is not None:
+                    raise ValueError("Corotational resume binding lacks checkpoint")
+                completed = 0
+            if row["status"] == "succeeded":
+                result = _strict_json_object(
+                    self._read_blob(
+                        row["result_hash"],
+                        row["result_size"],
+                        maximum_bytes=_result_byte_limit(request),
+                    ),
+                    "/result",
+                )
+                report = validate_rc_corotational_job_result(
+                    result,
+                    request=request,
+                    execution_budget=budget,
+                    checkpoint=checkpoint,
+                )
+                self._bind_rc_receipts(connection, row, result["receipts"])
+                completed = report["progress_completed"]
+                expected = {
+                    "result_hash": row["result_hash"],
+                    "evidence_hash": row["evidence_hash"],
+                    "progress_completed": completed,
+                }
+                final_payload = _strict_json_object(
+                    str(events[-1]["payload_json"]).encode(), "/events/payload"
+                )
+                if events[-1]["event_type"] != "completed" or _canonical_json_bytes(
+                    {key: final_payload.get(key) for key in expected}
+                ) != _canonical_json_bytes(expected):
+                    raise ValueError("Corotational completed event differs")
+            if row["progress_completed"] != completed:
+                raise ValueError("Corotational projection progress differs")
+        except (TypeError, ValueError, KeyError, IndexError):
+            _fail(
+                "job_projection_integrity_failed",
+                "/job/progress",
+                "Corotational counters must match their request, retained artifacts and events.",
+            )
+
     def validate_integrity(
         self,
         job_id: str,
@@ -1953,6 +2155,8 @@ class DurableJobService:
 
         self._authorize_tenant(tenant_id, authorization_token)
         with self._connect() as connection:
+            # Read row, events, budget and outcomes from one WAL snapshot.
+            connection.execute("BEGIN")
             row = self._job_row(connection, job_id)
             self._require_tenant(row, tenant_id)
             events = connection.execute(
@@ -1978,6 +2182,13 @@ class DurableJobService:
                 if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
                 else []
             )
+            if (
+                request.get("schema_version")
+                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+            ):
+                self._validate_rc_corotational_projection(
+                    connection, row, request, events
+                )
         refs = self._row_references(row)
         for ref in refs.values():
             if ref is not None:
@@ -2569,6 +2780,12 @@ class DurableJobService:
         request = references["request"]
         assert request is not None
         return JobView(
+            progress_unit=(
+                "control_solver_attempts"
+                if self._request_for_row(row).get("schema_version")
+                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                else None
+            ),
             job_id=str(row["job_id"]),
             status=str(row["status"]),  # type: ignore[arg-type]
             revision=int(row["revision"]),
@@ -2630,6 +2847,20 @@ def _validate_rc_outcome(
     typed: Any,
     request_hash: str,
 ) -> None:
+    if request.get("schema_version") == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION:
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            validate_rc_corotational_invocation_outcome,
+        )
+
+        try:
+            validate_rc_corotational_invocation_outcome(outcome, request, request_hash)
+        except (TypeError, ValueError, KeyError) as exc:
+            raise JobServiceError(
+                "rc_invocation_contract_invalid",
+                "/outcome",
+                "Invalid corotational invocation contract",
+            ) from exc
+        return
     fields = {
         "schema_version",
         "phase",
@@ -2832,6 +3063,13 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
     )
 
     try:
+        if request.get("schema_version") == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION:
+            from structural_analysis.execution.rc_corotational_job_request import (
+                validate_rc_corotational_job_request,
+            )
+
+            typed = validate_rc_corotational_job_request(request)
+            return typed.model, typed
         return validate_rc_fiber_job_request(request)
     except (TypeError, ValueError):
         _fail(
@@ -2842,6 +3080,12 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
 
 
 def _result_byte_limit(request: Mapping[str, Any]) -> int:
+    if request.get("schema_version") == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION:
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            RC_COROTATIONAL_JOB_MAX_BYTES,
+        )
+
+        return RC_COROTATIONAL_JOB_MAX_BYTES
     if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
         from structural_analysis.execution.rc_fiber_job_contract import (
             RC_FIBER_JOB_MAX_BYTES,
@@ -2896,7 +3140,13 @@ def validate_job_view(view: JobView | Mapping[str, Any]) -> dict[str, Any]:
         if isinstance(view, JobView)
         else _canonical_mapping(view, "/job")
     )
-    _validate_schema(payload, "job_view_v1.schema.json", "/job")
+    _validate_schema(
+        payload,
+        "job_view_v2.schema.json"
+        if payload.get("schema_version") == "structural-analysis-job-view.v2"
+        else "job_view_v1.schema.json",
+        "/job",
+    )
     status = payload["status"]
     progress = payload["progress"]
     completed = int(progress["completed_steps"])
@@ -2928,7 +3178,14 @@ def validate_job_view(view: JobView | Mapping[str, Any]) -> dict[str, Any]:
             "/job/result",
             "Result and evidence must be published atomically as a pair.",
         )
-    if status == "succeeded" and (not published or completed != total):
+    if status == "succeeded" and (
+        not published
+        or completed == 0
+        or (
+            completed != total
+            and payload["schema_version"] != "structural-analysis-job-view.v2"
+        )
+    ):
         _fail(
             "job_view_success_invalid",
             "/job/status",
