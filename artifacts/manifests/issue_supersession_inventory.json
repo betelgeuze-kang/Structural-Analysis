@@ -1,7 +1,7 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-10-10T11:03:02Z",
+  "observed_at": "2026-10-12T07:21:15Z",
   "observation_source": "github_rest_read_only_current_github_state",
   "observed_open_issue_count": 51,
   "open_issue_numbers": [
@@ -40,13 +40,9 @@
     520,
     522,
     524,
-    574,
-    576,
     578,
     580,
     584,
-    586,
-    588,
     590,
     592,
     594,
@@ -55,9 +51,13 @@
     600,
     602,
     610,
-    612
+    612,
+    621,
+    622,
+    623,
+    626
   ],
-  "open_issue_projection_sha256": "sha256:3b5e335d73b61ce50fd1db5a866668c29dccec3613a946b1d5a4714269f4fb01",
+  "open_issue_projection_sha256": "sha256:c66e669714a53acc802c4c21b567db7413c408c50b6c11ee02e7fd4f3199eb09",
   "open_issues": [
     {
       "number": 247,
@@ -750,42 +750,6 @@
     {
       "classification": "repository_implementation",
       "linked_pull_requests": [
-        575
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_pin_roller_rc_durable_workbench_integration",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:93bf3252500c38f53c43bee37dd07f3b938aaef65df9c20b6f77cd5d189c19cd",
-      "labels": [],
-      "number": 574,
-      "state": "open",
-      "title": "Connect explicit pin-roller RC beams to durable Workbench workflow",
-      "updated_at": "2026-10-08T13:27:42Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/574"
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
-        577
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_distinct_steel_law_state_and_recovery",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:0c619058b539e1e57b463414acebb1b73790da4c2ccda72eefaed854e5efe9a2",
-      "labels": [],
-      "number": 576,
-      "state": "open",
-      "title": "solver: preserve distinct steel laws in RC section state and recovery",
-      "updated_at": "2026-10-08T13:53:32Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/576"
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
         579
       ],
       "merged_implementation_pull_requests": [],
@@ -836,42 +800,6 @@
       "title": "Expand layered RC nonlinear reversal and restart matrix",
       "updated_at": "2026-10-08T14:55:04Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/584"
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
-        587
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_lazy_sparse_mode_canonicalization",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:1a32dc1c0e5f472e3b48f7b2262817e63babeab9597c4bba72f27d0501f4770b",
-      "labels": [],
-      "number": 586,
-      "state": "open",
-      "title": "Avoid quadratic candidate allocation in sparse mode canonicalization",
-      "updated_at": "2026-10-08T15:06:20Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/586"
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
-        589
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_idempotency_conflict_prewrite_admission",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:e1f7f21f52ecfc9d268ae5a19c3f5d5837155e0e6aeee4c89c55817a752ac71e",
-      "labels": [],
-      "number": 588,
-      "state": "open",
-      "title": "Prevent rejected idempotency conflicts from accumulating request payloads",
-      "updated_at": "2026-10-08T15:30:19Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/588"
     },
     {
       "classification": "repository_implementation",
@@ -1034,6 +962,78 @@
       "title": "Protect managed RC restores with shared execution authority and invocation budget",
       "updated_at": "2026-10-09T02:13:46Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/612"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        620
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_explicit_control_feasible_rc_initial_guess",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:ded95b4da49876c299075b360a6662c98a980adefa3b8cf519fd227dc4c66c74",
+      "labels": [],
+      "number": 621,
+      "state": "open",
+      "title": "RC direct control: explicit feasible initial guess at material kinks",
+      "updated_at": "2026-10-11T12:51:37Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/621"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        619
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_finite_circular_rc_bar_inertia_and_state_integration",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:382bd46d5ab399e3a7693e90cdb11026ff8d8fbce33b7ebc3ad389f2e15a9c6c",
+      "labels": [],
+      "number": 622,
+      "state": "open",
+      "title": "RC explicit layers: finite circular-bar inertia and state integration",
+      "updated_at": "2026-10-11T12:52:11Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/622"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        624
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_fixed_guided_axial_rc_durable_restart_and_reports",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:ff38d59e40c2eaa31307dd9ff17f6c096b83c8ff822a71314bded1a14342dfec",
+      "labels": [],
+      "number": 623,
+      "state": "open",
+      "title": "RC fixed-guided axial input through durable restart and reports",
+      "updated_at": "2026-10-11T13:41:25Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/623"
+    },
+    {
+      "classification": "repository_implementation",
+      "linked_pull_requests": [
+        625
+      ],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_verified_fixed_corotational_loads_and_displacement_reversal",
+      "required_external_inputs": [],
+      "closable_by_repository_code_alone": true,
+      "current_product_authority": false,
+      "body_sha256": "sha256:70f791180ed68dc0bec2d055cfe633437ec36bc02c5b61658014454c4d859025",
+      "labels": [],
+      "number": 626,
+      "state": "open",
+      "title": "Support fixed axial loads during corotational displacement reversals",
+      "updated_at": "2026-10-11T23:27:38Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/626"
     }
   ],
   "implemented_but_open_issues": [
