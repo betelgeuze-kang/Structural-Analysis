@@ -342,10 +342,21 @@ def test_self_rehashed_changed_material_memory_rejected_by_full_prefix_replay(
     index = next(
         i for i, state in enumerate(fibers) if type(state) is UniaxialPlasticityState
     )
+    # Forge an algebraically admissible history: raising only accumulated
+    # strain now fails the energy relation before the replay gate is exercised.
+    material_section = problem.members[0].element.section
+    material = material_section.steel_material_for(
+        material_section.fibers[index].fiber_id
+    )
+    forged_accumulated = fibers[index].accumulated_plastic_strain + 1e-4
     fibers[index] = replace(
         fibers[index],
-        accumulated_plastic_strain=fibers[index].accumulated_plastic_strain + 1e-4,
+        accumulated_plastic_strain=forged_accumulated,
+        dissipated_energy_density_mj_per_m3=(
+            material.yield_stress_mpa * forged_accumulated
+        ),
     )
+    material.validate_state_admissibility(fibers[index])
     new_section = replace(section, fiber_states=tuple(fibers))
     new_element = replace(
         element,
