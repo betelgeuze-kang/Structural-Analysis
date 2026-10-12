@@ -61,9 +61,7 @@ class MutableClock:
 
 def _model_payload() -> dict:
     return json.loads(
-        Path("examples/public_corotational_rc_portal.json").read_text(
-            encoding="utf-8"
-        )
+        Path("examples/public_corotational_rc_portal.json").read_text(encoding="utf-8")
     )
 
 
@@ -133,9 +131,7 @@ def _submit(service: DurableJobService, *, key: str = "portal-run-1"):
 
 
 def _claim(service: DurableJobService):
-    claim = service.claim_next(
-        worker_id="worker-a", authorization_token=WORKER_TOKEN
-    )
+    claim = service.claim_next(worker_id="worker-a", authorization_token=WORKER_TOKEN)
     assert claim is not None
     return claim
 
@@ -313,19 +309,24 @@ def test_exact_checkpoint_resume_survives_service_restart_and_matches_full_path(
         "engineering_result_ir",
     ):
         assert resumed_payload[key] == direct[key]
-    assert resumed_payload["checkpoint"]["chain_hash"] == direct["checkpoint"][
-        "chain_hash"
-    ]
-    assert resumed_payload["checkpoint"]["terminal_state_hash"] == direct[
-        "checkpoint"
-    ]["terminal_state_hash"]
+    assert (
+        resumed_payload["checkpoint"]["chain_hash"]
+        == direct["checkpoint"]["chain_hash"]
+    )
+    assert (
+        resumed_payload["checkpoint"]["terminal_state_hash"]
+        == direct["checkpoint"]["terminal_state_hash"]
+    )
     assert resumed_payload["metrics"]["replayed_prefix_step_count"] == 2
     assert resumed_payload["metrics"]["newly_solved_step_count"] == 2
-    assert service.validate_integrity(
-        submitted.job_id,
-        tenant_id="tenant-a",
-        authorization_token=TENANT_A_TOKEN,
-    )["contract_pass"] is True
+    assert (
+        service.validate_integrity(
+            submitted.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )["contract_pass"]
+        is True
+    )
 
 
 def test_model_ir_checkpoint_resume_preserves_source_and_execution_plan_bindings(
@@ -415,11 +416,14 @@ def test_model_ir_checkpoint_resume_preserves_source_and_execution_plan_bindings
     assert resumed["checkpoint"]["chain_hash"] == direct["checkpoint"]["chain_hash"]
     assert resumed["metrics"]["replayed_prefix_step_count"] == 1
     assert resumed["metrics"]["newly_solved_step_count"] == 1
-    assert service.validate_integrity(
-        submitted.job_id,
-        tenant_id="tenant-a",
-        authorization_token=TENANT_A_TOKEN,
-    )["contract_pass"] is True
+    assert (
+        service.validate_integrity(
+            submitted.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )["contract_pass"]
+        is True
+    )
 
 
 def test_failed_checkpoint_resume_requires_exact_optimistic_hashes(
@@ -946,3 +950,406 @@ def test_connection_unexpected_setup_exception_closes_without_retry(
     with pytest.raises(RuntimeError, match="setup interrupted"):
         _bare_connection_service(tmp_path)._connect()
     assert probe.closed
+
+
+def test_same_database_instances_serialize_real_writer_and_heartbeat(
+    tmp_path, monkeypatch
+):
+    """A busy SQLite BEGIN is real; only the test shortens its busy wait."""
+    clock = MutableClock()
+    writer = _service(tmp_path / "jobs", clock=clock)
+    renewer = _service(tmp_path / "jobs" / ".", clock=clock)
+    job = _submit(writer)
+    claim = _claim(writer)
+    started, finished = Event(), Event()
+    open_connection = renewer._open_configured_connection
+
+    def short_busy_connection():
+        connection = open_connection()
+        connection.execute("PRAGMA busy_timeout=25")
+        return connection
+
+    monkeypatch.setattr(renewer, "_open_configured_connection", short_busy_connection)
+
+    def heartbeat():
+        started.set()
+        try:
+            return renewer.heartbeat(
+                job.job_id,
+                worker_id="worker-a",
+                authorization_token=WORKER_TOKEN,
+                lease_token=claim.lease_token,
+            )
+        finally:
+            finished.set()
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with writer._transaction() as connection:
+            connection.execute(
+                "UPDATE jobs SET updated_at=updated_at WHERE job_id=?", (job.job_id,)
+            )
+            future = pool.submit(heartbeat)
+            assert started.wait(5)
+            early = finished.wait(0.2)
+        # Both threads are reaped even on the baseline failure.
+        result = future.result(timeout=5)
+    assert not early, "heartbeat bypassed the same-database writer coordination"
+    assert result.status == "running" and result.revision == claim.job.revision + 1
+    connection = writer._connect()
+    try:
+        assert connection.execute("PRAGMA busy_timeout").fetchone()[0] == 30000
+    finally:
+        connection.close()
+
+
+def test_claim_lease_is_minted_after_long_immutable_request_check(
+    tmp_path, monkeypatch
+):
+    clock = MutableClock()
+    service = _service(tmp_path / "jobs", clock=clock)
+    job = _submit(service)
+    read_blob = service._read_blob
+    delayed = False
+
+    def long_request_check(content_hash, *args, **kwargs):
+        nonlocal delayed
+        result = read_blob(content_hash, *args, **kwargs)
+        if content_hash == job.request.content_hash and not delayed:
+            delayed = True
+            clock.advance(65)
+        return result
+
+    monkeypatch.setattr(service, "_read_blob", long_request_check)
+    claim = service.claim_next(
+        worker_id="worker-a", authorization_token=WORKER_TOKEN, lease_seconds=60
+    )
+    assert claim is not None and delayed
+    expiry = datetime.fromisoformat(claim.job.lease_expires_at.replace("Z", "+00:00"))
+    assert expiry == clock.value + timedelta(seconds=60)
+    assert (
+        service.heartbeat(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+        ).status
+        == "running"
+    )
+
+
+def test_waiting_heartbeat_checks_expiration_after_writer_commits(tmp_path):
+    clock = MutableClock()
+    writer = _service(tmp_path / "jobs", clock=clock)
+    renewer = _service(tmp_path / "jobs", clock=clock)
+    job = _submit(writer)
+    claim = writer.claim_next(
+        worker_id="worker-a", authorization_token=WORKER_TOKEN, lease_seconds=5
+    )
+    started = Event()
+
+    def heartbeat():
+        started.set()
+        return renewer.heartbeat(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+        )
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with writer._transaction() as connection:
+            connection.execute("UPDATE jobs SET updated_at=updated_at")
+            future = pool.submit(heartbeat)
+            assert started.wait(5)
+            clock.advance(5)
+        with pytest.raises(JobServiceError, match="lease_expired"):
+            future.result(timeout=5)
+    assert (
+        writer.get_job(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        ).revision
+        == claim.job.revision
+    )
+
+
+def test_waiting_heartbeat_rejects_replaced_lease_token(tmp_path, monkeypatch):
+    clock = MutableClock()
+    claimer = _service(tmp_path / "jobs", clock=clock)
+    renewer = _service(tmp_path / "jobs", clock=clock)
+    job = _submit(claimer)
+    old_claim = claimer.claim_next(
+        worker_id="worker-a", authorization_token=WORKER_TOKEN, lease_seconds=5
+    )
+    clock.advance(5)
+    checking, release, heartbeat_started = Event(), Event(), Event()
+    read_blob = claimer._read_blob
+
+    def paused_request_check(content_hash, *args, **kwargs):
+        value = read_blob(content_hash, *args, **kwargs)
+        if content_hash == job.request.content_hash and not checking.is_set():
+            checking.set()
+            assert release.wait(5)
+        return value
+
+    monkeypatch.setattr(claimer, "_read_blob", paused_request_check)
+
+    def heartbeat():
+        heartbeat_started.set()
+        return renewer.heartbeat(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=old_claim.lease_token,
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        new_claim_future = pool.submit(_claim, claimer)
+        try:
+            assert checking.wait(5)
+            heartbeat_future = pool.submit(heartbeat)
+            assert heartbeat_started.wait(5)
+        finally:
+            release.set()
+        new_claim = new_claim_future.result(timeout=5)
+        with pytest.raises(JobServiceError, match="lease_unauthorized"):
+            heartbeat_future.result(timeout=5)
+    assert new_claim.lease_token != old_claim.lease_token
+    assert new_claim.job.attempt == 2
+    assert (
+        claimer.heartbeat(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=new_claim.lease_token,
+        ).status
+        == "running"
+    )
+
+
+def test_different_database_writer_does_not_block_heartbeat(tmp_path):
+    busy = _service(tmp_path / "busy")
+    independent = _service(tmp_path / "independent")
+    _submit(busy)
+    job = _submit(independent)
+    claim = _claim(independent)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with busy._transaction() as connection:
+            connection.execute("UPDATE jobs SET updated_at=updated_at")
+            result = pool.submit(
+                independent.heartbeat,
+                job.job_id,
+                worker_id="worker-a",
+                authorization_token=WORKER_TOKEN,
+                lease_token=claim.lease_token,
+            ).result(timeout=5)
+    assert result.status == "running"
+
+
+def test_constructor_schema_and_policy_wait_for_same_database_writer(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "jobs"
+    writer = _service(root)
+    _submit(writer)
+    started, initializing = Event(), Event()
+    initialize = DurableJobService._initialize_database_unlocked
+
+    def observed_initialize(service):
+        initializing.set()
+        return initialize(service)
+
+    monkeypatch.setattr(
+        DurableJobService, "_initialize_database_unlocked", observed_initialize
+    )
+
+    def reopen():
+        started.set()
+        return DurableJobService(
+            root,
+            tenant_tokens={"tenant-a": TENANT_A_TOKEN},
+            worker_tokens={"worker-a": WORKER_TOKEN},
+            max_blob_payload_bytes=1024 * 1024,
+        )
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with writer._transaction() as connection:
+            connection.execute("UPDATE jobs SET updated_at=updated_at")
+            future = pool.submit(reopen)
+            assert started.wait(5)
+            entered_early = initializing.wait(0.2)
+        reopened = future.result(timeout=5)
+    assert not entered_early and initializing.is_set()
+    with reopened._connect() as connection:
+        assert (
+            connection.execute(
+                "SELECT maximum_bytes FROM job_blob_payload_policy"
+            ).fetchone()[0]
+            == 1024 * 1024
+        )
+
+
+def test_writer_rollback_releases_same_database_mutex(tmp_path):
+    writer = _service(tmp_path / "jobs")
+    renewer = _service(tmp_path / "jobs")
+    job = _submit(writer)
+    claim = _claim(writer)
+    with pytest.raises(RuntimeError, match="interrupt transaction"):
+        with writer._transaction() as connection:
+            connection.execute("UPDATE jobs SET progress_completed=99")
+            raise RuntimeError("interrupt transaction")
+    result = renewer.heartbeat(
+        job.job_id,
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+        lease_token=claim.lease_token,
+    )
+    assert result.status == "running" and result.progress_completed == 0
+
+
+def test_waiting_fenced_writer_and_activation_keep_one_lock_order(
+    tmp_path, monkeypatch
+):
+    from structural_analysis.execution.job_execution_authority import (
+        ExecutionAuthorityError,
+        JobExecutionAuthority,
+    )
+    from tests.test_rc_real_process_lifecycle import request
+
+    root = tmp_path / "managed"
+    authority, binding = JobExecutionAuthority.create(tmp_path / "authority", root)
+    writer = DurableJobService(
+        root,
+        tenant_tokens={"tenant-a": TENANT_A_TOKEN},
+        worker_tokens={"worker-a": WORKER_TOKEN},
+        execution_authority=authority,
+        execution_binding=binding,
+    )
+    renewer = _service(root)
+    job = writer.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="managed",
+        request=request(),
+    )
+    claim = _claim(writer)
+    waiting_fenced, activating = Event(), Event()
+    database_writer = job_service_module._database_writer
+
+    def observed_writer(database):
+        if database == renewer._db_path:
+            waiting_fenced.set()
+        return database_writer(database)
+
+    monkeypatch.setattr(job_service_module, "_database_writer", observed_writer)
+
+    def activate():
+        activating.set()
+        return authority.activate(binding, tmp_path / "restored")
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        with writer._transaction() as connection:
+            connection.execute("UPDATE jobs SET updated_at=updated_at")
+            waiting_fenced.clear()
+            future = pool.submit(
+                renewer.heartbeat,
+                job.job_id,
+                worker_id="worker-a",
+                authorization_token=WORKER_TOKEN,
+                lease_token=claim.lease_token,
+            )
+            assert waiting_fenced.wait(5)
+            activation = pool.submit(activate)
+            assert activating.wait(5)
+            # Authority activation is deliberately nonblocking and fail-closed.
+            with pytest.raises(ExecutionAuthorityError, match="authority busy"):
+                activation.result(timeout=5)
+        assert future.result(timeout=5).status == "running"
+    assert authority.activate(binding, tmp_path / "restored").generation == 2
+    with pytest.raises(JobServiceError, match="execution_authority_rejected"):
+        renewer.heartbeat(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+        )
+
+
+def test_current_ordinal_resume_rejects_recorded_source_checkpoint_without_numerics(
+    monkeypatch,
+):
+    """A historical codec override does not grant a new-source worker resume."""
+    import base64
+
+    from structural_analysis.assembly import (
+        stateful_corotational_fiber_frame2d_ordinal_driver as driver,
+        stateful_corotational_fiber_frame2d_ordinal_history as history,
+    )
+    from structural_analysis.execution.rc_corotational_job_request import (
+        rc_corotational_job_canonical_bytes,
+    )
+    from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+        ORDINAL_JOB_CHECKPOINT_SCHEMA_VERSION,
+        ordinal_resume_binding,
+    )
+    from structural_analysis.execution.rc_corotational_ordinal_job_request import (
+        validate_rc_corotational_ordinal_job_request,
+    )
+    from tests.test_rc_corotational_ordinal_job_request import ordinal_request
+
+    # This is a virgin structural fixture, not an original job/owner checkpoint.
+    old_source = "sha256:" + "f" * 64
+    authored = ordinal_request()
+    current = validate_rc_corotational_ordinal_job_request(authored)
+    recorded = validate_rc_corotational_ordinal_job_request(
+        authored, recorded_source_identity=old_source
+    )
+    assert current.request_bytes == recorded.request_bytes
+    assert current.execution_source_identity != recorded.execution_source_identity
+    problem, plan, config = recorded.prepare()
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("source-only admission must not assemble, solve, run or launch")
+
+    for module in (driver, history):
+        monkeypatch.setattr(module, "assemble_scheduled_frame", forbidden)
+        monkeypatch.setattr(module, "solve_scheduled_control_step", forbidden)
+    monkeypatch.setattr(driver, "run_ordinal_history", forbidden)
+    monkeypatch.setattr(driver, "_source_identity", forbidden)
+    monkeypatch.setattr("subprocess.Popen", forbidden)
+    native = driver.OrdinalContinuation(
+        recorded.context_hash,
+        old_source,
+        plan.hash,
+        history.initial_mechanical_checkpoint(problem, recorded.context_hash),
+    )
+    raw = driver.dump_ordinal_continuation(
+        problem,
+        plan,
+        native,
+        maximum_solver_attempts=recorded.config.maximum_solver_attempts,
+        maximum_subdivision_depth=recorded.config.maximum_subdivision_depth,
+        config=config,
+        recorded_source_identity=old_source,
+    )
+    checkpoint = {
+        "schema_version": ORDINAL_JOB_CHECKPOINT_SCHEMA_VERSION,
+        "request_hash": recorded.request_hash,
+        "context_hash": recorded.context_hash,
+        "resume_contract_hash": recorded.resume_contract_hash,
+        "progress_completed": 0,
+        "terminal_checkpoint_artifact_base64": base64.b64encode(raw).decode("ascii"),
+    }
+    checkpoint["checkpoint_hash"] = (
+        "sha256:"
+        + hashlib.sha256(rc_corotational_job_canonical_bytes(checkpoint)).hexdigest()
+    )
+    historical = ordinal_resume_binding(recorded, checkpoint)
+    assert historical["completed_before"] == 0
+    assert historical["native_continuation_bytes"] == raw
+    assert historical["requires_solver"] is True
+    # The same production binding function used before the owned grant/child
+    # must reject this otherwise canonical prefix against the current request.
+    with pytest.raises(
+        ValueError, match="ordinal attached checkpoint identity differs"
+    ):
+        ordinal_resume_binding(current, checkpoint)

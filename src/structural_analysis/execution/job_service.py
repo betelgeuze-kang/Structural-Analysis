@@ -12,8 +12,9 @@ object-store durability, production identity management, or release authority.
 
 from __future__ import annotations
 
+from _thread import RLock
 from collections.abc import Callable, Collection, Mapping
-from contextlib import ExitStack, contextmanager
+from contextlib import ExitStack, closing, contextmanager
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import base64
@@ -29,9 +30,11 @@ import secrets
 import sqlite3
 import stat
 import tempfile
+from threading import Lock
 from time import monotonic, sleep
 from types import MappingProxyType
 from typing import Any, Final, Iterator, Literal, NoReturn
+from weakref import WeakValueDictionary
 
 from .job_execution_authority import (
     ExecutionBinding,
@@ -42,6 +45,24 @@ from .job_execution_authority import (
 from .job_execution_permit import ExecutionPermitError
 
 from jsonschema import Draft202012Validator
+
+
+# All service instances addressing the same canonical database share one
+# process-local writer. Weak values release idle roots without a registry leak;
+# an active or waiting context keeps its mutex alive. SQLite still supplies
+# cross-process exclusion, with the unchanged configured busy timeout.
+_DATABASE_WRITERS: WeakValueDictionary[str, RLock] = WeakValueDictionary()
+_DATABASE_WRITERS_GUARD = Lock()
+
+
+def _database_writer(database: Path) -> RLock:
+    key = str(database.resolve())
+    with _DATABASE_WRITERS_GUARD:
+        lock = _DATABASE_WRITERS.get(key)
+        if lock is None:
+            lock = RLock()
+            _DATABASE_WRITERS[key] = lock
+        return lock
 
 
 JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
@@ -374,10 +395,13 @@ class DurableJobService:
                 stream.flush()
                 os.fsync(stream.fileno())
             self._sync_authority_directory(storage_root)
-        with self.execution_guard():
-            self._initialize_database()
+        self._initialize_database()
         if execution_authority is not None:
-            with self.execution_guard(), self._connect() as connection:
+            with (
+                self.execution_guard(),
+                _database_writer(self._db_path),
+                closing(self._open_configured_connection()) as connection,
+            ):
                 connection.execute("BEGIN IMMEDIATE")
                 connection.execute(
                     "CREATE TABLE job_execution_authority_binding (singleton INTEGER PRIMARY KEY CHECK(singleton=1), directory TEXT NOT NULL, identity TEXT NOT NULL, generation INTEGER NOT NULL, root TEXT NOT NULL)"
@@ -412,7 +436,7 @@ class DurableJobService:
                     )
 
         if execution_authority is not None:
-            with self.execution_guard():
+            with self.execution_guard(), _database_writer(self.root / "jobs.sqlite3"):
                 try:
                     install_new_store(storage_root, self.root)
                 except ExecutionAuthorityError as exc:
@@ -420,8 +444,8 @@ class DurableJobService:
                         "execution_authority_install_failed", "/root", str(exc)
                     ) from exc
                 self._sync_authority_directory(self.root.parent)
-            self._blob_root = self.root / "blobs" / "sha256"
-            self._db_path = self.root / "jobs.sqlite3"
+                self._blob_root = self.root / "blobs" / "sha256"
+                self._db_path = self.root / "jobs.sqlite3"
 
     def _sync_authority_directory(self, root):
         descriptor = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
@@ -879,8 +903,6 @@ class DurableJobService:
 
         with self._transaction() as connection:
             now, now_us = self._now()
-            lease_expires_us = now_us + lease_seconds * 1_000_000
-            lease_expires_at = _format_us(lease_expires_us)
             self._recover_expired_leases(
                 connection, selected_tenants=selected_tenants, now=now, now_us=now_us
             )
@@ -921,6 +943,11 @@ class DurableJobService:
                     int(row["checkpoint_size"]),
                     maximum_bytes=_MAX_CHECKPOINT_BYTES,
                 )
+            # Immutable request/checkpoint and managed authority checks may be
+            # long. Mint the lease from the actual claim publication time.
+            now, now_us = self._now()
+            lease_expires_us = now_us + lease_seconds * 1_000_000
+            lease_expires_at = _format_us(lease_expires_us)
             lease_token = secrets.token_urlsafe(32)
             attempt = int(row["attempt"]) + 1
             resumed = checkpoint_bytes is not None
@@ -3593,7 +3620,11 @@ class DurableJobService:
         }
 
     def _initialize_database(self) -> None:
-        connection = self._connect()
+        with self.execution_guard(), _database_writer(self._db_path):
+            self._initialize_database_unlocked()
+
+    def _initialize_database_unlocked(self) -> None:
+        connection = self._open_configured_connection()
         try:
             connection.executescript(
                 """
@@ -3690,7 +3721,7 @@ class DurableJobService:
         # Even read callers configure SQLite's persistent journal mode. Fence
         # this setup before opening the store; writes retain their transaction-
         # lifetime guard separately.
-        with self.execution_guard():
+        with self.execution_guard(), _database_writer(self._db_path):
             return self._open_configured_connection()
 
     def _open_configured_connection(self) -> sqlite3.Connection:
@@ -3749,12 +3780,20 @@ class DurableJobService:
 
     @contextmanager
     def _transaction(self) -> Iterator[sqlite3.Connection]:
-        with self.execution_guard(), self._unguarded_transaction() as connection:
+        # Existing workers already retain the generation fence through child
+        # cleanup. Always acquire that fence BEFORE the local writer; activation
+        # never takes this mutex. Reentrancy coordinates setup, not nested SQL
+        # transactions, and the mutex spans rollback/commit AND connection close.
+        with (
+            self.execution_guard(),
+            _database_writer(self._db_path),
+            self._unguarded_transaction() as connection,
+        ):
             yield connection
 
     @contextmanager
     def _unguarded_transaction(self) -> Iterator[sqlite3.Connection]:
-        connection = self._connect()
+        connection = self._open_configured_connection()
         try:
             connection.execute("BEGIN IMMEDIATE")
             self._blob_admissions[connection] = None
