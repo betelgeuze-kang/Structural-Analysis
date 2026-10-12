@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 from typing import Any
+from types import MappingProxyType
 
 import numpy as np
 
@@ -338,6 +339,31 @@ def _validate(problem, plan, config, budget, depth, source, continuation):
     return context
 
 
+def _accepted_snapshot(problem, mechanical, assembly=None):
+    """Serialize an already accepted response; never assemble or infer a force."""
+    return {
+        "role": "accepted_response"
+        if assembly is not None
+        else "accepted_parent_on_failure",
+        "load_factor": mechanical.frame_checkpoint.load_factor,
+        "axial_load_kn": mechanical.axial_load_kn,
+        "prescribed_target_m": mechanical.prescribed_target_m,
+        "achieved_observation_m": problem.observation.evaluate(
+            mechanical.frame_checkpoint.global_displacements
+        ),
+        "global_displacements": list(mechanical.frame_checkpoint.global_displacements),
+        "external_loads_global": None
+        if assembly is None
+        else assembly.external_loads_global.tolist(),
+        "reactions_global": None
+        if assembly is None
+        else assembly.reactions_global.tolist(),
+        "residual_kn": None if assembly is None else assembly.residual_kn.tolist(),
+        "global_dof_order": "node-major UX UY RZ",
+        "global_load_component_units": ["kN", "kN", "kN*m"],
+    }
+
+
 def run_ordinal_history(
     problem,
     plan,
@@ -348,13 +374,21 @@ def run_ordinal_history(
     maximum_subdivision_depth=8,
     config=None,
     continuation=None,
+    before_solver=None,
 ):
     """Advance a bounded slice of one immutable full path, preserving its budget.
 
     ``maximum_solver_attempts`` is a required whole-path admission. The <=255
     call bounds govern returned work/memory; they never reset cumulative cost.
     """
-    integer(per_call_attempt_limit, "per_call_attempt_limit", 1, 255)
+    if before_solver is not None and not callable(before_solver):
+        raise ValueError("before_solver must be an owned callable grant hook")
+    integer(
+        per_call_attempt_limit,
+        "per_call_attempt_limit",
+        0 if before_solver is not None else 1,
+        255,
+    )
     integer(per_call_record_limit, "per_call_record_limit", 1, 255)
     if config is None:
         config = StatefulCorotationalFiberFrame2DDisplacementControlConfig()
@@ -463,6 +497,7 @@ def run_ordinal_history(
             call_records += 1
             event = {
                 "kind": "verified_hold",
+                "accepted_state": _accepted_snapshot(problem, parent, trial),
                 "ordinal": ordinal,
                 "source_row": row.source_row,
                 "source_row_sha256": row.source_row_sha256,
@@ -483,6 +518,19 @@ def run_ordinal_history(
             position = pending[0]
             g, p = _target(plan, parent, ordinal, position, genesis)
             before = parent.canonical_bytes()
+            if before_solver is not None:
+                before_solver(
+                    MappingProxyType(
+                        {
+                            "context_hash": context,
+                            "parent_mechanical_state_hash": parent.state_hash,
+                            "ordinal": ordinal,
+                            "source_row_sha256": row.source_row_sha256,
+                            "position_numerator": position[0],
+                            "position_depth": position[1],
+                        }
+                    )
+                )
             values["reserved_attempts"] += 1
             values["solver_invocations"] += 1
             call_attempts += 1
@@ -551,6 +599,11 @@ def run_ordinal_history(
                         values["pending_positions"] = (midpoint,) + pending
             event = {
                 "kind": "mechanical_commit" if committed else "failed_attempt",
+                "accepted_state": _accepted_snapshot(
+                    problem,
+                    values["mechanical"],
+                    result.assembly if committed else None,
+                ),
                 "ordinal": ordinal,
                 "source_row": row.source_row,
                 "source_row_sha256": row.source_row_sha256,
@@ -605,10 +658,16 @@ def dump_ordinal_continuation(
     maximum_solver_attempts,
     maximum_subdivision_depth=8,
     config=None,
+    recorded_source_identity=None,
 ):
     if config is None:
         config = StatefulCorotationalFiberFrame2DDisplacementControlConfig()
-    source = "sha256:" + _source_identity()
+    # Historical byte admission is pure; this is not solver permission.
+    source = (
+        "sha256:" + _source_identity()
+        if recorded_source_identity is None
+        else hash_field(recorded_source_identity, "recorded_source_identity")
+    )
     _validate(
         problem,
         plan,
@@ -652,6 +711,7 @@ def load_ordinal_continuation(
     maximum_solver_attempts,
     maximum_subdivision_depth=8,
     config=None,
+    recorded_source_identity=None,
 ):
     if type(data) is not bytes or not 0 < len(data) <= MAX_CONTINUATION_BYTES:
         raise ValueError("bounded canonical continuation bytes required")
@@ -733,7 +793,12 @@ def load_ordinal_continuation(
     continuation = OrdinalContinuation(mechanical=state, **payload)
     if config is None:
         config = StatefulCorotationalFiberFrame2DDisplacementControlConfig()
-    source = "sha256:" + _source_identity()
+    # Historical byte admission is pure; this is not solver permission.
+    source = (
+        "sha256:" + _source_identity()
+        if recorded_source_identity is None
+        else hash_field(recorded_source_identity, "recorded_source_identity")
+    )
     _validate(
         problem,
         plan,
@@ -751,6 +816,7 @@ def load_ordinal_continuation(
             maximum_solver_attempts=maximum_solver_attempts,
             maximum_subdivision_depth=maximum_subdivision_depth,
             config=config,
+            recorded_source_identity=source,
         )
         != data
     ):

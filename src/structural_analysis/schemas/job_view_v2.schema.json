@@ -74,7 +74,7 @@
           "minimum": 1
         },
         "unit": {
-          "const": "control_solver_attempts"
+          "enum": ["control_solver_attempts", "completed_source_ordinals"]
         }
       }
     },

@@ -65,6 +65,20 @@ def execute_job_claim(
             authorization_token=authorization_token,
             lease_seconds=lease_seconds,
         )
+    if request.get("operation") == "rc_corotational_ordinal_history":
+        if checkpoint_step_budget is not None or checkpoint_target_budget is not None:
+            raise ValueError("ordinal window limits belong to the immutable request")
+        from structural_analysis.execution.rc_corotational_ordinal_worker import (
+            execute_rc_corotational_ordinal_claim,
+        )
+
+        return execute_rc_corotational_ordinal_claim(
+            service,
+            claim,
+            worker_id=worker_id,
+            authorization_token=authorization_token,
+            lease_seconds=lease_seconds,
+        )
     if request.get("operation") == RC_FIBER_JOB_OPERATION:
         if checkpoint_step_budget is not None:
             raise ValueError(

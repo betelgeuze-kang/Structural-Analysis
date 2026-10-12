@@ -56,7 +56,9 @@ RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS = (
     RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
     ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
 )
+ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v8"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
+    ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION,
     RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
     PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
     FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION,
@@ -635,30 +637,45 @@ class DurableJobService:
             normalized_request.get("schema_version")
             in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
         ):
-            _validate_schema(
-                normalized_request,
-                (
-                    "job_request_v7.schema.json"
-                    if normalized_request["schema_version"]
-                    == ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
-                    else "job_request_v6.schema.json"
-                    if normalized_request["schema_version"]
-                    == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
-                    else "job_request_v5.schema.json"
-                    if normalized_request["schema_version"]
-                    == FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION
-                    else "job_request_v4.schema.json"
-                    if normalized_request["schema_version"]
-                    == PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION
-                    else "job_request_v3.schema.json"
-                ),
-                "/request",
-            )
+            if (
+                normalized_request["schema_version"]
+                == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+            ):
+                if self._execution_authority is None:
+                    _fail(
+                        "ordinal_managed_authority_required",
+                        "/request",
+                        "Ordinal-history jobs require an existing managed execution owner.",
+                    )
+                _rc_fiber_request(normalized_request)
+            else:
+                _validate_schema(
+                    normalized_request,
+                    (
+                        "job_request_v7.schema.json"
+                        if normalized_request["schema_version"]
+                        == ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                        else "job_request_v6.schema.json"
+                        if normalized_request["schema_version"]
+                        == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                        else "job_request_v5.schema.json"
+                        if normalized_request["schema_version"]
+                        == FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION
+                        else "job_request_v4.schema.json"
+                        if normalized_request["schema_version"]
+                        == PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION
+                        else "job_request_v3.schema.json"
+                    ),
+                    "/request",
+                )
             _model, rc_config = _rc_fiber_request(normalized_request)
             total_steps = (
                 rc_config.progress_total
                 if normalized_request["schema_version"]
-                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                in (
+                    *RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS,
+                    ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION,
+                )
                 else len(rc_config.targets_m)
             )
             maximum_attempts = normalized_request["execution_config"][
@@ -759,6 +776,9 @@ class DurableJobService:
                     (job_id, str(maximum_attempts)),
                 )
             row = self._job_row(connection, job_id)
+            if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+                self._ordinal_solver_budget(connection, row, reconcile=True)
+                row = self._job_row(connection, job_id)
         return self._view(row)
 
     def get_job(
@@ -827,6 +847,12 @@ class DurableJobService:
             if self._execution_authority is not None:
                 # Only the RC worker holds the authority through child cleanup.
                 row, _budget = self._reconcile_execution_reservations(connection, row)
+                if (
+                    self._request_for_row(row).get("schema_version")
+                    == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+                ):
+                    self._ordinal_solver_budget(connection, row, reconcile=True)
+                    row = self._job_row(connection, str(row["job_id"]))
 
             request_bytes = self._read_blob(
                 str(row["request_hash"]),
@@ -1021,6 +1047,12 @@ class DurableJobService:
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
             row, budget = self._reconcile_execution_reservations(connection, row)
+            if (
+                self._request_for_row(row).get("schema_version")
+                == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+            ):
+                self._ordinal_solver_budget(connection, row, reconcile=True)
+                row = self._job_row(connection, job_id)
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
             if budget["remaining_attempts"] == 0:
@@ -1077,6 +1109,233 @@ class DurableJobService:
                 updates={},
             )
         return reserved
+
+    def _ordinal_solver_budget(self, connection, row, *, reconcile=False):
+        request = self._request_for_row(row)
+        if (
+            request.get("schema_version") != ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+            or self._execution_authority is None
+        ):
+            _fail(
+                "ordinal_managed_authority_required",
+                "/solver_credit_budget",
+                "Managed ordinal operation required.",
+            )
+        typed = self._ordinal_typed_for_row(row)
+        if reconcile:
+            row, _budget = self._reconcile_execution_reservations(connection, row)
+        else:
+            self._execution_budget(connection, row)
+        try:
+            if reconcile:
+                snapshot = self._execution_authority.register_ordinal_credits(
+                    self._execution_binding,
+                    str(row["job_id"]),
+                    str(row["request_hash"]),
+                    typed.context_hash,
+                    typed.execution_config.production_solver_budget,
+                    typed.execution_config.verification_solver_budget,
+                )
+            else:
+                snapshot = self._execution_authority.read_ordinal_credits(
+                    self._execution_binding,
+                    str(row["job_id"]),
+                    str(row["request_hash"]),
+                    typed.context_hash,
+                )
+            if (
+                snapshot["production"]["maximum"]
+                != typed.execution_config.production_solver_budget
+                or snapshot["verification"]["maximum"]
+                != typed.execution_config.verification_solver_budget
+            ):
+                raise ExecutionAuthorityError("ordinal_budget_identity_mismatch")
+        except ExecutionAuthorityError as exc:
+            _fail(
+                "ordinal_solver_authority_rejected", "/solver_credit_budget", str(exc)
+            )
+        events = connection.execute(
+            "SELECT event_type,payload_json FROM job_events WHERE job_id=? AND event_type IN ('ordinal_solver_credit_reserved','ordinal_solver_credit_imported') ORDER BY revision",
+            (row["job_id"],),
+        ).fetchall()
+        if len(events) > len(snapshot["reservations"]):
+            _fail(
+                "ordinal_solver_credit_integrity_failed",
+                "/solver_credit_budget",
+                "Local solver journal exceeds external authority.",
+            )
+        for index, event in enumerate(events):
+            recorded = _strict_json_object(
+                str(event["payload_json"]).encode(), "/solver_credit_budget/event"
+            )
+            if event["event_type"] == "ordinal_solver_credit_imported":
+                if recorded.pop("execution_work", None) != "unknown":
+                    _fail(
+                        "ordinal_solver_credit_integrity_failed",
+                        "/solver_credit_budget",
+                        "Imported work must remain unknown.",
+                    )
+            if _canonical_json_bytes(recorded) != _canonical_json_bytes(
+                snapshot["reservations"][index]
+            ):
+                _fail(
+                    "ordinal_solver_credit_integrity_failed",
+                    "/solver_credit_budget",
+                    "Local solver credit journal differs from external authority.",
+                )
+        if not reconcile and len(events) != len(snapshot["reservations"]):
+            _fail(
+                "ordinal_solver_credit_reconcile_required",
+                "/solver_credit_budget",
+                "A worker must import external reservations before reading saved originals.",
+            )
+        for grant in snapshot["reservations"][len(events) :]:
+            row = self._transition(
+                connection,
+                row,
+                event_type="ordinal_solver_credit_imported",
+                status=str(row["status"]),
+                occurred_at=self._now()[0],
+                payload=dict(grant, execution_work="unknown"),
+                updates={},
+            )
+        return snapshot
+
+    def read_ordinal_solver_budget(
+        self, job_id, *, worker_id, authorization_token, lease_token
+    ):
+        self._authorize_worker(worker_id, authorization_token)
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            return self._ordinal_solver_budget(connection, row, reconcile=True)
+
+    def reserve_ordinal_solver_credits(
+        self,
+        job_id,
+        *,
+        worker_id,
+        authorization_token,
+        lease_token,
+        phase,
+        api_ordinal,
+        ceiling,
+        expected_checkpoint_hash,
+        native_input_sha256,
+        record_limit,
+    ):
+        """CAS the attached trusted prefix and commit a nonrefundable grant BEFORE launch."""
+        self._authorize_worker(worker_id, authorization_token)
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            self._ordinal_solver_budget(connection, row, reconcile=True)
+            row = self._job_row(connection, job_id)
+            checkpoint_hash = (
+                None if row["checkpoint_hash"] is None else str(row["checkpoint_hash"])
+            )
+            if checkpoint_hash != expected_checkpoint_hash:
+                _fail(
+                    "ordinal_checkpoint_cas_mismatch",
+                    "/checkpoint",
+                    "Attached checkpoint changed before reservation.",
+                )
+            from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+                ordinal_resume_binding,
+            )
+
+            request = self._request_for_row(row)
+            typed = self._ordinal_typed_for_row(row)
+            if (
+                phase not in ("production", "verification")
+                or type(ceiling) is not int
+                or not 0 <= ceiling <= typed.execution_config.attempt_limit_per_call
+                or type(record_limit) is not int
+                or not 1 <= record_limit <= typed.execution_config.record_limit_per_call
+            ):
+                _fail(
+                    "ordinal_solver_grant_bounds_invalid",
+                    "/solver_credit_budget",
+                    "Grant must satisfy the immutable operation bounds.",
+                )
+            # The mutable row hash alone is not accepted-prefix authority.
+            self._validate_integrity_snapshot(connection, row)
+            binding = ordinal_resume_binding(
+                typed, self._checkpoint_for_row(row), record_limit=record_limit
+            )
+            if (
+                binding["completed_before"] != int(row["progress_completed"])
+                or binding["native_input_sha256"] != native_input_sha256
+            ):
+                _fail(
+                    "ordinal_native_prefix_mismatch",
+                    "/checkpoint",
+                    "Only the attached owner checkpoint may authorize a suffix.",
+                )
+            if ceiling == 0 and binding["requires_solver"]:
+                _fail(
+                    "ordinal_solver_credit_zero_forbidden",
+                    "/solver_credit_budget",
+                    "A source change or uncertified first row needs solver permission.",
+                )
+            reservations = self._rc_reservations(connection, row)
+            record = reservations.get(api_ordinal)
+            if record is None or any(
+                record[0].get(k) != v
+                for k, v in {
+                    "worker_id": worker_id,
+                    "attempt": int(row["attempt"]),
+                    "lease_token_hash": str(row["lease_token_hash"]),
+                }.items()
+            ):
+                _fail(
+                    "ordinal_api_reservation_mismatch",
+                    "/api_ordinal",
+                    "Current lease API reservation required before solver grant.",
+                )
+            if connection.execute(
+                "SELECT 1 FROM job_rc_invocation_outcomes WHERE job_id=? AND ordinal=?",
+                (job_id, api_ordinal),
+            ).fetchone():
+                _fail(
+                    "ordinal_api_already_recorded",
+                    "/api_ordinal",
+                    "A recorded invocation cannot relaunch.",
+                )
+            _model, typed = _rc_fiber_request(request)
+            try:
+                grant = self._execution_authority.reserve_ordinal_credits(
+                    self._execution_binding,
+                    job_id,
+                    str(row["request_hash"]),
+                    typed.context_hash,
+                    api_ordinal=api_ordinal,
+                    phase=phase,
+                    ceiling=ceiling,
+                    completed_before=int(row["progress_completed"]),
+                    prior_checkpoint_hash=checkpoint_hash,
+                    native_input_sha256=native_input_sha256,
+                    record_limit=record_limit,
+                    worker_id=worker_id,
+                    lease_token_hash=str(row["lease_token_hash"]),
+                )
+            except ExecutionAuthorityError as exc:
+                _fail(
+                    "ordinal_solver_credit_rejected", "/solver_credit_budget", str(exc)
+                )
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            self._transition(
+                connection,
+                row,
+                event_type="ordinal_solver_credit_reserved",
+                status="running",
+                occurred_at=self._now()[0],
+                payload=grant,
+                updates={},
+            )
+            return grant
 
     def worker_result_byte_limit(
         self, job_id: str, *, worker_id: str, authorization_token: str, lease_token: str
@@ -1144,6 +1403,25 @@ class DurableJobService:
                     "A recorded outcome requires a reserved ordinal.",
                 )
             reservation, event_hash = reservations[ordinal]
+            if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+                snapshot = self._ordinal_solver_budget(connection, row)
+                grant = normalized.get("grant")
+                found = next(
+                    (
+                        g
+                        for g in snapshot["reservations"]
+                        if g["api_ordinal"] == ordinal
+                    ),
+                    None,
+                )
+                if found is None or _canonical_json_bytes(
+                    found
+                ) != _canonical_json_bytes(grant):
+                    _fail(
+                        "ordinal_credit_outcome_mismatch",
+                        "/outcome/grant",
+                        "Outcome must retain its exact externally committed solver credit grant.",
+                    )
             if any(
                 reservation.get(key) != value
                 for key, value in {
@@ -1184,7 +1462,24 @@ class DurableJobService:
                     "The invocation must start at the current durable prefix.",
                 )
             expected_restart_hash = None
-            if int(row["progress_completed"]) > 0:
+            if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+                from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+                    ordinal_resume_binding,
+                )
+
+                trusted = ordinal_resume_binding(
+                    request,
+                    self._checkpoint_for_row(row),
+                    record_limit=normalized["grant"]["record_limit"],
+                )
+                expected_restart_hash = trusted["native_input_sha256"]
+                if normalized["completed_before"] != trusted["completed_before"]:
+                    _fail(
+                        "ordinal_outcome_prefix_mismatch",
+                        "/completed_before",
+                        "Outcome differs from the attached owner prefix.",
+                    )
+            elif int(row["progress_completed"]) > 0:
                 prior_checkpoint = _strict_json_object(
                     self._checkpoint_for_row(row), "/checkpoint"
                 )
@@ -1225,6 +1520,13 @@ class DurableJobService:
                     "unavailable_execution_work",
                 )
             }
+            if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+                metadata.update(
+                    {
+                        key: normalized[key]
+                        for key in ("context_hash", "grant", "credits_used")
+                    }
+                )
             event_payload = {
                 "ordinal": ordinal,
                 "outcome_hash": ref.content_hash,
@@ -1465,6 +1767,47 @@ class DurableJobService:
         """Check each claimed receipt against its actual durable invocation pair, one pair at a time."""
         if (
             self._request_for_row(row).get("schema_version")
+            == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+        ):
+            from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+                bind_ordinal_receipts,
+            )
+
+            request = self._ordinal_typed_for_row(row)
+            budget = self._ordinal_solver_budget(connection, row)
+            records = {
+                r["ordinal"]: r for r in self._rc_invocation_rows(connection, row)
+            }
+            used = set()
+            for receipt in receipts:
+                outcomes = {}
+                for phase in ("production", "verification"):
+                    ordinal = receipt[f"{phase}_ordinal"]
+                    if (
+                        type(ordinal) is not int
+                        or ordinal in used
+                        or ordinal not in records
+                    ):
+                        raise ValueError("Ordinal invocation missing or reused")
+                    used.add(ordinal)
+                    r = records[ordinal]
+                    outcomes[ordinal] = _strict_json_object(
+                        self._read_blob(
+                            str(r["outcome_hash"]),
+                            int(r["outcome_size"]),
+                            maximum_bytes=_result_byte_limit(request.to_dict()),
+                        ),
+                        "/ordinal_invocation",
+                    )
+                bind_ordinal_receipts(
+                    [receipt],
+                    [{"ordinal": k, "outcome": v} for k, v in outcomes.items()],
+                    request,
+                    budget,
+                )
+            return
+        if (
+            self._request_for_row(row).get("schema_version")
             in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
         ):
             from structural_analysis.execution.rc_corotational_job_contract import (
@@ -1617,6 +1960,7 @@ class DurableJobService:
         progress_completed: int,
         progress_total: int,
         resume_contract_hash: str,
+        expected_checkpoint_hash: str | None = None,
     ) -> JobView:
         self._authorize_worker(worker_id, authorization_token)
         _hash(resume_contract_hash, "/resume_contract_hash")
@@ -1630,11 +1974,25 @@ class DurableJobService:
             self._require_active_lease(row, worker_id, lease_token, now_us)
             total = int(row["progress_total"])
             prior = int(row["progress_completed"])
+            request = self._request_for_row(row)
+            ordinal_profile = (
+                request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+            )
+            if ordinal_profile and row["checkpoint_hash"] != expected_checkpoint_hash:
+                _fail(
+                    "ordinal_checkpoint_cas_mismatch",
+                    "/checkpoint",
+                    "The attached owner checkpoint changed.",
+                )
             if (
                 type(progress_completed) is not int
                 or type(progress_total) is not int
                 or progress_total != total
-                or not prior < progress_completed < total
+                or not (
+                    prior <= progress_completed < total
+                    if ordinal_profile
+                    else prior < progress_completed < total
+                )
             ):
                 _fail(
                     "checkpoint_progress_invalid",
@@ -1669,6 +2027,21 @@ class DurableJobService:
                     def validate_rc_fiber_job_checkpoint(data, **kwargs):
                         return validate_rc_corotational_job_checkpoint(
                             data, resume_contract_hash=resume_contract_hash, **kwargs
+                        )["payload"]
+
+                elif ordinal_profile:
+                    from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+                        validate_ordinal_job_checkpoint,
+                    )
+
+                    solver_budget = self._ordinal_solver_budget(connection, row)
+
+                    def validate_rc_fiber_job_checkpoint(data, **kwargs):
+                        return validate_ordinal_job_checkpoint(
+                            data,
+                            resume_contract_hash=resume_contract_hash,
+                            solver_credit_budget=solver_budget,
+                            **kwargs,
                         )["payload"]
 
                 try:
@@ -1734,6 +2107,7 @@ class DurableJobService:
         result_bytes: bytes | bytearray | memoryview,
         result_media_type: str,
         evidence: Mapping[str, Any],
+        expected_checkpoint_hash: str | None = None,
     ) -> JobView:
         """Atomically publish a worker-validated result/evidence pair."""
 
@@ -1769,6 +2143,15 @@ class DurableJobService:
                 maximum_bytes=_MAX_REQUEST_BYTES,
             )
             request = _strict_json_object(request_bytes, "/request")
+            if (
+                request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+                and row["checkpoint_hash"] != expected_checkpoint_hash
+            ):
+                _fail(
+                    "ordinal_checkpoint_cas_mismatch",
+                    "/checkpoint",
+                    "The attached owner checkpoint changed.",
+                )
             if result_payload.get("schema_version") != request.get("result_contract"):
                 _fail(
                     "result_contract_mismatch",
@@ -1819,6 +2202,23 @@ class DurableJobService:
 
                     RC_FIBER_JOB_VALIDATOR_ID = RC_COROTATIONAL_JOB_VALIDATOR_ID
                     validate_rc_fiber_job_result = validate_rc_corotational_job_result
+                elif (
+                    request.get("schema_version")
+                    == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+                ):
+                    from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+                        ORDINAL_JOB_VALIDATOR_ID,
+                        validate_ordinal_job_result,
+                    )
+
+                    RC_FIBER_JOB_VALIDATOR_ID = ORDINAL_JOB_VALIDATOR_ID
+                    solver_budget = self._ordinal_solver_budget(connection, row)
+
+                    def validate_rc_fiber_job_result(data, **kwargs):
+                        return validate_ordinal_job_result(
+                            data, solver_credit_budget=solver_budget, **kwargs
+                        )
+
                 try:
                     report = validate_rc_fiber_job_result(
                         result_payload,
@@ -1869,7 +2269,10 @@ class DurableJobService:
             completed_progress = (
                 result_payload["progress_completed"]
                 if request.get("schema_version")
-                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                in (
+                    *RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS,
+                    ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION,
+                )
                 else int(row["progress_total"])
             )
             row = self._transition(
@@ -2090,6 +2493,124 @@ class DurableJobService:
             role="evidence",
             maximum_bytes=_MAX_EVIDENCE_BYTES,
         )
+
+    def read_rc_ordinal_report(
+        self,
+        job_id,
+        *,
+        tenant_id,
+        authorization_token,
+        expected_request_hash=None,
+        expected_result_artifact_hash=None,
+        expected_evidence_artifact_hash=None,
+    ) -> bytes:
+        """Export exact saved originals in a read transaction, with no replay."""
+        from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+            ORDINAL_JOB_VALIDATOR_ID,
+            validate_ordinal_job_result,
+        )
+        from structural_analysis.execution.rc_corotational_ordinal_report import (
+            build_ordinal_report,
+        )
+
+        self._authorize_tenant(tenant_id, authorization_token)
+        expected = {
+            "request": expected_request_hash,
+            "result": expected_result_artifact_hash,
+            "evidence": expected_evidence_artifact_hash,
+        }
+        for role, digest in expected.items():
+            _hash(digest, f"/expected_{role}_hash")
+        with self._connect() as connection:
+            connection.execute("BEGIN")
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            request = self._request_for_row(row)
+            if (
+                request.get("schema_version") != ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+                or row["status"] != "succeeded"
+            ):
+                _fail(
+                    "ordinal_report_job_unsupported",
+                    "/job",
+                    "A completed managed ordinal job is required.",
+                )
+            if any(row[f"{role}_hash"] != digest for role, digest in expected.items()):
+                _fail(
+                    "ordinal_report_source_conflict",
+                    "/source",
+                    "Saved artifact references changed.",
+                )
+            self._validate_integrity_snapshot(connection, row)
+            result_bytes = self._read_blob(
+                row["result_hash"],
+                row["result_size"],
+                maximum_bytes=_result_byte_limit(request),
+            )
+            result = _strict_json_object(result_bytes, "/result")
+            evidence = _strict_json_object(
+                self._read_blob(
+                    row["evidence_hash"],
+                    row["evidence_size"],
+                    maximum_bytes=_MAX_EVIDENCE_BYTES,
+                ),
+                "/evidence",
+            )
+            try:
+                typed = self._ordinal_typed_for_row(row)
+                validation = validate_ordinal_job_result(
+                    result,
+                    request=typed,
+                    execution_budget=self._execution_budget(connection, row),
+                    solver_credit_budget=self._ordinal_solver_budget(connection, row),
+                    checkpoint=self._checkpoint_for_row(row),
+                )
+                self._bind_rc_receipts(connection, row, result["receipts"])
+                exact = build_job_completion_evidence(
+                    job_id=job_id,
+                    request_hash=row["request_hash"],
+                    checkpoint_hash=row["checkpoint_hash"],
+                    result_bytes=result_bytes,
+                    validator_id=ORDINAL_JOB_VALIDATOR_ID,
+                    validation_report=validation,
+                )
+                if _canonical_json_bytes(exact) != _canonical_json_bytes(evidence):
+                    raise ValueError("ordinal completion evidence changed")
+                invocations = (
+                    {
+                        "ordinal": r["ordinal"],
+                        "outcome": _strict_json_object(
+                            self._read_blob(
+                                r["outcome_hash"],
+                                r["outcome_size"],
+                                maximum_bytes=_result_byte_limit(request),
+                            ),
+                            "/outcome",
+                        ),
+                    }
+                    for r in self._rc_invocation_rows(connection, row)
+                )
+                return build_ordinal_report(
+                    typed,
+                    result,
+                    {"invocations": invocations, "validation_report": validation},
+                    job_id=job_id,
+                    tenant_id=tenant_id,
+                    job_revision=row["revision"],
+                    terminal_event_hash=row["terminal_event_hash"],
+                    original_artifacts={
+                        role: ref.to_dict() if ref else None
+                        for role, ref in self._row_references(row).items()
+                    },
+                )
+            except JobServiceError:
+                raise
+            except (TypeError, ValueError, KeyError, IndexError):
+                _fail(
+                    "ordinal_report_original_invalid",
+                    "/source",
+                    "Saved ordinal originals or custody differ.",
+                )
 
     def read_rc_corotational_report(
         self,
@@ -2554,10 +3075,13 @@ class DurableJobService:
                 "A successful RC job is required.",
             )
         request = self._request_for_row(row)
-        if (
-            request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
-            or request.get("schema_version")
-            in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+        if request.get(
+            "schema_version"
+        ) not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS or request.get(
+            "schema_version"
+        ) in (
+            *RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS,
+            ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION,
         ):
             _fail(
                 "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
@@ -2787,6 +3311,105 @@ class DurableJobService:
                 "Corotational counters must match their request, retained artifacts and events.",
             )
 
+    def _validate_ordinal_projection(self, connection, row, request, events):
+        """Bind source cursor, exact saved suffix and external grants without a solve."""
+        from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+            validate_ordinal_job_checkpoint,
+            validate_ordinal_job_result,
+        )
+
+        try:
+            typed = self._ordinal_typed_for_row(row)
+            submitted = _strict_json_object(
+                str(events[0]["payload_json"]).encode(), "/events/payload"
+            )
+            if (
+                row["progress_total"] != typed.progress_total
+                or events[0]["event_type"] != "submitted"
+                or submitted.get("request_hash") != row["request_hash"]
+                or submitted.get("progress_total") != typed.progress_total
+            ):
+                raise ValueError("ordinal submitted source cursor differs")
+            budget = self._execution_budget(connection, row)
+            credits = self._ordinal_solver_budget(connection, row)
+            checkpoint = self._checkpoint_for_row(row)
+            committed = next(
+                (
+                    e
+                    for e in reversed(events)
+                    if e["event_type"] == "checkpoint_committed"
+                ),
+                None,
+            )
+            if (committed is None) != (checkpoint is None):
+                raise ValueError("ordinal retained checkpoint differs")
+            completed = 0
+            if checkpoint is not None:
+                saved = _strict_json_object(checkpoint, "/checkpoint")
+                validation = validate_ordinal_job_checkpoint(
+                    saved,
+                    request=typed,
+                    progress_completed=saved["progress_completed"],
+                    resume_contract_hash=row["resume_contract_hash"],
+                    execution_budget=budget,
+                    solver_credit_budget=credits,
+                )
+                self._bind_rc_receipts(connection, row, saved["receipts"])
+                completed = validation["progress_completed"]
+                payload = _strict_json_object(
+                    str(committed["payload_json"]).encode(), "/events/payload"
+                )
+                expected = dict(
+                    checkpoint_hash=row["checkpoint_hash"],
+                    resume_contract_hash=row["resume_contract_hash"],
+                    progress_completed=completed,
+                    progress_total=typed.progress_total,
+                )
+                if _canonical_json_bytes(
+                    {k: payload.get(k) for k in expected}
+                ) != _canonical_json_bytes(expected):
+                    raise ValueError("ordinal checkpoint event differs")
+            elif row["resume_contract_hash"] is not None:
+                raise ValueError("ordinal resume contract without checkpoint")
+            if row["status"] == "succeeded":
+                result = _strict_json_object(
+                    self._read_blob(
+                        row["result_hash"],
+                        row["result_size"],
+                        maximum_bytes=_result_byte_limit(request),
+                    ),
+                    "/result",
+                )
+                validation = validate_ordinal_job_result(
+                    result,
+                    request=typed,
+                    execution_budget=budget,
+                    solver_credit_budget=credits,
+                    checkpoint=checkpoint,
+                )
+                self._bind_rc_receipts(connection, row, result["receipts"])
+                completed = validation["progress_completed"]
+                payload = _strict_json_object(
+                    str(events[-1]["payload_json"]).encode(), "/events/payload"
+                )
+                expected = dict(
+                    result_hash=row["result_hash"],
+                    evidence_hash=row["evidence_hash"],
+                    progress_completed=completed,
+                )
+                if events[-1]["event_type"] != "completed" or _canonical_json_bytes(
+                    {k: payload.get(k) for k in expected}
+                ) != _canonical_json_bytes(expected):
+                    raise ValueError("ordinal completion event differs")
+            if row["progress_completed"] != completed:
+                raise ValueError("ordinal source cursor projection differs")
+        except (TypeError, ValueError, KeyError, IndexError):
+            _fail(
+                "job_projection_integrity_failed",
+                "/job/progress",
+                "Ordinal cursor must match retained artifacts and owned grants.",
+            )
+
     def validate_integrity(
         self,
         job_id: str,
@@ -2832,6 +3455,8 @@ class DurableJobService:
         )
         if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
             self._validate_rc_corotational_projection(connection, row, request, events)
+        elif request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+            self._validate_ordinal_projection(connection, row, request, events)
         refs = self._row_references(row)
         for ref in refs.values():
             if ref is not None:
@@ -3113,6 +3738,45 @@ class DurableJobService:
             "/request",
         )
 
+    def _ordinal_typed_for_row(self, row):
+        """Derive recorded source only from attached hash-verified originals."""
+        from structural_analysis.execution.rc_corotational_ordinal_job_request import (
+            validate_rc_corotational_ordinal_job_request,
+        )
+
+        request = self._request_for_row(row)
+        artifact = self._checkpoint_for_row(row)
+        if artifact is None and row["result_hash"] is not None:
+            artifact = self._read_blob(
+                row["result_hash"],
+                row["result_size"],
+                maximum_bytes=_result_byte_limit(request),
+            )
+        source = None
+        if artifact is not None:
+            wrapper = _strict_json_object(artifact, "/ordinal_saved_original")
+            encoded = wrapper.get("terminal_checkpoint_artifact_base64")
+            if type(encoded) is not str:
+                _fail(
+                    "ordinal_original_source_invalid",
+                    "/checkpoint",
+                    "Saved native original is required.",
+                )
+            try:
+                raw = base64.b64decode(encoded, validate=True)
+                native = _strict_json_object(raw, "/ordinal_native_original")
+                source = native.get("source_identity")
+                _hash(source, "/source_identity")
+            except (TypeError, ValueError):
+                _fail(
+                    "ordinal_original_source_invalid",
+                    "/checkpoint",
+                    "Saved native source identity is invalid.",
+                )
+        return validate_rc_corotational_ordinal_job_request(
+            request, recorded_source_identity=source
+        )
+
     def _execution_budget(
         self, connection: sqlite3.Connection, row: sqlite3.Row
     ) -> dict[str, int]:
@@ -3123,7 +3787,10 @@ class DurableJobService:
                 "/execution_budget",
                 "Only bounded RC jobs have a persisted execution budget.",
             )
-        _rc_fiber_request(request)
+        if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+            self._ordinal_typed_for_row(row)
+        else:
+            _rc_fiber_request(request)
         maximum = request["execution_config"]["maximum_api_invocations"]
         budget = connection.execute(
             "SELECT * FROM job_execution_budgets WHERE job_id = ?",
@@ -3688,7 +4355,10 @@ class DurableJobService:
         assert request is not None
         return JobView(
             progress_unit=(
-                "control_solver_attempts"
+                "completed_source_ordinals"
+                if self._request_for_row(row).get("schema_version")
+                == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+                else "control_solver_attempts"
                 if self._request_for_row(row).get("schema_version")
                 in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
                 else None
@@ -3754,6 +4424,20 @@ def _validate_rc_outcome(
     typed: Any,
     request_hash: str,
 ) -> None:
+    if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+        from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+            validate_ordinal_invocation_outcome,
+        )
+
+        try:
+            validate_ordinal_invocation_outcome(outcome, request, request_hash)
+        except (TypeError, ValueError, KeyError) as exc:
+            raise JobServiceError(
+                "rc_invocation_contract_invalid",
+                "/outcome",
+                "Invalid ordinal invocation contract",
+            ) from exc
+        return
     if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
         from structural_analysis.execution.rc_corotational_job_contract import (
             validate_rc_corotational_invocation_outcome,
@@ -3970,6 +4654,13 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
     )
 
     try:
+        if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+            from structural_analysis.execution.rc_corotational_ordinal_job_request import (
+                validate_rc_corotational_ordinal_job_request,
+            )
+
+            typed = validate_rc_corotational_ordinal_job_request(request)
+            return typed.model, typed
         if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
             from structural_analysis.execution.rc_corotational_job_request import (
                 validate_rc_corotational_job_request,
@@ -3987,6 +4678,12 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
 
 
 def _result_byte_limit(request: Mapping[str, Any]) -> int:
+    if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+        from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+            ORDINAL_JOB_MAX_BYTES,
+        )
+
+        return ORDINAL_JOB_MAX_BYTES
     if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
         from structural_analysis.execution.rc_corotational_job_contract import (
             RC_COROTATIONAL_JOB_MAX_BYTES,

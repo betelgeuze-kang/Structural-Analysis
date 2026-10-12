@@ -1,0 +1,370 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/job_request_v8.schema.json",
+  "title": "Managed complete source-ordinal corotational RC request v8",
+  "description": "Strict source order, supported numerical model semantics, explicit total axial load role and cross-field budgets additionally require pure typed admission. Observed force and authored numerical genesis confer no experimental validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation",
+    "case_id",
+    "source_revision",
+    "result_contract",
+    "model",
+    "history_plan",
+    "observed_force_reference",
+    "config",
+    "execution_config"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-job-request.v8"
+    },
+    "operation": {
+      "const": "rc_corotational_ordinal_history"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "result_contract": {
+      "const": "rc-corotational-ordinal-job-result.v1"
+    },
+    "model": {
+      "type": "object",
+      "required": [
+        "nodes",
+        "elements"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 48
+        },
+        "elements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 96
+        }
+      }
+    },
+    "history_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "source_id",
+        "source_sha256",
+        "mapping_hash",
+        "rows"
+      ],
+      "properties": {
+        "schema": {
+          "const": "source-ordinal-history-plan.v1"
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "mapping_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 65536,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ordinal",
+              "source_row",
+              "source_row_sha256",
+              "target_m",
+              "axial_load_kn"
+            ],
+            "properties": {
+              "ordinal": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "source_row": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "source_row_sha256": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "target_m": {
+                "type": "number"
+              },
+              "axial_load_kn": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "observed_force_reference": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "unit",
+            "rows"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "ordinal-observed-force-reference.v1"
+            },
+            "unit": {
+              "const": "kN"
+            },
+            "rows": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 65536,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ordinal",
+                  "source_row_sha256",
+                  "observed_force_kn"
+                ],
+                "properties": {
+                  "ordinal": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "source_row_sha256": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  "observed_force_kn": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximum_solver_attempts",
+        "maximum_subdivision_depth",
+        "solver_config",
+        "fixed_nodal_loads",
+        "control_observation",
+        "axial_load_pattern",
+        "independent_axial_load_role",
+        "initialization",
+        "experimental_pin_roller_beam",
+        "experimental_fixed_guided_axial"
+      ],
+      "properties": {
+        "maximum_solver_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "maximum_subdivision_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "solver_config": {
+          "type": "object"
+        },
+        "fixed_nodal_loads": {
+          "type": "array",
+          "maxItems": 48,
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "control_observation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "terms"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "linear-physical-displacement-observation.v1"
+            },
+            "terms": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 48,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "node_id",
+                  "component",
+                  "coefficient"
+                ],
+                "properties": {
+                  "node_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+                  },
+                  "component": {
+                    "enum": [
+                      "UX",
+                      "UY",
+                      "RZ"
+                    ]
+                  },
+                  "coefficient": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "axial_load_pattern": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "node_id",
+              "component",
+              "coefficient"
+            ],
+            "properties": {
+              "node_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+              },
+              "component": {
+                "enum": [
+                  "FX",
+                  "FY"
+                ]
+              },
+              "coefficient": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "independent_axial_load_role": {
+          "const": "source_total_dead_global"
+        },
+        "initialization": {
+          "const": "authored_virgin_zero_reference"
+        },
+        "experimental_pin_roller_beam": {
+          "type": "boolean"
+        },
+        "experimental_fixed_guided_axial": {
+          "type": "boolean"
+        }
+      }
+    },
+    "execution_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximum_api_invocations",
+        "production_solver_budget",
+        "verification_solver_budget",
+        "attempt_limit_per_call",
+        "record_limit_per_call",
+        "phase_execution_policy"
+      ],
+      "properties": {
+        "maximum_api_invocations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "production_solver_budget": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "verification_solver_budget": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "attempt_limit_per_call": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
+        "record_limit_per_call": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
+        "phase_execution_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "analysis_timeout_ms",
+            "verification_timeout_ms",
+            "termination_grace_ms"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "bounded-rc-corotational-phase-execution-policy.v1"
+            },
+            "analysis_timeout_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600000
+            },
+            "verification_timeout_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600000
+            },
+            "termination_grace_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5000
+            }
+          }
+        }
+      }
+    }
+  }
+}

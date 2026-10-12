@@ -49,6 +49,7 @@ def _main() -> None:
     if entry not in {
         source / "structural_analysis/execution/rc_fiber_phase_supervisor.py",
         source / "structural_analysis/execution/rc_corotational_phase_supervisor.py",
+        source / "structural_analysis/execution/rc_corotational_ordinal_worker.py",
     }:
         raise RuntimeError("RC phase bootstrap entry differs from its source root")
     dependencies = json.loads(sys.argv[4])

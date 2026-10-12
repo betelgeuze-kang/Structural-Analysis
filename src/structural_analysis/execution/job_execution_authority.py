@@ -9,6 +9,8 @@ fencing is provided. Missing state is never silently recreated.
 
 from contextlib import contextmanager
 from dataclasses import dataclass
+import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -29,6 +31,42 @@ from .job_execution_permit import (
 
 class ExecutionAuthorityError(ValueError):
     pass
+
+
+def _credit_hash(value, *, nullable=False):
+    if nullable and value is None:
+        return None
+    if type(value) is not str or re.fullmatch(r"sha256:[0-9a-f]{64}", value) is None:
+        raise ExecutionAuthorityError("invalid ordinal credit digest")
+    return value
+
+
+def _credit_json(value):
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+
+
+def _ordinal_credit_schema(db):
+    names = {
+        r[0]
+        for r in db.execute(
+            "SELECT name FROM sqlite_master WHERE name IN ('ordinal_credit_budgets','ordinal_credit_reservations')"
+        )
+    }
+    if names and len(names) != 2:
+        raise ExecutionAuthorityError("partial ordinal credit namespace")
+    if not names:
+        db.execute(
+            "CREATE TABLE ordinal_credit_budgets (job_id TEXT PRIMARY KEY, request_hash TEXT NOT NULL, context_hash TEXT NOT NULL, production_max INTEGER NOT NULL, verification_max INTEGER NOT NULL)"
+        )
+        db.execute(
+            "CREATE TABLE ordinal_credit_reservations (job_id TEXT NOT NULL, credit_ordinal INTEGER NOT NULL, api_ordinal INTEGER NOT NULL, phase TEXT NOT NULL, ceiling INTEGER NOT NULL, payload_json TEXT NOT NULL, payload_hash TEXT NOT NULL, PRIMARY KEY(job_id,credit_ordinal), UNIQUE(job_id,api_ordinal))"
+        )
 
 
 def install_new_store(staging, destination):
@@ -389,3 +427,275 @@ class JobExecutionAuthority:
                 (job_id, spent + 1, binding.generation, binding.root),
             )
         return spent + 1
+
+    def register_ordinal_credits(
+        self,
+        binding,
+        job_id,
+        request_hash,
+        context_hash,
+        production_max,
+        verification_max,
+    ):
+        """Explicit new-profile registration in this SAME external owner database."""
+        _credit_hash(request_hash)
+        _credit_hash(context_hash)
+        for v in (production_max, verification_max):
+            if type(v) is not int or not 1 <= v <= 1000000:
+                raise ExecutionAuthorityError(
+                    "invalid whole-path ordinal solver ceiling"
+                )
+        with self._lock(), self._connection() as db:
+            self._require(db, binding)
+            api_budget = self._budget(db, binding, job_id, request_hash)
+            if (
+                api_budget["reserved_attempts"]
+                and not db.execute(
+                    "SELECT 1 FROM sqlite_master WHERE name='ordinal_credit_budgets'"
+                ).fetchone()
+            ):
+                raise ExecutionAuthorityError(
+                    "missing ordinal namespace cannot adopt prior API spend"
+                )
+            _ordinal_credit_schema(db)
+            wanted = (request_hash, context_hash, production_max, verification_max)
+            row = db.execute(
+                "SELECT request_hash,context_hash,production_max,verification_max FROM ordinal_credit_budgets WHERE job_id=?",
+                (job_id,),
+            ).fetchone()
+            if row is None:
+                if api_budget["reserved_attempts"]:
+                    raise ExecutionAuthorityError(
+                        "missing ordinal registration cannot adopt prior spend"
+                    )
+                db.execute(
+                    "INSERT INTO ordinal_credit_budgets VALUES (?,?,?,?,?)",
+                    (job_id, *wanted),
+                )
+            elif row != wanted:
+                raise ExecutionAuthorityError(
+                    "immutable ordinal solver authority mismatch"
+                )
+            return self._ordinal_credits(
+                db, binding, job_id, request_hash, context_hash
+            )
+
+    def _ordinal_credits(self, db, binding, job_id, request_hash, context_hash):
+        self._budget(db, binding, job_id, request_hash)
+        # Read NEVER creates or repairs a missing credit namespace.
+        names = {
+            r[0]
+            for r in db.execute(
+                "SELECT name FROM sqlite_master WHERE name IN ('ordinal_credit_budgets','ordinal_credit_reservations')"
+            )
+        }
+        if len(names) != 2:
+            raise ExecutionAuthorityError("ordinal solver authority unavailable")
+        row = db.execute(
+            "SELECT request_hash,context_hash,production_max,verification_max FROM ordinal_credit_budgets WHERE job_id=?",
+            (job_id,),
+        ).fetchone()
+        if row is None or row[:2] != (request_hash, context_hash):
+            raise ExecutionAuthorityError("ordinal solver request/context mismatch")
+        maxima = {"production": row[2], "verification": row[3]}
+        spent = {k: 0 for k in maxima}
+        grants = []
+        records = db.execute(
+            "SELECT credit_ordinal,api_ordinal,phase,ceiling,payload_json,payload_hash FROM ordinal_credit_reservations WHERE job_id=? ORDER BY credit_ordinal",
+            (job_id,),
+        ).fetchall()
+        for ordinal, record in enumerate(records, 1):
+            c, a, phase, ceiling, raw, digest = record
+            if (
+                c != ordinal
+                or type(a) is not int
+                or a < 1
+                or phase not in maxima
+                or type(ceiling) is not int
+                or not 0 <= ceiling <= 255
+            ):
+                raise ExecutionAuthorityError("ordinal credit journal invalid")
+            payload = json.loads(raw)
+            fields = {
+                "schema_version",
+                "job_request_hash",
+                "context_hash",
+                "credit_ordinal",
+                "api_ordinal",
+                "phase",
+                "ceiling",
+                "completed_before",
+                "prior_checkpoint_hash",
+                "native_input_sha256",
+                "record_limit",
+                "authority_id",
+                "authority_generation",
+                "authority_root",
+                "worker_id",
+                "lease_token_hash",
+            }
+            if (
+                type(payload) is not dict
+                or set(payload) != fields
+                or payload["schema_version"]
+                != "rc-ordinal-solver-credit-reservation.v1"
+                or any(
+                    type(payload[k]) is not int
+                    for k in (
+                        "credit_ordinal",
+                        "api_ordinal",
+                        "ceiling",
+                        "completed_before",
+                        "record_limit",
+                        "authority_generation",
+                    )
+                )
+                or not 0 <= payload["completed_before"] <= 65536
+                or not 1 <= payload["record_limit"] <= 255
+                or type(payload["worker_id"]) is not str
+                or not payload["worker_id"]
+            ):
+                raise ExecutionAuthorityError(
+                    "ordinal credit payload shape/types invalid"
+                )
+            _credit_hash(payload["prior_checkpoint_hash"], nullable=True)
+            _credit_hash(payload["native_input_sha256"], nullable=True)
+            _credit_hash(payload["lease_token_hash"])
+            if (
+                _credit_json(payload) != raw
+                or "sha256:" + hashlib.sha256(raw.encode()).hexdigest() != digest
+            ):
+                raise ExecutionAuthorityError("ordinal credit event hash mismatch")
+            api = db.execute(
+                "SELECT generation,root FROM reservations WHERE job_id=? AND ordinal=?",
+                (job_id, a),
+            ).fetchone()
+            if (
+                api is None
+                or payload.get("credit_ordinal") != c
+                or payload.get("api_ordinal") != a
+                or payload.get("phase") != phase
+                or payload.get("ceiling") != ceiling
+                or payload.get("job_request_hash") != request_hash
+                or payload.get("context_hash") != context_hash
+                or payload.get("authority_id") != binding.authority_id
+                or (payload.get("authority_generation"), payload.get("authority_root"))
+                != api
+            ):
+                raise ExecutionAuthorityError(
+                    "ordinal credits differ from original API reservation"
+                )
+            spent[phase] += ceiling
+            grants.append(dict(payload, grant_hash=digest))
+        if any(
+            type(maxima[k]) is not int
+            or not 1 <= maxima[k] <= 1000000
+            or spent[k] > maxima[k]
+            for k in maxima
+        ):
+            raise ExecutionAuthorityError("ordinal solver ceiling exceeded")
+        return {
+            "context_hash": context_hash,
+            "production": {
+                "maximum": maxima["production"],
+                "reserved": spent["production"],
+                "remaining": maxima["production"] - spent["production"],
+            },
+            "verification": {
+                "maximum": maxima["verification"],
+                "reserved": spent["verification"],
+                "remaining": maxima["verification"] - spent["verification"],
+            },
+            "reservations": grants,
+        }
+
+    def read_ordinal_credits(self, binding, job_id, request_hash, context_hash):
+        with self._lock(), self._connection() as db:
+            self._require(db, binding)
+            return self._ordinal_credits(
+                db, binding, job_id, request_hash, context_hash
+            )
+
+    def reserve_ordinal_credits(
+        self,
+        binding,
+        job_id,
+        request_hash,
+        context_hash,
+        *,
+        api_ordinal,
+        phase,
+        ceiling,
+        completed_before,
+        prior_checkpoint_hash,
+        native_input_sha256,
+        record_limit,
+        worker_id,
+        lease_token_hash,
+    ):
+        """Nonrefundable bounded solver grant BEFORE launch; a duplicate never relaunches."""
+        _credit_hash(request_hash)
+        _credit_hash(context_hash)
+        _credit_hash(prior_checkpoint_hash, nullable=True)
+        _credit_hash(native_input_sha256, nullable=True)
+        _credit_hash(lease_token_hash)
+        if (
+            phase not in ("production", "verification")
+            or type(ceiling) is not int
+            or not 0 <= ceiling <= 255
+            or type(record_limit) is not int
+            or not 1 <= record_limit <= 255
+            or type(completed_before) is not int
+            or not 0 <= completed_before <= 65536
+            or type(worker_id) is not str
+            or not worker_id
+        ):
+            raise ExecutionAuthorityError("invalid ordinal solver reservation")
+        _integer(api_ordinal, minimum=1)
+        with self._lock(), self._connection() as db:
+            self._require(db, binding)
+            snapshot = self._ordinal_credits(
+                db, binding, job_id, request_hash, context_hash
+            )
+            api = db.execute(
+                "SELECT generation,root FROM reservations WHERE job_id=? AND ordinal=?",
+                (job_id, api_ordinal),
+            ).fetchone()
+            if api != (binding.generation, binding.root):
+                raise ExecutionAuthorityError(
+                    "ordinal launch needs current-generation API reservation"
+                )
+            if any(g["api_ordinal"] == api_ordinal for g in snapshot["reservations"]):
+                raise ExecutionAuthorityError(
+                    "ordinal API reservation already consumed; unknown work cannot relaunch"
+                )
+            if ceiling > snapshot[phase]["remaining"]:
+                raise ExecutionAuthorityError(
+                    "whole-path ordinal solver budget exhausted"
+                )
+            ordinal = len(snapshot["reservations"]) + 1
+            payload = {
+                "schema_version": "rc-ordinal-solver-credit-reservation.v1",
+                "job_request_hash": request_hash,
+                "context_hash": context_hash,
+                "credit_ordinal": ordinal,
+                "api_ordinal": api_ordinal,
+                "phase": phase,
+                "ceiling": ceiling,
+                "completed_before": completed_before,
+                "prior_checkpoint_hash": prior_checkpoint_hash,
+                "native_input_sha256": native_input_sha256,
+                "record_limit": record_limit,
+                "authority_id": binding.authority_id,
+                "authority_generation": binding.generation,
+                "authority_root": binding.root,
+                "worker_id": worker_id,
+                "lease_token_hash": lease_token_hash,
+            }
+            raw = _credit_json(payload)
+            digest = "sha256:" + hashlib.sha256(raw.encode()).hexdigest()
+            db.execute(
+                "INSERT INTO ordinal_credit_reservations VALUES (?,?,?,?,?,?,?)",
+                (job_id, ordinal, api_ordinal, phase, ceiling, raw, digest),
+            )
+            return dict(payload, grant_hash=digest)
