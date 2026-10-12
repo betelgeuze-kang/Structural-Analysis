@@ -52,10 +52,23 @@ authority to a substituted prefix. Checkpoint writes and completion preserve the
 attached receipt prefix and compare its exact identity. Restoring an older store
 cannot lower external spend, replay a consumed grant, or make unknown work free.
 
-Pure historical decoding uses the source identity retained in authenticated
-original native artifacts. It does not fingerprint current code or run a solver.
-This permits saved-artifact inspection after a source update without qualifying
-that update. New numerical entries always check current source identity.
+Fresh submission records its validated source identity and context in the
+submitted event and registers that context with the external authority. Pure
+historical decoding checks those original values against the external registry
+and any attached native artifacts. An exact idempotent retry keeps that recorded
+source. It does not fingerprint current code, create a missing credit namespace,
+or run a solver. New numerical entries always check current source identity.
+
+For older jobs without a submitted source pin, authenticated original production
+outcomes and their external grants may establish the historical source. A job
+without that evidence is rejected; the currently installed source is never used
+to fill the gap. This permits inspection of a recorded failed job without
+accepting its uncommitted numerical state or qualifying a source update.
+
+When production and fresh verification both return a matching blocked or
+budget-exhausted native result, the worker retains both original observations
+and their spent grants, reports the native failure, and accepts no checkpoint.
+Matching failed observations are diagnostic evidence, not successful execution.
 
 The complete report preserves every authored source row and observed force.
 Accepted endpoint samples retain achieved observation, load factor, hold/commit
