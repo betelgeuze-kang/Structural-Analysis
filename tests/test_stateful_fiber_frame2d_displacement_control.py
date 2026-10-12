@@ -151,23 +151,51 @@ def test_low_load_direct_control_matches_existing_force_path(elastic_pair):
     assert steel and all(state.accumulated_plastic_strain == 0.0 for state in steel)
 
 
+@pytest.mark.parametrize("initial_guess", ["parent", "control_target"])
 def test_accepted_state_initial_coordinates_preserve_rotation_and_load_scale(
     elastic_pair,
+    initial_guess,
 ):
     pair = elastic_pair
     parent = pair.direct.accepted_checkpoint
-    config = Config(load_factor_coordinate_scale_m=0.007)
+    config = Config(load_factor_coordinate_scale_m=0.007, initial_guess=initial_guess)
     adapter = Adapter(pair.problem, parent, 7, 1.1 * pair.target, config)
     z = adapter.initial_free_displacements_m()
     expected = (
         np.asarray(parent.global_displacements) / pair.problem.physical_coordinate_scale
     )[list(pair.problem.free_global_dofs)]
+    if initial_guess == "control_target":
+        expected[adapter.control_free_index] = adapter.target_control_displacement_m
     np.testing.assert_array_equal(z[:-1], expected)
     assert z[-1] == parent.load_factor * config.load_factor_coordinate_scale_m
     assert adapter.reference_force_scale() > 0.0
     assert isinstance(adapter.case_id, str) and adapter.case_id
     z[:] = 0.0
     assert parent.global_displacements[7] == pytest.approx(pair.target, abs=1.0e-12)
+
+
+def test_prescribed_initial_trial_does_not_edit_parent_or_other_coordinates(
+    elastic_pair,
+):
+    pair = elastic_pair
+    parent = pair.direct.accepted_checkpoint
+    original = parent.canonical_bytes()
+    target = 1.1 * pair.target
+    legacy = Adapter(pair.problem, parent, 7, target, Config())
+    prescribed = Adapter(
+        pair.problem,
+        parent,
+        7,
+        target,
+        Config(initial_trial_policy="prescribed_control"),
+    )
+    expected = legacy.initial_free_displacements_m()
+    expected[prescribed.control_free_index] = target
+    trial = prescribed.initial_free_displacements_m()
+    np.testing.assert_array_equal(trial, expected)
+    assert prescribed.observe(trial).control_error_m == 0.0
+    trial[:] = 0.0
+    assert parent.canonical_bytes() == original
 
 
 def test_augmented_jacobian_matches_finite_difference_with_original_rc_materials(

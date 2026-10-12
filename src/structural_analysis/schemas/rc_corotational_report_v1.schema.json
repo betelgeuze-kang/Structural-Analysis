@@ -1,0 +1,1254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/rc_corotational_report_v1.schema.json",
+  "title": "Saved experimental corotational RC nodal report v1",
+  "description": "Exact report field shape; original request/result/evidence, numerical token bytes and service ledger custody are verified separately. Authored model metadata and load/support rows are retained declarations, not authority grants.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bindings",
+    "declarations",
+    "progress",
+    "units",
+    "responses",
+    "execution",
+    "structural_authority",
+    "derivation",
+    "claim_boundary",
+    "report_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "durable-rc-corotational-report.v1"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "job_id",
+        "completed_job_revision",
+        "terminal_event_hash",
+        "original_artifacts",
+        "case_id",
+        "request_schema_version",
+        "source_revision",
+        "source_revision_is_execution_attestation",
+        "recorded_source_identity",
+        "canonical_model_checksum",
+        "model_input_checksum",
+        "problem_contract_hash",
+        "resume_contract_hash",
+        "durable_result_hash",
+        "terminal_api_artifact_sha256",
+        "terminal_native_checkpoint_sha256",
+        "terminal_native_checkpoint_byte_length",
+        "worker_validator_id",
+        "worker_validation_report_hash",
+        "receipt_hashes",
+        "invocation_artifact_hashes"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^job_[0-9a-f]{32}$"
+        },
+        "completed_job_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "terminal_event_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "original_artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "request",
+            "checkpoint",
+            "result",
+            "evidence"
+          ],
+          "properties": {
+            "request": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "content_hash",
+                "byte_length",
+                "media_type"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "request",
+                    "checkpoint",
+                    "result",
+                    "evidence"
+                  ]
+                },
+                "content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "byte_length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "media_type": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "checkpoint": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "role",
+                    "content_hash",
+                    "byte_length",
+                    "media_type"
+                  ],
+                  "properties": {
+                    "role": {
+                      "enum": [
+                        "request",
+                        "checkpoint",
+                        "result",
+                        "evidence"
+                      ]
+                    },
+                    "content_hash": {
+                      "type": "string",
+                      "pattern": "^sha256:[0-9a-f]{64}$"
+                    },
+                    "byte_length": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "media_type": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "result": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "content_hash",
+                "byte_length",
+                "media_type"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "request",
+                    "checkpoint",
+                    "result",
+                    "evidence"
+                  ]
+                },
+                "content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "byte_length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "media_type": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "evidence": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "content_hash",
+                "byte_length",
+                "media_type"
+              ],
+              "properties": {
+                "role": {
+                  "enum": [
+                    "request",
+                    "checkpoint",
+                    "result",
+                    "evidence"
+                  ]
+                },
+                "content_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "byte_length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "media_type": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_schema_version": {
+          "enum": [
+            "structural-analysis-job-request.v6",
+            "structural-analysis-job-request.v7"
+          ]
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "source_revision_is_execution_attestation": {
+          "const": false
+        },
+        "recorded_source_identity": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "canonical_model_checksum": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "model_input_checksum": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "problem_contract_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "resume_contract_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "durable_result_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "terminal_api_artifact_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "terminal_native_checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "terminal_native_checkpoint_byte_length": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "worker_validator_id": {
+          "const": "structural_analysis.execution.rc_corotational_job_contract.validate_rc_corotational_job_result"
+        },
+        "worker_validation_report_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "receipt_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "minItems": 1
+        },
+        "invocation_artifact_hashes": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "declarations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control",
+        "targets_m",
+        "fixed_nodal_loads",
+        "reference_loads",
+        "supports",
+        "model_units",
+        "coordinate_system",
+        "model_metadata",
+        "config",
+        "execution_config"
+      ],
+      "properties": {
+        "control": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "node_id",
+            "component",
+            "unit"
+          ],
+          "properties": {
+            "node_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "component": {
+              "enum": [
+                "UX",
+                "UY"
+              ]
+            },
+            "unit": {
+              "const": "m"
+            }
+          }
+        },
+        "targets_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "maxItems": 255
+        },
+        "fixed_nodal_loads": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "enum": [
+                  "FX",
+                  "FY",
+                  "MZ"
+                ]
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "maxItems": 48
+        },
+        "reference_loads": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "supports": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "model_units": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "length",
+            "force"
+          ],
+          "properties": {
+            "length": {
+              "type": "string",
+              "minLength": 1
+            },
+            "force": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "coordinate_system": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "axis_order",
+            "up_axis"
+          ],
+          "properties": {
+            "axis_order": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "up_axis": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "model_metadata": {
+          "type": "object"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "control_node_id",
+            "control_component",
+            "targets_m",
+            "fixed_nodal_loads",
+            "config",
+            "preload_config",
+            "maximum_attempt_count",
+            "maximum_subdivision_depth",
+            "experimental_pin_roller_beam",
+            "experimental_fixed_guided_axial"
+          ],
+          "properties": {
+            "control_node_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "control_component": {
+              "enum": [
+                "UX",
+                "UY"
+              ]
+            },
+            "targets_m": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "maxItems": 255
+            },
+            "fixed_nodal_loads": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "enum": [
+                      "FX",
+                      "FY",
+                      "MZ"
+                    ]
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "maxItems": 48
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "residual_tolerance",
+                "control_tolerance_m",
+                "increment_tolerance_m",
+                "load_factor_increment_tolerance",
+                "load_factor_coordinate_scale_m",
+                "maximum_iterations",
+                "line_search_alphas",
+                "matrix_backend"
+              ],
+              "properties": {
+                "residual_tolerance": {
+                  "type": "number"
+                },
+                "control_tolerance_m": {
+                  "type": "number"
+                },
+                "increment_tolerance_m": {
+                  "type": "number"
+                },
+                "load_factor_increment_tolerance": {
+                  "type": "number"
+                },
+                "load_factor_coordinate_scale_m": {
+                  "type": "number"
+                },
+                "maximum_iterations": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "line_search_alphas": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 1,
+                  "maxItems": 64
+                },
+                "matrix_backend": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "preload_config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "residual_tolerance",
+                "increment_tolerance",
+                "max_iterations",
+                "line_search_alphas",
+                "matrix_backend"
+              ],
+              "properties": {
+                "residual_tolerance": {
+                  "type": "number"
+                },
+                "increment_tolerance": {
+                  "type": "number"
+                },
+                "max_iterations": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "line_search_alphas": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 1,
+                  "maxItems": 64
+                },
+                "matrix_backend": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "maximum_attempt_count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            },
+            "maximum_subdivision_depth": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "experimental_pin_roller_beam": {
+              "type": "boolean"
+            },
+            "experimental_fixed_guided_axial": {
+              "type": "boolean"
+            }
+          }
+        },
+        "execution_config": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "attempt_limit_per_call",
+                "maximum_api_invocations"
+              ],
+              "properties": {
+                "attempt_limit_per_call": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "maximum_api_invocations": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "attempt_limit_per_call",
+                "maximum_api_invocations",
+                "phase_execution_policy"
+              ],
+              "properties": {
+                "attempt_limit_per_call": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "maximum_api_invocations": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "phase_execution_policy": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema_version",
+                    "analysis_timeout_ms",
+                    "verification_timeout_ms",
+                    "termination_grace_ms"
+                  ],
+                  "properties": {
+                    "schema_version": {
+                      "const": "bounded-rc-corotational-phase-execution-policy.v1"
+                    },
+                    "analysis_timeout_ms": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "verification_timeout_ms": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "termination_grace_ms": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_solver_attempts",
+        "authored_targets",
+        "accepted_response_states"
+      ],
+      "properties": {
+        "control_solver_attempts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "completed",
+            "maximum"
+          ],
+          "properties": {
+            "completed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maximum": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "authored_targets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "completed",
+            "total"
+          ],
+          "properties": {
+            "completed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "accepted_response_states": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4097
+        }
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "frame",
+        "displacement_components",
+        "displacement_units",
+        "load_components",
+        "load_units",
+        "load_factor",
+        "reaction_definition"
+      ],
+      "properties": {
+        "frame": {
+          "const": "global"
+        },
+        "displacement_components": {
+          "const": [
+            "UX",
+            "UY",
+            "RZ"
+          ]
+        },
+        "displacement_units": {
+          "const": [
+            "m",
+            "m",
+            "rad"
+          ]
+        },
+        "load_components": {
+          "const": [
+            "FX",
+            "FY",
+            "MZ"
+          ]
+        },
+        "load_units": {
+          "const": [
+            "kN",
+            "kN",
+            "kN*m"
+          ]
+        },
+        "load_factor": {
+          "const": "1"
+        },
+        "reaction_definition": {
+          "const": "internal_minus_external_on_constrained_dofs;free_dofs_zero"
+        }
+      }
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state_index",
+          "phase",
+          "checkpoint_hash",
+          "parent_checkpoint_hash",
+          "load_factor",
+          "control_displacement_m",
+          "nodes"
+        ],
+        "properties": {
+          "state_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "phase": {
+            "enum": [
+              "preload",
+              "control"
+            ]
+          },
+          "checkpoint_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "parent_checkpoint_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "load_factor": {
+            "type": "number"
+          },
+          "control_displacement_m": {
+            "type": "number"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "node_id",
+                "displacements_m_rad",
+                "external_loads_kn_knm",
+                "reactions_kn_knm"
+              ],
+              "properties": {
+                "node_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "displacements_m_rad": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "external_loads_kn_knm": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "reactions_kn_knm": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              }
+            },
+            "minItems": 2,
+            "maxItems": 16
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 4097
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit",
+        "budget",
+        "recorded_invocation_count",
+        "pending_ordinals",
+        "unknown_execution_work",
+        "known_work",
+        "invocations"
+      ],
+      "properties": {
+        "unit": {
+          "const": "reserved_api_invocations"
+        },
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maximum_attempts",
+            "reserved_attempts",
+            "remaining_attempts"
+          ],
+          "properties": {
+            "maximum_attempts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reserved_attempts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "remaining_attempts": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "recorded_invocation_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pending_ordinals": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "uniqueItems": true
+        },
+        "unknown_execution_work": {
+          "type": "boolean"
+        },
+        "known_work": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "preload_solver_calls",
+            "restart_replay_solver_calls",
+            "control_solver_calls"
+          ],
+          "properties": {
+            "preload_solver_calls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "restart_replay_solver_calls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "control_solver_calls": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "invocations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schema_version",
+              "phase",
+              "status",
+              "job_request_hash",
+              "chunk_request_hash",
+              "completed_before",
+              "completed_after",
+              "restart_input_sha256",
+              "timing",
+              "unavailable_execution_work",
+              "ordinal",
+              "content_hash",
+              "byte_length",
+              "work",
+              "phase_supervision"
+            ],
+            "properties": {
+              "schema_version": {
+                "enum": [
+                  "bounded-rc-corotational-job-invocation.v1",
+                  "bounded-rc-corotational-job-invocation.v2"
+                ]
+              },
+              "phase": {
+                "enum": [
+                  "analysis",
+                  "verification"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "returned",
+                  "raised"
+                ]
+              },
+              "job_request_hash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "chunk_request_hash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "completed_before": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "completed_after": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "restart_input_sha256": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "timing": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "wall_ns",
+                  "process_cpu_ns"
+                ],
+                "properties": {
+                  "wall_ns": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "process_cpu_ns": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              },
+              "unavailable_execution_work": {
+                "type": "boolean"
+              },
+              "ordinal": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "content_hash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "byte_length": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "work": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "preload_solver_calls",
+                      "restart_replay_solver_calls",
+                      "control_solver_calls",
+                      "unavailable_execution_work"
+                    ],
+                    "properties": {
+                      "preload_solver_calls": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "restart_replay_solver_calls": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "control_solver_calls": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "unavailable_execution_work": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phase_supervision": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "schema_version",
+                      "phase",
+                      "job_request_hash",
+                      "chunk_request_hash",
+                      "completed_before",
+                      "planned_after",
+                      "restart_input_sha256",
+                      "policy",
+                      "status",
+                      "supervisor",
+                      "cleanup"
+                    ],
+                    "properties": {
+                      "schema_version": {
+                        "const": "bounded-rc-corotational-phase-supervision.v1"
+                      },
+                      "phase": {
+                        "enum": [
+                          "analysis",
+                          "verification"
+                        ]
+                      },
+                      "job_request_hash": {
+                        "type": "string",
+                        "pattern": "^sha256:[0-9a-f]{64}$"
+                      },
+                      "chunk_request_hash": {
+                        "type": "string",
+                        "pattern": "^sha256:[0-9a-f]{64}$"
+                      },
+                      "completed_before": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "planned_after": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "restart_input_sha256": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^sha256:[0-9a-f]{64}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "policy": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "schema_version",
+                          "analysis_timeout_ms",
+                          "verification_timeout_ms",
+                          "termination_grace_ms"
+                        ],
+                        "properties": {
+                          "schema_version": {
+                            "const": "bounded-rc-corotational-phase-execution-policy.v1"
+                          },
+                          "analysis_timeout_ms": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "verification_timeout_ms": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "termination_grace_ms": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        }
+                      },
+                      "status": {
+                        "enum": [
+                          "returned",
+                          "raised",
+                          "unaccounted"
+                        ]
+                      },
+                      "supervisor": {
+                        "type": "object"
+                      },
+                      "cleanup": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          },
+          "maxItems": 100000
+        }
+      }
+    },
+    "structural_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "experimental_corotational_rc_control",
+        "trusted_worker_verification_attestation",
+        "service_numerical_verification_performed",
+        "independent_execution_authentication",
+        "independent_physical_validation",
+        "design_authority",
+        "release_approved",
+        "production_promotion_eligible"
+      ],
+      "properties": {
+        "experimental_corotational_rc_control": {
+          "const": true
+        },
+        "trusted_worker_verification_attestation": {
+          "const": true
+        },
+        "service_numerical_verification_performed": {
+          "const": false
+        },
+        "independent_execution_authentication": {
+          "const": false
+        },
+        "independent_physical_validation": {
+          "const": false
+        },
+        "design_authority": {
+          "const": false
+        },
+        "release_approved": {
+          "const": false
+        },
+        "production_promotion_eligible": {
+          "const": false
+        }
+      }
+    },
+    "derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "fresh_analysis_invocations",
+        "fresh_verification_invocations",
+        "source_fingerprint_invocations",
+        "new_structural_authority"
+      ],
+      "properties": {
+        "version": {
+          "const": "rc_corotational_nodal_report.v1"
+        },
+        "fresh_analysis_invocations": {
+          "const": 0
+        },
+        "fresh_verification_invocations": {
+          "const": 0
+        },
+        "source_fingerprint_invocations": {
+          "const": 0
+        },
+        "new_structural_authority": {
+          "const": false
+        }
+      }
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "report_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

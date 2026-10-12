@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/job_request_v6.schema.json",
+  "title": "Structural Analysis Experimental Corotational RC Durable Job Request v6",
+  "description": "Immutable corotational control input; full model, solver and numeric semantics are validated by the pure request decoder before numerical execution. Progress counts bounded control attempts, not authored targets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation",
+    "case_id",
+    "model",
+    "config",
+    "source_revision",
+    "result_contract",
+    "execution_config"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-job-request.v6"
+    },
+    "operation": {
+      "const": "bounded_rc_corotational_control"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "model": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "result_contract": {
+      "const": "bounded-rc-corotational-job-result.v1"
+    },
+    "execution_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_limit_per_call",
+        "maximum_api_invocations"
+      ],
+      "properties": {
+        "attempt_limit_per_call": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "maximum_api_invocations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "minProperties": 1
+    }
+  }
+}

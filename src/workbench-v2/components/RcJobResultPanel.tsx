@@ -88,6 +88,9 @@ export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJ
       <dt>Control</dt><dd>{summary.control.node_id} · {summary.control.component} ({summary.control.unit})</dd>
       <dt>{summary.historyFile ? 'Declared canonical model identity' : 'Source revision'}</dt><dd className="wb2-mono" style={{ overflowWrap: 'anywhere' }} data-rc-source>{summary.sourceRevision}</dd>
       <dt>Source attestation</dt><dd>Caller declaration; not independently attested</dd>
+      {summary.fixedGuided ? <>
+        <dt>Experimental support profile</dt><dd data-rc-fixed-guided-profile>Fixed/axial guide · fixed {summary.fixedGuided.fixed}, guided {summary.fixedGuided.guided} ({summary.fixedGuided.axial} free)</dd>
+      </> : null}
       {summary.historyFile ? <>
         <dt>Known step calls in this file</dt><dd data-rc-core>{summary.knownCoreCalls}</dd>
         <dt>Known Newton iterations in this file</dt><dd>{summary.knownNewtonIterations}</dd>

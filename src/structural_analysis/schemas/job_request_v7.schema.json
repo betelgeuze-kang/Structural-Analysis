@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/job_request_v7.schema.json",
+  "title": "Structural Analysis Isolated Corotational RC Durable Job Request v7",
+  "description": "Immutable v7 corotational inputs require an explicit strict isolated phase policy. Numerical model semantics remain subject to the pure request decoder. Deadlines do not establish process isolation, hard resource quotas or solver authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "operation", "case_id", "model", "config",
+    "source_revision", "result_contract", "execution_config"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-job-request.v7"},
+    "operation": {"const": "bounded_rc_corotational_control"},
+    "case_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"},
+    "model": {"type": "object", "minProperties": 1},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "result_contract": {"const": "bounded-rc-corotational-job-result.v1"},
+    "execution_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempt_limit_per_call", "maximum_api_invocations", "phase_execution_policy"],
+      "properties": {
+        "attempt_limit_per_call": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "maximum_api_invocations": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "phase_execution_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema_version", "analysis_timeout_ms", "verification_timeout_ms", "termination_grace_ms"],
+          "properties": {
+            "schema_version": {"const": "bounded-rc-corotational-phase-execution-policy.v1"},
+            "analysis_timeout_ms": {"type": "integer", "minimum": 1, "maximum": 3600000},
+            "verification_timeout_ms": {"type": "integer", "minimum": 1, "maximum": 3600000},
+            "termination_grace_ms": {"type": "integer", "minimum": 1, "maximum": 5000}
+          }
+        }
+      }
+    },
+    "config": {"type": "object", "minProperties": 1}
+  }
+}

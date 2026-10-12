@@ -81,6 +81,7 @@ def build_rc_quantity_report(
         model,
         rebar_density_kg_per_m3=7850.0,
         experimental_pin_roller_beam=config.experimental_pin_roller_beam,
+        experimental_fixed_guided_axial=config.experimental_fixed_guided_axial,
     )
     payload = {
         "schema_version": RC_QUANTITY_REPORT_SCHEMA,

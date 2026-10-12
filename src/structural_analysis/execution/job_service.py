@@ -13,7 +13,7 @@ object-store durability, production identity management, or release authority.
 from __future__ import annotations
 
 from collections.abc import Callable, Collection, Mapping
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import base64
@@ -27,9 +27,19 @@ from pathlib import Path
 import re
 import secrets
 import sqlite3
+import stat
 import tempfile
+from time import monotonic, sleep
 from types import MappingProxyType
 from typing import Any, Final, Iterator, Literal, NoReturn
+
+from .job_execution_authority import (
+    ExecutionBinding,
+    ExecutionAuthorityError,
+    JobExecutionAuthority,
+    install_new_store,
+)
+from .job_execution_permit import ExecutionPermitError
 
 from jsonschema import Draft202012Validator
 
@@ -37,9 +47,21 @@ from jsonschema import Draft202012Validator
 JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
 PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
+FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v5"
+RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v6"
+ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = (
+    "structural-analysis-job-request.v7"
+)
+RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS = (
+    RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+    ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+)
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
     RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
     PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
+    FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION,
+    RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+    ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
 )
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
@@ -133,6 +155,16 @@ class ArtifactReference:
         }
 
 
+@dataclass(frozen=True, eq=False)
+class _BlobAdmission:
+    """One registered plan under this service's active writer transaction."""
+
+    connection: sqlite3.Connection
+    candidates: Mapping[str, int]
+    existing: frozenset[str]
+    stored: set[str]
+
+
 @dataclass(frozen=True)
 class JobView:
     job_id: str
@@ -151,6 +183,7 @@ class JobView:
     evidence: ArtifactReference | None
     resume_contract_hash: str | None
     terminal_event_hash: str
+    progress_unit: str | None = None
 
     @property
     def can_resume(self) -> bool:
@@ -161,7 +194,11 @@ class JobView:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "schema_version": JOB_VIEW_SCHEMA_VERSION,
+            "schema_version": (
+                "structural-analysis-job-view.v2"
+                if self.progress_unit is not None
+                else JOB_VIEW_SCHEMA_VERSION
+            ),
             "service_profile": JOB_SERVICE_PROFILE,
             "job_id": self.job_id,
             "status": self.status,
@@ -170,6 +207,11 @@ class JobView:
             "progress": {
                 "completed_steps": self.progress_completed,
                 "total_steps": self.progress_total,
+                **(
+                    {"unit": self.progress_unit}
+                    if self.progress_unit is not None
+                    else {}
+                ),
             },
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -236,7 +278,19 @@ class DurableJobService:
         worker_tokens: Mapping[str, str],
         worker_tenants: Mapping[str, Collection[str]] | None = None,
         clock: Callable[[], datetime] | None = None,
+        max_blob_payload_bytes: int | None = None,
+        execution_authority: JobExecutionAuthority | None = None,
+        execution_binding: ExecutionBinding | None = None,
     ) -> None:
+        if max_blob_payload_bytes is not None and (
+            type(max_blob_payload_bytes) is not int
+            or not 1 <= max_blob_payload_bytes <= 2**63 - 1
+        ):
+            _fail(
+                "blob_payload_budget_invalid",
+                "/max_blob_payload_bytes",
+                "The root payload cap must be an exact positive signed 64-bit integer.",
+            )
         requested_root = Path(root)
         if requested_root.exists() and requested_root.is_symlink():
             _fail(
@@ -249,6 +303,7 @@ class DurableJobService:
         for marker in (
             ".job-store-backup.pending",
             ".job-store-restore.pending",
+            ".job-store-authority.pending",
             "backup-manifest.json",
         ):
             path = self.root / marker
@@ -258,10 +313,26 @@ class DurableJobService:
                     "/root",
                     "An incomplete recovery or sealed backup cannot be opened as a live job store.",
                 )
-        self.root.mkdir(parents=True, exist_ok=True)
-        self._blob_root = self.root / "blobs" / "sha256"
+        storage_root = self.root
+        if execution_authority is not None:
+            if self.root.exists() or self.root.is_symlink():
+                _fail(
+                    "execution_authority_adoption_required",
+                    "/root",
+                    "Managed enrollment requires a new destination.",
+                )
+            self.root.parent.mkdir(parents=True, exist_ok=True)
+            storage_root = Path(
+                tempfile.mkdtemp(prefix=".job-store-enroll-", dir=self.root.parent)
+            )
+        else:
+            self.root.mkdir(parents=True, exist_ok=True)
+        self._blob_root = storage_root / "blobs" / "sha256"
         self._blob_root.mkdir(parents=True, exist_ok=True)
-        self._db_path = self.root / "jobs.sqlite3"
+        self._db_path = storage_root / "jobs.sqlite3"
+        self._execution_authority = None
+        self._execution_binding = None
+        self._load_execution_authority(execution_authority, execution_binding)
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._tenant_token_hashes = MappingProxyType(
             _credential_map("tenant", tenant_tokens)
@@ -293,7 +364,259 @@ class DurableJobService:
                     )
                 permissions[worker_id] = normalized
         self._worker_tenants = MappingProxyType(permissions)
-        self._initialize_database()
+        self._blob_admissions: dict[sqlite3.Connection, _BlobAdmission | None] = {}
+        authority_pending = storage_root / ".job-store-authority.pending"
+        if execution_authority is not None:
+            with authority_pending.open("xb") as stream:
+                stream.write(b"Managed enrollment incomplete; preserve for recovery.\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            self._sync_authority_directory(storage_root)
+        with self.execution_guard():
+            self._initialize_database()
+        if execution_authority is not None:
+            with self.execution_guard(), self._connect() as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                connection.execute(
+                    "CREATE TABLE job_execution_authority_binding (singleton INTEGER PRIMARY KEY CHECK(singleton=1), directory TEXT NOT NULL, identity TEXT NOT NULL, generation INTEGER NOT NULL, root TEXT NOT NULL)"
+                )
+                connection.execute(
+                    "INSERT INTO job_execution_authority_binding VALUES (1, ?, ?, ?, ?)",
+                    (
+                        str(execution_authority.directory),
+                        execution_binding.authority_id,
+                        execution_binding.generation,
+                        execution_binding.root,
+                    ),
+                )
+                connection.execute("PRAGMA application_id=1380140373")
+                connection.commit()
+            authority_pending.unlink()
+            self._sync_authority_directory(storage_root)
+        # Policy is committed independently of subsequent job transactions.
+        with self._transaction() as connection:
+            current = self._blob_payload_limit(connection)
+            if max_blob_payload_bytes is not None:
+                if current is None:
+                    connection.execute(
+                        "INSERT INTO job_blob_payload_policy VALUES (1, ?)",
+                        (max_blob_payload_bytes,),
+                    )
+                elif current != max_blob_payload_bytes:
+                    _fail(
+                        "blob_payload_budget_conflict",
+                        "/max_blob_payload_bytes",
+                        "The root already has a different immutable payload cap.",
+                    )
+
+        if execution_authority is not None:
+            with self.execution_guard():
+                try:
+                    install_new_store(storage_root, self.root)
+                except ExecutionAuthorityError as exc:
+                    raise JobServiceError(
+                        "execution_authority_install_failed", "/root", str(exc)
+                    ) from exc
+                self._sync_authority_directory(self.root.parent)
+            self._blob_root = self.root / "blobs" / "sha256"
+            self._db_path = self.root / "jobs.sqlite3"
+
+    def _sync_authority_directory(self, root):
+        descriptor = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+
+    def _load_execution_authority(self, authority, binding):
+        if (authority is None) != (binding is None):
+            _fail(
+                "execution_authority_invalid",
+                "/root",
+                "Authority and binding must be supplied together.",
+            )
+        if authority is not None:
+            if (
+                type(authority) is not JobExecutionAuthority
+                or type(binding) is not ExecutionBinding
+            ):
+                _fail(
+                    "execution_authority_invalid",
+                    "/root",
+                    "Invalid managed execution binding.",
+                )
+            if self._db_path.exists():
+                _fail(
+                    "execution_authority_adoption_required",
+                    "/root",
+                    "Existing stores require explicit offline adoption; constructor enrollment is only for new stores.",
+                )
+        elif self._db_path.exists():
+            connection = None
+            try:
+                connection = sqlite3.connect(
+                    self._db_path.as_uri() + "?mode=ro", uri=True
+                )
+                marker = connection.execute("PRAGMA application_id").fetchone()[0]
+                exists = connection.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='job_execution_authority_binding'"
+                ).fetchone()
+                if marker == 1380140373 or exists:
+                    if marker != 1380140373 or not exists:
+                        raise ValueError("managed authority metadata incomplete")
+                    rows = connection.execute(
+                        "SELECT directory, identity, generation, root FROM job_execution_authority_binding"
+                    ).fetchall()
+                    if len(rows) != 1:
+                        raise ValueError("managed authority metadata invalid")
+                    directory, identity, generation, root = rows[0]
+                    authority = JobExecutionAuthority(directory)
+                    binding = ExecutionBinding(identity, generation, root)
+            except (sqlite3.Error, ValueError, TypeError) as exc:
+                raise JobServiceError(
+                    "execution_authority_invalid",
+                    "/root",
+                    "Managed execution metadata cannot be read.",
+                ) from exc
+            finally:
+                if connection is not None:
+                    connection.close()
+        self._execution_authority, self._execution_binding = authority, binding
+        with self.execution_guard():
+            pass
+
+    @contextmanager
+    def execution_guard(self):
+        if self._execution_authority is None:
+            yield None
+            return
+        try:
+            if self._execution_binding.root != str(self.root):
+                raise ExecutionAuthorityError(
+                    "store root differs from execution binding"
+                )
+            with self._execution_authority.execution(self._execution_binding) as fd:
+                yield fd
+        except ExecutionPermitError as exc:
+            raise JobServiceError(exc.code, "/root", str(exc)) from exc
+        except ExecutionAuthorityError as exc:
+            raise JobServiceError(
+                "execution_authority_rejected", "/root", str(exc)
+            ) from exc
+
+    @contextmanager
+    def job_execution_permit(
+        self,
+        job_id,
+        *,
+        expected_request_hash,
+        worker_id,
+        authorization_token,
+        lease_token,
+    ):
+        """Borrow a Linux per-job exclusion fd; busy never mutates the live claim.
+
+        The caller holds its generation guard first and retains both descriptors
+        through numerical children, publication and heartbeat shutdown. Runtime
+        locks are never copied into backups or deleted on release. Unmanaged
+        stores have canonical-root-local custody; cross-copy fencing requires
+        the external managed authority and its pinned namespace.
+        """
+        from structural_analysis.execution.job_execution_permit import (
+            acquire_execution_permit,
+            create_execution_permit_schema,
+            initialize_execution_permit_namespace,
+            register_execution_permit,
+            validate_execution_permit_namespace,
+        )
+
+        self._authorize_worker(worker_id, authorization_token)
+        expected_request_hash = _hash(expected_request_hash, "/request_hash")
+
+        def require_claim(connection):
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            if row["request_hash"] != expected_request_hash:
+                _fail(
+                    "execution_permit_request_mismatch",
+                    "/request_hash",
+                    "Claim request differs from the live job.",
+                )
+
+        try:
+            with self.execution_guard():
+                # Authenticate before touching the permit namespace. Recheck
+                # after admission; a lease cannot survive a blocking metadata
+                # read solely because it was valid before that read.
+                with self._transaction() as connection:
+                    require_claim(connection)
+                if self._execution_authority is not None:
+                    with self._execution_authority.execution_permit(
+                        self._execution_binding, job_id, expected_request_hash
+                    ) as fd:
+                        with self._transaction() as connection:
+                            require_claim(connection)
+                        yield fd
+                    return
+                directory = self.root.resolve() / ".job-execution-permits"
+                namespace_key = (
+                    "unmanaged:"
+                    + hashlib.sha256(str(self.root.resolve()).encode()).hexdigest()
+                )
+                with ExitStack() as permits:
+                    with self._transaction() as connection:
+                        require_claim(connection)
+                        if (
+                            connection.execute(
+                                "SELECT 1 FROM sqlite_master WHERE name='job_execution_permit_namespaces'"
+                            ).fetchone()
+                            is None
+                        ):
+                            create_execution_permit_schema(connection)
+                        namespace = connection.execute(
+                            "SELECT namespace_key FROM job_execution_permit_namespaces WHERE namespace_key=?",
+                            (namespace_key,),
+                        ).fetchone()
+                        if namespace is None:
+                            initialize_execution_permit_namespace(
+                                connection,
+                                directory=directory,
+                                namespace_key=namespace_key,
+                            )
+                        else:
+                            validate_execution_permit_namespace(
+                                connection,
+                                directory=directory,
+                                namespace_key=namespace_key,
+                            )
+                        register_execution_permit(
+                            connection,
+                            directory=directory,
+                            namespace_key=namespace_key,
+                            job_id=job_id,
+                            request_hash=expected_request_hash,
+                        )
+                        permit = permits.enter_context(
+                            acquire_execution_permit(
+                                connection,
+                                directory=directory,
+                                namespace_key=namespace_key,
+                                job_id=job_id,
+                                request_hash=expected_request_hash,
+                            )
+                        )
+                    with self._transaction() as connection:
+                        require_claim(connection)
+                    yield permit
+        except ExecutionPermitError as error:
+            raise JobServiceError(
+                error.code, "/execution_permit", str(error)
+            ) from error
+        except ExecutionAuthorityError as error:
+            raise JobServiceError(
+                "execution_authority_rejected", "/execution_permit", str(error)
+            ) from error
 
     def submit_job(
         self,
@@ -315,7 +638,16 @@ class DurableJobService:
             _validate_schema(
                 normalized_request,
                 (
-                    "job_request_v4.schema.json"
+                    "job_request_v7.schema.json"
+                    if normalized_request["schema_version"]
+                    == ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                    else "job_request_v6.schema.json"
+                    if normalized_request["schema_version"]
+                    == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                    else "job_request_v5.schema.json"
+                    if normalized_request["schema_version"]
+                    == FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION
+                    else "job_request_v4.schema.json"
                     if normalized_request["schema_version"]
                     == PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION
                     else "job_request_v3.schema.json"
@@ -323,7 +655,12 @@ class DurableJobService:
                 "/request",
             )
             _model, rc_config = _rc_fiber_request(normalized_request)
-            total_steps = len(rc_config.targets_m)
+            total_steps = (
+                rc_config.progress_total
+                if normalized_request["schema_version"]
+                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                else len(rc_config.targets_m)
+            )
             maximum_attempts = normalized_request["execution_config"][
                 "maximum_api_invocations"
             ]
@@ -356,11 +693,13 @@ class DurableJobService:
                     )
             # Resolve conflicts under the writer lock before persisting bytes.
             # Exact retries still verify or repair their existing request blob.
+            admission = self._admit_blob_payloads(connection, (request_bytes,))
             request_ref = self._put_blob(
                 request_bytes,
                 role="request",
                 media_type="application/json",
                 maximum_bytes=_MAX_REQUEST_BYTES,
+                admission=admission,
             )
             now, _now_us = self._now()
             if prior is not None:
@@ -463,10 +802,10 @@ class DurableJobService:
                 "Lease duration must be an integer in [5, 3600].",
             )
 
-        now, now_us = self._now()
-        lease_expires_us = now_us + lease_seconds * 1_000_000
-        lease_expires_at = _format_us(lease_expires_us)
         with self._transaction() as connection:
+            now, now_us = self._now()
+            lease_expires_us = now_us + lease_seconds * 1_000_000
+            lease_expires_at = _format_us(lease_expires_us)
             self._recover_expired_leases(
                 connection, selected_tenants=selected_tenants, now=now, now_us=now_us
             )
@@ -484,6 +823,10 @@ class DurableJobService:
             ).fetchone()
             if row is None:
                 return None
+
+            if self._execution_authority is not None:
+                # Only the RC worker holds the authority through child cleanup.
+                row, _budget = self._reconcile_execution_reservations(connection, row)
 
             request_bytes = self._read_blob(
                 str(row["request_hash"]),
@@ -549,10 +892,10 @@ class DurableJobService:
                 "/lease_seconds",
                 "Lease duration must be an integer in [5, 3600].",
             )
-        now, now_us = self._now()
-        expires_us = now_us + lease_seconds * 1_000_000
-        expires_at = _format_us(expires_us)
         with self._transaction() as connection:
+            now, now_us = self._now()
+            expires_us = now_us + lease_seconds * 1_000_000
+            expires_at = _format_us(expires_us)
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -590,7 +933,69 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
-            return self._execution_budget(connection, row)
+            return self._reconcile_execution_reservations(connection, row)[1]
+
+    def reconcile_execution_reservations(
+        self, job_id: str, *, tenant_id: str, authorization_token: str
+    ) -> dict[str, int]:
+        """Import missing external spend as unknown, never as a worker outcome.
+
+        This is an explicit managed-store operation. It cannot activate a copied
+        store, adopt legacy spend, or repair damaged local event history.
+        """
+        self._authorize_tenant(tenant_id, authorization_token)
+        if self._execution_authority is None:
+            _fail(
+                "execution_authority_required", "/root", "A managed store is required."
+            )
+        with self._transaction() as connection:
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            return self._reconcile_execution_reservations(connection, row)[1]
+
+    def _reconcile_execution_reservations(self, connection, row):
+        if self._execution_authority is None:
+            return row, self._execution_budget(connection, row)
+        budget = self._execution_budget(connection, row)
+        authority = self._execution_authority
+        try:
+            authority.register_job(
+                self._execution_binding,
+                str(row["job_id"]),
+                str(row["request_hash"]),
+                budget["maximum_attempts"],
+            )
+            snapshot = authority.read_reservations(
+                self._execution_binding, str(row["job_id"]), str(row["request_hash"])
+            )
+        except ExecutionAuthorityError as exc:
+            _fail("execution_authority_rejected", "/execution_budget", str(exc))
+        external = snapshot["budget"]
+        if (
+            external["adopted_reserved_attempts"] != 0
+            or external["maximum_attempts"] != budget["maximum_attempts"]
+            or external["reserved_attempts"] < budget["reserved_attempts"]
+        ):
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "External spend cannot be reconciled with this managed store.",
+            )
+        for payload in snapshot["reservations"][budget["reserved_attempts"] :]:
+            row = self._transition(
+                connection,
+                row,
+                event_type="execution_authority_reservation_imported",
+                status=row["status"],
+                occurred_at=self._now()[0],
+                payload=payload,
+                updates={},
+            )
+        connection.execute(
+            "UPDATE job_execution_budgets SET reserved_attempts=? WHERE job_id=?",
+            (external["reserved_attempts"], str(row["job_id"])),
+        )
+        return row, self._execution_budget(connection, row)
 
     def reserve_execution_attempt(
         self,
@@ -615,7 +1020,7 @@ class DurableJobService:
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
-            budget = self._execution_budget(connection, row)
+            row, budget = self._reconcile_execution_reservations(connection, row)
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
             if budget["remaining_attempts"] == 0:
@@ -625,6 +1030,25 @@ class DurableJobService:
                     "The immutable job-wide execution reservation limit is exhausted.",
                 )
             reserved = budget["reserved_attempts"] + 1
+            authority_payload = {}
+            if self._execution_authority is not None:
+                try:
+                    external_ordinal = self._execution_authority.reserve(
+                        self._execution_binding, job_id, str(row["request_hash"])
+                    )
+                except ExecutionAuthorityError as exc:
+                    _fail("execution_authority_rejected", "/execution_budget", str(exc))
+                if external_ordinal != reserved:
+                    _fail(
+                        "execution_authority_reservation_race",
+                        "/execution_budget",
+                        "External spend changed; reconcile before retrying. No work may begin.",
+                    )
+                authority_payload = {
+                    "authority_id": self._execution_binding.authority_id,
+                    "authority_generation": self._execution_binding.generation,
+                    "authority_root": self._execution_binding.root,
+                }
             connection.execute(
                 "UPDATE job_execution_budgets SET reserved_attempts = ? WHERE job_id = ?",
                 (reserved, job_id),
@@ -636,6 +1060,7 @@ class DurableJobService:
                 status="running",
                 occurred_at=now,
                 payload={
+                    **authority_payload,
                     "worker_id": worker_id,
                     "reserved_attempts": reserved,
                     "maximum_attempts": budget["maximum_attempts"],
@@ -775,11 +1200,15 @@ class DurableJobService:
                     "/restart_input_sha256",
                     "The invocation restart must match the current durable checkpoint bytes.",
                 )
+            admission = self._admit_blob_payloads(connection, (raw,))
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
             ref = self._put_blob(
                 raw,
                 role="evidence",
                 media_type="application/json",
                 maximum_bytes=_result_byte_limit(request),
+                admission=admission,
             )
             metadata = {
                 key: normalized[key]
@@ -844,10 +1273,11 @@ class DurableJobService:
             (row["job_id"],),
         ).fetchall()
         reservations = {}
-        for ordinal, event in enumerate(events, 1):
+        for event in events:
             payload = _strict_json_object(
                 str(event["payload_json"]).encode(), "/rc_invocations/reservation"
             )
+            ordinal = payload["reserved_attempts"]
             if type(payload.get("attempt")) is not int or not 1 <= payload[
                 "attempt"
             ] <= int(row["attempt"]):
@@ -1033,6 +1463,44 @@ class DurableJobService:
         self, connection: sqlite3.Connection, row: sqlite3.Row, receipts: Any
     ) -> None:
         """Check each claimed receipt against its actual durable invocation pair, one pair at a time."""
+        if (
+            self._request_for_row(row).get("schema_version")
+            in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+        ):
+            from structural_analysis.execution.rc_corotational_job_contract import (
+                bind_rc_corotational_receipts,
+            )
+
+            records = {
+                record["ordinal"]: record
+                for record in self._rc_invocation_rows(connection, row)
+            }
+            used = set()
+            request = self._request_for_row(row)
+            for receipt in receipts:
+                outcomes = {}
+                for phase in ("analysis", "verification"):
+                    ordinal = receipt[f"{phase}_ordinal"]
+                    if (
+                        type(ordinal) is not int
+                        or ordinal in used
+                        or ordinal not in records
+                    ):
+                        raise ValueError(
+                            "Corotational invocation ordinal missing or reused"
+                        )
+                    used.add(ordinal)
+                    record = records[ordinal]
+                    outcomes[ordinal] = _strict_json_object(
+                        self._read_blob(
+                            str(record["outcome_hash"]),
+                            int(record["outcome_size"]),
+                            maximum_bytes=_result_byte_limit(request),
+                        ),
+                        "/rc_invocation",
+                    )
+                bind_rc_corotational_receipts([receipt], outcomes, request)
+            return
         records = {
             record["ordinal"]: record
             for record in self._rc_invocation_rows(connection, row)
@@ -1153,14 +1621,10 @@ class DurableJobService:
         self._authorize_worker(worker_id, authorization_token)
         _hash(resume_contract_hash, "/resume_contract_hash")
         normalized_checkpoint = bytes(checkpoint_bytes)
-        checkpoint_ref = self._put_blob(
-            normalized_checkpoint,
-            role="checkpoint",
-            media_type=checkpoint_media_type,
-            maximum_bytes=_MAX_CHECKPOINT_BYTES,
-        )
-        now, now_us = self._now()
+        _media_type(checkpoint_media_type, "/checkpoint/media_type")
+        _bounded(normalized_checkpoint, _MAX_CHECKPOINT_BYTES, "/checkpoint")
         with self._transaction() as connection:
+            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -1194,6 +1658,19 @@ class DurableJobService:
                 )
 
                 checkpoint = self._checkpoint_for_row(row)
+                if (
+                    request.get("schema_version")
+                    in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                ):
+                    from structural_analysis.execution.rc_corotational_job_contract import (
+                        validate_rc_corotational_job_checkpoint,
+                    )
+
+                    def validate_rc_fiber_job_checkpoint(data, **kwargs):
+                        return validate_rc_corotational_job_checkpoint(
+                            data, resume_contract_hash=resume_contract_hash, **kwargs
+                        )["payload"]
+
                 try:
                     validated = validate_rc_fiber_job_checkpoint(
                         normalized_checkpoint,
@@ -1211,6 +1688,16 @@ class DurableJobService:
                         "/checkpoint",
                         "The RC checkpoint must preserve its request, prefix and recorded invocations.",
                     )
+            admission = self._admit_blob_payloads(connection, (normalized_checkpoint,))
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            checkpoint_ref = self._put_blob(
+                normalized_checkpoint,
+                role="checkpoint",
+                media_type=checkpoint_media_type,
+                maximum_bytes=_MAX_CHECKPOINT_BYTES,
+                admission=admission,
+            )
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
             row = self._transition(
@@ -1270,20 +1757,9 @@ class DurableJobService:
         _bounded(evidence_bytes, _MAX_EVIDENCE_BYTES, "/evidence")
         result_hash = _sha256(normalized_result)
         evidence_hash = _sha256(evidence_bytes)
-        result_ref = self._put_blob(
-            normalized_result,
-            role="result",
-            media_type=result_media_type,
-            maximum_bytes=maximum_result_bytes,
-        )
-        evidence_ref = self._put_blob(
-            evidence_bytes,
-            role="evidence",
-            media_type="application/json",
-            maximum_bytes=_MAX_EVIDENCE_BYTES,
-        )
-        now, now_us = self._now()
+        _media_type(result_media_type, "/result/media_type")
         with self._transaction() as connection:
+            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -1332,6 +1808,17 @@ class DurableJobService:
                     validate_rc_fiber_job_result,
                 )
 
+                if (
+                    request.get("schema_version")
+                    in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                ):
+                    from structural_analysis.execution.rc_corotational_job_contract import (
+                        RC_COROTATIONAL_JOB_VALIDATOR_ID,
+                        validate_rc_corotational_job_result,
+                    )
+
+                    RC_FIBER_JOB_VALIDATOR_ID = RC_COROTATIONAL_JOB_VALIDATOR_ID
+                    validate_rc_fiber_job_result = validate_rc_corotational_job_result
                 try:
                     report = validate_rc_fiber_job_result(
                         result_payload,
@@ -1356,8 +1843,35 @@ class DurableJobService:
                         "/evidence/validation_report",
                         "The evidence must retain the exact pure RC job validation report.",
                     )
+            admission = self._admit_blob_payloads(
+                connection, (normalized_result, evidence_bytes)
+            )
             now, now_us = self._now()
             self._require_active_lease(row, worker_id, lease_token, now_us)
+            result_ref = self._put_blob(
+                normalized_result,
+                role="result",
+                media_type=result_media_type,
+                maximum_bytes=maximum_result_bytes,
+                admission=admission,
+            )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            evidence_ref = self._put_blob(
+                evidence_bytes,
+                role="evidence",
+                media_type="application/json",
+                maximum_bytes=_MAX_EVIDENCE_BYTES,
+                admission=admission,
+            )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            completed_progress = (
+                result_payload["progress_completed"]
+                if request.get("schema_version")
+                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                else int(row["progress_total"])
+            )
             row = self._transition(
                 connection,
                 row,
@@ -1368,10 +1882,10 @@ class DurableJobService:
                     "worker_id": worker_id,
                     "result_hash": result_hash,
                     "evidence_hash": evidence_hash,
-                    "progress_completed": int(row["progress_total"]),
+                    "progress_completed": completed_progress,
                 },
                 updates={
-                    "progress_completed": int(row["progress_total"]),
+                    "progress_completed": completed_progress,
                     "result_hash": result_ref.content_hash,
                     "result_size": result_ref.byte_length,
                     "result_media_type": result_ref.media_type,
@@ -1403,8 +1917,8 @@ class DurableJobService:
             )
         if type(retriable) is not bool:
             _fail("retriable_invalid", "/retriable", "retriable must be boolean.")
-        now, now_us = self._now()
         with self._transaction() as connection:
+            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -1577,6 +2091,226 @@ class DurableJobService:
             maximum_bytes=_MAX_EVIDENCE_BYTES,
         )
 
+    def read_rc_corotational_report(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+        expected_request_hash: str | None = None,
+        expected_result_artifact_hash: str | None = None,
+        expected_evidence_artifact_hash: str | None = None,
+    ) -> bytes:
+        """Derive an immutable nodal report from one authenticated read snapshot.
+
+        No report table, new revision, numerical call or current source
+        fingerprint is created. Restoring identical originals retains the bytes.
+        """
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            RC_COROTATIONAL_JOB_VALIDATOR_ID,
+            validate_rc_corotational_invocation_outcome,
+            validate_rc_corotational_job_result,
+        )
+        from structural_analysis.execution.rc_corotational_job_request import (
+            validate_rc_corotational_job_request,
+        )
+        from structural_analysis.execution.rc_corotational_report import (
+            RCCorotationalReportTooLargeError,
+            build_rc_corotational_report,
+        )
+
+        self._authorize_tenant(tenant_id, authorization_token)
+        expected_hashes = {
+            "request": expected_request_hash,
+            "result": expected_result_artifact_hash,
+            "evidence": expected_evidence_artifact_hash,
+        }
+        for role, digest in expected_hashes.items():
+            if digest is None:
+                _fail(
+                    "rc_corotational_report_source_required",
+                    f"/expected_{role}_hash",
+                    "Specify the exact saved request, result and evidence hashes.",
+                )
+            _hash(digest, f"/expected_{role}_hash")
+        with self._connect() as connection:
+            connection.execute("BEGIN")
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            request = self._request_for_row(row)
+            if (
+                request.get("schema_version")
+                not in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+            ):
+                _fail(
+                    "rc_corotational_report_job_unsupported",
+                    "/job",
+                    "A durable corotational RC job is required.",
+                )
+            if (
+                row["status"] != "succeeded"
+                or row["result_hash"] is None
+                or row["evidence_hash"] is None
+            ):
+                _fail(
+                    "rc_corotational_report_job_not_succeeded",
+                    "/job",
+                    "A successful published corotational RC job is required.",
+                )
+            if any(
+                row[f"{role}_hash"] != digest
+                for role, digest in expected_hashes.items()
+            ):
+                _fail(
+                    "rc_corotational_report_source_conflict",
+                    "/source",
+                    "Refresh the exact saved request, result and evidence references.",
+                )
+            self._validate_integrity_snapshot(connection, row)
+            validate_job_view(self._view(row))
+            result = _strict_json_object(
+                self._read_blob(
+                    row["result_hash"],
+                    row["result_size"],
+                    maximum_bytes=_result_byte_limit(request),
+                ),
+                "/result",
+            )
+            evidence = _strict_json_object(
+                self._read_blob(
+                    row["evidence_hash"],
+                    row["evidence_size"],
+                    maximum_bytes=_MAX_EVIDENCE_BYTES,
+                ),
+                "/evidence",
+            )
+            try:
+                typed = validate_rc_corotational_job_request(request)
+                validation = validate_rc_corotational_job_result(
+                    result,
+                    request=typed,
+                    execution_budget=self._execution_budget(connection, row),
+                    checkpoint=self._checkpoint_for_row(row),
+                )
+                self._bind_rc_receipts(connection, row, result["receipts"])
+                _validate_schema(
+                    evidence, "job_completion_evidence_v1.schema.json", "/evidence"
+                )
+                expected_evidence = build_job_completion_evidence(
+                    job_id=job_id,
+                    request_hash=row["request_hash"],
+                    checkpoint_hash=row["checkpoint_hash"],
+                    result_bytes=self._read_blob(
+                        row["result_hash"],
+                        row["result_size"],
+                        maximum_bytes=_result_byte_limit(request),
+                    ),
+                    validator_id=RC_COROTATIONAL_JOB_VALIDATOR_ID,
+                    validation_report=validation,
+                )
+                if _canonical_json_bytes(evidence) != _canonical_json_bytes(
+                    expected_evidence
+                ):
+                    raise ValueError("Corotational completion evidence differs")
+                invocations = []
+                records = self._rc_invocation_rows(connection, row)
+                for record in records:
+                    outcome = validate_rc_corotational_invocation_outcome(
+                        self._read_blob(
+                            record["outcome_hash"],
+                            record["outcome_size"],
+                            maximum_bytes=_result_byte_limit(request),
+                        ),
+                        typed,
+                        row["request_hash"],
+                    )
+                    metadata = _strict_json_object(
+                        str(record["metadata_json"]).encode(),
+                        "/rc_invocations/metadata",
+                    )
+                    if _canonical_json_bytes(metadata) != _canonical_json_bytes(
+                        {key: outcome[key] for key in metadata}
+                    ):
+                        raise ValueError("Corotational invocation metadata differs")
+                    work = None
+                    if outcome["status"] == "returned":
+                        work = (
+                            outcome["api_result"]["work"]
+                            if outcome["phase"] == "analysis"
+                            else outcome["verification_report"]["replay_work"]
+                        )
+                    invocations.append(
+                        {
+                            **metadata,
+                            "ordinal": record["ordinal"],
+                            "content_hash": record["outcome_hash"],
+                            "byte_length": record["outcome_size"],
+                            "work": work,
+                            "phase_supervision": outcome.get("phase_supervision"),
+                        }
+                    )
+                tail = result["receipts"][-1]
+                bindings = {
+                    "tenant_id": row["tenant_id"],
+                    "job_id": job_id,
+                    "completed_job_revision": row["revision"],
+                    "terminal_event_hash": row["terminal_event_hash"],
+                    "original_artifacts": {
+                        role: ref.to_dict() if ref else None
+                        for role, ref in self._row_references(row).items()
+                    },
+                    "case_id": typed.case_id,
+                    "request_schema_version": request["schema_version"],
+                    "source_revision": typed.source_revision,
+                    "source_revision_is_execution_attestation": False,
+                    "recorded_source_identity": tail["api_request"]["source_identity"],
+                    "canonical_model_checksum": typed.source_model_checksum,
+                    "model_input_checksum": typed.source_input_checksum,
+                    "problem_contract_hash": typed.problem_contract_hash,
+                    "resume_contract_hash": typed.resume_contract_hash,
+                    "durable_result_hash": result["result_hash"],
+                    "terminal_api_artifact_sha256": tail["result_artifact_sha256"],
+                    "terminal_native_checkpoint_sha256": tail["checkpoint_sha256"],
+                    "terminal_native_checkpoint_byte_length": tail[
+                        "checkpoint_byte_length"
+                    ],
+                    "worker_validator_id": RC_COROTATIONAL_JOB_VALIDATOR_ID,
+                    "worker_validation_report_hash": _sha256(
+                        _canonical_json_bytes(validation)
+                    ),
+                    "receipt_hashes": validation["receipt_hashes"],
+                    "invocation_artifact_hashes": {
+                        str(record["ordinal"]): record["outcome_hash"]
+                        for record in records
+                    },
+                }
+                raw = build_rc_corotational_report(
+                    request=typed,
+                    result=result,
+                    bindings=bindings,
+                    invocations=invocations,
+                )
+                _validate_schema(
+                    _strict_json_object(raw, "/rc_corotational_report"),
+                    "rc_corotational_report_v1.schema.json",
+                    "/rc_corotational_report",
+                )
+                return raw
+            except JobServiceError:
+                raise
+            except RCCorotationalReportTooLargeError:
+                _fail(
+                    "rc_corotational_report_too_large",
+                    "/report",
+                    "The report exceeds its bounded export size.",
+                )
+            except (TypeError, ValueError, KeyError, IndexError):
+                _fail(
+                    "rc_corotational_report_original_invalid",
+                    "/source",
+                    "The saved corotational report source or execution custody differs.",
+                )
+
     def create_rc_quantity_report(
         self,
         job_id: str,
@@ -1653,11 +2387,13 @@ class DurableJobService:
                         "Revision changed.",
                     )
                 return self._rc_quantity_reference(current, prior)
+            admission = self._admit_blob_payloads(connection, (raw,))
             ref = self._put_blob(
                 raw,
                 role="rc-quantity-report",
                 media_type="application/json",
                 maximum_bytes=RC_QUANTITY_REPORT_MAX_BYTES,
+                admission=admission,
             )
             revision = connection.execute(
                 "SELECT COALESCE(MAX(revision), 0) + 1 FROM job_rc_quantity_reports WHERE job_id = ?",
@@ -1817,6 +2553,15 @@ class DurableJobService:
                 "/job",
                 "A successful RC job is required.",
             )
+        request = self._request_for_row(row)
+        if (
+            request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
+            or request.get("schema_version")
+            in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+        ):
+            _fail(
+                "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
+            )
         validate_job_view(self._view(row))
         event = connection.execute(
             "SELECT * FROM job_events WHERE job_id = ? AND revision = ?",
@@ -1845,11 +2590,6 @@ class DurableJobService:
                 "rc_quantity_original_invalid",
                 "/source",
                 "Completed-event artifact custody differs.",
-            )
-        request = self._request_for_row(row)
-        if request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
-            _fail(
-                "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
             )
         result = _strict_json_object(
             self._read_blob(
@@ -1940,6 +2680,113 @@ class DurableJobService:
                 "The original RC authority bindings differ.",
             )
 
+    def _validate_rc_corotational_projection(
+        self,
+        connection: sqlite3.Connection,
+        row: sqlite3.Row,
+        request: dict[str, Any],
+        events: list[sqlite3.Row],
+    ) -> None:
+        """Bind v6 mutable counters to retained bytes/events without a solve."""
+        from structural_analysis.execution.rc_corotational_job_request import (
+            validate_rc_corotational_job_request,
+        )
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            validate_rc_corotational_job_checkpoint,
+            validate_rc_corotational_job_result,
+        )
+
+        try:
+            typed = validate_rc_corotational_job_request(request)
+            if row["progress_total"] != typed.progress_total:
+                raise ValueError("Corotational attempt cap differs from request")
+            submitted = _strict_json_object(
+                str(events[0]["payload_json"]).encode(), "/events/payload"
+            )
+            if (
+                events[0]["event_type"] != "submitted"
+                or submitted.get("request_hash") != row["request_hash"]
+                or submitted.get("progress_total") != typed.progress_total
+            ):
+                raise ValueError("Corotational submitted request/cap differs")
+            budget = self._execution_budget(connection, row)
+            checkpoint = self._checkpoint_for_row(row)
+            committed = next(
+                (
+                    event
+                    for event in reversed(events)
+                    if event["event_type"] == "checkpoint_committed"
+                ),
+                None,
+            )
+            if (committed is None) != (checkpoint is None):
+                raise ValueError("Corotational retained checkpoint projection differs")
+            if checkpoint is not None:
+                saved = _strict_json_object(checkpoint, "/checkpoint")
+                report = validate_rc_corotational_job_checkpoint(
+                    saved,
+                    request=request,
+                    progress_completed=saved["progress_completed"],
+                    resume_contract_hash=row["resume_contract_hash"],
+                    execution_budget=budget,
+                )
+                self._bind_rc_receipts(connection, row, saved["receipts"])
+                committed_payload = _strict_json_object(
+                    str(committed["payload_json"]).encode(), "/events/payload"
+                )
+                expected = {
+                    "checkpoint_hash": row["checkpoint_hash"],
+                    "resume_contract_hash": row["resume_contract_hash"],
+                    "progress_completed": report["progress_completed"],
+                    "progress_total": typed.progress_total,
+                }
+                if _canonical_json_bytes(
+                    {key: committed_payload.get(key) for key in expected}
+                ) != _canonical_json_bytes(expected):
+                    raise ValueError("Corotational checkpoint event differs")
+                completed = report["progress_completed"]
+            else:
+                if row["resume_contract_hash"] is not None:
+                    raise ValueError("Corotational resume binding lacks checkpoint")
+                completed = 0
+            if row["status"] == "succeeded":
+                result = _strict_json_object(
+                    self._read_blob(
+                        row["result_hash"],
+                        row["result_size"],
+                        maximum_bytes=_result_byte_limit(request),
+                    ),
+                    "/result",
+                )
+                report = validate_rc_corotational_job_result(
+                    result,
+                    request=request,
+                    execution_budget=budget,
+                    checkpoint=checkpoint,
+                )
+                self._bind_rc_receipts(connection, row, result["receipts"])
+                completed = report["progress_completed"]
+                expected = {
+                    "result_hash": row["result_hash"],
+                    "evidence_hash": row["evidence_hash"],
+                    "progress_completed": completed,
+                }
+                final_payload = _strict_json_object(
+                    str(events[-1]["payload_json"]).encode(), "/events/payload"
+                )
+                if events[-1]["event_type"] != "completed" or _canonical_json_bytes(
+                    {key: final_payload.get(key) for key in expected}
+                ) != _canonical_json_bytes(expected):
+                    raise ValueError("Corotational completed event differs")
+            if row["progress_completed"] != completed:
+                raise ValueError("Corotational projection progress differs")
+        except (TypeError, ValueError, KeyError, IndexError):
+            _fail(
+                "job_projection_integrity_failed",
+                "/job/progress",
+                "Corotational counters must match their request, retained artifacts and events.",
+            )
+
     def validate_integrity(
         self,
         job_id: str,
@@ -1947,35 +2794,44 @@ class DurableJobService:
         tenant_id: str,
         authorization_token: str,
     ) -> dict[str, Any]:
-        """Verify every attached blob and the full persisted transition chain."""
-
+        """Verify attached bytes and transition/counter custody in one snapshot."""
         self._authorize_tenant(tenant_id, authorization_token)
         with self._connect() as connection:
+            connection.execute("BEGIN")
             row = self._job_row(connection, job_id)
             self._require_tenant(row, tenant_id)
-            events = connection.execute(
-                "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision",
-                (job_id,),
-            ).fetchall()
-            request = self._request_for_row(row)
-            if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
-                self._execution_budget(connection, row)
-            elif (
-                connection.execute(
-                    "SELECT 1 FROM job_execution_budgets WHERE job_id = ?", (job_id,)
-                ).fetchone()
-                is not None
-            ):
-                _fail(
-                    "execution_budget_integrity_failed",
-                    "/execution_budget",
-                    "An unsupported job operation has an unexpected execution budget.",
-                )
-            rc_records = (
-                self._rc_invocation_rows(connection, row, verify_blobs=True)
-                if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
-                else []
+            return self._validate_integrity_snapshot(connection, row)
+
+    def _validate_integrity_snapshot(
+        self, connection: sqlite3.Connection, row: sqlite3.Row
+    ) -> dict[str, Any]:
+        """Reuse the caller's authenticated read transaction, never a fresh solve."""
+        job_id = str(row["job_id"])
+        events = connection.execute(
+            "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision",
+            (job_id,),
+        ).fetchall()
+        request = self._request_for_row(row)
+        if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
+            self._execution_budget(connection, row)
+        elif (
+            connection.execute(
+                "SELECT 1 FROM job_execution_budgets WHERE job_id = ?", (job_id,)
+            ).fetchone()
+            is not None
+        ):
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "An unsupported job operation has an unexpected execution budget.",
             )
+        rc_records = (
+            self._rc_invocation_rows(connection, row, verify_blobs=True)
+            if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
+            else []
+        )
+        if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
+            self._validate_rc_corotational_projection(connection, row, request, events)
         refs = self._row_references(row)
         for ref in refs.values():
             if ref is not None:
@@ -2128,6 +2984,12 @@ class DurableJobService:
                     PRIMARY KEY (job_id, revision),
                     UNIQUE (job_id, report_id)
                 );
+                CREATE TABLE IF NOT EXISTS job_blob_payload_policy (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    maximum_bytes INTEGER NOT NULL CHECK (
+                        typeof(maximum_bytes) = 'integer' AND maximum_bytes > 0
+                    )
+                );
                 CREATE TABLE IF NOT EXISTS job_execution_budgets (
                     job_id TEXT PRIMARY KEY REFERENCES jobs(job_id) ON DELETE RESTRICT,
                     maximum_attempts TEXT NOT NULL,
@@ -2145,35 +3007,77 @@ class DurableJobService:
             connection.close()
 
     def _connect(self) -> sqlite3.Connection:
-        connection = None
-        try:
-            connection = sqlite3.connect(
-                self._db_path,
-                timeout=30.0,
-                isolation_level=None,
-            )
-            connection.row_factory = sqlite3.Row
-            connection.execute("PRAGMA foreign_keys = ON")
-            connection.execute("PRAGMA journal_mode = WAL")
-            connection.execute("PRAGMA synchronous = FULL")
-            return connection
-        except sqlite3.DatabaseError:
-            # Setup can fail after connect succeeds (for example a corrupt
-            # database during PRAGMA). Retained error tracebacks must not retain
-            # an open store handle while callers inspect or log the rejection.
-            if connection is not None:
-                connection.close()
-            _fail(
-                "job_database_open_failed",
-                "/database",
-                "The durable database could not be opened.",
-            )
+        # Even read callers configure SQLite's persistent journal mode. Fence
+        # this setup before opening the store; writes retain their transaction-
+        # lifetime guard separately.
+        with self.execution_guard():
+            return self._open_configured_connection()
+
+    def _open_configured_connection(self) -> sqlite3.Connection:
+        # WAL setup can return BUSY without invoking SQLite's busy handler.
+        # Retry fresh connections under one deadline, releasing every failed
+        # connection before waiting. Transactions retain their 30-second wait.
+        deadline = monotonic() + 30.0
+        retry_delay = 0.005
+        while monotonic() < deadline:
+            connection = None
+            configured = False
+            try:
+                connection = sqlite3.connect(
+                    self._db_path,
+                    timeout=0.0,
+                    isolation_level=None,
+                )
+                connection.row_factory = sqlite3.Row
+                connection.execute("PRAGMA foreign_keys = ON")
+                mode = connection.execute("PRAGMA journal_mode = WAL").fetchone()
+                if mode is None or mode[0] != "wal":
+                    raise sqlite3.OperationalError("WAL mode is required")
+                connection.execute("PRAGMA synchronous = FULL")
+                if monotonic() >= deadline:
+                    break
+                connection.execute("PRAGMA busy_timeout = 30000")
+                configured = True
+                return connection
+            except sqlite3.DatabaseError as exc:
+                code = getattr(exc, "sqlite_errorcode", None)
+                # Python 3.10 lacks sqlite_errorcode. Its exact BUSY message
+                # excludes SQLITE_LOCKED ("database table is locked").
+                busy = isinstance(exc, sqlite3.OperationalError) and (
+                    code & 0xFF == 5  # SQLITE_BUSY, including extended codes
+                    if type(code) is int
+                    else str(exc) == "database is locked"
+                )
+                if not busy:
+                    _fail(
+                        "job_database_open_failed",
+                        "/database",
+                        "The durable database could not be opened.",
+                    )
+            finally:
+                if connection is not None and not configured:
+                    connection.close()
+            remaining = deadline - monotonic()
+            if remaining > 0:
+                sleep(min(retry_delay, remaining))
+                retry_delay = min(retry_delay * 2, 0.05)
+        _fail(
+            "job_database_open_failed",
+            "/database",
+            "The durable database could not be opened.",
+        )
 
     @contextmanager
     def _transaction(self) -> Iterator[sqlite3.Connection]:
+        with self.execution_guard(), self._unguarded_transaction() as connection:
+            yield connection
+
+    @contextmanager
+    def _unguarded_transaction(self) -> Iterator[sqlite3.Connection]:
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
+            self._blob_admissions[connection] = None
             yield connection
             connection.commit()
         except JobServiceError:
@@ -2187,6 +3091,7 @@ class DurableJobService:
                 "The durable state transition did not commit.",
             )
         finally:
+            self._blob_admissions.pop(connection, None)
             connection.close()
 
     def _job_row(self, connection: sqlite3.Connection, job_id: str) -> sqlite3.Row:
@@ -2236,8 +3141,8 @@ class DurableJobService:
                 "The durable budget disagrees with the immutable request.",
             )
         reservations = connection.execute(
-            "SELECT payload_json FROM job_events "
-            "WHERE job_id = ? AND event_type = 'execution_attempt_reserved' "
+            "SELECT payload_json, event_type FROM job_events "
+            "WHERE job_id = ? AND event_type IN ('execution_attempt_reserved', 'execution_authority_reservation_imported') "
             "ORDER BY revision",
             (str(row["job_id"]),),
         ).fetchall()
@@ -2247,6 +3152,7 @@ class DurableJobService:
                 "/execution_budget",
                 "The durable reservation count disagrees with the event history.",
             )
+        imported = None
         for ordinal, event in enumerate(reservations, 1):
             payload = _strict_json_object(
                 str(event["payload_json"]).encode("utf-8"), "/execution_budget/events"
@@ -2262,6 +3168,53 @@ class DurableJobService:
                     "/execution_budget",
                     "Reservation event ordinals or immutable limits changed.",
                 )
+            if (
+                event["event_type"] == "execution_authority_reservation_imported"
+                or self._execution_authority is not None
+            ):
+                if self._execution_authority is None:
+                    _fail(
+                        "execution_budget_integrity_failed",
+                        "/execution_budget",
+                        "Imported reservations require an execution authority.",
+                    )
+                if imported is None:
+                    try:
+                        snapshot = self._execution_authority.read_reservations(
+                            self._execution_binding,
+                            str(row["job_id"]),
+                            str(row["request_hash"]),
+                        )
+                    except ExecutionAuthorityError as exc:
+                        _fail(
+                            "execution_authority_rejected",
+                            "/execution_budget",
+                            str(exc),
+                        )
+                    imported = {
+                        item["reserved_attempts"]: item
+                        for item in snapshot["reservations"]
+                    }
+                expected = imported.get(ordinal)
+                observed = payload
+                if event["event_type"] == "execution_attempt_reserved":
+                    observed = {
+                        key: payload.get(key)
+                        for key in (
+                            "reserved_attempts",
+                            "maximum_attempts",
+                            "authority_id",
+                            "authority_generation",
+                            "authority_root",
+                        )
+                    }
+                    observed["execution_work"] = "unknown"
+                if _canonical_json_bytes(observed) != _canonical_json_bytes(expected):
+                    _fail(
+                        "execution_budget_integrity_failed",
+                        "/execution_budget",
+                        "Imported unknown spend differs from the external journal.",
+                    )
         return {
             "maximum_attempts": maximum,
             "reserved_attempts": budget["reserved_attempts"],
@@ -2435,6 +3388,124 @@ class DurableJobService:
                 "The worker lease has expired and cannot mutate the job.",
             )
 
+    def _blob_payload_limit(self, connection: sqlite3.Connection) -> int | None:
+        try:
+            rows = connection.execute(
+                "SELECT singleton, maximum_bytes FROM job_blob_payload_policy"
+            ).fetchall()
+        except sqlite3.DatabaseError:
+            _fail(
+                "blob_payload_policy_invalid",
+                "/storage",
+                "The persisted root payload policy is invalid.",
+            )
+        if not rows:
+            return None
+        if (
+            len(rows) != 1
+            or type(rows[0][0]) is not int
+            or rows[0][0] != 1
+            or type(rows[0][1]) is not int
+            or not 1 <= rows[0][1] <= 2**63 - 1
+        ):
+            _fail(
+                "blob_payload_policy_invalid",
+                "/storage",
+                "The persisted root payload policy is invalid.",
+            )
+        return rows[0][1]
+
+    def _blob_payload_inventory(self) -> int:
+        """Count actual regular-file payload lengths without following aliases.
+
+        Digest-named orphans and crash-left staging files consume capacity.
+        This is a trusted local filesystem inventory, not an attacker-race API.
+        """
+        total = 0
+        try:
+            for directory in (self.root, self.root / "blobs", self._blob_root):
+                if not stat.S_ISDIR(directory.lstat().st_mode):
+                    raise OSError
+            with os.scandir(self._blob_root) as prefixes:
+                for prefix in prefixes:
+                    if re.fullmatch(
+                        r"[0-9a-f]{2}", prefix.name
+                    ) is None or not stat.S_ISDIR(
+                        prefix.stat(follow_symlinks=False).st_mode
+                    ):
+                        raise OSError
+                    with os.scandir(prefix.path) as entries:
+                        for entry in entries:
+                            metadata = entry.stat(follow_symlinks=False)
+                            canonical = re.fullmatch(
+                                r"[0-9a-f]{64}", entry.name
+                            ) is not None and entry.name.startswith(prefix.name)
+                            staging = entry.name.startswith(".job-blob-")
+                            if (
+                                not stat.S_ISREG(metadata.st_mode)
+                                or not (canonical or staging)
+                                or metadata.st_size < 0
+                            ):
+                                raise OSError
+                            total += metadata.st_size
+        except OSError:
+            _fail(
+                "blob_payload_inventory_invalid",
+                "/storage",
+                "The root payload inventory is unavailable or unsafe.",
+            )
+        return total
+
+    def _admit_blob_payloads(
+        self, connection: sqlite3.Connection, payloads: Collection[bytes]
+    ) -> _BlobAdmission:
+        """Validate a distinct payload union before any write and lease refresh.
+
+        A new plan replaces the preceding plan in this transaction; stale plans
+        cannot reserve overlapping unwritten groups and then overbook capacity.
+        """
+        if connection not in self._blob_admissions or not connection.in_transaction:
+            _fail(
+                "blob_payload_admission_required",
+                "/storage",
+                "Blob admission requires this service's active writer transaction.",
+            )
+        maximum = self._blob_payload_limit(connection)  # Never cache root policy.
+        retained = self._blob_payload_inventory() if maximum is not None else 0
+        candidates: dict[str, int] = {}
+        existing: set[str] = set()
+        missing = 0
+        for payload in payloads:
+            if type(payload) is not bytes:
+                _fail(
+                    "artifact_bytes_invalid",
+                    "/artifact",
+                    "Artifact payload must be bytes.",
+                )
+            digest = _sha256(payload)
+            if digest in candidates:
+                continue
+            candidates[digest] = len(payload)
+            path = self._blob_path(digest)
+            if path.exists() or path.is_symlink():
+                # All potentially slow dedup reads precede the caller's final
+                # active-lease check. _put_blob never repeats this read.
+                self._read_blob(digest, len(payload), maximum_bytes=len(payload))
+                existing.add(digest)
+            else:
+                missing += len(payload)
+        if maximum is not None and missing and retained + missing > maximum:
+            _fail(
+                "blob_payload_budget_exceeded",
+                "/storage",
+                "The retained payloads and planned growth exceed the root cap.",
+            )
+        admission = _BlobAdmission(
+            connection, MappingProxyType(candidates), frozenset(existing), set()
+        )
+        self._blob_admissions[connection] = admission
+        return admission
+
     def _put_blob(
         self,
         payload: bytes,
@@ -2444,15 +3515,63 @@ class DurableJobService:
         ],
         media_type: str,
         maximum_bytes: int,
+        admission: _BlobAdmission | None = None,
     ) -> ArtifactReference:
         _media_type(media_type, f"/{role}/media_type")
         _bounded(payload, maximum_bytes, f"/{role}")
+        if admission is None:
+            # Legacy private callers remain usable on unlimited roots. The lock
+            # also prevents concurrent policy adoption from racing this write.
+            with self._transaction() as connection:
+                if self._blob_payload_limit(connection) is not None:
+                    _fail(
+                        "blob_payload_admission_required",
+                        "/storage",
+                        "Capped blob writes require a registered group admission.",
+                    )
+                plan = self._admit_blob_payloads(connection, (payload,))
+                return self._put_blob(
+                    payload,
+                    role=role,
+                    media_type=media_type,
+                    maximum_bytes=maximum_bytes,
+                    admission=plan,
+                )
         content_hash = _sha256(payload)
+        if (
+            type(admission) is not _BlobAdmission
+            or self._blob_admissions.get(admission.connection) is not admission
+            or not admission.connection.in_transaction
+            or admission.candidates.get(content_hash) != len(payload)
+        ):
+            _fail(
+                "blob_payload_admission_required",
+                "/storage",
+                "Blob bytes must belong to the active registered group admission.",
+            )
         path = self._blob_path(content_hash)
         path.parent.mkdir(parents=True, exist_ok=True)
-        if path.exists():
-            self._read_blob(content_hash, len(payload), maximum_bytes=maximum_bytes)
+        if content_hash in admission.existing or content_hash in admission.stored:
+            # Do not turn loss of a validated dedup target into unplanned growth.
+            try:
+                metadata = path.lstat()
+                if not stat.S_ISREG(metadata.st_mode) or metadata.st_size != len(
+                    payload
+                ):
+                    raise OSError
+            except OSError:
+                _fail(
+                    "artifact_missing",
+                    "/artifact",
+                    "An admitted dedup target is unavailable.",
+                )
         else:
+            if path.exists() or path.is_symlink():
+                _fail(
+                    "blob_payload_inventory_invalid",
+                    "/storage",
+                    "The admitted payload namespace changed.",
+                )
             descriptor, temporary_name = tempfile.mkstemp(
                 prefix=".job-blob-", dir=path.parent
             )
@@ -2476,6 +3595,7 @@ class DurableJobService:
                     "The content-addressed artifact did not commit.",
                 )
             self._read_blob(content_hash, len(payload), maximum_bytes=maximum_bytes)
+            admission.stored.add(content_hash)
         return ArtifactReference(
             role=role,
             content_hash=content_hash,
@@ -2567,6 +3687,12 @@ class DurableJobService:
         request = references["request"]
         assert request is not None
         return JobView(
+            progress_unit=(
+                "control_solver_attempts"
+                if self._request_for_row(row).get("schema_version")
+                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+                else None
+            ),
             job_id=str(row["job_id"]),
             status=str(row["status"]),  # type: ignore[arg-type]
             revision=int(row["revision"]),
@@ -2628,6 +3754,20 @@ def _validate_rc_outcome(
     typed: Any,
     request_hash: str,
 ) -> None:
+    if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            validate_rc_corotational_invocation_outcome,
+        )
+
+        try:
+            validate_rc_corotational_invocation_outcome(outcome, request, request_hash)
+        except (TypeError, ValueError, KeyError) as exc:
+            raise JobServiceError(
+                "rc_invocation_contract_invalid",
+                "/outcome",
+                "Invalid corotational invocation contract",
+            ) from exc
+        return
     fields = {
         "schema_version",
         "phase",
@@ -2830,6 +3970,13 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
     )
 
     try:
+        if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
+            from structural_analysis.execution.rc_corotational_job_request import (
+                validate_rc_corotational_job_request,
+            )
+
+            typed = validate_rc_corotational_job_request(request)
+            return typed.model, typed
         return validate_rc_fiber_job_request(request)
     except (TypeError, ValueError):
         _fail(
@@ -2840,6 +3987,12 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
 
 
 def _result_byte_limit(request: Mapping[str, Any]) -> int:
+    if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            RC_COROTATIONAL_JOB_MAX_BYTES,
+        )
+
+        return RC_COROTATIONAL_JOB_MAX_BYTES
     if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
         from structural_analysis.execution.rc_fiber_job_contract import (
             RC_FIBER_JOB_MAX_BYTES,
@@ -2894,7 +4047,13 @@ def validate_job_view(view: JobView | Mapping[str, Any]) -> dict[str, Any]:
         if isinstance(view, JobView)
         else _canonical_mapping(view, "/job")
     )
-    _validate_schema(payload, "job_view_v1.schema.json", "/job")
+    _validate_schema(
+        payload,
+        "job_view_v2.schema.json"
+        if payload.get("schema_version") == "structural-analysis-job-view.v2"
+        else "job_view_v1.schema.json",
+        "/job",
+    )
     status = payload["status"]
     progress = payload["progress"]
     completed = int(progress["completed_steps"])
@@ -2926,7 +4085,14 @@ def validate_job_view(view: JobView | Mapping[str, Any]) -> dict[str, Any]:
             "/job/result",
             "Result and evidence must be published atomically as a pair.",
         )
-    if status == "succeeded" and (not published or completed != total):
+    if status == "succeeded" and (
+        not published
+        or completed == 0
+        or (
+            completed != total
+            and payload["schema_version"] != "structural-analysis-job-view.v2"
+        )
+    ):
         _fail(
             "job_view_success_invalid",
             "/job/status",

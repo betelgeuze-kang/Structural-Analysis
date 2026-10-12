@@ -169,6 +169,57 @@ def test_pin_roller_split_restart_and_fresh_source_validation():
     assert not rejected.to_dict()["artifact_contract_pass"]
 
 
+def test_mixed_layer_pin_roller_restart_preserves_materials_and_quantity():
+    from structural_analysis.execution.rc_fiber_quantities import (
+        calculate_fiber_frame_member_quantities,
+    )
+
+    layers = json.loads(
+        (
+            Path(__file__).parents[1]
+            / "examples/public_rc_fiber_frame_explicit_layers.json"
+        ).read_text()
+    )
+    data = beam()
+    data["materials"] = layers["materials"]
+    data["sections"] = layers["sections"]
+    for member in data["elements"]:
+        member["section"] = layers["elements"][0]["section"]
+    source = model(data)
+    config = request((-1e-6, -2e-6))
+    whole = analyze_bounded_rc_fiber_direct_control(
+        source, config.targets_m, **config.api_kwargs()
+    )
+    prefix = analyze_bounded_rc_fiber_direct_control(
+        source, config.targets_m[:1], **config.api_kwargs()
+    )
+    resumed = analyze_bounded_rc_fiber_direct_control(
+        source,
+        config.targets_m[1:],
+        restart=prefix.checkpoint_artifact_bytes(),
+        **config.api_kwargs(),
+    )
+    assert whole.to_dict()["contract_pass"] and resumed.to_dict()["contract_pass"]
+    assert resumed.checkpoint_artifact_bytes() == whole.checkpoint_artifact_bytes()
+    quantities = calculate_fiber_frame_member_quantities(
+        source, experimental_pin_roller_beam=True
+    )
+    assert quantities["totals"]["longitudinal_rebar_mass_kg"] == pytest.approx(
+        1.9 * 0.0012 * 7850
+    )
+    changed = deepcopy(data)
+    changed["sections"][0]["steel_layers"][1]["bar_area_m2"] *= 1.01
+    with pytest.raises(
+        ValueError, match="restart source/configuration/control/budget mismatch"
+    ):
+        analyze_bounded_rc_fiber_direct_control(
+            model(changed),
+            config.targets_m[1:],
+            restart=prefix.checkpoint_artifact_bytes(),
+            **config.api_kwargs(),
+        )
+
+
 def test_pin_roller_durable_resume_and_quantity_report(tmp_path):
     from structural_analysis.execution.job_service import DurableJobService
     from structural_analysis.execution.rc_fiber_direct_control_worker import (

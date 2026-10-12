@@ -5,6 +5,10 @@ import importlib.util
 import json
 from pathlib import Path
 import signal
+import sqlite3
+import sys
+
+import pytest
 import time
 
 
@@ -24,11 +28,60 @@ _SPEC.loader.exec_module(lifecycle)
 LIMIT = 10 * 1024 * 1024
 
 
-def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "isolated",
+    [
+        False,
+        pytest.param(
+            True,
+            marks=pytest.mark.skipif(
+                sys.platform != "linux", reason="Linux phase isolation"
+            ),
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "profile", ["legacy", "pin-roller-layers", "fixed_guided_axial"]
+)
+@pytest.mark.parametrize("payload_cap", [None, LIMIT])
+def test_rc_checkpoint_backup_stop_restore_resume_and_report(
+    tmp_path, monkeypatch, payload_cap, isolated, profile
+):
     source = tmp_path / "source"
-    service = lifecycle.service(source)
+    service = lifecycle.DurableJobService(
+        source,
+        tenant_tokens=lifecycle.TENANTS,
+        worker_tokens=lifecycle.WORKERS,
+        worker_tenants={name: {"a"} for name in lifecycle.WORKERS},
+        max_blob_payload_bytes=payload_cap,
+    )
+    request = lifecycle.request()
+    if profile == "pin-roller-layers":
+        spec = importlib.util.spec_from_file_location(
+            "combined_rc_browser_helpers",
+            Path(__file__).parent / "frontend/rc_lifecycle_http_fixture.py",
+        )
+        fixture = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixture)
+        request = fixture.authored_pin_roller_layers_request()
+    if profile == "fixed_guided_axial":
+        spec = importlib.util.spec_from_file_location(
+            "combined_fixed_guided_backup_helpers",
+            Path(__file__).parent / "test_rc_fixed_guided_axial_integration.py",
+        )
+        fixture = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixture)
+        request = fixture.request()
+    if isolated:
+        from structural_analysis.execution.rc_fiber_phase_policy import (
+            RCFiberPhasePolicy,
+        )
+
+        request["execution_config"]["phase_execution_policy"] = RCFiberPhasePolicy(
+            30000, 30000, 100
+        ).to_dict()
     job = service.submit_job(
-        **lifecycle.tenant(), idempotency_key="backup-rc", request=lifecycle.request()
+        **lifecycle.tenant(), idempotency_key="backup-rc", request=request
     )
     first = lifecycle.spawn(source, "first")
     try:
@@ -92,6 +145,7 @@ def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypat
     restored = lifecycle.service(restored_root)
     completed = restored.get_job(job.job_id, **lifecycle.tenant())
     assert completed.status == "succeeded"
+    assert completed.request.content_hash == job.request.content_hash
     result_bytes = restored.read_result(job.job_id, **lifecycle.tenant())
     result = json.loads(result_bytes)
     assert result["completed_target_count"] == 2
@@ -155,3 +209,25 @@ def test_rc_checkpoint_backup_stop_restore_resume_and_report(tmp_path, monkeypat
     assert lifecycle.numerical_rows(reopened_root) == lifecycle.numerical_rows(
         restored_root
     )
+
+    assert (
+        json.loads(reopened.read_request(job.job_id, **lifecycle.tenant())) == request
+    )
+    if profile == "pin-roller-layers":
+        assert json.loads(report_bytes)["quantities"]["totals"][
+            "longitudinal_rebar_mass_kg"
+        ] == pytest.approx(17.898)
+
+    for root in (source, restored_root, reopened_root):
+        with sqlite3.connect(root / "jobs.sqlite3") as connection:
+            policy = connection.execute(
+                "SELECT maximum_bytes FROM job_blob_payload_policy"
+            ).fetchall()
+        assert policy == ([] if payload_cap is None else [(payload_cap,)])
+        if payload_cap is not None:
+            assert (
+                sum(
+                    p.stat().st_size for p in (root / "blobs").rglob("*") if p.is_file()
+                )
+                <= payload_cap
+            )

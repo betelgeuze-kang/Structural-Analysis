@@ -42,6 +42,12 @@ lease rejection, five preserved reservations with unknown ordinal 3, then backs
 up and reopens the result and quantity report byte-for-byte. Read-only reopen is
 tested with numerical entry points forbidden.
 
+The backup integration now runs for both the cantilever request and the
+explicit fixed-guided axial v5 request. It additionally checks that restoration
+preserves the immutable request content hash. The two backup cases and four
+fixed-guided public/lifecycle cases passed together (6 tests). These checks
+exercise separate-store backup recovery rather than only restart in place.
+
 The model and prices are synthetic test inputs. This is software workflow proof,
 not a real specimen comparison, actual construction estimate, or release proof.
 Process exit is not an OS-wide RAM/CPU ceiling or descendant-process guarantee.
@@ -49,3 +55,14 @@ Payload/file/time bounds are cooperative and do not establish filesystem quotas,
 hard I/O deadlines, power-loss durability, remote replication, or original-writer
 fencing. Sealed-container verification leaves `application_integrity_checked`
 false; retained results still require the service's application-level validation.
+
+## Concurrent processes in one store
+
+`test_rc_process_reservation_race.py` starts four fresh interpreter processes
+behind a barrier. Exactly one claims the queued RC job. Four further processes
+then race twelve reservation requests under that lease: ordinals 1 through 8
+are issued once each and four requests are rejected at the configured limit.
+A fresh service instance retains all eight reservations. No solver is invoked;
+reserved work remains consumed even without a numerical outcome. This verifies
+single-store atomicity and does not close the independent-copy activation gap
+above. The race and RC service tests passed together (66 tests).

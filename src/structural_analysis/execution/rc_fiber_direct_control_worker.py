@@ -9,14 +9,21 @@ remain evidence; they do not replace the last verified checkpoint.
 from __future__ import annotations
 
 import base64
+from contextlib import nullcontext
 from dataclasses import replace
+from datetime import datetime
 import hashlib
+import signal
+import sys
 from threading import Event, Thread
 import time
 
 from structural_analysis.api import rc_fiber_frame_direct_control as api
 from structural_analysis.api.strict_json import (
     strict_json_object_bytes,
+)
+from structural_analysis.execution.rc_fiber_phase_policy import (
+    decode_rc_fiber_phase_policy,
 )
 from structural_analysis.execution.job_service import (
     DurableJobService,
@@ -57,36 +64,130 @@ def _hash(raw: bytes) -> str:
 
 
 class _LeaseKeeper:
-    """Renew independently of long numerical calls without pretending to cancel them."""
+    """Renew a confirmed lease, with a non-DB expiry check for supervised calls.
 
-    def __init__(self, service, job_id, credentials, lease_seconds):
+    This refuses further work/publication after expiry. It does not cancel an
+    arbitrary in-process numerical call or provide a per-job execution permit.
+    """
+
+    def __init__(self, service, job_id, credentials, lease_seconds, *, initial_lease):
         self.service = service
         self.job_id = job_id
         self.credentials = credentials
         self.lease_seconds = lease_seconds
         self.stopped = Event()
         self.failure = None
+        self._confirmed = None
+        self._attempt = None
+        self._request_hash = None
+        self._confirm(initial_lease)
         self.thread = Thread(target=self._run, name="rc-fiber-job-lease", daemon=True)
+
+    def _expire(self):
+        error = JobServiceError(
+            "rc_fiber_worker_lease_expired",
+            "/lease",
+            "The last confirmed worker lease expired; renewal in flight is not custody.",
+        )
+        self.failure = error
+        raise error
+
+    def _confirm(self, view):
+        # Never revive custody after an observed expiry, including when an old
+        # heartbeat finally returns from a blocked database transaction.
+        if self._confirmed is not None:
+            self.check()
+        if (
+            type(view) is not JobView
+            or view.job_id != self.job_id
+            or view.status != "running"
+            or type(view.lease_expires_at) is not str
+            or (self._attempt is not None and view.attempt != self._attempt)
+            or (
+                self._request_hash is not None
+                and view.request.content_hash != self._request_hash
+            )
+        ):
+            raise JobServiceError(
+                "rc_fiber_worker_confirmed_lease_invalid",
+                "/lease",
+                "A running lease confirmation for this exact job attempt is required.",
+            )
+        try:
+            expires = datetime.fromisoformat(
+                view.lease_expires_at.replace("Z", "+00:00")
+            )
+            if expires.tzinfo is None:
+                raise ValueError("lease expiry must have a timezone")
+            expiry_us = int(round(expires.timestamp() * 1_000_000))
+        except (ValueError, OverflowError) as error:
+            raise JobServiceError(
+                "rc_fiber_worker_confirmed_lease_invalid",
+                "/lease",
+                "The confirmed lease expiry is invalid.",
+            ) from error
+        # Anchor before reading the service clock. A slow clock callback or a
+        # backward clock change cannot add time to the monotonic lease bound.
+        started_ns = time.monotonic_ns()
+        _now, now_us = self.service._now()
+        self._raise_if_failed()
+        remaining_ns = min(
+            (expiry_us - now_us) * 1_000, self.lease_seconds * 1_000_000_000
+        )
+        deadline_ns = started_ns + remaining_ns
+        if remaining_ns <= 0 or time.monotonic_ns() >= deadline_ns:
+            self._expire()
+        self._attempt, self._request_hash = view.attempt, view.request.content_hash
+        # One immutable snapshot avoids a mutex shared with a blocked renewal.
+        self._confirmed = (expiry_us, deadline_ns)
 
     def _run(self):
         while not self.stopped.wait(min(30.0, self.lease_seconds / 3.0)):
             try:
-                self.service.heartbeat(
+                self.check()
+                confirmed = self.service.heartbeat(
                     self.job_id,
                     **self.credentials,
                     lease_seconds=self.lease_seconds,
                 )
+                self._confirm(confirmed)
             except Exception as error:
-                self.failure = error
+                if self.failure is None:
+                    self.failure = error
                 return
 
-    def check(self):
+    def _raise_if_failed(self):
         if self.failure is not None:
+            if (
+                isinstance(self.failure, JobServiceError)
+                and self.failure.code == "rc_fiber_worker_lease_expired"
+            ):
+                raise self.failure
             raise JobServiceError(
                 "rc_fiber_worker_lease_renewal_failed",
                 "/lease",
                 "The worker could not renew its lease; computed work cannot publish.",
             ) from self.failure
+
+    def check(self):
+        self._raise_if_failed()
+        expiry_us, deadline_ns = self._confirmed
+        if time.monotonic_ns() >= deadline_ns:
+            self._expire()
+        # _now reads only the injected service clock, never SQLite or the
+        # execution-authority mutex. Forward clock jumps fail closed as well.
+        try:
+            _now, now_us = self.service._now()
+        except Exception as error:
+            self.failure = error
+            raise JobServiceError(
+                "rc_fiber_worker_lease_renewal_failed",
+                "/lease",
+                "The worker could not confirm its lease clock.",
+            ) from error
+        self._raise_if_failed()
+        if now_us >= expiry_us or time.monotonic_ns() >= deadline_ns:
+            self._expire()
 
     def __enter__(self):
         self.thread.start()
@@ -106,13 +207,72 @@ def execute_rc_fiber_direct_control_claim(
     checkpoint_target_budget: int | None = None,
     lease_seconds: int = 300,
 ) -> JobView:
+    if type(service) is not DurableJobService or type(claim) is not JobClaim:
+        raise RCFiberDirectControlWorkerError(
+            "rc_fiber_worker_argument_invalid", "exact service/claim types required"
+        )
+    if type(lease_seconds) is not int or not 5 <= lease_seconds <= 3600:
+        raise RCFiberDirectControlWorkerError(
+            "rc_fiber_worker_lease_invalid",
+            "lease duration must be an integer in [5, 3600]",
+        )
+    if checkpoint_target_budget is not None and (
+        type(checkpoint_target_budget) is not int
+        or not 1 <= checkpoint_target_budget <= 255
+    ):
+        raise RCFiberDirectControlWorkerError(
+            "rc_fiber_worker_target_budget_invalid",
+            "target budget must be an integer in [1, 255]",
+        )
+    # Retain authority through result publication, heartbeat shutdown, and phase
+    # child cleanup. Each numerical child also inherits its own lock descriptor.
+    with service.execution_guard() as authority_fd:
+        # Busy admission remains outside the failure handler: a replacement
+        # claim is neither failed nor charged while an older child is alive.
+        permit = (
+            service.job_execution_permit(
+                claim.job.job_id,
+                expected_request_hash=claim.job.request.content_hash,
+                worker_id=worker_id,
+                authorization_token=authorization_token,
+                lease_token=claim.lease_token,
+            )
+            if sys.platform == "linux"
+            else nullcontext()
+        )
+        with permit as job_guard_fd:
+            return _execute_rc_fiber_direct_control_claim(
+                service,
+                claim,
+                worker_id=worker_id,
+                authorization_token=authorization_token,
+                checkpoint_target_budget=checkpoint_target_budget,
+                lease_seconds=lease_seconds,
+                authority_fd=authority_fd,
+                job_guard_fd=job_guard_fd,
+            )
+
+
+def _execute_rc_fiber_direct_control_claim(
+    service: DurableJobService,
+    claim: JobClaim,
+    *,
+    worker_id: str,
+    authorization_token: str,
+    checkpoint_target_budget: int | None = None,
+    lease_seconds: int = 300,
+    authority_fd: int | None = None,
+    job_guard_fd: int | None = None,
+) -> JobView:
     """Run one immutable chunk per lease, then release or publish completion.
 
     The optional dispatcher budget must equal the authored chunk size. Cancellation
-    is between chunks. A lost lease cannot interrupt an in-flight solver, but it
-    prevents publishing into a replacement lease. Each outcome records API plus
-    artifact-extraction wall/process time; durable storage/transport costs are
-    separate and are not represented as solver time.
+    is between chunks. Requests without a phase policy retain in-process calls.
+    An authored Linux phase policy runs each API and its artifact export in a
+    fresh child, interrupting on its deadline or observed lease-keeper failure.
+    A lost lease never publishes into a replacement lease. Returned child wall
+    and CPU cover its API plus export; process launch, IPC and durable storage
+    are separate scopes. Interrupted or unmeasured work stays pending unknown.
     """
     if type(service) is not DurableJobService or type(claim) is not JobClaim:
         raise RCFiberDirectControlWorkerError(
@@ -158,7 +318,9 @@ def execute_rc_fiber_direct_control_claim(
             )
         ):
             raise ValueError("claim projection differs from the live leased job")
-        with _LeaseKeeper(service, job_id, credentials, lease_seconds) as lease:
+        with _LeaseKeeper(
+            service, job_id, credentials, lease_seconds, initial_lease=current
+        ) as lease:
             if (
                 type(claim.request_bytes) is not bytes
                 or len(claim.request_bytes) != current.request.byte_length
@@ -171,7 +333,27 @@ def execute_rc_fiber_direct_control_claim(
             if rc_fiber_job_canonical_bytes(request) != claim.request_bytes:
                 raise ValueError("immutable request is not canonical JSON")
             model, config = validate_rc_fiber_job_request(request)
-            chunk_size = request["execution_config"]["chunk_target_count"]
+            execution = request["execution_config"]
+            phase_policy = (
+                decode_rc_fiber_phase_policy(execution["phase_execution_policy"])
+                if "phase_execution_policy" in execution
+                else None
+            )
+            if phase_policy is not None:
+                if sys.platform != "linux":
+                    raise RCFiberDirectControlWorkerError(
+                        "rc_fiber_worker_phase_platform_unsupported",
+                        "The authored phase execution policy requires a Linux worker.",
+                    )
+                if signal.getsignal(signal.SIGCHLD) != signal.SIG_DFL:
+                    raise RCFiberDirectControlWorkerError(
+                        "rc_fiber_worker_phase_reaping_unsupported",
+                        "Phase execution requires default SIGCHLD and exclusive child reaping.",
+                    )
+                from structural_analysis.execution import (
+                    rc_fiber_phase_supervisor as phase_runner,
+                )
+            chunk_size = execution["chunk_target_count"]
             if checkpoint_target_budget not in (None, chunk_size):
                 raise ValueError("dispatcher target budget changes the authored chunks")
             total, completed = len(config.targets_m), current.progress_completed
@@ -191,7 +373,8 @@ def execute_rc_fiber_direct_control_claim(
             receipts, restart = [], None
             if claim.checkpoint_bytes is not None:
                 if (
-                    type(claim.checkpoint_bytes) is not bytes
+                    current.checkpoint is None
+                    or type(claim.checkpoint_bytes) is not bytes
                     or len(claim.checkpoint_bytes) != current.checkpoint.byte_length
                     or _hash(claim.checkpoint_bytes) != current.checkpoint.content_hash
                     or current.resume_contract_hash != resume_hash
@@ -237,6 +420,152 @@ def execute_rc_fiber_direct_control_claim(
                     "error": None,
                     "unavailable_execution_work": True,
                 }
+                if phase_policy is not None:
+                    try:
+                        reply = phase_runner.run_rc_fiber_phase(
+                            phase=phase,
+                            request_bytes=claim.request_bytes,
+                            completed_before=completed,
+                            completed_after=stop,
+                            restart=restart,
+                            result=raw if phase == "verification" else None,
+                            checkpoint=checkpoint if phase == "verification" else None,
+                            policy=phase_policy,
+                            lease_check=lease.check,
+                            **(
+                                {"authority_fd": authority_fd}
+                                if authority_fd is not None
+                                else {}
+                            ),
+                            **(
+                                {"job_guard_fd": job_guard_fd}
+                                if job_guard_fd is not None
+                                else {}
+                            ),
+                        )
+                    except phase_runner.RCFiberPhaseError as error:
+                        # A killed, missing, malformed or late reply has no
+                        # measured child outcome. Its spent ordinal stays unknown.
+                        raise RCFiberDirectControlWorkerError(
+                            error.code, error.detail
+                        ) from error
+                    if reply.status == "raised":
+                        try:
+                            outcome["timing"] = reply.timing
+                            outcome["error"] = {"type": reply.error_type}
+                            report = reply.artifact_error_report
+                            if report is not None:
+                                artifact_error = (
+                                    api.BoundedRCFiberDirectControlArtifactError(
+                                        report["failure"],
+                                        {
+                                            "model": report["model"],
+                                            "request": report["request"],
+                                            "status": report["computed_path_status"],
+                                            "metrics": report["execution_metrics"],
+                                        },
+                                    )
+                                )
+                                if rc_fiber_job_canonical_bytes(
+                                    artifact_error.to_dict()
+                                ) != rc_fiber_job_canonical_bytes(report):
+                                    raise ValueError(
+                                        "child artifact-error reconstruction changed"
+                                    )
+                                outcome["error"]["report"] = report
+                        except (
+                            KeyError,
+                            TypeError,
+                            ValueError,
+                            AttributeError,
+                            RecursionError,
+                        ) as error:
+                            raise RCFiberDirectControlWorkerError(
+                                f"rc_fiber_worker_{phase}_transport_invalid",
+                                "Child exception report could not be reconstructed exactly.",
+                            ) from error
+                        service.record_rc_invocation_outcome(
+                            job_id, **credentials, ordinal=ordinal, outcome=outcome
+                        )
+                        if report is not None:
+                            raise artifact_error
+                        error_types = {
+                            "ValueError": ValueError,
+                            "TypeError": TypeError,
+                            "KeyError": KeyError,
+                            "RecursionError": RecursionError,
+                            "RuntimeError": RuntimeError,
+                            "OverflowError": OverflowError,
+                            "MemoryError": MemoryError,
+                        }
+                        error_type = error_types.get(reply.error_type, RuntimeError)
+                        raise error_type(f"RC {phase} child raised {reply.error_type}.")
+                    try:
+                        if phase == "analysis":
+                            child_result = api.BoundedRCFiberDirectControlResult(
+                                reply.raw_result, reply.native_checkpoint
+                            )
+                            child_payload = child_result.to_dict()
+                            value = (
+                                child_result,
+                                child_payload,
+                                reply.raw_result,
+                                reply.native_checkpoint,
+                            )
+                            fields = {
+                                "api_result": child_payload,
+                                "checkpoint_artifact_base64": (
+                                    base64.b64encode(reply.native_checkpoint).decode(
+                                        "ascii"
+                                    )
+                                    if reply.native_checkpoint is not None
+                                    else None
+                                ),
+                                "unavailable_execution_work": (
+                                    child_payload["metrics"].get(
+                                        "unavailable_execution_work", False
+                                    )
+                                    or child_payload["metrics"].get("control_work")
+                                    is None
+                                    or (
+                                        child_payload["metrics"].get("control_work")
+                                        or {}
+                                    ).get("unknown_solver_work_attempt_count", 0)
+                                    > 0
+                                ),
+                            }
+                        else:
+                            value = reply.verification_report
+                            fields = {
+                                "verification_report": value,
+                                "unavailable_execution_work": (
+                                    value["unavailable_execution_work"]
+                                    or (value.get("replay_control_work") or {}).get(
+                                        "unknown_solver_work_attempt_count", 0
+                                    )
+                                    > 0
+                                ),
+                            }
+                        child_timing = reply.timing
+                    except (
+                        KeyError,
+                        TypeError,
+                        ValueError,
+                        AttributeError,
+                        RecursionError,
+                    ) as error:
+                        raise RCFiberDirectControlWorkerError(
+                            f"rc_fiber_worker_{phase}_transport_invalid",
+                            "Child result or verification report could not be reconstructed.",
+                        ) from error
+                    outcome.update(fields)
+                    outcome["status"] = "returned"
+                    outcome["timing"] = child_timing
+                    service.record_rc_invocation_outcome(
+                        job_id, **credentials, ordinal=ordinal, outcome=outcome
+                    )
+                    lease.check()
+                    return value, outcome, ordinal
                 wall, cpu = time.perf_counter_ns(), time.process_time_ns()
                 try:
                     value, fields = call()
@@ -266,7 +595,10 @@ def execute_rc_fiber_direct_control_claim(
 
             def analyze():
                 result = api.analyze_bounded_rc_fiber_direct_control(
-                    model, chunk.targets_m, restart=restart, **chunk.api_kwargs()
+                    model,
+                    chunk.targets_m,
+                    restart=restart,
+                    **chunk.api_kwargs(),
                 )
                 payload = result.to_dict()
                 raw = result.result_artifact_bytes()

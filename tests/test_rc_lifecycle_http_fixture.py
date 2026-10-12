@@ -49,6 +49,36 @@ class FixtureContracts(unittest.TestCase):
         finally:
             supervisor.close()
 
+    def test_child_workspace_is_bounded_to_original_or_restored_runtime(self):
+        restored = self.workspace / "recovered-runtime"
+        restored.mkdir()
+        other = self.workspace / "arbitrary-child"
+        other.mkdir()
+        for mode in ("driver", "http", "worker"):
+            self.assertTrue(fixture.valid_workspace(self.workspace, mode))
+            self.assertFalse(fixture.valid_workspace(other, mode))
+            self.assertFalse(fixture.valid_workspace(self.workspace.parent, mode))
+            self.assertFalse(fixture.valid_workspace(restored / "missing", mode))
+            self.assertEqual(
+                fixture.valid_workspace(restored, mode), mode != "driver"
+            )
+        with tempfile.TemporaryDirectory(prefix="unrelated-runtime-") as directory:
+            external = Path(directory)
+            link = self.workspace / "structural-rc-browser-symlink"
+            link.symlink_to(external, target_is_directory=True)
+            self.assertFalse(fixture.valid_workspace(link, "http"))
+
+    def test_backup_restore_requires_original_writer_shutdown(self):
+        supervisor = fixture.Supervisor(self.workspace)
+        try:
+            with self.assertRaises(AssertionError):
+                supervisor.command({"command": "backup_restore"})
+            self.assertEqual(supervisor.runtime_workspace, self.workspace)
+            self.assertFalse((self.workspace / "sealed-backup").exists())
+            self.assertFalse((self.workspace / "recovered-runtime").exists())
+        finally:
+            supervisor.close()
+
     def test_http_mount_has_no_process_control_backdoor(self):
         application = fixture.build_application(self.workspace)
         for path in ("/v1/restart", "/v1/fixture/complete", "/v1/fixture/kill"):

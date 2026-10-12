@@ -17,6 +17,7 @@ interface ImportMeta {
 
 interface StructuralWorkbenchRuntimeConfig {
   readonly rcJobCollectionUrl?: string
+  readonly rcReviewResultMaxBytes?: number
   readonly jobAuthorization?: import('./workbench-v2/model/jobTransport').JobAuthorizationProvider
   readonly jobStatusUrl?: string
   readonly nativeFrameResultUrl?: string

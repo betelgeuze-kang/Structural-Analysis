@@ -12,13 +12,13 @@ export interface JobArtifactReference {
 }
 
 export interface WorkbenchJobView {
-  schema_version: 'structural-analysis-job-view.v1'
+  schema_version: 'structural-analysis-job-view.v1' | 'structural-analysis-job-view.v2'
   service_profile: 'sqlite_wal_content_addressed_single_host.v1'
   job_id: string
   status: JobStatus
   revision: number
   attempt: number
-  progress: { completed_steps: number; total_steps: number }
+  progress: { completed_steps: number; total_steps: number; unit?: 'control_solver_attempts' }
   created_at: string
   updated_at: string
   lease_expires_at: string | null
@@ -79,15 +79,18 @@ export function validateWorkbenchJobView(raw: unknown): JobViewValidation {
   if (!record(raw) || !exactKeys(raw, TOP_LEVEL_KEYS)) {
     return { ok: false, value: null, errors: ['job view must contain the exact v1 fields'] }
   }
-  if (raw.schema_version !== 'structural-analysis-job-view.v1') errors.push('schema_version is unsupported')
+  const attemptBounded = raw.schema_version === 'structural-analysis-job-view.v2'
+  if (!attemptBounded && raw.schema_version !== 'structural-analysis-job-view.v1') errors.push('schema_version is unsupported')
   if (raw.service_profile !== 'sqlite_wal_content_addressed_single_host.v1') errors.push('service_profile is unsupported')
   if (typeof raw.job_id !== 'string' || !JOB_ID.test(raw.job_id)) errors.push('job_id is invalid')
   if (typeof raw.status !== 'string' || !STATUS.has(raw.status as JobStatus)) errors.push('status is invalid')
   if (!Number.isInteger(raw.revision) || (raw.revision as number) < 0) errors.push('revision is invalid')
   if (!Number.isInteger(raw.attempt) || (raw.attempt as number) < 0) errors.push('attempt is invalid')
-  if (!record(raw.progress) || !exactKeys(raw.progress, new Set(['completed_steps', 'total_steps']))) {
+  if (!record(raw.progress) || !exactKeys(raw.progress, new Set(attemptBounded
+    ? ['completed_steps', 'total_steps', 'unit'] : ['completed_steps', 'total_steps']))) {
     errors.push('progress is invalid')
   }
+  if (attemptBounded && record(raw.progress) && raw.progress.unit !== 'control_solver_attempts') errors.push('progress.unit is invalid')
   const completed = record(raw.progress) ? raw.progress.completed_steps : null
   const total = record(raw.progress) ? raw.progress.total_steps : null
   if (!Number.isInteger(completed) || (completed as number) < 0) errors.push('progress.completed_steps is invalid')
@@ -110,7 +113,7 @@ export function validateWorkbenchJobView(raw: unknown): JobViewValidation {
   const status = raw.status as JobStatus
   const published = result !== null && evidence !== null
   if ((result === null) !== (evidence === null)) errors.push('result and evidence must be an atomic pair')
-  if (status === 'succeeded' && (!published || completed !== total)) errors.push('succeeded job is not terminal and published')
+  if (status === 'succeeded' && (!published || (!attemptBounded && completed !== total))) errors.push('succeeded job is not terminal and published')
   if (status !== 'succeeded' && published) errors.push('non-succeeded job exposes published artifacts')
   if ((status === 'running') !== (raw.lease_expires_at !== null)) errors.push('lease expiry does not match running status')
   const expectedResume = checkpoint !== null && (status === 'checkpointed' || status === 'failed')

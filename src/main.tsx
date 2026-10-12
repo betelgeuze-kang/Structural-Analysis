@@ -109,6 +109,7 @@ function RootRouter(): ReactElement {
       rcJobCollectionUrl={resolveSameOriginJobUrl(window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcJobCollectionUrl, window.location.origin)}
       rcJobId={location.searchParams.get('rcJob') ?? undefined}
       rcReportId={location.searchParams.get('rcReport') ?? undefined}
+      rcReviewResultMaxBytes={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcReviewResultMaxBytes}
       jobAuthorization={window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobAuthorization}
       jobStatusUrl={jobStatusUrl}
       nativeFrameResultUrl={nativeFrameResultUrl}

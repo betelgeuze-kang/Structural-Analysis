@@ -286,7 +286,12 @@ def backup_job_store(
     """
     budget = _Budget(maximum_bytes, maximum_files, timeout_seconds)
     source, destination = _roots(source, destination)
-    for name in (BACKUP_PENDING, RESTORE_PENDING, "backup-manifest.json"):
+    for name in (
+        BACKUP_PENDING,
+        RESTORE_PENDING,
+        ".job-store-authority.pending",
+        "backup-manifest.json",
+    ):
         marker = source / name
         if marker.exists() or marker.is_symlink():
             raise ValueError("backup source is not an active-store root")

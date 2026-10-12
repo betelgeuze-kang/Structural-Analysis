@@ -11,6 +11,7 @@ export interface RcJobSummary {
   targets: number[]
   hasPreload?: boolean
   pinRoller?: { pin: string; roller: string }
+  fixedGuided?: { fixed: string; guided: string; axial: string }
   assemblyReuse?: boolean
   constantLoads?: RcObject[]
   control: { node_id: string; component: string; unit: string }
@@ -52,6 +53,7 @@ export const PATH_CLAIMS = {
   public_j1_j5_authority: false,
 }
 const PIN_ROLLER_COMPILER_PROFILE = 'planar_serial_horizontal_pin_roller_beam_explicit_rectangular_rc_direct_control.v1'
+const FIXED_GUIDED_COMPILER_PROFILE = 'planar_serial_axis_aligned_fixed_guided_explicit_rectangular_rc_direct_control.v1'
 const CANTILEVER_COMPILER_PROFILE = 'planar_serial_cantilever_explicit_rectangular_rc.v1'
 export function check(value: unknown, code: string): asserts value {
   if (!value) throw new Error(`rc_review_${code}`)
@@ -149,6 +151,7 @@ function hash(value: unknown): boolean { return typeof value === 'string' && /^s
  * Source, numerical and quantity authority still require the original artifacts.
  */
 export function validateRcRequestProfile(value: unknown): void {
+  if (isRcCorotationalRequest(value)) { validateRcCorotationalRequestProfile(value); return }
   const request = object(value)
   finite(request)
   const exact = (record: RcObject, keys: string[], code: string): void => {
@@ -157,7 +160,8 @@ export function validateRcRequestProfile(value: unknown): void {
   exact(request, ['schema_version', 'operation', 'case_id', 'model', 'config',
     'source_revision', 'result_contract', 'execution_config'], 'request_invalid')
   const pinRoller = request.schema_version === 'structural-analysis-job-request.v4'
-  check((request.schema_version === 'structural-analysis-job-request.v3' || pinRoller)
+  const fixedGuided = request.schema_version === 'structural-analysis-job-request.v5'
+  check((request.schema_version === 'structural-analysis-job-request.v3' || pinRoller || fixedGuided)
     && request.operation === 'bounded_rc_fiber_direct_control'
     && request.result_contract === 'bounded-rc-fiber-job-result.v1'
     && typeof request.case_id === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(request.case_id)
@@ -166,9 +170,11 @@ export function validateRcRequestProfile(value: unknown): void {
   const config = object(request.config), execution = object(request.execution_config)
   exact(config, ['schema_version', 'control_global_dof', 'targets_m', 'solver_config',
     'allow_reversals', 'maximum_reversals', 'maximum_targets',
-    ...(pinRoller ? ['experimental_pin_roller_beam'] : [])], 'request_config_invalid')
-  check(config.schema_version === (pinRoller ? 'bounded-rc-fiber-direct-control-request.v4' : 'bounded-rc-fiber-direct-control-request.v1')
+    ...(pinRoller ? ['experimental_pin_roller_beam'] : []),
+    ...(fixedGuided ? ['experimental_fixed_guided_axial'] : [])], 'request_config_invalid')
+  check(config.schema_version === (fixedGuided ? 'bounded-rc-fiber-direct-control-request.v5' : pinRoller ? 'bounded-rc-fiber-direct-control-request.v4' : 'bounded-rc-fiber-direct-control-request.v1')
     && (!pinRoller || config.experimental_pin_roller_beam === true)
+    && (!fixedGuided || config.experimental_fixed_guided_axial === true)
     && nat(config.control_global_dof) && config.control_global_dof <= 47
     && config.control_global_dof % 3 !== 2
     && nat(config.maximum_targets) && config.maximum_targets >= 1 && config.maximum_targets <= 255
@@ -187,7 +193,15 @@ export function validateRcRequestProfile(value: unknown): void {
   }
   check(reversals <= config.maximum_reversals && (config.allow_reversals || reversals === 0), 'targets_invalid')
   const solver = object(config.solver_config), newton = object(solver.newton)
-  exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m'], 'solver_config_invalid')
+  const initialGuessAuthored = Object.prototype.hasOwnProperty.call(solver, 'initial_guess')
+  const initialTrialAuthored = Object.prototype.hasOwnProperty.call(solver, 'initial_trial_policy')
+  exact(solver, ['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
+    ...(initialGuessAuthored ? ['initial_guess'] : []),
+    ...(initialTrialAuthored ? ['initial_trial_policy'] : [])], 'solver_config_invalid')
+  check(!initialGuessAuthored || ['parent', 'control_target'].includes(solver.initial_guess), 'solver_config_invalid')
+  check(!initialTrialAuthored || ['accepted_checkpoint', 'prescribed_control', 'accepted_then_prescribed', 'accepted_then_prescribed_then_secant'].includes(solver.initial_trial_policy), 'solver_config_invalid')
+  check(!(solver.initial_guess === 'control_target' && initialTrialAuthored
+    && solver.initial_trial_policy !== 'accepted_checkpoint'), 'solver_config_invalid')
   exact(newton, ['residual_tolerance', 'increment_tolerance', 'max_iterations',
     'line_search_alphas', 'matrix_backend'], 'newton_config_invalid')
   const positive = (number: unknown): number is number => typeof number === 'number' && Number.isFinite(number) && number > 0
@@ -199,7 +213,9 @@ export function validateRcRequestProfile(value: unknown): void {
   check(Array.isArray(newton.line_search_alphas) && newton.line_search_alphas.length > 0
     && newton.line_search_alphas.every((alpha: unknown, index: number, alphas: unknown[]) =>
       positive(alpha) && alpha <= 1 && (index === 0 || alpha < (alphas[index - 1] as number))), 'newton_config_invalid')
-  exact(execution, ['chunk_target_count', 'maximum_api_invocations'], 'execution_config_invalid')
+  const phaseAuthored = Object.prototype.hasOwnProperty.call(execution, 'phase_execution_policy')
+  exact(execution, ['chunk_target_count', 'maximum_api_invocations', ...(phaseAuthored ? ['phase_execution_policy'] : [])], 'execution_config_invalid')
+  if (phaseAuthored) decodeRcFiberPhasePolicy(JSON.stringify(execution.phase_execution_policy))
   check(nat(execution.chunk_target_count) && execution.chunk_target_count >= 1 && execution.chunk_target_count <= 255
     && nat(execution.maximum_api_invocations) && execution.maximum_api_invocations >= 2
     && execution.maximum_api_invocations <= 4096, 'execution_config_invalid')
@@ -207,9 +223,10 @@ export function validateRcRequestProfile(value: unknown): void {
   check(model.schema_version === 'structural-analysis-canonical-model.v1'
     && Array.isArray(model.nodes) && model.nodes.length >= 2 && model.nodes.length <= 16
     && Array.isArray(model.elements) && model.elements.length === model.nodes.length - 1
-    && Array.isArray(model.supports) && model.supports.length === (pinRoller ? 2 : 1), 'rc_support_profile_invalid')
-  if (pinRoller) {
-    pinRollerSupports(model)
+    && Array.isArray(model.supports) && model.supports.length === (pinRoller || fixedGuided ? 2 : 1), 'rc_support_profile_invalid')
+  if (pinRoller || fixedGuided) {
+    if (fixedGuided) fixedGuidedSupports(model)
+    else pinRollerSupports(model)
     for (const raw of model.supports) exact(object(raw), ['node', 'dofs'], 'pin_roller_support_invalid')
     check(config.control_global_dof < model.nodes.length * 3, 'control_dof_invalid')
     const controlNode = object(model.nodes[Math.floor(config.control_global_dof / 3)]).id
@@ -246,6 +263,39 @@ function pinRollerSupports(model: RcObject): { pin: string; roller: string; reac
   return { pin, roller, reactions }
 }
 
+function fixedGuidedSupports(model: RcObject): { fixed: string; guided: string; axial: string; reactions: Array<[string, string]> } {
+  const code = 'fixed_guided_support_invalid'
+  check(Array.isArray(model.nodes) && model.nodes.length >= 2 && Array.isArray(model.supports) && model.supports.length === 2, code)
+  const nodes = model.nodes.map((raw: unknown) => object(raw))
+  check(nodes.every((n: RcObject) => typeof n.id === 'string' && Array.isArray(n.coordinates)
+    && n.coordinates.length === 3 && n.coordinates.every((v: unknown) => typeof v === 'number' && Number.isFinite(v))
+    && n.coordinates[2] === 0) && new Set(nodes.map((n: RcObject) => n.id)).size === nodes.length, code)
+  const axes = [0, 1].filter(axis => new Set(nodes.map((n: RcObject) => n.coordinates[axis])).size > 1)
+  check(axes.length === 1, code)
+  const axis = axes[0], axial = axis === 0 ? 'UX' : 'UY', transverse = axis === 0 ? 'UY' : 'UX'
+  const ordered = [...nodes].sort((a, b) => a.coordinates[axis] - b.coordinates[axis])
+  check(new Set(nodes.map((n: RcObject) => n.coordinates[axis])).size === nodes.length
+    && Array.isArray(model.elements) && model.elements.length === nodes.length - 1, code)
+  check(ordered.slice(1).every((node, index) => model.elements.some((raw: unknown) => {
+    const element = object(raw)
+    return Array.isArray(element.nodes) && same([...element.nodes].sort(), [ordered[index].id, node.id].sort())
+  })), code)
+  const ends = [ordered[0].id, ordered[ordered.length - 1].id], supported = new Map<string, string[]>()
+  for (const raw of model.supports) {
+    const support = object(raw)
+    check(same(Object.keys(support).sort(), ['dofs', 'node']) && ends.includes(support.node)
+      && !supported.has(support.node) && Array.isArray(support.dofs)
+      && support.dofs.every((d: unknown) => typeof d === 'string'), code)
+    supported.set(support.node, support.dofs)
+  }
+  const fixed = [...supported].find(([, dofs]) => same([...dofs].sort(), ['RZ', 'UX', 'UY']))?.[0]
+  const guided = [...supported].find(([, dofs]) => same([...dofs].sort(), ['RZ', transverse]))?.[0]
+  check(fixed && guided && fixed !== guided, code)
+  const reactions = nodes.flatMap((node: RcObject): Array<[string, string]> =>
+    ['UX', 'UY', 'RZ'].filter(dof => supported.get(node.id)?.includes(dof)).map(dof => [node.id, dof]))
+  return { fixed, guided, axial, reactions }
+}
+
 export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: RcArtifacts, tenantId?: string): Promise<{
   summary: RcJobSummary; history: RcObject[]; terminalBytes: Uint8Array; quantitySource: RcQuantityReportSource
 }> {
@@ -262,6 +312,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   validateRcRequestProfile(request)
   const config = object(request.config)
   const pinRoller = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
+  const fixedGuided = config.schema_version === 'bounded-rc-fiber-direct-control-request.v5'
   // Preserve v2 invalid-load checks while v4 binds the actual constant-load field.
   const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
     || (pinRoller && rcControlHasPreload(config))
@@ -271,6 +322,9 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     : config.experimental_pin_roller_beam === undefined, 'pin_roller_opt_in_invalid')
   check(config.experimental_two_fixed_endpoints === undefined, 'request_config_invalid')
   const supportRoles = pinRoller ? pinRollerSupports(object(request.model)) : undefined
+  const guidedRoles = fixedGuided ? fixedGuidedSupports(object(request.model)) : undefined
+  check(fixedGuided ? config.experimental_fixed_guided_axial === true
+    : config.experimental_fixed_guided_axial === undefined, 'fixed_guided_opt_in_invalid')
   if (hasPreload) {
     const loads = config.constant_nodal_loads
     check(Array.isArray(loads) && loads.length > 0 && loads.length <= 16, 'constant_loads_invalid')
@@ -292,7 +346,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   }
   check(execution.reuse_line_search_assembly === undefined || typeof execution.reuse_line_search_assembly === 'boolean', 'execution_reuse_invalid')
   const reuseProfile = execution.reuse_line_search_assembly === true ? 'rc-control-immediate-line-search-reuse.v1' : undefined
-  check((pinRoller || config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`)
+  check((pinRoller || fixedGuided || config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`)
     && request.model.schema_version === 'structural-analysis-canonical-model.v1'
     && typeof config.solver_config.control_tolerance_m === 'number'
     && config.solver_config.control_tolerance_m > 0, 'request_config_invalid')
@@ -338,11 +392,13 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && same(api.unsupported_features, []) && same(api.claims, CLAIMS), 'api_invalid')
   check(await sha256Hex(fields(requestDoc.raw).get('model')!.value) === api.model.input_checksum
     && api.model.canonical_model_checksum === api.model.input_checksum
-    && api.model.compiler_profile === (pinRoller ? PIN_ROLLER_COMPILER_PROFILE : CANTILEVER_COMPILER_PROFILE), 'model_binding_invalid')
+    && api.model.compiler_profile === (fixedGuided ? FIXED_GUIDED_COMPILER_PROFILE : pinRoller ? PIN_ROLLER_COMPILER_PROFILE : CANTILEVER_COMPILER_PROFILE), 'model_binding_invalid')
   check(api.control.global_dof === config.control_global_dof && api.control.unit === 'm'
     && ['UX', 'UY'].includes(api.control.component), 'control_invalid')
   check(pinRoller ? api.request.experimental_pin_roller_beam === true
     : api.request.experimental_pin_roller_beam === undefined, 'pin_roller_api_invalid')
+  check(fixedGuided ? api.request.experimental_fixed_guided_axial === true
+    : api.request.experimental_fixed_guided_axial === undefined, 'fixed_guided_api_invalid')
   const binary = atob(result.terminal_checkpoint_artifact_base64)
   check(binary.length <= 128 * 1024 * 1024, 'native_too_large')
   const terminalBytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
@@ -395,9 +451,15 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       && receipt.api_request.maximum_targets === config.maximum_targets
       && (pinRoller ? receipt.api_request.experimental_pin_roller_beam === true
         : receipt.api_request.experimental_pin_roller_beam === undefined)
+      && (fixedGuided ? receipt.api_request.experimental_fixed_guided_axial === true
+        : receipt.api_request.experimental_fixed_guided_axial === undefined)
+      && receipt.api_request.configuration.initial_guess === (config.solver_config.initial_guess === 'control_target' ? 'control_target' : undefined)
+      && receipt.api_request.configuration.profile === (config.solver_config.initial_guess === 'control_target'
+        ? 'small-displacement-rc-fiber-direct-control.v2' : 'small-displacement-rc-fiber-direct-control.v1')
       && same(receipt.api_request.configuration.newton, config.solver_config.newton)
       && receipt.api_request.configuration.control_tolerance_m === config.solver_config.control_tolerance_m
       && receipt.api_request.configuration.load_factor_coordinate_scale_m === config.solver_config.load_factor_coordinate_scale_m
+      && (receipt.api_request.configuration.initial_trial_policy ?? 'accepted_checkpoint') === (config.solver_config.initial_trial_policy ?? 'accepted_checkpoint')
       && same(receipt.control, api.control) && same(receipt.model_binding, api.model)
       && validation.schema_version === 'bounded-rc-fiber-direct-control-validation.v1'
       && validation.contract_pass === true && validation.artifact_contract_pass === true
@@ -462,12 +524,14 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   const normalizedConfig = new Map<string, string>([
     ['schema_version', JSON.stringify(config.schema_version)],
     ['targets_m', fields(nativeDoc.raw).get('accepted_targets_m')!.value],
-    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m']
+    ['solver_config', tokenObject(new Map(['newton', 'control_tolerance_m', 'load_factor_coordinate_scale_m',
+      ...(config.solver_config.initial_guess === 'control_target' ? ['initial_guess'] : []),
+      ...(config.solver_config.initial_trial_policy && config.solver_config.initial_trial_policy !== 'accepted_checkpoint' ? ['initial_trial_policy'] : [])]
       .map(key => [key, configurationFields.get(key)!.value])))],
     ...['allow_reversals', 'maximum_reversals', 'maximum_targets', 'control_global_dof']
       .map(key => [key, apiRequestFields.get(key)!.value] as [string, string]),
   ])
-  for (const key of ['constant_nodal_loads', 'experimental_pin_roller_beam']) {
+  for (const key of ['constant_nodal_loads', 'experimental_pin_roller_beam', 'experimental_fixed_guided_axial']) {
     if (apiRequestFields.has(key)) normalizedConfig.set(key, apiRequestFields.get(key)!.value)
   }
   // canonical_hash normalizes signed floating zero; retain all other producer
@@ -499,6 +563,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     resultHash: result.result_hash, sourceRevision: result.source_revision,
     ...(reuseProfile ? { assemblyReuse: true } : {}),
     targets, hasPreload, pinRoller: supportRoles && { pin: supportRoles.pin, roller: supportRoles.roller },
+    fixedGuided: guidedRoles && { fixed: guidedRoles.fixed, guided: guidedRoles.guided, axial: guidedRoles.axial },
     constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
     control: api.control, reservedInvocations: budget.reserved_attempts,
     confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
@@ -518,9 +583,12 @@ export function rcControlHasPreload(config: RcObject): boolean {
 
 /** Shared stored-history binding checks; no numerical execution. */
 export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model: RcObject, config: RcObject): RcObject[] {
+  validateRcDeclaredInitialTrials(api, config)
   const hasPreload = rcControlHasPreload(config)
   const supportRoles = config.schema_version === 'bounded-rc-fiber-direct-control-request.v4'
     ? pinRollerSupports(model) : undefined
+  const guidedRoles = config.schema_version === 'bounded-rc-fiber-direct-control-request.v5'
+    ? fixedGuidedSupports(model) : undefined
   const offset = hasPreload ? 1 : 0
   const history = hasPreload ? [api.preload_response, ...api.response_history] : api.response_history
   const targets = config.targets_m
@@ -569,6 +637,16 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
         check(node && node[`${dof}_m`] === 0, 'pin_roller_restrained_displacement_invalid')
       }
     }
+    if (guidedRoles) {
+      check(row.support_reactions.length === 5, 'fixed_guided_reaction_invalid')
+      row.support_reactions.forEach((reaction: RcObject, i: number) => {
+        const [nodeId, dof] = guidedRoles.reactions[i]
+        check(reaction.node_id === nodeId && reaction.dof === dof
+          && reaction.unit === (dof === 'RZ' ? 'N*m' : 'N'), 'fixed_guided_reaction_invalid')
+        const node = row.node_displacements.find((item: RcObject) => item.node_id === nodeId)
+        check(node && node[dof === 'RZ' ? 'RZ_rad' : `${dof}_m`] === 0, 'fixed_guided_restrained_displacement_invalid')
+      })
+    }
     for (const m of row.member_end_forces) check(nodeIds.includes(m.node_i) && nodeIds.includes(m.node_j)
       && ['local_end_i', 'local_end_j'].every((end) => ['FX_N', 'FY_N', 'MZ_Nm'].every((key) => typeof object(m[end])[key] === 'number')), 'member_invalid')
     for (const s of row.section_results) check(memberIds.includes(s.member_id) && nat(s.integration_point_index)
@@ -591,6 +669,95 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
   check(history[history.length - 1].checkpoint_hash === native.terminal_checkpoint.state_hash
     && history[history.length - 1].load_factor === native.terminal_checkpoint.load_factor, 'terminal_state_invalid')
   return history
+}
+
+/** Recount declared trial work, including a rejected first Newton invocation. */
+export function validateRcDeclaredInitialTrials(api: RcObject, config: RcObject): void {
+  const policy = config.solver_config.initial_trial_policy
+  const extended = policy === 'accepted_then_prescribed_then_secant'
+  if (!extended && policy !== 'accepted_then_prescribed') return
+  const maximum = extended ? 3 : 2
+  let previousStep: RcObject | null = null
+  const countGroup = (attempts: RcObject[]): RcObject => {
+    check(Array.isArray(attempts), 'initial_trial_attempts_invalid')
+    let count = 0
+    for (const attempt of attempts) {
+      const step = object(attempt.step), trace = object(step.initial_trial_search)
+      const trials = trace.trials
+      check(trace.schema_version === `rc-declared-initial-trial-search.v${extended ? 2 : 1}`
+        && trace.policy === policy && trace.maximum_trials === maximum
+        && Array.isArray(trials) && trials.length >= 1 && trials.length <= maximum
+        && attempt.committed === true && step.committed === true
+        && same(step.metrics.config, api.request.configuration), 'initial_trial_policy_invalid')
+      if (extended) check(trace.secant_predecessor_hash === (previousStep?.parent_checkpoint.state_hash ?? null)
+        && (previousStep !== null || trials.length <= 2), 'initial_trial_predecessor_invalid')
+      let subtotal = 0
+      for (const [index, row] of trials.entries()) {
+        const solver = object(row.solver), metrics = object(solver.metrics)
+        const history = solver.convergence_history, searches = solver.line_search_history
+        const terminal = index === trials.length - 1
+        check(row.initial_trial_policy === ['accepted_checkpoint', 'prescribed_control', 'secant_prediction'][index]
+          && row.parent_checkpoint_hash === attempt.parent_checkpoint_hash
+          && row.parent_checkpoint_hash === step.parent_checkpoint.state_hash
+          && Array.isArray(history) && history.length > 0
+          && history.every((entry: RcObject, i: number) => entry.iteration === i)
+          && Array.isArray(searches) && metrics.fallback_used === false
+          && metrics.regularization_used === false, 'initial_trial_binding_invalid')
+        if (index === 2) {
+          check(extended && previousStep !== null, 'initial_trial_predecessor_invalid')
+          const prediction = object(row.prediction), parent = step.parent_checkpoint
+          const prior = previousStep!.parent_checkpoint
+          const left = prior.global_displacements[config.control_global_dof]
+          const right = parent.global_displacements[config.control_global_dof]
+          const target = attempt.target_control_displacement_m
+          const ratio = (target - right) / (right - left)
+          const current = trials[0].solver.convergence_history[0].free_displacements_m
+          const old = previousStep!.initial_trial_search.trials[0].solver.convergence_history[0].free_displacements_m
+          check(Number.isFinite(ratio) && right !== left && Array.isArray(current) && Array.isArray(old)
+            && current.length === old.length && current.length === metrics.active_equation_count,
+            'initial_trial_prediction_invalid')
+          const expected = current.map((value: number, i: number) => value + ratio * (value - old[i]))
+          check(prediction.schema_version === 'rc-secant-initial-prediction.v1'
+            && prediction.previous_checkpoint_hash === prior.state_hash
+            && prediction.parent_checkpoint_hash === parent.state_hash
+            && prediction.previous_control_m === left && prediction.parent_control_m === right
+            && prediction.target_control_m === target && prediction.ratio === ratio
+            && expected.every(Number.isFinite) && same(prediction.initial_coordinates_m, expected)
+            && same(history[0].free_displacements_m, expected), 'initial_trial_prediction_invalid')
+        } else check(!('prediction' in row), 'initial_trial_prediction_invalid')
+        if (terminal) check(row.committed === true && solver.status === 'ready'
+          && metrics.contract_pass === true && metrics.linear_solve_count === history.length
+          && metrics.iteration_count === history.length && searches.length === history.length - 1
+          && same(solver, step.trial_solution), 'initial_trial_terminal_invalid')
+        else check(row.committed === false && solver.status === 'blocked'
+          && metrics.contract_pass === false && metrics.terminal_reason === 'line_search_failed_to_reduce_residual'
+          && searches.length === history.length && searches[searches.length - 1].selected_alpha === 0
+          && history[history.length - 1].accepted === false
+          && history.slice(0, -1).every((entry: RcObject) => entry.accepted === true)
+          && same(history[history.length - 1].free_displacements_m, solver.augmented_coordinates_m)
+          && same(history[history.length - 1].residual_kn, metrics.residual_kn), 'initial_trial_failure_invalid')
+        check(same(row.work, { known_linear_solve_count: history.length,
+          known_newton_iteration_count: history.length, unknown_solver_work_attempt_count: 0 }), 'initial_trial_work_invalid')
+        subtotal += history.length
+      }
+      const work = object(attempt.solver_work)
+      check(work.linear_solve_count === subtotal && work.iteration_count === subtotal
+        && work.newton_iteration_count === subtotal && work.initial_trial_unknown_work_count === 0
+        && work.declared_initial_trial_attempt_count === trials.length
+        && work.declared_initial_trial_retry_used === (trials.length > 1)
+        && work.work_scope === 'all_declared_initial_trials'
+        && same(work.initial_trial_search, trace), 'initial_trial_total_invalid')
+      count += subtotal
+      previousStep = step
+    }
+    return { attempted_step_count: attempts.length, known_linear_solve_count: count,
+      known_newton_iteration_count: count, unknown_solver_work_attempt_count: 0 }
+  }
+  const path = object(api.path), metrics = object(path.metrics)
+  const prefix = countGroup(path.replay_attempts), suffix = countGroup(path.attempts)
+  const total = Object.fromEntries(Object.keys(prefix).map(key => [key, prefix[key] + suffix[key]]))
+  check(same(prefix, metrics.prefix_replay_work) && same(suffix, metrics.suffix_work)
+    && same(total, metrics.total_work) && same(total, api.metrics.control_work), 'initial_trial_path_work_invalid')
 }
 
 /** Shared original preload and complete execution-work bindings. */
@@ -628,4 +795,79 @@ export async function validateRcPreload(api: RcObject, apiRaw: string, native: R
       && ['attempted_step_count', 'known_linear_solve_count', 'known_newton_iteration_count', 'unknown_solver_work_attempt_count']
         .every((key) => counts.total_work[key] === work[key] + counts.prefix_replay_work[key] + counts.suffix_work[key]), 'preload_total_work_invalid')
   } else check(api.preload_response === undefined, 'preload_profile_invalid')
+}
+
+/** Separate corotational authored profile; no legacy fiber schema/defaults or numerical compiler is reused. */
+export function isRcCorotationalRequest(value: unknown): boolean {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+    && ['structural-analysis-job-request.v6', 'structural-analysis-job-request.v7'].includes(String((value as RcObject).schema_version))
+}
+export function validateRcCorotationalRequestProfile(value: unknown): void {
+  const request = object(value); finite(request)
+  const exact = (row: RcObject, keys: string[], code: string) => check(same(Object.keys(row).sort(), [...keys].sort()), code)
+  const integer = (v: unknown, min: number, max: number) => Number.isSafeInteger(v) && (v as number) >= min && (v as number) <= max
+  const number = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+  const positive = (v: unknown): v is number => number(v) && v > 0
+  const identifier = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(v)
+  exact(request, ['schema_version', 'operation', 'case_id', 'model', 'config', 'source_revision', 'result_contract', 'execution_config'], 'corotational_request_invalid')
+  check(isRcCorotationalRequest(request) && request.operation === 'bounded_rc_corotational_control'
+    && request.result_contract === 'bounded-rc-corotational-job-result.v1' && identifier(request.case_id)
+    && typeof request.source_revision === 'string' && /^[a-f0-9]{40}$/.test(request.source_revision), 'corotational_request_invalid')
+  const c = object(request.config)
+  exact(c, ['control_node_id', 'control_component', 'targets_m', 'fixed_nodal_loads', 'config', 'preload_config', 'maximum_attempt_count', 'maximum_subdivision_depth', 'experimental_pin_roller_beam', 'experimental_fixed_guided_axial'], 'corotational_config_invalid')
+  check(identifier(c.control_node_id) && ['UX', 'UY'].includes(c.control_component)
+    && integer(c.maximum_attempt_count, 1, 4096) && integer(c.maximum_subdivision_depth, 0, 20)
+    && typeof c.experimental_pin_roller_beam === 'boolean' && typeof c.experimental_fixed_guided_axial === 'boolean'
+    && !(c.experimental_pin_roller_beam && c.experimental_fixed_guided_axial), 'corotational_config_invalid')
+  check(Array.isArray(c.targets_m) && c.targets_m.length >= 1 && c.targets_m.length <= 255
+    && c.targets_m.every((v: unknown, i: number, rows: unknown[]) => number(v) && (i === 0 || v !== rows[i - 1])), 'corotational_targets_invalid')
+  check(Array.isArray(c.fixed_nodal_loads) && c.fixed_nodal_loads.length <= 48
+    && c.fixed_nodal_loads.every((r: unknown) => Array.isArray(r) && r.length === 3 && identifier(r[0]) && ['FX', 'FY', 'MZ'].includes(r[1]) && number(r[2]))
+    && new Set(c.fixed_nodal_loads.map((r: [string, string, number]) => `${r[0]}:${r[1]}`)).size === c.fixed_nodal_loads.length, 'corotational_fixed_loads_invalid')
+  for (const preload of [false, true]) {
+    const solver = object(preload ? c.preload_config : c.config)
+    const iteration = preload ? 'max_iterations' : 'maximum_iterations'
+    const numeric = preload ? ['residual_tolerance', 'increment_tolerance'] : ['residual_tolerance', 'control_tolerance_m', 'increment_tolerance_m', 'load_factor_increment_tolerance', 'load_factor_coordinate_scale_m']
+    exact(solver, [...numeric, iteration, 'line_search_alphas', 'matrix_backend'], 'corotational_solver_invalid')
+    check(numeric.every(k => positive(solver[k])) && integer(solver[iteration], 0, 200)
+      && (preload ? ['numpy_linalg_solve_dense', 'scipy_sparse_spsolve_cpu'] : ['numpy_linalg_solve_dense']).includes(solver.matrix_backend)
+      && Array.isArray(solver.line_search_alphas) && solver.line_search_alphas.length >= 1 && solver.line_search_alphas.length <= 64
+      && solver.line_search_alphas.every((v: unknown, i: number, rows: unknown[]) => positive(v) && v <= 1 && (i === 0 || v < (rows[i - 1] as number))), 'corotational_solver_invalid')
+  }
+  const execution = object(request.execution_config), isolated = request.schema_version === 'structural-analysis-job-request.v7'
+  exact(execution, ['attempt_limit_per_call', 'maximum_api_invocations', ...(isolated ? ['phase_execution_policy'] : [])], 'corotational_execution_invalid')
+  check(integer(execution.attempt_limit_per_call, 1, 4096) && integer(execution.maximum_api_invocations, 1, 100000), 'corotational_execution_invalid')
+  if (isolated) {
+    const policy = object(execution.phase_execution_policy)
+    exact(policy, ['schema_version', 'analysis_timeout_ms', 'verification_timeout_ms', 'termination_grace_ms'], 'corotational_phase_policy_invalid')
+    check(policy.schema_version === 'bounded-rc-corotational-phase-execution-policy.v1'
+      && integer(policy.analysis_timeout_ms, 1, 3600000) && integer(policy.verification_timeout_ms, 1, 3600000)
+      && integer(policy.termination_grace_ms, 1, 5000), 'corotational_phase_policy_invalid')
+  }
+  const model = object(request.model)
+  exact(model, ['schema_version', 'units', 'coordinate_system', 'nodes', 'elements', 'materials', 'sections', 'loads', 'supports', 'unsupported_features', 'warnings', 'metadata'], 'corotational_model_invalid')
+  check(model.schema_version === 'structural-analysis-canonical-model.v1'
+    && Array.isArray(model.nodes) && model.nodes.length >= 2 && model.nodes.length <= 16
+    && Array.isArray(model.elements) && model.elements.length > 0 && Array.isArray(model.materials) && model.materials.length > 0
+    && Array.isArray(model.sections) && model.sections.length > 0 && Array.isArray(model.loads) && Array.isArray(model.supports)
+    && Array.isArray(model.unsupported_features) && model.unsupported_features.length === 0
+    && Array.isArray(model.warnings) && model.warnings.every((v: unknown) => typeof v === 'string'), 'corotational_model_invalid')
+  object(model.metadata)
+  const units = object(model.units), coordinates = object(model.coordinate_system)
+  exact(units, ['length', 'force'], 'corotational_model_units_invalid')
+  exact(coordinates, ['axis_order', 'up_axis'], 'corotational_model_units_invalid')
+  check(units.length === 'm' && units.force === 'kN' && Array.isArray(coordinates.axis_order) && same(coordinates.axis_order.map((v: unknown) => typeof v === 'string' ? v.toUpperCase() : v), ['X', 'Y', 'Z']) && typeof coordinates.up_axis === 'string' && coordinates.up_axis.toUpperCase() === 'Z', 'corotational_model_units_invalid')
+  const ids = model.nodes.map((n: unknown) => {
+    const row = object(n); exact(row, ['id', 'coordinates'], 'corotational_node_invalid')
+    check(identifier(row.id) && Array.isArray(row.coordinates) && row.coordinates.length === 3 && row.coordinates.every(number) && row.coordinates[2] === 0, 'corotational_node_invalid')
+    return row.id as string
+  })
+  check(new Set(ids).size === ids.length && ids.includes(c.control_node_id), 'corotational_node_invalid')
+  for (const raw of model.supports) {
+    const row = object(raw); exact(row, ['node', 'dofs'], 'corotational_support_invalid')
+    check(ids.includes(row.node) && Array.isArray(row.dofs) && row.dofs.length > 0 && new Set(row.dofs).size === row.dofs.length
+      && row.dofs.every((d: unknown) => ['UX', 'UY', 'RZ'].includes(String(d))), 'corotational_support_invalid')
+    check(row.node !== c.control_node_id || !row.dofs.includes(c.control_component), 'corotational_control_invalid')
+  }
+  check(c.fixed_nodal_loads.every((row: [string, string, number]) => ids.includes(row[0])), 'corotational_fixed_loads_invalid')
 }

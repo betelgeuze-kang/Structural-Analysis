@@ -138,11 +138,176 @@ def snapshot(output, request_bytes=None):
         }
 
 
+def secant_trace_snapshot(output):
+    """Fresh numerical trace projection for the narrow trial auditor only.
+
+    This intentionally is not a complete API result or a publishable job artifact.
+    """
+    from structural_analysis.api.nonlinear_fiber_frame import _compile
+    from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
+        _counts,
+        run_stateful_fiber_frame2d_control_path,
+    )
+    from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
+        StatefulFiberFrame2DDisplacementControlConfig,
+        solve_stateful_fiber_frame2d_displacement_control_step,
+    )
+    from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+    from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
+
+    root = Path(__file__).resolve().parents[2]
+    model = load_neutral_json_bytes(
+        (root / "tests/fixtures/rc_mathern_nominal_uncalibrated.json").read_bytes()
+    )
+    compiled, blockers, _ = _compile(model, experimental_pin_roller_beam=True)
+    assert compiled is not None and not blockers
+    config = StatefulFiberFrame2DDisplacementControlConfig(
+        initial_trial_policy="accepted_then_prescribed_then_secant",
+        newton=NewtonRaphsonConfig(
+            max_iterations=100, line_search_alphas=tuple(2.0**-i for i in range(16))
+        ),
+    )
+    targets = (
+        (-1e-5, -0.0001, -0.00025, -0.0005)
+        + tuple(-i / 2000 for i in range(2, 51))
+        + tuple(-i / 400 for i in range(9, -1, -1))
+    )
+    result = run_stateful_fiber_frame2d_control_path(
+        compiled.problem,
+        targets,
+        control_global_dof=10,
+        config=config,
+        allow_reversals=True,
+        maximum_reversals=2,
+    )
+    assert result.status == "ready"
+    path = result.to_dict()
+    # Newton's accepted route can vary across BLAS implementations. Keep the
+    # real third-seed requirement, but do not assume a particular target needs it.
+    # These are independent diagnostic probes from the same immutable prefix,
+    # not additional accepted path steps or a physical specimen fit.
+    parent = result.final_checkpoint
+    previous = result.steps[-1].parent_checkpoint
+    before = (previous.canonical_bytes(), parent.canonical_bytes())
+    probe_targets = (0.00125, 0.0025, 0.00375, 0.005, 0.0075, 0.01, 0.0125)
+    probes = []
+    selected = None
+    for target in probe_targets:
+        trial = solve_stateful_fiber_frame2d_displacement_control_step(
+            compiled.problem,
+            parent,
+            control_global_dof=10,
+            target_control_displacement_m=target,
+            config=config,
+            previous_checkpoint=previous,
+        )
+        assert before == (previous.canonical_bytes(), parent.canonical_bytes())
+        if not trial.committed:
+            assert (
+                trial.accepted_checkpoint.canonical_bytes() == parent.canonical_bytes()
+            )
+        row = {
+            "committed": trial.committed,
+            "parent_checkpoint_hash": parent.state_hash,
+            "target_control_displacement_m": target,
+            "solver_work": trial.solver_work(),
+            "step": trial.to_dict(),
+        }
+        probes.append(row)
+        if trial.committed and len(trial.initial_trial_search()["trials"]) == 3:
+            selected = row
+            break
+    generation = {
+        "scope": "bounded diagnostic witness search; not specimen calibration or product path cost",
+        "candidate_targets_m": probe_targets,
+        "prefix_work": _counts(path["attempts"]),
+        "probes": [
+            {
+                k: row[k]
+                for k in ("committed", "target_control_displacement_m", "solver_work")
+            }
+            for row in probes
+        ],
+        "total_work": _counts([*path["attempts"], *probes]),
+    }
+    output.with_suffix(".search.json").write_bytes(canonical(generation))
+    assert selected is not None, (
+        f"no real third-seed witness in bounded probes: {generation}"
+    )
+    path["attempts"].append(selected)
+    # Export only the projected work metrics, not stale prefix-only path claims.
+    path["metrics"] = {
+        "prefix_replay_work": _counts(path["replay_attempts"]),
+        "suffix_work": _counts(path["attempts"]),
+        "total_work": _counts([*path["replay_attempts"], *path["attempts"]]),
+    }
+    attempts = []
+    for row in path["attempts"]:
+        step = row["step"]
+        parent = step["parent_checkpoint"]
+        attempts.append(
+            {
+                key: row[key]
+                for key in (
+                    "committed",
+                    "parent_checkpoint_hash",
+                    "target_control_displacement_m",
+                    "solver_work",
+                )
+            }
+            | {
+                "step": {
+                    "committed": step["committed"],
+                    "metrics": {"config": step["metrics"]["config"]},
+                    "parent_checkpoint": {
+                        key: parent[key]
+                        for key in (
+                            "state_hash",
+                            "parent_state_hash",
+                            "global_displacements",
+                        )
+                    },
+                    "initial_trial_search": step["initial_trial_search"],
+                    "trial_solution": step["trial_solution"],
+                }
+            }
+        )
+    packet = {
+        "scope": "trial-audit projection; not a complete product artifact",
+        "fixture_generation": generation,
+        "config": {
+            "solver_config": {"initial_trial_policy": config.initial_trial_policy},
+            "control_global_dof": 10,
+        },
+        "api": {
+            "request": {"configuration": config.to_manifest()},
+            "path": {
+                "attempts": attempts,
+                "replay_attempts": path["replay_attempts"],
+                "metrics": path["metrics"],
+            },
+            "metrics": {"control_work": path["metrics"]["total_work"]},
+        },
+    }
+    output.write_bytes(canonical(packet))
+    return {
+        "path": str(output),
+        "bytes": output.stat().st_size,
+        "scope": packet["scope"],
+    }
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--request-file", type=Path)
+    parser.add_argument("--secant-trace", action="store_true")
     arguments = parser.parse_args()
+    if arguments.secant_trace:
+        if arguments.request_file is not None:
+            parser.error("secant trace does not accept a request override")
+        emit(secant_trace_snapshot(arguments.output))
+        raise SystemExit(0)
     emit(
         snapshot(
             arguments.output,

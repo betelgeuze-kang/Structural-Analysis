@@ -6,6 +6,8 @@ import { createJobWorkflowTransport, type JobAuthorizationProvider, type RcJobTr
 import { loadRcJobRequest, refreshRcJob, resumeRcJob, submitRcJob, verifyRcSubmissionBinding, SUBMIT_MAX_BYTES } from '../model/rcWorkflowProvider'
 import { parseNativeJsonStrict } from '../model/nativeFrameProvider'
 import type { RcJobReview } from '../model/rcJobReview'
+import type { RcCorotationalReportReview } from '../model/rcCorotationalReportReview'
+import { isRcCorotationalRequest, validateRcRequestProfile } from '../model/rcJobSchema'
 import type { WorkbenchJobView } from '../model/jobSchema'
 import { beginRcPhaseSession, traceRcPhase } from '../model/rcWorkflowTrace'
 
@@ -16,6 +18,8 @@ const empty = (): JobLoadResult => ({ status: 'unconfigured', job: null, errors:
 export function rcWorkflowMessage(error: unknown, operation: 'read' | 'submit' | 'resume' | 'save' = 'read'): string {
   const message = error instanceof Error ? error.message : ''
   if (message.includes('authorization_scope_changed')) return 'Authentication scope changed. Reopen this project with the current account.'
+  if (/^rc_(?:request|checkpoint|result|evidence|artifacts|corotational_report)_too_large$/.test(message)) return 'This saved result exceeds this workspace’s review size limit.'
+  if (message === 'rc_review_budget_invalid') return 'This workspace’s review size limit is invalid. Contact the workspace administrator.'
   const status = /(?:http_|HTTP_|HTTP )([0-9]{3})/.exec(message)?.[1]
   if (status === '401') return 'Authentication is unavailable. Reopen with the current account.'
   if (status === '404') return 'This saved job or report is unavailable for the current account.'
@@ -52,29 +56,32 @@ function sourceKey(job: WorkbenchJobView): string {
 function InputSummary({ value, saved }: { value: Record<string, unknown>; saved: boolean }): ReactElement {
   const model = value.model as Record<string, unknown> | undefined
   const config = value.config as Record<string, unknown> | undefined
+  const corotational = isRcCorotationalRequest(value)
   return <details data-rc-input-summary={saved ? 'stored' : 'draft'}>
     <summary>{saved ? 'Stored RC input' : 'Local RC input draft'}</summary>
     <dl className="wb2-kv"><dt>Case</dt><dd>{typeof value.case_id === 'string' ? value.case_id : 'not specified'}</dd>
       <dt>Source</dt><dd className="wb2-mono">{typeof value.source_revision === 'string' ? value.source_revision : 'not specified'}</dd>
+      <dt>Profile</dt><dd>{corotational ? 'Experimental corotational nodal control' : 'Bounded RC fiber control'}</dd>
       <dt>Model</dt><dd>{Array.isArray(model?.nodes) ? model?.nodes.length : '?'} nodes · {Array.isArray(model?.elements) ? model?.elements.length : '?'} members</dd>
     </dl>
-    <p>{saved ? 'This is the hash-checked request stored by the service.' : 'The service validates supported cantilever, control and material contracts when explicitly submitted.'}</p>
+    <p>{saved ? 'This is the hash-checked request stored by the service.' : corotational ? 'The service validates the experimental nodal model, control, fixed loads and execution policy when explicitly submitted.' : 'The service validates supported cantilever, control and material contracts when explicitly submitted.'}</p>
     <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: '18rem', overflow: 'auto' }}>{JSON.stringify(config ?? {}, null, 2)}</pre>
   </details>
 }
 
 interface RcJobWorkflowPanelProps {
+  rcReviewResultMaxBytes?: number
   collectionUrl: string; initialJobStatusUrl?: string; initialJobId?: string; initialReportId?: string; authorize?: JobAuthorizationProvider
 }
 
 export function RcJobWorkflowPanel(props: RcJobWorkflowPanelProps): ReactElement {
   // A saved link is a new session. Local Open/submit intent must never shadow
   // later Back/Forward navigation, including a different report on the same job.
-  const source = JSON.stringify([props.collectionUrl, props.initialJobStatusUrl, props.initialJobId, props.initialReportId])
+  const source = JSON.stringify([props.collectionUrl, props.initialJobStatusUrl, props.initialJobId, props.initialReportId, props.rcReviewResultMaxBytes])
   return <RcJobWorkflowSession key={source} {...props} />
 }
 
-function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId, initialReportId, authorize }: RcJobWorkflowPanelProps): ReactElement {
+function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId, initialReportId, authorize, rcReviewResultMaxBytes }: RcJobWorkflowPanelProps): ReactElement {
   const [authEpoch, setAuthEpoch] = useState(0)
   const [openId, setOpenId] = useState('')
   const [requestedId, setRequestedId] = useState<string>()
@@ -92,6 +99,11 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   const pollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [session, setSession] = useState<{ key: string; transport: RcJobTransport | null; load: JobLoadResult; input: Record<string, unknown> | null }>({ key: '', transport: null, load: empty(), input: null })
   const review = useRef<RcJobReview | undefined>(undefined)
+  const corotationalReview = useRef<RcCorotationalReportReview | undefined>(undefined)
+  function disposeReviews(): void {
+    review.current?.dispose(); review.current = undefined
+    corotationalReview.current?.dispose(); corotationalReview.current = undefined
+  }
   const fullSource = useRef('')
   const immutableRequest = useRef('')
   const [refreshEpoch, setRefreshEpoch] = useState(0)
@@ -105,7 +117,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       controllerRef.current?.abort()
       if (pollTimer.current) clearTimeout(pollTimer.current)
       setBusy(false)
-      review.current?.dispose(); review.current = undefined
+      disposeReviews()
       setSession({ key, transport: null, load: empty(), input: null })
     }
   }
@@ -116,7 +128,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     controllerRef.current = controller; fileGeneration.current++
     let transport: RcJobTransport | null = null
     const active = () => !controller.signal.aborted && ownGeneration === generation.current
-    review.current?.dispose(); review.current = undefined; fullSource.current = ''; immutableRequest.current = ''
+    disposeReviews(); fullSource.current = ''; immutableRequest.current = ''
     setSession({ key, transport: null, load: { status: 'loading', job: null, errors: [] }, input: null })
     setMessage(''); setBusy(false)
     const invalidSavedId = initialJobId !== undefined && !JOB_ID.test(initialJobId)
@@ -133,31 +145,43 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
         if (!immutableRequest.current) {
           const input = await loadRcJobRequest(transport, job)
           if (!active()) return
-          if (input.value.operation !== 'bounded_rc_fiber_direct_control') throw new Error('rc_request_kind_invalid')
+          validateRcRequestProfile(input.value)
           immutableRequest.current = job.request.content_hash
           setSession(old => ({ ...old, input: input.value }))
         }
         let loaded: JobLoadResult = { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
         if (job.status === 'succeeded') {
           const identity = sourceKey(job)
-          if (fullSource.current === identity && review.current) loaded = { ...loaded, artifactStatus: 'verified', rcReview: review.current }
+          if (fullSource.current === identity && corotationalReview.current) loaded = { ...loaded, artifactStatus: 'report_verified', rcCorotationalReview: corotationalReview.current }
+          else if (fullSource.current === identity && review.current) loaded = { ...loaded, artifactStatus: 'verified', rcReview: review.current }
           else {
-            review.current?.dispose(); review.current = undefined
-            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId))
-            if (!active()) { loaded.rcReview?.dispose(); return }
+            disposeReviews()
+            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId), rcReviewResultMaxBytes)
+            if (!active()) { loaded.rcReview?.dispose(); loaded.rcCorotationalReview?.dispose(); return }
+            if (loaded.status === 'error' && loaded.errors.length === 1) throw new Error(loaded.errors[0])
             if (!loaded.job || sourceKey(loaded.job) !== identity || loaded.status !== 'ready') throw new Error('rc_terminal_source_unavailable')
+            const guard = async <T,>(operation: () => Promise<T>): Promise<T> => {
+              try {
+                await transport!.verifyAuthorizationScope()
+                if (!active()) throw new Error('rc_session_stale')
+                const result = await operation()
+                await transport!.verifyAuthorizationScope()
+                if (!active()) throw new Error('rc_session_stale')
+                return result
+              } catch (error) { if (active()) invalidate(error); throw error }
+            }
+            if (loaded.rcCorotationalReview) {
+              const original = loaded.rcCorotationalReview
+              const scoped: RcCorotationalReportReview = { ...original,
+                state: index => guard(() => original.state(index)),
+                statePage: (start, count) => guard(() => original.statePage(start, count)),
+                download: () => guard(() => original.download()),
+                reopen: bytes => guard(() => original.reopen(bytes)),
+              }
+              corotationalReview.current = scoped; loaded = { ...loaded, rcCorotationalReview: scoped }; fullSource.current = identity
+            }
             if (loaded.rcReview) {
               const original = loaded.rcReview
-              const guard = async <T,>(operation: () => Promise<T>): Promise<T> => {
-                try {
-                  await transport!.verifyAuthorizationScope()
-                  if (!active()) throw new Error('rc_session_stale')
-                  const result = await operation()
-                  await transport!.verifyAuthorizationScope()
-                  if (!active()) throw new Error('rc_session_stale')
-                  return result
-                } catch (error) { if (active()) invalidate(error); throw error }
-              }
               const scoped: RcJobReview = { ...original,
                 epoch: index => guard(() => original.epoch(index)),
                 material: (member, point, fiber) => guard(() => original.material(member, point, fiber)),
@@ -170,17 +194,17 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
             }
           }
         } else {
-          review.current?.dispose(); review.current = undefined; fullSource.current = ''
+          disposeReviews(); fullSource.current = ''
           if (job.status === 'failed' && job.attempt > 0) {
             traceRcPhase(controller.signal, 'poll.failed-load.begin')
-            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId))
+            loaded = await loadWorkbenchJob(`${transport.collectionUrl}/${jobId}`, controller.signal, undefined, transport.readTransport(jobId), rcReviewResultMaxBytes)
             traceRcPhase(controller.signal, 'poll.failed-load.end')
             if (!active()) return
             if (!loaded.job || sourceKey(loaded.job) !== sourceKey(job)) throw new Error('rc_terminal_source_unavailable')
           }
         }
         await transport.verifyAuthorizationScope()
-        if (!active()) { loaded.rcReview?.dispose(); return }
+        if (!active()) { loaded.rcReview?.dispose(); loaded.rcCorotationalReview?.dispose(); return }
         traceRcPhase(controller.signal, loaded.status === 'ready' ? 'ui.ready.queue' : 'ui.other.queue')
         setSession(old => ({ ...old, key, transport, load: loaded }))
         if (resumeRefreshJob.current === jobId) {
@@ -191,7 +215,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       } catch (error) {
         traceRcPhase(controller.signal, 'poll.error')
         if (!active()) return
-        review.current?.dispose(); review.current = undefined
+        disposeReviews()
         setSession({ key, transport: null, input: null, load: { status: 'invalid', job: null, errors: [rcWorkflowMessage(error)], artifactStatus: 'invalid' } })
         setMessage(rcWorkflowMessage(error))
       }
@@ -204,8 +228,8 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       if (invalidSavedId && !requestedId) setMessage('The saved RC job identifier is invalid. Open an exact job explicitly.')
       if (savedId) { setOpenId(savedId); void poll(savedId) }
     }).catch(error => { if (active()) setMessage(rcWorkflowMessage(error)) })
-    return () => { traceRcPhase(controller.signal, 'effect.cleanup'); generation.current++; controller.abort(); fileGeneration.current++; if (pollTimer.current) clearTimeout(pollTimer.current); review.current?.dispose(); review.current = undefined }
-  }, [key, collectionUrl, authorize])
+    return () => { traceRcPhase(controller.signal, 'effect.cleanup'); generation.current++; controller.abort(); fileGeneration.current++; if (pollTimer.current) clearTimeout(pollTimer.current); disposeReviews() }
+  }, [key, collectionUrl, authorize, rcReviewResultMaxBytes])
   useLayoutEffect(() => {
     if (current.transport && current.load.status === 'ready') traceRcPhase(current.transport, 'ui.ready.commit')
   }, [key, current.transport, current.load.status, current.load.job?.job_id, current.load.job?.attempt])
@@ -226,7 +250,8 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     setBusy(true); setMessage('')
     try {
       const bytes = new TextEncoder().encode(draft)
-      if (!draftValue || draftValue.operation !== 'bounded_rc_fiber_direct_control' || bytes.byteLength === 0 || bytes.byteLength > SUBMIT_MAX_BYTES) throw new Error('rc_input_invalid')
+      if (!draftValue || bytes.byteLength === 0 || bytes.byteLength > SUBMIT_MAX_BYTES) throw new Error('rc_input_invalid')
+      validateRcRequestProfile(draftValue)
       if (!intent.current || intent.current.text !== draft) intent.current = { bytes, text: draft, key: `rc-ui-${crypto.randomUUID()}` }
       const job = await submitRcJob(current.transport, intent.current.bytes, intent.current.key)
       await verifyRcSubmissionBinding(current.transport, job, intent.current.bytes)
@@ -254,7 +279,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   }
   return <section className="wb2-panel" data-rc-workflow="project" aria-labelledby="wb2-rc-workflow-title">
     <h2 id="wb2-rc-workflow-title" className="wb2-panel__title">RC project workflow</h2>
-    <p>Open one durable RC job or explicitly submit its complete typed input. Saved analysis, quantities and declared prices stay bound to that job.</p>
+    <p>Open one durable RC job or explicitly submit its complete typed input. Saved analysis and any supported report stay bound to that job.</p>
     <div className="wb2-actions"><label>Saved RC job ID <input aria-label="Saved RC job ID" value={openId} onChange={e => setOpenId(e.target.value)} maxLength={36} /></label>
       <button type="button" className="wb2-btn" disabled={!JOB_ID.test(openId) || busy} onClick={() => { setRequestedId(openId); setRefreshEpoch(v => v + 1) }}>Open saved RC job</button>
       <button type="button" className="wb2-btn" disabled={busy} onClick={() => { setAuthEpoch(v => v + 1) }}>Refresh account and job</button></div>
@@ -281,7 +306,8 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       {current.load.job.checkpoint ? 'Resume RC from saved checkpoint' : 'Retry RC from the beginning'}
     </button> : null}
     <JobServicePanel key={`${key}:${current.load.job?.job_id}:${current.load.job?.attempt}`} loadStatus={current.load.status} job={current.load.job} errors={current.load.errors} artifactStatus={current.load.artifactStatus}
-      engineeringResultIr={current.load.engineeringResultIr} rcReview={current.load.rcReview} />
+      engineeringResultIr={current.load.engineeringResultIr} rcReview={current.load.rcReview} rcCorotationalReview={current.load.rcCorotationalReview}
+      expectedCorotationalReportId={current.load.job?.job_id === initialJobId || current.load.job?.job_id === configuredJob(collectionUrl, initialJobStatusUrl) ? initialReportId : undefined} />
     {current.transport && current.load.job && current.load.rcReview && current.load.artifactStatus === 'verified' ?
       <RcQuantityReportPanel key={`${current.transport.tenantId}:${sourceKey(current.load.job)}`} transport={current.transport} job={current.load.job}
         review={current.load.rcReview} initialReportId={current.load.job.job_id === initialJobId || current.load.job.job_id === configuredJob(collectionUrl, initialJobStatusUrl) ? initialReportId : undefined}
