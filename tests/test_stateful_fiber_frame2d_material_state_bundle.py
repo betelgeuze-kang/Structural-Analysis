@@ -110,10 +110,12 @@ def test_initial_projection_rejects_non_genesis_epoch_zero_material_history() ->
     element = checkpoint.element_states[0]
     section = element.integration_point_states[0]
     fiber_state = section.fiber_states[0]
+    concrete = problem.members[0].element.section.concrete
     altered_fiber_state = replace(
         fiber_state,
-        dissipated_energy_density_mj_per_m3=1.0,
+        tensile_history_strain=0.5 * concrete.tensile_threshold_strain,
     )
+    concrete.validate_state_admissibility(altered_fiber_state)
     altered_section = replace(
         section,
         fiber_states=(altered_fiber_state, *section.fiber_states[1:]),

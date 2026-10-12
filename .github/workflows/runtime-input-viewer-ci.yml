@@ -285,10 +285,7 @@ jobs:
         env:
           RC_COROTATIONAL_REPORT_FIXTURE_DIR: rc-lifecycle-evidence/corotational-report
         run: >-
-          node --loader ./scripts/json-module-loader.mjs
-          node_modules/@playwright/test/cli.js test
-          tests/frontend/rc-corotational-report-schema.spec.ts
-          tests/frontend/rc-corotational-report-browser.spec.ts
+          node scripts/verify-workbench-v2-e2e.mjs --saved-rc-reports
           --workers=1 --retries=0 --reporter=line --trace=retain-on-failure
 
       - name: Upload actual RC lifecycle evidence

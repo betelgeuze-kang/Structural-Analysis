@@ -250,7 +250,7 @@ def test_browser_helpers_spawn_only_trusted_node_with_sanitized_environment() ->
         assert "NODE_OPTIONS" not in text
         assert "node_modules/.bin" not in text
         assert "spawn('npm'" not in text
-        assert "spawn(\"npm\"" not in text
+        assert 'spawn("npm"' not in text
         assert "trustedNode()" in text
         assert "sanitizedFrontendEnvironment" in text
 
@@ -260,3 +260,36 @@ def test_browser_helpers_spawn_only_trusted_node_with_sanitized_environment() ->
     assert "node_modules/typescript/bin/tsc" in workbench
     assert "node_modules/vite/bin/vite.js" in workbench
     assert "node_modules/playwright/cli.js" in workbench
+
+
+@pytest.mark.parametrize("fixture_fault", ["unconfigured", "missing-v7", "symlink-v7"])
+def test_saved_report_runner_rejects_missing_or_unsafe_retained_inputs(
+    tmp_path: Path, fixture_fault: str
+) -> None:
+    node = shutil.which("node")
+    assert node is not None
+    environment = {"PATH": "/usr/bin:/bin"}
+    if fixture_fault != "unconfigured":
+        (tmp_path / "v6-review-snapshot.json").write_text("{}", encoding="utf-8")
+        environment["RC_COROTATIONAL_REPORT_FIXTURE_DIR"] = str(tmp_path)
+    if fixture_fault == "symlink-v7":
+        target = tmp_path / "retained.json"
+        target.write_text("{}", encoding="utf-8")
+        (tmp_path / "v7-review-snapshot.json").symlink_to(target)
+
+    result = subprocess.run(
+        [node, "scripts/verify-workbench-v2-e2e.mjs", "--saved-rc-reports"],
+        cwd=ROOT,
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    expected = {
+        "unconfigured": "retained_rc_report_fixture_directory_required",
+        "missing-v7": "retained_rc_report_fixture_missing:v7",
+        "symlink-v7": "retained_rc_report_fixture_unsafe:v7",
+    }[fixture_fault]
+    assert result.returncode != 0
+    assert expected in result.stderr

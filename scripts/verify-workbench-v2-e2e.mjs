@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, statSync } from 'node:fs'
+import { createReadStream, existsSync, lstatSync, statSync } from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
@@ -12,7 +12,12 @@ import {
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = path.join(rootDir, 'dist')
 const jsonLoader = pathToFileURL(path.join(rootDir, 'scripts', 'json-module-loader.mjs')).href
-const specs = [
+const arguments_ = process.argv.slice(2)
+const savedReportMode = arguments_.includes('--saved-rc-reports')
+const specs = savedReportMode ? [
+  'tests/frontend/rc-corotational-report-schema.spec.ts',
+  'tests/frontend/rc-corotational-report-browser.spec.ts',
+] : [
   'tests/frontend/workbench-v2-e2e.spec.ts',
   'tests/frontend/workbench-v2-rc-workspace.spec.ts',
   'tests/frontend/workbench-v2-import-health.spec.ts',
@@ -23,7 +28,7 @@ const specs = [
   'tests/frontend/workbench-v2-engineering-value-state.spec.ts',
   'tests/frontend/workbench-v2-status-taxonomy.spec.ts',
 ]
-const passthrough = process.argv.slice(2)
+const passthrough = arguments_.filter(argument => argument !== '--saved-rc-reports')
 
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -65,6 +70,21 @@ function serveDist() {
 
 async function main() {
   const node = trustedNode()
+  const reportEnvironment = {}
+  if (savedReportMode) {
+    const configured = process.env.RC_COROTATIONAL_REPORT_FIXTURE_DIR
+    if (!configured) throw new Error('retained_rc_report_fixture_directory_required')
+    const directory = path.resolve(rootDir, configured)
+    for (const profile of ['v6', 'v7']) {
+      const file = path.join(directory, `${profile}-review-snapshot.json`)
+      if (!existsSync(file)) throw new Error(`retained_rc_report_fixture_missing:${profile}`)
+      const stat = lstatSync(file)
+      if (!stat.isFile() || stat.isSymbolicLink()) {
+        throw new Error(`retained_rc_report_fixture_unsafe:${profile}`)
+      }
+    }
+    reportEnvironment.RC_COROTATIONAL_REPORT_FIXTURE_DIR = directory
+  }
   const typescript = trustedRepoTool(rootDir, 'node_modules/typescript/bin/tsc', 'typescript_cli')
   const vite = trustedRepoTool(rootDir, 'node_modules/vite/bin/vite.js', 'vite_cli')
   const delivery = trustedRepoTool(
@@ -103,6 +123,7 @@ async function main() {
       [loaderOption, playwright, 'test', ...specs, '--reporter=line', ...passthrough],
       sanitizedFrontendEnvironment(node, {
         WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
+        ...reportEnvironment,
       }),
     )
   } finally {
