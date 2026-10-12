@@ -31,6 +31,9 @@ _JOB_ROUTE = re.compile(
 _RC_QUANTITY_ROUTE = re.compile(
     r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-quantity-reports(?:/(?P<report_id>rcq_[0-9a-f]{64}))?$"
 )
+_RC_COROTATIONAL_REPORT_ROUTE = re.compile(
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-corotational-report$"
+)
 _MAX_HTTP_BODY = 192 * 1024 * 1024
 _MAX_SUBMIT_BODY = 16 * 1024 * 1024
 # Base64 of a bounded RC result plus the existing small completion envelope.
@@ -94,6 +97,14 @@ class DurableJobHttpApi:
                 )
             if path == "/v1/jobs" and normalized_method == "POST":
                 return self._submit(normalized_headers, raw)
+            corotational_match = _RC_COROTATIONAL_REPORT_ROUTE.fullmatch(path)
+            if corotational_match is not None:
+                return self._rc_corotational_report_route(
+                    normalized_method,
+                    corotational_match.group("job_id"),
+                    normalized_headers,
+                    raw,
+                )
             quantity_match = _RC_QUANTITY_ROUTE.fullmatch(path)
             if quantity_match is not None:
                 return self._rc_quantity_route(
@@ -136,6 +147,39 @@ class DurableJobHttpApi:
                 "request_field_invalid",
                 "One or more request fields have an invalid type or range.",
             )
+
+    def _rc_corotational_report_route(
+        self, method: str, job_id: str, headers: Mapping[str, str], body: bytes
+    ) -> JobHttpResponse:
+        tenant_id, token = _tenant_credentials(headers)
+        if method != "GET":
+            _api_fail("method_not_allowed", 405, "Report reads require GET.")
+        if body:
+            _api_fail("unexpected_body", 400, "Report reads do not accept a body.")
+        raw = self.service.read_rc_corotational_report(
+            job_id,
+            tenant_id=tenant_id,
+            authorization_token=token,
+            expected_request_hash=headers.get("x-structural-expected-request-hash"),
+            expected_result_artifact_hash=headers.get(
+                "x-structural-expected-result-hash"
+            ),
+            expected_evidence_artifact_hash=headers.get(
+                "x-structural-expected-evidence-hash"
+            ),
+        )
+        digest = hashlib.sha256(raw).hexdigest()
+        report_id = "rcc_" + digest
+        return JobHttpResponse(
+            200,
+            {
+                **_headers("application/json"),
+                "content-disposition": f'attachment; filename="{report_id}-corotational-nodal-report.json"',
+                "x-structural-report-sha256": "sha256:" + digest,
+                "x-structural-report-id": report_id,
+            },
+            raw,
+        )
 
     def _rc_quantity_route(
         self,
@@ -619,6 +663,8 @@ def _service_status(code: str) -> int:
         "rc_invocation_reservation_lease_mismatch",
         "rc_quantity_source_conflict",
         "rc_quantity_job_not_succeeded",
+        "rc_corotational_report_source_conflict",
+        "rc_corotational_report_job_not_succeeded",
     }:
         return 409
     if code.startswith("job_database_") or code in {

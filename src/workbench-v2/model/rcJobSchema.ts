@@ -151,6 +151,7 @@ function hash(value: unknown): boolean { return typeof value === 'string' && /^s
  * Source, numerical and quantity authority still require the original artifacts.
  */
 export function validateRcRequestProfile(value: unknown): void {
+  if (isRcCorotationalRequest(value)) { validateRcCorotationalRequestProfile(value); return }
   const request = object(value)
   finite(request)
   const exact = (record: RcObject, keys: string[], code: string): void => {
@@ -794,4 +795,79 @@ export async function validateRcPreload(api: RcObject, apiRaw: string, native: R
       && ['attempted_step_count', 'known_linear_solve_count', 'known_newton_iteration_count', 'unknown_solver_work_attempt_count']
         .every((key) => counts.total_work[key] === work[key] + counts.prefix_replay_work[key] + counts.suffix_work[key]), 'preload_total_work_invalid')
   } else check(api.preload_response === undefined, 'preload_profile_invalid')
+}
+
+/** Separate corotational authored profile; no legacy fiber schema/defaults or numerical compiler is reused. */
+export function isRcCorotationalRequest(value: unknown): boolean {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+    && ['structural-analysis-job-request.v6', 'structural-analysis-job-request.v7'].includes(String((value as RcObject).schema_version))
+}
+export function validateRcCorotationalRequestProfile(value: unknown): void {
+  const request = object(value); finite(request)
+  const exact = (row: RcObject, keys: string[], code: string) => check(same(Object.keys(row).sort(), [...keys].sort()), code)
+  const integer = (v: unknown, min: number, max: number) => Number.isSafeInteger(v) && (v as number) >= min && (v as number) <= max
+  const number = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+  const positive = (v: unknown): v is number => number(v) && v > 0
+  const identifier = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(v)
+  exact(request, ['schema_version', 'operation', 'case_id', 'model', 'config', 'source_revision', 'result_contract', 'execution_config'], 'corotational_request_invalid')
+  check(isRcCorotationalRequest(request) && request.operation === 'bounded_rc_corotational_control'
+    && request.result_contract === 'bounded-rc-corotational-job-result.v1' && identifier(request.case_id)
+    && typeof request.source_revision === 'string' && /^[a-f0-9]{40}$/.test(request.source_revision), 'corotational_request_invalid')
+  const c = object(request.config)
+  exact(c, ['control_node_id', 'control_component', 'targets_m', 'fixed_nodal_loads', 'config', 'preload_config', 'maximum_attempt_count', 'maximum_subdivision_depth', 'experimental_pin_roller_beam', 'experimental_fixed_guided_axial'], 'corotational_config_invalid')
+  check(identifier(c.control_node_id) && ['UX', 'UY'].includes(c.control_component)
+    && integer(c.maximum_attempt_count, 1, 4096) && integer(c.maximum_subdivision_depth, 0, 20)
+    && typeof c.experimental_pin_roller_beam === 'boolean' && typeof c.experimental_fixed_guided_axial === 'boolean'
+    && !(c.experimental_pin_roller_beam && c.experimental_fixed_guided_axial), 'corotational_config_invalid')
+  check(Array.isArray(c.targets_m) && c.targets_m.length >= 1 && c.targets_m.length <= 255
+    && c.targets_m.every((v: unknown, i: number, rows: unknown[]) => number(v) && (i === 0 || v !== rows[i - 1])), 'corotational_targets_invalid')
+  check(Array.isArray(c.fixed_nodal_loads) && c.fixed_nodal_loads.length <= 48
+    && c.fixed_nodal_loads.every((r: unknown) => Array.isArray(r) && r.length === 3 && identifier(r[0]) && ['FX', 'FY', 'MZ'].includes(r[1]) && number(r[2]))
+    && new Set(c.fixed_nodal_loads.map((r: [string, string, number]) => `${r[0]}:${r[1]}`)).size === c.fixed_nodal_loads.length, 'corotational_fixed_loads_invalid')
+  for (const preload of [false, true]) {
+    const solver = object(preload ? c.preload_config : c.config)
+    const iteration = preload ? 'max_iterations' : 'maximum_iterations'
+    const numeric = preload ? ['residual_tolerance', 'increment_tolerance'] : ['residual_tolerance', 'control_tolerance_m', 'increment_tolerance_m', 'load_factor_increment_tolerance', 'load_factor_coordinate_scale_m']
+    exact(solver, [...numeric, iteration, 'line_search_alphas', 'matrix_backend'], 'corotational_solver_invalid')
+    check(numeric.every(k => positive(solver[k])) && integer(solver[iteration], 0, 200)
+      && (preload ? ['numpy_linalg_solve_dense', 'scipy_sparse_spsolve_cpu'] : ['numpy_linalg_solve_dense']).includes(solver.matrix_backend)
+      && Array.isArray(solver.line_search_alphas) && solver.line_search_alphas.length >= 1 && solver.line_search_alphas.length <= 64
+      && solver.line_search_alphas.every((v: unknown, i: number, rows: unknown[]) => positive(v) && v <= 1 && (i === 0 || v < (rows[i - 1] as number))), 'corotational_solver_invalid')
+  }
+  const execution = object(request.execution_config), isolated = request.schema_version === 'structural-analysis-job-request.v7'
+  exact(execution, ['attempt_limit_per_call', 'maximum_api_invocations', ...(isolated ? ['phase_execution_policy'] : [])], 'corotational_execution_invalid')
+  check(integer(execution.attempt_limit_per_call, 1, 4096) && integer(execution.maximum_api_invocations, 1, 100000), 'corotational_execution_invalid')
+  if (isolated) {
+    const policy = object(execution.phase_execution_policy)
+    exact(policy, ['schema_version', 'analysis_timeout_ms', 'verification_timeout_ms', 'termination_grace_ms'], 'corotational_phase_policy_invalid')
+    check(policy.schema_version === 'bounded-rc-corotational-phase-execution-policy.v1'
+      && integer(policy.analysis_timeout_ms, 1, 3600000) && integer(policy.verification_timeout_ms, 1, 3600000)
+      && integer(policy.termination_grace_ms, 1, 5000), 'corotational_phase_policy_invalid')
+  }
+  const model = object(request.model)
+  exact(model, ['schema_version', 'units', 'coordinate_system', 'nodes', 'elements', 'materials', 'sections', 'loads', 'supports', 'unsupported_features', 'warnings', 'metadata'], 'corotational_model_invalid')
+  check(model.schema_version === 'structural-analysis-canonical-model.v1'
+    && Array.isArray(model.nodes) && model.nodes.length >= 2 && model.nodes.length <= 16
+    && Array.isArray(model.elements) && model.elements.length > 0 && Array.isArray(model.materials) && model.materials.length > 0
+    && Array.isArray(model.sections) && model.sections.length > 0 && Array.isArray(model.loads) && Array.isArray(model.supports)
+    && Array.isArray(model.unsupported_features) && model.unsupported_features.length === 0
+    && Array.isArray(model.warnings) && model.warnings.every((v: unknown) => typeof v === 'string'), 'corotational_model_invalid')
+  object(model.metadata)
+  const units = object(model.units), coordinates = object(model.coordinate_system)
+  exact(units, ['length', 'force'], 'corotational_model_units_invalid')
+  exact(coordinates, ['axis_order', 'up_axis'], 'corotational_model_units_invalid')
+  check(units.length === 'm' && units.force === 'kN' && Array.isArray(coordinates.axis_order) && same(coordinates.axis_order.map((v: unknown) => typeof v === 'string' ? v.toUpperCase() : v), ['X', 'Y', 'Z']) && typeof coordinates.up_axis === 'string' && coordinates.up_axis.toUpperCase() === 'Z', 'corotational_model_units_invalid')
+  const ids = model.nodes.map((n: unknown) => {
+    const row = object(n); exact(row, ['id', 'coordinates'], 'corotational_node_invalid')
+    check(identifier(row.id) && Array.isArray(row.coordinates) && row.coordinates.length === 3 && row.coordinates.every(number) && row.coordinates[2] === 0, 'corotational_node_invalid')
+    return row.id as string
+  })
+  check(new Set(ids).size === ids.length && ids.includes(c.control_node_id), 'corotational_node_invalid')
+  for (const raw of model.supports) {
+    const row = object(raw); exact(row, ['node', 'dofs'], 'corotational_support_invalid')
+    check(ids.includes(row.node) && Array.isArray(row.dofs) && row.dofs.length > 0 && new Set(row.dofs).size === row.dofs.length
+      && row.dofs.every((d: unknown) => ['UX', 'UY', 'RZ'].includes(String(d))), 'corotational_support_invalid')
+    check(row.node !== c.control_node_id || !row.dofs.includes(c.control_component), 'corotational_control_invalid')
+  }
+  check(c.fixed_nodal_loads.every((row: [string, string, number]) => ids.includes(row[0])), 'corotational_fixed_loads_invalid')
 }

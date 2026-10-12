@@ -265,9 +265,12 @@ function GeneralWorkbenchPage({
     }
     const controller = new AbortController()
     setJobLoad({ status: 'loading', job: null, errors: [] })
-    loadWorkbenchJob(jobStatusUrl, controller.signal, undefined, undefined, rcReviewResultMaxBytes).then(setJobLoad)
+    loadWorkbenchJob(jobStatusUrl, controller.signal, jobAuthorization, undefined, rcReviewResultMaxBytes).then(loaded => {
+      if (controller.signal.aborted) { loaded.rcReview?.dispose(); loaded.rcCorotationalReview?.dispose(); return }
+      setJobLoad(loaded)
+    })
     return () => controller.abort()
-  }, [jobStatusUrl, rcJobCollectionUrl, rcReviewResultMaxBytes])
+  }, [jobStatusUrl, rcJobCollectionUrl, jobAuthorization, rcReviewResultMaxBytes])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -410,6 +413,9 @@ function GeneralWorkbenchPage({
           errors={jobLoad.errors}
           artifactStatus={jobLoad.artifactStatus}
           engineeringResultIr={jobLoad.engineeringResultIr}
+          rcReview={jobLoad.rcReview}
+          rcCorotationalReview={jobLoad.rcCorotationalReview}
+          expectedCorotationalReportId={jobLoad.job?.job_id === rcJobId ? rcReportId : undefined}
         /> : null}
         {caseV2 ? (
           <RunMonitor

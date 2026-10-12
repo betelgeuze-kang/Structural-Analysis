@@ -1,5 +1,6 @@
 import { createJobReadTransport, JobArtifactError, readBoundedJobBytes, type JobAuthorizationProvider, type JobReadTransport } from './jobTransport'
 import { loadRcJobReview, type RcJobReview } from './rcJobReview'
+import { loadRcCorotationalReportReview, type RcCorotationalReportReview } from './rcCorotationalReportReview'
 import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
 import {
   validateWorkbenchJobView,
@@ -13,8 +14,9 @@ export interface JobLoadResult {
   status: JobLoadStatus
   job: WorkbenchJobView | null
   errors: string[]
-  artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
+  artifactStatus?: 'not_published' | 'verified' | 'report_verified' | 'integrity_unavailable' | 'invalid'
   rcReview?: RcJobReview
+  rcCorotationalReview?: RcCorotationalReportReview
   engineeringResultIr?: EngineeringResultIrManifest
 }
 
@@ -83,6 +85,11 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal, author
     if (job.status !== 'succeeded' || !job.result || !job.evidence) {
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
     }
+    if (job.result.media_type === 'application/vnd.structural-analysis.rc-corotational-job-result+json') {
+      const rcCorotationalReview = await loadRcCorotationalReportReview(job, transport, signal, rcReviewResultMaxBytes)
+      if (signal?.aborted) { rcCorotationalReview.dispose(); return { status: 'unconfigured', job: null, errors: [] } }
+      return { status: 'ready', job, errors: [], artifactStatus: 'report_verified', rcCorotationalReview }
+    }
     if (job.result.media_type === 'application/vnd.structural-analysis.rc-fiber-job-result+json') {
       const rcReview = await loadRcJobReview(job, transport, signal, rcReviewResultMaxBytes)
       if (signal?.aborted) { rcReview.dispose(); return { status: 'unconfigured', job: null, errors: [] } }
@@ -129,7 +136,7 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal, author
   } catch (error: unknown) {
     if ((error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
     const message = (error as Error)?.message
-    if (/^rc_(?:request|checkpoint|result|evidence|artifacts)_too_large$/.test(message) || message === 'rc_review_budget_invalid') {
+    if (/^rc_(?:request|checkpoint|result|evidence|artifacts)_too_large$/.test(message) || message === 'rc_review_budget_invalid' || /^rc_corotational_report_[A-Za-z_0-9]+$/.test(message ?? '') || /^rc_request_HTTP_[0-9]{3}$/.test(message ?? '')) {
       return { status: 'error', job: null, errors: [message] }
     }
     return { status: 'error', job: null, errors: ['job API request failed'] }

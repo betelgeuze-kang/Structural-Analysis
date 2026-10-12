@@ -12,6 +12,9 @@ on:
       - "examples/public_rc_fiber_frame_explicit_layers.json"
       - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
+      - "tests/frontend/rc_corotational_review_snapshot.py"
+      - "tests/frontend/rc-corotational-report-*.spec.ts"
+      - "tests/test_rc_corotational_report*.py"
       - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
@@ -57,6 +60,9 @@ on:
       - "examples/public_rc_fiber_frame_explicit_layers.json"
       - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
+      - "tests/frontend/rc_corotational_review_snapshot.py"
+      - "tests/frontend/rc-corotational-report-*.spec.ts"
+      - "tests/test_rc_corotational_report*.py"
       - "tests/test_rc_lifecycle_http_fixture.py"
       - "src/workbench-v2/model/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
@@ -132,10 +138,20 @@ jobs:
           tests/test_verify_quality_gate_contract.py
           tests/frontend/rc_lifecycle_http_fixture.py
           tests/frontend/rc_lifecycle_review_snapshot.py
+          tests/frontend/rc_corotational_review_snapshot.py
+          src/structural_analysis/execution/rc_corotational_report.py
+          tests/test_rc_corotational_report.py
+          tests/test_rc_corotational_report_actual.py
           tests/test_rc_lifecycle_http_fixture.py
           tests/test_rc_explicit_steel_input.py
           tests/test_rc_circular_steel_integration.py
           tests/test_rc_control_feasible_initial_guess.py
+
+      - name: Saved corotational report regressions
+        run: >-
+          python -m pytest -q
+          tests/test_rc_corotational_report.py
+          tests/test_rc_corotational_report_actual.py
 
       - name: Compile MIDAS adapter
         run: python -m compileall -q src/structural_analysis/io/midas
@@ -253,6 +269,26 @@ jobs:
           tests/frontend/rc-pin-roller-review.spec.ts
           tests/frontend/rc-fixed-guided-review.spec.ts
           tests/frontend/workbench-v2-rc-lifecycle-http-browser.spec.ts
+          --workers=1 --retries=0 --reporter=line --trace=retain-on-failure
+
+      # Generate each small actual example once. Browser routes replay these
+      # exact retained bytes; they do not establish deployed-service or physical
+      # specimen validation, and schema tests must not repeat numerical work.
+      - name: Retain actual corotational report workflow snapshots
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+        run: |
+          python tests/frontend/rc_corotational_review_snapshot.py --profile v6 --output rc-lifecycle-evidence/corotational-report/v6-review-snapshot.json
+          python tests/frontend/rc_corotational_review_snapshot.py --profile v7 --output rc-lifecycle-evidence/corotational-report/v7-review-snapshot.json
+
+      - name: Workbench saved corotational report contracts and browser review
+        env:
+          RC_COROTATIONAL_REPORT_FIXTURE_DIR: rc-lifecycle-evidence/corotational-report
+        run: >-
+          node --loader ./scripts/json-module-loader.mjs
+          node_modules/@playwright/test/cli.js test
+          tests/frontend/rc-corotational-report-schema.spec.ts
+          tests/frontend/rc-corotational-report-browser.spec.ts
           --workers=1 --retries=0 --reporter=line --trace=retain-on-failure
 
       - name: Upload actual RC lifecycle evidence

@@ -2091,6 +2091,226 @@ class DurableJobService:
             maximum_bytes=_MAX_EVIDENCE_BYTES,
         )
 
+    def read_rc_corotational_report(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+        expected_request_hash: str | None = None,
+        expected_result_artifact_hash: str | None = None,
+        expected_evidence_artifact_hash: str | None = None,
+    ) -> bytes:
+        """Derive an immutable nodal report from one authenticated read snapshot.
+
+        No report table, new revision, numerical call or current source
+        fingerprint is created. Restoring identical originals retains the bytes.
+        """
+        from structural_analysis.execution.rc_corotational_job_contract import (
+            RC_COROTATIONAL_JOB_VALIDATOR_ID,
+            validate_rc_corotational_invocation_outcome,
+            validate_rc_corotational_job_result,
+        )
+        from structural_analysis.execution.rc_corotational_job_request import (
+            validate_rc_corotational_job_request,
+        )
+        from structural_analysis.execution.rc_corotational_report import (
+            RCCorotationalReportTooLargeError,
+            build_rc_corotational_report,
+        )
+
+        self._authorize_tenant(tenant_id, authorization_token)
+        expected_hashes = {
+            "request": expected_request_hash,
+            "result": expected_result_artifact_hash,
+            "evidence": expected_evidence_artifact_hash,
+        }
+        for role, digest in expected_hashes.items():
+            if digest is None:
+                _fail(
+                    "rc_corotational_report_source_required",
+                    f"/expected_{role}_hash",
+                    "Specify the exact saved request, result and evidence hashes.",
+                )
+            _hash(digest, f"/expected_{role}_hash")
+        with self._connect() as connection:
+            connection.execute("BEGIN")
+            row = self._job_row(connection, job_id)
+            self._require_tenant(row, tenant_id)
+            request = self._request_for_row(row)
+            if (
+                request.get("schema_version")
+                not in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
+            ):
+                _fail(
+                    "rc_corotational_report_job_unsupported",
+                    "/job",
+                    "A durable corotational RC job is required.",
+                )
+            if (
+                row["status"] != "succeeded"
+                or row["result_hash"] is None
+                or row["evidence_hash"] is None
+            ):
+                _fail(
+                    "rc_corotational_report_job_not_succeeded",
+                    "/job",
+                    "A successful published corotational RC job is required.",
+                )
+            if any(
+                row[f"{role}_hash"] != digest
+                for role, digest in expected_hashes.items()
+            ):
+                _fail(
+                    "rc_corotational_report_source_conflict",
+                    "/source",
+                    "Refresh the exact saved request, result and evidence references.",
+                )
+            self._validate_integrity_snapshot(connection, row)
+            validate_job_view(self._view(row))
+            result = _strict_json_object(
+                self._read_blob(
+                    row["result_hash"],
+                    row["result_size"],
+                    maximum_bytes=_result_byte_limit(request),
+                ),
+                "/result",
+            )
+            evidence = _strict_json_object(
+                self._read_blob(
+                    row["evidence_hash"],
+                    row["evidence_size"],
+                    maximum_bytes=_MAX_EVIDENCE_BYTES,
+                ),
+                "/evidence",
+            )
+            try:
+                typed = validate_rc_corotational_job_request(request)
+                validation = validate_rc_corotational_job_result(
+                    result,
+                    request=typed,
+                    execution_budget=self._execution_budget(connection, row),
+                    checkpoint=self._checkpoint_for_row(row),
+                )
+                self._bind_rc_receipts(connection, row, result["receipts"])
+                _validate_schema(
+                    evidence, "job_completion_evidence_v1.schema.json", "/evidence"
+                )
+                expected_evidence = build_job_completion_evidence(
+                    job_id=job_id,
+                    request_hash=row["request_hash"],
+                    checkpoint_hash=row["checkpoint_hash"],
+                    result_bytes=self._read_blob(
+                        row["result_hash"],
+                        row["result_size"],
+                        maximum_bytes=_result_byte_limit(request),
+                    ),
+                    validator_id=RC_COROTATIONAL_JOB_VALIDATOR_ID,
+                    validation_report=validation,
+                )
+                if _canonical_json_bytes(evidence) != _canonical_json_bytes(
+                    expected_evidence
+                ):
+                    raise ValueError("Corotational completion evidence differs")
+                invocations = []
+                records = self._rc_invocation_rows(connection, row)
+                for record in records:
+                    outcome = validate_rc_corotational_invocation_outcome(
+                        self._read_blob(
+                            record["outcome_hash"],
+                            record["outcome_size"],
+                            maximum_bytes=_result_byte_limit(request),
+                        ),
+                        typed,
+                        row["request_hash"],
+                    )
+                    metadata = _strict_json_object(
+                        str(record["metadata_json"]).encode(),
+                        "/rc_invocations/metadata",
+                    )
+                    if _canonical_json_bytes(metadata) != _canonical_json_bytes(
+                        {key: outcome[key] for key in metadata}
+                    ):
+                        raise ValueError("Corotational invocation metadata differs")
+                    work = None
+                    if outcome["status"] == "returned":
+                        work = (
+                            outcome["api_result"]["work"]
+                            if outcome["phase"] == "analysis"
+                            else outcome["verification_report"]["replay_work"]
+                        )
+                    invocations.append(
+                        {
+                            **metadata,
+                            "ordinal": record["ordinal"],
+                            "content_hash": record["outcome_hash"],
+                            "byte_length": record["outcome_size"],
+                            "work": work,
+                            "phase_supervision": outcome.get("phase_supervision"),
+                        }
+                    )
+                tail = result["receipts"][-1]
+                bindings = {
+                    "tenant_id": row["tenant_id"],
+                    "job_id": job_id,
+                    "completed_job_revision": row["revision"],
+                    "terminal_event_hash": row["terminal_event_hash"],
+                    "original_artifacts": {
+                        role: ref.to_dict() if ref else None
+                        for role, ref in self._row_references(row).items()
+                    },
+                    "case_id": typed.case_id,
+                    "request_schema_version": request["schema_version"],
+                    "source_revision": typed.source_revision,
+                    "source_revision_is_execution_attestation": False,
+                    "recorded_source_identity": tail["api_request"]["source_identity"],
+                    "canonical_model_checksum": typed.source_model_checksum,
+                    "model_input_checksum": typed.source_input_checksum,
+                    "problem_contract_hash": typed.problem_contract_hash,
+                    "resume_contract_hash": typed.resume_contract_hash,
+                    "durable_result_hash": result["result_hash"],
+                    "terminal_api_artifact_sha256": tail["result_artifact_sha256"],
+                    "terminal_native_checkpoint_sha256": tail["checkpoint_sha256"],
+                    "terminal_native_checkpoint_byte_length": tail[
+                        "checkpoint_byte_length"
+                    ],
+                    "worker_validator_id": RC_COROTATIONAL_JOB_VALIDATOR_ID,
+                    "worker_validation_report_hash": _sha256(
+                        _canonical_json_bytes(validation)
+                    ),
+                    "receipt_hashes": validation["receipt_hashes"],
+                    "invocation_artifact_hashes": {
+                        str(record["ordinal"]): record["outcome_hash"]
+                        for record in records
+                    },
+                }
+                raw = build_rc_corotational_report(
+                    request=typed,
+                    result=result,
+                    bindings=bindings,
+                    invocations=invocations,
+                )
+                _validate_schema(
+                    _strict_json_object(raw, "/rc_corotational_report"),
+                    "rc_corotational_report_v1.schema.json",
+                    "/rc_corotational_report",
+                )
+                return raw
+            except JobServiceError:
+                raise
+            except RCCorotationalReportTooLargeError:
+                _fail(
+                    "rc_corotational_report_too_large",
+                    "/report",
+                    "The report exceeds its bounded export size.",
+                )
+            except (TypeError, ValueError, KeyError, IndexError):
+                _fail(
+                    "rc_corotational_report_original_invalid",
+                    "/source",
+                    "The saved corotational report source or execution custody differs.",
+                )
+
     def create_rc_quantity_report(
         self,
         job_id: str,
@@ -2574,44 +2794,44 @@ class DurableJobService:
         tenant_id: str,
         authorization_token: str,
     ) -> dict[str, Any]:
-        """Verify every attached blob and the full persisted transition chain."""
-
+        """Verify attached bytes and transition/counter custody in one snapshot."""
         self._authorize_tenant(tenant_id, authorization_token)
         with self._connect() as connection:
-            # Read row, events, budget and outcomes from one WAL snapshot.
             connection.execute("BEGIN")
             row = self._job_row(connection, job_id)
             self._require_tenant(row, tenant_id)
-            events = connection.execute(
-                "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision",
-                (job_id,),
-            ).fetchall()
-            request = self._request_for_row(row)
-            if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
-                self._execution_budget(connection, row)
-            elif (
-                connection.execute(
-                    "SELECT 1 FROM job_execution_budgets WHERE job_id = ?", (job_id,)
-                ).fetchone()
-                is not None
-            ):
-                _fail(
-                    "execution_budget_integrity_failed",
-                    "/execution_budget",
-                    "An unsupported job operation has an unexpected execution budget.",
-                )
-            rc_records = (
-                self._rc_invocation_rows(connection, row, verify_blobs=True)
-                if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
-                else []
+            return self._validate_integrity_snapshot(connection, row)
+
+    def _validate_integrity_snapshot(
+        self, connection: sqlite3.Connection, row: sqlite3.Row
+    ) -> dict[str, Any]:
+        """Reuse the caller's authenticated read transaction, never a fresh solve."""
+        job_id = str(row["job_id"])
+        events = connection.execute(
+            "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision",
+            (job_id,),
+        ).fetchall()
+        request = self._request_for_row(row)
+        if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS:
+            self._execution_budget(connection, row)
+        elif (
+            connection.execute(
+                "SELECT 1 FROM job_execution_budgets WHERE job_id = ?", (job_id,)
+            ).fetchone()
+            is not None
+        ):
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "An unsupported job operation has an unexpected execution budget.",
             )
-            if (
-                request.get("schema_version")
-                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
-            ):
-                self._validate_rc_corotational_projection(
-                    connection, row, request, events
-                )
+        rc_records = (
+            self._rc_invocation_rows(connection, row, verify_blobs=True)
+            if request.get("schema_version") in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
+            else []
+        )
+        if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
+            self._validate_rc_corotational_projection(connection, row, request, events)
         refs = self._row_references(row)
         for ref in refs.values():
             if ref is not None:
