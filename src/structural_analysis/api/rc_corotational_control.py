@@ -23,6 +23,8 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_su
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
     StatefulCorotationalFiberFrame2DDisplacementControlConfig,
     _controlled_free_index,
+    LinearPhysicalDisplacementObservation,
+    LINEAR_DISPLACEMENT_OBSERVATION_SCHEMA,
     _finite,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
@@ -59,6 +61,43 @@ class RCCorotationalControlExecutionError(RuntimeError):
         )
 
 
+def compile_rc_control_observation(compiled, value):
+    """Compile an explicitly authored physical observation; never infer source mapping."""
+    if type(value) is not dict or set(value) != {"schema_version", "terms"}:
+        raise ValueError(
+            "control_observation must contain exactly schema_version and terms"
+        )
+    if value["schema_version"] != LINEAR_DISPLACEMENT_OBSERVATION_SCHEMA:
+        raise ValueError("invalid control_observation schema")
+    rows = value["terms"]
+    if type(rows) is not list or not 1 <= len(rows) <= 48:
+        raise ValueError("control_observation requires 1 to 48 terms")
+    terms = []
+    for row in rows:
+        if type(row) is not dict or set(row) != {"node_id", "component", "coefficient"}:
+            raise ValueError(
+                "observation term requires node_id, component and coefficient"
+            )
+        node, component, coefficient = (
+            row["node_id"],
+            row["component"],
+            row["coefficient"],
+        )
+        if type(node) is not str or node not in compiled.node_ids:
+            raise ValueError("unknown observation node")
+        if type(component) is not str or component not in ("UX", "UY", "RZ"):
+            raise ValueError("observation component must be UX, UY or RZ")
+        terms.append(
+            (
+                3 * compiled.node_ids.index(node) + ("UX", "UY", "RZ").index(component),
+                coefficient,
+            )
+        )
+    observation = LinearPhysicalDisplacementObservation(tuple(terms))
+    observation.validate(compiled.problem)
+    return observation
+
+
 def _prepare(model, targets_m, options):
     compiled = compile_rc_corotational_control_model(
         model,
@@ -76,12 +115,21 @@ def _prepare(model, targets_m, options):
             "targets require 1 to 255 finite entries without adjacent duplicates"
         )
     node, component = options["control_node_id"], options["control_component"]
-    if type(node) is not str or node not in compiled.node_ids:
-        raise ValueError("unknown control node")
-    if type(component) is not str or component not in ("UX", "UY"):
-        raise ValueError("control component must be UX or UY")
-    dof = 3 * compiled.node_ids.index(node) + (component == "UY")
-    _controlled_free_index(compiled.problem, dof)
+    observation = None
+    if options["control_observation"] is not None:
+        if node is not None or component is not None:
+            raise ValueError("choose node/component control or an explicit observation")
+        observation = compile_rc_control_observation(
+            compiled, options["control_observation"]
+        )
+        dof = None
+    else:
+        if type(node) is not str or node not in compiled.node_ids:
+            raise ValueError("unknown control node")
+        if type(component) is not str or component not in ("UX", "UY"):
+            raise ValueError("control component must be UX or UY")
+        dof = 3 * compiled.node_ids.index(node) + (component == "UY")
+        _controlled_free_index(compiled.problem, dof)
     budget, depth, limit = (
         options[k]
         for k in (
@@ -135,8 +183,20 @@ def _prepare(model, targets_m, options):
         "attempt_limit_per_call": limit,
         "restart_sha256": None if restart is None else _sha(restart),
     }
+    if observation is not None:
+        request["control_observation"] = observation.to_dict()
+        request["control_observation_hash"] = observation.identity_hash
     _json(request)
-    return compiled, targets, dof, config, preload_config, prior_spent, request
+    return (
+        compiled,
+        targets,
+        dof,
+        observation,
+        config,
+        preload_config,
+        prior_spent,
+        request,
+    )
 
 
 def _response(compiled, step, phase):
@@ -178,8 +238,9 @@ def analyze_rc_corotational_control(
     model,
     targets_m,
     *,
-    control_node_id,
-    control_component,
+    control_node_id=None,
+    control_component=None,
+    control_observation=None,
     fixed_nodal_loads=(),
     config=None,
     preload_config=None,
@@ -191,8 +252,8 @@ def analyze_rc_corotational_control(
     experimental_fixed_guided_axial=False,
 ):
     options = dict(locals())
-    compiled, targets, dof, cfg, preload_cfg, prior_spent, request = _prepare(
-        model, targets_m, options
+    compiled, targets, dof, observation, cfg, preload_cfg, prior_spent, request = (
+        _prepare(model, targets_m, options)
     )
     work = {
         "preload_solver_calls": 0,
@@ -225,6 +286,7 @@ def analyze_rc_corotational_control(
             append_response(preload, "preload")
             kwargs = dict(
                 control_global_dof=dof,
+                control_observation=observation,
                 initial_checkpoint=preload.accepted_checkpoint,
                 maximum_attempt_count=maximum_attempt_count,
                 maximum_subdivision_depth=maximum_subdivision_depth,

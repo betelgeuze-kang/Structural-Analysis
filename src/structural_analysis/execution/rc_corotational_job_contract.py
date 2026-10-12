@@ -420,27 +420,41 @@ def _expected_api_request(typed, before, restart_hash, source_identity):
         raise ValueError("invalid corotational API source identity")
     cfg = typed.config
     node_ids = [row["id"] for row in typed.model.nodes]
-    return json.loads(
-        _api_bytes(
-            {
-                "model_checksum": typed.source_model_checksum,
-                "input_checksum": typed.source_input_checksum,
-                "problem_hash": typed.problem_contract_hash,
-                "source_identity": source_identity,
-                "targets_m": typed.targets_m,
-                "control_global_dof": 3 * node_ids.index(cfg.control_node_id)
-                + (cfg.control_component == "UY"),
-                "config": asdict(cfg.solver_config),
-                "preload_config": asdict(cfg.preload_config),
-                "maximum_attempt_count": cfg.maximum_attempt_count,
-                "maximum_subdivision_depth": cfg.maximum_subdivision_depth,
-                "attempt_limit_per_call": typed.execution_config.attempt_limit_per_call,
-                "restart_sha256": None
-                if restart_hash is None
-                else restart_hash.removeprefix("sha256:"),
-            }
+    request = {
+        "model_checksum": typed.source_model_checksum,
+        "input_checksum": typed.source_input_checksum,
+        "problem_hash": typed.problem_contract_hash,
+        "source_identity": source_identity,
+        "targets_m": typed.targets_m,
+        "control_global_dof": None
+        if cfg.control_observation is not None
+        else (
+            3 * node_ids.index(cfg.control_node_id) + (cfg.control_component == "UY")
+        ),
+        "config": asdict(cfg.solver_config),
+        "preload_config": asdict(cfg.preload_config),
+        "maximum_attempt_count": cfg.maximum_attempt_count,
+        "maximum_subdivision_depth": cfg.maximum_subdivision_depth,
+        "attempt_limit_per_call": typed.execution_config.attempt_limit_per_call,
+        "restart_sha256": None
+        if restart_hash is None
+        else restart_hash.removeprefix("sha256:"),
+    }
+    if cfg.control_observation is not None:
+        from structural_analysis.api.rc_corotational_control import (
+            compile_rc_control_observation,
         )
-    )
+
+        compiled = compile_rc_corotational_control_model(
+            typed.model,
+            fixed_nodal_loads=cfg.fixed_nodal_loads,
+            experimental_pin_roller_beam=cfg.experimental_pin_roller_beam,
+            experimental_fixed_guided_axial=cfg.experimental_fixed_guided_axial,
+        )
+        observation = compile_rc_control_observation(compiled, cfg.observation_dict())
+        request["control_observation"] = observation.to_dict()
+        request["control_observation_hash"] = observation.identity_hash
+    return json.loads(_api_bytes(request))
 
 
 def _native(raw, typed, api_request):
@@ -462,7 +476,9 @@ def _native(raw, typed, api_request):
                 "problem": typed.problem_contract_hash,
                 "source": api_request["source_identity"],
                 "targets": typed.targets_m,
-                "control": api_request["control_global_dof"],
+                "control": api_request.get(
+                    "control_observation", api_request["control_global_dof"]
+                ),
                 "budget": typed.progress_total,
                 "depth": typed.config.maximum_subdivision_depth,
                 "config": asdict(typed.config.solver_config),

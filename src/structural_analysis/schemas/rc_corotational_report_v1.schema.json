@@ -313,8 +313,6 @@
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "node_id",
-            "component",
             "unit"
           ],
           "properties": {
@@ -330,8 +328,208 @@
             },
             "unit": {
               "const": "m"
+            },
+            "observation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "schema_version",
+                "terms"
+              ],
+              "properties": {
+                "schema_version": {
+                  "const": "linear-physical-displacement-observation.v1"
+                },
+                "terms": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 48,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "node_id",
+                      "component",
+                      "coefficient"
+                    ],
+                    "properties": {
+                      "node_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+                      },
+                      "component": {
+                        "enum": [
+                          "UX",
+                          "UY",
+                          "RZ"
+                        ]
+                      },
+                      "coefficient": {
+                        "type": "number",
+                        "not": {
+                          "const": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "observation_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "definition": {
+              "const": "weighted_linear_physical_displacement"
+            },
+            "finite_rotation_drift": {
+              "const": false
+            },
+            "operator": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "schema_version",
+                "unit",
+                "terms"
+              ],
+              "properties": {
+                "schema_version": {
+                  "const": "linear-physical-displacement-observation.v1"
+                },
+                "unit": {
+                  "const": "m"
+                },
+                "terms": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 48,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "global_dof",
+                      "coefficient",
+                      "coefficient_unit"
+                    ],
+                    "properties": {
+                      "global_dof": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 47
+                      },
+                      "coefficient": {
+                        "type": "number",
+                        "not": {
+                          "const": 0
+                        }
+                      },
+                      "coefficient_unit": {
+                        "enum": [
+                          "1",
+                          "m/rad"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
             }
-          }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "node_id",
+                "component"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "observation"
+                    ],
+                    "properties": {
+                      "observation": {}
+                    }
+                  },
+                  {
+                    "required": [
+                      "operator"
+                    ],
+                    "properties": {
+                      "operator": {}
+                    }
+                  },
+                  {
+                    "required": [
+                      "observation_hash"
+                    ],
+                    "properties": {
+                      "observation_hash": {}
+                    }
+                  },
+                  {
+                    "required": [
+                      "definition"
+                    ],
+                    "properties": {
+                      "definition": {}
+                    }
+                  },
+                  {
+                    "required": [
+                      "finite_rotation_drift"
+                    ],
+                    "properties": {
+                      "finite_rotation_drift": {}
+                    }
+                  }
+                ]
+              },
+              "properties": {
+                "node_id": {},
+                "component": {}
+              }
+            },
+            {
+              "required": [
+                "observation",
+                "observation_hash",
+                "unit",
+                "definition",
+                "finite_rotation_drift",
+                "operator"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "node_id"
+                    ],
+                    "properties": {
+                      "node_id": {}
+                    }
+                  },
+                  {
+                    "required": [
+                      "component"
+                    ],
+                    "properties": {
+                      "component": {}
+                    }
+                  }
+                ]
+              },
+              "properties": {
+                "observation": {},
+                "observation_hash": {},
+                "unit": {},
+                "definition": {},
+                "finite_rotation_drift": {},
+                "operator": {}
+              }
+            }
+          ]
         },
         "targets_m": {
           "type": "array",
@@ -427,8 +625,6 @@
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "control_node_id",
-            "control_component",
             "targets_m",
             "fixed_nodal_loads",
             "config",
@@ -580,8 +776,102 @@
             },
             "experimental_fixed_guided_axial": {
               "type": "boolean"
+            },
+            "control_observation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "schema_version",
+                "terms"
+              ],
+              "properties": {
+                "schema_version": {
+                  "const": "linear-physical-displacement-observation.v1"
+                },
+                "terms": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 48,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "node_id",
+                      "component",
+                      "coefficient"
+                    ],
+                    "properties": {
+                      "node_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+                      },
+                      "component": {
+                        "enum": [
+                          "UX",
+                          "UY",
+                          "RZ"
+                        ]
+                      },
+                      "coefficient": {
+                        "type": "number",
+                        "not": {
+                          "const": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
-          }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "control_node_id",
+                "control_component"
+              ],
+              "not": {
+                "required": [
+                  "control_observation"
+                ],
+                "properties": {
+                  "control_observation": {}
+                }
+              },
+              "properties": {
+                "control_node_id": {},
+                "control_component": {}
+              }
+            },
+            {
+              "required": [
+                "control_observation"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "control_node_id"
+                    ],
+                    "properties": {
+                      "control_node_id": {}
+                    }
+                  },
+                  {
+                    "required": [
+                      "control_component"
+                    ],
+                    "properties": {
+                      "control_component": {}
+                    }
+                  }
+                ]
+              },
+              "properties": {
+                "control_observation": {}
+              }
+            }
+          ]
         },
         "execution_config": {
           "oneOf": [

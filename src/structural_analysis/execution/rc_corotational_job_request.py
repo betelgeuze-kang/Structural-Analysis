@@ -15,6 +15,9 @@ import math
 import re
 from typing import Any, Mapping
 
+from structural_analysis.api.rc_corotational_control import (
+    compile_rc_control_observation,
+)
 from structural_analysis.api.rc_corotational_control_model import (
     compile_rc_corotational_control_model,
 )
@@ -173,8 +176,8 @@ def _solver(value: Any, *, preload: bool):
 
 @dataclass(frozen=True)
 class RCCorotationalJobControlConfig:
-    control_node_id: str
-    control_component: str
+    control_node_id: str | None
+    control_component: str | None
     targets_m: tuple[float, ...]
     fixed_nodal_loads: tuple[tuple[str, str, float], ...]
     solver_config: StatefulCorotationalFiberFrame2DDisplacementControlConfig
@@ -183,10 +186,22 @@ class RCCorotationalJobControlConfig:
     maximum_subdivision_depth: int
     experimental_pin_roller_beam: bool
     experimental_fixed_guided_axial: bool
+    control_observation: tuple[tuple[str, str, float], ...] | None = None
+
+    def observation_dict(self):
+        if self.control_observation is None:
+            return None
+        return {
+            "schema_version": "linear-physical-displacement-observation.v1",
+            "terms": [
+                {"node_id": n, "component": c, "coefficient": v}
+                for n, c, v in self.control_observation
+            ],
+        }
 
     def api_kwargs(self) -> dict[str, Any]:
         """Fresh keyword mapping; target history and restart are supplied separately."""
-        return {
+        result = {
             "control_node_id": self.control_node_id,
             "control_component": self.control_component,
             "fixed_nodal_loads": self.fixed_nodal_loads,
@@ -197,6 +212,9 @@ class RCCorotationalJobControlConfig:
             "experimental_pin_roller_beam": self.experimental_pin_roller_beam,
             "experimental_fixed_guided_axial": self.experimental_fixed_guided_axial,
         }
+        if self.control_observation is not None:
+            result["control_observation"] = self.observation_dict()
+        return result
 
 
 @dataclass(frozen=True)
@@ -278,12 +296,56 @@ def validate_rc_corotational_job_request(
         or not _REVISION.fullmatch(value["source_revision"])
     ):
         raise ValueError("invalid corotational durable request identity")
-    config = _object(value["config"], _CONFIG_KEYS, "config")
-    node, component = config["control_node_id"], config["control_component"]
-    if type(node) is not str or not _ID.fullmatch(node):
-        raise ValueError("control_node_id must name a stable node identifier")
-    if type(component) is not str or component not in ("UX", "UY"):
-        raise ValueError("control_component must be UX or UY")
+    selected_observation = (
+        type(value["config"]) is dict and "control_observation" in value["config"]
+    )
+    keys = (
+        (_CONFIG_KEYS - {"control_node_id", "control_component"})
+        | {"control_observation"}
+        if selected_observation
+        else _CONFIG_KEYS
+    )
+    config = _object(value["config"], keys, "config")
+    node, component = config.get("control_node_id"), config.get("control_component")
+    observation_rows = None
+    if selected_observation:
+        definition = _object(
+            config["control_observation"],
+            {"schema_version", "terms"},
+            "control_observation",
+        )
+        if (
+            definition["schema_version"]
+            != "linear-physical-displacement-observation.v1"
+        ):
+            raise ValueError("invalid observation schema")
+        terms = definition["terms"]
+        if type(terms) is not list or not 1 <= len(terms) <= 48:
+            raise ValueError("observation requires 1 to 48 JSON terms")
+        observation_rows = []
+        for term in terms:
+            _object(term, {"node_id", "component", "coefficient"}, "observation term")
+            if type(term["node_id"]) is not str or not _ID.fullmatch(term["node_id"]):
+                raise ValueError("observation node must be a stable identifier")
+            if type(term["component"]) is not str or term["component"] not in (
+                "UX",
+                "UY",
+                "RZ",
+            ):
+                raise ValueError("invalid observation component")
+            observation_rows.append(
+                (
+                    term["node_id"],
+                    term["component"],
+                    _number(term["coefficient"], "observation coefficient"),
+                )
+            )
+        observation_rows = tuple(observation_rows)
+    else:
+        if type(node) is not str or not _ID.fullmatch(node):
+            raise ValueError("control_node_id must name a stable node identifier")
+        if type(component) is not str or component not in ("UX", "UY"):
+            raise ValueError("control_component must be UX or UY")
     targets = config["targets_m"]
     if type(targets) is not list or not 1 <= len(targets) <= 255:
         raise ValueError("targets_m must contain 1 to 255 JSON numbers")
@@ -310,6 +372,7 @@ def validate_rc_corotational_job_request(
         raise ValueError("support profiles are mutually exclusive")
     control = RCCorotationalJobControlConfig(
         control_node_id=node,
+        control_observation=observation_rows,
         control_component=component,
         targets_m=normalized_targets,
         fixed_nodal_loads=tuple(normalized_fixed),
@@ -365,12 +428,15 @@ def validate_rc_corotational_job_request(
         experimental_pin_roller_beam=control.experimental_pin_roller_beam,
         experimental_fixed_guided_axial=control.experimental_fixed_guided_axial,
     )
-    if node not in compiled.node_ids:
-        raise ValueError("unknown control node")
-    _controlled_free_index(
-        compiled.problem,
-        3 * compiled.node_ids.index(node) + (component == "UY"),
-    )
+    if control.control_observation is not None:
+        compile_rc_control_observation(compiled, control.observation_dict())
+    else:
+        if node not in compiled.node_ids:
+            raise ValueError("unknown control node")
+        _controlled_free_index(
+            compiled.problem,
+            3 * compiled.node_ids.index(node) + (component == "UY"),
+        )
     request_bytes = rc_corotational_job_canonical_bytes(value)
     request_hash = _sha(request_bytes)
     return RCCorotationalJobRequest(

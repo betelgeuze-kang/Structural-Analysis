@@ -8,6 +8,7 @@ into engineering tables. The service owns original artifact and ledger custody.
 from __future__ import annotations
 
 import hashlib
+import math
 from typing import Any
 
 from .rc_corotational_job_contract import RC_COROTATIONAL_JOB_AUTHORITY
@@ -80,10 +81,39 @@ def build_rc_corotational_report(
             unknown |= work["unavailable_execution_work"]
             for key in known:
                 known[key] += work[key]
-    control_index = [row["id"] for row in model["nodes"]].index(
-        request.config.control_node_id
-    )
-    component_index = int(request.config.control_component == "UY")
+    node_ids = [row["id"] for row in model["nodes"]]
+    observation = request.config.control_observation
+    if observation is None:
+        control_index = node_ids.index(request.config.control_node_id)
+        component_index = int(request.config.control_component == "UY")
+        control_declaration = {
+            "node_id": request.config.control_node_id,
+            "component": request.config.control_component,
+            "unit": "m",
+        }
+    else:
+        control_declaration = {
+            "observation": request.config.observation_dict(),
+            "operator": result["api_result"]["request"]["control_observation"],
+            "observation_hash": result["api_result"]["request"][
+                "control_observation_hash"
+            ],
+            "unit": "m",
+            "definition": "weighted_linear_physical_displacement",
+            "finite_rotation_drift": False,
+        }
+
+    def control_value(row):
+        if observation is None:
+            return row["nodes"][control_index]["displacements_m_rad"][component_index]
+        return math.fsum(
+            coefficient
+            * row["nodes"][node_ids.index(node)]["displacements_m_rad"][
+                ("UX", "UY", "RZ").index(component)
+            ]
+            for node, component, coefficient in observation
+        )
+
     responses = [
         {
             "state_index": index,
@@ -96,9 +126,7 @@ def build_rc_corotational_report(
                     "load_factor",
                 )
             },
-            "control_displacement_m": row["nodes"][control_index][
-                "displacements_m_rad"
-            ][component_index],
+            "control_displacement_m": control_value(row),
             "nodes": row["nodes"],
         }
         for index, row in enumerate(result["api_result"]["responses"])
@@ -107,11 +135,7 @@ def build_rc_corotational_report(
         "schema_version": RC_COROTATIONAL_REPORT_SCHEMA_VERSION,
         "bindings": bindings,
         "declarations": {
-            "control": {
-                "node_id": request.config.control_node_id,
-                "component": request.config.control_component,
-                "unit": "m",
-            },
+            "control": control_declaration,
             "targets_m": authored["config"]["targets_m"],
             "fixed_nodal_loads": authored["config"]["fixed_nodal_loads"],
             "reference_loads": model["loads"],

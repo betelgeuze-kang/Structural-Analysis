@@ -1,7 +1,9 @@
 import Ajv2020 from 'ajv/dist/2020.js'
 import reportSchema from '../../structural_analysis/schemas/rc_corotational_report_v1.schema.json' assert { type: 'json' }
 import { sha256Hex } from './checksum'
-import { document, fields, object, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
+import { document, fields, normalizeRcDisplacementObservation, object, rawValues, same, selfHash,
+  validateRcCorotationalRequestProfile, type RcLinearPhysicalDisplacementObservation,
+  type RcNormalizedDisplacementObservation, type RcObject } from './rcJobSchema'
 import { validateWorkbenchJobView, type JobArtifactReference, type WorkbenchJobView } from './jobSchema'
 
 export const RC_COROTATIONAL_REPORT_MAX_BYTES = 64 * 1024 * 1024
@@ -93,8 +95,16 @@ export interface RcCorotationalReportBindings {
   receipt_hashes: string[]
   invocation_artifact_hashes: Record<string, string>
 }
+export type RcCorotationalReportControl = { node_id: string; component: 'UX' | 'UY'; unit: 'm' } | {
+  observation: RcLinearPhysicalDisplacementObservation
+  operator: RcNormalizedDisplacementObservation
+  observation_hash: string
+  unit: 'm'
+  definition: 'weighted_linear_physical_displacement'
+  finite_rotation_drift: false
+}
 export interface RcCorotationalReportDeclarations {
-  control: { node_id: string; component: 'UX' | 'UY'; unit: 'm' }
+  control: RcCorotationalReportControl
   targets_m: number[]
   fixed_nodal_loads: [string, 'FX' | 'FY' | 'MZ', number][]
   reference_loads: Record<string, unknown>[]
@@ -103,8 +113,9 @@ export interface RcCorotationalReportDeclarations {
   coordinate_system: { axis_order: [string, string, string]; up_axis: string }
   model_metadata: Record<string, unknown>
   config: {
-    control_node_id: string
-    control_component: 'UX' | 'UY'
+    control_node_id?: string
+    control_component?: 'UX' | 'UY'
+    control_observation?: RcLinearPhysicalDisplacementObservation
     targets_m: number[]
     fixed_nodal_loads: [string, 'FX' | 'FY' | 'MZ', number][]
     config: {
@@ -201,6 +212,56 @@ function count(value: unknown, minimum: number, maximum: number): value is numbe
   return Number.isSafeInteger(value) && Number(value) >= minimum && Number(value) <= maximum
 }
 
+/** Error-free partial sums retain small terms through cancellation, as the
+ * producer's math.fsum does. A plain reduce can lose a support/rotation term. */
+function physicalSum(values: number[]): number {
+  const partials: number[] = []
+  for (let x of values) {
+    requireReport(Number.isFinite(x), 'response_control_invalid')
+    let count = 0
+    for (let y of partials) {
+      if (Math.abs(x) < Math.abs(y)) [x, y] = [y, x]
+      const hi = x + y, lo = y - (hi - x)
+      requireReport(Number.isFinite(hi), 'response_control_invalid')
+      if (lo !== 0) partials[count++] = lo
+      x = hi
+    }
+    partials.length = count
+    if (x !== 0) partials.push(x)
+  }
+  if (!partials.length) return 0
+  let remaining = partials.length - 1, hi = partials[remaining], lo = 0
+  while (remaining > 0) {
+    const x = hi, y = partials[--remaining]
+    hi = x + y; lo = y - (hi - x)
+    if (lo !== 0) break
+  }
+  if (remaining > 0 && ((lo < 0 && partials[remaining - 1] < 0) || (lo > 0 && partials[remaining - 1] > 0))) {
+    const y = lo * 2, adjusted = hi + y
+    if (adjusted - hi === y) hi = adjusted
+  }
+  requireReport(Number.isFinite(hi), 'response_control_invalid')
+  return hi
+}
+
+export function rcCorotationalObservationValue(observation: RcLinearPhysicalDisplacementObservation, nodes: RcCorotationalReportNode[]): number {
+  const byId = new Map(nodes.map(node => [node.node_id, node]))
+  return physicalSum(observation.terms.map(term => {
+    const node = byId.get(term.node_id)
+    requireReport(node, 'response_control_invalid')
+    return term.coefficient * node.displacements_m_rad[DOFS.indexOf(term.component)]
+  }))
+}
+
+async function observationHash(report: RcCorotationalReport, raw: string): Promise<void> {
+  if (!('observation' in report.declarations.control)) return
+  const controlRaw = fields(fields(raw).get('declarations')!.value).get('control')!.value
+  const operatorRaw = fields(controlRaw).get('operator')!.value
+  // The normalized descriptor is retained from the Python producer. JS
+  // JSON.stringify would change float coefficients such as 1.0 into 1.
+  requireReport(await sha256Hex(operatorRaw) === report.declarations.control.observation_hash, 'observation_hash_invalid')
+}
+
 /** AJV sees 1, 1.0 and 1e0 as the same JS integer. Retain Python's exact int contract. */
 function integerTokens(value: unknown, raw: string, schema: RcObject): void {
   if (schema.type === 'integer' && typeof value !== 'number') return
@@ -255,6 +316,7 @@ function policy(value: RcCorotationalPhasePolicy): void {
 
 function requestBindings(report: RcCorotationalReport, expected: RcCorotationalReportExpected): RcObject {
   const job = expected.job, request = object(expected.request), model = object(request.model)
+  validateRcCorotationalRequestProfile(request)
   requireReport(validateWorkbenchJobView(job).ok && job.schema_version === 'structural-analysis-job-view.v2'
     && job.status === 'succeeded' && job.progress.unit === 'control_solver_attempts'
     && job.result !== null && job.evidence !== null
@@ -279,8 +341,15 @@ function requestBindings(report: RcCorotationalReport, expected: RcCorotationalR
     && binding.case_id === request.case_id && binding.source_revision === request.source_revision,
   'request_binding_invalid')
   const config = object(request.config), declarations = report.declarations
+  const selected = Object.prototype.hasOwnProperty.call(config, 'control_observation')
+  const control: RcCorotationalReportControl = selected ? {
+    observation: config.control_observation,
+    operator: normalizeRcDisplacementObservation(config.control_observation, model),
+    observation_hash: 'observation' in declarations.control ? declarations.control.observation_hash : '',
+    unit: 'm', definition: 'weighted_linear_physical_displacement', finite_rotation_drift: false,
+  } : { node_id: config.control_node_id, component: config.control_component, unit: 'm' }
   requireReport(same(declarations, {
-    control: { node_id: config.control_node_id, component: config.control_component, unit: 'm' },
+    control,
     targets_m: config.targets_m, fixed_nodal_loads: config.fixed_nodal_loads,
     reference_loads: model.loads, supports: model.supports, model_units: model.units,
     coordinate_system: model.coordinate_system, model_metadata: model.metadata,
@@ -323,9 +392,10 @@ function responses(report: RcCorotationalReport, job: WorkbenchJobView, model: R
   const nodeIds = model.nodes.map((node: unknown) => object(node).id)
   requireReport(nodeIds.every((id: unknown) => typeof id === 'string' && id.length > 0 && id.length <= 256)
     && new Set(nodeIds).size === nodeIds.length, 'model_nodes_invalid')
-  const controlIndex = nodeIds.indexOf(declarations.control.node_id)
-  requireReport(controlIndex >= 0, 'control_node_invalid')
-  const componentIndex = declarations.control.component === 'UX' ? 0 : 1
+  const control = declarations.control
+  const controlIndex = 'observation' in control ? -1 : nodeIds.indexOf(control.node_id)
+  if (!('observation' in control)) requireReport(controlIndex >= 0, 'control_node_invalid')
+  const componentIndex: 0 | 1 = !('observation' in control) && control.component === 'UY' ? 1 : 0
   const constrained = new Set<string>()
   for (const supportValue of declarations.supports) {
     const support = object(supportValue)
@@ -354,7 +424,7 @@ function responses(report: RcCorotationalReport, job: WorkbenchJobView, model: R
     fixedDofs.add(identity)
     fixedLoads.get(node)![loadComponents.indexOf(component)] = value
   }
-  requireReport(!constrained.has(`${declarations.control.node_id}:${declarations.control.component}`), 'control_support_invalid')
+  if (!('observation' in control)) requireReport(!constrained.has(`${control.node_id}:${control.component}`), 'control_support_invalid')
   const hashes = new Set<string>(), tolerance = declarations.config.config.control_tolerance_m
   const initialParent = report.responses[0].parent_checkpoint_hash
   let previous = report.responses[0].control_displacement_m
@@ -367,7 +437,9 @@ function responses(report: RcCorotationalReport, job: WorkbenchJobView, model: R
     hashes.add(row.checkpoint_hash)
     requireReport(row.nodes.length === nodeIds.length
       && row.nodes.every((node, i) => node.node_id === nodeIds[i]), 'response_node_binding_invalid')
-    requireReport(row.control_displacement_m === row.nodes[controlIndex].displacements_m_rad[componentIndex], 'response_control_invalid')
+    const observed = 'observation' in control ? rcCorotationalObservationValue(control.observation, row.nodes)
+      : row.nodes[controlIndex].displacements_m_rad[componentIndex]
+    requireReport(row.control_displacement_m === observed, 'response_control_invalid')
     for (const node of row.nodes) {
       const reference = referenceLoads.get(node.node_id)!, fixed = fixedLoads.get(node.node_id)!
       for (let dof = 0; dof < 3; dof++) {
@@ -506,6 +578,7 @@ export async function parseRcCorotationalReport(bytes: Uint8Array, expected: RcC
     const report = value as unknown as RcCorotationalReport
     requireReport(report.claim_boundary === RC_COROTATIONAL_REPORT_CLAIM_BOUNDARY, 'claim_boundary_invalid')
     const model = requestBindings(report, expected)
+    await observationHash(report, raw)
     responses(report, expected.job, model)
     await execution(report, raw)
     return report
