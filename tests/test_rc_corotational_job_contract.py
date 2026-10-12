@@ -23,6 +23,7 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displaceme
 )
 from structural_analysis.execution import rc_corotational_job_contract as contract
 from structural_analysis.execution.rc_corotational_job_request import (
+    ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
     RC_COROTATIONAL_JOB_OPERATION,
     RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
     RC_COROTATIONAL_JOB_RESULT_SCHEMA_VERSION,
@@ -253,6 +254,78 @@ def receipt(payload, analysis, verification, ordinals=(1, 2)):
     return contract.build_rc_corotational_job_receipt(
         payload, analysis["completed_before"], *ordinals, analysis, verification
     )
+
+
+def isolated_request():
+    payload = request()
+    payload["schema_version"] = ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+    payload["execution_config"]["phase_execution_policy"] = {
+        "schema_version": "bounded-rc-corotational-phase-execution-policy.v1",
+        "analysis_timeout_ms": 1_000,
+        "verification_timeout_ms": 2_000,
+        "termination_grace_ms": 50,
+    }
+    return payload
+
+
+def isolated_pair(payload, **kwargs):
+    analysis, verification, raw = pair(payload, **kwargs)
+    typed = validate_rc_corotational_job_request(payload)
+    for index, outcome in enumerate((analysis, verification)):
+        outcome["schema_version"] = (
+            contract.ISOLATED_RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION
+        )
+        outcome["phase_supervision"] = {
+            "schema_version": contract.RC_COROTATIONAL_PHASE_SUPERVISION_SCHEMA_VERSION,
+            "phase": outcome["phase"],
+            "job_request_hash": typed.request_hash,
+            "chunk_request_hash": outcome["chunk_request_hash"],
+            "completed_before": outcome["completed_before"],
+            "planned_after": outcome["completed_after"],
+            "restart_input_sha256": outcome["restart_input_sha256"],
+            "policy": deepcopy(payload["execution_config"]["phase_execution_policy"]),
+            "status": "returned",
+            "supervisor": {
+                "wall_ns": 20,
+                "child_pid": 123 + index,
+                "child_returncode": 0,
+                "direct_child_reaped": True,
+                "stderr_byte_count": 0,
+                "stderr_retained_bytes": 0,
+                "stderr_truncated": False,
+                "scope": "parent launch/request/import/API/export/IPC/reap; contains child API scope",
+            },
+            "cleanup": {},
+        }
+    return analysis, verification, raw
+
+
+def isolated_raised(outcome, *, unaccounted=False):
+    raised = deepcopy(outcome)
+    raised.update(
+        status="raised",
+        api_result=None,
+        checkpoint_artifact_base64=None,
+        verification_report=None,
+        error={"type": "SyntheticError", "code": "synthetic"},
+        unavailable_execution_work=True,
+    )
+    supervision = raised["phase_supervision"]
+    supervision["status"] = "unaccounted" if unaccounted else "raised"
+    if unaccounted:
+        raised["timing"] = {"wall_ns": 500, "process_cpu_ns": None}
+        supervision["supervisor"] = {
+            "wall_ns": 500,
+            "scope": "parent phase failure; child CPU unavailable",
+        }
+        supervision["cleanup"] = {
+            "pid": 123,
+            "signals_sent": [15, 9],
+            "signal_errors": [],
+            "direct_child_reaped": False,
+            "wait_error": "synthetic wait failure",
+        }
+    return raised
 
 
 def rehash(value, field):
@@ -577,4 +650,298 @@ def test_transport_extra_fields_nonfinite_and_chunk_bounds_fail_closed():
     with pytest.raises(ValueError):
         contract.rc_corotational_chunk_binding(
             payload, 1, b"a" * (16 * 1024 * 1024 + 1)
+        )
+
+
+def test_v7_supervised_outcomes_keep_v1_receipt_checkpoint_and_result_custody():
+    payload = isolated_request()
+    a1, v1, raw1 = isolated_pair(payload)
+    row1 = receipt(payload, a1, v1)
+    prior = contract.build_rc_corotational_job_payload(payload, [row1], budget(), raw1)
+    typed = validate_rc_corotational_job_request(payload)
+    assert (
+        prior["schema_version"]
+        == contract.RC_COROTATIONAL_JOB_CHECKPOINT_SCHEMA_VERSION
+    )
+    assert (
+        contract.validate_rc_corotational_job_checkpoint(
+            prior, payload, 1, typed.resume_contract_hash, budget()
+        )["progress_completed"]
+        == 1
+    )
+    a2, v2, raw2 = isolated_pair(payload, before=1, after=3, ready=True, restart=raw1)
+    row2 = receipt(payload, a2, v2, (4, 5))
+    final = contract.build_rc_corotational_job_payload(
+        payload, [row1, row2], budget(5), raw2, a2["api_result"], True
+    )
+    assert final["schema_version"] == RC_COROTATIONAL_JOB_RESULT_SCHEMA_VERSION
+    report = contract.validate_rc_corotational_job_result(
+        final, payload, budget(5), checkpoint=prior
+    )
+    assert report["contract_pass"] and report["progress_completed"] == 3
+    assert contract.bind_rc_corotational_receipts(
+        [row1, row2], {1: a1, 2: v1, 4: a2, 5: v2}, payload
+    ) == (row1, row2)
+    assert not report["authority"]["independent_execution_authentication"]
+    changed = deepcopy(payload)
+    changed["execution_config"]["phase_execution_policy"]["termination_grace_ms"] += 1
+    with pytest.raises(ValueError):
+        contract.validate_rc_corotational_job_checkpoint(
+            prior, changed, 1, typed.resume_contract_hash, budget()
+        )
+    changed_outcome = deepcopy(a1)
+    changed_outcome["phase_supervision"]["supervisor"]["direct_child_reaped"] = False
+    with pytest.raises(ValueError, match="reaped successful child"):
+        contract.bind_rc_corotational_receipts(
+            [row1], {1: changed_outcome, 2: v1}, payload
+        )
+
+
+@pytest.mark.parametrize("version", ["v6", "v7"])
+def test_invocation_schema_is_request_specific_and_requires_exact_fields(version):
+    payload = request() if version == "v6" else isolated_request()
+    a, _v, _raw = pair(payload) if version == "v6" else isolated_pair(payload)
+    typed = validate_rc_corotational_job_request(payload)
+    assert (
+        contract.validate_rc_corotational_invocation_outcome(
+            a, payload, typed.request_hash
+        )
+        == a
+    )
+    changed = deepcopy(a)
+    changed["schema_version"] = (
+        contract.ISOLATED_RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION
+        if version == "v6"
+        else contract.RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION
+    )
+    malformed = [changed, dict(a, extra=True)]
+    if version == "v6":
+        malformed.append(dict(a, phase_supervision={}))
+    else:
+        malformed.append(
+            {key: value for key, value in a.items() if key != "phase_supervision"}
+        )
+    for outcome in malformed:
+        with pytest.raises(ValueError, match="request/schema"):
+            contract.validate_rc_corotational_invocation_outcome(
+                outcome, payload, typed.request_hash
+            )
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("schema_version", "old"),
+        ("phase", "verification"),
+        ("job_request_hash", "sha256:" + "c" * 64),
+        ("chunk_request_hash", "sha256:" + "c" * 64),
+        ("completed_before", True),
+        ("completed_before", 1),
+        ("planned_after", True),
+        ("planned_after", 3),
+        ("restart_input_sha256", "sha256:" + "c" * 64),
+        ("policy", {}),
+        ("status", "raised"),
+        ("status", "unaccounted"),
+        ("status", "old"),
+        ("supervisor", []),
+        ("cleanup", []),
+        ("cleanup", {"direct_child_reaped": False}),
+    ],
+)
+def test_v7_phase_supervision_request_policy_status_and_span_rejected(field, value):
+    payload = isolated_request()
+    a, _v, _raw = isolated_pair(payload)
+    a["phase_supervision"][field] = value
+    with pytest.raises(ValueError):
+        contract.validate_rc_corotational_invocation_outcome(
+            a, payload, validate_rc_corotational_job_request(payload).request_hash
+        )
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("wall_ns", True),
+        ("wall_ns", -1),
+        ("wall_ns", 10),
+        ("wall_ns", 2**63),
+        ("wall_ns", 1_000_000_001),
+        ("child_pid", True),
+        ("child_pid", 0),
+        ("child_returncode", False),
+        ("child_returncode", 1),
+        ("direct_child_reaped", False),
+        ("direct_child_reaped", 1),
+        ("stderr_byte_count", True),
+        ("stderr_byte_count", -1),
+        ("stderr_byte_count", 1),
+        ("stderr_retained_bytes", True),
+        ("stderr_retained_bytes", 1),
+        ("stderr_retained_bytes", 65_537),
+        ("stderr_truncated", True),
+        ("stderr_truncated", 0),
+        ("scope", "independently authenticated"),
+    ],
+)
+def test_v7_measured_supervisor_reaping_stderr_and_timing_rejected(field, value):
+    payload = isolated_request()
+    a, _v, _raw = isolated_pair(payload)
+    a["phase_supervision"]["supervisor"][field] = value
+    with pytest.raises(ValueError):
+        contract.validate_rc_corotational_invocation_outcome(
+            a, payload, validate_rc_corotational_job_request(payload).request_hash
+        )
+
+
+def test_v7_supervision_exact_fields_and_authored_per_phase_deadline():
+    payload = isolated_request()
+    a, v, _raw = isolated_pair(payload)
+    typed = validate_rc_corotational_job_request(payload)
+    for target in ("phase_supervision", "supervisor", "policy"):
+        changed = deepcopy(a)
+        value = changed["phase_supervision"]
+        if target != "phase_supervision":
+            value = value[target]
+        value["extra"] = True
+        with pytest.raises(ValueError):
+            contract.validate_rc_corotational_invocation_outcome(
+                changed, payload, typed.request_hash
+            )
+    for outcome, deadline in ((a, 1_000_000_000), (v, 2_000_000_000)):
+        outcome["phase_supervision"]["supervisor"]["wall_ns"] = deadline
+        assert (
+            contract.validate_rc_corotational_invocation_outcome(
+                outcome, payload, typed.request_hash
+            )["phase"]
+            == outcome["phase"]
+        )
+        outcome["phase_supervision"]["supervisor"]["wall_ns"] += 1
+        with pytest.raises(ValueError, match="timing/stderr bounds"):
+            contract.validate_rc_corotational_invocation_outcome(
+                outcome, payload, typed.request_hash
+            )
+    a, _v, _raw = isolated_pair(payload)
+    a["phase_supervision"]["supervisor"].update(
+        stderr_byte_count=65_537, stderr_retained_bytes=65_536, stderr_truncated=True
+    )
+    assert (
+        contract.validate_rc_corotational_invocation_outcome(
+            a, payload, typed.request_hash
+        )
+        == a
+    )
+    changed_policy = deepcopy(a)
+    changed_policy["phase_supervision"]["policy"]["analysis_timeout_ms"] += 1
+    with pytest.raises(ValueError, match="request/span/policy"):
+        contract.validate_rc_corotational_invocation_outcome(
+            changed_policy, payload, typed.request_hash
+        )
+
+
+@pytest.mark.parametrize("unaccounted", [False, True])
+@pytest.mark.parametrize("phase", ["analysis", "verification"])
+def test_v7_raised_phase_is_retained_audit_without_successful_receipt(
+    unaccounted, phase
+):
+    payload = isolated_request()
+    a, v, _raw = isolated_pair(payload)
+    outcome = isolated_raised(a if phase == "analysis" else v, unaccounted=unaccounted)
+    typed = validate_rc_corotational_job_request(payload)
+    validated = contract.validate_rc_corotational_invocation_outcome(
+        outcome, payload, typed.request_hash
+    )
+    assert validated == outcome
+    assert (
+        validated["phase_supervision"]["cleanup"]
+        == outcome["phase_supervision"]["cleanup"]
+    )
+    assert validated["timing"]["process_cpu_ns"] == (None if unaccounted else 7)
+    with pytest.raises(ValueError):
+        receipt(
+            payload,
+            outcome if phase == "analysis" else a,
+            outcome if phase == "verification" else v,
+        )
+    changed = deepcopy(outcome)
+    changed["unavailable_execution_work"] = False
+    with pytest.raises(ValueError, match="unknown work"):
+        contract.validate_rc_corotational_invocation_outcome(
+            changed, payload, typed.request_hash
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "fake_cpu_zero",
+        "cpu_int",
+        "wall_bool",
+        "wall_negative",
+        "wall_overflow",
+        "wall_mismatch",
+        "scope",
+        "summary_extra",
+        "cleanup_type",
+        "status_returned",
+        "status_raised",
+        "returned_artifacts",
+    ],
+)
+def test_v7_unaccounted_phase_rejects_fabricated_measurements_or_returned_artifacts(
+    mutation,
+):
+    payload = isolated_request()
+    a, _v, _raw = isolated_pair(payload)
+    outcome = isolated_raised(a, unaccounted=True)
+    summary = outcome["phase_supervision"]["supervisor"]
+    if mutation in ("fake_cpu_zero", "cpu_int"):
+        outcome["timing"]["process_cpu_ns"] = 0 if mutation == "fake_cpu_zero" else 7
+    elif mutation in ("wall_bool", "wall_negative", "wall_overflow", "wall_mismatch"):
+        outcome["timing"]["wall_ns"] = {
+            "wall_bool": True,
+            "wall_negative": -1,
+            "wall_overflow": 2**63,
+            "wall_mismatch": 501,
+        }[mutation]
+    elif mutation == "scope":
+        summary["scope"] = "parent API time"
+    elif mutation == "summary_extra":
+        summary["child_pid"] = 123
+    elif mutation == "cleanup_type":
+        outcome["phase_supervision"]["cleanup"] = []
+    elif mutation == "status_returned":
+        outcome["status"] = "returned"
+    elif mutation == "status_raised":
+        outcome["phase_supervision"]["status"] = "raised"
+    else:
+        outcome["api_result"] = a["api_result"]
+    with pytest.raises(ValueError):
+        contract.validate_rc_corotational_invocation_outcome(
+            outcome, payload, validate_rc_corotational_job_request(payload).request_hash
+        )
+
+
+@pytest.mark.parametrize("version", ["v6", "v7"])
+def test_unmeasured_cpu_is_allowed_only_for_v7_unaccounted_parent_failure(version):
+    payload = request() if version == "v6" else isolated_request()
+    a, _v, _raw = pair(payload) if version == "v6" else isolated_pair(payload)
+    a["timing"]["process_cpu_ns"] = None
+    typed = validate_rc_corotational_job_request(payload)
+    with pytest.raises(ValueError, match="timing counter"):
+        contract.validate_rc_corotational_invocation_outcome(
+            a, payload, typed.request_hash
+        )
+
+
+@pytest.mark.parametrize("cpu", [True, -1, 2**63, None])
+@pytest.mark.parametrize("status", ["returned", "raised"])
+def test_v7_measured_child_reply_requires_bounded_integer_cpu_time(cpu, status):
+    payload = isolated_request()
+    a, _v, _raw = isolated_pair(payload)
+    outcome = a if status == "returned" else isolated_raised(a)
+    outcome["timing"]["process_cpu_ns"] = cpu
+    with pytest.raises(ValueError, match="timing counter"):
+        contract.validate_rc_corotational_invocation_outcome(
+            outcome, payload, validate_rc_corotational_job_request(payload).request_hash
         )

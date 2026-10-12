@@ -12,9 +12,9 @@ The internal `run_corotational_control_subdivision` runner retries a failed incr
 
 Set `attempt_limit_per_call` to pause cooperatively after a bounded number of solver calls. The result includes `continuation` bytes containing the original and accepted checkpoints, pending subdivisions, completed authored targets, cumulative attempt count and terminal failure reason. Supply those bytes as `continuation` with the same inputs to resume. A completed or exhausted record performs no extra solver work. The cumulative cap is `maximum_attempt_count`; the per-call limit does not reset it.
 
-Restoration checks the artifact checksum, strict JSON schema, checkpoint state, pending queue and counters. The context binds authored targets, controlled degree of freedom, solver settings, subdivision depth, total budget, problem identity and every Python source file in the solver package. A source or policy change requires a new run. The checksum detects accidental damage, not deliberate rewriting with a recalculated checksum. Restoring an older valid record can replay work: a managed, durable authority must reject stale records and reserve attempts before execution. This runner alone does not provide that authority or account for a process killed during an unfinished attempt. The complete public result pipeline and managed worker integration remain open.
+Restoration checks the artifact checksum, strict JSON schema, checkpoint state, pending queue and counters. The context binds authored targets, controlled degree of freedom, solver settings, subdivision depth, total budget, problem identity and every Python source file in the solver package. A source or policy change requires a new run. The checksum detects accidental damage, not deliberate rewriting with a recalculated checksum. Restoring an older valid record can replay work: a managed, durable authority must reject stale records and reserve attempts before execution. This runner alone does not provide that authority or account for a process killed during an unfinished attempt. The source-replayed API and durable service below add separate artifact and reservation custody.
 
-This is an internal assembly/control capability. Repeated-target semantics, the complete public RC result pipeline and managed workflow are not connected by this change. The synthetic material values are not measured specimen inputs. This does not establish independent physical validation, design authority, general failure prediction, or release readiness.
+Repeated-target semantics and the complete public RC project/report workflow remain open. The synthetic material values are not measured specimen inputs. This does not establish independent physical validation, design authority, general failure prediction, or release readiness.
 
 ## Canonical model bridge
 
@@ -50,4 +50,33 @@ Pure service validation checks transport, immutable request/source declarations,
 
 The worker spans the service's `execution_guard`. Unmanaged stores retain ordinary lease custody. Explicitly enrolled Linux managed stores also retain external generation/root binding and conservative reservation custody. A tiny-model integration test checkpoints two control attempts, makes a backup, spends an unrecorded third invocation, activates the restored generation and rejects the old root. Resume consumes invocations four/five and completes three control attempts under the original cap of 255, with the unknown third reservation preserved and total invocation spend five of six. Cutover attempts inside actual analysis and replay are blocked for the worker lifetime.
 
-This single-host integration does not qualify isolated corotational numerical children, forced process termination, orphan reaping, memory/resource limits, the Workbench corotational report flow or release readiness. Those boundaries still need exact integrated-source verification. A changed package source requires fresh source-bound continuation evidence.
+The single-host managed restore test is separate from process lifecycle evidence. Memory/resource limits, arbitrary orphan reaping, the Workbench corotational report flow and release readiness remain unqualified. A changed package source requires fresh source-bound continuation evidence.
+
+## Opted-in isolated numerical phases
+
+`structural-analysis-job-request.v7` keeps the v6 model, numerical settings, budgets and result contract and requires `execution_config.phase_execution_policy`. The v6 execution-config shape remains unchanged and continues to use in-process numerical calls. A v7 execution config can be authored as:
+
+```json
+{
+  "attempt_limit_per_call": 2,
+  "maximum_api_invocations": 6,
+  "phase_execution_policy": {
+    "schema_version": "bounded-rc-corotational-phase-execution-policy.v1",
+    "analysis_timeout_ms": 60000,
+    "verification_timeout_ms": 60000,
+    "termination_grace_ms": 500
+  }
+}
+```
+
+Timeouts must be integers from 1 to 3,600,000 ms and termination grace from 1 to 5,000 ms. Extra fields and boolean, float or exponent spellings are rejected. The policy is part of the immutable job/restart binding and is excluded from numerical API arguments. Authored inputs keep the whole target history; the supervisor does not turn a restart into a sliced history.
+
+After host and managed-descriptor validation, each analysis and fresh verification reserves its invocation before launching a separate isolated interpreter. The parent retains credentials, lease custody and publication. The child arms Linux parent-death protection before package imports, reconstructs the original request/native restart, and uses a separate bounded binary namespace. Request/native segments are capped at 16 MiB, result/report segments at 64 MiB, and total binary segments at 112 MiB. These are transport limits rather than memory or disk quotas.
+
+An authored deadline covers parent request preparation, child launch/import/API/export, transport and direct-child cleanup. Successful transport requires observed exit status zero and exclusive direct-child reaping. The stored invocation separates measured child API/export wall/CPU time from total supervisor wall time. The latter includes launch/import/transport/cleanup and is not a CPU or RSS measurement. A measured child exception retains its error type and available partial-work counters.
+
+Timeout, missing/corrupt/late transport, rejected return or cleanup failure produces a raised audit outcome with `phase_supervision.status=unaccounted`, `process_cpu_ns=null`, and available cleanup diagnostics. Its reserved invocation remains spent. Such an outcome cannot enter an accepted result receipt. The durable outcome blob and event hash retain the full supervision record; the compact result receipt does not independently hash that entire record. Tenant access to `read_rc_invocation_artifact` retrieves the bound original outcome.
+
+Claim, heartbeat and failure transitions check current time after obtaining the database transaction lock. The worker's lease keeper starts from the last confirmed lease and checks both service-clock expiry and a conservative monotonic deadline without waiting for a pending database renewal. Observed expiry remains latched. A v7 supervisor then stops and reaps its child when that parent check fails. An ordinary in-process v6 call cannot be cancelled by this check.
+
+Tests distinguish real tiny numerical analysis/fresh verification from controlled subprocess lifecycle cases. Controlled children test cutoff, owned-group termination, direct-child reaping, malformed replies and inherited guard release without claiming numerical execution. The managed guard spans child cleanup, heartbeat shutdown and publication. Parent-death protection covers the direct child; ordinary group cleanup covers same-group processes during an observed failure. Escaped descendants, a hard memory quota and zero overlap between replacement workers require separate qualification. Exact-main Nightly, public specimen initial state/material correspondence and the complete Workbench report flow remain independent completion gates.

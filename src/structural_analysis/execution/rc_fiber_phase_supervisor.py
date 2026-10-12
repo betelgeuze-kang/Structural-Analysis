@@ -639,6 +639,16 @@ def _stop_process(process, grace_ms):
     return diagnostics
 
 
+@dataclass(frozen=True)
+class _PhaseBackend:
+    """Private immutable transport hooks; worker requests cannot provide them."""
+
+    code_prefix: str
+    receiver: Callable
+    child_argv: Callable
+    check_reply: Callable
+
+
 def _supervise(
     phase,
     parts,
@@ -648,10 +658,18 @@ def _supervise(
     grace_ms,
     lease_check,
     authority_fd=None,
+    *,
+    backend=None,
 ):
-    code = f"rc_fiber_worker_{phase}_"
+    if backend is None:
+        backend = _PhaseBackend(
+            "rc_fiber_worker_", _FrameReceiver, _child_argv, _check_reply
+        )
+    if type(backend) is not _PhaseBackend:
+        raise ValueError("private phase transport backend required")
+    code = f"{backend.code_prefix}{phase}_"
     process = None
-    receiver = _FrameReceiver("output", phase)
+    receiver = backend.receiver("output", phase)
     stderr_tail = bytearray()
     stderr_total = 0
     selector = None
@@ -677,7 +695,7 @@ def _supervise(
                 code + "timeout", "phase deadline passed before launch"
             )
         process = subprocess.Popen(
-            _child_argv(os.getpid()),
+            backend.child_argv(os.getpid()),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -710,7 +728,7 @@ def _supervise(
                         "numerical child exited without a successful complete transport"
                     )
                 metadata, segments = receiver.value()
-                reply = _check_reply(
+                reply = backend.check_reply(
                     metadata,
                     segments,
                     expected,

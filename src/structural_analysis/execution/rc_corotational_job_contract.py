@@ -28,6 +28,7 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_control_su
     _decode_continuation,
 )
 from structural_analysis.execution.rc_corotational_job_request import (
+    ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
     RC_COROTATIONAL_JOB_PROFILE,
     RC_COROTATIONAL_JOB_RESULT_SCHEMA_VERSION,
     RCCorotationalJobRequest,
@@ -41,6 +42,12 @@ RC_COROTATIONAL_JOB_CHECKPOINT_SCHEMA_VERSION = (
 )
 RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION = (
     "bounded-rc-corotational-job-invocation.v1"
+)
+ISOLATED_RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION = (
+    "bounded-rc-corotational-job-invocation.v2"
+)
+RC_COROTATIONAL_PHASE_SUPERVISION_SCHEMA_VERSION = (
+    "bounded-rc-corotational-phase-supervision.v1"
 )
 RC_COROTATIONAL_JOB_VALIDATOR_ID = "structural_analysis.execution.rc_corotational_job_contract.validate_rc_corotational_job_result"
 RC_COROTATIONAL_JOB_MAX_BYTES = 96 * 1024 * 1024
@@ -80,6 +87,34 @@ _OUTCOME_KEYS = {
     "error",
     "unavailable_execution_work",
 }
+_PHASE_SUPERVISION_KEYS = {
+    "schema_version",
+    "phase",
+    "job_request_hash",
+    "chunk_request_hash",
+    "completed_before",
+    "planned_after",
+    "restart_input_sha256",
+    "policy",
+    "status",
+    "supervisor",
+    "cleanup",
+}
+_MEASURED_SUPERVISOR_KEYS = {
+    "wall_ns",
+    "child_pid",
+    "child_returncode",
+    "direct_child_reaped",
+    "stderr_byte_count",
+    "stderr_retained_bytes",
+    "stderr_truncated",
+    "scope",
+}
+_MEASURED_SUPERVISOR_SCOPE = (
+    "parent launch/request/import/API/export/IPC/reap; contains child API scope"
+)
+_UNACCOUNTED_SUPERVISOR_SCOPE = "parent phase failure; child CPU unavailable"
+_STDERR_RETAINED_MAX_BYTES = 64 * 1024
 _API_KEYS = {
     "schema",
     "request",
@@ -234,6 +269,87 @@ def _timing(value: Any):
         raise ValueError("invalid corotational invocation timing")
     for count in value.values():
         _integer(count, 0, 2**63 - 1, "timing counter")
+
+
+def _phase_supervision(value, typed, binding):
+    """Bind worker supervision declarations without authenticating child execution."""
+    supervision = value["phase_supervision"]
+    policy = typed.execution_config.phase_execution_policy
+    if (
+        type(supervision) is not dict
+        or set(supervision) != _PHASE_SUPERVISION_KEYS
+        or supervision["schema_version"]
+        != RC_COROTATIONAL_PHASE_SUPERVISION_SCHEMA_VERSION
+        or policy is None
+        or not _same(supervision["policy"], policy.to_dict())
+        or supervision["phase"] != value["phase"]
+        or supervision["job_request_hash"] != typed.request_hash
+        or supervision["chunk_request_hash"] != binding["chunk_request_hash"]
+        or type(supervision["completed_before"]) is not int
+        or supervision["completed_before"] != binding["completed_before"]
+        or type(supervision["planned_after"]) is not int
+        or supervision["planned_after"] != binding["planned_after"]
+        or supervision["restart_input_sha256"] != binding["restart_input_sha256"]
+        or type(supervision["status"]) is not str
+        or supervision["status"] not in ("returned", "raised", "unaccounted")
+        or type(supervision["supervisor"]) is not dict
+        or type(supervision["cleanup"]) is not dict
+    ):
+        raise ValueError("corotational phase supervision request/span/policy mismatch")
+    summary, timing = supervision["supervisor"], value["timing"]
+    if supervision["status"] == "unaccounted":
+        if (
+            value["status"] != "raised"
+            or set(summary) != {"wall_ns", "scope"}
+            or summary["scope"] != _UNACCOUNTED_SUPERVISOR_SCOPE
+            or type(timing) is not dict
+            or set(timing) != {"wall_ns", "process_cpu_ns"}
+            or timing["process_cpu_ns"] is not None
+        ):
+            raise ValueError("invalid unaccounted corotational phase supervision")
+        _integer(summary["wall_ns"], 0, 2**63 - 1, "supervisor wall timing")
+        _integer(timing["wall_ns"], 0, 2**63 - 1, "parent failure wall timing")
+        if timing["wall_ns"] != summary["wall_ns"]:
+            raise ValueError("corotational parent failure timing mismatch")
+        # Cleanup diagnostics, including incomplete cleanup, are retained as audit
+        # evidence. The outer raised status forbids an accepted receipt.
+        return
+    _timing(timing)
+    if (
+        supervision["status"] != value["status"]
+        or set(summary) != _MEASURED_SUPERVISOR_KEYS
+        or summary["scope"] != _MEASURED_SUPERVISOR_SCOPE
+        or type(summary["child_returncode"]) is not int
+        or summary["child_returncode"] != 0
+        or summary["direct_child_reaped"] is not True
+        or type(summary["stderr_truncated"]) is not bool
+        or supervision["cleanup"]
+    ):
+        raise ValueError(
+            "corotational measured phase requires a reaped successful child"
+        )
+    _integer(summary["child_pid"], 1, 2**63 - 1, "supervisor child pid")
+    _integer(summary["wall_ns"], 0, 2**63 - 1, "supervisor wall timing")
+    _integer(summary["stderr_byte_count"], 0, 2**63 - 1, "stderr byte count")
+    _integer(
+        summary["stderr_retained_bytes"],
+        0,
+        _STDERR_RETAINED_MAX_BYTES,
+        "retained stderr byte count",
+    )
+    timeout_ms = (
+        policy.analysis_timeout_ms
+        if value["phase"] == "analysis"
+        else policy.verification_timeout_ms
+    )
+    if (
+        not timing["wall_ns"] <= summary["wall_ns"] <= timeout_ms * 1_000_000
+        or summary["stderr_retained_bytes"]
+        != min(summary["stderr_byte_count"], _STDERR_RETAINED_MAX_BYTES)
+        or summary["stderr_truncated"]
+        != (summary["stderr_byte_count"] > summary["stderr_retained_bytes"])
+    ):
+        raise ValueError("corotational supervisor timing/stderr bounds mismatch")
 
 
 def _work(value: Any):
@@ -584,10 +700,20 @@ def _report(value):
 def validate_rc_corotational_invocation_outcome(outcome, request, request_hash):
     """Return canonical validated outcome; raised/blocked records remain audit evidence."""
     typed, value = _typed(request), _mapping(outcome)
+    isolated = (
+        typed.to_dict()["schema_version"]
+        == ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+    )
+    outcome_keys = _OUTCOME_KEYS | {"phase_supervision"} if isolated else _OUTCOME_KEYS
+    schema = (
+        ISOLATED_RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION
+        if isolated
+        else RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION
+    )
     if (
         request_hash != typed.request_hash
-        or set(value) != _OUTCOME_KEYS
-        or value["schema_version"] != RC_COROTATIONAL_JOB_INVOCATION_SCHEMA_VERSION
+        or set(value) != outcome_keys
+        or value["schema_version"] != schema
     ):
         raise ValueError("corotational invocation request/schema mismatch")
     if (
@@ -607,7 +733,10 @@ def validate_rc_corotational_invocation_outcome(outcome, request, request_hash):
         or value["completed_after"] != binding["planned_after"]
     ):
         raise ValueError("corotational invocation planned span mismatch")
-    _timing(value["timing"])
+    if isolated:
+        _phase_supervision(value, typed, binding)
+    else:
+        _timing(value["timing"])
     if type(value["unavailable_execution_work"]) is not bool:
         raise ValueError("invalid corotational invocation unavailable-work flag")
     if value["phase"] == "verification" and (

@@ -24,6 +24,10 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displaceme
     _controlled_free_index,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+from structural_analysis.execution.rc_corotational_phase_policy import (
+    RCCorotationalPhasePolicy,
+    decode_rc_corotational_phase_policy,
+)
 from structural_analysis.model.schema import (
     CANONICAL_MODEL_SCHEMA_VERSION,
     CanonicalModel,
@@ -35,6 +39,13 @@ from structural_analysis.solvers.nonlinear.newton import (
 
 
 RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v6"
+ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = (
+    "structural-analysis-job-request.v7"
+)
+RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS = (
+    RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+    ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+)
 RC_COROTATIONAL_JOB_OPERATION = "bounded_rc_corotational_control"
 RC_COROTATIONAL_JOB_RESULT_SCHEMA_VERSION = "bounded-rc-corotational-job-result.v1"
 RC_COROTATIONAL_JOB_PROFILE = "bounded_rc_corotational_durable_execution.v1"
@@ -192,6 +203,7 @@ class RCCorotationalJobControlConfig:
 class RCCorotationalJobExecutionConfig:
     attempt_limit_per_call: int
     maximum_api_invocations: int
+    phase_execution_policy: RCCorotationalPhasePolicy | None = None
 
 
 @dataclass(frozen=True)
@@ -257,7 +269,7 @@ def validate_rc_corotational_job_request(
     )
     _object(value, _REQUEST_KEYS, "request")
     if (
-        value["schema_version"] != RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+        value["schema_version"] not in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
         or value["operation"] != RC_COROTATIONAL_JOB_OPERATION
         or value["result_contract"] != RC_COROTATIONAL_JOB_RESULT_SCHEMA_VERSION
         or type(value["case_id"]) is not str
@@ -312,9 +324,13 @@ def validate_rc_corotational_job_request(
         experimental_pin_roller_beam=config["experimental_pin_roller_beam"],
         experimental_fixed_guided_axial=config["experimental_fixed_guided_axial"],
     )
+    isolated = (
+        value["schema_version"] == ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+    )
     execution = _object(
         value["execution_config"],
-        {"attempt_limit_per_call", "maximum_api_invocations"},
+        {"attempt_limit_per_call", "maximum_api_invocations"}
+        | ({"phase_execution_policy"} if isolated else set()),
         "execution_config",
     )
     execution_config = RCCorotationalJobExecutionConfig(
@@ -324,6 +340,9 @@ def validate_rc_corotational_job_request(
         _integer(
             execution["maximum_api_invocations"], "maximum_api_invocations", 1, 100000
         ),
+        decode_rc_corotational_phase_policy(execution["phase_execution_policy"])
+        if isolated
+        else None,
     )
     model_payload = _object(value["model"], _MODEL_KEYS, "model")
     if model_payload["schema_version"] != CANONICAL_MODEL_SCHEMA_VERSION:

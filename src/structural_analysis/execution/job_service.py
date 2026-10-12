@@ -48,11 +48,17 @@ RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
 PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
 FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v5"
 RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v6"
+ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v7"
+RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS = (
+    RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+    ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+)
 RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS = (
     RC_FIBER_JOB_REQUEST_SCHEMA_VERSION,
     PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION,
     FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION,
     RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
+    ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
 )
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
@@ -513,7 +519,10 @@ class DurableJobService:
             _validate_schema(
                 normalized_request,
                 (
-                    "job_request_v6.schema.json"
+                    "job_request_v7.schema.json"
+                    if normalized_request["schema_version"]
+                    == ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                    else "job_request_v6.schema.json"
                     if normalized_request["schema_version"]
                     == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
                     else "job_request_v5.schema.json"
@@ -530,7 +539,7 @@ class DurableJobService:
             total_steps = (
                 rc_config.progress_total
                 if normalized_request["schema_version"]
-                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
                 else len(rc_config.targets_m)
             )
             maximum_attempts = normalized_request["execution_config"][
@@ -674,10 +683,10 @@ class DurableJobService:
                 "Lease duration must be an integer in [5, 3600].",
             )
 
-        now, now_us = self._now()
-        lease_expires_us = now_us + lease_seconds * 1_000_000
-        lease_expires_at = _format_us(lease_expires_us)
         with self._transaction() as connection:
+            now, now_us = self._now()
+            lease_expires_us = now_us + lease_seconds * 1_000_000
+            lease_expires_at = _format_us(lease_expires_us)
             self._recover_expired_leases(
                 connection, selected_tenants=selected_tenants, now=now, now_us=now_us
             )
@@ -764,10 +773,10 @@ class DurableJobService:
                 "/lease_seconds",
                 "Lease duration must be an integer in [5, 3600].",
             )
-        now, now_us = self._now()
-        expires_us = now_us + lease_seconds * 1_000_000
-        expires_at = _format_us(expires_us)
         with self._transaction() as connection:
+            now, now_us = self._now()
+            expires_us = now_us + lease_seconds * 1_000_000
+            expires_at = _format_us(expires_us)
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -1337,7 +1346,7 @@ class DurableJobService:
         """Check each claimed receipt against its actual durable invocation pair, one pair at a time."""
         if (
             self._request_for_row(row).get("schema_version")
-            == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+            in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
         ):
             from structural_analysis.execution.rc_corotational_job_contract import (
                 bind_rc_corotational_receipts,
@@ -1532,7 +1541,7 @@ class DurableJobService:
                 checkpoint = self._checkpoint_for_row(row)
                 if (
                     request.get("schema_version")
-                    == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                    in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
                 ):
                     from structural_analysis.execution.rc_corotational_job_contract import (
                         validate_rc_corotational_job_checkpoint,
@@ -1682,7 +1691,7 @@ class DurableJobService:
 
                 if (
                     request.get("schema_version")
-                    == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                    in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
                 ):
                     from structural_analysis.execution.rc_corotational_job_contract import (
                         RC_COROTATIONAL_JOB_VALIDATOR_ID,
@@ -1741,7 +1750,7 @@ class DurableJobService:
             completed_progress = (
                 result_payload["progress_completed"]
                 if request.get("schema_version")
-                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
                 else int(row["progress_total"])
             )
             row = self._transition(
@@ -1789,8 +1798,8 @@ class DurableJobService:
             )
         if type(retriable) is not bool:
             _fail("retriable_invalid", "/retriable", "retriable must be boolean.")
-        now, now_us = self._now()
         with self._transaction() as connection:
+            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -2209,7 +2218,7 @@ class DurableJobService:
         if (
             request.get("schema_version") not in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
             or request.get("schema_version")
-            == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+            in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
         ):
             _fail(
                 "rc_quantity_job_unsupported", "/job", "A durable RC job is required."
@@ -2479,7 +2488,7 @@ class DurableJobService:
             )
             if (
                 request.get("schema_version")
-                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
             ):
                 self._validate_rc_corotational_projection(
                     connection, row, request, events
@@ -3342,7 +3351,7 @@ class DurableJobService:
             progress_unit=(
                 "control_solver_attempts"
                 if self._request_for_row(row).get("schema_version")
-                == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION
+                in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS
                 else None
             ),
             job_id=str(row["job_id"]),
@@ -3406,7 +3415,7 @@ def _validate_rc_outcome(
     typed: Any,
     request_hash: str,
 ) -> None:
-    if request.get("schema_version") == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION:
+    if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
         from structural_analysis.execution.rc_corotational_job_contract import (
             validate_rc_corotational_invocation_outcome,
         )
@@ -3622,7 +3631,7 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
     )
 
     try:
-        if request.get("schema_version") == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION:
+        if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
             from structural_analysis.execution.rc_corotational_job_request import (
                 validate_rc_corotational_job_request,
             )
@@ -3639,7 +3648,7 @@ def _rc_fiber_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
 
 
 def _result_byte_limit(request: Mapping[str, Any]) -> int:
-    if request.get("schema_version") == RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION:
+    if request.get("schema_version") in RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS:
         from structural_analysis.execution.rc_corotational_job_contract import (
             RC_COROTATIONAL_JOB_MAX_BYTES,
         )

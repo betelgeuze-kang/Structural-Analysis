@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 from dataclasses import replace
+from datetime import datetime
 import hashlib
 import signal
 import sys
@@ -62,36 +63,130 @@ def _hash(raw: bytes) -> str:
 
 
 class _LeaseKeeper:
-    """Renew independently of long numerical calls without pretending to cancel them."""
+    """Renew a confirmed lease, with a non-DB expiry check for supervised calls.
 
-    def __init__(self, service, job_id, credentials, lease_seconds):
+    This refuses further work/publication after expiry. It does not cancel an
+    arbitrary in-process numerical call or provide a per-job execution permit.
+    """
+
+    def __init__(self, service, job_id, credentials, lease_seconds, *, initial_lease):
         self.service = service
         self.job_id = job_id
         self.credentials = credentials
         self.lease_seconds = lease_seconds
         self.stopped = Event()
         self.failure = None
+        self._confirmed = None
+        self._attempt = None
+        self._request_hash = None
+        self._confirm(initial_lease)
         self.thread = Thread(target=self._run, name="rc-fiber-job-lease", daemon=True)
+
+    def _expire(self):
+        error = JobServiceError(
+            "rc_fiber_worker_lease_expired",
+            "/lease",
+            "The last confirmed worker lease expired; renewal in flight is not custody.",
+        )
+        self.failure = error
+        raise error
+
+    def _confirm(self, view):
+        # Never revive custody after an observed expiry, including when an old
+        # heartbeat finally returns from a blocked database transaction.
+        if self._confirmed is not None:
+            self.check()
+        if (
+            type(view) is not JobView
+            or view.job_id != self.job_id
+            or view.status != "running"
+            or type(view.lease_expires_at) is not str
+            or (self._attempt is not None and view.attempt != self._attempt)
+            or (
+                self._request_hash is not None
+                and view.request.content_hash != self._request_hash
+            )
+        ):
+            raise JobServiceError(
+                "rc_fiber_worker_confirmed_lease_invalid",
+                "/lease",
+                "A running lease confirmation for this exact job attempt is required.",
+            )
+        try:
+            expires = datetime.fromisoformat(
+                view.lease_expires_at.replace("Z", "+00:00")
+            )
+            if expires.tzinfo is None:
+                raise ValueError("lease expiry must have a timezone")
+            expiry_us = int(round(expires.timestamp() * 1_000_000))
+        except (ValueError, OverflowError) as error:
+            raise JobServiceError(
+                "rc_fiber_worker_confirmed_lease_invalid",
+                "/lease",
+                "The confirmed lease expiry is invalid.",
+            ) from error
+        # Anchor before reading the service clock. A slow clock callback or a
+        # backward clock change cannot add time to the monotonic lease bound.
+        started_ns = time.monotonic_ns()
+        _now, now_us = self.service._now()
+        self._raise_if_failed()
+        remaining_ns = min(
+            (expiry_us - now_us) * 1_000, self.lease_seconds * 1_000_000_000
+        )
+        deadline_ns = started_ns + remaining_ns
+        if remaining_ns <= 0 or time.monotonic_ns() >= deadline_ns:
+            self._expire()
+        self._attempt, self._request_hash = view.attempt, view.request.content_hash
+        # One immutable snapshot avoids a mutex shared with a blocked renewal.
+        self._confirmed = (expiry_us, deadline_ns)
 
     def _run(self):
         while not self.stopped.wait(min(30.0, self.lease_seconds / 3.0)):
             try:
-                self.service.heartbeat(
+                self.check()
+                confirmed = self.service.heartbeat(
                     self.job_id,
                     **self.credentials,
                     lease_seconds=self.lease_seconds,
                 )
+                self._confirm(confirmed)
             except Exception as error:
-                self.failure = error
+                if self.failure is None:
+                    self.failure = error
                 return
 
-    def check(self):
+    def _raise_if_failed(self):
         if self.failure is not None:
+            if (
+                isinstance(self.failure, JobServiceError)
+                and self.failure.code == "rc_fiber_worker_lease_expired"
+            ):
+                raise self.failure
             raise JobServiceError(
                 "rc_fiber_worker_lease_renewal_failed",
                 "/lease",
                 "The worker could not renew its lease; computed work cannot publish.",
             ) from self.failure
+
+    def check(self):
+        self._raise_if_failed()
+        expiry_us, deadline_ns = self._confirmed
+        if time.monotonic_ns() >= deadline_ns:
+            self._expire()
+        # _now reads only the injected service clock, never SQLite or the
+        # execution-authority mutex. Forward clock jumps fail closed as well.
+        try:
+            _now, now_us = self.service._now()
+        except Exception as error:
+            self.failure = error
+            raise JobServiceError(
+                "rc_fiber_worker_lease_renewal_failed",
+                "/lease",
+                "The worker could not confirm its lease clock.",
+            ) from error
+        self._raise_if_failed()
+        if now_us >= expiry_us or time.monotonic_ns() >= deadline_ns:
+            self._expire()
 
     def __enter__(self):
         self.thread.start()
@@ -193,7 +288,9 @@ def _execute_rc_fiber_direct_control_claim(
             )
         ):
             raise ValueError("claim projection differs from the live leased job")
-        with _LeaseKeeper(service, job_id, credentials, lease_seconds) as lease:
+        with _LeaseKeeper(
+            service, job_id, credentials, lease_seconds, initial_lease=current
+        ) as lease:
             if (
                 type(claim.request_bytes) is not bytes
                 or len(claim.request_bytes) != current.request.byte_length

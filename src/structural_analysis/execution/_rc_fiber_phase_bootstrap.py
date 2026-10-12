@@ -46,7 +46,10 @@ def _main() -> None:
     _arm_parent_death_signal(int(sys.argv[1]))
     source = Path(sys.argv[2]).resolve(strict=True)
     entry = Path(sys.argv[3]).resolve(strict=True)
-    if entry != source / "structural_analysis/execution/rc_fiber_phase_supervisor.py":
+    if entry not in {
+        source / "structural_analysis/execution/rc_fiber_phase_supervisor.py",
+        source / "structural_analysis/execution/rc_corotational_phase_supervisor.py",
+    }:
         raise RuntimeError("RC phase bootstrap entry differs from its source root")
     dependencies = json.loads(sys.argv[4])
     if (
