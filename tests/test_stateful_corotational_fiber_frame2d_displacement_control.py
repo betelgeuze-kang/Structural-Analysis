@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import TypedDict, cast
 
 import numpy as np
 import pytest
@@ -23,6 +24,7 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displaceme
     solve_stateful_corotational_fiber_frame2d_displacement_control_step,
 )
 from structural_analysis.elements import StatefulCorotationalFiberBeam2D
+from structural_analysis.elements.axial_curvature_section import AxialCurvatureSection
 from structural_analysis.materials import (
     AsymmetricConcreteDamageMaterial,
     BilinearCombinedHardeningSteel,
@@ -35,6 +37,17 @@ from structural_analysis.solvers.nonlinear.newton import (
 
 ARCH_COORDINATES = ((-1.0, 0.0), (0.0, 0.1), (1.0, 0.0))
 ARCH_TARGETS = tuple(-0.01 * index for index in range(1, 19))
+
+
+class _ReversalOptions(TypedDict):
+    control_global_dof: int
+    allow_reversal: bool
+
+
+class _SubdivisionPolicyChanges(TypedDict, total=False):
+    config: StatefulCorotationalFiberFrame2DDisplacementControlConfig
+    maximum_attempt_count: int
+    maximum_subdivision_depth: int
 
 
 def _elastic_materials() -> tuple[
@@ -449,7 +462,7 @@ def test_constant_axial_load_reversal_and_serialized_restart():
     )
     assert check["load_factor_column_max_abs_error_kn"] < 1e-8
     targets = (0.001, -0.001, 0.002)
-    kwargs = dict(control_global_dof=3, allow_reversal=True)
+    kwargs = _ReversalOptions(control_global_dof=3, allow_reversal=True)
     full = run_stateful_corotational_fiber_frame2d_displacement_control_path(
         problem,
         targets,
@@ -577,7 +590,7 @@ def _nonlinear_fixed_axial_problem():
         node_j=1,
         element=StatefulCorotationalFiberBeam2D(
             node_coordinates_m=coords,
-            section=section,
+            section=cast(AxialCurvatureSection, section),
             integration_order=3,
             element_id="column",
         ),
@@ -625,7 +638,7 @@ def test_nonlinear_fixed_axial_reversal_restart_and_coarse_failure():
     targets = tuple(
         v for a, b in zip(turns[:-1], turns[1:]) for v in np.linspace(a, b, 11)[1:]
     )
-    kwargs = dict(control_global_dof=3, allow_reversal=True)
+    kwargs = _ReversalOptions(control_global_dof=3, allow_reversal=True)
     full = run_stateful_corotational_fiber_frame2d_displacement_control_path(
         p,
         targets,
@@ -770,7 +783,9 @@ def test_subdivision_rejects_falsey_non_config():
             _arch_problem("bad-config"),
             (-0.01,),
             control_global_dof=4,
-            config=False,
+            config=cast(
+                StatefulCorotationalFiberFrame2DDisplacementControlConfig, False
+            ),
         )
 
 
@@ -796,25 +811,27 @@ def test_subdivision_depth_limit_and_float_progress_preserve_parent():
 
     problem = replace(_arch_problem("depth-limit"), fixed_external_loads=((4, -0.01),))
     seed = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
-    kwargs = dict(
-        control_global_dof=4,
-        initial_checkpoint=seed,
-        config=StatefulCorotationalFiberFrame2DDisplacementControlConfig(
-            maximum_iterations=0
-        ),
+    config = StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+        maximum_iterations=0
     )
     depth = run_corotational_control_subdivision(
         problem,
         (-0.01,),
+        control_global_dof=4,
+        initial_checkpoint=seed,
+        config=config,
         maximum_subdivision_depth=0,
-        **kwargs,
     )
     assert depth.terminal_reason == "subdivision_depth_exhausted"
     assert not depth.contract_pass
     assert len(depth.attempts) == 1
     assert depth.final_checkpoint.canonical_bytes() == seed.canonical_bytes()
     tiny = run_corotational_control_subdivision(
-        problem, (np.nextafter(0.0, 1.0),), **kwargs
+        problem,
+        (np.nextafter(0.0, 1.0),),
+        control_global_dof=4,
+        initial_checkpoint=seed,
+        config=config,
     )
     assert tiny.terminal_reason == "subdivision_has_no_representable_progress"
     assert not tiny.contract_pass
@@ -886,10 +903,15 @@ def test_subdivision_serialized_resume_preserves_failed_work_and_nonlinear_state
     )
     assert pre.committed
     targets = (0.005, 0.01, -0.005, -0.01, 0.005)
-    kwargs = dict(control_global_dof=3, initial_checkpoint=pre.accepted_checkpoint)
-    full = run_corotational_control_subdivision(p, targets, **kwargs)
+    full = run_corotational_control_subdivision(
+        p, targets, control_global_dof=3, initial_checkpoint=pre.accepted_checkpoint
+    )
     pause = run_corotational_control_subdivision(
-        p, targets, attempt_limit_per_call=1, **kwargs
+        p,
+        targets,
+        control_global_dof=3,
+        initial_checkpoint=pre.accepted_checkpoint,
+        attempt_limit_per_call=1,
     )
     assert pause.status == "paused"
     assert pause.total_attempt_count == 1
@@ -897,7 +919,11 @@ def test_subdivision_serialized_resume_preserves_failed_work_and_nonlinear_state
     saved = tmp_path / "continuation.json"
     saved.write_bytes(pause.continuation)
     resumed = run_corotational_control_subdivision(
-        p, targets, continuation=saved.read_bytes(), **kwargs
+        p,
+        targets,
+        control_global_dof=3,
+        initial_checkpoint=pre.accepted_checkpoint,
+        continuation=saved.read_bytes(),
     )
     assert resumed.contract_pass
     assert resumed.total_attempt_count == full.total_attempt_count
@@ -908,7 +934,11 @@ def test_subdivision_serialized_resume_preserves_failed_work_and_nonlinear_state
     )
     assert resumed.continuation == full.continuation
     complete = run_corotational_control_subdivision(
-        p, targets, continuation=resumed.continuation, **kwargs
+        p,
+        targets,
+        control_global_dof=3,
+        initial_checkpoint=pre.accepted_checkpoint,
+        continuation=resumed.continuation,
     )
     assert complete.contract_pass
     assert complete.attempts == ()
@@ -921,10 +951,15 @@ def test_subdivision_resume_keeps_exhausted_budget_and_terminal_failure():
     )
 
     p = _arch_problem("resume-budget")
-    kwargs = dict(control_global_dof=4, maximum_attempt_count=1)
-    first = run_corotational_control_subdivision(p, (-0.01, -0.02), **kwargs)
+    first = run_corotational_control_subdivision(
+        p, (-0.01, -0.02), control_global_dof=4, maximum_attempt_count=1
+    )
     resumed = run_corotational_control_subdivision(
-        p, (-0.01, -0.02), continuation=first.continuation, **kwargs
+        p,
+        (-0.01, -0.02),
+        control_global_dof=4,
+        maximum_attempt_count=1,
+        continuation=first.continuation,
     )
     assert resumed.terminal_reason == "attempt_budget_exhausted"
     assert resumed.total_attempt_count == 1
@@ -933,11 +968,17 @@ def test_subdivision_resume_keeps_exhausted_budget_and_terminal_failure():
     cfg = StatefulCorotationalFiberFrame2DDisplacementControlConfig(
         maximum_iterations=0
     )
-    kwargs = dict(control_global_dof=4, config=cfg, maximum_subdivision_depth=0)
-    stopped = run_corotational_control_subdivision(p, (-0.01,), **kwargs)
+    stopped = run_corotational_control_subdivision(
+        p, (-0.01,), control_global_dof=4, config=cfg, maximum_subdivision_depth=0
+    )
     assert stopped.terminal_reason == "subdivision_depth_exhausted"
     restored = run_corotational_control_subdivision(
-        p, (-0.01,), continuation=stopped.continuation, **kwargs
+        p,
+        (-0.01,),
+        control_global_dof=4,
+        config=cfg,
+        maximum_subdivision_depth=0,
+        continuation=stopped.continuation,
     )
     assert restored.terminal_reason == stopped.terminal_reason
     assert not restored.attempts
@@ -953,8 +994,7 @@ def test_subdivision_resume_rejects_corruption_and_changed_context(monkeypatch):
     pause = module.run_corotational_control_subdivision(
         p, targets, control_global_dof=4, attempt_limit_per_call=1
     )
-    options = dict(control_global_dof=4, continuation=pause.continuation)
-    for changed in (
+    changed_options: tuple[_SubdivisionPolicyChanges, ...] = (
         {"maximum_attempt_count": 256},
         {"maximum_subdivision_depth": 9},
         {
@@ -962,13 +1002,20 @@ def test_subdivision_resume_rejects_corruption_and_changed_context(monkeypatch):
                 maximum_iterations=39
             )
         },
-    ):
+    )
+    for changed in changed_options:
         with pytest.raises(ValueError, match="input, policy or source mismatch"):
             module.run_corotational_control_subdivision(
-                p, targets, **options, **changed
+                p,
+                targets,
+                control_global_dof=4,
+                continuation=pause.continuation,
+                **changed,
             )
     with pytest.raises(ValueError, match="input, policy or source mismatch"):
-        module.run_corotational_control_subdivision(p, (-0.01, -0.03), **options)
+        module.run_corotational_control_subdivision(
+            p, (-0.01, -0.03), control_global_dof=4, continuation=pause.continuation
+        )
     artifact = json.loads(pause.continuation)
     artifact["payload"]["spent"] = 0
     with pytest.raises(ValueError, match="checksum"):
@@ -982,7 +1029,9 @@ def test_subdivision_resume_rejects_corruption_and_changed_context(monkeypatch):
             )
     monkeypatch.setattr(module, "_source_identity", lambda: "changed-source")
     with pytest.raises(ValueError, match="input, policy or source mismatch"):
-        module.run_corotational_control_subdivision(p, targets, **options)
+        module.run_corotational_control_subdivision(
+            p, targets, control_global_dof=4, continuation=pause.continuation
+        )
 
 
 def test_subdivision_repeated_resume_keeps_partial_success_and_seed_identity():
@@ -994,23 +1043,29 @@ def test_subdivision_repeated_resume_keeps_partial_success_and_seed_identity():
     targets = (-0.01, -0.02, -0.015)
     full = run_corotational_control_subdivision(p, targets, control_global_dof=4)
     assert full.contract_pass
-    kwargs = dict(control_global_dof=4, attempt_limit_per_call=1)
-    part = run_corotational_control_subdivision(p, targets, **kwargs)
+    part = run_corotational_control_subdivision(
+        p, targets, control_global_dof=4, attempt_limit_per_call=1
+    )
     assert part.completed_target_count == 1
     with pytest.raises(ValueError, match="initial checkpoint mismatch"):
         run_corotational_control_subdivision(
             p,
             targets,
+            control_global_dof=4,
+            attempt_limit_per_call=1,
             initial_checkpoint=part.final_checkpoint,
             continuation=part.continuation,
-            **kwargs,
         )
     for _ in range(full.total_attempt_count):
         if part.contract_pass:
             break
         prior_spent = part.total_attempt_count
         part = run_corotational_control_subdivision(
-            p, targets, continuation=part.continuation, **kwargs
+            p,
+            targets,
+            control_global_dof=4,
+            attempt_limit_per_call=1,
+            continuation=part.continuation,
         )
         assert part.total_attempt_count == prior_spent + 1
     assert part.contract_pass
