@@ -635,6 +635,34 @@ class DurableJobService:
         normalized_request = _canonical_mapping(request, "/request")
         if (
             normalized_request.get("schema_version")
+            == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+        ):
+            # An exact retry reads the original registered source, even after
+            # the currently installed package changes. It cannot repin a job.
+            retry_bytes = _canonical_json_bytes(normalized_request)
+            _bounded(retry_bytes, _MAX_REQUEST_BYTES, "/request")
+            retry_key = _sha256(
+                b"structural-analysis-job-idempotency.v1\0"
+                + tenant_id.encode("utf-8")
+                + b"\0"
+                + idempotency_key.encode("utf-8")
+            )
+            with self._connect() as connection:
+                prior = connection.execute(
+                    "SELECT * FROM jobs WHERE tenant_id=? AND idempotency_key_hash=?",
+                    (tenant_id, retry_key),
+                ).fetchone()
+                if prior is not None:
+                    if prior["request_hash"] != _sha256(retry_bytes):
+                        _fail(
+                            "idempotency_conflict",
+                            "/idempotency_key",
+                            "The key is bound to a different request.",
+                        )
+                    self._ordinal_typed_for_row(connection, prior)
+                    return self._view(prior)
+        if (
+            normalized_request.get("schema_version")
             in RC_FIBER_JOB_REQUEST_SCHEMA_VERSIONS
         ):
             if (
@@ -728,6 +756,14 @@ class DurableJobService:
                 "request_hash": request_hash,
                 "progress_total": total_steps,
             }
+            if (
+                normalized_request.get("schema_version")
+                == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+            ):
+                event_payload.update(
+                    ordinal_source_identity=rc_config.execution_source_identity,
+                    ordinal_context_hash=rc_config.context_hash,
+                )
             event_hash, event_json = _event_hash(
                 job_id=job_id,
                 revision=0,
@@ -776,7 +812,26 @@ class DurableJobService:
                     (job_id, str(maximum_attempts)),
                 )
             row = self._job_row(connection, job_id)
-            if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
+            if (
+                normalized_request.get("schema_version")
+                == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION
+            ):
+                # Fresh owner admission uses only the freshly validated object.
+                # Historical resolution never creates this external registry.
+                try:
+                    self._execution_authority.register_job(
+                        self._execution_binding, job_id, request_hash, maximum_attempts
+                    )
+                    self._execution_authority.register_ordinal_credits(
+                        self._execution_binding,
+                        job_id,
+                        request_hash,
+                        rc_config.context_hash,
+                        rc_config.execution_config.production_solver_budget,
+                        rc_config.execution_config.verification_solver_budget,
+                    )
+                except ExecutionAuthorityError as exc:
+                    _fail("ordinal_solver_authority_rejected", "/request", str(exc))
                 self._ordinal_solver_budget(connection, row, reconcile=True)
                 row = self._job_row(connection, job_id)
         return self._view(row)
@@ -1121,7 +1176,7 @@ class DurableJobService:
                 "/solver_credit_budget",
                 "Managed ordinal operation required.",
             )
-        typed = self._ordinal_typed_for_row(row)
+        typed = self._ordinal_typed_for_row(connection, row)
         if reconcile:
             row, _budget = self._reconcile_execution_reservations(connection, row)
         else:
@@ -1247,7 +1302,7 @@ class DurableJobService:
             )
 
             request = self._request_for_row(row)
-            typed = self._ordinal_typed_for_row(row)
+            typed = self._ordinal_typed_for_row(connection, row)
             if (
                 phase not in ("production", "verification")
                 or type(ceiling) is not int
@@ -1773,7 +1828,7 @@ class DurableJobService:
                 bind_ordinal_receipts,
             )
 
-            request = self._ordinal_typed_for_row(row)
+            request = self._ordinal_typed_for_row(connection, row)
             budget = self._ordinal_solver_budget(connection, row)
             records = {
                 r["ordinal"]: r for r in self._rc_invocation_rows(connection, row)
@@ -2557,7 +2612,7 @@ class DurableJobService:
                 "/evidence",
             )
             try:
-                typed = self._ordinal_typed_for_row(row)
+                typed = self._ordinal_typed_for_row(connection, row)
                 validation = validate_ordinal_job_result(
                     result,
                     request=typed,
@@ -3319,7 +3374,7 @@ class DurableJobService:
         )
 
         try:
-            typed = self._ordinal_typed_for_row(row)
+            typed = self._ordinal_typed_for_row(connection, row)
             submitted = _strict_json_object(
                 str(events[0]["payload_json"]).encode(), "/events/payload"
             )
@@ -3738,13 +3793,74 @@ class DurableJobService:
             "/request",
         )
 
-    def _ordinal_typed_for_row(self, row):
-        """Derive recorded source only from attached hash-verified originals."""
+    def _ordinal_typed_for_row(self, connection, row):
+        """Pure source admission bound to this snapshot and external registry."""
         from structural_analysis.execution.rc_corotational_ordinal_job_request import (
             validate_rc_corotational_ordinal_job_request,
         )
 
         request = self._request_for_row(row)
+        if self._execution_authority is None:
+            _fail(
+                "ordinal_managed_authority_required",
+                "/source",
+                "Historical ordinal source requires its owner.",
+            )
+        try:
+            registered = self._execution_authority.read_registered_ordinal_credits(
+                self._execution_binding, str(row["job_id"]), str(row["request_hash"])
+            )
+        except ExecutionAuthorityError as exc:
+            _fail("ordinal_solver_authority_rejected", "/source", str(exc))
+        event = connection.execute(
+            "SELECT * FROM job_events WHERE job_id=? AND revision=0", (row["job_id"],)
+        ).fetchone()
+        if event is None:
+            _fail(
+                "ordinal_original_source_invalid",
+                "/source",
+                "Submitted source event is missing.",
+            )
+        submitted = _strict_json_object(
+            str(event["payload_json"]).encode(), "/ordinal_submitted_source"
+        )
+        digest, encoded = _event_hash(
+            job_id=str(row["job_id"]),
+            revision=0,
+            event_type="submitted",
+            status="queued",
+            occurred_at=str(event["occurred_at"]),
+            payload=submitted,
+            previous_event_hash=None,
+        )
+        if (
+            event["event_type"] != "submitted"
+            or event["status"] != "queued"
+            or event["previous_event_hash"] is not None
+            or event["event_hash"] != digest
+            or event["payload_json"] != encoded
+            or submitted.get("request_hash") != row["request_hash"]
+            or submitted.get("progress_total") != row["progress_total"]
+        ):
+            _fail(
+                "ordinal_original_source_invalid",
+                "/source",
+                "Submitted source event differs.",
+            )
+        sources = set()
+        seed = submitted.get("ordinal_source_identity")
+        context = submitted.get("ordinal_context_hash")
+        if seed is not None or context is not None:
+            sources.add(_hash(seed, "/source/ordinal_source_identity"))
+            if (
+                _hash(context, "/source/ordinal_context_hash")
+                != registered["context_hash"]
+            ):
+                _fail(
+                    "ordinal_original_source_invalid",
+                    "/source",
+                    "Submitted context differs from external owner.",
+                )
         artifact = self._checkpoint_for_row(row)
         if artifact is None and row["result_hash"] is not None:
             artifact = self._read_blob(
@@ -3752,7 +3868,6 @@ class DurableJobService:
                 row["result_size"],
                 maximum_bytes=_result_byte_limit(request),
             )
-        source = None
         if artifact is not None:
             wrapper = _strict_json_object(artifact, "/ordinal_saved_original")
             encoded = wrapper.get("terminal_checkpoint_artifact_base64")
@@ -3765,17 +3880,191 @@ class DurableJobService:
             try:
                 raw = base64.b64decode(encoded, validate=True)
                 native = _strict_json_object(raw, "/ordinal_native_original")
-                source = native.get("source_identity")
-                _hash(source, "/source_identity")
+                sources.add(_hash(native.get("source_identity"), "/source_identity"))
             except (TypeError, ValueError):
                 _fail(
                     "ordinal_original_source_invalid",
                     "/checkpoint",
                     "Saved native source identity is invalid.",
                 )
-        return validate_rc_corotational_ordinal_job_request(
-            request, recorded_source_identity=source
+        elif seed is None:
+            # Old jobs had no submitted source pin. Only actual hash-verified
+            # production originals and their external grants can supply it.
+            sources.update(
+                self._ordinal_legacy_outcome_sources(
+                    connection, row, request, registered
+                )
+            )
+        if len(sources) != 1:
+            _fail(
+                "ordinal_original_source_invalid",
+                "/source",
+                "No unique owner-bound historical source exists.",
+            )
+        typed = validate_rc_corotational_ordinal_job_request(
+            request, recorded_source_identity=next(iter(sources))
         )
+        if (
+            typed.context_hash != registered["context_hash"]
+            or typed.request_hash != row["request_hash"]
+            or registered["production"]["maximum"]
+            != typed.execution_config.production_solver_budget
+            or registered["verification"]["maximum"]
+            != typed.execution_config.verification_solver_budget
+        ):
+            _fail(
+                "ordinal_original_source_invalid",
+                "/source",
+                "Recorded source-derived context differs from external owner.",
+            )
+        return typed
+
+    def _ordinal_legacy_outcome_sources(self, connection, row, request, registered):
+        """Stream legacy originals without recursion through budget readers."""
+        from structural_analysis.execution.rc_corotational_ordinal_job_request import (
+            validate_rc_corotational_ordinal_job_request,
+        )
+        from structural_analysis.execution.rc_corotational_ordinal_job_contract import (
+            validate_ordinal_invocation_outcome,
+        )
+
+        events = connection.execute(
+            "SELECT * FROM job_events WHERE job_id=? ORDER BY revision",
+            (row["job_id"],),
+        ).fetchall()
+        previous = None
+        recorded, reservations = {}, {}
+        for index, event in enumerate(events):
+            payload = _strict_json_object(
+                str(event["payload_json"]).encode(), "/source/event"
+            )
+            digest, encoded = _event_hash(
+                job_id=str(row["job_id"]),
+                revision=index,
+                event_type=str(event["event_type"]),
+                status=str(event["status"]),
+                occurred_at=str(event["occurred_at"]),
+                payload=payload,
+                previous_event_hash=previous,
+            )
+            if (
+                event["revision"] != index
+                or event["payload_json"] != encoded
+                or event["event_hash"] != digest
+                or event["previous_event_hash"] != previous
+            ):
+                _fail(
+                    "ordinal_original_source_invalid",
+                    "/source",
+                    "Legacy original event chain differs.",
+                )
+            previous = digest
+            if event["event_type"] == "rc_invocation_recorded":
+                ordinal = payload.get("ordinal")
+                if type(ordinal) is not int or ordinal in recorded:
+                    _fail(
+                        "ordinal_original_source_invalid",
+                        "/source",
+                        "Legacy original ordinal differs.",
+                    )
+                recorded[ordinal] = payload
+            elif event["event_type"] == "execution_attempt_reserved":
+                reservations[payload.get("reserved_attempts")] = event["event_hash"]
+        if len(events) != row["revision"] + 1 or previous != row["terminal_event_hash"]:
+            _fail(
+                "ordinal_original_source_invalid",
+                "/source",
+                "Legacy terminal event differs.",
+            )
+        grants = {g["api_ordinal"]: g for g in registered["reservations"]}
+        records = connection.execute(
+            "SELECT * FROM job_rc_invocation_outcomes WHERE job_id=? ORDER BY ordinal",
+            (row["job_id"],),
+        ).fetchall()
+        if len(records) != len(recorded):
+            _fail(
+                "ordinal_original_source_invalid",
+                "/source",
+                "Legacy original references differ.",
+            )
+        sources = set()
+        for record in records:
+            metadata = _strict_json_object(
+                str(record["metadata_json"]).encode(), "/source/metadata"
+            )
+            ordinal = record["ordinal"]
+            expected = dict(
+                ordinal=ordinal,
+                outcome_hash=record["outcome_hash"],
+                outcome_size=record["outcome_size"],
+                reservation_event_hash=record["reservation_event_hash"],
+                metadata=metadata,
+            )
+            if (
+                _canonical_json_bytes(recorded.get(ordinal))
+                != _canonical_json_bytes(expected)
+                or reservations.get(ordinal) != record["reservation_event_hash"]
+            ):
+                _fail(
+                    "ordinal_original_source_invalid",
+                    "/source",
+                    "Legacy original reservation differs.",
+                )
+            if (
+                metadata.get("phase") != "production"
+                or metadata.get("status") != "returned"
+            ):
+                continue
+            outcome = _strict_json_object(
+                self._read_blob(
+                    record["outcome_hash"],
+                    record["outcome_size"],
+                    maximum_bytes=_result_byte_limit(request),
+                ),
+                "/source/original",
+            )
+            grant = grants.get(ordinal)
+            if (
+                grant is None
+                or grant["phase"] != "production"
+                or _canonical_json_bytes(outcome.get("grant"))
+                != _canonical_json_bytes(grant)
+                or any(
+                    _canonical_json_bytes(outcome.get(k)) != _canonical_json_bytes(v)
+                    for k, v in metadata.items()
+                )
+                or outcome.get("job_request_hash") != row["request_hash"]
+                or outcome.get("context_hash") != registered["context_hash"]
+            ):
+                _fail(
+                    "ordinal_original_source_invalid",
+                    "/source",
+                    "Legacy production differs from its external grant.",
+                )
+            try:
+                native = _strict_json_object(
+                    base64.b64decode(
+                        outcome["checkpoint_artifact_base64"], validate=True
+                    ),
+                    "/source/native",
+                )
+                source = _hash(native.get("source_identity"), "/source/native_identity")
+                typed = validate_rc_corotational_ordinal_job_request(
+                    request, recorded_source_identity=source
+                )
+                if typed.context_hash != registered["context_hash"]:
+                    raise ValueError("legacy source context differs")
+                validate_ordinal_invocation_outcome(
+                    outcome, typed, str(row["request_hash"])
+                )
+            except (TypeError, ValueError, KeyError):
+                _fail(
+                    "ordinal_original_source_invalid",
+                    "/source",
+                    "Legacy native source is not owner-bound.",
+                )
+            sources.add(source)
+        return sources
 
     def _execution_budget(
         self, connection: sqlite3.Connection, row: sqlite3.Row
@@ -3788,7 +4077,7 @@ class DurableJobService:
                 "Only bounded RC jobs have a persisted execution budget.",
             )
         if request.get("schema_version") == ORDINAL_RC_JOB_REQUEST_SCHEMA_VERSION:
-            self._ordinal_typed_for_row(row)
+            self._ordinal_typed_for_row(connection, row)
         else:
             _rc_fiber_request(request)
         maximum = request["execution_config"]["maximum_api_invocations"]

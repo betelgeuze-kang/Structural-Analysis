@@ -616,6 +616,25 @@ class JobExecutionAuthority:
                 db, binding, job_id, request_hash, context_hash
             )
 
+    def read_registered_ordinal_credits(self, binding, job_id, request_hash):
+        """Pure historical registry read; no caller source or namespace repair."""
+        _credit_hash(request_hash)
+        with self._lock(), self._connection() as db:
+            self._require(db, binding)
+            self._budget(db, binding, job_id, request_hash)
+            if not db.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='ordinal_credit_budgets'"
+            ).fetchone():
+                raise ExecutionAuthorityError("ordinal solver authority unavailable")
+            row = db.execute(
+                "SELECT request_hash,context_hash FROM ordinal_credit_budgets WHERE job_id=?",
+                (job_id,),
+            ).fetchone()
+            if row is None or row[0] != request_hash:
+                raise ExecutionAuthorityError("ordinal registered request mismatch")
+            context = _credit_hash(row[1])
+            return self._ordinal_credits(db, binding, job_id, request_hash, context)
+
     def reserve_ordinal_credits(
         self,
         binding,

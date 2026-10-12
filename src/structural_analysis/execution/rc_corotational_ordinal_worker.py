@@ -586,6 +586,12 @@ def _execute(
             vordinal, verification, _reply = invoke(
                 "verification", artifacts.raw_result, artifacts.native_checkpoint
             )
+            native_status = production["api_result"]["status"]
+            if native_status in ("blocked", "budget_exhausted"):
+                # Both original phase observations and nonrefundable grants
+                # are recorded. A matching failed suffix is diagnostic data,
+                # rather than an accepted checkpoint or successful receipt.
+                raise RCOrdinalWorkerError("rc_ordinal_native_" + native_status)
             receipts.append(
                 build_ordinal_job_receipt(
                     typed,
