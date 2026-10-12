@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import math
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 
 import numpy as np
 
@@ -380,7 +380,8 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
     def control_free_index(self) -> int | None:
         if self.control_observation is not None:
             return None
-        return _controlled_free_index(self.problem, self.control_global_dof)
+        # Constructor selection validation admits an integer on this legacy branch.
+        return _controlled_free_index(self.problem, cast(int, self.control_global_dof))
 
     @property
     def accepted_control_displacement_m(self) -> float:
