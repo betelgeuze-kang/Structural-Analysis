@@ -293,3 +293,48 @@ def test_saved_report_runner_rejects_missing_or_unsafe_retained_inputs(
     }[fixture_fault]
     assert result.returncode != 0
     assert expected in result.stderr
+
+
+@pytest.mark.parametrize("saved_report_mode", [False, True])
+def test_browser_runner_keeps_runtime_identity_gate_before_tool_execution(
+    tmp_path: Path, saved_report_mode: bool
+) -> None:
+    node = shutil.which("node")
+    assert node is not None
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    shutil.copy2(ROOT / "scripts/verify-workbench-v2-e2e.mjs", scripts)
+    runtime = (ROOT / "scripts/trusted-frontend-runtime.mjs").read_text(
+        encoding="utf-8"
+    )
+    expected_sha = "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+    assert runtime.count(expected_sha) == 1
+    # Only this isolated test copy has an intentionally wrong runtime digest.
+    (scripts / "trusted-frontend-runtime.mjs").write_text(
+        runtime.replace(expected_sha, "0" * 64), encoding="utf-8"
+    )
+    environment = {"PATH": "/usr/bin:/bin"}
+    arguments = []
+    if saved_report_mode:
+        fixtures = tmp_path / "fixtures"
+        fixtures.mkdir()
+        for profile in ("v6", "v7"):
+            (fixtures / f"{profile}-review-snapshot.json").write_text(
+                "{}", encoding="utf-8"
+            )
+        environment["RC_COROTATIONAL_REPORT_FIXTURE_DIR"] = str(fixtures)
+        arguments.append("--saved-rc-reports")
+
+    result = subprocess.run(
+        [node, str(scripts / "verify-workbench-v2-e2e.mjs"), *arguments],
+        cwd=tmp_path,
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    assert "trusted_node_identity_mismatch" in result.stderr
+    assert "typescript_cli_missing" not in result.stderr
+    assert not (tmp_path / "dist").exists()
