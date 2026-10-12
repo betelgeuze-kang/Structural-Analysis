@@ -1,14 +1,14 @@
 import { JobArtifactError, readBoundedJobBytes, type JobReadTransport } from './jobTransport'
 import type { WorkbenchJobView } from './jobSchema'
 import { RC_REVIEW_DEFAULT_RESULT_BYTES, RC_REVIEW_MAX_RESULT_BYTES } from './rcJobReviewBudget'
-import type { RcCorotationalReportResponse } from './rcCorotationalReportSchema'
+import type { RcCorotationalReportControl, RcCorotationalReportResponse } from './rcCorotationalReportSchema'
 
 export interface RcCorotationalStateChoice {
   state_index: number; phase: 'preload' | 'control'; control_displacement_m: number; load_factor: number; checkpoint_hash: string
 }
 export interface RcCorotationalReportSummary {
   jobId: string; reportId: string; contentHash: string; reportHash: string; caseId: string; sourceRevision: string
-  targets: number[]; control: { node_id: string; component: 'UX' | 'UY'; unit: 'm' }; stateCount: number; nodeCount: number
+  targets: number[]; control: RcCorotationalReportControl; stateCount: number; nodeCount: number
   attemptProgress: { completed: number; maximum: number }; targetProgress: { completed: number; total: number }
   reservedInvocations: number; maximumInvocations: number; recordedInvocations: number; pendingInvocations: number
   unknownWork: boolean; knownWork: { preload_solver_calls: number; restart_replay_solver_calls: number; control_solver_calls: number }

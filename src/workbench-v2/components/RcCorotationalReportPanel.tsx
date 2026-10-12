@@ -1,8 +1,25 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import type { RcCorotationalReportReview, RcCorotationalStateChoice } from '../model/rcCorotationalReportReview'
-import type { RcCorotationalReportNode, RcCorotationalReportResponse } from '../model/rcCorotationalReportSchema'
+import type { RcCorotationalReportControl, RcCorotationalReportNode, RcCorotationalReportResponse } from '../model/rcCorotationalReportSchema'
 
 const PAGE_SIZE = 20
+export function RcCorotationalControlDescription({ control }: { control: RcCorotationalReportControl }): ReactElement {
+  if (!('observation' in control)) return <>{control.node_id} · {control.component} (m)</>
+  return <div data-rc-corotational-observation>
+    <p>Weighted displacement observation (m)</p>
+    <div role="region" aria-label="Movements included in this observation" tabIndex={0} style={{ overflowX: 'auto', maxWidth: '100%' }}>
+    <table className="wb2-table">
+      <caption>Movements included in this observation</caption>
+      <thead><tr><th scope="col">Node</th><th scope="col">Movement</th><th scope="col">Factor</th></tr></thead>
+      <tbody>{control.observation.terms.map(term => <tr key={`${term.node_id}:${term.component}`}>
+        <th scope="row">{term.node_id}</th><td>{term.component} ({term.component === 'RZ' ? 'rad' : 'm'})</td>
+        <td>{term.coefficient}{term.component === 'RZ' ? ' m/rad' : ''}</td>
+      </tr>)}</tbody>
+    </table>
+    </div>
+    <p className="wb2-note">The saved value combines these movements, including any support motion and rotation. Rotation factors define a linear observation, not a finite-rotation drift angle.</p>
+  </div>
+}
 function NodalTable({ nodes, kind, state }: { nodes: RcCorotationalReportNode[]; kind: 'displacements_m_rad' | 'external_loads_kn_knm' | 'reactions_kn_knm'; state: number }): ReactElement {
   const displacement = kind === 'displacements_m_rad'
   const label = displacement ? 'Node displacements' : kind === 'external_loads_kn_knm' ? 'Applied nodal loads' : 'Support reactions (free DOF values are zero)'
@@ -69,7 +86,7 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
     <p data-rc-corotational-authority>Report bytes, declarations and saved nodal values are verified for this authenticated job. Original result and evidence custody remains with the service. Worker verification is a stored attestation. Independent physical validation, design approval and release readiness are not granted.</p>
     <dl className="wb2-kv">
       <dt>Case</dt><dd>{summary.caseId}</dd>
-      <dt>Control</dt><dd>{summary.control.node_id} · {summary.control.component} (m)</dd>
+      <dt>Control</dt><dd><RcCorotationalControlDescription control={summary.control} /></dd>
       <dt>Authored targets completed</dt><dd data-rc-corotational-targets>{summary.targetProgress.completed}/{summary.targetProgress.total}</dd>
       <dt>Control solver attempts used</dt><dd data-rc-corotational-attempts>{summary.attemptProgress.completed}/{summary.attemptProgress.maximum}</dd>
       <dt>Accepted response states</dt><dd data-rc-corotational-states>{summary.stateCount} · preload and accepted subdivisions are included separately</dd>
@@ -95,7 +112,7 @@ export function RcCorotationalReportPanel({ review, expectedReportId }: { review
       <NodalTable nodes={state.nodes} kind="displacements_m_rad" state={state.state_index} />
       <NodalTable nodes={state.nodes} kind="external_loads_kn_knm" state={state.state_index} />
       <NodalTable nodes={state.nodes} kind="reactions_kn_knm" state={state.state_index} />
-      <p className="wb2-note">A free control DOF has zero support reaction. Use the applied nodal load table for its force; do not interpret that zero reaction as the lateral load.</p>
+      <p className="wb2-note">{'observation' in summary.control ? 'This observation combines nodal movements. Use the applied nodal load table for force; a zero reaction at a free DOF is not the lateral load.' : 'A free control DOF has zero support reaction. Use the applied nodal load table for its force; do not interpret that zero reaction as the lateral load.'}</p>
     </>}
     <div className="wb2-actions"><button type="button" className="wb2-btn" onClick={() => void download()}>Download corotational nodal report</button>
       <label>Reopen corotational report JSON <input type="file" aria-label="Reopen corotational report JSON" accept="application/json,.json" disabled={readingFile} onChange={e => { void reopen(e.target.files?.[0]); e.target.value = '' }} /></label>

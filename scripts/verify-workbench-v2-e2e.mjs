@@ -69,7 +69,6 @@ function serveDist() {
 }
 
 async function main() {
-  const node = trustedNode()
   const reportEnvironment = {}
   if (savedReportMode) {
     const configured = process.env.RC_COROTATIONAL_REPORT_FIXTURE_DIR
@@ -85,6 +84,7 @@ async function main() {
     }
     reportEnvironment.RC_COROTATIONAL_REPORT_FIXTURE_DIR = directory
   }
+  const node = trustedNode()
   const typescript = trustedRepoTool(rootDir, 'node_modules/typescript/bin/tsc', 'typescript_cli')
   const vite = trustedRepoTool(rootDir, 'node_modules/vite/bin/vite.js', 'vite_cli')
   const delivery = trustedRepoTool(

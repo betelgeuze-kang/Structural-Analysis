@@ -24,9 +24,10 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state impo
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
     StatefulCorotationalFiberFrame2DDisplacementControlConfig,
     StatefulCorotationalFiberFrame2DDisplacementControlStepResult,
-    _controlled_free_index,
+    LinearPhysicalDisplacementObservation,
+    _validate_control_selection,
+    _accepted_control_value,
     _finite,
-    _free_generalized_coordinates,
     _require_connected_member_graph,
     solve_stateful_corotational_fiber_frame2d_displacement_control_step,
 )
@@ -192,7 +193,8 @@ def run_corotational_control_subdivision(
     problem: StatefulCorotationalFiberFrame2DProblem,
     control_displacements_m: Iterable[float],
     *,
-    control_global_dof: int,
+    control_global_dof: int | None = None,
+    control_observation: LinearPhysicalDisplacementObservation | None = None,
     initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint | None = None,
     maximum_attempt_count: int = 255,
     maximum_subdivision_depth: int = 8,
@@ -220,7 +222,7 @@ def run_corotational_control_subdivision(
     if not 1 <= len(targets) <= 255:
         raise ValueError("control targets must contain 1 to 255 entries")
     _require_connected_member_graph(problem)
-    index = _controlled_free_index(problem, control_global_dof)
+    _validate_control_selection(problem, control_global_dof, control_observation)
     first = (
         initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
         if initial_checkpoint is None
@@ -246,7 +248,11 @@ def run_corotational_control_subdivision(
                 "problem": problem.contract_hash,
                 "source": _source_identity(),
                 "targets": targets,
-                "control": control_global_dof,
+                "control": (
+                    control_global_dof
+                    if control_observation is None
+                    else control_observation.to_dict()
+                ),
                 "budget": maximum_attempt_count,
                 "depth": maximum_subdivision_depth,
                 "config": asdict(cfg),
@@ -274,7 +280,9 @@ def run_corotational_control_subdivision(
             and original.canonical_bytes() != first.canonical_bytes()
         ):
             raise ValueError("continuation initial checkpoint mismatch")
-    previous = float(_free_generalized_coordinates(problem, first)[index])
+    previous = _accepted_control_value(
+        problem, first, control_global_dof, control_observation
+    )
     for target in targets:
         if target == previous:
             raise ValueError("consecutive control targets must differ")
@@ -294,11 +302,14 @@ def run_corotational_control_subdivision(
             break
         target, depth, authored_index = pending.pop()
         parent_bytes = accepted.canonical_bytes()
-        start = float(_free_generalized_coordinates(problem, accepted)[index])
+        start = _accepted_control_value(
+            problem, accepted, control_global_dof, control_observation
+        )
         step = solve_stateful_corotational_fiber_frame2d_displacement_control_step(
             problem,
             accepted,
             control_global_dof=control_global_dof,
+            control_observation=control_observation,
             target_control_displacement_m=target,
             config=cfg,
         )

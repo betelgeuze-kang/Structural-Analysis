@@ -5,6 +5,42 @@ import type { WorkbenchJobView } from './jobSchema'
 // Producer objects are checked at this boundary; only the selected stored row
 // is sent to React. These objects never grant numerical execution authority.
 export type RcObject = Record<string, any>
+export interface RcLinearPhysicalDisplacementObservation {
+  schema_version: 'linear-physical-displacement-observation.v1'
+  terms: Array<{ node_id: string; component: 'UX' | 'UY' | 'RZ'; coefficient: number }>
+}
+export interface RcNormalizedDisplacementObservation {
+  schema_version: 'linear-physical-displacement-observation.v1'
+  unit: 'm'
+  terms: Array<{ global_dof: number; coefficient: number; coefficient_unit: '1' | 'm/rad' }>
+}
+
+/** Authored physical terms, with model identity and restraint admission kept explicit. */
+export function normalizeRcDisplacementObservation(value: unknown, model: RcObject): RcNormalizedDisplacementObservation {
+  const observation = object(value)
+  check(same(Object.keys(observation).sort(), ['schema_version', 'terms'])
+    && observation.schema_version === 'linear-physical-displacement-observation.v1'
+    && Array.isArray(observation.terms) && observation.terms.length >= 1 && observation.terms.length <= 48,
+  'corotational_observation_invalid')
+  const ids = model.nodes.map((node: RcObject) => node.id), restrained = new Set<string>()
+  for (const support of model.supports) for (const component of support.dofs) restrained.add(`${support.node}:${component}`)
+  const seen = new Set<string>()
+  let free = false
+  const terms = observation.terms.map((value: unknown) => {
+    const term = object(value), identity = `${term.node_id}:${term.component}`
+    check(same(Object.keys(term).sort(), ['coefficient', 'component', 'node_id'])
+      && typeof term.node_id === 'string' && ids.includes(term.node_id)
+      && ['UX', 'UY', 'RZ'].includes(term.component)
+      && typeof term.coefficient === 'number' && Number.isFinite(term.coefficient) && term.coefficient !== 0
+      && !seen.has(identity), 'corotational_observation_invalid')
+    seen.add(identity)
+    free ||= !restrained.has(identity)
+    return { global_dof: 3 * ids.indexOf(term.node_id) + ['UX', 'UY', 'RZ'].indexOf(term.component),
+      coefficient: term.coefficient, coefficient_unit: term.component === 'RZ' ? 'm/rad' as const : '1' as const }
+  }).sort((a, b) => a.global_dof - b.global_dof)
+  check(free, 'corotational_observation_invalid')
+  return { schema_version: 'linear-physical-displacement-observation.v1', unit: 'm', terms }
+}
 export interface RcJobSummary {
   resultHash: string
   sourceRevision: string
@@ -814,8 +850,9 @@ export function validateRcCorotationalRequestProfile(value: unknown): void {
     && request.result_contract === 'bounded-rc-corotational-job-result.v1' && identifier(request.case_id)
     && typeof request.source_revision === 'string' && /^[a-f0-9]{40}$/.test(request.source_revision), 'corotational_request_invalid')
   const c = object(request.config)
-  exact(c, ['control_node_id', 'control_component', 'targets_m', 'fixed_nodal_loads', 'config', 'preload_config', 'maximum_attempt_count', 'maximum_subdivision_depth', 'experimental_pin_roller_beam', 'experimental_fixed_guided_axial'], 'corotational_config_invalid')
-  check(identifier(c.control_node_id) && ['UX', 'UY'].includes(c.control_component)
+  const selected = Object.prototype.hasOwnProperty.call(c, 'control_observation')
+  exact(c, [...(selected ? ['control_observation'] : ['control_node_id', 'control_component']), 'targets_m', 'fixed_nodal_loads', 'config', 'preload_config', 'maximum_attempt_count', 'maximum_subdivision_depth', 'experimental_pin_roller_beam', 'experimental_fixed_guided_axial'], 'corotational_config_invalid')
+  check((selected || (identifier(c.control_node_id) && ['UX', 'UY'].includes(c.control_component)))
     && integer(c.maximum_attempt_count, 1, 4096) && integer(c.maximum_subdivision_depth, 0, 20)
     && typeof c.experimental_pin_roller_beam === 'boolean' && typeof c.experimental_fixed_guided_axial === 'boolean'
     && !(c.experimental_pin_roller_beam && c.experimental_fixed_guided_axial), 'corotational_config_invalid')
@@ -862,12 +899,13 @@ export function validateRcCorotationalRequestProfile(value: unknown): void {
     check(identifier(row.id) && Array.isArray(row.coordinates) && row.coordinates.length === 3 && row.coordinates.every(number) && row.coordinates[2] === 0, 'corotational_node_invalid')
     return row.id as string
   })
-  check(new Set(ids).size === ids.length && ids.includes(c.control_node_id), 'corotational_node_invalid')
+  check(new Set(ids).size === ids.length && (selected || ids.includes(c.control_node_id)), 'corotational_node_invalid')
   for (const raw of model.supports) {
     const row = object(raw); exact(row, ['node', 'dofs'], 'corotational_support_invalid')
     check(ids.includes(row.node) && Array.isArray(row.dofs) && row.dofs.length > 0 && new Set(row.dofs).size === row.dofs.length
       && row.dofs.every((d: unknown) => ['UX', 'UY', 'RZ'].includes(String(d))), 'corotational_support_invalid')
-    check(row.node !== c.control_node_id || !row.dofs.includes(c.control_component), 'corotational_control_invalid')
+    if (!selected) check(row.node !== c.control_node_id || !row.dofs.includes(c.control_component), 'corotational_control_invalid')
   }
+  if (selected) normalizeRcDisplacementObservation(c.control_observation, model)
   check(c.fixed_nodal_loads.every((row: [string, string, number]) => ids.includes(row[0])), 'corotational_fixed_loads_invalid')
 }

@@ -1,7 +1,7 @@
 """Transactional direct displacement control for corotational fiber frames.
 
-The controlled free translational coordinate and the proportional load factor
-are solved together.  Every trial is assembled from one immutable accepted
+A free translational coordinate or explicitly selected weighted physical
+displacement observation and the proportional load factor are solved together.  Every trial is assembled from one immutable accepted
 checkpoint; a step commits the complete material/frame state only after the
 equilibrium, control, and correction gates all pass.
 """
@@ -73,7 +73,7 @@ def _finite(value: Any, *, name: str, positive: bool = False) -> float:
         raise ValueError(f"{name} must be finite")
     try:
         normalized = float(value)
-    except (TypeError, ValueError) as exc:
+    except (TypeError, ValueError, OverflowError) as exc:
         raise ValueError(f"{name} must be finite") from exc
     if not math.isfinite(normalized) or (positive and normalized <= 0.0):
         qualifier = "finite and positive" if positive else "finite"
@@ -112,6 +112,148 @@ def _controlled_free_index(
     if control_global_dof % 3 not in (0, 1):
         raise ValueError("control_global_dof must be translational UX or UY")
     return problem.free_global_dofs.index(control_global_dof)
+
+
+LINEAR_DISPLACEMENT_OBSERVATION_SCHEMA = "linear-physical-displacement-observation.v1"
+LINEAR_DISPLACEMENT_OBSERVATION_PROFILE = (
+    "dense-augmented-linear-physical-displacement-control.v1"
+)
+LINEAR_DISPLACEMENT_OBSERVATION_FORMULA = "[R_f(q,lambda);w*(c*u(q,lambda)-g_target)]=0"
+LINEAR_DISPLACEMENT_OBSERVATION_LOAD_COLUMN = (
+    "dR_f/dlambda=S_f*(partial_R_global/partial_lambda+K*ubar)_f;dg/dlambda=c_p*ubar_p"
+)
+LINEAR_DISPLACEMENT_OBSERVATION_CLAIM_BOUNDARY = (
+    "Explicit weighted linear physical displacement observation in meters for a bounded "
+    "planar corotational frame, including prescribed support motion and RZ lever arms. "
+    "This is not finite-rotation drift, a source measurement formula, independent physical "
+    "validation, design authority, or release readiness."
+)
+LINEAR_DISPLACEMENT_OBSERVATION_FORMULA_HASH = canonical_hash(
+    {
+        "equilibrium": RESIDUAL_FORMULA,
+        "augmented_residual": LINEAR_DISPLACEMENT_OBSERVATION_FORMULA,
+        "load_factor_column": LINEAR_DISPLACEMENT_OBSERVATION_LOAD_COLUMN,
+        "tangent": "material_plus_geometric_consistent",
+    }
+)
+
+
+@dataclass(frozen=True)
+class LinearPhysicalDisplacementObservation:
+    """Explicit global linear observation in meters, not finite-rotation drift.
+
+    UX/UY coefficients are dimensionless; RZ coefficients have units m/rad.
+    Coordinates refer to physical displacements, before generalized scaling.
+    No source correspondence or automatic lever arm is inferred.
+    """
+
+    terms: tuple[tuple[int, float], ...]
+
+    def __post_init__(self) -> None:
+        if type(self.terms) is not tuple or not 1 <= len(self.terms) <= 48:
+            raise ValueError("observation terms must be a tuple of 1 to 48 rows")
+        normalized = []
+        seen = set()
+        for term in self.terms:
+            if type(term) is not tuple or len(term) != 2:
+                raise ValueError(
+                    "observation term must be a (global_dof, coefficient) tuple"
+                )
+            dof, raw = term
+            if type(dof) is not int or dof < 0 or dof in seen:
+                raise ValueError(
+                    "observation global DOFs must be distinct nonnegative integers"
+                )
+            if type(raw) not in (int, float) or (
+                type(raw) is int and abs(raw) > 2**53 - 1
+            ):
+                raise ValueError("observation coefficient must be a finite number")
+            coefficient = _finite(raw, name="observation coefficient")
+            if coefficient == 0.0:
+                raise ValueError("observation coefficients must be nonzero")
+            seen.add(dof)
+            normalized.append((dof, coefficient))
+        object.__setattr__(self, "terms", tuple(sorted(normalized)))
+
+    def validate(self, problem: StatefulCorotationalFiberFrame2DProblem) -> None:
+        if any(dof >= problem.global_dof_count for dof, _ in self.terms):
+            raise ValueError("observation global DOF is out of range")
+        gradient = self.free_gradient(problem)
+        if not np.any(gradient != 0.0):
+            raise ValueError("observation must have a nonzero free gradient")
+        if not np.all(np.isfinite(gradient)):
+            raise ValueError("observation generalized gradient must be finite")
+        self.prescribed_load_derivative(problem)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": LINEAR_DISPLACEMENT_OBSERVATION_SCHEMA,
+            "unit": "m",
+            "terms": [
+                {
+                    "global_dof": dof,
+                    "coefficient": coefficient,
+                    "coefficient_unit": "m/rad" if dof % 3 == 2 else "1",
+                }
+                for dof, coefficient in self.terms
+            ],
+        }
+
+    @property
+    def identity_hash(self) -> str:
+        return canonical_hash(self.to_dict())
+
+    def evaluate(self, physical_displacements: Any) -> float:
+        values = np.asarray(physical_displacements, dtype=np.float64)
+        value = math.fsum(
+            coefficient * float(values[dof]) for dof, coefficient in self.terms
+        )
+        return _finite(value, name="observation displacement")
+
+    def free_gradient(
+        self, problem: StatefulCorotationalFiberFrame2DProblem
+    ) -> np.ndarray:
+        coefficients = dict(self.terms)
+        scale = problem.physical_coordinate_scale
+        return np.asarray(
+            [
+                coefficients.get(dof, 0.0) * scale[dof]
+                for dof in problem.free_global_dofs
+            ],
+            dtype=np.float64,
+        )
+
+    def prescribed_load_derivative(
+        self, problem: StatefulCorotationalFiberFrame2DProblem
+    ) -> float:
+        terminal = problem.prescribed_displacement_vector(1.0)
+        return _finite(
+            math.fsum(c * float(terminal[dof]) for dof, c in self.terms),
+            name="observation prescribed displacement derivative",
+        )
+
+
+def _validate_control_selection(problem, control_global_dof, control_observation):
+    if control_observation is None:
+        _controlled_free_index(problem, control_global_dof)
+    else:
+        if control_global_dof is not None:
+            raise ValueError("choose one control DOF or an explicit observation")
+        if type(control_observation) is not LinearPhysicalDisplacementObservation:
+            raise ValueError("control_observation type is invalid")
+        control_observation.validate(problem)
+
+
+def _accepted_control_value(
+    problem, checkpoint, control_global_dof, control_observation
+):
+    if control_observation is not None:
+        return control_observation.evaluate(checkpoint.global_displacements)
+    return float(
+        _free_generalized_coordinates(problem, checkpoint)[
+            _controlled_free_index(problem, control_global_dof)
+        ]
+    )
 
 
 def _require_connected_member_graph(
@@ -208,16 +350,19 @@ class StatefulCorotationalFiberFrame2DDisplacementControlAssembly:
 class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
     problem: StatefulCorotationalFiberFrame2DProblem
     accepted_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
-    control_global_dof: int
+    control_global_dof: int | None
     target_control_displacement_m: float
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig
+    control_observation: LinearPhysicalDisplacementObservation | None = None
 
     def __post_init__(self) -> None:
         validate_stateful_corotational_fiber_frame2d_checkpoint(
             self.problem,
             self.accepted_checkpoint,
         )
-        _controlled_free_index(self.problem, self.control_global_dof)
+        _validate_control_selection(
+            self.problem, self.control_global_dof, self.control_observation
+        )
         target = _finite(
             self.target_control_displacement_m,
             name="target_control_displacement_m",
@@ -227,16 +372,53 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
             StatefulCorotationalFiberFrame2DDisplacementControlConfig
         ):
             raise ValueError("config type is invalid")
-        accepted = self.initial_free_displacements_m()[self.control_free_index]
+        accepted = self.accepted_control_displacement_m
         if target == accepted:
             raise ValueError("target control displacement must differ from the parent")
 
     @property
-    def control_free_index(self) -> int:
+    def control_free_index(self) -> int | None:
+        if self.control_observation is not None:
+            return None
         return _controlled_free_index(self.problem, self.control_global_dof)
 
     @property
+    def accepted_control_displacement_m(self) -> float:
+        return _accepted_control_value(
+            self.problem,
+            self.accepted_checkpoint,
+            self.control_global_dof,
+            self.control_observation,
+        )
+
+    @property
+    def profile(self) -> str:
+        return (
+            LINEAR_DISPLACEMENT_OBSERVATION_PROFILE
+            if self.control_observation is not None
+            else STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE
+        )
+
+    @property
+    def formula_hash(self) -> str:
+        return (
+            LINEAR_DISPLACEMENT_OBSERVATION_FORMULA_HASH
+            if self.control_observation is not None
+            else STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA_HASH
+        )
+
+    def control_value(self, frame: StatefulCorotationalFiberFrame2DAssembly) -> float:
+        if self.control_observation is not None:
+            return self.control_observation.evaluate(frame.global_displacements)
+        return float(frame.generalized_coordinates_m[self.control_global_dof])
+
+    @property
     def case_id(self) -> str:
+        if self.control_observation is not None:
+            return (
+                f"{self.problem.case_id}@direct-observation={self.control_observation.identity_hash}"
+                f"@target={self.target_control_displacement_m:.12g}"
+            )
         return (
             f"{self.problem.case_id}@direct-control-dof={self.control_global_dof}"
             f"@target={self.target_control_displacement_m:.12g}"
@@ -284,7 +466,7 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
             trial_free_coordinates_m=free,
         )
         load_derivative = self.load_factor_residual_derivative_kn(frame)
-        parent_control = self.initial_free_displacements_m()[self.control_free_index]
+        parent_control = self.accepted_control_displacement_m
         control_reference = max(
             abs(self.target_control_displacement_m),
             abs(self.target_control_displacement_m - parent_control),
@@ -292,7 +474,7 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
         )
         control_scale = self.problem.reference_force_scale() / control_reference
         control_error = float(
-            free[self.control_free_index] - self.target_control_displacement_m
+            self.control_value(frame) - self.target_control_displacement_m
         )
         residual = np.concatenate(
             (
@@ -303,7 +485,17 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
         jacobian = np.zeros((free_count + 1, free_count + 1), dtype=np.float64)
         jacobian[:-1, :-1] = frame.jacobian_kn_per_m
         jacobian[:-1, -1] = load_derivative / self.config.load_factor_coordinate_scale_m
-        jacobian[-1, self.control_free_index] = control_scale
+        if self.control_observation is None:
+            jacobian[-1, self.control_free_index] = control_scale
+        else:
+            jacobian[-1, :-1] = control_scale * self.control_observation.free_gradient(
+                self.problem
+            )
+            jacobian[-1, -1] = (
+                control_scale
+                * self.control_observation.prescribed_load_derivative(self.problem)
+                / self.config.load_factor_coordinate_scale_m
+            )
         return StatefulCorotationalFiberFrame2DDisplacementControlAssembly(
             frame_assembly=frame,
             augmented_coordinates_m=coordinates.copy(),
@@ -319,6 +511,11 @@ class StatefulCorotationalFiberFrame2DDisplacementControlStepProblem:
         self,
         frame_assembly: StatefulCorotationalFiberFrame2DAssembly,
     ) -> np.ndarray:
+        if self.control_observation is not None:
+            # The admitted native assembly owns consistent member-feature/load
+            # condensation as well as prescribed-support coupling. Reconstructing
+            # only the nodal load vector loses its proportional member loads.
+            return frame_assembly.residual_load_factor_derivative_kn.copy()
         free_dofs = self.problem.free_global_dofs
         prescribed_dofs = tuple(
             dof for dof, _value in self.problem.prescribed_displacements
@@ -400,9 +597,7 @@ def _blocked_solution(
             "regularization_used": False,
             "fallback_used": False,
             "matrix_backend": VECTOR_MATRIX_BACKEND,
-            "profile": (
-                STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE
-            ),
+            "profile": step_problem.profile,
         },
         convergence_history=history,
         line_search_history=line_search_history,
@@ -619,7 +814,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         "control_free_index": step_problem.control_free_index,
         "target_control_displacement_m": (step_problem.target_control_displacement_m),
         "final_control_displacement_m": float(
-            coordinates[step_problem.control_free_index]
+            step_problem.control_value(final.frame_assembly)
         ),
         "control_error_m": final.control_error_m,
         "solved_load_factor": load_factor,
@@ -628,13 +823,15 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         "residual_formula": RESIDUAL_FORMULA,
         "residual_formula_hash": RESIDUAL_FORMULA_HASH,
         "augmented_formula": (
-            STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA
+            LINEAR_DISPLACEMENT_OBSERVATION_FORMULA
+            if step_problem.control_observation is not None
+            else STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA
         ),
-        "augmented_formula_hash": (
-            STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA_HASH
-        ),
+        "augmented_formula_hash": step_problem.formula_hash,
         "load_factor_column_formula": (
-            STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_LOAD_COLUMN
+            LINEAR_DISPLACEMENT_OBSERVATION_LOAD_COLUMN
+            if step_problem.control_observation is not None
+            else STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_LOAD_COLUMN
         ),
         "tangent_definition": "material_plus_geometric_consistent",
         "globalization": "backtracking_augmented_merit_line_search",
@@ -666,9 +863,14 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         "fallback_used": False,
         "matrix_backend": VECTOR_MATRIX_BACKEND,
         "stiffness_storage": "numpy_dense_augmented_ndarray",
-        "profile": STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE,
+        "profile": step_problem.profile,
         "contract_pass": contract_pass,
     }
+    if step_problem.control_observation is not None:
+        metrics["control_observation"] = step_problem.control_observation.to_dict()
+        metrics["control_observation_hash"] = (
+            step_problem.control_observation.identity_hash
+        )
     return StatefulCorotationalFiberFrame2DDisplacementControlSolution(
         status="ready" if contract_pass else "blocked",
         augmented_coordinates_m=coordinates.copy(),
@@ -712,7 +914,8 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
     problem: StatefulCorotationalFiberFrame2DProblem,
     accepted_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint,
     *,
-    control_global_dof: int,
+    control_global_dof: int | None = None,
+    control_observation: LinearPhysicalDisplacementObservation | None = None,
     target_control_displacement_m: float,
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig | None = None,
 ) -> StatefulCorotationalFiberFrame2DDisplacementControlStepResult:
@@ -730,6 +933,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
         problem=problem,
         accepted_checkpoint=accepted_checkpoint,
         control_global_dof=control_global_dof,
+        control_observation=control_observation,
         target_control_displacement_m=target_control_displacement_m,
         config=(
             StatefulCorotationalFiberFrame2DDisplacementControlConfig()
@@ -776,10 +980,9 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
         )
         and solution.load_factor == trial.target_load_factor
     )
-    control_index = _controlled_free_index(problem, control_global_dof)
     control_gate = bool(
         abs(
-            solution.free_displacements_m[control_index]
+            step_problem.control_value(trial)
             - step_problem.target_control_displacement_m
         )
         <= step_problem.config.control_tolerance_m
@@ -827,7 +1030,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
             )
             == parent_element_bytes
         )
-    return StatefulCorotationalFiberFrame2DDisplacementControlStepResult(
+    result = StatefulCorotationalFiberFrame2DDisplacementControlStepResult(
         status="ready" if committed else "blocked",
         committed=committed,
         parent_checkpoint=accepted_checkpoint,
@@ -838,14 +1041,10 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
             "schema_version": (
                 STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_SCHEMA_VERSION
             ),
-            "profile": (
-                STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE
-            ),
+            "profile": step_problem.profile,
             "residual_formula": RESIDUAL_FORMULA,
             "residual_formula_hash": RESIDUAL_FORMULA_HASH,
-            "augmented_formula_hash": (
-                STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA_HASH
-            ),
+            "augmented_formula_hash": step_problem.formula_hash,
             "control_mode": "direct_displacement_control",
             "control_global_dof": control_global_dof,
             "target_control_displacement_m": (
@@ -871,17 +1070,24 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control_step(
         },
     )
 
+    if control_observation is not None:
+        result.metrics["control_observation"] = control_observation.to_dict()
+        result.metrics["control_observation_hash"] = control_observation.identity_hash
+    return result
+
 
 @dataclass(frozen=True)
 class StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
     status: str
-    control_global_dof: int
+    control_global_dof: int | None
     target_control_displacements_m: tuple[float, ...]
     initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
     final_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
     steps: tuple[StatefulCorotationalFiberFrame2DDisplacementControlStepResult, ...] = (
         field(default_factory=tuple)
     )
+
+    control_observation: LinearPhysicalDisplacementObservation | None = None
 
     @property
     def contract_pass(self) -> bool:
@@ -895,12 +1101,22 @@ class StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
             "status": self.status,
             "contract_pass": self.contract_pass,
             "control_global_dof": self.control_global_dof,
+            **(
+                {
+                    "control_observation": self.control_observation.to_dict(),
+                    "control_observation_hash": self.control_observation.identity_hash,
+                }
+                if self.control_observation is not None
+                else {}
+            ),
             "target_control_displacements_m": list(self.target_control_displacements_m),
             "initial_checkpoint": self.initial_checkpoint.to_dict(),
             "final_checkpoint": self.final_checkpoint.to_dict(),
             "steps": [step.to_dict() for step in self.steps],
             "claim_boundary": (
-                STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY
+                LINEAR_DISPLACEMENT_OBSERVATION_CLAIM_BOUNDARY
+                if self.control_observation is not None
+                else STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY
             ),
         }
 
@@ -909,7 +1125,8 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
     problem: StatefulCorotationalFiberFrame2DProblem,
     control_displacements_m: Iterable[float],
     *,
-    control_global_dof: int,
+    control_global_dof: int | None = None,
+    control_observation: LinearPhysicalDisplacementObservation | None = None,
     initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint | None = None,
     allow_reversal: bool = False,
     config: StatefulCorotationalFiberFrame2DDisplacementControlConfig | None = None,
@@ -924,7 +1141,7 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
         raise ValueError("allow_reversal must be a boolean")
 
     _require_connected_member_graph(problem)
-    _controlled_free_index(problem, control_global_dof)
+    _validate_control_selection(problem, control_global_dof, control_observation)
     targets = tuple(
         _finite(value, name="control displacement") for value in control_displacements_m
     )
@@ -936,8 +1153,9 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
         initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
     )
     validate_stateful_corotational_fiber_frame2d_checkpoint(problem, first)
-    control_index = _controlled_free_index(problem, control_global_dof)
-    accepted_control = _free_generalized_coordinates(problem, first)[control_index]
+    accepted_control = _accepted_control_value(
+        problem, first, control_global_dof, control_observation
+    )
     direction = math.copysign(1.0, targets[0] - accepted_control)
     if targets[0] == accepted_control or any(
         (right == left if allow_reversal else direction * (right - left) <= 0.0)
@@ -962,6 +1180,7 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
             problem,
             accepted,
             control_global_dof=control_global_dof,
+            control_observation=control_observation,
             target_control_displacement_m=target,
             config=solver_config,
         )
@@ -970,6 +1189,7 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
             return StatefulCorotationalFiberFrame2DDisplacementControlPathResult(
                 status="blocked",
                 control_global_dof=control_global_dof,
+                control_observation=control_observation,
                 target_control_displacements_m=targets,
                 initial_checkpoint=first,
                 final_checkpoint=accepted,
@@ -979,6 +1199,7 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
     return StatefulCorotationalFiberFrame2DDisplacementControlPathResult(
         status="ready",
         control_global_dof=control_global_dof,
+        control_observation=control_observation,
         target_control_displacements_m=targets,
         initial_checkpoint=first,
         final_checkpoint=accepted,
@@ -1059,14 +1280,12 @@ def finite_difference_stateful_corotational_fiber_frame2d_displacement_control_l
         )
         and parent.canonical_bytes() == parent_bytes
     )
-    return {
-        "profile": STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_PROFILE,
+    result = {
+        "profile": step_problem.profile,
         "parent_checkpoint_hash": parent.state_hash,
         "parent_binding_passed": parent_binding,
         "residual_formula_hash": RESIDUAL_FORMULA_HASH,
-        "augmented_formula_hash": (
-            STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA_HASH
-        ),
+        "augmented_formula_hash": step_problem.formula_hash,
         "displacement_direction": direction.tolist(),
         "finite_difference_displacement_column_kn_per_m": (
             finite_displacement.tolist()
@@ -1078,8 +1297,34 @@ def finite_difference_stateful_corotational_fiber_frame2d_displacement_control_l
         "load_factor_column_max_abs_error_kn": load_error,
     }
 
+    if step_problem.control_observation is not None:
+        result.update(
+            control_observation=step_problem.control_observation.to_dict(),
+            control_observation_hash=step_problem.control_observation.identity_hash,
+            finite_difference_control_free_direction=(
+                forward.control_error_m - backward.control_error_m
+            )
+            / (2.0 * displacement_step),
+            analytic_control_free_direction=float(
+                step_problem.control_observation.free_gradient(step_problem.problem)
+                @ direction
+            ),
+            finite_difference_control_load_factor=(
+                load_forward.control_error_m - load_backward.control_error_m
+            )
+            / (2.0 * load_step),
+            analytic_control_load_factor=step_problem.control_observation.prescribed_load_derivative(
+                step_problem.problem
+            ),
+        )
+    return result
+
 
 __all__ = [
+    "LinearPhysicalDisplacementObservation",
+    "LINEAR_DISPLACEMENT_OBSERVATION_SCHEMA",
+    "LINEAR_DISPLACEMENT_OBSERVATION_PROFILE",
+    "LINEAR_DISPLACEMENT_OBSERVATION_FORMULA_HASH",
     "STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY",
     "STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA",
     "STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA_HASH",

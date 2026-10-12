@@ -50,7 +50,7 @@ def sha(raw):
     return "sha256:" + hashlib.sha256(raw).hexdigest()
 
 
-def authored_request(profile="v7"):
+def authored_request(profile="v7", *, linear_observation=False):
     payload = helpers.request()
     # Tiny positive/negative control demonstrates signed load-factor export;
     # the settings and fixed load come from the existing stable tiny fixture.
@@ -58,6 +58,18 @@ def authored_request(profile="v7"):
     payload["execution_config"].update(
         attempt_limit_per_call=2, maximum_api_invocations=6
     )
+    if linear_observation:
+        payload["config"].pop("control_node_id")
+        payload["config"].pop("control_component")
+        payload["config"]["control_observation"] = {
+            "schema_version": "linear-physical-displacement-observation.v1",
+            "terms": [
+                {"node_id": "N3", "component": "UY", "coefficient": 1.0},
+                {"node_id": "N1", "component": "UY", "coefficient": -1.0},
+                {"node_id": "N1", "component": "RZ", "coefficient": -0.5},
+                {"node_id": "N3", "component": "RZ", "coefficient": 0.2},
+            ],
+        }
     if profile == "v7":
         payload["schema_version"] = "structural-analysis-job-request.v7"
         payload["execution_config"]["phase_execution_policy"] = {
@@ -157,15 +169,19 @@ def stop_owned(process):
 
 
 def generate_snapshot(
-    workspace: Path, profile="v7", submitted_bytes: bytes | None = None
+    workspace: Path,
+    profile="v7",
+    submitted_bytes: bytes | None = None,
+    *,
+    linear_observation=False,
 ):
     """Compute, terminate, restore and reopen one real tiny managed job."""
     payload = (
-        authored_request(profile)
+        authored_request(profile, linear_observation=linear_observation)
         if submitted_bytes is None
         else strict_json_object_bytes(submitted_bytes)
     )
-    if payload != authored_request(profile):
+    if payload != authored_request(profile, linear_observation=linear_observation):
         raise ValueError(
             "snapshot fixture accepts only its authored tiny request values"
         )
@@ -347,6 +363,7 @@ def main():
     )
     parser.add_argument("--profile", choices=["v6", "v7"], default="v7")
     parser.add_argument("--request-file", type=Path)
+    parser.add_argument("--linear-observation", action="store_true")
     parser.add_argument("--store", type=Path)
     parser.add_argument("--identity", choices=["worker", "second"])
     parser.add_argument("--hold", action="store_true")
@@ -372,6 +389,7 @@ def main():
         args.output.with_suffix(".workflow"),
         args.profile,
         args.request_file.read_bytes() if args.request_file else None,
+        linear_observation=args.linear_observation,
     )
     with args.output.open("x", encoding="utf-8") as stream:
         json.dump(snapshot, stream, sort_keys=True, allow_nan=False)
