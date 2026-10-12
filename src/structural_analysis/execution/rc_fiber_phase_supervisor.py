@@ -660,6 +660,7 @@ def _supervise(
     authority_fd=None,
     *,
     backend=None,
+    job_guard_fd=None,
 ):
     if backend is None:
         backend = _PhaseBackend(
@@ -703,7 +704,7 @@ def _supervise(
             cwd="/tmp",
             start_new_session=True,
             close_fds=True,
-            pass_fds=() if authority_fd is None else (authority_fd,),
+            pass_fds=tuple(fd for fd in (authority_fd, job_guard_fd) if fd is not None),
         )
         # Track all owned endpoints before setup can fail for any one of them.
         endpoints.extend((process.stdin, process.stdout, process.stderr))
@@ -894,6 +895,7 @@ def run_rc_fiber_phase(
     policy,
     lease_check: Callable[[], None],
     authority_fd: int | None = None,
+    job_guard_fd: int | None = None,
 ) -> RCFiberPhaseReply:
     """Execute one authored phase; incomplete work never yields a measured reply."""
     started_ns = time.perf_counter_ns()
@@ -904,14 +906,23 @@ def run_rc_fiber_phase(
             "rc_fiber_worker_analysis_unsupported", "unknown numerical phase"
         )
     code = f"rc_fiber_worker_{phase}_"
-    if authority_fd is not None:
+    if authority_fd is not None and authority_fd == job_guard_fd:
+        raise RCFiberPhaseError(
+            code + "job_guard_invalid", "distinct execution guards required"
+        )
+    for guard_name, guard_fd in (
+        ("authority", authority_fd),
+        ("job_guard", job_guard_fd),
+    ):
+        if guard_fd is None:
+            continue
         try:
-            if type(authority_fd) is not int or not 3 <= authority_fd <= 2**31 - 1:
-                raise ValueError("invalid authority descriptor")
-            os.fstat(authority_fd)
+            if type(guard_fd) is not int or not 3 <= guard_fd <= 2**31 - 1:
+                raise ValueError("invalid execution guard descriptor")
+            os.fstat(guard_fd)
         except (OSError, ValueError) as error:
             raise RCFiberPhaseError(
-                code + "authority_invalid", "execution authority descriptor unavailable"
+                code + guard_name + "_invalid", "execution guard descriptor unavailable"
             ) from error
     if (
         sys.platform != "linux"
@@ -973,6 +984,7 @@ def run_rc_fiber_phase(
         policy.termination_grace_ms,
         lease_check,
         authority_fd,
+        job_guard_fd=job_guard_fd,
     )
 
 

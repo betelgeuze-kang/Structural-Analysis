@@ -9,6 +9,7 @@ are not numerical nonconvergence or independent physical evidence.
 from __future__ import annotations
 
 import base64
+from contextlib import closing
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 import hashlib
@@ -16,6 +17,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import tempfile
 from threading import Event
 
@@ -57,6 +59,47 @@ def _bytes(value):
 
 def _sha(raw):
     return "sha256:" + hashlib.sha256(raw).hexdigest()
+
+
+def _runtime_permit_state(directory):
+    directory = Path(directory)
+    state = {}
+    for namespace in directory.rglob(".job-execution-permits"):
+        for path in (namespace, *namespace.rglob("*")):
+            info = path.lstat()
+            state[str(path.relative_to(directory))] = (
+                info.st_dev,
+                info.st_ino,
+                info.st_mode,
+                info.st_nlink,
+                _sha(path.read_bytes()) if path.is_file() else None,
+            )
+    return state
+
+
+def _store_artifact_hashes(directory):
+    directory = Path(directory)
+    return {
+        str(path.relative_to(directory)): _sha(path.read_bytes())
+        for path in directory.rglob("*")
+        if path.is_file()
+        and (".sqlite3" in path.name or "blobs" in path.relative_to(directory).parts)
+    }
+
+
+def _copy_store_artifacts(source, destination):
+    """Copy fixture bytes for fresh root custody; never copy runtime locks."""
+    runtime = _runtime_permit_state(source)
+    artifacts = _store_artifact_hashes(source)
+    copied = shutil.copytree(
+        source,
+        destination,
+        ignore=shutil.ignore_patterns(".job-execution-permits"),
+    )
+    assert _runtime_permit_state(source) == runtime
+    assert not list(Path(destination).rglob(".job-execution-permits"))
+    assert _store_artifact_hashes(destination) == artifacts
+    return copied
 
 
 class Clock:
@@ -166,7 +209,7 @@ def actual_runs():
         directory = (
             Path(tempfile.mkdtemp(prefix="structural-rc-worker-reuse-")) / "copy"
         )
-        shutil.copytree(original_directory, directory)
+        _copy_store_artifacts(original_directory, directory)
         print(
             f"Reusing original RC worker artifacts without numerical calls: {original_directory}; working copy: {directory}"
         )
@@ -265,7 +308,7 @@ def actual_runs():
                         assert job.progress_completed == index + 1
                         assert job.lease_expires_at is None
                         if index == 0:
-                            shutil.copytree(store, directory / "prefix-store")
+                            _copy_store_artifacts(store, directory / "prefix-store")
                     else:
                         assert job.status == "succeeded"
                         (directory / f"{name}-result.json").write_bytes(
@@ -291,7 +334,7 @@ def actual_runs():
 
 def _prefix(actual_runs, tmp_path, clock=None):
     directory, summary = actual_runs
-    shutil.copytree(directory / "prefix-store", tmp_path / "service")
+    _copy_store_artifacts(directory / "prefix-store", tmp_path / "service")
     service = _service(tmp_path / "service", clock)
     claim = _claim(service)
     assert claim.job.job_id == summary["split"]["job_id"]
@@ -310,6 +353,60 @@ def _saved_call(actual_runs, *, chunk=2):
         (source / "verification.json").read_bytes()
     )
     return result, report
+
+
+def test_raw_unmanaged_store_copy_with_runtime_is_rejected_without_repair_or_spend(
+    actual_runs, tmp_path, monkeypatch
+):
+    source, claim = _prefix(actual_runs, tmp_path / "source")
+    with source.job_execution_permit(
+        claim.job.job_id,
+        expected_request_hash=claim.job.request.content_hash,
+        **_credentials(claim),
+    ):
+        pass
+    source_runtime = _runtime_permit_state(source.root)
+    assert source_runtime
+    # Deliberately violate the artifact-only fixture-copy rule in this case.
+    clone_root = tmp_path / "raw-runtime-copy"
+    shutil.copytree(source.root, clone_root)
+    clone = _service(clone_root)
+    copied_runtime = _runtime_permit_state(clone_root)
+    copied_artifacts = _store_artifact_hashes(clone_root)
+    before = clone.get_job(claim.job.job_id, **TENANT_AUTH)
+    budget = clone.read_execution_budget(claim.job.job_id, **_credentials(claim))
+    evidence = _evidence(clone, claim.job.job_id, **TENANT_AUTH)
+
+    def pins():
+        with closing(sqlite3.connect(clone_root / "jobs.sqlite3")) as connection:
+            return (
+                connection.execute(
+                    "SELECT * FROM job_execution_permit_namespaces ORDER BY namespace_key"
+                ).fetchall(),
+                connection.execute(
+                    "SELECT * FROM job_execution_permit_jobs ORDER BY namespace_key,job_id"
+                ).fetchall(),
+            )
+
+    before_pins = pins()
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("raw copied runtime must be rejected before any numerical API")
+
+    monkeypatch.setattr(api, "analyze_bounded_rc_fiber_direct_control", forbidden)
+    monkeypatch.setattr(
+        api, "validate_bounded_rc_fiber_direct_control_artifacts", forbidden
+    )
+    with pytest.raises(JobServiceError) as error:
+        _run(clone, claim)
+    assert error.value.code == "job_execution_permit_migration_required"
+    assert clone.get_job(claim.job.job_id, **TENANT_AUTH) == before
+    assert clone.read_execution_budget(claim.job.job_id, **_credentials(claim)) == budget
+    assert _evidence(clone, claim.job.job_id, **TENANT_AUTH) == evidence
+    assert pins() == before_pins
+    assert _runtime_permit_state(clone_root) == copied_runtime
+    assert _store_artifact_hashes(clone_root) == copied_artifacts
+    assert _runtime_permit_state(source.root) == source_runtime
 
 
 def _stub_saved_calls(actual_runs, monkeypatch, claim, *, report_mutation=None):
@@ -578,7 +675,7 @@ def test_cancel_between_chunks_never_enters_next_api(
     actual_runs, tmp_path, monkeypatch
 ):
     directory, summary = actual_runs
-    shutil.copytree(directory / "prefix-store", tmp_path / "service")
+    _copy_store_artifacts(directory / "prefix-store", tmp_path / "service")
     service = _service(tmp_path / "service")
     job_id = summary["split"]["job_id"]
     _forbid_numerics(monkeypatch)

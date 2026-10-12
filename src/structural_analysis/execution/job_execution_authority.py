@@ -17,6 +17,15 @@ import stat
 import sys
 import uuid
 
+from .job_execution_permit import (
+    acquire_execution_permit,
+    create_execution_permit_schema,
+    initialize_execution_permit_namespace,
+    register_execution_permit,
+    validate_execution_permit_namespace,
+    validate_execution_permit_registration,
+)
+
 
 class ExecutionAuthorityError(ValueError):
     pass
@@ -64,6 +73,7 @@ class JobExecutionAuthority:
         if sys.platform != "linux":
             raise ExecutionAuthorityError("managed execution requires Linux")
         self.directory = Path(directory).absolute()
+        self.permit_directory = self.directory / "job-execution-permits"
 
     def _root(self, root):
         root = Path(root).resolve()
@@ -103,6 +113,10 @@ class JobExecutionAuthority:
                     PRIMARY KEY (job_id, ordinal)
                 );
             """)
+            create_execution_permit_schema(db)
+            initialize_execution_permit_namespace(
+                db, directory=authority.permit_directory, namespace_key="managed"
+            )
             db.execute("INSERT INTO authority VALUES (1, ?, 1, ?)", (identity, root))
         fd = os.open(authority.directory, os.O_RDONLY | os.O_DIRECTORY)
         try:
@@ -174,6 +188,19 @@ class JobExecutionAuthority:
         _integer(rows[0][1], minimum=1)
         if self._root(binding.root) != binding.root:
             raise ExecutionAuthorityError("noncanonical store binding")
+        # Older authorities remain readable without constructing permit state.
+        # Once either new table exists, validate the complete pinned namespace:
+        # a partial schema or replaced namespace must not become a legacy read.
+        if (
+            db.execute(
+                "SELECT 1 FROM sqlite_master WHERE name IN "
+                "('job_execution_permit_namespaces', 'job_execution_permit_jobs')"
+            ).fetchone()
+            is not None
+        ):
+            validate_execution_permit_namespace(
+                db, directory=self.permit_directory, namespace_key="managed"
+            )
 
     @contextmanager
     def execution(self, binding):
@@ -188,6 +215,32 @@ class JobExecutionAuthority:
             with self._connection() as db:
                 self._require(db, binding)
             yield fd
+
+    @contextmanager
+    def execution_permit(self, binding, job_id, request_hash):
+        """Hold one job exclusively without retaining the authority transaction.
+
+        Busy acquisition never changes a lease or reserves an invocation. The
+        caller must separately inherit the generation execution() descriptor and
+        this descriptor into numerical children, and retain both until cleanup.
+        """
+        permit = None
+        with self._lock():
+            try:
+                with self._connection() as db:
+                    self._require(db, binding)
+                    self._budget(db, binding, job_id, request_hash)
+                    permit = acquire_execution_permit(
+                        db,
+                        directory=self.permit_directory,
+                        namespace_key="managed",
+                        job_id=job_id,
+                        request_hash=request_hash,
+                    )
+                yield permit.fd
+            finally:
+                if permit is not None:
+                    permit.close()
 
     def activate(self, binding, new_root):
         root = self._root(new_root)
@@ -227,6 +280,13 @@ class JobExecutionAuthority:
                 (job_id,),
             ).fetchone()
             if row is None:
+                register_execution_permit(
+                    db,
+                    directory=self.permit_directory,
+                    namespace_key="managed",
+                    job_id=job_id,
+                    request_hash=request_hash,
+                )
                 db.execute(
                     "INSERT INTO budgets VALUES (?, ?, ?, ?, ?)",
                     (job_id, request_hash, maximum, initial_spent, initial_spent),
@@ -243,13 +303,21 @@ class JobExecutionAuthority:
             self._budget(db, binding, job_id, request_hash)
             return spent
 
-    def _budget(self, db, binding, job_id, request_hash):
+    def _budget(self, db, binding, job_id, request_hash, *, require_permit=True):
         row = db.execute(
             "SELECT request_hash, maximum, spent, adopted_spent FROM budgets WHERE job_id=?",
             (job_id,),
         ).fetchone()
         if row is None or row[0] != request_hash:
             raise ExecutionAuthorityError("unknown or mismatched job authority")
+        if require_permit:
+            validate_execution_permit_registration(
+                db,
+                directory=self.permit_directory,
+                namespace_key="managed",
+                job_id=job_id,
+                request_hash=request_hash,
+            )
         maximum = _integer(row[1], minimum=1)
         spent, adopted = _integer(row[2]), _integer(row[3])
         if not adopted <= spent <= maximum:
@@ -279,13 +347,15 @@ class JobExecutionAuthority:
         """Read checked reservations, never infer completed numerical work."""
         with self._lock(), self._connection() as db:
             self._require(db, binding)
-            return self._budget(db, binding, job_id, request_hash)
+            return self._budget(db, binding, job_id, request_hash, require_permit=False)
 
     def read_reservations(self, binding, job_id, request_hash):
         """Return one checked snapshot without inventing adoption or lease history."""
         with self._lock(), self._connection() as db:
             self._require(db, binding)
-            budget = self._budget(db, binding, job_id, request_hash)
+            budget = self._budget(
+                db, binding, job_id, request_hash, require_permit=False
+            )
             records = db.execute(
                 "SELECT ordinal, generation, root FROM reservations WHERE job_id=? ORDER BY ordinal",
                 (job_id,),

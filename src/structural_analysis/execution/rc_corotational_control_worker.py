@@ -9,6 +9,7 @@ managed generation guard, when present, spans child cleanup and publication.
 import base64
 from contextlib import nullcontext
 import hashlib
+import sys
 import time
 
 from structural_analysis.api import rc_corotational_control as api
@@ -54,26 +55,48 @@ def execute_rc_corotational_control_claim(
         raise RCCorotationalWorkerError("rc_corotational_worker_argument_invalid")
     if type(lease_seconds) is not int or not 5 <= lease_seconds <= 3600:
         raise RCCorotationalWorkerError("rc_corotational_worker_lease_invalid")
-    # Older unmanaged services retain lease custody only. A managed service's
-    # generation lock must span calls, publication and heartbeat cleanup.
+    # Linux workers also hold a per-job permit. A managed generation guard
+    # spans calls, publication, child cleanup and heartbeat shutdown.
     guard = (
         service.execution_guard()
         if hasattr(service, "execution_guard")
         else nullcontext()
     )
     with guard as authority_fd:
-        return _execute(
-            service,
-            claim,
-            worker_id=worker_id,
-            authorization_token=authorization_token,
-            lease_seconds=lease_seconds,
-            authority_fd=authority_fd,
+        permit = (
+            service.job_execution_permit(
+                claim.job.job_id,
+                expected_request_hash=claim.job.request.content_hash,
+                worker_id=worker_id,
+                authorization_token=authorization_token,
+                lease_token=claim.lease_token,
+            )
+            if sys.platform == "linux"
+            else nullcontext()
         )
+        # Keep busy admission outside fail_active and before any heartbeat or
+        # invocation reservation. The caller can retry the same live claim.
+        with permit as job_guard_fd:
+            return _execute(
+                service,
+                claim,
+                worker_id=worker_id,
+                authorization_token=authorization_token,
+                lease_seconds=lease_seconds,
+                authority_fd=authority_fd,
+                job_guard_fd=job_guard_fd,
+            )
 
 
 def _execute(
-    service, claim, *, worker_id, authorization_token, lease_seconds, authority_fd
+    service,
+    claim,
+    *,
+    worker_id,
+    authorization_token,
+    lease_seconds,
+    authority_fd,
+    job_guard_fd,
 ):
     job_id = claim.job.job_id
     credentials = dict(
@@ -119,7 +142,7 @@ def _execute(
             phase_policy = typed.execution_config.phase_execution_policy
             if phase_policy is not None:
                 phase_runner.validate_corotational_phase_host(
-                    phase_policy, authority_fd=authority_fd
+                    phase_policy, authority_fd=authority_fd, job_guard_fd=job_guard_fd
                 )
             budget = service.read_execution_budget(job_id, **credentials)
             receipts, restart = [], None
@@ -198,6 +221,7 @@ def _execute(
                     policy=phase_policy,
                     lease_check=lease.check,
                     authority_fd=authority_fd,
+                    job_guard_fd=job_guard_fd,
                 )
                 phase_replies[phase] = reply
                 if reply.status == "raised":

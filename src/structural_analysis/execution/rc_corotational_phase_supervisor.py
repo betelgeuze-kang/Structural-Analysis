@@ -210,7 +210,7 @@ def _check_reply(metadata, segments, expected, started_ns, received_ns):
     )
 
 
-def validate_corotational_phase_host(policy, *, authority_fd=None):
+def validate_corotational_phase_host(policy, *, authority_fd=None, job_guard_fd=None):
     if sys.platform != "linux" or type(policy) is not RCCorotationalPhasePolicy:
         raise common.RCFiberPhaseError(
             "rc_corotational_worker_analysis_unsupported",
@@ -221,15 +221,25 @@ def validate_corotational_phase_host(policy, *, authority_fd=None):
             "rc_corotational_worker_analysis_unsupported",
             "default SIGCHLD and exclusive child-wait ownership required",
         )
-    if authority_fd is not None:
+    if authority_fd is not None and authority_fd == job_guard_fd:
+        raise common.RCFiberPhaseError(
+            "rc_corotational_worker_analysis_job_guard_invalid",
+            "distinct execution guards required",
+        )
+    for guard_name, guard_fd in (
+        ("authority", authority_fd),
+        ("job_guard", job_guard_fd),
+    ):
+        if guard_fd is None:
+            continue
         try:
-            if type(authority_fd) is not int or not 3 <= authority_fd <= 2**31 - 1:
-                raise ValueError("invalid authority descriptor")
-            os.fstat(authority_fd)
+            if type(guard_fd) is not int or not 3 <= guard_fd <= 2**31 - 1:
+                raise ValueError("invalid execution guard descriptor")
+            os.fstat(guard_fd)
         except (ValueError, OSError) as error:
             raise common.RCFiberPhaseError(
-                "rc_corotational_worker_analysis_authority_invalid",
-                "managed guard descriptor unavailable",
+                "rc_corotational_worker_analysis_" + guard_name + "_invalid",
+                "execution guard descriptor unavailable",
             ) from error
 
 
@@ -245,9 +255,12 @@ def run_rc_corotational_phase(
     policy,
     lease_check,
     authority_fd=None,
+    job_guard_fd=None,
 ):
     started_ns = time.perf_counter_ns()
-    validate_corotational_phase_host(policy, authority_fd=authority_fd)
+    validate_corotational_phase_host(
+        policy, authority_fd=authority_fd, job_guard_fd=job_guard_fd
+    )
     if (
         type(phase) is not str
         or phase not in ("analysis", "verification")
@@ -315,6 +328,7 @@ def run_rc_corotational_phase(
         backend=common._PhaseBackend(
             "rc_corotational_worker_", _FrameReceiver, _child_argv, _check_reply
         ),
+        job_guard_fd=job_guard_fd,
     )
 
 

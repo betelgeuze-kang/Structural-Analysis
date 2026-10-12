@@ -13,7 +13,6 @@ from copy import deepcopy
 import ctypes
 import os
 from pathlib import Path
-import shutil
 import signal
 import subprocess
 import sys
@@ -30,6 +29,7 @@ from tests.test_rc_fiber_durable_worker import (
     TENANT_AUTH,
     _bytes,
     _claim,
+    _copy_store_artifacts,
     _credentials,
     _evidence,
     _request,
@@ -72,7 +72,7 @@ def isolated_prefix(tmp_path_factory):
 
 def _prefix_copy(isolated_prefix, tmp_path, clock=None):
     directory, job_id, checkpoint, evidence = isolated_prefix
-    shutil.copytree(directory / "store", tmp_path / "store")
+    _copy_store_artifacts(directory / "store", tmp_path / "store")
     service = _service(tmp_path / "store", clock)
     claim = _claim(service)
     assert claim.job.job_id == job_id and claim.checkpoint_bytes == checkpoint

@@ -9,6 +9,7 @@ remain evidence; they do not replace the last verified checkpoint.
 from __future__ import annotations
 
 import base64
+from contextlib import nullcontext
 from dataclasses import replace
 from datetime import datetime
 import hashlib
@@ -210,18 +211,46 @@ def execute_rc_fiber_direct_control_claim(
         raise RCFiberDirectControlWorkerError(
             "rc_fiber_worker_argument_invalid", "exact service/claim types required"
         )
+    if type(lease_seconds) is not int or not 5 <= lease_seconds <= 3600:
+        raise RCFiberDirectControlWorkerError(
+            "rc_fiber_worker_lease_invalid",
+            "lease duration must be an integer in [5, 3600]",
+        )
+    if checkpoint_target_budget is not None and (
+        type(checkpoint_target_budget) is not int
+        or not 1 <= checkpoint_target_budget <= 255
+    ):
+        raise RCFiberDirectControlWorkerError(
+            "rc_fiber_worker_target_budget_invalid",
+            "target budget must be an integer in [1, 255]",
+        )
     # Retain authority through result publication, heartbeat shutdown, and phase
     # child cleanup. Each numerical child also inherits its own lock descriptor.
     with service.execution_guard() as authority_fd:
-        return _execute_rc_fiber_direct_control_claim(
-            service,
-            claim,
-            worker_id=worker_id,
-            authorization_token=authorization_token,
-            checkpoint_target_budget=checkpoint_target_budget,
-            lease_seconds=lease_seconds,
-            authority_fd=authority_fd,
+        # Busy admission remains outside the failure handler: a replacement
+        # claim is neither failed nor charged while an older child is alive.
+        permit = (
+            service.job_execution_permit(
+                claim.job.job_id,
+                expected_request_hash=claim.job.request.content_hash,
+                worker_id=worker_id,
+                authorization_token=authorization_token,
+                lease_token=claim.lease_token,
+            )
+            if sys.platform == "linux"
+            else nullcontext()
         )
+        with permit as job_guard_fd:
+            return _execute_rc_fiber_direct_control_claim(
+                service,
+                claim,
+                worker_id=worker_id,
+                authorization_token=authorization_token,
+                checkpoint_target_budget=checkpoint_target_budget,
+                lease_seconds=lease_seconds,
+                authority_fd=authority_fd,
+                job_guard_fd=job_guard_fd,
+            )
 
 
 def _execute_rc_fiber_direct_control_claim(
@@ -233,6 +262,7 @@ def _execute_rc_fiber_direct_control_claim(
     checkpoint_target_budget: int | None = None,
     lease_seconds: int = 300,
     authority_fd: int | None = None,
+    job_guard_fd: int | None = None,
 ) -> JobView:
     """Run one immutable chunk per lease, then release or publish completion.
 
@@ -405,6 +435,11 @@ def _execute_rc_fiber_direct_control_claim(
                             **(
                                 {"authority_fd": authority_fd}
                                 if authority_fd is not None
+                                else {}
+                            ),
+                            **(
+                                {"job_guard_fd": job_guard_fd}
+                                if job_guard_fd is not None
                                 else {}
                             ),
                         )

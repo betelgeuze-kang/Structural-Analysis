@@ -13,7 +13,7 @@ object-store durability, production identity management, or release authority.
 from __future__ import annotations
 
 from collections.abc import Callable, Collection, Mapping
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import base64
@@ -39,6 +39,7 @@ from .job_execution_authority import (
     JobExecutionAuthority,
     install_new_store,
 )
+from .job_execution_permit import ExecutionPermitError
 
 from jsonschema import Draft202012Validator
 
@@ -48,7 +49,9 @@ RC_FIBER_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v3"
 PIN_ROLLER_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v4"
 FIXED_GUIDED_RC_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v5"
 RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v6"
-ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v7"
+ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION = (
+    "structural-analysis-job-request.v7"
+)
 RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSIONS = (
     RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
     ISOLATED_RC_COROTATIONAL_JOB_REQUEST_SCHEMA_VERSION,
@@ -494,10 +497,126 @@ class DurableJobService:
                 )
             with self._execution_authority.execution(self._execution_binding) as fd:
                 yield fd
+        except ExecutionPermitError as exc:
+            raise JobServiceError(exc.code, "/root", str(exc)) from exc
         except ExecutionAuthorityError as exc:
             raise JobServiceError(
                 "execution_authority_rejected", "/root", str(exc)
             ) from exc
+
+    @contextmanager
+    def job_execution_permit(
+        self,
+        job_id,
+        *,
+        expected_request_hash,
+        worker_id,
+        authorization_token,
+        lease_token,
+    ):
+        """Borrow a Linux per-job exclusion fd; busy never mutates the live claim.
+
+        The caller holds its generation guard first and retains both descriptors
+        through numerical children, publication and heartbeat shutdown. Runtime
+        locks are never copied into backups or deleted on release. Unmanaged
+        stores have canonical-root-local custody; cross-copy fencing requires
+        the external managed authority and its pinned namespace.
+        """
+        from structural_analysis.execution.job_execution_permit import (
+            acquire_execution_permit,
+            create_execution_permit_schema,
+            initialize_execution_permit_namespace,
+            register_execution_permit,
+            validate_execution_permit_namespace,
+        )
+
+        self._authorize_worker(worker_id, authorization_token)
+        expected_request_hash = _hash(expected_request_hash, "/request_hash")
+
+        def require_claim(connection):
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, self._now()[1])
+            if row["request_hash"] != expected_request_hash:
+                _fail(
+                    "execution_permit_request_mismatch",
+                    "/request_hash",
+                    "Claim request differs from the live job.",
+                )
+
+        try:
+            with self.execution_guard():
+                # Authenticate before touching the permit namespace. Recheck
+                # after admission; a lease cannot survive a blocking metadata
+                # read solely because it was valid before that read.
+                with self._transaction() as connection:
+                    require_claim(connection)
+                if self._execution_authority is not None:
+                    with self._execution_authority.execution_permit(
+                        self._execution_binding, job_id, expected_request_hash
+                    ) as fd:
+                        with self._transaction() as connection:
+                            require_claim(connection)
+                        yield fd
+                    return
+                directory = self.root.resolve() / ".job-execution-permits"
+                namespace_key = (
+                    "unmanaged:"
+                    + hashlib.sha256(str(self.root.resolve()).encode()).hexdigest()
+                )
+                with ExitStack() as permits:
+                    with self._transaction() as connection:
+                        require_claim(connection)
+                        if (
+                            connection.execute(
+                                "SELECT 1 FROM sqlite_master WHERE name='job_execution_permit_namespaces'"
+                            ).fetchone()
+                            is None
+                        ):
+                            create_execution_permit_schema(connection)
+                        namespace = connection.execute(
+                            "SELECT namespace_key FROM job_execution_permit_namespaces WHERE namespace_key=?",
+                            (namespace_key,),
+                        ).fetchone()
+                        if namespace is None:
+                            initialize_execution_permit_namespace(
+                                connection,
+                                directory=directory,
+                                namespace_key=namespace_key,
+                            )
+                        else:
+                            validate_execution_permit_namespace(
+                                connection,
+                                directory=directory,
+                                namespace_key=namespace_key,
+                            )
+                        register_execution_permit(
+                            connection,
+                            directory=directory,
+                            namespace_key=namespace_key,
+                            job_id=job_id,
+                            request_hash=expected_request_hash,
+                        )
+                        permit = permits.enter_context(
+                            acquire_execution_permit(
+                                connection,
+                                directory=directory,
+                                namespace_key=namespace_key,
+                                job_id=job_id,
+                                request_hash=expected_request_hash,
+                            )
+                        )
+                    with self._transaction() as connection:
+                        require_claim(connection)
+                    yield permit
+        except ExecutionPermitError as error:
+            raise JobServiceError(
+                error.code, "/execution_permit", str(error)
+            ) from error
+        except ExecutionAuthorityError as error:
+            raise JobServiceError(
+                "execution_authority_rejected", "/execution_permit", str(error)
+            ) from error
 
     def submit_job(
         self,
