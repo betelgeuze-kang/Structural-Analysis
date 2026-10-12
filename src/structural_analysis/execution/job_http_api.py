@@ -314,18 +314,20 @@ class DurableJobHttpApi:
                     400,
                     "Original artifact reads do not accept a body.",
                 )
-            job = self.service.get_job(
-                job_id, tenant_id=tenant_id, authorization_token=token
-            )
-            reference = getattr(job, operation)
             reader = (
                 self.service.read_request
                 if operation == "request"
                 else self.service.read_checkpoint
             )
+            # Reject the target's persisted size before a corotational view
+            # reads the request blob to determine its progress profile.
             raw = reader(job_id, tenant_id=tenant_id, authorization_token=token)
-            # The checkpoint may advance between the view and artifact reads.
-            # Never label newer bytes with an older reference or media type.
+            job = self.service.get_job(
+                job_id, tenant_id=tenant_id, authorization_token=token
+            )
+            reference = getattr(job, operation)
+            # The checkpoint may advance between the artifact and view reads.
+            # Never label older bytes with a newer reference or media type.
             if (
                 reference is None
                 or len(raw) != reference.byte_length
