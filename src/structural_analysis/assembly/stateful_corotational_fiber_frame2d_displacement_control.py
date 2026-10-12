@@ -620,6 +620,18 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         StatefulCorotationalFiberFrame2DDisplacementControlStepProblem
     ):
         raise ValueError("step_problem type is invalid")
+    return _solve_corotational_augmented_control(step_problem)
+
+
+def _solve_corotational_augmented_control(
+    step_problem: Any,
+    *,
+    augmented_formula: str | None = None,
+    load_column_formula: str | None = None,
+    work_counters: dict[str, int] | None = None,
+    terminal_equilibrium_scale_kn: float | None = None,
+) -> StatefulCorotationalFiberFrame2DDisplacementControlSolution:
+    """Internal assembled-control kernel; callers own typed admission and commit."""
     _require_connected_member_graph(step_problem.problem)
     config = step_problem.config
     coordinates = step_problem.initial_augmented_coordinates_m()
@@ -630,8 +642,16 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         assembly = step_problem.assemble(coordinates)
         relative_residual = _relative_equilibrium(step_problem, assembly)
         residual_gate = relative_residual <= config.residual_tolerance
+        if terminal_equilibrium_scale_kn is not None:
+            residual_gate = residual_gate and (
+                float(np.linalg.norm(assembly.frame_assembly.residual_kn, ord=np.inf))
+                / terminal_equilibrium_scale_kn
+                <= config.residual_tolerance
+            )
         control_gate = abs(assembly.control_error_m) <= config.control_tolerance_m
         try:
+            if work_counters is not None:
+                work_counters["linear_solve_attempts"] += 1
             correction = np.linalg.solve(
                 assembly.augmented_jacobian_kn_per_m,
                 -assembly.augmented_residual_kn,
@@ -803,6 +823,12 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
     load_factor = float(coordinates[-1]) / config.load_factor_coordinate_scale_m
     contract_pass = bool(
         final_relative <= config.residual_tolerance
+        and (
+            terminal_equilibrium_scale_kn is None
+            or float(np.linalg.norm(final.frame_assembly.residual_kn, ord=np.inf))
+            / terminal_equilibrium_scale_kn
+            <= config.residual_tolerance
+        )
         and abs(final.control_error_m) <= config.control_tolerance_m
         and final_free_increment <= config.increment_tolerance_m
         and final_load_increment <= config.load_factor_increment_tolerance
@@ -822,13 +848,17 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         "relative_residual": final_relative,
         "residual_formula": RESIDUAL_FORMULA,
         "residual_formula_hash": RESIDUAL_FORMULA_HASH,
-        "augmented_formula": (
+        "augmented_formula": augmented_formula
+        if augmented_formula is not None
+        else (
             LINEAR_DISPLACEMENT_OBSERVATION_FORMULA
             if step_problem.control_observation is not None
             else STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_FORMULA
         ),
         "augmented_formula_hash": step_problem.formula_hash,
-        "load_factor_column_formula": (
+        "load_factor_column_formula": load_column_formula
+        if load_column_formula is not None
+        else (
             LINEAR_DISPLACEMENT_OBSERVATION_LOAD_COLUMN
             if step_problem.control_observation is not None
             else STATEFUL_COROTATIONAL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_LOAD_COLUMN
@@ -866,6 +896,15 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         "profile": step_problem.profile,
         "contract_pass": contract_pass,
     }
+    if terminal_equilibrium_scale_kn is not None:
+        metrics["accepted_state_equilibrium_scale_kn"] = terminal_equilibrium_scale_kn
+        metrics["accepted_state_relative_residual"] = (
+            float(np.linalg.norm(final.frame_assembly.residual_kn, ord=np.inf))
+            / terminal_equilibrium_scale_kn
+        )
+        metrics["accepted_state_residual_gate_passed"] = (
+            metrics["accepted_state_relative_residual"] <= config.residual_tolerance
+        )
     if step_problem.control_observation is not None:
         metrics["control_observation"] = step_problem.control_observation.to_dict()
         metrics["control_observation_hash"] = (
