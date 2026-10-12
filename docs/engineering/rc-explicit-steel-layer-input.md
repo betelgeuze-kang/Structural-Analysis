@@ -46,3 +46,30 @@ PR573 the separate operator backup interface. Their final merged combination
 still requires exact-source integration checks. Public specimen force/datum,
 nominal layer coordinates, test-day constitutive assumptions and applicable
 response interval must be recorded before measured-versus-solved acceptance.
+
+## Optional finite circular bar integration
+
+An explicit layer may include `circular_integration_points` (integer 2 through
+64). Omitting it preserves the existing centroid-point layer and its fiber IDs.
+Selecting it declares that `bar_area_m2` is the area of a solid circular bar;
+the radius is `sqrt(bar_area_m2 / pi)`. The complete circle, rather than only
+its center, must lie strictly inside the section depth and fit inside its width.
+This does not infer horizontal bar placement or prove detailing compliance.
+
+The compiler uses Gauss-Chebyshev second-kind weights for the circular chord
+area, creates one independent material state per integration point, and repeats
+the authored steel law at each point. Bars sharing a layer share planar strain
+kinematics; their count multiplies each integration weight. Authored quantities
+continue to use bar count and area, not integration-point count. The maximum
+is 32 layers times 64 steel integration points, plus the existing concrete
+layers. Increasing points increases solver state and work.
+
+Area, centroid, and intrinsic second moment are integrated exactly in the
+elastic limit up to floating-point error. Two points are not a claim of
+nonlinear convergence. Users must check convergence for their cyclic loading.
+Changing the integration count changes the original source identity and the
+section contract; a prior checkpoint cannot be reused with a changed count.
+
+This option does not replace gross concrete by net concrete, add bond slip,
+introduce a new steel law, or establish TC11 physical validation. Those model
+correspondences remain separate requirements.

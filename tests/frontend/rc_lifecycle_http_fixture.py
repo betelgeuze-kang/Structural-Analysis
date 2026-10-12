@@ -115,9 +115,20 @@ def authored_explicit_layers_request():
     return request
 
 
+def authored_circular_layers_request():
+    request = authored_explicit_layers_request()
+    request["case_id"] = "hosted-workbench-circular-steel-layers"
+    for layer in request["model"]["sections"][0]["steel_layers"]:
+        layer["circular_integration_points"] = 8
+    return request
+
+
 def is_authored_request(value):
     return value in (
-        authored_request(), authored_explicit_layers_request(), authored_pin_roller_request()
+        authored_request(),
+        authored_explicit_layers_request(),
+        authored_pin_roller_request(),
+        authored_circular_layers_request(),
     )
 
 
@@ -265,7 +276,7 @@ def serve(workspace, port):
 
 def run_worker(workspace, name):
     current = service(workspace / "store")
-    # Only the two fixed, tiny, UI-submitted requests are authorized here.
+    # Only the enumerated fixed, tiny, UI-submitted requests are authorized here.
     deadline = time.monotonic() + 20
     claim = None
     while claim is None:
