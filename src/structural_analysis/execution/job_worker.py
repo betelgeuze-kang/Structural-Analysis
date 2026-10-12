@@ -17,6 +17,9 @@ from structural_analysis.execution.rc_fiber_direct_control_worker import (
     execute_rc_fiber_direct_control_claim,
 )
 from structural_analysis.execution.rc_fiber_job_contract import RC_FIBER_JOB_OPERATION
+from structural_analysis.execution.rc_corotational_job_request import (
+    RC_COROTATIONAL_JOB_OPERATION,
+)
 
 
 def execute_job_claim(
@@ -45,6 +48,22 @@ def execute_job_claim(
             worker_id=worker_id,
             authorization_token=authorization_token,
             checkpoint_step_budget=checkpoint_step_budget,
+        )
+    if request.get("operation") == RC_COROTATIONAL_JOB_OPERATION:
+        if checkpoint_step_budget is not None or checkpoint_target_budget is not None:
+            raise ValueError(
+                "corotational attempt limits belong to the immutable request"
+            )
+        from structural_analysis.execution.rc_corotational_control_worker import (
+            execute_rc_corotational_control_claim,
+        )
+
+        return execute_rc_corotational_control_claim(
+            service,
+            claim,
+            worker_id=worker_id,
+            authorization_token=authorization_token,
+            lease_seconds=lease_seconds,
         )
     if request.get("operation") == RC_FIBER_JOB_OPERATION:
         if checkpoint_step_budget is not None:
