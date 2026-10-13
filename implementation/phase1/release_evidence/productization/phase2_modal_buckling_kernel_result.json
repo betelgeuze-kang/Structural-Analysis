@@ -1,6 +1,6 @@
 {
   "analysis_scope": "dense_symmetric_generalized_eigen_matrix_kernels",
-  "artifact_hash": "sha256:b7c265c102426ce6d7d18b90068f4a1b3502afbb82d80eca61d3b9373ceabb01",
+  "artifact_hash": "sha256:2ba70ca883f5cf018ec6f3136f8438d14b6ddbef3f5749c82cc9da54c71b4e6f",
   "blockers_remaining": [
     "whole_model_modal_assembly_not_connected",
     "whole_model_buckling_assembly_not_connected",
@@ -38,12 +38,12 @@
       "src/structural_analysis/solvers/buckling/__init__.py": "sha256:3106196c1dfa87b96508ed7523e5ce46716e8b6609baef44c2180452b563e823",
       "src/structural_analysis/solvers/buckling/solver.py": "sha256:b3572a2513274c4195735d958758ba67c284ca2c06e4bbda6e3ef9c25fc5f75d",
       "src/structural_analysis/solvers/modal/__init__.py": "sha256:31560958dad11385c572193c91095d80701239514bef91fbafdb08514739332f",
-      "src/structural_analysis/solvers/modal/solver.py": "sha256:91109241e086ea4f24be4a8d4a3485a6ac185959e5d7b5b09b093dd8a75af523",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:fc01425bd87a907ddb181435664c19d6a56b668eeda6e180407da801f0d4efc2",
       "tests/test_buckling_generalized_eigen_v1.py": "sha256:2ef4b1fa247fc4a284af513d7a39c52e47cc23ecbaaa91751adca43e5358996d",
       "tests/test_build_phase2_modal_buckling_kernel_artifacts.py": "sha256:001dcd0f06a933f8faf072f0f7df878ec52f13506fa6b041e2a268ea80fa25ef",
       "tests/test_modal_generalized_eigen_v1.py": "sha256:9788bc60da560c24d09de867edb054f96cc9ed22e3af1ce27e80ed52f910d1a4"
     },
-    "source_set_hash": "sha256:4b57d6f55e37fdad7de402a0505c45e2a56a82667bf335a1f62dfcef63bfc0ea"
+    "source_set_hash": "sha256:a7a83cf22e89a0c4260e51e6b5f2528dfc0702e5dddbb56af3abb5acccedbc1f"
   },
   "status": "partial",
   "summary": {
@@ -181,16 +181,16 @@
         ],
         [
           0.85065080835204,
-          -0.5257311121191336
+          -0.5257311121191335
         ]
       ],
-      "mass_orthogonality_error_inf": 2.5851585790883854e-17,
+      "mass_orthogonality_error_inf": 1.2029279712572748e-16,
       "maximum_eigenvalue_relative_error": 2.906601613561372e-16,
       "maximum_residual_relative_inf": 1.7084575627408797e-16,
-      "raw_result_hash": "sha256:f01cc454e0928fb7810839d126037668ee38c08e4f0ce8cb729897f4a7725f88",
+      "raw_result_hash": "sha256:1bf742cdb9a65f4cdd956223e9503e798c07ca3c246ed22bab0c035b3afc6842",
       "regularization_applied": false,
       "semantic_result_hash": "sha256:462e15a6737fc1b7a9c46236254c9ed18137ac894b2b05a99479aa774dd843f0",
-      "stiffness_diagonalization_error_inf": 1.6962698412563933e-16,
+      "stiffness_diagonalization_error_inf": 7.484219726191776e-17,
       "stiffness_matrix_hash": "sha256:48ae3de8e7a2456873b3100c5bbf8d3b33801ce5f2e9a752030c0fd862626aeb",
       "truth_basis": "analytic_closed_form"
     },

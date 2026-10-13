@@ -1,6 +1,6 @@
 {
   "analysis_scope": "public_api_dense_consistent_mass_frame_truss_modal",
-  "artifact_hash": "sha256:73c4573bd560ec0094328c5633134cf866bfb0bd05afc188ee1ddc3218d0e86d",
+  "artifact_hash": "sha256:08b964510831bc22e6e1ae01d5351696443f7ebf710b8b57f96015e535909318",
   "blockers_remaining": [
     "general_frame_shell_modal_workflow_not_verified",
     "nodal_lumped_mass_not_connected",
@@ -43,22 +43,22 @@
       "scripts/build_phase2_whole_model_modal_artifacts.py": "sha256:837ecd557a2f44ccfb919f9fae5eb03f07496d0cd4fce0a05129fb2ef47d2796",
       "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
       "src/structural_analysis/analyses/__init__.py": "sha256:a10e34597dc201e15c41b13dad6e7a52e65982aaf37d9c5513f2319b46fb1ed7",
-      "src/structural_analysis/analyses/modal.py": "sha256:ae7923f121e53b044044789a73d63e3745f3ee5d8cd44e23354cb0df34b5261c",
+      "src/structural_analysis/analyses/modal.py": "sha256:01543fc1b064bce96bf9db80ec3a18d479be166535ec133752f4600b8853e1c5",
       "src/structural_analysis/api/cli.py": "sha256:4d9d77ef6e4d7ec112256bff62446b674485e68cefabb6c230afcbae792cbb9a",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/assembly/__init__.py": "sha256:7e3fc3e71ab2df9ed72b4484b1c8125047901d8c800d206d823e49f497c515cb",
-      "src/structural_analysis/assembly/modal.py": "sha256:bf0909750f7d471541180c8dec8ac2037730e3b17b7ecbbedce0c5c74df83bd8",
+      "src/structural_analysis/assembly/modal.py": "sha256:b113bfc5769de2e748e0d2b7b69e48a09d690838a06bf732a84a91a1d146c99a",
       "src/structural_analysis/elements/axial.py": "sha256:47fb843e2e72ec68f23058b7c31a565212bd63e639a1fff04566b3034d3cf573",
       "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
       "src/structural_analysis/model_ir/loader.py": "sha256:df7509438219210583e8566daee80c5bed3782e7d1e415442b2d5f13fca6b9e8",
       "src/structural_analysis/model_ir/types.py": "sha256:2f39624a815671b4dc6b62f4337e0cca40f505424b72224fc9b3b24e488d1aa1",
       "src/structural_analysis/schemas/whole_model_modal_v1.schema.json": "sha256:cea61f7e8d91927492b6562369f7210a29fe05546a6b66ac34db4bf098b7e523",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
-      "src/structural_analysis/solvers/modal/solver.py": "sha256:91109241e086ea4f24be4a8d4a3485a6ac185959e5d7b5b09b093dd8a75af523",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:fc01425bd87a907ddb181435664c19d6a56b668eeda6e180407da801f0d4efc2",
       "tests/test_build_phase2_whole_model_modal_artifacts.py": "sha256:db67f3dfa657f9318a1a7c03c39eeef887f2a5b6407e5c52bf594fa5a0279427",
-      "tests/test_whole_model_modal_analysis.py": "sha256:bb10629f7b3a820039e8bceafcf2c3fd0aa2693c563b138b423585c5ef5210d8"
+      "tests/test_whole_model_modal_analysis.py": "sha256:99f01af708ca08eb29aa898acd3640c9a4021137b57f5f97decd601724d6bbf9"
     },
-    "source_set_hash": "sha256:11c2366bb656fa49977f0304781f66c2d31adc283b044848e36990aaa2f08314"
+    "source_set_hash": "sha256:89aaa26e6e1f87fc44f022e55f75267de3dbd0be18a8c7942dee8ca48c2e4a1b"
   },
   "status": "partial",
   "summary": {
@@ -106,7 +106,7 @@
     "cantilever_bending": {
       "actual_eigenvalues_rad2_per_s2": [
         79491.6697691323,
-        7716686.674179917
+        7716686.674179916
       ],
       "case_id": "public_frame_cantilever_consistent_mass",
       "contract_pass": true,
@@ -120,21 +120,21 @@
       "free_dof_count": 2,
       "free_dof_map_hash": "sha256:b9d868a8f7441af3c30a6ad1eae1da8c282ce57120f4371b5774b8a84b585464",
       "mass_matrix_hash": "sha256:4f13bfbace0cf57b8a9b7c7808627353ed1dd6039ab8c4ea6564d3372ddb627f",
-      "mass_orthogonality_error_inf": 6.661338147750939e-16,
+      "mass_orthogonality_error_inf": 9.850688949145218e-16,
       "maximum_eigenvalue_relative_error": 5.674926358818882e-15,
-      "maximum_residual_relative_inf": 4.140564551003539e-16,
+      "maximum_residual_relative_inf": 2.011131353344577e-15,
       "mode_count": 2,
       "public_status": "ready",
-      "raw_result_hash": "sha256:0502668472874d7b5070d5b1f9b427350d70815f953132d1f75f1db70f87f1c8",
+      "raw_result_hash": "sha256:e737a70b70291da038ed9cf047107724ae5cc4ba3e2c87eb79a9f735dd600681",
       "regularization_used": false,
       "rigid_mode_count": 0,
       "semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea",
       "solver_id": "authoritative_cpu_modal_fea_3d_v1",
-      "stiffness_diagonalization_error_inf": 6.5315805458198435e-18,
+      "stiffness_diagonalization_error_inf": 4.269578174743255e-17,
       "stiffness_matrix_hash": "sha256:2b0788e2e814fcd3c78ac9d611f161e6002f014f74a29ee2bbafc3461db16f61",
       "total_physical_mass_kg": 314.0,
       "truth_basis": "one_element_euler_bernoulli_consistent_mass_closed_form",
-      "uy_cumulative_effective_modal_mass_ratio": 1.0
+      "uy_cumulative_effective_modal_mass_ratio": 0.9999999999999998
     },
     "free_free_rigid_modes": {
       "actual_rigid_mode_count": 6,
@@ -186,7 +186,7 @@
       "incomplete_selection_blocker_kind": "modal_generalized_eigen_contract_failed",
       "incomplete_selection_detail": "requested mode_count cuts a repeated or clustered eigenvalue group",
       "incomplete_selection_status": "blocked",
-      "raw_result_hash": "sha256:9eb62842d2e3af61a67fc6be3c209b8df31c5b86bb1962d9a50b5cc03f2aa8d1",
+      "raw_result_hash": "sha256:d2490f830561549f425cda6eb5d6b173833a1590b996b7adbcb010f41dfcbe94",
       "regularization_used": false,
       "repeated_eigenvalue_relative_gap": 0.0,
       "semantic_result_hash": "sha256:bb7408fbd4421f9e926f5ba6a788c04c2a1a5693bf19270a5379e022c435ddcc",

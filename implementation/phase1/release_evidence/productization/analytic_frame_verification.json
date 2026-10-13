@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:08cb6ec50a5d64b73bb6f18bd183e915e75f3e63605df44990de0991e46e193b",
+  "artifact_hash": "sha256:f6b93f3e315d577f57f995ea2f65e9b177364b2d797cb8a8868aa609b5932d42",
   "blockers_remaining": [
     "independent_code_to_code_evidence_not_included",
     "published_benchmark_evidence_not_included",
@@ -343,20 +343,20 @@
       "scripts/build_analytic_frame_verification_artifact.py": "sha256:11747769b63eab8cdc366ece6eb5a8edcd183f05c6b4d2756f9c7e47e0068680",
       "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
-      "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
+      "src/structural_analysis/assembly/linear_static.py": "sha256:c849b2104878aae28a7c2cac47a0b54e139598bca1b973d8523d01aaddf0e413",
       "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
       "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
-      "src/structural_analysis/io/neutral/loader.py": "sha256:17646c526d2cdea80a7c498381c231dc5ca7530325108d63c800e96d6ff00e1c",
+      "src/structural_analysis/io/neutral/loader.py": "sha256:9e74a9769da3291999457be52ace67325b300ff16cd1994279d9cc3e507aa529",
       "src/structural_analysis/materials/elastic.py": "sha256:da75cd1c24102b7544a0a122f6d5688da600128bb57948ba202d05bc14d6a95a",
       "src/structural_analysis/model/entities.py": "sha256:a3ce4c83ffde7b0cc260845a9a6b1984b0212dcce3ff5a9f01a0343199857be9",
       "src/structural_analysis/model/schema.py": "sha256:ee8265c7e5ebd9d7c6d8c7c666bebec656654c34fa07381b9b4f53a8f01b6802",
       "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
       "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
       "src/structural_analysis/schemas/analytic_frame_verification_v1.schema.json": "sha256:8310a8ade94f872975c04e77d690c42e2ff04baa0566da536f1ae21bfab5e75c",
-      "src/structural_analysis/solvers/linear/static.py": "sha256:065c4e9deb01fe2f55dc51fbc0fa342e550fd4c1b47c25e96e024f57913dc1a4",
+      "src/structural_analysis/solvers/linear/static.py": "sha256:5283a51833bb3bb151818bf53d2b3f286fd26b37068d97f84ac7a22d6e171217",
       "tests/test_analytic_frame_verification.py": "sha256:8bd6190ebef7fc3278259b5736b252956cd4c5ff7fd544c24278c6e5fa27ea1c"
     },
-    "source_set_hash": "sha256:9b187652c759f2a090ff443b5bb2b49cd7d73664dbfb1292b6317f56b32d835d"
+    "source_set_hash": "sha256:899adc5dca6504847f296128c9620b33ebeb1c92faf7e1d216012948f3e0126e"
   },
   "summary": {
     "case_count": 3,

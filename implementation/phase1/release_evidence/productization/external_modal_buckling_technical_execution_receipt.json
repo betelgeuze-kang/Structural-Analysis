@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:fbdafb70127830148898f4f2ba02774af94534f5da8571e73f40bfe3254e63d4",
+  "artifact_hash": "sha256:e2409f61f4bb74a92006b2786d343e45f8803a8016183a337aea6a69e47d8a47",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -181,12 +181,12 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-29T16:24:56.774996+00:00",
+  "generated_at": "2026-10-13T06:33:58.437300+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/__init__.py": "sha256:31c100a82c060d1c2e23896fced89480977670723c8fb667e3e2c9c1d3f568fc",
       "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:1de8024b160e723af657f8474c11e3263ce9242ca545ebd394bc2c0b2c288ac9",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:a737f59ac2cc69d6bfb27ef6eee03680414a563656c1f49f0950558f406d34e0",
       "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:74ba8db797bc414a30b6d56c226b8411818eefcbb90cc8f4874112c56ff4d22e",
       "scripts/source_bound_python_inventory.py": "sha256:b60b5feecdaacaa924221be3ed13c46e2aa5bf4228c6e50fb70833f2d971919c",
       "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
@@ -196,28 +196,28 @@
       "src/structural_analysis/adapters/bounded_planar_execution_plan.py": "sha256:f8f56c91246c79c3ce8467f29b57d4dabeacd7b890fe825b4e16e01ec439a4bf",
       "src/structural_analysis/adapters/bounded_planar_model_ir.py": "sha256:a8a83aba5eb2769d6094839a03a028fa53d88732c75317daa2d9910af246249b",
       "src/structural_analysis/analyses/__init__.py": "sha256:a10e34597dc201e15c41b13dad6e7a52e65982aaf37d9c5513f2319b46fb1ed7",
-      "src/structural_analysis/analyses/buckling.py": "sha256:2a6f9208490e7598a8595449e186cc33c3178228e26868899cf8efd62b34cab2",
+      "src/structural_analysis/analyses/buckling.py": "sha256:afd6e44902f12d62f61edb3619ec6900176108cf8ebdf09c3e83fec668384986",
       "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
-      "src/structural_analysis/analyses/modal.py": "sha256:ae7923f121e53b044044789a73d63e3745f3ee5d8cd44e23354cb0df34b5261c",
+      "src/structural_analysis/analyses/modal.py": "sha256:01543fc1b064bce96bf9db80ec3a18d479be166535ec133752f4600b8853e1c5",
       "src/structural_analysis/api/__init__.py": "sha256:c9c48129569b556c901082a33aea8b7cf616e9f51fd4e7f13fe1bbcae44794b0",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/api/frame3d_direct_control.py": "sha256:9c793fd284c9c00bde1bf008a3354eb61eb33a4b19e08b63f042f761a41e2825",
-      "src/structural_analysis/api/nonlinear_fiber_frame.py": "sha256:73ccc10f2283a01488777fb02853d0b1f2a9de8d2b226182e4b26871a916b7c6",
+      "src/structural_analysis/api/nonlinear_fiber_frame.py": "sha256:7bdb4f1003c39ec98feb2f4e0b1beffe1c5aaddb873a04189e4fd31d597c9a91",
       "src/structural_analysis/api/nonlinear_frame.py": "sha256:e51855179758f3d83c9d924e638c9c296199af5e09df2f2c320c4ae72e382ded",
       "src/structural_analysis/api/nonlinear_truss.py": "sha256:c3503a03802cfbf0da667c40cbbc086fb53b35206477d206c3f78a5d958818ba",
       "src/structural_analysis/api/planar_frame.py": "sha256:356ce7b78552ec336d9356d7126f4b1ddd8cb96d6eaf6e05535b9d7d2160c9d0",
       "src/structural_analysis/assembly/__init__.py": "sha256:7e3fc3e71ab2df9ed72b4484b1c8125047901d8c800d206d823e49f497c515cb",
-      "src/structural_analysis/assembly/buckling.py": "sha256:fba3d394c496253c04421c13cfe50e00cc741129727b7ecf337a1628f54a0232",
+      "src/structural_analysis/assembly/buckling.py": "sha256:548d12e4531e7a9bd2be606452b076ee28dcfb84589ee64b531673a374ec654a",
       "src/structural_analysis/assembly/corotational_frame2d_member_features.py": "sha256:1fbcfd3a3bac6bb3b76f0285d3047c8f0e1ec5f16cec583cf5c8e0981d4e7652",
       "src/structural_analysis/assembly/corotational_frame3d_global.py": "sha256:0d63b849a6a2402782250951c9c4aaa281e9bbff613ac8337450665317d19a1b",
       "src/structural_analysis/assembly/corotational_frame3d_graph.py": "sha256:827a6c7ee9a3bac73f55f36c3a39a1f638c33c4cd14421c009bb231969f6359e",
       "src/structural_analysis/assembly/coupled_static.py": "sha256:56e1c3f1b09b6e47181d3c877397d6a109af41b5dc3fa459973cf650df9e611a",
-      "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
-      "src/structural_analysis/assembly/modal.py": "sha256:bf0909750f7d471541180c8dec8ac2037730e3b17b7ecbbedce0c5c74df83bd8",
+      "src/structural_analysis/assembly/linear_static.py": "sha256:c849b2104878aae28a7c2cac47a0b54e139598bca1b973d8523d01aaddf0e413",
+      "src/structural_analysis/assembly/modal.py": "sha256:b113bfc5769de2e748e0d2b7b69e48a09d690838a06bf732a84a91a1d146c99a",
       "src/structural_analysis/assembly/nonlinear_static.py": "sha256:fab28d6dbe60142650eca8db3cb563158de3c42df8536385a83e6b375e23d072",
       "src/structural_analysis/assembly/patch_static.py": "sha256:55b56f88b2d75aa7e979a2e6eac87ab2e4a14b447ec74ba6ec16b853ea62fe35",
       "src/structural_analysis/assembly/stateful_axial.py": "sha256:4a4598faa4c0a9ebcc9c6e64d5df45be6dff2f97dbad00bfe85d212d4fc57e62",
-      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:ba299b6cadc5e8553529b581ed716222d541cc6ae16ee5b66cd8059eff372f82",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:b2d785eca39a75a2c7ae31a1b9a649cab2c89544bcc8dfe6897d50f3939257a0",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py": "sha256:471ac08585e1dca3f16cc7b350010c0a5a2f1e86615d20c42e7d384efac02d75",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py": "sha256:2b13670ca200275e31f620d0f531f1792032d6f152c6783981d519f73110cb52",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py": "sha256:829a6339abf629a585edb6b79391b752b1ef14e97041c1a6e0bd0745b383de5c",
@@ -236,14 +236,14 @@
       "src/structural_analysis/assembly/stateful_fiber_frame2d_checkpoint_io.py": "sha256:9825158c3dd01d9c39096117caa69c39d8fb47152e67d316163719469b8e196d",
       "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py": "sha256:cc5e3dd9cade17b7484e00ef576c092c70091e99413c8d44e24237d518b96fd1",
       "src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py": "sha256:caad6ec00d18c102c27e77e057f2c5df195b906dac0a49ffaf790775870b1770",
-      "src/structural_analysis/assembly/stateful_fiber_frame2d_material_state_bundle.py": "sha256:06c87677d81c0d7ffb152b316b96a6eeceb445a3aa3ef45e46efd871bab1232e",
+      "src/structural_analysis/assembly/stateful_fiber_frame2d_material_state_bundle.py": "sha256:232e78d9f375f652b91dd75b5c7d8159e797c7479265a9eb493ebf804131a4ac",
       "src/structural_analysis/assembly/stateful_fiber_frame2d_material_state_projection_chain.py": "sha256:c2c79b6c0f28e7ff08f446cc608f4b932485c1dd30a1f0c1aaf56af9ac475f1f",
       "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_execution_state_binding.py": "sha256:aa23b1fa6b30cb30db31b0d28db9d5ee10c62be5e4f8528d7f9472e5ad1039e3",
-      "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py": "sha256:e05065c9d84a886ce79368ea8643de7bee27c9928a69244bace4a863131811a6",
-      "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py": "sha256:5935723ebbf1b517e2733730d85385eb46b8005f82b6974223ec4ab46c54547b",
-      "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py": "sha256:7145a3a86eab56fd2d382c39bda48ebe5c42006e81936bcb653bdf9e70607792",
+      "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py": "sha256:51443265f93f12e0d72f4975183f3175402ce2e7cf455b288b3363f1f39d04b9",
+      "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py": "sha256:72636a79fb1b36670a412b9b99677f399bfb3f36a3e7e40ab87e5c300943021d",
+      "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py": "sha256:8ca301041a610b00641a26922dbf751b2adbec3769d90c524f006739133fa207",
       "src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py": "sha256:4fa1c970adb9004eb43d4a209507e0b4e849a52751327465e173facfdb826143",
-      "src/structural_analysis/assembly/stateful_fiber_frame2d_solver.py": "sha256:e823067069cb1d95ad0e78211919900f398e4f012692aa21bb907a29e1f66cfa",
+      "src/structural_analysis/assembly/stateful_fiber_frame2d_solver.py": "sha256:8bbe5574f949a579e6cf20e740355b650d769ee2d1a4d08d96889eaca90e7523",
       "src/structural_analysis/assembly/stateful_fiber_frame2d_state.py": "sha256:a8718fa055e7596c3158460c75810b5e4da730f60df4206c704236c1cbe94014",
       "src/structural_analysis/benchmark/__init__.py": "sha256:6eeea3a385d79485d53fc27faf38b16314ec14d2d4669ecfe4e86d87198306fb",
       "src/structural_analysis/benchmark/acceptance.py": "sha256:239e0791a5f1d7b8d334fadddad0f003e1c9e81772aa59576c85c1d9b3c60bcc",
@@ -321,7 +321,7 @@
       "src/structural_analysis/io/midas/loader.py": "sha256:c6110cb2160c234065034c2144cc8e40087f9e8237eb3bafa82b87177fcde448",
       "src/structural_analysis/io/midas/raw_parser.py": "sha256:031ad549b5fd98f81981aaa55231afc978580fc358af5eac2e54292b85c51088",
       "src/structural_analysis/io/neutral/__init__.py": "sha256:93a5b8674e3c68d73531185b0525eab87b3e9655bb773108151073aa3e7493e6",
-      "src/structural_analysis/io/neutral/loader.py": "sha256:17646c526d2cdea80a7c498381c231dc5ca7530325108d63c800e96d6ff00e1c",
+      "src/structural_analysis/io/neutral/loader.py": "sha256:9e74a9769da3291999457be52ace67325b300ff16cd1994279d9cc3e507aa529",
       "src/structural_analysis/materials/__init__.py": "sha256:dc721269ee314e36fe49a0f117683deb81e356fce898d6ee100ea01830603997",
       "src/structural_analysis/materials/admissibility.py": "sha256:4ffb83f3f670e81dfa4198e520284cca82023fe432fde3e631a8bcca37917ba0",
       "src/structural_analysis/materials/bilinear_link.py": "sha256:7643fa4a300997af059fad859461bf9df2db091105cd6a2d655d192b7fa3d5ab",
@@ -334,7 +334,7 @@
       "src/structural_analysis/materials/elastic.py": "sha256:da75cd1c24102b7544a0a122f6d5688da600128bb57948ba202d05bc14d6a95a",
       "src/structural_analysis/materials/partial_composite.py": "sha256:1586e7fc0b737143169f48f6d2506af203d70a02345bf4e2d4cefd13ed2ba689",
       "src/structural_analysis/materials/stateful_biaxial_fiber_section.py": "sha256:819e2466f7c06de5cd6486aa42f54ff2d00d4f1d7cb21132cf36a27f62114773",
-      "src/structural_analysis/materials/stateful_fiber_section.py": "sha256:57fa7b737a2de2ed4c859acd1f072aae973283de23e32de88106b7393c55c933",
+      "src/structural_analysis/materials/stateful_fiber_section.py": "sha256:a0eaa401f87e10bc27388dbb98961f92026585ea117c92787612be37417cf417",
       "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
       "src/structural_analysis/model/__init__.py": "sha256:ca60aecf8b9ae4b8f26aae0d5506a7a19c576ce60222266b69f205a7579b092e",
       "src/structural_analysis/model/entities.py": "sha256:a3ce4c83ffde7b0cc260845a9a6b1984b0212dcce3ff5a9f01a0343199857be9",
@@ -355,9 +355,9 @@
       "src/structural_analysis/solvers/buckling/solver.py": "sha256:b3572a2513274c4195735d958758ba67c284ca2c06e4bbda6e3ef9c25fc5f75d",
       "src/structural_analysis/solvers/equation_scaling_6dof.py": "sha256:c11b2cc3756d7b0ded053bce3e4e6af4196357d37a5bbcd44e602d5a7229ec6a",
       "src/structural_analysis/solvers/linear/__init__.py": "sha256:afc9248a665b0bf6a365bd2790e141d8ac0a18c67eb0a0b99da58d1a2e365cb2",
-      "src/structural_analysis/solvers/linear/static.py": "sha256:065c4e9deb01fe2f55dc51fbc0fa342e550fd4c1b47c25e96e024f57913dc1a4",
+      "src/structural_analysis/solvers/linear/static.py": "sha256:5283a51833bb3bb151818bf53d2b3f286fd26b37068d97f84ac7a22d6e171217",
       "src/structural_analysis/solvers/modal/__init__.py": "sha256:31560958dad11385c572193c91095d80701239514bef91fbafdb08514739332f",
-      "src/structural_analysis/solvers/modal/solver.py": "sha256:91109241e086ea4f24be4a8d4a3485a6ac185959e5d7b5b09b093dd8a75af523",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:fc01425bd87a907ddb181435664c19d6a56b668eeda6e180407da801f0d4efc2",
       "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:4ef27ccf8db7613c32f84165c1813c72663513c2e670f298a75db41c0c25f808",
       "src/structural_analysis/solvers/nonlinear/arc_length.py": "sha256:e3c902652deb306ae1c74af7ecfee5bb5fe56dd6dd72c261dc5a22c7f2e0fe01",
       "src/structural_analysis/solvers/nonlinear/canonical_sparse_lu.py": "sha256:49f74473bf9fadea781bcdaf270af556ac8c80108d36d04f265e68fabe26abf1",
@@ -375,7 +375,7 @@
       "tests/test_external_modal_buckling_technical_receipt.py": "sha256:d7ce86138e53108bfc37f8eeb119ee6a65a4e1cbe3e283ce2f7d54cd5ea936bf",
       "tests/test_source_bound_python_inventory.py": "sha256:cb4abba49d8d62f5990630d4092a5505fd0f287cc0ae2ccfbc82a2355f7236f9"
     },
-    "source_set_hash": "sha256:2c432299a59606b789adb2adabdcebc4112b1b79c978fc2a1db88461f0f7a86b"
+    "source_set_hash": "sha256:8c3d96870aef4d7e404321be8b03e06ddec5797b0318072e86b3966e0248054a"
   },
   "mode_vector_artifacts": [
     {
@@ -443,13 +443,13 @@
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-29T16:24:56.774996+00:00",
+    "current_product_replay_generated_at": "2026-10-13T06:33:58.437300+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:37:59.789469+00:00",
     "external_execution_reused": true,
     "external_execution_source_commit_sha": null,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Nightly product replay; external execution bytes reused without freshness credit."
+    "reuse_reason": "Product replay after modal extraction source change; external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -500,7 +500,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "02588af98e43e64fdf03f557ce0e512abe89410c",
+  "source_commit_sha": "fafd6a852c83670fb0377e20fd1432ee51998c78",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

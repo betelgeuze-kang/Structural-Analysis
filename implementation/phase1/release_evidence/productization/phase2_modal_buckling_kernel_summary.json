@@ -34,14 +34,14 @@
   "contract_pass": true,
   "engine_version": "0.3.0",
   "euler_column_bridge_contract_pass": true,
-  "generated_at": "2026-08-29T01:03:42.623832+00:00",
+  "generated_at": "2026-10-13T06:33:52.422293+00:00",
   "modal_kernel_contract_pass": true,
   "passing_case_count": 4,
   "repeated_eigenspace_contract_pass": true,
-  "result_artifact_hash": "sha256:b7c265c102426ce6d7d18b90068f4a1b3502afbb82d80eca61d3b9373ceabb01",
+  "result_artifact_hash": "sha256:2ba70ca883f5cf018ec6f3136f8438d14b6ddbef3f5749c82cc9da54c71b4e6f",
   "schema_version": "phase2-modal-buckling-kernel-artifacts.v1",
   "semantic_hash_profile": "canonical-json-scientific-12e",
-  "source_commit_sha": "1ef8e320bf07970c017ced49234dadc2a9128db2",
-  "source_set_hash": "sha256:4b57d6f55e37fdad7de402a0505c45e2a56a82667bf335a1f62dfcef63bfc0ea",
+  "source_commit_sha": "fafd6a852c83670fb0377e20fd1432ee51998c78",
+  "source_set_hash": "sha256:a7a83cf22e89a0c4260e51e6b5f2528dfc0702e5dddbb56af3abb5acccedbc1f",
   "status": "partial"
 }

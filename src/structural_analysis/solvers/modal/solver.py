@@ -28,6 +28,9 @@ from structural_analysis.solvers._generalized_eigen import (
 
 
 MODAL_SOLUTION_SCHEMA_VERSION = "deterministic-modal-solution.v1"
+DIRECT_EXTRACTION_PROFILE = "dense_generalized_gvd_v1"
+RECIPROCAL_EXTRACTION_PROFILE = "dense_spd_reciprocal_gvd_direct_spectral_probe_v1"
+EXTRACTION_ROUTE_ROUNDOFF_FACTOR = 64.0
 
 
 class ModalAnalysisError(GeneralizedEigenContractError):
@@ -71,6 +74,8 @@ class ModalSolution:
     regularization_applied: bool
     fallback_used: bool
     deterministic_mode_basis: bool
+    eigen_extraction_profile: str
+    rigid_mode_spectral_scale: float
     contract_pass: bool
 
     def to_dict(self) -> dict[str, Any]:
@@ -155,13 +160,11 @@ def solve_modal_modes(
             raise GeneralizedEigenContractError(
                 "coordinate-scaled modal matrices must be finite"
             )
-        raw_values, raw_vectors = eigh(
+        raw_values, raw_vectors, spectral_scale, extraction_profile = _extract_modes(
             solve_stiffness,
             solve_mass,
-            check_finite=False,
-            driver="gvd",
+            rigid_mode_relative_tolerance=rigid_mode_relative_tolerance,
         )
-        spectral_scale = max(float(np.max(np.abs(raw_values))), 1.0)
         rigid_threshold = rigid_mode_relative_tolerance * spectral_scale
         rigid_count = int(np.count_nonzero(raw_values <= rigid_threshold))
         indices = np.flatnonzero(raw_values > rigid_threshold)
@@ -273,8 +276,71 @@ def solve_modal_modes(
         regularization_applied=False,
         fallback_used=False,
         deterministic_mode_basis=True,
+        eigen_extraction_profile=extraction_profile,
+        rigid_mode_spectral_scale=spectral_scale,
         contract_pass=True,
     )
+
+
+def _extract_modes(
+    stiffness: np.ndarray,
+    mass: np.ndarray,
+    *,
+    rigid_mode_relative_tolerance: float,
+) -> tuple[np.ndarray, np.ndarray, float, str]:
+    """Choose a pencil before extraction; never retry a failed extraction.
+
+    Reversing an SPD pencil improves its low end. Its high end can lose
+    accuracy, so rigidity still uses the direct pencil's spectral scale.
+    The fixed roundoff margins select a route, not a looser acceptance gate
+    or a rigorous error bound for an ill-conditioned generalized problem.
+    """
+    size = stiffness.shape[0]
+    epsilon = float(np.finfo(np.float64).eps)
+    stiffness_values = np.linalg.eigvalsh(stiffness)
+    stiffness_scale = max(
+        float(np.max(np.abs(stiffness_values))), float(np.finfo(np.float64).tiny)
+    )
+    spd_margin = EXTRACTION_ROUTE_ROUNDOFF_FACTOR * size * epsilon * stiffness_scale
+    if float(stiffness_values[0]) <= spd_margin:
+        values, vectors = eigh(stiffness, mass, check_finite=False, driver="gvd")
+        scale = max(float(np.max(np.abs(values))), 1.0)
+        return values, vectors, scale, DIRECT_EXTRACTION_PROFILE
+
+    reference_values = eigh(
+        stiffness, mass, check_finite=False, driver="gvd", eigvals_only=True
+    )
+    if not np.all(np.isfinite(reference_values)):
+        raise GeneralizedEigenContractError("modal spectral probe must be finite")
+    scale = max(float(np.max(np.abs(reference_values))), 1.0)
+    cutoff = rigid_mode_relative_tolerance * scale
+    route_margin = EXTRACTION_ROUTE_ROUNDOFF_FACTOR * size * epsilon * scale
+    if np.any(reference_values <= cutoff + route_margin):
+        # Near a rigid boundary, retain the original direct-vector extraction.
+        values, vectors = eigh(stiffness, mass, check_finite=False, driver="gvd")
+        scale = max(float(np.max(np.abs(values))), 1.0)
+        return values, vectors, scale, DIRECT_EXTRACTION_PROFILE
+
+    reciprocals, vectors = eigh(mass, stiffness, check_finite=False, driver="gvd")
+    if (
+        reciprocals.shape != (size,)
+        or vectors.shape != (size, size)
+        or not np.all(np.isfinite(reciprocals))
+        or not np.all(np.isfinite(vectors))
+        or np.any(reciprocals <= 0.0)
+    ):
+        raise GeneralizedEigenContractError("modal reciprocal extraction must be finite and positive")
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        values = 1.0 / reciprocals
+        order = np.argsort(values, kind="stable")
+        values = values[order]
+        # eigh(M,K) K-normalizes vectors. Divide by sqrt(mu) to M-normalize.
+        vectors = vectors[:, order] / np.sqrt(reciprocals[order])[None, :]
+    if not np.all(np.isfinite(values)) or not np.all(np.isfinite(vectors)):
+        raise GeneralizedEigenContractError("modal reciprocal recovery must be finite")
+    if np.any(values <= cutoff):
+        raise GeneralizedEigenContractError("modal reciprocal rigid classification disagrees with spectral probe")
+    return values, vectors, scale, RECIPROCAL_EXTRACTION_PROFILE
 
 
 def _mode_count(value: int) -> int:

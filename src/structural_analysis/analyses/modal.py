@@ -236,6 +236,8 @@ def run_authoritative_modal(
         "semantic_result_hash": modal.semantic_result_hash,
         "semantic_hash_profile": modal.semantic_hash_profile,
         "deterministic_mode_basis": modal.deterministic_mode_basis,
+        "eigen_extraction_profile": modal.eigen_extraction_profile,
+        "rigid_mode_spectral_scale": modal.rigid_mode_spectral_scale,
         "symmetry_projection_applied": modal.symmetry_projection_applied,
         "mode_shape_storage_profile": MODE_SHAPE_STORAGE_PROFILE,
         "mass_normalized_mode_vectors_inlined": False,
