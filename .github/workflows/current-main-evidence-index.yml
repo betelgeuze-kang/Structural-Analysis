@@ -609,7 +609,10 @@ jobs:
               )
               return blob
 
-          def workflow_run(run: int, *, path: str, name: str, events: set[str], label: str):
+          def workflow_run(
+              run: int, *, path: str, name: str, events: set[str], label: str,
+              expected_conclusion: str = "success",
+          ):
               positive(run, "workflow_run_id:" + label)
               value = api(f"actions/runs/{run}/attempts/1", "run:" + label)
               positive(value.get("run_number"), "workflow_run_number:" + label)
@@ -618,9 +621,11 @@ jobs:
                   type(value.get("id")) is int and value.get("id") == run
                   and type(value.get("run_attempt")) is int
                   and value.get("run_attempt") == 1
-                  and value.get("status") == "completed" and value.get("conclusion") == "success"
+                  and value.get("status") == "completed"
+                  and value.get("conclusion") == expected_conclusion
                   and value.get("head_sha") == source and value.get("head_branch") == "main"
                   and value.get("path") == path and value.get("name") == name
+                  and isinstance(value.get("event"), str)
                   and value.get("event") in events
                   and isinstance(head_repository, dict)
                   and head_repository.get("full_name") == repository,
@@ -646,6 +651,59 @@ jobs:
                   and payload["total_count"] == len(rows),
                   "workflow_run_inventory_invalid:" + label,
               )
+              inventory_ids = [positive(row.get("id"), "inventory_run_id:" + label) for row in rows]
+              require(
+                  len(set(inventory_ids)) == len(inventory_ids),
+                  "workflow_run_inventory_invalid:" + label,
+              )
+              if (
+                  path == ".github/workflows/product-state-current.yml"
+                  and name == "Product State Current" and events == {"workflow_run"}
+              ):
+                  candidates = []
+                  for row in rows:
+                      if (
+                          row["id"] != run and row.get("status") == "completed"
+                          and row.get("conclusion") == "failure"
+                          and type(row.get("run_attempt")) is int and row["run_attempt"] == 1
+                      ):
+                          positive(row.get("run_number"), "failed_sibling_run_number:" + label)
+                          head_repository = row.get("head_repository")
+                          require(
+                              row.get("head_sha") == source and row.get("head_branch") == "main"
+                              and row.get("path") == path and row.get("name") == name
+                              and isinstance(row.get("event"), str)
+                              and row.get("event") in events
+                              and isinstance(head_repository, dict)
+                              and head_repository.get("full_name") == repository,
+                              "failed_sibling_identity_invalid:" + label,
+                          )
+                          failed = workflow_run(
+                              row["id"], path=path, name=name, events=events,
+                              label="failed_sibling:" + label, expected_conclusion="failure",
+                          )
+                          require(
+                              same_fields(
+                                  row, failed,
+                                  (
+                                      "id", "run_number", "run_attempt", "status", "conclusion",
+                                      "head_sha", "head_branch", "path", "name", "event",
+                                  ),
+                              ),
+                              "failed_sibling_list_refetch_mismatch:" + label,
+                          )
+                      else:
+                          candidates.append(row)
+                  rows = candidates
+                  if len(rows) == 1:
+                      head_repository = rows[0].get("head_repository")
+                      require(
+                          isinstance(head_repository, dict)
+                          and head_repository.get("full_name") == repository
+                          and rows[0].get("status") == "completed"
+                          and rows[0].get("conclusion") == "success",
+                          "workflow_run_identity_invalid:" + label,
+                      )
               require(
                   len(rows) == 1 and type(rows[0].get("id")) is int
                   and rows[0].get("id") == run
@@ -657,6 +715,7 @@ jobs:
                   and rows[0].get("head_branch") == "main"
                   and rows[0].get("path") == path
                   and rows[0].get("name") == name
+                  and isinstance(rows[0].get("event"), str)
                   and rows[0].get("event") in events,
                   "unique_exact_source_workflow_run_required:" + label,
               )
@@ -4048,13 +4107,71 @@ jobs:
               require(
                   isinstance(payload, dict)
                   and type(payload.get("total_count")) is int
-                  and payload.get("total_count") == 1
                   and isinstance(payload.get("workflow_runs"), list)
-                  and len(payload["workflow_runs"]) == 1
-                  and isinstance(payload["workflow_runs"][0], dict),
+                  and payload["total_count"] == len(payload["workflow_runs"])
+                  and len(payload["workflow_runs"]) <= 100
+                  and all(isinstance(row, dict) for row in payload["workflow_runs"]),
                   "terminal_unique_run_inventory_invalid",
               )
-              row = payload["workflow_runs"][0]
+              rows = payload["workflow_runs"]
+              inventory_ids = [positive(row.get("id"), "terminal_inventory_run_id") for row in rows]
+              require(
+                  len(set(inventory_ids)) == len(inventory_ids),
+                  "terminal_unique_run_inventory_invalid",
+              )
+              if (
+                  workflow_path == ".github/workflows/product-state-current.yml"
+                  and workflow_name == "Product State Current"
+                  and allowed_events == {"workflow_run"} and completion_mode == "success"
+              ):
+                  candidates = []
+                  for candidate in rows:
+                      if (
+                          candidate["id"] != selected_run and candidate.get("status") == "completed"
+                          and candidate.get("conclusion") == "failure"
+                          and type(candidate.get("run_attempt")) is int
+                          and candidate["run_attempt"] == 1
+                      ):
+                          positive(candidate.get("run_number"), "terminal_failed_sibling_run_number")
+                          head_repository = candidate.get("head_repository")
+                          require(
+                              candidate.get("head_sha") == source and candidate.get("head_branch") == "main"
+                              and candidate.get("path") == workflow_path and candidate.get("name") == workflow_name
+                              and isinstance(candidate.get("event"), str)
+                              and candidate.get("event") in allowed_events
+                              and isinstance(head_repository, dict)
+                              and head_repository.get("full_name") == repository,
+                              "terminal_failed_sibling_identity_invalid",
+                          )
+                          failed_id = candidate["id"]
+                          failed = gh_json(
+                              f"actions/runs/{failed_id}/attempts/1", "terminal_failed_sibling"
+                          )
+                          require(
+                              isinstance(failed, dict)
+                              and isinstance(failed.get("head_repository"), dict)
+                              and failed["head_repository"].get("full_name") == repository
+                              and same_fields(
+                                  candidate, failed,
+                                  (
+                                      "id", "run_number", "run_attempt", "status", "conclusion",
+                                      "head_sha", "head_branch", "path", "name", "event",
+                                  ),
+                              ),
+                              "terminal_failed_sibling_list_refetch_mismatch",
+                          )
+                      else:
+                          candidates.append(candidate)
+                  rows = candidates
+                  if len(rows) == 1:
+                      head_repository = rows[0].get("head_repository")
+                      require(
+                          isinstance(head_repository, dict)
+                          and head_repository.get("full_name") == repository,
+                          "terminal_unique_run_identity_invalid",
+                      )
+              require(len(rows) == 1, "terminal_unique_run_inventory_invalid")
+              row = rows[0]
               require(
                   type(row.get("id")) is int
                   and row.get("id") == selected_run
@@ -4066,6 +4183,7 @@ jobs:
                   and row.get("head_branch") == "main"
                   and row.get("path") == workflow_path
                   and row.get("name") == workflow_name
+                  and isinstance(row.get("event"), str)
                   and row.get("event") in allowed_events
                   and (
                       completion_mode == "active"

@@ -1062,6 +1062,7 @@ def _validate_run_common(
     workflow_name: str,
     allowed_events: set[str],
     expected_run_id: int | None = None,
+    expected_conclusion: str = "success",
 ) -> int:
     run_id = _safe_positive_integer(run.get("id"), f"run_id:{workflow_name}")
     _safe_positive_integer(run.get("run_number"), f"run_number:{workflow_name}")
@@ -1072,11 +1073,12 @@ def _validate_run_common(
         type(run.get("run_attempt")) is int
         and run.get("run_attempt") == 1
         and run.get("status") == "completed"
-        and run.get("conclusion") == "success"
+        and run.get("conclusion") == expected_conclusion
         and run.get("head_sha") == source_sha
         and run.get("head_branch") == "main"
         and run.get("path") == workflow_path
         and run.get("name") == workflow_name
+        and type(run.get("event")) is str
         and run.get("event") in allowed_events
         and type(head_repository) is dict
         and head_repository.get("full_name") == repository,
@@ -1129,20 +1131,83 @@ def _product_state_run(
         "product_state_workflow_runs",
     )
     inventory_rows = inventory.get("workflow_runs")
+    if type(inventory_rows) is not list:
+        _fail("product_state_workflow_run_inventory_invalid")
     _require(
-        type(inventory_rows) is list
-        and len(inventory_rows) <= 100
+        len(inventory_rows) <= 100
         and all(type(row) is dict for row in inventory_rows)
         and type(inventory.get("total_count")) is int
         and inventory["total_count"] == len(inventory_rows),
         "product_state_workflow_run_inventory_invalid",
     )
+    inventory_ids = [
+        _safe_positive_integer(row.get("id"), "product_state_inventory_run_id")
+        for row in inventory_rows
+    ]
     _require(
-        len(inventory_rows) == 1,
+        len(set(inventory_ids)) == len(inventory_ids),
+        "product_state_workflow_run_inventory_invalid",
+    )
+    run_refetch_fields = (
+        "id",
+        "run_number",
+        "run_attempt",
+        "status",
+        "conclusion",
+        "head_sha",
+        "head_branch",
+        "path",
+        "name",
+        "event",
+    )
+    candidates = []
+    for row in inventory_rows:
+        if (
+            row["id"] != product_state_run_id
+            and row.get("status") == "completed"
+            and row.get("conclusion") == "failure"
+            and type(row.get("run_attempt")) is int
+            and row["run_attempt"] == 1
+        ):
+            # Failed first attempts are not successful producer candidates, but
+            # validate their complete identity and refetch before excluding them.
+            failed_id = _validate_run_common(
+                row,
+                repository=api.repository,
+                source_sha=source_sha,
+                workflow_path=workflow_path,
+                workflow_name=workflow_name,
+                allowed_events={"workflow_run"},
+                expected_conclusion="failure",
+            )
+            failed_run = api.json(
+                f"actions/runs/{failed_id}/attempts/1", "product_state_failed_sibling"
+            )
+            _validate_run_common(
+                failed_run,
+                repository=api.repository,
+                source_sha=source_sha,
+                workflow_path=workflow_path,
+                workflow_name=workflow_name,
+                allowed_events={"workflow_run"},
+                expected_run_id=failed_id,
+                expected_conclusion="failure",
+            )
+            _require(
+                _canonical_bytes({key: row.get(key) for key in run_refetch_fields})
+                == _canonical_bytes(
+                    {key: failed_run.get(key) for key in run_refetch_fields}
+                ),
+                "product_state_failed_sibling_list_refetch_mismatch",
+            )
+        else:
+            candidates.append(row)
+    _require(
+        len(candidates) == 1,
         "product_state_unique_exact_source_run_required",
     )
     _validate_run_common(
-        inventory_rows[0],
+        candidates[0],
         repository=api.repository,
         source_sha=source_sha,
         workflow_path=workflow_path,
@@ -1162,21 +1227,9 @@ def _product_state_run(
         allowed_events={"workflow_run"},
         expected_run_id=product_state_run_id,
     )
-    run_refetch_fields = (
-        "id",
-        "run_number",
-        "run_attempt",
-        "status",
-        "conclusion",
-        "head_sha",
-        "head_branch",
-        "path",
-        "name",
-        "event",
-    )
     _require(
         _canonical_bytes(
-            {key: inventory_rows[0].get(key) for key in run_refetch_fields}
+            {key: candidates[0].get(key) for key in run_refetch_fields}
         )
         == _canonical_bytes({key: run.get(key) for key in run_refetch_fields}),
         "product_state_run_list_refetch_mismatch",

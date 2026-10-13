@@ -1448,6 +1448,167 @@ def test_product_state_rejects_exact_source_attempt_two_sibling() -> None:
         MODULE._product_state_run(FakeApi(), source, run_id)
 
 
+class _ProductStateInventoryApi:
+    repository = "owner/repository"
+
+    def __init__(self, rows, direct_rows, jobs, *, total_count=None):
+        self.rows = rows
+        self.direct_rows = direct_rows
+        self.jobs = jobs
+        self.total_count = len(rows) if total_count is None else total_count
+        self.calls = []
+
+    def json(self, endpoint: str, label: str):
+        self.calls.append(endpoint)
+        if endpoint.startswith("actions/workflows/"):
+            return {"workflow_runs": self.rows, "total_count": self.total_count}
+        if endpoint.endswith("/jobs?per_page=100"):
+            return {"jobs": self.jobs, "total_count": len(self.jobs)}
+        return self.direct_rows[int(endpoint.split("/")[2])]
+
+
+@pytest.mark.parametrize("failure_first", [True, False])
+def test_product_state_accepts_validated_failed_first_attempt_sibling(
+    failure_first: bool,
+) -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    failed = {**run, "id": run_id + 1, "run_number": 76, "conclusion": "failure"}
+    rows = [failed, run] if failure_first else [run, failed]
+    api = _ProductStateInventoryApi(rows, {run_id: run, run_id + 1: failed}, jobs)
+
+    assert MODULE._product_state_run(api, source, run_id) == run
+    assert f"actions/runs/{run_id + 1}/attempts/1" in api.calls
+    assert f"actions/runs/{run_id}/attempts/1/jobs?per_page=100" in api.calls
+
+
+def test_product_state_accepts_observed_fafd_failure_success_list() -> None:
+    # Identity fields normalized from the authenticated 2026-10-13 run list.
+    source = "fafd6a852c83670fb0377e20fd1432ee51998c78"
+    run_id = 38354652295
+    _, _, shape, _ = _product_state_fixture()
+    run = {
+        **shape, "id": run_id, "run_number": 101, "head_sha": source,
+        "head_repository": {"full_name": "betelgeuze-kang/Structural-Analysis"},
+    }
+    failed = {**run, "id": 38339482507, "run_number": 100, "conclusion": "failure"}
+    jobs = [
+        _hosted_job(name, run_id=run_id, source=source, job_id=index)
+        for index, name in enumerate(
+            ("build-current-state", "attest-current-state", "verify-current-state",
+             "replay-final-attestations"), start=1,
+        )
+    ]
+    api = _ProductStateInventoryApi(
+        [run, failed], {run_id: run, 38339482507: failed}, jobs,
+    )
+    api.repository = "betelgeuze-kang/Structural-Analysis"
+    assert MODULE._product_state_run(api, source, run_id) == run
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"conclusion": "success"},
+        {"status": "in_progress", "conclusion": None},
+        {"run_attempt": 2},
+        {"run_attempt": True},
+        {"run_attempt": 1.0},
+        {"status": "in_progress"},
+        {"head_sha": "2" * 40},
+        {"head_branch": "other"},
+        {"path": ".github/workflows/other.yml"},
+        {"name": "Other"},
+        {"event": "push"},
+        {"event": []},
+        {"head_repository": []},
+        {"head_repository": {"full_name": "other/repository"}},
+        {"run_number": True},
+        {"id": True},
+        {"id": 77},
+    ],
+)
+def test_product_state_does_not_hide_invalid_or_ambiguous_failed_sibling(
+    mutation: dict[str, object],
+) -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    failed = {**run, "id": run_id + 1, "conclusion": "failure", **mutation}
+    api = _ProductStateInventoryApi([run, failed], {run_id: run, 78: failed}, jobs)
+    with pytest.raises(MODULE.EvidenceIndexError):
+        MODULE._product_state_run(api, source, run_id)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "id", "run_number", "run_attempt", "status", "conclusion", "head_sha",
+        "head_branch", "path", "name", "event", "head_repository",
+    ],
+)
+def test_product_state_does_not_hide_failed_sibling_missing_identity(field: str) -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    failed = {**run, "id": run_id + 1, "conclusion": "failure"}
+    del failed[field]
+    api = _ProductStateInventoryApi([run, failed], {run_id: run, 78: failed}, jobs)
+    with pytest.raises(MODULE.EvidenceIndexError):
+        MODULE._product_state_run(api, source, run_id)
+
+
+@pytest.mark.parametrize("direct_target", [False, True])
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"run_number": 99},
+        {"run_attempt": 2},
+        {"head_sha": "2" * 40},
+        {"path": ".github/workflows/other.yml"},
+        {"head_repository": {"full_name": "other/repository"}},
+        {"conclusion": "cancelled"},
+        {"event": []},
+    ],
+)
+def test_product_state_rejects_failed_sibling_or_target_refetch_drift(
+    direct_target: bool, mutation: dict[str, object],
+) -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    failed = {**run, "id": run_id + 1, "conclusion": "failure"}
+    direct = {run_id: run, run_id + 1: failed}
+    changed = run_id if direct_target else run_id + 1
+    direct[changed] = {**direct[changed], **mutation}
+    api = _ProductStateInventoryApi([run, failed], direct, jobs)
+    with pytest.raises(MODULE.EvidenceIndexError):
+        MODULE._product_state_run(api, source, run_id)
+
+
+def test_product_state_rejects_failed_target_even_with_failed_sibling() -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    run = {**run, "conclusion": "failure"}
+    failed = {**run, "id": run_id + 1}
+    api = _ProductStateInventoryApi([run, failed], {run_id: run, 78: failed}, jobs)
+    with pytest.raises(MODULE.EvidenceIndexError, match="workflow_run_identity_invalid"):
+        MODULE._product_state_run(api, source, run_id)
+
+
+def test_product_state_rejects_incomplete_inventory_before_filtering() -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    failed = {**run, "id": run_id + 1, "conclusion": "failure"}
+    api = _ProductStateInventoryApi(
+        [run, failed], {run_id: run, 78: failed}, jobs, total_count=3
+    )
+    with pytest.raises(MODULE.EvidenceIndexError, match="inventory_invalid"):
+        MODULE._product_state_run(api, source, run_id)
+
+
+def test_product_state_rejects_duplicate_failed_siblings_before_filtering() -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    failed = {**run, "id": run_id + 1, "conclusion": "failure"}
+    api = _ProductStateInventoryApi(
+        [run, failed, dict(failed)], {run_id: run, 78: failed}, jobs
+    )
+    with pytest.raises(MODULE.EvidenceIndexError, match="inventory_invalid"):
+        MODULE._product_state_run(api, source, run_id)
+    assert not any("/attempts/1" in endpoint for endpoint in api.calls)
+
+
 def test_lane_job_inventory_rejects_unselected_self_hosted_job() -> None:
     _, lanes = MODULE._load_catalog(ROOT)
     lane = lanes[0]

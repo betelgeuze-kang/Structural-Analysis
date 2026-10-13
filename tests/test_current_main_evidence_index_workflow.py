@@ -457,6 +457,299 @@ def test_privileged_exact_source_inventory_rejects_attempt_two_sibling() -> None
             )
 
 
+def _product_state_inventory_boundary(
+    boundary, rows, direct_rows, *, total_count=None,
+    source="1" * 40, selected_run=77, repository="owner/repository",
+):
+    tree = _post_publish_tree() if boundary == "terminal" else _inline_tree()
+    selected = [
+        node for node in tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name in {
+            "fail", "require", "positive", "canonical", "same_fields",
+            "workflow_run", "unique_exact_source_workflow_run",
+            "validate_terminal_run_payload",
+        }
+    ]
+    calls = []
+    payload = {
+        "workflow_runs": rows,
+        "total_count": len(rows) if total_count is None else total_count,
+    }
+
+    def api(endpoint, label):
+        calls.append(endpoint)
+        if endpoint.startswith("actions/workflows/"):
+            assert "head_sha=" + source in endpoint
+            return payload
+        return direct_rows[int(endpoint.split("/")[2])]
+
+    namespace = {
+        "MAX_SAFE": 9_007_199_254_740_991,
+        "PurePosixPath": PurePosixPath,
+        "quote": quote,
+        "json": json,
+        "source": source,
+        "repository": repository,
+        "api": api,
+        "gh_json": api,
+    }
+    exec(compile(ast.Module(body=selected, type_ignores=[]), "<product-state-boundary>", "exec"), namespace)
+
+    def validate(*, path=None, name=None, events=None, completion_mode="success"):
+        path = path or ".github/workflows/product-state-current.yml"
+        name = name or "Product State Current"
+        events = events or {"workflow_run"}
+        if boundary == "terminal":
+            return namespace["validate_terminal_run_payload"](
+                payload, selected_run=selected_run, workflow_path=path, workflow_name=name,
+                allowed_events=events, completion_mode=completion_mode,
+            )
+        return namespace["unique_exact_source_workflow_run"](
+            selected_run, path=path, name=name, events=events,
+            label="late:product_state" if boundary == "late_privileged" else "product_state",
+        )
+
+    return validate, calls
+
+
+def _product_state_inventory_rows():
+    target = {
+        "id": 77, "run_number": 77, "run_attempt": 1,
+        "head_sha": "1" * 40, "head_branch": "main",
+        "path": ".github/workflows/product-state-current.yml",
+        "name": "Product State Current", "event": "workflow_run",
+        "status": "completed", "conclusion": "success",
+        "head_repository": {"full_name": "owner/repository"},
+    }
+    failed = {**target, "id": 78, "run_number": 76, "conclusion": "failure"}
+    return target, failed
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+@pytest.mark.parametrize("failure_first", [True, False])
+def test_product_state_workflow_accepts_only_validated_failed_sibling(boundary, failure_first):
+    target, failed = _product_state_inventory_rows()
+    rows = [failed, target] if failure_first else [target, failed]
+    validate, calls = _product_state_inventory_boundary(boundary, rows, {77: target, 78: failed})
+    validate()
+    assert "actions/runs/78/attempts/1" in calls
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+def test_product_state_workflow_accepts_observed_fafd_failure_success_list(boundary):
+    source = "fafd6a852c83670fb0377e20fd1432ee51998c78"
+    repository = "betelgeuze-kang/Structural-Analysis"
+    target, _ = _product_state_inventory_rows()
+    target = {
+        **target, "id": 38354652295, "run_number": 101, "head_sha": source,
+        "head_repository": {"full_name": repository},
+    }
+    failed = {**target, "id": 38339482507, "run_number": 100, "conclusion": "failure"}
+    validate, calls = _product_state_inventory_boundary(
+        boundary, [target, failed], {target["id"]: target, failed["id"]: failed},
+        source=source, selected_run=target["id"], repository=repository,
+    )
+    validate()
+    assert "actions/runs/38339482507/attempts/1" in calls
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"conclusion": "success"},
+        {"status": "in_progress", "conclusion": None},
+        {"run_attempt": 2}, {"run_attempt": True}, {"run_attempt": 1.0},
+        {"status": "in_progress"}, {"head_sha": "2" * 40},
+        {"head_branch": "other"}, {"path": ".github/workflows/other.yml"},
+        {"name": "Other"}, {"event": "push"},
+        {"event": []}, {"head_repository": []},
+        {"head_repository": {"full_name": "other/repository"}},
+        {"run_number": True}, {"id": True}, {"id": 77},
+    ],
+)
+def test_product_state_workflow_rejects_invalid_or_ambiguous_failed_sibling(boundary, mutation):
+    target, failed = _product_state_inventory_rows()
+    failed = {**failed, **mutation}
+    validate, _ = _product_state_inventory_boundary(boundary, [target, failed], {77: target, 78: failed})
+    with pytest.raises(SystemExit):
+        validate()
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+@pytest.mark.parametrize(
+    "field",
+    ["id", "run_number", "run_attempt", "status", "conclusion", "head_sha",
+     "head_branch", "path", "name", "event", "head_repository"],
+)
+def test_product_state_workflow_rejects_incomplete_failed_sibling(boundary, field):
+    target, failed = _product_state_inventory_rows()
+    del failed[field]
+    validate, _ = _product_state_inventory_boundary(boundary, [target, failed], {77: target, 78: failed})
+    with pytest.raises(SystemExit):
+        validate()
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"run_number": 99}, {"id": 79}, {"run_attempt": 2}, {"run_attempt": 1.0},
+        {"head_sha": "2" * 40}, {"path": ".github/workflows/other.yml"},
+        {"head_repository": {"full_name": "other/repository"}},
+        {"conclusion": "success"}, {"status": "in_progress"},
+        {"event": []},
+    ],
+)
+def test_product_state_workflow_rejects_failed_sibling_refetch_drift(boundary, mutation):
+    target, failed = _product_state_inventory_rows()
+    validate, _ = _product_state_inventory_boundary(
+        boundary, [target, failed], {77: target, 78: {**failed, **mutation}},
+    )
+    with pytest.raises(SystemExit):
+        validate()
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+@pytest.mark.parametrize("total_count", [1, 3, 2.0, True])
+def test_product_state_workflow_rejects_incomplete_inventory_before_filtering(boundary, total_count):
+    target, failed = _product_state_inventory_rows()
+    validate, _ = _product_state_inventory_boundary(
+        boundary, [target, failed], {77: target, 78: failed}, total_count=total_count,
+    )
+    with pytest.raises(SystemExit):
+        validate()
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+def test_failed_sibling_exception_is_product_state_only(boundary):
+    target, failed = _product_state_inventory_rows()
+    target = {**target, "path": ".github/workflows/example.yml", "name": "Example", "event": "push"}
+    failed = {**failed, "path": target["path"], "name": target["name"], "event": target["event"]}
+    validate, _ = _product_state_inventory_boundary(boundary, [target, failed], {77: target, 78: failed})
+    with pytest.raises(SystemExit):
+        validate(path=target["path"], name=target["name"], events={"push"})
+
+
+@pytest.mark.parametrize("direct_target", [False, True])
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"conclusion": "failure"}, {"run_attempt": 2},
+        {"head_sha": "2" * 40}, {"path": ".github/workflows/other.yml"},
+        {"head_repository": {"full_name": "other/repository"}},
+        {"run_number": 99},
+    ],
+)
+def test_privileged_product_state_target_gates_still_reject_drift(direct_target, mutation):
+    tree = _inline_tree()
+    functions = [
+        node for node in tree.body if isinstance(node, ast.FunctionDef)
+        and node.name in {"fail", "require", "positive", "canonical", "same_fields",
+                          "workflow_run", "unique_exact_source_workflow_run"}
+    ]
+    start = next(
+        index for index, node in enumerate(tree.body)
+        if isinstance(node, ast.Assign)
+        and "product_state_inventory_row" in _assignment_names(node)
+    )
+    target, failed = _product_state_inventory_rows()
+    inventory_target = target if direct_target else {**target, **mutation}
+    direct = target if not direct_target else {**target, **mutation}
+
+    def api(endpoint, label):
+        if endpoint.startswith("actions/workflows/"):
+            return {"workflow_runs": [failed, inventory_target], "total_count": 2}
+        return {77: direct, 78: failed}[int(endpoint.split("/")[2])]
+
+    namespace = {
+        "MAX_SAFE": 9_007_199_254_740_991,
+        "PurePosixPath": PurePosixPath, "quote": quote, "json": json,
+        "source": "1" * 40, "repository": "owner/repository", "api": api,
+        "product_state_run_id": 77,
+    }
+    with pytest.raises(SystemExit):
+        exec(
+            compile(ast.Module(body=functions + tree.body[start:start + 3], type_ignores=[]),
+                    "<actual-product-state-selection-and-refetch>", "exec"),
+            namespace,
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [{"conclusion": "failure"}, {"run_attempt": 2}, {"head_sha": "2" * 40},
+     {"head_repository": {"full_name": "other/repository"}},
+     {"path": ".github/workflows/other.yml"}, {"run_attempt": True}],
+)
+def test_terminal_product_state_target_must_still_be_successful(mutation):
+    target, failed = _product_state_inventory_rows()
+    target = {**target, **mutation}
+    validate, _ = _product_state_inventory_boundary("terminal", [target, failed], {77: target, 78: failed})
+    with pytest.raises(SystemExit, match="terminal_unique_run_identity_invalid"):
+        validate()
+
+
+@pytest.mark.parametrize(
+    ("status", "conclusion"),
+    [("completed", "failure"), ("in_progress", None)],
+)
+def test_actual_late_product_state_recheck_rejects_unsuccessful_target(status, conclusion):
+    tree = _inline_tree()
+    functions = [
+        node for node in tree.body if isinstance(node, ast.FunctionDef)
+        and node.name in {"fail", "require", "positive", "canonical", "same_fields",
+                          "workflow_run", "unique_exact_source_workflow_run"}
+    ]
+    late_loop = next(
+        node for node in tree.body if isinstance(node, ast.For)
+        and isinstance(node.iter, ast.Name) and node.iter.id == "late_specs"
+    )
+    target, failed = _product_state_inventory_rows()
+    target = {**target, "status": status, "conclusion": conclusion}
+
+    def api(endpoint, label):
+        if endpoint.startswith("actions/workflows/"):
+            return {"workflow_runs": [target, failed], "total_count": 2}
+        return {77: target, 78: failed}[int(endpoint.split("/")[2])]
+
+    namespace = {
+        "MAX_SAFE": 9_007_199_254_740_991,
+        "PurePosixPath": PurePosixPath, "quote": quote, "json": json,
+        "source": "1" * 40, "repository": "owner/repository", "api": api,
+        "late_specs": [(77, target["path"], target["name"], {"workflow_run"}, "product_state")],
+    }
+    with pytest.raises(SystemExit):
+        exec(
+            compile(ast.Module(body=functions + [late_loop], type_ignores=[]),
+                    "<actual-late-product-state-recheck>", "exec"),
+            namespace,
+        )
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+def test_failed_sibling_policy_preserves_active_generator_candidate(boundary):
+    target, _ = _product_state_inventory_rows()
+    target = {
+        **target, "path": ".github/workflows/current-main-evidence-index.yml",
+        "name": "Current Main Evidence Index", "status": "in_progress", "conclusion": None,
+    }
+    validate, _ = _product_state_inventory_boundary(boundary, [target], {77: target})
+    validate(path=target["path"], name=target["name"], completion_mode="active")
+
+
+@pytest.mark.parametrize("boundary", ["privileged", "late_privileged", "terminal"])
+def test_product_state_workflow_rejects_duplicate_failed_siblings_before_filtering(boundary):
+    target, failed = _product_state_inventory_rows()
+    validate, calls = _product_state_inventory_boundary(
+        boundary, [target, failed, dict(failed)], {77: target, 78: failed},
+    )
+    with pytest.raises(SystemExit):
+        validate()
+    assert not any("/attempts/1" in endpoint for endpoint in calls)
+
+
 def test_final_publish_uses_one_exact_root_and_reauthenticates_archive() -> None:
     privileged = WORKFLOW.read_text().split("  attest-index:\n", 1)[1]
     assert "Stage exact single-root final artifact" in privileged
