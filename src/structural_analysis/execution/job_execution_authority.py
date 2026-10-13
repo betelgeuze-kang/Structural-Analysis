@@ -100,6 +100,19 @@ class ExecutionBinding:
     root: str
 
 
+@dataclass(frozen=True)
+class ExistingOrdinalTrialMember:
+    """Trusted caller scope for an already registered historical context.
+
+    A context digest is opaque here. This view does not recalculate, reinterpret,
+    or authorize numerical continuation of a context from an older source tree.
+    """
+
+    job_id: str
+    request_hash: str
+    context_hash: str
+
+
 def _integer(value, *, minimum=0):
     if type(value) is not int or not minimum <= value <= 2**63 - 1:
         raise ExecutionAuthorityError("invalid authority integer")
@@ -178,6 +191,104 @@ class JobExecutionAuthority:
         except sqlite3.Error as exc:
             raise ExecutionAuthorityError(
                 "authority database unavailable or invalid"
+            ) from exc
+        finally:
+            if db is not None:
+                db.close()
+
+    def _readonly_database_pin(self):
+        path = self.directory / "authority.sqlite3"
+        if self.directory.is_symlink() or path.is_symlink():
+            raise ExecutionAuthorityError("authority unavailable")
+        observed = path.stat(follow_symlinks=False)
+        if not stat.S_ISREG(observed.st_mode) or observed.st_nlink != 1:
+            raise ExecutionAuthorityError("authority database pin invalid")
+        # This authority normally uses rollback journaling, unlike copied job
+        # stores. A SQLite ro connection can still change a WAL shared-memory
+        # file. Do not silently ignore active WAL with immutable=1 or recover a
+        # journal to obtain an apparently read-only historical observation.
+        for suffix in ("-wal", "-shm", "-journal"):
+            sidecar = Path(str(path) + suffix)
+            if sidecar.exists() or sidecar.is_symlink():
+                raise ExecutionAuthorityError(
+                    "readonly authority requires no journal or WAL sidecars"
+                )
+        # A closed WAL database can have no sidecars. Opening it with mode=ro
+        # can still create shared-memory state, so inspect the persisted format
+        # through an ordinary read-only descriptor before SQLite opens it.
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)
+        try:
+            opened = os.fstat(fd)
+            if (
+                not stat.S_ISREG(opened.st_mode)
+                or opened.st_nlink != 1
+                or (opened.st_dev, opened.st_ino) != (observed.st_dev, observed.st_ino)
+            ):
+                raise ExecutionAuthorityError("authority database pin changed")
+            header = os.read(fd, 100)
+            if (
+                len(header) != 100
+                or header[:16] != b"SQLite format 3\x00"
+                or header[18:20] != b"\x01\x01"
+            ):
+                raise ExecutionAuthorityError(
+                    "readonly authority requires persisted rollback journal format"
+                )
+        finally:
+            os.close(fd)
+        return observed.st_dev, observed.st_ino
+
+    @contextmanager
+    def _readonly_connection(self):
+        db = None
+        try:
+            pin = self._readonly_database_pin()
+            path = self.directory / "authority.sqlite3"
+            db = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=5)
+
+            def authorize(action, first, second, _database, _trigger):
+                if action in (
+                    sqlite3.SQLITE_READ,
+                    sqlite3.SQLITE_SELECT,
+                    sqlite3.SQLITE_TRANSACTION,
+                ):
+                    return sqlite3.SQLITE_OK
+                if action == sqlite3.SQLITE_FUNCTION and second in (
+                    "count",
+                    "sum",
+                    "max",
+                    "length",
+                ):
+                    return sqlite3.SQLITE_OK
+                if (
+                    action == sqlite3.SQLITE_PRAGMA
+                    and first == "query_only"
+                    and second == "ON"
+                ):
+                    return sqlite3.SQLITE_OK
+                if (
+                    action == sqlite3.SQLITE_PRAGMA
+                    and first == "table_info"
+                    and second
+                    in ("job_execution_permit_namespaces", "job_execution_permit_jobs")
+                ):
+                    return sqlite3.SQLITE_OK
+                return sqlite3.SQLITE_DENY
+
+            db.set_authorizer(authorize)
+            db.execute("PRAGMA query_only=ON")
+            db.execute("BEGIN")
+            if self._readonly_database_pin() != pin:
+                raise ExecutionAuthorityError("authority database changed")
+            yield db
+            db.commit()
+            db.close()
+            db = None
+            if self._readonly_database_pin() != pin:
+                raise ExecutionAuthorityError("authority database changed")
+        except (sqlite3.Error, OSError) as exc:
+            raise ExecutionAuthorityError(
+                "readonly authority unavailable or invalid"
             ) from exc
         finally:
             if db is not None:
@@ -341,7 +452,16 @@ class JobExecutionAuthority:
             self._budget(db, binding, job_id, request_hash)
             return spent
 
-    def _budget(self, db, binding, job_id, request_hash, *, require_permit=True):
+    def _budget(
+        self,
+        db,
+        binding,
+        job_id,
+        request_hash,
+        *,
+        require_permit=True,
+        permit_readonly=False,
+    ):
         row = db.execute(
             "SELECT request_hash, maximum, spent, adopted_spent FROM budgets WHERE job_id=?",
             (job_id,),
@@ -355,6 +475,7 @@ class JobExecutionAuthority:
                 namespace_key="managed",
                 job_id=job_id,
                 request_hash=request_hash,
+                readonly=permit_readonly,
             )
         maximum = _integer(row[1], minimum=1)
         spent, adopted = _integer(row[2]), _integer(row[3])
@@ -480,8 +601,10 @@ class JobExecutionAuthority:
                 db, binding, job_id, request_hash, context_hash
             )
 
-    def _ordinal_credits(self, db, binding, job_id, request_hash, context_hash):
-        self._budget(db, binding, job_id, request_hash)
+    def _ordinal_credits(
+        self, db, binding, job_id, request_hash, context_hash, *, permit_readonly=False
+    ):
+        self._budget(db, binding, job_id, request_hash, permit_readonly=permit_readonly)
         # Read NEVER creates or repairs a missing credit namespace.
         names = {
             r[0]
@@ -634,6 +757,144 @@ class JobExecutionAuthority:
                 raise ExecutionAuthorityError("ordinal registered request mismatch")
             context = _credit_hash(row[1])
             return self._ordinal_credits(db, binding, job_id, request_hash, context)
+
+    def read_existing_ordinal_trial_snapshot(self, binding, members):
+        """Observe one existing owner without enrollment, repair or spending.
+
+        The trusted caller must name every member of this external authority.
+        API and phase ceilings are nonrefundable reservations, including unknown
+        or failed-before-launch work. Claims, elapsed time, retained storage and
+        completed numerical work are not recorded by this authority and are not
+        inferred. This observation never admits another run or changes a cap.
+
+        The single-host generation fence and one SQLite read transaction bind
+        every member to one external snapshot. Active journal/WAL layouts are
+        rejected rather than read through a stale immutable or copied database.
+        """
+        if type(members) is not tuple or not 1 <= len(members) <= 32:
+            raise ExecutionAuthorityError("invalid existing trial membership")
+        expected = {}
+        for member in members:
+            if (
+                type(member) is not ExistingOrdinalTrialMember
+                or type(member.job_id) is not str
+                or re.fullmatch(r"job_[0-9a-f]{32}", member.job_id) is None
+                or member.job_id in expected
+            ):
+                raise ExecutionAuthorityError("invalid existing trial membership")
+            _credit_hash(member.request_hash)
+            _credit_hash(member.context_hash)
+            expected[member.job_id] = (member.request_hash, member.context_hash)
+        with self._lock(), self._readonly_connection() as db:
+            self._require(db, binding)
+            actual_rows = db.execute(
+                "SELECT job_id,request_hash FROM budgets LIMIT 33"
+            ).fetchall()
+            actual = dict(actual_rows)
+            if len(actual_rows) != len(expected) or actual != {
+                job: hashes[0] for job, hashes in expected.items()
+            }:
+                raise ExecutionAuthorityError("existing trial membership differs")
+            context_rows = db.execute(
+                "SELECT job_id,request_hash,context_hash "
+                "FROM ordinal_credit_budgets LIMIT 33"
+            ).fetchall()
+            actual_contexts = {
+                job: (request, context) for job, request, context in context_rows
+            }
+            if len(context_rows) != len(expected) or actual_contexts != expected:
+                raise ExecutionAuthorityError("existing trial contexts differ")
+            permit_rows = db.execute(
+                "SELECT job_id,request_hash FROM job_execution_permit_jobs "
+                "WHERE namespace_key='managed' LIMIT 33"
+            ).fetchall()
+            if len(permit_rows) != len(expected) or dict(permit_rows) != actual:
+                raise ExecutionAuthorityError(
+                    "existing trial permit membership differs"
+                )
+            # Bound traversal before the existing journal validators fetch rows.
+            for table in ("reservations", "ordinal_credit_reservations"):
+                if db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] > 4096:
+                    raise ExecutionAuthorityError("readonly trial journal too large")
+                journal_jobs = db.execute(
+                    f"SELECT DISTINCT job_id FROM {table} LIMIT 33"
+                ).fetchall()
+                if any(job not in expected for (job,) in journal_jobs):
+                    raise ExecutionAuthorityError(
+                        "readonly trial journal has orphan work"
+                    )
+            total_payload, maximum_payload = db.execute(
+                "SELECT SUM(LENGTH(CAST(payload_json AS BLOB))),"
+                "MAX(LENGTH(CAST(payload_json AS BLOB))) "
+                "FROM ordinal_credit_reservations"
+            ).fetchone()
+            if (total_payload or 0) > 4 * 1024**2 or (maximum_payload or 0) > 16384:
+                raise ExecutionAuthorityError("readonly trial payload too large")
+            result = []
+            for member in members:
+                api = self._budget(
+                    db,
+                    binding,
+                    member.job_id,
+                    member.request_hash,
+                    permit_readonly=True,
+                )
+                credits = self._ordinal_credits(
+                    db,
+                    binding,
+                    member.job_id,
+                    member.request_hash,
+                    member.context_hash,
+                    permit_readonly=True,
+                )
+                result.append(
+                    {
+                        "job_id": member.job_id,
+                        "request_hash": member.request_hash,
+                        "context_hash": member.context_hash,
+                        "api": api,
+                        "production": credits["production"],
+                        "verification": credits["verification"],
+                        "ordinal_grant_count": len(credits["reservations"]),
+                        "numerical_work": "unknown",
+                    }
+                )
+            aggregate = {
+                "api": {
+                    field: _integer(sum(row["api"][field] for row in result))
+                    for field in (
+                        "maximum_attempts",
+                        "reserved_attempts",
+                        "remaining_attempts",
+                        "adopted_reserved_attempts",
+                    )
+                },
+                **{
+                    phase: {
+                        field: _integer(sum(row[phase][field] for row in result))
+                        for field in ("maximum", "reserved", "remaining")
+                    }
+                    for phase in ("production", "verification")
+                },
+            }
+            return {
+                "schema_version": "existing-ordinal-trial-budget-snapshot.v1",
+                "authority_id": binding.authority_id,
+                "authority_generation": binding.generation,
+                "authority_root": binding.root,
+                "members": result,
+                "aggregate": aggregate,
+                "read_only": True,
+                "reconciled": False,
+                "new_run_admitted": False,
+                "unobserved": [
+                    "claims",
+                    "elapsed_time",
+                    "retained_storage",
+                    "completed_numerical_work",
+                    "source_bytes",
+                ],
+            }
 
     def reserve_ordinal_credits(
         self,

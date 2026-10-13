@@ -235,7 +235,11 @@ def _check_job_path(directory, directory_fd, name, fd, expected=None):
     return _pin(observed)
 
 
-def _registered_job(db, directory, namespace_key, job_id, request_hash):
+def _registered_job(
+    db, directory, namespace_key, job_id, request_hash, *, readonly=False
+):
+    if type(readonly) is not bool:
+        _fail("invalid", "Invalid permit descriptor mode.")
     _job(job_id, request_hash)
     path, directory_fd = _open_namespace(db, directory, namespace_key)
     fd = None
@@ -253,7 +257,10 @@ def _registered_job(db, directory, namespace_key, job_id, request_hash):
         name = f"{job_id}.lock"
         fd = os.open(
             name,
-            os.O_RDWR | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC,
+            (os.O_RDONLY if readonly else os.O_RDWR)
+            | os.O_NOFOLLOW
+            | os.O_NONBLOCK
+            | os.O_CLOEXEC,
             dir_fd=directory_fd,
         )
         _check_job_path(path, directory_fd, name, fd, (row[1], row[2]))
@@ -266,11 +273,11 @@ def _registered_job(db, directory, namespace_key, job_id, request_hash):
 
 
 def validate_execution_permit_registration(
-    db, *, directory, namespace_key, job_id, request_hash
+    db, *, directory, namespace_key, job_id, request_hash, readonly=False
 ):
     try:
         _path, directory_fd, _name, fd, _expected = _registered_job(
-            db, directory, namespace_key, job_id, request_hash
+            db, directory, namespace_key, job_id, request_hash, readonly=readonly
         )
         os.close(fd)
         os.close(directory_fd)

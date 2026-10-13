@@ -82,3 +82,40 @@ successful restoration, and a report do not establish specimen equivalence,
 independent physical validation, design approval, or release qualification.
 
 The existing v6/v7 operation retains its independent input limits and semantics.
+
+## Existing-owner budget observation
+
+`JobExecutionAuthority.read_existing_ordinal_trial_snapshot(binding, members)`
+reads the already registered external owner without constructing a job service,
+enrolling a store, reconciling an import, reserving work, or changing a cap. Pass
+an explicit tuple of `ExistingOrdinalTrialMember(job_id, request_hash,
+context_hash)` values covering every registered job in that owner. Missing,
+extra, duplicate or mismatched membership is rejected. Context hashes remain
+opaque historical bindings; this operation does not reconstruct source bytes
+or authorize an older checkpoint under current numerical code.
+The registered permit list must match that membership too. A reservation for
+an undeclared or unregistered job is rejected rather than omitted from totals;
+the view does not repair or erase unexplained history.
+
+A shared generation fence and one SQLite read transaction cover all members.
+The connection uses `mode=ro` and `query_only=ON`; SQL authorization rejects
+writes and job permit pins are inspected through read-only descriptors. The
+external authority normally uses rollback journaling. Any existing journal,
+WAL or shared-memory sidecar makes this view unavailable, rather than causing
+recovery, sidecar creation, or an `immutable=1` read which could hide live WAL.
+A read-only header check also rejects persisted WAL mode before SQLite opens
+the database, even when a closed database has no sidecars.
+This is not a read-only view of the copied `jobs.sqlite3` store. A busy or
+changing authority must be observed again after its state can be checked safely.
+
+Traversal is bounded to 32 declared jobs, 4,096 records in each journal table,
+4 MiB of stored credit JSON and 16 KiB per credit payload. An oversized journal
+is rejected without returning a partial total. The result retains adopted API
+reservations, zero-ceiling grants and all production/verification ceilings;
+failed-before-launch and unknown work is never refunded or reported as completed.
+
+The snapshot does not observe claim counts, elapsed time, retained storage,
+completed numerical work or source bytes. These remain separate checks. A
+historical budget snapshot is an observation of the existing single-host custody
+contract, not distributed authentication, numerical continuation permission,
+new-run admission, physical validation or release qualification.
