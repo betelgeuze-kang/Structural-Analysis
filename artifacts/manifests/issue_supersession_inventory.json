@@ -1,9 +1,9 @@
 {
   "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-10-12T07:21:15Z",
+  "observed_at": "2026-10-13T01:27:30Z",
   "observation_source": "github_rest_read_only_current_github_state",
-  "observed_open_issue_count": 51,
+  "observed_open_issue_count": 49,
   "open_issue_numbers": [
     247,
     258,
@@ -45,7 +45,6 @@
     584,
     590,
     592,
-    594,
     596,
     598,
     600,
@@ -54,10 +53,9 @@
     612,
     621,
     622,
-    623,
-    626
+    623
   ],
-  "open_issue_projection_sha256": "sha256:c66e669714a53acc802c4c21b567db7413c408c50b6c11ee02e7fd4f3199eb09",
+  "open_issue_projection_sha256": "sha256:78a647b86962621faaacd5f8330c283e22a574f962c567286f8bf4580d62d8e5",
   "open_issues": [
     {
       "number": 247,
@@ -840,24 +838,6 @@
     {
       "classification": "repository_implementation",
       "linked_pull_requests": [
-        595
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_exact_scalar_mass_modal_path",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:2753302f2f5836043c1b2b0c50a0b307453e8fe68fddfb12e90bee6576accff2",
-      "labels": [],
-      "number": 594,
-      "state": "open",
-      "title": "Reduce exact scalar-mass modal work while retaining spectral checks",
-      "updated_at": "2026-10-08T16:20:36Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/594"
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
         597
       ],
       "merged_implementation_pull_requests": [],
@@ -1016,24 +996,6 @@
       "title": "RC fixed-guided axial input through durable restart and reports",
       "updated_at": "2026-10-11T13:41:25Z",
       "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/623"
-    },
-    {
-      "classification": "repository_implementation",
-      "linked_pull_requests": [
-        625
-      ],
-      "merged_implementation_pull_requests": [],
-      "disposition": "await_verified_fixed_corotational_loads_and_displacement_reversal",
-      "required_external_inputs": [],
-      "closable_by_repository_code_alone": true,
-      "current_product_authority": false,
-      "body_sha256": "sha256:70f791180ed68dc0bec2d055cfe633437ec36bc02c5b61658014454c4d859025",
-      "labels": [],
-      "number": 626,
-      "state": "open",
-      "title": "Support fixed axial loads during corotational displacement reversals",
-      "updated_at": "2026-10-11T23:27:38Z",
-      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/626"
     }
   ],
   "implemented_but_open_issues": [

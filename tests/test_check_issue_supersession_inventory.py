@@ -208,7 +208,6 @@ def test_inventory_tracks_complete_queue_and_offline_non_authoritative() -> None
         584,
         590,
         592,
-        594,
         596,
         598,
         600,
@@ -218,7 +217,6 @@ def test_inventory_tracks_complete_queue_and_offline_non_authoritative() -> None
         621,
         622,
         623,
-        626,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -244,7 +242,7 @@ def test_snapshot_retains_reviewed_boundaries_and_historical_records() -> None:
     payload = _payload()
     rows = {row["number"]: row for row in payload["open_issues"]}
     external_numbers = {247, 258, 260, 290, 291, 293, 297, 438, 475, 480, 486}
-    assert len(rows) == 51
+    assert len(rows) == 49
     assert payload["observation_source"] == "github_rest_read_only_current_github_state"
     for number, row in rows.items():
         assert row["current_product_authority"] is False
@@ -262,7 +260,6 @@ def test_snapshot_retains_reviewed_boundaries_and_historical_records() -> None:
         (621, 620),
         (622, 619),
         (623, 624),
-        (626, 625),
     ):
         assert rows[issue_number]["linked_pull_requests"] == [pull_request_number]
         assert rows[issue_number]["merged_implementation_pull_requests"] == []
