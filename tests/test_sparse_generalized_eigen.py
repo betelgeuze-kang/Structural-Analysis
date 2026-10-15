@@ -10,7 +10,7 @@ from structural_analysis.solvers.buckling import solve_linear_buckling
 from structural_analysis.solvers.modal import solve_modal_modes
 from structural_analysis.solvers.sparse_generalized_eigen import (
     SPARSE_BUCKLING_PROFILE,
-    SPARSE_MODAL_PROFILE,
+    SPARSE_DIAGONAL_MODAL_PROFILE,
     SparseGeneralizedEigenError,
     solve_sparse_linear_buckling,
     solve_sparse_modal_modes,
@@ -30,12 +30,12 @@ def test_sparse_modal_matches_dense_reference_without_fallback() -> None:
         rel=1.0e-11,
         abs=1.0e-12,
     )
-    assert sparse.backend_profile == SPARSE_MODAL_PROFILE
+    assert sparse.backend_profile == SPARSE_DIAGONAL_MODAL_PROFILE
     assert sparse.native_sparse_input is True
     assert sparse.regularization_applied is False
     assert sparse.fallback_used is False
     assert sparse.contract_pass is True
-    assert sparse.candidate_eigenpair_count < sparse.dof_count
+    assert sparse.candidate_eigenpair_count == sparse.dof_count
     assert max(mode.residual_relative_inf for mode in sparse.modes) <= 1.0e-9
 
 
