@@ -656,54 +656,78 @@ jobs:
                   len(set(inventory_ids)) == len(inventory_ids),
                   "workflow_run_inventory_invalid:" + label,
               )
-              if (
-                  path == ".github/workflows/product-state-current.yml"
-                  and name == "Product State Current" and events == {"workflow_run"}
+              lineage_completion = None
+              if (path, name, events) == (
+                  ".github/workflows/current-main-evidence-index.yml",
+                  "Current Main Evidence Index", {"workflow_run"},
               ):
-                  candidates = []
+                  lineage_completion = "active"
+              elif (path, name, events) in (
+                  (
+                      ".github/workflows/product-state-current.yml",
+                      "Product State Current", {"workflow_run"},
+                  ),
+                  (
+                      ".github/workflows/nightly-full-quality.yml",
+                      "Nightly Full Quality", {"schedule", "workflow_dispatch"},
+                  ),
+              ):
+                  lineage_completion = "success"
+              if lineage_completion is not None:
+                  # Only trusted causal run IDs permit repeated same-source history.
+                  # Keep the complete inventory and authenticate every other run.
+                  candidates = [row for row in rows if row["id"] == run]
+                  require(
+                      len(candidates) == 1,
+                      "unique_exact_source_workflow_run_required:" + label,
+                  )
                   for row in rows:
-                      if (
-                          row["id"] != run and row.get("status") == "completed"
-                          and row.get("conclusion") == "failure"
-                          and type(row.get("run_attempt")) is int and row["run_attempt"] == 1
-                      ):
-                          positive(row.get("run_number"), "failed_sibling_run_number:" + label)
+                      if row["id"] != run:
+                          positive(row.get("run_number"), "lineage_sibling_run_number:" + label)
                           head_repository = row.get("head_repository")
                           require(
-                              row.get("head_sha") == source and row.get("head_branch") == "main"
+                              row.get("status") == "completed"
+                              and row.get("conclusion") in ("success", "failure")
+                              and type(row.get("run_attempt")) is int
+                              and row["run_attempt"] == 1
+                              and row.get("head_sha") == source and row.get("head_branch") == "main"
                               and row.get("path") == path and row.get("name") == name
                               and isinstance(row.get("event"), str)
                               and row.get("event") in events
                               and isinstance(head_repository, dict)
                               and head_repository.get("full_name") == repository,
-                              "failed_sibling_identity_invalid:" + label,
+                              "lineage_sibling_identity_invalid:" + label,
                           )
-                          failed = workflow_run(
+                          historical = workflow_run(
                               row["id"], path=path, name=name, events=events,
-                              label="failed_sibling:" + label, expected_conclusion="failure",
+                              label="lineage_sibling:" + label,
+                              expected_conclusion=row["conclusion"],
                           )
                           require(
                               same_fields(
-                                  row, failed,
+                                  row, historical,
                                   (
                                       "id", "run_number", "run_attempt", "status", "conclusion",
                                       "head_sha", "head_branch", "path", "name", "event",
                                   ),
                               ),
-                              "failed_sibling_list_refetch_mismatch:" + label,
+                              "lineage_sibling_list_refetch_mismatch:" + label,
                           )
-                      else:
-                          candidates.append(row)
                   rows = candidates
-                  if len(rows) == 1:
-                      head_repository = rows[0].get("head_repository")
-                      require(
-                          isinstance(head_repository, dict)
-                          and head_repository.get("full_name") == repository
+                  head_repository = rows[0].get("head_repository")
+                  require(
+                      isinstance(head_repository, dict)
+                      and head_repository.get("full_name") == repository
+                      and (
+                          lineage_completion == "active"
+                          and rows[0].get("status") == "in_progress"
+                          and rows[0].get("conclusion") is None
+                          or lineage_completion == "success"
                           and rows[0].get("status") == "completed"
-                          and rows[0].get("conclusion") == "success",
-                          "workflow_run_identity_invalid:" + label,
-                      )
+                          and rows[0].get("conclusion") == "success"
+                      ),
+                      "workflow_run_identity_invalid:" + label,
+                  )
               require(
                   len(rows) == 1 and type(rows[0].get("id")) is int
                   and rows[0].get("id") == run
@@ -838,7 +862,7 @@ jobs:
               events={"workflow_run"}, label="generator",
           )
           expected_name = f"current-main-evidence-index-candidate-{run_id}-1-{source}"
-          workflow_run = metadata.get("workflow_run") if isinstance(metadata, dict) else None
+          candidate_workflow_run = metadata.get("workflow_run") if isinstance(metadata, dict) else None
           require(
               type(metadata.get("id")) is int
               and metadata.get("id") == artifact_id
@@ -849,11 +873,11 @@ jobs:
               and 0 < metadata["size_in_bytes"] <= MAX_ARCHIVE
               and metadata.get("url") == artifact_url
               and metadata.get("archive_download_url") == artifact_url + "/zip"
-              and isinstance(workflow_run, dict)
-              and type(workflow_run.get("id")) is int
-              and workflow_run.get("id") == run_id
-              and workflow_run.get("head_sha") == source
-              and workflow_run.get("head_branch") == "main",
+              and isinstance(candidate_workflow_run, dict)
+              and type(candidate_workflow_run.get("id")) is int
+              and candidate_workflow_run.get("id") == run_id
+              and candidate_workflow_run.get("head_sha") == source
+              and candidate_workflow_run.get("head_branch") == "main",
               "candidate_metadata_identity_invalid",
           )
           require(
@@ -4119,57 +4143,64 @@ jobs:
                   len(set(inventory_ids)) == len(inventory_ids),
                   "terminal_unique_run_inventory_invalid",
               )
-              if (
-                  workflow_path == ".github/workflows/product-state-current.yml"
-                  and workflow_name == "Product State Current"
-                  and allowed_events == {"workflow_run"} and completion_mode == "success"
+              lineage_specification = (workflow_path, workflow_name, allowed_events, completion_mode)
+              if lineage_specification in (
+                  (
+                      ".github/workflows/current-main-evidence-index.yml",
+                      "Current Main Evidence Index", {"workflow_run"}, "active",
+                  ),
+                  (
+                      ".github/workflows/product-state-current.yml",
+                      "Product State Current", {"workflow_run"}, "success",
+                  ),
+                  (
+                      ".github/workflows/nightly-full-quality.yml",
+                      "Nightly Full Quality", {"schedule", "workflow_dispatch"}, "success",
+                  ),
               ):
-                  candidates = []
+                  candidates = [row for row in rows if row["id"] == selected_run]
+                  require(len(candidates) == 1, "terminal_unique_run_inventory_invalid")
                   for candidate in rows:
-                      if (
-                          candidate["id"] != selected_run and candidate.get("status") == "completed"
-                          and candidate.get("conclusion") == "failure"
-                          and type(candidate.get("run_attempt")) is int
-                          and candidate["run_attempt"] == 1
-                      ):
-                          positive(candidate.get("run_number"), "terminal_failed_sibling_run_number")
+                      if candidate["id"] != selected_run:
+                          positive(candidate.get("run_number"), "terminal_lineage_sibling_run_number")
                           head_repository = candidate.get("head_repository")
                           require(
-                              candidate.get("head_sha") == source and candidate.get("head_branch") == "main"
+                              candidate.get("status") == "completed"
+                              and candidate.get("conclusion") in ("success", "failure")
+                              and type(candidate.get("run_attempt")) is int
+                              and candidate["run_attempt"] == 1
+                              and candidate.get("head_sha") == source and candidate.get("head_branch") == "main"
                               and candidate.get("path") == workflow_path and candidate.get("name") == workflow_name
                               and isinstance(candidate.get("event"), str)
                               and candidate.get("event") in allowed_events
                               and isinstance(head_repository, dict)
                               and head_repository.get("full_name") == repository,
-                              "terminal_failed_sibling_identity_invalid",
+                              "terminal_lineage_sibling_identity_invalid",
                           )
-                          failed_id = candidate["id"]
-                          failed = gh_json(
-                              f"actions/runs/{failed_id}/attempts/1", "terminal_failed_sibling"
+                          historical_id = candidate["id"]
+                          historical = gh_json(
+                              f"actions/runs/{historical_id}/attempts/1", "terminal_lineage_sibling"
                           )
                           require(
-                              isinstance(failed, dict)
-                              and isinstance(failed.get("head_repository"), dict)
-                              and failed["head_repository"].get("full_name") == repository
+                              isinstance(historical, dict)
+                              and isinstance(historical.get("head_repository"), dict)
+                              and historical["head_repository"].get("full_name") == repository
                               and same_fields(
-                                  candidate, failed,
+                                  candidate, historical,
                                   (
                                       "id", "run_number", "run_attempt", "status", "conclusion",
                                       "head_sha", "head_branch", "path", "name", "event",
                                   ),
                               ),
-                              "terminal_failed_sibling_list_refetch_mismatch",
+                              "terminal_lineage_sibling_list_refetch_mismatch",
                           )
-                      else:
-                          candidates.append(candidate)
                   rows = candidates
-                  if len(rows) == 1:
-                      head_repository = rows[0].get("head_repository")
-                      require(
-                          isinstance(head_repository, dict)
-                          and head_repository.get("full_name") == repository,
-                          "terminal_unique_run_identity_invalid",
-                      )
+                  head_repository = rows[0].get("head_repository")
+                  require(
+                      isinstance(head_repository, dict)
+                      and head_repository.get("full_name") == repository,
+                      "terminal_unique_run_identity_invalid",
+                  )
               require(len(rows) == 1, "terminal_unique_run_inventory_invalid")
               row = rows[0]
               require(

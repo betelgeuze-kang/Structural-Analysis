@@ -1508,7 +1508,6 @@ def test_product_state_accepts_observed_fafd_failure_success_list() -> None:
 @pytest.mark.parametrize(
     "mutation",
     [
-        {"conclusion": "success"},
         {"status": "in_progress", "conclusion": None},
         {"run_attempt": 2},
         {"run_attempt": True},
@@ -2019,3 +2018,127 @@ def test_schema_accepts_valid_timestamp_boundaries_without_format_checker(
     schema = json.loads((ROOT / MODULE.INDEX_SCHEMA_PATH).read_text())
     validator = jsonschema.Draft202012Validator(schema)
     validator.validate(index)
+
+
+@pytest.mark.parametrize("producer", ["product_state", "nightly"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_explicit_producer_selects_requested_run_among_repeated_successes(
+    producer: str, reverse: bool,
+) -> None:
+    source, run_id, run, jobs = _product_state_fixture()
+    if producer == "nightly":
+        run = {**run, "path": MODULE.NIGHTLY_WORKFLOW_PATH,
+               "name": "Nightly Full Quality", "event": "schedule"}
+    older = {**run, "id": run_id + 1, "run_number": 1}
+    newer = {**run, "id": run_id + 2, "run_number": 999}
+    failed = {**run, "id": run_id + 3, "conclusion": "failure"}
+    rows = [newer, failed, run, older]
+    if reverse:
+        rows.reverse()
+    api = _ProductStateInventoryApi(rows, {row["id"]: row for row in rows}, jobs)
+    selector = MODULE._product_state_run if producer == "product_state" else MODULE._nightly_run
+    assert selector(api, source, run_id) == run
+    assert {f"actions/runs/{row['id']}/attempts/1" for row in rows} <= set(api.calls)
+
+
+def _explicit_inventory_shape(producer):
+    source, run_id, run, jobs = _product_state_fixture()
+    if producer == "nightly":
+        run = {**run, "path": MODULE.NIGHTLY_WORKFLOW_PATH,
+               "name": "Nightly Full Quality", "event": "schedule"}
+    selector = MODULE._product_state_run if producer == "product_state" else MODULE._nightly_run
+    return source, run_id, run, jobs, selector
+
+
+@pytest.mark.parametrize("producer", ["product_state", "nightly"])
+@pytest.mark.parametrize("rows_kind", ["empty", "missing", "duplicate_target", "duplicate_sibling"])
+def test_explicit_producer_rejects_missing_or_duplicate_identity(producer, rows_kind):
+    source, run_id, run, jobs, selector = _explicit_inventory_shape(producer)
+    sibling = {**run, "id": run_id + 1}
+    rows = {
+        "empty": [], "missing": [sibling], "duplicate_target": [run, dict(run)],
+        "duplicate_sibling": [run, sibling, dict(sibling)],
+    }[rows_kind]
+    api = _ProductStateInventoryApi(rows, {row["id"]: row for row in rows}, jobs)
+    with pytest.raises(MODULE.EvidenceIndexError):
+        selector(api, source, run_id)
+    if "duplicate" in rows_kind:
+        assert not any("/attempts/" in endpoint for endpoint in api.calls)
+
+
+@pytest.mark.parametrize("producer", ["product_state", "nightly"])
+@pytest.mark.parametrize("mutation", [
+    {"run_number": 999}, {"id": 999}, {"run_attempt": 2},
+    {"head_sha": "2" * 40}, {"head_repository": {"full_name": "other/repository"}},
+    {"path": ".github/workflows/other.yml"}, {"conclusion": "failure"},
+])
+def test_explicit_producer_rejects_successful_history_refetch_drift(producer, mutation):
+    source, run_id, run, jobs, selector = _explicit_inventory_shape(producer)
+    sibling = {**run, "id": run_id + 1}
+    api = _ProductStateInventoryApi(
+        [sibling, run], {run_id: run, run_id + 1: {**sibling, **mutation}}, jobs,
+    )
+    with pytest.raises(MODULE.EvidenceIndexError):
+        selector(api, source, run_id)
+
+
+@pytest.mark.parametrize("producer", ["product_state", "nightly"])
+@pytest.mark.parametrize("mutation", [
+    {"run_attempt": 2}, {"status": "in_progress", "conclusion": None},
+    {"conclusion": "cancelled"},
+])
+def test_explicit_producer_keeps_unqualified_sibling_rejection(producer, mutation):
+    source, run_id, run, jobs, selector = _explicit_inventory_shape(producer)
+    sibling = {**run, "id": run_id + 1, **mutation}
+    api = _ProductStateInventoryApi([sibling, run], {run_id: run, run_id + 1: sibling}, jobs)
+    with pytest.raises(MODULE.EvidenceIndexError):
+        selector(api, source, run_id)
+
+
+@pytest.mark.parametrize("producer", ["product_state", "nightly"])
+@pytest.mark.parametrize("mutation", [{"run_attempt": 2}, {"conclusion": "failure"}])
+def test_explicit_producer_never_substitutes_another_success_for_invalid_target(producer, mutation):
+    source, run_id, run, jobs, selector = _explicit_inventory_shape(producer)
+    target = {**run, **mutation}
+    sibling = {**run, "id": run_id + 1}
+    api = _ProductStateInventoryApi([sibling, target], {run_id: target, run_id + 1: sibling}, jobs)
+    with pytest.raises(MODULE.EvidenceIndexError):
+        selector(api, source, run_id)
+
+
+@pytest.mark.parametrize("producer", ["product_state", "nightly"])
+def test_explicit_producer_preserves_complete_inventory_requirement(producer):
+    source, run_id, run, jobs, selector = _explicit_inventory_shape(producer)
+    api = _ProductStateInventoryApi([run], {run_id: run}, jobs, total_count=2)
+    with pytest.raises(MODULE.EvidenceIndexError, match="inventory_invalid"):
+        selector(api, source, run_id)
+    assert not any("/attempts/" in endpoint for endpoint in api.calls)
+
+
+@pytest.mark.parametrize("producer", ["product_state", "nightly"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_explicit_producer_handles_observed_repeated_main_run_ids(producer, reverse):
+    # Public run IDs/counts observed 2026-10-18; other identity fields use a
+    # normalized test fixture, not a claim of live artifact authentication.
+    source = "fafd6a852c83670fb0377e20fd1432ee51998c78"
+    _, _, shape, _, selector = _explicit_inventory_shape(producer)
+    if producer == "product_state":
+        ids = [39076533534, 38984980086, 38824594079, 38658621879,
+               38497188909, 38354652295, 38339482507]
+    else:
+        ids = [39067608787, 38967930700, 38809874009, 38642505350,
+               38480228253, 38340754031]
+    selected = ids[0]
+    rows = [{**shape, "id": value, "run_number": number, "head_sha": source,
+             "head_repository": {"full_name": "betelgeuze-kang/Structural-Analysis"}}
+            for number, value in enumerate(ids, 1)]
+    if producer == "product_state":
+        rows[-1]["conclusion"] = "failure"
+    if reverse:
+        rows.reverse()
+    jobs = [_hosted_job(name, run_id=selected, source=source, job_id=index)
+            for index, name in enumerate(("build-current-state", "attest-current-state",
+                                         "verify-current-state", "replay-final-attestations"), 1)]
+    api = _ProductStateInventoryApi(rows, {row["id"]: row for row in rows}, jobs)
+    api.repository = "betelgeuze-kang/Structural-Analysis"
+    assert selector(api, source, selected)["id"] == selected
