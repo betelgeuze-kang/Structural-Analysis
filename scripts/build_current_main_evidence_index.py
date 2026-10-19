@@ -1062,6 +1062,7 @@ def _validate_run_common(
     workflow_name: str,
     allowed_events: set[str],
     expected_run_id: int | None = None,
+    expected_conclusion: str = "success",
 ) -> int:
     run_id = _safe_positive_integer(run.get("id"), f"run_id:{workflow_name}")
     _safe_positive_integer(run.get("run_number"), f"run_number:{workflow_name}")
@@ -1072,11 +1073,12 @@ def _validate_run_common(
         type(run.get("run_attempt")) is int
         and run.get("run_attempt") == 1
         and run.get("status") == "completed"
-        and run.get("conclusion") == "success"
+        and run.get("conclusion") == expected_conclusion
         and run.get("head_sha") == source_sha
         and run.get("head_branch") == "main"
         and run.get("path") == workflow_path
         and run.get("name") == workflow_name
+        and type(run.get("event")) is str
         and run.get("event") in allowed_events
         and type(head_repository) is dict
         and head_repository.get("full_name") == repository,
@@ -1116,6 +1118,108 @@ def _validate_github_hosted_job(
     return job_id
 
 
+
+_RUN_REFETCH_FIELDS = (
+    "id", "run_number", "run_attempt", "status", "conclusion", "head_sha",
+    "head_branch", "path", "name", "event",
+)
+
+
+def _explicit_first_attempt_run(
+    api: GitHubApi,
+    inventory: dict[str, Any],
+    *,
+    source_sha: str,
+    run_id: int,
+    workflow_path: str,
+    workflow_name: str,
+    allowed_events: set[str],
+    label: str,
+) -> dict[str, Any]:
+    """Validate bounded history while selecting only the supplied lineage ID.
+
+    Other completed first-attempt successes/failures are checked and refetched;
+    none supplies a replacement producer or weakens its artifact verification.
+    Active, cancelled and later-attempt siblings remain outside this contract.
+    """
+    _safe_positive_integer(run_id, f"{label}_run_id")
+    rows = inventory.get("workflow_runs")
+    _require(
+        type(rows) is list
+        and len(rows) <= 100
+        and all(type(row) is dict for row in rows)
+        and type(inventory.get("total_count")) is int
+        and inventory["total_count"] == len(rows),
+        f"{label}_workflow_run_inventory_invalid",
+    )
+    inventory_ids = [
+        _safe_positive_integer(row.get("id"), f"{label}_inventory_run_id")
+        for row in rows
+    ]
+    _require(
+        len(set(inventory_ids)) == len(inventory_ids),
+        f"{label}_workflow_run_inventory_invalid",
+    )
+    candidates = []
+    for row in rows:
+        if (
+            row["id"] != run_id
+            and row.get("status") == "completed"
+            and row.get("conclusion") in ("success", "failure")
+            and type(row.get("run_attempt")) is int
+            and row["run_attempt"] == 1
+        ):
+            outcome = row["conclusion"]
+            sibling_kind = "failed" if outcome == "failure" else "successful"
+            sibling_id = _validate_run_common(
+                row, repository=api.repository, source_sha=source_sha,
+                workflow_path=workflow_path, workflow_name=workflow_name,
+                allowed_events=allowed_events, expected_conclusion=outcome,
+            )
+            sibling = api.json(
+                f"actions/runs/{sibling_id}/attempts/1",
+                f"{label}_{sibling_kind}_sibling:{sibling_id}",
+            )
+            _validate_run_common(
+                sibling, repository=api.repository, source_sha=source_sha,
+                workflow_path=workflow_path, workflow_name=workflow_name,
+                allowed_events=allowed_events, expected_run_id=sibling_id,
+                expected_conclusion=outcome,
+            )
+            _require(
+                _canonical_bytes({key: row.get(key) for key in _RUN_REFETCH_FIELDS})
+                == _canonical_bytes(
+                    {key: sibling.get(key) for key in _RUN_REFETCH_FIELDS}
+                ),
+                f"{label}_{sibling_kind}_sibling_list_refetch_mismatch",
+            )
+        else:
+            candidates.append(row)
+    _require(
+        len(candidates) == 1,
+        f"{label}_unique_exact_source_run_required",
+    )
+    _validate_run_common(
+        candidates[0], repository=api.repository, source_sha=source_sha,
+        workflow_path=workflow_path, workflow_name=workflow_name,
+        allowed_events=allowed_events, expected_run_id=run_id,
+    )
+    run = api.json(f"actions/runs/{run_id}/attempts/1", f"{label}_run")
+    _validate_run_common(
+        run, repository=api.repository, source_sha=source_sha,
+        workflow_path=workflow_path, workflow_name=workflow_name,
+        allowed_events=allowed_events, expected_run_id=run_id,
+    )
+    _require(
+        _canonical_bytes(
+            {key: candidates[0].get(key) for key in _RUN_REFETCH_FIELDS}
+        )
+        == _canonical_bytes({key: run.get(key) for key in _RUN_REFETCH_FIELDS}),
+        f"{label}_run_list_refetch_mismatch",
+    )
+    return run
+
+
 def _product_state_run(
     api: GitHubApi, source_sha: str, product_state_run_id: int
 ) -> dict[str, Any]:
@@ -1128,58 +1232,10 @@ def _product_state_run(
         f"&head_sha={source_sha}&per_page=100",
         "product_state_workflow_runs",
     )
-    inventory_rows = inventory.get("workflow_runs")
-    _require(
-        type(inventory_rows) is list
-        and len(inventory_rows) <= 100
-        and all(type(row) is dict for row in inventory_rows)
-        and type(inventory.get("total_count")) is int
-        and inventory["total_count"] == len(inventory_rows),
-        "product_state_workflow_run_inventory_invalid",
-    )
-    _require(
-        len(inventory_rows) == 1,
-        "product_state_unique_exact_source_run_required",
-    )
-    _validate_run_common(
-        inventory_rows[0],
-        repository=api.repository,
-        source_sha=source_sha,
-        workflow_path=workflow_path,
-        workflow_name=workflow_name,
-        allowed_events={"workflow_run"},
-        expected_run_id=product_state_run_id,
-    )
-    run = api.json(
-        f"actions/runs/{product_state_run_id}/attempts/1", "product_state_run"
-    )
-    _validate_run_common(
-        run,
-        repository=api.repository,
-        source_sha=source_sha,
-        workflow_path=workflow_path,
-        workflow_name=workflow_name,
-        allowed_events={"workflow_run"},
-        expected_run_id=product_state_run_id,
-    )
-    run_refetch_fields = (
-        "id",
-        "run_number",
-        "run_attempt",
-        "status",
-        "conclusion",
-        "head_sha",
-        "head_branch",
-        "path",
-        "name",
-        "event",
-    )
-    _require(
-        _canonical_bytes(
-            {key: inventory_rows[0].get(key) for key in run_refetch_fields}
-        )
-        == _canonical_bytes({key: run.get(key) for key in run_refetch_fields}),
-        "product_state_run_list_refetch_mismatch",
+    run = _explicit_first_attempt_run(
+        api, inventory, source_sha=source_sha, run_id=product_state_run_id,
+        workflow_path=workflow_path, workflow_name=workflow_name,
+        allowed_events={"workflow_run"}, label="product_state",
     )
     jobs = api.json(
         f"actions/runs/{product_state_run_id}/attempts/1/jobs?per_page=100",
@@ -1994,53 +2050,11 @@ def _nightly_run(
         f"&head_sha={source_sha}&per_page=100",
         "nightly_workflow_runs",
     )
-    rows = inventory.get("workflow_runs")
-    _require(
-        type(rows) is list
-        and len(rows) <= 100
-        and all(type(row) is dict for row in rows)
-        and type(inventory.get("total_count")) is int
-        and inventory["total_count"] == len(rows),
-        "nightly_workflow_run_inventory_invalid",
+    return _explicit_first_attempt_run(
+        api, inventory, source_sha=source_sha, run_id=nightly_run_id,
+        workflow_path=NIGHTLY_WORKFLOW_PATH, workflow_name=workflow_name,
+        allowed_events={"schedule", "workflow_dispatch"}, label="nightly",
     )
-    _require(len(rows) == 1, "nightly_unique_exact_source_run_required")
-    _validate_run_common(
-        rows[0],
-        repository=api.repository,
-        source_sha=source_sha,
-        workflow_path=NIGHTLY_WORKFLOW_PATH,
-        workflow_name=workflow_name,
-        allowed_events={"schedule", "workflow_dispatch"},
-        expected_run_id=nightly_run_id,
-    )
-    run = api.json(f"actions/runs/{nightly_run_id}/attempts/1", "nightly_run")
-    _validate_run_common(
-        run,
-        repository=api.repository,
-        source_sha=source_sha,
-        workflow_path=NIGHTLY_WORKFLOW_PATH,
-        workflow_name=workflow_name,
-        allowed_events={"schedule", "workflow_dispatch"},
-        expected_run_id=nightly_run_id,
-    )
-    run_refetch_fields = (
-        "id",
-        "run_number",
-        "run_attempt",
-        "status",
-        "conclusion",
-        "head_sha",
-        "head_branch",
-        "path",
-        "name",
-        "event",
-    )
-    _require(
-        _canonical_bytes({key: rows[0].get(key) for key in run_refetch_fields})
-        == _canonical_bytes({key: run.get(key) for key in run_refetch_fields}),
-        "nightly_run_list_refetch_mismatch",
-    )
-    return run
 
 
 def _root_reference(name: str, members: dict[str, bytes]) -> dict[str, Any]:
