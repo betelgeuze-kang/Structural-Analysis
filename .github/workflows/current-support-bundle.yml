@@ -551,7 +551,7 @@ jobs:
           ]
           require(len(build_jobs) == 1, "github_build_job_identity_invalid")
           build_job = build_jobs[0]
-          require(
+          build_job_completion_valid = (
               type(build_job.get("id")) is int
               and build_job["id"] > 0
               and str(build_job.get("run_id")) == run_id
@@ -559,7 +559,24 @@ jobs:
               and build_job.get("head_sha") == source_sha
               and build_job.get("status") == "completed"
               and build_job.get("conclusion") == "success"
-              and utc_timestamp(build_job.get("completed_at")),
+              and utc_timestamp(build_job.get("completed_at"))
+          )
+          if not build_job_completion_valid:
+              checks = {
+                  "positive_job_id": type(build_job.get("id")) is int and build_job["id"] > 0,
+                  "run_id_matches": str(build_job.get("run_id")) == run_id,
+                  "attempt_matches": str(build_job.get("run_attempt")) == run_attempt,
+                  "source_matches": build_job.get("head_sha") == source_sha,
+                  "completed": build_job.get("status") == "completed",
+                  "successful": build_job.get("conclusion") == "success",
+                  "completion_time_valid": bool(utc_timestamp(build_job.get("completed_at"))),
+              }
+              try:
+                  print("github_build_job_completion_checks=" + json.dumps(checks, sort_keys=True), file=sys.stderr)
+              except (OSError, ValueError):
+                  pass
+          require(
+              build_job_completion_valid,
               "github_build_job_completion_invalid",
           )
           artifact_meta = api_json(

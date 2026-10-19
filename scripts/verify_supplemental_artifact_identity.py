@@ -195,7 +195,7 @@ def verify_run(
 ) -> int:
     repo = run.get("repository")
     head_repo = run.get("head_repository")
-    if not (
+    run_identity_valid = (
         type(repo) is dict
         and type(head_repo) is dict
         and repo.get("full_name") == repository
@@ -215,7 +215,47 @@ def verify_run(
             (run.get("status") == "in_progress" and run.get("conclusion") is None)
             or (run.get("status") == "completed" and run.get("conclusion") == "success")
         )
-    ):
+    )
+    if not run_identity_valid:
+        checks = {
+            "repository_shape": type(repo) is dict,
+            "head_repository_shape": type(head_repo) is dict,
+            "repository_name": type(repo) is dict
+            and repo.get("full_name") == repository,
+            "head_repository_name": type(head_repo) is dict
+            and head_repo.get("full_name") == repository,
+            "repository_id_valid": type(repo) is dict
+            and positive_integer(repo.get("id")),
+            "head_repository_id_valid": type(head_repo) is dict
+            and positive_integer(head_repo.get("id")),
+            "repository_ids_match": type(repo) is dict
+            and type(head_repo) is dict
+            and repo.get("id") == head_repo.get("id"),
+            "run_id_valid": positive_integer(run.get("id")),
+            "run_id_matches": run.get("id") == run_id,
+            "attempt_valid": positive_integer(run.get("run_attempt")),
+            "attempt_matches": run.get("run_attempt") == run_attempt,
+            "source_matches": run.get("head_sha") == source_sha,
+            "main_branch": run.get("head_branch") == "main",
+            "workflow_path": run.get("path")
+            == ".github/workflows/" + FAMILIES[family][0],
+            "event_allowed": isinstance(run.get("event"), str)
+            and run.get("event") in {"push", "workflow_dispatch"},
+            "status_conclusion_allowed": (
+                (run.get("status") == "in_progress" and run.get("conclusion") is None)
+                or (
+                    run.get("status") == "completed"
+                    and run.get("conclusion") == "success"
+                )
+            ),
+        }
+        try:
+            print(
+                "workflow_run_identity_checks=" + json.dumps(checks, sort_keys=True),
+                file=sys.stderr,
+            )
+        except (OSError, ValueError):
+            pass
         raise ArtifactIdentityError("workflow_run_identity_invalid")
     return repo["id"]
 

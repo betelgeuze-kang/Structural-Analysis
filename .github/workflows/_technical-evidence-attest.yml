@@ -544,13 +544,29 @@ jobs:
           require(len(producer_rows) == 1, "producer_job_identity_invalid")
           producer = producer_rows[0]
           labels = producer.get("labels")
-          require(
+          producer_job_result_valid = (
               producer.get("run_id") == int(run_id)
               and producer.get("head_sha") == source_sha
               and producer.get("status") == "completed"
               and producer.get("conclusion") == "success"
               and isinstance(labels, list)
-              and "ubuntu-24.04" in labels,
+              and "ubuntu-24.04" in labels
+          )
+          if not producer_job_result_valid:
+              checks = {
+                  "run_id_matches": producer.get("run_id") == int(run_id),
+                  "source_matches": producer.get("head_sha") == source_sha,
+                  "completed": producer.get("status") == "completed",
+                  "successful": producer.get("conclusion") == "success",
+                  "labels_list": isinstance(labels, list),
+                  "hosted_label": isinstance(labels, list) and "ubuntu-24.04" in labels,
+              }
+              try:
+                  print("producer_job_result_checks=" + json.dumps(checks, sort_keys=True), file=sys.stderr)
+              except (OSError, ValueError):
+                  pass
+          require(
+              producer_job_result_valid,
               "producer_job_result_invalid",
           )
 
