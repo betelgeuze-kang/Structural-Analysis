@@ -652,7 +652,7 @@ def extract_certified_sparse_modal_subspace(
                         needed = width - locked.shape[1]
                         if not needed:
                             values, locked = _ritz(stiffness, mass, locked)
-                            relative, _, metric_error, bound = _measures(
+                            relative, errors, metric_error, bound = _measures(
                                 stiffness,
                                 mass,
                                 locked,
@@ -660,10 +660,25 @@ def extract_certified_sparse_modal_subspace(
                                 mass_lower,
                                 float(cluster.outside_gap_lower_bound),
                             )
+                            prefix_accuracy_satisfied = True
+                            if len(certificate.selected_clusters) > 1:
+                                # Bound cross-cluster errors while refining this
+                                # same block within its existing iteration budget.
+                                tau = min(orthogonality_tolerance, 1.0)
+                                prefix_accuracy_satisfied = (
+                                    metric_error <= tau
+                                    and bound <= min(
+                                        subspace_error_tolerance, tau / 8.0
+                                    )
+                                    and float(np.linalg.norm(errors, ord=2))
+                                    <= (tau / 2.0)
+                                    * max(float(np.max(np.abs(values))), 1.0)
+                                )
                             if (
                                 np.max(relative) <= residual_relative_tolerance
                                 and metric_error <= orthogonality_tolerance
                                 and bound <= subspace_error_tolerance
+                                and prefix_accuracy_satisfied
                             ):
                                 groups.append(
                                     ExtractedModalCluster(

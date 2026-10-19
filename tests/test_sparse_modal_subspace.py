@@ -303,3 +303,35 @@ def test_external_zero_targets_are_literal_and_live_duck_context_is_rejected():
         extract_certified_sparse_modal_subspace(
             stiffness, mass, certificate, _live_session={"minted": True}
         )
+
+
+def test_requested_prefix_can_exceed_each_certified_block_cap(monkeypatch):
+    import structural_analysis.solvers.sparse_modal_subspace as module
+
+    stiffness, mass = diagonal_case()
+    certificate = certify_sparse_modal_spectrum(stiffness, mass, mode_count=3)
+    budget = replace(SparseModalSubspaceBudget(), maximum_block_columns=2)
+    original = module.eigh
+    projected_widths = []
+
+    def bounded_ritz(a, b, **kwargs):
+        assert a.shape == b.shape
+        projected_widths.append(a.shape[0])
+        assert a.shape[0] <= budget.maximum_block_columns
+        return original(a, b, **kwargs)
+
+    monkeypatch.setattr(module, "eigh", bounded_ritz)
+    result = extract_certified_sparse_modal_subspace(
+        stiffness, mass, certificate, budget=budget
+    )
+    assert result.requested_mode_count == 3 > budget.maximum_block_columns
+    assert [len(group.eigenvalues) for group in result.clusters] == [2, 1]
+    assert projected_widths and max(projected_widths) == 2
+    vectors = vector_matrix(result)
+    np.testing.assert_allclose(vectors.T @ (mass @ vectors), np.eye(3), atol=1e-12)
+    values = np.asarray([value for group in result.clusters for value in group.eigenvalues])
+    np.testing.assert_allclose(values, [0.5, 0.5, 3.0], atol=1e-12)
+    np.testing.assert_allclose(
+        vectors.T @ (stiffness @ vectors), np.diag(values), atol=1e-12
+    )
+    assert result.statistics.peak_thin_entries <= budget.maximum_thin_entries

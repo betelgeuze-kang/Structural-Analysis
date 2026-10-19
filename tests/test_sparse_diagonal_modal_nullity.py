@@ -329,16 +329,50 @@ def test_off_diagonal_input_uses_guarded_counts_after_numeric_admission(
     else:
         stiffness = stiffness + off - off.T
     original = sparse.eigsh
+    original_prefix = sparse._count_guarded_coupled_modal_prefix
     calls = []
+    prefix_inputs = []
 
     def observed(*args, **kwargs):
         calls.append(kwargs["which"])
         return original(*args, **kwargs)
 
+    def observed_prefix(k_matrix, m_matrix, **kwargs):
+        prefix_inputs.append((k_matrix.toarray(), m_matrix.toarray()))
+        return original_prefix(k_matrix, m_matrix, **kwargs)
+
     monkeypatch.setattr(sparse, "eigsh", observed)
+    monkeypatch.setattr(sparse, "_count_guarded_coupled_modal_prefix", observed_prefix)
     result = sparse.solve_sparse_modal_modes(stiffness, mass, mode_count=3)
+    assert result.contract_pass
+    assert len(prefix_inputs) == 1
+    np.testing.assert_array_equal(
+        prefix_inputs[0][0], (0.5 * (stiffness + stiffness.T)).toarray()
+    )
+    np.testing.assert_array_equal(
+        prefix_inputs[0][1], (0.5 * (mass + mass.T)).toarray()
+    )
+    assert [mode.eigenvalue_rad2_per_s2 for mode in result.modes] == pytest.approx(
+        [1.0, 2.0, 3.0]
+    )
     assert result.backend_profile == sparse.SPARSE_COUNT_GUARDED_MODAL_PROFILE
     assert result.candidate_eigenpair_count < result.dof_count
-    assert "SA" in calls and "LA" in calls
+    if coupled == "projected_stiffness":
+        # Projected extrema are exactly diagonal, but the raw input still needs
+        # the complete count guards rather than the analytic modal shortcut.
+        assert calls == []
+        assert result.stiffness_minimum_eigenvalue_estimate == 1.0
+        assert result.mass_minimum_eigenvalue_estimate == 1.0
+    else:
+        assert "SA" in calls and "LA" in calls
     assert "SM" not in calls
     assert result.symmetry_projection_applied == (coupled == "projected_stiffness")
+    diagnostics = result.certificate_diagnostics
+    assert diagnostics is not None
+    certificate = diagnostics["certificate"]
+    guard = diagnostics["public_threshold_guard"]
+    assert guard["stiffness_input_hash"] == certificate["stiffness_input_hash"]
+    assert guard["mass_input_hash"] == certificate["mass_input_hash"]
+    assert guard["less_or_equal"] == result.rigid_mode_count == 0
+    assert diagnostics["stiffness_psd_guard"] is not None
+    assert diagnostics["mass_spd_guard"] is not None

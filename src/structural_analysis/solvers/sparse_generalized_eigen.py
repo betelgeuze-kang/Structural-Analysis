@@ -1063,6 +1063,14 @@ def _extreme_eigenvalues(
     maximum_iterations: int | None,
     arpack_tolerance: float,
 ) -> tuple[float, float, float]:
+    if _has_exact_diagonal_structure(matrix):
+        # The full diagonal includes omitted zeros and has an exact spectrum.
+        # Degenerate scalar masses otherwise pick up ARPACK last-bit noise.
+        diagonal = matrix.diagonal()
+        minimum = float(np.min(diagonal))
+        largest = float(np.max(diagonal))
+        scale = max(abs(minimum), abs(largest), float(np.finfo(np.float64).tiny))
+        return minimum, scale, largest
     start = _deterministic_start(matrix.shape[0])
     minimum = float(
         eigsh(

@@ -148,3 +148,54 @@ def test_sparse_buckling_rejects_dense_fallback_scope_and_invalid_kg() -> None:
             indefinite_geometric,
             mode_count=1,
         )
+
+
+@pytest.mark.parametrize(
+    "diagonal, expected",
+    [
+        ([0.0, 2.0, 2.0, 7.0], (0.0, 7.0, 7.0)),
+        ([-3.0, 0.0, 2.0, 1.0], (-3.0, 3.0, 2.0)),
+        ([7.0, 7.0, 7.0, 7.0], (7.0, 7.0, 7.0)),
+        ([0.0, 0.0, 0.0, 0.0], (0.0, np.finfo(float).tiny, 0.0)),
+    ],
+)
+def test_exact_diagonal_extremes_include_implicit_zeros_without_arpack(
+    monkeypatch, diagonal, expected
+):
+    import structural_analysis.solvers.sparse_generalized_eigen as module
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("exact diagonal spectrum used ARPACK")
+
+    monkeypatch.setattr(module, "eigsh", forbidden)
+    result = module._extreme_eigenvalues(
+        diags(diagonal, format="csr"), maximum_iterations=3, arpack_tolerance=0.0
+    )
+    assert result == expected
+
+
+def test_nonzero_tiny_offdiagonal_extremes_keep_original_arpack_contract(monkeypatch):
+    import structural_analysis.solvers.sparse_generalized_eigen as module
+
+    matrix = diags(
+        [np.full(3, 1e-30), np.arange(1.0, 5.0), np.full(3, 1e-30)],
+        [-1, 0, 1],
+        format="csr",
+    )
+    calls = []
+
+    def observed(actual, **kwargs):
+        assert actual is matrix
+        assert kwargs["k"] == 1
+        assert kwargs["return_eigenvectors"] is False
+        assert kwargs["tol"] == 1e-13
+        assert kwargs["maxiter"] == 3
+        calls.append(kwargs)
+        return np.array([1.0 if kwargs["which"] == "SA" else 4.0])
+
+    monkeypatch.setattr(module, "eigsh", observed)
+    assert module._extreme_eigenvalues(
+        matrix, maximum_iterations=3, arpack_tolerance=1e-13
+    ) == (1.0, 4.0, 4.0)
+    assert [call["which"] for call in calls] == ["SA", "LA"]
+    np.testing.assert_array_equal(calls[0]["v0"], calls[1]["v0"])
