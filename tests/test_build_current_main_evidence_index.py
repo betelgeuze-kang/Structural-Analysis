@@ -891,9 +891,83 @@ def test_technical_lane_selector_uses_complete_all_status_exact_sha_inventory() 
     assert MODULE._select_lane_run(FakeApi(), lane, source) == run
 
 
+def test_native_selector_reports_complete_empty_inventory_before_run_lookup() -> None:
+    _catalog, lanes = MODULE._load_catalog(ROOT)
+    lane = next(row for row in lanes if row["lane_id"] == "native")
+    source = "1" * 40
+    calls = []
+
+    class FakeApi:
+        repository = "betelgeuze-kang/Structural-Analysis"
+
+        def json(self, endpoint: str, label: str):
+            calls.append(endpoint)
+            assert endpoint.startswith("actions/workflows/")
+            return {"workflow_runs": [], "total_count": 0}
+
+    with pytest.raises(
+        MODULE.EvidenceIndexError, match="^exact_source_run_missing:native$"
+    ):
+        MODULE._select_lane_run(FakeApi(), lane, source)
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"workflow_runs": []},
+        {"workflow_runs": [], "total_count": 1},
+        {"workflow_runs": [], "total_count": False},
+        {"workflow_runs": [], "total_count": 0.0},
+        {"total_count": 0},
+        {"workflow_runs": {}, "total_count": 0},
+    ],
+)
+def test_native_selector_does_not_misreport_invalid_inventory_as_missing(
+    payload: dict[str, object],
+) -> None:
+    _catalog, lanes = MODULE._load_catalog(ROOT)
+    lane = next(row for row in lanes if row["lane_id"] == "native")
+
+    class FakeApi:
+        repository = "betelgeuze-kang/Structural-Analysis"
+
+        def json(self, endpoint: str, label: str):
+            assert endpoint.startswith("actions/workflows/")
+            return payload
+
+    with pytest.raises(
+        MODULE.EvidenceIndexError, match="^workflow_run_inventory_invalid:native$"
+    ):
+        MODULE._select_lane_run(FakeApi(), lane, "1" * 40)
+
+
 @pytest.mark.parametrize(
     ("payload", "error"),
     [
+        (
+            lambda lane, source: {
+                "workflow_runs": [
+                    _technical_lane_run(lane, source, run_id=701),
+                    _technical_lane_run(lane, source, run_id=702),
+                ],
+                "total_count": 2,
+            },
+            "unique_exact_source_run_required",
+        ),
+        (
+            lambda lane, source: {
+                "workflow_runs": [
+                    {
+                        **_technical_lane_run(lane, source),
+                        "status": "queued",
+                        "conclusion": None,
+                    }
+                ],
+                "total_count": 1,
+            },
+            "first_attempt_run_not_successful",
+        ),
         (
             lambda lane, source: {
                 "workflow_runs": [

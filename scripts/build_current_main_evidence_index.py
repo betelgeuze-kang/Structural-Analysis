@@ -1730,6 +1730,7 @@ def _select_lane_run(
         and payload["total_count"] == len(rows),
         f"workflow_run_inventory_invalid:{lane['lane_id']}",
     )
+    _require(len(rows) > 0, f"exact_source_run_missing:{lane['lane_id']}")
     _require(len(rows) == 1, f"unique_exact_source_run_required:{lane['lane_id']}")
     candidate = rows[0]
     _safe_positive_integer(

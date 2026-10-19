@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from fnmatch import fnmatchcase
 import importlib.util
 from pathlib import Path
 import sys
+
+import pytest
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,19 +74,55 @@ def test_clean_install_workflow_separates_build_from_ephemeral_replay() -> None:
 
 def test_clean_install_workflow_watches_complete_frontend_build_inputs() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
+    pull_request = yaml.safe_load(source)[True]["pull_request"]
     for path in (
-        '"src/**"',
-        '"public/**"',
-        '"index.html"',
-        '"vite.config.ts"',
-        '"tsconfig*.json"',
-        '"package.json"',
-        '"package-lock.json"',
-        '"scripts/verify-workbench-viewer-delivery.mjs"',
-        '"scripts/native_frame_alpha_clean_install_contract.py"',
+        "src/**",
+        "public/**",
+        "index.html",
+        "vite.config.ts",
+        "tsconfig*.json",
+        "package.json",
+        "package-lock.json",
+        "scripts/verify-workbench-viewer-delivery.mjs",
+        "scripts/native_frame_alpha_clean_install_contract.py",
     ):
-        assert source.count(path) == 2, path
-    assert '"src/workbench-v2/**"' not in source
+        assert path in pull_request["paths"], path
+    assert "src/workbench-v2/**" not in pull_request["paths"]
+
+
+@pytest.mark.parametrize(
+    "changed_paths",
+    [
+        pytest.param(
+            (
+                "artifacts/manifests/issue_supersession_inventory.json",
+                "tests/test_check_issue_supersession_inventory.py",
+            ),
+            id="main239-two-file-change",
+        ),
+        pytest.param(("docs/sparse-modal-buckling.md",), id="docs-only"),
+        pytest.param(
+            (
+                ".github/workflows/current-main-evidence-index.yml",
+                "scripts/build_current_main_evidence_index.py",
+                "tests/test_current_main_evidence_index_workflow.py",
+            ),
+            id="index-only",
+        ),
+    ],
+)
+def test_main_push_produces_native_evidence_outside_pr_paths(
+    changed_paths: tuple[str, ...],
+) -> None:
+    triggers = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))[True]
+
+    # Every main source needs an exact-source handoff, including unrelated changes.
+    assert triggers["push"] == {"branches": ["main"]}
+    pull_request_paths = triggers["pull_request"]["paths"]
+    assert all(
+        not any(fnmatchcase(path, pattern) for pattern in pull_request_paths)
+        for path in changed_paths
+    )
 
 
 def test_clean_install_workflow_attests_only_exact_current_main() -> None:
@@ -148,6 +188,7 @@ def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() ->
 
 def test_clean_install_workflow_triggers_for_every_packaged_browser_input() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
+    pull_request = yaml.safe_load(source)[True]["pull_request"]
     for path in (
         "scripts/verify-native-frame-packaged-browser.mjs",
         "scripts/verify-workbench-viewer-delivery.mjs",
@@ -158,7 +199,7 @@ def test_clean_install_workflow_triggers_for_every_packaged_browser_input() -> N
         "tsconfig.json",
         "vite.config.ts",
     ):
-        assert source.count(f'- "{path}"') == 2, path
+        assert path in pull_request["paths"], path
 
 
 def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
