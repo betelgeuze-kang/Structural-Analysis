@@ -8,11 +8,11 @@ from structural_analysis.solvers import sparse_generalized_eigen as sparse
 from structural_analysis.solvers.modal import solve_modal_modes
 
 
+@pytest.mark.parametrize("n", [12, 80])
 @pytest.mark.parametrize("scale", [0.125, 1.0, 7.0])
 def test_scalar_mass_reuses_stiffness_extreme_without_losing_accuracy(
-    monkeypatch, scale
+    monkeypatch, scale, n
 ):
-    n = 80
     k = diags(
         [-np.ones(n - 1), np.full(n, 3.0), -np.ones(n - 1)], [-1, 0, 1], format="csr"
     )

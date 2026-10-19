@@ -22,9 +22,9 @@ def test_nonuniform_diagonal_mass_preserves_rigid_and_repeated_modes():
         sparse.solve_sparse_modal_modes(stiffness, mass, mode_count=1)
 
 
+@pytest.mark.parametrize("n", [12, 80])
 @pytest.mark.parametrize("mass_range", [(0.5, 2.0), (0.1, 10.0)])
-def test_nonuniform_diagonal_mass_matches_dense_metric_and_subspace(mass_range):
-    n = 80
+def test_nonuniform_diagonal_mass_matches_dense_metric_and_subspace(mass_range, n):
     masses = np.geomspace(*mass_range, n)
     scale = diags(np.sqrt(masses), format="csr")
     chain = diags(
@@ -65,8 +65,8 @@ def test_nonuniform_diagonal_mass_matches_dense_metric_and_subspace(mass_range):
     )
 
 
-def test_off_diagonal_mass_keeps_generalized_path(monkeypatch):
-    n = 40
+@pytest.mark.parametrize("n", [12, 40])
+def test_off_diagonal_mass_keeps_generalized_path(n, monkeypatch):
     stiffness = diags(np.arange(1.0, n + 1), format="csr")
     mass = diags(
         [np.full(n - 1, 0.01), np.linspace(1, 2, n), np.full(n - 1, 0.01)],
@@ -74,16 +74,57 @@ def test_off_diagonal_mass_keeps_generalized_path(monkeypatch):
         format="csr",
     )
     original = sparse.eigsh
+    original_prefix = sparse._count_guarded_coupled_modal_prefix
     generalized = []
+    prefix_inputs = []
 
     def observed(*args, **kwargs):
         if kwargs.get("M") is not None:
             generalized.append(kwargs["which"])
         return original(*args, **kwargs)
 
+    def observed_prefix(k_matrix, m_matrix, **kwargs):
+        prefix_inputs.append((k_matrix.toarray(), m_matrix.toarray()))
+        return original_prefix(k_matrix, m_matrix, **kwargs)
+
     monkeypatch.setattr(sparse, "eigsh", observed)
-    assert sparse.solve_sparse_modal_modes(stiffness, mass, mode_count=3).contract_pass
-    assert generalized == ["SM", "LA"]
+    monkeypatch.setattr(sparse, "_count_guarded_coupled_modal_prefix", observed_prefix)
+    result = sparse.solve_sparse_modal_modes(stiffness, mass, mode_count=3)
+    assert result.contract_pass
+    # LA screens the scale; the complete low prefix uses the original K,M pair.
+    assert generalized == ["LA"]
+    assert len(prefix_inputs) == 1
+    np.testing.assert_array_equal(prefix_inputs[0][0], stiffness.toarray())
+    np.testing.assert_array_equal(prefix_inputs[0][1], mass.toarray())
+    assert result.backend_profile == sparse.SPARSE_COUNT_GUARDED_MODAL_PROFILE
+    assert not result.fallback_used
+    assert not result.regularization_applied
+    diagnostics = result.certificate_diagnostics
+    assert diagnostics is not None
+    certificate = diagnostics["certificate"]
+    guard = diagnostics["public_threshold_guard"]
+    assert guard["mass_input_hash"] == certificate["mass_input_hash"]
+    assert guard["stiffness_input_hash"] == certificate["stiffness_input_hash"]
+    assert guard["less_or_equal"] == result.rigid_mode_count == 0
+    reference = solve_modal_modes(stiffness.toarray(), mass.toarray(), mode_count=3)
+    np.testing.assert_allclose(
+        [mode.eigenvalue_rad2_per_s2 for mode in result.modes],
+        [mode.eigenvalue_rad2_per_s2 for mode in reference.modes],
+        rtol=1e-9,
+        atol=1e-12,
+    )
+    vectors = np.array([mode.mass_normalized_shape for mode in result.modes]).T
+    np.testing.assert_allclose(
+        vectors.T @ (mass @ vectors), np.eye(3), rtol=0.0, atol=1e-8
+    )
+    for mode, vector in zip(result.modes, vectors.T):
+        kv, mv = stiffness @ vector, mass @ vector
+        eigenvalue = mode.eigenvalue_rad2_per_s2
+        relative = np.linalg.norm(kv - eigenvalue * mv, ord=np.inf) / (
+            np.linalg.norm(kv, ord=np.inf)
+            + abs(eigenvalue) * np.linalg.norm(mv, ord=np.inf)
+        )
+        assert relative <= 1e-9
 
 
 @pytest.mark.parametrize("invalid", [0.0, -1.0, 1e-20, float("nan")])
