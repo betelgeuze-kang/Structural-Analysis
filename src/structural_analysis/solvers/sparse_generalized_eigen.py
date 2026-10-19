@@ -178,11 +178,9 @@ def solve_sparse_modal_modes(
         residual_relative_tolerance=residual_relative_tolerance,
         orthogonality_tolerance=orthogonality_tolerance,
         arpack_tolerance=arpack_tolerance,
+        rigid_mode_relative_tolerance=rigid_mode_relative_tolerance,
     )
-    rigid_tolerance = require_nonnegative_tolerance(
-        rigid_mode_relative_tolerance,
-        name="rigid_mode_relative_tolerance",
-    )
+    rigid_tolerance = tolerances["rigid_mode_relative_tolerance"]
     native_sparse = bool(issparse(stiffness) and issparse(mass))
     diagnostics: dict[str, Any] = {}
     try:
@@ -698,11 +696,9 @@ def solve_sparse_linear_buckling(
         residual_relative_tolerance=residual_relative_tolerance,
         orthogonality_tolerance=orthogonality_tolerance,
         arpack_tolerance=arpack_tolerance,
+        finite_mode_relative_tolerance=finite_mode_relative_tolerance,
     )
-    finite_tolerance = require_nonnegative_tolerance(
-        finite_mode_relative_tolerance,
-        name="finite_mode_relative_tolerance",
-    )
+    finite_tolerance = tolerances["finite_mode_relative_tolerance"]
     native_sparse = bool(
         issparse(stiffness) and issparse(geometric_stiffness_per_unit_load)
     )
@@ -1009,10 +1005,15 @@ def _operator_candidate_count(dof_count: int, requested: int) -> int:
 
 
 def _tolerances(**values: float) -> dict[str, float]:
-    return {
-        name: require_nonnegative_tolerance(value, name=name)
-        for name, value in values.items()
-    }
+    tolerances = {}
+    for name, value in values.items():
+        try:
+            tolerances[name] = require_nonnegative_tolerance(value, name=name)
+        except (GeneralizedEigenContractError, OverflowError) as exc:
+            raise SparseGeneralizedEigenError(
+                f"{name} must be finite and non-negative", stage="input"
+            ) from exc
+    return tolerances
 
 
 def _as_csr(value: Any, name: str) -> csr_matrix:
