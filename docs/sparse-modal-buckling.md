@@ -69,6 +69,12 @@ Both paths:
 - report canonical CSR input hashes plus raw and semantic result hashes; and
 - report `regularization_applied=false` and `fallback_used=false`.
 
+Both public functions accept `maximum_iterations=None` or a positive Python
+integer. Booleans and non-integer values are rejected with
+`SparseGeneralizedEigenError(stage="input")` before matrix conversion. Matrix
+conversion failures, including values too large for binary64, also raise
+`SparseGeneralizedEigenError` and retain the original exception as their cause.
+
 ## Whole-model and numerical boundary
 
 The independent kernel result profiles are:
