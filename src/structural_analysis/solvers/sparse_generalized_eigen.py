@@ -161,13 +161,7 @@ def solve_sparse_modal_modes(
     arpack_tolerance: float = 1.0e-12,
     maximum_iterations: int | None = None,
 ) -> SparseModalSolution:
-    if maximum_iterations is not None and (
-        type(maximum_iterations) is not int or maximum_iterations <= 0
-    ):
-        raise SparseGeneralizedEigenError(
-            "maximum_iterations must be a positive integer or None",
-            stage="input",
-        )
+    _validate_maximum_iterations(maximum_iterations)
     requested = _mode_count(mode_count)
     tolerances = _tolerances(
         symmetry_relative_tolerance=symmetry_relative_tolerance,
@@ -686,6 +680,7 @@ def solve_sparse_linear_buckling(
     arpack_tolerance: float = 1.0e-12,
     maximum_iterations: int | None = None,
 ) -> SparseBucklingSolution:
+    _validate_maximum_iterations(maximum_iterations)
     requested = _mode_count(mode_count)
     tolerances = _tolerances(
         symmetry_relative_tolerance=symmetry_relative_tolerance,
@@ -927,6 +922,14 @@ def _mode_count(value: Any) -> int:
     return value
 
 
+def _validate_maximum_iterations(value: Any) -> None:
+    if value is not None and (type(value) is not int or value <= 0):
+        raise SparseGeneralizedEigenError(
+            "maximum_iterations must be a positive integer or None",
+            stage="input",
+        )
+
+
 def _candidate_count(dof_count: int, requested: int) -> int:
     if dof_count < 3 or requested >= dof_count - 1:
         raise SparseGeneralizedEigenError(
@@ -1019,7 +1022,7 @@ def _tolerances(**values: float) -> dict[str, float]:
 def _as_csr(value: Any, name: str) -> csr_matrix:
     try:
         matrix = csr_matrix(value, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
+    except (TypeError, ValueError, OverflowError) as exc:
         raise SparseGeneralizedEigenError(f"{name} must be a numeric matrix") from exc
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1] or matrix.shape[0] == 0:
         raise SparseGeneralizedEigenError(f"{name} must be a non-empty square matrix")
