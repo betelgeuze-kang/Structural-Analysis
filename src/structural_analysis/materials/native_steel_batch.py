@@ -29,6 +29,8 @@ from structural_analysis.materials.uniaxial_plasticity import (
 _ACTIVE: ContextVar[NativeSteelBatch | None] = ContextVar(
     "native_steel_batch", default=None
 )
+_BULK_RESPONSE_LIMIT = 16_384
+_SIGNATURE_ROW_SHARING_LIMIT = 256
 
 
 class NativeSteelBatch:
@@ -283,10 +285,32 @@ def _steel_material_signature(
 ) -> tuple:
     if not 1 <= len(materials) <= 1_000_000:
         raise ValueError("materials must contain 1..1000000 material points")
+    # This map lives for one snapshot only. Ordinary exact laws have no field
+    # access hooks, so repeated references can share that call's fresh row.
+    # Custom descriptors/accessors keep the original per-occurrence reads.
+    plain_access = (
+        BilinearCombinedHardeningSteel.__getattribute__ is object.__getattribute__
+        and all(
+            type(vars(BilinearCombinedHardeningSteel).get(name)) in (float, str)
+            for name in (
+                "elastic_modulus_mpa",
+                "yield_stress_mpa",
+                "isotropic_hardening_modulus_mpa",
+                "kinematic_hardening_modulus_mpa",
+                "yield_tolerance_mpa",
+                "material_id",
+            )
+        )
+    )
+    shared: dict[int, tuple[BilinearCombinedHardeningSteel, tuple]] = {}
     rows: list[tuple[tuple[object, ...], ...]] = []
     for material in materials:
         if type(material) is not BilinearCombinedHardeningSteel:
             raise ValueError("native batch requires the exact supported steel law")
+        previous = shared.get(id(material)) if plain_access else None
+        if previous is not None and previous[0] is material:
+            rows.append(previous[1])
+            continue
         row: list[tuple[object, ...]] = []
         for value in (
             material.elastic_modulus_mpa,
@@ -319,7 +343,10 @@ def _steel_material_signature(
                 raise ValueError(
                     "prepared steel material fields must be plain scalar values"
                 )
-        rows.append(tuple(row))
+        copied = tuple(row)
+        rows.append(copied)
+        if plain_access and len(shared) < _SIGNATURE_ROW_SHARING_LIMIT:
+            shared[id(material)] = (material, copied)
     return tuple(rows)
 
 
@@ -466,9 +493,26 @@ class PreparedNativeSteelBatch:
                 buffers.output,
                 prepared_groups=groups,
             )
+            # Detach exact scratch arrays in one C-level conversion instead of
+            # creating a NumPy row/scalar object for every response field.
+            # Bound extra Python float/list storage independently of the native
+            # 1M-point admission. Larger batches and array subclasses keep the
+            # original lazy row/scalar indexing path.
+            response_strains = (
+                buffers.strains.tolist()
+                if type(buffers.strains) is np.ndarray
+                and buffers.strains.size <= _BULK_RESPONSE_LIMIT
+                else buffers.strains
+            )
+            response_rows = (
+                buffers.output.tolist()
+                if type(buffers.output) is np.ndarray
+                and buffers.output.shape[0] <= _BULK_RESPONSE_LIMIT
+                else buffers.output
+            )
             responses = []
             for strain, parent, row in zip(
-                buffers.strains, flat_parents, buffers.output, strict=True
+                response_strains, flat_parents, response_rows, strict=True
             ):
                 yielded = bool(row[10])
                 state = (

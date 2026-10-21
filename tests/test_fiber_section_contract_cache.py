@@ -12,6 +12,7 @@ from structural_analysis.engine_v2.contracts._canonical import (
     CanonicalContractError,
     canonical_hash,
 )
+from structural_analysis.engine_v2.contracts import _canonical
 from structural_analysis.materials import stateful_fiber_section as module
 from structural_analysis.materials.concrete_damage import (
     AsymmetricConcreteDamageMaterial,
@@ -123,7 +124,9 @@ def test_fiber_order_and_override_values_are_preserved():
     original = section.contract_hash
     reversed_fibers = replace(section, fibers=section.fibers[::-1])
     assert reversed_fibers.contract_hash == legacy_hash(reversed_fibers) != original
-    steel_ids = [fiber.fiber_id for fiber in section.fibers if fiber.material_kind == "steel"]
+    steel_ids = [
+        fiber.fiber_id for fiber in section.fibers if fiber.material_kind == "steel"
+    ]
     law = replace(section.steel, yield_stress_mpa=125.0)
     rows = ((steel_ids[0], law), (steel_ids[1], section.steel))
     first = replace(section, steel_overrides=rows)
@@ -153,7 +156,9 @@ def test_python_equal_boolean_integer_and_float_have_distinct_cache_keys():
     hashes = []
     for value in (True, 1, 1.0):
         # All three currently pass this material's material_id truthiness check.
-        candidate = replace(section, concrete=AsymmetricConcreteDamageMaterial(material_id=value))
+        candidate = replace(
+            section, concrete=AsymmetricConcreteDamageMaterial(material_id=value)
+        )
         hashes.append(candidate.contract_hash)
         assert candidate.contract_hash == legacy_hash(candidate)
     assert len(set(hashes)) == 3
@@ -201,7 +206,9 @@ def test_fracture_energy_subclass_additional_fields_are_included(name, value):
 
 @dataclass(frozen=True)
 class AnnotatedConcrete(AsymmetricConcreteDamageMaterial):
-    annotation: dict = field(default_factory=lambda: {"values": [True, 1, 1.0], "tag": (None, "x")})
+    annotation: dict = field(
+        default_factory=lambda: {"values": [True, 1, 1.0], "tag": (None, "x")}
+    )
 
 
 def test_unhashable_subclass_fields_are_snapshotted_recursively_and_freshly():
@@ -252,9 +259,13 @@ def test_non_dataclass_material_root_keeps_legacy_rejection(owner):
     assert str(actual.value) == str(expected.value)
 
 
-@pytest.mark.parametrize("owner,name", [("fiber", "y_m"), ("concrete", "elastic_modulus_mpa")])
+@pytest.mark.parametrize(
+    "owner,name", [("fiber", "y_m"), ("concrete", "elastic_modulus_mpa")]
+)
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
-def test_nonfinite_tampering_after_warm_cache_keeps_error_type_and_path(owner, name, value):
+def test_nonfinite_tampering_after_warm_cache_keeps_error_type_and_path(
+    owner, name, value
+):
     section = make_rectangular_stateful_rc_fiber_section()
     _ = section.contract_hash
     target = section.fibers[0] if owner == "fiber" else section.concrete
@@ -277,13 +288,156 @@ def test_private_derived_attributes_do_not_enter_the_physical_key():
 
 def test_cache_is_entry_bounded_and_does_not_retain_model_objects():
     section = make_rectangular_stateful_rc_fiber_section()
-    references = (weakref.ref(section), weakref.ref(section.concrete), weakref.ref(section.fibers[0]))
+    references = (
+        weakref.ref(section),
+        weakref.ref(section.concrete),
+        weakref.ref(section.fibers[0]),
+    )
     _ = section.contract_hash
     del section
     gc.collect()
     assert all(reference() is None for reference in references)
     for index in range(140):
-        candidate = replace(make_rectangular_stateful_rc_fiber_section(), section_id=f"section-{index}")
+        candidate = replace(
+            make_rectangular_stateful_rc_fiber_section(), section_id=f"section-{index}"
+        )
         assert candidate.contract_hash == legacy_hash(candidate)
     info = module._cached_section_contract_hash.cache_info()
     assert info.currsize == info.maxsize == 128
+
+
+def test_normal_exact_dataclasses_use_direct_primitive_snapshot(monkeypatch):
+    section = make_rectangular_stateful_rc_fiber_section()
+    expected = legacy_hash(section)
+    assert module._section_contract_snapshot(section)[0] == "plain_section"
+
+    # Only the generic recursive walker is replaced; supported direct rows
+    # must not pay for repeated dataclass/field dispatch on each scalar leaf.
+    def forbidden(value):
+        raise AssertionError("generic value walker was used")
+
+    monkeypatch.setattr(module, "_section_contract_value_snapshot", forbidden)
+    assert section.contract_hash == expected
+
+
+def test_forced_type_changes_use_existing_typed_generic_snapshot():
+    section = make_rectangular_stateful_rc_fiber_section()
+    assert module._section_contract_snapshot(section)[0] == "plain_section"
+    object.__setattr__(section.concrete, "material_id", True)
+    assert module._section_contract_snapshot(section)[0] == "mapping"
+    assert section.contract_hash == legacy_hash(section)
+
+
+def test_instance_to_dict_shadow_cannot_reuse_a_warm_digest():
+    section = make_rectangular_stateful_rc_fiber_section()
+    before = section.contract_hash
+    fiber = section.fibers[0]
+    original = fiber.to_dict()
+    object.__setattr__(fiber, "to_dict", lambda: {**original, "custom": True})
+    assert section.contract_hash == legacy_hash(section) != before
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "to_dict",
+        "to_dict_code",
+        "asdict",
+        "asdict_defaults",
+        "canonical",
+        "normalizer",
+        "normalizer_code",
+    ],
+)
+def test_warm_digest_respects_current_serialization_implementation(monkeypatch, change):
+    section = make_rectangular_stateful_rc_fiber_section()
+    before = section.contract_hash
+    if change in ("to_dict", "to_dict_code"):
+
+        def replacement(self):
+            return {"changed": True}
+
+        if change == "to_dict":
+            monkeypatch.setattr(StatefulSectionFiber, "to_dict", replacement)
+        else:
+            monkeypatch.setattr(
+                StatefulSectionFiber.to_dict, "__code__", replacement.__code__
+            )
+    elif change == "asdict":
+        monkeypatch.setattr(module, "asdict", lambda value: {"changed": True})
+    elif change == "asdict_defaults":
+
+        def changed_factory(rows):
+            return {**dict(rows), "changed": True}
+
+        monkeypatch.setitem(asdict.__kwdefaults__, "dict_factory", changed_factory)
+    elif change == "canonical":
+        monkeypatch.setattr(module, "canonical_hash", lambda value: "changed-hash")
+    elif change == "normalizer":
+        monkeypatch.setattr(
+            _canonical,
+            "_normalize_json_value",
+            lambda value, *, path: {"changed": True},
+        )
+    else:
+
+        def replacement(value, *, path):
+            return {"changed": True}
+
+        monkeypatch.setattr(
+            _canonical._normalize_json_value, "__code__", replacement.__code__
+        )
+    assert not module._section_contract_cache_eligible()
+    payload = legacy_payload(section)
+    if change == "asdict":
+        # The legacy property's module-local alias is intentionally rebound;
+        # this test module's independent imported alias remains unchanged.
+        payload["steel"] = module.asdict(section.steel)
+        payload["concrete"] = module.asdict(section.concrete)
+    expected = module.canonical_hash(payload)
+    assert section.contract_hash == expected != before
+    assert module._cached_section_contract_hash.cache_info().hits == 0
+
+
+def test_dataclass_layout_mutation_uses_current_generic_layout(monkeypatch):
+    section = make_rectangular_stateful_rc_fiber_section()
+    before = section.contract_hash
+    # asdict observes current declared fields; remove a field after warming.
+    changed_fields = dict(AsymmetricConcreteDamageMaterial.__dataclass_fields__)
+    del changed_fields["material_id"]
+    monkeypatch.setattr(
+        AsymmetricConcreteDamageMaterial, "__dataclass_fields__", changed_fields
+    )
+    assert module._section_contract_snapshot(section)[0] == "mapping"
+    assert section.contract_hash == legacy_hash(section) != before
+
+
+def test_custom_dataclass_field_mapping_is_not_speculatively_observed(monkeypatch):
+    class CustomFieldMapping(dict):
+        def __len__(self):
+            raise AssertionError("custom length was read")
+
+        def items(self):
+            raise AssertionError("custom items were read")
+
+    section = make_rectangular_stateful_rc_fiber_section()
+    monkeypatch.setattr(
+        AsymmetricConcreteDamageMaterial,
+        "__dataclass_fields__",
+        CustomFieldMapping(AsymmetricConcreteDamageMaterial.__dataclass_fields__),
+    )
+    assert not module._section_plain_layouts_unchanged()
+    assert module._plain_section_contract_snapshot(section) is None
+    assert section.contract_hash == legacy_hash(section)
+
+
+def test_hash_warming_keeps_stage1_implementation_guard_eligible():
+    from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_terminal_receipt import (
+        _AUDIT_IMPLEMENTATION,
+    )
+
+    assert _AUDIT_IMPLEMENTATION.unchanged()
+    section = make_rectangular_stateful_rc_fiber_section()
+    assert section.contract_hash == legacy_hash(section)
+    assert section.contract_hash == legacy_hash(section)
+    assert _AUDIT_IMPLEMENTATION.unchanged()

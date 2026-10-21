@@ -16,6 +16,9 @@ from typing import Any, Mapping
 import numpy as np
 
 from structural_analysis.materials.native_steel_batch import active_native_steel_batch
+from structural_analysis.assembly._jacobian_audit_reuse import (
+    reuse_fiber_frame_jacobian_audits,
+)
 
 from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DMember,
@@ -343,6 +346,7 @@ class _AuthorityArtifacts:
 
 @reuse_contract_computations()
 @reuse_sparse_factorizations()
+@reuse_fiber_frame_jacobian_audits()
 def analyze_public_rc_fiber_frame(
     model: CanonicalModel,
     config: PublicRCFiberFrameConfig | None = None,

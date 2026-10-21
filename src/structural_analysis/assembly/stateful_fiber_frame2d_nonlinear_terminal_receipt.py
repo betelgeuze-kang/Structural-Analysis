@@ -15,9 +15,10 @@ retains scalar gates and canonical binary identities rather than JSON vectors.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
 import math
 import re
+import sys
 from types import MappingProxyType
 from typing import Any
 
@@ -25,7 +26,16 @@ import numpy as np
 
 from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DProblem,
+    validate_stateful_fiber_frame2d_checkpoint,
 )
+from structural_analysis.assembly._jacobian_audit_reuse import (
+    ImplementationGuard,
+    _Ineligible,
+    audit_lease,
+    scope_active,
+    value_snapshot,
+)
+from structural_analysis.materials.native_steel_batch import active_native_steel_batch
 from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_chain_io import (
     StatefulFiberFrame2DCheckpointChain,
 )
@@ -58,6 +68,7 @@ from structural_analysis.benchmark.stateful_fiber_frame2d_diagnostics import (
     finite_difference_stateful_fiber_frame2d_tangent_check,
 )
 from structural_analysis.engine_v2.contracts._canonical import (
+    _canonical_cache_eligible,
     array_content_hash,
     array_data_hash,
     canonical_hash,
@@ -1485,6 +1496,98 @@ def _build_jacobian_audit(
     step: StatefulFiberFrame2DLoadStepResult,
     free_order_hash: str,
 ) -> FiberFrameNonlinearJacobianAuditReceipt:
+    if not scope_active():
+        return _compute_jacobian_audit(problem, topology_plan, step, free_order_hash)
+    key = _jacobian_audit_key(problem, topology_plan, step, free_order_hash)
+    with audit_lease(key) as lease:
+        if lease.entry is not None:
+            # A cached leaf never bypasses the current parent's original admission.
+            validate_stateful_fiber_frame2d_checkpoint(problem, step.parent_checkpoint)
+            result = FiberFrameNonlinearJacobianAuditReceipt(
+                **dict(zip(_AUDIT_SCALAR_FIELDS, lease.entry, strict=True)),
+                extensions=MappingProxyType({}),
+            )
+            result = validate_fiber_frame_nonlinear_jacobian_audit_receipt(result)
+        else:
+            result = _compute_jacobian_audit(
+                problem, topology_plan, step, free_order_hash
+            )
+        if key is not None:
+            if (
+                _jacobian_audit_key(problem, topology_plan, step, free_order_hash)
+                != key
+            ):
+                raise RuntimeError(
+                    "Jacobian audit inputs or implementation changed during reuse"
+                )
+            if lease.entry is None:
+                lease.publish(
+                    tuple(getattr(result, name) for name in _AUDIT_SCALAR_FIELDS)
+                )
+        return result
+
+
+def _jacobian_audit_key(
+    problem: StatefulFiberFrame2DProblem,
+    topology_plan: FiberFrameNonlinearExecutionTopologyPlan,
+    step: StatefulFiberFrame2DLoadStepResult,
+    free_order_hash: str,
+) -> tuple | None:
+    # Native execution state/ctypes call replacement needs a separate custody
+    # contract. This first slice leaves that path entirely uncached.
+    if (
+        not _canonical_cache_eligible()
+        or not _AUDIT_IMPLEMENTATION.unchanged()
+        or active_native_steel_batch() is not None
+    ):
+        return None
+    try:
+        if (
+            type(problem) is not StatefulFiberFrame2DProblem
+            or type(step) is not StatefulFiberFrame2DLoadStepResult
+        ):
+            return None
+        if type(topology_plan) is not FiberFrameNonlinearExecutionTopologyPlan:
+            return None
+        free = step.trial_solution.free_displacements_m
+        if (
+            type(free) is not np.ndarray
+            or free.dtype.str != "<f8"
+            or free.shape != (len(problem.free_global_dofs),)
+        ):
+            return None
+        remaining = [100_000, 1_048_576]
+        snapshot = value_snapshot(
+            (
+                problem,
+                topology_plan,
+                step.parent_checkpoint,
+                step.trial_solution.config,
+                free,
+                step.accepted_checkpoint.load_factor,
+                free_order_hash,
+                step.trial_solution.config.matrix_backend,
+                FIBER_FRAME_NONLINEAR_JACOBIAN_EPSILON_M,
+                FIBER_FRAME_NONLINEAR_JACOBIAN_RELATIVE_TOLERANCE,
+            ),
+            _AUDIT_IMPLEMENTATION.classes,
+            remaining,
+        )
+        return (
+            snapshot,
+            step.parent_checkpoint.canonical_bytes(),
+            step.parent_checkpoint.state_hash,
+        )
+    except (_Ineligible, AttributeError, TypeError, ValueError, RecursionError):
+        return None
+
+
+def _compute_jacobian_audit(
+    problem: StatefulFiberFrame2DProblem,
+    topology_plan: FiberFrameNonlinearExecutionTopologyPlan,
+    step: StatefulFiberFrame2DLoadStepResult,
+    free_order_hash: str,
+) -> FiberFrameNonlinearJacobianAuditReceipt:
     diagnostic = finite_difference_stateful_fiber_frame2d_tangent_check(
         problem,
         step.parent_checkpoint,
@@ -1492,6 +1595,7 @@ def _build_jacobian_audit(
         trial_free_coordinates_m=step.trial_solution.free_displacements_m,
         epsilon_m=FIBER_FRAME_NONLINEAR_JACOBIAN_EPSILON_M,
         relative_tolerance=FIBER_FRAME_NONLINEAR_JACOBIAN_RELATIVE_TOLERANCE,
+        matrix_backend=step.trial_solution.config.matrix_backend,
     )
     if diagnostic["pass"] is not True:
         _fail(
@@ -2438,3 +2542,33 @@ __all__ = [
     "validate_fiber_frame_nonlinear_terminal_receipt_shape",
     "validate_fiber_frame_nonlinear_terminal_step_receipt",
 ]
+
+
+_AUDIT_SCALAR_FIELDS = tuple(
+    item.name
+    for item in fields(FiberFrameNonlinearJacobianAuditReceipt)
+    if item.name != "extensions"
+)
+_AUDIT_IMPLEMENTATION = ImplementationGuard(
+    tuple(
+        sys.modules[name]
+        for name in (
+            __name__,
+            "structural_analysis.assembly._jacobian_audit_reuse",
+            "structural_analysis.assembly.stateful_fiber_frame2d",
+            "structural_analysis.assembly.stateful_fiber_frame2d_direct_sparse",
+            "structural_analysis.assembly.stateful_fiber_frame2d_state",
+            "structural_analysis.assembly.stateful_fiber_frame2d_execution_topology",
+            "structural_analysis.elements.stateful_fiber_beam2d",
+            "structural_analysis.elements.stateful_fiber_beam2d_state",
+            "structural_analysis.elements.stateful_fiber_beam2d_response",
+            "structural_analysis.materials.stateful_fiber_section",
+            "structural_analysis.materials.uniaxial_plasticity",
+            "structural_analysis.materials.concrete_damage",
+            "structural_analysis.materials.native_steel_batch",
+            "structural_analysis.benchmark.stateful_fiber_frame2d_diagnostics",
+            "structural_analysis.engine_v2.contracts._canonical",
+            "structural_analysis.engine_v2.contracts._computation_cache",
+        )
+    )
+)

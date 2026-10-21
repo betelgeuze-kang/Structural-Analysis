@@ -18,7 +18,9 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
     validate_stateful_fiber_frame2d_checkpoint,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_direct_sparse import (
+    DirectSparseFiberFrameAssembly,
     assemble_stateful_fiber_frame2d_direct_sparse,
+    assemble_stateful_fiber_frame2d_direct_sparse_terminal,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
@@ -329,7 +331,7 @@ class StatefulFiberFrame2DLoadStepResult:
     parent_checkpoint: StatefulFiberFrame2DCheckpoint
     accepted_checkpoint: StatefulFiberFrame2DCheckpoint
     trial_solution: NewtonRaphsonVectorSolution
-    trial_assembly: StatefulFiberFrame2DAssembly
+    trial_assembly: StatefulFiberFrame2DAssembly | DirectSparseFiberFrameAssembly
     metrics: dict[str, Any]
     initial_free_coordinates_m: tuple[float, ...] | None = None
 
@@ -363,9 +365,15 @@ def _assemble_terminal_trial(
     free_coordinates_m: np.ndarray,
     *,
     runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None,
-) -> StatefulFiberFrame2DAssembly:
+    matrix_backend: str = VECTOR_MATRIX_BACKEND,
+) -> StatefulFiberFrame2DAssembly | DirectSparseFiberFrameAssembly:
+    assembler = (
+        assemble_stateful_fiber_frame2d_direct_sparse_terminal
+        if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+        else assemble_stateful_fiber_frame2d
+    )
     if runtime_recorder is None:
-        return assemble_stateful_fiber_frame2d(
+        return assembler(
             problem,
             accepted_checkpoint,
             target_load_factor=target_load_factor,
@@ -374,7 +382,7 @@ def _assemble_terminal_trial(
     started_ns = runtime_recorder._begin_terminal_trial_assembly()
     raised = False
     try:
-        return assemble_stateful_fiber_frame2d(
+        return assembler(
             problem,
             accepted_checkpoint,
             target_load_factor=target_load_factor,
@@ -500,6 +508,7 @@ def _solve_stateful_fiber_frame2d_load_step(
         load_factor,
         solution.free_displacements_m,
         runtime_recorder=runtime_recorder,
+        matrix_backend=selected_config.matrix_backend,
     )
     no_solve_reaction_only = bool(
         solution.metrics.get("terminal_disposition")

@@ -17,6 +17,7 @@ const MODEL_IR_SCHEMA_TEXT: &str = include_str!(concat!(
     "/schemas/model_ir_v2.schema.json"
 ));
 const DUPLICATE_KEY_SENTINEL: &str = "structural_duplicate_json_object_key";
+const CANONICAL_JSON_RECURSION_LIMIT: usize = 128;
 const SEMANTIC_KEYS: [&str; 14] = [
     "schema_version",
     "capability_profile",
@@ -252,6 +253,21 @@ pub fn validate_model_ir_v2_wire(
 /// canonicalization or required projection construction fails.
 pub fn parse_model_ir_v2(bytes: &[u8]) -> Result<ModelIrV2Document, ModelIrContractError> {
     let value = decode_json_strict(bytes)?;
+    parse_model_ir_v2_value(value)
+}
+
+/// Schema-validate an owned, already decoded JSON value and bind its identities.
+///
+/// This is a value boundary, not a byte decoder: callers admitting untrusted
+/// JSON bytes must first use [`decode_json_strict`] so duplicate keys, invalid
+/// UTF-8, trailing data and out-of-range numbers remain rejected. In particular,
+/// the batch CLI uses only subtrees of its strictly decoded outer manifest.
+///
+/// # Errors
+///
+/// Returns the same schema, canonicalization and projection errors as the byte
+/// parser, retaining exact integer/float categories in the supplied value.
+pub fn parse_model_ir_v2_value(value: Value) -> Result<ModelIrV2Document, ModelIrContractError> {
     let report = validate_model_ir_v2_wire(&value)?;
     if !report.schema_valid {
         return Err(ModelIrContractError {
@@ -288,6 +304,58 @@ pub fn canonicalize_model_ir_v2(value: &Value) -> Result<String, ModelIrContract
     let mut output = String::new();
     write_canonical(value, &mut output)?;
     Ok(output)
+}
+
+/// Return the exact value obtained by parsing the canonical JSON representation.
+///
+/// Strings and containers need no whole-document text round trip. Every number
+/// still uses the existing canonical spelling and the precise JSON number
+/// parser. This preserves integral-float conversion, signed-zero normalization,
+/// integer categories and floating-point bits of the legacy text/parse path.
+///
+/// # Errors
+///
+/// Returns an error if a number cannot be canonically encoded or reparsed, or
+/// the default JSON parser's container recursion limit would be reached.
+pub fn canonical_value_model_ir_v2(value: &Value) -> Result<Value, ModelIrContractError> {
+    canonical_value_at_depth(value, CANONICAL_JSON_RECURSION_LIMIT)
+}
+
+fn canonical_value_at_depth(
+    value: &Value,
+    remaining: usize,
+) -> Result<Value, ModelIrContractError> {
+    if matches!(value, Value::Array(_) | Value::Object(_)) && remaining <= 1 {
+        return Err(contract_error(
+            "model_ir_canonicalization_failed",
+            "/",
+            "Canonical JSON exceeds the default JSON parser recursion limit",
+        ));
+    }
+    match value {
+        Value::Number(number) => {
+            let text = canonical_number(number)?;
+            let normalized: Number = serde_json::from_str(&text).map_err(|_| {
+                contract_error(
+                    "model_ir_canonicalization_failed",
+                    "/",
+                    "Canonical JSON number could not be reparsed",
+                )
+            })?;
+            Ok(Value::Number(normalized))
+        }
+        Value::Array(items) => items
+            .iter()
+            .map(|item| canonical_value_at_depth(item, remaining - 1))
+            .collect::<Result<Vec<_>, _>>()
+            .map(Value::Array),
+        Value::Object(object) => object
+            .iter()
+            .map(|(key, item)| Ok((key.clone(), canonical_value_at_depth(item, remaining - 1)?)))
+            .collect::<Result<Map<_, _>, _>>()
+            .map(Value::Object),
+        _ => Ok(value.clone()),
+    }
 }
 
 /// Build the physical-meaning projection, excluding source and extension metadata.

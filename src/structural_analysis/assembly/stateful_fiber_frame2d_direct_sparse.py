@@ -1,7 +1,8 @@
-"""Direct free-CSR Newton trials for the existing fixed-chord fiber frame.
+"""Direct free-CSR trials for the existing fixed-chord fiber frame.
 
-This execution-only consumer preserves member integration and accumulation order.
-Terminal engineering receipts continue to use the existing dense assembler.
+Newton trials discard element responses; terminal/recovery trials retain them.
+Legacy serialization still materializes a free-equation dense tangent, while
+assembly never allocates the full global square tangent.
 """
 
 from __future__ import annotations
@@ -14,11 +15,17 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 from .stateful_fiber_frame2d import (
+    StatefulFiberFrame2DAssembly,
+    StatefulFiberFrame2DMemberAssembly,
     StatefulFiberFrame2DProblem,
     _finite,
+    _readonly,
     validate_stateful_fiber_frame2d_checkpoint,
 )
 from .stateful_fiber_frame2d_state import StatefulFiberFrame2DCheckpoint
+from structural_analysis.elements.stateful_fiber_beam2d_state import (
+    StatefulFiberBeam2DState,
+)
 
 
 class _TopologyPlan(NamedTuple):
@@ -104,6 +111,40 @@ class DirectSparseFiberFrameTrial:
     allocated_bytes: int
 
 
+@dataclass(frozen=True)
+class DirectSparseFiberFrameAssembly:
+    parent_checkpoint_hash: str
+    target_load_factor: float
+    free_global_dofs: tuple[int, ...]
+    generalized_coordinates_m: np.ndarray
+    global_displacements: np.ndarray
+    residual_kn: np.ndarray
+    jacobian_kn_per_m: csr_matrix
+    internal_loads_global: np.ndarray
+    external_loads_global: np.ndarray
+    reactions_global: np.ndarray
+    member_assemblies: tuple[StatefulFiberFrame2DMemberAssembly, ...]
+    trial_element_states: tuple[StatefulFiberBeam2DState, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        # This compatibility boundary deliberately remains O(n_free ** 2).
+        # Reuse the original serializer so path/proof bytes and key order stay exact.
+        return StatefulFiberFrame2DAssembly(
+            parent_checkpoint_hash=self.parent_checkpoint_hash,
+            target_load_factor=self.target_load_factor,
+            free_global_dofs=self.free_global_dofs,
+            generalized_coordinates_m=self.generalized_coordinates_m,
+            global_displacements=self.global_displacements,
+            residual_kn=self.residual_kn,
+            jacobian_kn_per_m=self.jacobian_kn_per_m.toarray(),
+            internal_loads_global=self.internal_loads_global,
+            external_loads_global=self.external_loads_global,
+            reactions_global=self.reactions_global,
+            member_assemblies=self.member_assemblies,
+            trial_element_states=self.trial_element_states,
+        ).to_dict()
+
+
 def assemble_stateful_fiber_frame2d_direct_sparse(
     problem: StatefulFiberFrame2DProblem,
     accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
@@ -112,6 +153,59 @@ def assemble_stateful_fiber_frame2d_direct_sparse(
     trial_free_coordinates_m: Any,
 ) -> DirectSparseFiberFrameTrial:
     """Assemble one unchanged material trial without a global dense tangent."""
+    trial, _members, _states = _assemble_direct_sparse(
+        problem,
+        accepted_checkpoint,
+        target_load_factor=target_load_factor,
+        trial_free_coordinates_m=trial_free_coordinates_m,
+        retain_members=False,
+    )
+    return trial
+
+
+def assemble_stateful_fiber_frame2d_direct_sparse_terminal(
+    problem: StatefulFiberFrame2DProblem,
+    accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
+    *,
+    target_load_factor: float,
+    trial_free_coordinates_m: Any,
+) -> DirectSparseFiberFrameAssembly:
+    """Retain the same-parent element trials required for commit and recovery."""
+    trial, members, states = _assemble_direct_sparse(
+        problem,
+        accepted_checkpoint,
+        target_load_factor=target_load_factor,
+        trial_free_coordinates_m=trial_free_coordinates_m,
+        retain_members=True,
+    )
+    return DirectSparseFiberFrameAssembly(
+        parent_checkpoint_hash=trial.parent_checkpoint_hash,
+        target_load_factor=trial.target_load_factor,
+        free_global_dofs=trial.free_global_dofs,
+        generalized_coordinates_m=trial.generalized_coordinates_m,
+        global_displacements=trial.global_displacements,
+        residual_kn=trial.residual_kn,
+        jacobian_kn_per_m=trial.jacobian_kn_per_m,
+        internal_loads_global=trial.internal_loads_global,
+        external_loads_global=trial.external_loads_global,
+        reactions_global=trial.reactions_global,
+        member_assemblies=members,
+        trial_element_states=states,
+    )
+
+
+def _assemble_direct_sparse(
+    problem: StatefulFiberFrame2DProblem,
+    accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
+    *,
+    target_load_factor: float,
+    trial_free_coordinates_m: Any,
+    retain_members: bool,
+) -> tuple[
+    DirectSparseFiberFrameTrial,
+    tuple[StatefulFiberFrame2DMemberAssembly, ...],
+    tuple[StatefulFiberBeam2DState, ...],
+]:
     validate_stateful_fiber_frame2d_checkpoint(problem, accepted_checkpoint)
     load_factor = _finite(target_load_factor, name="target_load_factor")
     free_dofs = problem.free_global_dofs
@@ -131,6 +225,8 @@ def assemble_stateful_fiber_frame2d_direct_sparse(
     )
     plan = _topology_plan(problem.global_dof_count, free_dofs, member_dofs)
     data = np.zeros(len(plan.indices), dtype=np.float64)
+    member_rows = []
+    trial_states = []
     for member, parent, dofs, group in zip(
         problem.members,
         accepted_checkpoint.element_states,
@@ -156,6 +252,18 @@ def assemble_stateful_fiber_frame2d_direct_sparse(
             data[list(positions)] += tangent_global[
                 list(local_rows), list(local_columns)
             ]
+        if retain_members:
+            member_rows.append(
+                StatefulFiberFrame2DMemberAssembly(
+                    member_id=member.member_id,
+                    global_dofs=dofs,
+                    transformation_global_to_local=_readonly(transformation),
+                    internal_load_global=_readonly(internal_global),
+                    consistent_tangent_global=_readonly(tangent_global),
+                    response=response,
+                )
+            )
+            trial_states.append(response.state)
     external = load_factor * problem.reference_external_load_vector()
     physical_residual = internal - external
     free_scale = scale[list(free_dofs)]
@@ -193,7 +301,7 @@ def assemble_stateful_fiber_frame2d_direct_sparse(
     allocated_bytes = sum(array.nbytes for array in vectors) + sum(
         array.nbytes for array in (jacobian.data, jacobian.indices, jacobian.indptr)
     )
-    return DirectSparseFiberFrameTrial(
+    trial = DirectSparseFiberFrameTrial(
         accepted_checkpoint.state_hash,
         load_factor,
         free_dofs,
@@ -203,6 +311,7 @@ def assemble_stateful_fiber_frame2d_direct_sparse(
         len(plan.indices),
         allocated_bytes,
     )
+    return trial, tuple(member_rows), tuple(trial_states)
 
 
 __all__ = [

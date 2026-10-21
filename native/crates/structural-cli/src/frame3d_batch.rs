@@ -7,7 +7,7 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use serde_json::{json, Map, Value};
-use structural_contracts::model_ir::{decode_json_strict, parse_model_ir_v2};
+use structural_contracts::model_ir::{decode_json_strict, parse_model_ir_v2_value};
 use structural_contracts::report_ir::sha256_bytes_identity;
 use structural_runtime::{
     Frame3dBatchCpuBudget, LinearFrame3dBatchLoadSource, LinearFrame3dBatchRequest,
@@ -221,8 +221,9 @@ fn execute(bytes: &[u8]) -> Result<(Value, u8), Failure> {
     let mut valid_requests = Vec::with_capacity(manifest.cases.len());
     let mut valid_indices = Vec::with_capacity(manifest.cases.len());
     for (index, case) in manifest.cases.iter().enumerate() {
-        let model_bytes = case.model.to_string().into_bytes();
-        match parse_model_ir_v2(&model_bytes) {
+        // The outer manifest already passed recursive strict duplicate-key and
+        // number decoding; retain that exact owned value for wire validation.
+        match parse_model_ir_v2_value(case.model.clone()) {
             Ok(document) => {
                 valid_requests.push(LinearFrame3dBatchRequest {
                     document,
@@ -257,17 +258,11 @@ fn execute(bytes: &[u8]) -> Result<(Value, u8), Failure> {
             let case = &manifest.cases[index];
             outcomes[index] = match outcome {
                 Ok(result) => {
-                    let canonical = result.canonical_json().map_err(|error| Failure {
+                    let value = result.canonical_value().map_err(|error| Failure {
                         code: "batch_result_serialization_failed",
                         detail: error.to_string(),
                         exit_code: 1,
                     })?;
-                    let value: Value =
-                        serde_json::from_str(&canonical).map_err(|error| Failure {
-                            code: "batch_result_serialization_failed",
-                            detail: error.to_string(),
-                            exit_code: 1,
-                        })?;
                     json!({"index": index, "case_id": case.case_id, "result_id": case.result_id,
                            "success": true, "result_ir": value, "issues": []})
                 }

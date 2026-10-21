@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import ctypes as ct
+import hashlib
 import importlib.util
 import json
 import os
@@ -33,9 +34,10 @@ CLAIM = (
     "Generated fixed-linear-operator explicit state-update sequence only; no "
     "nonlinear material/RC solver, convergence, physical, public GPU backend or "
     "release authority. All methods compute the same sequence and final state/residual. "
-    "The CPU uses preassembled CSR; GPU uses existing frame-scatter/CSR kernels. "
-    "Operator/output reuse existed in v1. The new change keeps intermediate states "
-    "and residuals on GPU between updates. Compare only this sequence's host-roundtrip "
+    "CPU and the new GPU path use identical preassembled CSR bytes; old GPU paths "
+    "retain frame-scatter/CSR kernels. The new GPU path fuses each CSR residual/update "
+    "using separate old/new state buffers and returns the final-state residual. "
+    "Compare only this sequence's host-roundtrip "
     "baseline, not the different v1 independent-residual benchmark."
 )
 
@@ -52,10 +54,81 @@ def reference(case, steps, omega):
 def check_outputs(state, residual, expected):
     errors = []
     for actual, target in zip((state, residual), expected, strict=True):
-        if not np.allclose(actual, target, rtol=1e-11, atol=1e-12):
+        if (
+            actual.shape != target.shape
+            or not np.all(np.isfinite(actual))
+            or not np.allclose(actual, target, rtol=1e-11, atol=1e-12)
+        ):
             raise ValueError("fixed-operator sequence FP64 parity failed")
         errors.append(float(np.max(np.abs(actual - target))))
     return errors
+
+
+def csr_arrays(case):
+    """The same current preassembled CSR representation for both native paths."""
+    if type(case) is not dict or type(case.get("arrays")) is not dict:
+        raise ValueError("CSR case must provide an explicit arrays mapping")
+    dimension = case.get("dimension")
+    if type(dimension) is not int or not 12 <= dimension <= 196608:
+        raise ValueError("CSR dimension must be an integer in [12,196608]")
+    operator = case["operator"]
+    if (
+        type(operator) is not BASE.sparse.csr_matrix
+        or operator.shape != (dimension, dimension)
+        or not 1 <= operator.nnz <= 32 * dimension
+    ):
+        raise ValueError("CSR operator shape or nnz does not match the bounded case")
+    nnz = operator.nnz
+    for name, array, length in (
+        ("row", operator.indptr, dimension + 1),
+        ("column", operator.indices, nnz),
+    ):
+        if (
+            type(array) is not np.ndarray
+            or array.ndim != 1
+            or array.shape != (length,)
+            or array.dtype.kind not in "iu"
+            or array.dtype.itemsize > 8
+            or not array.flags.c_contiguous
+            or not array.flags.aligned
+        ):
+            raise ValueError(
+                f"CSR {name} must be a contiguous aligned integer vector of the exact length"
+            )
+    _float_buffer(operator.data, (nnz,), "CSR values")
+    _float_buffer(case["arrays"]["external"], (dimension,), "CSR external")
+    return {
+        "row": np.ascontiguousarray(operator.indptr, dtype=np.int64),
+        "column": np.ascontiguousarray(operator.indices, dtype=np.int64),
+        "value": np.ascontiguousarray(operator.data, dtype=np.float64),
+        "external": np.ascontiguousarray(case["arrays"]["external"], dtype=np.float64),
+    }
+
+
+def _float_buffer(array, shape, name, *, writable=False):
+    if (
+        type(array) is not np.ndarray
+        or array.dtype != np.dtype(np.float64)
+        or array.shape != shape
+        or not array.flags.c_contiguous
+        or not array.flags.aligned
+        or (writable and not array.flags.writeable)
+    ):
+        raise ValueError(
+            f"{name} must be an aligned contiguous float64 buffer with shape {shape}"
+            + (" and writable storage" if writable else "")
+        )
+
+
+def csr_identity(arrays):
+    digest = hashlib.sha256()
+    for name in ("row", "column", "value", "external"):
+        array = arrays[name]
+        metadata = [name, array.dtype.str, list(array.shape), array.nbytes]
+        digest.update(json.dumps(metadata, separators=(",", ":")).encode())
+        digest.update(b"\0")
+        digest.update(array.tobytes(order="C"))
+    return "sha256:" + digest.hexdigest()
 
 
 class CpuOperator:
@@ -88,16 +161,16 @@ class CpuOperator:
         self.lib.structural_cpu_fixed_operator_destroy_v1.restype = ct.c_int
         self.handle = p()
         operator = case["operator"]
-        row = operator.indptr.astype(np.int64)
-        column = operator.indices.astype(np.int64)
+        arrays = csr_arrays(case)
+        self.csr_identity_hash = csr_identity(arrays)
         start = time.perf_counter()
         code = self.lib.structural_cpu_fixed_operator_create_v1(
             case["dimension"],
             operator.nnz,
-            row.ctypes.data,
-            column.ctypes.data,
-            operator.data.ctypes.data,
-            case["arrays"]["external"].ctypes.data,
+            *(
+                arrays[name].ctypes.data
+                for name in ("row", "column", "value", "external")
+            ),
             ct.byref(self.handle),
         )
         self.setup_ms = (time.perf_counter() - start) * 1000
@@ -134,6 +207,7 @@ class CpuOperator:
 class HipSequence(BASE.HipResidual):
     def __init__(self, library):
         super().__init__(library)
+        self.csr = HipCsrSequence(library)
         p = ct.c_void_p
         self.lib.structural_hip_fixed_residual_sequence_v1.argtypes = [
             p,
@@ -187,6 +261,117 @@ class HipSequence(BASE.HipResidual):
         }
 
 
+class HipCsrSequence:
+    """Explicit new ABI; no fallback when its library or admission fails."""
+
+    def __init__(self, library):
+        self.lib = ct.CDLL(str(library))
+        self._dimensions = {}
+        p = ct.c_void_p
+        self.lib.structural_hip_csr_residual_last_error_v1.argtypes = []
+        self.lib.structural_hip_csr_residual_last_error_v1.restype = ct.c_char_p
+        self.lib.structural_hip_csr_residual_create_v1.argtypes = [
+            ct.c_longlong,
+            ct.c_longlong,
+            p,
+            p,
+            p,
+            p,
+            ct.POINTER(p),
+        ]
+        self.lib.structural_hip_csr_residual_create_v1.restype = ct.c_int
+        self.lib.structural_hip_csr_residual_evaluate_v1.argtypes = [
+            p,
+            p,
+            ct.c_longlong,
+            ct.c_int,
+            ct.c_double,
+            p,
+            p,
+            p,
+        ]
+        self.lib.structural_hip_csr_residual_evaluate_v1.restype = ct.c_int
+        self.lib.structural_hip_csr_residual_destroy_v1.argtypes = [p]
+        self.lib.structural_hip_csr_residual_destroy_v1.restype = ct.c_int
+
+    def checked(self, code):
+        if code:
+            raw = self.lib.structural_hip_csr_residual_last_error_v1()
+            detail = raw.decode(errors="replace") if raw else "no native detail"
+            raise RuntimeError(f"CSR fixed-operator native error {code}: {detail}")
+
+    def create(self, case):
+        arrays = csr_arrays(case)
+        self.csr_identity_hash = csr_identity(arrays)
+        handle = ct.c_void_p()
+        started = time.perf_counter()
+        self.checked(
+            self.lib.structural_hip_csr_residual_create_v1(
+                case["dimension"],
+                case["operator"].nnz,
+                *(
+                    arrays[name].ctypes.data
+                    for name in ("row", "column", "value", "external")
+                ),
+                ct.byref(handle),
+            )
+        )
+        self._dimensions[handle.value] = case["dimension"]
+        return handle, (time.perf_counter() - started) * 1000
+
+    def resident(self, handle, case, steps, omega, state, residual):
+        started = time.perf_counter()
+        token = handle.value if isinstance(handle, ct.c_void_p) else None
+        dimension = self._dimensions.get(token)
+        if (
+            dimension is None
+            or type(case) is not dict
+            or type(case.get("dimension")) is not int
+            or case.get("dimension") != dimension
+            or type(case.get("arrays")) is not dict
+        ):
+            raise ValueError("CSR case dimension must match this wrapper's live handle")
+        batch = case.get("batch")
+        if type(batch) is not int or not 1 <= batch <= 64:
+            raise ValueError("CSR batch must be an integer in [1,64]")
+        if type(steps) is not int or not 1 <= steps <= 128:
+            raise ValueError("CSR steps must be an integer in [1,128]")
+        if (
+            type(omega) not in (int, float)
+            or not np.isfinite(omega)
+            or not 0 < omega <= 1
+        ):
+            raise ValueError("CSR omega must be finite in (0,1]")
+        shape = (batch, dimension)
+        _float_buffer(case["arrays"]["states"], shape, "CSR initial states")
+        _float_buffer(state, shape, "CSR final states", writable=True)
+        _float_buffer(residual, shape, "CSR final residual", writable=True)
+        phases = np.empty(6, dtype=np.float64)
+        code = self.lib.structural_hip_csr_residual_evaluate_v1(
+            handle,
+            case["arrays"]["states"].ctypes.data,
+            case["batch"],
+            steps,
+            omega,
+            state.ctypes.data,
+            residual.ctypes.data,
+            phases.ctypes.data,
+        )
+        elapsed = (time.perf_counter() - started) * 1000
+        self.checked(code)
+        if not np.all(np.isfinite(phases)) or np.any(phases < 0.0):
+            raise ValueError("CSR timing phases must be finite and nonnegative")
+        return {
+            "wall_ms": elapsed,
+            "phases_ms": dict(zip(BASE.PHASE_NAMES, phases.tolist())),
+        }
+
+    def close(self, handle):
+        self.checked(self.lib.structural_hip_csr_residual_destroy_v1(handle))
+        if isinstance(handle, ct.c_void_p):
+            self._dimensions.pop(handle.value, None)
+
+
 def validate_scope(dimensions, batches, steps, workers):
     if any(type(n) is not int or n < 12 or n > 196608 or n % 6 for n in dimensions):
         raise ValueError("dimensions must be multiples of six in [12,196608]")
@@ -227,12 +412,27 @@ def compare_case(
     generation_ms = (time.perf_counter() - start) * 1000
     if not np.all(np.isfinite(case["arrays"]["states"])):
         raise ValueError("sequence input states must be finite")
+    free = case["arrays"]["free"]
+    if (
+        type(free) is not np.ndarray
+        or free.dtype != np.dtype(np.int64)
+        or free.shape != (dimension,)
+        or not free.flags.c_contiguous
+        or not free.flags.aligned
+        or not np.array_equal(free, np.arange(dimension, dtype=np.int64))
+    ):
+        raise ValueError(
+            "fixed-operator comparison requires every equation free in identity order"
+        )
     expected = reference(case, steps, omega)
     cpu = CpuOperator(cpu_library, case)
-    handle = None
+    handle = csr_handle = None
     state, residual, scratch = [np.empty_like(expected[0]) for _ in range(3)]
     try:
         handle, gpu_setup = gpu.create(case)
+        csr_handle, csr_gpu_setup = gpu.csr.create(case)
+        if cpu.csr_identity_hash != gpu.csr.csr_identity_hash:
+            raise ValueError("CPU/GPU preassembled CSR byte identity differs")
         methods = {
             f"cpu_openmp_{w}": (
                 lambda w=w: cpu.evaluate(case, steps, omega, w, state, residual)
@@ -245,7 +445,11 @@ def compare_case(
         methods["gpu_resident_sequence"] = lambda: gpu.resident(
             handle, case, steps, omega, state, residual
         )
+        methods["gpu_csr_resident_sequence"] = lambda: gpu.csr.resident(
+            csr_handle, case, steps, omega, state, residual
+        )
         rows = {name: [] for name in methods}
+        first_calls = {}
         maxima = {name: [0.0, 0.0] for name in methods}
         warm_count = 0 if correctness else warmups
         sample_count = 1 if correctness else samples
@@ -255,6 +459,17 @@ def compare_case(
             for name in names[shift:] + names[:shift]:
                 timing = methods[name]()
                 errors = check_outputs(state, residual, expected)
+                if ordinal == 0:
+                    first_calls[name] = {
+                        "timing": timing,
+                        "also_warmup": warm_count > 0,
+                        "also_saved_sample": warm_count == 0,
+                        "parity": {
+                            "pass": True,
+                            "state_absolute_error": errors[0],
+                            "residual_absolute_error": errors[1],
+                        },
+                    }
                 maxima[name] = [
                     max(a, b) for a, b in zip(maxima[name], errors, strict=True)
                 ]
@@ -296,6 +511,7 @@ def compare_case(
                 json.dumps(
                     {
                         "input_hash": case["input_hash"],
+                        "cpu_gpu_csr_identity_hash": cpu.csr_identity_hash,
                         "steps": steps,
                         "omega": omega,
                         "update": "u[k+1]=u[k]-omega*(A*u[k]-f);final=(u[S],A*u[S]-f)",
@@ -307,7 +523,20 @@ def compare_case(
             "input_generation_and_cpu_csr_preassembly_ms": generation_ms,
             "cpu_operator_copy_setup_ms": cpu.setup_ms,
             "gpu_operator_setup_ms": gpu_setup,
+            "gpu_csr_operator_setup_ms": csr_gpu_setup,
+            "cpu_gpu_csr_identity_hash": cpu.csr_identity_hash,
+            "equation_scope": "all equations free in identity order; checked before native creation",
+            "csr_array_metadata": {
+                name: {
+                    "dtype": array.dtype.str,
+                    "shape": list(array.shape),
+                    "bytes": array.nbytes,
+                }
+                for name, array in csr_arrays(case).items()
+            },
             "methods": summary,
+            "first_call_observations": first_calls,
+            "first_call_counting": "First observations reuse ordinal0 of the existing warmup/sample loop; they are not extra executions and must not be added to saved sample counts.",
             "expected_final_state_hash": BASE.digest(expected[0].tobytes()),
             "expected_final_residual_hash": BASE.digest(expected[1].tobytes()),
             "sequence_residual_evaluations": steps + 1,
@@ -326,6 +555,22 @@ def compare_case(
                 "expected_host_roundtrip_explicit_kernel_launches": 2 * (steps + 1),
                 "expected_resident_explicit_kernel_launches": 3 * steps + 2,
                 "frame_output_zero_operations": steps + 1,
+                "csr_resident_h2d_calls": 1,
+                "csr_resident_d2h_calls": 2,
+                "expected_csr_resident_explicit_kernel_launches": steps + 1,
+                "csr_frame_output_zero_operations": 0,
+                "csr_resident_transfer_bytes": 3 * dimension * batch * 8,
+                "csr_host_staging_commit_bytes": 2 * dimension * batch * 8,
+            },
+            "admission_cost_boundary": "New CSR GPU wall includes native finite input/output scans, registry/busy checks, staging and caller commit. Legacy CPU/GPU adapters retain their existing caller-side parity/finite checks outside timing; their admission costs are not identical. CSR D2H phase includes staging finite validation and host commits; native phase total excludes initial scan/event construction but Python wall includes them.",
+            "csr_memory_contract": {
+                "device_operator_array_bytes": sum(
+                    array.nbytes for array in csr_arrays(case).values()
+                ),
+                "steady_device_scratch_array_bytes": 3 * dimension * batch * 8,
+                "steady_host_staging_array_bytes": 2 * dimension * batch * 8,
+                "growth": "Transactional growth temporarily retains old and new capacities of three device and two host staging arrays; after success old scratch is released. Capacity follows the largest evaluated batch for this handle.",
+                "scope": "Named component array storage only; excludes allocator/runtime/context/caller/CPU/reference memory. Input size limits are not an explicit device or process memory budget.",
             },
         }
         if not correctness:
@@ -337,11 +582,22 @@ def compare_case(
             result["best_cpu_time_over_resident_gpu_time"] = (
                 summary[best]["wall_ms"]["median"] / resident
             )
+            csr_time = summary["gpu_csr_resident_sequence"]["wall_ms"]["median"]
+            result["csr_speedup_vs_old_resident_same_sequence"] = resident / csr_time
+            result["best_cpu_time_over_csr_gpu_time"] = (
+                summary[best]["wall_ms"]["median"] / csr_time
+            )
         return result
     finally:
-        cpu.close()
-        if handle:
-            gpu.checked(gpu.lib.mgt_hip_full_residual_destroy(handle))
+        try:
+            cpu.close()
+        finally:
+            try:
+                if handle:
+                    gpu.checked(gpu.lib.mgt_hip_full_residual_destroy(handle))
+            finally:
+                if csr_handle:
+                    gpu.csr.close(csr_handle)
 
 
 def build(out, reuse):
@@ -352,6 +608,7 @@ def build(out, reuse):
             "native/hip/hip_residual_timing.cpp",
             "implementation/phase1/hip_full_residual_ffi.cpp",
             "native/hip/residual_pipeline_cpu.cpp",
+            "native/hip/hip_csr_residual_pipeline.cpp",
         )
     ]
     hashes = {
@@ -381,6 +638,7 @@ def build(out, reuse):
             "-fPIC",
             "-shared",
             str(sources[0]),
+            str(sources[4]),
             "-o",
             str(gpu),
         ],
@@ -454,7 +712,14 @@ def main(argv=None):
         ),
         "cpu_threads": {
             key: os.environ.get(key)
-            for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")
+            for key in (
+                "OPENBLAS_NUM_THREADS",
+                "OMP_NUM_THREADS",
+                "MKL_NUM_THREADS",
+                "NUMEXPR_NUM_THREADS",
+                "OMP_DYNAMIC",
+                "OMP_WAIT_POLICY",
+            )
         },
         "cpu_affinity": sorted(os.sched_getaffinity(0)),
         "cases": [],

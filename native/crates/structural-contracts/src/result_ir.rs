@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-use crate::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
+use crate::model_ir::{canonical_value_model_ir_v2, canonicalize_model_ir_v2, decode_json_strict};
 use crate::FRAME3D_RESULT_IR_SCHEMA_V1;
 
 const SCHEMA_TEXT: &str = include_str!(concat!(
@@ -164,6 +164,31 @@ impl LinearFrame3dResultIrV1 {
             )
         })?;
         canonicalize(&value)
+    }
+
+    /// Return the same JSON value as parsing [`Self::canonical_json`].
+    ///
+    /// Canonical number rendering and precise number parsing are retained;
+    /// whole-document text allocation and decoding are avoided.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error if serialization or canonical number encoding fails.
+    pub fn canonical_value(&self) -> Result<Value, Frame3dResultIrError> {
+        let value = serde_json::to_value(self).map_err(|_| {
+            error(
+                "frame3d_result_ir_serialization_failed",
+                "/",
+                "ResultIR could not be represented as JSON",
+            )
+        })?;
+        canonical_value_model_ir_v2(&value).map_err(|source| {
+            error(
+                "frame3d_result_ir_canonicalization_failed",
+                &source.path,
+                &source.detail,
+            )
+        })
     }
 }
 

@@ -263,6 +263,88 @@ fn mixed_pattern_and_combination_results_match_the_existing_serial_cli_in_input_
 }
 
 #[test]
+fn finite_numeric_edges_keep_complete_ordered_cli_bytes_equal_to_serial_wire_results() {
+    let temporary = TempDirectory::new();
+    let literals = [
+        "0.0",
+        "-0.0",
+        "1.0",
+        "1e-5",
+        "42",
+        "1.2345678901234567",
+        "-10000.0",
+        "1000000.0",
+    ];
+    let requests = literals
+        .iter()
+        .enumerate()
+        .map(|(index, literal)| {
+            let mut model = fixture_model();
+            model["load_patterns"][1]["nodal_loads"][0]["components_si"]["FX"] =
+                serde_json::from_str(literal).expect("finite numeric edge");
+            pattern_case(&model, &format!("edge-{index}"), "LC_WEAK")
+        })
+        .collect::<Vec<_>>();
+    let mut manifest = manifest();
+    manifest["requests"] = json!(requests);
+    let path = temporary.write_json("finite-edges.json", &manifest);
+    let output = run_batch(&temporary, &path);
+    assert_eq!(output.status.code(), Some(0));
+    let mut expected = artifact(&output);
+    let outcomes = expected["outcomes"]
+        .as_array_mut()
+        .expect("ordered outcomes");
+    for (index, (case, outcome)) in requests.iter().zip(outcomes).enumerate() {
+        assert_eq!(outcome["index"], index);
+        assert_eq!(outcome["case_id"], case["case_id"]);
+        assert_eq!(outcome["success"], true);
+        outcome["result_ir"] = serial_result(&temporary, case);
+    }
+    let mut expected_bytes = serde_json::to_vec(&expected).expect("complete legacy wire results");
+    expected_bytes.push(b'\n');
+    assert_eq!(output.stdout, expected_bytes);
+}
+
+#[test]
+fn extreme_extension_refusals_keep_exact_issues_positions_and_later_wire_success() {
+    let temporary = TempDirectory::new();
+    let mut invalid_wire = fixture_model();
+    invalid_wire["extensions"]["numeric_edge"] = json!(f64::MAX);
+    let mut invalid_native = fixture_model();
+    invalid_native["extensions"]["stage4:numeric_edge"] = json!(f64::MAX);
+    let valid = pattern_case(&fixture_model(), "later-valid", "LC_WEAK");
+    let requests = [
+        pattern_case(&invalid_wire, "bad-wire-edge", "LC_WEAK"),
+        pattern_case(&invalid_native, "bad-native-edge", "LC_WEAK"),
+        valid,
+    ];
+    let mut manifest = manifest();
+    manifest["requests"] = json!(requests);
+    let path = temporary.write_json("refused-edges.json", &manifest);
+    let output = run_batch(&temporary, &path);
+    assert_eq!(output.status.code(), Some(1));
+    let mut expected = artifact(&output);
+    assert_eq!(
+        expected["summary"],
+        json!({"requested_cases":3,"succeeded_cases":1,"failed_cases":2})
+    );
+    expected["outcomes"] = json!([
+        {"index":0,"case_id":"bad-wire-edge","result_id":"batch-cli-result.bad-wire-edge",
+         "success":false,"result_ir":null,"issues":[{"code":"model_ir_schema_invalid","path":"/",
+         "detail":"ModelIR input does not satisfy the v2 JSON Schema","status_code":null,"layer":"model_wire_contract"}]},
+        {"index":1,"case_id":"bad-native-edge","result_id":"batch-cli-result.bad-native-edge",
+         "success":false,"result_ir":null,"issues":[{"code":"native_runtime_error","path":"/analysis",
+         "detail":"nonempty extensions are outside native Frame Alpha at /extensions","status_code":1200,"layer":"native_runtime"}]},
+        {"index":2,"case_id":"later-valid","result_id":"batch-cli-result.later-valid",
+         "success":true,"result_ir":serial_result(&temporary,&requests[2]),"issues":[]},
+    ]);
+    let mut expected_bytes =
+        serde_json::to_vec(&expected).expect("whole ordered refusal/success artifact");
+    expected_bytes.push(b'\n');
+    assert_eq!(output.stdout, expected_bytes);
+}
+
+#[test]
 fn invalid_models_and_runtime_cases_keep_their_positions_and_later_successes() {
     let temporary = TempDirectory::new();
     let model = fixture_model();

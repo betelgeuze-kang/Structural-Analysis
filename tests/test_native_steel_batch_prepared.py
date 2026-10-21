@@ -3,17 +3,20 @@
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import replace
+import gc
 from pathlib import Path
 import os
 import shutil
 import subprocess
 import sys
 from threading import Event
+import weakref
 
 import numpy as np
 import pytest
 
 from structural_analysis.materials.native_steel_batch import NativeSteelBatch
+from structural_analysis.materials import native_steel_batch as native_module
 from structural_analysis.materials.uniaxial_plasticity import (
     BilinearCombinedHardeningSteel,
 )
@@ -57,6 +60,122 @@ def material_rows():
         )
         for index in range(4)
     )
+
+
+def test_repeated_exact_law_signature_is_fresh_per_call_and_detached():
+    material = BilinearCombinedHardeningSteel()
+    reference = weakref.ref(material)
+    first = native_module._steel_material_signature((material,) * 16)
+    assert all(row is first[0] for row in first)
+    object.__setattr__(material, "yield_stress_mpa", 300.0)
+    second = native_module._steel_material_signature((material,) * 16)
+    assert second != first
+    assert second[0] is not first[0]
+    assert all(row is second[0] for row in second)
+    del material
+    gc.collect()
+    assert reference() is None
+
+
+def test_signature_sharing_limit_does_not_drop_or_reorder_current_values(monkeypatch):
+    monkeypatch.setattr(native_module, "_SIGNATURE_ROW_SHARING_LIMIT", 2)
+    materials = material_rows()
+    signature = native_module._steel_material_signature(
+        (*materials, materials[0], materials[2])
+    )
+    assert signature[0] is signature[4]
+    assert signature[2] == signature[5]
+    assert signature[2] is not signature[5]
+    expected = tuple(
+        native_module._steel_material_signature((value,))[0] for value in materials
+    )
+    assert signature == (*expected, expected[0], expected[2])
+
+
+@pytest.mark.parametrize("custom_access", ["descriptor", "getattribute"])
+def test_signature_keeps_custom_field_access_per_occurrence(monkeypatch, custom_access):
+    material = BilinearCombinedHardeningSteel()
+    observed = []
+
+    def value(instance):
+        observed.append(instance)
+        return 250.0 + len(observed)
+
+    if custom_access == "descriptor":
+        monkeypatch.setattr(
+            BilinearCombinedHardeningSteel, "yield_stress_mpa", property(value)
+        )
+    else:
+
+        def access(instance, name):
+            return (
+                value(instance)
+                if name == "yield_stress_mpa"
+                else object.__getattribute__(instance, name)
+            )
+
+        monkeypatch.setattr(BilinearCombinedHardeningSteel, "__getattribute__", access)
+    signature = native_module._steel_material_signature((material, material))
+    assert signature[0] != signature[1]
+    assert len(observed) == 2
+
+
+def test_prepared_array_subclasses_preserve_original_scalar_access(library):
+    class ScalarAccessArray(np.ndarray):
+        def tolist(self):
+            raise AssertionError("subclass bulk conversion must remain unused")
+
+    materials = material_rows()
+    backend = NativeSteelBatch(library, prepared=True)
+    plan = backend.prepare(materials)
+    buffers = plan._workspace.trial_buffers(1, backend)
+    buffers.strains = buffers.strains.view(ScalarAccessArray)
+    buffers.output = buffers.output.view(ScalarAccessArray)
+    parents = tuple(material.initial_state() for material in materials)
+    actual = plan.integrate((0.002,) * 4, parents)
+    expected = tuple(
+        material.integrate(0.002, parent)
+        for material, parent in zip(materials, parents, strict=True)
+    )
+    assert tuple(response.to_dict() for response in actual) == tuple(
+        response.to_dict() for response in expected
+    )
+    assert not plan._workspace.lock.locked()
+
+
+def test_response_detachment_cap_keeps_boundary_and_large_fallback_exact(
+    library, monkeypatch
+):
+    monkeypatch.setattr(native_module, "_BULK_RESPONSE_LIMIT", 4)
+    materials = material_rows()
+    backend = NativeSteelBatch(library, prepared=True)
+    raw = NativeSteelBatch(library)
+    plan = backend.prepare(materials)
+    parents = tuple(material.initial_state() for material in materials)
+    saved_parents = tuple(parent.canonical_bytes() for parent in parents)
+    first = None
+    first_bytes = None
+    for groups in (1, 2):
+        strains = tuple((0.0, -0.0, 0.002, -0.003) for _ in range(groups))
+        actual = plan.integrate_many(strains, (parents,) * groups)
+        expected = tuple(
+            raw.integrate(materials, values, parents) for values in strains
+        )
+        assert response_dicts(actual) == response_dicts(expected)
+        assert saved_parents == tuple(parent.canonical_bytes() for parent in parents)
+        assert all(
+            type(response.total_strain) is float for row in actual for response in row
+        )
+        if first is None:
+            first, first_bytes = actual, response_dicts(actual)
+        else:
+            assert response_dicts(first) == first_bytes
+    assert backend.calls == backend.prepared_calls == 2
+    assert backend.points == backend.prepared_points == 12
+    assert backend.group_calls == 1
+    assert backend.buffer_allocations == 2
+    assert backend.plan_builds == 1
+    assert not plan._workspace.lock.locked()
 
 
 def response_dicts(groups):

@@ -72,11 +72,17 @@ def test_actual_cpu_and_two_gpu_sequences_match_the_same_reference():
         "cpu_openmp_2",
         "gpu_host_roundtrip",
         "gpu_resident_sequence",
+        "gpu_csr_resident_sequence",
     }
     assert all(value["parity"]["pass"] for value in result["methods"].values())
     assert result["methods"]["cpu_openmp_2"]["observed_workers"] == [2]
     assert result["transfer_contract"]["resident_h2d_calls"] == 1
     assert result["transfer_contract"]["host_roundtrip_h2d_calls"] == 4
+    assert (
+        result["transfer_contract"]["expected_csr_resident_explicit_kernel_launches"]
+        == 4
+    )
+    assert result["transfer_contract"]["csr_frame_output_zero_operations"] == 0
     assert "best_cpu_time_over_resident_gpu_time" not in result
 
 
