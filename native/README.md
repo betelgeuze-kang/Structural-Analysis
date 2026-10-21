@@ -98,6 +98,30 @@ zero fallback/regularization, and promotes only the fixed `bounded_candidate` au
 The replay is a separate cross-language implementation gate, not external code-to-code or
 experimental validation. It grants no design, code, commercial or release authority.
 
+`analyze_linear_frame3d_batch` composes 1-1024 independent requests on 1-12 bounded
+standard-library worker threads. Each request retains the serial runtime's validation, model
+compilation, solve, independent recovery and ResultIR gates. Workers own their API table and native
+model handles locally; the existing non-Send native model owner remains unchanged. Outcomes stay
+in input order, including per-case errors. Thread creation failures or panics fail the batch
+without retry. Worker count changes neither the 60-equation single-model limit nor result authority.
+
+The following release example compares the existing per-request serial entry with batch workers
+1/2/4/8/12. It checks exact ordered canonical ResultIR equality outside each timed region. Timings
+include validation, model compilation, solve, recovery, ResultIR construction and batch thread
+startup, including runtime-internal serialization. They exclude file loading, wire parsing,
+final-output serialization and canonical JSON construction for the equality comparison:
+
+~~~bash
+cargo run --release --locked --manifest-path native/Cargo.toml \
+  -p structural-cli --example frame3d_batch_bench -- \
+  --model native/distribution/frame-alpha-cantilever.model-ir.json \
+  --load-pattern LC_WEAK --jobs 256 --repetitions 3 --workers 1,2,4,8,12
+~~~
+
+Repeat `--model` to cycle through several already-supported ModelIR documents. Reported throughput
+applies only to this bounded independent batch. Repeating one fixture does not add independent
+validation cases, and the result is not a single-model solver speedup or physical validation.
+
 The bounded analysis command writes exactly one selected artifact to stdout and never chooses an
 implicit report path:
 
@@ -338,3 +362,73 @@ append-only 128-byte table and versioned descriptors.
 
 The old probe crates remain outside this workspace. Their preservation and next migration
 owner are recorded in `compatibility-owners.json`; no legacy symbol is removed by Slice A.
+
+## Optional OpenMP steel batch
+
+On Linux with GCC and OpenMP, the additional shared library compiles the existing FP64
+combined-hardening steel return mapping. It accepts independent trial points from immutable
+accepted parents and preserves point ordering. It does not parallelize sequential nonlinear
+load steps or change the material law, scalar section reduction order, tolerances or rollback.
+
+~~~bash
+cmake -S native/cpp -B build/steel -DCMAKE_BUILD_TYPE=Release \
+  -DSTRUCTURAL_BUILD_STEEL_BATCH=ON
+cmake --build build/steel --target structural_steel_batch --parallel 4
+~~~
+
+Python callers explicitly load the resulting library and scope its use:
+
+~~~python
+from structural_analysis.materials.native_steel_batch import (
+    NativeSteelBatch, use_native_steel_batch,
+)
+
+backend = NativeSteelBatch("build/steel/libstructural_steel_batch.so", workers=12)
+with use_native_steel_batch(backend):
+    response = section.integrate(generalized_strain, accepted_parent)
+~~~
+
+The backend rejects an invalid batch without accepting partial output. It never silently
+falls back. The public RC result records the selected library hash and worker count; accepted
+material state and restart data remain independent of execution backend. Python execution
+remains the default: packing arrays and rebuilding Python response objects can outweigh the
+native arithmetic benefit. `evaluate_arrays` is a separate packed-array API and must not be
+compared with the full response API as though they returned the same work.
+
+Run the same comparison driver in separate baseline and candidate Python processes. It saves
+completed rows incrementally and fingerprints every timed result outside the timing region:
+
+~~~bash
+PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  OMP_WAIT_POLICY=PASSIVE python3 scripts/benchmark_native_steel_batch.py \
+  --suite all --repetitions 3 --output /tmp/steel-python.json
+PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  OMP_WAIT_POLICY=PASSIVE python3 scripts/benchmark_native_steel_batch.py \
+  --suite all --repetitions 3 --library build/steel/libstructural_steel_batch.so \
+  --workers 12 --output /tmp/steel-openmp.json
+~~~
+
+These generated material, section and bounded public RC cases establish implementation parity
+and measured local performance only. A first API call excludes process startup, imports and
+model construction. Compare input/output hashes and the same returned API before interpreting
+timings. Backend metadata and its result hash differ when explicitly selecting native execution.
+
+## HIP residual timing
+
+`native/hip/hip_residual_timing.cpp` wraps the existing frame/CSR/spring residual kernels for
+bounded measurement on an actual AMD GPU. It is a benchmark adapter; the native Frame3D and
+public nonlinear RC APIs do not acquire a HIP backend through this change.
+
+~~~bash
+python3 scripts/benchmark_hip_residual_performance.py \
+  --out /tmp/hip-residual --architecture gfx1030
+~~~
+
+The driver requires a working ROCm compiler/runtime and reports the actual device. It compares
+generated fixed linear operators against compiled SciPy CSR application, checks FP64 numerical
+agreement, and records compilation, setup, transfers, kernel time and transfer-inclusive Python
+wall time separately. Reused GPU operator/output buffers and allocating CPU outputs are explicit
+in the receipt. Small batches can be slower on the GPU; this result is neither a full nonlinear
+solve speedup nor a comparison against an optimized multicore CPU sparse solver. The measured
+Rust independent-model batch and HIP state batch are different workloads; their gains cannot
+be multiplied.

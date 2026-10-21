@@ -11,6 +11,15 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake/StructuralWarnings.cmake)
 
 find_package(Threads REQUIRED)
 
+option(STRUCTURAL_BUILD_STEEL_BATCH "Build the optional OpenMP steel material batch" OFF)
+if(STRUCTURAL_BUILD_STEEL_BATCH)
+  find_package(OpenMP REQUIRED COMPONENTS CXX)
+  add_library(structural_steel_batch SHARED src/materials/steel_batch.cpp)
+  target_link_libraries(structural_steel_batch PRIVATE OpenMP::OpenMP_CXX)
+  target_compile_features(structural_steel_batch PRIVATE cxx_std_20)
+  target_compile_options(structural_steel_batch PRIVATE -ffp-contract=off)
+endif()
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)

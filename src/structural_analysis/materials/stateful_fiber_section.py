@@ -10,12 +10,12 @@ distributed-plasticity formulation, or production material backend.
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from functools import lru_cache
 import hashlib
 import math
 import struct
-from typing import Any, Iterable, Literal
+from typing import Any, Iterable, Literal, cast
 
 import numpy as np
 
@@ -30,6 +30,7 @@ from structural_analysis.materials.uniaxial_plasticity import (
     UniaxialPlasticityResponse,
     UniaxialPlasticityState,
 )
+from structural_analysis.materials.native_steel_batch import active_native_steel_batch
 
 
 STATEFUL_FIBER_SECTION_SCHEMA_VERSION = "phase2-stateful-rc-fiber-section.v1"
@@ -57,6 +58,117 @@ _MPA_M2_TO_KN = 1_000.0
 FiberKind = Literal["steel", "concrete"]
 FiberState = UniaxialPlasticityState | ConcreteDamageState
 FiberResponse = UniaxialPlasticityResponse | ConcreteDamageResponse
+
+
+class _UncacheableSectionContractValue(TypeError):
+    """Preserve the original serializer for values outside the plain fast path."""
+
+
+def _section_contract_value_snapshot(value: Any) -> tuple[Any, ...]:
+    """Copy current values into typed immutable keys, never retaining models.
+
+    Python equates True, 1 and 1.0, but canonical JSON distinguishes them.  The
+    tags preserve that distinction, while signed floating zero deliberately
+    shares a key because the canonical serializer normalizes it.  Unusual
+    scalar/container types use the original asdict/canonical path instead of
+    assuming that their copying or conversion semantics match plain values.
+    """
+    kind = type(value)
+    if value is None:
+        return ("none", None)
+    if kind is str:
+        return ("string", value)
+    if kind is bool:
+        return ("boolean", value)
+    if kind is int:
+        return ("integer", value)
+    if kind is float:
+        if not math.isfinite(value):
+            # Let the original serializer retain its error type and field path.
+            raise _UncacheableSectionContractValue
+        return ("float", value)
+    if is_dataclass(value) and not isinstance(value, type):
+        return (
+            "mapping",
+            tuple(
+                (item.name, _section_contract_value_snapshot(getattr(value, item.name)))
+                for item in fields(value)
+            ),
+        )
+    if kind is dict:
+        if any(type(key) is not str for key in value):
+            raise _UncacheableSectionContractValue
+        return (
+            "mapping",
+            tuple(
+                (key, _section_contract_value_snapshot(item))
+                for key, item in value.items()
+            ),
+        )
+    if kind is list or kind is tuple:
+        return (
+            "sequence",
+            tuple(_section_contract_value_snapshot(item) for item in value),
+        )
+    raise _UncacheableSectionContractValue
+
+
+def _section_contract_value_from_snapshot(snapshot: tuple[Any, ...]) -> Any:
+    tag, value = snapshot
+    if tag == "mapping":
+        return {
+            key: _section_contract_value_from_snapshot(item) for key, item in value
+        }
+    if tag == "sequence":
+        return [_section_contract_value_from_snapshot(item) for item in value]
+    return value
+
+
+@lru_cache(maxsize=128)
+def _cached_section_contract_hash(snapshot: tuple[Any, ...]) -> str:
+    """Cache only a pure digest of the fresh value snapshot, bounded by entries."""
+    return canonical_hash(_section_contract_value_from_snapshot(snapshot))
+
+
+def _section_contract_snapshot(section: StatefulRCFiberSection) -> tuple[Any, ...]:
+    # Do not inspect a custom/single-use iterable before the legacy serializer.
+    if type(section.fibers) is not tuple or type(section.steel_overrides) is not tuple:
+        raise _UncacheableSectionContractValue
+    # A fiber subclass can override to_dict(), so preserve its original dispatch.
+    if any(type(fiber) is not StatefulSectionFiber for fiber in section.fibers):
+        raise _UncacheableSectionContractValue
+    # The original payload calls asdict(), which rejects non-dataclass roots.
+    for material in (section.steel, section.concrete):
+        if not is_dataclass(material) or isinstance(material, type):
+            raise _UncacheableSectionContractValue
+    for row in section.steel_overrides:
+        if type(row) is not tuple or len(row) != 2:
+            raise _UncacheableSectionContractValue
+        _, material = row
+        if not is_dataclass(material) or isinstance(material, type):
+            raise _UncacheableSectionContractValue
+    return _section_contract_value_snapshot(
+        {
+            "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
+            "section_id": section.section_id,
+            "strain_relation": FIBER_SECTION_STRAIN_RELATION,
+            "resultant_definition": FIBER_SECTION_RESULTANT_DEFINITION,
+            "tangent_definition": FIBER_SECTION_TANGENT_DEFINITION,
+            "fibers": section.fibers,
+            "steel": section.steel,
+            "concrete": section.concrete,
+            **(
+                {
+                    "steel_overrides": [
+                        {"fiber_id": fiber_id, "material": material}
+                        for fiber_id, material in section.steel_overrides
+                    ]
+                }
+                if section.steel_overrides
+                else {}
+            ),
+        }
+    )
 
 
 def _finite(value: Any, *, name: str) -> float:
@@ -333,8 +445,25 @@ class StatefulRCFiberSection:
             self.steel,
         )
 
+    def _current_steel_materials(self) -> dict[str, BilinearCombinedHardeningSteel]:
+        """Derive an operation-local map from the current physical fields."""
+        # Reversed construction preserves steel_material_for's first-match policy.
+        overrides = dict(reversed(self.steel_overrides))
+        return {
+            fiber.fiber_id: overrides.get(fiber.fiber_id, self.steel)
+            for fiber in self.fibers
+            if fiber.material_kind == "steel"
+        }
+
     @property
     def contract_hash(self) -> str:
+        try:
+            snapshot = _section_contract_snapshot(self)
+        except _UncacheableSectionContractValue:
+            pass
+        else:
+            return _cached_section_contract_hash(snapshot)
+        # Keep legacy behavior for custom values and precise rejection messages.
         return canonical_hash(
             {
                 "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
@@ -359,6 +488,7 @@ class StatefulRCFiberSection:
         )
 
     def initial_state(self) -> StatefulFiberSectionState:
+        steel_materials = self._current_steel_materials()
         return StatefulFiberSectionState(
             section_id=self.section_id,
             section_contract_hash=self.contract_hash,
@@ -366,7 +496,7 @@ class StatefulRCFiberSection:
             axial_strain=0.0,
             curvature_z_per_m=0.0,
             fiber_states=tuple(
-                self.steel_material_for(fiber.fiber_id).initial_state()
+                steel_materials[fiber.fiber_id].initial_state()
                 if fiber.material_kind == "steel"
                 else self.concrete.initial_state()
                 for fiber in self.fibers
@@ -382,6 +512,7 @@ class StatefulRCFiberSection:
             raise ValueError("state section_contract_hash does not match section")
         if len(state.fiber_states) != len(self.fibers):
             raise ValueError("state fiber count does not match section")
+        steel_materials = self._current_steel_materials()
         for fiber, fiber_state in zip(
             self.fibers,
             state.fiber_states,
@@ -390,7 +521,7 @@ class StatefulRCFiberSection:
             if fiber.material_kind == "steel":
                 if type(fiber_state) is not UniaxialPlasticityState:
                     raise ValueError("state fiber material type does not match section")
-                self.steel_material_for(fiber.fiber_id).validate_state_admissibility(
+                steel_materials[fiber.fiber_id].validate_state_admissibility(
                     fiber_state
                 )
             else:
@@ -434,6 +565,22 @@ class StatefulRCFiberSection:
         yielded_count = 0
         damaged_count = 0
 
+        native = active_native_steel_batch()
+        steel_materials = self._current_steel_materials()
+        native_responses: dict[str, UniaxialPlasticityResponse] = {}
+        if native is not None:
+            steel_rows = [(fiber, parent) for fiber, parent in zip(
+                self.fibers, committed_state.fiber_states, strict=True
+            ) if fiber.material_kind == "steel"]
+            evaluated = native.integrate(
+                [steel_materials[fiber.fiber_id] for fiber, _ in steel_rows],
+                [axial_strain - curvature * fiber.y_m for fiber, _ in steel_rows],
+                # validate_state above already binds each steel parent to this type.
+                [cast(UniaxialPlasticityState, parent) for _, parent in steel_rows],
+            )
+            native_responses = {fiber.fiber_id: response for (fiber, _), response
+                                in zip(steel_rows, evaluated, strict=True)}
+
         for fiber, parent in zip(
             self.fibers,
             committed_state.fiber_states,
@@ -442,8 +589,9 @@ class StatefulRCFiberSection:
             strain = axial_strain - curvature * fiber.y_m
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
-                steel_response = self.steel_material_for(fiber.fiber_id).integrate(
-                    strain, parent
+                steel_response = (
+                    native_responses[fiber.fiber_id] if native is not None
+                    else steel_materials[fiber.fiber_id].integrate(strain, parent)
                 )
                 yielded_count += int(steel_response.yielded)
                 response: FiberResponse = steel_response

@@ -15,6 +15,8 @@ from typing import Any, Mapping
 
 import numpy as np
 
+from structural_analysis.materials.native_steel_batch import active_native_steel_batch
+
 from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DMember,
     StatefulFiberFrame2DProblem,
@@ -355,6 +357,12 @@ def analyze_public_rc_fiber_frame(
         "restart_supplied": restart_checkpoint_chain is not None,
         "restart_checkpoint_artifact_hash": restart_hash,
     }
+    material_execution = active_native_steel_batch()
+    if material_execution is not None:
+        configuration["material_execution_backend"] = {
+            key: value for key, value in material_execution.metadata().items()
+            if key not in ("calls", "points")
+        }
     compiled, unsupported, warnings = _compile(snapshot)
     if compiled is None:
         return _build_public_result(
