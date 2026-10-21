@@ -17,6 +17,9 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
     initial_stateful_fiber_frame2d_checkpoint,
     validate_stateful_fiber_frame2d_checkpoint,
 )
+from structural_analysis.assembly.stateful_fiber_frame2d_direct_sparse import (
+    assemble_stateful_fiber_frame2d_direct_sparse,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
 )
@@ -25,6 +28,8 @@ from structural_analysis.solvers.nonlinear.newton import (
     RESIDUAL_FORMULA,
     RESIDUAL_FORMULA_HASH,
     SOLVE_FREE_EQUATIONS_DISPOSITION,
+    VECTOR_MATRIX_BACKEND,
+    VECTOR_SPARSE_MATRIX_BACKEND,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
     newton_raphson_vector,
@@ -256,6 +261,7 @@ class StatefulFiberFrame2DLoadStepAdapter:
         repr=False,
         compare=False,
     )
+    matrix_backend: str = VECTOR_MATRIX_BACKEND
 
     @property
     def case_id(self) -> str:
@@ -281,9 +287,14 @@ class StatefulFiberFrame2DLoadStepAdapter:
     def assemble(
         self,
         free_displacements_m: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, Any]:
+        assembler = (
+            assemble_stateful_fiber_frame2d_direct_sparse
+            if self.matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+            else assemble_stateful_fiber_frame2d
+        )
         if self.runtime_recorder is None:
-            assembly = assemble_stateful_fiber_frame2d(
+            assembly = assembler(
                 self.problem,
                 self.accepted_checkpoint,
                 target_load_factor=self.target_load_factor,
@@ -294,7 +305,7 @@ class StatefulFiberFrame2DLoadStepAdapter:
         started_ns = self.runtime_recorder.newton._begin_assemble()
         raised = False
         try:
-            assembly = assemble_stateful_fiber_frame2d(
+            assembly = assembler(
                 self.problem,
                 self.accepted_checkpoint,
                 target_load_factor=self.target_load_factor,
@@ -469,16 +480,18 @@ def _solve_stateful_fiber_frame2d_load_step(
             problem,
             initial_free_coordinates_m,
         )
+    selected_config = config or NewtonRaphsonConfig()
     adapter = StatefulFiberFrame2DLoadStepAdapter(
         problem=problem,
         accepted_checkpoint=accepted_checkpoint,
         target_load_factor=load_factor,
         initial_free_coordinates_override_m=initial_override,
+        matrix_backend=selected_config.matrix_backend,
         runtime_recorder=runtime_recorder,
     )
     solution = _solve_newton(
         adapter,
-        config or NewtonRaphsonConfig(),
+        selected_config,
         runtime_recorder=runtime_recorder,
     )
     trial_assembly = _assemble_terminal_trial(

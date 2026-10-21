@@ -180,6 +180,136 @@ remain separate gates.
 
 Generated readiness and evidence artifacts are source-derived. Do not hand-edit them or infer a broader claim from a passing bounded benchmark.
 
+## Developer CPU and GPU execution options
+
+These options retain the existing model, material, recovery and result contracts.
+They do not establish external validation or release readiness. Select each option
+explicitly and compare the same returned work before interpreting timings.
+
+The Rust CLI accepts an inline ModelIR batch manifest and emits one completed JSON
+artifact to stdout. For example, create a one-case manifest from the supported fixture:
+
+```bash
+python3 - <<'PY'
+import json
+from pathlib import Path
+model = json.loads(Path("native/distribution/frame-alpha-cantilever.model-ir.json").read_text())
+manifest = {
+    "schema_version": "structural-native-frame3d-batch-request.v1",
+    "batch_id": "example-batch",
+    "resource_policy": {
+        "profile": "bounded_frame3d_single_thread_workers.v1",
+        "workers": 1,
+        "cpu_budget": 1,
+    },
+    "requests": [{"case_id": "cantilever", "model": model,
+                  "load_pattern_id": "LC_WEAK", "result_id": "example-result"}],
+}
+with Path("frame-batch.json").open("x") as stream:
+    json.dump(manifest, stream)
+PY
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  BLIS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 NUMEXPR_NUM_THREADS=1 \
+  OMP_MAX_ACTIVE_LEVELS=1 OMP_NESTED=FALSE \
+  native/target/release/structural-cli model analyze-frame3d-batch frame-batch.json
+```
+
+Build the executable with `cargo build --release --locked --manifest-path
+native/Cargo.toml -p structural-cli`; a custom `CARGO_TARGET_DIR` changes its location.
+The manifest accepts 1–1024 cases and 1–12 workers. `cpu_budget` must fit observed
+available parallelism, and workers must fit that explicit budget. Case and result
+identifiers must be unique; select exactly one load pattern or combination per case.
+The fixed native kernel uses one thread per worker. Thread declarations, if present,
+must match this strict single-thread profile even when a named BLAS library is unused.
+The command reads these declarations without changing its process environment.
+This admission is per invocation, not a machine-wide or cross-process CPU quota.
+Ordered outcomes preserve each request's validation, compile, solve, recovery and
+ResultIR gates. Exit 0 means every case succeeded; exit 1 includes completed batches
+with case errors; invalid manifest/resource admission uses exit 2. No output-file
+paths are accepted: stdout contains the selected artifact, and callers own file
+publication. Independent-model throughput is distinct from single-model solve time.
+
+The optional OpenMP steel library supports reusable prepared buffers and a batch of
+integration-point trials sharing one fiber-law layout:
+
+```python
+from structural_analysis.materials.native_steel_batch import NativeSteelBatch, use_native_steel_batch
+
+backend = NativeSteelBatch("build/steel/libstructural_steel_batch.so", workers=1, prepared=True)
+with use_native_steel_batch(backend):
+    response = section.integrate(generalized_strain, accepted_parent)
+```
+
+See [native build instructions](native/README.md#optional-openmp-steel-batch).
+`prepared=True` reuses packed material data and scratch storage; compatible element
+integration points can share a native call. Accepted parents remain immutable, and
+point/fiber accumulation order, material laws, commit/rollback and failure checks
+remain unchanged. Shared prepared scratch rejects concurrent use. Python remains
+the default, and full Python response reconstruction can outweigh native arithmetic.
+
+The fixed-chord public RC API also accepts
+`PublicRCFiberFrameConfig(matrix_backend="scipy_sparse_spsolve_cpu")`. Its CLI equivalent is:
+
+```bash
+python -m structural_analysis.api.nonlinear_fiber_frame_cli \
+  examples/public_rc_fiber_frame_cantilever.json --load-steps 2 \
+  --matrix-backend scipy_sparse_spsolve_cpu \
+  --out rc-sparse-result.json --report-out rc-sparse-report.json \
+  --checkpoint-out rc-sparse-checkpoint-chain.json
+```
+
+The default stays `numpy_linalg_solve_dense` (reported as `numpy_dense_ndarray`).
+Sparse Newton trials assemble the free CSR tangent directly and use the existing
+unregularized CPU solver. Exact-conditioning admission remains capped at 256 free
+equations; terminal engineering receipts retain the existing dense assembler.
+This does not make the entire path sparse or lift a model, convergence or conditioning
+limit. Within one public invocation, eligible pure schema/hash computations and
+unchanged sparse factorizations may be reused. Changed values are rechecked;
+numerical replay, source binding, array commitments and semantic gates still run.
+Canonical JSON uses a fast normalization path for exact built-in values, with
+identical bytes, signed-zero rules and fresh containers. NumPy, custom, deep and
+invalid values retain the original normalization and error handling.
+
+Use the source-bound public RC driver to separate API timing from an optional
+diagnostic profile. Choose a new output filename for every run:
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  python3 -B scripts/benchmark_rc_execution_pipeline.py \
+  --source-root "$PWD" --output /tmp/rc-pipeline-dense.json \
+  --cases 1x2 --repetitions 5 --elapsed-budget-seconds 300 --profile
+```
+
+Cases are `1x2`, `2x2`, `4x2` (members × section layers) and `1x16`; all use
+two load steps. Add `--matrix-backend scipy_sparse_spsolve_cpu` for sparse execution,
+or `--steel-library build/steel/libstructural_steel_batch.so --steel-workers 1
+--prepared` for the explicit prepared native option. The timer covers the same
+analyze-plus-validate API for the first call and every steady sample; it excludes
+startup, imports, input preparation, hashing and report writes. Every result and
+checkpoint is fingerprinted outside timing and must repeat exactly within the same
+backend. Backend metadata is removed only from the comparison fingerprint, not the
+saved result configuration. The separate `--profile` call saves raw pstats and
+mutually exclusive self-time categories; its time is not a steady sample. Peak RSS
+is process-lifetime usage including imports and inputs, not isolated solver memory.
+Reports retain completed and interrupted work. Python signal budgets can be delayed
+inside native calls; use an external supervisor for a hard process timeout.
+
+The HIP sequence driver keeps intermediate states/residuals on the GPU and compares
+the same generated fixed-operator update sequence with host-roundtrip GPU execution
+and a preassembled-CSR OpenMP CPU implementation:
+
+```bash
+python3 scripts/benchmark_hip_residual_pipeline.py --out /tmp/hip-sequence \
+  --dimensions 1536 12288 49152 --batches 1 8 32 --steps 8 32 \
+  --workers 1 2 4 8 12 --samples 7
+```
+
+This developer driver builds its benchmark adapters unless `--reuse-library` is
+selected. Operator setup, transfers, device phases and transfer-inclusive wall time
+have separate scopes. It evaluates a fixed linear sequence, not nonlinear RC
+convergence or a public GPU solver. Compare only identical sequence inputs and
+returned final state/residual; CPU batch and GPU sequence gains cannot be multiplied.
+
 ## License boundary
 
 The root `LICENSE` is the authority for repository-authored source and is all-rights-reserved: it

@@ -16,9 +16,9 @@ pub use frame3d::{
     LinearFrame3dMemberResult, LinearFrame3dNodeResult,
 };
 pub use frame3d_batch::{
-    analyze_linear_frame3d_batch, Frame3dBatchError, LinearFrame3dBatchLoadSource,
-    LinearFrame3dBatchRequest, LinearFrame3dBatchResult, MAX_FRAME3D_BATCH_REQUESTS,
-    MAX_FRAME3D_BATCH_WORKERS,
+    analyze_linear_frame3d_batch, Frame3dBatchCpuBudget, Frame3dBatchError,
+    LinearFrame3dBatchLoadSource, LinearFrame3dBatchRequest, LinearFrame3dBatchResult,
+    MAX_FRAME3D_BATCH_REQUESTS, MAX_FRAME3D_BATCH_WORKERS,
 };
 pub use native_job_store::{
     NativeFrame3dJobStore, NativeFrame3dJobStoreError, NativeFrame3dJobViewRecord,

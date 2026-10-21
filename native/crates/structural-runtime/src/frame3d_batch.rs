@@ -12,6 +12,79 @@ pub const MAX_FRAME3D_BATCH_WORKERS: usize = 12;
 /// Maximum requests retained in one ordered batch result.
 pub const MAX_FRAME3D_BATCH_REQUESTS: usize = 1024;
 
+/// Per-invocation worker admission for the single-threaded bounded native kernel.
+///
+/// This is an observed process CPU-capacity check, not a cross-process CPU quota.
+/// It never changes affinity, environment variables or a foreign thread runtime.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Frame3dBatchCpuBudget {
+    total_workers: usize,
+    observed_available_parallelism: usize,
+}
+
+impl Frame3dBatchCpuBudget {
+    /// Admit an explicit worker budget against the current process CPU capacity.
+    ///
+    /// # Errors
+    /// Returns an error if capacity is unavailable or the budget is zero/too large.
+    pub fn for_current_process(total_workers: usize) -> Result<Self, Frame3dBatchError> {
+        let available = thread::available_parallelism()
+            .map_err(|_| Frame3dBatchError::CpuCapacityUnavailable)?
+            .get();
+        Self::for_observed_capacity(total_workers, available)
+    }
+
+    fn for_observed_capacity(
+        total_workers: usize,
+        available: usize,
+    ) -> Result<Self, Frame3dBatchError> {
+        if total_workers == 0 || total_workers > available {
+            return Err(Frame3dBatchError::InvalidCpuBudget {
+                requested: total_workers,
+                available,
+            });
+        }
+        Ok(Self {
+            total_workers,
+            observed_available_parallelism: available,
+        })
+    }
+
+    #[must_use]
+    pub const fn total_workers(self) -> usize {
+        self.total_workers
+    }
+
+    #[must_use]
+    pub const fn observed_available_parallelism(self) -> usize {
+        self.observed_available_parallelism
+    }
+
+    /// Run the unchanged batch computation after enforcing this invocation's budget.
+    ///
+    /// # Errors
+    /// Rejects excess workers before native initialization, plus ordinary batch failures.
+    pub fn analyze(
+        self,
+        requests: &[LinearFrame3dBatchRequest],
+        workers: usize,
+    ) -> Result<LinearFrame3dBatchResult, Frame3dBatchError> {
+        if !(1..=MAX_FRAME3D_BATCH_WORKERS).contains(&workers) {
+            return Err(Frame3dBatchError::InvalidWorkerCount {
+                requested: workers,
+                maximum: MAX_FRAME3D_BATCH_WORKERS,
+            });
+        }
+        if workers > self.total_workers {
+            return Err(Frame3dBatchError::WorkerBudgetExceeded {
+                requested: workers,
+                budget: self.total_workers,
+            });
+        }
+        analyze_linear_frame3d_batch(requests, workers)
+    }
+}
+
 /// Owned load selection, so a request never transports a native model handle.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LinearFrame3dBatchLoadSource {
@@ -47,6 +120,9 @@ pub struct LinearFrame3dBatchResult {
 /// Batch admission or thread-management failure, separate from each model's runtime error.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Frame3dBatchError {
+    CpuCapacityUnavailable,
+    InvalidCpuBudget { requested: usize, available: usize },
+    WorkerBudgetExceeded { requested: usize, budget: usize },
     InvalidWorkerCount { requested: usize, maximum: usize },
     InvalidRequestCount { requested: usize, maximum: usize },
     WorkerSpawnFailed { worker_index: usize, detail: String },
@@ -58,6 +134,23 @@ pub enum Frame3dBatchError {
 impl fmt::Display for Frame3dBatchError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::CpuCapacityUnavailable => {
+                write!(
+                    formatter,
+                    "Frame3D batch process CPU capacity is unavailable"
+                )
+            }
+            Self::InvalidCpuBudget {
+                requested,
+                available,
+            } => write!(
+                formatter,
+                "Frame3D batch CPU budget must be in 1..={available}, got {requested}"
+            ),
+            Self::WorkerBudgetExceeded { requested, budget } => write!(
+                formatter,
+                "Frame3D batch workers {requested} exceed the explicit CPU budget {budget}"
+            ),
             Self::InvalidWorkerCount { requested, maximum } => write!(
                 formatter,
                 "Frame3D batch workers must be in 1..={maximum}, got {requested}"
@@ -127,6 +220,8 @@ fn run_worker(
 /// Every case uses the existing serial validation, compilation, solve, recovery and promotion
 /// gates. Case errors remain in their input positions and do not cause retries. Workers reuse
 /// only their local API table, never a native model or mutable numerical state across cases.
+/// This original composition primitive does not reserve CPU capacity; use
+/// [`Frame3dBatchCpuBudget::analyze`] for explicit per-invocation CPU admission.
 ///
 /// # Errors
 ///
@@ -204,4 +299,36 @@ pub fn analyze_linear_frame3d_batch(
         workers_used,
         outcomes,
     })
+}
+
+#[cfg(test)]
+mod cpu_budget_tests {
+    use super::{Frame3dBatchCpuBudget, Frame3dBatchError};
+
+    #[test]
+    fn zero_and_excess_observed_budgets_fail_before_batch_execution() {
+        for requested in [0, 5] {
+            assert_eq!(
+                Frame3dBatchCpuBudget::for_observed_capacity(requested, 4),
+                Err(Frame3dBatchError::InvalidCpuBudget {
+                    requested,
+                    available: 4,
+                })
+            );
+        }
+    }
+
+    #[test]
+    fn excess_workers_fail_before_request_or_native_processing() {
+        let budget = Frame3dBatchCpuBudget::for_observed_capacity(2, 4).unwrap();
+        assert_eq!(budget.total_workers(), 2);
+        assert_eq!(budget.observed_available_parallelism(), 4);
+        assert_eq!(
+            budget.analyze(&[], 3),
+            Err(Frame3dBatchError::WorkerBudgetExceeded {
+                requested: 3,
+                budget: 2
+            })
+        );
+    }
 }

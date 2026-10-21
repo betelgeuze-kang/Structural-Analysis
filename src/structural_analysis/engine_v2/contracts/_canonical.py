@@ -23,7 +23,20 @@ class CanonicalContractError(ValueError):
 def canonical_json_bytes(payload: Any) -> bytes:
     """Return deterministic UTF-8 JSON after rejecting non-finite values."""
 
-    normalized = _normalize_json_value(payload, path="/")
+    normalized = _USE_LEGACY_NORMALIZATION
+    if (
+        _normalize_json_value is _NORMALIZER_REFERENCE
+        and _normalize_json_value.__code__ is _NORMALIZER_CODE
+        and math.isfinite is _ISFINITE_REFERENCE
+    ):
+        try:
+            normalized = _normalize_plain_json_value(payload, depth=0)
+        except (_PlainNormalizationFallback, RecursionError):
+            pass
+    # Keep the reference call outside the except block so its exceptions do
+    # not acquire an internal speculative-traversal exception as context.
+    if normalized is _USE_LEGACY_NORMALIZATION:
+        normalized = _normalize_json_value(payload, path="/")
     return json.dumps(
         normalized,
         ensure_ascii=False,
@@ -217,3 +230,38 @@ def _normalize_json_value(value: Any, *, path: str) -> Any:
     raise CanonicalContractError(
         f"Unsupported canonical JSON value {type(value).__name__} at {path}."
     )
+
+
+class _PlainNormalizationFallback(Exception):
+    """Abort speculative traversal without invoking custom value behavior."""
+
+
+_PLAIN_NORMALIZATION_MAX_DEPTH = 64
+_USE_LEGACY_NORMALIZATION = object()
+_NORMALIZER_REFERENCE = _normalize_json_value
+_NORMALIZER_CODE = _normalize_json_value.__code__
+_ISFINITE_REFERENCE = math.isfinite
+
+
+def _normalize_plain_json_value(value: Any, depth: int) -> Any:
+    """Copy exact builtins, otherwise request a complete legacy traversal."""
+
+    value_type = type(value)
+    if value is None or value_type is str or value_type is bool or value_type is int:
+        return value
+    if value_type is float:
+        if not math.isfinite(value):
+            raise _PlainNormalizationFallback
+        return 0.0 if value == 0.0 else value
+    if depth >= _PLAIN_NORMALIZATION_MAX_DEPTH:
+        raise _PlainNormalizationFallback
+    if value_type is dict:
+        if any(type(key) is not str for key in value):
+            raise _PlainNormalizationFallback
+        return {
+            key: _normalize_plain_json_value(value[key], depth + 1)
+            for key in sorted(value)
+        }
+    if value_type is list or value_type is tuple:
+        return [_normalize_plain_json_value(item, depth + 1) for item in value]
+    raise _PlainNormalizationFallback

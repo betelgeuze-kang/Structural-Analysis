@@ -15,6 +15,21 @@ from jsonschema import Draft202012Validator
 from scipy.sparse import csc_matrix, csr_matrix, issparse
 from scipy.sparse.linalg import splu
 
+try:
+    # Optional implementation identity only. Keep the existing public splu path
+    # usable when a supported SciPy distribution changes private module layout.
+    from scipy.sparse.linalg._dsolve import _superlu, linsolve
+except (ImportError, AttributeError):
+    _superlu = None
+    linsolve = None
+
+from ._factorization_cache import (
+    _factorization_lease,
+    _reuse_scope_active,
+    reuse_sparse_factorizations,
+    sparse_factorization_reuse_statistics,
+)
+
 from structural_analysis.engine_v2.contracts._canonical import (
     array_data_hash,
     canonical_hash,
@@ -184,11 +199,33 @@ def factorize_and_solve_sparse(
     numeric_hash = array_data_hash(np.asarray(csr.data, dtype="<f8"))
     rhs_hash = array_data_hash(np.asarray(vector, dtype="<f8"))
     try:
-        factor = splu(
-            csc_matrix(csr),
-            permc_spec=SPARSE_FACTORIZATION_ORDERING,
-            diag_pivot_thresh=1.0,
-            options={"Equil": True},
+        csc = csc_matrix(csr)
+    except (RuntimeError, ValueError) as exc:
+        raise SparseFactorizationError(
+            "sparse_factorization_singular",
+            "SuperLU could not factor the unregularized tangent",
+        ) from exc
+    key = _factorization_reuse_key(csc, selected)
+    with _factorization_lease(key) as lease:
+        return _solve_checked_sparse(
+            csr, csc, vector, selected, pattern_hash, numeric_hash, rhs_hash, lease
+        )
+
+
+def _solve_checked_sparse(
+    csr, csc, vector, selected, pattern_hash, numeric_hash, rhs_hash, lease
+):
+    size = csr.shape[0]
+    try:
+        factor = (
+            lease.entry.factor
+            if lease.entry is not None
+            else splu(
+                csc,
+                permc_spec=SPARSE_FACTORIZATION_ORDERING,
+                diag_pivot_thresh=1.0,
+                options={"Equil": True},
+            )
         )
     except (RuntimeError, ValueError) as exc:
         raise SparseFactorizationError(
@@ -213,7 +250,11 @@ def factorize_and_solve_sparse(
     pivot_maximum = float(np.max(pivots)) if pivots.size else 0.0
     normalized_pivot = pivot_minimum / pivot_maximum if pivot_maximum > 0.0 else 0.0
     matrix_norm_1 = _sparse_matrix_one_norm(csr)
-    inverse_norm_1 = _exact_inverse_one_norm(factor, size)
+    inverse_norm_1 = (
+        lease.entry.inverse_one_norm
+        if lease.entry is not None
+        else _exact_inverse_one_norm(factor, size)
+    )
     condition_number_1 = matrix_norm_1 * inverse_norm_1
     if not math.isfinite(condition_number_1):
         raise SparseFactorizationError(
@@ -308,6 +349,8 @@ def factorize_and_solve_sparse(
             diagnostic,
         )
     frozen_solution = immutable_array(solution, dtype="<f8")
+    if type(factor) is _REFERENCE_FACTOR_TYPE:
+        lease.publish(factor, inverse_norm_1)
     return SparseFactorizationSolve(solution=frozen_solution, diagnostic=diagnostic)
 
 
@@ -499,6 +542,67 @@ def _exact_inverse_one_norm(factor: Any, size: int) -> float:
     return maximum
 
 
+_REFERENCE_SPLU = splu
+_REFERENCE_SPLU_CODE = getattr(splu, "__code__", None)
+_REFERENCE_SUPERLU_MODULE = _superlu
+_REFERENCE_LINSOLVE_MODULE = linsolve
+_REFERENCE_GSTRF = getattr(_superlu, "gstrf", None)
+_REFERENCE_FACTOR_TYPE = getattr(_superlu, "SuperLU", None)
+_REFERENCE_INVERSE_NORM = _exact_inverse_one_norm
+_REFERENCE_INVERSE_CODE = _exact_inverse_one_norm.__code__
+
+
+def _factorization_reuse_key(csc, policy) -> tuple | None:
+    if not _reuse_scope_active():
+        return None
+    # A dynamic/custom backend or inverse evaluator retains the original uncached path.
+    if (
+        _REFERENCE_SUPERLU_MODULE is None
+        or _REFERENCE_LINSOLVE_MODULE is None
+        or _REFERENCE_GSTRF is None
+        or _REFERENCE_FACTOR_TYPE is None
+        or _REFERENCE_SPLU_CODE is None
+        or _superlu is not _REFERENCE_SUPERLU_MODULE
+        or linsolve is not _REFERENCE_LINSOLVE_MODULE
+        or getattr(linsolve, "_superlu", None) is not _REFERENCE_SUPERLU_MODULE
+        or type(policy) is not SparseFactorizationPolicy
+        or splu is not _REFERENCE_SPLU
+        or getattr(linsolve, "splu", None) is not _REFERENCE_SPLU
+        or getattr(splu, "__code__", None) is not _REFERENCE_SPLU_CODE
+        or getattr(splu, "__module__", None) != getattr(linsolve, "__name__", None)
+        or getattr(splu, "__globals__", None) is not vars(linsolve)
+        or getattr(_superlu, "gstrf", None) is not _REFERENCE_GSTRF
+        or _exact_inverse_one_norm is not _REFERENCE_INVERSE_NORM
+        or _exact_inverse_one_norm.__code__ is not _REFERENCE_INVERSE_CODE
+    ):
+        return None
+    try:
+        policy_hash = policy.policy_hash
+    except (ValueError, TypeError, OverflowError):
+        return None
+    return (
+        csc.shape,
+        csc.data.dtype.str,
+        csc.data.tobytes(),
+        csc.indices.dtype.str,
+        csc.indices.tobytes(),
+        csc.indptr.dtype.str,
+        csc.indptr.tobytes(),
+        SPARSE_FACTORIZATION_ORDERING,
+        1.0,
+        (("Equil", True),),
+        SPARSE_FACTORIZATION_BACKEND,
+        SPARSE_FACTORIZATION_CONDITION_METHOD,
+        _REFERENCE_SPLU,
+        _REFERENCE_SPLU_CODE,
+        _REFERENCE_GSTRF,
+        _REFERENCE_FACTOR_TYPE,
+        _REFERENCE_INVERSE_NORM,
+        _REFERENCE_INVERSE_CODE,
+        policy_hash,
+    )
+
+
 def _linf(values: Any) -> float:
     array = np.asarray(values, dtype=np.float64)
     return float(np.max(np.abs(array))) if array.size else 0.0
@@ -556,5 +660,7 @@ __all__ = [
     "SparseFactorizationPolicy",
     "SparseFactorizationSolve",
     "factorize_and_solve_sparse",
+    "reuse_sparse_factorizations",
+    "sparse_factorization_reuse_statistics",
     "validate_sparse_factorization_diagnostic_manifest",
 ]

@@ -18,6 +18,8 @@ from typing import Any
 from jsonschema import Draft202012Validator, validators
 import numpy as np
 
+from ._computation_cache import _register_pure_schema_validator, schema_errors
+
 from ._canonical import (
     CanonicalContractError,
     array_content_hash,
@@ -1440,7 +1442,7 @@ def _validate_schema(
     payload: Any, validator: Draft202012Validator, prefix: str
 ) -> None:
     errors = sorted(
-        validator.iter_errors(payload),
+        schema_errors(validator, payload),
         key=lambda error: tuple(str(x) for x in error.absolute_path),
     )
     if errors:
@@ -1464,7 +1466,9 @@ def _schema_validator(name: str) -> Draft202012Validator:
     with resource.open("r", encoding="utf-8") as handle:
         schema = json.load(handle)
     Draft202012Validator.check_schema(schema)
-    return _StrictDraft202012Validator(schema)
+    validator = _StrictDraft202012Validator(schema)
+    _register_pure_schema_validator(validator)
+    return validator
 
 
 def _fail(code: str, path: str, message: str) -> None:

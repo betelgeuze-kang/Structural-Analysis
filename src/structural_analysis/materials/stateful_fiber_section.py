@@ -116,9 +116,7 @@ def _section_contract_value_snapshot(value: Any) -> tuple[Any, ...]:
 def _section_contract_value_from_snapshot(snapshot: tuple[Any, ...]) -> Any:
     tag, value = snapshot
     if tag == "mapping":
-        return {
-            key: _section_contract_value_from_snapshot(item) for key, item in value
-        }
+        return {key: _section_contract_value_from_snapshot(item) for key, item in value}
     if tag == "sequence":
         return [_section_contract_value_from_snapshot(item) for item in value]
     return value
@@ -543,10 +541,83 @@ class StatefulRCFiberSection:
             )
         )
 
+    supports_native_steel_point_batch = True
+
+    def integrate_many(
+        self,
+        generalized_strains: Iterable[Any],
+        committed_states: Iterable[StatefulFiberSectionState],
+    ) -> tuple[StatefulFiberSectionResponse, ...]:
+        """Evaluate independent section points from their unchanged accepted parents."""
+        values, parents = tuple(generalized_strains), tuple(committed_states)
+        if not values or len(values) != len(parents):
+            raise ValueError("section point batches require matching nonempty inputs")
+        native = active_native_steel_batch()
+        if (
+            native is None
+            or not native.prepared
+            or type(self).__dict__.get("supports_native_steel_point_batch") is not True
+        ):
+            return tuple(
+                self.integrate(value, parent)
+                for value, parent in zip(values, parents, strict=True)
+            )
+        generalized = tuple(
+            _generalized_vector(value, name="generalized_strain") for value in values
+        )
+        for parent in parents:
+            self.validate_state(parent)
+        steel_rows = tuple(
+            (index, fiber)
+            for index, fiber in enumerate(self.fibers)
+            if fiber.material_kind == "steel"
+        )
+        materials = self._current_steel_materials()
+        point_responses = native.integrate_many(
+            [materials[fiber.fiber_id] for _, fiber in steel_rows],
+            [
+                [
+                    float(value[0]) - float(value[1]) * fiber.y_m
+                    for _, fiber in steel_rows
+                ]
+                for value in generalized
+            ],
+            [
+                [
+                    cast(UniaxialPlasticityState, parent.fiber_states[index])
+                    for index, _ in steel_rows
+                ]
+                for parent in parents
+            ],
+        )
+        return tuple(
+            self._integrate_with_steel_responses(
+                value,
+                parent,
+                {
+                    fiber.fiber_id: response
+                    for (_, fiber), response in zip(steel_rows, responses, strict=True)
+                },
+            )
+            for value, parent, responses in zip(
+                generalized, parents, point_responses, strict=True
+            )
+        )
+
     def integrate(
         self,
         generalized_strain: Any,
         committed_state: StatefulFiberSectionState,
+    ) -> StatefulFiberSectionResponse:
+        return self._integrate_with_steel_responses(
+            generalized_strain, committed_state, None
+        )
+
+    def _integrate_with_steel_responses(
+        self,
+        generalized_strain: Any,
+        committed_state: StatefulFiberSectionState,
+        prepared_responses: dict[str, UniaxialPlasticityResponse] | None,
     ) -> StatefulFiberSectionResponse:
         self.validate_state(committed_state)
         generalized = _generalized_vector(
@@ -567,19 +638,27 @@ class StatefulRCFiberSection:
 
         native = active_native_steel_batch()
         steel_materials = self._current_steel_materials()
-        native_responses: dict[str, UniaxialPlasticityResponse] = {}
-        if native is not None:
-            steel_rows = [(fiber, parent) for fiber, parent in zip(
-                self.fibers, committed_state.fiber_states, strict=True
-            ) if fiber.material_kind == "steel"]
+        native_responses: dict[str, UniaxialPlasticityResponse] = (
+            prepared_responses or {}
+        )
+        if native is not None and prepared_responses is None:
+            steel_rows = [
+                (fiber, parent)
+                for fiber, parent in zip(
+                    self.fibers, committed_state.fiber_states, strict=True
+                )
+                if fiber.material_kind == "steel"
+            ]
             evaluated = native.integrate(
                 [steel_materials[fiber.fiber_id] for fiber, _ in steel_rows],
                 [axial_strain - curvature * fiber.y_m for fiber, _ in steel_rows],
                 # validate_state above already binds each steel parent to this type.
                 [cast(UniaxialPlasticityState, parent) for _, parent in steel_rows],
             )
-            native_responses = {fiber.fiber_id: response for (fiber, _), response
-                                in zip(steel_rows, evaluated, strict=True)}
+            native_responses = {
+                fiber.fiber_id: response
+                for (fiber, _), response in zip(steel_rows, evaluated, strict=True)
+            }
 
         for fiber, parent in zip(
             self.fibers,
@@ -590,7 +669,8 @@ class StatefulRCFiberSection:
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
                 steel_response = (
-                    native_responses[fiber.fiber_id] if native is not None
+                    native_responses[fiber.fiber_id]
+                    if native is not None
                     else steel_materials[fiber.fiber_id].integrate(strain, parent)
                 )
                 yielded_count += int(steel_response.yielded)

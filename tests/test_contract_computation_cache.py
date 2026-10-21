@@ -1,0 +1,115 @@
+from copy import deepcopy
+from dataclasses import replace
+from pathlib import Path
+import runpy
+
+import numpy as np
+import pytest
+
+from structural_analysis.engine_v2.contracts._canonical import (
+    CanonicalContractError,
+    canonical_hash,
+)
+from structural_analysis.engine_v2.contracts._computation_cache import (
+    canonical_hash_cached,
+    reuse_contract_computations,
+)
+from structural_analysis.engine_v2.contracts import equation_scaling as scaling_module
+from structural_analysis.elements.stateful_fiber_beam2d import StatefulFiberBeam2D
+from structural_analysis.materials.stateful_fiber_section import (
+    make_rectangular_stateful_rc_fiber_section,
+)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        True,
+        1,
+        1.0,
+        -0.0,
+        0.0,
+        "한글",
+        [1, True, 1.0],
+        {"nested": (1.0, {"value": False})},
+        np.array([1.0, 2.0]),
+    ],
+)
+def test_cached_digest_preserves_the_original_serialization(value):
+    assert canonical_hash_cached(value) == canonical_hash(value)
+    assert canonical_hash_cached(value) == canonical_hash(value)
+
+
+def test_hash_keys_distinguish_equal_python_numeric_types_and_current_mutations():
+    assert len({canonical_hash_cached({"v": v}) for v in (True, 1, 1.0)}) == 3
+    value = {"nested": [{"v": 1}]}
+    old = canonical_hash_cached(value)
+    value["nested"][0]["v"] = 2
+    assert canonical_hash_cached(value) == canonical_hash(value) != old
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), {False: "bad key"}])
+def test_invalid_values_retain_original_rejection(value):
+    with pytest.raises(CanonicalContractError):
+        canonical_hash_cached(value)
+
+
+def test_large_and_custom_inputs_use_original_digest_semantics():
+    class MappingSubclass(dict):
+        pass
+
+    for value in (MappingSubclass(v=1), {"v": "x" * 65537}, list(range(2200))):
+        assert canonical_hash_cached(value) == canonical_hash(value)
+
+
+def test_beam_contract_rechecks_current_section_and_declared_values():
+    section = make_rectangular_stateful_rc_fiber_section()
+    beam = StatefulFiberBeam2D(section)
+    old = beam.contract_hash
+    assert deepcopy(beam).contract_hash == old
+    assert replace(beam, length_m=4.0).contract_hash != old
+    object.__setattr__(section.steel, "yield_stress_mpa", 125.0)
+    assert beam.contract_hash != old
+
+
+def _scaling_fixture():
+    return runpy.run_path(
+        str(Path(__file__).with_name("test_engine_v2_equation_scaling_v1.py"))
+    )["_scaling"]()
+
+
+def test_scoped_schema_reuse_never_reuses_semantic_array_commitments(monkeypatch):
+    scaling = _scaling_fixture()
+    payload = scaling_module._scaling_payload(scaling, include_scaling_hash=True)
+    with reuse_contract_computations():
+        scaling_module.validate_equation_scaling_manifest(payload)
+        scaling_module.validate_equation_scaling_manifest(payload)
+        monkeypatch.setattr(
+            scaling_module, "array_data_hash", lambda _: "sha256:" + "0" * 64
+        )
+        with pytest.raises(
+            scaling_module.EquationScalingError, match="Raw vector hash is stale"
+        ):
+            scaling_module.validate_equation_scaling_manifest(payload)
+
+
+def test_warm_schema_scope_rejects_changed_manifest_and_live_mutable_array():
+    scaling = _scaling_fixture()
+    payload = scaling_module._scaling_payload(scaling, include_scaling_hash=True)
+    with reuse_contract_computations():
+        scaling_module.validate_equation_scaling_manifest(payload)
+        changed = deepcopy(payload)
+        changed["dof_count"] = True
+        with pytest.raises(scaling_module.EquationScalingError):
+            scaling_module.validate_equation_scaling_manifest(changed)
+        changed = deepcopy(payload)
+        changed["scale_vector"]["values"][0] *= 2
+        with pytest.raises(scaling_module.EquationScalingError):
+            scaling_module.validate_equation_scaling_manifest(changed)
+        mutable = np.array(scaling._scale_divisors_si, copy=True)
+        mutable.setflags(write=False)
+        with pytest.raises(scaling_module.EquationScalingError):
+            scaling_module.validate_equation_scaling(
+                replace(scaling, _scale_divisors_si=mutable)
+            )

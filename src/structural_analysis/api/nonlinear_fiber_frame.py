@@ -79,7 +79,17 @@ from structural_analysis.model.schema import (
     CANONICAL_MODEL_SCHEMA_VERSION,
     CanonicalModel,
 )
-from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
+from structural_analysis.engine_v2.contracts._computation_cache import (
+    reuse_contract_computations,
+)
+from structural_analysis.solvers.nonlinear._factorization_cache import (
+    reuse_sparse_factorizations,
+)
+from structural_analysis.solvers.nonlinear.newton import (
+    NewtonRaphsonConfig,
+    VECTOR_MATRIX_BACKEND,
+    VECTOR_SPARSE_MATRIX_BACKEND,
+)
 
 
 PUBLIC_RC_FIBER_FRAME_SCHEMA_VERSION = "public-rc-fiber-frame-result.v1"
@@ -183,8 +193,16 @@ class PublicRCFiberFrameConfig:
     residual_tolerance: float = 1.0e-10
     increment_tolerance_m: float = 1.0e-12
     maximum_iterations: int = 40
+    matrix_backend: str = VECTOR_MATRIX_BACKEND
 
     def __post_init__(self) -> None:
+        if type(self.matrix_backend) is not str or self.matrix_backend not in (
+            VECTOR_MATRIX_BACKEND,
+            VECTOR_SPARSE_MATRIX_BACKEND,
+        ):
+            raise ValueError(
+                "matrix_backend must select an existing deterministic CPU solver"
+            )
         if (
             type(self.load_steps) is not int
             or self.load_steps < 2
@@ -323,6 +341,8 @@ class _AuthorityArtifacts:
     engineering_result: FiberFrameNonlinearEngineeringResultIR
 
 
+@reuse_contract_computations()
+@reuse_sparse_factorizations()
 def analyze_public_rc_fiber_frame(
     model: CanonicalModel,
     config: PublicRCFiberFrameConfig | None = None,
@@ -353,16 +373,19 @@ def analyze_public_rc_fiber_frame(
         "scaled_residual_tolerance": cfg.residual_tolerance,
         "solver_coordinate_increment_tolerance_m": cfg.increment_tolerance_m,
         "maximum_iterations": cfg.maximum_iterations,
-        "matrix_backend": "numpy_dense_ndarray",
+        "matrix_backend": (
+            "numpy_dense_ndarray"
+            if cfg.matrix_backend == VECTOR_MATRIX_BACKEND
+            else cfg.matrix_backend
+        ),
         "restart_supplied": restart_checkpoint_chain is not None,
         "restart_checkpoint_artifact_hash": restart_hash,
     }
     material_execution = active_native_steel_batch()
     if material_execution is not None:
-        configuration["material_execution_backend"] = {
-            key: value for key, value in material_execution.metadata().items()
-            if key not in ("calls", "points")
-        }
+        configuration["material_execution_backend"] = (
+            material_execution.execution_configuration()
+        )
     compiled, unsupported, warnings = _compile(snapshot)
     if compiled is None:
         return _build_public_result(
@@ -1237,6 +1260,7 @@ def _run_load_path(
         residual_tolerance=config.residual_tolerance,
         increment_tolerance=config.increment_tolerance_m,
         max_iterations=config.maximum_iterations,
+        matrix_backend=config.matrix_backend,
     )
     restart_supplied = restart_checkpoint_chain is not None
     replayed_prefix_count = 0
