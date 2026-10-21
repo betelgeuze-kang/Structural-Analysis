@@ -41,13 +41,19 @@ def _snapshot(value: Any, remaining: list[int]) -> tuple[Any, ...]:
     if kind is float and math.isfinite(value):
         return (float, value.hex())
     if kind is dict and all(type(key) is str for key in value):
-        return (
-            dict,
-            tuple(
-                (_snapshot(key, remaining)[1], _snapshot(item, remaining))
-                for key, item in value.items()
-            ),
-        )
+        rows = []
+        for key, item in value.items():
+            # The complete exact-string precheck above admits these keys. Keep
+            # their original node-then-string budget order without constructing
+            # a recursively snapshotted (str, key) tuple that is discarded.
+            remaining[0] -= 1
+            if remaining[0] < 0:
+                raise _Uncacheable
+            remaining[1] -= len(key)
+            if remaining[1] < 0:
+                raise _Uncacheable
+            rows.append((key, _snapshot(item, remaining)))
+        return (dict, tuple(rows))
     if kind in (tuple, list):
         return (kind, tuple(_snapshot(item, remaining) for item in value))
     raise _Uncacheable
