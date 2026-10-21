@@ -8,8 +8,14 @@ import shutil
 import pytest
 
 
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_runtime_packaging_manifest.py"
-SPEC = importlib.util.spec_from_file_location("build_runtime_packaging_manifest", SCRIPT_PATH)
+SCRIPT_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "scripts"
+    / "build_runtime_packaging_manifest.py"
+)
+SPEC = importlib.util.spec_from_file_location(
+    "build_runtime_packaging_manifest", SCRIPT_PATH
+)
 assert SPEC is not None
 build_runtime_packaging_manifest = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
@@ -66,9 +72,13 @@ It is not evidence of product-license approval.
                 "device_name": "AMD Radeon RX 6900 XT",
             },
         ),
-        "runtime_wrapper": _write_text(tmp_path / "runtime-wrapper.py", "print('runtime')\n"),
+        "runtime_wrapper": _write_text(
+            tmp_path / "runtime-wrapper.py", "print('runtime')\n"
+        ),
         "crate_dir": crate_dir,
-        "native_hip_ffi_source": _write_text(tmp_path / "hip_full_residual_ffi.cpp", "// hip\n"),
+        "native_hip_ffi_source": _write_text(
+            tmp_path / "hip_full_residual_ffi.cpp", "// hip\n"
+        ),
         "pyproject": _write_text(
             tmp_path / "pyproject.toml",
             '[project]\nname = "runtime-product"\nversion = "0.1.0"\n'
@@ -129,7 +139,9 @@ It is not evidence of product-license approval.
     }
 
 
-def test_runtime_packaging_manifest_generates_sbom_native_and_compatibility(tmp_path: Path) -> None:
+def test_runtime_packaging_manifest_generates_sbom_native_and_compatibility(
+    tmp_path: Path,
+) -> None:
     fixture = _runtime_fixture(tmp_path)
 
     payload = build_runtime_packaging_manifest.build_runtime_packaging_manifest(
@@ -193,7 +205,9 @@ def test_runtime_packaging_manifest_generates_sbom_native_and_compatibility(tmp_
     assert compatibility["authority"] == payload["authority"]
 
 
-def test_runtime_packaging_manifest_blocks_missing_native_artifact(tmp_path: Path) -> None:
+def test_runtime_packaging_manifest_blocks_missing_native_artifact(
+    tmp_path: Path,
+) -> None:
     fixture = _runtime_fixture(tmp_path)
     (fixture["crate_dir"] / "src" / "lib.rs").unlink()
 
@@ -267,8 +281,12 @@ def test_runtime_packaging_manifest_rejects_license_metadata_drift(
 def _materialize_canonical_runtime_fixture(tmp_path: Path) -> None:
     fixture = _runtime_fixture(tmp_path / "fixture")
     copies = {
-        fixture["runtime_probe"]: build_runtime_packaging_manifest.DEFAULT_RUNTIME_PROBE,
-        fixture["runtime_wrapper"]: build_runtime_packaging_manifest.DEFAULT_RUNTIME_WRAPPER,
+        fixture[
+            "runtime_probe"
+        ]: build_runtime_packaging_manifest.DEFAULT_RUNTIME_PROBE,
+        fixture[
+            "runtime_wrapper"
+        ]: build_runtime_packaging_manifest.DEFAULT_RUNTIME_WRAPPER,
         fixture["native_hip_ffi_source"]: (
             build_runtime_packaging_manifest.DEFAULT_NATIVE_HIP_FFI_SOURCE
         ),
@@ -299,9 +317,7 @@ def test_runtime_packaging_validator_rebuilds_all_canonical_leaves(
     build_runtime_packaging_manifest.build_runtime_packaging_manifest()
 
     assert (
-        build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(
-            tmp_path
-        )
+        build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(tmp_path)
         == []
     )
 
@@ -324,13 +340,84 @@ def test_runtime_packaging_validator_rejects_stale_sbom_even_with_parent_rehash(
     )
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
-    violations = (
-        build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(
-            tmp_path
-        )
+    violations = build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(
+        tmp_path
     )
 
     assert (
         "runtime_artifact_exact_rebuild_mismatch:"
         "implementation/phase1/runtime_sbom.json"
     ) in violations
+
+
+def test_runtime_packaging_vite_lock_update_requires_complete_runtime_refresh(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _materialize_canonical_runtime_fixture(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    package_json = tmp_path / build_runtime_packaging_manifest.DEFAULT_PACKAGE_JSON
+    package_lock = tmp_path / build_runtime_packaging_manifest.DEFAULT_PACKAGE_LOCK
+
+    def update_vite(version: str) -> None:
+        package = json.loads(package_json.read_text(encoding="utf-8"))
+        lock = json.loads(package_lock.read_text(encoding="utf-8"))
+        package["devDependencies"]["vite"] = version
+        lock["packages"][""]["devDependencies"]["vite"] = version
+        lock["packages"]["node_modules/vite"] = {
+            "version": version,
+            "dev": True,
+            "license": "MIT",
+            "integrity": "sha512-vite-" + version,
+        }
+        _write_json(package_json, package)
+        _write_json(package_lock, lock)
+
+    update_vite("8.0.16")
+    build_runtime_packaging_manifest.build_runtime_packaging_manifest()
+    outputs = (
+        build_runtime_packaging_manifest.DEFAULT_SBOM_OUT,
+        build_runtime_packaging_manifest.DEFAULT_NATIVE_ARTIFACT_MANIFEST_OUT,
+        build_runtime_packaging_manifest.DEFAULT_COMPATIBILITY_MATRIX_OUT,
+        build_runtime_packaging_manifest.DEFAULT_MANIFEST_OUT,
+    )
+    original = {
+        p: json.loads((tmp_path / p).read_text(encoding="utf-8")) for p in outputs
+    }
+
+    update_vite("8.1.6")
+    assert set(
+        build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(tmp_path)
+    ) == {
+        "runtime_artifact_exact_rebuild_mismatch:" + p.as_posix()
+        for p in outputs
+        if p != build_runtime_packaging_manifest.DEFAULT_NATIVE_ARTIFACT_MANIFEST_OUT
+    }
+
+    build_runtime_packaging_manifest.build_runtime_packaging_manifest()
+    assert (
+        build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(tmp_path)
+        == []
+    )
+    refreshed = {
+        p: json.loads((tmp_path / p).read_text(encoding="utf-8")) for p in outputs
+    }
+    for p in outputs:
+        assert refreshed[p]["authority"] == original[p]["authority"]
+        assert refreshed[p]["claim_boundary"] == original[p]["claim_boundary"]
+    native = build_runtime_packaging_manifest.DEFAULT_NATIVE_ARTIFACT_MANIFEST_OUT
+    for payload in (original[native], refreshed[native]):
+        payload.pop("generated_at")
+    assert refreshed[native] == original[native]
+    sbom = refreshed[build_runtime_packaging_manifest.DEFAULT_SBOM_OUT]
+    assert [
+        row["version"]
+        for row in sbom["components"]
+        if row.get("lock_path") == "node_modules/vite"
+    ] == ["8.1.6"]
+    assert sbom["source_hashes"]["package_json"] == (
+        build_runtime_packaging_manifest._sha256_path(package_json)
+    )
+    assert sbom["source_hashes"]["package_lock"] == (
+        build_runtime_packaging_manifest._sha256_path(package_lock)
+    )

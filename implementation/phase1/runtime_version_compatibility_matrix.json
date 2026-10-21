@@ -23,8 +23,8 @@
           "ajv_version": "8.20.0",
           "lockfile_version": 3,
           "package_count": 68,
-          "package_json_sha256": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
-          "package_lock_sha256": "141049f7f4b191d2d14f22462f8376c67f6daae952ce55acd5150f6e0734a38d",
+          "package_json_sha256": "fb748915d54464c9f70f2b4970b395463edb39dcaae5a1b75c89f31b434812fb",
+          "package_lock_sha256": "4a49818721f8f61aa9b2b84e04be70a39639910c2432d10ff7a770c541a94980",
           "postcss_version": "8.5.26",
           "requires": true
         },
@@ -74,6 +74,6 @@
       "status": "manifest_ready"
     }
   ],
-  "generated_at": "2026-10-06T03:35:24.449743+00:00",
+  "generated_at": "2026-10-21T22:43:59.191442+00:00",
   "schema_version": "runtime-version-compatibility-matrix.v1"
 }
