@@ -9,8 +9,12 @@ plane dependency here; it is not part of the native product runtime.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
+import hashlib
 import json
+import math
 import os
+import re
 from pathlib import Path, PurePosixPath
 import subprocess
 import sys
@@ -225,11 +229,13 @@ def _git_changed_paths(*, base: str, head: str, repo_root: Path) -> list[str]:
             "git",
             "diff-tree",
             "--root",
+            "-m",
             "--no-commit-id",
             "--name-only",
             "-z",
             "-r",
-            "--diff-filter=ACMRD",
+            "--diff-filter=ACMRTD",
+            "--no-renames",
             head,
         ]
     else:
@@ -238,7 +244,8 @@ def _git_changed_paths(*, base: str, head: str, repo_root: Path) -> list[str]:
             "diff",
             "--name-only",
             "-z",
-            "--diff-filter=ACMRD",
+            "--diff-filter=ACMRTD",
+            "--no-renames",
             f"{base}...{head}",
         ]
     completed = subprocess.run(
@@ -252,6 +259,325 @@ def _git_changed_paths(*, base: str, head: str, repo_root: Path) -> list[str]:
         for path in completed.stdout.decode("utf-8", "surrogateescape").split("\0")
         if path
     ]
+
+
+# This is a proposed change to the pre-merge admission policy, not an exemption
+# from the protected-evidence classification. It must be approved before use.
+_METADATA_PREFIX = "implementation/phase1/release_evidence/productization/"
+_CANONICAL_INPUT = "src/structural_analysis/engine_v2/contracts/_canonical.py"
+_COMMON_ARC_INPUTS = frozenset(
+    {
+        "src/structural_analysis/engine_v2/contracts/equation_scaling.py",
+        "src/structural_analysis/engine_v2/contracts/execution_plan.py",
+    }
+)
+METADATA_ONLY_SOFTWARE_CHECKSUM_KEYS = {
+    _METADATA_PREFIX + "phase2_sparse_chain_cpu_fgmres_arc_length_summary.json": (
+        _COMMON_ARC_INPUTS
+        | {"tests/test_build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py"}
+    ),
+    _METADATA_PREFIX + "phase2_load_coupled_sparse_chain_arc_length_summary.json": (
+        _COMMON_ARC_INPUTS
+        | {"tests/test_build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"}
+    ),
+    _METADATA_PREFIX + "g1_mgt_matrix_free_preconditioner_candidate_audit.json": (
+        frozenset({_CANONICAL_INPUT})
+    ),
+    _METADATA_PREFIX
+    + "g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.json": (
+        frozenset({_CANONICAL_INPUT})
+    ),
+    _METADATA_PREFIX
+    + "g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.json": (
+        frozenset({_CANONICAL_INPUT})
+    ),
+}
+_MAX_RECEIPT_BYTES = 1024 * 1024
+_MAX_SOFTWARE_INPUT_BYTES = 16 * 1024 * 1024
+_HEX40 = re.compile(r"[0-9a-f]{40}\Z")
+_SHA256 = re.compile(r"sha256:[0-9a-f]{64}\Z")
+_METADATA_BOUNDARY = (
+    "Only the five finite software metadata projections are compared. Changed "
+    "software checksum leaves bind exact head bytes; unchanged input references "
+    "bind equal base/head Git blob identities only, including LFS pointers. "
+    "This does not revalidate their contents, replay builders, or establish "
+    "numerical, physical, hardware, readiness, release or commercial authority."
+)
+
+
+class MetadataValidationError(ValueError):
+    """Fail closed when immutable metadata validation cannot be established."""
+
+
+def _metadata_git(repo_root: Path, *args: str) -> bytes:
+    result = subprocess.run(
+        ["git", *args], cwd=repo_root, check=False, capture_output=True
+    )
+    if result.returncode:
+        # Do not expose arbitrary Git output, receipt contents, or dependency data.
+        raise MetadataValidationError("immutable_git_object_unavailable")
+    return result.stdout
+
+
+def _metadata_commit(repo_root: Path, revision: str) -> str:
+    if not isinstance(revision, str) or _HEX40.fullmatch(revision) is None:
+        raise MetadataValidationError("full_immutable_commit_sha_required")
+    actual = _metadata_git(repo_root, "rev-parse", "--verify", revision + "^{commit}")
+    if actual.decode("ascii").strip() != revision:
+        raise MetadataValidationError("immutable_commit_identity_mismatch")
+    return revision
+
+
+def _metadata_reference(repo_root: Path, revision: str, path: str) -> tuple[str, str]:
+    if not isinstance(path, str) or _normalize_path(path) != path:
+        raise MetadataValidationError("noncanonical_input_reference_path")
+    # A checksum reference must never cause secret contents to be read.
+    for part in PurePosixPath(path).parts:
+        if part != ".env.example" and (
+            part == ".env"
+            or part.startswith(".env.")
+            or part.endswith(".env")
+            or ".env." in part
+        ):
+            raise MetadataValidationError("secret_input_reference_forbidden")
+    raw = _metadata_git(repo_root, "ls-tree", "-z", revision, "--", path)
+    entries = [item for item in raw.split(b"\0") if item]
+    if len(entries) != 1:
+        raise MetadataValidationError("input_reference_missing_or_nonregular")
+    descriptor, actual_path = entries[0].split(b"\t", 1)
+    mode, kind, oid = descriptor.decode("ascii").split(" ")
+    if (
+        actual_path.decode("utf-8", "surrogateescape") != path
+        or kind != "blob"
+        or mode not in {"100644", "100755"}
+        or _HEX40.fullmatch(oid) is None
+    ):
+        raise MetadataValidationError("input_reference_missing_or_nonregular")
+    return mode, oid
+
+
+def _metadata_blob(repo_root: Path, oid: str, limit: int) -> bytes:
+    size = int(_metadata_git(repo_root, "cat-file", "-s", oid))
+    if size < 0 or size > limit:
+        raise MetadataValidationError("immutable_blob_exceeds_validation_budget")
+    raw = _metadata_git(repo_root, "cat-file", "blob", oid)
+    if len(raw) != size:
+        raise MetadataValidationError("immutable_blob_size_mismatch")
+    return raw
+
+
+def _metadata_json(raw: bytes) -> dict[str, object]:
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise MetadataValidationError("duplicate_json_key")
+            result[key] = value
+        return result
+
+    def invalid_constant(_value):
+        raise MetadataValidationError("nonfinite_json_number")
+
+    def finite_float(token):
+        number = float(token)
+        if not math.isfinite(number):
+            raise MetadataValidationError("nonfinite_json_number")
+        return number
+
+    try:
+        result = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=pairs,
+            parse_constant=invalid_constant,
+            parse_float=finite_float,
+        )
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise MetadataValidationError("invalid_receipt_json") from exc
+    if not isinstance(result, dict):
+        raise MetadataValidationError("receipt_json_object_required")
+    return result
+
+
+def _metadata_diff(left, right, path=()):
+    if type(left) is not type(right):
+        raise MetadataValidationError("receipt_type_changed")
+    if isinstance(left, dict):
+        if left.keys() != right.keys():
+            raise MetadataValidationError("receipt_keys_changed")
+        return [
+            leaf
+            for key in left
+            for leaf in _metadata_diff(left[key], right[key], (*path, key))
+        ]
+    if isinstance(left, list):
+        if len(left) != len(right):
+            raise MetadataValidationError("receipt_array_shape_changed")
+        return [
+            leaf
+            for index, (a, b) in enumerate(zip(left, right))
+            for leaf in _metadata_diff(a, b, (*path, index))
+        ]
+    if isinstance(left, float):
+        return [] if left.hex() == right.hex() else [path]
+    return [] if left == right else [path]
+
+
+def _metadata_timestamp(value) -> None:
+    if not isinstance(value, str) or len(value) > 64:
+        raise MetadataValidationError("metadata_timestamp_invalid")
+    try:
+        timestamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise MetadataValidationError("metadata_timestamp_invalid") from exc
+    if timestamp.tzinfo is None or timestamp.utcoffset() != timezone.utc.utcoffset(
+        None
+    ):
+        raise MetadataValidationError("metadata_timestamp_must_be_utc")
+
+
+def validate_protected_metadata_changes(
+    *, base: str, head: str, repo_root: Path, protected_paths: Iterable[str]
+) -> dict[str, object]:
+    """Validate immutable finite software metadata; never qualify physical data.
+
+    All unknown protected paths, unsupported Git modes and indeterminate shallow
+    ancestry remain blocked. No PR number, fixed source SHA, environment approval,
+    broad metadata suffix, or generic checksum exception is accepted.
+    """
+    result: dict[str, object] = {
+        "schema_version": "native-protected-software-metadata.v1",
+        "status": "blocked",
+        "contract_pass": False,
+        "validated_receipts": [],
+        "blockers": [],
+        "authority_boundary": _METADATA_BOUNDARY,
+    }
+    try:
+        _metadata_commit(repo_root, base)
+        _metadata_commit(repo_root, head)
+        ancestry = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", base, head],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+        )
+        if ancestry.returncode:
+            raise MetadataValidationError("base_ancestry_not_proven")
+        # --no-renames exposes both old and new names of a protected rename.
+        raw = _metadata_git(
+            repo_root, "diff", "--name-only", "--no-renames", "-z", base, head
+        )
+        changed = [p.decode("utf-8", "surrogateescape") for p in raw.split(b"\0") if p]
+        if any(_normalize_path(path) != path for path in changed):
+            raise MetadataValidationError("noncanonical_changed_git_path")
+        actual_protected = classify_paths(changed)["protected_evidence_paths"]
+        requested = sorted(set(protected_paths))
+        if requested != actual_protected or not requested:
+            raise MetadataValidationError("protected_diff_inventory_mismatch")
+        if any(p not in METADATA_ONLY_SOFTWARE_CHECKSUM_KEYS for p in requested):
+            raise MetadataValidationError("unknown_protected_path")
+        for path in requested:
+            base_ref = _metadata_reference(repo_root, base, path)
+            head_ref = _metadata_reference(repo_root, head, path)
+            if base_ref[0] != "100644" or head_ref[0] != "100644":
+                raise MetadataValidationError("receipt_mode_must_be_regular_100644")
+            before = _metadata_json(
+                _metadata_blob(repo_root, base_ref[1], _MAX_RECEIPT_BYTES)
+            )
+            after = _metadata_json(
+                _metadata_blob(repo_root, head_ref[1], _MAX_RECEIPT_BYTES)
+            )
+            changed_leaves = _metadata_diff(before, after)
+            allowed = {("generated_at",), ("source_commit_sha",)} | {
+                ("input_checksums", key)
+                for key in METADATA_ONLY_SOFTWARE_CHECKSUM_KEYS[path]
+            }
+            if any(leaf not in allowed for leaf in changed_leaves):
+                raise MetadataValidationError("nonmetadata_receipt_value_changed")
+            _metadata_timestamp(after.get("generated_at"))
+            producer = after.get("source_commit_sha")
+            _metadata_commit(repo_root, producer)
+            producer_ancestry = subprocess.run(
+                ["git", "merge-base", "--is-ancestor", producer, head],
+                cwd=repo_root,
+                check=False,
+                capture_output=True,
+            )
+            if producer_ancestry.returncode:
+                raise MetadataValidationError("receipt_source_ancestry_not_proven")
+            old_inputs = before.get("input_checksums")
+            new_inputs = after.get("input_checksums")
+            if not isinstance(old_inputs, dict) or not isinstance(new_inputs, dict):
+                raise MetadataValidationError("input_checksum_objects_required")
+            if old_inputs.keys() != new_inputs.keys():
+                raise MetadataValidationError("input_checksum_key_set_changed")
+            references = []
+            for source_path, checksum in new_inputs.items():
+                if not isinstance(checksum, str) or _SHA256.fullmatch(checksum) is None:
+                    raise MetadataValidationError("input_checksum_invalid")
+                old_ref = _metadata_reference(repo_root, base, source_path)
+                new_ref = _metadata_reference(repo_root, head, source_path)
+                if old_inputs[source_path] != checksum:
+                    if source_path not in METADATA_ONLY_SOFTWARE_CHECKSUM_KEYS[path]:
+                        raise MetadataValidationError(
+                            "unapproved_input_checksum_changed"
+                        )
+                    raw_input = _metadata_blob(
+                        repo_root, new_ref[1], _MAX_SOFTWARE_INPUT_BYTES
+                    )
+                    if raw_input.startswith(
+                        b"version https://git-lfs.github.com/spec/v1\n"
+                    ):
+                        raise MetadataValidationError(
+                            "changed_software_input_is_lfs_pointer"
+                        )
+                    if "sha256:" + hashlib.sha256(raw_input).hexdigest() != checksum:
+                        raise MetadataValidationError(
+                            "changed_software_checksum_head_bytes_mismatch"
+                        )
+                    binding = "changed_software_exact_head_bytes"
+                else:
+                    if old_ref != new_ref:
+                        raise MetadataValidationError(
+                            "unchanged_checksum_reference_blob_changed"
+                        )
+                    # No content read, even for LFS pointers or protected inputs.
+                    binding = "unchanged_reference_git_blob_identity_only"
+                references.append(
+                    {
+                        "path": source_path,
+                        "mode": new_ref[0],
+                        "blob_sha": new_ref[1],
+                        "binding": binding,
+                    }
+                )
+            result["validated_receipts"].append(
+                {
+                    "path": path,
+                    "base_blob_sha": base_ref[1],
+                    "head_blob_sha": head_ref[1],
+                    "source_commit_sha": producer,
+                    "changed_leaves": [list(leaf) for leaf in changed_leaves],
+                    "input_references": references,
+                }
+            )
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        OSError,
+        OverflowError,
+        RecursionError,
+    ) as exc:
+        result["blockers"] = [
+            str(exc)
+            if isinstance(exc, MetadataValidationError)
+            else "metadata_validation_indeterminate"
+        ]
+        return result
+    result["status"] = "pass"
+    result["contract_pass"] = True
+    return result
 
 
 def _write_github_outputs(path: Path, payload: dict[str, object]) -> None:
@@ -311,12 +637,34 @@ def main(argv: list[str] | None = None) -> int:
         print(f"native CI scope classification failed: {exc}", file=sys.stderr)
         return 2
 
+    metadata_pass = False
+    if args.fail_protected_evidence and payload["protected_evidence"]:
+        if args.paths is not None:
+            validation = {
+                "status": "blocked",
+                "contract_pass": False,
+                "blockers": ["immutable_git_diff_required_instead_of_path_override"],
+                "authority_boundary": _METADATA_BOUNDARY,
+            }
+        else:
+            validation = validate_protected_metadata_changes(
+                base=args.base,
+                head=args.head,
+                repo_root=args.repo_root.resolve(),
+                protected_paths=payload["protected_evidence_paths"],
+            )
+        payload["metadata_only_validation"] = validation
+        metadata_pass = validation["contract_pass"] is True
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
     if args.github_output is not None:
         _write_github_outputs(args.github_output, payload)
-    if args.fail_protected_evidence and payload["protected_evidence"]:
+    if (
+        args.fail_protected_evidence
+        and payload["protected_evidence"]
+        and not metadata_pass
+    ):
         print(
-            "native CI scope includes protected evidence: "
+            "native CI scope includes unvalidated protected evidence: "
             + ", ".join(payload["protected_evidence_paths"]),
             file=sys.stderr,
         )
