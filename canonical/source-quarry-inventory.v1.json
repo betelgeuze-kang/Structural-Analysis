@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:47571d3c39f6f33a91bf2d89930e652ffc580a166cf4777ff06d9cb17725b245",
+  "inventory_digest": "sha256:2ba2b53c63687ae5b7eee6675adf5e356edc3114ed07707554651399a2d75860",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -7596,7 +7596,7 @@
           "blob_sha": "e9dd89ccde4405eeac936c33be164282d2f1c667",
           "change_status": "added",
           "changes": 117,
-          "current_blob_sha": "1df6581e7ab91bf60370bfaa633581a877af1973",
+          "current_blob_sha": "06b2539511f7e0f215388005a59c5a5bbe9da941",
           "current_relation": "different",
           "deletions": 0,
           "path": "tests/test_product_ci_workflow_contract.py",
