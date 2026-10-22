@@ -261,7 +261,9 @@ python -m structural_analysis.api.nonlinear_fiber_frame_cli \
 The default stays `numpy_linalg_solve_dense` (reported as `numpy_dense_ndarray`).
 Sparse Newton trials assemble the free CSR tangent directly and use the existing
 unregularized CPU solver. Exact-conditioning admission remains capped at 256 free
-equations; terminal engineering receipts retain the existing dense assembler.
+equations. Sparse terminal and recovery paths retain CSR, while legacy
+serialization returns ordinary dense lists and finite-difference proof checks
+use dense free-equation matrices.
 This does not make the entire path sparse or lift a model, convergence or conditioning
 limit. Within one public invocation, eligible pure schema/hash computations and
 unchanged sparse factorizations may be reused. Changed values are rechecked;

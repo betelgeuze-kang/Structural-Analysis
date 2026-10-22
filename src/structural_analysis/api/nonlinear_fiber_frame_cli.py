@@ -20,7 +20,10 @@ from structural_analysis.api.nonlinear_fiber_frame import (
     analyze_public_rc_fiber_frame,
     validate_public_rc_fiber_frame_result,
 )
-from structural_analysis.solvers.nonlinear.newton import VECTOR_MATRIX_BACKEND, VECTOR_SPARSE_MATRIX_BACKEND
+from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_MATRIX_BACKEND,
+    VECTOR_SPARSE_MATRIX_BACKEND,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_chain_io import (
     STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES,
 )
@@ -36,7 +39,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("model_path", help="Neutral canonical JSON input.")
     parser.add_argument("--load-steps", type=int, default=4)
-    parser.add_argument("--matrix-backend", choices=(VECTOR_MATRIX_BACKEND, VECTOR_SPARSE_MATRIX_BACKEND), default=VECTOR_MATRIX_BACKEND)
+    parser.add_argument(
+        "--matrix-backend",
+        choices=(VECTOR_MATRIX_BACKEND, VECTOR_SPARSE_MATRIX_BACKEND),
+        default=VECTOR_MATRIX_BACKEND,
+    )
     parser.add_argument("--max-iterations", type=int, default=40)
     parser.add_argument("--residual-tolerance", type=float, default=1.0e-10)
     parser.add_argument("--increment-tolerance", type=float, default=1.0e-12)

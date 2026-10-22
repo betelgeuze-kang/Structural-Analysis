@@ -24,7 +24,7 @@ from structural_analysis.solvers.nonlinear.newton import (
 )
 
 
-def finite_difference_stateful_fiber_frame2d_tangent_check(
+def _finite_difference_stateful_fiber_frame2d_tangent_arrays(
     problem: StatefulFiberFrame2DProblem,
     accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
     *,
@@ -33,6 +33,7 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
     epsilon_m: float = 1.0e-8,
     relative_tolerance: float = 5.0e-6,
     matrix_backend: str = VECTOR_MATRIX_BACKEND,
+    _matrix_result: Any = None,
 ) -> dict[str, Any]:
     """Check every free-equation column from one immutable checkpoint."""
 
@@ -117,8 +118,12 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
         "parent_epoch": accepted_checkpoint.epoch,
         "same_committed_parent_checkpoint": same_parent,
         "finite_difference_epsilon_m": epsilon,
-        "analytic_jacobian_kn_per_m": analytic.tolist(),
-        "finite_difference_jacobian_kn_per_m": finite_difference.tolist(),
+        "analytic_jacobian_kn_per_m": (
+            matrices := (analytic, finite_difference)
+            if _matrix_result is None
+            else _matrix_result(analytic, finite_difference)
+        )[0],
+        "finite_difference_jacobian_kn_per_m": matrices[1],
         "absolute_inf_error_kn_per_m": absolute_error,
         "relative_inf_error": relative_error,
         "relative_tolerance": tolerance,
@@ -127,6 +132,34 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
             relative_error <= tolerance and symmetry_error <= 1.0e-9 and same_parent
         ),
     }
+
+
+def _tangent_check_public_matrices(analytic: Any, difference: Any) -> tuple:
+    """Materialize the two historical list values in their original order."""
+    return analytic.tolist(), difference.tolist()
+
+
+def finite_difference_stateful_fiber_frame2d_tangent_check(
+    problem: StatefulFiberFrame2DProblem,
+    accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
+    *,
+    target_load_factor: float,
+    trial_free_coordinates_m: Any,
+    epsilon_m: float = 1.0e-8,
+    relative_tolerance: float = 5.0e-6,
+    matrix_backend: str = VECTOR_MATRIX_BACKEND,
+) -> dict[str, Any]:
+    """Check every free-equation column from one immutable checkpoint."""
+    return _finite_difference_stateful_fiber_frame2d_tangent_arrays(
+        problem,
+        accepted_checkpoint,
+        target_load_factor=target_load_factor,
+        trial_free_coordinates_m=trial_free_coordinates_m,
+        epsilon_m=epsilon_m,
+        relative_tolerance=relative_tolerance,
+        matrix_backend=matrix_backend,
+        _matrix_result=_tangent_check_public_matrices,
+    )
 
 
 __all__ = ["finite_difference_stateful_fiber_frame2d_tangent_check"]

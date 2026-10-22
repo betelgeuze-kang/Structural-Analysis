@@ -64,9 +64,20 @@ from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
     StatefulFiberFrame2DLoadStepResult,
     run_stateful_fiber_frame2d_load_path,
 )
+from structural_analysis.benchmark import (
+    stateful_fiber_frame2d_diagnostics as _array_diagnostics,
+)
 from structural_analysis.benchmark.stateful_fiber_frame2d_diagnostics import (
+    _finite_difference_stateful_fiber_frame2d_tangent_arrays,
+    _tangent_check_public_matrices,
     finite_difference_stateful_fiber_frame2d_tangent_check,
 )
+from structural_analysis.assembly.stateful_fiber_frame2d_direct_sparse import (
+    _boundary_bindings_unchanged,
+    _capture_boundary_bindings,
+    _function_builtin_bindings,
+)
+from structural_analysis.engine_v2.contracts import _canonical as _array_canonical
 from structural_analysis.engine_v2.contracts._canonical import (
     _canonical_cache_eligible,
     array_content_hash,
@@ -1582,13 +1593,42 @@ def _jacobian_audit_key(
         return None
 
 
+def _receipt_tangent_diagnostic(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    """Execute one current FD sweep and omit only an unchanged list boundary."""
+    if not _boundary_bindings_unchanged(_ARRAY_DIAGNOSTIC_DISPATCH):
+        return finite_difference_stateful_fiber_frame2d_tangent_check(*args, **kwargs)
+    formatter = _tangent_check_public_matrices
+
+    def matrix_result(analytic: Any, difference: Any) -> tuple:
+        # Run at the original dictionary position, before its final pass bool.
+        arrays = (analytic, difference)
+        if (
+            _boundary_bindings_unchanged(_ARRAY_DIAGNOSTIC_DISPATCH)
+            and _boundary_bindings_unchanged(_ARRAY_DIAGNOSTIC_CONVERSION)
+            and all(
+                type(array) is np.ndarray
+                and array.dtype.str == "<f8"
+                and array.ndim == 2
+                and all(size > 0 for size in array.shape)
+                for array in arrays
+            )
+        ):
+            return arrays
+        # No duplicate FD; list-specific refusals and empty-axis collapse remain.
+        return formatter(*arrays)
+
+    return _finite_difference_stateful_fiber_frame2d_tangent_arrays(
+        *args, **kwargs, _matrix_result=matrix_result
+    )
+
+
 def _compute_jacobian_audit(
     problem: StatefulFiberFrame2DProblem,
     topology_plan: FiberFrameNonlinearExecutionTopologyPlan,
     step: StatefulFiberFrame2DLoadStepResult,
     free_order_hash: str,
 ) -> FiberFrameNonlinearJacobianAuditReceipt:
-    diagnostic = finite_difference_stateful_fiber_frame2d_tangent_check(
+    diagnostic = _receipt_tangent_diagnostic(
         problem,
         step.parent_checkpoint,
         target_load_factor=step.accepted_checkpoint.load_factor,
@@ -2549,6 +2589,63 @@ _AUDIT_SCALAR_FIELDS = tuple(
     for item in fields(FiberFrameNonlinearJacobianAuditReceipt)
     if item.name != "extensions"
 )
+_ARRAY_DIAGNOSTIC_DISPATCH = _capture_boundary_bindings(
+    tuple(
+        (namespace, name)
+        for namespace, names in (
+            (
+                globals(),
+                (
+                    "finite_difference_stateful_fiber_frame2d_tangent_check",
+                    "_finite_difference_stateful_fiber_frame2d_tangent_arrays",
+                    "_tangent_check_public_matrices",
+                    "__builtins__",
+                    "type",
+                    "all",
+                ),
+            ),
+            (
+                vars(_array_diagnostics),
+                (
+                    "finite_difference_stateful_fiber_frame2d_tangent_check",
+                    "_finite_difference_stateful_fiber_frame2d_tangent_arrays",
+                    "_tangent_check_public_matrices",
+                ),
+            ),
+        )
+        for name in names
+    )
+    + _function_builtin_bindings((_receipt_tangent_diagnostic,), ("type", "all"))
+)
+_ARRAY_DIAGNOSTIC_CONVERSION = _capture_boundary_bindings(
+    tuple(
+        (owner, name)
+        for owner, names in (
+            (globals(), ("immutable_array", "np")),
+            (
+                vars(_array_canonical),
+                ("immutable_array", "_validate_lossless_array_cast", "np"),
+            ),
+            (
+                vars(np),
+                (
+                    "ndarray",
+                    "float64",
+                    "dtype",
+                    "asarray",
+                    "ascontiguousarray",
+                    "isfinite",
+                    "all",
+                    "errstate",
+                    "array_equal",
+                ),
+            ),
+            (np.errstate, ("__init__", "__enter__", "__exit__")),
+        )
+        for name in names
+    )
+)
+
 _AUDIT_IMPLEMENTATION = ImplementationGuard(
     tuple(
         sys.modules[name]

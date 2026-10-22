@@ -123,7 +123,7 @@ def test_noninitial_terminal_reversal_and_empty_free_serialization_are_exact():
     assert empty.jacobian_kn_per_m.shape == (0, 0)
 
 
-def test_terminal_assembly_avoids_global_square_but_legacy_free_dense_is_explicit(
+def test_terminal_assembly_avoids_global_square_and_keeps_current_allocation_hook(
     monkeypatch,
 ):
     problem = make_two_member_stateful_fiber_l_frame()
@@ -141,6 +141,8 @@ def test_terminal_assembly_avoids_global_square_but_legacy_free_dense_is_explici
     actual = sparse.assemble_stateful_fiber_frame2d_direct_sparse_terminal(
         problem, parent, target_load_factor=0.1, trial_free_coordinates_m=np.zeros(6)
     )
+    # A changed allocation binding must retain the legacy toarray hook path.
+    assert not sparse._sparse_legacy_rows_eligible(actual.jacobian_kn_per_m)
     actual.to_dict()
     assert (len(problem.free_global_dofs),) * 2 in shapes
 
