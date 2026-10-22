@@ -16,7 +16,7 @@
       "release authority"
     ]
   },
-  "component_count": 76,
+  "component_count": 77,
   "components": [
     {
       "ecosystem": "python",
@@ -51,6 +51,12 @@
       "ecosystem": "python",
       "kind": "dependency",
       "name": "jsonschema>=4.20",
+      "version": ""
+    },
+    {
+      "ecosystem": "python",
+      "kind": "dependency",
+      "name": "referencing>=0.28.4",
       "version": ""
     },
     {
@@ -931,7 +937,7 @@
     },
     "third_party_redistribution_clearance": "not_established"
   },
-  "generated_at": "2026-10-21T22:43:59.189811+00:00",
+  "generated_at": "2026-10-22T22:49:46.302680+00:00",
   "schema_version": "runtime-sbom.v1",
   "source_files": {
     "cargo_lock": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.lock",
@@ -945,7 +951,7 @@
     "cargo_toml": "73badcc7336768424ef718dd1bb7f3f62eff4da09d18cee7b1d915c2e74f4eea",
     "package_json": "fb748915d54464c9f70f2b4970b395463edb39dcaae5a1b75c89f31b434812fb",
     "package_lock": "4a49818721f8f61aa9b2b84e04be70a39639910c2432d10ff7a770c541a94980",
-    "pyproject": "02a29524cd3add6bf0f853b2570e4be80684c5fb2170f0b6d1bca83cb6044209",
+    "pyproject": "2694bcf1e1ed09fcda91ba810fb914d5690120b45d5ae7222cb681295523ad49",
     "repository_license": "2cb0e9dff0aa63dee5f398a0dd7f3471d67a94178c935b5fb6b94a6ac5fd7778"
   }
 }

@@ -2,15 +2,15 @@
   "artifacts": {
     "native_artifact_manifest": {
       "path": "implementation/phase1/native_runtime_artifact_manifest.json",
-      "sha256": "a46a4fb3dd83ce4e9d0cf708365733ef2702f94fffdd3f8d7be6270462550d19"
+      "sha256": "35988f79c1fdb11b22bfe3828dd79780dd071831313a9505ab7216f3cd76bee1"
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "116767ad12345d2199d90072b5ffa9f97007c85be2e27367d7dd891618c0a431"
+      "sha256": "15f64dd346cd4fe3538d838716adbe554d35de9f53987191d48c01f294e4fc11"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "eff97f07e5bbc64f0561df0d53b1b5150a008fb8fdc588271d29b08de5c87405"
+      "sha256": "7d5c92e55caa50230cc29e5f8275707e76b736ecd67931a67547b5fa185f2c86"
     }
   },
   "authority": {
@@ -42,7 +42,7 @@
   },
   "claim_boundary": "contract_pass covers the technical runtime packaging contract only. It grants no product license, commercial use, redistribution, third-party-material clearance, signing authority, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-10-21T22:43:59.192531+00:00",
+  "generated_at": "2026-10-22T22:49:46.305460+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
@@ -67,5 +67,5 @@
     "version": "0.1.0"
   },
   "schema_version": "production-runtime-packaging-manifest.v1",
-  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=76 | native_artifacts=5/6"
+  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=77 | native_artifacts=5/6"
 }

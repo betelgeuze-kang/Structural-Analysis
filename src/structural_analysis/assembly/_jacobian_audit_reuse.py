@@ -298,7 +298,13 @@ class ImplementationGuard:
             if isinstance(value, type)
             and value.__module__.startswith("structural_analysis.")
         )
-        self.baseline = self._current()
+        try:
+            self.baseline: tuple | None = self._current()
+        except (AttributeError, TypeError, ValueError, RecursionError):
+            # Dependency implementations can gain unknown closure/default
+            # layouts between supported Python versions. Reuse is optional;
+            # preserve the original numerical API without admitting that layout.
+            self.baseline = None
 
     def _current(self) -> tuple:
         result = []
@@ -442,6 +448,8 @@ class ImplementationGuard:
         return tuple(result), external, _csr_implementation_tokens()
 
     def unchanged(self) -> bool:
+        if self.baseline is None:
+            return False
         try:
             current = self._current()
             return current[-1] is not None and current == self.baseline

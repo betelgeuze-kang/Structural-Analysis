@@ -521,6 +521,40 @@ def test_function_code_and_mutable_closure_changes_are_guarded(monkeypatch):
     assert not guard.unchanged()
 
 
+@pytest.mark.parametrize(
+    "owner", ["typing", "structural_analysis.synthetic_unknown_default"]
+)
+def test_unknown_callable_default_disables_reuse_without_import_failure(owner):
+    from types import ModuleType
+
+    namespace = ModuleType("structural_analysis.synthetic_unknown_default")
+    unknown_default = SimpleNamespace(value=1)
+
+    def function(value=unknown_default):
+        return value
+
+    function.__module__ = owner
+    namespace.function = function
+    guard = cache.ImplementationGuard((namespace,))
+    assert guard.baseline is None
+    assert not guard.unchanged()
+
+    # An unavailable import baseline cannot become eligible after publication.
+    # A fresh guard can admit the now-known layout independently.
+    function.__defaults__ = (None,)
+    assert not guard.unchanged()
+    assert cache.ImplementationGuard((namespace,)).unchanged()
+
+
+def test_import_baseline_does_not_silence_unexpected_guard_failure(monkeypatch):
+    def unexpected_failure(self):
+        raise RuntimeError("unexpected guard failure")
+
+    monkeypatch.setattr(cache.ImplementationGuard, "_current", unexpected_failure)
+    with pytest.raises(RuntimeError, match="unexpected guard failure"):
+        cache.ImplementationGuard(())
+
+
 def test_typed_snapshot_has_no_numeric_type_signed_zero_or_container_aliases():
     def snapshot(value):
         return cache.value_snapshot(value, frozenset(), [100, 1000])

@@ -10,6 +10,7 @@ EXPECTED_REQUIRED_RUNTIME_DEPENDENCIES = {
     "jsonschema>=4.20",
     "matplotlib>=3.7",
     "numpy>=1.23",
+    "referencing>=0.28.4",
     "scipy>=1.10",
 }
 
@@ -77,5 +78,6 @@ def test_required_runtime_dependencies_match_across_package_metadata() -> None:
     }
 
     assert dependencies_by_source == {
-        source: EXPECTED_REQUIRED_RUNTIME_DEPENDENCIES for source in dependencies_by_source
+        source: EXPECTED_REQUIRED_RUNTIME_DEPENDENCIES
+        for source in dependencies_by_source
     }
