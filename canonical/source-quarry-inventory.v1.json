@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:e4a57b2f2c7b4c45fc79a05c2118db2c68ed556297d6533cecf3c11b6985b8f5",
+  "inventory_digest": "sha256:47571d3c39f6f33a91bf2d89930e652ffc580a166cf4777ff06d9cb17725b245",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -29,7 +29,7 @@
           "blob_sha": "aceacaae5ce11f9c027dc4c48cde2dad9432b34f",
           "change_status": "modified",
           "changes": 5,
-          "current_blob_sha": "23e02c3622cd72c186910d405c7ad34b55b7bd12",
+          "current_blob_sha": "51c973962e620e1613fdc792faa645f1c5d977e9",
           "current_relation": "different",
           "deletions": 2,
           "path": "README.md",
@@ -624,7 +624,7 @@
           "blob_sha": "b066c85f8ad2e67e52e9e74b64f84707a661b575",
           "change_status": "modified",
           "changes": 300,
-          "current_blob_sha": "23e02c3622cd72c186910d405c7ad34b55b7bd12",
+          "current_blob_sha": "51c973962e620e1613fdc792faa645f1c5d977e9",
           "current_relation": "different",
           "deletions": 231,
           "path": "README.md",
@@ -2093,7 +2093,7 @@
           "blob_sha": "025da778527196e4aa6c93b54a2ed515d1048738",
           "change_status": "modified",
           "changes": 13,
-          "current_blob_sha": "c4c6572a4795d5328553cbf6a719d50c3fe4ea2d",
+          "current_blob_sha": "a152ff7bd99c2924e8882f56c9cd30a97ac21f7a",
           "current_relation": "different",
           "deletions": 0,
           "path": "pyproject.toml",
@@ -2110,7 +2110,7 @@
           "blob_sha": "a480010f11c256df9b84fcf5e47c7ae9d0300635",
           "change_status": "modified",
           "changes": 4,
-          "current_blob_sha": "51cb3adac3e5d2d4ff8dd936e9f1143ba4601e0b",
+          "current_blob_sha": "45875a9e5487c1ec4c78f98b0cf70f15cdddba1e",
           "current_relation": "different",
           "deletions": 1,
           "path": "requirements.txt",
@@ -2372,7 +2372,7 @@
           "blob_sha": "c0e869ca1c408eeea0ae53fb32cd66c3745d5a18",
           "change_status": "modified",
           "changes": 9,
-          "current_blob_sha": "2c612cd62b2c7c1c467ee0b092f8aa6672827f8b",
+          "current_blob_sha": "0771c7e79ae88bc55427b133d140fd15bd33c9f3",
           "current_relation": "different",
           "deletions": 0,
           "path": "setup.cfg",
@@ -7628,7 +7628,7 @@
           "blob_sha": "533b09f2c6230dd05d9d5ab9097cea0a5f7dcb70",
           "change_status": "added",
           "changes": 84,
-          "current_blob_sha": "7f70a83a1d66518167e918bba37992ba22ef9df5",
+          "current_blob_sha": "f0f986fba5729aaf12d5a96fb46ad4b16a44b629",
           "current_relation": "different",
           "deletions": 0,
           "path": "tests/test_runtime_dependency_contract.py",
@@ -8088,7 +8088,7 @@
         "path": "docs/adr/010-retire-source-quarry-retained-device-fgmres.md"
       },
       {
-        "blob_sha": "23e02c3622cd72c186910d405c7ad34b55b7bd12",
+        "blob_sha": "51c973962e620e1613fdc792faa645f1c5d977e9",
         "path": "README.md"
       },
       {
@@ -8096,7 +8096,7 @@
         "path": "artifacts/manifests/capabilities.yaml"
       }
     ],
-    "policy_projection_digest": "sha256:29a62dd699c791676492f485d3cc1b3eb1079e0bd05b27be7f17f44e150c6085",
+    "policy_projection_digest": "sha256:7ed52cd90bfbca29abdf4d78ea96f5829116283598ae787095c43c16bf8d98b0",
     "retired_scope_status": "retired_not_planned_for_current_product",
     "scope_disposition_only": true,
     "semantic_equivalence_claim": false
