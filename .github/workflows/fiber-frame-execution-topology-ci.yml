@@ -83,6 +83,7 @@ on:
       - "tests/test_unified_nonlinear_frame_api.py"
       - "tests/test_corotational_fiber_frame_sparse.py"
       - "tests/test_sparse_factorization_diagnostics.py"
+      - "tests/test_sparse_factorization_reuse.py"
       - "tests/test_scalable_sparse_factorization.py"
       - "tests/test_stateful_corotational_fiber_frame2d_adaptive.py"
       - "tests/test_stateful_corotational_fiber_frame2d_arc_length.py"
