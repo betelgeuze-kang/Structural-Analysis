@@ -54,8 +54,26 @@ continues to export derived comparison results and is a separate format.
 
 ## Compare designs
 
-Capture up to four named variants of the applied request and explicitly select
-**Run captured designs**. Each design has its own immutable input, submission key
+Capture up to four named variants of the applied request. Before running them,
+compare two captured inputs in the input preview, including designs without
+results. The preview uses their original captured strings; later edits to the
+current draft do not change them. It lists bounded input changes and names
+differences in the conditions required for numerical comparison. Its selections
+are separate from the successful-result comparison selections.
+
+Native numeric tokens are retained in this preview, including large integers
+and different decimal spellings. Exact input equality means identical original
+text. If browser number conversion cannot safely represent or distinguish numeric
+inputs, comparison compatibility remains uncertain. The preview accepts up to
+1 MiB and 20,000 values per input, with depth at most 48 and numeric tokens at most
+256 characters; larger captured inputs stay intact but have no input comparison.
+The table shows at most 200 changes and 240 characters per value. Clipped values
+or a limited change list require checking the full input. Matching inputs or comparison conditions
+does not predict convergence, accuracy or speed. Previewing inputs performs no
+submission or numerical calculation.
+
+Explicitly select **Run captured designs** to submit the designs.
+Each design has its own immutable input, submission key
 and durable job. The queue runs sequentially and pauses when a submission outcome
 is uncertain or a known job exceeds its bounded polling interval. Retrying an
 uncertain submission uses its original bytes/key. Refreshing a known job uses
@@ -67,8 +85,9 @@ must be compatible. Geometry, sections and material declarations can differ.
 Quantities match by entity, component and unit rather than row order. The table
 shows compared minus baseline at the final authored target. Curves retain actual
 accepted state order; subdivisions and reversals are not sorted or fitted.
-Corotational saved reports currently provide nodal quantities, so member forces
-remain unavailable for that review path. Missing results, incompatible designs
+Corotational scenario comparison uses the original nodal report; member-force
+deltas remain unavailable there even when a separate detail report can be opened
+for an individual job. Missing results, incompatible designs
 and failed cases remain visible. JSON export retains bindings, statuses, scalar
 curves and derived comparisons.
 

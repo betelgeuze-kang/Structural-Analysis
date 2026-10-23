@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactElement } from 'react'
 import { createJobWorkflowTransport, type JobAuthorizationProvider, type RcJobTransport } from '../model/jobTransport'
 import { loadWorkbenchJob } from '../model/jobProvider'
 import type { WorkbenchJobView } from '../model/jobSchema'
@@ -7,6 +7,7 @@ import {
   rcScenarioAuthorizationFailure, rcScenarioRecordedWallSeconds, type RcScenarioIntent, type RcScenarioSummary,
 } from '../model/rcScenarioComparison'
 import { captureRcScenario, RcScenarioUnconfirmedError, runRcScenario } from '../model/rcScenarioRunner'
+import { compareRcScenarioInputs } from '../model/rcScenarioInputComparison'
 import { loadRcJobDiagnostics } from '../model/rcJobDiagnostics'
 import { refreshRcJob } from '../model/rcWorkflowProvider'
 import type { RcProjectScenario, RcProjectScope, RcProjectJobRef } from '../model/rcProjectFile'
@@ -54,6 +55,51 @@ function Curve({ rows }: { rows: Scenario[] }): ReactElement | null {
     <figcaption>{rows.map((row, index) => <span key={row.intent.id} style={{ color: COLORS[index], marginRight: 16 }}>{row.intent.name}</span>)}
       Recorded accepted states in original order; corotational subdivisions are retained. Lines are visual guides.</figcaption>
   </figure>
+}
+
+function CapturedInputComparison({ rows }: { rows: Scenario[] }): ReactElement {
+  const prefix = useId()
+  const [baselineId, setBaselineId] = useState(''), [variantId, setVariantId] = useState('')
+  const baseline = rows.find(row => row.intent.id === baselineId) ?? rows[0]
+  const variant = rows.find(row => row.intent.id === variantId) ?? rows[1]
+  const comparison = useMemo(() => compareRcScenarioInputs(baseline?.intent.serialized, variant?.intent.serialized), [baseline?.intent.serialized, variant?.intent.serialized])
+  return <section data-rc-scenario-input-comparison aria-label="Captured design input comparison">
+    <h4>Compare captured inputs</h4>
+    <p>Compare the original captured requests in any job status. Current draft edits do not change these inputs. These selections are separate from the saved numerical-result comparison.</p>
+    <label htmlFor={`${prefix}-input-baseline`}>Input baseline design</label>{' '}
+    <select id={`${prefix}-input-baseline`} style={{ maxWidth: '100%' }} value={baseline?.intent.id ?? ''} onChange={event => setBaselineId(event.target.value)}>
+      <option value="" disabled>Select a captured input</option>
+      {rows.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name} ({row.status})</option>)}
+    </select>{' '}
+    <label htmlFor={`${prefix}-input-variant`}>Input compared design</label>{' '}
+    <select id={`${prefix}-input-variant`} style={{ maxWidth: '100%' }} value={variant?.intent.id ?? ''} onChange={event => setVariantId(event.target.value)}>
+      <option value="" disabled>Select a captured input</option>
+      {rows.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name} ({row.status})</option>)}
+    </select>
+    <div aria-live="polite">
+      <p data-rc-input-identity>{comparison.message}</p>
+      {comparison.status === 'available' && <>
+        <p data-rc-input-compatibility>{comparison.compatibility === 'compatible'
+          ? 'Input comparison scope matches: source, profile, control, target order, loading, units, topology and supports. Geometry, sections and materials may differ. This does not establish a successful or verified numerical comparison.'
+          : comparison.compatibility === 'incompatible' ? 'Numerical comparison scope differs in the following declarations:'
+            : 'Numerical comparison compatibility is unavailable because decoded numbers cannot establish exact input equivalence.'}</p>
+        {comparison.reasons.length > 0 && <ul>{comparison.reasons.map(reason => <li key={reason.key} data-rc-input-mismatch={reason.key}>{reason.label}</li>)}</ul>}
+        {comparison.precisionLimited && <p data-rc-input-precision>Some original numeric values cannot be safely represented or distinguished in this preview. Review the original numeric tokens below; numerical compatibility remains unconfirmed.</p>}
+        {comparison.truncated && <p data-rc-input-truncated>Only the first {comparison.changes.length} changed paths are shown. Additional differences are omitted; this is not a complete input difference list.</p>}
+        {comparison.changes.length > 0 && <div className="wb2-table-wrap"><table>
+          <caption>Captured request differences · original JSON values · array indices retain authored order</caption>
+          <thead><tr><th>Path</th><th>Baseline input</th><th>Compared input</th><th>Difference</th></tr></thead>
+          <tbody>{comparison.changes.map(change => <tr key={change.path} data-rc-input-change={change.path}>
+            <td><code>{change.path}</code></td>
+            <td><code>{change.before}</code>{change.beforeClipped && <span> … [value clipped at 240 characters]</span>}</td>
+            <td><code>{change.after}</code>{change.afterClipped && <span> … [value clipped at 240 characters]</span>}</td>
+            <td>{change.kind === 'numeric_token' ? 'Original numeric token' : 'Value or presence'}</td>
+          </tr>)}</tbody>
+        </table></div>}
+      </>}
+    </div>
+    <p>This is a local input review. It performs no job submission, structural calculation or performance estimate.</p>
+  </section>
 }
 
 /** Separate from benchmark readiness comparison: these are explicitly submitted
@@ -326,6 +372,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
           <dt>Member forces</dt><dd>{row.summary.memberForcesAvailable ? 'Available from original result review' : 'Unavailable in the saved nodal report'}</dd><dt>Financial cost</dt><dd>Unknown; no price or cost is inferred.</dd></dl>
       </details>}
     </li>)}</ul>
+    {scenarios.length > 0 && <CapturedInputComparison rows={scenarios} />}
     {succeeded.length > 0 && <>
       <label>Baseline design <select value={baselineId} disabled={busy || disabled} onChange={event => setBaselineId(event.target.value)}>
         {baselineId && !baseline && <option value={baselineId} disabled>Stored baseline awaiting verification</option>}
