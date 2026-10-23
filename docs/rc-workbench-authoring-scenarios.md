@@ -20,6 +20,36 @@ edits before submitting or capturing a scenario. Submission is a separate action
 Imported solver settings, execution budgets, extension fields and source
 declarations are preserved. Advanced JSON remains available.
 
+## Save and reopen a project
+
+Use **Save RC project** to download `rc-workbench-project.json`. This versioned
+file retains the applied input draft (including incomplete JSON), captured design
+inputs, their original submission keys, saved job/request references, comparison
+selections and original/changed job links. Apply or undo local structured edits
+first. Saving and opening are disabled while a submission or design queue is
+active. Save the file before closing the browser; no automatic browser storage
+is used.
+
+**Open RC project file** replaces the local project after checking the file and
+the currently configured service/account. The service URL in the file cannot
+redirect requests or provide authorization. Bearer tokens and numerical result
+summaries are not saved. Native input strings are retained exactly, including
+integer and floating-point tokens. Only the supported v1 format is accepted;
+files are bounded to 96 MiB and each draft/request to 16 MiB.
+
+Opening a project never submits or resumes an analysis. The selected job is read
+again, and each restored design with a known job needs an explicit **Refresh**
+before results can be compared. A missing job retains its reference and remains
+unavailable; it cannot silently become a new submission. An uncertain submission
+without a job ID can be retried explicitly using the original input and key.
+Original/changed input comparisons are rebuilt from checked server requests. If
+those requests cannot be read, their links remain exportable and the comparison
+is unavailable. Imported links describe the saved user's comparison intent, not
+an independently attested parent/child relationship.
+
+Project files restore editing and submission custody. **Export scenario JSON**
+continues to export derived comparison results and is a separate format.
+
 ## Compare designs
 
 Capture up to four named variants of the applied request and explicitly select

@@ -8,17 +8,26 @@ import {
 } from '../model/rcScenarioComparison'
 import { captureRcScenario, RcScenarioUnconfirmedError, runRcScenario } from '../model/rcScenarioRunner'
 import { loadRcJobDiagnostics } from '../model/rcJobDiagnostics'
+import { refreshRcJob } from '../model/rcWorkflowProvider'
+import type { RcProjectScenario, RcProjectScope, RcProjectJobRef } from '../model/rcProjectFile'
 
 type ScenarioStatus = 'captured' | 'submitting' | 'waiting' | 'succeeded' | 'failed' | 'cancelled' | 'unconfirmed' | 'unavailable'
 interface Scenario {
-  intent: RcScenarioIntent; status: ScenarioStatus; job?: WorkbenchJobView; summary?: RcScenarioSummary; message?: string
+  intent: RcScenarioIntent; status: ScenarioStatus; attempted: boolean
+  jobRef: RcProjectScenario['job']; job?: WorkbenchJobView; summary?: RcScenarioSummary; message?: string
+}
+export interface RcScenarioProjectSnapshot {
+  scenarios: RcProjectScenario[]; baselineId: string | null; variantId: string | null; busy: boolean; scope: RcProjectScope | null; restoreRevision: number | null
 }
 export interface RcScenarioComparisonPanelProps {
   collectionUrl: string
   authorize?: JobAuthorizationProvider
   draft: Record<string, unknown> | null
   draftText?: string
-  onOpenJob?(jobId: string): void
+  disabled?: boolean
+  onOpenJob?(jobId: string, reference?: RcProjectJobRef): void
+  projectRestore?: { revision: number; scope: RcProjectScope; scenarios: RcProjectScenario[]; baselineId: string | null; variantId: string | null }
+  onProjectChange?(state: RcScenarioProjectSnapshot): void
 }
 const COLORS = ['#3a83dc', '#df8f36', '#43a879', '#ba6dbc']
 function number(value: number | null): string { return value === null ? 'Unknown' : value.toExponential(6) }
@@ -49,7 +58,7 @@ function Curve({ rows }: { rows: Scenario[] }): ReactElement | null {
 /** Separate from benchmark readiness comparison: these are explicitly submitted
  * designs and bounded quantities from their original verified review session.
  */
-export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, draftText, onOpenJob }: RcScenarioComparisonPanelProps): ReactElement {
+export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, draftText, disabled = false, onOpenJob, projectRestore, onProjectChange }: RcScenarioComparisonPanelProps): ReactElement {
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const current = useRef<Scenario[]>([])
   const [name, setName] = useState('Design 1')
@@ -57,6 +66,12 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
   const [message, setMessage] = useState('Capture up to four designs, then explicitly run them in sequence.')
   const [baselineId, setBaselineId] = useState('')
   const [variantId, setVariantId] = useState('')
+  const [sessionScope, setSessionScope] = useState<RcProjectScope | null>(null)
+  const previousScope = useRef<RcProjectScope | null>(null)
+  const selections = useRef({ baselineId, variantId }); selections.current = { baselineId, variantId }
+  const projectCallback = useRef(onProjectChange), appliedRestore = useRef<number | null>(null)
+  const preserveRestoredSelection = useRef(false)
+  projectCallback.current = onProjectChange
   const transport = useRef<RcJobTransport | null>(null)
   const scope = useRef<AbortController | null>(null)
   const generation = useRef(0), running = useRef(false)
@@ -64,19 +79,34 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
   const patch = (id: string, partial: Partial<Scenario>) => update(current.current.map(row => row.intent.id === id ? { ...row, ...partial } : row))
 
   useEffect(() => {
+    const retained = { rows: current.current, selections: selections.current, scope: previousScope.current, revision: appliedRestore.current }
     const epoch = ++generation.current, controller = new AbortController()
     scope.current = controller; transport.current = null; running.current = false
-    setBusy(false); update([]); setBaselineId(''); setVariantId('')
+    preserveRestoredSelection.current = false
+    appliedRestore.current = null
+    setBusy(false); update([]); setBaselineId(''); setVariantId(''); setSessionScope(null)
     const active = () => epoch === generation.current && !controller.signal.aborted
     let verifying = false
     function invalidate(): void {
       if (!active()) return
       controller.abort(); transport.current = null; generation.current++; running.current = false
-      update([]); setBaselineId(''); setVariantId(''); setBusy(false)
+      update([]); setBaselineId(''); setVariantId(''); setBusy(false); setSessionScope(null)
       setMessage('Authorization changed or became unavailable. Reopen this workspace to start a new session.')
     }
     void createJobWorkflowTransport(collectionUrl, controller.signal, authorize).then(value => {
-      if (active()) { transport.current = value; setMessage('Capture up to four designs, then explicitly run them in sequence.') }
+      if (active()) {
+        const nextScope = { collectionUrl: value.collectionUrl, tenantId: value.tenantId ?? null }
+        transport.current = value; previousScope.current = nextScope; setSessionScope(nextScope)
+        if (retained.scope?.collectionUrl === nextScope.collectionUrl && retained.scope.tenantId === nextScope.tenantId) {
+          // A replacement sign-in callback is not a new authoring project.
+          // Retain custody within the same scope, but re-read every result.
+          appliedRestore.current = retained.revision; preserveRestoredSelection.current = true
+          update(retained.rows.map(row => ({ intent: row.intent, attempted: row.attempted, jobRef: row.jobRef,
+            status: row.jobRef ? 'unavailable' : row.attempted ? 'unconfirmed' : 'captured' })))
+          setBaselineId(retained.selections.baselineId); setVariantId(retained.selections.variantId)
+          setMessage('Authorization refreshed. Designs are retained; refresh saved jobs to verify their results again.')
+        } else setMessage('Capture up to four designs, then explicitly run them in sequence.')
+      }
     }).catch(() => { if (active()) setMessage('Scenario service is unavailable for this session.') })
     // Revoke visible retained summaries as well as future network access when
     // the host changes tenants while the queue is idle.
@@ -88,17 +118,59 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
     return () => { controller.abort(); clearInterval(timer); if (epoch === generation.current) generation.current++; transport.current = null }
   }, [collectionUrl, authorize])
 
+  useEffect(() => {
+    projectCallback.current?.({
+      scenarios: scenarios.map(row => ({ intent: row.intent, attempted: row.attempted, job: row.jobRef })),
+      baselineId: baselineId || null, variantId: variantId || null, busy, scope: sessionScope, restoreRevision: appliedRestore.current,
+    })
+  }, [scenarios, baselineId, variantId, busy, sessionScope])
+
+  useEffect(() => {
+    const session = transport.current, controller = scope.current, epoch = generation.current
+    if (!projectRestore || appliedRestore.current === projectRestore.revision || !session || !controller || !sessionScope || running.current) return
+    if (projectRestore.scope.collectionUrl !== session.collectionUrl || projectRestore.scope.tenantId !== (session.tenantId ?? null)) {
+      setMessage('The project belongs to a different service or tenant. Its scenarios were not restored.')
+      return
+    }
+    let cancelled = false
+    running.current = true; setBusy(true)
+    const active = () => !cancelled && epoch === generation.current && !controller.signal.aborted
+    // The parent admits the project only in its original endpoint/tenant scope.
+    // Recheck that same live scope immediately before restoring local intents.
+    void session.verifyAuthorizationScope().then(() => {
+      if (!active()) return
+      appliedRestore.current = projectRestore.revision
+      preserveRestoredSelection.current = true
+      update(projectRestore.scenarios.map(row => ({
+        intent: row.intent, attempted: row.attempted, jobRef: row.job,
+        status: row.job ? 'unavailable' : row.attempted ? 'unconfirmed' : 'captured',
+        message: row.job ? 'Restored job reference. Refresh to verify the current stored request and result.'
+          : row.attempted ? 'The prior submission outcome is unconfirmed. Any explicit retry retains its original bytes and key.' : undefined,
+      })))
+      setBaselineId(projectRestore.baselineId ?? ''); setVariantId(projectRestore.variantId ?? '')
+      setMessage('Project scenarios restored. No job was submitted or read; refresh known jobs explicitly to verify their results.')
+    }).catch(error => {
+      if (!active()) return
+      if (rcScenarioAuthorizationFailure(error)) {
+        controller.abort(); generation.current++; transport.current = null; running.current = false
+        update([]); setBaselineId(''); setVariantId(''); setBusy(false); setSessionScope(null)
+      }
+      setMessage(rcScenarioSafeMessage(error))
+    }).finally(() => { if (active()) { running.current = false; setBusy(false) } })
+    return () => { cancelled = true; if (epoch === generation.current) { running.current = false; setBusy(false) } }
+  }, [projectRestore, sessionScope])
+
   function capture(): void {
-    if (!draft || busy || current.current.length >= RC_SCENARIO_LIMIT) return
+    if (!draft || busy || disabled || current.current.length >= RC_SCENARIO_LIMIT) return
     try {
       const intent = captureRcScenario(draft, name, undefined, draftText)
-      update([...current.current, { intent, status: 'captured' }]); setName(`Design ${current.current.length + 1}`)
+      update([...current.current, { intent, status: 'captured', attempted: false, jobRef: null }]); setName(`Design ${current.current.length + 1}`)
       setMessage('The design is captured as immutable request bytes. Running it requires the Run captured designs button.')
     } catch { setMessage('The design name or RC request is invalid. Correct the draft before capturing it.') }
   }
 
   async function execute(ids: string[]): Promise<void> {
-    if (running.current || !transport.current || !scope.current || scope.current.signal.aborted) return
+    if (disabled || running.current || !transport.current || !scope.current || scope.current.signal.aborted) return
     running.current = true; setBusy(true)
     const epoch = generation.current, session = transport.current, signal = scope.current.signal
     const active = () => epoch === generation.current && !signal.aborted
@@ -107,12 +179,22 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
         if (!active()) return
         const row = current.current.find(item => item.intent.id === id)
         if (!row || row.status === 'succeeded' || row.status === 'failed' || row.status === 'cancelled') continue
-        patch(id, { status: row.job ? 'waiting' : 'submitting', message: undefined })
+        patch(id, { status: row.jobRef ? 'waiting' : 'submitting', attempted: true, summary: undefined, message: undefined })
         let submittedJob = row.job
         try {
+          // A restored reference is authoritative for submission custody even
+          // if its fresh GET fails. Never turn that failure into a POST.
+          if (row.jobRef) {
+            const fresh = await refreshRcJob(session, row.jobRef.jobId)
+            if (fresh.request.content_hash !== row.jobRef.requestHash) throw new Error('rc_scenario_request_binding_changed')
+            submittedJob = fresh
+          }
           const job = await runRcScenario(session, row.intent, {
-            signal, existingJob: row.job,
-            onJob: next => { submittedJob = next; if (active()) patch(id, { job: next, status: 'waiting' }) },
+            signal, existingJob: submittedJob,
+            onJob: next => {
+              submittedJob = next
+              if (active()) patch(id, { job: next, jobRef: { jobId: next.job_id, requestHash: next.request.content_hash }, status: 'waiting' })
+            },
           })
           if (!active()) return
           if (job.status === 'failed' || job.status === 'cancelled') {
@@ -162,14 +244,14 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
               || summary.bindings.terminalEventHash !== job.terminal_event_hash) throw new Error('rc_scenario_review_binding_invalid')
             patch(id, { job, summary, status: 'succeeded' })
             setBaselineId(previous => previous || id)
-            setVariantId(id)
+            setVariantId(previous => preserveRestoredSelection.current ? previous || id : id)
           } finally { review?.dispose() }
         } catch (error) {
           if (!active()) return
           const safe = rcScenarioSafeMessage(error)
           if (rcScenarioAuthorizationFailure(error)) {
             scope.current?.abort(); generation.current++; transport.current = null; running.current = false; setBusy(false)
-            update([]); setBaselineId(''); setVariantId(''); setMessage(safe); break
+            update([]); setBaselineId(''); setVariantId(''); setSessionScope(null); setMessage(safe); break
           }
           const unconfirmed = error instanceof RcScenarioUnconfirmedError
           patch(id, { status: unconfirmed ? 'unconfirmed' : 'unavailable', job: submittedJob, message: safe })
@@ -188,11 +270,11 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
 
   async function download(): Promise<void> {
     const session = transport.current, epoch = generation.current
-    if (!session || busy) return
+    if (!session || busy || disabled) return
     try {
       await session.verifyAuthorizationScope()
       if (epoch !== generation.current || scope.current?.signal.aborted) return
-      const payload = exportRcScenarios(current.current.map(row => ({ name: row.intent.name, status: row.status, jobId: row.job?.job_id, summary: row.summary })), current.current.find(row => row.intent.id === baselineId)?.job?.job_id ?? null)
+      const payload = exportRcScenarios(current.current.map(row => ({ name: row.intent.name, status: row.status, jobId: row.jobRef?.jobId, summary: row.summary })), current.current.find(row => row.intent.id === baselineId)?.jobRef?.jobId ?? null)
       await session.verifyAuthorizationScope()
       if (epoch !== generation.current || scope.current?.signal.aborted) return
       const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }))
@@ -200,7 +282,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
       setTimeout(() => URL.revokeObjectURL(url), 0)
     } catch (error) {
       if (epoch === generation.current) {
-        if (rcScenarioAuthorizationFailure(error)) { scope.current?.abort(); generation.current++; transport.current = null; update([]); setBaselineId(''); setVariantId('') }
+        if (rcScenarioAuthorizationFailure(error)) { scope.current?.abort(); generation.current++; transport.current = null; update([]); setBaselineId(''); setVariantId(''); setSessionScope(null) }
         setMessage(rcScenarioSafeMessage(error))
       }
     }
@@ -211,21 +293,25 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
   let comparison = null, comparisonUnavailable = false
   try { comparison = baseline?.summary && variant?.summary ? compareRcScenarios(baseline.summary, variant.summary) : null }
   catch { comparisonUnavailable = true }
-  const unresolved = scenarios.some(row => row.status === 'unconfirmed' || (!!row.job && ['waiting', 'unavailable'].includes(row.status)))
+  const unresolved = scenarios.some(row => row.status === 'unconfirmed' || (!!row.jobRef && ['waiting', 'unavailable'].includes(row.status)))
   const pending = scenarios.filter(row => row.status === 'captured').map(row => row.intent.id)
   return <section className="wb2-panel" data-rc-scenario-comparison>
     <h3>Design scenarios</h3>
     <p>Capture the current validated RC draft after each edit. Up to four independent durable jobs run sequentially after an explicit action. Failed or unavailable results remain visible.</p>
-    <label>Scenario name <input value={name} maxLength={80} disabled={busy} onChange={event => setName(event.target.value)} /></label>{' '}
-    <button type="button" disabled={!draft || busy || scenarios.length >= RC_SCENARIO_LIMIT} onClick={capture}>Capture current design</button>{' '}
-    <button type="button" disabled={busy || !transport.current || !pending.length || unresolved} onClick={() => void execute(pending)}>Run captured designs</button>{' '}
-    <button type="button" disabled={busy || !scenarios.length || !transport.current} onClick={() => void download()}>Export scenario JSON</button>
+    <label>Scenario name <input value={name} maxLength={80} disabled={busy || disabled} onChange={event => setName(event.target.value)} /></label>{' '}
+    <button type="button" disabled={!draft || busy || disabled || scenarios.length >= RC_SCENARIO_LIMIT} onClick={capture}>Capture current design</button>{' '}
+    <button type="button" disabled={busy || disabled || !transport.current || !pending.length || unresolved} onClick={() => void execute(pending)}>Run captured designs</button>{' '}
+    <button type="button" disabled={busy || disabled || !scenarios.length || !transport.current} onClick={() => void download()}>Export scenario JSON</button>
     <p role="status">{message}</p>
     <ul>{scenarios.map(row => <li key={row.intent.id} data-scenario-id={row.intent.id}>
-      <strong>{row.intent.name}</strong> — <span>{row.status}</span>{row.job && <> · <code>{row.job.job_id}</code>{onOpenJob && <> <button type="button" disabled={busy} onClick={() => onOpenJob(row.job!.job_id)}>Open job</button></>}</>}
+      <strong>{row.intent.name}</strong> — <span>{row.status}</span>{row.jobRef && <> · <code>{row.jobRef.jobId}</code>{onOpenJob && <> <button type="button" disabled={busy || disabled} onClick={() => onOpenJob(row.jobRef!.jobId, row.jobRef!)}>Open job</button></>}</>}
       {row.message && <p>{row.message}</p>}
-      {row.status === 'captured' && <button type="button" disabled={busy} onClick={() => update(current.current.filter(item => item.intent.id !== row.intent.id))}>Remove {row.intent.name}</button>}
-      {['unconfirmed', 'waiting', 'unavailable'].includes(row.status) && <button type="button" disabled={busy} onClick={() => void execute([row.intent.id])}>{row.job ? `Refresh ${row.intent.name}` : `Retry same submission for ${row.intent.name}`}</button>}
+      {row.status === 'captured' && <button type="button" disabled={busy || disabled} onClick={() => {
+        update(current.current.filter(item => item.intent.id !== row.intent.id))
+        if (baselineId === row.intent.id) setBaselineId('')
+        if (variantId === row.intent.id) setVariantId('')
+      }}>Remove {row.intent.name}</button>}
+      {['unconfirmed', 'waiting', 'unavailable'].includes(row.status) && <button type="button" disabled={busy || disabled} onClick={() => void execute([row.intent.id])}>{row.jobRef ? `Refresh ${row.intent.name}` : `Retry same submission for ${row.intent.name}`}</button>}
       {row.summary && <details><summary>Original bindings and recorded work</summary>
         <dl><dt>Source revision (caller declaration)</dt><dd><code>{row.summary.sourceRevision}</code></dd>
           <dt>Review</dt><dd>{row.summary.reviewKind}</dd><dt>Request</dt><dd><code>{row.summary.bindings.requestHash}</code></dd><dt>Result</dt><dd><code>{row.summary.bindings.resultHash}</code></dd><dt>Evidence</dt><dd><code>{row.summary.bindings.evidenceHash}</code></dd>
@@ -234,8 +320,14 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
       </details>}
     </li>)}</ul>
     {succeeded.length > 0 && <>
-      <label>Baseline design <select value={baselineId} onChange={event => setBaselineId(event.target.value)}>{succeeded.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name}</option>)}</select></label>{' '}
-      <label>Compared design <select value={variantId} onChange={event => setVariantId(event.target.value)}>{succeeded.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name}</option>)}</select></label>
+      <label>Baseline design <select value={baselineId} disabled={busy || disabled} onChange={event => setBaselineId(event.target.value)}>
+        {baselineId && !baseline && <option value={baselineId} disabled>Stored baseline awaiting verification</option>}
+        {succeeded.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name}</option>)}
+      </select></label>{' '}
+      <label>Compared design <select value={variantId} disabled={busy || disabled} onChange={event => setVariantId(event.target.value)}>
+        {variantId && !variant && <option value={variantId} disabled>Stored compared design awaiting verification</option>}
+        {succeeded.map(row => <option key={row.intent.id} value={row.intent.id}>{row.intent.name}</option>)}
+      </select></label>
       {comparisonUnavailable && <p>The comparison is unavailable because the bounded numerical difference cannot be represented.</p>}
       <Curve rows={comparison?.compatible ? [baseline!, ...(baselineId === variantId ? [] : [variant!])] : baseline ? [baseline] : []} />
       {comparison && <><p>{comparison.compatible ? `Final target occurrence ${baseline!.summary!.targetIndex + 1}, ${number(baseline!.summary!.targetM)} m. ${comparison.reason}` : `Incompatible designs: ${comparison.reason}`}</p>

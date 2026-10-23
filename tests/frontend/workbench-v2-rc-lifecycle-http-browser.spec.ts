@@ -207,6 +207,46 @@ test('actual authored designs compare real core outputs and a failed input becom
     expect(retained.job.status).toBe('failed')
     expect(retained.original_request).toEqual(ready.requests.failed)
     expect(retained.original_request_hash).toBe(failed.job.request.content_hash)
+    // Reopen the complete authored project in a new browser context. Existing
+    // numerical work is reused through authenticated reads and fresh reviewers;
+    // no fifth solver job or submission is permitted by this restoration test.
+    const projectDownload = view.page.waitForEvent('download')
+    await view.page.getByRole('button', { name: 'Save RC project', exact: true }).click()
+    const projectPath = join(workspace, 'rc-workbench-project.json')
+    await (await projectDownload).saveAs(projectPath)
+    const projectBytes = await readFile(projectPath), projectFile = JSON.parse(projectBytes.toString('utf8'))
+    expect(projectFile.scenarios).toHaveLength(2)
+    expect(projectFile.submission.job.jobId).toBe(repaired.job.job_id)
+    expect(projectFile.changedRun.original.jobId).toBe(failed.job.job_id)
+    const reopened = await freshPage(browser, ready.credentials, contexts, evidence)
+    const reopenedPosts: string[] = []
+    reopened.page.on('request', request => { if (request.method() === 'POST') reopenedPosts.push(request.url()) })
+    await reopened.page.goto(`${server.origin}/#/workbench-v2`)
+    const projectInput = reopened.page.getByLabel('Open RC project file', { exact: true })
+    await expect(projectInput).toBeEnabled()
+    await projectInput.setInputFiles({ name: 'rc-workbench-project.json', mimeType: 'application/json', buffer: projectBytes })
+    await verifiedReview(reopened.page, reopened.workerUrls)
+    const restoredScenarios = reopened.page.locator('[data-rc-scenario-comparison]')
+    await expect(restoredScenarios.locator('[data-scenario-curve]')).toHaveCount(0)
+    for (const name of ['Baseline', 'Wider']) {
+      await restoredScenarios.getByRole('button', { name: `Refresh ${name}`, exact: true }).click()
+      await expect(restoredScenarios.locator('[data-scenario-id]').filter({ has: reopened.page.getByText(name, { exact: true }) })).toContainText('succeeded')
+    }
+    await expect(restoredScenarios.locator('[data-scenario-curve]')).toHaveCount(2)
+    await reopened.page.getByText('Submit a new RC input', { exact: true }).click()
+    await expect(reopened.page.locator('[data-rc-changed-run]')).toContainText(failed.job.job_id)
+    await expect(reopened.page.locator('[data-rc-changed-run]')).toContainText(repaired.job.job_id)
+    await expect(reopened.page.locator('[data-rc-changed-run]')).toContainText('/execution_config/maximum_api_invocations')
+    const reexportDownload = reopened.page.waitForEvent('download')
+    await restoredScenarios.getByRole('button', { name: 'Export scenario JSON', exact: true }).click()
+    const reexportPath = join(workspace, 'restored-comparison.json')
+    await (await reexportDownload).saveAs(reexportPath)
+    const reexported = JSON.parse(await readFile(reexportPath, 'utf8'))
+    expect(reexported).toEqual(exported)
+    expect(reopenedPosts).toEqual([])
+    evidence.projectRestoration = { schema: projectFile.schema, freshBrowser: true, submissions: reopenedPosts.length,
+      verifiedJobIds: [first.job.job_id, second.job.job_id, repaired.job.job_id], comparisonUnchanged: true,
+      originalFailedJobId: failed.job.job_id }
     evidence.completed = true
     evidence.jobs = [first.job, second.job, failed.job, repaired.job]
     evidence.workerProcesses = [first.process, second.process, failed.process, repaired.process]
