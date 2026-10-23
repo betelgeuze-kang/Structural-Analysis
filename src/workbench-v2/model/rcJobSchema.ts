@@ -851,7 +851,10 @@ export function validateRcCorotationalRequestProfile(value: unknown): void {
     && typeof request.source_revision === 'string' && /^[a-f0-9]{40}$/.test(request.source_revision), 'corotational_request_invalid')
   const c = object(request.config)
   const selected = Object.prototype.hasOwnProperty.call(c, 'control_observation')
-  exact(c, [...(selected ? ['control_observation'] : ['control_node_id', 'control_component']), 'targets_m', 'fixed_nodal_loads', 'config', 'preload_config', 'maximum_attempt_count', 'maximum_subdivision_depth', 'experimental_pin_roller_beam', 'experimental_fixed_guided_axial'], 'corotational_config_invalid')
+  const portalSpecified = Object.prototype.hasOwnProperty.call(c, 'experimental_portal_frame')
+  const portal = c.experimental_portal_frame === true
+  exact(c, [...(selected ? ['control_observation'] : ['control_node_id', 'control_component']), 'targets_m', 'fixed_nodal_loads', 'config', 'preload_config', 'maximum_attempt_count', 'maximum_subdivision_depth', 'experimental_pin_roller_beam', 'experimental_fixed_guided_axial', ...(portalSpecified ? ['experimental_portal_frame'] : [])], 'corotational_config_invalid')
+  check(!portalSpecified || (portal && !selected && !c.experimental_pin_roller_beam && !c.experimental_fixed_guided_axial), 'corotational_portal_opt_in_invalid')
   check((selected || (identifier(c.control_node_id) && ['UX', 'UY'].includes(c.control_component)))
     && integer(c.maximum_attempt_count, 1, 4096) && integer(c.maximum_subdivision_depth, 0, 20)
     && typeof c.experimental_pin_roller_beam === 'boolean' && typeof c.experimental_fixed_guided_axial === 'boolean'
@@ -908,4 +911,44 @@ export function validateRcCorotationalRequestProfile(value: unknown): void {
   }
   if (selected) normalizeRcDisplacementObservation(c.control_observation, model)
   check(c.fixed_nodal_loads.every((row: [string, string, number]) => ids.includes(row[0])), 'corotational_fixed_loads_invalid')
+  check(portal || !model.elements.some((member: RcObject) => member?.type === 'stateful_corotational_rc_fiber_frame2d'), 'corotational_portal_opt_in_required')
+  if (portal) {
+    check(model.nodes.length === 4 && model.elements.length === 3 && model.supports.length === 2, 'corotational_portal_topology_invalid')
+    check(model.sections.every((section: RcObject) => section?.type === 'rectangular_rc_fiber_section'), 'corotational_portal_section_invalid')
+    const xs = [...new Set<number>(model.nodes.map((n: RcObject) => n.coordinates[0]))].sort((a, b) => a - b)
+    const ys = [...new Set<number>(model.nodes.map((n: RcObject) => n.coordinates[1]))].sort((a, b) => a - b)
+    check(xs.length === 2 && ys.length === 2 && positive(xs[1] - xs[0]) && positive(ys[1] - ys[0]), 'corotational_portal_geometry_invalid')
+    const at = (x: number, y: number) => model.nodes.filter((node: RcObject) => node.coordinates[0] === x && node.coordinates[1] === y)
+    const corners = [at(xs[0], ys[0]), at(xs[1], ys[0]), at(xs[0], ys[1]), at(xs[1], ys[1])]
+    check(corners.every(rows => rows.length === 1), 'corotational_portal_geometry_invalid')
+    const [leftBase, rightBase, leftRoof, rightRoof] = corners.map(rows => rows[0].id as string)
+    const pair = (a: string, b: string) => JSON.stringify([a, b].sort())
+    const expectedPairs = new Set([pair(leftBase, leftRoof), pair(rightBase, rightRoof), pair(leftRoof, rightRoof)])
+    const memberIds = new Set<string>(), pairs = new Set<string>()
+    for (const raw of model.elements) {
+      const member = object(raw)
+      exact(member, ['id', 'type', 'nodes', 'section', 'integration_order'], 'corotational_portal_member_invalid')
+      check(identifier(member.id) && !memberIds.has(member.id) && member.type === 'stateful_corotational_rc_fiber_frame2d'
+        && Array.isArray(member.nodes) && member.nodes.length === 2 && member.nodes.every((id: unknown) => typeof id === 'string' && ids.includes(id))
+        && identifier(member.section) && [2, 3].includes(member.integration_order), 'corotational_portal_member_invalid')
+      memberIds.add(member.id)
+      const connection = pair(member.nodes[0], member.nodes[1])
+      check(expectedPairs.has(connection) && !pairs.has(connection), 'corotational_portal_topology_invalid')
+      pairs.add(connection)
+    }
+    const bases = new Set([leftBase, rightBase]), roofs = new Set([leftRoof, rightRoof])
+    check(new Set(model.supports.map((support: RcObject) => support.node)).size === 2
+      && model.supports.every((support: RcObject) => bases.has(support.node) && same([...support.dofs].sort(), ['RZ', 'UX', 'UY'])), 'corotational_portal_support_invalid')
+    check(c.control_component === 'UX' && roofs.has(c.control_node_id), 'corotational_portal_control_invalid')
+    check(c.fixed_nodal_loads.length === 2 && new Set(c.fixed_nodal_loads.map((load: [string, string, number]) => load[0])).size === 2
+      && c.fixed_nodal_loads.every((load: [string, string, number]) => roofs.has(load[0]) && load[1] === 'FY' && load[2] < 0), 'corotational_portal_gravity_invalid')
+    check(model.loads.length >= 1 && model.loads.length <= 2 && new Set(model.loads.map((load: RcObject) => load.node)).size === model.loads.length, 'corotational_portal_reference_load_invalid')
+    for (const raw of model.loads) {
+      const load = object(raw), components = object(load.components)
+      exact(load, ['node', 'components'], 'corotational_portal_reference_load_invalid')
+      exact(components, ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ'], 'corotational_portal_reference_load_invalid')
+      check(roofs.has(load.node) && number(components.FX) && components.FX !== 0
+        && ['FY', 'FZ', 'MX', 'MY', 'MZ'].every(key => components[key] === 0), 'corotational_portal_reference_load_invalid')
+    }
+  }
 }

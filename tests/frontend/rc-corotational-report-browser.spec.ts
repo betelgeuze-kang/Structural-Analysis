@@ -59,7 +59,7 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
     await expect(page.locator('[data-rc-corotational-review]')).toHaveAttribute('data-rc-corotational-review', 'report_verified')
   }
 
-  test('opens exact nodal values with distinct target/state/attempt budgets in a dedicated worker', async ({ page }) => {
+  test('opens exact nodal values with distinct target/state/attempt budgets in a dedicated worker', async ({ page }, testInfo) => {
     const workers: string[] = []; page.on('worker', worker => workers.push(worker.url()))
     const calls = await setup(page)
     await ready(page)
@@ -80,8 +80,62 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
     await expect(page.getByRole('columnheader', { name: 'RZ (rad)', exact: true })).toHaveCSS('text-transform', 'none')
     await expect(page.getByRole('columnheader', { name: 'MZ (kN*m)', exact: true }).first()).toHaveCSS('text-transform', 'none')
     await expect(page.getByRole('columnheader', { name: 'MZ (kN*m)', exact: true })).toHaveCount(2)
-    await page.getByLabel('Accepted state to inspect', { exact: true }).selectOption('0')
+    // Geometry comes from the original request and translations from the
+    // authenticated response. Plot coordinates retain stored order and units.
+    const shape = page.locator('[data-rc-deformed-shape]')
+    await expect(shape).toBeVisible()
+    const checkShape = async (response: any, scale: number) => {
+      await expect(shape.locator('[data-rc-member]')).toHaveCount(snapshot.request.model.elements.length)
+      for (const member of snapshot.request.model.elements) {
+        const element = shape.locator(`[data-rc-member="${member.id}"]`)
+        for (const [index, nodeId] of member.nodes.entries()) {
+          const node = snapshot.request.model.nodes.find((value: any) => value.id === nodeId)
+          const displacement = response.nodes.find((value: any) => value.node_id === nodeId).displacements_m_rad
+          for (const [axis, component] of [['x', 0], ['y', 1]] as const) {
+            const coordinate = node.coordinates[component]
+            await expect(element).toHaveAttribute(`data-rc-${axis}${index + 1}`, String(coordinate))
+            await expect(element).toHaveAttribute(`data-rc-deformed-${axis}${index + 1}`, String(coordinate + scale * displacement[component]))
+          }
+        }
+      }
+    }
+    await checkShape(selected, 1)
+    await page.getByLabel('Deformation scale', { exact: true }).fill('1000')
+    await checkShape(selected, 1000)
+    // The two-member L frame exercises keyboard member selection and the
+    // corresponding table highlights without changing the response itself.
+    const chosenMember = snapshot.request.model.elements[1]
+    const memberButton = shape.getByRole('button', { name: `Select member ${chosenMember.id}`, exact: true })
+    await memberButton.focus(); await memberButton.press('Enter')
+    await expect(page.getByLabel('Result member', { exact: true })).toHaveValue(chosenMember.id)
+    await expect(page.locator('[data-rc-corotational-selected-member]')).toContainText(`Member ${chosenMember.id}`)
+    await expect(page.locator('[data-rc-corotational-table="displacements_m_rad"] tr[data-rc-selected-node="true"] th'))
+      .toHaveText(chosenMember.nodes)
+    const history = page.locator('[data-rc-history-plot="Accepted control history"]')
+    await expect(history.locator('[data-rc-history-point]')).toHaveCount(report.responses.length)
+    expect(await history.locator('[data-rc-history-point]').evaluateAll(elements => elements.map(element => ({
+      state: Number(element.getAttribute('data-rc-history-point')), x: Number(element.getAttribute('data-rc-x')), y: Number(element.getAttribute('data-rc-y')),
+    })))).toEqual(report.responses.map((response: any) => ({ state: response.state_index, x: response.control_displacement_m, y: response.load_factor })))
+    const firstPoint = history.locator('[data-rc-history-point="0"]')
+    await firstPoint.focus(); await firstPoint.press('Enter')
     await expect(page.locator('[data-rc-corotational-selected]')).toContainText('Accepted state 0 · preload')
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('0')
+    await checkShape(report.responses[0], 1000)
+    for (const node of report.responses[0].nodes) await expect(page.locator('[data-rc-corotational-table="displacements_m_rad"] tbody tr')
+      .filter({ has: page.getByRole('rowheader', { name: node.node_id, exact: true }) }).locator('td')).toHaveText(node.displacements_m_rad.map(String))
+    await expect(page.getByRole('button', { name: 'Previous accepted state', exact: true })).toBeDisabled()
+    await page.getByRole('button', { name: 'Next accepted state', exact: true }).click()
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('1')
+    await checkShape(report.responses[1], 1000)
+    await page.getByRole('button', { name: 'Previous accepted state', exact: true }).click()
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('0')
+    await expect(page.locator('[data-rc-corotational-member-unavailable]')).toContainText('unavailable in this saved nodal report')
+    await expect(page.locator('[data-rc-history-plot="Section moment–curvature history"]')).toHaveCount(0)
+    await expect(page.locator('[data-rc-history-plot="Fiber stress–strain history"]')).toHaveCount(0)
+    expect(calls.filter(call => call.method === 'POST')).toEqual([])
+    const explorerScreenshot = testInfo.outputPath(`${profile}-saved-result-explorer.png`)
+    await page.locator('[data-rc-corotational-review]').screenshot({ path: explorerScreenshot })
+    await testInfo.attach(`${profile}-saved-result-explorer.png`, { path: explorerScreenshot, contentType: 'image/png' })
     const reportCall = calls.find(call => call.path.endsWith('/rc-corotational-report'))!
     expect(reportCall.headers.authorization).toBe('Bearer test-token')
     expect(reportCall.headers['x-structural-expected-request-hash']).toBe(snapshot.job.request.content_hash)
@@ -124,6 +178,70 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
     const submission = calls.find(call => call.method === 'POST' && call.path === '/v1/jobs')!
     expect(JSON.parse(submission.body!)).toEqual(snapshot.request)
     expect(submission.headers['idempotency-key']).toMatch(/^rc-ui-/)
+  })
+
+  test('compares a captured scenario through the real nodal reviewer worker and exports bound quantities', async ({ page }) => {
+    const workers: string[] = []; page.on('worker', worker => workers.push(worker.url()))
+    const calls = await setup(page, { mode: 'submit' })
+    await page.getByText('Submit a new RC input', { exact: true }).click()
+    await page.getByLabel('Typed RC request JSON', { exact: true }).fill(Buffer.from(snapshot.submitted_request_base64, 'base64').toString('utf8'))
+    const panel = page.locator('[data-rc-scenario-comparison]')
+    await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    expect(calls.filter(call => call.method === 'POST')).toHaveLength(0)
+    await panel.getByRole('button', { name: 'Run captured designs', exact: true }).click()
+    await expect(panel.locator('[data-scenario-id]')).toContainText('succeeded')
+    expect(workers.some(url => url.includes('rcCorotationalReportReview.worker'))).toBe(true)
+    await panel.getByText('Original bindings and recorded work', { exact: true }).click()
+    await expect(panel).toContainText('authenticated_saved_nodal_report')
+    await expect(panel).toContainText('Unavailable in the saved nodal report')
+    await expect(panel).toContainText(snapshot.request.source_revision)
+    await expect(panel).toContainText(snapshot.job.request.content_hash)
+    await expect(panel.getByRole('img', { name: 'Accepted control displacement versus load factor by scenario' })).toBeVisible()
+
+    const downloadEvent = page.waitForEvent('download')
+    await panel.getByRole('button', { name: 'Export scenario JSON', exact: true }).click()
+    const download = await downloadEvent, output = await download.path()
+    const exported = JSON.parse(readFileSync(output!, 'utf8'))
+    expect(exported.scenarios).toHaveLength(1)
+    const selected = exported.scenarios[0], summary = selected.summary
+    expect(selected.status).toBe('succeeded')
+    expect(summary.reviewKind).toBe('authenticated_saved_nodal_report')
+    expect(summary.sourceRevision).toBe(snapshot.request.source_revision)
+    expect(summary.bindings).toEqual({
+      jobId: snapshot.job.job_id, requestHash: snapshot.job.request.content_hash,
+      resultHash: snapshot.job.result.content_hash, evidenceHash: snapshot.job.evidence.content_hash,
+      checkpointHash: snapshot.job.checkpoint?.content_hash ?? null, revision: snapshot.job.revision,
+      terminalEventHash: snapshot.job.terminal_event_hash,
+    })
+    const report = JSON.parse(reportBytes.toString('utf8')), final = report.responses[report.responses.length - 1]
+    expect(summary.targetsM).toEqual(report.declarations.targets_m)
+    expect(summary.targetIndex).toBe(report.declarations.targets_m.length - 1)
+    expect(summary.targetM).toBe(report.declarations.targets_m[summary.targetIndex])
+    expect(summary.curve).toEqual(report.responses.filter((row: any) => row.phase === 'control').map((row: any) => ({
+      state: row.state_index, displacementM: row.control_displacement_m, loadFactor: row.load_factor,
+    })))
+    for (const node of final.nodes) for (let index = 0; index < 3; index++) {
+      const component = ['UX', 'UY', 'RZ'][index]
+      expect(summary.values.find((row: any) => row.kind === 'reaction' && row.entity === node.node_id && row.component === component))
+        .toMatchObject({ unit: index === 2 ? 'N*m' : 'N', value: node.reactions_kn_knm[index] * 1000 })
+      expect(summary.values.find((row: any) => row.kind === 'displacement' && row.entity === node.node_id && row.component === component))
+        .toMatchObject({ unit: index === 2 ? 'rad' : 'm', value: node.displacements_m_rad[index] })
+    }
+    expect(summary.memberForcesAvailable).toBe(false)
+    expect(summary.values.some((row: any) => row.kind === 'member_force')).toBe(false)
+    expect(summary.unknownWork).toBe(report.execution.unknown_execution_work)
+    if (summary.unknownWork) expect(summary.recordedPhaseWallSeconds).toBeNull()
+    expect(exported.baselineJobId).toBe(snapshot.job.job_id)
+    expect(exported.comparisons).toHaveLength(1)
+    expect(exported.comparisons[0]).toMatchObject({ jobId: snapshot.job.job_id, compatible: true })
+    expect(exported.comparisons[0].rows).toHaveLength(summary.values.length)
+    expect(exported.comparisons[0].rows.every((row: any) => row.delta === 0 && row.baseline === row.variant)).toBe(true)
+    const submissions = calls.filter(call => call.method === 'POST')
+    expect(submissions).toHaveLength(1)
+    expect(submissions[0].path).toBe('/v1/jobs')
+    expect(submissions[0].headers['idempotency-key']).toMatch(/^rc-scenario-/)
+    expect(JSON.parse(submissions[0].body!)).toEqual(snapshot.request)
+    expect(calls.some(call => /\/(?:result|evidence|checkpoint)$/.test(call.path))).toBe(false)
   })
 
   test('polls checkpointed state and resumes failed state only on explicit retry', async ({ page }) => {

@@ -12,6 +12,10 @@ on:
       - "examples/public_rc_fiber_frame_explicit_layers.json"
       - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
+      - "tests/frontend/rc_authoring_http_fixture.py"
+      - "tests/frontend/rc_portal_http_fixture.py"
+      - "examples/public_rc_portal_frame_corotational_request.json"
+      - "tests/test_rc_portal*.py"
       - "tests/frontend/rc_corotational_review_snapshot.py"
       - "tests/frontend/rc-corotational-report-*.spec.ts"
       - "tests/test_rc_corotational_report*.py"
@@ -60,6 +64,10 @@ on:
       - "examples/public_rc_fiber_frame_explicit_layers.json"
       - "tests/test_rc_explicit_steel_input.py"
       - "tests/frontend/rc_lifecycle*.py"
+      - "tests/frontend/rc_authoring_http_fixture.py"
+      - "tests/frontend/rc_portal_http_fixture.py"
+      - "examples/public_rc_portal_frame_corotational_request.json"
+      - "tests/test_rc_portal*.py"
       - "tests/frontend/rc_corotational_review_snapshot.py"
       - "tests/frontend/rc-corotational-report-*.spec.ts"
       - "tests/test_rc_corotational_report*.py"
@@ -137,12 +145,16 @@ jobs:
           tests/test_structure_viewer_module_boundaries.py
           tests/test_verify_quality_gate_contract.py
           tests/frontend/rc_lifecycle_http_fixture.py
+          tests/frontend/rc_authoring_http_fixture.py
+          tests/frontend/rc_portal_http_fixture.py
           tests/frontend/rc_lifecycle_review_snapshot.py
           tests/frontend/rc_corotational_review_snapshot.py
           src/structural_analysis/execution/rc_corotational_report.py
           tests/test_rc_corotational_report.py
           tests/test_rc_corotational_report_actual.py
           tests/test_rc_lifecycle_http_fixture.py
+          tests/test_rc_portal_control.py
+          tests/test_rc_portal_elastic_reference.py
           tests/test_rc_explicit_steel_input.py
           tests/test_rc_circular_steel_integration.py
           tests/test_rc_control_feasible_initial_guess.py
@@ -175,6 +187,8 @@ jobs:
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
           tests/test_rc_lifecycle_http_fixture.py
+          tests/test_rc_portal_control.py
+          tests/test_rc_portal_elastic_reference.py
           tests/test_rc_explicit_steel_input.py
           tests/test_rc_circular_steel_integration.py
           tests/test_rc_control_feasible_initial_guess.py
@@ -269,6 +283,7 @@ jobs:
           tests/frontend/rc-pin-roller-review.spec.ts
           tests/frontend/rc-fixed-guided-review.spec.ts
           tests/frontend/workbench-v2-rc-lifecycle-http-browser.spec.ts
+          tests/frontend/workbench-v2-rc-portal-http-browser.spec.ts
           --workers=1 --retries=0 --reporter=line --trace=retain-on-failure
 
       # Generate each small actual example once. Browser routes replay these

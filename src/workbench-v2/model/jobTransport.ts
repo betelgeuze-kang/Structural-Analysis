@@ -58,6 +58,8 @@ export interface RcJobTransport {
   listQuantityReports(jobId: string, page?: RcReportPage): Promise<Response>
   getQuantityReport(jobId: string, reportId: string): Promise<Response>
   getCorotationalReport(jobId: string, binding: RcCorotationalReportBinding): Promise<Response>
+  /** Stored observations only; this read never dispatches numerical work. */
+  getRcInvocations?(jobId: string, ordinal?: number): Promise<Response>
 }
 
 function endpoint(value: string, authorize?: JobAuthorizationProvider): URL {
@@ -250,6 +252,10 @@ export async function createJobWorkflowTransport(
     readTransport,
     getJob: (jobId) => send(jobPath(jobId)),
     getRequest: (jobId) => send(`${jobPath(jobId)}/request`),
+    getRcInvocations(jobId, ordinal) {
+      if (ordinal !== undefined && (!Number.isSafeInteger(ordinal) || ordinal < 1 || ordinal > 9999)) throw new JobArtifactError('rc_invocation_ordinal_invalid')
+      return send(`${jobPath(jobId)}/rc-invocations${ordinal === undefined ? '' : `/${ordinal}`}`)
+    },
     getCorotationalReport: (jobId, binding) => send(`${jobPath(jobId)}/rc-corotational-report`, undefined, corotationalReportHeaders(binding)),
     submit(bytes, key) {
       if (!(bytes instanceof Uint8Array) || !bytes.byteLength || bytes.byteLength > SUBMIT_MAX_BYTES) throw new JobArtifactError('job_submit_too_large')

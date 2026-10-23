@@ -42,10 +42,10 @@ class Driver {
   sequence = 0
   ended = false
   protocolHealthy = true
-  constructor(workspace: string, managed = false) {
+  constructor(workspace: string, managed = false, fixture = 'rc_lifecycle_http_fixture.py') {
     // This separate hosted lane intentionally retains setup-python's PATH.
     // The normal sanitized frontend runner is unchanged and never starts Python.
-    this.child = spawn('python', ['-B', 'tests/frontend/rc_lifecycle_http_fixture.py', 'driver', '--workspace', workspace, ...(managed ? ['--managed'] : [])], {
+    this.child = spawn('python', ['-B', `tests/frontend/${fixture}`, 'driver', '--workspace', workspace, ...(managed ? ['--managed'] : [])], {
       env: { ...process.env, PYTHONPATH: resolve('src'), OPENBLAS_NUM_THREADS: '1' },
       stdio: ['pipe', 'pipe', 'pipe'],
     })
@@ -126,6 +126,221 @@ async function verifiedReview(page: Page, workerUrls: string[]) {
   // context that renders a result. No injected reviewer can satisfy this alone.
   expect(workerUrls.some(url => /\/assets\/rcJobReview\.worker[^/]*\.js(?:\?.*)?$/.test(url))).toBe(true)
 }
+
+test('actual authored designs compare real core outputs and a failed input becomes an explicitly changed new job', async ({ browser }, testInfo) => {
+  test.setTimeout(240000)
+  const workspace = await mkdtemp(join(tmpdir(), 'structural-rc-browser-'))
+  const driver = new Driver(workspace, false, 'rc_authoring_http_fixture.py')
+  const contexts: BrowserContext[] = []
+  const evidence: Record<string, unknown> = { scope: 'bounded actual core software integration; no physical validation', completed: false }
+  try {
+    const ready = await driver.read<{ ready: boolean; requests: Record<string, any>; credentials: Credentials }>(20000)
+    expect(ready.ready).toBe(true)
+    const server = await driver.command<Server>('start_http')
+    const view = await freshPage(browser, ready.credentials, contexts, evidence)
+    await view.page.goto(`${server.origin}/#/workbench-v2`)
+    await view.page.getByText('Submit a new RC input', { exact: true }).click()
+    await view.page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(ready.requests.baseline))
+    const editor = view.page.locator('[data-rc-model-editor]')
+    await expect(editor.locator('[data-rc-preview-node]')).toHaveCount(2)
+    const scenarios = view.page.locator('[data-rc-scenario-comparison]')
+    await scenarios.getByLabel('Scenario name', { exact: true }).fill('Baseline')
+    await scenarios.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    // Change a physical section through the real editor, then explicitly apply
+    // before capture. No HTTP submission occurs during authoring.
+    await editor.getByLabel('case_id', { exact: true }).fill('authoring-wider')
+    await editor.getByText('Sections (1)', { exact: true }).click()
+    await editor.getByLabel('width_m', { exact: true }).fill(String(ready.requests.wider.model.sections[0].width_m))
+    await expect(scenarios.getByRole('button', { name: 'Capture current design', exact: true })).toBeDisabled()
+    await editor.getByRole('button', { name: 'Apply structured model to draft', exact: true }).click()
+    await expect(view.page.getByLabel('Typed RC request JSON', { exact: true })).toHaveValue(JSON.stringify(ready.requests.wider, null, 2))
+    await scenarios.getByLabel('Scenario name', { exact: true }).fill('Wider')
+    await scenarios.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    await scenarios.getByRole('button', { name: 'Run captured designs', exact: true }).click()
+    await expect(scenarios.locator('[data-scenario-id]').nth(0)).toContainText(/job_[a-f0-9]{32}/)
+    const first = await driver.command<any>('execute_one', {}, 90000)
+    expect(first.job.status).toBe('succeeded')
+    await expect(scenarios.locator('[data-scenario-id]').nth(0)).toContainText('succeeded', { timeout: 90000 })
+    await expect(scenarios.locator('[data-scenario-id]').nth(1)).toContainText(/job_[a-f0-9]{32}/)
+    const second = await driver.command<any>('execute_one', {}, 90000)
+    expect(second.job.status).toBe('succeeded')
+    await expect(scenarios.locator('[data-scenario-id]').nth(1)).toContainText('succeeded', { timeout: 90000 })
+    await expect(scenarios.locator('[data-scenario-curve]')).toHaveCount(2)
+    await expect(scenarios.getByRole('table')).toContainText('member_force')
+    expect(view.workerUrls.some(url => /rcJobReview\.worker/.test(url))).toBe(true)
+    const downloaded = view.page.waitForEvent('download')
+    await scenarios.getByRole('button', { name: 'Export scenario JSON', exact: true }).click()
+    const exportPath = join(workspace, 'comparison.json')
+    await (await downloaded).saveAs(exportPath)
+    const exported = JSON.parse(await readFile(exportPath, 'utf8'))
+    expect(exported.scenarios.map((row: any) => row.status)).toEqual(['succeeded', 'succeeded'])
+    expect(exported.scenarios[0].summary.bindings.resultHash).toBe(first.job.result.content_hash)
+    expect(exported.scenarios[1].summary.bindings.resultHash).toBe(second.job.result.content_hash)
+    const left = new Map(exported.scenarios[0].summary.values.map((row: any) => [row.key, row.value]))
+    expect(exported.scenarios[1].summary.values.some((row: any) => row.value !== left.get(row.key))).toBe(true)
+    const screenshot = testInfo.outputPath('actual-design-comparison.png')
+    await scenarios.screenshot({ path: screenshot })
+    await testInfo.attach('actual-design-comparison.png', { path: screenshot, contentType: 'image/png' })
+    await view.page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(ready.requests.failed))
+    await view.page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
+    await expect(view.page.locator('[data-rc-project-link]')).toBeVisible()
+    const failed = await driver.command<any>('execute_one', {}, 90000)
+    expect(failed.job.status).toBe('failed')
+    await expect(view.page.locator('[data-job-status="failed"]')).toBeVisible({ timeout: 90000 })
+    const diagnostics = view.page.locator('[data-rc-diagnostics]')
+    await expect(diagnostics.getByRole('table')).toContainText('verification')
+    await diagnostics.getByRole('button', { name: 'Inspect invocation 1', exact: true }).click()
+    await expect(diagnostics.locator('[data-rc-invocation-detail]')).toContainText('Invocation 1')
+    await diagnostics.getByRole('button', { name: 'Copy failed input for a changed run', exact: true }).click()
+    await expect(view.page.getByRole('button', { name: 'Submit RC analysis', exact: true })).toBeDisabled()
+    await view.page.getByLabel('Typed RC request JSON', { exact: true }).fill(JSON.stringify(ready.requests.repaired))
+    await expect(view.page.locator('[data-rc-changed-run]')).toContainText('/execution_config/maximum_api_invocations')
+    await view.page.getByRole('button', { name: 'Submit RC analysis', exact: true }).click()
+    await expect(view.page.locator('[data-rc-changed-run]')).toContainText('New job:')
+    const repaired = await driver.command<any>('execute_one', {}, 90000)
+    expect(repaired.job.status).toBe('succeeded')
+    expect(repaired.job.job_id).not.toBe(failed.job.job_id)
+    await verifiedReview(view.page, view.workerUrls)
+    // Inspect the already-produced result. These interactions may only read
+    // retained values; they add no fifth job or numerical execution.
+    const visualizationPosts: string[] = []
+    view.page.on('request', request => { if (request.method() === 'POST') visualizationPosts.push(request.url()) })
+    const fixedReview = view.page.locator('[data-rc-review="verified"]')
+    const originalResultDownload = view.page.waitForEvent('download')
+    await fixedReview.getByRole('button', { name: 'Download RC result', exact: true }).click()
+    const originalResultPath = join(workspace, 'visualized-original-result.json')
+    await (await originalResultDownload).saveAs(originalResultPath)
+    const originalResultBytes = await readFile(originalResultPath)
+    expect(digest(originalResultBytes)).toBe(repaired.job.result.content_hash)
+    const apiResult = JSON.parse(originalResultBytes.toString('utf8')).api_result
+    const resultHistory = apiResult.preload_response ? [apiResult.preload_response, ...apiResult.response_history] : apiResult.response_history
+    const finalResponse = resultHistory[resultHistory.length - 1], shape = fixedReview.locator('[data-rc-deformed-shape]')
+    const checkShape = async (response: any, scale: number) => {
+      await expect(shape.locator('[data-rc-member]')).toHaveCount(ready.requests.repaired.model.elements.length)
+      for (const member of ready.requests.repaired.model.elements) {
+        const element = shape.locator(`[data-rc-member="${member.id}"]`)
+        for (const [index, nodeId] of member.nodes.entries()) {
+          const node = ready.requests.repaired.model.nodes.find((value: any) => value.id === nodeId)
+          const displacement = response.node_displacements.find((value: any) => value.node_id === nodeId)
+          for (const [axis, component, field] of [['x', 0, 'UX_m'], ['y', 1, 'UY_m']] as const) {
+            const coordinate = node.coordinates[component]
+            await expect(element).toHaveAttribute(`data-rc-${axis}${index + 1}`, String(coordinate))
+            await expect(element).toHaveAttribute(`data-rc-deformed-${axis}${index + 1}`, String(coordinate + scale * displacement[field]))
+          }
+        }
+      }
+    }
+    await checkShape(finalResponse, 1)
+    await fixedReview.getByLabel('Deformation scale', { exact: true }).fill('1000')
+    await checkShape(finalResponse, 1000)
+    const memberId = ready.requests.repaired.model.elements[0].id
+    await fixedReview.getByLabel('Result member', { exact: true }).selectOption('')
+    const selectedMember = shape.getByRole('button', { name: `Select member ${memberId}`, exact: true })
+    await selectedMember.focus(); await selectedMember.press('Enter')
+    await expect(fixedReview.getByLabel('Result member', { exact: true })).toHaveValue(memberId)
+    await expect(selectedMember).toHaveAttribute('aria-pressed', 'true')
+    const memberResponse = finalResponse.member_end_forces.find((value: any) => value.member_id === memberId)
+    await expect(fixedReview.locator('[data-rc-table="members"] tbody tr').filter({ has: view.page.getByRole('rowheader', { name: memberId, exact: true }) }).locator('td'))
+      .toHaveText([memberResponse.local_end_i.FX_N, memberResponse.local_end_i.FY_N, memberResponse.local_end_i.MZ_Nm,
+        memberResponse.local_end_j.FX_N, memberResponse.local_end_j.FY_N, memberResponse.local_end_j.MZ_Nm].map(String))
+    const sectionPlot = fixedReview.locator('[data-rc-history-plot="Section moment–curvature history"]')
+    const fiberPlot = fixedReview.locator('[data-rc-history-plot="Fiber stress–strain history"]')
+    await expect(sectionPlot.locator('[data-rc-history-point]')).toHaveCount(resultHistory.length)
+    await expect(fiberPlot.locator('[data-rc-history-point]')).toHaveCount(resultHistory.length)
+    const sectionKey = JSON.parse(await fixedReview.getByLabel('RC section history', { exact: true }).inputValue())
+    const fiberKey = JSON.parse(await fixedReview.getByLabel('RC material point history', { exact: true }).inputValue())
+    const plotted = async (locator: typeof sectionPlot) => locator.locator('[data-rc-history-point]').evaluateAll(elements => elements.map(element => ({
+      state: Number(element.getAttribute('data-rc-history-point')), x: Number(element.getAttribute('data-rc-x')), y: Number(element.getAttribute('data-rc-y')),
+    })))
+    expect(await plotted(sectionPlot)).toEqual(resultHistory.map((response: any, state: number) => {
+      const section = response.section_results.find((value: any) => value.member_id === sectionKey[0] && value.integration_point_index === sectionKey[1])
+      return { state, x: section.curvature_z_per_m, y: section.moment_z_Nm }
+    }))
+    expect(await plotted(fiberPlot)).toEqual(resultHistory.map((response: any, state: number) => {
+      const fiber = response.fiber_results.find((value: any) => value.member_id === fiberKey[0] && value.integration_point_index === fiberKey[1] && value.fiber_index === fiberKey[2])
+      return { state, x: fiber.strain, y: fiber.stress_MPa }
+    }))
+    const firstSectionPoint = sectionPlot.locator('[data-rc-history-point="0"]')
+    await firstSectionPoint.focus(); await firstSectionPoint.press('Enter')
+    await expect(fixedReview.getByLabel('RC target to inspect', { exact: true })).toHaveValue('0')
+    await checkShape(resultHistory[0], 1000)
+    for (const node of resultHistory[0].node_displacements) await expect(fixedReview.locator('[data-rc-table="nodes"] tbody tr')
+      .filter({ has: view.page.getByRole('rowheader', { name: node.node_id, exact: true }) }).locator('td'))
+      .toHaveText([node.UX_m, node.UY_m, node.UZ_m, node.RX_rad, node.RY_rad, node.RZ_rad].map(String))
+    await fixedReview.getByLabel('Fiber stress–strain history stored state', { exact: true }).selectOption(String(resultHistory.length - 1))
+    await expect(fixedReview.getByLabel('RC target to inspect', { exact: true })).toHaveValue(String(resultHistory.length - 1))
+    await checkShape(finalResponse, 1000)
+    expect(visualizationPosts).toEqual([])
+    const explorerScreenshot = testInfo.outputPath('actual-fixed-result-explorer.png')
+    await fixedReview.screenshot({ path: explorerScreenshot })
+    await testInfo.attach('actual-fixed-result-explorer.png', { path: explorerScreenshot, contentType: 'image/png' })
+    evidence.resultExploration = { sourceResultHash: repaired.job.result.content_hash, states: resultHistory.length,
+      geometryScale: 1000, selectedMember: memberId, sectionKey, fiberKey, additionalSubmissions: visualizationPosts.length }
+    await view.page.getByText('Submit a new RC input', { exact: true }).click()
+    await expect(view.page.locator('[data-rc-changed-run]')).toContainText('current new job status: succeeded')
+    const retained = await driver.command<any>('inspect_job', { job_id: failed.job.job_id })
+    expect(retained.job.status).toBe('failed')
+    expect(retained.original_request).toEqual(ready.requests.failed)
+    expect(retained.original_request_hash).toBe(failed.job.request.content_hash)
+    // Reopen the complete authored project in a new browser context. Existing
+    // numerical work is reused through authenticated reads and fresh reviewers;
+    // no fifth solver job or submission is permitted by this restoration test.
+    const projectDownload = view.page.waitForEvent('download')
+    await view.page.getByRole('button', { name: 'Save RC project', exact: true }).click()
+    const projectPath = join(workspace, 'rc-workbench-project.json')
+    await (await projectDownload).saveAs(projectPath)
+    const projectBytes = await readFile(projectPath), projectFile = JSON.parse(projectBytes.toString('utf8'))
+    expect(projectFile.scenarios).toHaveLength(2)
+    expect(projectFile.submission.job.jobId).toBe(repaired.job.job_id)
+    expect(projectFile.changedRun.original.jobId).toBe(failed.job.job_id)
+    const reopened = await freshPage(browser, ready.credentials, contexts, evidence)
+    const reopenedPosts: string[] = []
+    reopened.page.on('request', request => { if (request.method() === 'POST') reopenedPosts.push(request.url()) })
+    await reopened.page.goto(`${server.origin}/#/workbench-v2`)
+    const projectInput = reopened.page.getByLabel('Open RC project file', { exact: true })
+    await expect(projectInput).toBeEnabled()
+    await projectInput.setInputFiles({ name: 'rc-workbench-project.json', mimeType: 'application/json', buffer: projectBytes })
+    await verifiedReview(reopened.page, reopened.workerUrls)
+    const restoredScenarios = reopened.page.locator('[data-rc-scenario-comparison]')
+    await expect(restoredScenarios.locator('[data-scenario-curve]')).toHaveCount(0)
+    for (const name of ['Baseline', 'Wider']) {
+      await restoredScenarios.getByRole('button', { name: `Refresh ${name}`, exact: true }).click()
+      await expect(restoredScenarios.locator('[data-scenario-id]').filter({ has: reopened.page.getByText(name, { exact: true }) })).toContainText('succeeded')
+    }
+    await expect(restoredScenarios.locator('[data-scenario-curve]')).toHaveCount(2)
+    await reopened.page.getByText('Submit a new RC input', { exact: true }).click()
+    await expect(reopened.page.locator('[data-rc-changed-run]')).toContainText(failed.job.job_id)
+    await expect(reopened.page.locator('[data-rc-changed-run]')).toContainText(repaired.job.job_id)
+    await expect(reopened.page.locator('[data-rc-changed-run]')).toContainText('/execution_config/maximum_api_invocations')
+    const reexportDownload = reopened.page.waitForEvent('download')
+    await restoredScenarios.getByRole('button', { name: 'Export scenario JSON', exact: true }).click()
+    const reexportPath = join(workspace, 'restored-comparison.json')
+    await (await reexportDownload).saveAs(reexportPath)
+    const reexported = JSON.parse(await readFile(reexportPath, 'utf8'))
+    expect(reexported).toEqual(exported)
+    expect(reopenedPosts).toEqual([])
+    evidence.projectRestoration = { schema: projectFile.schema, freshBrowser: true, submissions: reopenedPosts.length,
+      verifiedJobIds: [first.job.job_id, second.job.job_id, repaired.job.job_id], comparisonUnchanged: true,
+      originalFailedJobId: failed.job.job_id }
+    evidence.completed = true
+    evidence.jobs = [first.job, second.job, failed.job, repaired.job]
+    evidence.workerProcesses = [first.process, second.process, failed.process, repaired.process]
+    expect((evidence.workerProcesses as any[]).every(process => process.reaped && process.returncode === 0)).toBe(true)
+    evidence.comparison = exported
+    const proof = testInfo.outputPath('authoring-scenario-diagnostics.json')
+    await writeFile(proof, JSON.stringify(evidence, null, 2))
+    await testInfo.attach('authoring-scenario-diagnostics.json', { path: proof, contentType: 'application/json' })
+  } finally {
+    try { for (const context of contexts) await context.close() }
+    finally { await driver.close() }
+    const output = testInfo.outputPath('authoring-driver-output.json')
+    await writeFile(output, JSON.stringify({ stdout: driver.stdout, stderr: driver.stderr, workspace }))
+    await testInfo.attach('authoring-driver-output', { path: output, contentType: 'application/json' })
+    // Keep the disposable test artifacts if any assertion failed.
+    if (evidence.completed) expect(driver.child.exitCode).toBe(0)
+    if (evidence.completed && driver.ended && driver.child.exitCode === 0) await rm(workspace, { recursive: true, force: true })
+  }
+})
 
 for (const { profile, isolated, managed } of [
   ...['cantilever', 'explicit-layers', 'pin-roller', 'pin-roller-layers', 'fixed-guided'].map(profile => ({ profile, isolated: false, managed: false })),

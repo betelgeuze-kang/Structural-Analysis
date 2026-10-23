@@ -11,6 +11,7 @@ import json
 
 from structural_analysis.api.rc_corotational_control_model import (
     compile_rc_corotational_control_model,
+    validate_rc_portal_control_selection,
 )
 from structural_analysis.api.strict_json import strict_json_object_bytes
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
@@ -104,6 +105,7 @@ def _prepare(model, targets_m, options):
         fixed_nodal_loads=options["fixed_nodal_loads"],
         experimental_pin_roller_beam=options["experimental_pin_roller_beam"],
         experimental_fixed_guided_axial=options["experimental_fixed_guided_axial"],
+        experimental_portal_frame=options["experimental_portal_frame"],
     )
     targets = tuple(
         _finite(v, name="control displacement") for v in islice(targets_m, 256)
@@ -115,6 +117,9 @@ def _prepare(model, targets_m, options):
             "targets require 1 to 255 finite entries without adjacent duplicates"
         )
     node, component = options["control_node_id"], options["control_component"]
+    validate_rc_portal_control_selection(
+        compiled, node, component, options["control_observation"]
+    )
     observation = None
     if options["control_observation"] is not None:
         if node is not None or component is not None:
@@ -250,6 +255,7 @@ def analyze_rc_corotational_control(
     restart=None,
     experimental_pin_roller_beam=False,
     experimental_fixed_guided_axial=False,
+    experimental_portal_frame=False,
 ):
     options = dict(locals())
     compiled, targets, dof, observation, cfg, preload_cfg, prior_spent, request = (

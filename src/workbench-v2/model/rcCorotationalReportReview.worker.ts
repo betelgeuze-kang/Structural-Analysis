@@ -2,6 +2,8 @@ import { sha256Bytes } from './checksum'
 import { document, validateRcRequestProfile } from './rcJobSchema'
 import { parseRcCorotationalReport, type RcCorotationalReport, type RcCorotationalReportExpected } from './rcCorotationalReportSchema'
 import type { RcCorotationalReportSummary } from './rcCorotationalReportReview'
+import { corotationalRcScenarioSummary } from './rcScenarioComparison'
+import { rcResultGeometry } from './rcResultVisualization'
 
 let report: RcCorotationalReport | null = null
 let bytes: Uint8Array | null = null
@@ -38,6 +40,11 @@ self.onmessage = async ({ data }) => {
       self.postMessage({ id, value: summary }); return
     }
     if (!report || !bytes || !expected || !summary) unavailable()
+    if (type === 'geometry') {
+      try { self.postMessage({ id, value: rcResultGeometry(expected.request) }) }
+      catch { self.postMessage({ id, operationError: 'rc_corotational_report_geometry_invalid' }) }
+      return
+    }
     if (type === 'reopen') {
       try {
         if (!(data.bytes instanceof Uint8Array) || !data.bytes.byteLength || data.bytes.byteLength > maximumBytes) throw new Error('rc_corotational_report_too_large')
@@ -49,7 +56,9 @@ self.onmessage = async ({ data }) => {
       } catch (error) { self.postMessage({ id, operationError: safe(error) }) }
       return
     }
-    if (type === 'state') {
+    if (type === 'comparisonSummary') {
+      self.postMessage({ id, value: corotationalRcScenarioSummary(expected.request, expected.job, report) })
+    } else if (type === 'state') {
       if (!Number.isSafeInteger(data.index) || data.index < 0 || data.index >= report.responses.length) throw new Error('rc_corotational_report_state_invalid')
       self.postMessage({ id, value: report.responses[data.index] })
     } else if (type === 'statePage') {

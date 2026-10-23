@@ -3,13 +3,18 @@ import type { WorkbenchJobView } from './jobSchema'
 import { JobArtifactError, readBoundedJobBytes, type JobReadTransport } from './jobTransport'
 import type { RcArtifacts, RcJobSummary, RcObject } from './rcJobSchema'
 import type { RcQuantityReportReference, RcQuantityReportReview } from './rcQuantityReportSchema'
+import type { RcScenarioSummary } from './rcScenarioComparison'
+import type { RcResultGeometry } from './rcResultVisualization'
 
 export interface RcJobReview {
   summary: RcJobSummary
   epoch(index: number): Promise<RcObject>
   material(memberId: string, integrationPoint: number, fiberIndex: number): Promise<RcObject[]>
   materialPage?(memberId: string, integrationPoint: number, fiberIndex: number, start: number, count: number): Promise<RcObject[]>
+  sectionPage?(memberId: string, integrationPoint: number, start: number, count: number): Promise<RcObject[]>
+  geometry?(): Promise<RcResultGeometry>
   download(role: string): Promise<Blob>
+  comparisonSummary?(): Promise<RcScenarioSummary>
   verifyQuantityReport?(bytes: Uint8Array, reference?: RcQuantityReportReference): Promise<RcQuantityReportReview>
   downloadQuantityReport?(reportId: string): Promise<Blob>
   onFailure(listener: (message: string) => void): () => void
@@ -57,6 +62,11 @@ export async function loadRcJobReview(
       item.reject(new JobArtifactError(/^rc_review_[a-z_]+$/.test(data.quantityError) ? data.quantityError : 'rc_review_quantity_contract_invalid'))
       return
     }
+    if (data.operationError && ['geometry', 'materialPage', 'sectionPage'].includes(item.type)) {
+      pending.delete(data.id); clearTimeout(item.timer)
+      item.reject(new JobArtifactError(/^rc_review_[a-z_]+$/.test(data.operationError) ? data.operationError : 'rc_review_projection_invalid'))
+      return
+    }
     pending.delete(data.id); clearTimeout(item.timer); item.resolve(data.value)
   }
   function call<T>(type: string, payload: object, transfer: Transferable[] = []): Promise<T> {
@@ -83,7 +93,11 @@ export async function loadRcJobReview(
       summary,
       epoch: (index) => call('epoch', { index }),
       material: (memberId, integrationPoint, fiberIndex) => call('material', { memberId, integrationPoint, fiberIndex }),
+      materialPage: (memberId, integrationPoint, fiberIndex, start, count) => call('materialPage', { memberId, integrationPoint, fiberIndex, start, count }),
+      sectionPage: (memberId, integrationPoint, start, count) => call('sectionPage', { memberId, integrationPoint, start, count }),
+      geometry: () => call('geometry', {}),
       download: (role) => call('download', { role }),
+      comparisonSummary: () => call('comparisonSummary', {}),
       verifyQuantityReport: (bytes, reference) => {
         // Copy only the bounded companion so its caller can retain the received
         // bytes; never copy or retransmit the original numerical result arrays.
