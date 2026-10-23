@@ -143,6 +143,43 @@ test('RC portal is authored, saved, checkpointed, resumed in a fresh process and
     const member = review.getByRole('button', { name: 'Select member beam-top', exact: true })
     await member.focus(); await member.press('Enter')
     await expect(review.locator('[data-rc-corotational-selected-member]')).toContainText('beam-top: N3 → N4')
+    await review.getByRole('button', { name: 'Open stored RC details', exact: true }).click()
+    const details = review.locator('[data-rc-corotational-details="verified"]')
+    await expect(details).toBeVisible({ timeout: 30000 })
+    const detailDownload = reopened.page.waitForEvent('download')
+    await details.getByRole('button', { name: 'Download corotational detail report', exact: true }).click()
+    const detailPath = join(workspace, 'portal-detail-report.json')
+    await (await detailDownload).saveAs(detailPath)
+    const detail = JSON.parse(await readFile(detailPath, 'utf8'))
+    expect(detail.nodal_report_hash).toBe(report.report_hash)
+    expect(detail.responses.map((row: any) => row.checkpoint_hash)).toEqual(report.responses.map((row: any) => row.checkpoint_hash))
+    for (const row of detail.responses) {
+      await review.getByLabel('Accepted state to inspect', { exact: true }).selectOption(String(row.state_index))
+      for (const response of row.members) {
+        await details.getByLabel('Detail member', { exact: true }).selectOption(response.member_id)
+        await expect(details.locator('[data-rc-detail-member]')).toContainText(`Accepted state ${row.state_index} · ${response.member_id}:`)
+        for (const frame of ['global', 'local']) {
+          for (const [end, offset] of [['i', 0], ['j', 3]] as const) {
+            await expect(details.locator(`[data-rc-detail-force="${frame}:${end}"] td`)).toHaveText([
+              `${end}: ${response[`node_${end}`]}`, ...response[`end_force_${frame}_kn_knm`].slice(offset, offset + 3).map(String),
+            ])
+          }
+        }
+        const section = response.sections.at(-1)
+        await details.getByLabel('Detail integration point', { exact: true }).selectOption(String(section.integration_point_index))
+        await expect(details.locator('[data-rc-detail-section-table] tbody td')).toHaveText([
+          section.axial_strain, section.curvature_z_per_m, section.axial_force_kn, section.moment_z_kn_m,
+        ].map(String))
+        const fiber = section.fibers.at(-1)
+        await details.getByLabel('Detail fiber index', { exact: true }).fill(String(fiber.fiber_index))
+        await expect(details.locator('[data-rc-detail-fiber-table] tbody td')).toHaveText([
+          fiber.fiber_index, fiber.material_kind, fiber.strain, fiber.stress_mpa,
+        ].map(String))
+      }
+    }
+    await expect(details.getByRole('group', { name: 'Section moment–curvature history', exact: true })).toBeVisible()
+    await expect(details.getByRole('group', { name: 'Fiber stress–strain history', exact: true })).toBeVisible()
+    await testInfo.attach('portal-detail-report', { path: detailPath, contentType: 'application/json' })
     expect(reopened.posts).toEqual([])
     const receipt = await driver.command('verify_reads')
     expect(receipt.http_numerical_calls).toBe(0)
@@ -150,7 +187,7 @@ test('RC portal is authored, saved, checkpointed, resumed in a fresh process and
     await review.screenshot({ path: screenshot })
     await testInfo.attach('actual-portal-result', { path: screenshot, contentType: 'image/png' })
     evidence.completed = true
-    Object.assign(evidence, { first, killed, finished, receipt, authoredSubmissions: view.posts.length, reopenedSubmissions: reopened.posts.length, checkpointHash: first.checkpoint_hash, reportHash: report.report_hash })
+    Object.assign(evidence, { first, killed, finished, receipt, authoredSubmissions: view.posts.length, reopenedSubmissions: reopened.posts.length, checkpointHash: first.checkpoint_hash, reportHash: report.report_hash, detailReportHash: detail.report_hash })
   } finally {
     try {
       try { for (const context of contexts) await context.close() } finally { await driver.close() }

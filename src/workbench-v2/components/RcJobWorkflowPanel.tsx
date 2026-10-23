@@ -201,7 +201,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
               const outcome = await guard(async (): Promise<{ ok: true; value: T } | { ok: false; error: Error }> => {
                 try { return { ok: true, value: await operation() } }
                 catch (error) {
-                  if (error instanceof Error && /^(?:rc_review_(?:geometry_[a-z_]+|history_[a-z_]+|projection_invalid)|rc_corotational_report_geometry_invalid)$/.test(error.message)) return { ok: false, error }
+                  if (error instanceof Error && /^(?:rc_review_(?:geometry_[a-z_]+|history_[a-z_]+|projection_invalid)|rc_corotational_report_(?:geometry_invalid|detail_[a-z_]+))$/.test(error.message)) return { ok: false, error }
                   throw error
                 }
               })
@@ -213,6 +213,13 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
               const scoped: RcCorotationalReportReview = { ...original,
                 ...(original.geometry ? { geometry: () => guardProjection(() => original.geometry!()) } : {}),
                 ...(original.comparisonSummary ? { comparisonSummary: () => guard(() => original.comparisonSummary!()) } : {}),
+                ...(original.openDetails ? { openDetails: () => guardProjection(() => original.openDetails!()) } : {}),
+                ...(original.detailMember ? { detailMember: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailMember']>>) => guardProjection(() => original.detailMember!(...args)) } : {}),
+                ...(original.detailSection ? { detailSection: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailSection']>>) => guardProjection(() => original.detailSection!(...args)) } : {}),
+                ...(original.detailFiber ? { detailFiber: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailFiber']>>) => guardProjection(() => original.detailFiber!(...args)) } : {}),
+                ...(original.detailSectionPage ? { detailSectionPage: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailSectionPage']>>) => guardProjection(() => original.detailSectionPage!(...args)) } : {}),
+                ...(original.detailFiberPage ? { detailFiberPage: (...args: Parameters<NonNullable<RcCorotationalReportReview['detailFiberPage']>>) => guardProjection(() => original.detailFiberPage!(...args)) } : {}),
+                ...(original.detailDownload ? { detailDownload: () => guardProjection(() => original.detailDownload!()) } : {}),
                 state: index => guard(() => original.state(index)),
                 statePage: (start, count) => guard(() => original.statePage(start, count)),
                 download: () => guard(() => original.download()),

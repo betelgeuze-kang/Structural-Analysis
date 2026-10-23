@@ -102,3 +102,25 @@ The export retains global UX/UY/RZ values in m/m/rad, FX/FY/MZ values in kN/kN/k
 `report_hash` binds the canonical body excluding that field. `X-Structural-Report-SHA256` binds the exact final bytes, and `X-Structural-Report-ID` is `rcc_` followed by that raw digest. The two hashes serve different purposes. The export has an independent 64 MiB cap. Workbench authenticates the request and report, validates declarations and custody fields in a dedicated worker, and displays one accepted nodal state at a time. Download preserves exact bytes. File reopening accepts only the exact report already authenticated for that session; a recalculated self-hash is insufficient. Account scope changes or disposal invalidate the review.
 
 The actual tiny example fixture exercises separate worker execution, termination between chunks, older-backup activation, a fresh completing worker and repeated report reopening for v6/v7. It retains an unknown reservation and spends no new numerical work on report reads. Browser tests replay those saved bytes through controlled HTTP routes. These are software workflow observations, not a measured specimen comparison, deployed-service qualification, independent execution authentication, design approval or release readiness. The report retains the original experimental corotational authority flags and grants no new structural authority.
+
+### Saved member, section and fiber details
+
+`GET /v1/jobs/{job_id}/rc-corotational-detail-report` uses the same authentication,
+three expected-original hash headers and read snapshot. Its separate
+`durable-rc-corotational-detail-report.v1` document binds the nodal report and the
+stored member, integration-point and material states to each accepted checkpoint.
+The original nodal report and its `rcc_` identity remain unchanged. Detail report
+IDs use `rcd_` plus the exact byte digest and have an independent 64 MiB limit.
+An unavailable or oversized detail report leaves nodal review available;
+authorization loss invalidates the whole review.
+
+Workbench loads details only when requested and keeps the complete document in
+its reviewer worker. It projects one selected member, section or fiber and bounded
+history pages. All preload and subdivision states retain their saved order.
+Global endpoint forces use kN and kN*m. Current-local forces are an explicit
+rotation of those stored global endpoint forces along the current i-to-j chord;
+they are not a continuous member-force diagram. Section curvature uses 1/m and
+fiber stress uses MPa. Steel indices describe stored aggregate layers, not
+individual physical bars. The detail export preserves exact bytes and the
+original authority flags. Reading it does not invoke analysis, numerical recovery,
+checkpoint replay or a new budget reservation.

@@ -2101,6 +2101,46 @@ class DurableJobService:
         expected_result_artifact_hash: str | None = None,
         expected_evidence_artifact_hash: str | None = None,
     ) -> bytes:
+        return self._read_rc_corotational_report(
+            job_id,
+            tenant_id=tenant_id,
+            authorization_token=authorization_token,
+            expected_request_hash=expected_request_hash,
+            expected_result_artifact_hash=expected_result_artifact_hash,
+            expected_evidence_artifact_hash=expected_evidence_artifact_hash,
+        )
+
+    def read_rc_corotational_detail_report(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+        expected_request_hash: str | None = None,
+        expected_result_artifact_hash: str | None = None,
+        expected_evidence_artifact_hash: str | None = None,
+    ) -> bytes:
+        return self._read_rc_corotational_report(
+            job_id,
+            detail=True,
+            tenant_id=tenant_id,
+            authorization_token=authorization_token,
+            expected_request_hash=expected_request_hash,
+            expected_result_artifact_hash=expected_result_artifact_hash,
+            expected_evidence_artifact_hash=expected_evidence_artifact_hash,
+        )
+
+    def _read_rc_corotational_report(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+        detail: bool = False,
+        expected_request_hash: str | None = None,
+        expected_result_artifact_hash: str | None = None,
+        expected_evidence_artifact_hash: str | None = None,
+    ) -> bytes:
         """Derive an immutable nodal report from one authenticated read snapshot.
 
         No report table, new revision, numerical call or current source
@@ -2295,18 +2335,35 @@ class DurableJobService:
                     "rc_corotational_report_v1.schema.json",
                     "/rc_corotational_report",
                 )
+                if detail:
+                    from .rc_corotational_detail_report import (
+                        build_rc_corotational_detail_report,
+                    )
+
+                    raw = build_rc_corotational_detail_report(
+                        request=typed, result=result, nodal_report=raw
+                    )
+                    _validate_schema(
+                        _strict_json_object(raw, "/rc_corotational_detail_report"),
+                        "rc_corotational_detail_report_v1.schema.json",
+                        "/rc_corotational_detail_report",
+                    )
                 return raw
             except JobServiceError:
                 raise
             except RCCorotationalReportTooLargeError:
                 _fail(
-                    "rc_corotational_report_too_large",
+                    "rc_corotational_detail_report_too_large"
+                    if detail
+                    else "rc_corotational_report_too_large",
                     "/report",
                     "The report exceeds its bounded export size.",
                 )
-            except (TypeError, ValueError, KeyError, IndexError):
+            except (TypeError, ValueError, KeyError, IndexError, OverflowError):
                 _fail(
-                    "rc_corotational_report_original_invalid",
+                    "rc_corotational_detail_report_original_invalid"
+                    if detail
+                    else "rc_corotational_report_original_invalid",
                     "/source",
                     "The saved corotational report source or execution custody differs.",
                 )

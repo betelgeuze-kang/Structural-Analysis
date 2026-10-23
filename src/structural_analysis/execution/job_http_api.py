@@ -32,7 +32,7 @@ _RC_QUANTITY_ROUTE = re.compile(
     r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-quantity-reports(?:/(?P<report_id>rcq_[0-9a-f]{64}))?$"
 )
 _RC_COROTATIONAL_REPORT_ROUTE = re.compile(
-    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-corotational-report$"
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})/rc-corotational-(?P<kind>detail-report|report)$"
 )
 _MAX_HTTP_BODY = 192 * 1024 * 1024
 _MAX_SUBMIT_BODY = 16 * 1024 * 1024
@@ -104,6 +104,7 @@ class DurableJobHttpApi:
                     corotational_match.group("job_id"),
                     normalized_headers,
                     raw,
+                    detail=corotational_match.group("kind") == "detail-report",
                 )
             quantity_match = _RC_QUANTITY_ROUTE.fullmatch(path)
             if quantity_match is not None:
@@ -149,14 +150,25 @@ class DurableJobHttpApi:
             )
 
     def _rc_corotational_report_route(
-        self, method: str, job_id: str, headers: Mapping[str, str], body: bytes
+        self,
+        method: str,
+        job_id: str,
+        headers: Mapping[str, str],
+        body: bytes,
+        *,
+        detail: bool = False,
     ) -> JobHttpResponse:
         tenant_id, token = _tenant_credentials(headers)
         if method != "GET":
             _api_fail("method_not_allowed", 405, "Report reads require GET.")
         if body:
             _api_fail("unexpected_body", 400, "Report reads do not accept a body.")
-        raw = self.service.read_rc_corotational_report(
+        reader = (
+            self.service.read_rc_corotational_detail_report
+            if detail
+            else self.service.read_rc_corotational_report
+        )
+        raw = reader(
             job_id,
             tenant_id=tenant_id,
             authorization_token=token,
@@ -169,12 +181,13 @@ class DurableJobHttpApi:
             ),
         )
         digest = hashlib.sha256(raw).hexdigest()
-        report_id = "rcc_" + digest
+        report_id = ("rcd_" if detail else "rcc_") + digest
+        label = "detail" if detail else "nodal"
         return JobHttpResponse(
             200,
             {
                 **_headers("application/json"),
-                "content-disposition": f'attachment; filename="{report_id}-corotational-nodal-report.json"',
+                "content-disposition": f'attachment; filename="{report_id}-corotational-{label}-report.json"',
                 "x-structural-report-sha256": "sha256:" + digest,
                 "x-structural-report-id": report_id,
             },

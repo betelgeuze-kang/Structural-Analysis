@@ -4,12 +4,16 @@ import { parseRcCorotationalReport, type RcCorotationalReport, type RcCorotation
 import type { RcCorotationalReportSummary } from './rcCorotationalReportReview'
 import { corotationalRcScenarioSummary } from './rcScenarioComparison'
 import { rcResultGeometry } from './rcResultVisualization'
+import { parseRcCorotationalDetailReport, corotationalDetailMember, corotationalDetailSection, corotationalDetailFiber,
+  corotationalDetailSectionPage, corotationalDetailFiberPage, type RcCorotationalDetailReport, type RcCorotationalDetailSummary } from './rcCorotationalDetailReport'
 
 let report: RcCorotationalReport | null = null
 let bytes: Uint8Array | null = null
 let expected: RcCorotationalReportExpected | null = null
 let summary: RcCorotationalReportSummary | null = null
 let maximumBytes = 0
+let detail: RcCorotationalDetailReport | null = null, detailBytes: Uint8Array | null = null
+let detailSummary: RcCorotationalDetailSummary | null = null
 const safe = (error: unknown) => error instanceof Error && /^rc_corotational_report_[a-z_]+$/.test(error.message) ? error.message : 'rc_corotational_report_contract_invalid'
 function unavailable(): never { throw new Error('rc_corotational_report_unavailable') }
 self.onmessage = async ({ data }) => {
@@ -40,6 +44,33 @@ self.onmessage = async ({ data }) => {
       self.postMessage({ id, value: summary }); return
     }
     if (!report || !bytes || !expected || !summary) unavailable()
+    if (type === 'openDetails' || typeof type === 'string' && type.startsWith('detail')) {
+      try {
+        if (type === 'openDetails') {
+          if (!(data.bytes instanceof Uint8Array) || !data.bytes.byteLength || data.bytes.byteLength > maximumBytes) throw new Error('rc_corotational_report_detail_size_invalid')
+          if (await sha256Bytes(data.bytes) !== data.contentHash || data.reportId !== `rcd_${data.contentHash.slice(7)}`) throw new Error('rc_corotational_report_detail_raw_hash_mismatch')
+          const parsed = await parseRcCorotationalDetailReport(data.bytes, expected, report)
+          detail = parsed; detailBytes = data.bytes
+          detailSummary = { reportId: data.reportId, contentHash: data.contentHash, reportHash: parsed.report_hash,
+            stateCount: parsed.responses.length, members: parsed.responses[0].members.map(member => ({
+              member_id: member.member_id, node_i: member.node_i, node_j: member.node_j, sectionCount: member.sections.length,
+            })) }
+          self.postMessage({ id, value: detailSummary })
+        } else {
+          if (!detail || !detailBytes || !detailSummary) throw new Error('rc_corotational_report_detail_unavailable')
+          let value: unknown
+          if (type === 'detailMember') value = corotationalDetailMember(detail, data.state, data.member)
+          else if (type === 'detailSection') value = corotationalDetailSection(detail, data.state, data.member, data.point)
+          else if (type === 'detailFiber') value = corotationalDetailFiber(detail, data.state, data.member, data.point, data.fiber)
+          else if (type === 'detailSectionPage') value = corotationalDetailSectionPage(detail, data.member, data.point, data.start, data.count)
+          else if (type === 'detailFiberPage') value = corotationalDetailFiberPage(detail, data.member, data.point, data.fiber, data.start, data.count)
+          else if (type === 'detailDownload') value = new Blob([detailBytes], { type: 'application/json' })
+          else throw new Error('rc_corotational_report_detail_operation_invalid')
+          self.postMessage({ id, value })
+        }
+      } catch (error) { self.postMessage({ id, operationError: error instanceof Error && /^rc_corotational_report_detail_[a-z_]+$/.test(error.message) ? error.message : 'rc_corotational_report_detail_invalid' }) }
+      return
+    }
     if (type === 'geometry') {
       try { self.postMessage({ id, value: rcResultGeometry(expected.request) }) }
       catch { self.postMessage({ id, operationError: 'rc_corotational_report_geometry_invalid' }) }
@@ -68,6 +99,7 @@ self.onmessage = async ({ data }) => {
     else throw new Error('rc_corotational_report_operation_invalid')
   } catch (error) {
     report = null; bytes = null; expected = null; summary = null; maximumBytes = 0
+    detail = null; detailBytes = null; detailSummary = null
     self.postMessage({ id, error: safe(error) })
   }
 }

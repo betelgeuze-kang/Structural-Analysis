@@ -26,6 +26,7 @@ const specs = savedReportMode ? [
   'tests/frontend/rc-project-browser.spec.ts',
   'tests/frontend/rc-result-visualization.spec.ts',
   'tests/frontend/rc-result-plots.spec.ts',
+  'tests/frontend/rc-corotational-detail-report.spec.ts',
   'tests/frontend/rc-job-diagnostics.spec.ts',
   'tests/frontend/workbench-v2-import-health.spec.ts',
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',

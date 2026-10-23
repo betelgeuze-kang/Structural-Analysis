@@ -18,7 +18,8 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
     requestBytes = Buffer.from(snapshot.artifacts.request, 'base64')
     reportBytes = Buffer.from(snapshot.report.body_base64, 'base64')
   })
-  async function setup(page: Page, options: { mode?: 'submit' | 'failed' | 'poll'; body?: Buffer; headers?: Record<string, string>; reportStatus?: number; maximum?: number; standalone?: boolean } = {}) {
+  async function setup(page: Page, options: { mode?: 'submit' | 'failed' | 'poll'; body?: Buffer; headers?: Record<string, string>; reportStatus?: number; maximum?: number; standalone?: boolean;
+    detail?: { status: number; body?: Buffer; headers?: Record<string, string> } } = {}) {
     const calls: Array<{ method: string; path: string; headers: Record<string, string>; body: string | null }> = []
     let resumed = false, statusReads = 0
     const failed = { ...snapshot.job, status: 'failed', can_resume: true, result: null, evidence: null, error_code: 'worker_failure' }
@@ -39,6 +40,9 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
       if (request.headers()['x-structural-tenant'] !== snapshot.tenant_id) return route.fulfill({ status: 401 })
       if (pathname === '/v1/jobs' && request.method() === 'POST') return json(snapshot.job)
       if (pathname === `/v1/jobs/${snapshot.job.job_id}/resume`) { resumed = true; return json(snapshot.job) }
+      if (pathname.endsWith('/rc-corotational-detail-report')) return route.fulfill({
+        status: options.detail?.status ?? 404, headers: options.detail?.headers, body: options.detail?.body,
+      })
       if (pathname.endsWith('/rc-corotational-report')) return route.fulfill({
         status: options.reportStatus ?? 200, headers: options.headers ?? snapshot.report.headers, body: options.body ?? reportBytes,
       })
@@ -58,6 +62,96 @@ for (const profile of ['v6', 'v7'] as const) test.describe(`Corotational report 
   async function ready(page: Page) {
     await expect(page.locator('[data-rc-corotational-review]')).toHaveAttribute('data-rc-corotational-review', 'report_verified')
   }
+
+  for (const failure of ['missing', 'malformed'] as const) test(`optional ${failure} detail report retains the verified nodal view`, async ({ page }) => {
+    const invalid = Buffer.from('{}'), invalidHash = digest(invalid)
+    const calls = await setup(page, { detail: failure === 'missing' ? { status: 404 } : {
+      status: 200, body: invalid, headers: { 'content-type': 'application/json', 'x-structural-report-sha256': invalidHash, 'x-structural-report-id': `rcd_${invalidHash.slice(7)}` },
+    } })
+    await ready(page)
+    expect(calls.some(row => row.path.endsWith('/rc-corotational-detail-report'))).toBe(false)
+    await page.getByRole('button', { name: 'Open stored RC details', exact: true }).click()
+    await expect(page.locator('[data-rc-detail-message]')).toContainText('verified nodal report remains available')
+    await ready(page)
+    await expect(page.locator('[data-rc-detail-force-table]')).toHaveCount(0)
+    await expect(page.locator('[data-rc-corotational-table="displacements_m_rad"]')).toBeVisible()
+    await page.getByRole('button', { name: 'Previous accepted state', exact: true }).click()
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('2')
+    expect(calls.filter(row => row.method === 'POST')).toEqual([])
+    const request = calls.find(row => row.path.endsWith('/rc-corotational-detail-report'))!
+    expect(request.headers['x-structural-expected-request-hash']).toBe(snapshot.job.request.content_hash)
+    expect(request.headers['x-structural-expected-result-hash']).toBe(snapshot.job.result.content_hash)
+    expect(request.headers['x-structural-expected-evidence-hash']).toBe(snapshot.job.evidence.content_hash)
+  })
+
+  test('detail authorization failure revokes the whole retained review', async ({ page }) => {
+    const calls = await setup(page, { detail: { status: 401 } })
+    await ready(page)
+    await page.getByRole('button', { name: 'Open stored RC details', exact: true }).click()
+    await expect(page.locator('[data-rc-corotational-table]')).toHaveCount(0)
+    await expect(page.locator('[data-rc-detail-force-table]')).toHaveCount(0)
+    expect(calls.filter(row => row.method === 'POST')).toEqual([])
+  })
+
+  test('opens stored details and selects exact member, section and fiber histories without analysis', async ({ page }) => {
+    page.setDefaultTimeout(5000)
+    expect(snapshot.detail_report.status).toBe(200)
+    const detailBytes = Buffer.from(snapshot.detail_report.body_base64, 'base64')
+    const detail = JSON.parse(detailBytes.toString('utf8'))
+    const calls = await setup(page, { detail: { status: 200, body: detailBytes, headers: snapshot.detail_report.headers } })
+    await ready(page)
+    expect(calls.some(row => row.path.endsWith('/rc-corotational-detail-report'))).toBe(false)
+    await page.getByRole('button', { name: 'Open stored RC details', exact: true }).click()
+    const panel = page.locator('[data-rc-corotational-details="verified"]')
+    await expect(panel).toBeVisible()
+    await expect(panel.getByLabel('Detail member', { exact: true })).toHaveCount(1)
+    for (const state of detail.responses) {
+      await page.getByLabel('Accepted state to inspect', { exact: true }).selectOption(String(state.state_index))
+      for (const member of state.members) {
+        await panel.getByLabel('Detail member', { exact: true }).selectOption(member.member_id)
+        await expect(panel.locator('[data-rc-detail-member]')).toContainText(`Accepted state ${state.state_index} · ${member.member_id}:`)
+        for (const frame of ['global', 'local']) for (const [end, offset] of [['i', 0], ['j', 3]] as const) {
+          await expect(panel.locator(`[data-rc-detail-force="${frame}:${end}"] td`)).toHaveText([
+            `${end}: ${member[`node_${end}`]}`, ...member[`end_force_${frame}_kn_knm`].slice(offset, offset + 3).map(String),
+          ])
+        }
+        const section = member.sections.at(-1)
+        await panel.getByLabel('Detail integration point', { exact: true }).selectOption(String(section.integration_point_index))
+        await expect(panel.locator('[data-rc-detail-section-table] tbody td')).toHaveText([
+          section.axial_strain, section.curvature_z_per_m, section.axial_force_kn, section.moment_z_kn_m,
+        ].map(String))
+        const fiber = section.fibers.at(-1)
+        await panel.getByLabel('Detail fiber index', { exact: true }).fill(String(fiber.fiber_index))
+        await expect(panel.locator('[data-rc-detail-fiber-table] tbody td')).toHaveText([
+          fiber.fiber_index, fiber.material_kind, fiber.strain, fiber.stress_mpa,
+        ].map(String))
+      }
+    }
+    const member = detail.responses.at(-1).members.at(-1), section = member.sections.at(-1), fiber = section.fibers.at(-1)
+    const sectionPlot = panel.locator('[data-rc-history-plot="Section moment–curvature history"]')
+    const fiberPlot = panel.locator('[data-rc-history-plot="Fiber stress–strain history"]')
+    for (const [plot, values] of [[sectionPlot, detail.responses.map((row: any) => {
+      const selected = row.members[member.member_index].sections[section.integration_point_index]
+      return { state: row.state_index, x: selected.curvature_z_per_m, y: selected.moment_z_kn_m }
+    })], [fiberPlot, detail.responses.map((row: any) => {
+      const selected = row.members[member.member_index].sections[section.integration_point_index].fibers[fiber.fiber_index]
+      return { state: row.state_index, x: selected.strain, y: selected.stress_mpa }
+    })]] as const) {
+      await expect(plot.locator('[data-rc-history-point]')).toHaveCount(detail.responses.length)
+      expect(await plot.locator('[data-rc-history-point]').evaluateAll(elements => elements.map(element => ({
+        state: Number(element.getAttribute('data-rc-history-point')), x: Number(element.getAttribute('data-rc-x')), y: Number(element.getAttribute('data-rc-y')),
+      })))).toEqual(values)
+    }
+    await sectionPlot.getByRole('button', { name: 'Inspect stored state 0', exact: true }).press('Enter')
+    await expect(page.getByLabel('Accepted state to inspect', { exact: true })).toHaveValue('0')
+    await expect(panel.locator('[data-rc-detail-member]')).toContainText(`Accepted state 0 · ${member.member_id}:`)
+    const downloadEvent = page.waitForEvent('download')
+    await panel.getByRole('button', { name: 'Download corotational detail report', exact: true }).click()
+    const download = await downloadEvent
+    expect(digest(readFileSync((await download.path())!))).toBe(snapshot.detail_report.headers['x-structural-report-sha256'])
+    expect(calls.filter(row => row.method === 'POST')).toEqual([])
+    expect(calls.filter(row => row.path.endsWith('/rc-corotational-detail-report'))).toHaveLength(1)
+  })
 
   test('opens exact nodal values with distinct target/state/attempt budgets in a dedicated worker', async ({ page }, testInfo) => {
     const workers: string[] = []; page.on('worker', worker => workers.push(worker.url()))
