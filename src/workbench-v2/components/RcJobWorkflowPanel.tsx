@@ -104,6 +104,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
   const [projectBusy, setProjectBusy] = useState(false)
   const [projectMessage, setProjectMessage] = useState('')
   const [projectRestore, setProjectRestore] = useState<{ revision: number; scope: RcProjectScope; scenarios: RcProjectFile['scenarios']; baselineId: string | null; variantId: string | null }>()
+  const projectRestoreRevision = useRef(0)
   const [scenarioState, setScenarioState] = useState<RcScenarioProjectSnapshot>({ scenarios: [], baselineId: null, variantId: null, busy: false, scope: null, restoreRevision: null })
   const onProjectChange = useCallback((state: typeof scenarioState) => setScenarioState(state), [])
   const [intentVersion, setIntentVersion] = useState(0)
@@ -446,8 +447,8 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       setChangedRun(restoredChange); setChangedReferences(project.changedRun); setEditorDirty(false)
       setRequestedId(project.selectedJob?.jobId ?? ''); setOpenId(project.selectedJob?.jobId ?? '')
       setResumeRefreshRequired(null); resumeRefreshJob.current = null
-      setProjectRestore(previous => ({ revision: (previous?.revision ?? 0) + 1, scope: project.scope,
-        scenarios: project.scenarios, baselineId: project.baselineId, variantId: project.variantId }))
+      setProjectRestore({ revision: ++projectRestoreRevision.current, scope: project.scope,
+        scenarios: project.scenarios, baselineId: project.baselineId, variantId: project.variantId })
       setRefreshEpoch(value => value + 1)
       setProjectMessage('Project opened. No analysis was submitted. Refresh saved designs to verify their results, or explicitly run captured designs. Submission retries retain their original input and key.'
         + (relationUnavailable ? ' The original/changed job links were retained, but their inputs are unavailable for comparison.' : ''))
@@ -480,7 +481,12 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
     </section>
     <div className="wb2-actions"><label>Saved RC job ID <input aria-label="Saved RC job ID" value={openId} onChange={e => setOpenId(e.target.value)} maxLength={36} /></label>
       <button type="button" className="wb2-btn" disabled={!JOB_ID.test(openId) || busy || projectBusy} onClick={() => selectJob(openId)}>Open saved RC job</button>
-      <button type="button" className="wb2-btn" disabled={busy || projectBusy} onClick={() => { setChangedRun(null); setProjectRestore(undefined); setAuthEpoch(v => v + 1) }}>Refresh account and job</button></div>
+      <button type="button" className="wb2-btn" disabled={busy || projectBusy} onClick={() => {
+        if (busy || projectBusy) return
+        // Preserve the admitted restore identity across same-scope refreshes.
+        // The child finishes pending restores and skips already-applied ones.
+        setChangedRun(null); setAuthEpoch(v => v + 1)
+      }}>Refresh account and job</button></div>
     <details open={!!activeChangedRun && !activeChangedRun.childId}><summary>Submit a new RC input</summary>
       <RcModelEditor value={draftValue} disabled={busy || projectBusy} onDirtyChange={setEditorDirty} onChange={value => replaceDraft(JSON.stringify(value, null, 2))} />
       <label>Typed RC request JSON <textarea aria-label="Typed RC request JSON" disabled={busy || projectBusy} rows={8} value={draft} onChange={e => replaceDraft(e.target.value)} style={{ display: 'block', width: '100%' }} /></label>
@@ -505,7 +511,7 @@ function RcJobWorkflowSession({ collectionUrl, initialJobStatusUrl, initialJobId
       <button type="button" className="wb2-btn" data-rc-submit-intent={intentVersion} disabled={!current.transport || !draftValue || busy || projectBusy || editorDirty || (!!activeChangedRun && !activeChangedRun.childId && requestDiff?.changes.length === 0)} onClick={() => void submit()}>Submit RC analysis</button>
       <p className="wb2-muted">An uncertain submission retry retains the same input and submission key. Change the input to start a different submission.</p>
     </details>
-    <RcScenarioComparisonPanel key={`${collectionUrl}:${authEpoch}`} collectionUrl={collectionUrl} authorize={authorize} draft={editorDirty ? null : draftValue} draftText={draft}
+    <RcScenarioComparisonPanel key={collectionUrl} collectionUrl={collectionUrl} authorize={authorize} authorizationRevision={authEpoch} draft={editorDirty ? null : draftValue} draftText={draft}
       disabled={projectBusy} projectRestore={projectRestore} onProjectChange={onProjectChange}
       onOpenJob={selectJob} />
     {message ? <p role="alert" data-rc-workflow-error>{message}</p> : null}

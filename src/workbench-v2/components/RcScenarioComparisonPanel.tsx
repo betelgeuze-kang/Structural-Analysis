@@ -22,6 +22,7 @@ export interface RcScenarioProjectSnapshot {
 export interface RcScenarioComparisonPanelProps {
   collectionUrl: string
   authorize?: JobAuthorizationProvider
+  authorizationRevision?: number
   draft: Record<string, unknown> | null
   draftText?: string
   disabled?: boolean
@@ -58,7 +59,7 @@ function Curve({ rows }: { rows: Scenario[] }): ReactElement | null {
 /** Separate from benchmark readiness comparison: these are explicitly submitted
  * designs and bounded quantities from their original verified review session.
  */
-export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, draftText, disabled = false, onOpenJob, projectRestore, onProjectChange }: RcScenarioComparisonPanelProps): ReactElement {
+export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizationRevision = 0, draft, draftText, disabled = false, onOpenJob, projectRestore, onProjectChange }: RcScenarioComparisonPanelProps): ReactElement {
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const current = useRef<Scenario[]>([])
   const [name, setName] = useState('Design 1')
@@ -70,6 +71,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
   const previousScope = useRef<RcProjectScope | null>(null)
   const selections = useRef({ baselineId, variantId }); selections.current = { baselineId, variantId }
   const projectCallback = useRef(onProjectChange), appliedRestore = useRef<number | null>(null)
+  const pendingCustody = useRef<{ rows: Scenario[]; selections: { baselineId: string; variantId: string }; scope: RcProjectScope | null; revision: number | null } | null>(null)
   const preserveRestoredSelection = useRef(false)
   projectCallback.current = onProjectChange
   const transport = useRef<RcJobTransport | null>(null)
@@ -79,7 +81,10 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
   const patch = (id: string, partial: Partial<Scenario>) => update(current.current.map(row => row.intent.id === id ? { ...row, ...partial } : row))
 
   useEffect(() => {
-    const retained = { rows: current.current, selections: selections.current, scope: previousScope.current, revision: appliedRestore.current }
+    // Repeated refreshes can overlap while host authorization is pending. Keep
+    // the original custody snapshot, not the temporarily hidden empty UI.
+    const retained = pendingCustody.current ?? { rows: current.current, selections: selections.current, scope: previousScope.current, revision: appliedRestore.current }
+    pendingCustody.current = retained
     const epoch = ++generation.current, controller = new AbortController()
     scope.current = controller; transport.current = null; running.current = false
     preserveRestoredSelection.current = false
@@ -90,12 +95,14 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
     function invalidate(): void {
       if (!active()) return
       controller.abort(); transport.current = null; generation.current++; running.current = false
+      pendingCustody.current = null
       update([]); setBaselineId(''); setVariantId(''); setBusy(false); setSessionScope(null)
       setMessage('Authorization changed or became unavailable. Reopen this workspace to start a new session.')
     }
     void createJobWorkflowTransport(collectionUrl, controller.signal, authorize).then(value => {
       if (active()) {
         const nextScope = { collectionUrl: value.collectionUrl, tenantId: value.tenantId ?? null }
+        pendingCustody.current = null
         transport.current = value; previousScope.current = nextScope; setSessionScope(nextScope)
         if (retained.scope?.collectionUrl === nextScope.collectionUrl && retained.scope.tenantId === nextScope.tenantId) {
           // A replacement sign-in callback is not a new authoring project.
@@ -116,7 +123,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
       void transport.current.verifyAuthorizationScope().catch(invalidate).finally(() => { verifying = false })
     }, 2000)
     return () => { controller.abort(); clearInterval(timer); if (epoch === generation.current) generation.current++; transport.current = null }
-  }, [collectionUrl, authorize])
+  }, [collectionUrl, authorize, authorizationRevision])
 
   useEffect(() => {
     projectCallback.current?.({
@@ -161,7 +168,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
   }, [projectRestore, sessionScope])
 
   function capture(): void {
-    if (!draft || busy || disabled || current.current.length >= RC_SCENARIO_LIMIT) return
+    if (!draft || busy || disabled || !transport.current || scope.current?.signal.aborted || current.current.length >= RC_SCENARIO_LIMIT) return
     try {
       const intent = captureRcScenario(draft, name, undefined, draftText)
       update([...current.current, { intent, status: 'captured', attempted: false, jobRef: null }]); setName(`Design ${current.current.length + 1}`)
@@ -299,7 +306,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, draft, dra
     <h3>Design scenarios</h3>
     <p>Capture the current validated RC draft after each edit. Up to four independent durable jobs run sequentially after an explicit action. Failed or unavailable results remain visible.</p>
     <label>Scenario name <input value={name} maxLength={80} disabled={busy || disabled} onChange={event => setName(event.target.value)} /></label>{' '}
-    <button type="button" disabled={!draft || busy || disabled || scenarios.length >= RC_SCENARIO_LIMIT} onClick={capture}>Capture current design</button>{' '}
+    <button type="button" disabled={!draft || busy || disabled || !transport.current || scenarios.length >= RC_SCENARIO_LIMIT} onClick={capture}>Capture current design</button>{' '}
     <button type="button" disabled={busy || disabled || !transport.current || !pending.length || unresolved} onClick={() => void execute(pending)}>Run captured designs</button>{' '}
     <button type="button" disabled={busy || disabled || !scenarios.length || !transport.current} onClick={() => void download()}>Export scenario JSON</button>
     <p role="status">{message}</p>

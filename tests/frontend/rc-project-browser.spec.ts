@@ -44,6 +44,7 @@ function project(serialized = nativeDraft()) {
 }
 async function workspace(page: Page, options: {
   mode?: ReadMode; serialized?: string; postGate?: Promise<void>
+  firstPostResult?: WorkbenchJobView; onPostSettled?: () => void
   records?: Record<string, { serialized: string; mode?: ReadMode; attempt?: number }>
 } = {}) {
   const posts: ObservedPost[] = [], gets: string[] = []
@@ -52,15 +53,30 @@ async function workspace(page: Page, options: {
     ;(window as any).__rcProjectTenant = 'project-tenant'
     window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
       rcJobCollectionUrl: '/v1/jobs',
-      jobAuthorization: () => ({ tenantId: (window as any).__rcProjectTenant, bearerToken: privateToken }),
+      jobAuthorization: async () => {
+        const tenantId = (window as any).__rcProjectTenant
+        const marker = (window as any).__rcProjectRestoreGateMarker
+        if (marker && document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Typed RC request JSON"]')?.value.includes(marker)) {
+          ;(window as any).__rcProjectRestoreWaiting = true
+          await (window as any).__rcProjectRestoreAuthorizationGate
+          if ((window as any).__rcProjectRestoreAuthorizationFailure) throw new Error('test project authorization unavailable')
+        }
+        await (window as any).__rcProjectAuthorizationGate
+        return { tenantId, bearerToken: privateToken }
+      },
     }
   }, { privateToken })
   await page.route('**/v1/jobs**', async route => {
     const request = route.request(), path = new URL(request.url()).pathname
     if (request.method() === 'POST') {
       posts.push({ body: request.postData()!, key: request.headers()['idempotency-key'] })
+      const ordinal = posts.length
       if (options.postGate) await options.postGate
-      return route.fulfill({ status: 503, contentType: 'application/json', body: '{"private":"response-body-never-save"}' })
+      try {
+        return await route.fulfill(options.firstPostResult && ordinal === 1
+          ? { status: 200, contentType: 'application/json', body: JSON.stringify(options.firstPostResult) }
+          : { status: 503, contentType: 'application/json', body: '{"private":"response-body-never-save"}' })
+      } finally { options.onPostSettled?.() }
     }
     gets.push(path)
     const matched = /^\/v1\/jobs\/(job_[0-9a-f]{32})(\/request)?$/.exec(path)
@@ -117,6 +133,220 @@ function expectPrivateDataAbsent(text: string): void {
     expect(keys).not.toContain(forbidden)
   }
 }
+
+function custodyProject() {
+  const file = project(), serialized = file.draft
+  file.scenarios = [
+    { intent: { id: 'captured-design', name: 'Captured design', serialized, idempotencyKey: 'rc-scenario-captured-design' }, attempted: false, job: null },
+    { intent: { id: 'uncertain-design', name: 'Uncertain design', serialized, idempotencyKey: 'rc-scenario-uncertain-design' }, attempted: true, job: null },
+    { intent: { id: 'known-design', name: 'Known design', serialized, idempotencyKey: 'rc-scenario-known-design' }, attempted: true, job: { jobId, requestHash: hash(serialized) } },
+  ]
+  file.baselineId = 'known-design'; file.variantId = 'uncertain-design'
+  return file
+}
+
+test('RC project same-account refresh retains captured, uncertain and known scenario custody', async ({ page }) => {
+  const { posts, gets } = await workspace(page)
+  const file = custodyProject()
+  await openProject(page, file)
+  const panel = page.locator('[data-rc-scenario-comparison]')
+  await expect(panel.locator('[data-scenario-id]')).toHaveCount(3)
+  await page.getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+  await expect(panel).toContainText('Authorization refreshed. Designs are retained')
+  const saved = await saveProject(page)
+  expect(saved.value.scenarios).toEqual(file.scenarios)
+  expect(saved.value.baselineId).toBe(file.baselineId)
+  expect(saved.value.variantId).toBe(file.variantId)
+  expect(posts).toEqual([])
+  expect(gets).toEqual([])
+  expectPrivateDataAbsent(saved.text)
+  await panel.getByRole('button', { name: 'Retry same submission for Uncertain design', exact: true }).click()
+  await expect(panel).toContainText('Submission outcome is unconfirmed')
+  expect(posts).toEqual([{ body: file.draft, key: file.scenarios[1].intent.idempotencyKey }])
+  await panel.getByRole('button', { name: 'Refresh Known design', exact: true }).click()
+  await expect(panel.locator('[data-scenario-id="known-design"]')).toContainText('No succeeded numerical result')
+  expect(gets).toContain(`/v1/jobs/${jobId}`)
+  expect(posts).toHaveLength(1)
+  expect((await saveProject(page)).value.scenarios).toEqual(file.scenarios)
+})
+
+test('RC project cross-account refresh clears scenario custody and stored selections', async ({ page }) => {
+  const { posts } = await workspace(page)
+  const file = custodyProject()
+  await openProject(page, file)
+  const panel = page.locator('[data-rc-scenario-comparison]')
+  await expect(panel.locator('[data-scenario-id]')).toHaveCount(3)
+  await page.evaluate(() => { (window as any).__rcProjectTenant = 'other-tenant' })
+  await page.getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+  await expect(panel.locator('[data-scenario-id]')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeEnabled()
+  const saved = await saveProject(page)
+  expect(saved.value.scope.tenantId).toBe('other-tenant')
+  expect(saved.value.scenarios).toEqual([])
+  expect(saved.value.baselineId).toBeNull()
+  expect(saved.value.variantId).toBeNull()
+  expect(posts).toEqual([])
+})
+
+test('RC project opening another file after same-account refresh replaces the prior scenario custody', async ({ page }) => {
+  const { posts, gets } = await workspace(page)
+  const first = custodyProject(), second = custodyProject()
+  second.draft = second.draft.replace('"width_m": 0.4', '"width_m": 0.8')
+  second.scenarios = second.scenarios.map((row, index) => ({
+    ...row, intent: { ...row.intent, id: `second-${index}`, name: `Second design ${index}`, serialized: second.draft, idempotencyKey: `rc-scenario-second-${index}` },
+    job: row.job ? { jobId: `job_${'4'.repeat(32)}`, requestHash: hash(second.draft) } : null,
+  }))
+  second.baselineId = 'second-2'; second.variantId = 'second-1'
+  await openProject(page, first)
+  const panel = page.locator('[data-rc-scenario-comparison]')
+  await expect(panel.locator('[data-scenario-id="known-design"]')).toBeVisible()
+  await page.getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+  await expect(panel).toContainText('Authorization refreshed. Designs are retained')
+  await openProject(page, second)
+  await expect(panel.locator('[data-scenario-id="second-2"]')).toBeVisible()
+  await expect(panel.locator('[data-scenario-id="known-design"]')).toHaveCount(0)
+  const saved = (await saveProject(page)).value
+  expect(saved.draft).toBe(second.draft)
+  expect(saved.scenarios).toEqual(second.scenarios)
+  expect(saved.baselineId).toBe(second.baselineId)
+  expect(saved.variantId).toBe(second.variantId)
+  expect(posts).toEqual([])
+  expect(gets).toEqual([])
+})
+
+for (const authorizationFails of [false, true]) {
+  test(`RC project account refresh ${authorizationFails ? 'recovers a failed' : 'continues a pending'} restore without mixing scenario custody`, async ({ page }) => {
+    const { posts, gets } = await workspace(page)
+    const first = custodyProject(), second = custodyProject()
+    second.draft = second.draft.replace(/"case_id": "[^"]+"/, '"case_id": "refresh-race-B"')
+    second.scenarios = second.scenarios.map((row, index) => ({
+      ...row, intent: { ...row.intent, id: `pending-${index}`, name: `Pending design ${index}`, serialized: second.draft, idempotencyKey: `rc-scenario-pending-${index}` },
+      job: row.job ? { jobId: `job_${'5'.repeat(32)}`, requestHash: hash(second.draft) } : null,
+    }))
+    second.baselineId = 'pending-2'; second.variantId = 'pending-1'
+    await openProject(page, first)
+    await revealDraft(page)
+    const panel = page.locator('[data-rc-scenario-comparison]')
+    const refresh = page.getByRole('button', { name: 'Refresh account and job', exact: true })
+    await expect(panel.locator('[data-scenario-id="known-design"]')).toBeVisible()
+    await page.evaluate(authorizationFails => {
+      ;(window as any).__rcProjectRestoreGateMarker = '"case_id": "refresh-race-B"'
+      ;(window as any).__rcProjectRestoreAuthorizationFailure = authorizationFails
+      ;(window as any).__rcProjectRestoreAuthorizationGate = new Promise<void>(resolve => { (window as any).__rcReleaseProjectRestoreAuthorization = resolve })
+    }, authorizationFails)
+    try {
+      await openProject(page, second)
+      await expect(page.getByLabel('Typed RC request JSON', { exact: true })).toHaveValue(second.draft)
+      await expect.poll(() => page.evaluate(() => (window as any).__rcProjectRestoreWaiting === true)).toBe(true)
+      await expect(panel.locator('[data-scenario-id="known-design"]')).toBeVisible()
+      await expect(refresh).toBeEnabled()
+      await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeDisabled()
+      if (!authorizationFails) {
+        await refresh.click()
+        await expect(panel.locator('[data-scenario-id]')).toHaveCount(0)
+        await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeDisabled()
+      }
+      expect(posts).toEqual([])
+    } finally {
+      await page.evaluate(() => { (window as any).__rcReleaseProjectRestoreAuthorization() })
+    }
+    if (authorizationFails) {
+      await expect(panel).toContainText('Authorization changed or became unavailable')
+      await expect(panel.locator('[data-scenario-id]')).toHaveCount(0)
+      await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeDisabled()
+      await page.evaluate(() => { (window as any).__rcProjectRestoreAuthorizationFailure = false })
+      await expect(refresh).toBeEnabled()
+      await refresh.click()
+    }
+    await expect(panel.locator('[data-scenario-id="pending-2"]')).toBeVisible()
+    await expect(panel.locator('[data-scenario-id="known-design"]')).toHaveCount(0)
+    await expect(refresh).toBeEnabled()
+    const saved = (await saveProject(page)).value
+    expect(saved.draft).toBe(second.draft)
+    expect(saved.scenarios).toEqual(second.scenarios)
+    expect(saved.baselineId).toBe(second.baselineId)
+    expect(saved.variantId).toBe(second.variantId)
+    expect(posts).toEqual([])
+    expect(gets).toEqual([])
+  })
+}
+
+for (const changedTenant of [false, true]) {
+  test(`RC project ${changedTenant ? 'cross' : 'same'}-account refresh aborts a queue awaiting authorization without losing scope custody`, async ({ page }) => {
+    const { posts } = await workspace(page)
+    await revealDraft(page)
+    await page.getByLabel('Typed RC request JSON', { exact: true }).fill(nativeDraft())
+    const panel = page.locator('[data-rc-scenario-comparison]')
+    await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    const before = (await saveProject(page)).value
+    await page.evaluate(() => {
+      ;(window as any).__rcProjectAuthorizationGate = new Promise<void>(resolve => { (window as any).__rcReleaseProjectAuthorization = resolve })
+    })
+    try {
+      await panel.getByRole('button', { name: 'Run captured designs', exact: true }).click()
+      await expect(panel.locator('[data-scenario-id]').first()).toContainText('submitting')
+      if (changedTenant) await page.evaluate(() => { (window as any).__rcProjectTenant = 'other-tenant' })
+      const refresh = page.getByRole('button', { name: 'Refresh account and job', exact: true })
+      await refresh.click()
+      await expect(panel.locator('[data-scenario-id]')).toHaveCount(0)
+      await expect(panel.getByRole('button', { name: 'Capture current design', exact: true })).toBeDisabled()
+      await refresh.click()
+      expect(posts).toEqual([])
+    } finally {
+      await page.evaluate(() => { (window as any).__rcReleaseProjectAuthorization() })
+    }
+    await expect(page.getByRole('button', { name: 'Save RC project', exact: true })).toBeEnabled()
+    const saved = (await saveProject(page)).value
+    expect(posts).toEqual([])
+    if (changedTenant) {
+      expect(saved.scope.tenantId).toBe('other-tenant')
+      expect(saved.scenarios).toEqual([])
+      expect(saved.baselineId).toBeNull()
+      expect(saved.variantId).toBeNull()
+    } else {
+      expect(saved.scenarios).toEqual(before.scenarios.map((row: any, index: number) => ({ ...row, attempted: index === 0 })))
+      await expect(panel.locator('[data-scenario-id]').first()).toContainText('unconfirmed')
+      await expect(panel.getByRole('button', { name: 'Run captured designs', exact: true })).toBeDisabled()
+      await panel.getByRole('button', { name: 'Retry same submission for Design 1', exact: true }).click()
+      await expect(panel).toContainText('Submission outcome is unconfirmed')
+      expect(posts).toEqual([{ body: before.scenarios[0].intent.serialized, key: before.scenarios[0].intent.idempotencyKey }])
+      expect((await saveProject(page)).value.scenarios).toEqual(saved.scenarios)
+    }
+  })
+}
+
+test('RC project same-account refresh aborts an in-flight POST and ignores its late known-job response', async ({ page }) => {
+  let release!: () => void, settled = 0
+  const postGate = new Promise<void>(resolve => { release = resolve })
+  const serialized = nativeDraft()
+  const { posts } = await workspace(page, { postGate, firstPostResult: storedJob(serialized), onPostSettled: () => { settled++ } })
+  try {
+    await revealDraft(page)
+    await page.getByLabel('Typed RC request JSON', { exact: true }).fill(serialized)
+    const panel = page.locator('[data-rc-scenario-comparison]')
+    await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    await panel.getByRole('button', { name: 'Capture current design', exact: true }).click()
+    const before = (await saveProject(page)).value
+    await panel.getByRole('button', { name: 'Run captured designs', exact: true }).click()
+    await expect.poll(() => posts.length).toBe(1)
+    await page.getByRole('button', { name: 'Refresh account and job', exact: true }).click()
+    await expect(panel).toContainText('Authorization refreshed. Designs are retained')
+    await expect(panel.locator('[data-scenario-id]').first()).toContainText('unconfirmed')
+    const retained = before.scenarios.map((row: any, index: number) => ({ ...row, attempted: index === 0 }))
+    expect((await saveProject(page)).value.scenarios).toEqual(retained)
+    release()
+    await expect.poll(() => settled).toBe(1)
+    expect((await saveProject(page)).value.scenarios).toEqual(retained)
+    expect(posts).toEqual([{ body: serialized, key: before.scenarios[0].intent.idempotencyKey }])
+    await expect(panel.getByRole('button', { name: 'Run captured designs', exact: true })).toBeDisabled()
+    await panel.getByRole('button', { name: 'Retry same submission for Design 1', exact: true }).click()
+    await expect(panel).toContainText('Submission outcome is unconfirmed')
+    expect(posts).toHaveLength(2)
+    expect(posts[1]).toEqual(posts[0])
+    expect((await saveProject(page)).value.scenarios).toEqual(retained)
+  } finally { release() }
+})
 
 test('RC project restores exact draft and captured/uncertain scenarios without running them', async ({ page }) => {
   const { posts } = await workspace(page)
