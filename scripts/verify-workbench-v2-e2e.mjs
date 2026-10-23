@@ -24,6 +24,7 @@ const specs = savedReportMode ? [
   'tests/frontend/rc-scenario-comparison.spec.ts',
   'tests/frontend/rc-project-file.spec.ts',
   'tests/frontend/rc-project-browser.spec.ts',
+  'tests/frontend/rc-project-navigation.spec.ts',
   'tests/frontend/rc-result-visualization.spec.ts',
   'tests/frontend/rc-result-plots.spec.ts',
   'tests/frontend/rc-corotational-detail-report.spec.ts',

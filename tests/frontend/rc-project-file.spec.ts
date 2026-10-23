@@ -5,6 +5,7 @@ import {
   parseRcProjectFile, RC_PROJECT_MAX_BYTES, rcProjectJobRef, serializeRcProjectFile,
   type RcProjectFile, type RcProjectJobRef,
 } from '../../src/workbench-v2/model/rcProjectFile'
+import { emptyRcProject, sameRcProject, snapshotRcProject } from '../../src/workbench-v2/model/rcProjectSnapshot'
 import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 
 const scope = { collectionUrl: 'https://example.test/v1/jobs', tenantId: 'tenant-A' }
@@ -168,4 +169,76 @@ test('job projection retains only validated immutable identity and request bindi
   expect(rcProjectJobRef(original)).toEqual(ref())
   original.job_id = '../invalid'
   expect(() => rcProjectJobRef(original)).toThrow('job_reference_invalid')
+})
+
+
+test('project snapshot preserves immutable raw strings and isolates every mutable custody wrapper', () => {
+  const original = project(), snapshot = snapshotRcProject(original)
+  expect(snapshot).toEqual(original)
+  expect(snapshot.draft).toBe(original.draft)
+  expect(snapshot.submission!.serialized).toBe(original.submission!.serialized)
+  expect(snapshot.selectedJob).not.toBe(original.selectedJob)
+  expect(snapshot.submission!.job).not.toBe(original.submission!.job)
+  expect(snapshot.changedRun!.original).not.toBe(original.changedRun!.original)
+  expect(snapshot.changedRun!.child).not.toBe(original.changedRun!.child)
+  expect(snapshot.scenarios[0].intent).not.toBe(original.scenarios[0].intent)
+  expect(snapshot.scenarios[0].job).not.toBe(original.scenarios[0].job)
+  original.selectedJob!.requestHash = ref('4').requestHash
+  original.submission!.job!.jobId = ref('4').jobId
+  original.changedRun!.original.requestHash = ref('4').requestHash
+  original.changedRun!.child!.jobId = ref('4').jobId
+  original.scenarios[0].job!.jobId = ref('4').jobId
+  original.scenarios[0].intent = { ...original.scenarios[0].intent, name: 'Later design' }
+  expect(snapshot).toEqual(project())
+  expect(sameRcProject(original, snapshot)).toBe(false)
+})
+
+test('project snapshot comparison includes every saved custody field and exact native numeric text', () => {
+  const baseline = snapshotRcProject(project())
+  const changes: Array<(value: RcProjectFile) => void> = [
+    value => { value.scope.tenantId = 'other' }, value => { value.scope.collectionUrl += '/other' },
+    value => { value.draft += '\n' }, value => { value.submission!.serialized = value.submission!.serialized.replace('1.0', '1') },
+    value => { value.submission!.idempotencyKey += 'x' }, value => { value.submission!.job = null },
+    value => { value.selectedJob = null }, value => { value.changedRun!.child = null },
+    value => { value.changedRun!.original = ref('4') }, value => { value.scenarios.reverse() },
+    value => { value.scenarios[0].attempted = false }, value => { value.scenarios[0].job = null },
+    value => { value.scenarios[0].intent = { ...value.scenarios[0].intent, serialized: value.scenarios[0].intent.serialized.replace('9007199254740993', '9007199254740992') } },
+    value => { value.scenarios[0].intent = { ...value.scenarios[0].intent, name: 'Renamed' } },
+    value => { value.scenarios[0].intent = { ...value.scenarios[0].intent, id: 'new-id' } },
+    value => { value.scenarios[0].intent = { ...value.scenarios[0].intent, idempotencyKey: 'new-key' } },
+    value => { value.baselineId = null }, value => { value.variantId = 'baseline' },
+  ]
+  expect(sameRcProject(project(), baseline)).toBe(true)
+  for (const change of changes) { const current = project(); change(current); expect(sameRcProject(current, baseline)).toBe(false) }
+})
+
+test('project dirtiness ignores result polling metadata and handles large incomplete drafts without serialization', () => {
+  const original = project(), baseline = snapshotRcProject(original)
+  const polled = snapshotRcProject(original) as RcProjectFile & { status: string; revision: number; result: unknown }
+  polled.status = 'succeeded'; polled.revision = 42; polled.result = { arbitrary: true }
+  expect(sameRcProject(polled, baseline)).toBe(true)
+  const incomplete = project(); incomplete.submission = null; incomplete.draft = '{' + ' '.repeat(1024 * 1024)
+  const nativeStringify = JSON.stringify
+  let equal = false, changed = false
+  try {
+    JSON.stringify = () => { throw new Error('Snapshot equality must not serialize') }
+    const saved = snapshotRcProject(incomplete)
+    equal = sameRcProject(incomplete, saved)
+    incomplete.draft += '0'
+    changed = !sameRcProject(incomplete, saved)
+  } finally { JSON.stringify = nativeStringify }
+  expect(equal).toBe(true); expect(changed).toBe(true)
+})
+
+test('an empty initial project is clean independently of account discovery but authored values are not empty', () => {
+  const value = project()
+  value.draft = ''; value.submission = null; value.selectedJob = null; value.changedRun = null
+  value.scenarios = []; value.baselineId = null; value.variantId = null
+  expect(emptyRcProject(value)).toBe(true)
+  value.scope.tenantId = null
+  expect(emptyRcProject(value)).toBe(true)
+  value.draft = '{'
+  expect(emptyRcProject(value)).toBe(false)
+  value.draft = ''; value.selectedJob = ref()
+  expect(emptyRcProject(value)).toBe(false)
 })

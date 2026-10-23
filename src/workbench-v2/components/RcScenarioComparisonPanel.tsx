@@ -30,6 +30,7 @@ export interface RcScenarioComparisonPanelProps {
   onOpenJob?(jobId: string, reference?: RcProjectJobRef): void
   projectRestore?: { revision: number; scope: RcProjectScope; scenarios: RcProjectScenario[]; baselineId: string | null; variantId: string | null }
   onProjectChange?(state: RcScenarioProjectSnapshot): void
+  onAuthorizationFailure?(nextScope?: RcProjectScope): void
 }
 const COLORS = ['#3a83dc', '#df8f36', '#43a879', '#ba6dbc']
 function number(value: number | null): string { return value === null ? 'Unknown' : value.toExponential(6) }
@@ -105,7 +106,7 @@ function CapturedInputComparison({ rows }: { rows: Scenario[] }): ReactElement {
 /** Separate from benchmark readiness comparison: these are explicitly submitted
  * designs and bounded quantities from their original verified review session.
  */
-export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizationRevision = 0, draft, draftText, disabled = false, onOpenJob, projectRestore, onProjectChange }: RcScenarioComparisonPanelProps): ReactElement {
+export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizationRevision = 0, draft, draftText, disabled = false, onOpenJob, projectRestore, onProjectChange, onAuthorizationFailure }: RcScenarioComparisonPanelProps): ReactElement {
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const current = useRef<Scenario[]>([])
   const [name, setName] = useState('Design 1')
@@ -120,6 +121,12 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
   const pendingCustody = useRef<{ rows: Scenario[]; selections: { baselineId: string; variantId: string }; scope: RcProjectScope | null; revision: number | null } | null>(null)
   const preserveRestoredSelection = useRef(false)
   projectCallback.current = onProjectChange
+  const authorizationFailureCallback = useRef(onAuthorizationFailure)
+  authorizationFailureCallback.current = onAuthorizationFailure
+  const authorizationFailed = (nextScope?: RcProjectScope) => {
+    pendingCustody.current = null; previousScope.current = null
+    authorizationFailureCallback.current?.(nextScope)
+  }
   const transport = useRef<RcJobTransport | null>(null)
   const scope = useRef<AbortController | null>(null)
   const generation = useRef(0), running = useRef(false)
@@ -141,13 +148,18 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
     function invalidate(): void {
       if (!active()) return
       controller.abort(); transport.current = null; generation.current++; running.current = false
-      pendingCustody.current = null
+      authorizationFailed()
       update([]); setBaselineId(''); setVariantId(''); setBusy(false); setSessionScope(null)
       setMessage('Authorization changed or became unavailable. Reopen this workspace to start a new session.')
     }
     void createJobWorkflowTransport(collectionUrl, controller.signal, authorize).then(value => {
       if (active()) {
         const nextScope = { collectionUrl: value.collectionUrl, tenantId: value.tenantId ?? null }
+        if (retained.scope && (retained.scope.collectionUrl !== nextScope.collectionUrl || retained.scope.tenantId !== nextScope.tenantId) && authorizationFailureCallback.current) {
+          controller.abort(); transport.current = null
+          authorizationFailed(nextScope)
+          return
+        }
         pendingCustody.current = null
         transport.current = value; previousScope.current = nextScope; setSessionScope(nextScope)
         if (retained.scope?.collectionUrl === nextScope.collectionUrl && retained.scope.tenantId === nextScope.tenantId) {
@@ -160,7 +172,10 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
           setMessage('Authorization refreshed. Designs are retained; refresh saved jobs to verify their results again.')
         } else setMessage('Capture up to four designs, then explicitly run them in sequence.')
       }
-    }).catch(() => { if (active()) setMessage('Scenario service is unavailable for this session.') })
+    }).catch(error => { if (active()) {
+      if (rcScenarioAuthorizationFailure(error)) { controller.abort(); authorizationFailed() }
+      setMessage('Scenario service is unavailable for this session.')
+    } })
     // Revoke visible retained summaries as well as future network access when
     // the host changes tenants while the queue is idle.
     const timer = setInterval(() => {
@@ -205,6 +220,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
     }).catch(error => {
       if (!active()) return
       if (rcScenarioAuthorizationFailure(error)) {
+        authorizationFailed()
         controller.abort(); generation.current++; transport.current = null; running.current = false
         update([]); setBaselineId(''); setVariantId(''); setBusy(false); setSessionScope(null)
       }
@@ -303,6 +319,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
           if (!active()) return
           const safe = rcScenarioSafeMessage(error)
           if (rcScenarioAuthorizationFailure(error)) {
+            authorizationFailed()
             scope.current?.abort(); generation.current++; transport.current = null; running.current = false; setBusy(false)
             update([]); setBaselineId(''); setVariantId(''); setSessionScope(null); setMessage(safe); break
           }
@@ -335,7 +352,7 @@ export function RcScenarioComparisonPanel({ collectionUrl, authorize, authorizat
       setTimeout(() => URL.revokeObjectURL(url), 0)
     } catch (error) {
       if (epoch === generation.current) {
-        if (rcScenarioAuthorizationFailure(error)) { scope.current?.abort(); generation.current++; transport.current = null; update([]); setBaselineId(''); setVariantId(''); setSessionScope(null) }
+        if (rcScenarioAuthorizationFailure(error)) { authorizationFailed(); scope.current?.abort(); generation.current++; transport.current = null; update([]); setBaselineId(''); setVariantId(''); setSessionScope(null) }
         setMessage(rcScenarioSafeMessage(error))
       }
     }

@@ -112,7 +112,11 @@ async function freshPage(browser: Browser, credentials: Credentials, contexts: B
   return { page, context, workerUrls }
 }
 
-async function navigateSavedLink(page: Page, url: string): Promise<void> {
+async function navigateSavedLink(page: Page, url: string, discardLocalChanges = false): Promise<void> {
+  if (discardLocalChanges) {
+    await expect(page.locator('[data-rc-project-dirty]')).toHaveAttribute('data-rc-project-dirty', 'true')
+    page.once('dialog', async dialog => { expect(dialog.type()).toBe('confirm'); await dialog.accept() })
+  }
   await page.evaluate(url => {
     history.pushState({}, '', url)
     window.dispatchEvent(new PopStateEvent('popstate'))
@@ -420,7 +424,7 @@ test(`actual Workbench ${profile}${isolated ? ' isolated' : ''}${managed ? ' man
     // replace that intent, then actual Back/Forward must restore URL identity.
     const missingJobUrl = new URL(savedJobUrl)
     missingJobUrl.searchParams.set('rcJob', `job_${'f'.repeat(32)}`)
-    await navigateSavedLink(view.page, missingJobUrl.href)
+    await navigateSavedLink(view.page, missingJobUrl.href, true)
     await expect(view.page.locator('[data-rc-workflow-error]')).toBeVisible()
     await expect(view.page.locator('[data-job-service="ready"]')).toHaveCount(0)
     await view.page.goBack()
@@ -581,7 +585,7 @@ test(`actual Workbench ${profile}${isolated ? ' isolated' : ''}${managed ? ' man
     const firstReportUrl = new URL(savedReportUrl)
     firstReportUrl.searchParams.set('rcReport', reports[0].report_id)
     await view.page.evaluate(() => { delete (window as any).__rcAuthorizationGate })
-    await navigateSavedLink(view.page, firstReportUrl.href)
+    await navigateSavedLink(view.page, firstReportUrl.href, true)
     await expect(view.page.locator('[data-rc-saved-report-id]')).toHaveText(reports[0].report_id)
     await view.page.evaluate(() => (window as any).__rcAuthorizationRelease())
     await expect.poll(() => view.page.evaluate(() => (window as any).__rcAuthorizationSettled)).toBe(true)

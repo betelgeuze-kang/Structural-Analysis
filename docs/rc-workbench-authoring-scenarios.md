@@ -32,12 +32,31 @@ first. Saving and opening are disabled while a submission or design queue is
 active. Save the file before closing the browser; no automatic browser storage
 is used.
 
+The workspace indicates changes since its last project export or open. This
+includes unapplied structured fields and portal dimensions, captured inputs,
+submission keys and job links. Ordinary result polling does not mark an unchanged
+project as edited. A successful export means the browser download was initiated;
+check that the file reached your downloads folder. Failed exports retain the
+change indicator, and edits made while exporting still need another export.
+
+When changes remain, reload or close uses the browser's leave-page confirmation.
+Navigation within the app asks before replacing the current view. Choosing to
+stay preserves the local draft. Downloads and links opened in another tab do not
+discard it. This is a loss warning, not automatic recovery after a browser crash.
+
 **Open RC project file** replaces the local project after checking the file and
 the currently configured service/account. The service URL in the file cannot
 redirect requests or provide authorization. Bearer tokens and numerical result
 summaries are not saved. Native input strings are retained exactly, including
 integer and floating-point tokens. Only the supported v1 format is accepted;
 files are bounded to 96 MiB and each draft/request to 16 MiB.
+
+A valid project file asks before replacing a workspace that has changes.
+Cancelling keeps the current project; malformed files or files for another
+account/service cannot replace it. Ordinary refresh within the same account
+retains editing and submission custody. Confirmed authorization loss or an
+account change clears private local content; after signing in, explicitly reopen
+the exported file for that account.
 
 Opening a project never submits or resumes an analysis. The selected job is read
 again, and each restored design with a known job needs an explicit **Refresh**
