@@ -2,15 +2,15 @@
   "artifacts": {
     "native_artifact_manifest": {
       "path": "implementation/phase1/native_runtime_artifact_manifest.json",
-      "sha256": "5691c775bafe540e5443915e6c5b9577247e54d695e3f94cc6eaac6a4e2fc43a"
+      "sha256": "35988f79c1fdb11b22bfe3828dd79780dd071831313a9505ab7216f3cd76bee1"
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "cbd21805b94aeb7d42d1456dd0e60362841fde44fd8a6c392187ab03f511f53f"
+      "sha256": "15f64dd346cd4fe3538d838716adbe554d35de9f53987191d48c01f294e4fc11"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "88ac08b3faa2f67e7c551182dca6f39bb1bee7d6ae14279572032f53754c4aab"
+      "sha256": "7d5c92e55caa50230cc29e5f8275707e76b736ecd67931a67547b5fa185f2c86"
     }
   },
   "authority": {
@@ -29,8 +29,8 @@
       "ajv_version": "8.20.0",
       "lockfile_version": 3,
       "package_count": 68,
-      "package_json_sha256": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
-      "package_lock_sha256": "141049f7f4b191d2d14f22462f8376c67f6daae952ce55acd5150f6e0734a38d",
+      "package_json_sha256": "fb748915d54464c9f70f2b4970b395463edb39dcaae5a1b75c89f31b434812fb",
+      "package_lock_sha256": "4a49818721f8f61aa9b2b84e04be70a39639910c2432d10ff7a770c541a94980",
       "postcss_version": "8.5.26",
       "requires": true
     },
@@ -42,7 +42,7 @@
   },
   "claim_boundary": "contract_pass covers the technical runtime packaging contract only. It grants no product license, commercial use, redistribution, third-party-material clearance, signing authority, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-10-06T03:35:24.452115+00:00",
+  "generated_at": "2026-10-22T22:49:46.305460+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
@@ -67,5 +67,5 @@
     "version": "0.1.0"
   },
   "schema_version": "production-runtime-packaging-manifest.v1",
-  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=76 | native_artifacts=5/6"
+  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=77 | native_artifacts=5/6"
 }

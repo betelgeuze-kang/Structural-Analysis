@@ -55,10 +55,10 @@ jobs:
       - name: Checkout exact tested ref without LFS
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          # The PR merge ref and both direct parents fit in depth 2. Fetching
-          # the repository's complete multi-gigabyte history made this ten-minute
-          # classifier time out before executing any contract code.
-          fetch-depth: 2
+          # A finite 32-commit checkout also proves receipt producer ancestry.
+          # Missing deeper producer history remains blocked; no unbounded fetch,
+          # dynamic ref fetch, or ancestry fallback is permitted by the validator.
+          fetch-depth: 32
           lfs: false
           persist-credentials: false
 

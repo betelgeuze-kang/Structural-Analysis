@@ -1,17 +1,17 @@
 from __future__ import annotations
 
+from copy import deepcopy
+import hashlib
 import importlib.util
 from pathlib import Path
 import sys
 
 from jsonschema import Draft202012Validator
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = (
-    ROOT
-    / "scripts/build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py"
-)
+SCRIPT = ROOT / "scripts/build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py"
 SPEC = importlib.util.spec_from_file_location(
     "build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts",
     SCRIPT,
@@ -49,9 +49,7 @@ def test_builder_records_sparse_state_operator_and_claim_boundaries() -> None:
     assert summary["sparse_gate_passed"] is True
     assert summary["tangent_solve_count"] == 52
     assert summary["maximum_tangent_solve_iteration_count"] == 12
-    assert summary[
-        "maximum_tangent_solve_explicit_residual_inf_norm_kn"
-    ] <= 1.0e-9
+    assert summary["maximum_tangent_solve_explicit_residual_inf_norm_kn"] <= 1.0e-9
     assert len(summary["tangent_solve_hashes"]) == 52
     assert len(summary["operator_numeric_values_hashes"]) == 52
     assert summary["unique_operator_numeric_values_hash_count"] >= 2
@@ -62,17 +60,18 @@ def test_builder_records_sparse_state_operator_and_claim_boundaries() -> None:
     assert summary["negative_load_branch_reached"] is True
     assert summary["fallback_count"] == 0
     assert summary["regularization_count"] == 0
-    assert summary[
-        "sparse_state_operator_arc_length_integration_claim"
-    ] is True
+    assert summary["sparse_state_operator_arc_length_integration_claim"] is True
     assert summary["dense_tangent_materialization_avoided_claim"] is True
-    assert summary[
-        "engine_v2_cpu_fgmres_every_tangent_solve_claim"
-    ] is True
+    assert summary["engine_v2_cpu_fgmres_every_tangent_solve_claim"] is True
     assert summary["production_scale_sparse_preconditioner_claim"] is False
     assert summary["general_frame_shell_arc_length_claim"] is False
     assert summary["production_rocm_hip_nonlinear_parity_claim"] is False
     assert summary["g1_full_building_closure_claim"] is False
+    for source, checksum in summary["input_checksums"].items():
+        assert (
+            checksum
+            == "sha256:" + hashlib.sha256((ROOT / source).read_bytes()).hexdigest()
+        )
 
 
 def test_builder_result_validates_against_schema() -> None:
@@ -86,12 +85,10 @@ def test_builder_result_validates_against_schema() -> None:
 
 
 def test_builder_check_reports_missing_artifacts(tmp_path: Path) -> None:
-    ok, message = (
-        module.check_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts(
-            repo_root=ROOT,
-            result_out=tmp_path / "missing-result.json",
-            summary_out=tmp_path / "missing-summary.json",
-        )
+    ok, message = module.check_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts(
+        repo_root=ROOT,
+        result_out=tmp_path / "missing-result.json",
+        summary_out=tmp_path / "missing-summary.json",
     )
 
     assert ok is False
@@ -99,11 +96,50 @@ def test_builder_check_reports_missing_artifacts(tmp_path: Path) -> None:
 
 
 def test_committed_sparse_chain_arc_length_artifacts_match_builder() -> None:
-    ok, message = (
-        module.check_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts(
-            repo_root=ROOT
-        )
+    ok, message = module.check_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts(
+        repo_root=ROOT
     )
 
     assert ok is True
     assert message == "phase2_sparse_chain_arc_length_consistent"
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "src/structural_analysis/engine_v2/contracts/execution_plan.py",
+        "src/structural_analysis/engine_v2/contracts/equation_scaling.py",
+    ],
+)
+def test_builder_check_rejects_stale_source_checksum(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, source: str
+) -> None:
+    # Keep this checker regression independent of the analytic solver run.
+    expected = {
+        "result": {"contract_pass": True},
+        "summary": {
+            "generated_at": "current timestamp",
+            "source_commit_sha": "current commit",
+            "input_checksums": {source: "sha256:" + "1" * 64},
+        },
+    }
+    existing = deepcopy(expected)
+    existing["summary"]["generated_at"] = "previous timestamp"
+    existing["summary"]["source_commit_sha"] = "previous commit"
+    existing["summary"]["input_checksums"][source] = "sha256:" + "0" * 64
+    result_out = tmp_path / "result.json"
+    summary_out = tmp_path / "summary.json"
+    result_out.write_text(module._json_text(existing["result"]), encoding="utf-8")
+    summary_out.write_text(module._json_text(existing["summary"]), encoding="utf-8")
+    monkeypatch.setattr(
+        module,
+        "build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts",
+        lambda **_kwargs: expected,
+    )
+
+    ok, message = module.check_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts(
+        repo_root=ROOT, result_out=result_out, summary_out=summary_out
+    )
+
+    assert ok is False
+    assert message == "phase2_sparse_chain_arc_length_mismatch:summary"

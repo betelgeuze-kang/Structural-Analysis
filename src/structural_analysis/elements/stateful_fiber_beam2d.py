@@ -33,7 +33,10 @@ from structural_analysis.elements.stateful_fiber_beam2d_response import (
 from structural_analysis.elements.stateful_fiber_beam2d_state import (
     StatefulFiberBeam2DState,
 )
-from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.engine_v2.contracts._computation_cache import (
+    canonical_hash_cached,
+)
+from structural_analysis.materials.native_steel_batch import active_native_steel_batch
 
 
 def _finite(value: Any, *, name: str) -> float:
@@ -106,7 +109,7 @@ class StatefulFiberBeam2D:
     @property
     def contract_hash(self) -> str:
         points, weights = self.quadrature
-        return canonical_hash(
+        return canonical_hash_cached(
             {
                 "schema_version": STATEFUL_FIBER_BEAM2D_SCHEMA_VERSION,
                 "element_id": self.element_id,
@@ -242,15 +245,48 @@ class StatefulFiberBeam2D:
         section_responses: list[AxialCurvatureSectionResponse] = []
         next_states: list[AxialCurvatureSectionState] = []
 
-        for xi, weight, parent in zip(
-            points,
-            weights,
-            committed_state.integration_point_states,
-            strict=True,
+        native = active_native_steel_batch()
+        batched_responses = None
+        point_matrices = None
+        if (
+            native is not None
+            and native.prepared
+            and type(self.section).__dict__.get("supports_native_steel_point_batch")
+            is True
         ):
-            strain_displacement = self.strain_displacement_matrix(xi)
+            batch_integrator = getattr(self.section, "integrate_many", None)
+            if callable(batch_integrator):
+                point_matrices = tuple(
+                    self.strain_displacement_matrix(xi) for xi in points
+                )
+                batched_responses = batch_integrator(
+                    tuple(matrix @ local for matrix in point_matrices),
+                    committed_state.integration_point_states,
+                )
+                if len(batched_responses) != len(points):
+                    raise ValueError(
+                        "section batch response count does not match integration points"
+                    )
+
+        for index, (xi, weight, parent) in enumerate(
+            zip(
+                points,
+                weights,
+                committed_state.integration_point_states,
+                strict=True,
+            )
+        ):
+            strain_displacement = (
+                point_matrices[index]
+                if point_matrices is not None
+                else self.strain_displacement_matrix(xi)
+            )
             generalized = strain_displacement @ local
-            response = self.section.integrate(generalized, parent)
+            response = (
+                batched_responses[index]
+                if batched_responses is not None
+                else self.section.integrate(generalized, parent)
+            )
             if not isinstance(response, AxialCurvatureSectionResponse):
                 raise ValueError(
                     "section response must satisfy AxialCurvatureSectionResponse"

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+import shlex
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -433,3 +434,41 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
     assert "self-hosted" not in workflow
     assert "does not exercise" in workflow
     assert "hipcc" not in workflow
+
+
+def test_topology_sparse_coverage_includes_factorization_reuse_contract() -> None:
+    workflow = _read("fiber-frame-execution-topology-ci.yml")
+    lane = workflow.split(
+        "- name: Sparse factorization diagnostics branch coverage", 1
+    )[1].split("- name: Unified nonlinear frame API contract", 1)[0]
+    run = lane.split("run: |", 1)[1]
+    commands = [
+        shlex.split(line, comments=True)
+        for line in run.replace("\\\n", " ").splitlines()
+    ]
+    commands = [command for command in commands if command]
+
+    assert commands[:2] == [
+        [
+            "python",
+            "-m",
+            "coverage",
+            "run",
+            "--rcfile=/dev/null",
+            "--branch",
+            "--include=src/structural_analysis/solvers/nonlinear/sparse_factorization.py",
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_sparse_factorization_diagnostics.py",
+            "tests/test_sparse_factorization_reuse.py",
+        ],
+        [
+            "python",
+            "-m",
+            "coverage",
+            "report",
+            "--rcfile=/dev/null",
+            "--fail-under=90",
+        ],
+    ]

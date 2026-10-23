@@ -19,6 +19,8 @@ from typing import Any, Literal
 from jsonschema import Draft202012Validator, validators
 import numpy as np
 
+from ._computation_cache import _register_pure_schema_validator, schema_errors
+
 from ._canonical import (
     CanonicalContractError,
     array_content_hash,
@@ -428,7 +430,7 @@ def validate_execution_plan_manifest(payload: Any) -> Mapping[str, Any]:
     """Reject unknown fields, wrong JSON types, and stale manifest hashes."""
 
     errors = sorted(
-        _execution_plan_validator().iter_errors(payload),
+        schema_errors(_execution_plan_validator(), payload),
         key=lambda error: tuple(str(value) for value in error.absolute_path),
     )
     if errors:
@@ -928,7 +930,9 @@ def _execution_plan_validator() -> Draft202012Validator:
     if not isinstance(schema, dict):  # pragma: no cover
         raise TypeError("Packaged ExecutionPlan schema must be an object.")
     Draft202012Validator.check_schema(schema)
-    return _StrictDraft202012Validator(schema)
+    validator = _StrictDraft202012Validator(schema)
+    _register_pure_schema_validator(validator)
+    return validator
 
 
 def _fail(code: str, path: str, message: str) -> None:

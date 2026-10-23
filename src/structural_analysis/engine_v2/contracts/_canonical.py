@@ -8,6 +8,7 @@ StateIR contracts.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from functools import lru_cache
 import hashlib
 import json
 import math
@@ -23,7 +24,20 @@ class CanonicalContractError(ValueError):
 def canonical_json_bytes(payload: Any) -> bytes:
     """Return deterministic UTF-8 JSON after rejecting non-finite values."""
 
-    normalized = _normalize_json_value(payload, path="/")
+    normalized = _USE_LEGACY_NORMALIZATION
+    if (
+        _normalize_json_value is _NORMALIZER_REFERENCE
+        and _normalize_json_value.__code__ is _NORMALIZER_CODE
+        and math.isfinite is _ISFINITE_REFERENCE
+    ):
+        try:
+            normalized = _normalize_plain_json_value(payload, depth=0)
+        except (_PlainNormalizationFallback, RecursionError):
+            pass
+    # Keep the reference call outside the except block so its exceptions do
+    # not acquire an internal speculative-traversal exception as context.
+    if normalized is _USE_LEGACY_NORMALIZATION:
+        normalized = _normalize_json_value(payload, path="/")
     return json.dumps(
         normalized,
         ensure_ascii=False,
@@ -152,7 +166,7 @@ def array_content_hash(metadata: Any, array: np.ndarray) -> str:
 
     checked = _contract_array(array)
     digest = hashlib.sha256()
-    digest.update(canonical_json_bytes(metadata))
+    digest.update(_array_metadata_bytes(metadata))
     digest.update(b"\0")
     raw_bytes: bytes | memoryview = (
         b"" if checked.nbytes == 0 else memoryview(checked).cast("B")
@@ -217,3 +231,229 @@ def _normalize_json_value(value: Any, *, path: str) -> Any:
     raise CanonicalContractError(
         f"Unsupported canonical JSON value {type(value).__name__} at {path}."
     )
+
+
+class _PlainNormalizationFallback(Exception):
+    """Abort speculative traversal without invoking custom value behavior."""
+
+
+_PLAIN_NORMALIZATION_MAX_DEPTH = 64
+_USE_LEGACY_NORMALIZATION = object()
+_NORMALIZER_REFERENCE = _normalize_json_value
+_NORMALIZER_CODE = _normalize_json_value.__code__
+_ISFINITE_REFERENCE = math.isfinite
+
+
+def _normalize_plain_json_value(value: Any, depth: int) -> Any:
+    """Copy exact builtins, otherwise request a complete legacy traversal."""
+
+    value_type = type(value)
+    if value is None or value_type is str or value_type is bool or value_type is int:
+        return value
+    if value_type is float:
+        if not math.isfinite(value):
+            raise _PlainNormalizationFallback
+        return 0.0 if value == 0.0 else value
+    if depth >= _PLAIN_NORMALIZATION_MAX_DEPTH:
+        raise _PlainNormalizationFallback
+    if value_type is dict:
+        if any(type(key) is not str for key in value):
+            raise _PlainNormalizationFallback
+        return {
+            key: _normalize_plain_json_value(value[key], depth + 1)
+            for key in sorted(value)
+        }
+    if value_type is list or value_type is tuple:
+        return [_normalize_plain_json_value(item, depth + 1) for item in value]
+    raise _PlainNormalizationFallback
+
+
+def _serialization_implementation(function: Any) -> tuple[Any, ...]:
+    """Freeze the small, explicit serializer call graph, without model state."""
+    return (
+        function,
+        getattr(function, "__code__", None),
+        getattr(function, "__defaults__", None),
+        (getattr(function, "__kwdefaults__", None) or {}).copy() or None,
+        tuple(
+            id(cell.cell_contents)
+            for cell in (getattr(function, "__closure__", None) or ())
+        ),
+    )
+
+
+def _serialization_bindings(
+    namespace: Mapping[str, Any], names: tuple[str, ...]
+) -> tuple[tuple[Any, ...], ...]:
+    return tuple(
+        (namespace, name, *_serialization_implementation(namespace.get(name)))
+        for name in names
+    )
+
+
+def _serialization_bindings_unchanged(bindings: tuple[tuple[Any, ...], ...]) -> bool:
+    # Flatten once at import. On each use, compare the live binding and Python
+    # function attributes directly instead of rebuilding per-function tokens.
+    for namespace, name, expected, code, defaults, kwdefaults, closure in bindings:
+        function = namespace.get(name)
+        if function is None or function is not expected:
+            return False
+        if code is not None:
+            if (
+                function.__code__ is not code
+                or function.__defaults__ is not defaults
+                or (function.__kwdefaults__ or None) != kwdefaults
+            ):
+                return False
+            if (
+                closure
+                and tuple(id(cell.cell_contents) for cell in function.__closure__)
+                != closure
+            ):
+                return False
+    return True
+
+
+# These are import-time immutable implementation descriptions. The value cache
+# below changes no module-level registry, including the Jacobian source guard.
+_JSON_MODULE = json
+_JSON_ENCODER_MODULE = json.encoder
+_HASHLIB_MODULE = hashlib
+_CANONICAL_CACHE_BINDINGS = _serialization_bindings(
+    globals(),
+    (
+        "canonical_json_bytes",
+        "canonical_hash",
+        "sha256_prefixed",
+        "_normalize_json_value",
+        "_normalize_plain_json_value",
+    ),
+) + tuple(
+    binding
+    for owner, names in (
+        (json, ("dumps", "JSONEncoder")),
+        (json.JSONEncoder, ("__init__", "encode", "iterencode", "default")),
+        (
+            json.encoder,
+            (
+                "c_make_encoder",
+                "_make_iterencode",
+                "encode_basestring",
+                "encode_basestring_ascii",
+            ),
+        ),
+        (hashlib, ("sha256",)),
+    )
+    for binding in _serialization_bindings(vars(owner), names)
+)
+
+
+def _canonical_cache_eligible() -> bool:
+    """Do not reuse old bytes/digests after explicit serializer changes."""
+    if (
+        json is not _JSON_MODULE
+        or getattr(json, "encoder", None) is not _JSON_ENCODER_MODULE
+        or hashlib is not _HASHLIB_MODULE
+        or math.isfinite is not _ISFINITE_REFERENCE
+    ):
+        return False
+    return _serialization_bindings_unchanged(_CANONICAL_CACHE_BINDINGS)
+
+
+_ARRAY_METADATA_STRING_FIELDS = frozenset(
+    (
+        "name",
+        "dtype",
+        "layout",
+        "byte_order",
+        "storage_profile",
+        "unit_profile",
+        "artifact_uri",
+        "state_hash",
+        "equation_order_hash",
+        "equation_scope",
+        "owner_kind",
+        "owner_hash",
+        "engineering_result_id",
+        "source_numerical_result_hash",
+        "recovery_operator_hash",
+    )
+)
+
+
+def _array_metadata_snapshot(metadata: Any) -> tuple[tuple[str, Any], ...] | None:
+    """Copy only bounded, known descriptor fields; all other JSON stays legacy.
+
+    Types are fixed by each field, so True/1/1.0 cannot share a cache key.
+    Shape list/tuple spelling may share one key: both canonically encode a list.
+    """
+    if type(metadata) is not dict or not 3 <= len(metadata) <= 20:
+        return None
+    if any(type(key) is not str for key in metadata):
+        return None
+    if len(metadata) == 5:
+        name, dtype, shape_value, layout, length = (
+            metadata.get("name"),
+            metadata.get("dtype"),
+            metadata.get("shape"),
+            metadata.get("layout"),
+            metadata.get("byte_length"),
+        )
+        shape: Any = shape_value
+        if (
+            type(name) is str
+            and type(dtype) is str
+            and type(layout) is str
+            and type(length) is int
+            and length.bit_length() <= 64
+            and type(shape) in (list, tuple)
+            and len(shape) <= 32
+            and len(name) + len(dtype) + len(layout) <= 4096
+            and all(type(item) is int and item.bit_length() <= 64 for item in shape)
+        ):
+            # The common descriptor has a fixed canonical key order and no
+            # recursive object walk, generic field dispatch, or sorting.
+            return (
+                ("byte_length", length),
+                ("dtype", dtype),
+                ("layout", layout),
+                ("name", name),
+                ("shape", tuple(shape)),
+            )
+    if not {"name", "dtype", "shape"}.issubset(metadata):
+        return None
+    result: list[tuple[str, Any]] = []
+    characters = 0
+    for key in sorted(metadata):
+        value = metadata[key]
+        if key in _ARRAY_METADATA_STRING_FIELDS:
+            if type(value) is not str:
+                return None
+            characters += len(value)
+            if characters > 4096:
+                return None
+        elif key == "byte_length":
+            if type(value) is not int or value.bit_length() > 64:
+                return None
+        elif key == "shape":
+            if type(value) not in (list, tuple) or len(value) > 32:
+                return None
+            if any(type(item) is not int or item.bit_length() > 64 for item in value):
+                return None
+            value = tuple(value)
+        else:
+            return None
+        result.append((key, value))
+    return tuple(result)
+
+
+@lru_cache(maxsize=128)
+def _cached_array_metadata_bytes(snapshot: tuple[tuple[str, Any], ...]) -> bytes:
+    return canonical_json_bytes(dict(snapshot))
+
+
+def _array_metadata_bytes(metadata: Any) -> bytes:
+    snapshot = _array_metadata_snapshot(metadata)
+    if snapshot is not None and _canonical_cache_eligible():
+        return _cached_array_metadata_bytes(snapshot)
+    return canonical_json_bytes(metadata)

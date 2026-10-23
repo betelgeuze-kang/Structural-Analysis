@@ -16,7 +16,7 @@ from structural_analysis.elements.stateful_fiber_beam2d import (
     StatefulFiberBeam2DResponse,
     StatefulFiberBeam2DState,
 )
-from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.engine_v2.contracts._computation_cache import canonical_hash_cached
 from structural_analysis.solvers.nonlinear.newton import (
     RESIDUAL_FORMULA,
 )
@@ -225,7 +225,7 @@ class StatefulFiberFrame2DProblem:
 
     @property
     def contract_hash(self) -> str:
-        return canonical_hash(
+        return canonical_hash_cached(
             {
                 "schema_version": STATEFUL_FIBER_FRAME2D_SCHEMA_VERSION,
                 "case_id": self.case_id,

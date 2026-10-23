@@ -10,26 +10,30 @@ distributed-plasticity formulation, or production material backend.
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field
+import dataclasses as _dataclasses
+from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from functools import lru_cache
 import hashlib
 import math
 import struct
-from typing import Any, Iterable, Literal
+from typing import Any, Iterable, Literal, cast
 
 import numpy as np
 
+from structural_analysis.engine_v2.contracts import _canonical
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.materials.concrete_damage import (
     AsymmetricConcreteDamageMaterial,
     ConcreteDamageResponse,
     ConcreteDamageState,
+    FractureEnergyConcreteDamageMaterial,
 )
 from structural_analysis.materials.uniaxial_plasticity import (
     BilinearCombinedHardeningSteel,
     UniaxialPlasticityResponse,
     UniaxialPlasticityState,
 )
+from structural_analysis.materials.native_steel_batch import active_native_steel_batch
 
 
 STATEFUL_FIBER_SECTION_SCHEMA_VERSION = "phase2-stateful-rc-fiber-section.v1"
@@ -57,6 +61,138 @@ _MPA_M2_TO_KN = 1_000.0
 FiberKind = Literal["steel", "concrete"]
 FiberState = UniaxialPlasticityState | ConcreteDamageState
 FiberResponse = UniaxialPlasticityResponse | ConcreteDamageResponse
+
+
+class _UncacheableSectionContractValue(TypeError):
+    """Preserve the original serializer for values outside the plain fast path."""
+
+
+def _section_contract_value_snapshot(value: Any) -> tuple[Any, ...]:
+    """Copy current values into typed immutable keys, never retaining models.
+
+    Python equates True, 1 and 1.0, but canonical JSON distinguishes them.  The
+    tags preserve that distinction, while signed floating zero deliberately
+    shares a key because the canonical serializer normalizes it.  Unusual
+    scalar/container types use the original asdict/canonical path instead of
+    assuming that their copying or conversion semantics match plain values.
+    """
+    kind = type(value)
+    if value is None:
+        return ("none", None)
+    if kind is str:
+        return ("string", value)
+    if kind is bool:
+        return ("boolean", value)
+    if kind is int:
+        return ("integer", value)
+    if kind is float:
+        if not math.isfinite(value):
+            # Let the original serializer retain its error type and field path.
+            raise _UncacheableSectionContractValue
+        return ("float", value)
+    if is_dataclass(value) and not isinstance(value, type):
+        return (
+            "mapping",
+            tuple(
+                (item.name, _section_contract_value_snapshot(getattr(value, item.name)))
+                for item in fields(value)
+            ),
+        )
+    if kind is dict:
+        if any(type(key) is not str for key in value):
+            raise _UncacheableSectionContractValue
+        return (
+            "mapping",
+            tuple(
+                (key, _section_contract_value_snapshot(item))
+                for key, item in value.items()
+            ),
+        )
+    if kind is list or kind is tuple:
+        return (
+            "sequence",
+            tuple(_section_contract_value_snapshot(item) for item in value),
+        )
+    raise _UncacheableSectionContractValue
+
+
+def _section_contract_value_from_snapshot(snapshot: tuple[Any, ...]) -> Any:
+    tag, value = snapshot
+    if tag == "plain_section":
+        constants, fibers, steel, concrete, overrides = value
+        payload = {
+            "schema_version": constants[0],
+            "section_id": constants[1],
+            "strain_relation": constants[2],
+            "resultant_definition": constants[3],
+            "tangent_definition": constants[4],
+            "fibers": [dict(zip(_FIBER_CONTRACT_FIELDS, row)) for row in fibers],
+            "steel": _plain_material_payload(steel),
+            "concrete": _plain_material_payload(concrete),
+        }
+        if overrides:
+            payload["steel_overrides"] = [
+                {"fiber_id": fiber_id, "material": _plain_material_payload(material)}
+                for fiber_id, material in overrides
+            ]
+        return payload
+    if tag == "mapping":
+        return {key: _section_contract_value_from_snapshot(item) for key, item in value}
+    if tag == "sequence":
+        return [_section_contract_value_from_snapshot(item) for item in value]
+    return value
+
+
+@lru_cache(maxsize=128)
+def _cached_section_contract_hash(snapshot: tuple[Any, ...]) -> str:
+    """Cache only a pure digest of the fresh value snapshot, bounded by entries."""
+    return canonical_hash(_section_contract_value_from_snapshot(snapshot))
+
+
+def _section_contract_snapshot(section: StatefulRCFiberSection) -> tuple[Any, ...]:
+    # Do not inspect a custom/single-use iterable before the legacy serializer.
+    if type(section.fibers) is not tuple or type(section.steel_overrides) is not tuple:
+        raise _UncacheableSectionContractValue
+    plain = _plain_section_contract_snapshot(section)
+    if plain is not None:
+        return plain
+    # A fiber subclass can override to_dict(), so preserve its original dispatch.
+    if any(type(fiber) is not StatefulSectionFiber for fiber in section.fibers):
+        raise _UncacheableSectionContractValue
+    if any("to_dict" in vars(fiber) for fiber in section.fibers):
+        raise _UncacheableSectionContractValue
+    # The original payload calls asdict(), which rejects non-dataclass roots.
+    for material in (section.steel, section.concrete):
+        if not is_dataclass(material) or isinstance(material, type):
+            raise _UncacheableSectionContractValue
+    for row in section.steel_overrides:
+        if type(row) is not tuple or len(row) != 2:
+            raise _UncacheableSectionContractValue
+        _, material = row
+        if not is_dataclass(material) or isinstance(material, type):
+            raise _UncacheableSectionContractValue
+    return _section_contract_value_snapshot(
+        {
+            "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
+            "section_id": section.section_id,
+            "strain_relation": FIBER_SECTION_STRAIN_RELATION,
+            "resultant_definition": FIBER_SECTION_RESULTANT_DEFINITION,
+            "tangent_definition": FIBER_SECTION_TANGENT_DEFINITION,
+            "fibers": section.fibers,
+            "steel": section.steel,
+            "concrete": section.concrete,
+            **(
+                {
+                    "steel_overrides": [
+                        {"fiber_id": fiber_id, "material": material}
+                        for fiber_id, material in section.steel_overrides
+                    ]
+                }
+                if section.steel_overrides
+                else {}
+            ),
+        }
+    )
 
 
 def _finite(value: Any, *, name: str) -> float:
@@ -124,6 +260,179 @@ class StatefulSectionFiber:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+_FIBER_CONTRACT_FIELDS = ("fiber_id", "y_m", "area_m2", "material_kind")
+_STEEL_CONTRACT_FIELDS = (
+    "elastic_modulus_mpa",
+    "yield_stress_mpa",
+    "isotropic_hardening_modulus_mpa",
+    "kinematic_hardening_modulus_mpa",
+    "yield_tolerance_mpa",
+    "material_id",
+)
+_CONCRETE_CONTRACT_FIELDS = (
+    "elastic_modulus_mpa",
+    "tensile_strength_mpa",
+    "compressive_strength_mpa",
+    "tensile_softening_rate",
+    "compressive_softening_rate",
+    "history_tolerance",
+    "material_id",
+)
+_FRACTURE_CONTRACT_FIELDS = _CONCRETE_CONTRACT_FIELDS + (
+    "characteristic_length_m",
+    "tensile_fracture_energy_n_per_m",
+    "compressive_fracture_energy_n_per_m",
+)
+_SECTION_PLAIN_LAYOUTS = tuple(
+    (
+        kind,
+        names,
+        tuple(
+            (id(item), item.name, id(getattr(item, "_field_type", None)))
+            for item in fields(kind)
+        ),
+    )
+    for kind, names in (
+        (StatefulSectionFiber, _FIBER_CONTRACT_FIELDS),
+        (BilinearCombinedHardeningSteel, _STEEL_CONTRACT_FIELDS),
+        (AsymmetricConcreteDamageMaterial, _CONCRETE_CONTRACT_FIELDS),
+        (FractureEnergyConcreteDamageMaterial, _FRACTURE_CONTRACT_FIELDS),
+    )
+)
+_SECTION_SERIALIZER_BINDINGS = (
+    _canonical._serialization_bindings(
+        globals(), ("asdict", "fields", "is_dataclass", "canonical_hash")
+    )
+    + _canonical._serialization_bindings(
+        vars(_dataclasses), ("asdict", "fields", "_asdict_inner")
+    )
+    + _canonical._serialization_bindings(vars(StatefulSectionFiber), ("to_dict",))
+)
+
+
+def _section_contract_cache_eligible() -> bool:
+    # Both the specialized and generic caches must respect changed dispatch.
+    return (
+        _canonical._canonical_cache_eligible()
+        and StatefulRCFiberSection.__getattribute__ is object.__getattribute__
+        and _canonical._serialization_bindings_unchanged(_SECTION_SERIALIZER_BINDINGS)
+        and all(
+            kind.__getattribute__ is object.__getattribute__
+            for kind, _, _ in _SECTION_PLAIN_LAYOUTS
+        )
+    )
+
+
+def _section_plain_layouts_unchanged() -> bool:
+    # Check metadata once per class, rather than once per field of every fiber.
+    for kind, names, expected in _SECTION_PLAIN_LAYOUTS:
+        declared = getattr(kind, "__dataclass_fields__", None)
+        if type(declared) is not dict or len(declared) != len(expected):
+            return False
+        for (key, item), declared_name, (old, name, field_type) in zip(
+            declared.items(), names, expected
+        ):
+            if (
+                type(key) is not str
+                or key != declared_name
+                or id(item) != old
+                or item.name != name
+                or id(getattr(item, "_field_type", None)) != field_type
+            ):
+                return False
+    return True
+
+
+def _plain_material_snapshot(material: Any) -> tuple[str, tuple[Any, ...]] | None:
+    kind = type(material)
+    names: tuple[str, ...]
+    if kind is BilinearCombinedHardeningSteel:
+        tag, names = "steel", _STEEL_CONTRACT_FIELDS
+    elif kind is AsymmetricConcreteDamageMaterial:
+        tag, names = "concrete", _CONCRETE_CONTRACT_FIELDS
+    elif kind is FractureEnergyConcreteDamageMaterial:
+        tag, names = "fracture", _FRACTURE_CONTRACT_FIELDS
+    else:
+        return None
+    values = tuple(getattr(material, name) for name in names)
+    for name, value in zip(names, values):
+        if name == "material_id":
+            if type(value) is not str:
+                return None
+        elif type(value) is not float or not math.isfinite(value):
+            return None
+    return tag, values
+
+
+def _plain_material_payload(snapshot: tuple[str, tuple[Any, ...]]) -> dict[str, Any]:
+    tag, values = snapshot
+    names = (
+        _STEEL_CONTRACT_FIELDS
+        if tag == "steel"
+        else _CONCRETE_CONTRACT_FIELDS
+        if tag == "concrete"
+        else _FRACTURE_CONTRACT_FIELDS
+    )
+    return dict(zip(names, values))
+
+
+def _plain_section_contract_snapshot(
+    section: StatefulRCFiberSection,
+) -> tuple[Any, ...] | None:
+    if (
+        type(section) is not StatefulRCFiberSection
+        or not _section_plain_layouts_unchanged()
+    ):
+        return None
+    constants = (
+        STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
+        section.section_id,
+        FIBER_SECTION_STRAIN_RELATION,
+        FIBER_SECTION_RESULTANT_DEFINITION,
+        FIBER_SECTION_TANGENT_DEFINITION,
+    )
+    if any(type(value) is not str for value in constants):
+        return None
+    fibers: list[tuple[str, float, float, str]] = []
+    for fiber in section.fibers:
+        if type(fiber) is not StatefulSectionFiber or "to_dict" in vars(fiber):
+            return None
+        row = (fiber.fiber_id, fiber.y_m, fiber.area_m2, fiber.material_kind)
+        if (
+            type(row[0]) is not str
+            or type(row[1]) is not float
+            or type(row[2]) is not float
+            or type(row[3]) is not str
+            or not math.isfinite(row[1])
+            or not math.isfinite(row[2])
+        ):
+            return None
+        fibers.append(row)
+    steel = _plain_material_snapshot(section.steel)
+    concrete = _plain_material_snapshot(section.concrete)
+    if steel is None or concrete is None:
+        return None
+    overrides = []
+    for override in section.steel_overrides:
+        if (
+            type(override) is not tuple
+            or len(override) != 2
+            or type(override[0]) is not str
+        ):
+            return None
+        material = _plain_material_snapshot(override[1])
+        if material is None:
+            return None
+        overrides.append((override[0], material))
+    return "plain_section", (
+        constants,
+        tuple(fibers),
+        steel,
+        concrete,
+        tuple(overrides),
+    )
 
 
 @dataclass(frozen=True)
@@ -333,8 +642,26 @@ class StatefulRCFiberSection:
             self.steel,
         )
 
+    def _current_steel_materials(self) -> dict[str, BilinearCombinedHardeningSteel]:
+        """Derive an operation-local map from the current physical fields."""
+        # Reversed construction preserves steel_material_for's first-match policy.
+        overrides = dict(reversed(self.steel_overrides))
+        return {
+            fiber.fiber_id: overrides.get(fiber.fiber_id, self.steel)
+            for fiber in self.fibers
+            if fiber.material_kind == "steel"
+        }
+
     @property
     def contract_hash(self) -> str:
+        if _section_contract_cache_eligible():
+            try:
+                snapshot = _section_contract_snapshot(self)
+            except _UncacheableSectionContractValue:
+                pass
+            else:
+                return _cached_section_contract_hash(snapshot)
+        # Keep legacy behavior for custom values and precise rejection messages.
         return canonical_hash(
             {
                 "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,
@@ -359,6 +686,7 @@ class StatefulRCFiberSection:
         )
 
     def initial_state(self) -> StatefulFiberSectionState:
+        steel_materials = self._current_steel_materials()
         return StatefulFiberSectionState(
             section_id=self.section_id,
             section_contract_hash=self.contract_hash,
@@ -366,7 +694,7 @@ class StatefulRCFiberSection:
             axial_strain=0.0,
             curvature_z_per_m=0.0,
             fiber_states=tuple(
-                self.steel_material_for(fiber.fiber_id).initial_state()
+                steel_materials[fiber.fiber_id].initial_state()
                 if fiber.material_kind == "steel"
                 else self.concrete.initial_state()
                 for fiber in self.fibers
@@ -382,6 +710,7 @@ class StatefulRCFiberSection:
             raise ValueError("state section_contract_hash does not match section")
         if len(state.fiber_states) != len(self.fibers):
             raise ValueError("state fiber count does not match section")
+        steel_materials = self._current_steel_materials()
         for fiber, fiber_state in zip(
             self.fibers,
             state.fiber_states,
@@ -390,7 +719,7 @@ class StatefulRCFiberSection:
             if fiber.material_kind == "steel":
                 if type(fiber_state) is not UniaxialPlasticityState:
                     raise ValueError("state fiber material type does not match section")
-                self.steel_material_for(fiber.fiber_id).validate_state_admissibility(
+                steel_materials[fiber.fiber_id].validate_state_admissibility(
                     fiber_state
                 )
             else:
@@ -412,10 +741,83 @@ class StatefulRCFiberSection:
             )
         )
 
+    supports_native_steel_point_batch = True
+
+    def integrate_many(
+        self,
+        generalized_strains: Iterable[Any],
+        committed_states: Iterable[StatefulFiberSectionState],
+    ) -> tuple[StatefulFiberSectionResponse, ...]:
+        """Evaluate independent section points from their unchanged accepted parents."""
+        values, parents = tuple(generalized_strains), tuple(committed_states)
+        if not values or len(values) != len(parents):
+            raise ValueError("section point batches require matching nonempty inputs")
+        native = active_native_steel_batch()
+        if (
+            native is None
+            or not native.prepared
+            or type(self).__dict__.get("supports_native_steel_point_batch") is not True
+        ):
+            return tuple(
+                self.integrate(value, parent)
+                for value, parent in zip(values, parents, strict=True)
+            )
+        generalized = tuple(
+            _generalized_vector(value, name="generalized_strain") for value in values
+        )
+        for parent in parents:
+            self.validate_state(parent)
+        steel_rows = tuple(
+            (index, fiber)
+            for index, fiber in enumerate(self.fibers)
+            if fiber.material_kind == "steel"
+        )
+        materials = self._current_steel_materials()
+        point_responses = native.integrate_many(
+            [materials[fiber.fiber_id] for _, fiber in steel_rows],
+            [
+                [
+                    float(value[0]) - float(value[1]) * fiber.y_m
+                    for _, fiber in steel_rows
+                ]
+                for value in generalized
+            ],
+            [
+                [
+                    cast(UniaxialPlasticityState, parent.fiber_states[index])
+                    for index, _ in steel_rows
+                ]
+                for parent in parents
+            ],
+        )
+        return tuple(
+            self._integrate_with_steel_responses(
+                value,
+                parent,
+                {
+                    fiber.fiber_id: response
+                    for (_, fiber), response in zip(steel_rows, responses, strict=True)
+                },
+            )
+            for value, parent, responses in zip(
+                generalized, parents, point_responses, strict=True
+            )
+        )
+
     def integrate(
         self,
         generalized_strain: Any,
         committed_state: StatefulFiberSectionState,
+    ) -> StatefulFiberSectionResponse:
+        return self._integrate_with_steel_responses(
+            generalized_strain, committed_state, None
+        )
+
+    def _integrate_with_steel_responses(
+        self,
+        generalized_strain: Any,
+        committed_state: StatefulFiberSectionState,
+        prepared_responses: dict[str, UniaxialPlasticityResponse] | None,
     ) -> StatefulFiberSectionResponse:
         self.validate_state(committed_state)
         generalized = _generalized_vector(
@@ -434,6 +836,30 @@ class StatefulRCFiberSection:
         yielded_count = 0
         damaged_count = 0
 
+        native = active_native_steel_batch()
+        steel_materials = self._current_steel_materials()
+        native_responses: dict[str, UniaxialPlasticityResponse] = (
+            prepared_responses or {}
+        )
+        if native is not None and prepared_responses is None:
+            steel_rows = [
+                (fiber, parent)
+                for fiber, parent in zip(
+                    self.fibers, committed_state.fiber_states, strict=True
+                )
+                if fiber.material_kind == "steel"
+            ]
+            evaluated = native.integrate(
+                [steel_materials[fiber.fiber_id] for fiber, _ in steel_rows],
+                [axial_strain - curvature * fiber.y_m for fiber, _ in steel_rows],
+                # validate_state above already binds each steel parent to this type.
+                [cast(UniaxialPlasticityState, parent) for _, parent in steel_rows],
+            )
+            native_responses = {
+                fiber.fiber_id: response
+                for (fiber, _), response in zip(steel_rows, evaluated, strict=True)
+            }
+
         for fiber, parent in zip(
             self.fibers,
             committed_state.fiber_states,
@@ -442,8 +868,10 @@ class StatefulRCFiberSection:
             strain = axial_strain - curvature * fiber.y_m
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
-                steel_response = self.steel_material_for(fiber.fiber_id).integrate(
-                    strain, parent
+                steel_response = (
+                    native_responses[fiber.fiber_id]
+                    if native is not None
+                    else steel_materials[fiber.fiber_id].integrate(strain, parent)
                 )
                 yielded_count += int(steel_response.yielded)
                 response: FiberResponse = steel_response

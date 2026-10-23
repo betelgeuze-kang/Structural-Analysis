@@ -10,6 +10,13 @@ CORE_ROOTS = (
     REPO_ROOT / "src/structural_analysis/model_ir",
 )
 ALLOWED_EXTERNAL_ROOTS = {"jsonschema", "numpy", "structural_analysis"}
+# The pure schema cache checks the default draft specification used by
+# jsonschema. Keep this direct dependency scoped to its reviewed file/module.
+ALLOWED_FILE_EXTERNAL_IMPORTS = {
+    "src/structural_analysis/engine_v2/contracts/_computation_cache.py": {
+        "referencing.jsonschema"
+    },
+}
 ALLOWED_INTERNAL_PREFIXES = (
     "structural_analysis.engine_v2.cpu_fgmres",
     "structural_analysis.engine_v2.contracts",
@@ -35,6 +42,26 @@ def _python_sources() -> tuple[Path, ...]:
     return tuple(sorted(path for root in CORE_ROOTS for path in root.rglob("*.py")))
 
 
+def _external_dependency_allowed(path: Path, name: str) -> bool:
+    root = name.split(".", 1)[0]
+    return root in sys.stdlib_module_names | ALLOWED_EXTERNAL_ROOTS or name in (
+        ALLOWED_FILE_EXTERNAL_IMPORTS.get(path.relative_to(REPO_ROOT).as_posix(), set())
+    )
+
+
+def test_computation_cache_referencing_allowance_is_file_and_module_specific() -> None:
+    cache = (
+        REPO_ROOT / "src/structural_analysis/engine_v2/contracts/_computation_cache.py"
+    )
+    other_core = REPO_ROOT / "src/structural_analysis/engine_v2/cpu_fgmres.py"
+
+    assert _external_dependency_allowed(cache, "referencing.jsonschema")
+    assert not _external_dependency_allowed(other_core, "referencing.jsonschema")
+    assert not _external_dependency_allowed(cache, "referencing")
+    assert not _external_dependency_allowed(cache, "referencing.jsonschema.other")
+    assert not _external_dependency_allowed(cache, "referencing.retrieval")
+
+
 def test_engine_v2_core_import_graph_is_backend_and_solver_neutral() -> None:
     violations: list[str] = []
 
@@ -54,8 +81,7 @@ def test_engine_v2_core_import_graph_is_backend_and_solver_neutral() -> None:
                 violations.append(f"{path}: dynamic __import__ is forbidden")
 
             for name in names:
-                root = name.split(".", 1)[0]
-                if root not in sys.stdlib_module_names | ALLOWED_EXTERNAL_ROOTS:
+                if not _external_dependency_allowed(path, name):
                     violations.append(f"{path}: undeclared dependency {name}")
                 if name.startswith("structural_analysis") and not name.startswith(
                     ALLOWED_INTERNAL_PREFIXES
@@ -88,6 +114,7 @@ def test_engine_v2_core_source_inventory_is_explicit_and_backend_neutral() -> No
         "src/structural_analysis/engine_v2/cpu_fgmres_tangent.py",
         "src/structural_analysis/engine_v2/contracts/__init__.py",
         "src/structural_analysis/engine_v2/contracts/_canonical.py",
+        "src/structural_analysis/engine_v2/contracts/_computation_cache.py",
         "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py",
         "src/structural_analysis/engine_v2/contracts/engineering_result.py",
         "src/structural_analysis/engine_v2/contracts/equation_scaling.py",

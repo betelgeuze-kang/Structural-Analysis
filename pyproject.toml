@@ -20,6 +20,7 @@ dependencies = [
   "scipy>=1.10",
   "matplotlib>=3.7",
   "jsonschema>=4.20",
+  "referencing>=0.28.4",
 ]
 
 [project.optional-dependencies]

@@ -337,7 +337,7 @@
     "residual_gate_passed": true,
     "solution_data_hash": "sha256:f34beea3dcaeefbb3ad7eb97eeb6c0448124198d69654d09d9189c616dea2b35"
   },
-  "generated_at": "2026-07-31T04:23:54.531203+00:00",
+  "generated_at": "2026-10-21T23:09:07.277166+00:00",
   "hip_current_tangent_execution_preparation": {
     "actual_hardware_execution": true,
     "actual_mgt_fixture": {
@@ -969,7 +969,7 @@
     "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:7e182b1fde74743dc7399108d24d55a30d237674ccd5b4883f74e427dd050752",
     "scripts/run_engine_v2_hip_sparse_lu_apply.py": "sha256:0b87e59982247a2f4393c65cf6bd7ef1d37d50db2ea8a02086dfc0d4a422a7e5",
     "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py": "sha256:1125e6522c8add5a305869047214a203c65548d29727b01a7ddf3970ecaffff2",
-    "src/structural_analysis/engine_v2/contracts/_canonical.py": "sha256:78883ad07598edeb838de0ccce2717b362a323574bfe86822dfcfda665ecf11b",
+    "src/structural_analysis/engine_v2/contracts/_canonical.py": "sha256:fbe226656a9379a1a976368a141069ba8e1e5cdee78a374fd8a26e69c4b9c1bd",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
     "src/structural_analysis/schemas/canonical_sparse_lu_binary_artifacts_v1.schema.json": "sha256:da1e8a095ee2740dcf8f597395b4e8f5ddc7c553799fa1fc49e840c9024c3bb3",
@@ -1175,7 +1175,7 @@
   "readiness_pass": false,
   "schema_version": "g1-mgt-matrix-free-preconditioner-candidate-audit.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "308763d9fbea9a55023827d6ddcf69a9762db5bc",
+  "source_commit_sha": "519b1a999b37a7ef961f02401e21ed112ce65e56",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }

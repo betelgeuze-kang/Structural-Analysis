@@ -11,12 +11,20 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DProblem,
     assemble_stateful_fiber_frame2d,
 )
+from structural_analysis.assembly.stateful_fiber_frame2d_direct_sparse import (
+    assemble_stateful_fiber_frame2d_direct_sparse,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
 )
+from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_MATRIX_BACKEND,
+    VECTOR_MATRIX_BACKENDS,
+    VECTOR_SPARSE_MATRIX_BACKEND,
+)
 
 
-def finite_difference_stateful_fiber_frame2d_tangent_check(
+def _finite_difference_stateful_fiber_frame2d_tangent_arrays(
     problem: StatefulFiberFrame2DProblem,
     accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
     *,
@@ -24,6 +32,8 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
     trial_free_coordinates_m: Any,
     epsilon_m: float = 1.0e-8,
     relative_tolerance: float = 5.0e-6,
+    matrix_backend: str = VECTOR_MATRIX_BACKEND,
+    _matrix_result: Any = None,
 ) -> dict[str, Any]:
     """Check every free-equation column from one immutable checkpoint."""
 
@@ -33,6 +43,15 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
         raise ValueError("epsilon_m must be finite and positive")
     if not math.isfinite(tolerance) or tolerance <= 0.0:
         raise ValueError("relative_tolerance must be finite and positive")
+    if matrix_backend not in VECTOR_MATRIX_BACKENDS:
+        raise ValueError(
+            "matrix_backend must select an existing dense or sparse backend"
+        )
+    assembler = (
+        assemble_stateful_fiber_frame2d_direct_sparse
+        if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+        else assemble_stateful_fiber_frame2d
+    )
     try:
         free = np.asarray(trial_free_coordinates_m, dtype=np.float64)
     except (TypeError, ValueError) as exc:
@@ -40,24 +59,31 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
     if free.shape != (len(problem.free_global_dofs),) or not np.all(np.isfinite(free)):
         raise ValueError("trial_free_coordinates_m has invalid shape or values")
     parent_bytes = accepted_checkpoint.canonical_bytes()
-    base = assemble_stateful_fiber_frame2d(
+    base = assembler(
         problem,
         accepted_checkpoint,
         target_load_factor=target_load_factor,
         trial_free_coordinates_m=free,
     )
-    finite_difference = np.empty_like(base.jacobian_kn_per_m)
+    # Legacy FD norms, hashes and manifest shape still require dense free matrices.
+    # Perturbed assemblies themselves never build the global square tangent.
+    analytic = (
+        base.jacobian_kn_per_m.toarray()
+        if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+        else base.jacobian_kn_per_m
+    )
+    finite_difference = np.empty_like(analytic)
     parent_hashes = [base.parent_checkpoint_hash]
     for column in range(free.size):
         direction = np.zeros_like(free)
         direction[column] = epsilon
-        forward = assemble_stateful_fiber_frame2d(
+        forward = assembler(
             problem,
             accepted_checkpoint,
             target_load_factor=target_load_factor,
             trial_free_coordinates_m=free + direction,
         )
-        backward = assemble_stateful_fiber_frame2d(
+        backward = assembler(
             problem,
             accepted_checkpoint,
             target_load_factor=target_load_factor,
@@ -69,17 +95,17 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
         parent_hashes.extend(
             (forward.parent_checkpoint_hash, backward.parent_checkpoint_hash)
         )
-    error = finite_difference - base.jacobian_kn_per_m
+    error = finite_difference - analytic
     absolute_error = float(np.linalg.norm(error, ord=np.inf))
     scale = max(
         float(np.linalg.norm(finite_difference, ord=np.inf)),
-        float(np.linalg.norm(base.jacobian_kn_per_m, ord=np.inf)),
+        float(np.linalg.norm(analytic, ord=np.inf)),
         1.0,
     )
     relative_error = absolute_error / scale
     symmetry_error = float(
         np.linalg.norm(
-            base.jacobian_kn_per_m - base.jacobian_kn_per_m.T,
+            analytic - analytic.T,
             ord=np.inf,
         )
     )
@@ -92,8 +118,12 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
         "parent_epoch": accepted_checkpoint.epoch,
         "same_committed_parent_checkpoint": same_parent,
         "finite_difference_epsilon_m": epsilon,
-        "analytic_jacobian_kn_per_m": base.jacobian_kn_per_m.tolist(),
-        "finite_difference_jacobian_kn_per_m": finite_difference.tolist(),
+        "analytic_jacobian_kn_per_m": (
+            matrices := (analytic, finite_difference)
+            if _matrix_result is None
+            else _matrix_result(analytic, finite_difference)
+        )[0],
+        "finite_difference_jacobian_kn_per_m": matrices[1],
         "absolute_inf_error_kn_per_m": absolute_error,
         "relative_inf_error": relative_error,
         "relative_tolerance": tolerance,
@@ -102,6 +132,34 @@ def finite_difference_stateful_fiber_frame2d_tangent_check(
             relative_error <= tolerance and symmetry_error <= 1.0e-9 and same_parent
         ),
     }
+
+
+def _tangent_check_public_matrices(analytic: Any, difference: Any) -> tuple:
+    """Materialize the two historical list values in their original order."""
+    return analytic.tolist(), difference.tolist()
+
+
+def finite_difference_stateful_fiber_frame2d_tangent_check(
+    problem: StatefulFiberFrame2DProblem,
+    accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
+    *,
+    target_load_factor: float,
+    trial_free_coordinates_m: Any,
+    epsilon_m: float = 1.0e-8,
+    relative_tolerance: float = 5.0e-6,
+    matrix_backend: str = VECTOR_MATRIX_BACKEND,
+) -> dict[str, Any]:
+    """Check every free-equation column from one immutable checkpoint."""
+    return _finite_difference_stateful_fiber_frame2d_tangent_arrays(
+        problem,
+        accepted_checkpoint,
+        target_load_factor=target_load_factor,
+        trial_free_coordinates_m=trial_free_coordinates_m,
+        epsilon_m=epsilon_m,
+        relative_tolerance=relative_tolerance,
+        matrix_backend=matrix_backend,
+        _matrix_result=_tangent_check_public_matrices,
+    )
 
 
 __all__ = ["finite_difference_stateful_fiber_frame2d_tangent_check"]

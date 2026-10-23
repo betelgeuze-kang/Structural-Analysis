@@ -24,6 +24,9 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DProblem,
     assemble_stateful_fiber_frame2d,
 )
+from structural_analysis.assembly.stateful_fiber_frame2d_direct_sparse import (
+    assemble_stateful_fiber_frame2d_direct_sparse_terminal,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology import (
     FiberFrameNonlinearExecutionTopologyPlan,
     physical_3dof_to_canonical_6dof,
@@ -70,7 +73,10 @@ from structural_analysis.materials.uniaxial_plasticity import (
 from structural_analysis.materials.uniaxial_plasticity import (
     UniaxialPlasticityState,
 )
-from structural_analysis.solvers.nonlinear.newton import RESIDUAL_FORMULA
+from structural_analysis.solvers.nonlinear.newton import (
+    RESIDUAL_FORMULA,
+    VECTOR_SPARSE_MATRIX_BACKEND,
+)
 
 
 FIBER_FRAME_NONLINEAR_RECOVERY_OPERATOR_SCHEMA_VERSION = (
@@ -726,7 +732,13 @@ def _replay_terminal_engineering_outputs(
     # constitutive outputs below must still match at the binary level.
     terminal_trial = source._load_path.steps[-1]
     solver_generalized = terminal_trial.trial_assembly.generalized_coordinates_m
-    replay = assemble_stateful_fiber_frame2d(
+    assembler = (
+        assemble_stateful_fiber_frame2d_direct_sparse_terminal
+        if terminal_trial.trial_solution.config.matrix_backend
+        == VECTOR_SPARSE_MATRIX_BACKEND
+        else assemble_stateful_fiber_frame2d
+    )
+    replay = assembler(
         problem,
         parent_checkpoint,
         target_load_factor=source.terminal_load_factor,

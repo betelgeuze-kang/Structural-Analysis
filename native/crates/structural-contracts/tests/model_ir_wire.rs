@@ -3,8 +3,9 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{json, Value};
 use structural_contracts::model_ir::{
-    canonicalize_model_ir_v2, parse_model_ir_v2, provenance_projection, semantic_projection,
-    validate_model_ir_v2_wire, ModelIrValidationIssue,
+    canonical_value_model_ir_v2, canonicalize_model_ir_v2, decode_json_strict, parse_model_ir_v2,
+    parse_model_ir_v2_value, provenance_projection, semantic_projection, validate_model_ir_v2_wire,
+    ModelIrValidationIssue,
 };
 
 const GOLDEN_FIXTURES: [(&str, usize, &str, &str, &str); 8] = [
@@ -164,6 +165,13 @@ fn python_oracle_golden_bytes_and_three_hashes_are_native_constants() {
     for (relative, canonical_length, content, semantic, provenance) in GOLDEN_FIXTURES {
         let bytes = std::fs::read(root.join(relative)).expect("tracked fixture");
         let document = parse_model_ir_v2(&bytes).expect("schema-valid fixture");
+        let owned = parse_model_ir_v2_value(decode_json_strict(&bytes).expect("strict fixture"))
+            .expect("schema-valid owned fixture");
+        assert_eq!(owned.canonical_bytes(), document.canonical_bytes());
+        assert_eq!(owned.content_hash(), document.content_hash());
+        assert_eq!(owned.semantic_hash(), document.semantic_hash());
+        assert_eq!(owned.provenance_hash(), document.provenance_hash());
+        assert_json_number_bits(owned.value(), document.value());
         assert_eq!(
             document.canonical_bytes().len(),
             canonical_length,
@@ -299,4 +307,162 @@ fn schema_report_is_explicitly_not_a_semantic_or_solver_claim() {
     let serialized = serde_json::to_string(&report).expect("serialized report");
     assert!(!serialized.contains("analysis_ready"));
     assert!(!serialized.contains("semantics_valid"));
+}
+
+const NUMERIC_EDGE_LITERALS: [&str; 26] = [
+    "0",
+    "-0",
+    "0.0",
+    "-0.0",
+    "1",
+    "1.0",
+    "1e0",
+    "-1.0",
+    "1e-4",
+    "1e-5",
+    "1e15",
+    "1e16",
+    "9007199254740991",
+    "9007199254740991.0",
+    "9007199254740992.0",
+    "9007199254740993",
+    "9007199254740993.0",
+    "-9223372036854775808",
+    "9223372036854775807",
+    "18446744073709551615",
+    "18446744073709551616",
+    "1e20",
+    "-1.7976931348623157e308",
+    "4.9406564584124654e-324",
+    "2.2250738585072014e-308",
+    "1.7976931348623157e308",
+];
+
+fn assert_json_number_bits(actual: &Value, expected: &Value) {
+    match (actual, expected) {
+        (Value::Number(left), Value::Number(right)) => {
+            assert_eq!(left.is_i64(), right.is_i64());
+            assert_eq!(left.is_u64(), right.is_u64());
+            assert_eq!(left.is_f64(), right.is_f64());
+            assert_eq!(left.as_i64(), right.as_i64());
+            assert_eq!(left.as_u64(), right.as_u64());
+            assert_eq!(
+                left.as_f64().map(f64::to_bits),
+                right.as_f64().map(f64::to_bits)
+            );
+        }
+        (Value::Array(left), Value::Array(right)) => {
+            assert_eq!(left.len(), right.len());
+            for (a, b) in left.iter().zip(right) {
+                assert_json_number_bits(a, b);
+            }
+        }
+        (Value::Object(left), Value::Object(right)) => {
+            assert_eq!(
+                left.keys().collect::<Vec<_>>(),
+                right.keys().collect::<Vec<_>>()
+            );
+            for (key, value) in left {
+                assert_json_number_bits(value, &right[key]);
+            }
+        }
+        _ => assert_eq!(actual, expected),
+    }
+}
+
+#[test]
+fn owned_value_parser_matches_old_wire_roundtrip_types_bits_and_three_hashes() {
+    for literal in NUMERIC_EDGE_LITERALS {
+        let mut value = fixture_value();
+        value["extensions"]["stage4:numeric_edge"] =
+            decode_json_strict(literal.as_bytes()).expect("finite number");
+        let old_bytes = value.to_string().into_bytes();
+        let old = parse_model_ir_v2(&old_bytes).expect("old string/strict decode path");
+        let current = parse_model_ir_v2_value(value).expect("owned strictly decoded subtree");
+        assert_json_number_bits(current.value(), old.value());
+        assert_eq!(current.canonical_json(), old.canonical_json(), "{literal}");
+        assert_eq!(current.content_hash(), old.content_hash(), "{literal}");
+        assert_eq!(current.semantic_hash(), old.semantic_hash(), "{literal}");
+        assert_eq!(
+            current.provenance_hash(),
+            old.provenance_hash(),
+            "{literal}"
+        );
+    }
+}
+
+#[test]
+fn owned_value_schema_refusals_match_old_wire_errors_and_sorted_issues() {
+    let mut invalid = vec![
+        Value::Null,
+        json!([]),
+        json!({}),
+        json!({"schema_version": "invalid"}),
+    ];
+    for replacement in [json!(0.0), json!(true), json!(-1), json!("0")] {
+        let mut model = fixture_value();
+        model["nodes"][0]["index"] = replacement;
+        invalid.push(model);
+    }
+    for value in invalid {
+        let old = parse_model_ir_v2(value.to_string().as_bytes()).expect_err("old refusal");
+        let current = parse_model_ir_v2_value(value).expect_err("owned-value refusal");
+        assert_eq!(current, old);
+    }
+}
+
+#[test]
+fn canonical_value_matches_legacy_text_decode_categories_bits_and_full_bytes() {
+    let mut numbers = NUMERIC_EDGE_LITERALS
+        .iter()
+        .map(|literal| decode_json_strict(literal.as_bytes()).expect("finite edge"))
+        .collect::<Vec<_>>();
+    let mut bits = 0x1234_5678_9abc_def0_u64;
+    for _ in 0..1024 {
+        bits = bits.wrapping_mul(6_364_136_223_846_793_005).wrapping_add(1);
+        let value = f64::from_bits(bits);
+        if value.is_finite() {
+            numbers.push(json!(value));
+        }
+    }
+    let input = json!({"numeric": numbers, "nested": [{"key/한글": "quote\"\\\n\u{0}", "list": [null, true, false]}]});
+    let text = canonicalize_model_ir_v2(&input).expect("legacy canonical text");
+    let old: Value = serde_json::from_str(&text).expect("legacy precise whole-document parse");
+    let current = canonical_value_model_ir_v2(&input).expect("precise numeric leaves only");
+    assert_json_number_bits(&current, &old);
+    assert_eq!(
+        serde_json::to_vec(&current).expect("new outer bytes"),
+        serde_json::to_vec(&old).expect("old outer bytes")
+    );
+    assert_eq!(current["numeric"][2].as_u64(), Some(0));
+    assert!(!current["numeric"][2].is_f64());
+    assert_eq!(current["numeric"][5].as_u64(), Some(1));
+    assert!(!current["numeric"][5].is_f64());
+}
+
+#[test]
+fn canonical_value_keeps_legacy_container_recursion_refusal_boundary() {
+    for depth in 120..=132 {
+        for use_object in [false, true] {
+            let mut value = json!(0);
+            for _ in 0..depth {
+                value = if use_object {
+                    json!({"child": value})
+                } else {
+                    json!([value])
+                };
+            }
+            let canonical = canonicalize_model_ir_v2(&value).expect("legacy canonical rendering");
+            let legacy: Result<Value, _> = serde_json::from_str(&canonical);
+            let current = canonical_value_model_ir_v2(&value);
+            assert_eq!(
+                current.is_ok(),
+                legacy.is_ok(),
+                "depth={depth}, object={use_object}"
+            );
+            if let (Ok(current), Ok(legacy)) = (current, legacy) {
+                assert_json_number_bits(&current, &legacy);
+            }
+        }
+    }
 }

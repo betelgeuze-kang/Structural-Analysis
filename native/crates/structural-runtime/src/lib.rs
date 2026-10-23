@@ -5,6 +5,7 @@
 #![forbid(unsafe_code)]
 
 mod frame3d;
+mod frame3d_batch;
 mod native_job_store;
 
 use structural_contracts::model_ir::ModelIrV2Document;
@@ -13,6 +14,11 @@ use structural_ffi::{Api, Error, LinearFrame3dInput, LinearFrame3dLoadCase as Ff
 pub use frame3d::{
     LinearFrame3dAnalysisResult, LinearFrame3dGateMetrics, LinearFrame3dLoadSelection,
     LinearFrame3dMemberResult, LinearFrame3dNodeResult,
+};
+pub use frame3d_batch::{
+    analyze_linear_frame3d_batch, Frame3dBatchCpuBudget, Frame3dBatchError,
+    LinearFrame3dBatchLoadSource, LinearFrame3dBatchRequest, LinearFrame3dBatchResult,
+    MAX_FRAME3D_BATCH_REQUESTS, MAX_FRAME3D_BATCH_WORKERS,
 };
 pub use native_job_store::{
     NativeFrame3dJobStore, NativeFrame3dJobStoreError, NativeFrame3dJobViewRecord,

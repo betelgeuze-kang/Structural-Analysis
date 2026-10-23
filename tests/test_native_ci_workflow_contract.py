@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 import sys
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "check_native_ci_contract.py"
@@ -59,7 +61,7 @@ def test_scope_classifier_uses_bounded_immutable_merge_ref_checkout() -> None:
     scope = pr_fast.split("  scope-contract:\n", 1)[1].split("\n  rust-quality:", 1)[0]
 
     assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in scope
-    assert "fetch-depth: 2" in scope
+    assert "fetch-depth: 32" in scope
     assert "fetch-depth: 0" not in scope
 
 
@@ -190,3 +192,40 @@ def test_frame_alpha_distribution_is_required_on_linux_and_windows() -> None:
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in block
     aggregate = workflow.split("  native-merge-product:\n", 1)[1]
     assert "- frame-alpha-cli-distribution" in aggregate
+
+
+def test_proposed_bounded_scope_checkout_does_not_accept_other_depths(tmp_path) -> None:
+    import shutil
+
+    workflow_dir = tmp_path / ".github/workflows"
+    workflow_dir.mkdir(parents=True)
+    for name in ("native-pr-fast.yml", "native-nightly-quality.yml"):
+        shutil.copyfile(ROOT / ".github/workflows" / name, workflow_dir / name)
+    path = workflow_dir / "native-pr-fast.yml"
+    original = path.read_text()
+    for depth in (0, 2, 64, 320):
+        path.write_text(original.replace("fetch-depth: 32", f"fetch-depth: {depth}"))
+        payload = check_native_ci_contract.check_native_ci_contract(tmp_path)
+        assert payload["contract_pass"] is False
+        assert "native_pr_fast_scope_checkout_not_bounded" in payload["blockers"]
+
+
+@pytest.mark.parametrize("second_depth", [32, 0])
+def test_proposed_scope_checkout_rejects_duplicate_fetch_depth_keys(
+    tmp_path, second_depth
+) -> None:
+    import shutil
+
+    workflow_dir = tmp_path / ".github/workflows"
+    workflow_dir.mkdir(parents=True)
+    for name in ("native-pr-fast.yml", "native-nightly-quality.yml"):
+        shutil.copyfile(ROOT / ".github/workflows" / name, workflow_dir / name)
+    path = workflow_dir / "native-pr-fast.yml"
+    path.write_text(
+        path.read_text().replace(
+            "fetch-depth: 32", f"fetch-depth: 32\n          fetch-depth: {second_depth}"
+        )
+    )
+    payload = check_native_ci_contract.check_native_ci_contract(tmp_path)
+    assert payload["contract_pass"] is False
+    assert "native_pr_fast_scope_checkout_not_bounded" in payload["blockers"]

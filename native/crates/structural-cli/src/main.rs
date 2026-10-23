@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+mod frame3d_batch;
 mod workstation;
 
 use serde_json::{json, Value};
@@ -40,13 +41,14 @@ fn run(arguments: &[OsString]) -> ExitCode {
             require_analysis_ready,
         }) => run_validate(&path, require_analysis_ready),
         Some(Command::Analyze(options)) => run_analyze(&options),
+        Some(Command::AnalyzeBatch { path }) => frame3d_batch::run(&path),
         Some(Command::Report(options)) => run_report(&options),
         Some(Command::Compare(options)) => run_compare(&options),
         Some(Command::Job(command)) => run_job(&command),
         Some(Command::Workstation(options)) => run_workstation(&options),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli result report-frame3d <RESULT.json> --report-id <ID> [--output report-ir|html]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>\n  structural-cli workstation serve --store <DIR> --workbench <DIST_DIR> [--listen 127.0.0.1:8787] [--worker-timeout-seconds <1..3600>] [--max-requests <N>]"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli model analyze-frame3d-batch <BATCH.json>\n  structural-cli result report-frame3d <RESULT.json> --report-id <ID> [--output report-ir|html]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>\n  structural-cli workstation serve --store <DIR> --workbench <DIST_DIR> [--listen 127.0.0.1:8787] [--worker-timeout-seconds <1..3600>] [--max-requests <N>]"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
         }
@@ -518,6 +520,9 @@ enum Command {
         require_analysis_ready: bool,
     },
     Analyze(AnalyzeOptions),
+    AnalyzeBatch {
+        path: PathBuf,
+    },
     Report(ReportOptions),
     Compare(CompareOptions),
     Job(JobCommand),
@@ -593,6 +598,15 @@ enum AnalysisLoadSource {
 }
 
 fn parse_command(arguments: &[OsString]) -> Option<Command> {
+    if arguments.len() == 3
+        && arguments[0] == "model"
+        && arguments[1] == "analyze-frame3d-batch"
+        && !arguments[2].to_string_lossy().starts_with('-')
+    {
+        return Some(Command::AnalyzeBatch {
+            path: PathBuf::from(&arguments[2]),
+        });
+    }
     if let Some((path, require_analysis_ready)) = parse_validate_arguments(arguments) {
         return Some(Command::Validate {
             path,

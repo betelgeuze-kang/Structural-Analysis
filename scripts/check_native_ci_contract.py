@@ -150,7 +150,10 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             not in scope_checkout
         ):
             blockers.append("native_pr_fast_scope_checkout_not_immutable")
-        if "fetch-depth: 2" not in scope_checkout or "fetch-depth: 0" in scope_checkout:
+        scope_depths = re.findall(
+            r"^[ \t]+fetch-depth:[ \t]*([^\r\n]*)$", scope_checkout, flags=re.MULTILINE
+        )
+        if [value.strip() for value in scope_depths] != ["32"]:
             blockers.append("native_pr_fast_scope_checkout_not_bounded")
 
     merge_aggregate = pr_jobs.get("native-merge-product", "")
