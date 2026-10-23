@@ -22,15 +22,21 @@ other load patterns are outside this profile.
 
 The preview distinguishes fixed preload from proportional reference loads.
 Coordinates, sections, reinforcement, loads and control targets remain editable
-within admission bounds. To change span or height, update both corresponding
-corner coordinates. Admission rejects an invalid rectangle or moved support.
+within admission bounds. Enter **Portal span (m)** and **Portal height (m)**,
+then choose **Update portal dimensions locally** to update the corresponding
+corners together. The bottom-left origin, node/member IDs and order, member
+direction, supports, loads and settings are retained. Inspect the preview before
+applying to the submission draft. Invalid or unapplied dimension text blocks
+Apply; other pending field edits are preserved. Individual coordinates remain
+editable, but the dimension operation requires a valid rectangle.
 
 Save the project to retain the complete request and job reference. Reopening a
 project does not submit another job. A successful authenticated job provides the
 saved corotational nodal report, deformed member chords, accepted-state history,
-applied loads and support reactions. Member end forces, section and fiber
-histories are not available in that report. Shape amplification changes display
-only. Gravity preload and signed lateral targets retain their stored order.
+applied loads and support reactions. **Open stored RC details** loads a separate
+verified report of member endpoint forces, section and fiber histories from the
+same saved job. Shape amplification changes display only. Gravity preload and
+signed lateral targets retain their stored order.
 
 ## Numerical and recovery checks
 

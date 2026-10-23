@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import portalRequest from '../../examples/public_rc_portal_frame_corotational_request.json'
 import {
-  changeRcEditorRows, createRcEditorExample, createRcPortalEditorExample, rcEditorPreview, rcEditorSections,
+  changeRcEditorRows, changeRcPortalDimensions, createRcEditorExample, createRcPortalEditorExample, rcEditorPreview, rcEditorSections, rcPortalDimensions,
   resolveRcEditorDraft, validateRcEditorRequest,
 } from '../../src/workbench-v2/model/rcModelEditor'
 import { validateRcRequestProfile } from '../../src/workbench-v2/model/rcJobSchema'
@@ -176,6 +176,103 @@ test('portal dimension, section, reinforcement and gravity edits preserve the sh
   expect(preview.loads.filter(load => load.phase === 'reference')).toEqual([{ node: 'N4', fx: 1, fy: 0, phase: 'reference' }])
 })
 
+test('portal dimension update preserves arbitrary identities, original order, reversed members and a translated origin', () => {
+  const original = createRcPortalEditorExample(revision)
+  const names = new Map([['N1', 'left.base'], ['N2', 'right-base'], ['N3', 'roof:left'], ['N4', 'roof_right']])
+  original.model.nodes.forEach((node: any) => { node.id = names.get(node.id); node.coordinates[0] -= 12.5; node.coordinates[1] += 6.25 })
+  original.model.elements.forEach((member: any, index: number) => { member.id = `authored-${index}`; member.nodes = member.nodes.map((name: string) => names.get(name)).reverse() })
+  original.model.supports.forEach((support: any) => { support.node = names.get(support.node); support.dofs.reverse() })
+  original.model.loads.forEach((load: any) => { load.node = names.get(load.node) })
+  original.config.control_node_id = names.get(original.config.control_node_id)
+  original.config.fixed_nodal_loads.forEach((load: any[]) => { load[0] = names.get(load[0]) })
+  original.model.nodes = [original.model.nodes[3], original.model.nodes[0], original.model.nodes[2], original.model.nodes[1]]
+  original.model.elements.reverse(); original.model.supports.reverse()
+  const before = JSON.stringify(original)
+  const change = changeRcPortalDimensions(original, {}, '7.5', '4.25')
+  expect(change.issues).toEqual([])
+  expect(Object.keys(change.edits!)).toHaveLength(4)
+  const resolved = resolveRcEditorDraft(original, change.edits!)
+  expect(resolved.issues).toEqual([])
+  const expected = JSON.parse(before)
+  expected.model.nodes.forEach((node: any) => {
+    if (['right-base', 'roof_right'].includes(node.id)) node.coordinates[0] = -5
+    if (['roof:left', 'roof_right'].includes(node.id)) node.coordinates[1] = 10.5
+  })
+  expect(resolved.value).toEqual(expected)
+  expect(JSON.stringify(original)).toBe(before)
+  expect(rcPortalDimensions(resolved.value!)).toMatchObject({ span: 7.5, height: 4.25, leftX: -12.5, baseY: 6.25 })
+})
+
+test('portal dimension update preserves unfinished unrelated text and uses pending coordinate origins', () => {
+  const original = createRcPortalEditorExample(revision)
+  const pending = {
+    '/model/materials/0/yield_stress_mpa': '-',
+    '/config/fixed_nodal_loads/0/2': '-2',
+    '/model/nodes/0/coordinates/0': '10', '/model/nodes/2/coordinates/0': '10',
+    '/model/nodes/1/coordinates/0': '14', '/model/nodes/3/coordinates/0': '14',
+  }
+  const before = JSON.stringify(pending)
+  expect(resolveRcEditorDraft(original, pending).value).toBeNull()
+  const changed = changeRcPortalDimensions(original, pending, '6', '5')
+  expect(changed.issues).toEqual([])
+  expect(changed.edits!['/model/materials/0/yield_stress_mpa']).toBe('-')
+  expect(changed.edits!['/config/fixed_nodal_loads/0/2']).toBe('-2')
+  expect(changed.edits!['/model/nodes/0/coordinates/0']).toBe('10')
+  expect(changed.edits!['/model/nodes/1/coordinates/0']).toBe('16')
+  expect(resolveRcEditorDraft(original, changed.edits!).value).toBeNull()
+  const fixed = resolveRcEditorDraft(original, { ...changed.edits, '/model/materials/0/yield_stress_mpa': '300' })
+  expect(fixed.issues).toEqual([])
+  expect(fixed.value!.model.nodes.map((node: any) => node.coordinates)).toEqual([[10, 0, 0], [16, 0, 0], [10, 5, 0], [16, 5, 0]])
+  expect(JSON.stringify(pending)).toBe(before)
+  const second = changeRcPortalDimensions(original, changed.edits!, '7', '6')
+  expect(second.issues).toEqual([])
+  expect(rcPortalDimensions(original, second.edits!)).toMatchObject({ span: 7, height: 6, leftX: 10, baseY: 0 })
+})
+
+test('portal dimension update rejects invalid raw values atomically without erasing the pending draft', () => {
+  const original = createRcPortalEditorExample(revision)
+  const pending = { '/config/fixed_nodal_loads/0/2': '-' }
+  for (const raw of ['', ' ', '-', 'NaN', 'Infinity', '1e999', '0x10', '3 trailing', '0', '-3', '1e-324', '1e-20']) {
+    for (const axis of ['span', 'height']) {
+      const result = changeRcPortalDimensions(original, pending, axis === 'span' ? raw : '5', axis === 'height' ? raw : '4')
+      expect(result.edits, `${axis}: ${raw}`).toBeNull()
+      expect(result.issues.some(issue => issue.path === `/portal_dimensions/${axis}`)).toBe(true)
+    }
+  }
+  expect(pending).toEqual({ '/config/fixed_nodal_loads/0/2': '-' })
+  expect(original.model.nodes.map((node: any) => node.coordinates)).toEqual([[0, 0, 0], [4, 0, 0], [0, 3, 0], [4, 3, 0]])
+})
+
+test('portal dimension update rejects overflow and rounded-away dimensions at large origins', () => {
+  for (const [axis, origin, existingExtent, dimension] of [[0, 1e308, 1e307, '1e308'], [1, 1e308, 1e307, '1e308'], [0, 1e16, 4, '1'], [1, 1e16, 4, '1']] as const) {
+    const original = createRcPortalEditorExample(revision)
+    original.model.nodes.forEach((node: any) => { node.coordinates[axis] = origin + (node.coordinates[axis] === 0 ? 0 : existingExtent) })
+    expect(rcPortalDimensions(original)).not.toBeNull()
+    const changed = changeRcPortalDimensions(original, {}, axis === 0 ? dimension : '5', axis === 1 ? dimension : '4')
+    expect(changed.edits).toBeNull()
+    expect(changed.issues.some(issue => issue.path === `/portal_dimensions/${axis === 0 ? 'span' : 'height'}`)).toBe(true)
+  }
+})
+
+test('portal dimension update never repairs incomplete geometry, references or support roles', () => {
+  const original = createRcPortalEditorExample(revision)
+  for (const pending of [
+    { '/model/nodes/1/coordinates/0': '-' },
+    { '/model/nodes/1/coordinates/0': '5' },
+    { '/model/nodes/1/coordinates/2': '1' },
+    { '/model/nodes/1/id': 'unbound-id' },
+    { '/model/elements/0/nodes/1': 'N4' },
+    { '/model/supports/0/dofs': 'UY' },
+  ]) {
+    const before = JSON.stringify(pending)
+    expect(rcPortalDimensions(original, pending)).toBeNull()
+    expect(changeRcPortalDimensions(original, pending, '5', '4').edits).toBeNull()
+    expect(JSON.stringify(pending)).toBe(before)
+  }
+  expect(rcPortalDimensions(request())).toBeNull()
+  expect(changeRcPortalDimensions(request(), {}, '5', '4').edits).toBeNull()
+})
+
 test('portal admission refuses other topologies, support roles, loads and control observations', () => {
   const changes: Array<[string, (value: any) => void]> = [
     ['false opt-in', value => { value.config.experimental_portal_frame = false }],
@@ -273,6 +370,62 @@ test('browser authors a portal locally and reopens its project without posting a
   await expect(page.locator('[data-rc-portal-profile]')).toBeVisible()
   expect(JSON.parse(await page.getByLabel('Typed RC request JSON', { exact: true }).inputValue())).toEqual(draft)
   await expect(page.locator('[data-scenario-id]')).toHaveCount(1)
+  expect(posts).toEqual([])
+})
+
+test('browser portal dimension inputs preserve pending fields, block stale Apply and saving, and Undo restores dimensions', async ({ page }) => {
+  const posts: string[] = []
+  page.on('request', outgoing => { if (outgoing.method() === 'POST') posts.push(outgoing.url()) })
+  await page.addInitScript(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcJobCollectionUrl: '/v1/jobs' } })
+  await page.goto(`${process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'}/#/workbench-v2`)
+  await page.getByText('Submit a new RC input', { exact: true }).click()
+  await page.getByText('Start from the RC portal example', { exact: true }).click()
+  await page.getByLabel('Caller-declared source revision for portal example', { exact: true }).fill(revision)
+  await page.getByRole('button', { name: 'Load portal example locally', exact: true }).click()
+  const apply = page.getByRole('button', { name: 'Apply structured model to draft', exact: true })
+  const submit = page.getByRole('button', { name: 'Submit RC analysis', exact: true })
+  const save = page.getByRole('button', { name: 'Save RC project', exact: true })
+  const span = page.getByLabel('Portal span (m)', { exact: true }), height = page.getByLabel('Portal height (m)', { exact: true })
+  const update = page.getByRole('button', { name: 'Update portal dimensions locally', exact: true })
+  await apply.click()
+  await expect(save).toBeEnabled()
+  await expect(span).toHaveValue('4'); await expect(height).toHaveValue('3')
+  await page.getByText('Gravity preload (2)', { exact: true }).click()
+  const gravity = page.locator('[data-rc-editor-field="/config/fixed_nodal_loads/0/2"]')
+  await gravity.fill('-')
+  await span.fill('')
+  await height.fill('4')
+  await expect(span).toHaveAttribute('aria-invalid', 'true')
+  await expect(update).toBeDisabled()
+  await expect(apply).toBeDisabled(); await expect(submit).toBeDisabled(); await expect(save).toBeDisabled()
+  await span.fill('5')
+  await expect(update).toBeEnabled()
+  await expect(apply).toBeDisabled()
+  await expect(page.locator('[data-rc-portal-current-dimensions]')).toContainText('span 4 m, height 3 m')
+  await update.click()
+  await expect(gravity).toHaveValue('-')
+  await expect(page.locator('[data-rc-editor-field="/model/nodes/1/coordinates/0"]')).toHaveValue('5')
+  await expect(page.locator('[data-rc-editor-field="/model/nodes/3/coordinates/0"]')).toHaveValue('5')
+  await expect(page.locator('[data-rc-editor-field="/model/nodes/2/coordinates/1"]')).toHaveValue('4')
+  await expect(page.locator('[data-rc-editor-field="/model/nodes/3/coordinates/1"]')).toHaveValue('4')
+  await expect(apply).toBeDisabled()
+  await gravity.fill('-2')
+  await apply.click()
+  const raw = page.getByLabel('Typed RC request JSON', { exact: true })
+  const applied = JSON.parse(await raw.inputValue())
+  expect(applied.model.nodes.map((node: any) => node.coordinates)).toEqual([[0, 0, 0], [5, 0, 0], [0, 4, 0], [5, 4, 0]])
+  const expected = createRcPortalEditorExample(revision)
+  expected.model.nodes = applied.model.nodes; expected.config.fixed_nodal_loads[0][2] = -2
+  expect(applied).toEqual(expected)
+  await expect(save).toBeEnabled()
+  await span.fill('6')
+  await expect(update).toBeEnabled(); await expect(apply).toBeDisabled(); await expect(save).toBeDisabled()
+  expect(JSON.parse(await raw.inputValue())).toEqual(applied)
+  await height.fill('-')
+  await page.getByRole('button', { name: 'Undo local model changes', exact: true }).click()
+  await expect(span).toHaveValue('5'); await expect(height).toHaveValue('4'); await expect(gravity).toHaveValue('-2')
+  await expect(update).toBeDisabled(); await expect(submit).toBeEnabled(); await expect(save).toBeEnabled()
+  expect(JSON.parse(await raw.inputValue())).toEqual(applied)
   expect(posts).toEqual([])
 })
 

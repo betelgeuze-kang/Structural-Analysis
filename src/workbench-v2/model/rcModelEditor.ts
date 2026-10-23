@@ -54,6 +54,65 @@ export function createRcPortalEditorExample(sourceRevision: string): RcObject {
   return { ...clone(portalExample), source_revision: sourceRevision }
 }
 
+export interface RcPortalDimensions {
+  span: number
+  height: number
+  leftX: number
+  baseY: number
+  rightNodeIndices: number[]
+  roofNodeIndices: number[]
+}
+
+/** Only pending geometry fields participate here; unrelated raw edits remain untouched. */
+export function rcPortalDimensions(request: RcObject, edits: Record<string, string> = {}): RcPortalDimensions | null {
+  if (!isRcCorotationalRequest(request) || request.config?.experimental_portal_frame !== true) return null
+  const geometryEdits = Object.fromEntries(Object.entries(edits).filter(([path]) => /^\/model\/(nodes|elements|supports)\//.test(path)))
+  const candidate = resolveRcEditorDraft(request, geometryEdits).value
+  const model = candidate?.model
+  if (!model || !Array.isArray(model.nodes) || model.nodes.length !== 4 || !Array.isArray(model.elements) || model.elements.length !== 3 || !Array.isArray(model.supports) || model.supports.length !== 2) return null
+  const nodes: RcObject[] = model.nodes
+  if (nodes.some(node => !record(node) || !id(node.id) || !Array.isArray(node.coordinates) || node.coordinates.length !== 3 || !node.coordinates.every(finite) || node.coordinates[2] !== 0) || new Set(nodes.map(node => node.id)).size !== 4) return null
+  const xs = nodes.map(node => node.coordinates[0]), ys = nodes.map(node => node.coordinates[1])
+  const leftX = Math.min(...xs), rightX = Math.max(...xs), baseY = Math.min(...ys), roofY = Math.max(...ys)
+  const span = rightX - leftX, height = roofY - baseY
+  if (![span, height].every(value => Number.isFinite(value) && value > Number.EPSILON)) return null
+  const corners = [[leftX, baseY], [rightX, baseY], [leftX, roofY], [rightX, roofY]].map(([x, y]) => nodes.findIndex(node => node.coordinates[0] === x && node.coordinates[1] === y))
+  if (corners.some(index => index < 0) || new Set(corners).size !== 4) return null
+  const edge = (a: string, b: string) => JSON.stringify([a, b].sort())
+  const expectedEdges = new Set([[0, 2], [2, 3], [3, 1]].map(([a, b]) => edge(nodes[corners[a]].id, nodes[corners[b]].id)))
+  for (const member of model.elements) {
+    if (!record(member) || member.type !== 'stateful_corotational_rc_fiber_frame2d' || !Array.isArray(member.nodes) || member.nodes.length !== 2 || !expectedEdges.delete(edge(member.nodes[0], member.nodes[1]))) return null
+  }
+  const bases = new Set([nodes[corners[0]].id, nodes[corners[1]].id])
+  for (const support of model.supports) {
+    if (!record(support) || !bases.delete(support.node) || !Array.isArray(support.dofs) || [...support.dofs].sort().join(',') !== 'RZ,UX,UY') return null
+  }
+  return { span, height, leftX, baseY, rightNodeIndices: [corners[1], corners[3]], roofNodeIndices: [corners[2], corners[3]] }
+}
+
+/** Atomically stage both right-hand X and both roof Y fields, preserving every other raw edit. */
+export function changeRcPortalDimensions(request: RcObject, edits: Record<string, string>, spanRaw: string, heightRaw: string): { edits: Record<string, string> | null; issues: RcEditorIssue[] } {
+  const issues: RcEditorIssue[] = []
+  const dimension = (name: 'span' | 'height', raw: string): number => {
+    const value = Number(raw)
+    if (!numeric.test(raw.trim()) || !Number.isFinite(value) || value <= Number.EPSILON) issues.push({ path: `/portal_dimensions/${name}`, message: 'Enter a finite positive dimension greater than machine epsilon, in metres.' })
+    return value
+  }
+  const span = dimension('span', spanRaw), height = dimension('height', heightRaw)
+  const geometry = rcPortalDimensions(request, edits)
+  if (!geometry) issues.push({ path: '/portal_dimensions', message: 'Resolve the node coordinates, three portal members and two fixed bases into a rectangle before updating dimensions. Existing field edits are retained.' })
+  if (issues.length || !geometry) return { edits: null, issues }
+  const rightX = geometry.leftX + span, roofY = geometry.baseY + height
+  for (const [name, coordinate, origin] of [['span', rightX, geometry.leftX], ['height', roofY, geometry.baseY]] as const) {
+    if (!Number.isFinite(coordinate) || !Number.isFinite(coordinate - origin) || coordinate - origin <= Number.EPSILON) issues.push({ path: `/portal_dimensions/${name}`, message: 'The dimension must produce finite, distinct coordinates at the current origin.' })
+  }
+  if (issues.length) return { edits: null, issues }
+  const result = { ...edits }
+  geometry.rightNodeIndices.forEach(index => { result[`/model/nodes/${index}/coordinates/0`] = String(rightX) })
+  geometry.roofNodeIndices.forEach(index => { result[`/model/nodes/${index}/coordinates/1`] = String(roofY) })
+  return { edits: result, issues: [] }
+}
+
 /** Field paths only address fixed schema keys and bounded array indices, never authored object keys. */
 export function rcEditorSections(request: RcObject): RcEditorSection[] {
   const field = (path: string, label: string, kind: RcEditorField['kind'] = 'text'): RcEditorField => {

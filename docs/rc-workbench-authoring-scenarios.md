@@ -105,8 +105,12 @@ Page boundaries are not stitched into a fabricated continuous history.
 Saved corotational reports provide a displaced chord view, selected member
 endpoint highlights in the nodal tables, and a control-displacement/load-factor
 plot for the current accepted-state page. Preload and accepted subdivisions
-remain separate from authored targets. Member forces, section moment–curvature
-and fiber stress–strain remain explicitly unavailable in this nodal-only format.
+remain separate from authored targets. **Open stored RC details** reads a
+separate source-bound report for member endpoint forces, section moment–curvature
+and fiber stress–strain. These details retain kN, kN*m, 1/m and MPa units; steel
+fiber indices can represent aggregate bar layers. Their local endpoint forces
+rotate the stored global forces along the current i-to-j chord. The original
+nodal-only report remains available if optional details cannot be verified.
 Changing a selection, page or visual scale does not submit or resume an analysis.
 Original artifact downloads remain unchanged.
 
