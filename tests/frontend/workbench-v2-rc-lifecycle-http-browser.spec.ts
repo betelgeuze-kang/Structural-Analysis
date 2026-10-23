@@ -170,7 +170,7 @@ test('actual authored designs compare real core outputs and a failed input becom
     expect(second.job.status).toBe('succeeded')
     await expect(scenarios.locator('[data-scenario-id]').nth(1)).toContainText('succeeded', { timeout: 90000 })
     await expect(scenarios.locator('[data-scenario-curve]')).toHaveCount(2)
-    await expect(scenarios.getByRole('table')).toContainText('member_force')
+    await expect(scenarios.getByRole('table', { name: /^Matched final target/ })).toContainText('member_force')
     expect(view.workerUrls.some(url => /rcJobReview\.worker/.test(url))).toBe(true)
     const downloaded = view.page.waitForEvent('download')
     await scenarios.getByRole('button', { name: 'Export scenario JSON', exact: true }).click()

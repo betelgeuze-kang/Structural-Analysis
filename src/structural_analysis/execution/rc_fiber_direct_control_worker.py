@@ -406,15 +406,25 @@ def _execute_rc_fiber_direct_control_claim(
 
             def invoke(phase, call):
                 lease.check()
-                ordinal = service.reserve_rc_execution_attempt(
-                    job_id,
-                    **credentials,
-                    phase=phase,
-                    chunk_request_hash=binding["chunk_request_hash"],
-                    analysis_ordinal=analysis_ordinal
-                    if phase == "verification"
-                    else None,
-                )
+                try:
+                    ordinal = service.reserve_rc_execution_attempt(
+                        job_id,
+                        **credentials,
+                        phase=phase,
+                        chunk_request_hash=binding["chunk_request_hash"],
+                        analysis_ordinal=analysis_ordinal
+                        if phase == "verification"
+                        else None,
+                    )
+                except JobServiceError as error:
+                    # Reservation owns the atomic pause/budget decision. Keep the
+                    # worker's established exhaustion error without moving that
+                    # decision ahead of a pending control boundary.
+                    if error.code == "execution_attempt_budget_exhausted":
+                        raise RCFiberDirectControlWorkerError(
+                            error.code, error.detail
+                        ) from error
+                    raise
                 if isinstance(ordinal, JobView):
                     raise RcControlBoundaryStop(ordinal)
                 outcome = binding | {

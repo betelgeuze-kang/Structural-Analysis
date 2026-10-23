@@ -637,13 +637,51 @@ def test_crash_reservation_stays_unknown_and_exhaustion_cannot_retry_api(
     with pytest.raises(
         worker.RCFiberDirectControlWorkerError,
         match="execution_attempt_budget_exhausted",
-    ):
+    ) as caught:
         _run(restarted, retry)
+    assert isinstance(caught.value.__cause__, JobServiceError)
+    assert caught.value.__cause__.code == caught.value.code
     assert len(calls) == 1
     final = restarted.get_job(job.job_id, **TENANT_AUTH)
     assert final.status == "failed"
     assert final.result is final.checkpoint is None
-    assert _evidence(restarted, job.job_id, **TENANT_AUTH)["pending_ordinals"] == [1]
+    final_evidence = _evidence(restarted, job.job_id, **TENANT_AUTH)
+    assert final_evidence["pending_ordinals"] == [1]
+    assert final_evidence["records"] == []
+    assert final_evidence["execution_budget"] == {
+        "maximum_attempts": 2,
+        "reserved_attempts": 1,
+        "remaining_attempts": 1,
+    }
+
+
+def test_reservation_nonbudget_service_error_keeps_identity(tmp_path, monkeypatch):
+    service = _service(tmp_path / "service")
+    job = _submit(service)
+    claim = _claim(service)
+    original = JobServiceError(
+        "rc_control_verification_required",
+        "/rc_phase",
+        "Existing verification required.",
+    )
+
+    def refuse(*_args, **_kwargs):
+        raise original
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("rejected reservation must not invoke the numerical API")
+
+    monkeypatch.setattr(service, "reserve_rc_execution_attempt", refuse)
+    monkeypatch.setattr(api, "analyze_bounded_rc_fiber_direct_control", forbidden)
+    monkeypatch.setattr(
+        api, "validate_bounded_rc_fiber_direct_control_artifacts", forbidden
+    )
+    with pytest.raises(JobServiceError) as caught:
+        _run(service, claim)
+    assert caught.value is original
+    evidence = _evidence(service, job.job_id, **TENANT_AUTH)
+    assert evidence["records"] == evidence["pending_ordinals"] == []
+    assert evidence["execution_budget"]["reserved_attempts"] == 0
 
 
 def test_stale_claim_does_not_mutate_replacement_lease(

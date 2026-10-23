@@ -568,6 +568,9 @@ def test_fixed_worker_pending_boundary_precedes_two_invocation_budget_gate(
     tmp_path, pause
 ):
     from structural_analysis.execution.job_worker import execute_job_claim
+    from structural_analysis.execution.rc_fiber_direct_control_worker import (
+        RCFiberDirectControlWorkerError,
+    )
 
     s = seams.service(tmp_path)
     job = seams.submit(s, seams.request(maximum=2))
@@ -589,8 +592,14 @@ def test_fixed_worker_pending_boundary_precedes_two_invocation_budget_gate(
         assert stopped.status == "queued" and stopped.error_code is None
         assert current(s, job)["state"] == "paused"
     else:
-        with pytest.raises(JobServiceError, match="execution_attempt_budget_exhausted"):
+        with pytest.raises(
+            RCFiberDirectControlWorkerError, match="execution_attempt_budget_exhausted"
+        ) as caught:
             execute_job_claim(
                 s, c, worker_id="worker-a", authorization_token=seams.WORKER
             )
+        assert isinstance(caught.value.__cause__, JobServiceError)
+        assert caught.value.__cause__.code == caught.value.code
+        assert s.get_job(job.job_id, **seams.tenant()).status == "failed"
     assert seams.evidence(s, job.job_id)["execution_budget"]["reserved_attempts"] == 1
+    assert seams.evidence(s, job.job_id)["pending_ordinals"] == [1]
